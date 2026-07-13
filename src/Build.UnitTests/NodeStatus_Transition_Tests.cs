@@ -9,23 +9,22 @@ using System.Threading.Tasks;
 using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Logging;
 using Shouldly;
-using VerifyXunit;
-using Xunit;
-using Xunit.NetCore.Extensions;
-using static VerifyXunit.Verifier;
+using VerifyMSTest;
+using System.Runtime.CompilerServices;
 
 
 namespace Microsoft.Build.CommandLine.UnitTests;
 
 [UseInvariantCulture]
-public class NodeStatus_Transition_Tests
+[TestClass]
+[UsesVerify]
+public partial class NodeStatus_Transition_Tests
 {
-    public NodeStatus_Transition_Tests()
-    {
-        UseProjectRelativeDirectory("Snapshots");
-    }
+    [ModuleInitializer]
+    internal static void InitializeVerify() => Verifier.UseProjectRelativeDirectory("Snapshots");
 
-    [Fact]
+
+    [MSBuildTestMethod]
     public void NodeStatusTargetThrowsForInputWithAnsi()
     {
 #if DEBUG
@@ -35,7 +34,7 @@ public class NodeStatus_Transition_Tests
 #endif
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task NodeTargetChanges()
     {
         var rendered = Animate(
@@ -49,7 +48,7 @@ public class NodeStatus_Transition_Tests
         await VerifyReplay(rendered);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task NodeTargetUpdatesTime()
     {
         // This test look like there is no change between the frames, but we ask the stopwatch for time they will increase the number.
@@ -67,7 +66,7 @@ public class NodeStatus_Transition_Tests
         await VerifyReplay(rendered);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task NodeTargetChangesToColoredTarget()
     {
         var rendered = Animate(
@@ -81,7 +80,7 @@ public class NodeStatus_Transition_Tests
         await VerifyReplay(rendered);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task NodeWithColoredTargetUpdatesTime()
     {
         // This test look like there is no change between the frames, but we ask the stopwatch for time they will increase the number.
@@ -125,7 +124,7 @@ public class NodeStatus_Transition_Tests
     {
         try
         {
-            await Verify(rendered);
+            await Verifier.Verify(rendered);
         }
         catch (Exception ex)
         {

@@ -12,17 +12,17 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class MSBuildTask_Tests : IDisposable
     {
-        private readonly ITestOutputHelper _testOutput;
+        private readonly TestContext _testOutput;
 
-        public MSBuildTask_Tests(ITestOutputHelper testOutput)
+        public MSBuildTask_Tests(TestContext testOutput)
         {
             _testOutput = testOutput;
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests
         /// If we pass in an item spec that is over the max path but it can be normalized down to something under the max path, we should still work and not
         /// throw a path too long exception
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectItemSpecTooLong()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -83,7 +83,7 @@ namespace Microsoft.Build.UnitTests
                     Project p = ObjectModelHelpers.CreateInMemoryProject(parentProjectContents);
 
                     bool success = p.Build();
-                    Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
+                    Assert.IsTrue(success); // "Build failed.  See 'Standard Out' tab for details."
                 }
                 finally
                 {
@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests
         /// Ensure that the MSBuild task tags any output items with two pieces of metadata -- MSBuildSourceProjectFile and
         /// MSBuildSourceTargetName  -- that give an indication of where the items came from.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputItemsAreTaggedWithProjectFileAndTargetName()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests
                 IDictionary<string, TargetResult> targetOutputs;
                 bool success = pi.Build(null, null, null, out targetOutputs);
 
-                Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
+                Assert.IsTrue(success); // "Build failed.  See 'Standard Out' tab for details."
 
                 string expectedItemOutputs = string.Format(@"
                     a1.dll : MSBuildSourceProjectFile={0} ; MSBuildSourceTargetName=TargetA
@@ -157,8 +157,8 @@ namespace Microsoft.Build.UnitTests
                     h1.dll : MSBuildSourceProjectFile={1} ; MSBuildSourceTargetName=TargetH
                     ", projectFile1, projectFile2);
 
-                Assert.True(targetOutputs.ContainsKey("Build"));
-                Assert.Equal(7, targetOutputs["Build"].Items.Length);
+                Assert.IsTrue(targetOutputs.ContainsKey("Build"));
+                Assert.AreEqual(7, targetOutputs["Build"].Items.Length);
                 ObjectModelHelpers.AssertItemsMatch(expectedItemOutputs, targetOutputs["Build"].Items, false /* order of items not enforced */);
             }
             finally
@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests
         /// Ensures that it is possible to call the MSBuild task with an empty Projects parameter, and it
         /// shouldn't error, and it shouldn't try to build itself.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyProjectsParameterResultsInNoop()
         {
             string projectContents = @"
@@ -187,13 +187,13 @@ namespace Microsoft.Build.UnitTests
             Project project = ObjectModelHelpers.CreateInMemoryProject(projectContents, logger);
 
             bool success = project.Build();
-            Assert.True(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
+            Assert.IsTrue(success); // "Build failed.  See test output (Attachments in Azure Pipelines) for details"
         }
 
         /// <summary>
         /// Verifies that nonexistent projects aren't normally skipped
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NormallyDoNotSkipNonexistentProjects()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -215,7 +215,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that nonexistent projects aren't normally skipped
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NormallyDoNotSkipNonexistentProjectsBuildInParallel()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -231,15 +231,15 @@ namespace Microsoft.Build.UnitTests
             MockLogger logger = new MockLogger(_testOutput);
             ObjectModelHelpers.BuildTempProjectFileExpectFailure(@"SkipNonexistentProjectsMain.csproj", logger);
             string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist.csproj");
-            Assert.Equal(0, logger.WarningCount);
-            Assert.Equal(1, logger.ErrorCount);
+            Assert.AreEqual(0, logger.WarningCount);
+            Assert.AreEqual(1, logger.ErrorCount);
             Assert.Contains(error, logger.FullLog);
         }
 
         /// <summary>
         /// Verifies that nonexistent projects are skipped when requested
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SkipNonexistentProjects()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -267,8 +267,8 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains("Hello from foo.csproj");
             string message = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFoundMessage"), "this_project_does_not_exist.csproj");
             string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist.csproj");
-            Assert.Equal(0, logger.WarningCount);
-            Assert.Equal(0, logger.ErrorCount);
+            Assert.AreEqual(0, logger.WarningCount);
+            Assert.AreEqual(0, logger.ErrorCount);
             Assert.Contains(message, logger.FullLog); // for the missing project
             Assert.DoesNotContain(error, logger.FullLog);
         }
@@ -277,7 +277,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that nonexistent projects are skipped when requested when building in parallel.
         /// DDB # 125831
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SkipNonexistentProjectsBuildingInParallel()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -305,8 +305,8 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains("Hello from foo.csproj");
             string message = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFoundMessage"), "this_project_does_not_exist.csproj");
             string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist.csproj");
-            Assert.Equal(0, logger.WarningCount);
-            Assert.Equal(0, logger.ErrorCount);
+            Assert.AreEqual(0, logger.WarningCount);
+            Assert.AreEqual(0, logger.ErrorCount);
             Assert.Contains(message, logger.FullLog); // for the missing project
             Assert.DoesNotContain(error, logger.FullLog);
         }
@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that nonexistent projects are skipped when requested when building in parallel.
         /// DDB # 125831
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SkipNonexistentProjectsAsMetadataBuildingInParallel()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -354,14 +354,14 @@ namespace Microsoft.Build.UnitTests
             string message = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFoundMessage"), "this_project_does_not_exist_warn.csproj");
             string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist_warn.csproj");
             string error2 = String.Format(AssemblyResources.GetString("MSBuild.ProjectFileNotFound"), "this_project_does_not_exist_error.csproj");
-            Assert.Equal(0, logger.WarningCount);
-            Assert.Equal(1, logger.ErrorCount);
+            Assert.AreEqual(0, logger.WarningCount);
+            Assert.AreEqual(1, logger.ErrorCount);
             Assert.Contains(message, logger.FullLog); // for the missing project
             Assert.Contains(error2, logger.FullLog);
             Assert.DoesNotContain(error, logger.FullLog);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LogErrorWhenBuildingVCProj()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -398,8 +398,8 @@ namespace Microsoft.Build.UnitTests
 
             logger.AssertLogContains("Hello from foo.csproj");
             string error = String.Format(AssemblyResources.GetString("MSBuild.ProjectUpgradeNeededToVcxProj"), "blah.vcproj");
-            Assert.Equal(0, logger.WarningCount);
-            Assert.Equal(1, logger.ErrorCount);
+            Assert.AreEqual(0, logger.WarningCount);
+            Assert.AreEqual(1, logger.ErrorCount);
             Assert.Contains(error, logger.FullLog);
         }
 
@@ -410,7 +410,7 @@ namespace Microsoft.Build.UnitTests
         /// However, it's a situation where the project author doesn't have control over the
         /// property value and so he can't escape it himself.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyOverridesContainSemicolon()
         {
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -511,7 +511,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check if passing different global properties via metadata works
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DifferentGlobalPropertiesWithDefault()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -557,7 +557,7 @@ namespace Microsoft.Build.UnitTests
 
                 IDictionary<string, TargetResult> targetOutputs;
                 bool success = pi.Build(null, null, null, out targetOutputs);
-                Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
+                Assert.IsTrue(success); // "Build failed.  See 'Standard Out' tab for details."
 
                 string expectedItemOutputs = string.Format(@"
                     a1.dll : MSBuildSourceProjectFile={0} ; MSBuildSourceTargetName=TargetA
@@ -566,8 +566,8 @@ namespace Microsoft.Build.UnitTests
                     h1.dll : MSBuildSourceProjectFile={1} ; MSBuildSourceTargetName=TargetH
                     ", projectFile1, projectFile2);
 
-                Assert.True(targetOutputs.ContainsKey("Build"));
-                Assert.Equal(4, targetOutputs["Build"].Items.Length);
+                Assert.IsTrue(targetOutputs.ContainsKey("Build"));
+                Assert.AreEqual(4, targetOutputs["Build"].Items.Length);
                 ObjectModelHelpers.AssertItemsMatch(expectedItemOutputs, targetOutputs["Build"].Items, false /* order of items not enforced */);
             }
             finally
@@ -580,7 +580,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check if passing different global properties via metadata works
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DifferentGlobalPropertiesWithoutDefault()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -626,15 +626,15 @@ namespace Microsoft.Build.UnitTests
 
                 IDictionary<string, TargetResult> targetOutputs;
                 bool success = pi.Build(null, null, null, out targetOutputs);
-                Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
+                Assert.IsTrue(success); // "Build failed.  See 'Standard Out' tab for details."
 
                 string expectedItemOutputs = string.Format(@"
                     b1.dll : MSBuildSourceProjectFile={0} ; MSBuildSourceTargetName=TargetB
                     h1.dll : MSBuildSourceProjectFile={1} ; MSBuildSourceTargetName=TargetH
                     ", projectFile1, projectFile2);
 
-                Assert.True(targetOutputs.ContainsKey("Build"));
-                Assert.Equal(2, targetOutputs["Build"].Items.Length);
+                Assert.IsTrue(targetOutputs.ContainsKey("Build"));
+                Assert.AreEqual(2, targetOutputs["Build"].Items.Length);
                 ObjectModelHelpers.AssertItemsMatch(expectedItemOutputs, targetOutputs["Build"].Items, false /* order of items not enforced */);
             }
             finally
@@ -647,7 +647,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check trailing semicolons are ignored
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VariousPropertiesToMSBuildTask()
         {
             string projectFile = null;
@@ -702,7 +702,7 @@ namespace Microsoft.Build.UnitTests
         /// Include and Exclude items outside and inside targets should result in same behavior on
         ///  platform specific paths.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemsIncludeExcludePathsCombinations()
         {
             string projectFile = null;
@@ -773,7 +773,7 @@ namespace Microsoft.Build.UnitTests
         /// Referring to an item outside of target leads to 'naturally expected' reference to the item being processed.
         ///  No expansion occurs.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemsRecursionOutsideTarget()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -804,7 +804,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Referring to an item within target leads to item expansion which might be unintended behavior - hence warning.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemsRecursionWithinTarget()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -841,14 +841,14 @@ namespace Microsoft.Build.UnitTests
             logger.AssertMessageCount($"{projFileName}(4,34):", 2, false);
             logger.AssertMessageCount($"{projFileName}(5,34):", 2, false);
             logger.AssertMessageCount($"{projFileName}(6,34):", 2, false);
-            Assert.Equal(0, logger.WarningCount);
-            Assert.Equal(0, logger.ErrorCount);
+            Assert.AreEqual(0, logger.WarningCount);
+            Assert.AreEqual(0, logger.ErrorCount);
         }
 
         /// <summary>
         /// Referring to an unrelated item within target leads to expected expansion.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UnrelatedItemsRecursionWithinTarget()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -880,14 +880,14 @@ namespace Microsoft.Build.UnitTests
             logger.AssertLogContains("iin1-target-paths=[b.foo;d.foo;h.foo]");
 
             logger.AssertLogDoesntContain("MSB4120");
-            Assert.Equal(0, logger.WarningCount);
-            Assert.Equal(0, logger.ErrorCount);
+            Assert.AreEqual(0, logger.WarningCount);
+            Assert.AreEqual(0, logger.ErrorCount);
         }
 
         /// <summary>
         /// Check if passing different global properties via metadata works
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DifferentGlobalPropertiesWithBlanks()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -933,14 +933,14 @@ namespace Microsoft.Build.UnitTests
 
                 IDictionary<string, TargetResult> targetOutputs;
                 bool success = pi.Build(null, null, null, out targetOutputs);
-                Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
+                Assert.IsTrue(success); // "Build failed.  See 'Standard Out' tab for details."
 
                 string expectedItemOutputs = string.Format(@"
                     h1.dll : MSBuildSourceProjectFile={0} ; MSBuildSourceTargetName=TargetH
                     ", projectFile2);
 
-                Assert.True(targetOutputs.ContainsKey("Build"));
-                Assert.Single(targetOutputs["Build"].Items);
+                Assert.IsTrue(targetOutputs.ContainsKey("Build"));
+                Assert.ContainsSingle(targetOutputs["Build"].Items);
                 ObjectModelHelpers.AssertItemsMatch(expectedItemOutputs, targetOutputs["Build"].Items, false /* order of items not enforced */);
             }
             finally
@@ -954,7 +954,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check if passing different global properties via metadata works
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DifferentGlobalPropertiesInvalid()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -997,7 +997,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Project p = ObjectModelHelpers.CreateInMemoryProject(parentProjectContents);
                 bool success = p.Build();
-                Assert.False(success); // "Build succeeded.  See 'Standard Out' tab for details."
+                Assert.IsFalse(success); // "Build succeeded.  See 'Standard Out' tab for details."
             }
             finally
             {
@@ -1009,7 +1009,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check if passing additional global properties via metadata works
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DifferentAdditionalPropertiesWithDefault()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1053,7 +1053,7 @@ namespace Microsoft.Build.UnitTests
 
                 IDictionary<string, TargetResult> targetOutputs;
                 bool success = pi.Build(null, null, null, out targetOutputs);
-                Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
+                Assert.IsTrue(success); // "Build failed.  See 'Standard Out' tab for details."
 
                 string expectedItemOutputs = string.Format(@"
                     a1.dll : MSBuildSourceProjectFile={0} ; MSBuildSourceTargetName=TargetA
@@ -1061,8 +1061,8 @@ namespace Microsoft.Build.UnitTests
                     g1.dll : MSBuildSourceProjectFile={1} ; MSBuildSourceTargetName=TargetG
                     ", projectFile1, projectFile2);
 
-                Assert.True(targetOutputs.ContainsKey("Build"));
-                Assert.Equal(3, targetOutputs["Build"].Items.Length);
+                Assert.IsTrue(targetOutputs.ContainsKey("Build"));
+                Assert.AreEqual(3, targetOutputs["Build"].Items.Length);
                 ObjectModelHelpers.AssertItemsMatch(expectedItemOutputs, targetOutputs["Build"].Items, false /* order of items not enforced */);
             }
             finally
@@ -1076,7 +1076,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check if passing additional global properties via metadata works
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DifferentAdditionalPropertiesWithGlobalProperties()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1122,7 +1122,7 @@ namespace Microsoft.Build.UnitTests
 
                 IDictionary<string, TargetResult> targetOutputs;
                 bool success = pi.Build(null, null, null, out targetOutputs);
-                Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
+                Assert.IsTrue(success); // "Build failed.  See 'Standard Out' tab for details."
 
                 string expectedItemOutputs = string.Format(@"
                     b1.dll : MSBuildSourceProjectFile={0} ; MSBuildSourceTargetName=TargetB
@@ -1130,8 +1130,8 @@ namespace Microsoft.Build.UnitTests
                     h1.dll : MSBuildSourceProjectFile={1} ; MSBuildSourceTargetName=TargetH
                     ", projectFile1, projectFile2);
 
-                Assert.True(targetOutputs.ContainsKey("Build"));
-                Assert.Equal(3, targetOutputs["Build"].Items.Length);
+                Assert.IsTrue(targetOutputs.ContainsKey("Build"));
+                Assert.AreEqual(3, targetOutputs["Build"].Items.Length);
                 ObjectModelHelpers.AssertItemsMatch(expectedItemOutputs, targetOutputs["Build"].Items, false /* order of items not enforced */);
             }
             finally
@@ -1145,7 +1145,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check if passing additional global properties via metadata works
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DifferentAdditionalPropertiesWithoutDefault()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1189,15 +1189,15 @@ namespace Microsoft.Build.UnitTests
 
                 IDictionary<string, TargetResult> targetOutputs;
                 bool success = pi.Build(null, null, null, out targetOutputs);
-                Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
+                Assert.IsTrue(success); // "Build failed.  See 'Standard Out' tab for details."
 
                 string expectedItemOutputs = string.Format(@"
                     b1.dll : MSBuildSourceProjectFile={0} ; MSBuildSourceTargetName=TargetB
                     h1.dll : MSBuildSourceProjectFile={1} ; MSBuildSourceTargetName=TargetH
                     ", projectFile1, projectFile2);
 
-                Assert.True(targetOutputs.ContainsKey("Build"));
-                Assert.Equal(2, targetOutputs["Build"].Items.Length);
+                Assert.IsTrue(targetOutputs.ContainsKey("Build"));
+                Assert.AreEqual(2, targetOutputs["Build"].Items.Length);
                 ObjectModelHelpers.AssertItemsMatch(expectedItemOutputs, targetOutputs["Build"].Items, false /* order of items not enforced */);
             }
             finally
@@ -1210,7 +1210,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Properties and Targets that use non-standard separation chars
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TargetsWithSeparationChars()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1254,7 +1254,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Project p = ObjectModelHelpers.CreateInMemoryProject(parentProjectContents);
                 bool success = p.Build();
-                Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
+                Assert.IsTrue(success); // "Build failed.  See 'Standard Out' tab for details."
             }
             finally
             {
@@ -1269,7 +1269,7 @@ namespace Microsoft.Build.UnitTests
         /// The Aardvark tests which also test StopOnFirstFailure are at:
         /// qa\md\wd\DTP\MSBuild\ShippingExtensions\ShippingTasks\MSBuild\_Tst\MSBuild.StopOnFirstFailure
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void StopOnFirstFailureandBuildInParallelSingleNode()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1383,7 +1383,7 @@ namespace Microsoft.Build.UnitTests
                             break;
                     }
                     // The build should fail as the first project has an error
-                    Assert.False(success, "Iteration of i " + i + " Build Succeeded.  See 'Standard Out' tab for details.");
+                    Assert.IsFalse(success, "Iteration of i " + i + " Build Succeeded.  See 'Standard Out' tab for details.");
                 }
             }
             finally
@@ -1397,7 +1397,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify stopOnFirstFailure with BuildInParallel override message are correctly logged when there are multiple nodes
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void StopOnFirstFailureandBuildInParallelMultipleNode()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1507,7 +1507,7 @@ namespace Microsoft.Build.UnitTests
                             break;
                     }
                     // The build should fail as the first project has an error
-                    Assert.False(success, "Iteration of i " + i + " Build Succeeded.  See 'Standard Out' tab for details.");
+                    Assert.IsFalse(success, "Iteration of i " + i + " Build Succeeded.  See 'Standard Out' tab for details.");
                 }
             }
             finally
@@ -1521,7 +1521,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the skipping of the remaining projects. Verify the skip message is only displayed when there are projects to skip.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SkipRemainingProjects()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1561,7 +1561,7 @@ namespace Microsoft.Build.UnitTests
                 bool success = p.Build();
 
                 logger.AssertLogDoesntContain(AssemblyResources.GetString("MSBuild.SkippingRemainingProjects"));
-                Assert.False(success); // "Build Succeeded.  See 'Standard Out' tab for details."
+                Assert.IsFalse(success); // "Build Succeeded.  See 'Standard Out' tab for details."
 
                 parentProjectContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
@@ -1581,7 +1581,7 @@ namespace Microsoft.Build.UnitTests
                 Project p2 = ObjectModelHelpers.CreateInMemoryProject(pc, parentProjectContents, logger2);
                 bool success2 = p2.Build();
                 logger2.AssertLogDoesntContain(AssemblyResources.GetString("MSBuild.SkippingRemainingProjects"));
-                Assert.False(success2); // "Build Succeeded.  See 'Standard Out' tab for details."
+                Assert.IsFalse(success2); // "Build Succeeded.  See 'Standard Out' tab for details."
             }
             finally
             {
@@ -1593,7 +1593,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the behavior of Target execution with StopOnFirstFailure
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TargetStopOnFirstFailureBuildInParallel()
         {
             string project1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1735,7 +1735,7 @@ namespace Microsoft.Build.UnitTests
                     }
 
                     // The build should fail as the first project has an error
-                    Assert.False(success, "Iteration of i:" + i + "Build Succeeded.  See 'Standard Out' tab for details.");
+                    Assert.IsFalse(success, "Iteration of i:" + i + "Build Succeeded.  See 'Standard Out' tab for details.");
                 }
             }
             finally
@@ -1747,7 +1747,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Properties and Targets that use non-standard separation chars
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertiesWithSeparationChars()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1804,15 +1804,15 @@ namespace Microsoft.Build.UnitTests
 
                 IDictionary<string, TargetResult> targetOutputs;
                 bool success = pi.Build(null, null, null, out targetOutputs);
-                Assert.True(success); // "Build failed.  See 'Standard Out' tab for details."
+                Assert.IsTrue(success); // "Build failed.  See 'Standard Out' tab for details."
 
-                Assert.True(targetOutputs.ContainsKey("Build"));
-                Assert.Equal(5, targetOutputs["Build"].Items.Length);
-                Assert.Equal("|a", targetOutputs["Build"].Items[0].ItemSpec);
-                Assert.Equal("A|b", targetOutputs["Build"].Items[1].ItemSpec);
-                Assert.Equal("B|c", targetOutputs["Build"].Items[2].ItemSpec);
-                Assert.Equal("C|d", targetOutputs["Build"].Items[3].ItemSpec);
-                Assert.Equal("D|", targetOutputs["Build"].Items[4].ItemSpec);
+                Assert.IsTrue(targetOutputs.ContainsKey("Build"));
+                Assert.AreEqual(5, targetOutputs["Build"].Items.Length);
+                Assert.AreEqual("|a", targetOutputs["Build"].Items[0].ItemSpec);
+                Assert.AreEqual("A|b", targetOutputs["Build"].Items[1].ItemSpec);
+                Assert.AreEqual("B|c", targetOutputs["Build"].Items[2].ItemSpec);
+                Assert.AreEqual("C|d", targetOutputs["Build"].Items[3].ItemSpec);
+                Assert.AreEqual("D|", targetOutputs["Build"].Items[4].ItemSpec);
             }
             finally
             {
@@ -1825,7 +1825,7 @@ namespace Microsoft.Build.UnitTests
         /// Orcas had a bug that if the target casing specified was not correct, we would still build it,
         /// but not return any target outputs!
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TargetNameIsCaseInsensitive()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1850,7 +1850,7 @@ namespace Microsoft.Build.UnitTests
                 Project project = new Project(projectFile2);
                 MockLogger logger = new MockLogger();
 
-                Assert.True(project.Build(logger));
+                Assert.IsTrue(project.Build(logger));
 
                 logger.AssertLogContains("[foo.out]");
             }
@@ -1861,7 +1861,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectFileWithoutNamespaceBuilds()
         {
             string projectFile1 = ObjectModelHelpers.CreateTempFileOnDisk(@"
@@ -1886,7 +1886,7 @@ namespace Microsoft.Build.UnitTests
                 Project project = new Project(projectFile2);
                 MockLogger logger = new MockLogger();
 
-                Assert.True(project.Build(logger));
+                Assert.IsTrue(project.Build(logger));
 
                 logger.AssertLogContains("[foo.out]");
             }
@@ -1897,7 +1897,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InMemoryProject_Build()
         {
             Project project = ObjectModelHelpers.CreateInMemoryProject("""
@@ -1914,11 +1914,11 @@ namespace Microsoft.Build.UnitTests
             var logger = new MockLogger();
             bool result = project.Build(logger);
             _testOutput.WriteLine(logger.FullLog);
-            Assert.True(result);
+            Assert.IsTrue(result);
             logger.AssertLogContains("test message from other");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InMemoryProject_Error()
         {
             Project project = ObjectModelHelpers.CreateInMemoryProject("""
@@ -1935,7 +1935,7 @@ namespace Microsoft.Build.UnitTests
             var logger = new MockLogger();
             bool result = project.Build(logger);
             _testOutput.WriteLine(logger.FullLog);
-            Assert.False(result);
+            Assert.IsFalse(result);
             logger.AssertLogDoesntContain("test message from other");
             logger.AssertLogContains("MSB3202"); // error MSB3202: The project file was not found.
         }
@@ -1944,7 +1944,7 @@ namespace Microsoft.Build.UnitTests
         /// This is used by file-based apps (<c>dotnet run file.cs</c>) which use in-memory projects
         /// and want to support existing targets which often invoke the <c>MSBuild</c> task on the current project.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InMemoryProject_BuildByDefault()
         {
             Project project = ObjectModelHelpers.CreateInMemoryProject("""
@@ -1963,14 +1963,14 @@ namespace Microsoft.Build.UnitTests
             var logger = new MockLogger();
             bool result = project.Build(logger);
             _testOutput.WriteLine(logger.FullLog);
-            Assert.True(result);
+            Assert.IsTrue(result);
             logger.AssertLogContains("test message from other");
         }
 
-        [Theory]
-        [InlineData(null)]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(null)]
+        [DataRow(false)]
+        [DataRow(true)]
         public void NonExistentProject(bool? buildNonexistentProjectsByDefault)
         {
             Project project = ObjectModelHelpers.CreateInMemoryProject("""
@@ -1992,7 +1992,7 @@ namespace Microsoft.Build.UnitTests
             var logger = new MockLogger();
             bool result = project.Build(logger);
             _testOutput.WriteLine(logger.FullLog);
-            Assert.False(result);
+            Assert.IsFalse(result);
             logger.AssertLogDoesntContain("test message from other");
             logger.AssertLogContains(buildNonexistentProjectsByDefault == true
                 ? "MSB4025" // error MSB4025: The project file could not be loaded.
@@ -2006,9 +2006,9 @@ namespace Microsoft.Build.UnitTests
         /// This is used by file-based apps (<c>dotnet run file.cs</c>) to support
         /// <c>#:ref</c> directives that create virtual project references.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void VirtualProjectReference_SplitByFileExistence(bool buildNonexistentProjectsByDefault)
         {
             using TestEnvironment env = TestEnvironment.Create(_testOutput);
@@ -2055,7 +2055,7 @@ namespace Microsoft.Build.UnitTests
             var logger = new MockLogger(_testOutput);
             bool result = project.Build("CheckSplit", [logger]);
             _testOutput.WriteLine(logger.FullLog);
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             if (buildNonexistentProjectsByDefault)
             {
@@ -2075,9 +2075,9 @@ namespace Microsoft.Build.UnitTests
         /// <c>_BuildNonexistentProjectsByDefault</c> is set. Parameterized to verify
         /// that the main project can also be virtual (not on disk).
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void VirtualProjectReference_EndToEnd(bool mainProjectVirtual)
         {
             using TestEnvironment env = TestEnvironment.Create(_testOutput);
@@ -2132,7 +2132,7 @@ namespace Microsoft.Build.UnitTests
             var logger = new MockLogger(_testOutput);
             bool result = project.Build("ResolveProjectReferences", [logger]);
             _testOutput.WriteLine(logger.FullLog);
-            Assert.True(result);
+            Assert.IsTrue(result);
             logger.AssertLogContains("message from referenced project");
         }
     }

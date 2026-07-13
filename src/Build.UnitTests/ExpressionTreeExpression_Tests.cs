@@ -11,15 +11,15 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared.FileSystem;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class ExpressionTest : IDisposable
     {
-        private readonly ITestOutputHelper output;
+        private readonly TestContext output;
 
 
         private static readonly string[] FilesWithExistenceChecks = { "a", "c", "a;b", "a'b", ";", "'" };
@@ -360,7 +360,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Set up expression tests by creating files for existence checks.
         /// </summary>
-        public ExpressionTest(ITestOutputHelper output)
+        public ExpressionTest(TestContext output)
         {
             this.output = output;
 
@@ -427,8 +427,8 @@ namespace Microsoft.Build.UnitTests
         /// (many coincidentally like existing QA tests) to give breadth coverage.
         /// Please add more cases as they arise.
         /// </summary>
-        [Theory]
-        [MemberData(nameof(TrueTests))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(TrueTests))]
         public void EvaluateAVarietyOfTrueExpressions(string expression)
         {
             Parser p = new Parser();
@@ -443,7 +443,7 @@ namespace Microsoft.Build.UnitTests
                     ElementLocation.EmptyLocation,
                     FileSystems.Default);
 
-            Assert.True(tree.Evaluate(state), "expected true from '" + expression + "'");
+            Assert.IsTrue(tree.Evaluate(state), "expected true from '" + expression + "'");
         }
 
         /// <summary>
@@ -451,8 +451,8 @@ namespace Microsoft.Build.UnitTests
         /// (many coincidentally like existing QA tests) to give breadth coverage.
         /// Please add more cases as they arise.
         /// </summary>
-        [Theory]
-        [MemberData(nameof(FalseTests))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(FalseTests))]
         public void EvaluateAVarietyOfFalseExpressions(string expression)
         {
             Parser p = new Parser();
@@ -467,7 +467,7 @@ namespace Microsoft.Build.UnitTests
                     ElementLocation.EmptyLocation,
                     FileSystems.Default);
 
-            Assert.False(tree.Evaluate(state), "expected false from '" + expression + "' and got true");
+            Assert.IsFalse(tree.Evaluate(state), "expected false from '" + expression + "' and got true");
         }
 
         /// <summary>
@@ -475,8 +475,8 @@ namespace Microsoft.Build.UnitTests
         /// (many coincidentally like existing QA tests) to give breadth coverage.
         /// Please add more cases as they arise.
         /// </summary>
-        [Theory]
-        [MemberData(nameof(ErrorTests))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(ErrorTests))]
         public void EvaluateAVarietyOfErrorExpressions(string expression)
         {
             // If an expression is invalid,
@@ -506,7 +506,7 @@ namespace Microsoft.Build.UnitTests
                 output.WriteLine(expression + " caused '" + ex.Message + "'");
                 caughtException = true;
             }
-            Assert.True(caughtException,
+            Assert.IsTrue(caughtException,
                 "expected '" + expression + "' to not parse or not be evaluated");
         }
     }

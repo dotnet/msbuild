@@ -8,7 +8,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -33,11 +32,12 @@ namespace Microsoft.Build.UnitTests
     /// - https://github.com/dotnet/msbuild/issues/2997
     /// - https://github.com/dotnet/msbuild/issues/9150
     /// </summary>
+    [TestClass]
     public class Resources_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public Resources_Tests(ITestOutputHelper output)
+        public Resources_Tests(TestContext output)
         {
             _output = output;
         }
@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that all resource strings referenced in Microsoft.Build assembly exist in the corresponding .resx files
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AllReferencedResourcesExistInBuildAssembly()
         {
             VerifyResourcesForAssembly(
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that all resource strings referenced in Microsoft.Build.Tasks.Core assembly exist in the corresponding .resx files
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AllReferencedResourcesExistInTasksAssembly()
         {
             VerifyResourcesForAssembly(
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that all resource strings referenced in Microsoft.Build.Utilities.Core assembly exist in the corresponding .resx files
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AllReferencedResourcesExistInUtilitiesAssembly()
         {
             VerifyResourcesForAssembly(
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that all resource strings referenced in MSBuild assembly exist in the corresponding .resx files
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AllReferencedResourcesExistInMSBuildAssembly()
         {
             VerifyResourcesForAssembly(
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // NOTE: To add verification for additional assemblies, follow this pattern:
-        // [Fact]
+        // [MSBuildTestMethod]
         // public void AllReferencedResourcesExistInYourAssembly()
         // {
         //     VerifyResourcesForAssembly(

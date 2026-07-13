@@ -5,12 +5,12 @@ using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Evaluation;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.Construction
 {
+    [TestClass]
     public class XmlReaderWithoutLocation_Tests
     {
         private sealed class XmlReaderNoIXmlLineInfo : XmlReader
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests.Construction
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateProjectWithoutLineInfo()
         {
             XmlReader reader = XmlReader.Create(new StringReader(
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.Construction
                   </Project>"));
             using XmlReader noLineInfoReader = new XmlReaderNoIXmlLineInfo(reader);
             Project project = new Project(noLineInfoReader);
-            Assert.Single(project.Targets);
+            Assert.ContainsSingle(project.Targets);
         }
     }
 }

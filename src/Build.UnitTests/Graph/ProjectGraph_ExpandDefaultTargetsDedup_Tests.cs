@@ -10,7 +10,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Graph.UnitTests
 {
@@ -35,11 +34,12 @@ namespace Microsoft.Build.Graph.UnitTests
     /// so the publicly-observable result of <c>GetTargetLists</c> is unchanged — this is a
     /// purely structural / performance fix.
     /// </summary>
+    [TestClass]
     public class ProjectGraph_ExpandDefaultTargetsDedup_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public ProjectGraph_ExpandDefaultTargetsDedup_Tests(ITestOutputHelper output)
+        public ProjectGraph_ExpandDefaultTargetsDedup_Tests(TestContext output)
         {
             _output = output;
         }
@@ -49,7 +49,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// the <see cref="MSBuildConstants.DefaultTargetsMarker"/> that expands to default
         /// targets <c>[Build, X]</c>. Result is deduped to <c>[Build, X]</c>.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Dedupes_WhenMarkerExpansionProducesDuplicates()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -68,7 +68,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// edge's Targets metadata (<c>A;B;A</c>), producing the geometric amplification
         /// shape this fix prevents. Verify the per-call result collapses to the unique set.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Dedupes_PRTOrDefaultMarker_WhenTargetsMetadataDuplicatesExpansion()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -92,7 +92,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// iterates each entry target against every matching PRT, so an N-duplicate
         /// arriving at an edge becomes N^2 propagated at the next hop.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Dedupes_ExplicitNonMarkerDuplicates()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -111,7 +111,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// the outer post-BFS dedup at <c>ProjectGraph.GetTargetLists</c> and
         /// <c>ProjectGraphBuildRequest.Equals</c>). First-occurrence wins.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Dedupes_IgnoresCase()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -129,7 +129,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// Fast path: when no marker is present and no duplicate is detected, the original
         /// input reference is returned unchanged — zero allocations beyond the lookup HashSet.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoMarkerNoDuplicates_ReturnsSameInstance()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -147,7 +147,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// Marker is expanded but the resulting list has no duplicates. The buffer is
         /// allocated (because we crossed the marker), but no entries are dropped.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MarkerExpanded_NoDuplicates_ReturnsExpandedList()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -165,7 +165,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// Edge case: a marker that expands to an empty <c>defaultTargets</c> list. The
         /// marker is consumed and the result is empty.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MarkerExpandsToEmptyDefaults_ReturnsEmptyList()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -183,7 +183,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// Edge case: every entry collapses to the same target. Verifies the buffer copies
         /// the unique prefix correctly when the prefix is length 1.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AllEntriesCollapseToSingleton()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -201,7 +201,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// Verifies the order of first-occurrence wins across a mix of literal, marker
         /// expansion, and post-marker literal entries.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PreservesFirstOccurrenceOrder()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -224,7 +224,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// target list contains each target at most once. With the fix in place the BFS
         /// runs in sub-second time; without the fix it explodes geometrically.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetLists_DuplicateMarkerPRT_StaysBoundedAcrossChain()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -248,7 +248,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// Sanity: a single-PRT(Build)-with-single-marker chain at depth 6 produces one
         /// <c>Build</c> per node — verifies the common case is unaffected.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetLists_SingleMarkerPRT_PropagatesLinearly()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);

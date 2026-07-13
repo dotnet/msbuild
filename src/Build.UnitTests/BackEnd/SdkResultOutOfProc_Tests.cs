@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -15,13 +15,13 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Unittest;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
+    [TestClass]
     public class SdkResultOutOfProc_Tests : IDisposable
     {
         /// <summary>
@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private readonly TestEnvironment _env;
 
-        public SdkResultOutOfProc_Tests(ITestOutputHelper output)
+        public SdkResultOutOfProc_Tests(TestContext output)
         {
             // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
             BuildManager.DefaultBuildManager.Dispose();
@@ -90,7 +90,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     </ItemGroup>
  </Target>";
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RunOutOfProcBuild()
         {
             string contents = $@"
@@ -122,7 +122,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         // Test scenario where using an SdkResolver in a project that hasn't been evaluated
         //  in the main node (which is where the SdkResolver runs).  This validates that
         //  the SdkResult is correctly transferred between nodes.
-        [Fact]
+        [MSBuildTestMethod]
         public void RunOutOfProcBuildWithTwoProjects()
         {
             string entryProjectContents = $@"

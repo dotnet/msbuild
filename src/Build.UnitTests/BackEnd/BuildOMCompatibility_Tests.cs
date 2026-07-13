@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -6,95 +6,95 @@ using System.Reflection;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Graph;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
+    [TestClass]
     public class BuildOMCompatibility_Tests
     {
-        [Theory]
-        [InlineData("ProjectInstance")]
-        [InlineData("ProjectFullPath")]
-        [InlineData("TargetNames")]
-        [InlineData("Flags")]
-        [InlineData("GlobalProperties")]
-        [InlineData("ExplicitlySpecifiedToolsVersion")]
-        [InlineData("HostServices")]
-        [InlineData("PropertiesToTransfer")]
-        [InlineData("RequestedProjectState")]
+        [MSBuildTestMethod]
+        [DataRow("ProjectInstance")]
+        [DataRow("ProjectFullPath")]
+        [DataRow("TargetNames")]
+        [DataRow("Flags")]
+        [DataRow("GlobalProperties")]
+        [DataRow("ExplicitlySpecifiedToolsVersion")]
+        [DataRow("HostServices")]
+        [DataRow("PropertiesToTransfer")]
+        [DataRow("RequestedProjectState")]
         public void BuildRequestDataPropertyCompatTest(string propertyName)
             => VerifyPropertyExists(typeof(BuildRequestData), propertyName);
 
-        [Theory]
-        [InlineData("ProjectGraph")]
-        [InlineData("ProjectGraphEntryPoints")]
-        [InlineData("TargetNames")]
-        [InlineData("Flags")]
-        [InlineData("GraphBuildOptions")]
-        [InlineData("HostServices")]
+        [MSBuildTestMethod]
+        [DataRow("ProjectGraph")]
+        [DataRow("ProjectGraphEntryPoints")]
+        [DataRow("TargetNames")]
+        [DataRow("Flags")]
+        [DataRow("GraphBuildOptions")]
+        [DataRow("HostServices")]
         public void GraphBuildRequestDataPropertyCompatTest(string propertyName)
             => VerifyPropertyExists(typeof(GraphBuildRequestData), propertyName);
 
-        [Theory]
-        [InlineData("BuildManager")]
-        [InlineData("SubmissionId")]
-        [InlineData("AsyncContext")]
-        [InlineData("WaitHandle")]
-        [InlineData("IsCompleted")]
-        [InlineData("BuildResult")]
+        [MSBuildTestMethod]
+        [DataRow("BuildManager")]
+        [DataRow("SubmissionId")]
+        [DataRow("AsyncContext")]
+        [DataRow("WaitHandle")]
+        [DataRow("IsCompleted")]
+        [DataRow("BuildResult")]
         public void BuildSubmissionDataPropertyCompatTest(string propertyName)
             => VerifyPropertyExists(typeof(BuildSubmission), propertyName);
 
-        [Theory]
-        [InlineData("Execute")]
-        [InlineData("ExecuteAsync")]
+        [MSBuildTestMethod]
+        [DataRow("Execute")]
+        [DataRow("ExecuteAsync")]
         public void BuildSubmissionDataMethodCompatTest(string methodName)
             => VerifyMethodExists(typeof(BuildSubmission), methodName);
 
-        [Theory]
-        [InlineData("BuildManager")]
-        [InlineData("SubmissionId")]
-        [InlineData("AsyncContext")]
-        [InlineData("WaitHandle")]
-        [InlineData("IsCompleted")]
-        [InlineData("BuildResult")]
+        [MSBuildTestMethod]
+        [DataRow("BuildManager")]
+        [DataRow("SubmissionId")]
+        [DataRow("AsyncContext")]
+        [DataRow("WaitHandle")]
+        [DataRow("IsCompleted")]
+        [DataRow("BuildResult")]
         public void GraphBuildSubmissionDataPropertyCompatTest(string propertyName)
             => VerifyPropertyExists(typeof(BuildSubmission), propertyName);
 
-        [Theory]
-        [InlineData("Execute")]
-        [InlineData("ExecuteAsync")]
+        [MSBuildTestMethod]
+        [DataRow("Execute")]
+        [DataRow("ExecuteAsync")]
         public void GraphBuildSubmissionDataMethodCompatTest(string methodName)
             => VerifyMethodExists(typeof(BuildSubmission), methodName);
 
-        [Theory]
-        [InlineData("SubmissionId")]
-        [InlineData("ConfigurationId")]
-        [InlineData("GlobalRequestId")]
-        [InlineData("ParentGlobalRequestId")]
-        [InlineData("NodeRequestId")]
-        [InlineData("Exception")]
-        [InlineData("CircularDependency")]
-        [InlineData("OverallResult")]
-        [InlineData("ResultsByTarget")]
-        [InlineData("ProjectStateAfterBuild")]
-        [InlineData("BuildRequestDataFlags")]
+        [MSBuildTestMethod]
+        [DataRow("SubmissionId")]
+        [DataRow("ConfigurationId")]
+        [DataRow("GlobalRequestId")]
+        [DataRow("ParentGlobalRequestId")]
+        [DataRow("NodeRequestId")]
+        [DataRow("Exception")]
+        [DataRow("CircularDependency")]
+        [DataRow("OverallResult")]
+        [DataRow("ResultsByTarget")]
+        [DataRow("ProjectStateAfterBuild")]
+        [DataRow("BuildRequestDataFlags")]
         public void BuildResultPropertyCompatTest(string propertyName)
             => VerifyPropertyExists(typeof(BuildResult), propertyName);
 
-        [Theory]
-        [InlineData("AddResultsForTarget")]
-        [InlineData("MergeResults")]
-        [InlineData("HasResultsForTarget")]
+        [MSBuildTestMethod]
+        [DataRow("AddResultsForTarget")]
+        [DataRow("MergeResults")]
+        [DataRow("HasResultsForTarget")]
         public void BuildResultMethodCompatTest(string methodName)
             => VerifyMethodExists(typeof(BuildResult), methodName);
 
-        [Theory]
-        [InlineData("SubmissionId")]
-        [InlineData("Exception")]
-        [InlineData("CircularDependency")]
-        [InlineData("OverallResult")]
-        [InlineData("ResultsByNode")]
+        [MSBuildTestMethod]
+        [DataRow("SubmissionId")]
+        [DataRow("Exception")]
+        [DataRow("CircularDependency")]
+        [DataRow("OverallResult")]
+        [DataRow("ResultsByNode")]
         public void GraphBuildResultPropertyCompatTest(string propertyName)
             => VerifyPropertyExists(typeof(GraphBuildResult), propertyName);
 

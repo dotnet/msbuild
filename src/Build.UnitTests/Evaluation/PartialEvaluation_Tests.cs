@@ -10,7 +10,6 @@ using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -18,13 +17,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
     /// Tests for the opt-in partial (stop-after-pass) evaluation model exposed via
     /// <see cref="ProjectOptions.EvaluationStage"/>.
     /// </summary>
+    [TestClass]
     public class PartialEvaluation_Tests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
         private readonly TestEnvironment _env;
         private readonly ProjectCollection _collection = new ProjectCollection();
 
-        public PartialEvaluation_Tests(ITestOutputHelper output)
+        public PartialEvaluation_Tests(TestContext output)
         {
             _output = output;
             _env = TestEnvironment.Create(_output);
@@ -70,23 +70,23 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ProjectCollection = _collection,
         };
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DefaultProjectOptionsStageIsFull()
         {
             new ProjectOptions().EvaluationStage.ShouldBe(ProjectEvaluationStage.Full);
         }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(5)]
-        [InlineData(-1)]
-        [InlineData(int.MaxValue - 1)]
+        [MSBuildTestMethod]
+        [DataRow(0)]
+        [DataRow(5)]
+        [DataRow(-1)]
+        [DataRow(int.MaxValue - 1)]
         public void EvaluationStage_RejectsUndefinedValues(int value)
         {
             Should.Throw<ArgumentOutOfRangeException>(() => new ProjectOptions { EvaluationStage = (ProjectEvaluationStage)value });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertiesStage_ExposesPropertiesButNotItemsOrTargets_ProjectInstance()
         {
             ProjectInstance instance = ProjectInstance.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Properties));
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Should.Throw<InvalidOperationException>(() => instance.DefaultTargets);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertiesStage_ExposesPropertiesButNotItemsOrTargets_Project()
         {
             Project project = Project.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Properties));
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Should.Throw<InvalidOperationException>(() => project.Targets);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyValuesEqualFullEvaluation()
         {
             ProjectInstance partial = ProjectInstance.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Properties));
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             partial.GetPropertyValue("FromItem").ShouldBe(full.GetPropertyValue("FromItem"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemDefinitionsStage_ExposesItemDefinitionsButNotItemsOrTargets()
         {
             ProjectInstance instance = ProjectInstance.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.ItemDefinitions));
@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Should.Throw<InvalidOperationException>(() => instance.Targets);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemsStage_ExposesItemsButNotTargets()
         {
             ProjectInstance instance = ProjectInstance.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Items));
@@ -155,7 +155,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Should.Throw<InvalidOperationException>(() => instance.Targets);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FullStage_IsDefault_AndExposesEverything()
         {
             ProjectInstance instance = ProjectInstance.FromProjectRootElement(CreateRootElement(), new ProjectOptions { ProjectCollection = _collection });
@@ -165,7 +165,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             instance.Targets.ShouldContainKey("Build");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReevaluateUpgradesPartialProjectToFull()
         {
             Project project = Project.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Properties));
@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             project.GetItems("Compile").Count.ShouldBe(2);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateProjectInstanceFromPartialProjectUpgradesToFull()
         {
             Project project = Project.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Properties));
@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             project.EvaluationStage.ShouldBe(ProjectEvaluationStage.Full);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PartialProjectInstanceCannotBeBuilt()
         {
             ProjectInstance instance = ProjectInstance.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Properties));
@@ -201,7 +201,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Should.Throw<InvalidOperationException>(() => new BuildRequestData(instance, new[] { "Build" }));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CacheDoesNotServePartialProjectForFullLoad()
         {
             TransientTestFile file = _env.CreateFile("test.proj", ProjectXml);

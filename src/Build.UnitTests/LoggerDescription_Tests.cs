@@ -5,15 +5,15 @@ using System;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class LoggerDescription_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void LoggerDescriptionCustomSerialization()
         {
             const string className = "Class";
@@ -34,12 +34,12 @@ namespace Microsoft.Build.UnitTests
             LoggerDescription description2 = new LoggerDescription();
             description2.CreateFromStream(reader);
             long streamReadEndPosition = stream.Position;
-            Assert.Equal(streamWriteEndPosition, streamReadEndPosition); // "Stream end positions should be equal"
+            Assert.AreEqual(streamWriteEndPosition, streamReadEndPosition); // "Stream end positions should be equal"
 
-            Assert.Equal(description.Verbosity, description2.Verbosity); // "Expected Verbosity to Match"
-            Assert.Equal(description.LoggerId, description2.LoggerId); // "Expected Verbosity to Match"
-            Assert.Equal(0, string.Compare(description.LoggerSwitchParameters, description2.LoggerSwitchParameters, StringComparison.OrdinalIgnoreCase)); // "Expected LoggerSwitchParameters to Match"
-            Assert.Equal(0, string.Compare(description.Name, description2.Name, StringComparison.OrdinalIgnoreCase)); // "Expected Name to Match"
+            Assert.AreEqual(description.Verbosity, description2.Verbosity); // "Expected Verbosity to Match"
+            Assert.AreEqual(description.LoggerId, description2.LoggerId); // "Expected Verbosity to Match"
+            Assert.AreEqual(0, string.Compare(description.LoggerSwitchParameters, description2.LoggerSwitchParameters, StringComparison.OrdinalIgnoreCase)); // "Expected LoggerSwitchParameters to Match"
+            Assert.AreEqual(0, string.Compare(description.Name, description2.Name, StringComparison.OrdinalIgnoreCase)); // "Expected Name to Match"
         }
     }
 }

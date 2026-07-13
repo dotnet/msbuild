@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -13,22 +13,22 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Unittest;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
+    [TestClass]
     public class SdkResultEvaluation_Tests : IDisposable
     {
         private TestEnvironment _env;
         private readonly string _testFolder;
         private MockLogger _logger;
         private ProjectCollection _projectCollection;
-        private ITestOutputHelper _log;
+        private TestContext _log;
         private bool _originalWarnOnUnitializedProperty;
 
-        public SdkResultEvaluation_Tests(ITestOutputHelper log)
+        public SdkResultEvaluation_Tests(TestContext log)
         {
             _log = log;
 
@@ -99,9 +99,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 .ShouldBeSameIgnoringOrder(new[] { (Name: "MetadataName", EvaluatedValue: "MetadataValue") });
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void SdkResolverCanReturnNoPaths(bool includePropertiesAndItems)
         {
             Dictionary<string, string> propertiesToAdd = null;
@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             _logger.WarningCount.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SuccessfullyEvaluatesSdkResultWithPropertiesForNullProjectRootElement()
         {
             Dictionary<string, string> propertiesToAdd = null;
@@ -171,11 +171,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Project.FromXmlReader(xmlReader, projectOptions);
         }
 
-        [Theory]
-        [InlineData(true, true)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
-        [InlineData(false, false)]
+        [MSBuildTestMethod]
+        [DataRow(true, true)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(false, false)]
         public void SdkResolverCanReturnSinglePath(bool includePropertiesAndItems, bool useSinglePathResult)
         {
             Dictionary<string, string> propertiesToAdd = null;
@@ -267,9 +267,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
             _logger.WarningCount.ShouldBe(0);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void SdkResolverCanReturnMultiplePaths(bool includePropertiesAndItems)
         {
             Dictionary<string, string> propertiesToAdd = null;
@@ -375,7 +375,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         // When two different SdkResults (ie from the Sdk.props and Sdk.targets imports) return the same combination of items / properties:
         //  - Test that there aren't warnings for duplicate imports
         //  - Test that items from resolver are duplicated in final evaluation result
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResolverCanReturnTheSamePropertiesAndItemsMultipleTimes()
         {
             Dictionary<string, string> propertiesToAdd;
@@ -441,7 +441,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             _logger.WarningCount.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResolverCanReturnSpecialCharacters()
         {
             // %3B - semicolon
@@ -495,7 +495,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             _logger.WarningCount.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResolverCanSetEnvVarsThatInfluenceBuild()
         {
             var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver((_, _, factory) =>
@@ -548,7 +548,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             instance.GetItems("ExecThingsAsEnvironment").ShouldHaveSingleItem().EvaluatedInclude.ShouldBe("TestEnvVarValue");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResolverEnvironmentVariablesOverrideAmbientEnvironmentVariables()
         {
             _env.SetEnvironmentVariable("SDK_TEST_VAR", "AmbientValue");
@@ -597,7 +597,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             instance.GetPropertyValue("ExecValue").ShouldBe("SdkValue");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FirstSdkEnvironmentVariableWinsOverSubsequentSdks()
         {
             var projectOptions = SdkUtilities.CreateProjectOptionsWithResolver(new SdkUtilities.ConfigurableMockSdkResolver((sdkReference, _, factory) =>

@@ -15,23 +15,23 @@ using Microsoft.Build.TelemetryInfra;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 using static Microsoft.Build.Framework.Telemetry.TelemetryDataUtils;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
-    [Collection("TelemetryManagerTests")]
+    [DoNotParallelize]
+    [TestClass]
     public class Telemetry_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public Telemetry_Tests(ITestOutputHelper output)
+        public Telemetry_Tests(TestContext output)
         {
             _output = output;
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WorkerNodeTelemetryCollection_BasicTarget()
         {
             WorkerNodeTelemetryData? workerNodeTelemetryData = null;
@@ -70,7 +70,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 .Count(v => v.CumulativeExecutionTime > TimeSpan.Zero || v.ExecutionsCount > 0).ShouldBe(2);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WorkerNodeTelemetryCollection_CustomTargetsAndTasks()
         {
             WorkerNodeTelemetryData? workerNodeData = null;
@@ -150,7 +150,7 @@ namespace Microsoft.Build.Engine.UnitTests
             workerNodeData.TasksExecutionData.Keys.ShouldAllBe(k => !k.IsNuget);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WorkerNodeTelemetryCollection_TaskFactoryName()
         {
             WorkerNodeTelemetryData? workerNodeData = null;
@@ -196,7 +196,7 @@ namespace Microsoft.Build.Engine.UnitTests
             workerNodeData.TasksExecutionData[inlineTaskKey].ExecutionsCount.ShouldBe(1);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TelemetryDataUtils_HashesCustomFactoryName()
         {
             // Create telemetry data with a custom factory name
@@ -236,7 +236,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
 #if NET
         // test in .net core with telemetry opted in to avoid sending it but enable listening to it
-        [Fact]
+        [MSBuildTestMethod]
         public void NodeTelemetryE2E()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -391,7 +391,7 @@ namespace Microsoft.Build.Engine.UnitTests
             public void Shutdown() { }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildIncrementalityInfo_AllTargetsExecuted_ClassifiedAsFull()
         {
             // Arrange: All targets were executed (none skipped)
@@ -420,7 +420,7 @@ namespace Microsoft.Build.Engine.UnitTests
             incrementality.IncrementalityRatio.ShouldBe(0.0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildIncrementalityInfo_MostTargetsSkipped_ClassifiedAsIncremental()
         {
             // Arrange: Most targets were skipped (>70%)
@@ -452,7 +452,7 @@ namespace Microsoft.Build.Engine.UnitTests
             incrementality.IncrementalityRatio.ShouldBe(0.75);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildIncrementalityInfo_NoTargets_ClassifiedAsUnknown()
         {
             // Arrange: No targets
@@ -473,7 +473,7 @@ namespace Microsoft.Build.Engine.UnitTests
             incrementality.IncrementalityRatio.ShouldBe(0.0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsEmpty_TrueForDefault_FalseAfterAdd()
         {
             var data = new WorkerNodeTelemetryData();
@@ -484,7 +484,7 @@ namespace Microsoft.Build.Engine.UnitTests
             data.IsEmpty.ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TelemetryCollector_AccumulatesAndSendsOnFinalize()
         {
             var collector = new TelemetryCollectorProvider.TelemetryCollector();

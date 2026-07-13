@@ -12,7 +12,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -24,13 +23,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// run in-process, while tasks without this attribute run in TaskHost for isolation.
     /// Tasks may also implement IMultiThreadableTask to gain access to TaskEnvironment APIs.
     /// </summary>
+    [TestClass]
     public class TaskRouter_IntegrationTests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
         private readonly TestEnvironment _env;
         private readonly string _testProjectsDir;
 
-        public TaskRouter_IntegrationTests(ITestOutputHelper output)
+        public TaskRouter_IntegrationTests(TestContext output)
         {
             _output = output;
             _env = TestEnvironment.Create(output);
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Verifies that a NonEnlightened task (no interface, no attribute) runs in TaskHost
         /// when MultiThreaded mode is enabled.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NonEnlightenedTask_RunsInTaskHost_InMultiThreadedMode()
         {
             // Arrange
@@ -93,7 +93,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Verifies that a task with IMultiThreadableTask interface but without MSBuildMultiThreadableTaskAttribute
         /// runs in TaskHost when MultiThreaded mode is enabled. Only the attribute determines routing.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskWithInterface_RunsInTaskHost_InMultiThreadedMode()
         {
             // Arrange
@@ -138,7 +138,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Verifies that a task with MSBuildMultiThreadableTaskAttribute runs in-process
         /// (not in TaskHost) when MultiThreaded mode is enabled.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskWithAttribute_RunsInProcess_InMultiThreadedMode()
         {
             // Arrange
@@ -183,7 +183,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Verifies that when MultiThreaded mode is disabled, even NonEnlightened tasks
         /// run in-process and do not use TaskHost.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NonEnlightenedTask_RunsInProcess_WhenMultiThreadedModeDisabled()
         {
             // Arrange
@@ -227,7 +227,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// <summary>
         /// Verifies that all tasks run in-process in single-threaded mode regardless of attributes.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskWithInterface_RunsInProcess_WhenMultiThreadedModeDisabled()
         {
             // Arrange
@@ -272,7 +272,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Verifies that multiple task types in the same build are routed correctly
         /// based on their characteristics in multi-threaded mode.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MixedTasks_RouteCorrectly_InMultiThreadedMode()
         {
             // Arrange
@@ -332,7 +332,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Verifies that explicit TaskHostFactory request overrides routing logic,
         /// forcing tasks to run in TaskHost even if they have the MSBuildMultiThreadableTaskAttribute.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExplicitTaskHostFactory_OverridesRoutingLogic()
         {
             // Arrange - Use a task with attribute but explicitly request TaskHostFactory
@@ -398,6 +398,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// Helper utilities for testing task routing behavior.
     /// Provides robust assertions that are less fragile than raw log string matching.
     /// </summary>
+    [TestClass]
     internal static class TaskRouterTestHelper
     {
         /// <summary>
@@ -432,6 +433,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// NonEnlightened task without IMultiThreadableTask interface or MSBuildMultiThreadableTaskAttribute.
     /// Should run in TaskHost in multi-threaded mode.
     /// </summary>
+    [TestClass]
     public class NonEnlightenedTestTask : Task
     {
         public override bool Execute()
@@ -445,6 +447,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// Task implementing IMultiThreadableTask interface.
     /// Should run in-process in multi-threaded mode.
     /// </summary>
+    [TestClass]
     public class InterfaceTestTask : Task, IMultiThreadableTask
     {
         public TaskEnvironment TaskEnvironment { get; set; }
@@ -469,6 +472,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 #pragma warning disable CS0436 // Type conflicts with imported type - intentional for testing
     [MSBuildMultiThreadableTask]
 #pragma warning restore CS0436
+    [TestClass]
     public class AttributeTestTask : Task
     {
         public override bool Execute()
@@ -493,6 +497,7 @@ namespace Microsoft.Build.Framework
     /// Must match the non-inheritable definition (Inherited = false).
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    [TestClass]
     public sealed class MSBuildMultiThreadableTaskAttribute : Attribute
     {
     }

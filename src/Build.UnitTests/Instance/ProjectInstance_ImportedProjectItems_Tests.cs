@@ -10,23 +10,23 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Unittest;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
     /// <summary>
     /// Tests for the MSBuildImportedProject items synthesized from the import closure.
     /// </summary>
+    [TestClass]
     public class ProjectInstance_ImportedProjectItems_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public ProjectInstance_ImportedProjectItems_Tests(ITestOutputHelper output)
+        public ProjectInstance_ImportedProjectItems_Tests(TestContext output)
         {
             _output = output;
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportedProjectItemsNotCreatedWithoutOptIn()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             instance.GetItems("MSBuildImportedProject").Count.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportedProjectItemsCreatedWhenPropertyIsSet()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             instanceItems[0].GetMetadataValue("ImportingProjectPath").ShouldBe(projectFile.Path);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportedProjectItemsHaveCorrectImportingPath()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             item2.GetMetadataValue("ImportingProjectPath").ShouldBe(import1File.Path);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportedProjectItemsExcludeRootProject()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -150,7 +150,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             instance.GetItems("MSBuildImportedProject").Count.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportedProjectItemsAvailableToTargets()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             mockLogger.AssertLogContains($"Import: {importFile.Path} from {projectFile.Path}");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportedProjectItemsHaveSdkMetadataForSdkImports()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -219,7 +219,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportedProjectItemsCreatedWhenSetViaGlobalProperty()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);

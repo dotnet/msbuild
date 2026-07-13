@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
-using Xunit;
 
 #nullable disable
 
@@ -14,13 +13,14 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests from Orcas
     /// </summary>
+    [TestClass]
     public sealed class TargetsFile_Test
     {
 #if FEATURE_COMPILE_IN_TESTS
         /// <summary>
         /// Check that the ARM flag is passed to the compiler when targeting ARM.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TargetARM()
         {
             string file = null;
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), library type assemblies do not
         /// get forced to anycpu32bitpreferred by default.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AnyCPULibraryProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platform of anycpu, library type assemblies do not
         /// get forced to anycpu32bitpreferred by default.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExplicitAnyCPULibraryProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -171,7 +171,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), winmdobj type assemblies do not
         /// get forced to anycpu32bitpreferred by default.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AnyCPUWinMDObjProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -226,7 +226,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, winmdobj type assemblies do not
         /// get forced to anycpu32bitpreferred by default.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExplicitAnyCPUWinMDObjProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -282,7 +282,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), exe type assemblies
         /// get forced to anycpu32bitpreferred by default.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AnyCPUExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -331,7 +331,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, exe type assemblies
         /// get forced to anycpu32bitpreferred by default.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExplicitAnyCPUExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -381,7 +381,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), exe type assemblies
         /// that are targeting .NET 4.0 do not get forced to anycpu32bitpreferred by default.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AnyCPU40ExeProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -430,7 +430,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, exe type assemblies that are
         /// targeting .NET 4.0+ do not get forced to anycpu32bitpreferred by default.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExplicitAnyCPUExeProjectIsNot32BitPreferred()
         {
             string file = null;
@@ -480,7 +480,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an empty platformtarget (equivalent to anycpu), appcontainerexe type assemblies
         /// get forced to anycpu32bitpreferred by default.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AnyCPUAppContainerExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -535,7 +535,7 @@ namespace Microsoft.Build.UnitTests
         /// Check that with an explicit platformtarget of anycpu, appcontainerexe type assemblies
         /// get forced to anycpu32bitpreferred by default.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExplicitAnyCPUAppContainerExeProjectIs32BitPreferred()
         {
             string file = null;
@@ -591,7 +591,7 @@ namespace Microsoft.Build.UnitTests
         /// Although AnyCPU library projects should not default to AnyCPU32BitPreferred, because that platform is
         /// not supported for library projects, if Prefer32Bit is explicitly set, we should still respect that.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AnyCPULibraryProjectIs32BitPreferredIfPrefer32BitSet()
         {
             string file = null;
@@ -642,7 +642,7 @@ namespace Microsoft.Build.UnitTests
         /// A project with no explicit OutputType will end up defaulting its OutputType to exe,
         /// so it should also default to Prefer32Bit = true.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AnyCPUProjectWithNoExplicitOutputTypeIs32BitPreferred()
         {
             string file = null;
@@ -691,7 +691,7 @@ namespace Microsoft.Build.UnitTests
         /// A project with no explicit OutputType will end up defaulting its OutputType to exe,
         /// so it should also default to Prefer32Bit = true.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AnyCPUJupiterProjectWithNoExplicitOutputTypeIs32BitPreferred()
         {
             string file = null;
@@ -742,7 +742,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Validate that the GetFrameworkPaths target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGetFrameworkPaths()
         {
             MockLogger logger = new MockLogger();
@@ -776,7 +776,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Validate that the GetFrameworkPaths target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTargetFrameworkPaths()
         {
             string[] targetFrameworkVersions = { "v2.0", "v3.0", "v3.5", "v4.0", "v4.5", "" };
@@ -839,7 +839,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Doesn't synthesize Link metadata if the items are defined in the project
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoLinkMetadataSynthesisWhenDefinedInProject()
         {
             string[] files = null;
@@ -900,7 +900,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Synthesizes Link metadata if the items are defined in an import and are on the allowlist
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SynthesizeLinkMetadataForItemsOnAllowlist()
         {
             string outputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -977,7 +977,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Don't synthesize link metadata if the SynthesizeLinkMetadata property is false
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DontSynthesizeLinkMetadataIfPropertyNotSet()
         {
             string outputPath = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
@@ -1396,6 +1396,7 @@ namespace Microsoft.Build.UnitTests
     /// Regress specific bugs.
     /// </summary>
     [TestFixture]
+    [TestClass]
     sealed public class Bugs
     {
         /// <summary>
@@ -1451,6 +1452,7 @@ namespace Microsoft.Build.UnitTests
     /// building) returning the name of the EXE or DLL that would be built.
     /// </summary>
     [TestFixture]
+    [TestClass]
     sealed public class GetTargetPath
     {
         /// <summary>
@@ -1489,6 +1491,7 @@ namespace Microsoft.Build.UnitTests
     /// the resource files.
     /// </summary>
     [TestFixture]
+    [TestClass]
     sealed public class PrepareResourceNamesTarget
     {
         /// <summary>
@@ -1543,6 +1546,7 @@ namespace Microsoft.Build.UnitTests
     /// Tests the CopyAppConfigFile target.
     /// </summary>
     [TestFixture]
+    [TestClass]
     sealed public class CopyAppConfigFile
     {
         [Test]
@@ -1810,6 +1814,7 @@ namespace Microsoft.Build.UnitTests
     /// Tests some general things about our .TARGETS files, such as which properties are referenced.
     /// </summary>
     [TestFixture]
+    [TestClass]
     sealed public class General
     {
         /// <summary>
@@ -2462,6 +2467,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Helper methods for unit-tests in this file.
     /// </summary>
+    [TestClass]
     internal static class Helper
     {
         /// <summary>

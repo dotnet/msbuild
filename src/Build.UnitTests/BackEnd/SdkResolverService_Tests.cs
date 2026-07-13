@@ -15,7 +15,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
 using SdkResultBase = Microsoft.Build.Framework.SdkResult;
 using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
@@ -25,6 +24,7 @@ using SdkResultImpl = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
+    [TestClass]
     public class SdkResolverService_Tests
     {
         private readonly MockLogger _logger;
@@ -41,7 +41,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0, 0));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         // Scenario: Sdk is not resolved.
         public void AssertAllResolverErrorsLoggedWhenSdkNotResolved()
         {
@@ -75,7 +75,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.Warnings.Select(i => i.Message).ShouldBe(new[] { "WARNING4", "WARNING2" });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         // Scenario: in a trimmed / Native AOT host the dynamic loading of plugin SDK resolvers is disabled.
         // An SDK that can only be resolved by such a resolver must fail observably with a reported
         // project-file error (MSB4282) rather than silently or by attempting an unsupported Assembly.LoadFrom.
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
 #if NET
-        [Fact]
+        [MSBuildTestMethod]
         // Scenario: even with dynamic resolver loading disabled (trimmed / Native AOT host), an in-box SDK
         // resolved by the reflection-free default resolver still succeeds, and the reflective manifest-load
         // funnel is never reached.
@@ -145,14 +145,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 #endif
 
-        [Fact]
+        [MSBuildTestMethod]
         // SdkResolver.Register validates its argument.
         public void RegisterSdkResolver_NullResolver_Throws()
         {
             Should.Throw<ArgumentNullException>(() => SdkResolver.Register(null));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         // Registering the same instance more than once has no additional effect.
         public void RegisterSdkResolver_SameInstanceTwice_RegistersOnce()
         {
@@ -170,7 +170,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         // A host-registered resolver is folded into the reflection-free default-resolver pass, ordered by Priority.
         public void RegisteredResolverIsIncludedInDefaultResolversByPriority()
         {
@@ -192,7 +192,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         // End to end: a resolver registered via SdkResolver.Register resolves an SDK through the service on
         // the reflection-free path, with no on-disk resolver manifests involved.
         public void RegisteredResolverResolvesSdkThroughService()
@@ -225,7 +225,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssertSingleResolverErrorLoggedWhenSdkNotResolved()
         {
             var service = new SdkResolverService();
@@ -252,7 +252,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                     "ERROR1"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssertResolutionWarnsIfResolvedVersionIsDifferentFromReferencedVersion()
         {
             var sdk = new SdkReference("foo", "1.0.0", null);
@@ -278,7 +278,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.Warnings.First().Code.ShouldStartWith("MSB4241");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssertResolverThrows()
         {
             var service = new SdkResolverService();
@@ -292,7 +292,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             e.Sdk.Name.ShouldBe("1sdkName");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         // Scenario: MockSdkResolverWithResolvableSdkPattern2 is a specific resolver (i.e. resolver with pattern)
         // and it successfully resolves sdk.
         public void AssertSecondResolverWithPatternCanResolve()
@@ -335,7 +335,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         // Scenario: we want to test that we solved the contention described here: https://github.com/dotnet/msbuild/issues/7927#issuecomment-1232470838
         public async Task AssertResolverPopulationContentionNotPresent()
         {
@@ -351,12 +351,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             string message1 = await res1;
             string message2 = await res2;
 
-            Assert.Equal("", message1);
-            Assert.Equal("", message2);
+            Assert.AreEqual("", message1);
+            Assert.AreEqual("", message2);
         }
 #endif
 
-        [Fact]
+        [MSBuildTestMethod]
         // Scenario: MockSdkResolverWithResolvableSdkPattern1 is a specific resolver, it is loaded but did not resolve sdk.
         // MockSdkResolver1 is a general resolver (i.e. resolver without pattern), it resolves sdk on a fallback.
         public void AssertFirstResolverCanResolve()
@@ -373,7 +373,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldNotContain("MockSdkResolverWithResolvableSdkPattern1 running");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         // Scenario: MockSdkResolver1 has higher priority than MockSdkResolverWithResolvableSdkPattern1 but MockSdkResolverWithResolvableSdkPattern1 resolves sdk,
         // becuase MockSdkResolver1 is general and MockSdkResolverWithResolvableSdkPattern1 is specific.
         public void AssertFirstResolverWithPatternCanResolve()
@@ -390,7 +390,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldNotContain("MockSdkResolver1 running");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssertSdkResolutionMessagesAreLogged()
         {
             var service = new SdkResolverService();
@@ -406,7 +406,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.BuildMessageEvents.Select(i => i.Message).ShouldContain(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("SucceededToResolveSDK", sdk.ToString(), nameof(MockSdkResolver1), result.Path, result.Version));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssertSdkResolutionMessagesAreLoggedInEventSource()
         {
             using var eventSourceTestListener = new EventSourceTestHelper();
@@ -421,7 +421,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             eventsLogged.ShouldContain(x => x.EventId == 65 && x.Payload[1].ToString() == sdkName);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssertFirstResolverErrorsSupressedWhenResolved()
         {
             var service = new SdkResolverService();
@@ -444,7 +444,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.ErrorCount.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssertResolverHasStatePreserved()
         {
             const int submissionId = 5;
@@ -461,7 +461,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             service.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true).Path.ShouldBe(MockSdkResolverWithState.Expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssertResolverStateNotPreserved()
         {
             const int submissionId = BuildEventContext.InvalidSubmissionId;
@@ -478,7 +478,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             service.ResolveSdk(submissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true).Path.ShouldBe("resolverpath");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssertResolversLoadedIfDefaultResolverSucceeds()
         {
             const int submissionId = BuildEventContext.InvalidSubmissionId;
@@ -502,16 +502,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 #endif
         }
 
-        [Theory]
-        [InlineData(null, "1.0", true)]
-        [InlineData("1.0", "1.0", true)]
-        [InlineData("1.0-preview", "1.0-PrEvIeW", true)]
-        [InlineData("1.0", "1.0.0", false)]
-        [InlineData("1.0", "1.0.0.0", false)]
-        [InlineData("1.0.0", "1.0.0.0", false)]
-        [InlineData("1.2.0.0", "1.0.0.0", false)]
-        [InlineData("1.2.3.0", "1.2.0.0", false)]
-        [InlineData("1.2.3.4", "1.2.3.0", false)]
+        [MSBuildTestMethod]
+        [DataRow(null, "1.0", true)]
+        [DataRow("1.0", "1.0", true)]
+        [DataRow("1.0-preview", "1.0-PrEvIeW", true)]
+        [DataRow("1.0", "1.0.0", false)]
+        [DataRow("1.0", "1.0.0.0", false)]
+        [DataRow("1.0.0", "1.0.0.0", false)]
+        [DataRow("1.2.0.0", "1.0.0.0", false)]
+        [DataRow("1.2.3.0", "1.2.0.0", false)]
+        [DataRow("1.2.3.4", "1.2.3.0", false)]
         public void IsReferenceSameVersionTests(string version1, string version2, bool expected)
         {
             SdkReference sdk = new SdkReference("Microsoft.NET.Sdk", version1, null);
@@ -519,7 +519,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             SdkResolverService.IsReferenceSameVersion(sdk, version2).ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CachingWrapperShouldWarnWhenMultipleVersionsAreReferenced()
         {
             var sdk = new SdkReference("foo", "1.0.0", null);
@@ -594,9 +594,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void SdkResolverCanReturnNoPaths(bool includePropertiesAndItems)
         {
             var sdk = new SdkReference("foo", null, null);
@@ -634,7 +634,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.WarningCount.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResultCanReturnPropertiesAndItems()
         {
             string expectedPath = "Path/To/Return/From/Resolver";
@@ -671,9 +671,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.WarningCount.ShouldBe(0);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void SdkResultCanReturnMultiplePaths(bool includePropertiesAndItems)
         {
             string expectedPath1 = "First/Path/To/Return/From/Resolver";
@@ -724,7 +724,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.WarningCount.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssertResolutionWarnsIfResolvedVersionIsDifferentFromReferencedVersionWithMultipleReturnPaths()
         {
             var expectedPath1 = "First/Path/To/Return/From/Resolver";
@@ -774,7 +774,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// <summary>
         /// Verifies that an SDK resolver is only called once per build per SDK.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CachingWrapperShouldOnlyResolveOnce()
         {
             var sdk = new SdkReference("foo", "1.0.0", null);
@@ -808,7 +808,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.Value.ShouldBe(1, $"The SDK resolver should have only been called once but was called {result.Value} times");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InteractiveIsSetForResolverContext()
         {
             // Start with interactive false
@@ -842,7 +842,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             interactive.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsRunningInVisualStudioIsSetForResolverContext()
         {
             bool isRunningInVisualStudio = false;
@@ -873,7 +873,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             isRunningInVisualStudio.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssertResolversCanReturnEnvVariables()
         {
             var service = new CachingSdkResolverService();
@@ -904,6 +904,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.EnvironmentVariablesToAdd.Count.ShouldBe(1);
         }
 
+        [TestClass]
         internal sealed class SdkResolverServiceTextExtension : SdkResolverService
         {
 

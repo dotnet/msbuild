@@ -5,7 +5,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
@@ -16,12 +15,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// tolerates "worker node sent no arch bit") accept the connection regardless of either
     /// process arch.
     /// </summary>
+    [TestClass]
     public sealed class CommunicationsUtilities_Tests
     {
-        [Theory]
-        [InlineData(XMakeAttributes.MSBuildArchitectureValues.x64)]
-        [InlineData(XMakeAttributes.MSBuildArchitectureValues.arm64)]
-        [InlineData(XMakeAttributes.MSBuildArchitectureValues.x86)]
+        [MSBuildTestMethod]
+        [DataRow(XMakeAttributes.MSBuildArchitectureValues.x64)]
+        [DataRow(XMakeAttributes.MSBuildArchitectureValues.arm64)]
+        [DataRow(XMakeAttributes.MSBuildArchitectureValues.x86)]
         public void GetHandshakeOptions_NetTaskHostWorkerNode_SuppressesArchBit(string workerArchitecture)
         {
             var parameters = new TaskHostParameters(
@@ -37,7 +37,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             options.HasFlag(HandshakeOptions.Arm64).ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetHandshakeOptions_NonNetTaskHostWorkerNode_KeepsX64ArchBit()
         {
             var parameters = new TaskHostParameters(
@@ -51,7 +51,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             options.HasFlag(HandshakeOptions.X64).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetHandshakeOptions_NonNetTaskHostWorkerNode_KeepsArm64ArchBit()
         {
             var parameters = new TaskHostParameters(
@@ -65,7 +65,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             options.HasFlag(HandshakeOptions.Arm64).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetHandshakeOptions_NetTaskHostNode_KeepsArchBit()
         {
             // The TaskHost node invokes GetHandshakeOptions with TaskHostParameters.Empty; the

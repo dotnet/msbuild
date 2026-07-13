@@ -6,7 +6,6 @@ using System.IO;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 
 #nullable disable
@@ -20,10 +19,11 @@ namespace Microsoft.Build.Graph.UnitTests
     /// The static graph mirrors the negotiation during build to determine plartform for each node.
     /// These tests mirror GetCompatiblePlatform_Tests.cs in order to make sure they both are in sync.
     /// </summary>
+    [TestClass]
     public class ProjectGraphSetPlatformTests
     {
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidateGlobalPropertyCopyByValueNotReference()
         {
             using (var env = TestEnvironment.Create())
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidateSetPlatformOverride()
         {
             using (var env = TestEnvironment.Create())
@@ -91,7 +91,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidateNegotiationOverride()
         {
             using (var env = TestEnvironment.Create())
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ResolvesMultipleReferencesToSameProject()
         {
             using (var env = TestEnvironment.Create())
@@ -174,7 +174,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ResolvesViaPlatformLookupTable()
         {
             using (var env = TestEnvironment.Create())
@@ -201,7 +201,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ResolvesViaProjectReferencesPlatformLookupTable()
         {
             using (var env = TestEnvironment.Create())
@@ -229,7 +229,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ResolvesViaAnyCPUDefault()
         {
             using (var env = TestEnvironment.Create())
@@ -256,7 +256,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ResolvesViaSamePlatform()
         {
             using (var env = TestEnvironment.Create())
@@ -284,7 +284,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FailsToResolve()
         {
             using (var env = TestEnvironment.Create())
@@ -314,7 +314,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PlatformIsChosenAsDefault()
         {
             using (var env = TestEnvironment.Create())
@@ -342,7 +342,7 @@ namespace Microsoft.Build.Graph.UnitTests
         }
 
         // Validate configurations are defined in project reference protocol
-        [Fact]
+        [MSBuildTestMethod]
         public void SolutionWithoutAllConfigurations()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())

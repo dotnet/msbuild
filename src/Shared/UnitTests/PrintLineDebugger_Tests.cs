@@ -9,13 +9,13 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Shared.Debugging;
 using Shouldly;
-using Xunit;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class PrintLineDebugger_Tests
     {
         private sealed class MockWriter
@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DebuggerCanLogToWriter()
         {
             var writer = new MockWriter();
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests
             AssertContextInfo(writer.Logs);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CompositeWriterCanWriteToMultipleWriters()
         {
             var writer1 = new MockWriter();
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
             writer1.Logs.ShouldBe(writer2.Logs, Case.Sensitive);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DebuggerCanPrependAnId()
         {
             var writer = new MockWriter();
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests
             AssertContextInfo(writer.Logs, "foo");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestEnvironmentBasedPrintLineDebuggerShouldWork()
         {
             var writer = new MockWriter();
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests
             AssertContextInfo(writer.Logs);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DefaultDebuggerCanUseStaticallyControlledWriters()
         {
             var writer = new MockWriter();
@@ -154,7 +154,7 @@ namespace Microsoft.Build.UnitTests
             AssertContextInfo(writer.Logs);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         // This is one way to use the debugger without a TestEnvironment
         public void DefaultDebuggerShouldUseOuterDebuggerWriter()
         {
@@ -182,7 +182,7 @@ namespace Microsoft.Build.UnitTests
             AssertContextInfo(writer.Logs);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ArtifactsDirectoryLooksGood()
         {
             var artifactsDirectory = PrintLineDebuggerWriters.ArtifactsLogDirectory;
@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests
             Directory.Exists(artifactsDirectory).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CannotSetTwoWritersViaStaticSetters()
         {
             PrintLineDebugger.SetWriter(new MockWriter().Writer());
@@ -217,7 +217,7 @@ namespace Microsoft.Build.UnitTests
             PrintLineDebugger.UnsetWriter();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CannotSetWriterDuringADebuggerWhichAlreadySetAWriter()
         {
             PrintLineDebugger.SetWriter(new MockWriter().Writer());
@@ -239,7 +239,7 @@ namespace Microsoft.Build.UnitTests
             PrintLineDebugger.UnsetWriter();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CannotUnsetWriterWhenNoWriterIsSet()
         {
             PrintLineDebugger.SetWriter(new MockWriter().Writer());

@@ -11,17 +11,17 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.Construction
 {
+    [TestClass]
     public class SolutionFile_OldParser_Tests
     {
-        public ITestOutputHelper TestOutputHelper { get; }
+        public TestContext TestOutputHelper { get; }
 
-        public SolutionFile_OldParser_Tests(ITestOutputHelper testOutputHelper)
+        public SolutionFile_OldParser_Tests(TestContext testOutputHelper)
         {
             TestOutputHelper = testOutputHelper;
         }
@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test just the most basic, plain vanilla first project line.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicParseFirstProjectLine()
         {
             SolutionFile p = new SolutionFile();
@@ -49,7 +49,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test that the first project line of a project with the C++ project guid and an
         /// extension of vcproj is seen as invalid.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseFirstProjectLine_VC()
         {
             Should.Throw<InvalidProjectFileException>(() =>
@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// arbitrary extension is seen as valid -- we assume that all C++ projects except
         /// .vcproj are MSBuild format.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseFirstProjectLine_VC2()
         {
             SolutionFile p = new SolutionFile();
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// A slightly more complicated test where there is some different whitespace.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseFirstProjectLineWithDifferentSpacing()
         {
             SolutionFile p = new SolutionFile();
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// A slightly more complicated test where there is some different whitespace.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseSolutionWithDifferentSpacing()
         {
             string solutionFileContents =
@@ -134,16 +134,16 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
-            Assert.Equal("Project name", solution.ProjectsInOrder[0].ProjectName);
-            Assert.Equal("Relative path to project file", solution.ProjectsInOrder[0].RelativePath);
-            Assert.Equal("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
+            Assert.AreEqual("Project name", solution.ProjectsInOrder[0].ProjectName);
+            Assert.AreEqual("Relative path to project file", solution.ProjectsInOrder[0].RelativePath);
+            Assert.AreEqual("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
         }
 
         /// <summary>
         /// First project line with an empty project name.  This is somewhat malformed, but we should
         /// still behave reasonably instead of crashing.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseFirstProjectLine_InvalidProject()
         {
             SolutionFile p = new SolutionFile();
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test ParseEtpProject function.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseEtpProject()
         {
             string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
@@ -213,7 +213,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test CanBeMSBuildFile
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CanBeMSBuildFile()
         {
             string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test CanBeMSBuildFile
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CanBeMSBuildFileRejectsMSBuildLikeFiles()
         {
             using (var env = TestEnvironment.Create())
@@ -338,7 +338,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test ParseEtpProject function.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseNestedEtpProjectSingleLevel()
         {
             string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
@@ -402,7 +402,7 @@ namespace Microsoft.Build.UnitTests.Construction
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestVSAndSolutionVersionParsing()
         {
             // Create the SolutionFile object
@@ -531,9 +531,9 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test ParseEtpProject function.
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void ParseNestedEtpProjectMultipleLevel()
         {
             string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
@@ -625,7 +625,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Ensure that a malformed .etp proj file listed in the .SLN file results in an
         /// InvalidProjectFileException.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MalformedEtpProjFile()
         {
             string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
@@ -683,7 +683,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Ensure that a missing .etp proj file listed in the .SLN file results in an
         /// InvalidProjectFileException.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MissingEtpProjFile()
         {
             string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
@@ -708,7 +708,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test some characters that are valid in a file name but that also could be
         /// considered a delimiter by a parser. Does quoting work for special characters?
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseFirstProjectLineWhereProjectNameHasSpecialCharacters()
         {
             SolutionFile p = new SolutionFile();
@@ -728,7 +728,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test some characters that are valid in a file name but that also could be
         /// considered a delimiter by a parser. Does quoting work for special characters?
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseSolutionWhereProjectNameHasSpecialCharacters()
         {
             string solutionFileContents =
@@ -756,16 +756,16 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
-            Assert.Equal("MyProject,(=IsGreat)", solution.ProjectsInOrder[0].ProjectName);
-            Assert.Equal("Relative path to project file", solution.ProjectsInOrder[0].RelativePath);
-            Assert.Equal("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
+            Assert.AreEqual("MyProject,(=IsGreat)", solution.ProjectsInOrder[0].ProjectName);
+            Assert.AreEqual("Relative path to project file", solution.ProjectsInOrder[0].RelativePath);
+            Assert.AreEqual("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
         }
 
         /// <summary>
         /// Test some characters that are valid in a file name but that also could be
         /// considered a delimiter by a parser. Does quoting work for special characters?
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseFirstProjectLineWhereProjectPathHasBackslash()
         {
             using (var env = TestEnvironment.Create())
@@ -812,7 +812,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Ensure that a bogus version stamp in the .SLN file results in an
         /// InvalidProjectFileException.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BadVersionStamp()
         {
             Should.Throw<InvalidProjectFileException>(() =>
@@ -829,7 +829,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Expected version numbers less than 7 to cause an invalid project file exception.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VersionTooLow()
         {
             Should.Throw<InvalidProjectFileException>(() =>
@@ -847,7 +847,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Ensure that an unsupported version greater than the current maximum (10) in the .SLN file results in a
         /// comment indicating we will try and continue
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UnsupportedVersion()
         {
             string solutionFileContents =
@@ -861,7 +861,7 @@ namespace Microsoft.Build.UnitTests.Construction
             solution.SolutionParserComments[0].ShouldBe(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("UnrecognizedSolutionComment", "999"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Version9()
         {
             string solutionFileContents =
@@ -875,7 +875,7 @@ namespace Microsoft.Build.UnitTests.Construction
             solution.Version.ShouldBe(9);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Version10()
         {
             string solutionFileContents =
@@ -893,7 +893,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to parse a very basic .sln file to validate that description property in a solution file
         /// is properly handled.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseSolutionFileWithDescriptionInformation()
         {
             string solutionFileContents =
@@ -932,7 +932,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests the parsing of a very basic .SLN file with four independent projects.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicSolution()
         {
             string solutionFileContents =
@@ -1017,7 +1017,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Exercises solution folders, and makes sure that samely named projects in different
         /// solution folders will get correctly uniquified.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SolutionFolders()
         {
             string solutionFileContents =
@@ -1103,7 +1103,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Parses solution configuration file that contains empty or whitespace lines
         /// to simulate a possible source control merge scenario.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseSolutionConfigurationWithEmptyLines()
         {
             string solutionFileContents =
@@ -1169,7 +1169,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Tests situation where there's a nonexistent project listed in the solution folders.  We should
         /// error with a useful message.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MissingNestedProject()
         {
             string solutionFileContents =
@@ -1222,7 +1222,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Checks whether incorrect nesting found within the solution file is reported MSB5009 error
         /// with the incorrectly nested project's name and it's GUID
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void IncorrectlyNestedProjectErrorContainsProjectNameAndGuid()
         {
             string solutionFileContents =
@@ -1266,7 +1266,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Verifies that we correctly identify solution folders and mercury non-buildable projects both as
         /// "non-building"
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildableProjects()
         {
             string solutionFileContents =
@@ -1416,7 +1416,7 @@ EndGlobal
         /// Verifies that hand-coded project-to-project dependencies listed in the .SLN file
         /// are correctly recognized by our solution parser.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SolutionDependencies()
         {
             string solutionFileContents =
@@ -1491,7 +1491,7 @@ EndGlobal
         /// Tests to see that all the data/properties are correctly parsed out of a Venus
         /// project in a .SLN.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VenusProject()
         {
             string solutionFileContents =
@@ -1586,7 +1586,7 @@ EndGlobal
         /// Tests to see that our solution parser correctly recognizes a Venus project that
         /// sits inside a solution folder.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VenusProjectInASolutionFolder()
         {
             string solutionFileContents =
@@ -1637,7 +1637,7 @@ EndGlobal
         /// <summary>
         /// Make sure the solution configurations get parsed correctly for a simple mixed C#/VC solution
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseSolutionConfigurations()
         {
             string solutionFileContents =
@@ -1712,7 +1712,7 @@ EndGlobal
         /// <summary>
         /// Make sure the solution configurations get parsed correctly for a simple C# application
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseSolutionConfigurationsNoMixedPlatform()
         {
             string solutionFileContents =
@@ -1773,7 +1773,7 @@ EndGlobal
         /// Test some invalid cases for solution configuration parsing.
         /// There can be only one '=' character in a sln cfg entry, separating two identical names
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseInvalidSolutionConfigurations1()
         {
             Should.Throw<InvalidProjectFileException>(() =>
@@ -1799,7 +1799,7 @@ EndGlobal
         /// Test some invalid cases for solution configuration parsing
         /// There can be only one '=' character in a sln cfg entry, separating two identical names
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseInvalidSolutionConfigurations2()
         {
             Should.Throw<InvalidProjectFileException>(() =>
@@ -1825,7 +1825,7 @@ EndGlobal
         /// Test some invalid cases for solution configuration parsing
         /// Solution configurations must include the platform part
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseInvalidSolutionConfigurations3()
         {
             Should.Throw<InvalidProjectFileException>(() =>
@@ -1854,7 +1854,7 @@ EndGlobal
         /// If it doesn't then each next project should still be parsed correctly.
         /// Which means even if a project is missing it's EndProject, next projects are still found and are parsed correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseAllProjectsContainedInInvalidSolutionEvenWhenMissingEndProject()
         {
             string solutionFileContents =
@@ -1906,7 +1906,7 @@ EndGlobal
         /// Make sure the project configurations in solution configurations get parsed correctly
         /// for a simple mixed C#/VC solution
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseProjectConfigurationsInSolutionConfigurations1()
         {
             string solutionFileContents =
@@ -2004,7 +2004,7 @@ EndGlobal
         /// Make sure the project configurations in solution configurations get parsed correctly
         /// for a more tricky solution
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseProjectConfigurationsInSolutionConfigurations2()
         {
             string solutionFileContents =
@@ -2061,7 +2061,7 @@ EndGlobal
             solution.GetDefaultPlatformName().ShouldBe(".NET"); // "Default solution platform"
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseSolutionFileContainingProjectsWithParentSlnFolder()
         {
             string solutionFileContents = @"
@@ -2106,8 +2106,8 @@ EndGlobal
             project2.GetOriginalProjectName().ShouldBe(@"MySlnFolder\Project_Named_With_Dots");
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                 Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 15
                 VisualStudioVersion = 15.0.27130.2010
@@ -2134,7 +2134,7 @@ EndGlobal
 	                EndGlobalSection
                 EndGlobal
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                 Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 15
                 VisualStudioVersion = 15.0.27130.2010
@@ -2175,8 +2175,8 @@ EndGlobal
             project2.GetOriginalProjectName().ShouldBe("Project_Named_With_Dots");
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                 Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 15
                 VisualStudioVersion = 15.0.27130.2010
@@ -2207,7 +2207,7 @@ EndGlobal
 	                EndGlobalSection
                 EndGlobal
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                 Microsoft Visual Studio Solution File, Format Version 12.00
                 # Visual Studio 15
                 VisualStudioVersion = 15.0.27130.2010
@@ -2259,7 +2259,7 @@ EndGlobal
             project3.GetOriginalProjectName().ShouldBe("Project_Named_With_Dots");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseSolutionFileContainingProjectsWithSimilarNames_ThreeProjects_OneNormalizedDuplicated()
         {
             string solutionFileContents =
@@ -2303,7 +2303,7 @@ EndGlobal
             exception.Message.ShouldStartWith(message);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseSolutionFileContainingProjectsWithSimilarNames_ThreeProjects_OneDuplicated()
         {
             string solutionFileContents =
@@ -2347,7 +2347,7 @@ EndGlobal
             exception.Message.ShouldStartWith(message);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseSolutionFileContainingProjectsWithSimilarNames_FourProjects_OneDuplicated()
         {
             string solutionFileContents =
@@ -2396,7 +2396,7 @@ EndGlobal
         /// <summary>
         /// A test where paths contain ..\ segments to ensure the paths are normalized.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseSolutionWithParentedPaths()
         {
             string solutionFileContents =
@@ -2433,7 +2433,7 @@ EndGlobal
         /// <summary>
         /// Parse solution file with comments
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseSolutionWithComments()
         {
             const string solutionFileContent = @"
@@ -2488,7 +2488,7 @@ EndGlobal
         /// Ensure that AbsolutePath uses forward slashes on Unix systems even when the solution
         /// file contains project paths with backslashes.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         [SkipOnPlatform(TestPlatforms.Windows, "Unix-specific test")]
         public void AbsolutePathShouldUseForwardSlashesOnUnix()
         {
@@ -2526,7 +2526,7 @@ EndGlobal
         /// Test for edge case where RelativePath could be treated as an absolute URI
         /// and bypass normalization, leading to backslashes in AbsolutePath on Unix.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         [SkipOnPlatform(TestPlatforms.Windows, "Unix-specific test")]
         public void AbsolutePathShouldHandleUriLikeRelativePathsOnUnix()
         {
@@ -2559,7 +2559,7 @@ EndGlobal
         /// This test simulates scenarios where intermediate path processing might
         /// leave backslashes in the AbsolutePath on Unix systems.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         [SkipOnPlatform(TestPlatforms.Windows, "Unix-specific test")]
         public void AbsolutePathFixFilePathIntegrationTest()
         {

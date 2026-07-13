@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -13,7 +13,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.UnitTests.Helpers;
 
 using ExpectedNodeBuildOutput = System.Collections.Generic.Dictionary<Microsoft.Build.Graph.ProjectGraphNode, string[]>;
@@ -23,9 +22,10 @@ using OutputCacheDictionary = System.Collections.Generic.Dictionary<Microsoft.Bu
 
 namespace Microsoft.Build.Graph.UnitTests
 {
+    [TestClass]
     public class ResultCacheBasedBuilds_Tests : IDisposable
     {
-        public ResultCacheBasedBuilds_Tests(ITestOutputHelper output)
+        public ResultCacheBasedBuilds_Tests(TestContext output)
         {
             _output = output;
             _env = TestEnvironment.Create(_output);
@@ -38,16 +38,16 @@ namespace Microsoft.Build.Graph.UnitTests
             _env.Dispose();
         }
 
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
         private readonly TestEnvironment _env;
         private readonly MockLogger _logger;
 
-        [Theory]
-        [InlineData(new byte[] { })]
-        [InlineData(new byte[] { 1 })]
-        [InlineData(new byte[] { 0 })]
-        [InlineData(new byte[] { 1, 1 })]
-        [InlineData(new byte[] { 1, 1, 90, 23 })]
+        [MSBuildTestMethod]
+        [DataRow(new byte[] { })]
+        [DataRow(new byte[] { 1 })]
+        [DataRow(new byte[] { 0 })]
+        [DataRow(new byte[] { 1, 1 })]
+        [DataRow(new byte[] { 1, 1, 90, 23 })]
         public void InvalidCacheFilesShouldLogError(byte[] cacheContents)
         {
             var project = CreateProjectFileWithBuildTargetAndItems(_env, 1).Path;
@@ -72,9 +72,9 @@ namespace Microsoft.Build.Graph.UnitTests
             _logger.ErrorCount.ShouldBe(1);
         }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("   ")]
+        [MSBuildTestMethod]
+        [DataRow("")]
+        [DataRow("   ")]
         public void ShouldGeneratePathForEmptyOutputPath(string emptyInput)
         {
             var project = CreateProjectFileWithBuildTargetAndItems(_env, 1).Path;
@@ -94,7 +94,7 @@ namespace Microsoft.Build.Graph.UnitTests
             _logger.ErrorCount.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CachesGetLogged()
         {
             using (var buildManager = new BuildManager())
@@ -115,11 +115,11 @@ namespace Microsoft.Build.Graph.UnitTests
             _logger.ErrorCount.ShouldBe(1);
         }
 
-        [Theory]
-        [InlineData("", "")]
-        [InlineData("", "Build")]
-        [InlineData("Build", "")]
-        [InlineData("Build", "Build")]
+        [MSBuildTestMethod]
+        [DataRow("", "")]
+        [DataRow("", "Build")]
+        [DataRow("Build", "")]
+        [DataRow("Build", "Build")]
         public void RebuildSingleProjectFromCache(string defaultTargets, string explicitTargets)
         {
             var projectFile = CreateProjectFileWithBuildTargetAndItems(_env, 1, null, defaultTargets, explicitTargets).Path;
@@ -280,8 +280,8 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(BuildGraphData), DisableDiscoveryEnumeration = true)]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(BuildGraphData))]
         public void BuildProjectGraphUsingCaches(Dictionary<int, int[]> edges)
         {
             var topoSortedNodes =
@@ -328,7 +328,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 (node, localExpectedOutput) => localExpectedOutput[node].Skip(1).ToArray());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputCacheShouldNotContainInformationFromInputCaches()
         {
             var topoSortedNodes =
@@ -366,7 +366,7 @@ namespace Microsoft.Build.Graph.UnitTests
             configEntries.First().ConfigurationId.ShouldBe(rootNodeBuildResult.ConfigurationId);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MissingResultFromCacheShouldErrorDueToIsolatedBuildCacheEnforcement()
         {
             var topoSortedNodes =
@@ -548,7 +548,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 sb.ToString());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonExistingInputResultsCacheShouldLogError()
         {
             var project = CreateProjectFileWithBuildTargetAndItems(_env, 1).Path;

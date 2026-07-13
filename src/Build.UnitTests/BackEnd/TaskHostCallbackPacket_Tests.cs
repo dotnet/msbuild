@@ -7,7 +7,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Execution;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -15,9 +14,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// Pure unit tests for TaskHost callback packet serialization.
     /// No I/O or BuildManager -- just round-trip translation.
     /// </summary>
+    [TestClass]
     public class TaskHostCallbackPacket_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostIsRunningMultipleNodesRequest_RoundTrip_Serialization()
         {
             var request = new TaskHostIsRunningMultipleNodesRequest();
@@ -33,9 +33,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             deserialized.Type.ShouldBe(NodePacketType.TaskHostIsRunningMultipleNodesRequest);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void TaskHostIsRunningMultipleNodesResponse_RoundTrip_Serialization(bool isRunningMultipleNodes)
         {
             var response = new TaskHostIsRunningMultipleNodesResponse(123, isRunningMultipleNodes);
@@ -51,9 +51,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             deserialized.Type.ShouldBe(NodePacketType.TaskHostIsRunningMultipleNodesResponse);
         }
 
-        [Theory]
-        [InlineData(4, false)]  // RequestCores(4)
-        [InlineData(2, true)]   // ReleaseCores(2)
+        [MSBuildTestMethod]
+        [DataRow(4, false)]  // RequestCores(4)
+        [DataRow(2, true)]   // ReleaseCores(2)
         public void TaskHostCoresRequest_RoundTrip_Serialization(int cores, bool isRelease)
         {
             var request = new TaskHostCoresRequest(cores, isRelease);
@@ -71,9 +71,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
             deserialized.Type.ShouldBe(NodePacketType.TaskHostCoresRequest);
         }
 
-        [Theory]
-        [InlineData(0)]   // ReleaseCores acknowledgment
-        [InlineData(3)]   // RequestCores granted 3
+        [MSBuildTestMethod]
+        [DataRow(0)]   // ReleaseCores acknowledgment
+        [DataRow(3)]   // RequestCores granted 3
         public void TaskHostCoresResponse_RoundTrip_Serialization(int grantedCores)
         {
             var response = new TaskHostCoresResponse(99, grantedCores);
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             deserialized.Type.ShouldBe(NodePacketType.TaskHostCoresResponse);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostBuildRequest_RoundTrip_Serialization()
         {
             Dictionary<string, string>?[] globalProps = [new(StringComparer.OrdinalIgnoreCase) { ["Configuration"] = "Release" }, null];
@@ -124,7 +124,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             deserialized.RemoveGlobalProperties[1].ShouldBeNull();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostBuildRequest_NullArrays_RoundTrip_Serialization()
         {
             var request = new TaskHostBuildRequest(
@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             deserialized.ReturnTargetOutputs.ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostBuildResponse_Success_WithOutputs_RoundTrip_Serialization()
         {
             var outputs = new List<Dictionary<string, TaskParameter>>
@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             buildEngineResult.TargetOutputsPerProject[0]["Build"][0].ItemSpec.ShouldBe("item1.dll");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostBuildResponse_Failure_NoOutputs_RoundTrip_Serialization()
         {
             var response = new TaskHostBuildResponse(33, false, null);

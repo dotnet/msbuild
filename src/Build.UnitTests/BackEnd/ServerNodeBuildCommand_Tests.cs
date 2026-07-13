@@ -7,13 +7,13 @@ using System.Globalization;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Unit tests for the <see cref="ServerNodeBuildCommand"/> packet.
     /// </summary>
+    [TestClass]
     public class ServerNodeBuildCommand_Tests
     {
         /// <summary>
@@ -21,9 +21,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// fields - including the <see cref="ServerNodeBuildCommand.ShutdownAfterBuild"/> flag that drives the
         /// server's self-teardown - survive serialization for both values of the flag.
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void RoundTripSerializationPreservesFields(bool shutdownAfterBuild)
         {
             string[] commandLine = ["msbuild.exe", "project.proj", "-mt", "-nr:false"];

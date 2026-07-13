@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -17,8 +17,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
-using Xunit.NetCore.Extensions;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 
 #nullable disable
@@ -26,6 +24,7 @@ using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 namespace Microsoft.Build.Graph.UnitTests
 {
     [ActiveIssue("https://github.com/dotnet/msbuild/issues/4368")]
+    [TestClass]
     public class ProjectGraphTests : IDisposable
     {
         private TestEnvironment _env;
@@ -40,12 +39,12 @@ namespace Microsoft.Build.Graph.UnitTests
 
         private const string OuterBuildSpecificationWithProjectReferenceTargets = MultitargetingSpecificationPropertyGroup + ProjectReferenceTargetsWithMultitargeting;
 
-        public ProjectGraphTests(ITestOutputHelper outputHelper)
+        public ProjectGraphTests(TestContext outputHelper)
         {
             _env = TestEnvironment.Create(outputHelper);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithNoNodes()
         {
             var projectGraph = new ProjectGraph(Enumerable.Empty<ProjectGraphEntryPoint>());
@@ -57,7 +56,7 @@ namespace Microsoft.Build.Graph.UnitTests
             projectGraph.GetTargetLists(new[] { "restore", "build" }).ShouldBeEmpty();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithSingleNode()
         {
             using (var env = TestEnvironment.Create())
@@ -69,7 +68,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructionMetricsAreAvailable()
         {
             var graph = Helpers.CreateProjectGraph(
@@ -84,7 +83,7 @@ namespace Microsoft.Build.Graph.UnitTests
             graph.ConstructionMetrics.EdgeCount.ShouldBe(2);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CycleInGraphDoesNotThrowStackOverflowException()
         {
             using (var env = TestEnvironment.Create())
@@ -95,7 +94,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithSingleNodeWithProjectInstanceFactory()
         {
             using (var env = TestEnvironment.Create())
@@ -121,13 +120,13 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectGraphNodeConstructorNoNullArguments()
         {
-            Assert.Throws<InternalErrorException>(() => new ProjectGraphNode(null));
+            Assert.ThrowsExactly<InternalErrorException>(() => new ProjectGraphNode(null));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdatingReferencesIsBidirectional()
         {
             using (var env = TestEnvironment.Create())
@@ -174,7 +173,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FirstEdgeWinsWhenMultipleEdgesPointToSameReference()
         {
             using (var env = TestEnvironment.Create())
@@ -198,7 +197,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithProjectInstanceFactory_FactoryReturnsNull_Throws()
         {
             using (var env = TestEnvironment.Create())
@@ -220,7 +219,7 @@ namespace Microsoft.Build.Graph.UnitTests
         ///  / \
         /// 2   3
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithThreeNodes()
         {
             using (var env = TestEnvironment.Create())
@@ -244,7 +243,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// 5 depends on 7
         /// 1 depends on 4,5
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithMultipleNodes()
         {
             using (var env = TestEnvironment.Create())
@@ -298,7 +297,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithCycle()
         {
             using (var env = TestEnvironment.Create())
@@ -312,7 +311,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithSelfLoop()
         {
             using (var env = TestEnvironment.Create())
@@ -324,7 +323,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         // graph with a cycle between 2->6->7->3->2
         public void ConstructBigGraphWithCycle()
         {
@@ -346,7 +345,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectCollectionShouldNotInfluenceGlobalProperties()
         {
             var entryFile1 = CreateProjectFile(_env, 1, new[] { 3, 4 });
@@ -382,7 +381,7 @@ namespace Microsoft.Build.Graph.UnitTests
             root2.ProjectReferences.First(r => GetProjectNumber(r) == 5).ProjectInstance.GlobalProperties.ShouldBeSameIgnoringOrder(globalPropertiesFor2);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithDifferentGlobalProperties()
         {
             using (var env = TestEnvironment.Create())
@@ -415,7 +414,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGlobalPropertiesInProjectReferences()
         {
             using (var env = TestEnvironment.Create())
@@ -434,7 +433,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithConvergingProperties()
         {
             using (var env = TestEnvironment.Create())
@@ -474,7 +473,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithSameEffectiveProperties()
         {
             using (var env = TestEnvironment.Create())
@@ -505,7 +504,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithCaseDifferences()
         {
             using (var env = TestEnvironment.Create())
@@ -547,7 +546,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithInvalidProperties()
         {
             using (var env = TestEnvironment.Create())
@@ -568,7 +567,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithMultipleEntryPoints()
         {
             using (var env = TestEnvironment.Create())
@@ -589,7 +588,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithMultipleEntryPointsWithDifferentGlobalProperties()
         {
             using (var env = TestEnvironment.Create())
@@ -623,7 +622,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithMultipleEntryPointsWithDifferentGlobalPropertiesConverging()
         {
             using (var env = TestEnvironment.Create())
@@ -660,7 +659,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructGraphWithDifferentEntryPointsAndGraphRoots()
         {
             using (var env = TestEnvironment.Create())
@@ -678,7 +677,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructGraphWithSolution()
         {
             /*
@@ -903,7 +902,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 project6Node.ProjectReferences.Count.ShouldBe(0);
 
                 // Project not included in the build
-                Assert.DoesNotContain(projectGraph.ProjectNodes, node => node.ProjectInstance.FullPath == project7Path);
+                projectGraph.ProjectNodes.ShouldNotContain(node => node.ProjectInstance.FullPath == project7Path);
 
                 ProjectGraphNode project8Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project8Path);
                 project8Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
@@ -912,7 +911,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsAggregatesFromMultipleEdges()
         {
             using (var env = TestEnvironment.Create())
@@ -934,7 +933,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsDedupesTargets()
         {
             var projectReferenceTargets = new Dictionary<string, string[]>
@@ -961,7 +960,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsForComplexGraph()
         {
             var projectReferenceTargets = new Dictionary<string, string[]>
@@ -995,7 +994,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsNullEntryTargets()
         {
             using (var env = TestEnvironment.Create())
@@ -1013,7 +1012,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetsListReturnsEmptyTargetsForNodeIfNoTargetsPropagatedToIt()
         {
             using (var env = TestEnvironment.Create())
@@ -1031,7 +1030,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsReturnsEmptyTargetsForAllNodesWhenDefaultTargetsAreRequestedAndThereAreNoDefaultTargets()
         {
             using (var env = TestEnvironment.Create())
@@ -1063,7 +1062,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsDoesNotPropagateEmptyTargets()
         {
             using (var env = TestEnvironment.Create())
@@ -1086,7 +1085,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsThrowsOnInvalidTargetNames()
         {
             using (var env = TestEnvironment.Create())
@@ -1101,7 +1100,7 @@ namespace Microsoft.Build.Graph.UnitTests
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsUsesAllTargetsForNonMultitargetingNodes()
         {
             using (var env = TestEnvironment.Create())
@@ -1130,7 +1129,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetsListInnerBuildToInnerBuild()
         {
             using (var env = TestEnvironment.Create())
@@ -1171,7 +1170,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsFiltersTargetsForOuterAndInnerBuilds()
         {
             using (var env = TestEnvironment.Create())
@@ -1215,7 +1214,7 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsDoesNotUseTargetsMetadataOnInnerBuildsFromRootOuterBuilds()
         {
             string projectReferenceTargetsProtocol =
@@ -1287,7 +1286,7 @@ $@"
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsForComplexMultitargetingGraph()
         {
             using (var env = TestEnvironment.Create())
@@ -1393,7 +1392,7 @@ $@"
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsDefaultTargetsAreExpanded()
         {
             using (var env = TestEnvironment.Create())
@@ -1411,7 +1410,7 @@ $@"
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsUnspecifiedTargetsDefaultToBuild()
         {
             using (var env = TestEnvironment.Create())
@@ -1434,7 +1433,7 @@ $@"
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetListsDefaultComplexPropagation()
         {
             var projectReferenceTargets = new Dictionary<string, string[]>
@@ -1469,7 +1468,7 @@ $@"
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetsListProjectReferenceTargetsOrDefaultComplexPropagation()
         {
             var referenceItem = @"
@@ -1524,7 +1523,7 @@ $@"
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTargetsListSupportsTargetsMarkedSkipNonexistentTargets()
         {
             ProjectGraph graph = Helpers.CreateProjectGraph(
@@ -1576,7 +1575,7 @@ $@"
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SkipNonexistentTargetsDoesNotHideMissedTargetResults()
         {
             ProjectGraph graph = Helpers.CreateProjectGraph(
@@ -1632,7 +1631,7 @@ $@"
             project1ErrorMessage.ShouldContain(" with the (NonskippableTarget1;NonskippableTarget2;SkippableExistingTarget;SkippableNonexistentTarget) target(s) but the build result for the built project is not in the engine cache");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReferencedMultitargetingEntryPointNodeTargetListContainsDefaultTarget()
         {
             using (var env = TestEnvironment.Create())
@@ -1812,8 +1811,8 @@ $@"
             }
         }
 
-        [Theory]
-        [MemberData(nameof(Graphs), DisableDiscoveryEnumeration = true)]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(Graphs))]
         public void TopologicalSortShouldTopologicallySort(Dictionary<int, int[]> edges)
         {
             using (var env = TestEnvironment.Create())
@@ -1835,8 +1834,8 @@ $@"
             }
         }
 
-        [Theory]
-        [MemberData(nameof(Graphs), DisableDiscoveryEnumeration = true)]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(Graphs))]
         public void DotNotationShouldRepresentGraph(Dictionary<int, int[]> edges)
         {
             var graph = Helpers.CreateProjectGraph(
@@ -1886,7 +1885,7 @@ $@"
             Regex.Matches(dot, "label").Count.ShouldBe(graph.ProjectNodes.Count);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OuterBuildAsRootShouldDirectlyReferenceInnerBuilds()
         {
             var projectFile = _env.CreateTestProjectWithFiles($@"<Project>{MultitargetingSpecificationPropertyGroup}</Project>").ProjectFile;
@@ -1902,7 +1901,7 @@ $@"
             AssertOuterBuild(outerBuild, graph);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OuterBuildAsNonRootShouldNotReferenceInnerBuilds()
         {
             var entryProject = CreateProjectFile(
@@ -1929,7 +1928,7 @@ $@"
             AssertOuterBuild(outerBuild, graph);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InnerBuildsFromNonRootOuterBuildInheritEdgesToOuterBuild()
         {
             var entryProject = CreateProjectFile(
@@ -1973,7 +1972,7 @@ $@"
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DuplicatedInnerBuildMonikersShouldGetDeduplicated()
         {
             // multitarget to duplicate monikers
@@ -1998,7 +1997,7 @@ $@"
             AssertOuterBuild(nonRootOuterBuild, graph, null, 1);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReferenceOfMultitargetingProjectShouldNotInheritInnerBuildSpecificGlobalProperties()
         {
             var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] { 2 }, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecificationPropertyGroup).Path;
@@ -2017,7 +2016,7 @@ $@"
             AssertNonMultitargetingNode(nonMultitargetingNode);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InnerBuildAsRootViaLocalPropertyShouldNotPropagateInnerBuildPropertyToReference()
         {
             var innerBuildViaLocalProperty = MultitargetingSpecificationPropertyGroup + $"<PropertyGroup><{InnerBuildPropertyName}>foo</{InnerBuildPropertyName}></PropertyGroup>";
@@ -2045,7 +2044,7 @@ $@"
             AssertNonMultitargetingNode(nonMultitargetingNode);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InnerBuildAsRootViaGlobalPropertyShouldNotPropagateInnerBuildPropertyToReference()
         {
             var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] { 2 }, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecificationPropertyGroup).Path;
@@ -2064,7 +2063,7 @@ $@"
             AssertNonMultitargetingNode(nonMultitargetingNode);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonMultitargetingProjectsAreCompatibleWithMultitargetingProjects()
         {
             var root = CreateProjectFile(env: _env, projectNumber: 1, projectReferences: new[] { 2, 3 }, projectReferenceTargets: null, defaultTargets: null, extraContent: MultitargetingSpecificationPropertyGroup).Path;
@@ -2085,7 +2084,7 @@ $@"
             AssertNonMultitargetingNode(GetFirstNodeWithProjectNumber(graph, 3));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InnerBuildsCanHaveSeparateReferences()
         {
             var extraInnerBuildReferenceSpec = MultitargetingSpecificationPropertyGroup +
@@ -2125,7 +2124,7 @@ $@"
             referenceNumbersSet.ShouldBeSameIgnoringOrder(new HashSet<string> { "2", "3", "4", "5" });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InnerBuildProducedByOuterBuildCanBeReferencedByAnotherNode()
         {
             var referenceToInnerBuild = $@"<ItemGroup>
@@ -2160,7 +2159,7 @@ $@"
             referencedInnerBuild.ReferencingProjects.ShouldBeSameIgnoringOrder(new[] { two, outerBuild });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void StandaloneInnerBuildsCanBeReferencedWithoutOuterBuilds()
         {
             var referenceToInnerBuild = $@"<ItemGroup>
@@ -2191,7 +2190,8 @@ $@"
             AssertNonMultitargetingNode(innerBuildNode.ProjectReferences.First(), additionalGlobalProperties);
         }
 
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/4262")]
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/4262")]
         public void InnerBuildsProducedByOuterBuildsCanBeReferencedByOtherInnerBuilds()
         {
             var referenceToInnerBuild = $@"<ItemGroup>
@@ -2328,8 +2328,8 @@ $@"
             }
         }
 
-        [Theory]
-        [MemberData(nameof(AllNodesShouldHaveGraphBuildGlobalPropertyData), DisableDiscoveryEnumeration = true)]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(AllNodesShouldHaveGraphBuildGlobalPropertyData))]
         public void AllNodesShouldHaveGraphBuildGlobalProperty(Dictionary<int, int[]> edges, int[] entryPoints, Dictionary<string, string> globalProperties)
         {
             using (var env = TestEnvironment.Create())
@@ -2348,7 +2348,7 @@ $@"
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UserValuesForIsGraphBuildGlobalPropertyShouldBePreserved()
         {
             using (var env = TestEnvironment.Create())
@@ -2362,8 +2362,8 @@ $@"
             }
         }
 
-        [Theory]
-        [MemberData(nameof(Graphs), DisableDiscoveryEnumeration = true)]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(Graphs))]
         public void GraphShouldSupportTransitiveReferences(Dictionary<int, int[]> edges)
         {
             var graph = Helpers.CreateProjectGraph(
@@ -2487,8 +2487,8 @@ $@"
             }
         }
 
-        [Theory]
-        [MemberData(nameof(TransitiveReferencesAreDefinedPerProjectTestData), DisableDiscoveryEnumeration = true)]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(TransitiveReferencesAreDefinedPerProjectTestData))]
         public void TransitiveReferencesAreDefinedPerProject(
             Dictionary<int, int[]> edges,
             Dictionary<int, string> extraContentPerProjectNumber,
@@ -2502,7 +2502,7 @@ $@"
             graph.AssertReferencesIgnoringOrder(expectedReferences);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TransitiveReferencesShouldNotBeAddedToOuterBuilds()
         {
             var graph = Helpers.CreateProjectGraph(
@@ -2565,7 +2565,7 @@ $@"
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TransitiveReferencesShouldNotOverwriteMultitargetingEdges()
         {
             var graph = Helpers.CreateProjectGraph(
@@ -2671,7 +2671,7 @@ $@"
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DuplicateProjectReferences()
         {
             var graph = Helpers.CreateProjectGraph(
@@ -2717,7 +2717,7 @@ $@"
             targetLists[project2].ShouldBe(new[] { "SomeDefaultTarget2" });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleProjectReferencesSameFileDifferentTargets()
         {
             var graph = Helpers.CreateProjectGraph(
@@ -2763,7 +2763,7 @@ $@"
             targetLists[project2].ShouldBe(new[] { "SomeDefaultTarget2", "SomeOtherTarget" });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultitargettingTargetsWithBuildProjectReferencesFalse()
         {
             // This test should emulate Microsoft.Managed.After.targets's handling of multitargetting projects.
@@ -2828,24 +2828,24 @@ $@"
             }
         }
 
-        [Theory]
+        [MSBuildTestMethod]
         // Built-in targets
-        [InlineData(new string[0], new[] { "Project1Default" }, new[] { "Project2Default" })]
-        [InlineData(new[] { "Build" }, new[] { "Project1Default" }, new[] { "Project2Default" })]
-        [InlineData(new[] { "Rebuild" }, new[] { "Rebuild" }, new[] { "Rebuild" })]
-        [InlineData(new[] { "Clean" }, new[] { "Clean" }, new[] { "Clean" })]
-        [InlineData(new[] { "Publish" }, new[] { "Publish" }, new[] { "Publish" })]
+        [DataRow(new string[0], new[] { "Project1Default" }, new[] { "Project2Default" })]
+        [DataRow(new[] { "Build" }, new[] { "Project1Default" }, new[] { "Project2Default" })]
+        [DataRow(new[] { "Rebuild" }, new[] { "Rebuild" }, new[] { "Rebuild" })]
+        [DataRow(new[] { "Clean" }, new[] { "Clean" }, new[] { "Clean" })]
+        [DataRow(new[] { "Publish" }, new[] { "Publish" }, new[] { "Publish" })]
         // Traversal targets
-        [InlineData(new[] { "Project1" }, new[] { "Project1Default" }, new string[0])]
-        [InlineData(new[] { "Project2" }, new string[0], new[] { "Project2Default" })]
-        [InlineData(new[] { "Project1", "Project2" }, new[] { "Project1Default" }, new[] { "Project2Default" })]
-        [InlineData(new[] { "Project1:Rebuild" }, new[] { "Rebuild" }, new string[0])]
-        [InlineData(new[] { "Project2:Rebuild" }, new string[0], new[] { "Rebuild" })]
-        [InlineData(new[] { "Project1:Rebuild", "Project2:Clean" }, new[] { "Rebuild" }, new[] { "Clean" })]
-        [InlineData(new[] { "CustomTarget" }, new[] { "CustomTarget" }, new[] { "CustomTarget" })]
-        [InlineData(new[] { "Project1:CustomTarget" }, new[] { "CustomTarget" }, new string[0])]
-        [InlineData(new[] { "Project2:CustomTarget" }, new string[0], new[] { "CustomTarget" })]
-        [InlineData(new[] { "Project1:CustomTarget", "Project2:CustomTarget" }, new[] { "CustomTarget" }, new[] { "CustomTarget" })]
+        [DataRow(new[] { "Project1" }, new[] { "Project1Default" }, new string[0])]
+        [DataRow(new[] { "Project2" }, new string[0], new[] { "Project2Default" })]
+        [DataRow(new[] { "Project1", "Project2" }, new[] { "Project1Default" }, new[] { "Project2Default" })]
+        [DataRow(new[] { "Project1:Rebuild" }, new[] { "Rebuild" }, new string[0])]
+        [DataRow(new[] { "Project2:Rebuild" }, new string[0], new[] { "Rebuild" })]
+        [DataRow(new[] { "Project1:Rebuild", "Project2:Clean" }, new[] { "Rebuild" }, new[] { "Clean" })]
+        [DataRow(new[] { "CustomTarget" }, new[] { "CustomTarget" }, new[] { "CustomTarget" })]
+        [DataRow(new[] { "Project1:CustomTarget" }, new[] { "CustomTarget" }, new string[0])]
+        [DataRow(new[] { "Project2:CustomTarget" }, new string[0], new[] { "CustomTarget" })]
+        [DataRow(new[] { "Project1:CustomTarget", "Project2:CustomTarget" }, new[] { "CustomTarget" }, new[] { "CustomTarget" })]
         public void GetTargetListsWithSolution(string[] entryTargets, string[] expectedProject1Targets, string[] expectedProject2Targets)
         {
             using (var env = TestEnvironment.Create())
@@ -2899,9 +2899,9 @@ $@"
             }
         }
 
-        [Theory]
-        [InlineData("Project1:Build")]
-        [InlineData("Project1:")]
+        [MSBuildTestMethod]
+        [DataRow("Project1:Build")]
+        [DataRow("Project1:")]
         public void GetTargetListsWithSolutionInvalidTargets(string entryTarget)
         {
             using (var env = TestEnvironment.Create())
@@ -2941,7 +2941,7 @@ $@"
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         [UseInvariantCulture]
         public void InvalidProjectReferenceErrorIncludesReferringProject()
         {
@@ -2970,7 +2970,7 @@ $@"
             innerException.Message.ShouldContain("referenced by");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         [UseInvariantCulture]
         public void InvalidProjectReferenceErrorIncludesMultipleReferringProjects()
         {
@@ -3021,7 +3021,7 @@ $@"
             (mentionsProject1 || mentionsProject2).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FullGraphModeLoadsAllTargetFrameworksIgnoringSetTargetFramework()
         {
             using var env = TestEnvironment.Create();
@@ -3086,7 +3086,7 @@ $@"
             project2Node.ProjectReferences.Count.ShouldBe(3); // References to outer build and two inner builds of project1
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FullGraphModeIgnoresSetTargetFrameworkForSingleTargetProject()
         {
             using var env = TestEnvironment.Create();
@@ -3130,7 +3130,7 @@ $@"
             project2Node.ProjectReferences.Single().ShouldBe(project1Node);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructWithProjectGraphOptionsAndNullEntryPointsThrows()
         {
             var exception = Should.Throw<ArgumentNullException>(() => new ProjectGraph(
@@ -3142,9 +3142,9 @@ $@"
             exception.ParamName.ShouldBe("EntryPoints");
         }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(-1)]
+        [MSBuildTestMethod]
+        [DataRow(0)]
+        [DataRow(-1)]
         public void ConstructWithProjectGraphOptionsAndNonPositiveDegreeOfParallelismThrows(int degreeOfParallelism)
         {
             var exception = Should.Throw<ArgumentOutOfRangeException>(() => new ProjectGraph(

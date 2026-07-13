@@ -10,7 +10,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Shouldly;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -22,6 +21,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
      *
      * Tests that exercise the <OnError> tag.
      */
+    [TestClass]
     public sealed class OnError_Tests
     {
         /*
@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Construct a simple OnError tag.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void Basic()
         {
             MockLogger l = new MockLogger();
@@ -47,8 +47,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
         }
 
 #if FEATURE_TASK_GENERATERESOURCES
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// outputs them fails. (Of course the task must have populated its property before it errors.)
         /// Then these items and properties should be visible to the onerror targets.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FailingTaskStillPublishesOutputs()
         {
             MockLogger l = new MockLogger();
@@ -115,18 +115,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 string resource = Path.ChangeExtension(resx, ".resources");
 
-                Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+                Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
                 l.AssertLogContains("[" + resource + "]", "[" + resource + "]");
 
                 // And outputs are visible at the project level
-                Assert.Equal(resource, Helpers.MakeList(p.GetItems("FilesWrittenItem"))[0].EvaluatedInclude);
-                Assert.Equal(resource, p.GetPropertyValue("FilesWrittenProperty"));
+                Assert.AreEqual(resource, Helpers.MakeList(p.GetItems("FilesWrittenItem"))[0].EvaluatedInclude);
+                Assert.AreEqual(resource, p.GetPropertyValue("FilesWrittenProperty"));
 
                 p = project.CreateProjectInstance();
 
                 // But are gone after resetting of course
-                Assert.Empty(Helpers.MakeList(p.GetItems("FilesWrittenItem")));
-                Assert.Equal(String.Empty, p.GetPropertyValue("FilesWrittenProperty"));
+                Assert.IsEmpty(Helpers.MakeList(p.GetItems("FilesWrittenItem")));
+                Assert.AreEqual(String.Empty, p.GetPropertyValue("FilesWrittenProperty"));
             }
             finally
             {
@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Target items and properties should be published to the project level when an OnError
         /// target runs, and those items and properties should be visible to the OnError targets.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OnErrorSeesPropertiesAndItemsFromFirstTarget()
         {
             MockLogger l = new MockLogger();
@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
             l.AssertLogContains("[a1;a2][v1][v2]");
         }
 
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Make sure two execute targets can be called.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoExecuteTargets()
         {
             MockLogger l = new MockLogger();
@@ -206,9 +206,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
-            Assert.True(l.FullLog.Contains("CleanUp2-was-called", StringComparison.Ordinal)); // "The CleanUp2 target should have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp2-was-called", StringComparison.Ordinal)); // "The CleanUp2 target should have been called."
         }
 
         /*
@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Make sure two OnError clauses can be used.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoOnErrorClauses()
         {
             MockLogger l = new MockLogger();
@@ -239,9 +239,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
-            Assert.True(l.FullLog.Contains("CleanUp2-was-called", StringComparison.Ordinal)); // "The CleanUp2 target should have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp2-was-called", StringComparison.Ordinal)); // "The CleanUp2 target should have been called."
         }
 
         /*
@@ -250,7 +250,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * Make sure that a target that is a dependent of a target called because of an
          * OnError clause is called
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void DependentTarget()
         {
             MockLogger l = new MockLogger();
@@ -272,9 +272,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
-            Assert.True(l.FullLog.Contains("CleanUp2-was-called", StringComparison.Ordinal)); // "The CleanUp2 target should have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp2-was-called", StringComparison.Ordinal)); // "The CleanUp2 target should have been called."
         }
 
         /*
@@ -283,7 +283,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * If a target is dependent on a child target and that child target errors,
          * then the parent's OnError clauses should fire.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void ErrorInChildIsHandledInParent()
         {
             MockLogger l = new MockLogger();
@@ -304,9 +304,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'BuildStep1' failed."
-            Assert.True(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
-            Assert.True(l.FullLog.Contains("Error-in-build-step-1", StringComparison.Ordinal)); // "The BuildStep1 target should have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'BuildStep1' failed."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("Error-in-build-step-1", StringComparison.Ordinal)); // "The BuildStep1 target should have been called."
         }
 
 
@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Construct a simple OnError tag.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void NonExistentExecuteTarget()
         {
             MockLogger l = new MockLogger();
@@ -331,8 +331,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(2, l.ErrorCount); // "Expected at least one error because 'Build' failed and one error because 'CleanUp' didn't exist."
-            Assert.False(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should not have been called."
+            Assert.AreEqual(2, l.ErrorCount); // "Expected at least one error because 'Build' failed and one error because 'CleanUp' didn't exist."
+            Assert.IsFalse(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should not have been called."
         }
 
         /*
@@ -340,7 +340,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Test the case when the result of the condition is 'true'
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void TrueCondition()
         {
             MockLogger l = new MockLogger();
@@ -359,8 +359,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
         }
 
         /*
@@ -368,7 +368,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Test the case when the result of the condition is 'false'
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void FalseCondition()
         {
             MockLogger l = new MockLogger();
@@ -387,8 +387,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.False(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should not have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.IsFalse(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should not have been called."
         }
 
         /*
@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Make sure that properties in ExecuteTargets are properly expanded.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertiesInExecuteTargets()
         {
             MockLogger l = new MockLogger();
@@ -419,8 +419,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
         }
 
         /*
@@ -429,7 +429,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * If an error occurs in an error handling target, then continue processing
          * remaining error targets
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void ErrorTargetsContinueAfterErrorsInErrorHandler()
         {
             MockLogger l = new MockLogger();
@@ -460,10 +460,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(4, l.ErrorCount); // "Four build errors expect: One from CoreBuild and on each from the error handlers."
-            Assert.True(l.FullLog.Contains("CleanUp1-was-called", StringComparison.Ordinal)); // "The CleanUp1 target should have been called."
-            Assert.True(l.FullLog.Contains("CleanUp2-was-called", StringComparison.Ordinal)); // "The CleanUp2 target should have been called."
-            Assert.True(l.FullLog.Contains("CleanUp3-was-called", StringComparison.Ordinal)); // "The CleanUp3 target should have been called."
+            Assert.AreEqual(4, l.ErrorCount); // "Four build errors expect: One from CoreBuild and on each from the error handlers."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp1-was-called", StringComparison.Ordinal)); // "The CleanUp1 target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp2-was-called", StringComparison.Ordinal)); // "The CleanUp2 target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp3-was-called", StringComparison.Ordinal)); // "The CleanUp3 target should have been called."
         }
 
         /*
@@ -471,7 +471,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * If an OnError specifies an ExecuteTarget that is missing, that's an error
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void ExecuteTargetIsMissing()
         {
             MockLogger l = new MockLogger();
@@ -487,7 +487,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(2, l.ErrorCount); // "Expected one error because 'Build' failed and one because 'CleanUp' doesn't exist."
+            Assert.AreEqual(2, l.ErrorCount); // "Expected one error because 'Build' failed and one because 'CleanUp' doesn't exist."
         }
 
         /*
@@ -496,7 +496,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * Since there is special-case code to ignore comments around OnError blocks,
          * let's test this case.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void CommentsAroundOnError()
         {
             MockLogger l = new MockLogger();
@@ -517,8 +517,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.IsTrue(l.FullLog.Contains("CleanUp-was-called", StringComparison.Ordinal)); // "The CleanUp target should have been called."
         }
 
         /*
@@ -526,7 +526,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * Detect circular dependencies and break out.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void CircularDependency()
         {
             MockLogger l = new MockLogger();
@@ -542,7 +542,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(2, l.ErrorCount); // "Expected one error because 'Build' failed and one error because of the circular dependency."
+            Assert.AreEqual(2, l.ErrorCount); // "Expected one error because 'Build' failed and one error because of the circular dependency."
         }
 
         /*
@@ -550,10 +550,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
          *
          * OnError clauses must come at the end of a Target, it can't be sprinkled in-between tasks. Catch this case.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void OutOfOrderOnError()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 MockLogger l = new MockLogger();
                 Project p = new Project(XmlReader.Create(new StringReader(ObjectModelHelpers.CleanupFileContents(@"
@@ -572,10 +572,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             });
         }
 
-        [Theory]
-        [InlineData("True")]
-        [InlineData("False")]
-        [InlineData("Default")]
+        [MSBuildTestMethod]
+        [DataRow("True")]
+        [DataRow("False")]
+        [DataRow("Default")]
         public void ErrorWhenTaskFailsWithoutLoggingErrorEscapeHatch(string failureResponse)
         {
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectFailure($@"
@@ -604,7 +604,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * Handle the basic post-build case where the user has asked for 'On_Success' and
          * none of the build steps fail.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void PostBuildBasic()
         {
             MockLogger l = new MockLogger();
@@ -613,11 +613,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(0, l.ErrorCount); // "Expected no error because 'Build' succeeded."
-            Assert.True(l.FullLog.Contains("ResGen-was-called", StringComparison.Ordinal)); // "The ResGen target should have been called."
-            Assert.True(l.FullLog.Contains("Compile-was-called", StringComparison.Ordinal)); // "The Compile target should have been called."
-            Assert.True(l.FullLog.Contains("GenerateSatellites-was-called", StringComparison.Ordinal)); // "The GenerateSatellites target should have been called."
-            Assert.True(l.FullLog.Contains("PostBuild-was-called", StringComparison.Ordinal)); // "The PostBuild target should have been called."
+            Assert.AreEqual(0, l.ErrorCount); // "Expected no error because 'Build' succeeded."
+            Assert.IsTrue(l.FullLog.Contains("ResGen-was-called", StringComparison.Ordinal)); // "The ResGen target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("Compile-was-called", StringComparison.Ordinal)); // "The Compile target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("GenerateSatellites-was-called", StringComparison.Ordinal)); // "The GenerateSatellites target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("PostBuild-was-called", StringComparison.Ordinal)); // "The PostBuild target should have been called."
         }
 
         /*
@@ -626,7 +626,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * User asked for 'On_Success' but the compile step failed. We don't expect post-build
          * to be called.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void PostBuildOnSuccessWhereCompileFailed()
         {
             MockLogger l = new MockLogger();
@@ -635,12 +635,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True(l.FullLog.Contains("ResGen-was-called", StringComparison.Ordinal)); // "The ResGen target should have been called."
-            Assert.True(l.FullLog.Contains("Compile-was-called", StringComparison.Ordinal)); // "The Compile target should have been called."
-            Assert.True(l.FullLog.Contains("Compile-step-failed", StringComparison.Ordinal)); // "The Compile target should have failed."
-            Assert.False(l.FullLog.Contains("GenerateSatellites-was-called", StringComparison.Ordinal)); // "The GenerateSatellites target should not have been called."
-            Assert.False(l.FullLog.Contains("PostBuild-was-called", StringComparison.Ordinal)); // "The PostBuild target should not have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.IsTrue(l.FullLog.Contains("ResGen-was-called", StringComparison.Ordinal)); // "The ResGen target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("Compile-was-called", StringComparison.Ordinal)); // "The Compile target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("Compile-step-failed", StringComparison.Ordinal)); // "The Compile target should have failed."
+            Assert.IsFalse(l.FullLog.Contains("GenerateSatellites-was-called", StringComparison.Ordinal)); // "The GenerateSatellites target should not have been called."
+            Assert.IsFalse(l.FullLog.Contains("PostBuild-was-called", StringComparison.Ordinal)); // "The PostBuild target should not have been called."
         }
 
         /*
@@ -649,7 +649,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * User asked for 'On_Success' but the PostBuildOnSuccessWhereGenerateSatellitesFailed step
          * failed. We don't expect post-build to be called.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void PostBuildOnSuccessWhereGenerateSatellitesFailed()
         {
             MockLogger l = new MockLogger();
@@ -658,12 +658,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True(l.FullLog.Contains("ResGen-was-called", StringComparison.Ordinal)); // "The ResGen target should have been called."
-            Assert.True(l.FullLog.Contains("Compile-was-called", StringComparison.Ordinal)); // "The Compile target should have been called."
-            Assert.True(l.FullLog.Contains("GenerateSatellites-was-called", StringComparison.Ordinal)); // "The GenerateSatellites target should have been called."
-            Assert.True(l.FullLog.Contains("GenerateSatellites-step-failed", StringComparison.Ordinal)); // "The GenerateSatellites target should have failed."
-            Assert.False(l.FullLog.Contains("PostBuild-was-called", StringComparison.Ordinal)); // "The PostBuild target should not have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.IsTrue(l.FullLog.Contains("ResGen-was-called", StringComparison.Ordinal)); // "The ResGen target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("Compile-was-called", StringComparison.Ordinal)); // "The Compile target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("GenerateSatellites-was-called", StringComparison.Ordinal)); // "The GenerateSatellites target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("GenerateSatellites-step-failed", StringComparison.Ordinal)); // "The GenerateSatellites target should have failed."
+            Assert.IsFalse(l.FullLog.Contains("PostBuild-was-called", StringComparison.Ordinal)); // "The PostBuild target should not have been called."
         }
 
         /*
@@ -672,7 +672,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * User asked for 'Always' but the compile step failed. We expect the post-build
          * to be called.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void PostBuildAlwaysWhereCompileFailed()
         {
             MockLogger l = new MockLogger();
@@ -681,12 +681,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True(l.FullLog.Contains("ResGen-was-called", StringComparison.Ordinal)); // "The ResGen target should have been called."
-            Assert.True(l.FullLog.Contains("Compile-was-called", StringComparison.Ordinal)); // "The Compile target should have been called."
-            Assert.True(l.FullLog.Contains("Compile-step-failed", StringComparison.Ordinal)); // "The Compile target should have failed."
-            Assert.False(l.FullLog.Contains("GenerateSatellites-was-called", StringComparison.Ordinal)); // "The GenerateSatellites target should not have been called."
-            Assert.True(l.FullLog.Contains("PostBuild-was-called", StringComparison.Ordinal)); // "The PostBuild target should have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.IsTrue(l.FullLog.Contains("ResGen-was-called", StringComparison.Ordinal)); // "The ResGen target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("Compile-was-called", StringComparison.Ordinal)); // "The Compile target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("Compile-step-failed", StringComparison.Ordinal)); // "The Compile target should have failed."
+            Assert.IsFalse(l.FullLog.Contains("GenerateSatellites-was-called", StringComparison.Ordinal)); // "The GenerateSatellites target should not have been called."
+            Assert.IsTrue(l.FullLog.Contains("PostBuild-was-called", StringComparison.Ordinal)); // "The PostBuild target should have been called."
         }
 
         /*
@@ -695,7 +695,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * User asked for 'Final_Output_Changed' but the Compile step failed.
          * We expect post-build to be called.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void PostBuildFinalOutputChangedWhereCompileFailed()
         {
             MockLogger l = new MockLogger();
@@ -704,12 +704,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True(l.FullLog.Contains("ResGen-was-called", StringComparison.Ordinal)); // "The ResGen target should have been called."
-            Assert.True(l.FullLog.Contains("Compile-was-called", StringComparison.Ordinal)); // "The Compile target should have been called."
-            Assert.True(l.FullLog.Contains("Compile-step-failed", StringComparison.Ordinal)); // "The Compile target should have failed."
-            Assert.False(l.FullLog.Contains("GenerateSatellites-was-called", StringComparison.Ordinal)); // "The GenerateSatellites target should not have been called."
-            Assert.False(l.FullLog.Contains("PostBuild-was-called", StringComparison.Ordinal)); // "The PostBuild target should not have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.IsTrue(l.FullLog.Contains("ResGen-was-called", StringComparison.Ordinal)); // "The ResGen target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("Compile-was-called", StringComparison.Ordinal)); // "The Compile target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("Compile-step-failed", StringComparison.Ordinal)); // "The Compile target should have failed."
+            Assert.IsFalse(l.FullLog.Contains("GenerateSatellites-was-called", StringComparison.Ordinal)); // "The GenerateSatellites target should not have been called."
+            Assert.IsFalse(l.FullLog.Contains("PostBuild-was-called", StringComparison.Ordinal)); // "The PostBuild target should not have been called."
         }
 
         /*
@@ -718,7 +718,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
          * User asked for 'Final_Output_Changed' but the GenerateSatellites step failed.
          * We expect post-build to be called because Compile succeeded (and wrote to the output).
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void PostBuildFinalOutputChangedWhereGenerateSatellitesFailed()
         {
             MockLogger l = new MockLogger();
@@ -727,12 +727,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             p.Build(new string[] { "Build" }, new ILogger[] { l });
 
-            Assert.Equal(1, l.ErrorCount); // "Expected one error because 'Build' failed."
-            Assert.True(l.FullLog.Contains("ResGen-was-called", StringComparison.Ordinal)); // "The ResGen target should have been called."
-            Assert.True(l.FullLog.Contains("Compile-was-called", StringComparison.Ordinal)); // "The Compile target should have been called."
-            Assert.True(l.FullLog.Contains("GenerateSatellites-was-called", StringComparison.Ordinal)); // "The GenerateSatellites target should have been called."
-            Assert.True(l.FullLog.Contains("GenerateSatellites-step-failed", StringComparison.Ordinal)); // "The GenerateSatellites target should have failed."
-            Assert.True(l.FullLog.Contains("PostBuild-was-called", StringComparison.Ordinal)); // "The PostBuild target should have been called."
+            Assert.AreEqual(1, l.ErrorCount); // "Expected one error because 'Build' failed."
+            Assert.IsTrue(l.FullLog.Contains("ResGen-was-called", StringComparison.Ordinal)); // "The ResGen target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("Compile-was-called", StringComparison.Ordinal)); // "The Compile target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("GenerateSatellites-was-called", StringComparison.Ordinal)); // "The GenerateSatellites target should have been called."
+            Assert.IsTrue(l.FullLog.Contains("GenerateSatellites-step-failed", StringComparison.Ordinal)); // "The GenerateSatellites target should have failed."
+            Assert.IsTrue(l.FullLog.Contains("PostBuild-was-called", StringComparison.Ordinal)); // "The PostBuild target should have been called."
         }
 
         /*

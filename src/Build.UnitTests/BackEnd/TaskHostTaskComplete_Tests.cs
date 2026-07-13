@@ -9,7 +9,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 using TaskHostPacketHelpers = Microsoft.Build.UnitTests.BackEnd.TaskHostConfiguration_Tests.TaskHostPacketHelpers;
 
 #nullable disable
@@ -19,12 +18,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Unit Tests for TaskHostTaskComplete packet.
     /// </summary>
+    [TestClass]
     public class TaskHostTaskComplete_Tests
     {
         /// <summary>
         /// Tests various valid ways to construct this packet.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructors()
         {
 #if FEATURE_REPORTFILEACCESSES
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test invalid constructor permutations.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestInvalidConstructors()
         {
             AssertInvalidConstructorThrows(typeof(InternalErrorException), TaskCompleteType.CrashedDuringExecution, null, "ExceptionlessErrorMessage", null, null, null);
@@ -107,7 +107,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary is null
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTranslationWithNullDictionary()
         {
             TaskHostTaskComplete complete = new(
@@ -122,15 +122,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskHostTaskComplete deserializedComplete = packet as TaskHostTaskComplete;
 
-            Assert.Equal(complete.TaskResult, deserializedComplete.TaskResult);
-            Assert.NotNull(deserializedComplete.TaskOutputParameters);
-            Assert.Empty(deserializedComplete.TaskOutputParameters);
+            Assert.AreEqual(complete.TaskResult, deserializedComplete.TaskResult);
+            Assert.IsNotNull(deserializedComplete.TaskOutputParameters);
+            Assert.IsEmpty(deserializedComplete.TaskOutputParameters);
         }
 
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary is empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTranslationWithEmptyDictionary()
         {
             TaskHostTaskComplete complete = new(
@@ -145,15 +145,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskHostTaskComplete deserializedComplete = packet as TaskHostTaskComplete;
 
-            Assert.Equal(complete.TaskResult, deserializedComplete.TaskResult);
-            Assert.NotNull(deserializedComplete.TaskOutputParameters);
-            Assert.Equal(complete.TaskOutputParameters.Count, deserializedComplete.TaskOutputParameters.Count);
+            Assert.AreEqual(complete.TaskResult, deserializedComplete.TaskResult);
+            Assert.IsNotNull(deserializedComplete.TaskOutputParameters);
+            Assert.AreEqual(complete.TaskOutputParameters.Count, deserializedComplete.TaskOutputParameters.Count);
         }
 
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains only value types
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTranslationWithValueTypesInDictionary()
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -171,17 +171,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskHostTaskComplete deserializedComplete = packet as TaskHostTaskComplete;
 
-            Assert.Equal(complete.TaskResult, deserializedComplete.TaskResult);
-            Assert.NotNull(deserializedComplete.TaskOutputParameters);
-            Assert.Equal(complete.TaskOutputParameters.Count, deserializedComplete.TaskOutputParameters.Count);
-            Assert.Equal(complete.TaskOutputParameters["Text"].WrappedParameter, deserializedComplete.TaskOutputParameters["Text"].WrappedParameter);
-            Assert.Equal(complete.TaskOutputParameters["BoolValue"].WrappedParameter, deserializedComplete.TaskOutputParameters["BoolValue"].WrappedParameter);
+            Assert.AreEqual(complete.TaskResult, deserializedComplete.TaskResult);
+            Assert.IsNotNull(deserializedComplete.TaskOutputParameters);
+            Assert.AreEqual(complete.TaskOutputParameters.Count, deserializedComplete.TaskOutputParameters.Count);
+            Assert.AreEqual(complete.TaskOutputParameters["Text"].WrappedParameter, deserializedComplete.TaskOutputParameters["Text"].WrappedParameter);
+            Assert.AreEqual(complete.TaskOutputParameters["BoolValue"].WrappedParameter, deserializedComplete.TaskOutputParameters["BoolValue"].WrappedParameter);
         }
 
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTranslationWithITaskItemInDictionary()
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -198,16 +198,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskHostTaskComplete deserializedComplete = packet as TaskHostTaskComplete;
 
-            Assert.Equal(complete.TaskResult, deserializedComplete.TaskResult);
-            Assert.NotNull(deserializedComplete.TaskOutputParameters);
-            Assert.Equal(complete.TaskOutputParameters.Count, deserializedComplete.TaskOutputParameters.Count);
+            Assert.AreEqual(complete.TaskResult, deserializedComplete.TaskResult);
+            Assert.IsNotNull(deserializedComplete.TaskOutputParameters);
+            Assert.AreEqual(complete.TaskOutputParameters.Count, deserializedComplete.TaskOutputParameters.Count);
             TaskHostPacketHelpers.AreEqual((ITaskItem)complete.TaskOutputParameters["TaskItemValue"].WrappedParameter, (ITaskItem)deserializedComplete.TaskOutputParameters["TaskItemValue"].WrappedParameter);
         }
 
         /// <summary>
         /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTranslationWithITaskItemArrayInDictionary()
         {
             IDictionary<string, object> parameters = new Dictionary<string, object>();
@@ -224,9 +224,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             TaskHostTaskComplete deserializedComplete = packet as TaskHostTaskComplete;
 
-            Assert.Equal(complete.TaskResult, deserializedComplete.TaskResult);
-            Assert.NotNull(deserializedComplete.TaskOutputParameters);
-            Assert.Equal(complete.TaskOutputParameters.Count, deserializedComplete.TaskOutputParameters.Count);
+            Assert.AreEqual(complete.TaskResult, deserializedComplete.TaskResult);
+            Assert.IsNotNull(deserializedComplete.TaskOutputParameters);
+            Assert.AreEqual(complete.TaskOutputParameters.Count, deserializedComplete.TaskOutputParameters.Count);
 
             ITaskItem[] itemArray = (ITaskItem[])complete.TaskOutputParameters["TaskItemArrayValue"].WrappedParameter;
             ITaskItem[] deserializedItemArray = (ITaskItem[])deserializedComplete.TaskOutputParameters["TaskItemArrayValue"].WrappedParameter;
@@ -239,7 +239,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <see cref="InvariantPayloadTransferMode.Full"/> mode, the build process environment
         /// is serialized in full and round-trips correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTranslationEnvironmentFullRoundTripsAtVersion5()
         {
             Dictionary<string, string> environment = new(StringComparer.OrdinalIgnoreCase)
@@ -277,7 +277,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// dictionary is omitted from the wire (saving the ~6 KB echo) and is null after deserialization;
         /// the parent reconstructs it from the configuration it sent for the task.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTranslationEnvironmentIdenticalOmitsDictionaryAtVersion5()
         {
             Dictionary<string, string> environment = new(StringComparer.OrdinalIgnoreCase)
@@ -323,7 +323,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// the build process environment is serialized in the legacy full-dictionary format. Guards the Math.Min
         /// version-negotiation fallback so older hosts keep working.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTranslationLegacyVersionSerializesFullEnvironment()
         {
             Dictionary<string, string> environment = new(StringComparer.OrdinalIgnoreCase)
@@ -373,10 +373,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             catch (Exception e)
             {
                 exceptionCaught = true;
-                Assert.IsAssignableFrom(expectedExceptionType, e); // "Wrong exception was thrown!"
+                Assert.IsInstanceOfType(e, expectedExceptionType); // "Wrong exception was thrown!"
             }
 
-            Assert.True(exceptionCaught); // "No exception was caught when one was expected!"
+            Assert.IsTrue(exceptionCaught); // "No exception was caught when one was expected!"
         }
     }
 }

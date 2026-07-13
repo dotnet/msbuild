@@ -4,16 +4,16 @@
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     /// <summary>
     /// Tests for TaskHostNodeKey record struct functionality.
     /// </summary>
+    [TestClass]
     public class TaskHostNodeKey_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostNodeKey_Equality_SameValues_AreEqual()
         {
             var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1);
@@ -24,7 +24,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             key1.GetHashCode().ShouldBe(key2.GetHashCode());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostNodeKey_Equality_DifferentNodeId_AreNotEqual()
         {
             var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1);
@@ -34,7 +34,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             (key1 != key2).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostNodeKey_Equality_DifferentHandshakeOptions_AreNotEqual()
         {
             var key1 = new TaskHostNodeKey(HandshakeOptions.TaskHost | HandshakeOptions.NET, 1);
@@ -44,7 +44,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             (key1 != key2).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostNodeKey_CanBeUsedAsDictionaryKey()
         {
             var dict = new System.Collections.Generic.Dictionary<TaskHostNodeKey, string>();
@@ -62,7 +62,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             dict[key1Copy].ShouldBe("value1");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostNodeKey_LargeNodeId_Works()
         {
             // Test that we can use node IDs greater than 255 (the previous limit)
@@ -80,7 +80,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             key1.ShouldNotBe(key3);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostNodeKey_NegativeNodeId_Works()
         {
             // Traditional multi-proc builds use -1 for node ID
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             key.HandshakeOptions.ShouldBe(HandshakeOptions.TaskHost | HandshakeOptions.NET);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostNodeKey_AllHandshakeOptions_Work()
         {
             // Test various HandshakeOptions combinations

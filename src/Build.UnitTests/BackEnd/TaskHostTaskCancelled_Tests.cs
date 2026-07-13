@@ -3,7 +3,6 @@
 
 using Microsoft.Build.BackEnd;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -12,12 +11,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Unit Tests for TaskHostTaskCancelled packet.
     /// </summary>
+    [TestClass]
     public class TaskHostTaskCancelled_Tests
     {
         /// <summary>
         /// Basic test of the constructor.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructor()
         {
             TaskHostTaskCancelled cancelled = new TaskHostTaskCancelled();
@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Basic test of serialization / deserialization.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTranslation()
         {
             TaskHostTaskCancelled cancelled = new TaskHostTaskCancelled();

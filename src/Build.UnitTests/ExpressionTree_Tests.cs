@@ -12,17 +12,17 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class ExpressionTreeTest
     {
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SimpleEvaluationTests()
         {
             Parser p = new Parser();
@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EqualityTests()
         {
             Parser p = new Parser();
@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RelationalTests()
         {
             Parser p = new Parser();
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AndandOrTests()
         {
             Parser p = new Parser();
@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FunctionTests()
         {
             Parser p = new Parser();
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests
                                     FileSystems.Default);
 
             value = tree.Evaluate(state);
-            Assert.True(value);
+            Assert.IsTrue(value);
 
             if (File.Exists(fileThatMustAlwaysExist))
             {
@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyTests()
         {
             Parser p = new Parser();
@@ -174,7 +174,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemListTests()
         {
             Parser p = new Parser();
@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void StringExpansionTests()
         {
             Parser p = new Parser();
@@ -240,7 +240,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ComplexTests()
         {
             Parser p = new Parser();
@@ -272,7 +272,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure when a non number is used in an expression which expects a numeric value that a error is emitted.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidItemInConditionEvaluation()
         {
             Parser p = new Parser();
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OldSyntaxTests()
         {
             Parser p = new Parser();
@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConditionedPropertyUpdateTests()
         {
             Parser p = new Parser();
@@ -340,50 +340,50 @@ namespace Microsoft.Build.UnitTests
                                        ElementLocation.EmptyLocation,
                                        FileSystems.Default);
             AssertParseEvaluate(p, "'0' == '1'", expander, false, state);
-            Assert.Empty(conditionedProperties);
+            Assert.IsEmpty(conditionedProperties);
 
             AssertParseEvaluate(p, "$(foo) == foo", expander, false, state);
-            Assert.Single(conditionedProperties);
+            Assert.ContainsSingle(conditionedProperties);
             List<string> properties = conditionedProperties["foo"];
-            Assert.Single(properties);
+            Assert.ContainsSingle(properties);
 
             AssertParseEvaluate(p, "'$(foo)' != 'bar'", expander, true, state);
-            Assert.Single(conditionedProperties);
+            Assert.ContainsSingle(conditionedProperties);
             properties = conditionedProperties["foo"];
-            Assert.Equal(2, properties.Count);
+            Assert.AreEqual(2, properties.Count);
 
             AssertParseEvaluate(p, "'$(branch)|$(build)|$(platform)' == 'lab22dev|debug|x86'", expander, false, state);
-            Assert.Equal(4, conditionedProperties.Count);
+            Assert.AreEqual(4, conditionedProperties.Count);
             properties = conditionedProperties["foo"];
-            Assert.Equal(2, properties.Count);
+            Assert.AreEqual(2, properties.Count);
             properties = conditionedProperties["branch"];
-            Assert.Single(properties);
+            Assert.ContainsSingle(properties);
             properties = conditionedProperties["build"];
-            Assert.Single(properties);
+            Assert.ContainsSingle(properties);
             properties = conditionedProperties["platform"];
-            Assert.Single(properties);
+            Assert.ContainsSingle(properties);
 
             AssertParseEvaluate(p, "'$(branch)|$(build)|$(platform)' == 'lab21|debug|x86'", expander, false, state);
-            Assert.Equal(4, conditionedProperties.Count);
+            Assert.AreEqual(4, conditionedProperties.Count);
             properties = conditionedProperties["foo"];
-            Assert.Equal(2, properties.Count);
+            Assert.AreEqual(2, properties.Count);
             properties = conditionedProperties["branch"];
-            Assert.Equal(2, properties.Count);
+            Assert.AreEqual(2, properties.Count);
             properties = conditionedProperties["build"];
-            Assert.Single(properties);
+            Assert.ContainsSingle(properties);
             properties = conditionedProperties["platform"];
-            Assert.Single(properties);
+            Assert.ContainsSingle(properties);
 
             AssertParseEvaluate(p, "'$(branch)|$(build)|$(platform)' == 'lab23|retail|ia64'", expander, false, state);
-            Assert.Equal(4, conditionedProperties.Count);
+            Assert.AreEqual(4, conditionedProperties.Count);
             properties = conditionedProperties["foo"];
-            Assert.Equal(2, properties.Count);
+            Assert.AreEqual(2, properties.Count);
             properties = conditionedProperties["branch"];
-            Assert.Equal(3, properties.Count);
+            Assert.AreEqual(3, properties.Count);
             properties = conditionedProperties["build"];
-            Assert.Equal(2, properties.Count);
+            Assert.AreEqual(2, properties.Count);
             properties = conditionedProperties["platform"];
-            Assert.Equal(2, properties.Count);
+            Assert.AreEqual(2, properties.Count);
             DumpDictionary(conditionedProperties);
         }
 
@@ -405,7 +405,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NotTests()
         {
             Console.WriteLine("NegationParseTest()");
@@ -451,7 +451,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             bool result = tree.Evaluate(state);
-            Assert.Equal(expected, result);
+            Assert.AreEqual(expected, result);
         }
 
 
@@ -493,12 +493,12 @@ namespace Microsoft.Build.UnitTests
                 fExceptionCaught = true;
             }
 
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
         }
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NegativeTests()
         {
             Parser p = new Parser();

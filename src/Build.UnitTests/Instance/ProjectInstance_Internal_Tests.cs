@@ -15,7 +15,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.Engine.UnitTests.TestComparers.ProjectInstanceModelTestComparers;
 
 #nullable disable
@@ -25,11 +24,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// <summary>
     /// Tests for ProjectInstance internal members
     /// </summary>
+    [TestClass]
     public class ProjectInstance_Internal_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public ProjectInstance_Internal_Tests(ITestOutputHelper output)
+        public ProjectInstance_Internal_Tests(TestContext output)
         {
             _output = output;
         }
@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Read task registrations
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTaskRegistrations()
         {
             try
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// DefaultTargets are not read from imported projects.
         /// InitialTargets are gathered from imports depth-first.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InitialTargetsDefaultTargets()
         {
             try
@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// DefaultTargets are not read from imported projects.
         /// InitialTargets are gathered from imports depth-first.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InitialTargetsDefaultTargetsEscaped()
         {
             try
@@ -154,7 +154,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Read property group under target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPropertyGroupUnderTarget()
         {
             string content = @"
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Read item group under target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetItemGroupUnderTarget()
         {
             string content = @"
@@ -249,7 +249,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Task registry accessor
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTaskRegistry()
         {
             ProjectInstance p = GetSampleProjectInstance();
@@ -260,7 +260,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Global properties accessor
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetGlobalProperties()
         {
             ProjectInstance p = GetSampleProjectInstance();
@@ -272,7 +272,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// ToolsVersion accessor
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetToolsVersion()
         {
             ProjectInstance p = GetSampleProjectInstance();
@@ -280,7 +280,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             p.Toolset.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UsingExplicitToolsVersionShouldBeFalseWhenNoToolsetIsReferencedInProject()
         {
             using ProjectRootElementFromString projectRootElementFromString = new("<Project></Project>", ProjectCollection.GlobalProjectCollection, false, false);
@@ -293,7 +293,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Toolset data is cloned properly
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneToolsetData()
         {
             using var projectCollection = new ProjectCollection();
@@ -308,7 +308,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test ProjectInstance's surfacing of the sub-toolset version
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetSubToolsetVersion()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -342,7 +342,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Test ProjectInstance's surfacing of the sub-toolset version when it is overridden by a value in the
         /// environment
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetSubToolsetVersion_FromEnvironment()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -367,7 +367,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test ProjectInstance's surfacing of the sub-toolset version when it is overridden by a global property
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetSubToolsetVersion_FromProjectGlobalProperties()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Verify that if a sub-toolset version is passed to the constructor, it all other heuristic methods for
         /// getting the sub-toolset version.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetSubToolsetVersion_FromConstructor()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -436,7 +436,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// DefaultTargets accessor
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetDefaultTargets()
         {
             ProjectInstance p = GetSampleProjectInstance();
@@ -447,7 +447,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// InitialTargets accessor
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetInitialTargets()
         {
             ProjectInstance p = GetSampleProjectInstance();
@@ -458,7 +458,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning project clones targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneTargets()
         {
             var hostServices = new HostServices();
@@ -480,7 +480,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning project copies task registry
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneTaskRegistry()
         {
             ProjectInstance first = GetSampleProjectInstance();
@@ -493,7 +493,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning project copies global properties
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneGlobalProperties()
         {
             ProjectInstance first = GetSampleProjectInstance();
@@ -506,7 +506,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning project copies default targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneDefaultTargets()
         {
             ProjectInstance first = GetSampleProjectInstance();
@@ -518,7 +518,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning project copies initial targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneInitialTargets()
         {
             ProjectInstance first = GetSampleProjectInstance();
@@ -530,7 +530,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning project copies toolsversion
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneToolsVersion()
         {
             ProjectInstance first = GetSampleProjectInstance();
@@ -542,7 +542,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning project copies toolsversion
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneStateTranslation()
         {
             ProjectInstance first = GetSampleProjectInstance();
@@ -556,7 +556,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Tests building a simple project and verifying the log looks as expected.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Build()
         {
             // Setting the current directory to the MSBuild running location. It *should* be this
@@ -586,13 +586,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             mockLogger.AssertLogContains(new string[] { "Building...", "Completed!" });
         }
 
-        [Theory]
-        [InlineData(
+        [MSBuildTestMethod]
+        [DataRow(
             @"      <Project>
                     </Project>
                 ")]
         // Project with one of each direct child(indirect children trees are tested separately)
-        [InlineData(
+        [DataRow(
             @"      <Project InitialTargets=`t1` DefaultTargets=`t2` ToolsVersion=`{0}`>
                         <UsingTask TaskName=`t1` AssemblyFile=`f1`/>
 
@@ -624,7 +624,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     </Project>
                 ")]
         // Project with at least two instances of each direct child. Tests that collections serialize well.
-        [InlineData(
+        [DataRow(
             @"      <Project InitialTargets=`t1` DefaultTargets=`t2` ToolsVersion=`{0}`>
                         <UsingTask TaskName=`t1` AssemblyFile=`f1`/>
                         <UsingTask TaskName=`t2` AssemblyFile=`f2`/>
@@ -754,8 +754,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             };
         }
 
-        [Theory]
-        [MemberData(nameof(ProjectInstanceHasEvaluationIdTestData))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(ProjectInstanceHasEvaluationIdTestData))]
         public void ProjectInstanceHasEvaluationId(ProjectInstanceFactory projectInstanceFactory)
         {
             using (var env = TestEnvironment.Create())
@@ -771,7 +771,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AddTargetAddsNewTarget()
         {
             string projectFileContent = @"
@@ -807,7 +807,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             targetInstance.ParentProjectSupportsReturnsAttribute.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AddTargetThrowsWithExistingTarget()
         {
             string projectFileContent = @"
@@ -821,11 +821,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Should.Throw<InternalErrorException>(() => projectInstance.AddTarget("a", "1==1", "inputs", "outputs", "returns", "keepDuplicateOutputs", "dependsOnTargets", "beforeTargets", "afterTargets", true));
         }
 
-        [Theory]
-        [InlineData(false, ProjectLoadSettings.Default)]
-        [InlineData(false, ProjectLoadSettings.RecordDuplicateButNotCircularImports)]
-        [InlineData(true, ProjectLoadSettings.Default)]
-        [InlineData(true, ProjectLoadSettings.RecordDuplicateButNotCircularImports)]
+        [MSBuildTestMethod]
+        [DataRow(false, ProjectLoadSettings.Default)]
+        [DataRow(false, ProjectLoadSettings.RecordDuplicateButNotCircularImports)]
+        [DataRow(true, ProjectLoadSettings.Default)]
+        [DataRow(true, ProjectLoadSettings.RecordDuplicateButNotCircularImports)]
         public void GetImportPathsAndImportPathsIncludingDuplicates(bool useDirectConstruction, ProjectLoadSettings projectLoadSettings)
         {
             try
@@ -881,9 +881,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Verifies that when calling <see cref="ProjectInstance.FromFile(string, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <see langword="true" />, the built-in &quot;MSBuildInteractive&quot; property is set to <see langword="true" />, otherwise the property is <see cref="string.Empty" />.
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void ProjectInstanceFromFileInteractive(bool interactive)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -909,9 +909,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Verifies that when calling <see cref="ProjectInstance.FromProjectRootElement(ProjectRootElement, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <see langword="true" />, the built-in &quot;MSBuildInteractive&quot; property is set to <see langword="true" />, otherwise the property is <see cref="string.Empty" />.
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void ProjectInstanceFromProjectRootElementInteractive(bool interactive)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())

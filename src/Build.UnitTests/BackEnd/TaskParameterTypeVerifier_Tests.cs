@@ -7,379 +7,379 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Tests for TaskParameterTypeVerifier class
     /// </summary>
+    [TestClass]
     public class TaskParameterTypeVerifier_Tests
     {
         #region IsValidScalarInputParameter Tests
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidScalarInputParameter_String_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(string)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(string)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidScalarInputParameter_ITaskItem_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidScalarInputParameter_Bool_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(bool)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(bool)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidScalarInputParameter_Int_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(int)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(int)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidScalarInputParameter_Double_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(double)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(double)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidScalarInputParameter_DateTime_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(DateTime)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(DateTime)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidScalarInputParameter_AbsolutePath_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(AbsolutePath)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(AbsolutePath)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidScalarInputParameter_Object_ReturnsFalse()
         {
-            Assert.False(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(object)));
+            Assert.IsFalse(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(object)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidScalarInputParameter_StringArray_ReturnsFalse()
         {
-            Assert.False(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(string[])));
+            Assert.IsFalse(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(string[])));
         }
 
         #endregion
 
         #region IsValidVectorInputParameter Tests
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidVectorInputParameter_StringArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(string[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(string[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidVectorInputParameter_ITaskItemArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(ITaskItem[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(ITaskItem[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidVectorInputParameter_BoolArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(bool[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(bool[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidVectorInputParameter_IntArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(int[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(int[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidVectorInputParameter_DoubleArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(double[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(double[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidVectorInputParameter_DateTimeArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(DateTime[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(DateTime[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidVectorInputParameter_AbsolutePathArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(AbsolutePath[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(AbsolutePath[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidVectorInputParameter_String_ReturnsFalse()
         {
-            Assert.False(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(string)));
+            Assert.IsFalse(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(string)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidVectorInputParameter_ObjectArray_ReturnsFalse()
         {
-            Assert.False(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(object[])));
+            Assert.IsFalse(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(object[])));
         }
 
         #endregion
 
         #region IsValueTypeOutputParameter Tests
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValueTypeOutputParameter_String_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(string)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(string)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValueTypeOutputParameter_Bool_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(bool)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(bool)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValueTypeOutputParameter_Int_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(int)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(int)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValueTypeOutputParameter_AbsolutePath_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(AbsolutePath)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(AbsolutePath)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValueTypeOutputParameter_StringArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(string[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(string[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValueTypeOutputParameter_BoolArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(bool[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(bool[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValueTypeOutputParameter_IntArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(int[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(int[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValueTypeOutputParameter_AbsolutePathArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(AbsolutePath[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(AbsolutePath[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValueTypeOutputParameter_ITaskItem_ReturnsFalse()
         {
-            Assert.False(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(ITaskItem)));
+            Assert.IsFalse(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(ITaskItem)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValueTypeOutputParameter_Object_ReturnsFalse()
         {
-            Assert.False(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(object)));
+            Assert.IsFalse(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(object)));
         }
 
         #endregion
 
         #region IsValidInputParameter Tests
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidInputParameter_String_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(string)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidInputParameter(typeof(string)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidInputParameter_ITaskItem_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(ITaskItem)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidInputParameter(typeof(ITaskItem)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidInputParameter_Bool_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(bool)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidInputParameter(typeof(bool)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidInputParameter_AbsolutePath_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(AbsolutePath)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidInputParameter(typeof(AbsolutePath)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidInputParameter_StringArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(string[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidInputParameter(typeof(string[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidInputParameter_ITaskItemArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(ITaskItem[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidInputParameter(typeof(ITaskItem[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidInputParameter_BoolArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(bool[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidInputParameter(typeof(bool[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidInputParameter_AbsolutePathArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(AbsolutePath[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidInputParameter(typeof(AbsolutePath[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidInputParameter_Object_ReturnsFalse()
         {
-            Assert.False(TaskParameterTypeVerifier.IsValidInputParameter(typeof(object)));
+            Assert.IsFalse(TaskParameterTypeVerifier.IsValidInputParameter(typeof(object)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidInputParameter_ObjectArray_ReturnsFalse()
         {
-            Assert.False(TaskParameterTypeVerifier.IsValidInputParameter(typeof(object[])));
+            Assert.IsFalse(TaskParameterTypeVerifier.IsValidInputParameter(typeof(object[])));
         }
 
         #endregion
 
         #region IsValidOutputParameter Tests
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidOutputParameter_String_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(string)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(string)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidOutputParameter_ITaskItem_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidOutputParameter_Bool_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(bool)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(bool)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidOutputParameter_AbsolutePath_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(AbsolutePath)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(AbsolutePath)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidOutputParameter_StringArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(string[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(string[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidOutputParameter_ITaskItemArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidOutputParameter_BoolArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(bool[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(bool[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidOutputParameter_AbsolutePathArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(AbsolutePath[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(AbsolutePath[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidOutputParameter_Object_ReturnsFalse()
         {
-            Assert.False(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(object)));
+            Assert.IsFalse(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(object)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidOutputParameter_ObjectArray_ReturnsFalse()
         {
-            Assert.False(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(object[])));
+            Assert.IsFalse(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(object[])));
         }
 
         // ─── ITaskItem<T> and ITaskItem<T>[] coverage (path-like types) ────────
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidScalarInputParameter_ITaskItemOfAbsolutePath_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<AbsolutePath>)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<AbsolutePath>)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidScalarInputParameter_ITaskItemOfFileInfo_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<FileInfo>)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<FileInfo>)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidScalarInputParameter_ITaskItemOfDirectoryInfo_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<DirectoryInfo>)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<DirectoryInfo>)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidVectorInputParameter_ITaskItemOfAbsolutePathArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(ITaskItem<AbsolutePath>[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(ITaskItem<AbsolutePath>[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsAssignableToITaskItem_ITaskItemOfAbsolutePath_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(ITaskItem<AbsolutePath>)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(ITaskItem<AbsolutePath>)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsAssignableToITaskItem_ITaskItemOfAbsolutePathArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(ITaskItem<AbsolutePath>[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(ITaskItem<AbsolutePath>[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidOutputParameter_ITaskItemOfAbsolutePath_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem<AbsolutePath>)));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem<AbsolutePath>)));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidOutputParameter_ITaskItemOfAbsolutePathArray_ReturnsTrue()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem<AbsolutePath>[])));
+            Assert.IsTrue(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem<AbsolutePath>[])));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsAssignableToITaskItem_TaskItemOfAbsolutePathArray_ReturnsTrue()
         {
             typeof(ITaskItem[]).IsAssignableFrom(typeof(TaskItem<AbsolutePath>[])).ShouldBeFalse();
             TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(TaskItem<AbsolutePath>[])).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IsValidOutputParameter_TaskItemOfAbsolutePathArray_ReturnsTrue()
         {
             TaskParameterTypeVerifier.IsValidOutputParameter(typeof(TaskItem<AbsolutePath>[])).ShouldBeTrue();

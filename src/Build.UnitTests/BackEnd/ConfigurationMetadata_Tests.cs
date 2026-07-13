@@ -8,7 +8,7 @@ using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Shouldly;
-using Xunit;
+using System.Linq;
 
 #nullable disable
 
@@ -17,6 +17,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Unit tests for ConfigurationMetadata
     /// </summary>
+    [TestClass]
     public class ConfigurationMetadata_Tests
     {
         /// <summary>
@@ -30,10 +31,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that a null config throws an ArgumentNullException.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructorNullConfiguration()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 BuildRequestConfiguration config = null;
                 ConfigurationMetadata metadata = new ConfigurationMetadata(config);
@@ -42,10 +43,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that a null project thrown an ArgumentNullException
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructorNullProject()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 Project project = null;
                 ConfigurationMetadata metadata = new ConfigurationMetadata(project);
@@ -54,33 +55,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that we get the project path and tools version from the configuration
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestValidConfiguration()
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data, "2.0");
             ConfigurationMetadata metadata = new ConfigurationMetadata(config);
-            Assert.Equal(data.ProjectFullPath, metadata.ProjectFullPath);
-            Assert.Equal(data.ExplicitlySpecifiedToolsVersion, metadata.ToolsVersion);
+            Assert.AreEqual(data.ProjectFullPath, metadata.ProjectFullPath);
+            Assert.AreEqual(data.ExplicitlySpecifiedToolsVersion, metadata.ToolsVersion);
         }
 
         /// <summary>
         /// Verify that we get the project path and tools version from the project.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestValidProject()
         {
             Project project = CreateProject();
 
             ConfigurationMetadata metadata = new ConfigurationMetadata(project);
-            Assert.Equal(project.FullPath, metadata.ProjectFullPath);
-            Assert.Equal(project.ToolsVersion, metadata.ToolsVersion);
+            Assert.AreEqual(project.FullPath, metadata.ProjectFullPath);
+            Assert.AreEqual(project.ToolsVersion, metadata.ToolsVersion);
         }
 
         /// <summary>
         /// Verify that we get the same hash code from equivalent metadatas even if they come from different sources.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGetHashCode()
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
@@ -90,13 +91,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ConfigurationMetadata metadata1 = new ConfigurationMetadata(config);
             ConfigurationMetadata metadata2 = new ConfigurationMetadata(project);
-            Assert.Equal(metadata1.GetHashCode(), metadata2.GetHashCode());
+            Assert.AreEqual(metadata1.GetHashCode(), metadata2.GetHashCode());
         }
 
         /// <summary>
         /// Verify that the Equals method works correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestEquals()
         {
             BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
@@ -106,20 +107,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ConfigurationMetadata metadata1 = new ConfigurationMetadata(config);
             ConfigurationMetadata metadata2 = new ConfigurationMetadata(project);
-            Assert.True(metadata1.Equals(metadata2));
+            Assert.IsTrue(metadata1.Equals(metadata2));
 
             data = new BuildRequestData("file2", new Dictionary<string, string>(), ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
             BuildRequestConfiguration config2 = new BuildRequestConfiguration(1, data, ObjectModelHelpers.MSBuildDefaultToolsVersion);
             ConfigurationMetadata metadata3 = new ConfigurationMetadata(config2);
-            Assert.False(metadata1.Equals(metadata3));
+            Assert.IsFalse(metadata1.Equals(metadata3));
 
             data = new BuildRequestData("file", new Dictionary<string, string>(), "3.0", Array.Empty<string>(), null);
             BuildRequestConfiguration config3 = new BuildRequestConfiguration(1, data, "3.0");
             ConfigurationMetadata metadata4 = new ConfigurationMetadata(config3);
-            Assert.False(metadata1.Equals(metadata4));
+            Assert.IsFalse(metadata1.Equals(metadata4));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTranslation()
         {
             var globalProperties = new PropertyDictionary<ProjectPropertyInstance>();
@@ -133,7 +134,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             copy.ProjectFullPath.ShouldBe(initial.ProjectFullPath);
             copy.ToolsVersion.ShouldBe(initial.ToolsVersion);
 
-            Assert.Equal(copy.GlobalProperties, initial.GlobalProperties, EqualityComparer<ProjectPropertyInstance>.Default);
+            Assert.IsTrue(copy.GlobalProperties.SequenceEqual(initial.GlobalProperties, EqualityComparer<ProjectPropertyInstance>.Default));
         }
 
         /// <summary>

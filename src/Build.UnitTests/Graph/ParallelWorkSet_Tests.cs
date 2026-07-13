@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.Threading;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Graph.UnitTests
 {
+    [TestClass]
     public class ParallelWorkSet_Tests
     {
         private sealed class ParallelWorkSetTestCase
@@ -33,7 +33,7 @@ namespace Microsoft.Build.Graph.UnitTests
 
         private ParallelWorkSet<string, string> _workSet;
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GivenExceptionsOnCompletionThread_CompletesAndThrowsException()
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Graph.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GivenExceptionsOnWorkerThread_CompletesAndThrowsExceptions()
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase
@@ -89,7 +89,7 @@ namespace Microsoft.Build.Graph.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GivenNoWorkItemAndMultipleWorkers_Completes()
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase
@@ -98,13 +98,13 @@ namespace Microsoft.Build.Graph.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GivenNoWorkItemAndNoWorkers_Completes()
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GivenRecursiveWorkItemsAndMultipleWorkers_Completes()
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase
@@ -136,7 +136,7 @@ namespace Microsoft.Build.Graph.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GivenRecursiveWorkItemsAndNoWorker_Completes()
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase
@@ -168,7 +168,7 @@ namespace Microsoft.Build.Graph.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GivenWorkItemsAndMultipleWorkers_Completes()
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase
@@ -201,7 +201,7 @@ namespace Microsoft.Build.Graph.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GivenWorkItemsAndNoWorker_Completes()
         {
             TestParallelWorkSet(new ParallelWorkSetTestCase

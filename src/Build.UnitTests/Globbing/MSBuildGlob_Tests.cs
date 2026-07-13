@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -8,7 +8,6 @@ using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
-using Xunit;
 
 #nullable disable
 
@@ -17,79 +16,80 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
     /// <summary>
     ///     Actual parsing tests are covered by FileMatcher_Tests (e.g. FileMatcher_Tests.SplitFileSpec)/>
     /// </summary>
+    [TestClass]
     public class MSBuildGlob_Tests
     {
-        [Theory]
-        [InlineData("")]
-        [InlineData("a")]
+        [MSBuildTestMethod]
+        [DataRow("")]
+        [DataRow("a")]
 #if TEST_ISWINDOWS
-        [InlineData(@"c:\a")]
+        [DataRow(@"c:\a")]
 #else
-        [InlineData("/a")]
+        [DataRow("/a")]
 #endif
         public void GlobRootEndsWithTrailingSlash(string globRoot)
         {
             var glob = MSBuildGlob.Parse(globRoot, "*");
 
-            Assert.Equal(glob.TestOnlyGlobRoot.LastOrDefault(), Path.DirectorySeparatorChar);
+            Assert.AreEqual(glob.TestOnlyGlobRoot.LastOrDefault(), Path.DirectorySeparatorChar);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobFromAbsoluteRootDoesNotChangeTheRoot()
         {
             var globRoot = NativeMethodsShared.IsWindows ? @"c:\a" : "/a";
             var glob = MSBuildGlob.Parse(globRoot, "*");
 
             var expectedRoot = Path.Combine(Directory.GetCurrentDirectory(), globRoot).WithTrailingSlash();
-            Assert.Equal(expectedRoot, glob.TestOnlyGlobRoot);
+            Assert.AreEqual(expectedRoot, glob.TestOnlyGlobRoot);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobFromEmptyRootUsesCurrentDirectory()
         {
             var glob = MSBuildGlob.Parse(string.Empty, "*");
 
-            Assert.Equal(Directory.GetCurrentDirectory().WithTrailingSlash(), glob.TestOnlyGlobRoot);
+            Assert.AreEqual(Directory.GetCurrentDirectory().WithTrailingSlash(), glob.TestOnlyGlobRoot);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobFromNullRootThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => MSBuildGlob.Parse(null, "*"));
+            Assert.ThrowsExactly<ArgumentNullException>(() => MSBuildGlob.Parse(null, "*"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobFromRelativeGlobRootNormalizesRootAgainstCurrentDirectory()
         {
             var globRoot = "a/b/c";
             var glob = MSBuildGlob.Parse(globRoot, "*");
 
             var expectedRoot = NormalizeRelativePathForGlobRepresentation(globRoot);
-            Assert.Equal(expectedRoot, glob.TestOnlyGlobRoot);
+            Assert.AreEqual(expectedRoot, glob.TestOnlyGlobRoot);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobFromRootWithInvalidPathThrows()
         {
             for (int i = 0; i < 128; i++)
             {
                 if (FileUtilities.InvalidPathChars.Contains((char)i))
                 {
-                    Assert.Throws<ArgumentException>(() => MSBuildGlob.Parse(((char)i).ToString(), "*"));
+                    Assert.ThrowsExactly<ArgumentException>(() => MSBuildGlob.Parse(((char)i).ToString(), "*"));
                 }
             }
         }
 
-        [Theory]
-        [InlineData(
+        [MSBuildTestMethod]
+        [DataRow(
             "a/b/c",
             "**",
             "a/b/c")]
-        [InlineData(
+        [DataRow(
             "a/b/c",
             "../../**",
             "a")]
-        [InlineData(
+        [DataRow(
             "a/b/c",
             "../d/e/**",
             "a/b/d/e")]
@@ -99,18 +99,18 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
 
             var expectedFixedDirectory = NormalizeRelativePathForGlobRepresentation(expectedFixedDirectoryPart);
 
-            Assert.Equal(expectedFixedDirectory, glob.FixedDirectoryPart);
+            Assert.AreEqual(expectedFixedDirectory, glob.FixedDirectoryPart);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobFromNullFileSpecThrows()
         {
-            Assert.Throws<ArgumentNullException>(() => MSBuildGlob.Parse(null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => MSBuildGlob.Parse(null));
         }
 
         // Smoke test. Comprehensive parsing tests in FileMatcher
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobParsingShouldInitializeState()
         {
             var globRoot = NativeMethodsShared.IsWindows ? @"c:\a" : "/a";
@@ -119,39 +119,39 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
 
             var expectedFixedDirectory = Path.Combine(globRoot, "b").WithTrailingSlash();
 
-            Assert.True(glob.IsLegal);
-            Assert.True(glob.TestOnlyNeedsRecursion);
-            Assert.Equal(fileSpec, glob.TestOnlyFileSpec);
+            Assert.IsTrue(glob.IsLegal);
+            Assert.IsTrue(glob.TestOnlyNeedsRecursion);
+            Assert.AreEqual(fileSpec, glob.TestOnlyFileSpec);
 
-            Assert.Equal(globRoot.WithTrailingSlash(), glob.TestOnlyGlobRoot);
+            Assert.AreEqual(globRoot.WithTrailingSlash(), glob.TestOnlyGlobRoot);
             Assert.StartsWith(glob.TestOnlyGlobRoot, glob.FixedDirectoryPart);
 
-            Assert.Equal(expectedFixedDirectory, glob.FixedDirectoryPart);
-            Assert.Equal("**/", glob.WildcardDirectoryPart);
-            Assert.Equal("*.cs", glob.FilenamePart);
+            Assert.AreEqual(expectedFixedDirectory, glob.FixedDirectoryPart);
+            Assert.AreEqual("**/", glob.WildcardDirectoryPart);
+            Assert.AreEqual("*.cs", glob.FilenamePart);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobParsingShouldInitializePartialStateOnIllegalFileSpec()
         {
             var globRoot = NativeMethodsShared.IsWindows ? @"c:\a" : "/a";
             var illegalFileSpec = $"b/.../**/*.cs";
             var glob = MSBuildGlob.Parse(globRoot, illegalFileSpec);
 
-            Assert.False(glob.IsLegal);
-            Assert.False(glob.TestOnlyNeedsRecursion);
-            Assert.Equal(illegalFileSpec, glob.TestOnlyFileSpec);
+            Assert.IsFalse(glob.IsLegal);
+            Assert.IsFalse(glob.TestOnlyNeedsRecursion);
+            Assert.AreEqual(illegalFileSpec, glob.TestOnlyFileSpec);
 
-            Assert.Equal(globRoot.WithTrailingSlash(), glob.TestOnlyGlobRoot);
+            Assert.AreEqual(globRoot.WithTrailingSlash(), glob.TestOnlyGlobRoot);
 
-            Assert.Equal(string.Empty, glob.FixedDirectoryPart);
-            Assert.Equal(string.Empty, glob.WildcardDirectoryPart);
-            Assert.Equal(string.Empty, glob.FilenamePart);
+            Assert.AreEqual(string.Empty, glob.FixedDirectoryPart);
+            Assert.AreEqual(string.Empty, glob.WildcardDirectoryPart);
+            Assert.AreEqual(string.Empty, glob.FilenamePart);
 
-            Assert.False(glob.IsMatch($"b/.../c/d.cs"));
+            Assert.IsFalse(glob.IsMatch($"b/.../c/d.cs"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobParsingShouldDeduplicateRegexes()
         {
             var globRoot = NativeMethodsShared.IsWindows ? @"c:\a" : "/a";
@@ -159,29 +159,29 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             var glob1 = MSBuildGlob.Parse(globRoot, fileSpec);
             var glob2 = MSBuildGlob.Parse(globRoot, fileSpec);
 
-            Assert.Same(glob1.TestOnlyRegex, glob2.TestOnlyRegex);
+            Assert.AreSame(glob1.TestOnlyRegex, glob2.TestOnlyRegex);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobIsNotUnescaped()
         {
             var glob = MSBuildGlob.Parse("%42/%42");
 
-            Assert.True(glob.IsLegal);
+            Assert.IsTrue(glob.IsLegal);
             Assert.EndsWith("%42" + Path.DirectorySeparatorChar, glob.FixedDirectoryPart);
-            Assert.Equal(string.Empty, glob.WildcardDirectoryPart);
-            Assert.Equal("%42", glob.FilenamePart);
+            Assert.AreEqual(string.Empty, glob.WildcardDirectoryPart);
+            Assert.AreEqual("%42", glob.FilenamePart);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobMatchingShouldThrowOnNullMatchArgument()
         {
             var glob = MSBuildGlob.Parse("*");
 
-            Assert.Throws<ArgumentNullException>(() => glob.IsMatch(null));
+            Assert.ThrowsExactly<ArgumentNullException>(() => glob.IsMatch(null));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobMatchShouldReturnFalseIfArgumentContainsInvalidPathOrFileCharacters()
         {
             var glob = MSBuildGlob.Parse("*");
@@ -190,7 +190,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             {
                 if (FileUtilities.InvalidPathChars.Contains((char)i))
                 {
-                    Assert.False(glob.IsMatch(((char)i).ToString()));
+                    Assert.IsFalse(glob.IsMatch(((char)i).ToString()));
                 }
             }
 
@@ -201,11 +201,11 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
                     continue;
                 }
 
-                Assert.False(glob.IsMatch(invalidFileChar.ToString()));
+                Assert.IsFalse(glob.IsMatch(invalidFileChar.ToString()));
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobMatchingBehaviourWhenInputIsASingleSlash()
         {
             var glob = MSBuildGlob.Parse("*");
@@ -213,92 +213,93 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             if (NativeMethodsShared.IsUnixLike)
             {
                 // \ is an acceptable file character on Unix, * should match it
-                Assert.True(glob.IsMatch("\\"));
+                Assert.IsTrue(glob.IsMatch("\\"));
 
                 // / means root on Unix
-                Assert.False(glob.IsMatch("/"));
+                Assert.IsFalse(glob.IsMatch("/"));
             }
             else
             {
                 // \ means partition root on Windows
-                Assert.False(glob.IsMatch("\\"));
+                Assert.IsFalse(glob.IsMatch("\\"));
 
                 // / also means partition root on Windows
-                Assert.False(glob.IsMatch("/"));
+                Assert.IsFalse(glob.IsMatch("/"));
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobMatchingShouldWorkWithLiteralStrings()
         {
             var glob = MSBuildGlob.Parse("abc");
 
-            Assert.True(glob.IsMatch("abc"));
+            Assert.IsTrue(glob.IsMatch("abc"));
         }
 
         // Just a smoke test. Comprehensive tests in FileMatcher_Tests
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobMatchingShouldWorkWithWildcards()
         {
             var glob = MSBuildGlob.Parse("ab?c*");
 
-            Assert.False(glob.IsMatch("acd"));
+            Assert.IsFalse(glob.IsMatch("acd"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobMatchingShouldNotUnescapeInput()
         {
             var glob = MSBuildGlob.Parse("%42");
 
-            Assert.False(glob.IsMatch("B"));
+            Assert.IsFalse(glob.IsMatch("B"));
         }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("a/b/c")]
+        [MSBuildTestMethod]
+        [DataRow("")]
+        [DataRow("a/b/c")]
         public void GlobShouldMatchEmptyArgWhenGlobIsEmpty(string globRoot)
         {
             var glob = MSBuildGlob.Parse(globRoot, string.Empty);
 
-            Assert.True(glob.IsMatch(string.Empty));
+            Assert.IsTrue(glob.IsMatch(string.Empty));
         }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("a/b/c")]
+        [MSBuildTestMethod]
+        [DataRow("")]
+        [DataRow("a/b/c")]
         public void GlobShouldMatchEmptyArgWhenGlobAcceptsEmptyString(string globRoot)
         {
             var glob = MSBuildGlob.Parse(globRoot, "*");
 
-            Assert.True(glob.IsMatch(string.Empty));
+            Assert.IsTrue(glob.IsMatch(string.Empty));
         }
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("a/b/c")]
+        [MSBuildTestMethod]
+        [DataRow("")]
+        [DataRow("a/b/c")]
         public void GlobShouldNotMatchEmptyArgWhenGlobDoesNotRepresentEmpty(string globRoot)
         {
             var glob = MSBuildGlob.Parse(globRoot, "*a*");
 
-            Assert.False(glob.IsMatch(string.Empty));
+            Assert.IsFalse(glob.IsMatch(string.Empty));
         }
 
-        [Fact(Skip = "TODO")]
+        [MSBuildTestMethod]
+        [Ignore("TODO")]
         public void GlobMatchingShouldTreatIllegalFileSpecAsLiteral()
         {
             var illegalSpec = "|...*";
             var glob = MSBuildGlob.Parse(illegalSpec);
 
-            Assert.False(glob.IsLegal);
-            Assert.True(glob.IsMatch(illegalSpec));
+            Assert.IsFalse(glob.IsLegal);
+            Assert.IsTrue(glob.IsMatch(illegalSpec));
         }
 
         public static IEnumerable<object[]> GlobMatchingShouldRespectTheRootOfTheGlobTestData => GlobbingTestData.GlobbingConesTestData;
 
-        [Theory]
+        [MSBuildTestMethod]
 
-        [MemberData(nameof(GlobMatchingShouldRespectTheRootOfTheGlobTestData))]
+        [DynamicData(nameof(GlobMatchingShouldRespectTheRootOfTheGlobTestData))]
 
         public void GlobMatchingShouldRespectTheRootOfTheGlob(string fileSpec, string stringToMatch, string globRoot, bool shouldMatch)
         {
@@ -306,11 +307,11 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
 
             if (shouldMatch)
             {
-                Assert.True(glob.IsMatch(stringToMatch));
+                Assert.IsTrue(glob.IsMatch(stringToMatch));
             }
             else
             {
-                Assert.False(glob.IsMatch(stringToMatch));
+                Assert.IsFalse(glob.IsMatch(stringToMatch));
             }
         }
 
@@ -319,27 +320,27 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             return Path.Combine(Directory.GetCurrentDirectory(), expectedFixedDirectoryPart).Replace("/", "\\").WithTrailingSlash();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobMatchingShouldWorkWithComplexRelativeLiterals()
         {
             var glob = MSBuildGlob.Parse("u/x", "../../u/x/d11/d21/../d22/../../d12/a.cs");
 
-            Assert.True(glob.IsMatch(@"../x/d13/../../x/d12/d23/../a.cs"));
-            Assert.False(glob.IsMatch(@"../x/d13/../x/d12/d23/../a.cs"));
+            Assert.IsTrue(glob.IsMatch(@"../x/d13/../../x/d12/d23/../a.cs"));
+            Assert.IsFalse(glob.IsMatch(@"../x/d13/../x/d12/d23/../a.cs"));
         }
 
-        [Theory]
-        [InlineData(
+        [MSBuildTestMethod]
+        [DataRow(
             @"a/b\c",
             @"d/e\f/**\a.cs",
             @"d\e/f\g/h\i/a.cs",
             @"d\e/f\", @"g/h\i/", @"a.cs")]
-        [InlineData(
+        [DataRow(
             @"a/b\c",
             @"d/e\f/*b*\*.cs",
             @"d\e/f\abc/a.cs",
             @"d\e/f\", @"abc/", @"a.cs")]
-        [InlineData(
+        [DataRow(
             @"a/b/\c",
             @"d/e\/*b*/\*.cs",
             @"d\e\\abc/\a.cs",
@@ -349,10 +350,10 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
         {
             var glob = MSBuildGlob.Parse(globRoot, fileSpec);
 
-            Assert.True(glob.IsMatch(stringToMatch));
+            Assert.IsTrue(glob.IsMatch(stringToMatch));
 
             MSBuildGlob.MatchInfoResult result = glob.MatchInfo(stringToMatch);
-            Assert.True(result.IsMatch);
+            Assert.IsTrue(result.IsMatch);
 
             string NormalizeSlashes(string path)
             {
@@ -362,9 +363,9 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
 
             var rootedFixedDirectoryPart = Path.Combine(FileUtilities.NormalizePath(globRoot), fixedDirectoryPart);
 
-            Assert.Equal(FileUtilities.GetFullPathNoThrow(rootedFixedDirectoryPart), result.FixedDirectoryPartMatchGroup);
-            Assert.Equal(NormalizeSlashes(wildcardDirectoryPart), result.WildcardDirectoryPartMatchGroup);
-            Assert.Equal(NormalizeSlashes(filenamePart), result.FilenamePartMatchGroup);
+            Assert.AreEqual(FileUtilities.GetFullPathNoThrow(rootedFixedDirectoryPart), result.FixedDirectoryPartMatchGroup);
+            Assert.AreEqual(NormalizeSlashes(wildcardDirectoryPart), result.WildcardDirectoryPartMatchGroup);
+            Assert.AreEqual(NormalizeSlashes(filenamePart), result.FilenamePartMatchGroup);
         }
     }
 }

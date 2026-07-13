@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Xunit;
 #if FEATURE_WINDOWSINTEROP
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -18,6 +17,7 @@ using Windows.Win32.Foundation;
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class NativeMethodsShared_Tests
     {
         #region Data
@@ -51,14 +51,14 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 // Make sure the pointer passed back for the method is not null
-                Assert.NotEqual(processHandle, IntPtr.Zero);
+                Assert.AreNotEqual(processHandle, IntPtr.Zero);
 
                 // Actually call the method
                 GetProcessIdDelegate processIdDelegate = Marshal.GetDelegateForFunctionPointer<GetProcessIdDelegate>(processHandle);
                 uint processId = processIdDelegate();
 
                 // Make sure the return value is the same as retrieved from the .net methods to make sure everything works
-                Assert.Equal((uint)Process.GetCurrentProcess().Id, processId); // "Expected the .net processId to match the one from GetCurrentProcessId"
+                Assert.AreEqual((uint)Process.GetCurrentProcess().Id, processId); // "Expected the .net processId to match the one from GetCurrentProcessId"
             }
             finally
             {
@@ -73,40 +73,40 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that when NativeMethodsShared.GetLastWriteFileUtcTime() is called on a
         /// missing time, DateTime.MinValue is returned.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetLastWriteFileUtcTimeReturnsMinValueForMissingFile()
         {
             string nonexistentFile = FileUtilities.GetTemporaryFileName();
 
             DateTime nonexistentFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(nonexistentFile);
-            Assert.Equal(DateTime.MinValue, nonexistentFileTime);
+            Assert.AreEqual(DateTime.MinValue, nonexistentFileTime);
         }
 
         /// <summary>
         /// Verifies that when NativeMethodsShared.GetLastWriteFileUtcTime() is called on a
         /// *directory*, DateTime.MinValue is returned.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetLastWriteFileUtcTimeReturnsMinValueForDirectory()
         {
             string directory = FileUtilities.GetTemporaryDirectory(createDirectory: true);
 
             DateTime directoryTime = NativeMethodsShared.GetLastWriteFileUtcTime(directory);
-            Assert.Equal(DateTime.MinValue, directoryTime);
+            Assert.AreEqual(DateTime.MinValue, directoryTime);
         }
 
         /// <summary>
         /// Verifies that when NativeMethodsShared.GetLastWriteDirectoryUtcTime() is called on a
         /// *file*, it returns DateTime.MinValue
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetLastWriteDirectoryUtcTimeReturnsMinValueForFile()
         {
             string file = FileUtilities.GetTemporaryFile();
 
             DateTime directoryTime;
-            Assert.False(NativeMethodsShared.GetLastWriteDirectoryUtcTime(file, out directoryTime));
-            Assert.Equal(DateTime.MinValue, directoryTime);
+            Assert.IsFalse(NativeMethodsShared.GetLastWriteDirectoryUtcTime(file, out directoryTime));
+            Assert.AreEqual(DateTime.MinValue, directoryTime);
         }
 
 
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that NativeMethodsShared.SetCurrentDirectory(), when called on a nonexistent
         /// directory, will not set the current directory to that location.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetCurrentDirectoryDoesNotSetNonexistentFolder()
         {
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -134,7 +134,7 @@ namespace Microsoft.Build.UnitTests
                 }
             }
 
-            Assert.False(Directory.Exists(nonexistentDirectory),
+            Assert.IsFalse(Directory.Exists(nonexistentDirectory),
                 "Tried 10 times to get a nonexistent directory name and failed -- please try again");
 
             bool exceptionCaught = false;
@@ -150,8 +150,8 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 // verify that the current directory did not change
-                Assert.False(exceptionCaught); // "SetCurrentDirectory should not throw!"
-                Assert.Equal(currentDirectory, Directory.GetCurrentDirectory());
+                Assert.IsFalse(exceptionCaught); // "SetCurrentDirectory should not throw!"
+                Assert.AreEqual(currentDirectory, Directory.GetCurrentDirectory());
             }
         }
 

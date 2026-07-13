@@ -10,7 +10,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 
 #nullable disable
@@ -20,12 +19,13 @@ namespace Microsoft.Build.UnitTests.Definition
     /// <summary>
     /// Tests some manipulations of Project and ProjectCollection that require dealing with internal data.
     /// </summary>
+    [TestClass]
     public class Project_Internal_Tests
     {
         /// <summary>
         /// Set default tools version; subsequent projects should use it
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetDefaultToolsVersion()
         {
             string oldValue = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 collection.DefaultToolsVersion = "x";
 
-                Assert.Equal("x", collection.DefaultToolsVersion);
+                Assert.AreEqual("x", collection.DefaultToolsVersion);
 
                 string content = @"
                     <Project>
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 using ProjectFromString projectFromString = new(content, null, null, collection);
                 Project project = projectFromString.Project;
 
-                Assert.Equal("x", project.ToolsVersion);
+                Assert.AreEqual("x", project.ToolsVersion);
             }
             finally
             {
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests.Definition
         ///
         /// ... Make sure we can do this even if we're not using the "always default everything to current anyway" codepath.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadProjectWithInvalidToolsVersionInFile()
         {
             string oldValue = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\123.proj", null, null);
 
-                Assert.True(Object.ReferenceEquals(project, project2));
+                Assert.IsTrue(Object.ReferenceEquals(project, project2));
             }
             finally
             {
@@ -107,9 +107,9 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Project.ToolsVersion should be set to ToolsVersion evaluated with,
         /// even if it is subsequently changed on the XML (without reevaluation)
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void ProjectToolsVersion20Present()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -133,11 +133,11 @@ namespace Microsoft.Build.UnitTests.Definition
                 project.Xml.ToolsVersion = "2.0";
                 project.ReevaluateIfNecessary();
 
-                Assert.Equal("2.0", project.ToolsVersion);
+                Assert.AreEqual("2.0", project.ToolsVersion);
 
                 project.Xml.ToolsVersion = "4.0";
 
-                Assert.Equal("2.0", project.ToolsVersion);
+                Assert.AreEqual("2.0", project.ToolsVersion);
             }
             finally
             {
@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UsingExplicitToolsVersionShouldBeFalseWhenNoToolsetIsReferencedInProject()
         {
             var project = ObjectModelHelpers.CreateInMemoryProject("<Project></Project>");
@@ -158,9 +158,9 @@ namespace Microsoft.Build.UnitTests.Definition
         /// $(MSBuildToolsVersion) should be set to ToolsVersion evaluated with,
         /// even if it is subsequently changed on the XML (without reevaluation)
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void MSBuildToolsVersionProperty()
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -184,14 +184,14 @@ namespace Microsoft.Build.UnitTests.Definition
                 project.Xml.ToolsVersion = "2.0";
                 project.ReevaluateIfNecessary();
 
-                Assert.Equal("2.0", project.GetPropertyValue("msbuildtoolsversion"));
+                Assert.AreEqual("2.0", project.GetPropertyValue("msbuildtoolsversion"));
 
                 project.Xml.ToolsVersion = ObjectModelHelpers.MSBuildDefaultToolsVersion;
-                Assert.Equal("2.0", project.GetPropertyValue("msbuildtoolsversion"));
+                Assert.AreEqual("2.0", project.GetPropertyValue("msbuildtoolsversion"));
 
                 project.ReevaluateIfNecessary();
 
-                Assert.Equal(
+                Assert.AreEqual(
                     ObjectModelHelpers.MSBuildDefaultToolsVersion,
                     project.GetPropertyValue("msbuildtoolsversion"));
             }
@@ -202,7 +202,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectEvaluationShouldRespectConditionsIfProjectLoadSettingsSaysSo()
         {
             var projectContents = @"
@@ -262,9 +262,9 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Verifies that when calling <see cref="Project.FromFile(string, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <see langword="true" />, the built-in &quot;MSBuildInteractive&quot; property is set to <see langword="true" />, otherwise the property is <see cref="string.Empty" />.
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void ProjectFromFileInteractive(bool interactive)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -290,9 +290,9 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Verifies that when calling <see cref="Project.FromProjectRootElement(ProjectRootElement, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <see langword="true" />, the built-in &quot;MSBuildInteractive&quot; property is set to <see langword="true" />, otherwise the property is <see cref="string.Empty" />.
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void ProjectFromProjectRootElementInteractive(bool interactive)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -318,9 +318,9 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Verifies that when calling <see cref="Project.FromXmlReader(XmlReader, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <see langword="true" />, the built-in &quot;MSBuildInteractive&quot; property is set to <see langword="true" />, otherwise the property is <see cref="string.Empty" />.
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void ProjectFromXmlReaderInteractive(bool interactive)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())

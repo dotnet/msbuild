@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -6,12 +6,12 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Engine.UnitTests.Evaluation
 {
+    [TestClass]
     public class SimpleProjectRootElementCache_Tests : IDisposable
     {
         public SimpleProjectRootElementCache_Tests()
@@ -26,7 +26,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Get_GivenCachedProjectFile_ReturnsRootElement()
         {
             string projectFile = NativeMethodsShared.IsUnixLike ? "/foo" : "c:\\foo";
@@ -40,7 +40,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualRootElement.ShouldBe(rootElementToCache);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Get_GivenCachedProjectFileWithDifferentCasing_ReturnsRootElement()
         {
             string projectFile = NativeMethodsShared.IsUnixLike ? "/foo" : "c:\\foo";
@@ -54,7 +54,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualRootElement.ShouldBe(rootElementToCache);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Get_GivenOpenFuncWhichAddsRootElement_ReturnsRootElement()
         {
             string projectFile = NativeMethodsShared.IsUnixLike ? "/foo" : "c:\\foo";
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualRootElement.ShouldBe(rootElementToCache);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Get_GivenOpenFuncWhichAddsRootElementWithDifferentCasing_ReturnsRootElement()
         {
             string projectFile = NativeMethodsShared.IsUnixLike ? "/foo" : "c:\\foo";
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualRootElement.ShouldBe(rootElementToCache);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Get_GivenOpenFuncWhichReturnsNull_ThrowsInternalErrorException()
         {
             string projectFile = NativeMethodsShared.IsUnixLike ? "/foo" : "c:\\foo";
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Get_GivenOpenFuncWhichReturnsIncorrectProject_ThrowsInternalErrorException()
         {
             string projectFile = NativeMethodsShared.IsUnixLike ? "/foo" : "c:\\foo";

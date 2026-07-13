@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -16,13 +16,12 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using VerifyTests;
-using VerifyXunit;
-using Xunit;
-using Xunit.NetCore.Extensions;
-using static VerifyXunit.Verifier;
+using VerifyMSTest;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     internal sealed class MockBuildEventSink(int nodeNumber) : IBuildEventSink, IEventSource
     {
         public string Name { get; set; } = $"MockBuildEventSink{nodeNumber}";
@@ -132,8 +131,13 @@ namespace Microsoft.Build.UnitTests
     }
 
     [UseInvariantCulture]
-    public class TerminalLogger_Tests
+    [TestClass]
+    [UsesVerify]
+    public partial class TerminalLogger_Tests
     {
+    [ModuleInitializer]
+    internal static void InitializeVerify() => Verifier.UseProjectRelativeDirectory("Snapshots");
+
         private const int _nodeCount = 8;
 
         private const string _immediateMessageString =
@@ -161,9 +165,9 @@ namespace Microsoft.Build.UnitTests
 
         private VerifySettings _settings = new();
 
-        private readonly ITestOutputHelper _outputHelper;
+        private readonly TestContext _outputHelper;
 
-        public TerminalLogger_Tests(ITestOutputHelper outputHelper)
+        public TerminalLogger_Tests(TestContext outputHelper)
         {
             _outputHelper = outputHelper;
             _mockTerminal = new Terminal(_outputWriter);
@@ -176,38 +180,37 @@ namespace Microsoft.Build.UnitTests
             _remoteTerminalLogger.BuildEventRedirector = new EventRedirectorToSink(0, _centralNodeEventSource);
             _remoteTerminalLogger.Initialize(_remoteNodeEventSource, 1);
 
-            UseProjectRelativeDirectory("Snapshots");
         }
 
-        [Theory]
-        [InlineData(null, false, false, "", typeof(ConsoleLogger))]
-        [InlineData(null, true, false, "", typeof(ConsoleLogger))]
-        [InlineData(null, false, true, "", typeof(ConsoleLogger))]
-        [InlineData(null, true, true, "off", typeof(ConsoleLogger))]
-        [InlineData(null, true, true, "false", typeof(ConsoleLogger))]
-        [InlineData("--tl:off", true, true, "", typeof(ConsoleLogger))]
-        [InlineData("--tl:false", true, true, "", typeof(ConsoleLogger))]
-        [InlineData(null, true, true, "", typeof(TerminalLogger))]
-        [InlineData("-tl:on", true, true, "off", typeof(TerminalLogger))] // arg overrides env
-        [InlineData("-tl:true", true, true, "off", typeof(TerminalLogger))] // arg overrides env
-        [InlineData("-tl:off", true, true, "on", typeof(ConsoleLogger))] // arg overrides env (disable)
-        [InlineData("-tl:false", true, true, "true", typeof(ConsoleLogger))] // arg overrides env (disable)
-        [InlineData("-tl:on", false, false, "", typeof(TerminalLogger))] // Force when explicitly set to "on"
-        [InlineData("-tl:true", false, false, "", typeof(TerminalLogger))] // Force when explicitly set to "true"
-        [InlineData("-tl:on", true, false, "", typeof(TerminalLogger))] // Force when explicitly set to "on"
-        [InlineData("-tl:true", false, true, "", typeof(TerminalLogger))] // Force when explicitly set to "true"
-        [InlineData(null, false, false, "on", typeof(TerminalLogger))] // Force when env var set to "on"
-        [InlineData(null, false, false, "true", typeof(TerminalLogger))] // Force when env var set to "true"
-        [InlineData(null, true, false, "on", typeof(TerminalLogger))] // Force when env var set to "on"
-        [InlineData(null, false, true, "true", typeof(TerminalLogger))] // Force when env var set to "true"
-        [InlineData("-tl:auto", false, false, "", typeof(ConsoleLogger))] // Auto respects system capabilities (no ANSI, no screen)
-        [InlineData("-tl:auto", true, false, "", typeof(ConsoleLogger))] // Auto respects system capabilities (ANSI but no screen)
-        [InlineData("-tl:auto", false, true, "", typeof(ConsoleLogger))] // Auto respects system capabilities (screen but no ANSI)
-        [InlineData("-tl:auto", true, true, "", typeof(TerminalLogger))] // Auto respects system capabilities (both ANSI and screen)
-        [InlineData("-tl:auto", true, true, "off", typeof(TerminalLogger))] // Auto ignores env var when explicitly set
-        [InlineData("-tl:auto", false, false, "on", typeof(ConsoleLogger))] // Auto ignores env var and respects system capabilities
-        [InlineData(null, false, false, "auto", typeof(ConsoleLogger))] // Auto via env var respects system capabilities
-        [InlineData(null, true, true, "auto", typeof(TerminalLogger))] // Auto via env var respects system capabilities
+        [MSBuildTestMethod]
+        [DataRow(null, false, false, "", typeof(ConsoleLogger))]
+        [DataRow(null, true, false, "", typeof(ConsoleLogger))]
+        [DataRow(null, false, true, "", typeof(ConsoleLogger))]
+        [DataRow(null, true, true, "off", typeof(ConsoleLogger))]
+        [DataRow(null, true, true, "false", typeof(ConsoleLogger))]
+        [DataRow("--tl:off", true, true, "", typeof(ConsoleLogger))]
+        [DataRow("--tl:false", true, true, "", typeof(ConsoleLogger))]
+        [DataRow(null, true, true, "", typeof(TerminalLogger))]
+        [DataRow("-tl:on", true, true, "off", typeof(TerminalLogger))] // arg overrides env
+        [DataRow("-tl:true", true, true, "off", typeof(TerminalLogger))] // arg overrides env
+        [DataRow("-tl:off", true, true, "on", typeof(ConsoleLogger))] // arg overrides env (disable)
+        [DataRow("-tl:false", true, true, "true", typeof(ConsoleLogger))] // arg overrides env (disable)
+        [DataRow("-tl:on", false, false, "", typeof(TerminalLogger))] // Force when explicitly set to "on"
+        [DataRow("-tl:true", false, false, "", typeof(TerminalLogger))] // Force when explicitly set to "true"
+        [DataRow("-tl:on", true, false, "", typeof(TerminalLogger))] // Force when explicitly set to "on"
+        [DataRow("-tl:true", false, true, "", typeof(TerminalLogger))] // Force when explicitly set to "true"
+        [DataRow(null, false, false, "on", typeof(TerminalLogger))] // Force when env var set to "on"
+        [DataRow(null, false, false, "true", typeof(TerminalLogger))] // Force when env var set to "true"
+        [DataRow(null, true, false, "on", typeof(TerminalLogger))] // Force when env var set to "on"
+        [DataRow(null, false, true, "true", typeof(TerminalLogger))] // Force when env var set to "true"
+        [DataRow("-tl:auto", false, false, "", typeof(ConsoleLogger))] // Auto respects system capabilities (no ANSI, no screen)
+        [DataRow("-tl:auto", true, false, "", typeof(ConsoleLogger))] // Auto respects system capabilities (ANSI but no screen)
+        [DataRow("-tl:auto", false, true, "", typeof(ConsoleLogger))] // Auto respects system capabilities (screen but no ANSI)
+        [DataRow("-tl:auto", true, true, "", typeof(TerminalLogger))] // Auto respects system capabilities (both ANSI and screen)
+        [DataRow("-tl:auto", true, true, "off", typeof(TerminalLogger))] // Auto ignores env var when explicitly set
+        [DataRow("-tl:auto", false, false, "on", typeof(ConsoleLogger))] // Auto ignores env var and respects system capabilities
+        [DataRow(null, false, false, "auto", typeof(ConsoleLogger))] // Auto via env var respects system capabilities
+        [DataRow(null, true, true, "auto", typeof(TerminalLogger))] // Auto via env var respects system capabilities
         public void CreateTerminalOrConsoleLogger_CreatesCorrectLoggerInstance(string? argsString, bool supportsAnsi, bool outputIsScreen, string evnVariableValue, Type expectedType)
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -220,12 +223,12 @@ namespace Microsoft.Build.UnitTests
             logger.GetType().ShouldBe(expectedType);
         }
 
-        [Theory]
-        [InlineData("-v:q", LoggerVerbosity.Quiet)]
-        [InlineData("-verbosity:minimal", LoggerVerbosity.Minimal)]
-        [InlineData("--v:d", LoggerVerbosity.Detailed)]
-        [InlineData("/verbosity:diag", LoggerVerbosity.Diagnostic)]
-        [InlineData(null, LoggerVerbosity.Normal)]
+        [MSBuildTestMethod]
+        [DataRow("-v:q", LoggerVerbosity.Quiet)]
+        [DataRow("-verbosity:minimal", LoggerVerbosity.Minimal)]
+        [DataRow("--v:d", LoggerVerbosity.Detailed)]
+        [DataRow("/verbosity:diag", LoggerVerbosity.Diagnostic)]
+        [DataRow(null, LoggerVerbosity.Normal)]
         public void CreateTerminalOrConsoleLogger_ParsesVerbosity(string? argsString, LoggerVerbosity expectedVerbosity)
         {
             string[]? args = argsString?.Split(' ');
@@ -245,11 +248,11 @@ namespace Microsoft.Build.UnitTests
         /// console, it must fall back to <see cref="ConsoleLogger"/>. This exercises the real
         /// <c>QueryIsScreenAndTryEnableAnsiColorCodes</c> path and needs no real terminal.
         /// </summary>
-        [Theory]
-        [InlineData(true, true, typeof(TerminalLogger))]
-        [InlineData(false, false, typeof(ConsoleLogger))]
-        [InlineData(true, false, typeof(ConsoleLogger))]
-        [InlineData(false, true, typeof(ConsoleLogger))]
+        [MSBuildTestMethod]
+        [DataRow(true, true, typeof(TerminalLogger))]
+        [DataRow(false, false, typeof(ConsoleLogger))]
+        [DataRow(true, false, typeof(ConsoleLogger))]
+        [DataRow(false, true, typeof(ConsoleLogger))]
         public void CreateTerminalOrConsoleLogger_AutoHonorsServerTransmittedConsoleConfiguration(bool acceptAnsi, bool outputIsScreen, Type expectedType)
         {
             using TestEnvironment env = TestEnvironment.Create(_outputHelper);
@@ -500,15 +503,15 @@ namespace Microsoft.Build.UnitTests
             _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(succeeded));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintsBuildSummary_Succeeded()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () => { });
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintBuildSummary_SucceededWithWarnings()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
@@ -516,10 +519,10 @@ namespace Microsoft.Build.UnitTests
                 _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("A\nMulti\r\nLine\nWarning!"));
             });
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintImmediateWarningMessage_Succeeded()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
@@ -532,10 +535,10 @@ namespace Microsoft.Build.UnitTests
                     "**********************************************************************"));
             });
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintCopyTaskRetryWarningAsImmediateMessage_Failed()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
@@ -545,10 +548,10 @@ namespace Microsoft.Build.UnitTests
                 _centralNodeEventSource.InvokeWarningRaised(MakeCopyRetryWarning(3));
             });
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintImmediateMessage_Success()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
@@ -556,10 +559,10 @@ namespace Microsoft.Build.UnitTests
                 _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs(_immediateMessageString, MessageImportance.High));
             });
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintImmediateMessage_Skipped()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
@@ -567,10 +570,10 @@ namespace Microsoft.Build.UnitTests
                 _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("--anycustomarg", MessageImportance.High));
             });
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintRestore_Failed()
         {
             _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
@@ -581,10 +584,10 @@ namespace Microsoft.Build.UnitTests
             _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, succeeded));
             _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(succeeded));
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintRestore_SuccessWithWarnings()
         {
             _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
@@ -595,17 +598,17 @@ namespace Microsoft.Build.UnitTests
             _centralNodeEventSource.InvokeProjectFinished(MakeProjectFinishedEventArgs(_projectFile, succeeded));
             _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(succeeded));
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintBuildSummary_Failed()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () => { });
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintBuildSummary_FailedWithErrors()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
@@ -613,10 +616,10 @@ namespace Microsoft.Build.UnitTests
                 _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("Error!"));
             });
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintDetailedBuildSummary_FailedWithErrorAndWarning()
         {
             string? originalParameters = _terminallogger.Parameters;
@@ -633,10 +636,10 @@ namespace Microsoft.Build.UnitTests
             _terminallogger.Parameters = originalParameters;
             _terminallogger.ParseParameters();
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintBuildSummary_FailedWithErrorsAndWarnings()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, () =>
@@ -647,11 +650,11 @@ namespace Microsoft.Build.UnitTests
                 _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("Error2!"));
             });
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintBuildSummary_2Projects_FailedWithErrorsAndWarnings()
         {
             InvokeLoggerCallbacksForTwoProjects(
@@ -673,10 +676,10 @@ namespace Microsoft.Build.UnitTests
                     _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("Error4!", buildEventContext: p2Context));
                 });
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintProjectOutputDirectoryLink()
         {
             // Send message in order to set project output path
@@ -686,7 +689,7 @@ namespace Microsoft.Build.UnitTests
                 _centralNodeEventSource.InvokeMessageRaised(e);
             }, _projectFileWithNonAnsiSymbols);
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
         #endregion
@@ -724,26 +727,26 @@ namespace Microsoft.Build.UnitTests
         }
         #endregion
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintBuildSummaryQuietVerbosity_FailedWithErrors()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Quiet;
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintBuildSummaryMinimalVerbosity_FailedWithErrors()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Minimal;
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task LogEvaluationErrorFromEngine()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Normal;
@@ -757,56 +760,56 @@ namespace Microsoft.Build.UnitTests
                 });
             });
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintBuildSummaryNormalVerbosity_FailedWithErrors()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Normal;
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintBuildSummaryDetailedVerbosity_FailedWithErrors()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Detailed;
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintBuildSummaryDiagnosticVerbosity_FailedWithErrors()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Diagnostic;
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintTestSummaryNormalVerbosity_Succeeded()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Normal;
             InvokeLoggerCallbacksForTestProject(succeeded: true, CallAllTypesOfTestMessages);
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintTestSummaryQuietVerbosity_Succeeded()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Quiet;
             InvokeLoggerCallbacksForTestProject(succeeded: true, CallAllTypesOfTestMessages);
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintSummaryWithOverwrittenVerbosity_FailedWithErrors()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Minimal;
@@ -815,10 +818,10 @@ namespace Microsoft.Build.UnitTests
 
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, CallAllTypesOfMessagesWarningAndError);
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintSummaryWithTaskCommandLineEventArgs_Succeeded()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Detailed;
@@ -830,10 +833,10 @@ namespace Microsoft.Build.UnitTests
                 _centralNodeEventSource.InvokeMessageRaised(MakeTaskCommandLineEventArgs("Task Command Line.", MessageImportance.High));
             });
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public Task PrintSummaryWithoutTaskCommandLineEventArgs_Succeeded()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Detailed;
@@ -845,21 +848,21 @@ namespace Microsoft.Build.UnitTests
                 _centralNodeEventSource.InvokeMessageRaised(MakeTaskCommandLineEventArgs("Task Command Line.", MessageImportance.High));
             });
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            return Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DisplayNodesShowsCurrent()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: false, async () =>
             {
                 _terminallogger.DisplayNodes();
 
-                await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+                await Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DisplayNodesOverwritesTime()
         {
             List<MockStopwatch> stopwatches = new();
@@ -886,7 +889,7 @@ namespace Microsoft.Build.UnitTests
 
                     _terminallogger.DisplayNodes();
 
-                    await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+                    await Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
                 });
             }
             finally
@@ -896,7 +899,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public async Task DisplayNodesOverwritesWithNewTargetFramework()
         {
             _centralNodeEventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
@@ -919,10 +922,10 @@ namespace Microsoft.Build.UnitTests
 
             _terminallogger.DisplayNodes();
 
-            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            await Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTerminalLoggerTogetherWithOtherLoggers()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -980,7 +983,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public async Task PrintMessageLinks()
         {
             _terminallogger.Verbosity = LoggerVerbosity.Detailed;
@@ -993,11 +996,11 @@ namespace Microsoft.Build.UnitTests
                 _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("this message has no link because it only has a keyword", MessageImportance.High, keyword: "keyword"));
             });
 
-            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            await Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public async Task PrintWarningLinks()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
@@ -1008,10 +1011,10 @@ namespace Microsoft.Build.UnitTests
                 _centralNodeEventSource.InvokeWarningRaised(MakeWarningEventArgs("this warning has no link because it has no link or keyword"));
             });
 
-            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            await Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public async Task PrintErrorLinks()
         {
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
@@ -1022,10 +1025,10 @@ namespace Microsoft.Build.UnitTests
                 _centralNodeEventSource.InvokeErrorRaised(MakeErrorEventArgs("this error has no link because it has no link or keyword"));
             });
 
-            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            await Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public async Task ProjectFinishedReportsRuntimeIdentifier()
         {
             // this project will report a RID and so will show a RID in the build output
@@ -1034,10 +1037,10 @@ namespace Microsoft.Build.UnitTests
             {
                 _centralNodeEventSource.InvokeMessageRaised(buildOutputEvent);
             });
-            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            await Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public async Task ProjectFinishedReportsTargetFrameworkAndRuntimeIdentifier()
         {
             // this project will report a TFM and a RID and so will show a both in the output
@@ -1046,10 +1049,10 @@ namespace Microsoft.Build.UnitTests
             {
                 _centralNodeEventSource.InvokeMessageRaised(buildOutputEvent);
             });
-            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            await Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReplayBinaryLogWithFewerNodesThanOriginalBuild()
         {
             // This test validates that replaying a binary log with terminal logger
@@ -1115,9 +1118,9 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public async Task DisplayNodesRestoresStatusAfterMSBuildTaskYields_TestProject(bool runOnCentralNode)
         {
             // 1. Start Build
@@ -1165,10 +1168,10 @@ namespace Microsoft.Build.UnitTests
 
             _centralNodeEventSource.InvokeBuildFinished(MakeBuildFinishedEventArgs(true));
 
-            await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform().UseParameters(runOnCentralNode);
+            await Verifier.Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform().UseParameters(runOnCentralNode);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MetaprojProjectStartedDoesNotCrash()
         {
 #if DEBUG

@@ -14,7 +14,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Win32.SafeHandles;
-using Xunit;
 #if FEATURE_WINDOWSINTEROP
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -25,12 +24,13 @@ using Windows.Win32.Storage.FileSystem;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
+    [TestClass]
     public class TargetUpToDateChecker_Tests : IDisposable
     {
         private MockHost _mockHost;
-        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly TestContext _testOutputHelper;
 
-        public TargetUpToDateChecker_Tests(ITestOutputHelper testOutputHelper)
+        public TargetUpToDateChecker_Tests(TestContext testOutputHelper)
         {
             _mockHost = new MockHost();
             _testOutputHelper = testOutputHelper;
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             GC.Collect();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyItemSpecInTargetInputs()
         {
             MockLogger ml = new MockLogger();
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             bool success = p.Build(new string[] { "Build" }, new ILogger[] { ml });
 
-            Assert.True(success);
+            Assert.IsTrue(success);
 
             // It should have actually skipped the "Build" target since there were no inputs.
             ml.AssertLogDoesntContain("Running Build target");
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// https://github.com/dotnet/msbuild/issues/10497
         /// .NET Framework Path.Combine should have exception handling for invalid path characters
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidPathInTargetOutPuts()
         {
             MockLogger ml = new MockLogger();
@@ -100,7 +100,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify missing output metadata does not cause errors.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyItemSpecInTargetOutputs()
         {
             MockLogger ml = new MockLogger();
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             bool success = p.Build("Build", new ILogger[] { ml });
 
-            Assert.True(success);
+            Assert.IsTrue(success);
 
             // It should not have skipped the "Build" target since some output metadata was missing
             ml.AssertLogContains("Running Build target");
@@ -150,7 +150,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             success = p.Build("Build", new ILogger[] { ml });
 
-            Assert.True(success);
+            Assert.IsTrue(success);
 
             // It should have actually skipped the "Build" target since some output metadata was missing
             ml.AssertLogDoesntContain("Running Build target");
@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If Items = [a.cs;b.cs], and only b.cs is out of date w/r/t its
         /// correlated output b.dll, then we should only build "b" incrementally.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetaInputAndInputItemThatCorrelatesWithOutputItem()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -191,7 +191,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             DependencyAnalysisResult result = PerformDependencyAnalysisTestHelper(filesToAnalyze, itemsByName, inputs, outputs);
 
-            Assert.Equal(DependencyAnalysisResult.IncrementalBuild, result); // "Should only build partially."
+            Assert.AreEqual(DependencyAnalysisResult.IncrementalBuild, result); // "Should only build partially."
         }
 
         /// <summary>
@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If Items = [a.cs;b.cs;c.cs], and only b.cs is out of date w/r/t its
         /// correlated outputs (dll or xml), then we should only build "b" incrementally.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InputItemThatCorrelatesWithMultipleTransformOutputItems()
         {
             ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
@@ -234,7 +234,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             DependencyAnalysisResult result = PerformDependencyAnalysisTestHelper(filesToAnalyze, itemsByName, inputs, outputs);
 
-            Assert.Equal(DependencyAnalysisResult.IncrementalBuild, result); // "Should only build partially."
+            Assert.AreEqual(DependencyAnalysisResult.IncrementalBuild, result); // "Should only build partially."
         }
 
         /// <summary>
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// If Items = [a.cs;b.cs;c.cs], and only b.cs is out of date w/r/t its
         /// correlated outputs (dll or xml), then we should only build "b" incrementally.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultiInputItemsThatCorrelatesWithMultipleTransformOutputItems()
         {
             Console.WriteLine("MultiInputItemsThatCorrelatesWithMultipleTransformOutputItems");
@@ -291,15 +291,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Console.WriteLine("Changed: {0}:{1}", itemInstance.ItemType, itemInstance.EvaluatedInclude);
             }
 
-            Assert.Equal(DependencyAnalysisResult.IncrementalBuild, result); // "Should only build partially."
+            Assert.AreEqual(DependencyAnalysisResult.IncrementalBuild, result); // "Should only build partially."
 
             // Even though they were all up to date, we still expect to see an empty marker
             // so that lookups can correctly *not* find items of that type
-            Assert.True(changedTargetInputs.ItemTypes.Contains("MoreItems"));
-            Assert.Empty(changedTargetInputs["MoreItems"]);
+            Assert.IsTrue(changedTargetInputs.ItemTypes.Contains("MoreItems"));
+            Assert.IsEmpty(changedTargetInputs["MoreItems"]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InputItemsTransformedToDifferentNumberOfOutputsFewer()
         {
             Console.WriteLine("InputItemsTransformedToDifferentNumberOfOutputsFewer");
@@ -323,12 +323,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using ProjectFromString projectFromString = new(projectText.Replace("`", "\""));
             Project p = projectFromString.Project;
 
-            Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
+            Assert.IsTrue(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
             logger.AssertLogContains("SomeMetaThing");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InputItemsTransformedToDifferentNumberOfOutputsFewer1()
         {
             Console.WriteLine("InputItemsTransformedToDifferentNumberOfOutputsFewer1");
@@ -352,12 +352,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using ProjectFromString projectFromString = new(projectText.Replace("`", "\""));
             Project p = projectFromString.Project;
 
-            Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
+            Assert.IsTrue(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
             logger.AssertLogContains("SomeMetaThing");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InputItemsTransformedToDifferentNumberOfOutputsMore()
         {
             Console.WriteLine("InputItemsTransformedToDifferentNumberOfOutputsMore");
@@ -381,13 +381,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using ProjectFromString projectFromString = new(projectText.Replace("`", "\""));
             Project p = projectFromString.Project;
 
-            Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
+            Assert.IsTrue(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
             logger.AssertLogContains("1;2;3;4;5;6;7;8;9");
             logger.AssertLogContains("a;b;c;d;e;f;g");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InputItemsTransformedToDifferentNumberOfOutputsMore1()
         {
             Console.WriteLine("InputItemsTransformedToDifferentNumberOfOutputsMore1");
@@ -411,13 +411,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using ProjectFromString projectFromString = new(projectText.Replace("`", "\""));
             Project p = projectFromString.Project;
 
-            Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
+            Assert.IsTrue(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
             logger.AssertLogContains("1;2;3;4;5;6;7;8;9");
             logger.AssertLogContains("a;b;c;d;e;f;g");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InputItemsTransformedToDifferentNumberOfOutputsTwoWays()
         {
             Console.WriteLine("InputItemsTransformedToDifferentNumberOfOutputsTwoWays");
@@ -446,7 +446,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             using ProjectFromString projectFromString = new(projectText.Replace("`", "\""));
             Project p = projectFromString.Project;
 
-            Assert.True(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
+            Assert.IsTrue(p.Build(new string[] { "Build" }, new ILogger[] { logger }));
 
             logger.AssertLogContains("foo.goo");
             logger.AssertLogContains("foo1.goo");
@@ -460,7 +460,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Ensure that items not involved in the incremental build are explicitly empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultiInputItemsThatCorrelatesWithMultipleTransformOutputItems2()
         {
             Console.WriteLine("MultiInputItemsThatCorrelatesWithMultipleTransformOutputItems2");
@@ -637,7 +637,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: up to date
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestIsAnyOutOfDate1()
         {
             IsAnyOutOfDateTestHelper(
@@ -651,7 +651,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: first input out of date wrt second output
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestIsAnyOutOfDate2()
         {
             IsAnyOutOfDateTestHelper(
@@ -665,7 +665,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: second input out of date wrt first output
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestIsAnyOutOfDate3()
         {
             IsAnyOutOfDateTestHelper(
@@ -679,7 +679,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: inputs and outputs have same dates
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestIsAnyOutOfDate4()
         {
             IsAnyOutOfDateTestHelper(
@@ -693,7 +693,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: first input missing
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestIsAnyOutOfDate5()
         {
             IsAnyOutOfDateTestHelper(
@@ -708,7 +708,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: second input missing
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestIsAnyOutOfDate6()
         {
             IsAnyOutOfDateTestHelper(
@@ -722,7 +722,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: second output missing
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestIsAnyOutOfDate7()
         {
             IsAnyOutOfDateTestHelper(
@@ -736,7 +736,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: first output missing
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestIsAnyOutOfDate8()
         {
             IsAnyOutOfDateTestHelper(
@@ -750,7 +750,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: first input and first output missing
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestIsAnyOutOfDate9()
         {
             IsAnyOutOfDateTestHelper(
@@ -764,7 +764,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: one input, two outputs, input out of date
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestIsAnyOutOfDate10()
         {
             IsAnyOutOfDateTestHelper(
@@ -782,7 +782,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: one input, two outputs, input up to date
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestIsAnyOutOfDate11()
         {
             IsAnyOutOfDateTestHelper(
@@ -800,7 +800,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: two inputs, one output, inputs up to date
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestIsAnyOutOfDate12()
         {
             IsAnyOutOfDateTestHelper(
@@ -818,7 +818,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test comparison of inputs/outputs: two inputs, one output, second input out of date
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestIsAnyOutOfDate13()
         {
             IsAnyOutOfDateTestHelper(
@@ -933,7 +933,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
 
                 DependencyAnalysisLogDetail detail;
-                Assert.Equal(expectedAnyOutOfDate, TargetUpToDateChecker.IsAnyOutOfDate(out detail, Directory.GetCurrentDirectory(), inputs, outputs));
+                Assert.AreEqual(expectedAnyOutOfDate, TargetUpToDateChecker.IsAnyOutOfDate(out detail, Directory.GetCurrentDirectory(), inputs, outputs));
             }
             finally
             {
@@ -963,7 +963,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private static readonly DateTime Middle = new DateTime(2001, 1, 1);
         private static readonly DateTime New = new DateTime(2002, 1, 1);
 
-        [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
+        [MSBuildTestMethod]
+        [Ignore("Creating a symlink on Windows requires elevation.")]
         [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
         [SupportedOSPlatform("windows6.1")]
         public void NewSymlinkOldDestinationIsUpToDate()
@@ -974,7 +975,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 expectedOutOfDate: false);
         }
 
-        [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
+        [MSBuildTestMethod]
+        [Ignore("Creating a symlink on Windows requires elevation.")]
         [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
         [SupportedOSPlatform("windows6.1")]
         public void OldSymlinkOldDestinationIsUpToDate()
@@ -985,7 +987,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 expectedOutOfDate: false);
         }
 
-        [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
+        [MSBuildTestMethod]
+        [Ignore("Creating a symlink on Windows requires elevation.")]
         [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
         [SupportedOSPlatform("windows6.1")]
         public void OldSymlinkNewDestinationIsNotUpToDate()
@@ -996,7 +999,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 expectedOutOfDate: true);
         }
 
-        [Fact(Skip = "Creating a symlink on Windows requires elevation.")]
+        [MSBuildTestMethod]
+        [Ignore("Creating a symlink on Windows requires elevation.")]
         [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
         [SupportedOSPlatform("windows6.1")]
         public void NewSymlinkNewDestinationIsNotUpToDate()
@@ -1095,7 +1099,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 
                 DependencyAnalysisLogDetail detail;
-                Assert.Equal(expectedOutOfDate,
+                Assert.AreEqual(expectedOutOfDate,
                     TargetUpToDateChecker.IsAnyOutOfDate(out detail, Directory.GetCurrentDirectory(), inputs, outputs));
             }
             finally

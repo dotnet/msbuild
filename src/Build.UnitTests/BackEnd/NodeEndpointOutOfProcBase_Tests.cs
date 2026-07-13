@@ -6,7 +6,6 @@
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Internal;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
@@ -16,11 +15,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// architecture bit (e.g. a .NET Framework MSBuild) connect to an SDK TaskHost node running
     /// on x64 or arm64.
     /// </summary>
+    [TestClass]
     public sealed class NodeEndpointOutOfProcBase_Tests
     {
         private const HandshakeOptions BaseNet = HandshakeOptions.TaskHost | HandshakeOptions.NET;
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NoArchBitWorkerNode_X64TaskHost_IsTolerated()
         {
             NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
@@ -28,7 +28,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 receivedOptions: (int)BaseNet).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NoArchBitWorkerNode_Arm64TaskHost_IsTolerated()
         {
             NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
@@ -36,7 +36,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 receivedOptions: (int)BaseNet).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void X64WorkerNode_X64TaskHost_NotConsideredMismatch()
         {
             // Equal handshakes never hit IsAllowedBitnessMismatch in production; verify it
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 receivedOptions: (int)(BaseNet | HandshakeOptions.X64)).ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void X64WorkerNode_Arm64TaskHost_NotTolerated()
         {
             // True architecture mismatch (worker node sent X64, TaskHost node expects Arm64) is rejected.
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 receivedOptions: (int)(BaseNet | HandshakeOptions.X64)).ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Arm64WorkerNode_X64TaskHost_NotTolerated()
         {
             NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 receivedOptions: (int)(BaseNet | HandshakeOptions.Arm64)).ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NoArchBitWorkerNode_NoArchBitTaskHost_NotTolerated()
         {
             // The tolerance is scoped to x64/arm64 TaskHost nodes; an x86-equivalent (no arch bit)

@@ -1,33 +1,33 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Execution;
 
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class EndToEndCondition_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public EndToEndCondition_Tests(ITestOutputHelper output)
+        public EndToEndCondition_Tests(TestContext output)
         {
             _output = output;
         }
 
-        [Theory]
-        [InlineData("'$(MSBuildToolsVersion)' == 'Current'")] // shim doesn't apply to string-equal
-        [InlineData("'$(MSBuildToolsVersion)' &gt;= '15.0'")]
-        [InlineData("'$(MSBuildToolsVersion)' &gt;= '14.0.0.0'")]
-        [InlineData("'$(MSBuildToolsVersion)' &gt; '15.0'")]
-        [InlineData("'15.0' &lt; '$(MSBuildToolsVersion)'")]
-        [InlineData("'14.0.0.0' &lt; '$(MSBuildToolsVersion)'")]
-        [InlineData("'15.0' &lt;= '$(MSBuildToolsVersion)'")]
-        [InlineData("'$(MSBuildToolsVersion)' == '$(VisualStudioVersion)'")]
+        [MSBuildTestMethod]
+        [DataRow("'$(MSBuildToolsVersion)' == 'Current'")] // shim doesn't apply to string-equal
+        [DataRow("'$(MSBuildToolsVersion)' &gt;= '15.0'")]
+        [DataRow("'$(MSBuildToolsVersion)' &gt;= '14.0.0.0'")]
+        [DataRow("'$(MSBuildToolsVersion)' &gt; '15.0'")]
+        [DataRow("'15.0' &lt; '$(MSBuildToolsVersion)'")]
+        [DataRow("'14.0.0.0' &lt; '$(MSBuildToolsVersion)'")]
+        [DataRow("'15.0' &lt;= '$(MSBuildToolsVersion)'")]
+        [DataRow("'$(MSBuildToolsVersion)' == '$(VisualStudioVersion)'")]
         public void TrueComparisonsInvolvingMSBuildToolsVersion(string condition)
         {
             MockLogger logger = new MockLogger(_output, profileEvaluation: false, printEventsToStdout: false);
@@ -44,13 +44,13 @@ namespace Microsoft.Build.UnitTests
             result.OverallResult.ShouldBe(BuildResultCode.Success);
         }
 
-        [Theory]
-        [InlineData(" '$(MSBuildToolsVersion)' == '' OR '$(MSBuildToolsVersion)' &lt; '4.0' ")] // WiX check
-        [InlineData("$(MSBuildToolsVersion) &gt; 20")]
-        [InlineData("'$(MSBuildToolsVersion)' == ''")]
-        [InlineData("'$(MSBuildToolsVersion)' == 'Incorrect'")]
-        [InlineData("'14.3' &gt; '$(MSBuildToolsVersion)'")]
-        [InlineData("'Current' == '$(VisualStudioVersion)'")] // comparing the string representation of MSBuildToolsVersion directly doesn't match
+        [MSBuildTestMethod]
+        [DataRow(" '$(MSBuildToolsVersion)' == '' OR '$(MSBuildToolsVersion)' &lt; '4.0' ")] // WiX check
+        [DataRow("$(MSBuildToolsVersion) &gt; 20")]
+        [DataRow("'$(MSBuildToolsVersion)' == ''")]
+        [DataRow("'$(MSBuildToolsVersion)' == 'Incorrect'")]
+        [DataRow("'14.3' &gt; '$(MSBuildToolsVersion)'")]
+        [DataRow("'Current' == '$(VisualStudioVersion)'")] // comparing the string representation of MSBuildToolsVersion directly doesn't match
         public void FalseComparisonsInvolvingMSBuildToolsVersion(string condition)
         {
             MockLogger logger = new MockLogger(_output, profileEvaluation: false, printEventsToStdout: false);

@@ -12,7 +12,6 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
-using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
@@ -23,6 +22,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// Each packet is split up into a region, the region contains the tests for
     /// a given packet type.
     /// </summary>
+    [TestClass]
     public class NodePackets_Tests
     {
         #region LogMessagePacket Tests
@@ -30,10 +30,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify a null build event throws an exception
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LogMessageConstructorNullBuildEvent()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.ThrowsExactly<InternalErrorException>(() =>
             {
                 LogMessagePacket packet = new LogMessagePacket(null);
             });
@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify when creating a LogMessagePacket
         /// that the correct Event Type is set.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyEventType()
         {
             BuildFinishedEventArgs buildFinished = new BuildFinishedEventArgs("Message", "Keyword", true);
@@ -209,7 +209,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.ColumnNumber = 50;
 
             // normalize line endings as we can't rely on the line endings of NodePackets_Tests.cs
-            Assert.Equal(@"Task Parameter:
+            Assert.AreEqual(@"Task Parameter:
     ItemName=
         ItemSpec1
         ItemSpec1
@@ -246,7 +246,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests serialization of LogMessagePacket with each kind of event type.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTranslation()
         {
             // need to touch the type so that the static constructor runs
@@ -376,9 +376,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private static void VerifyLoggingPacket(BuildEventArgs buildEvent, LoggingEventType logEventType)
         {
             LogMessagePacket packet = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, buildEvent));
-            Assert.Equal(logEventType, packet.EventType);
-            Assert.Equal(NodePacketType.LogMessage, packet.Type);
-            Assert.True(Object.ReferenceEquals(buildEvent, packet.NodeBuildEvent.Value.Value)); // "Expected buildEvent to have the same object reference as packet.BuildEvent"
+            Assert.AreEqual(logEventType, packet.EventType);
+            Assert.AreEqual(NodePacketType.LogMessage, packet.Type);
+            Assert.IsTrue(Object.ReferenceEquals(buildEvent, packet.NodeBuildEvent.Value.Value)); // "Expected buildEvent to have the same object reference as packet.BuildEvent"
         }
 
         #endregion

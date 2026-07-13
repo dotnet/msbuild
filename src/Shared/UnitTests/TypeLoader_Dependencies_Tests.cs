@@ -7,12 +7,12 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class TypeLoader_Dependencies_Tests
     {
         private static readonly string ProjectFileFolder = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, "TaskWithDependency");
@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests
         private const string TaskDllFileName = "TaskWithDependency.dll";
         private const string DependencyDllFileName = "Dependency.dll";
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LoadAssemblyAndDependency_InsideProjectFolder()
         {
             using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))
@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LoadAssemblyAndDependency_OutsideProjectFolder()
         {
             using (var dir = new FileUtilities.TempWorkingDirectory(ProjectFileFolder))

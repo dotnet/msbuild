@@ -11,8 +11,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
 using Microsoft.Build.UnitTests;
-using Xunit;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
+using Shouldly;
 
 #nullable disable
 
@@ -21,6 +21,7 @@ namespace Microsoft.Build.Engine.UnitTests
     /// <summary>
     /// Integration tests that run a build with the profiler turned on and validates the profiler report
     /// </summary>
+    [TestClass]
     public class EvaluationProfiler_Tests : IDisposable
     {
         private readonly BuildManager _buildManager;
@@ -51,7 +52,7 @@ namespace Microsoft.Build.Engine.UnitTests
     </Target>
 </Project>";
         /// <nodoc/>
-        public EvaluationProfiler_Tests(ITestOutputHelper output)
+        public EvaluationProfiler_Tests(TestContext output)
         {
             // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
             BuildManager.DefaultBuildManager.Dispose();
@@ -78,22 +79,22 @@ namespace Microsoft.Build.Engine.UnitTests
         /// <summary>
         /// Verifies that a given element name shows up in a profiled MSBuild project
         /// </summary>
-        [InlineData("Target", "<Target Name='test'/>")]
-        [InlineData("Message",
+        [DataRow("Target", "<Target Name='test'/>")]
+        [DataRow("Message",
 @"<Target Name='echo'>
     <Message text='echo!'/>
 </Target>")]
-        [InlineData("appname",
+        [DataRow("appname",
 @"<Target Name='test'/>
 <PropertyGroup>
     <appname>Hello</appname>
 </PropertyGroup>")]
-        [InlineData("CSFile",
+        [DataRow("CSFile",
 @"<Target Name='test'/>
 <ItemGroup>
     <CSFile Include='file.cs'/>
 </ItemGroup>")]
-        [Theory]
+        [MSBuildTestMethod]
         public void VerifySimpleProfiledData(string elementName, string body)
         {
             string contents = $@"
@@ -104,28 +105,28 @@ namespace Microsoft.Build.Engine.UnitTests
             var result = BuildAndGetProfilerResult(contents);
             var profiledElements = result.ProfiledLocations.Keys.ToList();
 
-            Assert.Contains(profiledElements, location => location.ElementName == elementName);
+            profiledElements.ShouldContain(location => location.ElementName == elementName);
         }
 
         /// <summary>
         /// Verifies that a given element name shows up in a profiled MSBuild project
         /// </summary>
-        [InlineData("Target", "<Target Name='test'/>")]
-        [InlineData("Message",
+        [DataRow("Target", "<Target Name='test'/>")]
+        [DataRow("Message",
             @"<Target Name='echo'>
     <Message text='echo!'/>
 </Target>")]
-        [InlineData("appname",
+        [DataRow("appname",
             @"<Target Name='test'/>
 <PropertyGroup>
     <appname>Hello</appname>
 </PropertyGroup>")]
-        [InlineData("CSFile",
+        [DataRow("CSFile",
             @"<Target Name='test'/>
 <ItemGroup>
     <CSFile Include='file.cs'/>
 </ItemGroup>")]
-        [Theory]
+        [MSBuildTestMethod]
         public void VerifySimpleProfiledDataWithoutProjectLoadSetting(string elementName, string body)
         {
             string contents = $@"
@@ -136,10 +137,10 @@ namespace Microsoft.Build.Engine.UnitTests
             var result = BuildAndGetProfilerResult(contents, false);
             var profiledElements = result.ProfiledLocations.Keys.ToList();
 
-            Assert.Contains(profiledElements, location => location.ElementName == elementName);
+            profiledElements.ShouldContain(location => location.ElementName == elementName);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyProfiledData()
         {
             var result = BuildAndGetProfilerResult(SpecData);
@@ -147,32 +148,32 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // Initial properties (pass 0)
             // There are no XML elements representing initial properties, so just checking the pass is triggered
-            Assert.Single(profiledElements, location => location.EvaluationPass == EvaluationPass.InitialProperties);
+            Assert.ContainsSingle(profiledElements.Where(location => location.EvaluationPass == EvaluationPass.InitialProperties));
 
             // Properties (pass 1)
-            Assert.Single(profiledElements, location => location.ElementName == "PropertyGroup");
-            Assert.Single(profiledElements, location => location.ElementName == "appname");
+            Assert.ContainsSingle(profiledElements.Where(location => location.ElementName == "PropertyGroup"));
+            Assert.ContainsSingle(profiledElements.Where(location => location.ElementName == "appname"));
 
             // Item definition group (pass 2)
-            Assert.Single(profiledElements, location => location.ElementName == "ItemDefinitionGroup");
-            Assert.Single(profiledElements, location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.ItemDefinitionGroups);
+            Assert.ContainsSingle(profiledElements.Where(location => location.ElementName == "ItemDefinitionGroup"));
+            Assert.ContainsSingle(profiledElements.Where(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.ItemDefinitionGroups));
 
             // Item groups (pass 3 and 3.1)
-            Assert.Single(profiledElements, location => location.ElementName == "ItemGroup");
-            Assert.Equal(2, profiledElements.Count(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.Items));
-            Assert.Single(profiledElements, location => location.ElementName == "Condition" & location.EvaluationPass == EvaluationPass.Items);
-            Assert.Equal(2, profiledElements.Count(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.LazyItems));
+            Assert.ContainsSingle(profiledElements.Where(location => location.ElementName == "ItemGroup"));
+            Assert.AreEqual(2, profiledElements.Count(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.Items));
+            Assert.ContainsSingle(profiledElements.Where(location => location.ElementName == "Condition" & location.EvaluationPass == EvaluationPass.Items));
+            Assert.AreEqual(2, profiledElements.Count(location => location.ElementName == "CSFile" & location.EvaluationPass == EvaluationPass.LazyItems));
 
             // Using tasks (pass 4)
             // The using element itself is evaluated as part of pass 0, so just checking the overall pass is triggered by the corresponding element
-            Assert.Single(profiledElements, location => location.EvaluationPass == EvaluationPass.UsingTasks);
+            Assert.ContainsSingle(profiledElements.Where(location => location.EvaluationPass == EvaluationPass.UsingTasks));
 
             // Targets (pass 5)
-            Assert.Equal(2, profiledElements.Count(location => location.ElementName == "Message"));
-            Assert.Single(profiledElements, location => location.ElementName == "Target");
+            Assert.AreEqual(2, profiledElements.Count(location => location.ElementName == "Message"));
+            Assert.ContainsSingle(profiledElements.Where(location => location.ElementName == "Target"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyProfiledGlobData()
         {
             string contents = @"
@@ -190,19 +191,19 @@ namespace Microsoft.Build.Engine.UnitTests
             var profiledElements = result.ProfiledLocations.Keys.ToList();
 
             // Item groups (pass 3 and 3.1)
-            Assert.Equal(2, profiledElements.Count(location => location.ElementName == "TestGlob" & location.EvaluationPass == EvaluationPass.Items));
-            Assert.Equal(2, profiledElements.Count(location => location.ElementName == "TestGlob" & location.EvaluationPass == EvaluationPass.LazyItems));
+            Assert.AreEqual(2, profiledElements.Count(location => location.ElementName == "TestGlob" & location.EvaluationPass == EvaluationPass.Items));
+            Assert.AreEqual(2, profiledElements.Count(location => location.ElementName == "TestGlob" & location.EvaluationPass == EvaluationPass.LazyItems));
 
             // There should be one aggregated entry representing the total glob time
-            Assert.Single(profiledElements, location => location.EvaluationPass == EvaluationPass.TotalGlobbing);
+            Assert.ContainsSingle(profiledElements.Where(location => location.EvaluationPass == EvaluationPass.TotalGlobbing));
             var totalGlob = profiledElements.Find(evaluationLocation =>
                 evaluationLocation.EvaluationPass == EvaluationPass.TotalGlobbing);
             // And it should aggregate the result of the 2 glob locations
             var totalGlobLocation = result.ProfiledLocations[totalGlob];
-            Assert.Equal(2, totalGlobLocation.NumberOfHits);
+            Assert.AreEqual(2, totalGlobLocation.NumberOfHits);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyParentIdData()
         {
             string contents = @"
@@ -219,30 +220,30 @@ namespace Microsoft.Build.Engine.UnitTests
 
             // The total evaluation should be the parent of all other passes (but total globbing, which is an aggregate item)
             var totalEvaluation = profiledElements.Find(e => e.IsEvaluationPass && e.EvaluationPass == EvaluationPass.TotalEvaluation);
-            Assert.True(profiledElements.Where(e => e.IsEvaluationPass && e.EvaluationPass != EvaluationPass.TotalGlobbing && !e.Equals(totalEvaluation))
+            Assert.IsTrue(profiledElements.Where(e => e.IsEvaluationPass && e.EvaluationPass != EvaluationPass.TotalGlobbing && !e.Equals(totalEvaluation))
                 .All(e => e.ParentId == totalEvaluation.Id));
 
             // Check the test item has the right parent
             var itemPass = profiledElements.Find(e => e.IsEvaluationPass && e.EvaluationPass == EvaluationPass.Items);
             var itemGroup = profiledElements.Find(e => e.ElementName == "ItemGroup");
             var testItem = profiledElements.Find(e => e.ElementName == "Test" && e.EvaluationPass == EvaluationPass.Items);
-            Assert.Equal(itemPass.Id, itemGroup.ParentId);
-            Assert.Equal(itemGroup.Id, testItem.ParentId);
+            Assert.AreEqual(itemPass.Id, itemGroup.ParentId);
+            Assert.AreEqual(itemGroup.Id, testItem.ParentId);
 
             // Check the lazy test item has the right parent
             var lazyItemPass = profiledElements.Find(e => e.IsEvaluationPass && e.EvaluationPass == EvaluationPass.LazyItems);
             var lazyTestItem = profiledElements.Find(e => e.ElementName == "Test" && e.EvaluationPass == EvaluationPass.LazyItems);
-            Assert.Equal(lazyItemPass.Id, lazyTestItem.ParentId);
+            Assert.AreEqual(lazyItemPass.Id, lazyTestItem.ParentId);
 
             // Check the target item has the right parent
             var targetPass = profiledElements.Find(e => e.IsEvaluationPass && e.EvaluationPass == EvaluationPass.Targets);
             var target = profiledElements.Find(e => e.ElementName == "Target");
             var messageTarget = profiledElements.Find(e => e.ElementName == "Message");
-            Assert.Equal(targetPass.Id, target.ParentId);
-            Assert.Equal(target.Id, messageTarget.ParentId);
+            Assert.AreEqual(targetPass.Id, target.ParentId);
+            Assert.AreEqual(target.Id, messageTarget.ParentId);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyIdsSanity()
         {
             var result = BuildAndGetProfilerResult(SpecData);
@@ -251,10 +252,10 @@ namespace Microsoft.Build.Engine.UnitTests
             // All ids must be unique
             var allIds = profiledElements.Select(e => e.Id).ToList();
             var allUniqueIds = allIds.ToImmutableHashSet();
-            Assert.Equal(allIds.Count, allUniqueIds.Count);
+            Assert.AreEqual(allIds.Count, allUniqueIds.Count);
 
             // Every element with a parent id must point to a valid item
-            Assert.True(profiledElements.All(e => e.ParentId == null || allUniqueIds.Contains(e.ParentId.Value)));
+            Assert.IsTrue(profiledElements.All(e => e.ParentId == null || allUniqueIds.Contains(e.ParentId.Value)));
         }
 
         /// <summary>
@@ -288,7 +289,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 File.Delete(project.FullPath);
 
-                Assert.Equal(BuildResultCode.Success, result.OverallResult);
+                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
             }
 
             return profilerLogger.GetAggregatedResult(pruneSmallItems: false);

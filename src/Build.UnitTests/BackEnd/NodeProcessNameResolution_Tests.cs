@@ -7,7 +7,6 @@ using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 using Constants = Microsoft.Build.Framework.Constants;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
@@ -16,6 +15,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// Tests for <see cref="NodeProviderOutOfProcBase.ResolveProcessNamesToSearch"/>, the resolver
     /// changed by the fix for https://github.com/dotnet/msbuild/issues/13508.
     /// </summary>
+    [TestClass]
     public class NodeProcessNameResolution_Tests
     {
         private const string AppHostName = "MSBuild";  // Constants.MSBuildAppName
@@ -25,7 +25,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             names.Any(n => string.Equals(n, expected, StringComparison.OrdinalIgnoreCase))
                 .ShouldBeTrue($"Expected names [{string.Join(", ", names)}] to contain '{expected}' (case-insensitive).");
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReuseBranch_AppHostPath_ReturnsAppHostName()
         {
             string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearch(
@@ -35,7 +35,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             names.ShouldBe([AppHostName]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReuseBranch_DllPath_ReturnsHostName()
         {
             // For a managed-assembly path the launcher uses the current host (e.g. "dotnet" on .NET Core).
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         // Regression for https://github.com/dotnet/msbuild/issues/13508.
-        [Fact]
+        [MSBuildTestMethod]
         public void ShutdownBranch_NoConfiguredLocation_AlwaysIncludesAppHostName()
         {
             string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearch(
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             ShouldContainIgnoreCase(names, AppHostName);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ShutdownBranch_ConfiguredAppHostLocation_IncludesBothNames()
         {
             string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearch(
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
 #if NET
-        [Fact]
+        [MSBuildTestMethod]
         public void ShutdownBranch_NetCore_ConfiguredDllLocation_IncludesAppHostFallback()
         {
             string[] names = NodeProviderOutOfProcBase.ResolveProcessNamesToSearch(

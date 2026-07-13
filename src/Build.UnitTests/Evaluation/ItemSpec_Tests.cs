@@ -11,7 +11,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
-using Xunit;
 using ProjectInstanceExpander =
     Microsoft.Build.Evaluation.Expander<Microsoft.Build.Execution.ProjectPropertyInstance, Microsoft.Build.Execution.ProjectItemInstance>;
 using ProjectInstanceItemSpec =
@@ -22,23 +21,24 @@ using ProjectInstanceItemSpec =
 
 namespace Microsoft.Build.UnitTests.OM.Evaluation
 {
+    [TestClass]
     public class ItemSpec_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void EachFragmentTypeShouldContributeToItemSpecGlob()
         {
             var itemSpec = CreateItemSpecFrom("a;b*;c*;@(foo)", CreateExpander(new Dictionary<string, string[]> { { "foo", new[] { "d", "e" } } }));
 
             var itemSpecGlob = itemSpec.ToMSBuildGlob();
 
-            Assert.True(itemSpecGlob.IsMatch("a"));
-            Assert.True(itemSpecGlob.IsMatch("bar"));
-            Assert.True(itemSpecGlob.IsMatch("car"));
-            Assert.True(itemSpecGlob.IsMatch("d"));
-            Assert.True(itemSpecGlob.IsMatch("e"));
+            Assert.IsTrue(itemSpecGlob.IsMatch("a"));
+            Assert.IsTrue(itemSpecGlob.IsMatch("bar"));
+            Assert.IsTrue(itemSpecGlob.IsMatch("car"));
+            Assert.IsTrue(itemSpecGlob.IsMatch("d"));
+            Assert.IsTrue(itemSpecGlob.IsMatch("e"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AbsolutePathsShouldMatch()
         {
             var absoluteRootPath = NativeMethodsShared.IsWindows
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             itemSpecFromAbsolute.ToMSBuildGlob().IsMatch(absoluteSpec).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FragmentGlobsWorkAfterStateIsPartiallyInitializedByOtherOperations()
         {
             var itemSpec = CreateItemSpecFrom("a;b*;c*;@(foo)", CreateExpander(new Dictionary<string, string[]> { { "foo", new[] { "d", "e" } } }));
@@ -67,15 +67,15 @@ namespace Microsoft.Build.UnitTests.OM.Evaluation
             // cause partial Lazy state to initialize in the ItemExpressionFragment
             itemSpec.FragmentsMatchingItem("e", out matches);
 
-            Assert.Equal(1, matches);
+            Assert.AreEqual(1, matches);
 
             var itemSpecGlob = itemSpec.ToMSBuildGlob();
 
-            Assert.True(itemSpecGlob.IsMatch("a"));
-            Assert.True(itemSpecGlob.IsMatch("bar"));
-            Assert.True(itemSpecGlob.IsMatch("car"));
-            Assert.True(itemSpecGlob.IsMatch("d"));
-            Assert.True(itemSpecGlob.IsMatch("e"));
+            Assert.IsTrue(itemSpecGlob.IsMatch("a"));
+            Assert.IsTrue(itemSpecGlob.IsMatch("bar"));
+            Assert.IsTrue(itemSpecGlob.IsMatch("car"));
+            Assert.IsTrue(itemSpecGlob.IsMatch("d"));
+            Assert.IsTrue(itemSpecGlob.IsMatch("e"));
         }
 
         private ProjectInstanceItemSpec CreateItemSpecFrom(string itemSpec, ProjectInstanceExpander expander, IElementLocation location = null)

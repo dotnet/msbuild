@@ -7,7 +7,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
-using Xunit;
+using System.Linq;
 
 #nullable disable
 
@@ -19,16 +19,16 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
         {
             public bool Equals(TaskRegistry x, TaskRegistry y)
             {
-                Assert.Equal(x.Toolset, y.Toolset, new ToolsetComparer());
-                Assert.Equal(x.NextRegistrationOrderId, y.NextRegistrationOrderId);
+                Assert.AreEqual(x.Toolset, y.Toolset, new ToolsetComparer());
+                Assert.AreEqual(x.NextRegistrationOrderId, y.NextRegistrationOrderId);
 
                 Helpers.AssertDictionariesEqual(
                     x.TaskRegistrations,
                     y.TaskRegistrations,
                     (xp, yp) =>
                     {
-                        Assert.Equal(xp.Key, yp.Key, TaskRegistry.RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
-                        Assert.Equal(xp.Value, yp.Value, new RegisteredTaskRecordComparer());
+                        Assert.AreEqual(xp.Key, yp.Key, TaskRegistry.RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                        Assert.IsTrue(xp.Value.SequenceEqual(yp.Value, new RegisteredTaskRecordComparer()));
                     });
 
                 return true;
@@ -44,20 +44,20 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
         {
             public bool Equals(TaskRegistry.RegisteredTaskRecord x, TaskRegistry.RegisteredTaskRecord y)
             {
-                Assert.Equal(x.TaskIdentity, y.TaskIdentity, TaskRegistry.RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
-                Assert.Equal(x.RegisteredName, y.RegisteredName);
-                Assert.Equal(x.TaskFactoryAssemblyLoadInfo, y.TaskFactoryAssemblyLoadInfo);
-                Assert.Equal(x.TaskFactoryAttributeName, y.TaskFactoryAttributeName);
-                Assert.Equal(x.ParameterGroupAndTaskBody, y.ParameterGroupAndTaskBody, new ParamterGroupAndTaskBodyComparer());
+                Assert.AreEqual(x.TaskIdentity, y.TaskIdentity, TaskRegistry.RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                Assert.AreEqual(x.RegisteredName, y.RegisteredName);
+                Assert.AreEqual(x.TaskFactoryAssemblyLoadInfo, y.TaskFactoryAssemblyLoadInfo);
+                Assert.AreEqual(x.TaskFactoryAttributeName, y.TaskFactoryAttributeName);
+                Assert.AreEqual(x.ParameterGroupAndTaskBody, y.ParameterGroupAndTaskBody, new ParamterGroupAndTaskBodyComparer());
 
                 // Assert TaskFactoryParameters equality
                 var xParams = x.TaskFactoryParameters;
                 var yParams = y.TaskFactoryParameters;
-                Assert.Equal(xParams.Runtime, yParams.Runtime);
-                Assert.Equal(xParams.Architecture, yParams.Architecture);
-                Assert.Equal(xParams.DotnetHostPath, yParams.DotnetHostPath);
-                Assert.Equal(xParams.MSBuildAssemblyPath, yParams.MSBuildAssemblyPath);
-                Assert.Equal(xParams.TaskHostFactoryExplicitlyRequested, yParams.TaskHostFactoryExplicitlyRequested);
+                Assert.AreEqual(xParams.Runtime, yParams.Runtime);
+                Assert.AreEqual(xParams.Architecture, yParams.Architecture);
+                Assert.AreEqual(xParams.DotnetHostPath, yParams.DotnetHostPath);
+                Assert.AreEqual(xParams.MSBuildAssemblyPath, yParams.MSBuildAssemblyPath);
+                Assert.AreEqual(xParams.TaskHostFactoryExplicitlyRequested, yParams.TaskHostFactoryExplicitlyRequested);
 
                 return true;
             }
@@ -74,16 +74,16 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
                 TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord x,
                 TaskRegistry.RegisteredTaskRecord.ParameterGroupAndTaskElementRecord y)
             {
-                Assert.Equal(x.InlineTaskXmlBody, y.InlineTaskXmlBody);
-                Assert.Equal(x.TaskBodyEvaluated, y.TaskBodyEvaluated);
+                Assert.AreEqual(x.InlineTaskXmlBody, y.InlineTaskXmlBody);
+                Assert.AreEqual(x.TaskBodyEvaluated, y.TaskBodyEvaluated);
 
                 Helpers.AssertDictionariesEqual(
                     x.UsingTaskParameters,
                     y.UsingTaskParameters,
                     (xp, yp) =>
                     {
-                        Assert.Equal(xp.Key, yp.Key);
-                        Assert.Equal(xp.Value, yp.Value, new TaskPropertyInfoComparer());
+                        Assert.AreEqual(xp.Key, yp.Key);
+                        Assert.AreEqual(xp.Value, yp.Value, new TaskPropertyInfoComparer());
                     });
 
                 return true;
@@ -99,10 +99,10 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
         {
             public bool Equals(TaskPropertyInfo x, TaskPropertyInfo y)
             {
-                Assert.Equal(x.Name, y.Name);
-                Assert.Equal(x.Output, y.Output);
-                Assert.Equal(x.Required, y.Required);
-                Assert.Equal(x.PropertyType.FullName, y.PropertyType.FullName);
+                Assert.AreEqual(x.Name, y.Name);
+                Assert.AreEqual(x.Output, y.Output);
+                Assert.AreEqual(x.Required, y.Required);
+                Assert.AreEqual(x.PropertyType.FullName, y.PropertyType.FullName);
 
                 return true;
             }
@@ -119,23 +119,23 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
             {
                 if (x == null || y == null)
                 {
-                    Assert.True(x == null && y == null);
+                    Assert.IsTrue(x == null && y == null);
                     return true;
                 }
 
-                Assert.Equal(x.ToolsVersion, y.ToolsVersion);
-                Assert.Equal(x.ToolsPath, y.ToolsPath);
-                Assert.Equal(x.DefaultOverrideToolsVersion, y.DefaultOverrideToolsVersion);
-                Assert.Equal(x.OverrideTasksPath, y.OverrideTasksPath);
+                Assert.AreEqual(x.ToolsVersion, y.ToolsVersion);
+                Assert.AreEqual(x.ToolsPath, y.ToolsPath);
+                Assert.AreEqual(x.DefaultOverrideToolsVersion, y.DefaultOverrideToolsVersion);
+                Assert.AreEqual(x.OverrideTasksPath, y.OverrideTasksPath);
 
                 Helpers.AssertDictionariesEqual(
                     x.Properties,
                     y.Properties,
                     (xp, yp) =>
                     {
-                        Assert.Equal(xp.Key, yp.Key);
-                        Assert.Equal(xp.Value.Name, yp.Value.Name);
-                        Assert.Equal(xp.Value.EvaluatedValue, yp.Value.EvaluatedValue);
+                        Assert.AreEqual(xp.Key, yp.Key);
+                        Assert.AreEqual(xp.Value.Name, yp.Value.Name);
+                        Assert.AreEqual(xp.Value.EvaluatedValue, yp.Value.EvaluatedValue);
                     });
 
                 return true;

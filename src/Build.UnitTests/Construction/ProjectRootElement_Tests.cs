@@ -6,7 +6,6 @@ using System;
 using System.Text;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Xunit;
 
 #nullable disable
 
@@ -15,16 +14,17 @@ namespace Microsoft.Build.UnitTests.Construction
     /// <summary>
     /// Tests for the ElementLocation class
     /// </summary>
+    [TestClass]
     public class ProjectRootElement_Tests
     {
-        [Theory]
-        [InlineData("", true)]
-        [InlineData("", false)]
-        [InlineData(@"<?xml version=""1.0"" encoding=""utf-8""?>", true)]
-        [InlineData(@"<?xml version=""1.0"" encoding=""utf-8""?>", false)]
-        [InlineData(@"<?xml version=""1.0"" encoding=""utf-8""?>
+        [MSBuildTestMethod]
+        [DataRow("", true)]
+        [DataRow("", false)]
+        [DataRow(@"<?xml version=""1.0"" encoding=""utf-8""?>", true)]
+        [DataRow(@"<?xml version=""1.0"" encoding=""utf-8""?>", false)]
+        [DataRow(@"<?xml version=""1.0"" encoding=""utf-8""?>
 ", true)]
-        [InlineData(@"<?xml version=""1.0"" encoding=""utf-8""?>
+        [DataRow(@"<?xml version=""1.0"" encoding=""utf-8""?>
 ", false)]
         public void IsEmptyXmlFileReturnsTrue(string contents, bool useByteOrderMark)
         {
@@ -32,19 +32,19 @@ namespace Microsoft.Build.UnitTests.Construction
                 ObjectModelHelpers.CreateFileInTempProjectDirectory(Guid.NewGuid().ToString("N"), contents, Encoding.UTF8) :
                 ObjectModelHelpers.CreateFileInTempProjectDirectory(Guid.NewGuid().ToString("N"), contents);
 
-            Assert.True(ProjectRootElement.IsEmptyXmlFile(path));
+            Assert.IsTrue(ProjectRootElement.IsEmptyXmlFile(path));
         }
 
-        [Theory]
-        [InlineData("<Foo/>", true)]
-        [InlineData("Foo/>", false)]
-        [InlineData(@"<?xml version=""1.0"" encoding=""utf-8""?>
+        [MSBuildTestMethod]
+        [DataRow("<Foo/>", true)]
+        [DataRow("Foo/>", false)]
+        [DataRow(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <Foo/>", true)]
-        [InlineData(@"<?xml version=""1.0"" encoding=""utf-8""?>
+        [DataRow(@"<?xml version=""1.0"" encoding=""utf-8""?>
 <Foo/>", false)]
-        [InlineData(@"<?xml version=""1.0"" encoding=""utf-8""?>
+        [DataRow(@"<?xml version=""1.0"" encoding=""utf-8""?>
 bar", true)]
-        [InlineData(@"<?xml version=""1.0"" encoding=""utf-8""?>
+        [DataRow(@"<?xml version=""1.0"" encoding=""utf-8""?>
 bar", false)]
         public void IsEmptyXmlFileReturnsFalse(string contents, bool useByteOrderMark)
         {
@@ -52,10 +52,10 @@ bar", false)]
                 ObjectModelHelpers.CreateFileInTempProjectDirectory(Guid.NewGuid().ToString("N"), contents, Encoding.UTF8) :
                 ObjectModelHelpers.CreateFileInTempProjectDirectory(Guid.NewGuid().ToString("N"), contents);
 
-            Assert.False(ProjectRootElement.IsEmptyXmlFile(path));
+            Assert.IsFalse(ProjectRootElement.IsEmptyXmlFile(path));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectLoadedPreservingCommentsAndWhiteSpaceIsNotReadOnly()
         {
             var projectContents =
@@ -76,17 +76,17 @@ bar", false)]
                 var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
                 ProjectRootElement xml = ProjectRootElement.Open(testFiles.ProjectFile);
 
-                Assert.False(xml.XmlDocument.IsReadOnly);
+                Assert.IsFalse(xml.XmlDocument.IsReadOnly);
                 var children = xml.XmlDocument.ChildNodes;
-                Assert.Single(children);
-                Assert.Equal("Project", children[0].Name);
-                Assert.Equal(2, children[0].ChildNodes.Count);
-                Assert.Equal("Initial Comment", children[0].ChildNodes[0].Value);
-                Assert.Equal("Ending Comment", children[0].ChildNodes[1].Value);
+                Assert.ContainsSingle(children);
+                Assert.AreEqual("Project", children[0].Name);
+                Assert.AreEqual(2, children[0].ChildNodes.Count);
+                Assert.AreEqual("Initial Comment", children[0].ChildNodes[0].Value);
+                Assert.AreEqual("Ending Comment", children[0].ChildNodes[1].Value);
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectLoadedStrippingCommentsAndWhiteSpaceIsReadOnly()
         {
             var projectContents =
@@ -108,13 +108,13 @@ bar", false)]
                 var testFiles = env.CreateTestProjectWithFiles(projectContents, Array.Empty<string>());
                 ProjectRootElement xml = ProjectRootElement.Open(testFiles.ProjectFile);
 
-                Assert.True(xml.XmlDocument.IsReadOnly);
+                Assert.IsTrue(xml.XmlDocument.IsReadOnly);
                 var children = xml.XmlDocument.ChildNodes;
-                Assert.Single(children);
-                Assert.Equal("Project", children[0].Name);
-                Assert.Equal(2, children[0].ChildNodes.Count);
-                Assert.Equal(string.Empty, children[0].ChildNodes[0].Value);
-                Assert.Equal(string.Empty, children[0].ChildNodes[1].Value);
+                Assert.ContainsSingle(children);
+                Assert.AreEqual("Project", children[0].Name);
+                Assert.AreEqual(2, children[0].ChildNodes.Count);
+                Assert.AreEqual(string.Empty, children[0].ChildNodes[0].Value);
+                Assert.AreEqual(string.Empty, children[0].ChildNodes[1].Value);
 
                 // We cleared at the beginning, but then we set MSBUILDLOADALLFILESASREADONLY to 1.
                 // This means that opening the project will cache s_readOnlyFlags as ReadOnlyLoadFlags.LoadAllReadOnly
@@ -124,7 +124,7 @@ bar", false)]
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateEphemeralCannotBeDirtied()
         {
             var projectRootElement = ProjectRootElement.CreateEphemeral(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
@@ -132,7 +132,7 @@ bar", false)]
 
             projectRootElement.MarkDirty("test", "test");
 
-            Assert.Equal(projectRootElement.Version, versionBeforeMarkDirty);
+            Assert.AreEqual(projectRootElement.Version, versionBeforeMarkDirty);
         }
     }
 }

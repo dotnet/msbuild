@@ -8,29 +8,29 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.BackEnd.Logging.BuildErrorTelemetryTracker;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd;
 
+[TestClass]
 public class BuildTelemetryErrorCategorization_Tests
 {
-    [Theory]
-    [InlineData("CS0103", null, nameof(ErrorCategory.Compiler))]
-    [InlineData("CS1002", "CS", nameof(ErrorCategory.Compiler))]
-    [InlineData("VBC30451", "VBC", nameof(ErrorCategory.Compiler))]
-    [InlineData("FS0039", null, nameof(ErrorCategory.Compiler))]
-    [InlineData("MSB4018", null, nameof(ErrorCategory.MSBuildGeneral))]
-    [InlineData("MSB4236", null, nameof(ErrorCategory.SDKResolvers))]
-    [InlineData("MSB3026", null, nameof(ErrorCategory.Tasks))]
-    [InlineData("NETSDK1045", null, nameof(ErrorCategory.NETSDK))]
-    [InlineData("NU1101", null, nameof(ErrorCategory.NuGet))]
-    [InlineData("BC0001", null, nameof(ErrorCategory.BuildCheck))]
-    [InlineData("CUSTOM001", null, nameof(ErrorCategory.Other))]
-    [InlineData(null, null, nameof(ErrorCategory.Other))]
-    [InlineData("", null, nameof(ErrorCategory.Other))]
+    [MSBuildTestMethod]
+    [DataRow("CS0103", null, nameof(ErrorCategory.Compiler))]
+    [DataRow("CS1002", "CS", nameof(ErrorCategory.Compiler))]
+    [DataRow("VBC30451", "VBC", nameof(ErrorCategory.Compiler))]
+    [DataRow("FS0039", null, nameof(ErrorCategory.Compiler))]
+    [DataRow("MSB4018", null, nameof(ErrorCategory.MSBuildGeneral))]
+    [DataRow("MSB4236", null, nameof(ErrorCategory.SDKResolvers))]
+    [DataRow("MSB3026", null, nameof(ErrorCategory.Tasks))]
+    [DataRow("NETSDK1045", null, nameof(ErrorCategory.NETSDK))]
+    [DataRow("NU1101", null, nameof(ErrorCategory.NuGet))]
+    [DataRow("BC0001", null, nameof(ErrorCategory.BuildCheck))]
+    [DataRow("CUSTOM001", null, nameof(ErrorCategory.Other))]
+    [DataRow(null, null, nameof(ErrorCategory.Other))]
+    [DataRow("", null, nameof(ErrorCategory.Other))]
     public void ErrorCategorizationWorksCorrectly(string errorCode, string subcategory, string expectedCategory)
     {
         // Create a LoggingService
@@ -96,7 +96,7 @@ public class BuildTelemetryErrorCategorization_Tests
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void MultipleErrorsAreCountedByCategory()
     {
         var loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -140,7 +140,7 @@ public class BuildTelemetryErrorCategorization_Tests
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PrimaryCategoryIsSetToHighestErrorCount()
     {
         var loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
@@ -177,7 +177,7 @@ public class BuildTelemetryErrorCategorization_Tests
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void SubcategoryIsUsedForCompilerErrors()
     {
         var loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);

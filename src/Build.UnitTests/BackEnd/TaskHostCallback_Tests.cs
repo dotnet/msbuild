@@ -9,7 +9,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -18,11 +17,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// These tests use BuildManager to run real builds with TaskHostFactory.
     /// For packet serialization tests, see <see cref="TaskHostCallbackPacket_Tests"/>.
     /// </summary>
+    [TestClass]
     public class TaskHostCallback_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public TaskHostCallback_Tests(ITestOutputHelper output)
+        public TaskHostCallback_Tests(TestContext output)
         {
             _output = output;
         }
@@ -32,9 +32,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// IsRunningMultipleNodes is configuration-based (MaxNodeCount > 1), not based on actual running nodes.
         /// See TaskHost.IsRunningMultipleNodes: returns _host.BuildParameters.MaxNodeCount > 1 || _disableInprocNode.
         /// </summary>
-        [Theory]
-        [InlineData(1, false)]  // MaxNodeCount=1 -> IsRunningMultipleNodes=false
-        [InlineData(4, true)]   // MaxNodeCount=4 -> IsRunningMultipleNodes=true (even with one project)
+        [MSBuildTestMethod]
+        [DataRow(1, false)]  // MaxNodeCount=1 -> IsRunningMultipleNodes=false
+        [DataRow(4, true)]   // MaxNodeCount=4 -> IsRunningMultipleNodes=true (even with one project)
         public void IsRunningMultipleNodes_WorksWithExplicitTaskHostFactory(int maxNodeCount, bool expectedResult)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -63,9 +63,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verifies IsRunningMultipleNodes callback works when unmarked task is auto-ejected to TaskHost in MT mode.
         /// </summary>
-        [Theory]
-        [InlineData(1, false)]
-        [InlineData(4, true)]
+        [MSBuildTestMethod]
+        [DataRow(1, false)]
+        [DataRow(4, true)]
         public void IsRunningMultipleNodes_WorksWhenAutoEjectedInMultiThreadedMode(int maxNodeCount, bool expectedResult)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verifies RequestCores callback works when task is explicitly run in TaskHost via TaskHostFactory.
         /// The first RequestCores call should always return at least 1 (the implicit core).
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RequestCores_WorksWithExplicitTaskHostFactory()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verifies RequestCores + ReleaseCores works end-to-end when task runs in TaskHost.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RequestAndReleaseCores_WorksWithExplicitTaskHostFactory()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verifies RequestCores callback works when task is auto-ejected to TaskHost in multithreaded mode.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RequestCores_WorksWhenAutoEjectedInMultiThreadedMode()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -218,7 +218,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// which did not include per-request properties like MSBuildRestoreSessionId. This caused
         /// NuGet static graph restore to fail for conditional ProjectReference items.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobalProperties_ForwardedToAutoEjectedTaskInMultiThreadedMode()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -273,7 +273,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// TaskHostTask sends build-level properties (BuildParameters.GlobalProperties) instead
         /// of request-level properties. This is the opt-out for the fix in #13153.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobalProperties_UseBuildLevelWhenChangeWaveDisabled()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -330,7 +330,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verifies BuildProjectFile callback works when task is explicitly run in TaskHost via TaskHostFactory.
         /// The child project should build and the task should return success.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildProjectFile_WorksWithExplicitTaskHostFactory()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -369,7 +369,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verifies BuildProjectFile forwards global properties to the child build.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildProjectFile_ForwardsGlobalProperties()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -407,7 +407,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verifies BuildProjectFile returns ITaskItem[] target outputs through the TaskHost callback.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildProjectFile_ReturnsTargetOutputs()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -454,7 +454,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verifies BuildProjectFile returns false when the child project fails.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildProjectFile_ChildFailure_ReturnsFalse()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -493,7 +493,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verifies BuildProjectFile auto-ejection works in multithreaded mode.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildProjectFile_WorksWhenAutoEjectedInMultiThreadedMode()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);

@@ -14,7 +14,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Xunit;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using LoggerMode = Microsoft.Build.BackEnd.Logging.LoggerMode;
@@ -24,9 +23,10 @@ using LoggingService = Microsoft.Build.BackEnd.Logging.LoggingService;
 
 namespace Microsoft.Build.UnitTests.Definition
 {
+    [TestClass]
     public class ToolsetState_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void OverrideTasksAreFoundInOverridePath()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -48,30 +48,30 @@ namespace Microsoft.Build.UnitTests.Definition
 
             foreach (string expectedRegisteredTask in expectedRegisteredTasks)
             {
-                Assert.True(taskRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(expectedRegisteredTask, TaskHostParameters.Empty)),
+                Assert.IsTrue(taskRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(expectedRegisteredTask, TaskHostParameters.Empty)),
                               String.Format("Expected task '{0}' registered!", expectedRegisteredTask));
             }
 
             foreach (string expectedRegisteredTask in expectedOverrideTasks)
             {
-                Assert.True(taskoverrideRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(expectedRegisteredTask, TaskHostParameters.Empty)),
+                Assert.IsTrue(taskoverrideRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(expectedRegisteredTask, TaskHostParameters.Empty)),
                               String.Format("Expected task '{0}' registered!", expectedRegisteredTask));
             }
 
             foreach (string unexpectedRegisteredTask in unexpectedRegisteredTasks)
             {
-                Assert.False(taskRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(unexpectedRegisteredTask, TaskHostParameters.Empty)),
+                Assert.IsFalse(taskRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(unexpectedRegisteredTask, TaskHostParameters.Empty)),
                               String.Format("Unexpected task '{0}' registered!", unexpectedRegisteredTask));
             }
 
             foreach (string unexpectedRegisteredTask in unexpectedOverrideRegisteredTasks)
             {
-                Assert.False(taskoverrideRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(unexpectedRegisteredTask, TaskHostParameters.Empty)),
+                Assert.IsFalse(taskoverrideRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(unexpectedRegisteredTask, TaskHostParameters.Empty)),
                               String.Format("Unexpected task '{0}' registered!", unexpectedRegisteredTask));
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OverrideTaskPathIsRelative()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -86,8 +86,8 @@ namespace Microsoft.Build.UnitTests.Definition
 
 
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
-            Assert.NotNull(taskoverrideRegistry);
-            Assert.Empty(taskoverrideRegistry.TaskRegistrations);
+            Assert.IsNotNull(taskoverrideRegistry);
+            Assert.IsEmpty(taskoverrideRegistry.TaskRegistrations);
             string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", "msbuildoverridetasks");
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTasksFileFailure", rootedPathMessage));
         }
@@ -105,12 +105,12 @@ namespace Microsoft.Build.UnitTests.Definition
             LoggingContext loggingContext = new TestLoggingContext(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
 
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
-            Assert.NotNull(taskoverrideRegistry);
-            Assert.Empty(taskoverrideRegistry.TaskRegistrations);
+            Assert.IsNotNull(taskoverrideRegistry);
+            Assert.IsEmpty(taskoverrideRegistry.TaskRegistrations);
             mockLogger.AssertLogContains("MSB4194");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OverrideTaskPathHasTooLongOfAPath()
         {
             string tooLong = "c:\\" + new string('C', 6000);
@@ -124,13 +124,13 @@ namespace Microsoft.Build.UnitTests.Definition
             LoggingContext loggingContext = new TestLoggingContext(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
 
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
-            Assert.NotNull(taskoverrideRegistry);
-            Assert.Empty(taskoverrideRegistry.TaskRegistrations);
+            Assert.IsNotNull(taskoverrideRegistry);
+            Assert.IsEmpty(taskoverrideRegistry.TaskRegistrations);
             string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", tooLong);
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTasksFileFailure", rootedPathMessage));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OverrideTaskPathIsNotFound()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -144,13 +144,13 @@ namespace Microsoft.Build.UnitTests.Definition
             LoggingContext loggingContext = new TestLoggingContext(service, new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, 4));
 
             TaskRegistry taskoverrideRegistry = (TaskRegistry)t.GetOverrideTaskRegistry(loggingContext, e.ProjectRootElementCache);
-            Assert.NotNull(taskoverrideRegistry);
-            Assert.Empty(taskoverrideRegistry.TaskRegistrations);
+            Assert.IsNotNull(taskoverrideRegistry);
+            Assert.IsEmpty(taskoverrideRegistry.TaskRegistrations);
             string rootedPathMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTaskNotRootedPath", "k:\\Thecatinthehat");
             mockLogger.AssertLogContains(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("OverrideTasksFileFailure", rootedPathMessage));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DefaultTasksAreFoundInToolsPath()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -173,17 +173,17 @@ namespace Microsoft.Build.UnitTests.Definition
 
             foreach (string expectedRegisteredTask in expectedRegisteredTasks)
             {
-                Assert.True(taskRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(expectedRegisteredTask, TaskHostParameters.Empty)),
+                Assert.IsTrue(taskRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(expectedRegisteredTask, TaskHostParameters.Empty)),
                               String.Format("Expected task '{0}' registered!", expectedRegisteredTask));
             }
             foreach (string unexpectedRegisteredTask in unexpectedRegisteredTasks)
             {
-                Assert.False(taskRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(unexpectedRegisteredTask, TaskHostParameters.Empty)),
+                Assert.IsFalse(taskRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(unexpectedRegisteredTask, TaskHostParameters.Empty)),
                               String.Format("Unexpected task '{0}' registered!", unexpectedRegisteredTask));
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WarningLoggedIfNoDefaultTasksFound()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -200,15 +200,15 @@ namespace Microsoft.Build.UnitTests.Definition
 
             string[] unexpectedRegisteredTasks = { "a1", "a2", "a3", "a4", "b1", "c1", "d1", "e1", "f1", "g1", "g2", "g3", "11", "12", "13", "21" };
 
-            Assert.Equal(1, mockLogger.WarningCount); // "Expected 1 warning logged!"
+            Assert.AreEqual(1, mockLogger.WarningCount); // "Expected 1 warning logged!"
             foreach (string unexpectedRegisteredTask in unexpectedRegisteredTasks)
             {
-                Assert.False(taskRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(unexpectedRegisteredTask, TaskHostParameters.Empty)),
+                Assert.IsFalse(taskRegistry.TaskRegistrations.ContainsKey(new TaskRegistry.RegisteredTaskIdentity(unexpectedRegisteredTask, TaskHostParameters.Empty)),
                                String.Format("Unexpected task '{0}' registered!", unexpectedRegisteredTask));
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidToolPath()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -222,14 +222,14 @@ namespace Microsoft.Build.UnitTests.Definition
             TaskRegistry taskRegistry = (TaskRegistry)t.GetTaskRegistry(loggingContext, ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
 
             Console.WriteLine(mockLogger.FullLog);
-            Assert.Equal(1, mockLogger.WarningCount); // "Expected a warning for invalid character in toolpath"
+            Assert.AreEqual(1, mockLogger.WarningCount); // "Expected a warning for invalid character in toolpath"
         }
 
         /// <summary>
         /// Make sure when we read in the tasks files off disk that they come in a sorted order so that there is a deterministic way of
         /// figuring out the order the files were read in.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyTasksFilesAreInSortedOrder()
         {
             // Note Engine's BinPath is distinct from the ToolsVersion's ToolsPath
@@ -274,20 +274,20 @@ namespace Microsoft.Build.UnitTests.Definition
             sortedTasksExpectedPaths.Sort(StringComparer.OrdinalIgnoreCase);
             sortedOverrideExpectedPaths.Sort(StringComparer.OrdinalIgnoreCase);
 
-            Assert.Equal(sortedTasksExpectedPaths.Count, foundFiles.Length);
+            Assert.AreEqual(sortedTasksExpectedPaths.Count, foundFiles.Length);
             for (int i = 0; i < foundFiles.Length; i++)
             {
-                Assert.Equal(foundFiles[i], sortedTasksExpectedPaths[i]);
+                Assert.AreEqual(foundFiles[i], sortedTasksExpectedPaths[i]);
             }
 
-            Assert.Equal(sortedOverrideExpectedPaths.Count, foundoverrideFiles.Length);
+            Assert.AreEqual(sortedOverrideExpectedPaths.Count, foundoverrideFiles.Length);
             for (int i = 0; i < foundoverrideFiles.Length; i++)
             {
-                Assert.Equal(foundoverrideFiles[i], sortedOverrideExpectedPaths[i]);
+                Assert.AreEqual(foundoverrideFiles[i], sortedOverrideExpectedPaths[i]);
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidToolsVersionTooHighMappedToCurrent()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -313,7 +313,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Project project = projectFromString.Project;
                 success = project.Build(mockLogger);
 
-                Assert.True(success);
+                Assert.IsTrue(success);
 
                 mockLogger.AssertLogContains("ToolsVersion=\"98.6\"");
                 mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
@@ -326,7 +326,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidToolsVersionMissingLowMappedToCurrent()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -351,7 +351,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
                 success = project.Build(mockLogger);
 
-                Assert.True(success);
+                Assert.IsTrue(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"0.1\"");
                 mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
             }
@@ -362,7 +362,7 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidToolsVersionMissingMappedToCurrent()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -386,7 +386,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Project project = projectFromString.Project;
                 success = project.Build(mockLogger);
 
-                Assert.True(success);
+                Assert.IsTrue(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"invalidToolsVersion\"");
                 mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
             }
@@ -397,10 +397,10 @@ namespace Microsoft.Build.UnitTests.Definition
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidToolsVersion()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectCollection p = new ProjectCollection();
                 MockLogger mockLogger = new MockLogger();
@@ -422,7 +422,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Even a valid toolsversion should be forced to the current ToolsVersion if MSBUILDTREATALLTOOLSVERSIONSASCURRENT
         /// is set.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolsVersionMappedToCurrent()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -448,7 +448,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Project project = projectFromString.Project;
                 success = project.Build(mockLogger);
 
-                Assert.True(success);
+                Assert.IsTrue(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
                 mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
             }
@@ -464,7 +464,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// Validate that a custom defined toolset is honored
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CustomToolsVersionIsHonored()
         {
             Environment.SetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT", String.Empty);
@@ -490,7 +490,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Project project = p.LoadProject(projectPath, "potato");
                 bool success = project.Build(mockLogger);
 
-                Assert.True(success);
+                Assert.IsTrue(success);
                 mockLogger.AssertLogContains("[potato]");
             }
             finally
@@ -502,7 +502,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist()
         {
             using ProjectCollection p = new ProjectCollection();
@@ -518,10 +518,10 @@ namespace Microsoft.Build.UnitTests.Definition
             using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
             Project project = projectFromString.Project;
 
-            Assert.Equal("4.0", project.ToolsVersion);
+            Assert.AreEqual("4.0", project.ToolsVersion);
             bool success = project.Build(mockLogger);
 
-            Assert.True(success);
+            Assert.IsTrue(success);
             mockLogger.AssertLogContains("\"4.0\"");
             mockLogger.AssertLogDoesntContain(ObjectModelHelpers.CleanupFileContents("\"msbuilddefaulttoolsversion\""));
         }
@@ -531,7 +531,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
         /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolsVersionFromEnvironmentVariable()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -555,7 +555,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
                 success = projectFromString.Project.Build(mockLogger);
 
-                Assert.True(success);
+                Assert.IsTrue(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
                 mockLogger.AssertLogContains("ToolsVersion=\"foo\"");
             }
@@ -570,7 +570,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
         /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidToolsVersionFromEnvironmentVariable()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -593,7 +593,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
                 success = projectFromString.Project.Build(mockLogger);
 
-                Assert.True(success);
+                Assert.IsTrue(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
                 // falls back to the current ToolsVersion
                 mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
@@ -609,7 +609,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Even a valid toolsversion should be forced to the current ToolsVersion if MSBUILDTREATALLTOOLSVERSIONSASCURRENT
         /// is set.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolsVersionMappedToCurrent_CreateProjectInstance()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -636,7 +636,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 ProjectInstance pi = projectFromString.Project.CreateProjectInstance();
                 success = pi.Build(new ILogger[] { mockLogger });
 
-                Assert.True(success);
+                Assert.IsTrue(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
                 mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
             }
@@ -652,7 +652,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist_CreateProjectInstance()
         {
             using ProjectCollection p = new ProjectCollection();
@@ -668,10 +668,10 @@ namespace Microsoft.Build.UnitTests.Definition
             using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
             ProjectInstance pi = projectFromString.Project.CreateProjectInstance();
-            Assert.Equal("4.0", pi.ToolsVersion);
+            Assert.AreEqual("4.0", pi.ToolsVersion);
             bool success = pi.Build(new ILogger[] { mockLogger });
 
-            Assert.True(success);
+            Assert.IsTrue(success);
             mockLogger.AssertLogContains("\"4.0\"");
             mockLogger.AssertLogDoesntContain(ObjectModelHelpers.CleanupFileContents("\"msbuilddefaulttoolsversion\""));
         }
@@ -681,7 +681,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
         /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolsVersionFromEnvironmentVariable_CreateProjectInstance()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -707,7 +707,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 ProjectInstance pi = projectFromString.Project.CreateProjectInstance();
                 success = pi.Build(new ILogger[] { mockLogger });
 
-                Assert.True(success);
+                Assert.IsTrue(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
                 mockLogger.AssertLogContains("ToolsVersion=\"foo\"");
             }
@@ -723,7 +723,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
         /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidToolsVersionFromEnvironmentVariable_CreateProjectInstance()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -748,7 +748,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 ProjectInstance pi = projectFromString.Project.CreateProjectInstance();
                 success = pi.Build(new ILogger[] { mockLogger });
 
-                Assert.True(success);
+                Assert.IsTrue(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
                 // falls back to the current ToolsVersion
                 mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
@@ -765,7 +765,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Even a valid toolsversion should be forced to the current ToolsVersion if MSBUILDTREATALLTOOLSVERSIONSASCURRENT
         /// is set.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolsVersionMappedToCurrent_ProjectInstance()
         {
             string oldLegacyToolsVersion = Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION");
@@ -792,7 +792,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 ProjectInstance pi = new ProjectInstance(projectFromString.Project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
                 success = pi.Build(new ILogger[] { mockLogger });
 
-                Assert.True(success);
+                Assert.IsTrue(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
                 mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
             }
@@ -808,7 +808,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// If the current ToolsVersion doesn't exist, we should fall back to what's in the project file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolsVersionFallbackIfCurrentToolsVersionDoesNotExist_ProjectInstance()
         {
             using ProjectCollection p = new ProjectCollection();
@@ -824,10 +824,10 @@ namespace Microsoft.Build.UnitTests.Definition
             using ProjectFromString projectFromString = new(content, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
 
             ProjectInstance pi = new ProjectInstance(projectFromString.Project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
-            Assert.Equal("4.0", pi.ToolsVersion);
+            Assert.AreEqual("4.0", pi.ToolsVersion);
             bool success = pi.Build(new ILogger[] { mockLogger });
 
-            Assert.True(success);
+            Assert.IsTrue(success);
             mockLogger.AssertLogContains("\"4.0\"");
             mockLogger.AssertLogDoesntContain(ObjectModelHelpers.CleanupFileContents("\"msbuilddefaulttoolsversion\""));
         }
@@ -836,7 +836,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
         /// then if MSBUILDDEFAULTTOOLSVERSION is set and exists, use that ToolsVersion.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolsVersionFromEnvironmentVariable_ProjectInstance()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -862,7 +862,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 ProjectInstance pi = new ProjectInstance(projectFromString.Project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
                 success = pi.Build(new ILogger[] { mockLogger });
 
-                Assert.True(success);
+                Assert.IsTrue(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
                 mockLogger.AssertLogContains("ToolsVersion=\"foo\"");
             }
@@ -878,7 +878,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// If MSBUILDTREATALLTOOLSVERSIONSASCURRENT is not set, and there is not an explicit ToolsVersion passed to the project,
         /// and if MSBUILDDEFAULTTOOLSVERSION is set but to an invalid ToolsVersion, fall back to current.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidToolsVersionFromEnvironmentVariable_ProjectInstance()
         {
             string oldDefaultToolsVersion = Environment.GetEnvironmentVariable("MSBUILDDEFAULTTOOLSVERSION");
@@ -902,7 +902,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 ProjectInstance pi = new ProjectInstance(projectFromString.Project.Xml, null /* no global properties */, null /* don't explicitly set the toolsversion */, p);
                 success = pi.Build(new ILogger[] { mockLogger });
 
-                Assert.True(success);
+                Assert.IsTrue(success);
                 mockLogger.AssertLogContains("ToolsVersion=\"4.0\"");
                 // falls back to the current ToolsVersion
                 mockLogger.AssertLogContains(ObjectModelHelpers.CleanupFileContents("ToolsVersion=\"msbuilddefaulttoolsversion\""));
@@ -918,7 +918,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// Inline tasks found in a .tasks file only have properties expanded.
         /// (When they are in a regular MSBuild file, items are also expanded.)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InlineTasksInDotTasksFile()
         {
             using var collection = new ProjectCollection();

@@ -9,20 +9,20 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class TaskEnvironment_Tests
     {
         private const string StubEnvironmentName = "Stub";
         private const string MultithreadedEnvironmentName = "Multithreaded";
 
-        public static TheoryData<string> EnvironmentTypes =>
-            new TheoryData<string>
+        public static IEnumerable<object[]> EnvironmentTypes =>
+            new[]
             {
-                StubEnvironmentName,
-                MultithreadedEnvironmentName
+                new object[] { StubEnvironmentName },
+                new object[] { MultithreadedEnvironmentName },
             };
 
         // CA2000 is suppressed because the caller is responsible for disposal via DisposeTaskEnvironment
@@ -81,8 +81,8 @@ namespace Microsoft.Build.UnitTests
             return tempPath;
         }
 
-        [Theory]
-        [MemberData(nameof(EnvironmentTypes))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(EnvironmentTypes))]
         public void TaskEnvironment_SetAndGetEnvironmentVariable_ShouldWork(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
@@ -107,8 +107,8 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(EnvironmentTypes))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(EnvironmentTypes))]
         public void TaskEnvironment_SetEnvironmentVariableToNull_ShouldRemoveVariable(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests
         /// back to SetEnvironment. A naive Clear()-then-copy implementation would self-empty the environment
         /// because the source and destination are the same object; this verifies the environment is preserved.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskEnvironment_SetEnvironment_WithAliasedDictionary_PreservesEnvironment()
         {
             var taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(GetResolvedTempPath());
@@ -168,8 +168,8 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(EnvironmentTypes))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(EnvironmentTypes))]
         public void TaskEnvironment_SetEnvironment_ShouldReplaceAllVariables(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
@@ -208,8 +208,8 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(EnvironmentTypes))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(EnvironmentTypes))]
         public void TaskEnvironment_SetAndGetProjectDirectory_ShouldWork(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
@@ -250,8 +250,8 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(EnvironmentTypes))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(EnvironmentTypes))]
         public void TaskEnvironment_GetAbsolutePath_ShouldResolveCorrectly(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
@@ -276,8 +276,8 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(EnvironmentTypes))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(EnvironmentTypes))]
         public void TaskEnvironment_GetAbsolutePath_WithAlreadyAbsolutePath_ShouldReturnUnchanged(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
@@ -294,8 +294,8 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(EnvironmentTypes))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(EnvironmentTypes))]
         public void TaskEnvironment_GetProcessStartInfo_ShouldConfigureCorrectly(string environmentType)
         {
             var taskEnvironment = CreateTaskEnvironment(environmentType);
@@ -335,7 +335,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskEnvironment_StubEnvironment_ShouldAffectSystemEnvironment()
         {
             string testVarName = $"MSBUILD_STUB_ISOLATION_TEST_{Guid.NewGuid():N}";
@@ -365,7 +365,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskEnvironment_MultithreadedEnvironment_ShouldBeIsolatedFromSystem()
         {
             string testVarName = $"MSBUILD_MULTITHREADED_ISOLATION_TEST_{Guid.NewGuid():N}";
@@ -394,7 +394,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskEnvironment_Fallback_ReadsProcessEnvironment()
         {
             string testVarName = $"MSBUILD_DEFAULT_ENV_TEST_{Guid.NewGuid():N}";
@@ -412,7 +412,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskEnvironment_CreateWithProjectDirectoryAndEnvironment_SnapshotsCurrentEnvironment()
         {
             string testVarName = $"MSBUILD_CREATE_MT_TEST_{Guid.NewGuid():N}";
@@ -439,7 +439,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskEnvironment_CreateWithProjectDirectoryAndEnvironment_WithCustomEnvironment_UsesProvidedDictionary()
         {
             string excludedVarName = $"MSBUILD_EXCLUDED_VAR_{Guid.NewGuid():N}";
@@ -470,7 +470,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskEnvironment_CreateWithProjectDirectoryAndEnvironment_ReturnsIsolatedInstances()
         {
             string projectDir = GetResolvedTempPath();
@@ -487,20 +487,20 @@ namespace Microsoft.Build.UnitTests
             env2.GetEnvironmentVariable(testVarName).ShouldNotBe("only_in_env1");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskEnvironment_CreateWithProjectDirectoryAndEnvironment_NullProjectDirectory_Throws()
         {
             Should.Throw<ArgumentNullException>(() => TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(null!));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskEnvironment_CreateWithProjectDirectoryAndEnvironment_EmptyProjectDirectory_Throws()
         {
             Should.Throw<ArgumentException>(() => TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(string.Empty));
         }
 
-        [Theory]
-        [MemberData(nameof(EnvironmentTypes))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(EnvironmentTypes))]
         public void TaskEnvironment_GetAbsolutePath_WithInvalidPathChars_ShouldNotThrow(string environmentType)
         {
             // Construct a path containing an invalid path character

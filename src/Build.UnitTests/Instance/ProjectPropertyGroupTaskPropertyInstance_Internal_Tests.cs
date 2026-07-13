@@ -5,7 +5,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Engine.UnitTests.TestComparers;
 using Microsoft.Build.Execution;
 using Microsoft.Build.UnitTests.BackEnd;
-using Xunit;
 
 using static Microsoft.Build.Engine.UnitTests.TestData.ProjectInstanceTestObjects;
 
@@ -13,9 +12,10 @@ using static Microsoft.Build.Engine.UnitTests.TestData.ProjectInstanceTestObject
 
 namespace Microsoft.Build.Engine.UnitTests.Instance
 {
+    [TestClass]
     public class ProjectPropertyGroupTaskPropertyInstance_Internal_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectPropertyGroupTaskPropertyInstanceCanSerializeViaTranslator()
         {
             var original = CreateTargetProperty();
@@ -23,7 +23,7 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
             ((ITranslatable)original).Translate(TranslationHelpers.GetWriteTranslator());
             var copy = ProjectPropertyGroupTaskPropertyInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(original, copy, new TargetPropertyComparer());
+            Assert.AreEqual(original, copy, new TargetPropertyComparer());
         }
     }
 }

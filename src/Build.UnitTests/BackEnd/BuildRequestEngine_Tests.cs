@@ -11,7 +11,6 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Unittest;
-using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
@@ -20,8 +19,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 {
     using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
 
+    [TestClass]
     public class BuildRequestEngine_Tests : IDisposable
     {
+        [TestClass]
         internal sealed class MockRequestBuilder : IRequestBuilder, IBuildComponent
         {
             public bool ThrowExceptionOnRequest
@@ -78,7 +79,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             public void BuildRequest(NodeLoggingContext context, BuildRequestEntry entry)
             {
-                Assert.Null(_builderThread); // "Received BuildRequest while one was in progress"
+                Assert.IsNull(_builderThread); // "Received BuildRequest while one was in progress"
 
                 _continueEvent = new AutoResetEvent(false);
                 _cancelEvent = new AutoResetEvent(false);
@@ -324,7 +325,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that the engine properly shuts down even if there is an active build request.
         /// This should cause that request to cancel and fail.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestEngineShutdownWhileActive()
         {
             BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", Array.Empty<string>(), null);
@@ -346,8 +347,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _engine.CleanupForBuild();
 
             WaitForEvent(_requestCompleteEvent, "RequestComplete");
-            Assert.Equal(request, _requestComplete_Request);
-            Assert.Equal(BuildResultCode.Failure, _requestComplete_Result.OverallResult);
+            Assert.AreEqual(request, _requestComplete_Request);
+            Assert.AreEqual(BuildResultCode.Failure, _requestComplete_Result.OverallResult);
             VerifyEngineStatus(BuildRequestEngineStatus.Uninitialized);
         }
 
@@ -355,7 +356,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// This test verifies that issuing a simple request results in a successful completion.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestSimpleBuildScenario()
         {
             BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", Array.Empty<string>(), null);
@@ -373,8 +374,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             VerifyEngineStatus(BuildRequestEngineStatus.Active);
 
             WaitForEvent(_requestCompleteEvent, "RequestComplete");
-            Assert.Equal(request, _requestComplete_Request);
-            Assert.Equal(BuildResultCode.Success, _requestComplete_Result.OverallResult);
+            Assert.AreEqual(request, _requestComplete_Request);
+            Assert.AreEqual(BuildResultCode.Success, _requestComplete_Result.OverallResult);
 
             VerifyEngineStatus(BuildRequestEngineStatus.Idle);
         }
@@ -383,7 +384,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that a project which has project dependencies can issue and consume them through the
         /// engine interface.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBuildWithChildren()
         {
             BuildRequestData data = new BuildRequestData("TestFile", new Dictionary<string, string>(), "TestToolsVersion", Array.Empty<string>(), null);
@@ -408,9 +409,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Wait for the new requests to be spawned by the builder
             WaitForEvent(_newRequestEvent, "NewRequestEvent");
-            Assert.Equal(1, _newRequest_Request.BuildRequests[0].ConfigurationId);
-            Assert.Single(_newRequest_Request.BuildRequests[0].Targets);
-            Assert.Equal("requiredTarget1", _newRequest_Request.BuildRequests[0].Targets[0]);
+            Assert.AreEqual(1, _newRequest_Request.BuildRequests[0].ConfigurationId);
+            Assert.ContainsSingle(_newRequest_Request.BuildRequests[0].Targets);
+            Assert.AreEqual("requiredTarget1", _newRequest_Request.BuildRequests[0].Targets[0]);
 
             VerifyEngineStatus(BuildRequestEngineStatus.Waiting);
 
@@ -426,8 +427,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Wait for the original request to complete
             WaitForEvent(_requestCompleteEvent, "RequestComplete");
-            Assert.Equal(request, _requestComplete_Request);
-            Assert.Equal(BuildResultCode.Success, _requestComplete_Result.OverallResult);
+            Assert.AreEqual(request, _requestComplete_Request);
+            Assert.AreEqual(BuildResultCode.Success, _requestComplete_Result.OverallResult);
 
             VerifyEngineStatus(BuildRequestEngineStatus.Idle);
         }
@@ -436,7 +437,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This test verifies that a project can issue a build request with an unresolved configuration and that if we resolve it,
         /// the build will continue and complete successfully.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBuildWithNewConfiguration()
         {
             BuildRequestData data = new BuildRequestData(Path.GetFullPath("TestFile"), new Dictionary<string, string>(), "TestToolsVersion", Array.Empty<string>(), null);
@@ -463,9 +464,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Wait for the request to generate the child request with the unresolved configuration
             WaitForEvent(_newConfigurationEvent, "NewConfigurationEvent");
-            Assert.Equal(Path.GetFullPath("OtherFile"), _newConfiguration_Config.ProjectFullPath);
-            Assert.Equal("TestToolsVersion", _newConfiguration_Config.ToolsVersion);
-            Assert.True(_newConfiguration_Config.WasGeneratedByNode);
+            Assert.AreEqual(Path.GetFullPath("OtherFile"), _newConfiguration_Config.ProjectFullPath);
+            Assert.AreEqual("TestToolsVersion", _newConfiguration_Config.ToolsVersion);
+            Assert.IsTrue(_newConfiguration_Config.WasGeneratedByNode);
             VerifyEngineStatus(BuildRequestEngineStatus.Waiting);
 
             // Resolve the configuration
@@ -474,10 +475,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Now wait for the actual requests to be issued.
             WaitForEvent(_newRequestEvent, "NewRequestEvent");
-            Assert.Equal(2, _newRequest_Request.BuildRequests[0].ConfigurationId);
-            Assert.Equal(2, _newRequest_Request.BuildRequests[0].ConfigurationId);
-            Assert.Single(_newRequest_Request.BuildRequests[0].Targets);
-            Assert.Equal("requiredTarget1", _newRequest_Request.BuildRequests[0].Targets[0]);
+            Assert.AreEqual(2, _newRequest_Request.BuildRequests[0].ConfigurationId);
+            Assert.AreEqual(2, _newRequest_Request.BuildRequests[0].ConfigurationId);
+            Assert.ContainsSingle(_newRequest_Request.BuildRequests[0].Targets);
+            Assert.AreEqual("requiredTarget1", _newRequest_Request.BuildRequests[0].Targets[0]);
 
             // Report a result to satisfy the build request
             BuildResult result = new BuildResult(_newRequest_Request.BuildRequests[0]);
@@ -491,12 +492,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Wait for the original request to complete
             WaitForEvent(_requestCompleteEvent, "RequestComplete");
-            Assert.Equal(request, _requestComplete_Request);
-            Assert.Equal(BuildResultCode.Success, _requestComplete_Result.OverallResult);
+            Assert.AreEqual(request, _requestComplete_Request);
+            Assert.AreEqual(BuildResultCode.Success, _requestComplete_Result.OverallResult);
             VerifyEngineStatus(BuildRequestEngineStatus.Idle);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestShutdown()
         {
         }
@@ -519,7 +520,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             WaitForEvent(_engineStatusChangedEvent, "EngineStatusChanged");
             BuildRequestEngineStatus engineStatus = engine.Status;
-            Assert.Equal(expectedStatus, engineStatus);
+            Assert.AreEqual(expectedStatus, engineStatus);
         }
 
         private void WaitForEvent(WaitHandle evt, string eventName)

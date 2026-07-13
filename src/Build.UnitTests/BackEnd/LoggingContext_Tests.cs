@@ -4,7 +4,6 @@
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -13,11 +12,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Tests for logging contexts.
     /// </summary>
+    [TestClass]
     public class LoggingContext_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public LoggingContext_Tests(ITestOutputHelper outputHelper)
+        public LoggingContext_Tests(TestContext outputHelper)
         {
             _output = outputHelper;
         }
@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// A few simple tests for NodeLoggingContexts.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateValidNodeLoggingContexts()
         {
             NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(_output.WriteLine), 1, true);
@@ -52,16 +52,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// an exception -- this is to guarantee that if we're passing around invalid node IDs,
         /// we'll know about it.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidNodeIdOnNodeLoggingContext()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.ThrowsExactly<InternalErrorException>(() =>
             {
                 _ = new NodeLoggingContext(new MockLoggingService(), -2, true);
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void HasLoggedErrors()
         {
             NodeLoggingContext context = new NodeLoggingContext(new MockLoggingService(_output.WriteLine), 1, true);

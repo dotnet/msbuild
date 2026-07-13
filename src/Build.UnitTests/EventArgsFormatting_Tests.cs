@@ -3,7 +3,6 @@
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Xunit;
 
 
 
@@ -17,94 +16,95 @@ namespace Microsoft.Build.UnitTests
     /// gets a bunch of lines of extra coverage of Engine that we weren't otherwise getting, and
     /// in theory at least the implementation in Engine should be tested too.
     /// </summary>
+    [TestClass]
     public class EventArgsFormattingTests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void NoLineInfoFormatEventMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 0, 0, 0, 0, 0);
-            Assert.Equal(
+            Assert.AreEqual(
                       "source.cs : CS error 312: Missing ;", s);
         }
 
         // Valid forms for line/col number patterns:
         // (line) or (line-line) or (line,col) or (line,col-col) or (line,col,line,col)
-        [Fact]
+        [MSBuildTestMethod]
         public void LineNumberRange()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 2, 0, 0, 0);
-            Assert.Equal(
+            Assert.AreEqual(
                       "source.cs(1-2): CS error 312: Missing ;", s);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ColumnNumberRange()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 0, 0, 1, 2, 0);
-            Assert.Equal(
+            Assert.AreEqual(
                       "source.cs : CS error 312: Missing ;", s);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LineAndColumnNumberRange()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 2, 3, 4, 0);
-            Assert.Equal(
+            Assert.AreEqual(
                       "source.cs(1,3,2,4): CS error 312: Missing ;", s);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LineAndColumnNumberRange2()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 0, 3, 4, 0);
-            Assert.Equal(
+            Assert.AreEqual(
                       "source.cs(1,3-4): CS error 312: Missing ;", s);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LineAndColumnNumberRange3()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 2, 3, 0, 0);
-            Assert.Equal(
+            Assert.AreEqual(
                       "source.cs(1-2,3): CS error 312: Missing ;", s);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LineAndColumnNumberRange4()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 2, 0, 3, 0);
-            Assert.Equal(
+            Assert.AreEqual(
                       "source.cs(1-2): CS error 312: Missing ;", s);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LineAndColumnNumberRange5()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 1, 0, 2, 0, 0);
-            Assert.Equal(
+            Assert.AreEqual(
                       "source.cs(1,2): CS error 312: Missing ;", s);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicFormatEventMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 42, 0, 0, 0, 0);
-            Assert.Equal(
+            Assert.AreEqual(
                       "source.cs(42): CS error 312: Missing ;", s);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CarriageReturnInMessageIsUnchanged()
         {
             BuildErrorEventArgs error = new BuildErrorEventArgs("CS", "312", "source.cs", 42, 0, 0, 0, "message\r Hello", "help", "sender");
@@ -114,21 +114,21 @@ namespace Microsoft.Build.UnitTests
             string errorString = EventArgsFormatting.FormatEventMessage(error, true);
             string warningString = EventArgsFormatting.FormatEventMessage(warning, true);
 
-            Assert.Equal("source.cs(42): CS error 312: message\r Hello", errorString);
-            Assert.Equal("source.cs(42): CS warning 312: message\r Hello", warningString);
+            Assert.AreEqual("source.cs(42): CS error 312: message\r Hello", errorString);
+            Assert.AreEqual("source.cs(42): CS warning 312: message\r Hello", warningString);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExactLocationFormatEventMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
                       "Missing ;", "312", "source.cs", 233, 236, 4, 8, 0);
-            Assert.Equal(
+            Assert.AreEqual(
                     "source.cs(233,4,236,8): CS error 312: Missing ;", s);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NullMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
