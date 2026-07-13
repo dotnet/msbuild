@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Return the default search paths.
         /// </summary>
         /// <value></value>
-        internal new string[] DefaultPaths
+        internal string[] TestSpecificDefaultPaths
         {
             get { return new string[] { s_myApp_V10Path, @"C:\Framework\Whidbey", @"C:\Framework\Everett" }; }
         }
@@ -63,7 +63,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
 
             bool succeeded = Execute(t);
 

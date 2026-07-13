@@ -3070,7 +3070,6 @@ namespace Microsoft.Build.UnitTests.GenerateResource_Tests.OutOfProc
             }
             else
             {
-                Assert.IsTrue(true); // "We only need to test .NET 3.5 ResGen, if it isn't on disk then pass the test and return"
                 return;
             }
 

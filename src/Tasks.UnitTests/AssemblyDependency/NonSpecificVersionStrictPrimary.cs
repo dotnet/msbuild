@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Return the default search paths.
         /// </summary>
         /// <value></value>
-        internal new string[] DefaultPaths
+        internal string[] TestSpecificDefaultPaths
         {
             get { return new string[] { s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
         }
@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);
@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);
@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);
@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);
@@ -277,7 +277,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);

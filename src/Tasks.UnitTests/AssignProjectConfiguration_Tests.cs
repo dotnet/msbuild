@@ -355,15 +355,15 @@ namespace Microsoft.Build.UnitTests
 
             // Test defaults with nothing set
             string actualDefaultToVcxPlatformMapping = assignProjectConfiguration.DefaultToVcxPlatformMapping;
-            Assert.AreEqual(actualDefaultToVcxPlatformMapping, expectedDefaultToVcxPlatformMapping);
+            Assert.AreEqual(expectedDefaultToVcxPlatformMapping, actualDefaultToVcxPlatformMapping);
 
             assignProjectConfiguration.DefaultToVcxPlatformMapping = String.Empty;
             actualDefaultToVcxPlatformMapping = assignProjectConfiguration.DefaultToVcxPlatformMapping;
-            Assert.AreEqual(actualDefaultToVcxPlatformMapping, expectedDefaultToVcxPlatformMapping);
+            Assert.AreEqual(expectedDefaultToVcxPlatformMapping, actualDefaultToVcxPlatformMapping);
 
             assignProjectConfiguration.DefaultToVcxPlatformMapping = null;
             actualDefaultToVcxPlatformMapping = assignProjectConfiguration.DefaultToVcxPlatformMapping;
-            Assert.AreEqual(actualDefaultToVcxPlatformMapping, expectedDefaultToVcxPlatformMapping);
+            Assert.AreEqual(expectedDefaultToVcxPlatformMapping, actualDefaultToVcxPlatformMapping);
         }
 
         /// <summary>
@@ -377,15 +377,15 @@ namespace Microsoft.Build.UnitTests
 
             // Test the case for VcxToDefaultPlatformMapping when the outputType is not library
             string actualVcxToDefaultPlatformMappingNoOutput = assignProjectConfiguration.VcxToDefaultPlatformMapping;
-            Assert.AreEqual(actualVcxToDefaultPlatformMappingNoOutput, expectedVcxToDefaultPlatformMappingNoOutput);
+            Assert.AreEqual(expectedVcxToDefaultPlatformMappingNoOutput, actualVcxToDefaultPlatformMappingNoOutput);
 
             assignProjectConfiguration.VcxToDefaultPlatformMapping = String.Empty;
             actualVcxToDefaultPlatformMappingNoOutput = assignProjectConfiguration.VcxToDefaultPlatformMapping;
-            Assert.AreEqual(actualVcxToDefaultPlatformMappingNoOutput, expectedVcxToDefaultPlatformMappingNoOutput);
+            Assert.AreEqual(expectedVcxToDefaultPlatformMappingNoOutput, actualVcxToDefaultPlatformMappingNoOutput);
 
             assignProjectConfiguration.VcxToDefaultPlatformMapping = null;
             actualVcxToDefaultPlatformMappingNoOutput = assignProjectConfiguration.VcxToDefaultPlatformMapping;
-            Assert.AreEqual(actualVcxToDefaultPlatformMappingNoOutput, expectedVcxToDefaultPlatformMappingNoOutput);
+            Assert.AreEqual(expectedVcxToDefaultPlatformMappingNoOutput, actualVcxToDefaultPlatformMappingNoOutput);
         }
 
         /// <summary>
@@ -400,15 +400,15 @@ namespace Microsoft.Build.UnitTests
             // Test the case for VcxToDefaultPlatformMapping when the outputType is library
             assignProjectConfiguration.OutputType = "Library";
             string actualVcxToDefaultPlatformMappingNoOutput = assignProjectConfiguration.VcxToDefaultPlatformMapping;
-            Assert.AreEqual(actualVcxToDefaultPlatformMappingNoOutput, expectedVcxToDefaultPlatformMappingLibraryOutput);
+            Assert.AreEqual(expectedVcxToDefaultPlatformMappingLibraryOutput, actualVcxToDefaultPlatformMappingNoOutput);
 
             assignProjectConfiguration.VcxToDefaultPlatformMapping = String.Empty;
             actualVcxToDefaultPlatformMappingNoOutput = assignProjectConfiguration.VcxToDefaultPlatformMapping;
-            Assert.AreEqual(actualVcxToDefaultPlatformMappingNoOutput, expectedVcxToDefaultPlatformMappingLibraryOutput);
+            Assert.AreEqual(expectedVcxToDefaultPlatformMappingLibraryOutput, actualVcxToDefaultPlatformMappingNoOutput);
 
             assignProjectConfiguration.VcxToDefaultPlatformMapping = null;
             actualVcxToDefaultPlatformMappingNoOutput = assignProjectConfiguration.VcxToDefaultPlatformMapping;
-            Assert.AreEqual(actualVcxToDefaultPlatformMappingNoOutput, expectedVcxToDefaultPlatformMappingLibraryOutput);
+            Assert.AreEqual(expectedVcxToDefaultPlatformMappingLibraryOutput, actualVcxToDefaultPlatformMappingNoOutput);
         }
         #endregion
     }

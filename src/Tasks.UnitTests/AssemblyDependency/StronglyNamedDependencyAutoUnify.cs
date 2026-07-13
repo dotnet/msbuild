@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Return the default search paths.
         /// </summary>
         /// <value></value>
-        internal new string[] DefaultPaths
+        internal string[] TestSpecificDefaultPaths
         {
             get { return new string[] { s_myApp_V05Path, s_myApp_V10Path, s_myApp_V20Path, s_myApp_V30Path, s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
         }
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AutoUnify = true;
 
             bool succeeded = Execute(t, rarSimulationMode);
@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 t.InstalledAssemblySubsetTables = new TaskItem[] { new TaskItem(subsetListPath) };
                 t.BuildEngine = engine;
                 t.Assemblies = assemblyNames;
-                t.SearchPaths = DefaultPaths;
+                t.SearchPaths = TestSpecificDefaultPaths;
                 t.AutoUnify = true;
 
                 bool succeeded = Execute(t);
@@ -229,7 +229,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
                 t.BuildEngine = engine;
                 t.Assemblies = assemblyNames;
-                t.SearchPaths = DefaultPaths;
+                t.SearchPaths = TestSpecificDefaultPaths;
                 t.AppConfigFile = appConfigFile;
 
                 bool succeeded = Execute(t, false);
@@ -300,7 +300,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 t.InstalledAssemblySubsetTables = new TaskItem[] { new TaskItem(subsetListPath) };
                 t.BuildEngine = engine;
                 t.Assemblies = assemblyNames;
-                t.SearchPaths = DefaultPaths;
+                t.SearchPaths = TestSpecificDefaultPaths;
                 t.AutoUnify = true;
 
                 bool succeeded = Execute(t, false);
@@ -374,7 +374,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.TargetFrameworkDirectories = new string[] { @"c:\myfx" };
             t.AutoUnify = true;
 
@@ -431,7 +431,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.TargetFrameworkDirectories = new string[] { @"c:\myfx" };
             t.AutoUnify = true;
 
@@ -483,7 +483,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AutoUnify = true;
 
             bool succeeded = Execute(t);

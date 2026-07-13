@@ -988,7 +988,6 @@ class X
             if (!Environment.Is64BitOperatingSystem)
             {
                 Console.WriteLine("FileTrackerFindStrInX64X86ChainRepeatCommand runs both 32-and 64-bit programs so it requires 64-bit Windows.");
-                Assert.IsTrue(true);
                 return;
             }
 
@@ -1015,7 +1014,6 @@ class X
             if (!Environment.Is64BitOperatingSystem)
             {
                 Console.WriteLine("FileTrackerFindStrInX86X64ChainRepeatCommand runs both 32-and 64-bit programs so it requires 64-bit Windows.");
-                Assert.IsTrue(true);
                 return;
             }
 

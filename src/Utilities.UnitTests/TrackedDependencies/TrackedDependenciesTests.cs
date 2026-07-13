@@ -3516,7 +3516,7 @@ namespace Microsoft.Build.UnitTests.TrackedDependencies
                 false);
 
             // We should not use the cached dependency table, since it has been updated since it was last read from disk
-            Assert.AreNotEqual(outputs.DependencyTable, outputs2.DependencyTable);
+            Assert.AreNotSequenceEqual(outputs.DependencyTable, outputs2.DependencyTable);
         }
 
         [MSBuildTestMethod]

@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests
             t.StronglyTypedLanguage = null;
             t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version45));
 
-            Assert.AreEqual(singleTestFile, t.InputFiles); // "New InputFiles value should be set"
+            Assert.AreSequenceEqual(singleTestFile, t.InputFiles); // "New InputFiles value should be set"
             Assert.IsNull(t.OutputFiles); // "OutputFiles is null until default name generation is triggered"
 
             string commandLineParameter = String.Join(",", new string[] { singleTestFile[0].ItemSpec, singleOutput[0].ItemSpec });
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests
             t.OutputFiles = null; // want it to reset to default
             t.StronglyTypedLanguage = null;
 
-            Assert.AreEqual(multipleTestFiles, t.InputFiles); // "New InputFiles value should be set"
+            Assert.AreSequenceEqual(multipleTestFiles, t.InputFiles); // "New InputFiles value should be set"
 
             CommandLine.ValidateHasParameter(t, @"/compile", true /* resgen 4.0 supports response files */);
             for (int i = 0; i < multipleTestFiles.Length; i++)
@@ -98,8 +98,8 @@ namespace Microsoft.Build.UnitTests
             t.OutputFiles = differentLengthOutput;
             t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version45));
 
-            Assert.AreEqual(differentLengthInput, t.InputFiles); // "New InputFiles value should be set"
-            Assert.AreEqual(differentLengthOutput, t.OutputFiles); // "New OutputFiles value should be set"
+            Assert.AreSequenceEqual(differentLengthInput, t.InputFiles); // "New InputFiles value should be set"
+            Assert.AreSequenceEqual(differentLengthOutput, t.OutputFiles); // "New OutputFiles value should be set"
 
             ExecuteTaskAndVerifyLogContainsErrorFromResource(
                 t,
@@ -117,7 +117,7 @@ namespace Microsoft.Build.UnitTests
             t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version45));
 
             Assert.IsNull(t.InputFiles); // "New InputFiles value should be set"
-            Assert.AreEqual(differentLengthOutput, t.OutputFiles); // "New OutputFiles value should be set"
+            Assert.AreSequenceEqual(differentLengthOutput, t.OutputFiles); // "New OutputFiles value should be set"
 
             ExecuteTaskAndVerifyLogContainsResource(t, true /* task passes */, "ResGen.NoInputFiles");
 
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests
             t.InputFiles = differentLengthInput;
             t.OutputFiles = null;
 
-            Assert.AreEqual(differentLengthInput, t.InputFiles); // "New InputFiles value should be set"
+            Assert.AreSequenceEqual(differentLengthInput, t.InputFiles); // "New InputFiles value should be set"
             Assert.IsNull(t.OutputFiles); // "OutputFiles is null until default name generation is triggered"
 
             string commandLineParameter = String.Join(",", new string[] { differentLengthInput[0].ItemSpec, differentLengthDefaultOutput[0].ItemSpec });
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests
             t.InputFiles = inputFiles;
             t.OutputFiles = null;
 
-            Assert.AreEqual(inputFiles, t.InputFiles); // "New InputFiles value should be set"
+            Assert.AreSequenceEqual(inputFiles, t.InputFiles); // "New InputFiles value should be set"
             Assert.IsNull(t.OutputFiles); // "OutputFiles is null until default name generation is triggered"
 
             commandLineParameter = String.Join(",", new string[] { inputFiles[0].ItemSpec, defaultOutput[0].ItemSpec });
@@ -149,8 +149,8 @@ namespace Microsoft.Build.UnitTests
 
             t.OutputFiles = explicitOutput;
 
-            Assert.AreEqual(inputFiles, t.InputFiles); // "New InputFiles value should be set"
-            Assert.AreEqual(explicitOutput, t.OutputFiles); // "New OutputFiles value should be set"
+            Assert.AreSequenceEqual(inputFiles, t.InputFiles); // "New InputFiles value should be set"
+            Assert.AreSequenceEqual(explicitOutput, t.OutputFiles); // "New OutputFiles value should be set"
 
             commandLineParameter = String.Join(",", new string[] { inputFiles[0].ItemSpec, explicitOutput[0].ItemSpec });
             CommandLine.ValidateHasParameter(t, commandLineParameter, true /* resgen 4.0 supports response files */);
@@ -202,12 +202,12 @@ namespace Microsoft.Build.UnitTests
 
             // Single reference
             t.References = singleReference;
-            Assert.AreEqual(singleReference, t.References); // "New References value should be set"
+            Assert.AreSequenceEqual(singleReference, t.References); // "New References value should be set"
             CommandLine.ValidateHasParameter(t, "/r:" + singleReference[0].ItemSpec, true /* resgen 4.0 supports response files */);
 
             // MultipleReferences
             t.References = multipleReferences;
-            Assert.AreEqual(multipleReferences, t.References); // "New References value should be set"
+            Assert.AreSequenceEqual(multipleReferences, t.References); // "New References value should be set"
 
             foreach (ITaskItem reference in multipleReferences)
             {
@@ -510,7 +510,7 @@ namespace Microsoft.Build.UnitTests
             t.BuildEngine = e;
 
             bool taskPassed = t.Execute();
-            Assert.AreEqual(taskPassed, expectedResult); // "Unexpected task result"
+            Assert.AreEqual(expectedResult, taskPassed); // "Unexpected task result"
 
             VerifyLogContainsResource(e, t.Log, resourceString, args);
         }
@@ -544,7 +544,7 @@ namespace Microsoft.Build.UnitTests
             t.BuildEngine = e;
 
             bool taskPassed = t.Execute();
-            Assert.AreEqual(taskPassed, expectedResult); // "Unexpected task result"
+            Assert.AreEqual(expectedResult, taskPassed); // "Unexpected task result"
 
             VerifyLogDoesNotContainResource(e, t.Log, resourceString, args);
         }
