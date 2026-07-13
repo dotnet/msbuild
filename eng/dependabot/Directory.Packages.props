@@ -62,15 +62,7 @@
     <PackageVersion Include="Verify.XunitV3" Version="28.12.0" />
     <PackageVersion Update="Verify.XunitV3" Condition="'$(VerifyXunitV3Version)' != ''" Version="$(VerifyXunitV3Version)" />
 
-    <!--
-      Pinned to 30.6.0 deliberately. Verify.MSTest 31.x floors Microsoft.Bcl.AsyncInterfaces at [10.0.9,),
-      which lands 10.0.9 in the net472 test output. MSBuild.exe (spawned by these tests) binds
-      Microsoft.Bcl.AsyncInterfaces to exactly 10.0.0.8 (app.config), so any other version co-located with it
-      triggers a FileLoadException at startup. 30.6.0 floors at [9.0.8,), which unifies to the 10.0.8 already
-      pulled in by System.Text.Json 10.0.8 — matching the product binding redirect. Requires MSTest.TestFramework
-      [3.10.1,), satisfied by our 4.3.0. Do not bump past 30.x until the frozen maintenance-package version is 10.0.9+.
-    -->
-    <PackageVersion Include="Verify.MSTest" Version="30.6.0" />
+    <PackageVersion Include="Verify.MSTest" Version="31.24.0" />
     <PackageVersion Update="Verify.MSTest" Condition="'$(VerifyMSTestVersion)' != ''" Version="$(VerifyMSTestVersion)" />
 
   </ItemGroup>
