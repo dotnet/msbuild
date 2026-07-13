@@ -26,6 +26,14 @@ namespace Microsoft.Build.Framework;
 internal sealed class TaskClassRegistration
 {
     private readonly Func<TaskEnvironment, ITask> _createInstance;
+
+    /// <summary>
+    /// The untyped factory, set only for the <see cref="TaskClassRegistry.Register(string, Func{ITask})"/>
+    /// overload whose task type is not statically known. Used to build the <see cref="LoadedType"/> lazily by
+    /// probing a constructed instance's runtime type. <see langword="null"/> for the trim-rooted overloads,
+    /// which supply the <see cref="LoadedType"/> eagerly.
+    /// </summary>
+    private readonly Func<ITask>? _factory;
     private readonly object _loadedTypeLock = new();
     private volatile LoadedType? _loadedType;
 
@@ -39,10 +47,14 @@ internal sealed class TaskClassRegistration
     }
 
     /// <summary>
-    /// Creates a registration backed only by a factory; the <see cref="LoadedType"/> is computed lazily from
-    /// the first instance's type.
+    /// Creates a registration backed only by an untyped factory; the <see cref="LoadedType"/> is computed
+    /// lazily from the first probed instance's type.
     /// </summary>
-    internal TaskClassRegistration(Func<TaskEnvironment, ITask> createInstance) => _createInstance = createInstance;
+    internal TaskClassRegistration(Func<ITask> factory)
+    {
+        _factory = factory;
+        _createInstance = _ => factory();
+    }
 
     /// <summary>
     /// Constructs a new instance of the registered task. Reflection-free unless the registered task type
@@ -80,5 +92,5 @@ internal sealed class TaskClassRegistration
             "through the generic RegisterTask<T> overload, which roots them, or via a TrimmerRootAssembly entry). The generic overload, " +
             "which the built-in tasks and most hosts use, supplies the LoadedType eagerly and is fully trim-safe.")]
     private LoadedType CreateLoadedTypeFromFactory()
-        => TaskClassRegistry.CreateLoadedType(_createInstance(TaskEnvironment.Fallback).GetType());
+        => TaskClassRegistry.CreateLoadedType(_factory!().GetType());
 }

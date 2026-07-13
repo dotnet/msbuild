@@ -87,11 +87,11 @@ internal static class TaskClassRegistry
         ArgumentNullException.ThrowIfNull(factory);
 
         // The host-supplied factory's task type is not statically known here, so the LoadedType (needed to
-        // bind parameters) is built lazily from the first constructed instance's type. The host is
+        // bind parameters) is built lazily by probing a constructed instance's runtime type. The host is
         // responsible for preserving that type's public properties under trimming (for example via the
         // generic Register<T> overload or a TrimmerRootAssembly entry). This factory does not receive the
         // TaskEnvironment; a host whose task needs it during construction registers the overload below.
-        s_tasksByName[taskName] = new TaskClassRegistration(_ => factory());
+        s_tasksByName[taskName] = new TaskClassRegistration(factory);
         s_hasRegistrations = true;
     }
 
