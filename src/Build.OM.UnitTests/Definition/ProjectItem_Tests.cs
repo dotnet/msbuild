@@ -3762,6 +3762,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         }
     }
 
+    [TestClass]
     public class ProjectItemWithOptimizations_Tests : ProjectItem_Tests
     {
         public ProjectItemWithOptimizations_Tests()
