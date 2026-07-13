@@ -26,6 +26,11 @@ namespace MSBuild.Benchmarks;
 ///   <item><description><c>LoadedType_TaskEnvironmentConstructor</c> — <see cref="LoadedType.CreateInstance"/> on the
 ///     same TaskEnvironment task; invokes the cached constructor directly with the environment.</description></item>
 /// </list>
+///
+/// Each case is measured for <see cref="InstantiationCount"/> repeated instantiations (1, 10, 100) so the
+/// per-instance cost — and how any one-time setup (for example <see cref="LoadedType"/>'s first-call
+/// constructor resolution) amortizes over repeated construction — is visible. The project multi-targets
+/// .NET Framework (net472) and .NET (net10.0), so running it on each framework contrasts the two runtimes.
 /// </summary>
 [MemoryDiagnoser]
 public class TaskInstantiationBenchmark
@@ -37,6 +42,14 @@ public class TaskInstantiationBenchmark
     private LoadedType _taskEnvironmentLoadedType = null!;
 
     private TaskEnvironment _taskEnvironment = null!;
+
+    /// <summary>
+    /// Number of task instances constructed per benchmark invocation. Contrasts a single instantiation
+    /// against repeated ones so any amortizing one-time cost (for example the first-call constructor
+    /// resolution a <see cref="LoadedType"/> caches) shows up as a lower per-instance cost at higher counts.
+    /// </summary>
+    [Params(1, 10, 100)]
+    public int InstantiationCount { get; set; }
 
     [GlobalSetup]
     public void GlobalSetup()
@@ -78,20 +91,52 @@ public class TaskInstantiationBenchmark
     }
 
     [Benchmark(Baseline = true)]
-    public ITask Activator_Parameterless()
-        => (ITask)Activator.CreateInstance(_parameterlessType)!;
+    public ITask? Activator_Parameterless()
+    {
+        ITask? task = null;
+        for (int i = 0; i < InstantiationCount; i++)
+        {
+            task = (ITask)Activator.CreateInstance(_parameterlessType)!;
+        }
+
+        return task;
+    }
 
     [Benchmark]
-    public ITask Activator_TaskEnvironmentConstructor()
-        => (ITask)Activator.CreateInstance(_taskEnvironmentType, new object[] { _taskEnvironment })!;
+    public ITask? Activator_TaskEnvironmentConstructor()
+    {
+        ITask? task = null;
+        for (int i = 0; i < InstantiationCount; i++)
+        {
+            task = (ITask)Activator.CreateInstance(_taskEnvironmentType, new object[] { _taskEnvironment })!;
+        }
+
+        return task;
+    }
 
     [Benchmark]
     public ITask? LoadedType_Parameterless()
-        => _parameterlessLoadedType.CreateInstance(_taskEnvironment);
+    {
+        ITask? task = null;
+        for (int i = 0; i < InstantiationCount; i++)
+        {
+            task = _parameterlessLoadedType.CreateInstance(_taskEnvironment);
+        }
+
+        return task;
+    }
 
     [Benchmark]
     public ITask? LoadedType_TaskEnvironmentConstructor()
-        => _taskEnvironmentLoadedType.CreateInstance(_taskEnvironment);
+    {
+        ITask? task = null;
+        for (int i = 0; i < InstantiationCount; i++)
+        {
+            task = _taskEnvironmentLoadedType.CreateInstance(_taskEnvironment);
+        }
+
+        return task;
+    }
 
     /// <summary>
     /// Task exposing only the implicit parameterless constructor. Exercises the parameterless
