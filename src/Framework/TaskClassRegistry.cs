@@ -60,7 +60,7 @@ internal static class TaskClassRegistry
     /// </summary>
     /// <typeparam name="T">The task type to register. The registration key is <c>typeof(T).Name</c>.</typeparam>
     internal static void Register<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>()
-        where T : ITask, new()
+        where T : ITask
     {
         // typeof(T) carries T's [DynamicallyAccessedMembers] here, so building the LoadedType (a
         // GetProperties walk) is trim-safe and is done once, eagerly, at registration.

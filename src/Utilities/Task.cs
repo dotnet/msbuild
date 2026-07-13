@@ -168,9 +168,10 @@ namespace Microsoft.Build.Utilities
         /// Native AOT host.
         /// </summary>
         /// <typeparam name="T">
-        /// The task type to register. The registration key is <c>typeof(T).Name</c>. It must have a public
-        /// parameterless constructor. The <c>[DynamicallyAccessedMembers]</c> roots the type's public
-        /// constructor and properties so a trimmer preserves them, keeping both construction and parameter
+        /// The task type to register. The registration key is <c>typeof(T).Name</c>. It must have either a
+        /// public parameterless constructor or a public constructor taking a single <c>TaskEnvironment</c>
+        /// parameter (preferred when present). The <c>[DynamicallyAccessedMembers]</c> roots the type's public
+        /// constructors and properties so a trimmer preserves them, keeping both construction and parameter
         /// binding working.
         /// </typeparam>
         /// <remarks>
@@ -182,7 +183,7 @@ namespace Microsoft.Build.Utilities
         /// </remarks>
         public static void RegisterTask<
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>()
-            where T : ITask, new()
+            where T : ITask
             => TaskClassRegistry.Register<T>();
 
         /// <summary>
