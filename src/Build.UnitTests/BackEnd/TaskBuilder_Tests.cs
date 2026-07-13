@@ -1042,7 +1042,6 @@ using Microsoft.Build.Framework;
 
 namespace ClassLibrary2
 {" + (requireSTA ? "[RunInSTA]" : String.Empty) + @"
-    [TestClass]
     public class ThreadTask : ITask
     {
 #region ITask Members

@@ -25,8 +25,21 @@ namespace Microsoft.Build.UnitTests
 
     public class MSBuildTestMethodAttribute : TestMethodAttribute
     {
+        // The BuildEnvironmentHelper.Instance is a process-wide singleton. A number of tests reset it
+        // via ResetInstance_ForUnitTestsOnly() (which re-detects the environment from the current process)
+        // and never restore it, leaving the singleton polluted with values derived from the test host
+        // working directory. Under xUnit this was harmless because of the test ordering; under MSTest the
+        // different ordering exposes it and destabilizes environment-sensitive tests (e.g. MSBuildExtensionsPath
+        // resolution on .NET Framework). To keep every test isolated regardless of ordering, capture the clean
+        // environment established by MSBuildTestAssemblyHooks.AssemblyInitialize (before any test mutates it)
+        // and restore it after each test runs.
+        private static BuildEnvironment s_cleanBuildEnvironment;
+        private static bool s_cleanBuildEnvironmentCaptured;
+
         public override async Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
         {
+            CaptureCleanBuildEnvironment();
+
             string skipReason = GetSkipReason() ?? GetCategoryFilterSkipReason(testMethod);
             if (skipReason != null)
             {
@@ -53,6 +66,8 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
+                RestoreCleanBuildEnvironment();
+
                 Assert.IsTrue(BuildEnvironmentState.s_runningTests);
                 Assert.AreEqual(initialHandshakeSalt, Framework.Traits.MSBuildNodeHandshakeSalt);
                 Assert.AreEqual(initialLogAllEnvVariables, Framework.Traits.LogAllEnvironmentVariables);
@@ -62,6 +77,28 @@ namespace Microsoft.Build.UnitTests
                     CultureInfo.CurrentCulture = originalCulture;
                     CultureInfo.CurrentUICulture = originalUICulture;
                 }
+            }
+        }
+
+        private static void CaptureCleanBuildEnvironment()
+        {
+            // Runs on the first test invocation, immediately after AssemblyInitialize has established the
+            // clean environment and before any test body has had a chance to mutate the singleton. Tests run
+            // serially (MSTestParallelizeScope=None), so no synchronization is required.
+            if (!s_cleanBuildEnvironmentCaptured)
+            {
+                s_cleanBuildEnvironment = BuildEnvironmentHelper.Instance;
+                s_cleanBuildEnvironmentCaptured = true;
+            }
+        }
+
+        private static void RestoreCleanBuildEnvironment()
+        {
+            if (s_cleanBuildEnvironment != null)
+            {
+                // Cheap: just swaps the singleton back to the captured clean instance so that any pollution
+                // left behind by the test just executed does not leak into subsequent tests.
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(s_cleanBuildEnvironment);
             }
         }
 

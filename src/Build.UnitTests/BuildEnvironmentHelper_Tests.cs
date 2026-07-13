@@ -535,8 +535,15 @@ namespace Microsoft.Build.Engine.UnitTests
 
             private readonly List<VisualStudioInstance> _mockInstances = new List<VisualStudioInstance>();
 
+            private readonly BuildEnvironment _originalBuildEnvironment;
+
             public EmptyStandaloneEnviroment(string msBuildExeName, bool writeFakeFiles = true, bool includeAmd64Folder = false)
             {
+                // Capture the environment that existed before this test mutated the singleton so we can restore it on
+                // dispose. Restoring (rather than re-detecting) keeps these tests from leaking a re-detected environment
+                // into tests that happen to run afterwards, which is order-dependent and differs between test runners.
+                _originalBuildEnvironment = BuildEnvironmentHelper.Instance;
+
                 try
                 {
                     MSBuildExecutableName = msBuildExeName;
@@ -587,7 +594,15 @@ namespace Microsoft.Build.Engine.UnitTests
             public void Dispose()
             {
                 FileUtilities.DeleteDirectoryNoThrow(TempFolderRoot, true);
+
+                // Reset the mocked detection delegates back to their production defaults...
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(runningTests: () => true);
+
+                // ...then restore the environment instance that existed before this test ran, so tests executing
+                // afterwards (in whatever order the test runner chooses) observe the assembly-initialized environment
+                // rather than one re-detected from the current process (which resolves paths like MSBuildExtensionsPath
+                // to the test host directory and breaks downstream tests).
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(_originalBuildEnvironment);
             }
         }
     }
