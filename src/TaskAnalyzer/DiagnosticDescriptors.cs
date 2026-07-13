@@ -88,11 +88,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         public static readonly DiagnosticDescriptor UnsupportedTaskItemType = new(
             id: DiagnosticIds.UnsupportedTaskItemType,
             title: "ITaskItem<T> used with unsupported type argument",
-            messageFormat: "Task property '{0}' uses ITaskItem<{1}> but '{1}' is not supported by MSBuild's ValueTypeParser. Use one of the supported types: {2}.",
+            messageFormat: "Task property '{0}' uses ITaskItem<{1}> but MSBuild cannot automatically parse '{1}' from item metadata. Use one of the supported types: {2}.",
             category: "MSBuild.TaskAuthoring",
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "MSBuild can only parse ITaskItem<T> properties when T is a type supported by ValueTypeParser. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.");
+            description: "MSBuild can only bind ITaskItem<T> properties when T is a supported type. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.");
 
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,

@@ -114,7 +114,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
     }
 
     [Fact]
-    public async Task OutputProperty_NoDiagnostic()
+    public async Task OutputProperty_ProducesDiagnostic()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
             using System;
@@ -127,7 +127,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
             }
             """);
 
-        diags.ShouldNotContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
+        diags.ShouldContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
     }
 
     // ═══════════════════════════════════════════════════════════════════════
@@ -184,6 +184,42 @@ public class UnsupportedTaskItemTypeAnalyzerTests
             """);
 
         diags.ShouldContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
+    }
+
+    [Fact]
+    public async Task InheritedProperty_ProducesDiagnostic()
+    {
+        var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public class BaseParameters
+            {
+                public ITaskItem<Guid> Item { get; set; } = null!;
+            }
+            public class MyTask : BaseParameters, ITask
+            {
+                public IBuildEngine BuildEngine { get; set; } = new BuildEngineStub();
+                public bool Execute() => true;
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
+    }
+
+    [Fact]
+    public async Task StaticProperty_NoDiagnostic()
+    {
+        var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public static ITaskItem<Guid> Item { get; set; } = null!;
+                public override bool Execute() => true;
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
     }
 
     // ═══════════════════════════════════════════════════════════════════════

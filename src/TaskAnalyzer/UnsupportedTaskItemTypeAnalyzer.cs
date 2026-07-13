@@ -43,7 +43,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            var outputAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.OutputAttributeFullName);
             var absolutePathType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AbsolutePathFullName);
             var fileInfoType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.FileInfoFullName);
             var directoryInfoType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.DirectoryInfoFullName);
@@ -58,16 +57,21 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     return;
                 }
 
-                foreach (var member in namedType.GetMembers())
+                foreach (IPropertySymbol property in GetPropertiesIncludingBaseTypes(namedType))
                 {
-                    if (member is not IPropertySymbol property)
+                    if (property.DeclaredAccessibility != Accessibility.Public ||
+                        property.SetMethod?.DeclaredAccessibility != Accessibility.Public ||
+                        property.IsStatic)
                     {
                         continue;
                     }
 
-                    if (property.DeclaredAccessibility != Accessibility.Public ||
-                        property.SetMethod is null ||
-                        HasAttribute(property, outputAttributeType))
+                    // A source-declared base task is analyzed by its own symbol action. Avoid reporting its
+                    // properties again for every source-derived task while still covering metadata base tasks.
+                    if (!SymbolEqualityComparer.Default.Equals(property.ContainingType, namedType) &&
+                        property.ContainingType is not null &&
+                        ImplementsInterface(property.ContainingType, iTaskType) &&
+                        HasSourceLocation(property))
                     {
                         continue;
                     }
@@ -97,7 +101,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                     symbolContext.ReportDiagnostic(Diagnostic.Create(
                         DiagnosticDescriptors.UnsupportedTaskItemType,
-                        property.Locations[0],
+                        GetDiagnosticLocation(property, namedType),
                         property.Name,
                         typeArg.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
                         SupportedTaskItemTypes.DisplayNames));
@@ -105,22 +109,30 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }, SymbolKind.NamedType);
         }
 
-        private static bool HasAttribute(IPropertySymbol property, INamedTypeSymbol? attributeType)
+        private static bool HasSourceLocation(ISymbol symbol)
         {
-            if (attributeType is null)
+            foreach (Location location in symbol.Locations)
             {
-                return false;
-            }
-
-            foreach (AttributeData attribute in property.GetAttributes())
-            {
-                if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, attributeType))
+                if (location.IsInSource)
                 {
                     return true;
                 }
             }
 
             return false;
+        }
+
+        private static Location GetDiagnosticLocation(IPropertySymbol property, INamedTypeSymbol taskType)
+        {
+            foreach (Location location in property.Locations)
+            {
+                if (location.IsInSource)
+                {
+                    return location;
+                }
+            }
+
+            return taskType.Locations.Length > 0 ? taskType.Locations[0] : Location.None;
         }
     }
 }
