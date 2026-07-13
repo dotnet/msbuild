@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 #endif
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Collections.Immutable;
 using System.Collections.ObjectModel;
@@ -74,6 +75,25 @@ namespace Microsoft.Build.Construction
         /// The Special Target name which when <see cref="_batchProjectTargets"/> is enabled, all P2P references will just execute this target.
         /// </summary>
         internal const string SolutionProjectReferenceAllTargets = "SlnProjectResolveProjectReference";
+
+        /// <summary>
+        /// Graph solution compatibility phase property used to split before/after solution imports.
+        /// </summary>
+        internal const string GraphBuildSolutionCompatibilityPhasePropertyName = "_MSBuildGraphSolutionCompatibilityPhase";
+
+        internal enum GraphBuildSolutionCompatibilityPhase
+        {
+            Before,
+            After,
+        }
+
+        internal static string GetGraphBuildSolutionCompatibilityPhaseValue(GraphBuildSolutionCompatibilityPhase phase)
+            => phase switch
+            {
+                GraphBuildSolutionCompatibilityPhase.Before => nameof(GraphBuildSolutionCompatibilityPhase.Before),
+                GraphBuildSolutionCompatibilityPhase.After => nameof(GraphBuildSolutionCompatibilityPhase.After),
+                _ => throw new InvalidEnumArgumentException(nameof(phase), (int)phase, typeof(GraphBuildSolutionCompatibilityPhase)),
+            };
 
         /// <summary>
         /// A known list of target names to create.  This is for backwards compatibility.
@@ -933,11 +953,13 @@ namespace Microsoft.Build.Construction
             // Add our global extensibility points to the project representing the solution:
             // Imported at the top:  $(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportBefore\*
             // Imported at the bottom:  $(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter\*
+            string graphBuildSolutionCompatibilityAfterPhaseValue = GetGraphBuildSolutionCompatibilityPhaseValue(GraphBuildSolutionCompatibilityPhase.After);
+            string graphBuildSolutionCompatibilityBeforePhaseValue = GetGraphBuildSolutionCompatibilityPhaseValue(GraphBuildSolutionCompatibilityPhase.Before);
             ProjectImportElement importBefore = traversalProject.CreateImportElement(@"$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportBefore\*");
-            importBefore.Condition = @"'$(ImportByWildcardBeforeSolution)' != 'false' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportBefore')"; // Avoids wildcard perf problem
+            importBefore.Condition = $@"'$(ImportByWildcardBeforeSolution)' != 'false' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportBefore') and '$({GraphBuildSolutionCompatibilityPhasePropertyName})' != '{graphBuildSolutionCompatibilityAfterPhaseValue}'"; // Avoids wildcard perf problem
 
             ProjectImportElement importAfter = traversalProject.CreateImportElement(@"$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter\*");
-            importAfter.Condition = @"'$(ImportByWildcardBeforeSolution)' != 'false' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter')"; // Avoids wildcard perf problem
+            importAfter.Condition = $@"'$(ImportByWildcardBeforeSolution)' != 'false' and exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\SolutionFile\ImportAfter') and '$({GraphBuildSolutionCompatibilityPhasePropertyName})' != '{graphBuildSolutionCompatibilityBeforePhaseValue}'"; // Avoids wildcard perf problem
 
             /* The code below adds the following XML:
 
@@ -1079,13 +1101,15 @@ namespace Microsoft.Build.Construction
             }
 
             string escapedSolutionDirectory = EscapingUtilities.Escape(_solutionFile.SolutionFileDirectory);
+            string graphBuildSolutionCompatibilityAfterPhaseValue = GetGraphBuildSolutionCompatibilityPhaseValue(GraphBuildSolutionCompatibilityPhase.After);
+            string graphBuildSolutionCompatibilityBeforePhaseValue = GetGraphBuildSolutionCompatibilityPhaseValue(GraphBuildSolutionCompatibilityPhase.Before);
             string localFile = Path.Combine(escapedSolutionDirectory, $"before.{escapedSolutionFileName}.targets");
             ProjectImportElement importBeforeLocal = traversalProject.CreateImportElement(localFile);
-            importBeforeLocal.Condition = $"exists('{localFile}')";
+            importBeforeLocal.Condition = $"exists('{localFile}') and '$({GraphBuildSolutionCompatibilityPhasePropertyName})' != '{graphBuildSolutionCompatibilityAfterPhaseValue}'";
 
             localFile = Path.Combine(escapedSolutionDirectory, $"after.{escapedSolutionFileName}.targets");
             ProjectImportElement importAfterLocal = traversalProject.CreateImportElement(localFile);
-            importAfterLocal.Condition = $"exists('{localFile}')";
+            importAfterLocal.Condition = $"exists('{localFile}') and '$({GraphBuildSolutionCompatibilityPhasePropertyName})' != '{graphBuildSolutionCompatibilityBeforePhaseValue}'";
 
             return (importBeforeLocal, importAfterLocal);
         }

@@ -4554,10 +4554,77 @@ $@"<Project InitialTargets=`Sleep`>
             _logger.AssertLogContains("[BeforeHook]");
             _logger.AssertLogContains("[AfterHook]");
 
+            int beforeHookIndex = _logger.FullLog.IndexOf("[BeforeHook]", StringComparison.Ordinal);
+            int projectBuildIndex = _logger.FullLog.IndexOf("[ProjectBuild]", StringComparison.Ordinal);
+            int afterHookIndex = _logger.FullLog.IndexOf("[AfterHook]", StringComparison.Ordinal);
+            beforeHookIndex.ShouldBeGreaterThanOrEqualTo(0);
+            projectBuildIndex.ShouldBeGreaterThan(beforeHookIndex);
+            afterHookIndex.ShouldBeGreaterThan(projectBuildIndex);
+
             _logger.AllBuildEvents
                 .OfType<BuildMessageEventArgs>()
                 .Count(e => e.Message.Contains("[ProjectBuild]", StringComparison.Ordinal))
                 .ShouldBe(1);
+        }
+
+        [Fact]
+        public void GraphBuildFromSolutionFailsBeforeBuildingProjectsWhenBeforeHookFails()
+        {
+            string projectContents = """
+                <Project>
+                  <Target Name="Build">
+                    <Message Text="[ProjectBuild]" />
+                  </Target>
+                </Project>
+                """.Cleanup();
+
+            string projectPath = _env.CreateFile("GraphBeforeHookFailProject.csproj", projectContents).Path;
+
+            string solutionContents = new SolutionFileBuilder
+            {
+                Projects = new Dictionary<string, string>
+                {
+                    { "1", projectPath }
+                }
+            }.BuildSolution();
+
+            string solutionPath = _env.CreateFile("GraphBeforeHookFailSolution.sln", solutionContents).Path;
+
+            _env.CreateFile(
+                $"before.{Path.GetFileName(solutionPath)}.targets",
+                """
+                <Project>
+                  <Target Name="FailBeforeHook" BeforeTargets="Build">
+                    <Error Text="[BeforeHookError]" />
+                  </Target>
+                </Project>
+                """.Cleanup());
+
+            _env.CreateFile(
+                $"after.{Path.GetFileName(solutionPath)}.targets",
+                """
+                <Project>
+                  <Target Name="AfterHook" AfterTargets="Build">
+                    <Message Text="[AfterHook]" />
+                  </Target>
+                </Project>
+                """.Cleanup());
+
+            var data = new GraphBuildRequestData(
+                new[] { new ProjectGraphEntryPoint(solutionPath, new Dictionary<string, string>()) },
+                Array.Empty<string>(),
+                null);
+
+            GraphBuildResult result = _buildManager.Build(_parameters, data);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+            result.Exception.ShouldNotBeNull();
+            result.Exception.Message.ShouldContain("Graph solution compatibility build failed.");
+            result.ResultsByNode.ShouldBeEmpty();
+
+            _logger.AssertLogContains("[BeforeHookError]");
+            _logger.AssertLogDoesntContain("[ProjectBuild]");
+            _logger.AssertLogDoesntContain("[AfterHook]");
         }
 
         [Fact]

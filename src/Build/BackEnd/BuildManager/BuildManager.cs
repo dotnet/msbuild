@@ -21,6 +21,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -1752,16 +1753,26 @@ namespace Microsoft.Build.Execution
             }
         }
 
-        private ProjectInstance[] CreateGraphSolutionCompatibilityInstances(GraphBuildSubmission submission, ProjectGraph projectGraph)
+        [RequiresUnreferencedCode("Evaluates a solution's projects, which resolves SDKs and reflects over their types; incompatible with trimming.")]
+        private ProjectInstance[] CreateGraphSolutionCompatibilityInstances(
+            GraphBuildSubmission submission,
+            ProjectGraph projectGraph,
+            SolutionProjectGenerator.GraphBuildSolutionCompatibilityPhase? compatibilityPhase = null)
         {
             Assumed.NotNull(projectGraph.Solution, "Graph solution compatibility step requires a solution graph.");
 
-            var globalProperties = new PropertyDictionary<ProjectPropertyInstance>(submission.BuildRequestData.GlobalPropertiesLookup.Count + 1);
+            var globalProperties = new PropertyDictionary<ProjectPropertyInstance>(submission.BuildRequestData.GlobalPropertiesLookup.Count + 2);
             foreach (KeyValuePair<string, string?> propertyPair in submission.BuildRequestData.GlobalPropertiesLookup)
             {
                 globalProperties.Set(ProjectPropertyInstance.Create(propertyPair.Key, propertyPair.Value));
             }
             globalProperties.Set(ProjectPropertyInstance.Create("IsGraphBuild", "true"));
+            if (compatibilityPhase is not null)
+            {
+                globalProperties.Set(ProjectPropertyInstance.Create(
+                    SolutionProjectGenerator.GraphBuildSolutionCompatibilityPhasePropertyName,
+                    SolutionProjectGenerator.GetGraphBuildSolutionCompatibilityPhaseValue(compatibilityPhase.Value)));
+            }
 
             var buildEventContext = new BuildEventContext(
                 submission.SubmissionId,
@@ -1785,6 +1796,31 @@ namespace Microsoft.Build.Execution
                 targetNames,
                 SdkResolverService,
                 submission.SubmissionId);
+        }
+
+        [RequiresUnreferencedCode("Evaluates a solution's projects, which resolves SDKs and reflects over their types; incompatible with trimming.")]
+        private BuildResult ExecuteGraphSolutionCompatibilityBuild(
+            GraphBuildSubmission submission,
+            ProjectGraph projectGraph,
+            SolutionProjectGenerator.GraphBuildSolutionCompatibilityPhase compatibilityPhase)
+        {
+            ProjectInstance[] instances = CreateGraphSolutionCompatibilityInstances(submission, projectGraph, compatibilityPhase);
+            ProjectRootElementCacheBase? originalProjectRootElementCache = _buildParameters!.ProjectRootElementCache;
+            _buildParameters.ProjectRootElementCache = instances[0].ProjectRootElementCache;
+            BuildRequestData compatibilityRequestData = new(
+                instances[0],
+                submission.BuildRequestData.TargetNames.ToArray(),
+                submission.BuildRequestData.HostServices,
+                submission.BuildRequestData.Flags);
+            BuildSubmission compatibilitySubmission = PendBuildRequest(compatibilityRequestData);
+            try
+            {
+                return compatibilitySubmission.Execute();
+            }
+            finally
+            {
+                _buildParameters.ProjectRootElementCache = originalProjectRootElementCache;
+            }
         }
 
         /// <summary>
@@ -2294,21 +2330,26 @@ namespace Microsoft.Build.Execution
                     ProjectErrorUtilities.VerifyThrowInvalidProject(entryPointNode.ProjectInstance.Targets.Count > 0, entryPointNode.ProjectInstance.ProjectFileLocation, "NoTargetSpecified");
                 }
 
-                resultsPerNode = BuildGraph(projectGraph, targetsPerNode, submission.BuildRequestData);
-
-                // Synthetic solution traversal project compatibility step. Traversal can run after node
-                // execution and restore before/after.<solution>.targets and Directory.Solution.* behavior.
                 if (projectGraph.Solution != null)
                 {
-                    ProjectInstance[] instances = CreateGraphSolutionCompatibilityInstances(submission, projectGraph);
-                    _buildParameters!.ProjectRootElementCache = instances[0].ProjectRootElementCache;
-                    BuildRequestData compatibilityRequestData = new(
-                        instances[0],
-                        submission.BuildRequestData.TargetNames.ToArray(),
-                        submission.BuildRequestData.HostServices,
-                        submission.BuildRequestData.Flags);
-                    BuildSubmission compatibilitySubmission = PendBuildRequest(compatibilityRequestData);
-                    compatibilityResult = compatibilitySubmission.Execute();
+                    compatibilityResult = ExecuteGraphSolutionCompatibilityBuild(
+                        submission,
+                        projectGraph,
+                        SolutionProjectGenerator.GraphBuildSolutionCompatibilityPhase.Before);
+                }
+
+                if (compatibilityResult?.OverallResult != BuildResultCode.Failure)
+                {
+                    resultsPerNode = BuildGraph(projectGraph, targetsPerNode, submission.BuildRequestData);
+
+                    // Synthetic solution traversal project compatibility step for after hooks.
+                    if (projectGraph.Solution != null)
+                    {
+                        compatibilityResult = ExecuteGraphSolutionCompatibilityBuild(
+                            submission,
+                            projectGraph,
+                            SolutionProjectGenerator.GraphBuildSolutionCompatibilityPhase.After);
+                    }
                 }
             }
             else
