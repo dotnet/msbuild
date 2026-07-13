@@ -51,7 +51,7 @@ internal sealed class TaskClassRegistration
     /// construction.
     /// </summary>
     /// <param name="taskEnvironment">The environment supplied to a task that declares a <see cref="TaskEnvironment"/> constructor.</param>
-    internal ITask CreateInstance(TaskEnvironment taskEnvironment) => _createInstance(taskEnvironment ?? TaskEnvironment.Fallback);
+    internal ITask CreateInstance(TaskEnvironment taskEnvironment) => _createInstance(taskEnvironment);
 
     /// <summary>
     /// Gets the reflected type metadata the engine uses to discover and bind the task's parameters.
