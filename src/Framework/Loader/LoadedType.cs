@@ -182,21 +182,6 @@ namespace Microsoft.Build.Shared
         public bool HasLoadInSeparateAppDomainAttribute { get; }
 
         /// <summary>
-        /// Gets whether this type declares a public instance constructor that accepts a single
-        /// <see cref="TaskEnvironment"/> parameter. When present, <see cref="CreateInstance"/> prefers this
-        /// constructor over the parameterless one so the task can compute environment-dependent default values
-        /// (for example, rooting a default output path) during construction.
-        /// </summary>
-        public bool HasTaskEnvironmentConstructor
-        {
-            get
-            {
-                EnsureConstructorsResolved();
-                return _constructorNeedsEnvironment;
-            }
-        }
-
-        /// <summary>
         /// Creates an <see cref="ITask"/> instance of this loaded type. When the type declares a constructor
         /// that takes a single <see cref="TaskEnvironment"/>, that constructor is invoked with
         /// <paramref name="taskEnvironment"/> — falling back to <see cref="TaskEnvironment.Fallback"/> when the

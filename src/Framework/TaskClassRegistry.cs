@@ -66,16 +66,12 @@ internal static class TaskClassRegistry
         // GetProperties walk) is trim-safe and is done once, eagerly, at registration.
         LoadedType loadedType = CreateLoadedType(typeof(T));
 
-        // A task that declares a constructor taking a TaskEnvironment gets it injected at construction time
-        // (mirroring the reflective task-load path), so property initializers that depend on the environment
-        // can run. The invocation via Activator over typeof(T) stays trim-safe because T's public constructors
-        // are rooted by the [DynamicallyAccessedMembers] above. Tasks without such a constructor use the
-        // reflection-free new T().
-        Func<TaskEnvironment, ITask> factory = loadedType.HasTaskEnvironmentConstructor
-            ? static taskEnvironment => (ITask)Activator.CreateInstance(typeof(T), taskEnvironment)!
-            : static _ => new T();
-
-        s_tasksByName[typeof(T).Name] = new TaskClassRegistration(factory, loadedType);
+        // Construction is delegated to the LoadedType, which resolves T's constructors from the same
+        // trim-rooted type and prefers a TaskEnvironment constructor (injecting the environment so property
+        // initializers that depend on it can run) over the parameterless one. It goes through the type's
+        // ConstructorInfo/ConstructorInvoker directly - no Activator, no dynamic code - so it stays
+        // Native AOT friendly.
+        s_tasksByName[typeof(T).Name] = new TaskClassRegistration(taskEnvironment => loadedType.CreateInstance(taskEnvironment)!, loadedType);
         s_hasRegistrations = true;
     }
 

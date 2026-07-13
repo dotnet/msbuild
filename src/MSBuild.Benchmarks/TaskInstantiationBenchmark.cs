@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Reflection;
 using BenchmarkDotNet.Attributes;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -48,12 +49,26 @@ public class TaskInstantiationBenchmark
         _parameterlessLoadedType = CreateLoadedType(_parameterlessType);
         _taskEnvironmentLoadedType = CreateLoadedType(_taskEnvironmentType);
 
-        // Sanity-check that the two LoadedType instances actually exercise the two intended paths;
+        // Sanity-check that the two benchmark task types actually exercise the two intended paths;
         // otherwise the benchmark would silently measure the same thing twice.
-        if (_parameterlessLoadedType.HasTaskEnvironmentConstructor || !_taskEnvironmentLoadedType.HasTaskEnvironmentConstructor)
+        if (HasTaskEnvironmentConstructor(_parameterlessType) || !HasTaskEnvironmentConstructor(_taskEnvironmentType))
         {
-            throw new InvalidOperationException("Benchmark task types are not detected as expected by LoadedType.");
+            throw new InvalidOperationException("Benchmark task types do not declare the expected constructors.");
         }
+    }
+
+    private static bool HasTaskEnvironmentConstructor(Type type)
+    {
+        foreach (ConstructorInfo constructor in type.GetConstructors(BindingFlags.Instance | BindingFlags.Public))
+        {
+            ParameterInfo[] parameters = constructor.GetParameters();
+            if (parameters.Length == 1 && parameters[0].ParameterType == typeof(TaskEnvironment))
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static LoadedType CreateLoadedType(Type type)
@@ -79,8 +94,8 @@ public class TaskInstantiationBenchmark
         => _taskEnvironmentLoadedType.CreateInstance(_taskEnvironment);
 
     /// <summary>
-    /// Task exposing only the implicit parameterless constructor. Exercises the
-    /// <see cref="LoadedType.HasTaskEnvironmentConstructor"/> == false instantiation path.
+    /// Task exposing only the implicit parameterless constructor. Exercises the parameterless
+    /// instantiation path (no <see cref="TaskEnvironment"/> constructor).
     /// </summary>
     private sealed class ParameterlessBenchmarkTask : ITask
     {
