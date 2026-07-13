@@ -121,6 +121,18 @@ internal static class TestHelpers
     private static readonly MetadataReference[] s_coreReferences = CreateCoreReferences();
 
     /// <summary>
+    /// Returns a fully-qualified path literal that is absolute on the OS the tests are running on: a
+    /// drive-rooted path on Windows (<c>C:/…</c>) and a leading-slash path on Unix (<c>/…</c>). Use this when
+    /// analyzer test source needs a default value that must classify as fully-qualified regardless of OS —
+    /// a single hard-coded literal cannot satisfy both, since <c>C:/x</c> is relative on Unix and <c>/x</c> is
+    /// not fully-qualified on Windows.
+    /// </summary>
+    public static string FullyQualifiedPath(string tail) =>
+        System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows)
+            ? "C:/" + tail
+            : "/" + tail;
+
+    /// <summary>
     /// Returns the core runtime references used by test compilations.
     /// </summary>
     public static MetadataReference[] GetCoreReferences() => s_coreReferences;

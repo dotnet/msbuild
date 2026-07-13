@@ -71,12 +71,12 @@ public class PreferTypedParameterAnalyzerTests
     public async Task FullyQualifiedDefault_StaysOnPathDiagnostic()
     {
         // A fully-qualified default can be reproduced in the initializer, so it stays on MSBuildTask0006.
-        var diags = await GetTypedParameterDiagnosticsAsync("""
+        var diags = await GetTypedParameterDiagnosticsAsync($$"""
             using Microsoft.Build.Framework;
             [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
             public class MyTask : Microsoft.Build.Utilities.Task
             {
-                public string InputPath { get; set; } = "C:/work/obj";
+                public string InputPath { get; set; } = "{{TestHelpers.FullyQualifiedPath("work/obj")}}";
                 public override bool Execute()
                 {
                     var abs = new AbsolutePath(InputPath);

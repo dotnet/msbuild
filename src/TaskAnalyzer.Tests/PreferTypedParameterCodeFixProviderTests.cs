@@ -444,12 +444,12 @@ public class PreferTypedParameterCodeFixProviderTests
         // initializer. This is only safe because the value is already rooted: MSBuild normally roots a relative
         // string via TaskEnvironment, which is not available inside a property initializer (it runs in the ctor).
         await CreateFixTest(
-            testCode: """
+            testCode: $$"""
                 using Microsoft.Build.Framework;
                 [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
                 public class MyTask : Microsoft.Build.Utilities.Task
                 {
-                    public string InputPath { get; set; } = "C:/logs";
+                    public string InputPath { get; set; } = "{{TestHelpers.FullyQualifiedPath("logs")}}";
                     public override bool Execute()
                     {
                         var abs = {|#0:new AbsolutePath(InputPath)|};
@@ -457,12 +457,12 @@ public class PreferTypedParameterCodeFixProviderTests
                     }
                 }
                 """,
-            fixedCode: """
+            fixedCode: $$"""
                 using Microsoft.Build.Framework;
                 [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
                 public class MyTask : Microsoft.Build.Utilities.Task
                 {
-                    public AbsolutePath InputPath { get; set; } = new AbsolutePath("C:/logs");
+                    public AbsolutePath InputPath { get; set; } = new AbsolutePath("{{TestHelpers.FullyQualifiedPath("logs")}}");
                     public override bool Execute()
                     {
                         var abs = InputPath;
@@ -480,13 +480,13 @@ public class PreferTypedParameterCodeFixProviderTests
         // For FileInfo the engine goes string -> AbsolutePath -> FileInfo, so the fix constructs through
         // AbsolutePath rather than passing the raw string to FileInfo directly.
         await CreateFixTest(
-            testCode: """
+            testCode: $$"""
                 using System.IO;
                 using Microsoft.Build.Framework;
                 [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
                 public class MyTask : Microsoft.Build.Utilities.Task
                 {
-                    public string FilePath { get; set; } = "C:/logs/out.txt";
+                    public string FilePath { get; set; } = "{{TestHelpers.FullyQualifiedPath("logs/out.txt")}}";
                     public override bool Execute()
                     {
                         var fi = {|#0:new FileInfo(FilePath)|};
@@ -494,13 +494,13 @@ public class PreferTypedParameterCodeFixProviderTests
                     }
                 }
                 """,
-            fixedCode: """
+            fixedCode: $$"""
                 using System.IO;
                 using Microsoft.Build.Framework;
                 [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
                 public class MyTask : Microsoft.Build.Utilities.Task
                 {
-                    public FileInfo FilePath { get; set; } = new FileInfo(new AbsolutePath("C:/logs/out.txt"));
+                    public FileInfo FilePath { get; set; } = new FileInfo(new AbsolutePath("{{TestHelpers.FullyQualifiedPath("logs/out.txt")}}"));
                     public override bool Execute()
                     {
                         var fi = FilePath;
