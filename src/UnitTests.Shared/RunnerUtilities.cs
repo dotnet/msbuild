@@ -54,6 +54,23 @@ namespace Microsoft.Build.UnitTests.Shared
             "DOTNET_ROOT_ARM64",
         ];
 
+        /// <summary>
+        /// Returns environment variable overrides (value <see langword="null"/> means "remove the variable") that clear the
+        /// MSBuildSDKsPath/MSBuildExtensionsPath the CI two-stage build leaks from the stage 1 bootstrap (used as the build
+        /// tool for stage 2). Without clearing them, a bootstrapped MSBuild launched by a test resolves Microsoft.NET.Sdk
+        /// (and therefore its NET task host) from the stage 1 layout instead of its own location, failing with MSB4216.
+        /// Built here (in a nullable-oblivious context) so callers in nullable-enabled files can add the null values
+        /// without CS8625. Locally these variables are unset, so removal is a no-op.
+        /// </summary>
+        public static Dictionary<string, string> CreateBootstrapSdkPathClearingEnvironment()
+        {
+            return new Dictionary<string, string>
+            {
+                ["MSBuildSDKsPath"] = null,
+                ["MSBuildExtensionsPath"] = null,
+            };
+        }
+
         public static void ApplyDotnetHostPathEnvironmentVariable(TestEnvironment testEnvironment)
         {
             // Built msbuild.dll executed by dotnet.exe needs this environment variable for msbuild tasks such as RoslynCodeTaskFactory.
@@ -137,20 +154,15 @@ namespace Microsoft.Build.UnitTests.Shared
             }
 
             string bootstrapRoot = BootstrapMsBuildBinaryLocation.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            var environmentVariables = new Dictionary<string, string>
-            {
-                [Constants.DotnetHostPathEnvVarName] = s_bootstrapDotnetHostPath,
-                ["DOTNET_ROOT"] = bootstrapRoot,
-                ["DOTNET_INSTALL_DIR"] = bootstrapRoot,
 
-                // The CI two-stage build uses the stage 1 bootstrap as the build tool for stage 2, which exports
-                // MSBuildSDKsPath/MSBuildExtensionsPath pointing at the stage 1 layout. These leak into the stage 2 test
-                // host and would make the launched stage 2 bootstrapped MSBuild resolve Microsoft.NET.Sdk (and therefore
-                // its task host) from stage 1, failing with MSB4216. Remove them (null value) so the child self-derives
-                // both paths from its own location. Locally these are unset, so removal is a no-op.
-                ["MSBuildSDKsPath"] = null,
-                ["MSBuildExtensionsPath"] = null,
-            };
+            // The CI two-stage build uses the stage 1 bootstrap as the build tool for stage 2, which exports
+            // MSBuildSDKsPath/MSBuildExtensionsPath pointing at the stage 1 layout. These leak into the stage 2 test
+            // host and would make the launched stage 2 bootstrapped MSBuild resolve Microsoft.NET.Sdk (and therefore
+            // its task host) from stage 1, failing with MSB4216. Clear them so the child self-derives both paths.
+            var environmentVariables = CreateBootstrapSdkPathClearingEnvironment();
+            environmentVariables[Constants.DotnetHostPathEnvVarName] = s_bootstrapDotnetHostPath;
+            environmentVariables["DOTNET_ROOT"] = bootstrapRoot;
+            environmentVariables["DOTNET_INSTALL_DIR"] = bootstrapRoot;
 
             // Architecture-specific DOTNET_ROOT_<ARCH> variables take precedence over DOTNET_ROOT for the app host, so a
             // stale value leaked from the CI environment would silently override the bootstrap root. Remove them (null value).

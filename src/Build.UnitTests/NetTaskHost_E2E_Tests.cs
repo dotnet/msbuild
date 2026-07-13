@@ -382,16 +382,21 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
 
+                // Clear MSBuildSDKsPath/MSBuildExtensionsPath so the apphost launched through the symlink self-derives
+                // them from its own (symlinked) location. Otherwise, in the CI two-stage build these leak from the stage 1
+                // build tool and the child resolves Microsoft.NET.Sdk from the real stage 1 path instead of the symlink
+                // under test, so the symlink handshake scenario is never exercised (it fails with a stage 1 MSB4216 for
+                // the wrong reason). Built via the helper so the null (remove) values don't produce CS8625 here.
+                Dictionary<string, string> symlinkEnvironment = RunnerUtilities.CreateBootstrapSdkPathClearingEnvironment();
+                symlinkEnvironment[Constants.DotnetHostPathEnvVarName] = Path.Combine(realSdkPath, "dotnet");
+
                 string testTaskOutput = RunnerUtilities.RunProcessAndGetOutput(
                     apphostPath,
                     $"\"{testProjectPath}\" -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}",
                     out bool successTestTask,
                     shellExecute: false,
                     outputHelper: _output,
-                    environmentVariables: new Dictionary<string, string>
-                    {
-                        [Constants.DotnetHostPathEnvVarName] = Path.Combine(realSdkPath, "dotnet"),
-                    });
+                    environmentVariables: symlinkEnvironment);
 
                 _output.WriteLine(testTaskOutput);
 
