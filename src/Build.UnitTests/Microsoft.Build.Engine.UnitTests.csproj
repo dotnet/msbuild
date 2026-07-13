@@ -15,8 +15,14 @@
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
 
     <!-- Suppression in needed to build ExampleTaskX86 that targets x86 architecture. -->
-    <!-- NU1605: intentional downgrade of Microsoft.Bcl.AsyncInterfaces to 10.0.8 on .NETFramework (see PackageReference below). -->
-    <NoWarn>$(NoWarn);MSB3270;CS0436;NU1605</NoWarn>
+    <NoWarn>$(NoWarn);MSB3270;CS0436</NoWarn>
+
+    <!--
+      Verify.MSTest 31.x references Microsoft.Bcl.AsyncInterfaces 10.0.9 on .NETFramework, but the product
+      MSBuild.exe these tests spawn is co-located in the output and binds it to exactly 10.0.0.8. Compile
+      against 10.0.9 (so Verify.MSTest resolves) but overwrite the net472 output copy with 10.0.8 so the
+      spawned MSBuild.exe loads a matching assembly. See src/Directory.Build.targets. -->
+    <VerifyMSTestForcesAsyncInterfaces1008>true</VerifyMSTestForcesAsyncInterfaces1008>
 
     <AppConfig>..\Shared\UnitTests\App.config</AppConfig>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -31,13 +37,6 @@
     <PackageReference Include="Shouldly" />
     <PackageReference Include="FakeItEasy" />
     <PackageReference Include="Verify.MSTest" />
-    <!--
-      Verify.MSTest 31.x floors Microsoft.Bcl.AsyncInterfaces at 10.0.9 on .NETFramework, but the product
-      MSBuild.exe these tests spawn binds it to exactly 10.0.0.8 (src/MSBuild/app.config). Co-locating any
-      other version triggers a FileLoadException at MSBuild.exe startup. Force 10.0.8 to match the product
-      redirect; the test host's auto-generated binding redirect covers 10.0.9 -> 10.0.8. (NU1605 suppressed.)
-    -->
-    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" VersionOverride="10.0.8" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" />
     <PackageReference Include="NuGet.Frameworks">
       <PrivateAssets>all</PrivateAssets>
