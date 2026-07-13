@@ -91,6 +91,7 @@ export DOTNET_PERFLOG_DIR="$PerfLogDir"
 # DOTNET_ROOT and the bootstrap's own expectation that tests invoke the bootstrap dotnet (see
 # eng/BootStrapMsBuild.targets).
 export DOTNET_HOST_PATH="$bootstrapRoot/core/dotnet"
+export DOTNET_INSTALL_DIR="$bootstrapRoot/core"
 
 # stage2Properties are passed to the stage 2 build only since some MSBuild switches (like /mt) may not
 # work with the SDK MSBuild used in stage 1. Mirroring the branches:

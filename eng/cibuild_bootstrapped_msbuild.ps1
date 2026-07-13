@@ -94,6 +94,7 @@ $env:DOTNET_PERFLOG_DIR=$PerfLogDir
 # above for the core engine) and the bootstrap's own expectation that tests invoke the bootstrap dotnet
 # (see eng/BootStrapMsBuild.targets).
 $env:DOTNET_HOST_PATH = Join-Path $bootstrapRoot 'core\dotnet.exe'
+$env:DOTNET_INSTALL_DIR = Join-Path $bootstrapRoot 'core'
 
 # $stage2Properties are appended to the stage 2 build only.
 # Use this for switches like /mt that should not be passed to the stable MSBuild used in stage 1
