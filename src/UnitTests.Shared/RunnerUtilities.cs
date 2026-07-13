@@ -38,6 +38,13 @@ namespace Microsoft.Build.UnitTests.Shared
 #if !FEATURE_RUN_EXE_IN_TESTS
         private static readonly string s_dotnetExePath = EnvironmentProvider.GetDotnetExePath();
 
+        // The dotnet host that ships inside the bootstrap layout. When we launch the bootstrapped MSBuild we must
+        // point DOTNET_HOST_PATH at this host (rather than an ambient dotnet on PATH such as the repo-local .dotnet)
+        // so that any task hosts it spawns resolve their runtime from the bootstrap. The bootstrap can target an
+        // earlier runtime (e.g. net10.0) than the SDK overlaid into .dotnet, so a task host resolving .dotnet would
+        // fail to find its runtime. See eng/BootStrapMsBuild.targets.
+        private static readonly string s_bootstrapDotnetHostPath = EnvironmentProvider.GetDotnetExePathFromFolder(BootstrapMsBuildBinaryLocation);
+
         public static void ApplyDotnetHostPathEnvironmentVariable(TestEnvironment testEnvironment)
         {
             // Built msbuild.dll executed by dotnet.exe needs this environment variable for msbuild tasks such as RoslynCodeTaskFactory.
@@ -60,7 +67,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// </summary>
         public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
         {
-            return RunProcessAndGetOutput(pathToMsBuildExe, msbuildParameters, out successfulExit, shellExecute, outputHelper, environmentVariables: GetMSBuildEnvironmentVariables());
+            return RunProcessAndGetOutput(pathToMsBuildExe, msbuildParameters, out successfulExit, shellExecute, outputHelper, environmentVariables: GetMSBuildEnvironmentVariables(useBootstrapHost: false));
         }
 
         public static Task<(bool SuccessfulExit, string BuildOutput)> ExecBootstrappedMSBuildAsync(
@@ -88,20 +95,26 @@ namespace Microsoft.Build.UnitTests.Shared
 #else
             string pathToExecutable = Path.Combine(BootstrapMsBuildBinaryLocation, Constants.MSBuildExecutableName);
 #endif
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds, environmentVariables: GetMSBuildEnvironmentVariables());
+            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds, environmentVariables: GetMSBuildEnvironmentVariables(useBootstrapHost: true));
         }
 
         /// <summary>
         /// Returns environment variables that should be set when launching MSBuild as a child process.
         /// On .NET Core, this includes DOTNET_HOST_PATH so that tasks like RoslynCodeTaskFactory
-        /// can locate the dotnet host even when MSBuild runs as a native app host.
+        /// can locate the dotnet host even when MSBuild runs as a native app host, and so that any
+        /// task hosts MSBuild spawns resolve their runtime (DOTNET_ROOT) from the same host.
         /// </summary>
-        private static Dictionary<string, string> GetMSBuildEnvironmentVariables()
+        /// <param name="useBootstrapHost">
+        /// When <see langword="true"/>, DOTNET_HOST_PATH points at the dotnet host inside the bootstrap layout
+        /// (used when launching the bootstrapped MSBuild) so task hosts resolve the bootstrap runtime rather than
+        /// an ambient dotnet on PATH (e.g. the repo-local .dotnet, which may not contain the runtime the bootstrap targets).
+        /// </param>
+        private static Dictionary<string, string> GetMSBuildEnvironmentVariables(bool useBootstrapHost)
         {
 #if !FEATURE_RUN_EXE_IN_TESTS
             return new Dictionary<string, string>
             {
-                [Constants.DotnetHostPathEnvVarName] = s_dotnetExePath,
+                [Constants.DotnetHostPathEnvVarName] = useBootstrapHost ? s_bootstrapDotnetHostPath : s_dotnetExePath,
             };
 #else
             return null;
