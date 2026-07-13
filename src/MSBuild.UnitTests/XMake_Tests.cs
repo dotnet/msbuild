@@ -861,6 +861,41 @@ namespace Microsoft.Build.UnitTests
             results.ShouldNotContain(ResourceUtilities.GetResourceString("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
         }
 
+        /// <summary>
+        /// When no target is requested, <c>-getProperty</c>/<c>-getItem</c> evaluate only as far as
+        /// needed (partial evaluation, gated behind change wave 18.10). A project whose only error is
+        /// in the targets pass therefore succeeds for a property-only query, but reverts to failing
+        /// when the change wave is opted out (full evaluation).
+        /// </summary>
+        [Theory]
+        [InlineData(null, true)]      // wave enabled (default): partial evaluation stops before the failing targets pass
+        [InlineData("18.10", false)]  // wave disabled: full evaluation hits the failing targets pass
+        public void GetPropertyWithoutTargetUsesPartialEvaluation(string disableFeaturesFromVersion, bool expectedSuccess)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            if (disableFeaturesFromVersion is not null)
+            {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFeaturesFromVersion);
+            }
+
+            // The BeforeTargets expression only fails when the targets pass runs (pass 5); properties
+            // (pass 1) are unaffected, so a partial evaluation reads Foo without hitting the error.
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <PropertyGroup>
+    <Foo>EvalValue</Foo>
+  </PropertyGroup>
+  <Target Name=""Bad"" BeforeTargets=""$([System.Int32]::Parse('notanumber'))"" />
+</Project>
+");
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} -getProperty:Foo", out bool success);
+            success.ShouldBe(expectedSuccess, results);
+            if (expectedSuccess)
+            {
+                results.ShouldContain("EvalValue");
+            }
+        }
+
         [Fact]
         public void BuildFailsWithBadPropertyName()
         {
