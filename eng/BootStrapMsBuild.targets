@@ -300,17 +300,28 @@
       MSBuild can target an earlier .NET runtime (e.g. net10.0) than the SDK we overlay it onto (e.g. net11.0).
       In that case the freshly-built *.runtimeconfig.json files pin Microsoft.NETCore.App to a runtime version
       (e.g. 10.0.0) that isn't present in the bootstrap layout, so the just-built MSBuild would fail to start.
-      Rewrite that framework version to the SDK's major runtime version (Major.Minor.0 derived from the SDK
-      version) so MSBuild runs against the runtime that ships with the overlaid SDK. This mirrors what
-      dotnet/sdk does via its UpdateRuntimeConfig task, but as a low-cost find & replace with no dedicated task.
-      We only care about Microsoft.NETCore.App, so the replacement is keyed on that framework name and leaves
-      the previous version untouched (a no-op) once MSBuild targets the same major runtime as the SDK. -->
+      Rewrite that framework version to the exact runtime version that the overlaid SDK ships, so MSBuild runs
+      against the runtime present in the bootstrap layout. This mirrors what dotnet/sdk does via its
+      UpdateRuntimeConfig task, but as a low-cost find & replace with no dedicated task.
+
+      The exact runtime version (including any prerelease suffix) is read from the restored SDK's
+      Microsoft.NETCoreSdk.BundledVersions.props ($(BundledNETCoreAppPackageVersion)). We must not derive it from
+      BootstrapSdkVersion (that's the SDK version, e.g. 11.0.100-*, not the runtime version 11.0.0-*), nor use the
+      MSBuild property $(BundledNETCoreAppPackageVersion), which resolves to the runtime of the SDK building this
+      project rather than the one restored into the bootstrap. A wrong/rounded version (e.g. 11.0.0 without the
+      prerelease suffix) still lets the top-level SDK host roll forward, but the child apphosts (worker node,
+      TaskHost) fail with hostfxr error 150. We only care about Microsoft.NETCore.App, so the replacement is keyed
+      on that framework name and leaves the version untouched (a no-op) once MSBuild targets the SDK's runtime. -->
     <PropertyGroup>
-      <!-- The overlaid SDK's major runtime version, e.g. 11.0.100-preview.7.26360.111 => 11.0.0. -->
-      <_BootstrapSdkNetCoreVersion>$([System.Version]::Parse($(BootstrapSdkVersion.Split('-')[0])).Major).$([System.Version]::Parse($(BootstrapSdkVersion.Split('-')[0])).Minor).0</_BootstrapSdkNetCoreVersion>
+      <_BootstrapBundledVersionsFile>$(InstallDir)sdk\$(BootstrapSdkVersion)\Microsoft.NETCoreSdk.BundledVersions.props</_BootstrapBundledVersionsFile>
+      <!-- The exact runtime version restored into the bootstrap, e.g. 11.0.0-preview.5.26302.115. -->
+      <_BootstrapNetCoreVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(_BootstrapBundledVersionsFile)')), '&lt;BundledNETCoreAppPackageVersion&gt;([^&lt;]+)&lt;').Groups[1].Value)</_BootstrapNetCoreVersion>
       <_BootstrapNetCoreVersionPattern>(&quot;name&quot;:\s*&quot;Microsoft\.NETCore\.App&quot;,\s*&quot;version&quot;:\s*&quot;)[^&quot;]*</_BootstrapNetCoreVersionPattern>
-      <_BootstrapNetCoreVersionReplacement>${1}$(_BootstrapSdkNetCoreVersion)</_BootstrapNetCoreVersionReplacement>
+      <_BootstrapNetCoreVersionReplacement>${1}$(_BootstrapNetCoreVersion)</_BootstrapNetCoreVersionReplacement>
     </PropertyGroup>
+
+    <Error Condition="'$(_BootstrapNetCoreVersion)' == ''"
+           Text="Could not read BundledNETCoreAppPackageVersion from '$(_BootstrapBundledVersionsFile)'; the bootstrap runtimeconfig.json files cannot be rewritten to a valid runtime version." />
 
     <ItemGroup>
       <_BootstrapRuntimeConfigFile Include="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')"
