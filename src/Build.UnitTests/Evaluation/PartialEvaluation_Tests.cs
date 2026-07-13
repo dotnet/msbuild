@@ -117,6 +117,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        public void ProjectFactories_RejectNullOptions()
+        {
+            // The partial-stage guard is the first thing the factories do, so it must not dereference
+            // a null ProjectOptions; callers get the canonical ArgumentNullException instead.
+            Should.Throw<ArgumentNullException>(() =>
+                Project.FromProjectRootElement(CreateRootElement(), null));
+        }
+
+        [Fact]
         public void ProjectFactories_AllowFullEvaluationStage()
         {
             Project project = Project.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Full));

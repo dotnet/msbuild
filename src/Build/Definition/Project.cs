@@ -558,6 +558,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private static void ThrowIfPartialEvaluationRequested(ProjectOptions options)
         {
+            ArgumentNullException.ThrowIfNull(options);
+
             if (options.EvaluationStage != ProjectEvaluationStage.Full)
             {
                 ErrorUtilities.ThrowArgument("OM_PartialEvaluationNotSupportedForProject", options.EvaluationStage);

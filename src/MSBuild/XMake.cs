@@ -1044,7 +1044,7 @@ namespace Microsoft.Build.CommandLine
                             // reports the project load error (for example MSB4025) rather than failing silently.
                             if (!ex.HasBeenLogged)
                             {
-                                Console.WriteLine($"MSBUILD : error {ex.ErrorCode}: {ex.BaseMessage}");
+                                Console.WriteLine($"MSBUILD : error {ex.ErrorCode}: {ex.Message}");
                             }
 
                             exitType = ExitType.BuildError;
