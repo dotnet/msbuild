@@ -35,8 +35,14 @@
          run ONLY those tests instead. See azure-pipelines/quarantine.yml. -->
     <_ExcludedTestCategoryFilter Condition="'$(RunQuarantinedTests)' != 'true'">$(_ExcludedTestCategoryFilter);failing</_ExcludedTestCategoryFilter>
 
-    <!-- xUnit projects use Category traits; migrated MSTest.Sdk projects expose the same values as TestCategory traits. -->
-    <UnitTestRunnerOptions Condition="'$(UsingMSTestSdk)' == 'true' and '$(_ExcludedTestCategoryFilter)' != ''">$(UnitTestRunnerOptions) --filter-not-trait TestCategory=$(_ExcludedTestCategoryFilter)</UnitTestRunnerOptions>
+    <!-- xUnit projects use Category traits and the xUnit MTP runner's not-trait filter extension.
+         MSTest.Sdk projects run on the MSTest runner, which does not understand that extension;
+         it uses the VSTest-style TestCaseFilter expression via the filter option instead. The excluded
+         categories are a ';'-separated list, so rewrite them into "TestCategory!=a&TestCategory!=b..."
+         and wrap the whole expression in quotes so '&' is not interpreted by /bin/sh (arcade runs the
+         test command through Exec, which uses /bin/sh on non-Windows). -->
+    <_MSTestExcludeFilter Condition="'$(UsingMSTestSdk)' == 'true' and '$(_ExcludedTestCategoryFilter)' != ''">TestCategory!=$(_ExcludedTestCategoryFilter.Replace(';', '&amp;TestCategory!='))</_MSTestExcludeFilter>
+    <UnitTestRunnerOptions Condition="'$(UsingMSTestSdk)' == 'true' and '$(_MSTestExcludeFilter)' != ''">$(UnitTestRunnerOptions) --filter "$(_MSTestExcludeFilter)"</UnitTestRunnerOptions>
     <UnitTestRunnerOptions Condition="'$(UsingMSTestSdk)' != 'true' and '$(_ExcludedTestCategoryFilter)' != ''">$(UnitTestRunnerOptions) --filter-not-trait Category=$(_ExcludedTestCategoryFilter)</UnitTestRunnerOptions>
 
     <!-- Quarantined tests are expected to be flaky, and most assemblies contain zero quarantined
@@ -44,7 +50,7 @@
          an actual infrastructure problem. The per-test signal is the published TRX, not exit code.
          The "8;2" value MUST stay quoted: arcade runs the test command through <Exec>, which on
          non-Windows executes via /bin/sh, where an unquoted ';' is a command separator. -->
-    <UnitTestRunnerOptions Condition="'$(UsingMSTestSdk)' == 'true' and '$(RunQuarantinedTests)' == 'true'"> --filter-trait TestCategory=failing --ignore-exit-code "8;2"</UnitTestRunnerOptions>
+    <UnitTestRunnerOptions Condition="'$(UsingMSTestSdk)' == 'true' and '$(RunQuarantinedTests)' == 'true'"> --filter "TestCategory=failing" --ignore-exit-code "8;2"</UnitTestRunnerOptions>
     <UnitTestRunnerOptions Condition="'$(UsingMSTestSdk)' != 'true' and '$(RunQuarantinedTests)' == 'true'"> --filter-trait Category=failing --ignore-exit-code "8;2"</UnitTestRunnerOptions>
 
     <!-- Enable code coverage on non-Windows normal runs. Quarantined-only runs skip coverage. -->

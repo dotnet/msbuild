@@ -555,7 +555,7 @@ public class FileUtilities_Tests
     {
         if (!RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241())
         {
-            Assert.Skip("These tests will need to be redesigned for Linux");
+            Assert.Inconclusive("These tests will need to be redesigned for Linux");
         }
 
         int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
@@ -575,7 +575,7 @@ public class FileUtilities_Tests
     {
         if (!RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241())
         {
-            Assert.Skip("These tests will need to be redesigned for Linux");
+            Assert.Inconclusive("These tests will need to be redesigned for Linux");
         }
 
         int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
@@ -633,7 +633,7 @@ public class FileUtilities_Tests
     {
         if (!RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241())
         {
-            Assert.Skip("These tests will need to be redesigned for Linux");
+            Assert.Inconclusive("These tests will need to be redesigned for Linux");
         }
 
         int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
@@ -674,7 +674,7 @@ public class FileUtilities_Tests
     {
         if (!RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241())
         {
-            Assert.Skip("These tests will need to be redesigned for Linux");
+            Assert.Inconclusive("These tests will need to be redesigned for Linux");
         }
 
         int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
@@ -694,7 +694,7 @@ public class FileUtilities_Tests
     {
         if (!RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241())
         {
-            Assert.Skip("These tests will need to be redesigned for Linux");
+            Assert.Inconclusive("These tests will need to be redesigned for Linux");
         }
 
         int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;

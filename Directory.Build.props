@@ -28,7 +28,17 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(UsingMSTestSdk)' == 'true'">
-    <UsingToolXUnit>false</UsingToolXUnit>
+    <!--
+        Wire Arcade's test infrastructure to the MSTest runner on Microsoft.Testing.Platform (MTP).
+        Arcade's Tests.targets imports its MSTest runner (which defines the RunTests target used by
+        the Test target) only when TestRunnerName=MSTest and EnableMSTestRunner=true. Setting
+        UsingToolXUnit=false would instead blank out TestRunnerName and skip that import entirely,
+        so we leave it unset and select the MSTest runner explicitly. UseMSTestSdk stops Arcade from
+        injecting Microsoft.NET.Test.Sdk / duplicate MSTest packages that MSTest.Sdk already provides.
+    -->
+    <TestRunnerName>MSTest</TestRunnerName>
+    <EnableMSTestRunner>true</EnableMSTestRunner>
+    <UseMSTestSdk>true</UseMSTestSdk>
     <MSTestParallelizeScope>None</MSTestParallelizeScope>
     <MicrosoftTestingPlatformVersion>2.3.1</MicrosoftTestingPlatformVersion>
     <MSTestVersion>4.3.0</MSTestVersion>

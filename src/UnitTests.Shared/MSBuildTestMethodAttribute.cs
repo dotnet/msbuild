@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests
                 "nonwindowstests" => RuntimeInformation.IsOSPlatform(OSPlatform.Windows),
                 "nonlinuxtests" => RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
                 "nonosxtests" => RuntimeInformation.IsOSPlatform(OSPlatform.OSX),
-                "nonfreebsdtests" => RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD),
+                "nonfreebsdtests" => RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")),
                 "nonnetcoreapptests" => !RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase),
                 "nonnetfxtests" => RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase),
                 "netcore-linux-failing" => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && !RuntimeInformation.FrameworkDescription.StartsWith(".NET Framework", StringComparison.OrdinalIgnoreCase),
@@ -378,7 +378,7 @@ namespace Microsoft.Build.UnitTests
                 TestPlatforms.Windows => NativeMethodsShared.IsWindows,
                 TestPlatforms.Linux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
                 TestPlatforms.OSX => RuntimeInformation.IsOSPlatform(OSPlatform.OSX),
-                TestPlatforms.FreeBSD => RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD),
+                TestPlatforms.FreeBSD => RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")),
                 TestPlatforms.AnyUnix => !NativeMethodsShared.IsWindows,
                 _ => false,
             };
@@ -407,7 +407,7 @@ namespace Microsoft.Build.UnitTests
                 TestPlatforms.Windows => NativeMethodsShared.IsWindows,
                 TestPlatforms.Linux => RuntimeInformation.IsOSPlatform(OSPlatform.Linux),
                 TestPlatforms.OSX => RuntimeInformation.IsOSPlatform(OSPlatform.OSX),
-                TestPlatforms.FreeBSD => RuntimeInformation.IsOSPlatform(OSPlatform.FreeBSD),
+                TestPlatforms.FreeBSD => RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")),
                 TestPlatforms.AnyUnix => !NativeMethodsShared.IsWindows,
                 _ => false,
             };

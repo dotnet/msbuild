@@ -157,7 +157,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             string? source = TryGetCandidateFrameworkDll();
             if (source is null)
             {
-                Assert.Skip("No candidate framework DLL available on this machine.");
+                Assert.Inconclusive("No candidate framework DLL available on this machine.");
             }
 
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -186,7 +186,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             string? source = TryGetCandidateFrameworkDll();
             if (source is null)
             {
-                Assert.Skip("No candidate framework DLL available on this machine.");
+                Assert.Inconclusive("No candidate framework DLL available on this machine.");
             }
 
             using TestEnvironment env = TestEnvironment.Create(_output);
