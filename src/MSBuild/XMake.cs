@@ -1006,12 +1006,15 @@ namespace Microsoft.Build.CommandLine
                                 // Properties pass; items require the Items pass. This skips the later passes
                                 // (using-tasks and target registration) entirely. Gated behind change wave 18.10
                                 // so the historical full-evaluation behavior can be restored if needed.
+                                // A ProjectInstance (an uncached evaluation snapshot) is used rather than a Project
+                                // because this is a read-only "evaluate, read, discard" scenario and partial
+                                // evaluation is only supported on ProjectInstance.
                                 ProjectEvaluationStage evaluationStage =
                                     ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
                                         ? (getItem.Length == 0 ? ProjectEvaluationStage.Properties : ProjectEvaluationStage.Items)
                                         : ProjectEvaluationStage.Full;
 
-                                Project project = Project.FromFile(projectFile, new ProjectOptions
+                                ProjectInstance project = ProjectInstance.FromFile(projectFile, new ProjectOptions
                                 {
                                     ProjectCollection = collection,
                                     GlobalProperties = globalProperties,
@@ -1033,8 +1036,17 @@ namespace Microsoft.Build.CommandLine
                                 collection.LogBuildFinishedEvent(exitType == ExitType.Success);
                             }
                         }
-                        catch (InvalidProjectFileException)
+                        catch (InvalidProjectFileException ex)
                         {
+                            // ProjectInstance evaluation logs semantic evaluation errors through the collection's
+                            // loggers, but a pre-evaluation failure (for example malformed project XML) throws
+                            // before any logging occurs. Surface the latter in canonical format so the CLI still
+                            // reports the project load error (for example MSB4025) rather than failing silently.
+                            if (!ex.HasBeenLogged)
+                            {
+                                Console.WriteLine($"MSBUILD : error {ex.ErrorCode}: {ex.Message}");
+                            }
+
                             exitType = ExitType.BuildError;
                         }
                     }
@@ -1315,7 +1327,7 @@ namespace Microsoft.Build.CommandLine
                 isStandaloneExecution: !s_isNodeMode);
         }
 
-        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project, TextWriter outputStream)
+        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, ProjectInstance project, TextWriter outputStream)
         {
             // Special case if the user requests exactly one property: skip json formatting
             if (getProperty.Length == 1 && getItem.Length == 0)
@@ -1326,7 +1338,7 @@ namespace Microsoft.Build.CommandLine
             {
                 JsonOutputFormatter jsonOutputFormatter = new();
                 jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
-                jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
+                jsonOutputFormatter.AddItemInstancesInJsonFormat(getItem, project);
                 outputStream.WriteLine(jsonOutputFormatter.ToString());
             }
 
