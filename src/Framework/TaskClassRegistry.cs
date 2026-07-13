@@ -111,7 +111,7 @@ internal static class TaskClassRegistry
     /// keeping parameter binding working; the host-supplied factory handles construction.
     /// </typeparam>
     /// <param name="factory">A delegate that creates a new instance of the task given the current <see cref="TaskEnvironment"/>.</param>
-    internal static void Register<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] TTask>(Func<TaskEnvironment, ITask> factory)
+    internal static void Register<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] TTask>(Func<TaskEnvironment, TTask> factory)
         where TTask : ITask
     {
         ArgumentNullException.ThrowIfNull(factory);
@@ -120,7 +120,10 @@ internal static class TaskClassRegistry
         // GetProperties walk) is trim-safe and is done once, eagerly, at registration.
         LoadedType loadedType = CreateLoadedType(typeof(TTask));
 
-        s_tasksByName[typeof(TTask).Name] = new TaskClassRegistration(factory, loadedType);
+        // The registration stores an ITask-returning factory; TTask : ITask, so the host's typed factory
+        // coerces to it. Accepting Func<TaskEnvironment, TTask> (rather than Func<TaskEnvironment, ITask>) lets
+        // callers rely on type inference for TTask instead of writing it explicitly.
+        s_tasksByName[typeof(TTask).Name] = new TaskClassRegistration(taskEnvironment => factory(taskEnvironment), loadedType);
         s_hasRegistrations = true;
     }
 

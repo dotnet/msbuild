@@ -234,6 +234,11 @@ namespace Microsoft.Build.Utilities
         /// environment in its constructor should also store it into that property.
         /// </para>
         /// <para>
+        /// Because the factory returns <typeparamref name="TTask"/>, the compiler infers <typeparamref name="TTask"/>
+        /// from the factory, so callers normally do not write the type argument explicitly (for example
+        /// <c>RegisterTask(env =&gt; new MyTask(env))</c>).
+        /// </para>
+        /// <para>
         /// Intended to be called once per task during host initialization, before the first build. This
         /// method is thread-safe; registering the same name again replaces the previous registration. A
         /// registered name takes precedence over a project-level <c>&lt;UsingTask&gt;</c> of the same name.
@@ -241,7 +246,7 @@ namespace Microsoft.Build.Utilities
         /// </remarks>
         public static void RegisterTask<
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] TTask>(
-            Func<TaskEnvironment, ITask> factory)
+            Func<TaskEnvironment, TTask> factory)
             where TTask : ITask
             => TaskClassRegistry.Register<TTask>(factory);
 

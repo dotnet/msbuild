@@ -171,7 +171,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void RegisterTaskEnvironmentFactory_InjectsEnvironment()
         {
-            Task.RegisterTask<RegisteredEnvOnlyCtorTestTask>(static env => new RegisteredEnvOnlyCtorTestTask(env));
+            Task.RegisterTask(static (TaskEnvironment env) => new RegisteredEnvOnlyCtorTestTask(env));
 
             string project = """
                 <Project DefaultTargets="Build">
