@@ -197,30 +197,40 @@ namespace Microsoft.Build.Shared
         /// Native AOT friendly, since no dynamic code is generated.
         /// </summary>
         /// <remarks>
-        /// Discovery is deferred until first access so that the extra constructor reflection is only paid
-        /// for types we actually instantiate — not for the many <see cref="LoadedType"/> instances built
-        /// solely to marshal property metadata to a task host. A <see cref="LoadedType"/> is cached per task
-        /// type and shared across threads in multi-threaded builds, so the memoization is thread-safe: the
-        /// worst a race can do is resolve the same (equivalent) constructor on more than one thread, and the
-        /// volatile flag guarantees a reader that observes <c>true</c> also observes the published value.
+        /// See <see cref="EnsureConstructorsResolved"/> for the deferred, thread-safe resolution strategy.
         /// </remarks>
         internal ConstructorInfo? TaskEnvironmentConstructor
         {
             get
             {
-                if (!_taskEnvironmentConstructorComputed)
-                {
-                    _taskEnvironmentConstructor = FindTaskEnvironmentConstructor(Type, LoadedViaMetadataLoadContext);
-                    _taskEnvironmentConstructorComputed = true;
-                }
-
+                EnsureConstructorsResolved();
                 return _taskEnvironmentConstructor;
+            }
+        }
+
+        /// <summary>
+        /// Gets the public parameterless instance constructor, or <see langword="null"/> if the type does not
+        /// declare one. Invoking this cached <see cref="ConstructorInfo"/> directly lets callers instantiate
+        /// the task without <see cref="Activator.CreateInstance(Type)"/>, keeping every task-creation path on a
+        /// single, Native AOT friendly mechanism that generates no dynamic code.
+        /// </summary>
+        /// <remarks>
+        /// See <see cref="EnsureConstructorsResolved"/> for the deferred, thread-safe resolution strategy.
+        /// </remarks>
+        internal ConstructorInfo? ParameterlessConstructor
+        {
+            get
+            {
+                EnsureConstructorsResolved();
+                return _parameterlessConstructor;
             }
         }
 
         private ConstructorInfo? _taskEnvironmentConstructor;
 
-        private volatile bool _taskEnvironmentConstructorComputed;
+        private ConstructorInfo? _parameterlessConstructor;
+
+        private volatile bool _constructorsResolved;
 
         /// <summary>
         /// Gets whether there's a STAThread attribute on the Execute method of this type.
@@ -261,36 +271,57 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Finds the public instance constructor that takes a single <see cref="TaskEnvironment"/> parameter,
-        /// returning it so callers can invoke it directly, or <see langword="null"/> if none exists. The
-        /// comparison is done by full type name so that it also works for types loaded via MetadataLoadContext,
-        /// whose <see cref="TaskEnvironment"/> is a distinct <see cref="Type"/> identity from the one loaded in
-        /// the current context.
+        /// Resolves — on first access and at most once per observed result — the public instance constructors
+        /// this type offers for task instantiation: the parameterless constructor and the one that takes a
+        /// single <see cref="TaskEnvironment"/> parameter (if any). Both are found in a single reflection pass.
+        /// The <see cref="TaskEnvironment"/> parameter is matched by full type name so that it also works for
+        /// types loaded via MetadataLoadContext, whose <see cref="TaskEnvironment"/> is a distinct
+        /// <see cref="Type"/> identity from the one loaded in the current context.
         /// </summary>
-        private static ConstructorInfo? FindTaskEnvironmentConstructor(
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
-            Type type,
-            bool loadedViaMetadataLoadContext)
+        /// <remarks>
+        /// Resolution is deferred until first access so that the constructor reflection is only paid for types
+        /// we actually instantiate — not for the many <see cref="LoadedType"/> instances built solely to
+        /// marshal property metadata to a task host. A <see cref="LoadedType"/> is cached per task type and
+        /// shared across threads in multi-threaded builds, so the memoization is intentionally lock-free: the
+        /// worst a race can do is resolve the same (equivalent) constructors on more than one thread, and the
+        /// volatile <see cref="_constructorsResolved"/> flag guarantees a reader that observes <c>true</c> also
+        /// observes the published constructor references.
+        /// </remarks>
+        private void EnsureConstructorsResolved()
         {
+            if (_constructorsResolved)
+            {
+                return;
+            }
+
+            ConstructorInfo? parameterlessConstructor = null;
+            ConstructorInfo? taskEnvironmentConstructor = null;
+
             try
             {
-                foreach (ConstructorInfo constructor in type.GetConstructors(BindingFlags.Instance | BindingFlags.Public))
+                foreach (ConstructorInfo constructor in Type.GetConstructors(BindingFlags.Instance | BindingFlags.Public))
                 {
                     ParameterInfo[] parameters = constructor.GetParameters();
-                    if (parameters.Length == 1 &&
+                    if (parameters.Length == 0)
+                    {
+                        parameterlessConstructor = constructor;
+                    }
+                    else if (parameters.Length == 1 &&
                         string.Equals(parameters[0].ParameterType.FullName, TaskEnvironmentTypeFullName, StringComparison.Ordinal))
                     {
-                        return constructor;
+                        taskEnvironmentConstructor = constructor;
                     }
                 }
             }
-            catch when (loadedViaMetadataLoadContext)
+            catch when (LoadedViaMetadataLoadContext)
             {
                 // Reflecting over constructors of a MetadataLoadContext-loaded type can fail; such types are
                 // executed in a task host rather than instantiated in-proc, so it is safe to report none here.
             }
 
-            return null;
+            _parameterlessConstructor = parameterlessConstructor;
+            _taskEnvironmentConstructor = taskEnvironmentConstructor;
+            _constructorsResolved = true;
         }
 
         private static readonly string TaskEnvironmentTypeFullName = typeof(TaskEnvironment).FullName!;

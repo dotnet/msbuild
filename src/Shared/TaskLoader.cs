@@ -1,9 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using Microsoft.Build.Framework;
 #if FEATURE_APPDOMAIN
+using System;
 using System.Reflection;
 using Microsoft.Build.Shared.Debugging;
 #endif
@@ -119,15 +119,16 @@ namespace Microsoft.Build.Shared
                     // and don't want to go through reflection to recreate it from the name.
                     // If the task declares a constructor that accepts a TaskEnvironment, prefer it so the task
                     // can compute environment-dependent default values during construction. The engine still
-                    // sets the TaskEnvironment property separately after construction. Invoking the cached
-                    // ConstructorInfo directly avoids the reflection-binder overload-resolution cost that
+                    // sets the TaskEnvironment property separately after construction. Either way we invoke the
+                    // cached ConstructorInfo directly, keeping task creation on a single Native AOT friendly
+                    // mechanism and avoiding the reflection-binder overload-resolution cost that
                     // Activator.CreateInstance(Type, object[]) would pay on every task instantiation.
                     if (loadedType.HasTaskEnvironmentConstructor)
                     {
                         return (ITask?)loadedType.TaskEnvironmentConstructor!.Invoke(new object[] { taskEnvironment ?? TaskEnvironment.Fallback });
                     }
 
-                    return (ITask?)Activator.CreateInstance(loadedType.Type);
+                    return (ITask?)loadedType.ParameterlessConstructor!.Invoke(null);
                 }
 
 #if FEATURE_APPDOMAIN
