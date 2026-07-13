@@ -142,6 +142,14 @@ namespace Microsoft.Build.UnitTests.Shared
                 [Constants.DotnetHostPathEnvVarName] = s_bootstrapDotnetHostPath,
                 ["DOTNET_ROOT"] = bootstrapRoot,
                 ["DOTNET_INSTALL_DIR"] = bootstrapRoot,
+
+                // The CI two-stage build uses the stage 1 bootstrap as the build tool for stage 2, which exports
+                // MSBuildSDKsPath/MSBuildExtensionsPath pointing at the stage 1 layout. These leak into the stage 2 test
+                // host and would make the launched stage 2 bootstrapped MSBuild resolve Microsoft.NET.Sdk (and therefore
+                // its task host) from stage 1, failing with MSB4216. Remove them (null value) so the child self-derives
+                // both paths from its own location. Locally these are unset, so removal is a no-op.
+                ["MSBuildSDKsPath"] = null,
+                ["MSBuildExtensionsPath"] = null,
             };
 
             // Architecture-specific DOTNET_ROOT_<ARCH> variables take precedence over DOTNET_ROOT for the app host, so a
