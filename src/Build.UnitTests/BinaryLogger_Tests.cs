@@ -296,7 +296,7 @@ namespace Microsoft.Build.UnitTests
             //  and to force the embedded files to be read.
             reader2.Read().ShouldBeNull($"Binlogs ({firstPath} and {secondPath}) are not equal - second has more events >{i + 1}");
 
-            Assert.AreEqual(embedFiles1, embedFiles2);
+            Helpers.AssertDictionariesEqual(embedFiles1, embedFiles2);
 
             void AddArchiveFile(Dictionary<string, string> files, ArchiveFileEventArgs arg)
             {

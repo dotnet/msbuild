@@ -78,7 +78,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
                         s_currentFramework,
                         "ProjectCachePlugin.dll"));
 
-        [TestClass]
         public class GraphCacheResponse
         {
             private readonly IDictionary<int, string>? _extraContentPerProjectNumber;
@@ -208,7 +207,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
         }
 
-        [TestClass]
         public class DelegatingMockCache : ProjectCachePluginBase
         {
             private readonly Func<BuildRequestData, PluginLoggerBase, CancellationToken, Task<CacheResult>> _getCacheResultDelegate;
@@ -278,7 +276,6 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
         }
 
-        [TestClass]
         public class InstanceMockCache : ProjectCachePluginBase
         {
             private readonly GraphCacheResponse? _testData;

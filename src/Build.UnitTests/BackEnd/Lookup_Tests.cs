@@ -1581,7 +1581,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
     }
 
-    [TestClass]
     internal sealed class LookupHelpers
     {
         internal static Lookup CreateEmptyLookup()

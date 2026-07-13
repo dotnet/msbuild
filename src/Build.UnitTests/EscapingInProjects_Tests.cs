@@ -1787,7 +1787,6 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
     }
 #endif
 
-    [TestClass]
     internal sealed class EscapingInProjectsHelper
     {
         /// <summary>

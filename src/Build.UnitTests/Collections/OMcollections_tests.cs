@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             PropertyDictionary<ProjectPropertyInstance> deserializedProperties = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref deserializedProperties, ProjectPropertyInstance.FactoryForDeserialization);
 
-            Assert.AreEqual(properties, deserializedProperties);
+            Assert.IsTrue(EqualityComparer<PropertyDictionary<ProjectPropertyInstance>>.Default.Equals(properties, deserializedProperties));
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             PropertyDictionary<ProjectPropertyInstance> deserializedProperties = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref deserializedProperties, ProjectPropertyInstance.FactoryForDeserialization);
 
-            Assert.AreEqual(properties, deserializedProperties);
+            Assert.IsTrue(EqualityComparer<PropertyDictionary<ProjectPropertyInstance>>.Default.Equals(properties, deserializedProperties));
         }
 
         /// <summary>

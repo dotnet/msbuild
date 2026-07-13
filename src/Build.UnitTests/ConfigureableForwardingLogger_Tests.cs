@@ -32,7 +32,6 @@ namespace Microsoft.Build.UnitTests
         private readonly ProjectFinishedEventArgs _projectFinished = new ProjectFinishedEventArgs("message", "help", "ProjectFile", true);
         private readonly ExternalProjectStartedEventArgs _externalStartedEvent = new ExternalProjectStartedEventArgs("message", "help", "senderName", "projectFile", "targetNames");
 
-        [TestClass]
         internal sealed class TestForwardingLogger : ConfigurableForwardingLogger
         {
             internal TestForwardingLogger()

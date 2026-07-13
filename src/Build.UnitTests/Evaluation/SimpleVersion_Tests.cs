@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [DataRow(0)]
         [DataRow(2)]
         [DataRow(int.MaxValue)]
-        public static void Ctor_Int(int major)
+        public void Ctor_Int(int major)
         {
             VerifyVersion(new SimpleVersion(major), major, 0, 0, 0);
         }
@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [DataRow(0, 0)]
         [DataRow(2, 3)]
         [DataRow(int.MaxValue, int.MaxValue)]
-        public static void Ctor_Int_Int(int major, int minor)
+        public void Ctor_Int_Int(int major, int minor)
         {
             VerifyVersion(new SimpleVersion(major, minor), major, minor, 0, 0);
         }
@@ -41,7 +41,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [DataRow(0, 0, 0)]
         [DataRow(2, 3, 4)]
         [DataRow(int.MaxValue, int.MaxValue, int.MaxValue)]
-        public static void Ctor_Int_Int_Int(int major, int minor, int build)
+        public void Ctor_Int_Int_Int(int major, int minor, int build)
         {
             VerifyVersion(new SimpleVersion(major, minor, build), major, minor, build, 0);
         }
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [DataRow(2, 3, 4, 2147450879)]
         [DataRow(2, 3, 4, 2147418112)]
         [DataRow(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue)]
-        public static void Ctor_Int_Int_Int_Int(int major, int minor, int build, int revision)
+        public void Ctor_Int_Int_Int_Int(int major, int minor, int build, int revision)
         {
             VerifyVersion(new SimpleVersion(major, minor, build, revision), major, minor, build, revision);
         }
@@ -190,7 +190,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [MSBuildTestMethod]
         [DynamicData(nameof(Equals_TestData))]
-        public static void Equals_Other_ReturnsExpected(object version1Object, object version2Object, bool expected)
+        public void Equals_Other_ReturnsExpected(object version1Object, object version2Object, bool expected)
         {
             var version1 = (SimpleVersion)version1Object;
 
@@ -226,7 +226,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [MSBuildTestMethod]
         [DynamicData(nameof(Parse_Valid_TestData))]
-        public static void Parse_ValidInput_ReturnsExpected(string input, object expected)
+        public void Parse_ValidInput_ReturnsExpected(string input, object expected)
         {
             Assert.AreEqual(expected, SimpleVersion.Parse(input));
         }
@@ -276,7 +276,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [MSBuildTestMethod]
         [DynamicData(nameof(Parse_Invalid_TestData))]
-        public static void Parse_InvalidInput_ThrowsException(string input, Type exceptionType)
+        public void Parse_InvalidInput_ThrowsException(string input, Type exceptionType)
         {
             Should.Throw(() => SimpleVersion.Parse(input), exceptionType);
         }
@@ -291,7 +291,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         [MSBuildTestMethod]
         [DynamicData(nameof(ToString_TestData))]
-        public static void ToString_Invoke_ReturnsExpected(object versionObject, string expected)
+        public void ToString_Invoke_ReturnsExpected(object versionObject, string expected)
         {
             var version = (SimpleVersion)versionObject;
 

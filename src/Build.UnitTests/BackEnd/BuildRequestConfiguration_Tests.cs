@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestEquals()
         {
             BuildRequestConfiguration config1 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null), "2.0");
-            Assert.AreEqual(config1, config1);
+            Assert.IsTrue(config1.Equals(config1));
             BuildRequestConfiguration config2 = new BuildRequestConfiguration(new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null), "2.0");
             Assert.AreEqual(config1, config2);
 

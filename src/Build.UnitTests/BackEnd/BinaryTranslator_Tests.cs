@@ -869,7 +869,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, string> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary(ref deserializedValue, StringComparer.OrdinalIgnoreCase);
 
-            Assert.AreEqual(value, deserializedValue);
+            Helpers.AssertDictionariesEqual(value, deserializedValue);
         }
 
         /// <summary>
@@ -908,7 +908,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, BaseClass> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary(ref deserializedValue, StringComparer.OrdinalIgnoreCase, BaseClass.FactoryForDeserialization);
 
-            Assert.AreEqual(value, deserializedValue);
+            Helpers.AssertDictionariesEqual(value, deserializedValue, (xPair, yPair) => { Assert.AreEqual(xPair.Key, yPair.Key); Assert.AreEqual(xPair.Value, yPair.Value); });
         }
 
         /// <summary>
@@ -947,7 +947,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Dictionary<string, BaseClass> deserializedValue = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary<Dictionary<string, BaseClass>, BaseClass>(ref deserializedValue, BaseClass.FactoryForDeserialization);
 
-            Assert.AreEqual(value, deserializedValue);
+            Helpers.AssertDictionariesEqual(value, deserializedValue, (xPair, yPair) => { Assert.AreEqual(xPair.Key, yPair.Key); Assert.AreEqual(xPair.Value, yPair.Value); });
         }
 
         /// <summary>

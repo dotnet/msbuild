@@ -26,7 +26,9 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
                 Assert.IsTrue(x.Properties.SequenceEqual(y.Properties, EqualityComparer<ProjectPropertyInstance>.Default));
                 Assert.IsTrue(x.TestEnvironmentalProperties.SequenceEqual(y.TestEnvironmentalProperties, EqualityComparer<ProjectPropertyInstance>.Default));
                 Helpers.AssertDictionariesEqual(x.GlobalProperties, y.GlobalProperties);
-                Assert.AreEqual(((EvaluatorData)x).GlobalPropertiesToTreatAsLocal, ((EvaluatorData)y).GlobalPropertiesToTreatAsLocal);
+                ISet<string> globalToLocalX = ((EvaluatorData)x).GlobalPropertiesToTreatAsLocal;
+                ISet<string> globalToLocalY = ((EvaluatorData)y).GlobalPropertiesToTreatAsLocal;
+                Assert.IsTrue((globalToLocalX == null && globalToLocalY == null) || (globalToLocalX != null && globalToLocalY != null && globalToLocalX.SetEquals(globalToLocalY)));
 
                 Assert.IsTrue(x.Items.ToArray().SequenceEqual(y.Items.ToArray(), ProjectItemInstance.ProjectItemInstanceEqualityComparer.Default));
 
@@ -40,8 +42,8 @@ namespace Microsoft.Build.Engine.UnitTests.TestComparers
                     });
                 Helpers.AssertDictionariesEqual(((EvaluatorData)x).BeforeTargets, ((EvaluatorData)y).BeforeTargets, AssertTargetSpecificationPairsEqual);
                 Helpers.AssertDictionariesEqual(((EvaluatorData)x).AfterTargets, ((EvaluatorData)y).AfterTargets, AssertTargetSpecificationPairsEqual);
-                Assert.AreEqual(x.DefaultTargets, y.DefaultTargets);
-                Assert.AreEqual(x.InitialTargets, y.InitialTargets);
+                CollectionAssert.AreEqual(x.DefaultTargets, y.DefaultTargets);
+                CollectionAssert.AreEqual(x.InitialTargets, y.InitialTargets);
 
                 Assert.AreEqual(x.Toolset, y.Toolset, new TaskRegistryComparers.ToolsetComparer());
                 Assert.AreEqual(x.UsingDifferentToolsVersionFromProjectFile, y.UsingDifferentToolsVersionFromProjectFile);

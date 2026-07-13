@@ -362,7 +362,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 #endif
             Assert.IsNull(deserializedConfig.TaskParameters);
 
-            Assert.AreEqual(expectedGlobalProperties, deserializedConfig.GlobalProperties);
+            Helpers.AssertDictionariesEqual(expectedGlobalProperties, deserializedConfig.GlobalProperties);
         }
 
 #if FEATURE_APPDOMAIN
@@ -970,7 +970,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Helper methods for testing the task host-related packets.
         /// </summary>
-        [TestClass]
         internal static class TaskHostPacketHelpers
         {
             /// <summary>

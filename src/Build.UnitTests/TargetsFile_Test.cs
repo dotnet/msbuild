@@ -2467,7 +2467,6 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Helper methods for unit-tests in this file.
     /// </summary>
-    [TestClass]
     internal static class Helper
     {
         /// <summary>

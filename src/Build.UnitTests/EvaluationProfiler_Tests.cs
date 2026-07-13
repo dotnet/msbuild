@@ -11,8 +11,8 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Logging;
 using Microsoft.Build.UnitTests;
-using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 using Shouldly;
+using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 
 #nullable disable
 

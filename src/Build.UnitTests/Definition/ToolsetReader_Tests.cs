@@ -2742,7 +2742,6 @@ namespace Microsoft.Build.UnitTests.Definition
 #endif
 
 #if FEATURE_WIN32_REGISTRY
-    [TestClass]
     internal sealed class MockRegistryKey : RegistryKeyWrapper
     {
         public enum WhereToThrow

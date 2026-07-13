@@ -963,7 +963,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private static readonly DateTime Middle = new DateTime(2001, 1, 1);
         private static readonly DateTime New = new DateTime(2002, 1, 1);
 
-        [MSBuildTestMethod]
         [Ignore("Creating a symlink on Windows requires elevation.")]
         [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
         [SupportedOSPlatform("windows6.1")]
@@ -975,7 +974,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 expectedOutOfDate: false);
         }
 
-        [MSBuildTestMethod]
         [Ignore("Creating a symlink on Windows requires elevation.")]
         [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
         [SupportedOSPlatform("windows6.1")]
@@ -987,7 +985,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 expectedOutOfDate: false);
         }
 
-        [MSBuildTestMethod]
         [Ignore("Creating a symlink on Windows requires elevation.")]
         [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
         [SupportedOSPlatform("windows6.1")]
@@ -999,7 +996,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 expectedOutOfDate: true);
         }
 
-        [MSBuildTestMethod]
         [Ignore("Creating a symlink on Windows requires elevation.")]
         [SkipOnPlatform(TestPlatforms.AnyUnix, "Windows-specific test")]
         [SupportedOSPlatform("windows6.1")]

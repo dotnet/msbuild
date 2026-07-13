@@ -398,7 +398,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// Helper utilities for testing task routing behavior.
     /// Provides robust assertions that are less fragile than raw log string matching.
     /// </summary>
-    [TestClass]
     internal static class TaskRouterTestHelper
     {
         /// <summary>

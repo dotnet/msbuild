@@ -110,14 +110,14 @@ namespace Microsoft.Build.UnitTests
 
             TaskParameter t = new TaskParameter(array);
 
-            Assert.AreEqual(array, t.WrappedParameter);
+            CollectionAssert.AreEqual((System.Collections.ICollection)array, (System.Collections.ICollection)t.WrappedParameter);
             Assert.AreEqual(TaskParameterType.PrimitiveTypeArray, t.ParameterType);
             Assert.AreEqual(expectedTypeCode, t.ParameterTypeCode);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.AreEqual(array, t2.WrappedParameter);
+            CollectionAssert.AreEqual((System.Collections.ICollection)array, (System.Collections.ICollection)t2.WrappedParameter);
             Assert.AreEqual(TaskParameterType.PrimitiveTypeArray, t2.ParameterType);
             Assert.AreEqual(expectedTypeCode, t2.ParameterTypeCode);
         }
@@ -149,7 +149,7 @@ namespace Microsoft.Build.UnitTests
             };
             TaskParameter t = new TaskParameter(value);
 
-            Assert.AreEqual(value, t.WrappedParameter);
+            CollectionAssert.AreEqual((System.Collections.ICollection)value, (System.Collections.ICollection)t.WrappedParameter);
             Assert.AreEqual(TaskParameterType.ValueTypeArray, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());

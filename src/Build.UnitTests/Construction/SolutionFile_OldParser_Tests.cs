@@ -2488,7 +2488,6 @@ EndGlobal
         /// Ensure that AbsolutePath uses forward slashes on Unix systems even when the solution
         /// file contains project paths with backslashes.
         /// </summary>
-        [MSBuildTestMethod]
         [SkipOnPlatform(TestPlatforms.Windows, "Unix-specific test")]
         public void AbsolutePathShouldUseForwardSlashesOnUnix()
         {
@@ -2526,7 +2525,6 @@ EndGlobal
         /// Test for edge case where RelativePath could be treated as an absolute URI
         /// and bypass normalization, leading to backslashes in AbsolutePath on Unix.
         /// </summary>
-        [MSBuildTestMethod]
         [SkipOnPlatform(TestPlatforms.Windows, "Unix-specific test")]
         public void AbsolutePathShouldHandleUriLikeRelativePathsOnUnix()
         {
@@ -2559,7 +2557,6 @@ EndGlobal
         /// This test simulates scenarios where intermediate path processing might
         /// leave backslashes in the AbsolutePath on Unix systems.
         /// </summary>
-        [MSBuildTestMethod]
         [SkipOnPlatform(TestPlatforms.Windows, "Unix-specific test")]
         public void AbsolutePathFixFilePathIntegrationTest()
         {

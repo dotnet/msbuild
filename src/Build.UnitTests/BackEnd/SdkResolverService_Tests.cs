@@ -904,7 +904,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result.EnvironmentVariablesToAdd.Count.ShouldBe(1);
         }
 
-        [TestClass]
         internal sealed class SdkResolverServiceTextExtension : SdkResolverService
         {
 

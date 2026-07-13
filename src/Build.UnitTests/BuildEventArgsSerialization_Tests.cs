@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests
             using BinaryReader binaryReader = new BinaryReader(outputStream);
             Assert.AreEqual(BinaryLogRecordKind.ProjectImportArchive, (BinaryLogRecordKind)binaryReader.Read7BitEncodedInt());
             Assert.AreEqual(bytes.Length, binaryReader.Read7BitEncodedInt());
-            Assert.AreEqual(bytes, binaryReader.ReadBytes(bytes.Length));
+            CollectionAssert.AreEqual(bytes, binaryReader.ReadBytes(bytes.Length));
         }
 
         [MSBuildTestMethod]

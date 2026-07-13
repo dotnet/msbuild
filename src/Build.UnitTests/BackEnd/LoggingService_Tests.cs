@@ -1260,7 +1260,6 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// A forwarding logger which will throw an exception
         /// </summary>
-        [TestClass]
         public class BaseFLThrowException : LoggerThrowException, IForwardingLogger
         {
             #region Constructor
@@ -1355,7 +1354,6 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Logger which can throw a defined exception in the initialize or shutdown methods
         /// </summary>
-        [TestClass]
         public class LoggerThrowException : INodeLogger
         {
             #region Constructor
@@ -1592,7 +1590,6 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         ///  Create a non logging packet to test the packet handling code
         /// </summary>
-        [TestClass]
         internal sealed class NonLoggingPacket : INodePacket
         {
             #region Members

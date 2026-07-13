@@ -21,7 +21,6 @@ using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.UnitTests
 {
-    [TestClass]
     internal sealed class MockBuildEventSink(int nodeNumber) : IBuildEventSink, IEventSource
     {
         public string Name { get; set; } = $"MockBuildEventSink{nodeNumber}";
@@ -179,7 +178,6 @@ namespace Microsoft.Build.UnitTests
             _remoteTerminalLogger = new ForwardingTerminalLogger();
             _remoteTerminalLogger.BuildEventRedirector = new EventRedirectorToSink(0, _centralNodeEventSource);
             _remoteTerminalLogger.Initialize(_remoteNodeEventSource, 1);
-
         }
 
         [MSBuildTestMethod]

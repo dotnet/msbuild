@@ -848,7 +848,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Create a custom message event to make sure it can get sent correctly
         /// </summary>
         [Serializable]
-        [TestClass]
         internal sealed class MyCustomMessageEvent : BuildMessageEventArgs
         {
             /// <summary>
@@ -886,7 +885,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Create a custom build event to test the logging of custom build events against the task host
         /// </summary>
         [Serializable]
-        [TestClass]
         internal sealed class MyCustomBuildEventArgs : CustomBuildEventArgs
         {
             /// <summary>
@@ -908,7 +906,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Class which implements a simple custom build error
         /// </summary>
         [Serializable]
-        [TestClass]
         internal sealed class MyCustomBuildErrorEventArgs : BuildErrorEventArgs
         {
             /// <summary>
@@ -946,7 +943,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Class which implements a simple custom build warning
         /// </summary>
         [Serializable]
-        [TestClass]
         internal sealed class MyCustomBuildWarningEventArgs : BuildWarningEventArgs
         {
             /// <summary>
@@ -983,7 +979,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Create a custom message event to make sure it can get sent correctly
         /// </summary>
-        [TestClass]
         internal sealed class MyCustomMessageEventNotSerializable : BuildMessageEventArgs
         {
             /// <summary>
@@ -1020,7 +1015,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Custom build event which is not marked serializable. This is used to make sure we warn if we try and log a not serializable type in multiproc.
         /// </summary>
-        [TestClass]
         internal sealed class MyCustomBuildEventArgsNotSerializable : CustomBuildEventArgs
         {
             // If binary serialization is not available, then we use a simple serializer which relies on a default constructor.  So to test
@@ -1043,7 +1037,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Class which implements a simple custom build error which is not serializable
         /// </summary>
-        [TestClass]
         internal sealed class MyCustomBuildErrorEventArgsNotSerializable : BuildErrorEventArgs
         {
             /// <summary>
@@ -1080,7 +1073,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Class which implements a simple custom build warning which is not serializable
         /// </summary>
-        [TestClass]
         internal sealed class MyCustomBuildWarningEventArgsNotSerializable : BuildWarningEventArgs
         {
             /// <summary>
@@ -1117,7 +1109,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Custom logger which will be used for testing
         /// </summary>
-        [TestClass]
         internal sealed class MyCustomLogger : ILogger
         {
             /// <summary>
@@ -1348,7 +1339,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Mock this class so that we can determine if build results are being cloned or if the live copies are being returned to the callers of the msbuild callback.
         /// </summary>
-        [TestClass]
         internal sealed class MockIRequestBuilderCallback : IRequestBuilderCallback, IRequestBuilder
         {
             /// <summary>

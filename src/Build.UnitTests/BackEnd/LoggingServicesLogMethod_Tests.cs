@@ -1343,7 +1343,7 @@ namespace Microsoft.Build.UnitTests.Logging
             TelemetryEventArgs actualEventArgs = (TelemetryEventArgs)service.ProcessedBuildEvent;
 
             Assert.AreEqual(expectedEventArgs.EventName, actualEventArgs.EventName);
-            Assert.AreEqual(expectedEventArgs.Properties.OrderBy(kvp => kvp.Key, StringComparer.Ordinal), actualEventArgs.Properties.OrderBy(kvp => kvp.Key, StringComparer.OrdinalIgnoreCase));
+            Assert.IsTrue(expectedEventArgs.Properties.OrderBy(kvp => kvp.Key, StringComparer.Ordinal).SequenceEqual(actualEventArgs.Properties.OrderBy(kvp => kvp.Key, StringComparer.OrdinalIgnoreCase)));
             Assert.AreEqual(expectedEventArgs.BuildEventContext, actualEventArgs.BuildEventContext);
 
             if (properties != null)
@@ -1834,7 +1834,6 @@ namespace Microsoft.Build.UnitTests.Logging
         /// we can test most of the logging methods without relying on the
         /// exact implementation of process logging events.
         /// </summary>
-        [TestClass]
         internal sealed class ProcessBuildEventHelper : LoggingService
         {
             #region Data
