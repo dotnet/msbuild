@@ -20,6 +20,7 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -1751,6 +1752,41 @@ namespace Microsoft.Build.Execution
             }
         }
 
+        private ProjectInstance[] CreateGraphSolutionCompatibilityInstances(GraphBuildSubmission submission, ProjectGraph projectGraph)
+        {
+            Assumed.NotNull(projectGraph.Solution, "Graph solution compatibility step requires a solution graph.");
+
+            var globalProperties = new PropertyDictionary<ProjectPropertyInstance>(submission.BuildRequestData.GlobalPropertiesLookup.Count + 1);
+            foreach (KeyValuePair<string, string?> propertyPair in submission.BuildRequestData.GlobalPropertiesLookup)
+            {
+                globalProperties.Set(ProjectPropertyInstance.Create(propertyPair.Key, propertyPair.Value));
+            }
+            globalProperties.Set(ProjectPropertyInstance.Create("IsGraphBuild", "true"));
+
+            var buildEventContext = new BuildEventContext(
+                submission.SubmissionId,
+                _buildParameters!.NodeId,
+                BuildEventContext.InvalidProjectInstanceId,
+                BuildEventContext.InvalidProjectContextId,
+                BuildEventContext.InvalidTargetId,
+                BuildEventContext.InvalidTaskId);
+
+            IReadOnlyCollection<string> targetNames = submission.BuildRequestData.TargetNames as IReadOnlyCollection<string>
+                ?? submission.BuildRequestData.TargetNames.ToList();
+
+            return ProjectInstance.LoadSolutionForBuild(
+                projectGraph.Solution.FullPath,
+                globalProperties,
+                toolsVersion: null,
+                _buildParameters,
+                ((IBuildComponentHost)this).LoggingService,
+                buildEventContext,
+                false /* loaded by solution parser */,
+                targetNames,
+                SdkResolverService,
+                submission.SubmissionId);
+        }
+
         /// <summary>
         /// Creates the traversal and metaproject instances necessary to represent the solution and populates new configurations with them.
         /// </summary>
@@ -2240,6 +2276,7 @@ namespace Microsoft.Build.Execution
                     projectGraph.ConstructionMetrics.EdgeCount));
 
             Dictionary<ProjectGraphNode, BuildResult>? resultsPerNode = null;
+            BuildResult? compatibilityResult = null;
 
             if (submission.BuildRequestData.GraphBuildOptions.Build)
             {
@@ -2258,6 +2295,21 @@ namespace Microsoft.Build.Execution
                 }
 
                 resultsPerNode = BuildGraph(projectGraph, targetsPerNode, submission.BuildRequestData);
+
+                // Synthetic solution traversal project compatibility step. Traversal can run after node
+                // execution and restore before/after.<solution>.targets and Directory.Solution.* behavior.
+                if (projectGraph.Solution != null)
+                {
+                    ProjectInstance[] instances = CreateGraphSolutionCompatibilityInstances(submission, projectGraph);
+                    _buildParameters!.ProjectRootElementCache = instances[0].ProjectRootElementCache;
+                    BuildRequestData compatibilityRequestData = new(
+                        instances[0],
+                        submission.BuildRequestData.TargetNames.ToArray(),
+                        submission.BuildRequestData.HostServices,
+                        submission.BuildRequestData.Flags);
+                    BuildSubmission compatibilitySubmission = PendBuildRequest(compatibilityRequestData);
+                    compatibilityResult = compatibilitySubmission.Execute();
+                }
             }
             else
             {
@@ -2266,11 +2318,17 @@ namespace Microsoft.Build.Execution
 
             Assumed.Null(submission.BuildResult?.Exception, "Exceptions only get set when the graph submission gets completed with an exception in OnThreadException. That should not happen during graph builds.");
 
+            var graphBuildResult = new GraphBuildResult(
+                submission.SubmissionId,
+                new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>()));
+
+            if (compatibilityResult?.OverallResult == BuildResultCode.Failure)
+            {
+                graphBuildResult.Exception = compatibilityResult.Exception ?? new InvalidOperationException("Graph solution compatibility build failed.");
+            }
+
             // The overall submission is complete, so report it as complete
-            ReportResultsToSubmission<GraphBuildRequestData, GraphBuildResult>(
-                new GraphBuildResult(
-                    submission.SubmissionId,
-                    new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>())));
+            ReportResultsToSubmission<GraphBuildRequestData, GraphBuildResult>(graphBuildResult);
 
             static void DumpGraph(ProjectGraph graph, IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>>? targetList = null)
             {

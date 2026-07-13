@@ -1421,13 +1421,17 @@ namespace Microsoft.Build.Construction
             // Add the task to build the actual project.
             AddProjectBuildTask(traversalProject, projectConfiguration, target, targetName, EscapingUtilities.Escape(project.AbsolutePath), String.Empty, outputItem);
         }
+        private const string NotGraphBuildCondition = "'$(IsGraphBuild)' != 'true'";
 
         /// <summary>
         /// Adds an MSBuild task to a real project.
         /// </summary>
         private static void AddProjectBuildTask(ProjectInstance traversalProject, ProjectConfigurationInSolution projectConfiguration, ProjectTargetInstance target, string targetToBuild, string sourceItems, string condition, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", condition, String.Empty);
+            // Graph compatibility execution should keep the traversal targets and imports alive while
+            // suppressing this direct project-dispatch task because the graph scheduler already built the node.
+            string combinedCondition = string.IsNullOrEmpty(condition) ? NotGraphBuildCondition : $"({condition}) and {NotGraphBuildCondition}";
+            ProjectTaskInstance task = target.AddTask("MSBuild", combinedCondition, String.Empty);
             task.SetParameter("Projects", sourceItems);
             if (targetToBuild != null)
             {
@@ -1458,7 +1462,11 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void AddMetaprojectBuildTask(ProjectInSolution project, ProjectTargetInstance target, string targetToBuild, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", Strings.WeakIntern($"'%(ProjectReference.Identity)' == '{GetMetaprojectName(project)}'"), String.Empty);
+            // Graph compatibility execution should also suppress metaproject dispatch. This pass exists
+            // only to run solution-level extensibility hooks, not to re-enter project or metaproject builds.
+            string projectMatchCondition = Strings.WeakIntern($"'%(ProjectReference.Identity)' == '{GetMetaprojectName(project)}'");
+            string combinedCondition = string.IsNullOrEmpty(projectMatchCondition) ? NotGraphBuildCondition : $"({projectMatchCondition}) and {NotGraphBuildCondition}";
+            ProjectTaskInstance task = target.AddTask("MSBuild", combinedCondition, String.Empty);
             task.SetParameter("Projects", "@(ProjectReference)");
 
             if (targetToBuild != null)
@@ -2061,7 +2069,9 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static void AddReferencesBuildTask(ProjectTargetInstance target, string targetToBuild, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", String.Empty, String.Empty);
+            // In graph compatibility mode the surrounding target should 
+            // still execute, but this inner MSBuild task should be skipped.
+            ProjectTaskInstance task = target.AddTask("MSBuild", NotGraphBuildCondition, String.Empty);
             if (String.Equals(targetToBuild, "Clean", StringComparison.OrdinalIgnoreCase))
             {
                 task.SetParameter("Projects", "@(ProjectReference->Reverse())");
