@@ -1159,7 +1159,7 @@ namespace Microsoft.Build.UnitTests
                 MessageImportance.Low);
             var deferredMessages = new[]
             {
-                new BuildManager.DeferredBuildMessage(lifecycleEvent, MessageImportance.Low),
+                new BuildManager.DeferredBuildMessage(lifecycleEvent),
             };
 
             var parameters = new BuildParameters

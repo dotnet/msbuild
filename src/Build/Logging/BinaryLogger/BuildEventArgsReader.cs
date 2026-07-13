@@ -1258,6 +1258,9 @@ namespace Microsoft.Build.Logging
 
         private MSBuildServerLifecycleEventArgs ReadMSBuildServerLifecycleEventArgs()
         {
+            // Field order/count MUST stay in sync with BuildEventArgsWriter.Write(MSBuildServerLifecycleEventArgs)
+            // and with MSBuildServerLifecycleEventArgs.CreateFromStream (the node-packet path). ReadInt32() is a
+            // 7-bit-encoded int, paired with the writer's Write(int).
             var fields = ReadBuildEventArgsFields(readImportance: true);
 
             MSBuildServerLifecycleKind kind = (MSBuildServerLifecycleKind)ReadInt32();

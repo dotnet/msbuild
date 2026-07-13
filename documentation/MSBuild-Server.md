@@ -23,7 +23,7 @@ The client makes a single, response-file-aware determination and sets the `Shutd
 
 ## Diagnostics: server lifecycle messages
 
-Every build that uses MSBuild Server now records what happened to the server — whether it started a new one, reused a running one, or ran without one (and why). This appears in binary logs and at diagnostic verbosity, so server behavior is easy to see when troubleshooting.
+Every build where MSBuild Server is *requested* now records what happened to the server — whether it started a new one, reused a running one, or ran the build in-process instead (and why). This is emitted as a dedicated, structured `MSBuildServerLifecycleEventArgs` (its own binary-log record kind), so it appears in binary logs and at diagnostic verbosity and server behavior is easy to see when troubleshooting. Ordinary builds that never request the server record nothing.
 
 ## Communication protocol
 

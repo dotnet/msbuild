@@ -599,6 +599,55 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        /// <summary>
+        /// Companion to <see cref="RoundtripMSBuildServerLifecycleEventArgs"/> covering the <c>NotUsed</c> kind
+        /// with a non-null <see cref="MSBuildServerLifecycleEventArgs.Reason"/> /
+        /// <see cref="MSBuildServerLifecycleEventArgs.ReasonCode"/> (the deduplicated-string branch the Spawned
+        /// case leaves null) and the <c>Reused</c> kind (a non-zero enum value). Verifies every structured field
+        /// round-trips through the binary-log writer/reader.
+        /// </summary>
+        [Fact]
+        public void RoundtripMSBuildServerLifecycleEventArgs_NotUsedAndReused()
+        {
+            RoundtripAndAssert(new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.NotUsed,
+                processId: 0,
+                reason: "node reuse is disabled",
+                reasonCode: "node-reuse-disabled",
+                "MSBuild Server was requested but not used for this build: node reuse is disabled.",
+                MessageImportance.Low));
+
+            RoundtripAndAssert(new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.Reused,
+                processId: 9876,
+                reason: null,
+                reasonCode: null,
+                "Reusing the running MSBuild Server node for this build (process ID 9876).",
+                MessageImportance.Low));
+
+            static void RoundtripAndAssert(MSBuildServerLifecycleEventArgs args)
+            {
+                args.BuildEventContext = BuildEventContext.Invalid;
+
+                var memoryStream = new MemoryStream();
+                using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+                {
+                    new BuildEventArgsWriter(binaryWriter).Write(args);
+                }
+
+                memoryStream.Position = 0;
+                using var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true);
+                using var eventsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+                var deserialized = eventsReader.Read().ShouldBeOfType<MSBuildServerLifecycleEventArgs>();
+                deserialized.Kind.ShouldBe(args.Kind);
+                deserialized.ProcessId.ShouldBe(args.ProcessId);
+                deserialized.Reason.ShouldBe(args.Reason);
+                deserialized.ReasonCode.ShouldBe(args.ReasonCode);
+                deserialized.ShortLived.ShouldBe(args.ShortLived);
+                deserialized.Message.ShouldBe(args.Message);
+            }
+        }
+
         [Fact]
         public void RoundtripAssemblyLoadBuild()
         {
