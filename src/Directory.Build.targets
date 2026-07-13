@@ -286,32 +286,6 @@
     </ItemGroup>
   </Target>
 
-  <!--
-    Verify.MSTest 31.x references Microsoft.Bcl.AsyncInterfaces 10.0.9 on .NETFramework. Test projects that
-    both reference Verify.MSTest and spawn the product MSBuild.exe (co-located in their output via a
-    ProjectReference) hit a conflict: MSBuild.exe binds Microsoft.Bcl.AsyncInterfaces to exactly 10.0.0.8
-    (src/MSBuild/app.config), so any other version on disk throws a FileLoadException at MSBuild.exe startup,
-    while compiling against anything lower than 10.0.9 fails with CS1705 because Verify.MSTest references
-    10.0.9. The fix is to compile against 10.0.9 but overwrite the net472 output copy with 10.0.8 so the
-    spawned MSBuild.exe loads a matching assembly; the test host redirects 10.0.9 -> 10.0.8 through
-    src/Shared/UnitTests/App.config. Opt in per project via VerifyMSTestForcesAsyncInterfaces1008. -->
-  <PropertyGroup Condition="'$(VerifyMSTestForcesAsyncInterfaces1008)' == 'true' AND '$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <VerifyMSTestAsyncInterfacesOnDiskVersion>10.0.8</VerifyMSTestAsyncInterfacesOnDiskVersion>
-  </PropertyGroup>
-
-  <ItemGroup Condition="'$(VerifyMSTestForcesAsyncInterfaces1008)' == 'true' AND '$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <PackageDownload Include="Microsoft.Bcl.AsyncInterfaces" Version="[$(VerifyMSTestAsyncInterfacesOnDiskVersion)]" />
-  </ItemGroup>
-
-  <Target Name="OverwriteAsyncInterfacesForSpawnedMSBuild"
-          AfterTargets="Build"
-          Condition="'$(VerifyMSTestForcesAsyncInterfaces1008)' == 'true' AND '$(TargetFrameworkIdentifier)' == '.NETFramework'">
-    <Copy SourceFiles="$(NuGetPackageRoot)microsoft.bcl.asyncinterfaces\$(VerifyMSTestAsyncInterfacesOnDiskVersion)\lib\net462\Microsoft.Bcl.AsyncInterfaces.dll"
-          DestinationFolder="$(OutDir)"
-          OverwriteReadOnlyFiles="true"
-          SkipUnchangedFiles="false" />
-  </Target>
-
   <!-- Import parent targets -->
   <Import Project="..\Directory.Build.targets"/>
 

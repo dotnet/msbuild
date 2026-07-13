@@ -17,13 +17,6 @@
     <!-- Suppression in needed to build ExampleTaskX86 that targets x86 architecture. -->
     <NoWarn>$(NoWarn);MSB3270;CS0436</NoWarn>
 
-    <!--
-      Verify.MSTest 31.x references Microsoft.Bcl.AsyncInterfaces 10.0.9 on .NETFramework, but the product
-      MSBuild.exe these tests spawn is co-located in the output and binds it to exactly 10.0.0.8. Compile
-      against 10.0.9 (so Verify.MSTest resolves) but overwrite the net472 output copy with 10.0.8 so the
-      spawned MSBuild.exe loads a matching assembly. See src/Directory.Build.targets. -->
-    <VerifyMSTestForcesAsyncInterfaces1008>true</VerifyMSTestForcesAsyncInterfaces1008>
-
     <AppConfig>..\Shared\UnitTests\App.config</AppConfig>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
