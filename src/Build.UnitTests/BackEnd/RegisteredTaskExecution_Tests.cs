@@ -12,15 +12,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     /// <summary>
     /// Integration coverage for the host task-class registration API
-    /// (<see cref="Task.RegisterTask{T}(string)"/> and the
+    /// (<see cref="Task.RegisterTask{T}()"/> and the
     /// <see cref="System.Func{ITask}"/> overload) exercised through a real in-process build on the default
     /// (JIT) engine, where reflective task execution is enabled. The Native AOT (reflective-off) counterparts
     /// live in the aot-validation harness, which is not part of the CI test run; these run in CI.
     /// </summary>
     /// <remarks>
-    /// The task registry is process-global and has no unregister API, so each test uses a unique, distinctive
-    /// task name that no real task or other test uses; the leftover registrations are harmless (a registered
-    /// name only affects a build that invokes a task of exactly that name).
+    /// The task registry is process-global and has no unregister API. Generic registrations are keyed by the
+    /// task type's name; the custom test task types here are used by no real task or other test, and the
+    /// <see cref="System.Func{ITask}"/> factory tests use a unique, distinctive name. Leftover registrations
+    /// are harmless (a registered name only affects a build that invokes a task of exactly that name).
     /// </remarks>
     public sealed class RegisteredTaskExecution_Tests
     {
@@ -36,14 +37,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void RegisterTaskGeneric_ResolvesAndExecutesAndBindsOutput()
         {
-            Task.RegisterTask<RegisteredEchoTestTask>("RegTaskTest_GenericEcho");
+            Task.RegisterTask<RegisteredEchoTestTask>();
 
             string project = """
                 <Project DefaultTargets="Build">
                   <Target Name="Build">
-                    <RegTaskTest_GenericEcho Input="hello">
+                    <RegisteredEchoTestTask Input="hello">
                       <Output TaskParameter="Result" PropertyName="EchoResult" />
-                    </RegTaskTest_GenericEcho>
+                    </RegisteredEchoTestTask>
                     <Message Text="Bound: $(EchoResult)" Importance="high" />
                   </Target>
                 </Project>
@@ -84,15 +85,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         /// <summary>
         /// Registering a name a second time replaces the previous registration; the most recently registered
-        /// task is the one the engine constructs.
+        /// task is the one the engine constructs. Uses the <see cref="System.Func{ITask}"/> overload (which
+        /// takes an explicit name) so two different task types can share one registration name.
         /// </summary>
         [Fact]
         public void RegisterTask_RegisteringSameNameAgain_ReplacesPreviousRegistration()
         {
-            Task.RegisterTask<RegisteredEchoTestTask>("RegTaskTest_Replace");
+            Task.RegisterTask("RegTaskTest_Replace", static () => new RegisteredEchoTestTask());
 
             // Re-register the same name with a different task type; the latest registration must win.
-            Task.RegisterTask<RegisteredMarkerTestTask>("RegTaskTest_Replace");
+            Task.RegisterTask("RegTaskTest_Replace", static () => new RegisteredMarkerTestTask());
 
             string project = """
                 <Project DefaultTargets="Build">
@@ -116,12 +118,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void RegisteredTaskFollowedByIntrinsicTask_BothExecute_NoStateLeak()
         {
-            Task.RegisterTask<RegisteredEchoTestTask>("RegTaskTest_ResetEcho");
+            Task.RegisterTask<RegisteredEchoTestTask>();
 
             string project = """
                 <Project DefaultTargets="Build">
                   <Target Name="Build">
-                    <RegTaskTest_ResetEcho Input="x" />
+                    <RegisteredEchoTestTask Input="x" />
                     <CallTarget Targets="Side" />
                   </Target>
                   <Target Name="Side">
@@ -144,12 +146,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void RegisterTaskGeneric_TaskWithTaskEnvironmentConstructor_InjectsEnvironment()
         {
-            Task.RegisterTask<RegisteredEnvCtorTestTask>("RegTaskTest_GenericEnvCtor");
+            Task.RegisterTask<RegisteredEnvCtorTestTask>();
 
             string project = """
                 <Project DefaultTargets="Build">
                   <Target Name="Build">
-                    <RegTaskTest_GenericEnvCtor />
+                    <RegisteredEnvCtorTestTask />
                   </Target>
                 </Project>
                 """;

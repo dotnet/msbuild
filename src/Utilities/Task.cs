@@ -162,19 +162,17 @@ namespace Microsoft.Build.Utilities
         #region Task class registration
 
         /// <summary>
-        /// Registers a task type under the name a target uses to invoke it (the <c>TaskName</c> of a
-        /// <c>&lt;UsingTask&gt;</c>), so MSBuild can instantiate and run it without loading its assembly or
-        /// resolving its type by reflection - the path required in a trimmed or Native AOT host.
+        /// Registers a task type under its type name - <c>typeof(T).Name</c>, the name a target uses to invoke
+        /// it (the <c>TaskName</c> of a <c>&lt;UsingTask&gt;</c>) - so MSBuild can instantiate and run it
+        /// without loading its assembly or resolving its type by reflection - the path required in a trimmed or
+        /// Native AOT host.
         /// </summary>
         /// <typeparam name="T">
-        /// The task type to register. It must have a public parameterless constructor. The
-        /// <c>[DynamicallyAccessedMembers]</c> roots the type's public constructor and properties so a
-        /// trimmer preserves them, keeping both construction and parameter binding working.
+        /// The task type to register. The registration key is <c>typeof(T).Name</c>. It must have a public
+        /// parameterless constructor. The <c>[DynamicallyAccessedMembers]</c> roots the type's public
+        /// constructor and properties so a trimmer preserves them, keeping both construction and parameter
+        /// binding working.
         /// </typeparam>
-        /// <param name="taskName">
-        /// The name a target uses to invoke the task. This is the <c>TaskName</c> of the corresponding
-        /// <c>&lt;UsingTask&gt;</c> (typically the task's class name, optionally namespace-qualified).
-        /// </param>
         /// <remarks>
         /// Intended to be called once per task during host initialization, before the first build. This
         /// method is thread-safe; registering the same name again replaces the previous registration. A
@@ -183,10 +181,9 @@ namespace Microsoft.Build.Utilities
         /// selection - the registered task is always the one the engine constructs.
         /// </remarks>
         public static void RegisterTask<
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(
-            string taskName)
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>()
             where T : ITask, new()
-            => TaskClassRegistry.Register<T>(taskName);
+            => TaskClassRegistry.Register<T>();
 
         /// <summary>
         /// Registers a task under the name a target uses to invoke it (the <c>TaskName</c> of a
@@ -204,7 +201,7 @@ namespace Microsoft.Build.Utilities
         /// Construction is reflection-free, but binding the task's parameters still reflects over its
         /// properties. Because the task type is not statically known through this overload, the host is
         /// responsible for preserving that type's public properties under trimming (for example by also
-        /// registering it through <see cref="RegisterTask{T}(string)"/>, which roots them). The generic
+        /// registering it through <see cref="RegisterTask{T}()"/>, which roots them). The generic
         /// overload is the fully trim-safe path.
         /// </para>
         /// <para>

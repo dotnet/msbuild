@@ -12,7 +12,7 @@ namespace Microsoft.Build.Framework;
 /// reflected type metadata the engine binds its parameters against.
 /// </summary>
 /// <remarks>
-/// The <see cref="LoadedType"/> is built once. For the generic <see cref="TaskClassRegistry.Register{T}(string)"/>
+/// The <see cref="LoadedType"/> is built once. For the generic <see cref="TaskClassRegistry.Register{T}()"/>
 /// overload it is supplied eagerly at registration (where the task type is trim-rooted). For the
 /// <see cref="TaskClassRegistry.Register(string, Func{ITask})"/> overload - where only an untyped factory is
 /// known - it is built lazily from the first constructed instance's type.
