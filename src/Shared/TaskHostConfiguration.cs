@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+#if FEATURE_APPDOMAIN
+using System.Runtime.CompilerServices;
+#endif
 using Microsoft.Build.Execution;
 
 #nullable disable
@@ -531,17 +534,18 @@ namespace Microsoft.Build.BackEnd
                 byte[] appDomainConfigBytes = null;
 
                 // Set the configuration bytes just before serialization in case the SetConfigurationBytes was invoked during lifetime of this instance.
-                if (translator.Mode == TranslationDirection.WriteToStream)
+                // The null guard also keeps the JIT-isolated helper uninvoked when hosted on the .NET
+                // runtime, where the AppDomainSetup configuration-bytes APIs do not exist.
+                if (translator.Mode == TranslationDirection.WriteToStream && _appDomainSetup != null)
                 {
-                    appDomainConfigBytes = _appDomainSetup?.GetConfigurationBytes();
+                    appDomainConfigBytes = GetAppDomainConfigBytes(_appDomainSetup);
                 }
 
                 translator.Translate(ref appDomainConfigBytes);
 
                 if (translator.Mode == TranslationDirection.ReadFromStream)
                 {
-                    _appDomainSetup = new AppDomainSetup();
-                    _appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
+                    _appDomainSetup = CreateAppDomainSetupFromConfigBytes(appDomainConfigBytes);
                 }
             }
 #endif
@@ -576,6 +580,22 @@ namespace Microsoft.Build.BackEnd
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
         }
+
+#if FEATURE_APPDOMAIN
+        // The AppDomainSetup configuration-bytes APIs do not exist when this .NET Framework assembly
+        // is hosted on the .NET runtime, and an unresolvable member fails the JIT of the entire
+        // referencing method — these never-inlined helpers keep those references out of Translate.
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static byte[] GetAppDomainConfigBytes(AppDomainSetup appDomainSetup) => appDomainSetup.GetConfigurationBytes();
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static AppDomainSetup CreateAppDomainSetupFromConfigBytes(byte[] appDomainConfigBytes)
+        {
+            AppDomainSetup appDomainSetup = new AppDomainSetup();
+            appDomainSetup.SetConfigurationBytes(appDomainConfigBytes);
+            return appDomainSetup;
+        }
+#endif
 
         /// <summary>
         /// Translates the build process environment.
