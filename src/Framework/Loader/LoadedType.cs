@@ -52,7 +52,11 @@ namespace Microsoft.Build.Shared
             LoadedViaMetadataLoadContext = loadedViaMetadataLoadContext;
             Architecture = architecture;
             Runtime = runtime;
-            HasTaskEnvironmentConstructor = DetectTaskEnvironmentConstructor(type, loadedViaMetadataLoadContext);
+
+            // Cache the TaskEnvironment constructor (if any) discovered during construction so callers can
+            // instantiate the task directly through it rather than paying the reflection-binder cost of
+            // Activator.CreateInstance(Type, object[]) on every task instantiation.
+            TaskEnvironmentConstructor = FindTaskEnvironmentConstructor(type, loadedViaMetadataLoadContext);
 
             // Assembly.Location is empty for inline tasks loaded from bytes, and for every assembly in a
             // single-file/Native AOT host; in those cases fall back to the original load path. On .NET the
@@ -188,7 +192,16 @@ namespace Microsoft.Build.Shared
         /// over the parameterless one so the task can compute environment-dependent default values
         /// (for example, rooting a default output path) during construction.
         /// </summary>
-        public bool HasTaskEnvironmentConstructor { get; }
+        public bool HasTaskEnvironmentConstructor => TaskEnvironmentConstructor is not null;
+
+        /// <summary>
+        /// Gets the cached public instance constructor that accepts a single <see cref="TaskEnvironment"/>
+        /// parameter, or <see langword="null"/> if the type does not declare one. Caching the resolved
+        /// <see cref="ConstructorInfo"/> lets callers invoke it directly (avoiding the reflection-binder
+        /// overload-resolution cost of <see cref="Activator.CreateInstance(Type, object[])"/>) while staying
+        /// Native AOT friendly, since no dynamic code is generated.
+        /// </summary>
+        internal ConstructorInfo? TaskEnvironmentConstructor { get; }
 
         /// <summary>
         /// Gets whether there's a STAThread attribute on the Execute method of this type.
@@ -229,12 +242,13 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Determines whether the given type exposes a public instance constructor that takes a single
-        /// <see cref="TaskEnvironment"/> parameter. The comparison is done by full type name so that it
-        /// also works for types loaded via MetadataLoadContext, whose <see cref="TaskEnvironment"/> is a
-        /// distinct <see cref="Type"/> identity from the one loaded in the current context.
+        /// Finds the public instance constructor that takes a single <see cref="TaskEnvironment"/> parameter,
+        /// returning it so callers can invoke it directly, or <see langword="null"/> if none exists. The
+        /// comparison is done by full type name so that it also works for types loaded via MetadataLoadContext,
+        /// whose <see cref="TaskEnvironment"/> is a distinct <see cref="Type"/> identity from the one loaded in
+        /// the current context.
         /// </summary>
-        private static bool DetectTaskEnvironmentConstructor(
+        private static ConstructorInfo? FindTaskEnvironmentConstructor(
             [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)]
             Type type,
             bool loadedViaMetadataLoadContext)
@@ -247,17 +261,17 @@ namespace Microsoft.Build.Shared
                     if (parameters.Length == 1 &&
                         string.Equals(parameters[0].ParameterType.FullName, TaskEnvironmentTypeFullName, StringComparison.Ordinal))
                     {
-                        return true;
+                        return constructor;
                     }
                 }
             }
             catch when (loadedViaMetadataLoadContext)
             {
                 // Reflecting over constructors of a MetadataLoadContext-loaded type can fail; such types are
-                // executed in a task host rather than instantiated in-proc, so it is safe to report false here.
+                // executed in a task host rather than instantiated in-proc, so it is safe to report none here.
             }
 
-            return false;
+            return null;
         }
 
         private static readonly string TaskEnvironmentTypeFullName = typeof(TaskEnvironment).FullName!;
