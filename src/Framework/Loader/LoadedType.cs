@@ -53,11 +53,6 @@ namespace Microsoft.Build.Shared
             Architecture = architecture;
             Runtime = runtime;
 
-            // Cache the TaskEnvironment constructor (if any) discovered during construction so callers can
-            // instantiate the task directly through it rather than paying the reflection-binder cost of
-            // Activator.CreateInstance(Type, object[]) on every task instantiation.
-            TaskEnvironmentConstructor = FindTaskEnvironmentConstructor(type, loadedViaMetadataLoadContext);
-
             // Assembly.Location is empty for inline tasks loaded from bytes, and for every assembly in a
             // single-file/Native AOT host; in those cases fall back to the original load path. On .NET the
             // read is guarded on dynamic-code support so ILC dead-strips it (and its IL3000) under AOT, while
@@ -195,13 +190,37 @@ namespace Microsoft.Build.Shared
         public bool HasTaskEnvironmentConstructor => TaskEnvironmentConstructor is not null;
 
         /// <summary>
-        /// Gets the cached public instance constructor that accepts a single <see cref="TaskEnvironment"/>
-        /// parameter, or <see langword="null"/> if the type does not declare one. Caching the resolved
+        /// Gets the public instance constructor that accepts a single <see cref="TaskEnvironment"/>
+        /// parameter, or <see langword="null"/> if the type does not declare one. The resolved
         /// <see cref="ConstructorInfo"/> lets callers invoke it directly (avoiding the reflection-binder
         /// overload-resolution cost of <see cref="Activator.CreateInstance(Type, object[])"/>) while staying
         /// Native AOT friendly, since no dynamic code is generated.
         /// </summary>
-        internal ConstructorInfo? TaskEnvironmentConstructor { get; }
+        /// <remarks>
+        /// Discovery is deferred until first access so that the extra constructor reflection is only paid
+        /// for types we actually instantiate — not for the many <see cref="LoadedType"/> instances built
+        /// solely to marshal property metadata to a task host. A <see cref="LoadedType"/> is cached per task
+        /// type and shared across threads in multi-threaded builds, so the memoization is thread-safe: the
+        /// worst a race can do is resolve the same (equivalent) constructor on more than one thread, and the
+        /// volatile flag guarantees a reader that observes <c>true</c> also observes the published value.
+        /// </remarks>
+        internal ConstructorInfo? TaskEnvironmentConstructor
+        {
+            get
+            {
+                if (!_taskEnvironmentConstructorComputed)
+                {
+                    _taskEnvironmentConstructor = FindTaskEnvironmentConstructor(Type, LoadedViaMetadataLoadContext);
+                    _taskEnvironmentConstructorComputed = true;
+                }
+
+                return _taskEnvironmentConstructor;
+            }
+        }
+
+        private ConstructorInfo? _taskEnvironmentConstructor;
+
+        private volatile bool _taskEnvironmentConstructorComputed;
 
         /// <summary>
         /// Gets whether there's a STAThread attribute on the Execute method of this type.
