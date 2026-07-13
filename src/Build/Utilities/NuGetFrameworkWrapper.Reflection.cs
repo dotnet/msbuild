@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -158,6 +159,27 @@ namespace Microsoft.Build.Evaluation
             return appDomainSetup;
         }
 
+        /// <summary>
+        /// Creates the wrapper in a separate AppDomain. Kept in a separate never-inlined method:
+        /// the AppDomain.CreateDomain overload used here has System.Security.Policy.Evidence in its
+        /// signature, a type that does not exist when a .NET host loads this .NET Framework assembly.
+        /// An unresolvable signature fails the JIT of the entire calling method (bypassing its
+        /// try/catch), so the reference must stay out of <see cref="CreateInstance"/> for its
+        /// fallback path to be reachable on .NET.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static NuGetFrameworkWrapper CreateInstanceInAppDomain(AssemblyName assemblyName, string assemblyPath)
+        {
+            AppDomainSetup appDomainSetup = CreateAppDomainSetup(assemblyName, assemblyPath);
+            if (appDomainSetup == null)
+            {
+                return null;
+            }
+
+            AppDomain appDomain = AppDomain.CreateDomain(nameof(NuGetFrameworkWrapper), null, appDomainSetup);
+            return (NuGetFrameworkWrapper)appDomain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(NuGetFrameworkWrapper).FullName);
+        }
+
         public static NuGetFrameworkWrapper CreateInstance()
         {
             // Resolve the location of the NuGet.Frameworks assembly
@@ -181,12 +203,7 @@ namespace Microsoft.Build.Evaluation
                     assemblyName = AssemblyName.GetAssemblyName(assemblyPath);
                     if (assemblyName != null && BuildEnvironmentHelper.Instance.RunningInMSBuildExe)
                     {
-                        AppDomainSetup appDomainSetup = CreateAppDomainSetup(assemblyName, assemblyPath);
-                        if (appDomainSetup != null)
-                        {
-                            AppDomain appDomain = AppDomain.CreateDomain(nameof(NuGetFrameworkWrapper), null, appDomainSetup);
-                            instance = (NuGetFrameworkWrapper)appDomain.CreateInstanceAndUnwrap(Assembly.GetExecutingAssembly().FullName, typeof(NuGetFrameworkWrapper).FullName);
-                        }
+                        instance = CreateInstanceInAppDomain(assemblyName, assemblyPath);
                     }
                 }
                 catch
