@@ -1,6 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+// Scoped to the .NET (Core) target only; see BinlogAllocationHarness.cs. Excluded on net472.
+#if NET
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -58,9 +61,9 @@ public static class AllocHarnessRunner
 
         foreach (Cell c in cells)
         {
-            int iterations = Math.Clamp(200_000 / Math.Max(1, c.RecordCount * c.PropsPerEvent), 20, 2000);
+            int iterations = Math.Clamp(400_000 / Math.Max(1, c.RecordCount * c.PropsPerEvent), 100, 2000);
             (long bytesPerOp, long outputLength) = BinlogAllocationHarness.MeasureAllocations(
-                c.RecordCount, c.PropsPerEvent, c.ValueLen, c.Distinct, warmup: 5, iterations: iterations);
+                c.RecordCount, c.PropsPerEvent, c.ValueLen, c.Distinct, warmup: 20, iterations: iterations);
 
             double bytesPerRecord = c.RecordCount > 0 ? (double)bytesPerOp / c.RecordCount : 0;
 
@@ -68,9 +71,9 @@ public static class AllocHarnessRunner
                 label, c.RecordCount, c.PropsPerEvent, c.ValueLen, c.Distinct,
                 bytesPerOp, bytesPerRecord.ToString("F2", CultureInfo.InvariantCulture), outputLength));
 
-            int timeIters = Math.Clamp(50_000 / Math.Max(1, c.RecordCount), 50, 500);
+            int timeIters = Math.Clamp(100_000 / Math.Max(1, c.RecordCount), 100, 500);
             double medianNs = BinlogAllocationHarness.MeasureTimeNs(
-                c.RecordCount, c.PropsPerEvent, c.ValueLen, c.Distinct, warmup: 10, iterations: timeIters);
+                c.RecordCount, c.PropsPerEvent, c.ValueLen, c.Distinct, warmup: 20, iterations: timeIters);
 
             timeCsv.AppendLine(string.Join(',',
                 label, c.RecordCount, c.PropsPerEvent, c.ValueLen, c.Distinct,
@@ -118,3 +121,5 @@ public static class AllocHarnessRunner
         return 0;
     }
 }
+
+#endif

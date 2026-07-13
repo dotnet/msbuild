@@ -1,6 +1,12 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+// This measurement harness is intentionally scoped to the .NET (Core) target only. It is a
+// developer A/B tool (like the BenchmarkDotNet benchmarks) and uses .NET 5+ APIs
+// (SHA256.HashData, Convert.ToHexString). The MSBuild.Benchmarks project also compiles for
+// net472 on Windows, so the whole file is excluded there to avoid a build break.
+#if NET
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -8,7 +14,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
-using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 
@@ -201,3 +206,5 @@ public static class BinlogAllocationHarness
         return $"Microsoft.Build: {location}\n  sha256={sha}";
     }
 }
+
+#endif
