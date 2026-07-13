@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Reflection;
 using BenchmarkDotNet.Attributes;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -10,24 +9,22 @@ using Microsoft.Build.Shared;
 namespace MSBuild.Benchmarks;
 
 /// <summary>
-/// Benchmarks the cost of creating a task instance through the engine's <see cref="TaskLoader.CreateTask"/>
-/// path, so the newly-added TaskEnvironment constructor-injection mechanism can be compared against the
-/// pre-existing parameterless path and against a raw <see cref="Activator.CreateInstance(Type)"/> call.
+/// Compares the two mechanisms MSBuild can use to construct a task instance in-proc, so the constructor-based
+/// path that <see cref="LoadedType.CreateInstance"/> uses can be measured directly against
+/// <see cref="Activator"/> — with no <see cref="TaskLoader"/> or engine plumbing in the loop.
 ///
-/// Three axes are measured:
+/// Four cases are measured across two axes (mechanism × constructor shape):
 /// <list type="bullet">
-///   <item><description><c>Activator_Parameterless</c> — a raw reflection <see cref="Activator.CreateInstance(Type)"/>
-///     call with no engine involvement (the floor cost of reflective instantiation).</description></item>
-///   <item><description><c>TaskLoader_Parameterless</c> — the current engine mechanism on a task type that only
-///     exposes a parameterless constructor (the <see cref="LoadedType.HasTaskEnvironmentConstructor"/> == false path).</description></item>
-///   <item><description><c>TaskLoader_TaskEnvironmentConstructor</c> — the current engine mechanism on a task type that
-///     declares a <see cref="TaskEnvironment"/> constructor (the injection path, which allocates a one-element
-///     argument array and dispatches to the parameterized <see cref="Activator.CreateInstance(Type, object[])"/>).</description></item>
+///   <item><description><c>Activator_Parameterless</c> — <see cref="Activator.CreateInstance(Type)"/> on a task
+///     that only exposes a parameterless constructor (the CLR's cached per-type activator; the baseline).</description></item>
+///   <item><description><c>Activator_TaskEnvironmentConstructor</c> — <see cref="Activator.CreateInstance(Type, object[])"/>
+///     on a task that declares a <see cref="TaskEnvironment"/> constructor (allocates a one-element argument
+///     array and pays the reflection-binder overload resolution on every call).</description></item>
+///   <item><description><c>LoadedType_Parameterless</c> — <see cref="LoadedType.CreateInstance"/> on the same
+///     parameterless task; invokes the cached constructor directly.</description></item>
+///   <item><description><c>LoadedType_TaskEnvironmentConstructor</c> — <see cref="LoadedType.CreateInstance"/> on the
+///     same TaskEnvironment task; invokes the cached constructor directly with the environment.</description></item>
 /// </list>
-///
-/// <c>Activator_TaskEnvironmentConstructor</c> is included as an additional reference point that isolates the
-/// raw parameterized-<see cref="Activator"/> cost (argument-array allocation + constructor match) from any engine
-/// overhead in the <c>TaskLoader_*</c> variants.
 /// </summary>
 [MemoryDiagnoser]
 public class TaskInstantiationBenchmark
@@ -74,33 +71,12 @@ public class TaskInstantiationBenchmark
         => (ITask)Activator.CreateInstance(_taskEnvironmentType, new object[] { _taskEnvironment })!;
 
     [Benchmark]
-    public ITask? TaskLoader_Parameterless()
-        => CreateTask(_parameterlessLoadedType);
+    public ITask LoadedType_Parameterless()
+        => (ITask)_parameterlessLoadedType.CreateInstance(_taskEnvironment);
 
     [Benchmark]
-    public ITask? TaskLoader_TaskEnvironmentConstructor()
-        => CreateTask(_taskEnvironmentLoadedType);
-
-    private ITask? CreateTask(LoadedType loadedType)
-#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-        => TaskLoader.CreateTask(
-            loadedType,
-            loadedType.Type.Name,
-            "task-instantiation-benchmark.proj",
-            1,
-            1,
-            static (_, _, _, _, _) => { },
-            _taskEnvironment,
-#if FEATURE_APPDOMAIN
-            AppDomain.CurrentDomain.SetupInformation,
-            static _ => { },
-#endif
-            isOutOfProc: false
-#if FEATURE_APPDOMAIN
-            , out _
-#endif
-            );
-#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+    public ITask LoadedType_TaskEnvironmentConstructor()
+        => (ITask)_taskEnvironmentLoadedType.CreateInstance(_taskEnvironment);
 
     /// <summary>
     /// Task exposing only the implicit parameterless constructor. Exercises the
@@ -117,7 +93,7 @@ public class TaskInstantiationBenchmark
 
     /// <summary>
     /// Task declaring a <see cref="TaskEnvironment"/> constructor. Exercises the constructor-injection
-    /// instantiation path (parameterized <see cref="Activator.CreateInstance(Type, object[])"/>).
+    /// instantiation path.
     /// </summary>
     private sealed class TaskEnvironmentBenchmarkTask : ITask, IMultiThreadableTask
     {

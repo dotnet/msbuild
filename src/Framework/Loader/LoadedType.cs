@@ -183,52 +183,72 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Gets whether this type declares a public instance constructor that accepts a single
-        /// <see cref="TaskEnvironment"/> parameter. When present, the engine prefers this constructor
-        /// over the parameterless one so the task can compute environment-dependent default values
+        /// <see cref="TaskEnvironment"/> parameter. When present, <see cref="CreateInstance"/> prefers this
+        /// constructor over the parameterless one so the task can compute environment-dependent default values
         /// (for example, rooting a default output path) during construction.
         /// </summary>
-        public bool HasTaskEnvironmentConstructor => TaskEnvironmentConstructor is not null;
-
-        /// <summary>
-        /// Gets the public instance constructor that accepts a single <see cref="TaskEnvironment"/>
-        /// parameter, or <see langword="null"/> if the type does not declare one. The resolved
-        /// <see cref="ConstructorInfo"/> lets callers invoke it directly (avoiding the reflection-binder
-        /// overload-resolution cost of <see cref="Activator.CreateInstance(Type, object[])"/>) while staying
-        /// Native AOT friendly, since no dynamic code is generated.
-        /// </summary>
-        /// <remarks>
-        /// See <see cref="EnsureConstructorsResolved"/> for the deferred, thread-safe resolution strategy.
-        /// </remarks>
-        internal ConstructorInfo? TaskEnvironmentConstructor
+        public bool HasTaskEnvironmentConstructor
         {
             get
             {
                 EnsureConstructorsResolved();
-                return _taskEnvironmentConstructor;
+                return _taskEnvironmentConstructor is not null;
             }
         }
 
         /// <summary>
-        /// Gets the public parameterless instance constructor, or <see langword="null"/> if the type does not
-        /// declare one. Invoking this cached <see cref="ConstructorInfo"/> directly lets callers instantiate
-        /// the task without <see cref="Activator.CreateInstance(Type)"/>, keeping every task-creation path on a
-        /// single, Native AOT friendly mechanism that generates no dynamic code.
+        /// Creates an instance of this loaded type for use as a task. When the type declares a constructor that
+        /// takes a single <see cref="TaskEnvironment"/>, that constructor is invoked with
+        /// <paramref name="taskEnvironment"/> — falling back to <see cref="TaskEnvironment.Fallback"/> when the
+        /// caller does not supply one — so the task can compute environment-dependent defaults during
+        /// construction; otherwise the public parameterless constructor is used. The engine still assigns the
+        /// TaskEnvironment property separately after construction.
         /// </summary>
         /// <remarks>
-        /// See <see cref="EnsureConstructorsResolved"/> for the deferred, thread-safe resolution strategy.
+        /// Instantiation goes through a cached <c>ConstructorInvoker</c> (or, on frameworks that predate
+        /// it, the cached <see cref="ConstructorInfo"/>) rather than <see cref="Activator.CreateInstance(Type)"/>
+        /// / <see cref="Activator.CreateInstance(Type, object[])"/>. This keeps every task-creation path on a
+        /// single, Native AOT friendly mechanism that generates no dynamic code, while letting repeated
+        /// instantiations approach the speed of the CLR's cached activator. Constructor discovery is deferred
+        /// until this first call — see <see cref="EnsureConstructorsResolved"/>.
         /// </remarks>
-        internal ConstructorInfo? ParameterlessConstructor
+        internal object CreateInstance(TaskEnvironment? taskEnvironment)
         {
-            get
+            EnsureConstructorsResolved();
+
+            if (_taskEnvironmentConstructor is not null)
             {
-                EnsureConstructorsResolved();
-                return _parameterlessConstructor;
+                object environment = taskEnvironment ?? TaskEnvironment.Fallback;
+#if NET
+                return _taskEnvironmentInvoker!.Invoke(environment);
+#else
+                return _taskEnvironmentConstructor.Invoke([environment]);
+#endif
             }
+
+            if (_parameterlessConstructor is not null)
+            {
+#if NET
+                return _parameterlessInvoker!.Invoke();
+#else
+                return _parameterlessConstructor.Invoke(null);
+#endif
+            }
+
+            // Neither a parameterless nor a TaskEnvironment constructor exists; surface the same failure
+            // Activator.CreateInstance would have produced rather than a NullReferenceException.
+            throw new MissingMethodException(Type.FullName, ".ctor");
         }
 
         private ConstructorInfo? _taskEnvironmentConstructor;
 
         private ConstructorInfo? _parameterlessConstructor;
+
+#if NET
+        private ConstructorInvoker? _taskEnvironmentInvoker;
+
+        private ConstructorInvoker? _parameterlessInvoker;
+#endif
 
         private volatile bool _constructorsResolved;
 
@@ -273,19 +293,22 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Resolves — on first access and at most once per observed result — the public instance constructors
         /// this type offers for task instantiation: the parameterless constructor and the one that takes a
-        /// single <see cref="TaskEnvironment"/> parameter (if any). Both are found in a single reflection pass.
-        /// The <see cref="TaskEnvironment"/> parameter is matched by full type name so that it also works for
-        /// types loaded via MetadataLoadContext, whose <see cref="TaskEnvironment"/> is a distinct
-        /// <see cref="Type"/> identity from the one loaded in the current context.
+        /// single <see cref="TaskEnvironment"/> parameter (if any), both found in a single reflection pass. On
+        /// frameworks that support it, a cached <c>ConstructorInvoker</c> is also built for whichever
+        /// constructor <see cref="CreateInstance"/> will use. The <see cref="TaskEnvironment"/> parameter is
+        /// matched by full type name so that it also works for types loaded via MetadataLoadContext, whose
+        /// <see cref="TaskEnvironment"/> is a distinct <see cref="Type"/> identity from the one loaded in the
+        /// current context.
         /// </summary>
         /// <remarks>
         /// Resolution is deferred until first access so that the constructor reflection is only paid for types
         /// we actually instantiate — not for the many <see cref="LoadedType"/> instances built solely to
         /// marshal property metadata to a task host. A <see cref="LoadedType"/> is cached per task type and
         /// shared across threads in multi-threaded builds, so the memoization is intentionally lock-free: the
-        /// worst a race can do is resolve the same (equivalent) constructors on more than one thread, and the
-        /// volatile <see cref="_constructorsResolved"/> flag guarantees a reader that observes <c>true</c> also
-        /// observes the published constructor references.
+        /// worst a race can do is resolve the same (equivalent) constructors on more than one thread — every
+        /// published field is a reference written atomically — and the volatile
+        /// <see cref="_constructorsResolved"/> flag guarantees a reader that observes <c>true</c> also observes
+        /// those published references.
         /// </remarks>
         private void EnsureConstructorsResolved()
         {
@@ -321,6 +344,26 @@ namespace Microsoft.Build.Shared
 
             _parameterlessConstructor = parameterlessConstructor;
             _taskEnvironmentConstructor = taskEnvironmentConstructor;
+
+#if NET
+            // Build the cached invoker for whichever constructor CreateInstance will actually use. Types loaded
+            // only for metadata inspection run in a task host and are never instantiated in-proc, so they never
+            // need an invoker (and a MetadataLoadContext ConstructorInfo cannot be invoked). ConstructorInvoker
+            // caches an optimized, Native AOT friendly invocation path so repeated instantiations approach
+            // Activator.CreateInstance speed without generating dynamic code.
+            if (!LoadedViaMetadataLoadContext)
+            {
+                if (taskEnvironmentConstructor is not null)
+                {
+                    _taskEnvironmentInvoker = ConstructorInvoker.Create(taskEnvironmentConstructor);
+                }
+                else if (parameterlessConstructor is not null)
+                {
+                    _parameterlessInvoker = ConstructorInvoker.Create(parameterlessConstructor);
+                }
+            }
+#endif
+
             _constructorsResolved = true;
         }
 

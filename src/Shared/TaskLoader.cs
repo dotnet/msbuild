@@ -117,18 +117,11 @@ namespace Microsoft.Build.Shared
                 {
                     // perf improvement for the same appdomain case - we already have the type object
                     // and don't want to go through reflection to recreate it from the name.
-                    // If the task declares a constructor that accepts a TaskEnvironment, prefer it so the task
-                    // can compute environment-dependent default values during construction. The engine still
-                    // sets the TaskEnvironment property separately after construction. Either way we invoke the
-                    // cached ConstructorInfo directly, keeping task creation on a single Native AOT friendly
-                    // mechanism and avoiding the reflection-binder overload-resolution cost that
-                    // Activator.CreateInstance(Type, object[]) would pay on every task instantiation.
-                    if (loadedType.HasTaskEnvironmentConstructor)
-                    {
-                        return (ITask?)loadedType.TaskEnvironmentConstructor!.Invoke(new object[] { taskEnvironment ?? TaskEnvironment.Fallback });
-                    }
-
-                    return (ITask?)loadedType.ParameterlessConstructor!.Invoke(null);
+                    // LoadedType owns instantiation: it invokes the TaskEnvironment-accepting constructor when
+                    // the task declares one (so the task can compute environment-dependent defaults during
+                    // construction) or the parameterless one otherwise, through a cached, Native AOT friendly
+                    // mechanism. The engine still assigns the TaskEnvironment property separately afterward.
+                    return (ITask?)loadedType.CreateInstance(taskEnvironment);
                 }
 
 #if FEATURE_APPDOMAIN
