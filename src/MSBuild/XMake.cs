@@ -345,16 +345,13 @@ namespace Microsoft.Build.CommandLine
             }
             else
             {
-                // The server was requested for this invocation but cannot be used by the in-process build below.
-                // Record the specific localized reason (and a stable reason code) so the build log (and any
-                // binary log) explains why the server was skipped. When the server was never requested we stay
-                // silent to avoid noise on ordinary builds. The null check defends the (currently unreachable
-                // from here) case where the client-fallback path in MSBuildClientApp already recorded a more
-                // specific reason before invoking the in-process build.
+                // If the server was requested but this build runs in-process instead, record why so the build
+                // log explains it. Skip when the server was never requested (an ordinary build logs nothing) or
+                // when the client fallback path already recorded a more specific reason (s_serverNotUsed set).
                 if (shouldUseServer && s_serverNotUsed is null)
                 {
-                    // Reaching the else branch with shouldUseServer means either the switches preclude the server
-                    // (serverDisabled is set) or only the stdout escape hatch does.
+                    // canRunServer here means only the stdout escape hatch blocked the server; otherwise the
+                    // switches disabled it and serverDisabled carries the reason.
                     s_serverNotUsed = canRunServer
                         ? new ServerNotUsedReason(
                             ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerReasonStdOutForChildNodes"),
@@ -469,9 +466,6 @@ namespace Microsoft.Build.CommandLine
                 }
                 else if (nodeReuseDisqualifies)
                 {
-                    // Node reuse is the disablement reason a user most commonly hits while expecting the server
-                    // (and the in-process build still proceeds), so give it a specific message. A /mt build is
-                    // exempt: it keeps the server on (short-lived) for Server GC rather than falling back.
                     canRunServer = false;
                     serverDisabled = new ServerNotUsedReason(
                         ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerReasonNodeReuseDisabled"),
@@ -2024,59 +2018,11 @@ namespace Microsoft.Build.CommandLine
                     MessageImportance.Low),
             };
 
-            // Record the MSBuild Server lifecycle for this build so it is visible in the binary log and at
-            // diagnostic verbosity. These are logged as a dedicated, versionable MSBuildServerLifecycleEventArgs
-            // (recorded under its own binary-log record kind) rather than an ad-hoc message, so tooling can
-            // recognize and render them structurally; the console still shows the human-readable text at -v:diag.
-            // The s_isServerNode check must come first: it intentionally masks any s_serverNotUsed reason
-            // that the server process may have set during its own startup (the server's own command line
-            // can look "server requested but not used"), so the server only ever logs a spawn/reuse message.
-            if (s_isServerNode)
+            // Record how this build relates to MSBuild Server (spawned/reused/not-used) as a dedicated,
+            // structured event, visible in binary logs and at -v:diag.
+            if (TryCreateServerLifecycleEvent() is { } serverLifecycleEvent)
             {
-                // The first build a freshly spawned server serves reports a "spawned" message; every
-                // subsequent build on the same long-lived node reports that the node is being reused.
-                // A spawned server that will tear itself down after this build (a /mt build with node reuse
-                // off) reports a distinct "short-lived" spawn message.
-                bool spawned = s_serverBuildCounter == 1;
-                bool shortLived = spawned && OutOfProcServerNode.CurrentBuildShutsDownServerNode;
-                string serverStatusResource = spawned
-                    ? (shortLived ? "MSBuildServerNodeSpawnedShortLived" : "MSBuildServerNodeSpawned")
-                    : "MSBuildServerNodeReused";
-                MSBuildServerLifecycleEventArgs lifecycleEvent = new(
-                    spawned ? MSBuildServerLifecycleKind.Spawned : MSBuildServerLifecycleKind.Reused,
-                    EnvironmentUtilities.CurrentProcessId,
-                    reason: null,
-                    reasonCode: null,
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                        serverStatusResource,
-                        EnvironmentUtilities.CurrentProcessId),
-                    MessageImportance.Low,
-                    shortLived)
-                {
-                    // Deferred messages have no project/target context; give the event the Invalid context the
-                    // plain-text deferred path uses so loggers requiring a non-null context accept it.
-                    BuildEventContext = BuildEventContext.Invalid,
-                };
-                messages.Add(new BuildManager.DeferredBuildMessage(lifecycleEvent));
-            }
-            else if (s_serverNotUsed is { } serverNotUsed)
-            {
-                MSBuildServerLifecycleEventArgs lifecycleEvent = new(
-                    MSBuildServerLifecycleKind.NotUsed,
-                    processId: 0,
-                    serverNotUsed.Message,
-                    serverNotUsed.Code,
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                        "MSBuildServerNotUsedForBuild",
-                        serverNotUsed.Message),
-                    MessageImportance.Low)
-                {
-                    BuildEventContext = BuildEventContext.Invalid,
-                };
-                messages.Add(new BuildManager.DeferredBuildMessage(lifecycleEvent));
-
-                // Consume the reason so it cannot leak into a subsequent in-process build in this process.
-                s_serverNotUsed = null;
+                messages.Add(new BuildManager.DeferredBuildMessage(serverLifecycleEvent));
             }
 
             NativeMethodsShared.LongPathsStatus longPaths = NativeMethodsShared.IsLongPathsEnabled();
@@ -2114,6 +2060,63 @@ namespace Microsoft.Build.CommandLine
             }
 
             return messages;
+        }
+
+        /// <summary>
+        /// Builds the <see cref="MSBuildServerLifecycleEventArgs"/> describing how this build relates to MSBuild
+        /// Server, or <see langword="null"/> when the server was neither used nor requested (an ordinary build,
+        /// which logs nothing). In a server process the event is always a spawn/reuse status; any "not used"
+        /// reason the server may have recorded from its own <c>-nodeMode</c> startup command line does not apply
+        /// to the builds it serves and is ignored.
+        /// </summary>
+        private static MSBuildServerLifecycleEventArgs TryCreateServerLifecycleEvent()
+        {
+            if (s_isServerNode)
+            {
+                // s_serverBuildCounter is 1 for the first build a freshly spawned node serves and greater when a
+                // resident node is reused. A spawned node that tears down after this build (a /mt build with node
+                // reuse off) reports a distinct short-lived status.
+                bool spawned = s_serverBuildCounter == 1;
+                bool shortLived = spawned && OutOfProcServerNode.CurrentBuildShutsDownServerNode;
+                string statusResource = (spawned, shortLived) switch
+                {
+                    (true, true) => "MSBuildServerNodeSpawnedShortLived",
+                    (true, false) => "MSBuildServerNodeSpawned",
+                    _ => "MSBuildServerNodeReused",
+                };
+
+                return CreateLifecycleEvent(
+                    spawned ? MSBuildServerLifecycleKind.Spawned : MSBuildServerLifecycleKind.Reused,
+                    processId: EnvironmentUtilities.CurrentProcessId,
+                    reason: null,
+                    reasonCode: null,
+                    message: ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(statusResource, EnvironmentUtilities.CurrentProcessId),
+                    shortLived: shortLived);
+            }
+
+            if (s_serverNotUsed is { } serverNotUsed)
+            {
+                // Clear it so a later in-process build in this process does not report a stale reason.
+                s_serverNotUsed = null;
+
+                return CreateLifecycleEvent(
+                    MSBuildServerLifecycleKind.NotUsed,
+                    processId: 0,
+                    reason: serverNotUsed.Message,
+                    reasonCode: serverNotUsed.Code,
+                    message: ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("MSBuildServerNotUsedForBuild", serverNotUsed.Message));
+            }
+
+            return null;
+
+            static MSBuildServerLifecycleEventArgs CreateLifecycleEvent(
+                MSBuildServerLifecycleKind kind, int processId, string reason, string reasonCode, string message, bool shortLived = false) =>
+                new(kind, processId, reason, reasonCode, message, MessageImportance.Low, shortLived)
+                {
+                    // A deferred message has no project/target context; use the Invalid context so loggers that
+                    // require a non-null context accept the event.
+                    BuildEventContext = BuildEventContext.Invalid,
+                };
         }
 
         private static BuildResult ExecuteBuild(BuildManager buildManager, BuildRequestData request)
@@ -3337,11 +3340,9 @@ namespace Microsoft.Build.CommandLine
                         // we have to pass down xmake build invocation to avoid circular dependency
                         OutOfProcServerNode.BuildCallback buildFunction = (commandLine) =>
                         {
-                            // Count builds this server node serves so the build log can distinguish a
-                            // freshly spawned node (first build) from a reused one (subsequent builds).
-                            // A plain increment is safe: the server serializes build commands behind the
-                            // busy mutex, so this never runs concurrently and the mutex provides the memory
-                            // barrier that makes the new value visible to GetMessagesToLogInBuildLoggers.
+                            // Count builds this node serves; TryCreateServerLifecycleEvent uses the count to tell
+                            // a freshly spawned node from a reused one. No synchronization needed: the server
+                            // serializes builds behind its busy mutex, which also publishes the value.
                             s_serverBuildCounter++;
 
                             int exitCode;

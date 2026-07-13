@@ -37,11 +37,9 @@ namespace Microsoft.Build.Experimental
         /// <summary>
         /// Whether the build currently being served by this server node will tear the node down afterward
         /// instead of leaving it resident for reuse (a "short-lived" server — a <c>/mt</c> build with node reuse
-        /// off). Set from the server build command before the build callback runs, so the callback can report it.
-        /// Only meaningful from within a server build callback: it is written and read on the same build thread
-        /// (the server serializes builds behind its busy mutex). Intentionally public — MSBuild.exe reads it and
-        /// cannot see Microsoft.Build internals (no InternalsVisibleTo), so an internal member is not an option;
-        /// the value is transient plumbing rather than a queryable API.
+        /// off). Only meaningful from within a server build callback; written and read on the same build thread,
+        /// so no synchronization is needed. Public because MSBuild.exe reads it and Microsoft.Build exposes no
+        /// InternalsVisibleTo to it.
         /// </summary>
         public static bool CurrentBuildShutsDownServerNode => s_currentBuildShutsDownServerNode;
 
@@ -468,10 +466,7 @@ namespace Microsoft.Build.Experimental
                     Console.SetOut(outWriter);
                     Console.SetError(errWriter);
 
-                    // Publish whether this build's server is short-lived (it will shut down afterward rather than
-                    // stay resident for reuse) so the build callback can report it in the lifecycle log. Written
-                    // and read on the same build thread (the server serializes builds behind the busy mutex), so
-                    // a plain bool needs no synchronization.
+                    // Publish whether this build's server is short-lived so the build callback can report it.
                     s_currentBuildShutsDownServerNode = command.ShutdownAfterBuild;
 
                     buildResult = _buildFunction(command.CommandLine);

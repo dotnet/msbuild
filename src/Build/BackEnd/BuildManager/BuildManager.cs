@@ -3413,11 +3413,8 @@ namespace Microsoft.Build.Execution
                 }
                 else if (message.BuildEvent is not null)
                 {
-                    // Raise the caller's pre-built event as-is so it is recorded under its own (structured)
-                    // event type / binary-log record kind, rather than being flattened into an ad-hoc message.
-                    // Deferred messages have no project/target context; callers normally set the Invalid context
-                    // at construction. Fall back to it here (first-write-wins) so loggers that require a non-null
-                    // context still accept the event.
+                    // Raise the pre-built event as-is so it keeps its own event type. A deferred message has no
+                    // project/target context, so supply the Invalid context if the caller left it unset.
                     message.BuildEvent.BuildEventContext ??= BuildEventContext.Invalid;
                     loggingService.LogBuildEvent(message.BuildEvent);
                 }
