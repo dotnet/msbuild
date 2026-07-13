@@ -816,6 +816,102 @@ public class PreferTypedParameterCodeFixProviderTests
     /// Builds a code-fix test where the diagnostic is expected but no fix is offered: the fixed source is
     /// identical to the test source, so applying any offered fix would fail the comparison.
     /// </summary>
+    [Fact]
+    public async Task Fix_0006_FileInfo_NullGuardedReference_NoFixOffered()
+    {
+        // The property is consumed by string.IsNullOrEmpty(prop), which is deliberately null-tolerant. Rewriting
+        // that argument to prop.FullName after retyping to FileInfo would dereference a possibly-null property and
+        // throw at runtime, so the diagnostic is reported but no fix is offered.
+        await CreateNoFixTest(
+            """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public string InputPath { get; set; } = "";
+                public override bool Execute()
+                {
+                    if (!string.IsNullOrEmpty(InputPath))
+                    {
+                        var fi = {|#0:new FileInfo(InputPath)|};
+                    }
+                    return true;
+                }
+            }
+            """,
+            Diag(DiagnosticIds.PreferTypedPathParameter).WithLocation(0)
+                .WithArguments("InputPath", "string", "FileInfo"));
+    }
+
+    [Fact]
+    public async Task Fix_0006_DirectoryInfo_NullWhiteSpaceGuardedReference_NoFixOffered()
+    {
+        // Same null-guard hazard via string.IsNullOrWhiteSpace(prop) for a DirectoryInfo retype.
+        await CreateNoFixTest(
+            """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public string OutputDir { get; set; } = "";
+                public override bool Execute()
+                {
+                    if (!string.IsNullOrWhiteSpace(OutputDir))
+                    {
+                        var di = {|#0:new DirectoryInfo(OutputDir)|};
+                    }
+                    return true;
+                }
+            }
+            """,
+            Diag(DiagnosticIds.PreferTypedPathParameter).WithLocation(0)
+                .WithArguments("OutputDir", "string", "DirectoryInfo"));
+    }
+
+    [Fact]
+    public async Task Fix_0006_AbsolutePath_NullGuardedReference_StillFixed()
+    {
+        // AbsolutePath is a struct with an implicit string conversion, so string.IsNullOrEmpty(prop) compiles
+        // unchanged after the retype and cannot NRE — the fix is still safely offered.
+        await CreateFixTest(
+            testCode: """
+                using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public string InputPath { get; set; } = "";
+                    public override bool Execute()
+                    {
+                        if (!string.IsNullOrEmpty(InputPath))
+                        {
+                            var abs = {|#0:new AbsolutePath(InputPath)|};
+                        }
+                        return true;
+                    }
+                }
+                """,
+            fixedCode: """
+                using Microsoft.Build.Framework;
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public AbsolutePath InputPath { get; set; } = default;
+                    public override bool Execute()
+                    {
+                        if (!string.IsNullOrEmpty(InputPath))
+                        {
+                            var abs = InputPath;
+                        }
+                        return true;
+                    }
+                }
+                """,
+            Diag(DiagnosticIds.PreferTypedPathParameter).WithLocation(0)
+                .WithArguments("InputPath", "string", "AbsolutePath")).RunAsync();
+    }
+
     private static async Task CreateNoFixTest(string code, params DiagnosticResult[] expected)
     {
         var test = new CSharpCodeFixTest<PreferTypedParameterAnalyzer, PreferTypedParameterCodeFixProvider, DefaultVerifier>

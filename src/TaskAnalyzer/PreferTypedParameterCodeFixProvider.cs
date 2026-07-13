@@ -612,6 +612,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // alone is the fix. FileInfo/DirectoryInfo have no implicit string conversion, so pass .FullName.
                 if (suggestedType != "AbsolutePath")
                 {
+                    // A null-guard such as string.IsNullOrEmpty(prop) is specifically tolerant of a null property.
+                    // Rewriting it to prop.FullName would dereference a possibly-null FileInfo/DirectoryInfo and
+                    // throw, silently defeating the guard. We cannot safely rewrite this shape, so withhold the
+                    // whole fix (the diagnostic still surfaces) rather than emit code that can NRE.
+                    if (IsNullGuardArgument(semanticModel, propertyAccess, cancellationToken))
+                    {
+                        return false;
+                    }
+
                     var replacement = AppendFullName(propertyAccess)
                         .WithTriviaFrom(propertyAccess)
                         .WithAdditionalAnnotations(Formatter.Annotation);
@@ -623,6 +632,29 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// True when <paramref name="propertyAccess"/> is the argument of a <c>string.IsNullOrEmpty</c> or
+        /// <c>string.IsNullOrWhiteSpace</c> call. These are null-tolerant by design, so a FileInfo/DirectoryInfo
+        /// retype cannot rewrite them to <c>prop.FullName</c> without risking a <see cref="System.NullReferenceException"/>.
+        /// </summary>
+        private static bool IsNullGuardArgument(
+            SemanticModel semanticModel,
+            ExpressionSyntax propertyAccess,
+            CancellationToken cancellationToken)
+        {
+            if (propertyAccess.Parent is not ArgumentSyntax argument ||
+                argument.Parent is not ArgumentListSyntax argumentList ||
+                argumentList.Arguments.Count != 1 ||
+                argumentList.Parent is not InvocationExpressionSyntax candidate)
+            {
+                return false;
+            }
+
+            return semanticModel.GetSymbolInfo(candidate, cancellationToken).Symbol is IMethodSymbol method &&
+                method.ContainingType?.SpecialType == SpecialType.System_String &&
+                method.Name is "IsNullOrEmpty" or "IsNullOrWhiteSpace";
         }
 
         /// <summary>
