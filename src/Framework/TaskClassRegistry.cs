@@ -103,18 +103,27 @@ internal static class TaskClassRegistry
     }
 
     /// <summary>
-    /// Registers a task under the given name with a factory that receives the <see cref="TaskEnvironment"/> the
-    /// engine is running the task with, so a task can consume it during construction (for example to compute
-    /// property defaults that depend on the environment). Construction is fully reflection-free.
+    /// Registers a task type with a factory that receives the <see cref="TaskEnvironment"/> the engine is
+    /// running the task with, so a task can consume it during construction (for example to compute property
+    /// defaults that depend on the environment). Construction is fully reflection-free, and the registration is
+    /// keyed by the task type's name (the name a target uses to invoke it).
     /// </summary>
-    /// <param name="taskName">The name a target uses to invoke the task (the <c>TaskName</c> of a <c>&lt;UsingTask&gt;</c>).</param>
+    /// <typeparam name="TTask">
+    /// The task type to register. The registration key is <c>typeof(TTask).Name</c>. The
+    /// <c>[DynamicallyAccessedMembers]</c> roots the type's public properties so a trimmer preserves them,
+    /// keeping parameter binding working; the host-supplied factory handles construction.
+    /// </typeparam>
     /// <param name="factory">A delegate that creates a new instance of the task given the current <see cref="TaskEnvironment"/>.</param>
-    internal static void Register(string taskName, Func<TaskEnvironment, ITask> factory)
+    internal static void Register<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] TTask>(Func<TaskEnvironment, ITask> factory)
+        where TTask : ITask
     {
-        ArgumentException.ThrowIfNullOrEmpty(taskName);
         ArgumentNullException.ThrowIfNull(factory);
 
-        s_tasksByName[taskName] = new TaskClassRegistration(factory);
+        // typeof(TTask) carries TTask's [DynamicallyAccessedMembers] here, so building the LoadedType (a
+        // GetProperties walk) is trim-safe and is done once, eagerly, at registration.
+        LoadedType loadedType = CreateLoadedType(typeof(TTask));
+
+        s_tasksByName[typeof(TTask).Name] = new TaskClassRegistration(factory, loadedType);
         s_hasRegistrations = true;
     }
 
