@@ -45,6 +45,15 @@ namespace Microsoft.Build.UnitTests.Shared
         // fail to find its runtime. See eng/BootStrapMsBuild.targets.
         private static readonly string s_bootstrapDotnetHostPath = EnvironmentProvider.GetDotnetExePathFromFolder(BootstrapMsBuildBinaryLocation);
 
+        // Architecture-specific DOTNET_ROOT_<ARCH> variables take precedence over DOTNET_ROOT for the .NET app host.
+        // X86/X64/ARM64 cover every CI agent architecture; these are cleared when launching the bootstrapped MSBuild.
+        private static readonly string[] s_archSpecificDotnetRootVars =
+        [
+            "DOTNET_ROOT_X86",
+            "DOTNET_ROOT_X64",
+            "DOTNET_ROOT_ARM64",
+        ];
+
         public static void ApplyDotnetHostPathEnvironmentVariable(TestEnvironment testEnvironment)
         {
             // Built msbuild.dll executed by dotnet.exe needs this environment variable for msbuild tasks such as RoslynCodeTaskFactory.
@@ -103,19 +112,46 @@ namespace Microsoft.Build.UnitTests.Shared
         /// On .NET Core, this includes DOTNET_HOST_PATH so that tasks like RoslynCodeTaskFactory
         /// can locate the dotnet host even when MSBuild runs as a native app host, and so that any
         /// task hosts MSBuild spawns resolve their runtime (DOTNET_ROOT) from the same host.
+        /// A null value in the returned dictionary means the variable should be removed from the child environment.
         /// </summary>
         /// <param name="useBootstrapHost">
-        /// When <see langword="true"/>, DOTNET_HOST_PATH points at the dotnet host inside the bootstrap layout
-        /// (used when launching the bootstrapped MSBuild) so task hosts resolve the bootstrap runtime rather than
-        /// an ambient dotnet on PATH (e.g. the repo-local .dotnet, which may not contain the runtime the bootstrap targets).
+        /// When <see langword="true"/>, the whole child process tree is pinned to the bootstrap layout: DOTNET_HOST_PATH,
+        /// DOTNET_ROOT and DOTNET_INSTALL_DIR all point at the bootstrap, and any architecture-specific DOTNET_ROOT_&lt;ARCH&gt;
+        /// variables (which take precedence over DOTNET_ROOT) are cleared. This is required because the CI two-stage build
+        /// exports DOTNET_ROOT/DOTNET_HOST_PATH/DOTNET_INSTALL_DIR pointing at the stage 1 bootstrap (it is the build tool
+        /// for stage 2). Without this override those leak into the stage 2 test run, so the launched stage 2 bootstrapped
+        /// MSBuild would resolve the stage 1 SDK/runtime and spawn a mismatched task host, failing with MSB4216. The
+        /// bootstrap can also target an earlier runtime (e.g. net10.0) than the SDK overlaid into .dotnet, so an ambient
+        /// dotnet (e.g. the repo-local .dotnet) may not contain the runtime the bootstrap targets. See
+        /// eng/BootStrapMsBuild.targets and eng/cibuild_bootstrapped_msbuild.sh.
         /// </param>
         private static Dictionary<string, string> GetMSBuildEnvironmentVariables(bool useBootstrapHost)
         {
 #if !FEATURE_RUN_EXE_IN_TESTS
-            return new Dictionary<string, string>
+            if (!useBootstrapHost)
             {
-                [Constants.DotnetHostPathEnvVarName] = useBootstrapHost ? s_bootstrapDotnetHostPath : s_dotnetExePath,
+                return new Dictionary<string, string>
+                {
+                    [Constants.DotnetHostPathEnvVarName] = s_dotnetExePath,
+                };
+            }
+
+            string bootstrapRoot = BootstrapMsBuildBinaryLocation.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            var environmentVariables = new Dictionary<string, string>
+            {
+                [Constants.DotnetHostPathEnvVarName] = s_bootstrapDotnetHostPath,
+                ["DOTNET_ROOT"] = bootstrapRoot,
+                ["DOTNET_INSTALL_DIR"] = bootstrapRoot,
             };
+
+            // Architecture-specific DOTNET_ROOT_<ARCH> variables take precedence over DOTNET_ROOT for the app host, so a
+            // stale value leaked from the CI environment would silently override the bootstrap root. Remove them (null value).
+            foreach (string archSpecificRootVar in s_archSpecificDotnetRootVars)
+            {
+                environmentVariables[archSpecificRootVar] = null;
+            }
+
+            return environmentVariables;
 #else
             return null;
 #endif
@@ -170,7 +206,16 @@ namespace Microsoft.Build.UnitTests.Shared
             {
                 foreach (var kvp in environmentVariables)
                 {
-                    psi.Environment[kvp.Key] = kvp.Value;
+                    // A null value means the variable should be removed from the child environment
+                    // (e.g. arch-specific DOTNET_ROOT_<ARCH> vars leaked from the CI build environment).
+                    if (kvp.Value is null)
+                    {
+                        psi.Environment.Remove(kvp.Key);
+                    }
+                    else
+                    {
+                        psi.Environment[kvp.Key] = kvp.Value;
+                    }
                 }
             }
             string output = string.Empty;
