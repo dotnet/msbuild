@@ -47,20 +47,10 @@
         <target state="translated">"{0}" は予約された項目メタデータです。変更または削除することはできません。</target>
         <note>UE: Tasks and OM users are not allowed to remove or change the value of the built-in metadata on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</note>
       </trans-unit>
-      <trans-unit id="Shared.FailedDeletingTempFile">
-        <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
-        <target state="translated">MSB5018: 一時ファイル "{0}" を削除できませんでした。{1} {2}</target>
-        <note>{StrBegin="MSB5018: "}</note>
-      </trans-unit>
       <trans-unit id="TaskNotMarshalByRef">
         <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
         <target state="translated">MSB4077: "{0}" タスクに属性 LoadInSeparateAppDomain が設定されていますが、MarshalByRefObject から派生していません。そのタスクが MarshalByRefObject または AppDomainIsolatedTask から派生していることを確認してください。</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="Shared.KillingProcess">
-        <source>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</source>
-        <target state="translated">MSB5002: 実行可能なタスク "{0}" は、指定された制限 ({1} ミリ秒) 内で完了しなかったため、終了しています。</target>
-        <note>{StrBegin="MSB5002: "}</note>
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotHaveZeroLength">
         <source>Parameter "{0}" cannot have zero length.</source>
@@ -76,11 +66,6 @@
         <source>The "{0}" task has not registered its resources. In order to use the "TaskLoggingHelper.FormatResourceString()" method this task needs to register its resources either during construction, or via the "TaskResources" property.</source>
         <target state="translated">"{0}" タスクのリソースが登録されていません。"TaskLoggingHelper.FormatResourceString()" メソッドを使用するためには、構築時に、または "TaskResources" プロパティを通じて、このタスクのリソースを登録する必要があります。</target>
         <note>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="Shared.KillingProcessByCancellation">
-        <source>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</source>
-        <target state="translated">MSB5021: ビルドが取り消されたため、実行可能なタスク "{0}" とその子プロセスを終了しています。</target>
-        <note>{StrBegin="MSB5021: "}</note>
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>

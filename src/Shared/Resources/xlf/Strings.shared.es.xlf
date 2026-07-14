@@ -47,20 +47,10 @@
         <target state="translated">"{0}" es un metadato de elemento reservado y no se puede modificar ni eliminar.</target>
         <note>UE: Tasks and OM users are not allowed to remove or change the value of the built-in metadata on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</note>
       </trans-unit>
-      <trans-unit id="Shared.FailedDeletingTempFile">
-        <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
-        <target state="translated">MSB5018: No se pudo eliminar el archivo temporal "{0}". {1} {2}</target>
-        <note>{StrBegin="MSB5018: "}</note>
-      </trans-unit>
       <trans-unit id="TaskNotMarshalByRef">
         <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
         <target state="translated">MSB4077: La tarea "{0}" se marcó con el atributo LoadInSeparateAppDomain, pero esta no deriva de MarshalByRefObject. Asegúrese de que la tarea deriva de MarshalByRefObject o de AppDomainIsolatedTask.</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="Shared.KillingProcess">
-        <source>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</source>
-        <target state="translated">MSB5002: Finalizando el ejecutable de la tarea "{0}" porque no se completó dentro del límite especificado de {1} milisegundos.</target>
-        <note>{StrBegin="MSB5002: "}</note>
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotHaveZeroLength">
         <source>Parameter "{0}" cannot have zero length.</source>
@@ -76,11 +66,6 @@
         <source>The "{0}" task has not registered its resources. In order to use the "TaskLoggingHelper.FormatResourceString()" method this task needs to register its resources either during construction, or via the "TaskResources" property.</source>
         <target state="translated">La tarea "{0}" no registró sus recursos. Para usar el método "TaskLoggingHelper.FormatResourceString()", esta tarea tiene que registrar sus recursos durante la construcción o mediante la propiedad "TaskResources".</target>
         <note>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="Shared.KillingProcessByCancellation">
-        <source>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</source>
-        <target state="translated">MSB5021: Finalizando el ejecutable de la tarea "{0}" y sus procesos secundarios porque se canceló la compilación.</target>
-        <note>{StrBegin="MSB5021: "}</note>
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>

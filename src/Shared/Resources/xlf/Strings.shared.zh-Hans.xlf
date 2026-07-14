@@ -47,20 +47,10 @@
         <target state="translated">“{0}”是保留的项元数据，不能修改或删除。</target>
         <note>UE: Tasks and OM users are not allowed to remove or change the value of the built-in metadata on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</note>
       </trans-unit>
-      <trans-unit id="Shared.FailedDeletingTempFile">
-        <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
-        <target state="translated">MSB5018: 未能删除临时文件“{0}”。{1} {2}</target>
-        <note>{StrBegin="MSB5018: "}</note>
-      </trans-unit>
       <trans-unit id="TaskNotMarshalByRef">
         <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
         <target state="translated">MSB4077: “{0}”任务已标记为 LoadInSeparateAppDomain 特性，但未派生自 MarshalByRefObject。请检查该任务是派生自 MarshalByRefObject 还是 AppDomainIsolatedTask。</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="Shared.KillingProcess">
-        <source>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</source>
-        <target state="translated">MSB5002: 终止任务可执行文件“{0}”，因为它未在指定的 {1} 毫秒限制内完成。</target>
-        <note>{StrBegin="MSB5002: "}</note>
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotHaveZeroLength">
         <source>Parameter "{0}" cannot have zero length.</source>
@@ -76,11 +66,6 @@
         <source>The "{0}" task has not registered its resources. In order to use the "TaskLoggingHelper.FormatResourceString()" method this task needs to register its resources either during construction, or via the "TaskResources" property.</source>
         <target state="translated">任务“{0}”尚未注册其资源。此任务需要在构造期间或通过“TaskResources”属性注册其资源，然后才能使用“TaskLoggingHelper.FormatResourceString()”方法。</target>
         <note>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="Shared.KillingProcessByCancellation">
-        <source>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</source>
-        <target state="translated">MSB5021: 终止任务可执行文件“{0}”及其子进程，因为已取消生成。</target>
-        <note>{StrBegin="MSB5021: "}</note>
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>

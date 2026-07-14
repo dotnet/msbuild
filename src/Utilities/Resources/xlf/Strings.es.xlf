@@ -302,6 +302,21 @@
         <target state="translated">Compilación correcta.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Shared.KillingProcess">
+        <source>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</source>
+        <target state="translated">MSB5002: Finalizando el ejecutable de la tarea "{0}" porque no se completó dentro del límite especificado de {1} milisegundos.</target>
+        <note>{StrBegin="MSB5002: "}</note>
+      </trans-unit>
+      <trans-unit id="Shared.KillingProcessByCancellation">
+        <source>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</source>
+        <target state="translated">MSB5021: Finalizando el ejecutable de la tarea "{0}" y sus procesos secundarios porque se canceló la compilación.</target>
+        <note>{StrBegin="MSB5021: "}</note>
+      </trans-unit>
+      <trans-unit id="Shared.FailedDeletingTempFile">
+        <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
+        <target state="translated">MSB5018: No se pudo eliminar el archivo temporal "{0}". {1} {2}</target>
+        <note>{StrBegin="MSB5018: "}</note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
