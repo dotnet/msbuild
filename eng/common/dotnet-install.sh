@@ -92,7 +92,6 @@ elif [[ -n "${DOTNET_GLOBAL_INSTALL_DIR:-}" ]]; then
 else
   dotnetRoot="${repo_root}.dotnet"
 fi
-
 if [[ $architecture != "" ]] && [[ $architecture != $buildarch ]]; then
   dotnetRoot="$dotnetRoot/$architecture"
 fi
