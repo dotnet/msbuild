@@ -1425,7 +1425,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DateTimeParse_FromItemSpec_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""

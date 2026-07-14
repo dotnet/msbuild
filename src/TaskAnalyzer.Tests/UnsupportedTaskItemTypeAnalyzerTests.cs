@@ -3,7 +3,6 @@
 
 using System.Threading.Tasks;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
@@ -11,28 +10,29 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 /// <summary>
 /// Tests for <see cref="UnsupportedTaskItemTypeAnalyzer"/> covering MSBuildTask0009.
 /// </summary>
+[TestClass]
 public class UnsupportedTaskItemTypeAnalyzerTests
 {
     // ═══════════════════════════════════════════════════════════════════════
     // Value types are not yet supported by the task parameter binder
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Theory]
-    [InlineData("int")]
-    [InlineData("bool")]
-    [InlineData("long")]
-    [InlineData("double")]
-    [InlineData("float")]
-    [InlineData("decimal")]
-    [InlineData("byte")]
-    [InlineData("sbyte")]
-    [InlineData("short")]
-    [InlineData("ushort")]
-    [InlineData("uint")]
-    [InlineData("ulong")]
-    [InlineData("char")]
-    [InlineData("System.DateTime")]
-    [InlineData("string")]
+    [TestMethod]
+    [DataRow("int")]
+    [DataRow("bool")]
+    [DataRow("long")]
+    [DataRow("double")]
+    [DataRow("float")]
+    [DataRow("decimal")]
+    [DataRow("byte")]
+    [DataRow("sbyte")]
+    [DataRow("short")]
+    [DataRow("ushort")]
+    [DataRow("uint")]
+    [DataRow("ulong")]
+    [DataRow("char")]
+    [DataRow("System.DateTime")]
+    [DataRow("string")]
     public async Task ValueType_ProducesDiagnostic(string typeName)
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync($$"""
@@ -47,7 +47,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task AbsolutePath_NoDiagnostic()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
@@ -62,7 +62,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileInfo_NoDiagnostic()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
@@ -78,7 +78,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DirectoryInfo_NoDiagnostic()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
@@ -98,7 +98,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
     // Array variants
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task SupportedPathTypeArray_NoDiagnostic()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
@@ -113,7 +113,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task OutputProperty_ProducesDiagnostic()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
@@ -134,7 +134,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
     // Unsupported types — diagnostic expected
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task Guid_ProducesDiagnostic()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
@@ -152,7 +152,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
         diags[0].GetMessage().ShouldContain("Guid");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task TimeSpan_ProducesDiagnostic()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
@@ -170,7 +170,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
         diags[0].GetMessage().ShouldContain("TimeSpan");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task UnsupportedTypeArray_ProducesDiagnostic()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
@@ -186,7 +186,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task InheritedProperty_ProducesDiagnostic()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
@@ -206,7 +206,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task StaticProperty_NoDiagnostic()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
@@ -226,7 +226,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
     // Non-task classes — no diagnostic expected
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task NonTaskClass_NoDiagnostic()
     {
         // A class that does not implement ITask should not trigger the diagnostic,
