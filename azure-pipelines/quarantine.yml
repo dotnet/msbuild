@@ -65,10 +65,10 @@ jobs:
   timeoutInMinutes: 120
   steps:
   - task: BatchScript@1
-    displayName: Build (multi-stage) with -mt mode (quarantined tests only)
+    displayName: Build (quarantined tests only)
     inputs:
       filename: 'build.cmd'
-      arguments: "-ci -test -stage2Arguments '/mt /p:RunQuarantinedTests=true'"
+      arguments: "-ci -test -stage2Arguments '/p:RunQuarantinedTests=true'"
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -115,8 +115,8 @@ jobs:
   steps:
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
-  - bash: . 'build.sh' --ci --test --stage2Arguments '/mt /p:RunQuarantinedTests=true'
-    displayName: Build (multi-stage) with -mt mode (quarantined tests only)
+  - bash: . 'build.sh' --ci --test --stage2Arguments '/p:RunQuarantinedTests=true'
+    displayName: Build (quarantined tests only)
     env:
       MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
@@ -152,8 +152,8 @@ jobs:
     vmImage: 'macOS-latest'
   timeoutInMinutes: 120
   steps:
-  - bash: . 'build.sh' --ci --test --stage2Arguments '/mt /p:RunQuarantinedTests=true'
-    displayName: Build (multi-stage) with -mt mode (quarantined tests only)
+  - bash: . 'build.sh' --ci --test --stage2Arguments '/p:RunQuarantinedTests=true'
+    displayName: Build (quarantined tests only)
     env:
       MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
