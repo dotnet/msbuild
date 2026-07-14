@@ -65,7 +65,7 @@ jobs:
   timeoutInMinutes: 120
   steps:
   - task: BatchScript@1
-    displayName: Multi-stage build with -mt mode (quarantined tests only)
+    displayName: Build (multi-stage) with -mt mode (quarantined tests only)
     inputs:
       filename: 'build.cmd'
       arguments: "-ci -test -stage2Arguments '/mt /p:RunQuarantinedTests=true'"
@@ -116,7 +116,7 @@ jobs:
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
   - bash: . 'build.sh' --ci --test --stage2Arguments '/mt /p:RunQuarantinedTests=true'
-    displayName: Multi-stage build with -mt mode (quarantined tests only)
+    displayName: Build (multi-stage) with -mt mode (quarantined tests only)
     env:
       MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
@@ -153,7 +153,7 @@ jobs:
   timeoutInMinutes: 120
   steps:
   - bash: . 'build.sh' --ci --test --stage2Arguments '/mt /p:RunQuarantinedTests=true'
-    displayName: Multi-stage build with -mt mode (quarantined tests only)
+    displayName: Build (multi-stage) with -mt mode (quarantined tests only)
     env:
       MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2

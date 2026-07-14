@@ -44,7 +44,7 @@ jobs:
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
-    displayName: Multi-stage build with -mt mode
+    displayName: Build (with -mt in stage2)
     inputs:
       filename: 'build.cmd'
       arguments: '-onlyDocChanged $(onlyDocChanged) -ci -test -stage2Arguments /mt'
@@ -154,7 +154,7 @@ jobs:
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - task: BatchScript@1
-    displayName: Multi-stage build with -mt mode
+    displayName: Build (with -mt in stage2)
     inputs:
       filename: 'build.cmd'
       arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged) -ci -test -stage2Arguments /mt'
@@ -236,7 +236,7 @@ jobs:
   - bash: sudo apt-get install -y libxml2
   # Intentionally not running tests
   - bash: . 'build.sh' --onlyDocChanged $(onlyDocChanged) --ci --stage2Arguments '/mt /p:BuildAnalyzer=true'
-    displayName: Multi-stage build with -mt mode
+    displayName: Build (with -mt in stage2)
     condition: eq(variables.onlyDocChanged, 0)
     env:
       MSBUILDUSESERVER: "1"
@@ -358,7 +358,7 @@ jobs:
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
   - bash: . 'build.sh' --onlyDocChanged $(onlyDocChanged) --ci --test --stage2Arguments '/mt'
-    displayName: Multi-stage build with -mt mode
+    displayName: Build (with -mt in stage2)
     env:
         MSBUILDUSESERVER: "1"
   - task: Bash@3
@@ -446,7 +446,7 @@ jobs:
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: . 'build.sh' --onlyDocChanged $(onlyDocChanged) --ci --test --stage2Arguments '/mt'
-    displayName: Multi-stage build with -mt mode
+    displayName: Build (with -mt in stage2)
     env:
         MSBUILDUSESERVER: "1"
   - task: Bash@3
