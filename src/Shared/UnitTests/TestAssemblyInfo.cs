@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -20,6 +21,33 @@ namespace Microsoft.Build.UnitTests
     public sealed class MSBuildTestAssemblyHooks
     {
         private static TestEnvironment s_testEnvironment;
+
+        /// <summary>
+        /// Marks the process as "running tests" at assembly-LOAD time, before test discovery, dynamic-data
+        /// providers, or any test-class static constructor can run.
+        /// </summary>
+        /// <remarks>
+        /// On .NET Framework, <c>ToolsetConfigurationReader</c> caches (process-wide, in a static
+        /// <c>Lazy&lt;Configuration&gt;</c>) which application config it reads for toolset definitions. When
+        /// <c>BuildEnvironmentHelper.Instance.RunningTests</c> is <see langword="false"/> at the moment of the
+        /// first read, it reads <c>MSBuild.exe.config</c> — which defines a toolset property
+        /// <c>MSBuildExtensionsPath = $([MSBuild]::GetMSBuildExtensionsPath())</c> that resolves to the test
+        /// host's own output directory. That poisons <c>MSBuildExtensionsPath</c> resolution for the entire run.
+        /// When <c>RunningTests</c> is <see langword="true"/> it instead reads the test host's own config, which
+        /// does not define that property, so the tests behave correctly.
+        ///
+        /// <c>[AssemblyInitialize]</c> can run too late (after MTP discovery has already triggered the first config
+        /// read and populated the cache). Setting the flag from a <c>[ModuleInitializer]</c> guarantees the very
+        /// first read observes <c>RunningTests == true</c>, mirroring what the old xUnit
+        /// <c>ITestPipelineStartup</c> did before discovery.
+        /// </remarks>
+        [ModuleInitializer]
+        internal static void MarkRunningTestsBeforeConfigCacheIsPopulated()
+        {
+            var frameworkAssembly = typeof(ITask).Assembly;
+            SetRunningTests(frameworkAssembly.GetType("Microsoft.Build.Framework.TestInfo"));
+            SetRunningTests(frameworkAssembly.GetType("Microsoft.Build.Framework.BuildEnvironmentState"));
+        }
 
         [AssemblyInitialize]
         public static void AssemblyInitialize(TestContext context)
