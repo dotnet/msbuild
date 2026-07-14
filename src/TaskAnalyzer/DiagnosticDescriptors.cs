@@ -85,6 +85,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             isEnabledByDefault: true,
             description: "A relative default path cannot be rooted in a property initializer because the MSBuild engine only assigns TaskEnvironment after the task is constructed. Move the default into Execute(), where TaskEnvironment.GetAbsolutePath can resolve it, guarding the assignment so a value bound from the project is not overwritten.");
 
+        public static readonly DiagnosticDescriptor UnsupportedTaskItemType = new(
+            id: DiagnosticIds.UnsupportedTaskItemType,
+            title: "ITaskItem<T> used with unsupported type argument",
+            messageFormat: "Task property '{0}' uses ITaskItem<{1}> but MSBuild cannot automatically parse '{1}' from item metadata. Use one of the supported types: {2}.",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "MSBuild can only bind ITaskItem<T> properties when T is a supported type. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.");
+
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
             TaskEnvironmentRequired,
@@ -93,6 +102,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             TransitiveUnsafeCall,
             PreferTypedPathParameter,
             PreferTypedTaskItem,
-            InitializeRelativeDefaultInExecute);
+            InitializeRelativeDefaultInExecute,
+            UnsupportedTaskItemType);
     }
 }
