@@ -50,12 +50,4 @@
     <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
   </ItemGroup>
 
-  <ItemGroup>
-    <PackageVersion Update="Microsoft.Testing.Platform" Version="2.3.1" />
-    <PackageVersion Update="Microsoft.Testing.Platform.MSBuild" Version="2.3.1" />
-    <PackageVersion Update="MSTest.Analyzers" Version="4.3.0" />
-    <PackageVersion Update="MSTest.TestAdapter" Version="4.3.0" />
-    <PackageVersion Update="MSTest.TestFramework" Version="4.3.0" />
-  </ItemGroup>
-
 </Project>

@@ -17,6 +17,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 #nullable disable
 
+#pragma warning disable MSTEST0057 // Custom test-method attributes intentionally preserve existing xUnit-style one-attribute tests.
+
 namespace Microsoft.Build.UnitTests
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
@@ -505,6 +507,8 @@ namespace Microsoft.Build.UnitTests
                 _ => false,
             };
     }
+
+#pragma warning restore MSTEST0057
 
     internal static class TestAttributeUtilities
     {

@@ -7,15 +7,12 @@
     <IsTestLibrary>true</IsTestLibrary>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="xunit.v3.assert" VersionOverride="$(XUnitV3Version)" />
-    <PackageReference Include="xunit.v3.extensibility.core" VersionOverride="$(XUnitV3Version)" />
     <PackageReference Include="MSTest.TestFramework" VersionOverride="4.3.0" PrivateAssets="all" />
     <PackageReference Include="Shouldly" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
-    <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
     <ProjectReference Include="..\MSBuild.Bootstrap\MSBuild.Bootstrap.csproj">
       <Private>false</Private>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -25,7 +22,6 @@
   <ItemGroup>
     <Compile Remove="MSBuildTestMethodAttribute.cs" />
   </ItemGroup>
-
 
   <ItemGroup>
     <Compile Include="..\Shared\IsExternalInit.cs" />
