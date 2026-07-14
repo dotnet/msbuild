@@ -13,6 +13,7 @@ surface stays in sync; only the runner stack differs.
 | -------------------------- | ---------------------------------------------------------- |
 | `projects.json`            | Registry of `*.UnitTests.VSTest` projects + demo files     |
 | `cts.config.json`          | CTS configuration (Modules / SourceCodeFiles / Filter)     |
+| `cts.config.mtp.json`      | Experimental MTP-mode config (see [MTP mode](#mtp-mode-experimental)) |
 | `_Common.ps1`              | Tiny PS helpers (paths, build, registry lookup)            |
 | `Collect-Local.ps1`        | `cts collect vstest --coverage` → baseline in `.cts/`      |
 | `Run-Local.ps1`            | `cts apply vstest --local-development` → impacted-only run |
@@ -104,9 +105,38 @@ silently skip the other. It is wired into `azure-pipelines/cts-apply.yml` as
 a **non-blocking** PR-time step, and can also be run locally:
 `pwsh ./scripts/cts/Check-SlnxParity.ps1`.
 
-## Notes
+## MTP mode (experimental)
 
-* Baseline + logs live at `<repo>/.cts/` (gitignored).
+> The VSTest path above remains the supported, non-blocking CI mode. The MTP
+> path below is opt-in and **not yet wired into CI** — see the caveat.
+
+CTS originally could not drive this repo's tests in their native
+**Microsoft.Testing.Platform (MTP)** form (the default xUnit.v3 runner) because
+the CTS↔host JsonRpc session could hang indefinitely — the reason the VSTest
+wrappers exist. That hang has two independent causes, both now addressed in the
+CTS tool itself (driver resilience: wait for real host exit + bounded output
+drain, and a per-batch response timeout that kills a wedged host and lets CTS
+retry it on a fresh process):
+
+1. A Windows stdout/stderr pipe-inheritance leak past host exit.
+2. A wedged JSON-RPC handshake with no timeout.
+
+`cts.config.mtp.json` drives the **regular `*.UnitTests` MTP DLLs directly**
+(no `.VSTest` wrapper): `Filter.Include` targets
+`**/artifacts/bin/*.UnitTests/Debug/net10.0/*.UnitTests.dll`, and
+`RunConfiguration.TestHostResponseTimeoutSeconds` (120s here) tunes the new
+per-batch wedged-host timeout. Point `cts collect testingplatform` /
+`cts apply testingplatform` at this config instead of `cts.config.json`.
+
+**Caveat (why this is still experimental):** with xUnit.v3 3.2.2, a specific
+batch of tests can deterministically deadlock the test host in MTP *server*
+mode (the auto-generated entry point blocks sync-over-async on its run task).
+The CTS timeout+retry converts that from an infinite hang into a bounded
+outcome, but the deadlocking batch can still surface as a spurious failure.
+Fully green MTP-mode CTS is therefore gated on an upstream xUnit.v3 fix; until
+then, VSTest mode remains the CI path.
+
+
 * The `.VSTest.csproj` wrappers output to
   `artifacts/bin/<MSBuildProjectName>/Debug/net10.0/` — distinct from the
   default MTP variant.
