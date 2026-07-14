@@ -62,15 +62,10 @@ internal static class TaskClassRegistry
     internal static void Register<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>()
         where T : ITask
     {
-        // typeof(T) carries T's [DynamicallyAccessedMembers] here, so building the LoadedType (a
-        // GetProperties walk) is trim-safe and is done once, eagerly, at registration.
         LoadedType loadedType = CreateLoadedType(typeof(T));
 
-        // Construction is delegated to the LoadedType, which resolves T's constructors from the same
-        // trim-rooted type and prefers a TaskEnvironment constructor (injecting the environment so property
-        // initializers that depend on it can run) over the parameterless one. It goes through the type's
-        // ConstructorInfo/ConstructorInvoker directly - no Activator, no dynamic code - so it stays
-        // Native AOT friendly.
+        // The LoadedType owns construction: it prefers a TaskEnvironment constructor (so environment-dependent
+        // property defaults can run) over the parameterless one, reflection- and dynamic-code-free.
         s_tasksByName[typeof(T).Name] = new TaskClassRegistration(taskEnvironment => loadedType.CreateInstance(taskEnvironment)!, loadedType);
         s_hasRegistrations = true;
     }
@@ -86,11 +81,8 @@ internal static class TaskClassRegistry
         ArgumentException.ThrowIfNullOrEmpty(taskName);
         ArgumentNullException.ThrowIfNull(factory);
 
-        // The host-supplied factory's task type is not statically known here, so the LoadedType (needed to
-        // bind parameters) is built lazily by probing a constructed instance's runtime type. The host is
-        // responsible for preserving that type's public properties under trimming (for example via the
-        // generic Register<T> overload or a TrimmerRootAssembly entry). This factory does not receive the
-        // TaskEnvironment; a host whose task needs it during construction registers the overload below.
+        // The task type is not statically known here, so the LoadedType is built lazily from a probed
+        // instance's runtime type. The host must preserve that type's public properties under trimming.
         s_tasksByName[taskName] = new TaskClassRegistration(factory);
         s_hasRegistrations = true;
     }
@@ -112,13 +104,10 @@ internal static class TaskClassRegistry
     {
         ArgumentNullException.ThrowIfNull(factory);
 
-        // typeof(TTask) carries TTask's [DynamicallyAccessedMembers] here, so building the LoadedType (a
-        // GetProperties walk) is trim-safe and is done once, eagerly, at registration.
         LoadedType loadedType = CreateLoadedType(typeof(TTask));
 
-        // The registration stores an ITask-returning factory; TTask : ITask, so the host's typed factory
-        // coerces to it. Accepting Func<TaskEnvironment, TTask> (rather than Func<TaskEnvironment, ITask>) lets
-        // callers rely on type inference for TTask instead of writing it explicitly.
+        // Accepting Func<TaskEnvironment, TTask> (rather than ...ITask) lets callers rely on type inference for
+        // TTask; TTask : ITask, so the typed factory coerces to the ITask-returning factory stored here.
         s_tasksByName[typeof(TTask).Name] = new TaskClassRegistration(taskEnvironment => factory(taskEnvironment), loadedType);
         s_hasRegistrations = true;
     }

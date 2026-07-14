@@ -18,10 +18,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// live in the aot-validation harness, which is not part of the CI test run; these run in CI.
     /// </summary>
     /// <remarks>
-    /// The task registry is process-global and has no unregister API. Generic registrations are keyed by the
-    /// task type's name; the custom test task types here are used by no real task or other test, and the
-    /// <see cref="System.Func{ITask}"/> factory tests use a unique, distinctive name. Leftover registrations
-    /// are harmless (a registered name only affects a build that invokes a task of exactly that name).
+    /// The task registry is process-global and has no unregister API. Generic <see cref="Task.RegisterTask{T}()"/>
+    /// registrations are keyed by the task type's name, so each such test invokes the task through a project
+    /// element of that same type name (for example <c>&lt;RegisteredEchoTestTask&gt;</c>); the custom test task
+    /// types here are used by no real task or other test. The <see cref="System.Func{ITask}"/> factory overload
+    /// takes an explicit name, so those tests use a unique, distinctive one. Leftover registrations are harmless
+    /// (a registered name only affects a build that invokes a task of exactly that name).
     /// </remarks>
     public sealed class RegisteredTaskExecution_Tests
     {

@@ -28,14 +28,13 @@ internal sealed class TaskClassRegistration
     private readonly Func<TaskEnvironment, ITask> _createInstance;
 
     /// <summary>
-    /// The untyped factory, set only for the <see cref="TaskClassRegistry.Register(string, Func{ITask})"/>
-    /// overload whose task type is not statically known. Used to build the <see cref="LoadedType"/> lazily by
-    /// probing a constructed instance's runtime type. <see langword="null"/> for the trim-rooted overloads,
-    /// which supply the <see cref="LoadedType"/> eagerly.
+    /// The reflected type metadata the engine binds the task's parameters against. For the generic,
+    /// trim-rooted overload the value is known at registration; for the untyped
+    /// <see cref="TaskClassRegistry.Register(string, Func{ITask})"/> overload it is computed on first use by
+    /// probing a constructed instance's runtime type. Either way <see cref="Lazy{T}"/> memoizes it in a
+    /// thread-safe way, so no field is ever observed in an unset state.
     /// </summary>
-    private readonly Func<ITask>? _factory;
-    private readonly object _loadedTypeLock = new();
-    private volatile LoadedType? _loadedType;
+    private readonly Lazy<LoadedType> _loadedType;
 
     /// <summary>
     /// Creates a registration whose <see cref="LoadedType"/> is already known (the generic, trim-rooted path).
@@ -43,7 +42,7 @@ internal sealed class TaskClassRegistration
     internal TaskClassRegistration(Func<TaskEnvironment, ITask> createInstance, LoadedType loadedType)
     {
         _createInstance = createInstance;
-        _loadedType = loadedType;
+        _loadedType = new Lazy<LoadedType>(() => loadedType);
     }
 
     /// <summary>
@@ -52,8 +51,8 @@ internal sealed class TaskClassRegistration
     /// </summary>
     internal TaskClassRegistration(Func<ITask> factory)
     {
-        _factory = factory;
         _createInstance = _ => factory();
+        _loadedType = new Lazy<LoadedType>(() => CreateLoadedTypeFromFactory(factory));
     }
 
     /// <summary>
@@ -68,18 +67,7 @@ internal sealed class TaskClassRegistration
     /// <summary>
     /// Gets the reflected type metadata the engine uses to discover and bind the task's parameters.
     /// </summary>
-    internal LoadedType GetLoadedType()
-    {
-        if (_loadedType is null)
-        {
-            lock (_loadedTypeLock)
-            {
-                _loadedType ??= CreateLoadedTypeFromFactory();
-            }
-        }
-
-        return _loadedType;
-    }
+    internal LoadedType GetLoadedType() => _loadedType.Value;
 
     /// <summary>
     /// Builds the <see cref="LoadedType"/> for the factory-only registration from a probe instance's type.
@@ -91,6 +79,6 @@ internal sealed class TaskClassRegistration
             "The host is responsible for preserving the task type's public properties under trimming (for example by also registering it " +
             "through the generic RegisterTask<T> overload, which roots them, or via a TrimmerRootAssembly entry). The generic overload, " +
             "which the built-in tasks and most hosts use, supplies the LoadedType eagerly and is fully trim-safe.")]
-    private LoadedType CreateLoadedTypeFromFactory()
-        => TaskClassRegistry.CreateLoadedType(_factory!().GetType());
+    private static LoadedType CreateLoadedTypeFromFactory(Func<ITask> factory)
+        => TaskClassRegistry.CreateLoadedType(factory().GetType());
 }
