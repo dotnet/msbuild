@@ -57,11 +57,6 @@
         <target state="translated">"{0}" タスクのリソースが登録されていません。"TaskLoggingHelper.FormatResourceString()" メソッドを使用するためには、構築時に、または "TaskResources" プロパティを通じて、このタスクのリソースを登録する必要があります。</target>
         <note>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
-        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
-        <target state="translated">値 "{1}" が割り当てられたパラメーター "{0}" には、無効なパスまたは無効なファイル内の文字を指定することはできません。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
         <target state="translated">MSB5029: ファイル "{3}" の要素 &lt;{2}&gt; の "{1}" 属性の値 "{0}" は、ドライブ上のすべてのファイルを列挙するワイルドカードであり、意図されていない可能性があります。参照されるプロパティが常に定義されていること、およびプロジェクトと現在の作業ディレクトリがドライブ ルートにないことを確認します。</target>

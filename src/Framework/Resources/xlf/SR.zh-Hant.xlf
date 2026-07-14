@@ -152,6 +152,11 @@
         <target state="translated">集合中的元素數大於目標陣列中的可用空間 (從指定索引開始時)。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <target state="translated">指派值為 "{1}" 的參數 "{0}" 不得具有無效的路徑或檔案字元。</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

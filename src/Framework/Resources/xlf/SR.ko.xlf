@@ -152,6 +152,11 @@
         <target state="translated">컬렉션의 요소 수가 대상 배열에서 사용 가능한 공간보다 큽니다(지정된 인덱스에서 시작할 때).</target>
         <note />
       </trans-unit>
+      <trans-unit id="ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <target state="translated">"{1}" 값이 할당된 "{0}" 매개 변수는 유효하지 않은 경로 또는 파일 문자를 포함할 수 없습니다.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

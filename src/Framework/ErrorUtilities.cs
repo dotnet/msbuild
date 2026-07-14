@@ -142,4 +142,20 @@ internal static class FrameworkErrorUtilities
     [DoesNotReturn]
     private static void ThrowArgumentLength(string? parameterName)
         => throw new ArgumentException(SR.Argument_EmptyString, parameterName);
+
+    /// <summary>
+    ///  Throws an <see cref="ArgumentNullException"/> if the given string parameter is null,
+    ///  and an <see cref="ArgumentException"/> if it contains invalid path or file characters.
+    /// </summary>
+    /// <param name="parameter">The path to check.</param>
+    /// <param name="parameterName">The name of the <paramref name="parameter"/>.</param>
+    public static void VerifyThrowArgumentInvalidPath([NotNull] string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+    {
+        ArgumentNullException.ThrowIfNull(parameter, parameterName);
+
+        if (FileUtilities.PathIsInvalid(parameter))
+        {
+            throw new ArgumentException(SR.FormatParameterCannotHaveInvalidPathChars(parameterName, parameter));
+        }
+    }
 }

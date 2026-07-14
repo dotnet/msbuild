@@ -152,6 +152,11 @@
         <target state="translated">Количество элементов в коллекции превышает доступное пространство в целевом массиве (при запуске с указанного индекса).</target>
         <note />
       </trans-unit>
+      <trans-unit id="ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <target state="translated">Параметр "{0}" с назначенным значением "{1}" не может иметь недопустимый путь или недопустимые символы файлов.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -57,11 +57,6 @@
         <target state="translated">"{0}" görevi, kaynaklarını kaydetmedi. "TaskLoggingHelper.FormatResourceString()" metodunu kullanmak için, bu görevin oluşturma sırasında veya "TaskResources" özelliği aracılığıyla kaynaklarını kaydetmesi gerekir.</target>
         <note>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
-        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
-        <target state="translated">"{1}" değeri atanan "{0}" parametresinde geçersiz yol veya geçersiz dosya karakterleri bulunamaz.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
         <target state="translated">MSB5029: "{0}" dosyasındaki &lt;{1}&gt; öğesinde "{2}" özniteliğinin "{3}" değeri, sürücüdeki tüm dosyaların numaralandırılmasıyla sonuçlanan (büyük olasılıkla bunun olması amaçlanmıyordu) bir joker karakterdir. Başvurulan özelliklerin her zaman tanımlandığını ve projenin ve geçerli çalışma dizininin sürücü kökünde bulunmadığını kontrol edin.</target>

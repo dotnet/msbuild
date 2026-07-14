@@ -152,6 +152,11 @@
         <target state="translated">Le nombre d’éléments de la collection est supérieur à l’espace disponible dans le tableau de destination (lors du démarrage à l’index spécifié).</target>
         <note />
       </trans-unit>
+      <trans-unit id="ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <target state="translated">Le paramètre "{0}" avec la valeur assignée "{1}" ne peut pas avoir un chemin non valide ou des caractères de fichier non valides.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

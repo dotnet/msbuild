@@ -152,6 +152,11 @@
         <target state="translated">Il numero di elementi nella raccolta è maggiore dello spazio disponibile nella matrice di destinazione (a partire dall'indice specificato).</target>
         <note />
       </trans-unit>
+      <trans-unit id="ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <target state="translated">Il parametro "{0}" con valore assegnato "{1}" non può contenere un percorso non valido o caratteri di file non validi.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

@@ -57,11 +57,6 @@
         <target state="translated">任务“{0}”尚未注册其资源。此任务需要在构造期间或通过“TaskResources”属性注册其资源，然后才能使用“TaskLoggingHelper.FormatResourceString()”方法。</target>
         <note>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
-        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
-        <target state="translated">分配有值“{1}”的参数“{0}”不可具有无效路径或无效的文件字符。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
         <target state="translated">MSB5029: 文件“{3}”中元素 &lt;{2}&gt; 中“{1}”属性的值“{0}”是通配符，可导致枚举驱动器上的所有文件，这可能不是预期的行为。确认始终定义了引用的属性，并且项目和当前工作目录不在驱动器根目录下。</target>

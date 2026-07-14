@@ -57,11 +57,6 @@
         <target state="translated">La tâche "{0}" n'a pas inscrit ses ressources. Pour pouvoir utiliser la méthode "TaskLoggingHelper.FormatResourceString()", cette tâche doit inscrire ses ressources durant la construction ou par le biais de la propriété "TaskResources".</target>
         <note>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
-        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
-        <target state="translated">Le paramètre "{0}" avec la valeur assignée "{1}" ne peut pas avoir un chemin non valide ou des caractères de fichier non valides.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
         <target state="translated">MSB5029: La valeur «{0}» de l’attribut «{1}» dans l’élément &lt;{2}&gt; dans le fichier «{3}» est un caractère générique qui entraîne l’énumération de tous les fichiers sur le lecteur, ce qui n’était probablement pas prévu. Vérifiez que les propriétés référencées sont toujours définies et que le projet et le répertoire de travail actuel ne se trouvent pas à la racine du lecteur.</target>

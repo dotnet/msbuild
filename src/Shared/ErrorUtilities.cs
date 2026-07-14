@@ -291,19 +291,9 @@ internal static class ErrorUtilities
     internal static void VerifyThrowArgumentLengthIfNotNull<T>(IReadOnlyCollection<T>? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
         => FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(parameter, parameterName);
 
-    /// <summary>
-    /// Throws an ArgumentNullException if the given string parameter is null
-    /// and ArgumentException if it has zero length.
-    /// </summary>
-    internal static void VerifyThrowArgumentInvalidPath([NotNull] string parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        ArgumentNullException.ThrowIfNull(parameter, parameterName);
-
-        if (FileUtilities.PathIsInvalid(parameter))
-        {
-            ThrowArgument("Shared.ParameterCannotHaveInvalidPathChars", parameterName, parameter);
-        }
-    }
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowArgumentInvalidPath(string, string)"/>
+    internal static void VerifyThrowArgumentInvalidPath([NotNull] string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+        => FrameworkErrorUtilities.VerifyThrowArgumentInvalidPath(parameter, parameterName);
 
     /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(string, string)"/>
     internal static void VerifyThrowArgumentLengthIfNotNull(string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)

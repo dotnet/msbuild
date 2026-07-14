@@ -152,6 +152,11 @@
         <target state="translated">Die Anzahl der Elemente in der Auflistung ist größer als der verfügbare Speicherplatz im Zielarray (wenn am angegebenen Index begonnen wird).</target>
         <note />
       </trans-unit>
+      <trans-unit id="ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <target state="translated">Der Parameter "{0}" mit dem zugewiesenen Wert "{1}" darf keinen ungültigen Pfad und keine ungültigen Dateizeichen haben.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

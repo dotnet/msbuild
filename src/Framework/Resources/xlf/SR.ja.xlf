@@ -152,6 +152,11 @@
         <target state="translated">コレクション内の要素の数が、同期先配列内の使用可能な領域を超えています (指定されたインデックスで開始する場合)。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <target state="translated">値 "{1}" が割り当てられたパラメーター "{0}" には、無効なパスまたは無効なファイル内の文字を指定することはできません。</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

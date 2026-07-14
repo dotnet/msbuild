@@ -57,11 +57,6 @@
         <target state="translated">Задача "{0}" не зарегистрировала свои ресурсы. Чтобы использовать метод "TaskLoggingHelper.FormatResourceString()", эта задача должна зарегистрировать свои ресурсы во время построения или через свойство "TaskResources".</target>
         <note>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
-        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
-        <target state="translated">Параметр "{0}" с назначенным значением "{1}" не может иметь недопустимый путь или недопустимые символы файлов.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
         <target state="translated">MSB5029: значение "{0}" атрибута "{1}" в элементе &lt;{2}&gt; в файле "{3}" является подстановочным знаком, который приводит к перечислению всех файлов на диске, что, вероятно, не предполагалось. Убедитесь, что указанные свойства всегда определены и что проект и текущий рабочий каталог не находятся в корне диска.</target>

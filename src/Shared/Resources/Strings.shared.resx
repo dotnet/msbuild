@@ -140,9 +140,6 @@
     <value>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</value>
     <comment>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</comment>
   </data>
-  <data name="Shared.ParameterCannotHaveInvalidPathChars" xml:space="preserve">
-    <value>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</value>
-  </data>
   <data name="Shared.TaskResourceNotFound" xml:space="preserve">
     <value>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</value>
   </data>

@@ -209,4 +209,7 @@
   <data name="CollectionCopyToFailureProvidedArrayIsTooSmall" xml:space="preserve">
     <value>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</value>
   </data>
+  <data name="ParameterCannotHaveInvalidPathChars" xml:space="preserve">
+    <value>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</value>
+  </data>
 </root>

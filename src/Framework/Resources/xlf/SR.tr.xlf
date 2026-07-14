@@ -152,6 +152,11 @@
         <target state="translated">Koleksiyondaki öğe sayısı hedef dizideki kullanılabilir boşluğun boyutundan (belirtilen dizinden başlayarak) daha büyük.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <target state="translated">"{1}" değeri atanan "{0}" parametresinde geçersiz yol veya geçersiz dosya karakterleri bulunamaz.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>

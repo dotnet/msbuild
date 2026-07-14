@@ -152,6 +152,11 @@
         <target state="translated">Liczba elementów w kolekcji jest większa niż dostępne miejsce w tablicy docelowej (zaczynając od określonego indeksu).</target>
         <note />
       </trans-unit>
+      <trans-unit id="ParameterCannotHaveInvalidPathChars">
+        <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
+        <target state="translated">Parametr „{0}” z przypisaną wartością „{1}” nie może mieć nieprawidłowej ścieżki ani zawierać nieprawidłowych znaków w pliku.</target>
+        <note />
+      </trans-unit>
     </body>
   </file>
 </xliff>
