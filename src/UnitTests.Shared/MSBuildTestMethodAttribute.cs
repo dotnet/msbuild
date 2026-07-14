@@ -66,6 +66,14 @@ namespace Microsoft.Build.UnitTests
                 return Skipped(testMethod, skipReason);
             }
 
+            // Scrub the extension-path environment variables to their clean values BEFORE the test runs as well.
+            // The `dotnet` muxer injects MSBuildExtensionsPath into the native environment block when it launches
+            // the test host, and an earlier test's in-proc build can leak these via the native environment block.
+            // AssemblyInitialize only clears them through the managed API, which on .NET Framework does not
+            // neutralize a value written to the native block. Restoring here guarantees a clean slate for the very
+            // first environment-sensitive test too, not just for tests that follow a polluting one.
+            ScrubExtensionPathEnvironmentVariables();
+
             CultureInfo originalCulture = null;
             CultureInfo originalUICulture = null;
             if (UsesInvariantCulture(testMethod))
@@ -128,10 +136,10 @@ namespace Microsoft.Build.UnitTests
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(s_cleanBuildEnvironment);
             }
 
-            RestoreCleanExtensionPathEnvironmentVariables();
+            ScrubExtensionPathEnvironmentVariables();
         }
 
-        private static void RestoreCleanExtensionPathEnvironmentVariables()
+        private static void ScrubExtensionPathEnvironmentVariables()
         {
             if (s_cleanExtensionPathValues == null)
             {
@@ -143,17 +151,15 @@ namespace Microsoft.Build.UnitTests
                 string name = s_extensionPathVariableNames[i];
                 string cleanValue = s_cleanExtensionPathValues[i];
 
-                if (string.Equals(Environment.GetEnvironmentVariable(name), cleanValue, StringComparison.Ordinal))
-                {
-                    continue;
-                }
-
                 // Restore via the managed API...
                 Environment.SetEnvironmentVariable(name, cleanValue);
 #if NETFRAMEWORK
-                // ...and via the native API, because MSBuild reads its environment through kernel32 and, on
-                // .NET Framework, the managed and native environment blocks can diverge. Passing null clears
-                // the variable, which is what happens when the clean value was itself unset.
+                // ...and unconditionally via the native API, because MSBuild reads its environment through
+                // kernel32 (GetEnvironmentStringsW) and, on .NET Framework, the managed and native environment
+                // blocks can diverge: a value leaked into the native block by a prior in-proc build (or injected
+                // by the `dotnet` muxer at host launch) is often invisible to Environment.GetEnvironmentVariable.
+                // We therefore must NOT short-circuit on the managed read — always write through to the native
+                // block. Passing null clears the variable, which is what happens when the clean value was unset.
                 SetEnvironmentVariable(name, cleanValue);
 #endif
             }
