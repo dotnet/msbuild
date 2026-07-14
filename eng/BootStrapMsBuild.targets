@@ -266,15 +266,19 @@
     <PropertyGroup>
       <_DotNetInstallScript>$(RepositoryEngineeringDir)common\dotnet-install.cmd</_DotNetInstallScript>
       <_DotNetInstallScript Condition="'$(OS)' != 'Windows_NT'">$(RepositoryEngineeringDir)common\dotnet-install.sh</_DotNetInstallScript>
-
-      <_DotNetInstallScriptCommand>powershell -NoProfile -NonInteractive -ExecutionPolicy Bypass -Command &quot;$(_DotNetInstallScript)&quot;</_DotNetInstallScriptCommand>
-      <_DotNetInstallScriptCommand Condition="'$(OS)' != 'Windows_NT'">bash &quot;$(_DotNetInstallScript)&quot;</_DotNetInstallScriptCommand>
     </PropertyGroup>
 
     <Exec Condition="'$(OS)' != 'Windows_NT'" Command="chmod +x &quot;$(_DotNetInstallScript)&quot;" />
-    <!-- Temporarily install a 10.0 runtime until msbuild re-targeted to net11.0. Comment the below line out when that's completed,
-         don't remove it entirely as support for that will be needed in the future again. -->
-    <Exec Command="$(_DotNetInstallScriptCommand) -dotnetpath &quot;$(InstallDir.TrimEnd('/\'))&quot; -version 10.0.0" />
+
+    <!-- Download additional runtimes if specified in global.json -->
+    <InstallDotNetCore
+      VersionsPropsPath="$(RepositoryEngineeringDir)Versions.props"
+      GlobalJsonPath="$(RepoRoot)global.json"
+      DotNetPath="$(InstallDir)"
+      DotNetInstallScript="$(_DotNetInstallScript)"
+      Platform="$(Platform)"
+      RuntimeSourceFeed="$(DotNetRuntimeSourceFeed)"
+      RuntimeSourceFeedKey="$(DotNetRuntimeSourceFeedKey)"/>
   </Target>
 
   <Target Name="BootstrapNetCore" DependsOnTargets="AcquireSdk">
