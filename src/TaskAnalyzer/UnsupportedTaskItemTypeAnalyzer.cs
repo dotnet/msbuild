@@ -11,8 +11,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 {
     /// <summary>
     /// Roslyn analyzer that warns when a task property is typed as <c>ITaskItem&lt;T&gt;</c> or
-    /// <c>ITaskItem&lt;T&gt;[]</c> where <c>T</c> is not in the set of types that MSBuild's
-    /// <c>ValueTypeParser</c> can parse at runtime.
+    /// <c>ITaskItem&lt;T&gt;[]</c> where <c>T</c> is not supported by MSBuild's task parameter binder.
     ///
     /// MSBuildTask0009: ITaskItem&lt;T&gt; used with unsupported type argument.
     /// </summary>
@@ -94,7 +93,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     ITypeSymbol typeArg = namedPropertyType.TypeArguments[0];
 
                     // Check if T is in the supported set
-                    if (SupportedTaskItemTypes.IsSupported(typeArg, absolutePathType, fileInfoType, directoryInfoType))
+                    if (SupportedTaskItemTypes.IsSupportedTaskItemType(typeArg, absolutePathType, fileInfoType, directoryInfoType))
                     {
                         continue;
                     }

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Immutable;
-using System.Text;
 using Microsoft.CodeAnalysis;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer
@@ -39,7 +38,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 new SupportedSpecialType(SpecialType.System_DateTime, "DateTime"),
                 new SupportedSpecialType(SpecialType.System_String, "string"));
 
-        internal static string DisplayNames { get; } = CreateDisplayNames();
+        internal const string DisplayNames = "AbsolutePath, FileInfo, DirectoryInfo";
 
         internal static bool TryGetSpecialTypeDisplayName(SpecialType specialType, out string? displayName)
         {
@@ -56,36 +55,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             return false;
         }
 
-        internal static bool IsSupported(
+        internal static bool IsSupportedTaskItemType(
             ITypeSymbol type,
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? fileInfoType,
             INamedTypeSymbol? directoryInfoType)
         {
-            if (TryGetSpecialTypeDisplayName(type.SpecialType, out _))
-            {
-                return true;
-            }
-
             return (absolutePathType is not null && SymbolEqualityComparer.Default.Equals(type, absolutePathType))
                 || (fileInfoType is not null && SymbolEqualityComparer.Default.Equals(type, fileInfoType))
                 || (directoryInfoType is not null && SymbolEqualityComparer.Default.Equals(type, directoryInfoType));
-        }
-
-        private static string CreateDisplayNames()
-        {
-            var builder = new StringBuilder();
-            foreach (SupportedSpecialType supportedType in s_specialTypes)
-            {
-                if (builder.Length > 0)
-                {
-                    builder.Append(", ");
-                }
-
-                builder.Append(supportedType.DisplayName);
-            }
-
-            return builder.Append(", AbsolutePath, FileInfo, DirectoryInfo").ToString();
         }
     }
 }

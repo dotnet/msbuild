@@ -228,9 +228,9 @@ For a reference-typed target (`FileInfo`/`DirectoryInfo`) the guard is a null-co
 
 ### MSBuildTask0009 — Unsupported `ITaskItem<T>` Type Argument
 
-When a task property is typed as `ITaskItem<T>` or `ITaskItem<T>[]` but `T` is not a type that MSBuild's `ValueTypeParser` can parse at runtime, a **Warning** is emitted. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.
+When a task property is typed as `ITaskItem<T>` or `ITaskItem<T>[]` but `T` is not supported by MSBuild's task parameter binder, a **Warning** is emitted. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.
 
-**Supported type arguments:** `bool`, `char`, `byte`, `sbyte`, `short`, `ushort`, `int`, `uint`, `long`, `ulong`, `float`, `double`, `decimal`, `DateTime`, `string`, `AbsolutePath`, `FileInfo`, `DirectoryInfo`.
+**Supported type arguments:** `AbsolutePath`, `FileInfo`, `DirectoryInfo`.
 
 ```csharp
 // ⚠️ MSBuildTask0009: Task property 'Id' uses ITaskItem<Guid> but 'Guid' is not supported
@@ -238,7 +238,7 @@ public class MyTask : Task
 {
     public ITaskItem<System.Guid> Id { get; set; }       // warning
     public ITaskItem<System.TimeSpan>[] Durations { get; set; }  // warning
-    public ITaskItem<int> Count { get; set; }             // OK
+    public ITaskItem<int> Count { get; set; }             // warning until value-type binding is supported
 }
 ```
 

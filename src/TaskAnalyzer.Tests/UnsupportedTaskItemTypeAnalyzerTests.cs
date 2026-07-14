@@ -14,7 +14,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 public class UnsupportedTaskItemTypeAnalyzerTests
 {
     // ═══════════════════════════════════════════════════════════════════════
-    // Supported types — no diagnostic expected
+    // Value types are not yet supported by the task parameter binder
     // ═══════════════════════════════════════════════════════════════════════
 
     [Theory]
@@ -33,7 +33,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
     [InlineData("char")]
     [InlineData("System.DateTime")]
     [InlineData("string")]
-    public async Task SupportedValueType_NoDiagnostic(string typeName)
+    public async Task ValueType_ProducesDiagnostic(string typeName)
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync($$"""
             using Microsoft.Build.Framework;
@@ -44,7 +44,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
             }
             """);
 
-        diags.ShouldNotContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
+        diags.ShouldContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
     }
 
     [Fact]
@@ -95,17 +95,17 @@ public class UnsupportedTaskItemTypeAnalyzerTests
     }
 
     // ═══════════════════════════════════════════════════════════════════════
-    // Array variants of supported types — no diagnostic expected
+    // Array variants
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
-    public async Task SupportedTypeArray_NoDiagnostic()
+    public async Task SupportedPathTypeArray_NoDiagnostic()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
             using Microsoft.Build.Framework;
             public class MyTask : Microsoft.Build.Utilities.Task
             {
-                public ITaskItem<int>[] Items { get; set; } = null!;
+                public ITaskItem<AbsolutePath>[] Items { get; set; } = null!;
                 public override bool Execute() => true;
             }
             """);
