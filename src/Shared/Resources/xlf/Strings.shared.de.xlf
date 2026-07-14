@@ -7,11 +7,6 @@
         <target state="translated">MSB4188: Der Buildvorgang wurde abgebrochen.</target>
         <note>{StrBegin="MSB4188: "} Error when the build stops suddenly for some reason. For example, because a child node died.</note>
       </trans-unit>
-      <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
-        <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
-        <target state="translated">MSB5022: Der MSBuild-Aufgabenhost unterstützt das Ausführen von Aufgaben nicht, die IBuildEngine-Rückrufe tätigen. Führen Sie Ihre Aufgabe stattdessen im MSBuild-Kernprozess aus, wenn Sie diese Vorgänge durchführen möchten.  Wenn UsingTask mit einem Runtime- oder Architecture-Wert oder der Aufgabenaufruf mit einem MSBuildRuntime- oder MSBuildArchitecture-Wert attribuiert wurde, der nicht mit der aktuellen Laufzeit oder Architektur von MSBuild übereinstimmt, wird eine Aufgabe automatisch im Aufgabenhost ausgeführt.</target>
-        <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
-      </trans-unit>
       <trans-unit id="BuildStarted">
         <source>Build started.</source>
         <target state="translated">Der Buildvorgang wurde gestartet.</target>
@@ -56,16 +51,6 @@
             High should not be localized.
             Normal should not be localized.
             Low should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="ModifyingTaskHostEnvironmentHeader">
-        <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
-        <target state="translated">Es werden folgende vom übergeordneten Knoten empfangene Änderungen an der Umgebung vorgenommen, bevor sie auf den Aufgabenhost angewendet wird:</target>
-        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
-      </trans-unit>
-      <trans-unit id="ModifyingTaskHostEnvironmentVariable">
-        <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
-        <target state="translated">  Festlegen von "{0}" auf "{1}" statt auf den Wert "{2}" der übergeordneten Umgebung.</target>
-        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
       </trans-unit>
       <trans-unit id="InvalidProjectFile">
         <source>MSB4025: The project file could not be loaded. {0}</source>
@@ -124,16 +109,6 @@
         <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
         <target state="translated">MSB4077: Die Aufgabe "{0}" wurde mit dem LoadInSeparateAppDomain-Attribut markiert, ist jedoch nicht von MarshalByRefObject abgeleitet. Stellen Sie sicher, dass die Aufgabe von MarshalByRefObject oder AppDomainIsolatedTask abgeleitet wird.</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="SubCategoryForSchemaValidationErrors">
-        <source>Schema validation</source>
-        <target state="translated">Schemavalidierung</target>
-        <note>
-      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
-      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
-      "MSBUILD : Schema validation error MSB0000: This is an error."
-      LOCALIZATION: This fragment needs to be localized.
-    </note>
       </trans-unit>
       <trans-unit id="Shared.KillingProcess">
         <source>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</source>
@@ -252,11 +227,6 @@
         <source>This collection is read-only.</source>
         <target state="translated">Diese Sammlung ist schreibgeschützt.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="InvalidLogFileFormat">
-        <source>MSB4233: There was an exception while reading the log file: {0}</source>
-        <target state="translated">MSB4233: Beim Lesen der Protokolldatei ist eine Ausnahme aufgetreten: {0}.</target>
-        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>

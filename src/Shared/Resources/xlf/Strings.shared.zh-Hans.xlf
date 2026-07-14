@@ -7,11 +7,6 @@
         <target state="translated">MSB4188: 已取消生成。</target>
         <note>{StrBegin="MSB4188: "} Error when the build stops suddenly for some reason. For example, because a child node died.</note>
       </trans-unit>
-      <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
-        <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
-        <target state="translated">MSB5022: MSBuild 任务宿主不支持运行执行 IBuildEngine 回调的任务。如果需要执行这些操作，请改为在核心 MSBuild 进程中运行您的任务。如果 UsingTask 已用“Runtime”或“Architecture”值特性化，或者任务调用已用“MSBuildRuntime”或“MSBuildArchitecture”值(与 MSBuild 的当前运行时或体系结构不匹配)特性化，则将自动在任务宿主中执行任务。</target>
-        <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
-      </trans-unit>
       <trans-unit id="BuildStarted">
         <source>Build started.</source>
         <target state="translated">已启动生成。</target>
@@ -56,16 +51,6 @@
             High should not be localized.
             Normal should not be localized.
             Low should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="ModifyingTaskHostEnvironmentHeader">
-        <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
-        <target state="translated">先对从父节点收到的环境进行以下修改，然后再将其应用于任务宿主:</target>
-        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
-      </trans-unit>
-      <trans-unit id="ModifyingTaskHostEnvironmentVariable">
-        <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
-        <target state="translated">  将“{0}”设置为“{1}”，而不是父环境的值“{2}”。</target>
-        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
       </trans-unit>
       <trans-unit id="InvalidProjectFile">
         <source>MSB4025: The project file could not be loaded. {0}</source>
@@ -124,16 +109,6 @@
         <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
         <target state="translated">MSB4077: “{0}”任务已标记为 LoadInSeparateAppDomain 特性，但未派生自 MarshalByRefObject。请检查该任务是派生自 MarshalByRefObject 还是 AppDomainIsolatedTask。</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="SubCategoryForSchemaValidationErrors">
-        <source>Schema validation</source>
-        <target state="translated">架构验证</target>
-        <note>
-      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
-      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
-      "MSBUILD : Schema validation error MSB0000: This is an error."
-      LOCALIZATION: This fragment needs to be localized.
-    </note>
       </trans-unit>
       <trans-unit id="Shared.KillingProcess">
         <source>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</source>
@@ -252,11 +227,6 @@
         <source>This collection is read-only.</source>
         <target state="translated">此集合是只读的。</target>
         <note />
-      </trans-unit>
-      <trans-unit id="InvalidLogFileFormat">
-        <source>MSB4233: There was an exception while reading the log file: {0}</source>
-        <target state="translated">MSB4233: 读取日志文件时出现异常: {0}</target>
-        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
