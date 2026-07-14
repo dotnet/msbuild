@@ -163,6 +163,18 @@ namespace Microsoft.Build.UnitTests.Shared
 #endif
         }
 
+        /// <summary>
+        /// The environment variables a test must apply when it launches the bootstrapped MSBuild (or an executable
+        /// from the bootstrap layout, such as an apphost) as a child process, so the whole child process tree resolves
+        /// its SDK and runtime from the bootstrap under test rather than from the CI two-stage build's stage 1 build
+        /// tool or an ambient dotnet. <see cref="ExecBootstrapedMSBuild(string, out bool, bool, ITestOutputHelper, bool, int)"/>
+        /// applies these automatically, so prefer it. Only tests that must start the process themselves (e.g. launching
+        /// an apphost directly via <see cref="RunProcessAndGetOutput"/>) need this: seed their environment dictionary
+        /// from here and then override only the entries the scenario requires.
+        /// </summary>
+        public static Dictionary<string, string> GetBootstrapMSBuildEnvironmentVariables()
+            => GetMSBuildEnvironmentVariables(useBootstrapHost: true) ?? new Dictionary<string, string>();
+
         private static void AdjustForShellExecution(ref string pathToExecutable, ref string arguments)
         {
             if (NativeMethodsShared.IsWindows)
@@ -182,6 +194,14 @@ namespace Microsoft.Build.UnitTests.Shared
         /// <summary>
         /// Run the process and get stdout and stderr.
         /// </summary>
+        /// <remarks>
+        /// If <paramref name="process"/> is the bootstrapped MSBuild (or an executable from the bootstrap layout),
+        /// prefer <see cref="ExecBootstrapedMSBuild(string, out bool, bool, ITestOutputHelper, bool, int)"/>, which
+        /// applies the required bootstrap environment automatically. If the process must be launched here directly,
+        /// seed <paramref name="environmentVariables"/> from <see cref="GetBootstrapMSBuildEnvironmentVariables"/> so
+        /// the child resolves its SDK and runtime from the bootstrap under test rather than a leaked stage 1 / ambient
+        /// dotnet; otherwise the launch can fail with MSB4216 / MSB4062 in the CI two-stage build.
+        /// </remarks>
         public static string RunProcessAndGetOutput(
             string process,
             string parameters,
