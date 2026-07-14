@@ -3,62 +3,44 @@
 
 using System.Globalization;
 using System.Resources;
+using Microsoft.Build.Framework;
 
-#nullable disable
+namespace Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Shared
+/// <summary>
+///  This class provides access to the assembly's resources.
+/// </summary>
+internal static class AssemblyResources
 {
     /// <summary>
-    /// This class provides access to the assembly's resources.
+    ///  Gets the assembly's primary resources, i.e. the resources exclusively owned by this assembly.
     /// </summary>
-    internal static class AssemblyResources
+    internal static ResourceManager PrimaryResources { get; } = new ResourceManager("Microsoft.Build.Tasks.Core.Strings", typeof(AssemblyResources).Assembly);
+
+    /// <summary>
+    ///  Gets the assembly's shared resources, i.e. the resources this assembly shares with other assemblies.
+    /// </summary>
+    internal static ResourceManager SharedResources => Framework.Resources.SR.ResourceManager;
+
+    /// <summary>
+    ///  Loads the specified resource string, either from the assembly's primary resources, or its shared resources.
+    /// </summary>
+    /// <param name="name">The name of the resource to load.</param>
+    /// <param name="culture">
+    ///  The culture to use when looking up the resource. If <see langword="null"/>, the current UI culture is used.
+    /// </param>
+    /// <returns>
+    ///  The resource string.
+    /// </returns>
+    /// <exception cref="InternalErrorException">Thrown if the resource is not found.</exception>
+    internal static string GetString(string name, CultureInfo? culture = null)
     {
-        /// <summary>
-        /// Loads the specified resource string, either from the assembly's primary resources, or its shared resources.
-        /// </summary>
-        /// <remarks>This method is thread-safe.</remarks>
-        /// <returns>The resource string, or null if not found.</returns>
-        internal static string GetString(string name)
-        {
-            // NOTE: the ResourceManager.GetString() method is thread-safe
-            string resource = PrimaryResources.GetString(name, CultureInfo.CurrentUICulture) ?? SharedResources.GetString(name, CultureInfo.CurrentUICulture);
+        culture ??= CultureInfo.CurrentUICulture;
+        string? resource = PrimaryResources.GetString(name, culture) ??
+                           SharedResources.GetString(name, culture);
 
-            Assumed.NotNull(resource, $"Missing resource '{name}'");
+        Assumed.NotNull(resource, $"Missing resource '{name}'");
 
-            return resource;
-        }
-
-        /// <summary>
-        /// Loads the specified resource string using invariant culture, either from the assembly's primary resources, or its shared resources.
-        /// This method is useful for generating code that should be culture-independent for reproducible builds.
-        /// </summary>
-        /// <remarks>This method is thread-safe.</remarks>
-        /// <returns>The resource string, or null if not found.</returns>
-        internal static string GetInvariantString(string name)
-        {
-            // NOTE: the ResourceManager.GetString() method is thread-safe
-            string resource = PrimaryResources.GetString(name, CultureInfo.InvariantCulture) ?? SharedResources.GetString(name, CultureInfo.InvariantCulture);
-
-            Assumed.NotNull(resource, $"Missing resource '{name}'");
-
-            return resource;
-        }
-
-        /// <summary>
-        /// Gets the assembly's primary resources i.e. the resources exclusively owned by this assembly.
-        /// </summary>
-        /// <remarks>This property is thread-safe.</remarks>
-        /// <value>ResourceManager for primary resources.</value>
-        internal static ResourceManager PrimaryResources { get; } = new ResourceManager("Microsoft.Build.Tasks.Core.Strings", typeof(AssemblyResources).Assembly);
-
-        /// <summary>
-        /// Gets the assembly's shared resources i.e. the resources this assembly shares with other assemblies.
-        /// </summary>
-        /// <remarks>This property is thread-safe.</remarks>
-        /// <value>ResourceManager for shared resources.</value>
-        internal static ResourceManager SharedResources { get; } = Framework.Resources.SR.ResourceManager;
-
-        // assembly resources
-        // shared resources
+        return resource;
     }
 }
