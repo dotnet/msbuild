@@ -1196,11 +1196,28 @@ public sealed partial class TerminalLogger : INodeLogger
     private void MessageRaised(object sender, BuildMessageEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
+        string? message = e.Message;
+        // For global/coordinator messages with high importance
+        if (buildEventContext is null && message is not null && e.Importance == MessageImportance.High)
+        {
+            lock(_lock)
+            {
+                Terminal.BeginUpdate();
+                try
+                {
+                    Terminal.WriteLine(message);
+                }
+                finally
+                {
+                    Terminal.EndUpdate();
+                }
+                return;
+            }
+        }
         if (buildEventContext is null)
         {
             return;
         }
-        string? message = e.Message;
 
         if (message is not null && e.Importance == MessageImportance.High)
         {
