@@ -162,9 +162,6 @@
     <value>MSB6005: Task attempted to log before it was initialized. Message was: {0}</value>
     <comment>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</comment>
   </data>
-  <data name="CollectionCopyToFailureProvidedArrayIsTooSmall" xml:space="preserve">
-    <value>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</value>
-  </data>
   <data name="Message.InvalidImportance" xml:space="preserve">
     <value>MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</value>
     <comment>{StrBegin="MSB3511: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.

@@ -349,36 +349,12 @@ internal static class ErrorUtilities
         throw new ArgumentNullException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, parameterName), (Exception?)null);
     }
 
-    /// <summary>
-    /// A utility that verifies the parameters provided to a standard <see cref="ICollection{T}.CopyTo"/> call.
-    /// </summary>
-    /// <typeparam name="T">The element type of the collection.</typeparam>
-    /// <param name="collection">The destination collection to copy into.</param>
-    /// <param name="index">The zero-based index in <paramref name="collection"/> at which copying begins.</param>
-    /// <param name="requiredCapacity">The number of elements that need to be copied.</param>
-    /// <param name="collectionParamName">The name of the <paramref name="collection"/> parameter.</param>
-    /// <param name="indexParamName">The name of the <paramref name="index"/> parameter.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="collection"/> is null.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/> falls outside of the bounds of <paramref name="collection"/>.</exception>
-    /// <exception cref="ArgumentException">If there is insufficient capacity to copy the collection contents into <paramref name="collection"/>
-    /// when starting at <paramref name="index"/>.</exception>
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyCollectionCopyToArguments{T}(ICollection{T}, int, int, string, string)"/>
     internal static void VerifyCollectionCopyToArguments<T>(
         [NotNull] ICollection<T>? collection,
         int index,
         int requiredCapacity,
         [CallerArgumentExpression(nameof(collection))] string? collectionParamName = null,
         [CallerArgumentExpression(nameof(index))] string? indexParamName = null)
-    {
-        ArgumentNullException.ThrowIfNull(collection, collectionParamName);
-        ArgumentOutOfRangeException.ThrowIfNegative(index, indexParamName);
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(index, collection.Count, indexParamName);
-
-        int capacity = collection.Count - index;
-        if (requiredCapacity > capacity)
-        {
-            throw new ArgumentException(
-                ResourceUtilities.GetResourceString("CollectionCopyToFailureProvidedArrayIsTooSmall"),
-                collectionParamName);
-        }
-    }
+        => FrameworkErrorUtilities.VerifyCollectionCopyToArguments(collection, index, requiredCapacity, collectionParamName, indexParamName);
 }
