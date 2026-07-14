@@ -23,5 +23,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>Transitive unsafe API usage detected in task call chain.</summary>
         public const string TransitiveUnsafeCall = "MSBuildTask0005";
+
+        /// <summary>Task input property should use AbsolutePath, FileInfo, or DirectoryInfo instead of string.</summary>
+        public const string PreferTypedPathParameter = "MSBuildTask0006";
+
+        /// <summary>Task input property should use ITaskItem&lt;T&gt; instead of ITaskItem with manual ItemSpec parsing.</summary>
+        public const string PreferTypedTaskItem = "MSBuildTask0007";
+
+        /// <summary>Task input property has a relative default path that should be initialized in Execute() where TaskEnvironment can root it.</summary>
+        public const string InitializeRelativeDefaultInExecute = "MSBuildTask0008";
     }
 }
