@@ -274,7 +274,7 @@
     <InstallDotNetCore
       VersionsPropsPath="$(RepositoryEngineeringDir)Versions.props"
       GlobalJsonPath="$(RepoRoot)global.json"
-      DotNetPath="$(InstallDir)"
+      DotNetPath="$(InstallDir.TrimEnd('/\'))"
       DotNetInstallScript="$(_DotNetInstallScript)"
       Platform="$(Platform)"
       RuntimeSourceFeed="$(DotNetRuntimeSourceFeed)"
