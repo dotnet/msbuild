@@ -32,6 +32,22 @@ namespace Microsoft.Build.UnitTests.Shared
 
         public static string LatestDotNetCoreForMSBuild => BootstrapLocationAttribute.LatestDotNetCoreForMSBuild;
 
+        public static string BootstrapMSBuildExecutablePath
+#if NET
+            => Path.Combine(BootstrapMsBuildBinaryLocation, "sdk", BootstrapLocationAttribute.BootstrapSdkVersion, Constants.MSBuildExecutableName);
+#else
+            => Path.Combine(BootstrapMsBuildBinaryLocation, Constants.MSBuildExecutableName);
+#endif
+
+        public static string BootstrapMSBuildCommand
+#if NET
+            => NativeMethodsShared.IsWindows
+                ? $"\"{BootstrapMSBuildExecutablePath}\""
+                : $"\"{s_dotnetExePath}\" \"{Path.Combine(BootstrapMsBuildBinaryLocation, "sdk", BootstrapLocationAttribute.BootstrapSdkVersion, Constants.MSBuildAssemblyName)}\"";
+#else
+            => $"\"{BootstrapMSBuildExecutablePath}\"";
+#endif
+
         internal static BootstrapLocationAttribute BootstrapLocationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<BootstrapLocationAttribute>()
                                            ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
 
@@ -99,12 +115,7 @@ namespace Microsoft.Build.UnitTests.Shared
             bool attachProcessId = true,
             int timeoutMilliseconds = 30_000)
         {
-#if NET
-            string pathToExecutable = Path.Combine(BootstrapMsBuildBinaryLocation, "sdk", BootstrapLocationAttribute.BootstrapSdkVersion, Constants.MSBuildExecutableName);
-#else
-            string pathToExecutable = Path.Combine(BootstrapMsBuildBinaryLocation, Constants.MSBuildExecutableName);
-#endif
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds, environmentVariables: GetMSBuildEnvironmentVariables(useBootstrapHost: true));
+            return RunProcessAndGetOutput(BootstrapMSBuildExecutablePath, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds, environmentVariables: GetMSBuildEnvironmentVariables(useBootstrapHost: true));
         }
 
         /// <summary>
