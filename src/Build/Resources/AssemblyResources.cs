@@ -115,7 +115,7 @@ namespace Microsoft.Build.Shared
 
         // assembly resources
         private static readonly ResourceManager s_resources = new ResourceManager("Microsoft.Build.Strings", typeof(AssemblyResources).Assembly);
-        // shared resources
-        private static readonly ResourceManager s_sharedResources = new ResourceManager("Microsoft.Build.Strings.shared", typeof(AssemblyResources).Assembly);
+        // shared resources, embedded in and consumed from Microsoft.Build.Framework
+        private static readonly ResourceManager s_sharedResources = Framework.Resources.SR.ResourceManager;
     }
 }

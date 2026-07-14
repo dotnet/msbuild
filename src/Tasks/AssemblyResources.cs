@@ -56,7 +56,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <remarks>This property is thread-safe.</remarks>
         /// <value>ResourceManager for shared resources.</value>
-        internal static ResourceManager SharedResources { get; } = new ResourceManager("Microsoft.Build.Tasks.Core.Strings.shared", typeof(AssemblyResources).Assembly);
+        internal static ResourceManager SharedResources { get; } = Framework.Resources.SR.ResourceManager;
 
         // assembly resources
         // shared resources
