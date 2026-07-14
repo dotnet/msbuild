@@ -2651,11 +2651,13 @@ $@"<Project>
         }
 
         /// <summary>
-        /// Verifies restore sets the ExcludeRestorePackageImports global property so that NuGet's restore reuses the initial
-        /// evaluation instead of forcing a second evaluation of every project.
+        /// Regression test for dotnet/msbuild#14274 / dotnet/sdk#55245: restore must not inject the ExcludeRestorePackageImports
+        /// global property. Doing so aligns MSBuild's restore evaluation with the global property set NuGet's inner restore walk
+        /// uses, which makes a nonexistent &lt;ProjectReference&gt; leak into NuGet's _GenerateRestoreGraphProjectEntry MSBuild call
+        /// (which does not skip nonexistent projects) and fail with MSB3202 instead of being skipped.
         /// </summary>
         [MSBuildTestMethod]
-        public void RestoreSetsExcludeRestorePackageImports()
+        public void RestoreDoesNotInjectExcludeRestorePackageImports()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(
                 @"<Project>
@@ -2666,30 +2668,7 @@ $@"<Project>
 
             string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: "/t:restore");
 
-            // The value must be the literal lowercase "true" to exactly match the global property NuGet's restore passes
-            // (NuGet.targets sets ExcludeRestorePackageImports=true), otherwise evaluation reuse would not occur.
-            logContents.ShouldContain($"ExcludeRestorePackageImports=[{MSBuildConstants.ExcludeRestorePackageImportsValue}]");
-        }
-
-        /// <summary>
-        /// Verifies restore does not set the ExcludeRestorePackageImports global property when change wave 18.10 is disabled,
-        /// preserving the prior behavior for repositories that opt out.
-        /// </summary>
-        [MSBuildTestMethod]
-        public void RestoreDoesNotSetExcludeRestorePackageImportsWhenWaveDisabled()
-        {
-            string projectContents = ObjectModelHelpers.CleanupFileContents(
-                @"<Project>
-  <Target Name=""Restore"">
-    <Message Text=""ExcludeRestorePackageImports=[$(ExcludeRestorePackageImports)]"" Importance=""High"" />
-  </Target>
-</Project>");
-
-            Dictionary<string, string> envVars = new() { { "MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString() } };
-
-            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, envsToCreate: envVars, arguments: "/t:restore");
-
-            // When the wave is disabled, the property must not be injected.
+            // The property must remain empty; MSBuild must not set it during restore.
             logContents.ShouldContain("ExcludeRestorePackageImports=[]");
         }
 

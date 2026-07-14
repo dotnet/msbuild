@@ -5,6 +5,7 @@ using System.Text;
 using BenchmarkDotNet.Attributes;
 using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
+using Microsoft.Build.Execution;
 
 namespace MSBuild.Benchmarks;
 
@@ -16,7 +17,7 @@ namespace MSBuild.Benchmarks;
 /// </summary>
 /// <remarks>
 /// Each invocation mirrors the CLI path in <c>XMake.cs</c>: a fresh <see cref="ProjectCollection"/>
-/// is created, the project is loaded via <see cref="Project.FromFile(string, ProjectOptions)"/>, and
+/// is created, the project is loaded via <see cref="ProjectInstance.FromFile(string, ProjectOptions)"/>, and
 /// a single property value is read. The project XML is written to disk once in
 /// <see cref="GlobalSetup"/> and re-parsed on every invocation (as the CLI does), so the reported
 /// delta reflects the evaluation passes that partial evaluation skips, not parsing.
@@ -106,7 +107,7 @@ public class PartialEvaluationBenchmark
         // A fresh collection per invocation mirrors the CLI and avoids cross-iteration caching so the
         // project XML is re-parsed and re-evaluated every time, exactly as `msbuild -getProperty` does.
         using ProjectCollection collection = new();
-        Project project = Project.FromFile(_projectPath, new ProjectOptions
+        ProjectInstance project = ProjectInstance.FromFile(_projectPath, new ProjectOptions
         {
             ProjectCollection = collection,
             EvaluationStage = stage,
@@ -118,7 +119,7 @@ public class PartialEvaluationBenchmark
     private string EvaluateAndReadItems(ProjectEvaluationStage stage)
     {
         using ProjectCollection collection = new();
-        Project project = Project.FromFile(_projectPath, new ProjectOptions
+        ProjectInstance project = ProjectInstance.FromFile(_projectPath, new ProjectOptions
         {
             ProjectCollection = collection,
             EvaluationStage = stage,

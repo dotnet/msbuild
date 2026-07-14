@@ -46,6 +46,21 @@ namespace Microsoft.Build.UnitTests
             s_testEnvironment.SetEnvironmentVariable("VisualStudioVersion", null);
             s_testEnvironment.SetEnvironmentVariable("DOTNET_PERFLOG_DIR", null);
 
+            // The `dotnet` muxer always injects MSBuildSDKsPath / MSBuildExtensionsPath (pointing at the SDK it
+            // resolved) into the environment of the MSBuild process it launches. In the bootstrapped CI build the
+            // test hosts are spawned by the stage 1 bootstrap `dotnet`, so these leak in pointing at the stage 1
+            // SDK. Any in-proc build a test performs (e.g. ObjectModelHelpers.BuildTempProjectFile*) would then
+            // resolve SDKs and import the SDK's ImportAfter targets (e.g. Microsoft.NET.Build.Extensions) from that
+            // stale SDK instead of the MSBuild layout under test, producing errors such as MSB4062 / MSB4216.
+            // Unset them so every in-proc build uses the test host's own MSBuild layout (matching a clean local run).
+            // Child processes that shell out to the bootstrap `dotnet` are unaffected: the muxer recomputes these.
+            s_testEnvironment.SetEnvironmentVariable("MSBuildSDKsPath", null);
+            s_testEnvironment.SetEnvironmentVariable("MSBuildExtensionsPath", null);
+            s_testEnvironment.SetEnvironmentVariable("MSBuildExtensionsPath32", null);
+            s_testEnvironment.SetEnvironmentVariable("MSBuildExtensionsPath64", null);
+
+            // Use a project-specific temporary path
+            //  This is so multiple test projects can be run in parallel without sharing the same temp directory
             var subdirectory = Path.GetRandomFileName();
             string newTempPath = Path.Combine(Path.GetTempPath(), subdirectory);
             var assemblyTempFolder = s_testEnvironment.CreateFolder(newTempPath);

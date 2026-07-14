@@ -1006,12 +1006,15 @@ namespace Microsoft.Build.CommandLine
                                 // Properties pass; items require the Items pass. This skips the later passes
                                 // (using-tasks and target registration) entirely. Gated behind change wave 18.10
                                 // so the historical full-evaluation behavior can be restored if needed.
+                                // A ProjectInstance (an uncached evaluation snapshot) is used rather than a Project
+                                // because this is a read-only "evaluate, read, discard" scenario and partial
+                                // evaluation is only supported on ProjectInstance.
                                 ProjectEvaluationStage evaluationStage =
                                     ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
                                         ? (getItem.Length == 0 ? ProjectEvaluationStage.Properties : ProjectEvaluationStage.Items)
                                         : ProjectEvaluationStage.Full;
 
-                                Project project = Project.FromFile(projectFile, new ProjectOptions
+                                ProjectInstance project = ProjectInstance.FromFile(projectFile, new ProjectOptions
                                 {
                                     ProjectCollection = collection,
                                     GlobalProperties = globalProperties,
@@ -1033,8 +1036,17 @@ namespace Microsoft.Build.CommandLine
                                 collection.LogBuildFinishedEvent(exitType == ExitType.Success);
                             }
                         }
-                        catch (InvalidProjectFileException)
+                        catch (InvalidProjectFileException ex)
                         {
+                            // ProjectInstance evaluation logs semantic evaluation errors through the collection's
+                            // loggers, but a pre-evaluation failure (for example malformed project XML) throws
+                            // before any logging occurs. Surface the latter in canonical format so the CLI still
+                            // reports the project load error (for example MSB4025) rather than failing silently.
+                            if (!ex.HasBeenLogged)
+                            {
+                                Console.WriteLine($"MSBUILD : error {ex.ErrorCode}: {ex.Message}");
+                            }
+
                             exitType = ExitType.BuildError;
                         }
                     }
@@ -1315,7 +1327,7 @@ namespace Microsoft.Build.CommandLine
                 isStandaloneExecution: !s_isNodeMode);
         }
 
-        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project, TextWriter outputStream)
+        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, ProjectInstance project, TextWriter outputStream)
         {
             // Special case if the user requests exactly one property: skip json formatting
             if (getProperty.Length == 1 && getItem.Length == 0)
@@ -1326,7 +1338,7 @@ namespace Microsoft.Build.CommandLine
             {
                 JsonOutputFormatter jsonOutputFormatter = new();
                 jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
-                jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
+                jsonOutputFormatter.AddItemInstancesInJsonFormat(getItem, project);
                 outputStream.WriteLine(jsonOutputFormatter.ToString());
             }
 
@@ -2082,18 +2094,15 @@ namespace Microsoft.Build.CommandLine
             // Add a property to indicate that a Restore is executing
             restoreGlobalProperties[MSBuildConstants.MSBuildIsRestoring] = bool.TrueString;
 
-            // Add the property that NuGet passes when it re-invokes the build during restore. NuGet's restore targets pass
-            // ExcludeRestorePackageImports=true as a global property, which normally forces a second evaluation of every project.
-            // Setting it up front here means the initial evaluation already matches, so it is reused instead of being discarded.
-            // The value must match NuGet's exactly (the literal lowercase "true" from NuGet.targets) because global property values
-            // are compared case-sensitively when matching build configurations for evaluation reuse.
-            // Only set it when the user has not explicitly supplied a value so that an explicit opt-out (e.g.
-            // /p:ExcludeRestorePackageImports=false) is respected instead of being silently overwritten.
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
-                && !globalProperties.ContainsKey(MSBuildConstants.ExcludeRestorePackageImports))
-            {
-                restoreGlobalProperties[MSBuildConstants.ExcludeRestorePackageImports] = MSBuildConstants.ExcludeRestorePackageImportsValue;
-            }
+            // NOTE: Do NOT add ExcludeRestorePackageImports=true here to try to match the global properties that NuGet's
+            // restore targets pass when they re-invoke the build. It is tempting because it would let the initial restore
+            // evaluation be reused instead of re-evaluated, but it breaks restore for projects that have a nonexistent
+            // <ProjectReference>. When the top-level restore evaluation shares the same global property set as NuGet's inner
+            // _GenerateRestoreProjectPathWalk invocation, that walk runs in the same project instance and its unfiltered
+            // _RestoreProjectPathItems (which contains the raw ProjectReference paths, including missing ones) leaks into
+            // _GenerateRestoreGraph's _GenerateRestoreGraphProjectEntry MSBuild call, which does not set SkipNonexistentProjects
+            // and therefore fails with MSB3202 instead of skipping the missing project. See dotnet/msbuild#14274 (reverted)
+            // and dotnet/sdk#55245.
 
             // Create a new request with a Restore target only and specify:
             //  - BuildRequestDataFlags.ClearCachesAfterBuild to ensure the projects will be reloaded from disk for subsequent builds
