@@ -1134,6 +1134,7 @@ namespace Microsoft.Build.UnitTests
 
                 // cmd echoes "hello", then starts a background ping that inherits
                 // pipe handles. cmd exits immediately; ping outlives the 30s EOF timeout.
+                string grandchildProcessName = NativeMethodsShared.IsWindows ? "PING" : "sleep";
                 t.MockCommandLineCommands = NativeMethodsShared.IsWindows
                     ? "/c echo hello & start /b ping -n 40 127.0.0.1 > nul"
                     : "-c \"echo hello; sleep 40 &\"";
@@ -1141,17 +1142,72 @@ namespace Microsoft.Build.UnitTests
                 // Outer task timeout is generous; the EOF timeout (30s) is what bounds us.
                 t.Timeout = 60000;
 
-                var sw = Stopwatch.StartNew();
-                bool result = t.Execute();
-                sw.Stop();
+                // Snapshot the grandchild processes that already exist so cleanup only targets the
+                // one this test spawns.
+                HashSet<int> preexistingGrandchildren = SnapshotProcessIds(grandchildProcessName);
 
-                _output.WriteLine(engine.Log);
+                try
+                {
+                    var sw = Stopwatch.StartNew();
+                    bool result = t.Execute();
+                    sw.Stop();
 
-                engine.Log.ShouldContain("hello");
-                // The task must return within ~30s (EOF timeout) even though the grandchild lives longer.
-                sw.Elapsed.TotalSeconds.ShouldBeLessThan(35, "ToolTask should be bounded by the 30s EOF timeout, not the grandchild's lifetime");
-                // The diagnostic message must appear so CI reports show why the wait ended.
-                engine.Log.ShouldContain("Pipe EOF not received");
+                    _output.WriteLine(engine.Log);
+
+                    engine.Log.ShouldContain("hello");
+                    // The task must return within ~30s (EOF timeout) even though the grandchild lives longer.
+                    sw.Elapsed.TotalSeconds.ShouldBeLessThan(35, "ToolTask should be bounded by the 30s EOF timeout, not the grandchild's lifetime");
+                    // The diagnostic message must appear so CI reports show why the wait ended.
+                    engine.Log.ShouldContain("Pipe EOF not received");
+                }
+                finally
+                {
+                    // The grandchild inherited this process's handles, including the Microsoft.Testing.Platform
+                    // diagnostic-log file handle. If it lingers (it lives ~40s, past the 30s EOF timeout) it keeps
+                    // that log file locked, which makes Arcade's post-run WriteLinesToFile fail with MSB3491. Kill
+                    // the grandchild we spawned so the inherited handle is released before log finalization.
+                    KillNewProcesses(grandchildProcessName, preexistingGrandchildren);
+                }
+            }
+        }
+
+        private static HashSet<int> SnapshotProcessIds(string processName)
+        {
+            var ids = new HashSet<int>();
+            foreach (Process process in Process.GetProcessesByName(processName))
+            {
+                try
+                {
+                    ids.Add(process.Id);
+                }
+                finally
+                {
+                    process.Dispose();
+                }
+            }
+
+            return ids;
+        }
+
+        private static void KillNewProcesses(string processName, HashSet<int> preexistingProcessIds)
+        {
+            foreach (Process process in Process.GetProcessesByName(processName))
+            {
+                try
+                {
+                    if (!preexistingProcessIds.Contains(process.Id))
+                    {
+                        process.Kill();
+                    }
+                }
+                catch
+                {
+                    // The process may have already exited; nothing to clean up.
+                }
+                finally
+                {
+                    process.Dispose();
+                }
             }
         }
 
