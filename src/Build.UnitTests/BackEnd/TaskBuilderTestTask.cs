@@ -726,6 +726,28 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// A TaskItem&lt;string&gt; parameter.
+        /// </summary>
+        public ITaskItem<string> TaskItemStringParam
+        {
+            set
+            {
+                _testTaskHost?.ParameterSet("TaskItemStringParam", value);
+            }
+        }
+
+        /// <summary>
+        /// A TaskItem&lt;bool&gt; parameter.
+        /// </summary>
+        public ITaskItem<bool> TaskItemBoolParam
+        {
+            set
+            {
+                _testTaskHost?.ParameterSet("TaskItemBoolParam", value);
+            }
+        }
+
+        /// <summary>
         /// A TaskItem&lt;int&gt; array parameter.
         /// </summary>
         public ITaskItem<int>[] TaskItemIntArrayParam

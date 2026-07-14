@@ -577,6 +577,24 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Validate that setting a TaskItem&lt;string&gt; parameter preserves the item identity.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemStringParam()
+        {
+            ValidateTaskParameter("TaskItemStringParam", "value", new Microsoft.Build.Framework.TaskItem<string>("value"));
+        }
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;bool&gt; parameter uses MSBuild boolean parsing.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemBoolParam()
+        {
+            ValidateTaskParameter("TaskItemBoolParam", "yes", new Microsoft.Build.Framework.TaskItem<bool>(true));
+        }
+
+        /// <summary>
         /// Validate that parse failures from TaskItem&lt;T&gt; scalar binding are reported as invalid task parameter values.
         /// </summary>
         [Fact]

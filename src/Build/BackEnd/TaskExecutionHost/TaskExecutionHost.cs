@@ -914,12 +914,11 @@ namespace Microsoft.Build.BackEnd
         #region Local Methods
 
         /// <summary>
-        /// Checks if a type is TaskItem&lt;T&gt; or ITaskItem&lt;T&gt; where T is a supported value type
-        /// (including AbsolutePath) or FileInfo/DirectoryInfo.
+        /// Checks if a type is TaskItem&lt;T&gt; or ITaskItem&lt;T&gt; where T is supported by ValueTypeParser.
         /// </summary>
-        private static bool IsPathLikeTaskItemOrITaskItemOfT(Type parameterType)
-            => TaskParameterTypeVerifier.IsPathLikeITaskItemOfT(parameterType)
-                || TaskParameterTypeVerifier.IsPathLikeTaskItemOfT(parameterType, typeof(TaskItem<>).FullName);
+        private static bool IsSupportedTaskItemOrITaskItemOfT(Type parameterType)
+            => TaskParameterTypeVerifier.IsSupportedITaskItemOfT(parameterType)
+                || TaskParameterTypeVerifier.IsSupportedTaskItemOfT(parameterType, typeof(TaskItem<>).FullName);
 
         /// <summary>
         /// Cache of compiled constructor delegates that wrap an <see cref="ITaskItem"/> into a
@@ -1031,7 +1030,7 @@ namespace Microsoft.Build.BackEnd
 
                     return InternalSetTaskParameter(parameter, finalInputs);
                 }
-                else if (IsPathLikeTaskItemOrITaskItemOfT(elementType))
+                else if (IsSupportedTaskItemOrITaskItemOfT(elementType))
                 {
                     // TaskItem<T> / ITaskItem<T> arrays: wrap each item into the closed generic TaskItem<T>.
 #if NET
@@ -1141,7 +1140,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             Type outputType = outputs.GetType();
-            if (outputType.IsArray && IsPathLikeTaskItemOrITaskItemOfT(outputType.GetElementType()))
+            if (outputType.IsArray && IsSupportedTaskItemOrITaskItemOfT(outputType.GetElementType()))
             {
                 Array taskItemArray = (Array)outputs;
                 ITaskItem[] result = new ITaskItem[taskItemArray.Length];
@@ -1560,7 +1559,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                if (parameterType == typeof(ITaskItem) || IsPathLikeTaskItemOrITaskItemOfT(parameterType))
+                if (parameterType == typeof(ITaskItem) || IsSupportedTaskItemOrITaskItemOfT(parameterType))
                 {
                     // We don't know how many items we're going to end up with, but we'll
                     // keep adding them to this arraylist as we find them.
@@ -1588,7 +1587,7 @@ namespace Microsoft.Build.BackEnd
 
                         RecordItemForDisconnectIfNecessary(finalTaskItems[0]);
 
-                        if (IsPathLikeTaskItemOrITaskItemOfT(parameterType))
+                        if (IsSupportedTaskItemOrITaskItemOfT(parameterType))
                         {
                             ITaskItem taskItemOfT = CreateTaskItemOfT(parameterType.GetGenericArguments()[0], finalTaskItems[0]);
                             success = InternalSetTaskParameter(parameter, taskItemOfT);

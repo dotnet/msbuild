@@ -29,26 +29,37 @@ namespace Microsoft.Build.BackEnd
         ];
 
         /// <summary>
-        /// Checks if a type is the provided generic TaskItem type where T is a supported value type
-        /// (including AbsolutePath) or FileInfo/DirectoryInfo.
+        /// Checks if a type is the provided generic TaskItem type where T is supported by ValueTypeParser.
         /// </summary>
-        internal static bool IsPathLikeTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
-            => TaskItemTypeDetector.IsPathLikeTaskItemOfT(parameterType, genericTaskItemTypeDefinitionFullName);
+        internal static bool IsSupportedTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
+            => TaskItemTypeDetector.IsSupportedTaskItemOfT(parameterType, genericTaskItemTypeDefinitionFullName);
 
         /// <summary>
-        /// Checks if a type is ITaskItem&lt;T&gt; where T is path-like.
+        /// Checks if a type is ITaskItem&lt;T&gt; where T is supported by ValueTypeParser.
         /// </summary>
-        internal static bool IsPathLikeITaskItemOfT(Type parameterType)
-            => TaskItemTypeDetector.IsPathLikeITaskItemOfT(parameterType);
+        internal static bool IsSupportedITaskItemOfT(Type parameterType)
+            => TaskItemTypeDetector.IsSupportedITaskItemOfT(parameterType);
+
+        private static bool IsUnsupportedTaskItemOfT(Type parameterType)
+        {
+            if (!TaskItemTypeDetector.IsTaskItemOfT(parameterType, typeof(ITaskItem<>).FullName)
+                && !TaskItemTypeDetector.IsTaskItemOfT(parameterType, typeof(Microsoft.Build.Framework.TaskItem<>).FullName))
+            {
+                return false;
+            }
+
+            return !TaskItemTypeDetector.IsSupportedTaskItemType(parameterType.GetGenericArguments()[0]);
+        }
 
         /// <summary>
         /// Is the parameter type a valid scalar input value
         /// </summary>
         internal static bool IsValidScalarInputParameter(Type parameterType) =>
-            parameterType.IsValueType ||
-            parameterType == typeof(ITaskItem) ||
-            s_supportedTypes.Contains(parameterType) ||
-            IsPathLikeITaskItemOfT(parameterType);
+            !IsUnsupportedTaskItemOfT(parameterType)
+            && (parameterType.IsValueType
+                || parameterType == typeof(ITaskItem)
+                || s_supportedTypes.Contains(parameterType)
+                || IsSupportedITaskItemOfT(parameterType));
 
         /// <summary>
         /// Is the passed in parameterType a valid vector input parameter
@@ -61,11 +72,15 @@ namespace Microsoft.Build.BackEnd
             }
 
             Type elementType = parameterType.GetElementType();
+            if (IsUnsupportedTaskItemOfT(elementType))
+            {
+                return false;
+            }
 
             return elementType.IsValueType ||
                         parameterType == typeof(ITaskItem[]) ||
                         s_supportedTypes.Contains(elementType) ||
-                        IsPathLikeITaskItemOfT(elementType);
+                        IsSupportedITaskItemOfT(elementType);
         }
 
         /// <summary>
@@ -73,7 +88,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static bool IsAssignableToITaskItem(Type parameterType)
         {
-            if (parameterType.IsArray && typeof(ITaskItem).IsAssignableFrom(parameterType.GetElementType()))
+            Type elementType = parameterType.IsArray ? parameterType.GetElementType() : parameterType;
+            if (IsUnsupportedTaskItemOfT(elementType))
+            {
+                return false;
+            }
+
+            if (parameterType.IsArray && typeof(ITaskItem).IsAssignableFrom(elementType))
             {
                 return true;
             }
@@ -87,11 +108,11 @@ namespace Microsoft.Build.BackEnd
             {
                 if (parameterType.IsArray)
                 {
-                    result = IsPathLikeITaskItemOfT(parameterType.GetElementType());
+                    result = IsSupportedITaskItemOfT(elementType);
                 }
                 else
                 {
-                    result = IsPathLikeITaskItemOfT(parameterType);
+                    result = IsSupportedITaskItemOfT(parameterType);
                 }
             }
 
@@ -102,13 +123,21 @@ namespace Microsoft.Build.BackEnd
         /// Is the passed parameter a valid value type output parameter
         /// </summary>
         internal static bool IsValueTypeOutputParameter(Type parameterType)
-            => parameterType switch
+        {
+            Type elementType = parameterType.IsArray ? parameterType.GetElementType() : parameterType;
+            if (IsUnsupportedTaskItemOfT(elementType))
+            {
+                return false;
+            }
+
+            return parameterType switch
             {
                 { IsValueType: true } => true,                                      // value type
                 { IsArray: true } => parameterType.GetElementType() is { } element
                     && (element.IsValueType || s_supportedTypes.Contains(element)), // array of value type or supported type
                 _ => s_supportedTypes.Contains(parameterType),                      // supported scalar type
             };
+        }
 
         /// <summary>
         /// Is the parameter type a valid scalar or value type input parameter

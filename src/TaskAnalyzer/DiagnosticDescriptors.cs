@@ -8,7 +8,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 {
     /// <summary>
     /// Diagnostic descriptors for the thread-safe task analyzer.
-    /// All rules default to Warning severity. MSBuildTask0001 defaults to Error.
+    /// Rules default to the severity appropriate for the behavior they diagnose.
     /// </summary>
     internal static class DiagnosticDescriptors
     {
@@ -88,11 +88,20 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         public static readonly DiagnosticDescriptor UnsupportedTaskItemType = new(
             id: DiagnosticIds.UnsupportedTaskItemType,
             title: "ITaskItem<T> used with unsupported type argument",
-            messageFormat: "Task property '{0}' uses ITaskItem<{1}> but MSBuild cannot automatically parse '{1}' from item metadata. Use one of the supported types: {2}.",
+            messageFormat: "Task property '{0}' uses ITaskItem<{1}> but MSBuild cannot automatically parse '{1}' from item metadata. Use one of the directly parsed types: {2}.",
             category: "MSBuild.TaskAuthoring",
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
             description: "MSBuild can only bind ITaskItem<T> properties when T is a supported type. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.");
+
+        public static readonly DiagnosticDescriptor CultureSensitiveTaskItemType = new(
+            id: DiagnosticIds.CultureSensitiveTaskItemType,
+            title: "ITaskItem<T> type argument relies on culture-sensitive conversion",
+            messageFormat: "Task property '{0}' uses ITaskItem<{1}>, which MSBuild parses through Convert.ChangeType and therefore relies on CultureInfo conversion semantics. Use ITaskItem<string> and parse explicitly with a chosen culture.",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Error,
+            isEnabledByDefault: true,
+            description: "ITaskItem<T> type arguments parsed through Convert.ChangeType rely on culture-sensitive conversion semantics. Bind the item as a string and parse it explicitly with the intended culture.");
 
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
@@ -103,6 +112,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             PreferTypedPathParameter,
             PreferTypedTaskItem,
             InitializeRelativeDefaultInExecute,
-            UnsupportedTaskItemType);
+            UnsupportedTaskItemType,
+            CultureSensitiveTaskItemType);
     }
 }
