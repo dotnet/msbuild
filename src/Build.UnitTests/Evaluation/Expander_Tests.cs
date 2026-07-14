@@ -646,7 +646,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             log.AssertLogContains("[foo;bar]");
         }
 
-        [LongPathSupportDisabledFact(fullFrameworkOnly: true, additionalMessage: "https://github.com/dotnet/msbuild/issues/4363")]
+        [LongPathSupportDisabledTestMethod(fullFrameworkOnly: true, additionalMessage: "https://github.com/dotnet/msbuild/issues/4363")]
         public void ExpandItemVectorFunctionsBuiltIn_PathTooLongError()
         {
             string content = @"
@@ -927,7 +927,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->Metadata function
         /// </summary>
-        [LongPathSupportDisabledFact]
+        [LongPathSupportDisabledTestMethod]
         public void InvalidPathAndMetadataItemFunctionPathTooLong()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -986,7 +986,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->WithMetadataValue function
         /// </summary>
-        [LongPathSupportDisabledFact]
+        [LongPathSupportDisabledTestMethod]
         public void InvalidPathAndMetadataItemFunctionPathTooLong2()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1045,7 +1045,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// <summary>
         /// Bad path when getting metadata through ->AnyHaveMetadataValue function
         /// </summary>
-        [LongPathSupportDisabledFact]
+        [LongPathSupportDisabledTestMethod]
         public void InvalidPathAndMetadataItemFunctionPathTooLong3()
         {
             MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
@@ -1097,7 +1097,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4248");
         }
 
-        [LongPathSupportDisabledFact(fullFrameworkOnly: true, additionalMessage: "new enough dotnet.exe transparently opts into long paths")]
+        [LongPathSupportDisabledTestMethod(fullFrameworkOnly: true, additionalMessage: "new enough dotnet.exe transparently opts into long paths")]
         public void PathTooLongInDirectMetadata()
         {
             var logger = Helpers.BuildProjectContentUsingBuildManagerExpectResult(

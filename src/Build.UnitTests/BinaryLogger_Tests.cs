@@ -521,7 +521,7 @@ namespace Microsoft.Build.UnitTests
             generatedFileCount.ShouldBe(2, $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
-        [RequiresSymbolicLinksFact]
+        [RequiresSymbolicLinksTestMethod]
         public void BinaryLoggerShouldEmbedSymlinkFilesViaTaskOutput()
         {
             string testFileName = "foobar.txt";

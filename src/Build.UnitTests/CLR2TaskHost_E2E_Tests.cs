@@ -35,7 +35,7 @@ public class CLR2TaskHost_E2E_Tests
     ///      salt matches what the child process computes on startup
     /// Without these, the parent and child compute different pipe name hashes → MSB4216.
     /// </summary>
-    [WindowsNet35OnlyFact]
+    [WindowsNet35OnlyTestMethod]
     public void ExplicitCLR2TaskHostFactory_RunsTaskSuccessfully()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);

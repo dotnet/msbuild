@@ -26,7 +26,7 @@ public class MSBuildTaskHostTests(TestContext testOutput) : IDisposable
         => _environment.Dispose();
 
     [ActiveIssue("https://github.com/dotnet/msbuild/issues/13933", TestPlatforms.Windows)]
-    [WindowsNet35OnlyFact]
+    [WindowsNet35OnlyTestMethod]
     public void CompileNet35WinFormsApp()
     {
         TransientTestFolder testFolder = _environment.CreateFolder(createFolder: true);
