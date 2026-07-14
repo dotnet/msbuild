@@ -731,7 +731,7 @@
       </trans-unit>
       <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
         <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
-        <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
+        <target state="translated">建立專案時不支援部分評估 ("{0}" 評估階段)。使用 ProjectInstance 來執行部分評估，或使用完整評估階段來建立專案。</target>
         <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
