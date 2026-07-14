@@ -143,7 +143,7 @@
       </trans-unit>
       <trans-unit id="BuildCheckCustomCheckNotSupportedInTrimmedHost">
         <source>MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</source>
-        <target state="new">MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</target>
+        <target state="translated">MSB4284: 이 MSBuild 호스트에서는 사용자 지정 플러그 인 검색이 비활성화되어 있으므로 사용자 지정 빌드 검사 "{0}"을(를) 로드할 수 없습니다. 예를 들어 트리밍된 빌드 또는 네이티브 AOT 빌드에서는 반영으로 검사 어셈블리를 로드할 수 없습니다. 사용자 지정 검사를 실행하려면 JIT 기반 MSBuild로 빌드하세요.</target>
         <note>{StrBegin="MSB4284: "}{0} is the path to the custom build check assembly.</note>
       </trans-unit>
       <trans-unit id="BuildCheckEnabled">
@@ -696,7 +696,7 @@
       </trans-unit>
       <trans-unit id="OM_ConfigurationFileToolsetsNotSupported">
         <source>Reading toolset definitions from the application configuration file (ToolsetDefinitionLocations.ConfigurationFile) is not supported in this trimmed or Native AOT host. Remove ConfigurationFile from the requested toolset locations, or run a JIT-based MSBuild.</source>
-        <target state="new">Reading toolset definitions from the application configuration file (ToolsetDefinitionLocations.ConfigurationFile) is not supported in this trimmed or Native AOT host. Remove ConfigurationFile from the requested toolset locations, or run a JIT-based MSBuild.</target>
+        <target state="translated">애플리케이션 구성 파일(ToolsetDefinitionLocations.ConfigurationFile)에서 도구 집합 정의를 읽는 것은 이 트리밍된 호스트 또는 네이티브 AOT 호스트에서 지원되지 않습니다. 요청한 도구 집합 위치에서 ConfigurationFile을 제거하거나 JIT 기반 MSBuild를 실행하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
@@ -721,12 +721,12 @@
       </trans-unit>
       <trans-unit id="OM_PartialEvaluationCannotBuild">
         <source>The project instance cannot be built because it was only partially evaluated (evaluation stopped after the "{0}" stage). A full evaluation is required to build a project.</source>
-        <target state="new">The project instance cannot be built because it was only partially evaluated (evaluation stopped after the "{0}" stage). A full evaluation is required to build a project.</target>
+        <target state="translated">프로젝트 인스턴스가 부분적으로만 평가되었으므로 빌드할 수 없습니다(평가는 "{0}" 단계 이후 중지됨). 프로젝트를 빌드하려면 전체 평가가 필요합니다.</target>
         <note>UE: This message is shown when the user tries to build a ProjectInstance produced by a partial evaluation. {0} is the ProjectEvaluationStage the instance was evaluated to.</note>
       </trans-unit>
       <trans-unit id="OM_PartialEvaluationMemberUnavailable">
         <source>The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with at least the "{2}" evaluation stage to access this member.</source>
-        <target state="new">The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with at least the "{2}" evaluation stage to access this member.</target>
+        <target state="translated">프로젝트가 부분적으로만 평가되었으므로 "{0}" 멤버를 사용할 수 없습니다(평가는 "{1}" 단계 이후 중지됨). 이 멤버에 액세스하려면 최소 "{2}" 평가 단계로 프로젝트를 다시 평가하세요.</target>
         <note>UE: This message is shown when the user reads a member (for example items or targets) that a partial evaluation did not compute. {0} is the member name, {1} is the ProjectEvaluationStage the project was evaluated to, {2} is the minimum ProjectEvaluationStage required to access the member.</note>
       </trans-unit>
       <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
@@ -935,12 +935,12 @@
       </trans-unit>
       <trans-unit id="ReflectiveLoggerLoadingNotSupported">
         <source>MSB4285: A logger could not be created from its assembly and class name because loading loggers by reflection is not supported in this trimmed or Native AOT host. Provide the logger to the engine as a constructed ILogger instance, or build with a JIT-based MSBuild.</source>
-        <target state="new">MSB4285: A logger could not be created from its assembly and class name because loading loggers by reflection is not supported in this trimmed or Native AOT host. Provide the logger to the engine as a constructed ILogger instance, or build with a JIT-based MSBuild.</target>
+        <target state="translated">MSB4285: 이 트리밍된 호스트 또는 네이티브 AOT 호스트에서는 반영을 사용한 로거 로드가 지원되지 않으므로 어셈블리 이름과 클래스 이름으로 로거를 만들 수 없습니다. 로거를 생성된 ILogger 인스턴스로 엔진에 제공하거나 JIT 기반 MSBuild로 빌드하세요.</target>
         <note>{StrBegin="MSB4285: "}</note>
       </trans-unit>
       <trans-unit id="ReflectiveTaskExecutionNotSupported">
         <source>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</source>
-        <target state="new">MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</target>
+        <target state="translated">MSB4283: "{0}" 작업을 실행하려면 반영을 통해 작업 어셈블리와 형식을 로드해야 하므로 실행할 수 없습니다. 이는 이 트리밍된 호스트 또는 네이티브 AOT 호스트에서는 지원되지 않습니다. 작업을 실행하려면 JIT 기반 MSBuild로 빌드하세요.</target>
         <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
       </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
@@ -1026,7 +1026,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="SdkResolverDynamicLoadingNotSupported">
         <source>MSB4282: The SDK "{0}" could not be resolved because it requires an SDK resolver ("{1}") that must be loaded dynamically, which is not supported in this trimmed or Native AOT host. SDKs available in the SDK installation are supported; build with a JIT-based MSBuild to use NuGet, workload, or custom SDK resolvers.</source>
-        <target state="new">MSB4282: The SDK "{0}" could not be resolved because it requires an SDK resolver ("{1}") that must be loaded dynamically, which is not supported in this trimmed or Native AOT host. SDKs available in the SDK installation are supported; build with a JIT-based MSBuild to use NuGet, workload, or custom SDK resolvers.</target>
+        <target state="translated">MSB4282: 동적으로 로드해야 하는 SDK 확인자("{0}")가 필요하므로 SDK "{1}"을(를) 확인할 수 없습니다. 이는 이 트리밍된 호스트 또는 네이티브 AOT 호스트에서 지원되지 않습니다. SDK 설치에서 사용할 수 있는 SDK는 지원됩니다. NuGet, 워크로드 또는 사용자 지정 SDK 확인자를 사용하려면 JIT 기반 MSBuild로 빌드하세요.</target>
         <note>{StrBegin="MSB4282: "}{0} is the SDK name; {1} is the SDK resolver manifest display name.</note>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
