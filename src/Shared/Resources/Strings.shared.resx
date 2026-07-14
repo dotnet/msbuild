@@ -165,9 +165,6 @@
     <value>MSB4233: There was an exception while reading the log file: {0}</value>
     <comment>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</comment>
   </data>
-  <data name="MissingProject" xml:space="preserve">
-    <value>MSBuild is expecting a valid "{0}" object.</value>
-  </data>
   <data name="UnrecognizedToolsVersion" xml:space="preserve">
     <value>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</value>
     <comment>{StrBegin="MSB4132: "}LOCALIZATION: {1} contains a comma separated list.</comment>
@@ -180,45 +177,13 @@
     <value>"{0}" is a reserved item metadata, and cannot be modified or deleted.</value>
     <comment>UE: Tasks and OM users are not allowed to remove or change the value of the built-in metadata on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</comment>
   </data>
-  <data name="Shared.CannotConvertStringToBool" xml:space="preserve">
-    <value>The string "{0}" cannot be converted to a boolean (true/false) value.</value>
-  </data>
-  <data name="Shared.FailedCreatingTempFile" xml:space="preserve">
-    <value>MSB5003: Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</value>
-    <comment>{StrBegin="MSB5003: "}</comment>
-  </data>
   <data name="Shared.FailedDeletingTempFile" xml:space="preserve">
     <value>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</value>
     <comment>{StrBegin="MSB5018: "}</comment>
   </data>
-  <data name="Shared.InvalidFilespecForTransform" xml:space="preserve">
-    <value>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</value>
-    <comment>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</comment>
-  </data>
   <data name="TaskNotMarshalByRef" xml:space="preserve">
     <value>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</value>
     <comment>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</comment>
-  </data>
-  <data name="FrameworkLocationHelper.UnsupportedFrameworkVersion" xml:space="preserve">
-    <value>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</value>
-  </data>
-  <data name="FrameworkLocationHelper.UnsupportedFrameworkVersionForWindowsSdk" xml:space="preserve">
-    <value>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</value>
-  </data>
-  <data name="FrameworkLocationHelper.UnsupportedVisualStudioVersion" xml:space="preserve">
-    <value>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</value>
-  </data>
-  <data name="FrameworkLocationHelper.CouldNotGenerateReferenceAssemblyDirectory" xml:space="preserve">
-    <value>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</value>
-    <comment>No Error code because this resource will be used in an exception. The error code is discarded if it is included</comment>
-  </data>
-  <data name="DirectoryNotFound" xml:space="preserve">
-    <value>Could not find directory path: {0}</value>
-    <comment>Directory must exist</comment>
-  </data>
-  <data name="UnauthorizedAccess" xml:space="preserve">
-    <value>You do not have access to: {0}</value>
-    <comment>Directory must have access</comment>
   </data>
   <data name="SubCategoryForSchemaValidationErrors" xml:space="preserve">
     <value>Schema validation</value>
@@ -233,17 +198,11 @@
     <value>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</value>
     <comment>{StrBegin="MSB5002: "}</comment>
   </data>
-  <data name="Shared.ParameterCannotBeNull" xml:space="preserve">
-    <value>Parameter "{0}" cannot be null.</value>
-  </data>
   <data name="Shared.ParameterCannotHaveInvalidPathChars" xml:space="preserve">
     <value>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</value>
   </data>
   <data name="Shared.ParameterCannotHaveZeroLength" xml:space="preserve">
     <value>Parameter "{0}" cannot have zero length.</value>
-  </data>
-  <data name="Shared.ParametersMustHaveTheSameLength" xml:space="preserve">
-    <value>Parameters "{0}" and "{1}" must have the same number of elements.</value>
   </data>
   <data name="Shared.TaskResourceNotFound" xml:space="preserve">
     <value>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</value>
@@ -329,13 +288,6 @@
   <data name="Shared.KillingProcessByCancellation" xml:space="preserve">
     <value>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</value>
     <comment>{StrBegin="MSB5021: "}</comment>
-  </data>
-  <data name="Shared.CanNotFindValidMSBuildLocation" xml:space="preserve">
-    <value>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</value>
-    <comment>{StrBegin="MSB5024: "}</comment>
-  </data>
-  <data name="Shared.GlobExpansionFailed" xml:space="preserve">
-    <value>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</value>
   </data>
   <data name="SolutionFilterJsonParsingError" xml:space="preserve">
     <value>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</value>

@@ -80,11 +80,6 @@
         <target state="translated">MSB4103: "{0}", geçerli bir günlükçü ayrıntı düzeyi değil.</target>
         <note>{StrBegin="MSB4103: "}</note>
       </trans-unit>
-      <trans-unit id="MissingProject">
-        <source>MSBuild is expecting a valid "{0}" object.</source>
-        <target state="translated">MSBuild, geçerli bir "{0}" nesnesi bekliyor.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SolutionFilterFilterContainsProjectNotInSolution">
         <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
         <target state="translated">MSB5028: "{0}" konumundaki çözüm filtresi dosyası, "{2}" konumundaki çözüm dosyasında bulunmayan "{1}" projesini içeriyor.</target>
@@ -120,60 +115,15 @@
         <target state="translated">"{0}" ayrılmış bir öğe meta verisi olduğu için değiştirilemez veya silinemez.</target>
         <note>UE: Tasks and OM users are not allowed to remove or change the value of the built-in metadata on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</note>
       </trans-unit>
-      <trans-unit id="Shared.CannotConvertStringToBool">
-        <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
-        <target state="translated">"{0}" dizesi bir boole (doğru/yanlış) değerine dönüştürülemiyor.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Shared.FailedCreatingTempFile">
-        <source>MSB5003: Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
-        <target state="translated">MSB5003: Geçici bir dosya oluşturulamadı. Geçici dosyalar klasörü dolu veya yolu hatalı. {0}</target>
-        <note>{StrBegin="MSB5003: "}</note>
-      </trans-unit>
       <trans-unit id="Shared.FailedDeletingTempFile">
         <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
         <target state="translated">MSB5018: "{0}" geçici dosyası silinemedi. {1} {2}</target>
         <note>{StrBegin="MSB5018: "}</note>
       </trans-unit>
-      <trans-unit id="Shared.InvalidFilespecForTransform">
-        <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
-        <target state="translated">"%({0})" öğe meta verisi "{1}" yoluna uygulanamıyor. {2}</target>
-        <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
-      </trans-unit>
       <trans-unit id="TaskNotMarshalByRef">
         <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
         <target state="translated">MSB4077: "{0}" görevi LoadInSeparateAppDomain özniteliğiyle işaretlenmiş, ancak MarshalByRefObject öğesinden türetilmiyor. Görevin MarshalByRefObject veya AppDomainIsolatedTask öğesinden türetildiğini denetleyin.</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="FrameworkLocationHelper.UnsupportedFrameworkVersion">
-        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
-        <target state="translated">.NET Framework "{0}" sürümü desteklenmiyor. Lütfen Microsoft.Build.Utilities.TargetDotNetFrameworkVersion sabit listesinden bir değer belirtin.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkLocationHelper.UnsupportedFrameworkVersionForWindowsSdk">
-        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="translated">Yalnızca .NET 4.5 ve sonraki sürümlerde desteklenen Windows SDK açıkça hedeflenirken .NET Framework "{0}" sürümü desteklenmez.  Lütfen Microsoft.Build.Utilities.TargetDotNetFrameworkVersion sabit listesinden Sürüm 45 veya üzerinde bir değer belirtin.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkLocationHelper.UnsupportedVisualStudioVersion">
-        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
-        <target state="translated">Visual Studio "{0}" sürümü desteklenmiyor.  Lütfen Microsoft.Build.Utilities.VisualStudioVersion sabit listesinden bir değer belirtin.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkLocationHelper.CouldNotGenerateReferenceAssemblyDirectory">
-        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
-        <target state="translated">"{0}" yolundan ve "{1}" framework adından bir başvuru bütünleştirilmiş kod yolu oluşturmaya çalışılırken bir hata oluştu. {2}</target>
-        <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
-      </trans-unit>
-      <trans-unit id="DirectoryNotFound">
-        <source>Could not find directory path: {0}</source>
-        <target state="translated">Dizin yolu bulunamadı: {0}</target>
-        <note>Directory must exist</note>
-      </trans-unit>
-      <trans-unit id="UnauthorizedAccess">
-        <source>You do not have access to: {0}</source>
-        <target state="translated">Şu öğeye erişiminiz yok: {0}</target>
-        <note>Directory must have access</note>
       </trans-unit>
       <trans-unit id="SubCategoryForSchemaValidationErrors">
         <source>Schema validation</source>
@@ -190,19 +140,9 @@
         <target state="translated">MSB5002: "{0}" görev yürütülebilir dosyası belirtilen {1} milisaniye sınırı içinde tamamlanmadığından sonlandırılıyor.</target>
         <note>{StrBegin="MSB5002: "}</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotBeNull">
-        <source>Parameter "{0}" cannot be null.</source>
-        <target state="translated">"{0}" parametresi null olamaz.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Shared.ParameterCannotHaveZeroLength">
         <source>Parameter "{0}" cannot have zero length.</source>
         <target state="translated">"{0}" parametresinin uzunluğu sıfır olamaz.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Shared.ParametersMustHaveTheSameLength">
-        <source>Parameters "{0}" and "{1}" must have the same number of elements.</source>
-        <target state="translated">"{0}" ve "{1}" parametrelerinin öğe sayıları aynı olmalıdır.</target>
         <note />
       </trans-unit>
       <trans-unit id="Shared.TaskResourceNotFound">
@@ -313,11 +253,6 @@
         <target state="translated">Bu koleksiyon salt okunur.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.CanNotFindValidMSBuildLocation">
-        <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
-        <target state="translated">MSB5024: MSBuild için geçerli bir konum belirlenemedi. Bu işlemi Visual Studio için Geliştirici Komut İstemi’nde çalıştırmayı deneyin.</target>
-        <note>{StrBegin="MSB5024: "}</note>
-      </trans-unit>
       <trans-unit id="InvalidLogFileFormat">
         <source>MSB4233: There was an exception while reading the log file: {0}</source>
         <target state="translated">MSB4233: Günlük dosyası okunurken bir özel durum oluştu: {0}</target>
@@ -326,11 +261,6 @@
       <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
         <target state="translated">"{1}" değeri atanan "{0}" parametresinde geçersiz yol veya geçersiz dosya karakterleri bulunamaz.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Shared.GlobExpansionFailed">
-        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">globs: fileSpec: "{0}" ile bir fileSpec genişletilirken özel bir durum oluştu, bunun bir dosya adı olduğu varsayıldı. Özel Durum: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">

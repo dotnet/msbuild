@@ -80,11 +80,6 @@
         <target state="translated">MSB4103: „{0}” nie jest prawidłowym poziomem szczegółowości rejestratora.</target>
         <note>{StrBegin="MSB4103: "}</note>
       </trans-unit>
-      <trans-unit id="MissingProject">
-        <source>MSBuild is expecting a valid "{0}" object.</source>
-        <target state="translated">Program MSBuild oczekuje prawidłowego obiektu „{0}”.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="SolutionFilterFilterContainsProjectNotInSolution">
         <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
         <target state="translated">MSB5028: Plik filtru rozwiązania w lokalizacji „{0}” obejmuje projekt „{1}”, który nie znajduje się w pliku rozwiązania w lokalizacji „{2}”.</target>
@@ -120,60 +115,15 @@
         <target state="translated">„{0}” jest zastrzeżonym elementem metadanych i nie może zostać zmodyfikowany ani usunięty.</target>
         <note>UE: Tasks and OM users are not allowed to remove or change the value of the built-in metadata on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</note>
       </trans-unit>
-      <trans-unit id="Shared.CannotConvertStringToBool">
-        <source>The string "{0}" cannot be converted to a boolean (true/false) value.</source>
-        <target state="translated">Ciągu „{0}” nie można przekonwertować na wartość logiczną (prawda/fałsz).</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Shared.FailedCreatingTempFile">
-        <source>MSB5003: Failed to create a temporary file. Temporary files folder is full or its path is incorrect. {0}</source>
-        <target state="translated">MSB5003: Nie można utworzyć pliku tymczasowego. Folder plików tymczasowych jest zapełniony lub jego ścieżka jest niepoprawna. {0}</target>
-        <note>{StrBegin="MSB5003: "}</note>
-      </trans-unit>
       <trans-unit id="Shared.FailedDeletingTempFile">
         <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
         <target state="translated">MSB5018: nie można usunąć pliku tymczasowego „{0}”. {1} {2}</target>
         <note>{StrBegin="MSB5018: "}</note>
       </trans-unit>
-      <trans-unit id="Shared.InvalidFilespecForTransform">
-        <source>The item metadata "%({0})" cannot be applied to the path "{1}". {2}</source>
-        <target state="translated">Elementu metadanych „%({0})” nie można zastosować do ścieżki „{1}”. {2}</target>
-        <note>UE: This message is shown when the user tries to perform path manipulations using one of the built-in item metadata e.g. %(RootDir), on an item-spec that's not a valid path. LOCALIZATION: "{2}" is a localized message from a CLR/FX exception.</note>
-      </trans-unit>
       <trans-unit id="TaskNotMarshalByRef">
         <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
         <target state="translated">MSB4077: Zadanie „{0}” zostało oznaczone atrybutem LoadInSeparateAppDomain, ale nie pochodzi od obiektu MarshalByRefObject. Sprawdź, czy zadanie pochodzi od obiektu MarshalByRefObject lub zadania AppDomainIsolatedTask.</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="FrameworkLocationHelper.UnsupportedFrameworkVersion">
-        <source>.NET Framework version "{0}" is not supported. Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</source>
-        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany. Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkLocationHelper.UnsupportedFrameworkVersionForWindowsSdk">
-        <source>.NET Framework version "{0}" is not supported when explicitly targeting the Windows SDK, which is only supported on .NET 4.5 and later.  Please specify a value from the enumeration Microsoft.Build.Utilities.TargetDotNetFrameworkVersion that is Version45 or above.</source>
-        <target state="translated">Program .NET Framework w wersji „{0}” nie jest obsługiwany, jeśli jawnym obiektem docelowym jest zestaw SDK systemu Windows, ponieważ taki zestaw jest obsługiwany tylko na platformie .NET w wersji 4.5 lub nowszej.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.TargetDotNetFrameworkVersion, która wynosi co najmniej Version45.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkLocationHelper.UnsupportedVisualStudioVersion">
-        <source>Visual Studio version "{0}" is not supported.  Please specify a value from the enumeration Microsoft.Build.Utilities.VisualStudioVersion.</source>
-        <target state="translated">Program Visual Studio w wersji „{0}” nie jest obsługiwany.  Podaj wartość z wyliczenia Microsoft.Build.Utilities.VisualStudioVersion.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="FrameworkLocationHelper.CouldNotGenerateReferenceAssemblyDirectory">
-        <source>When attempting to generate a reference assembly path from the path "{0}" and the framework moniker "{1}" there was an error. {2}</source>
-        <target state="translated">Wystąpił błąd podczas próby wygenerowania ścieżki zestawu odwołania ze ścieżki „{0}” i monikera struktury „{1}”. {2}</target>
-        <note>No Error code because this resource will be used in an exception. The error code is discarded if it is included</note>
-      </trans-unit>
-      <trans-unit id="DirectoryNotFound">
-        <source>Could not find directory path: {0}</source>
-        <target state="translated">Nie można odnaleźć ścieżki katalogu: {0}</target>
-        <note>Directory must exist</note>
-      </trans-unit>
-      <trans-unit id="UnauthorizedAccess">
-        <source>You do not have access to: {0}</source>
-        <target state="translated">Nie masz dostępu do następującego elementu: {0}</target>
-        <note>Directory must have access</note>
       </trans-unit>
       <trans-unit id="SubCategoryForSchemaValidationErrors">
         <source>Schema validation</source>
@@ -190,19 +140,9 @@
         <target state="translated">MSB5002: plik wykonywalny zadania „{0}” zostanie zakończony, ponieważ nie ukończył działania przed określonym limitem czasu ({1} ms).</target>
         <note>{StrBegin="MSB5002: "}</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotBeNull">
-        <source>Parameter "{0}" cannot be null.</source>
-        <target state="translated">Parametr „{0}” nie może być zerowy.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Shared.ParameterCannotHaveZeroLength">
         <source>Parameter "{0}" cannot have zero length.</source>
         <target state="translated">Parametr „{0}” nie może mieć zerowej długości.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Shared.ParametersMustHaveTheSameLength">
-        <source>Parameters "{0}" and "{1}" must have the same number of elements.</source>
-        <target state="translated">Parametry „{0}” i „{1}” muszą mieć tę samą liczbę elementów.</target>
         <note />
       </trans-unit>
       <trans-unit id="Shared.TaskResourceNotFound">
@@ -313,11 +253,6 @@
         <target state="translated">Ta kolekcja jest tylko do odczytu.</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.CanNotFindValidMSBuildLocation">
-        <source>MSB5024: Could not determine a valid location to MSBuild. Try running this process from the Developer Command Prompt for Visual Studio.</source>
-        <target state="translated">MSB5024: Nie można określić prawidłowej lokalizacji programu MSBuild. Spróbuj uruchomić ten proces z wiersza polecenia dewelopera dla programu Visual Studio.</target>
-        <note>{StrBegin="MSB5024: "}</note>
-      </trans-unit>
       <trans-unit id="InvalidLogFileFormat">
         <source>MSB4233: There was an exception while reading the log file: {0}</source>
         <target state="translated">MSB4233: Wystąpił wyjątek podczas odczytywania pliku dziennika: {0}</target>
@@ -326,11 +261,6 @@
       <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
         <target state="translated">Parametr „{0}” z przypisaną wartością „{1}” nie może mieć nieprawidłowej ścieżki ani zawierać nieprawidłowych znaków w pliku.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Shared.GlobExpansionFailed">
-        <source>An exception occurred while expanding a fileSpec with globs: fileSpec: "{0}", assuming it is a file name. Exception: {1}</source>
-        <target state="translated">Wystąpił wyjątek podczas rozwijania elementu fileSpec za pomocą globów: fileSpec: „{0}”, przy założeniu, że jest to nazwa pliku. Wyjątek: {1}</target>
         <note />
       </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
