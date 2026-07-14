@@ -97,16 +97,6 @@ jobs:
     env:
       Token: $(dn-bot-dnceng-artifact-feeds-rw)
 
-
-  - task: NuGetCommand@2
-    displayName: Restore internal tools
-    inputs:
-      command: restore
-      feedsToUse: config
-      restoreSolution: 'eng\common\internal\Tools.csproj'
-      nugetConfigPath: 'eng\common\internal\NuGet.config'
-      restoreDirectory: '$(Build.SourcesDirectory)\.packages'
-
   - task: MicroBuildSigningPlugin@4
     displayName: Install MicroBuild plugin
     inputs:
