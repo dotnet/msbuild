@@ -47,11 +47,6 @@
         <target state="translated">MSB4077: "{0}" タスクに属性 LoadInSeparateAppDomain が設定されていますが、MarshalByRefObject から派生していません。そのタスクが MarshalByRefObject または AppDomainIsolatedTask から派生していることを確認してください。</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotHaveZeroLength">
-        <source>Parameter "{0}" cannot have zero length.</source>
-        <target state="translated">パラメーター "{0}" の長さを 0 にすることはできません。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Shared.TaskResourceNotFound">
         <source>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</source>
         <target state="translated">"{1}" タスクのリソース文字列 "{0}" が見つかりません。リソース名 "{0}" のスペルが正しいこと、およびリソースがタスクのアセンブリ内に存在することを確認してください。</target>

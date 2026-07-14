@@ -47,11 +47,6 @@
         <target state="translated">MSB4077: задача "{0}" помечена атрибутом LoadInSeparateAppDomain, но не является производной от MarshalByRefObject. Задача должна быть производной от MarshalByRefObject или AppDomainIsolatedTask.</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotHaveZeroLength">
-        <source>Parameter "{0}" cannot have zero length.</source>
-        <target state="translated">Длина параметра "{0}" не может быть равна нулю.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Shared.TaskResourceNotFound">
         <source>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</source>
         <target state="translated">Не удалось найти строку ресурса "{0}" для задачи "{1}". Убедитесь, что имя ресурса "{0}" написано правильно и ресурс существует в сборке задачи.</target>

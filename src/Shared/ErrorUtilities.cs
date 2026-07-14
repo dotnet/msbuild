@@ -287,22 +287,9 @@ internal static class ErrorUtilities
         throw new ArgumentOutOfRangeException(parameterName);
     }
 
-    /// <summary>
-    /// Throws an ArgumentException if the given collection is not null but of zero length.
-    /// </summary>
-    internal static void VerifyThrowArgumentLengthIfNotNull<T>([MaybeNull] IReadOnlyCollection<T>? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        if (parameter?.Count == 0)
-        {
-            ThrowArgumentLength(parameterName);
-        }
-    }
-
-    [DoesNotReturn]
-    private static void ThrowArgumentLength(string? parameterName)
-    {
-        throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
-    }
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull{T}(IReadOnlyCollection{T}, string)"/>
+    internal static void VerifyThrowArgumentLengthIfNotNull<T>(IReadOnlyCollection<T>? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+        => FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(parameter, parameterName);
 
     /// <summary>
     /// Throws an ArgumentNullException if the given string parameter is null
@@ -318,17 +305,9 @@ internal static class ErrorUtilities
         }
     }
 
-    /// <summary>
-    /// Throws an ArgumentException if the string has zero length, unless it is
-    /// null, in which case no exception is thrown.
-    /// </summary>
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(string, string)"/>
     internal static void VerifyThrowArgumentLengthIfNotNull(string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        if (parameter?.Length == 0)
-        {
-            ThrowArgumentLength(parameterName);
-        }
-    }
+        => FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(parameter, parameterName);
 
     /// <summary>
     /// Throws an ArgumentNullException if the given parameter is null.

@@ -47,11 +47,6 @@
         <target state="translated">MSB4077: l'attività "{0}" è stata contrassegnata con l'attributo LoadInSeparateAppDomain, ma non deriva da MarshalByRefObject. Verificare che l'attività derivi da MarshalByRefObject o AppDomainIsolatedTask.</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotHaveZeroLength">
-        <source>Parameter "{0}" cannot have zero length.</source>
-        <target state="translated">Il parametro "{0}" non può avere lunghezza zero.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Shared.TaskResourceNotFound">
         <source>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</source>
         <target state="translated">La stringa di risorsa "{0}" per l'attività "{1}" non è stata trovata. Verificare che il nome della risorsa "{0}" sia stato digitato correttamente e che la risorsa sia presente nell'assembly dell'attività.</target>

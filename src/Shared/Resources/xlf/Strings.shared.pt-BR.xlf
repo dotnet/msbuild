@@ -47,11 +47,6 @@
         <target state="translated">MSB4077: A tarefa "{0}" foi marcada com o atributo LoadInSeparateAppDomain, mas não é derivada de MarshalByRefObject. Verifique se a tarefa é derivada de MarshalByRefObject ou de AppDomainIsolatedTask.</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotHaveZeroLength">
-        <source>Parameter "{0}" cannot have zero length.</source>
-        <target state="translated">O parâmetro "{0}" não pode ter comprimento zero.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Shared.TaskResourceNotFound">
         <source>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</source>
         <target state="translated">A cadeia de caracteres de recursos "{0}" da tarefa "{1}" não foi encontrada. Confirme se o nome do recurso "{0}" foi digitado corretamente e se o recurso existe no assembly da tarefa.</target>

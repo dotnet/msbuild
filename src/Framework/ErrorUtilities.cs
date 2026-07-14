@@ -110,4 +110,36 @@ internal static class FrameworkErrorUtilities
             throw new ArgumentException(SR.CollectionCopyToFailureProvidedArrayIsTooSmall, collectionParamName);
         }
     }
+
+    /// <summary>
+    ///  Throws an <see cref="ArgumentException"/> if the given collection is not null but of zero length.
+    /// </summary>
+    /// <typeparam name="T">The element type of the collection.</typeparam>
+    /// <param name="parameter">The collection to check.</param>
+    /// <param name="parameterName">The name of the <paramref name="parameter"/>.</param>
+    public static void VerifyThrowArgumentLengthIfNotNull<T>(IReadOnlyCollection<T>? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+    {
+        if (parameter?.Count == 0)
+        {
+            ThrowArgumentLength(parameterName);
+        }
+    }
+
+    /// <summary>
+    ///  Throws an <see cref="ArgumentException"/> if the string has zero length, unless it is
+    ///  null, in which case no exception is thrown.
+    /// </summary>
+    /// <param name="parameter">The string to check.</param>
+    /// <param name="parameterName">The name of the <paramref name="parameter"/>.</param>
+    public static void VerifyThrowArgumentLengthIfNotNull(string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+    {
+        if (parameter?.Length == 0)
+        {
+            ThrowArgumentLength(parameterName);
+        }
+    }
+
+    [DoesNotReturn]
+    private static void ThrowArgumentLength(string? parameterName)
+        => throw new ArgumentException(SR.Argument_EmptyString, parameterName);
 }

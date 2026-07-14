@@ -47,11 +47,6 @@
         <target state="translated">MSB4077: Úloha {0} byla označena atributem LoadInSeparateAppDomain, není ale odvozena od třídy MarshalByRefObject. Zkontrolujte, jestli je úloha odvozena od třídy MarshalByRefObject nebo AppDomainIsolatedTask.</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotHaveZeroLength">
-        <source>Parameter "{0}" cannot have zero length.</source>
-        <target state="translated">Parametr {0} nesmí mít nulovou délku.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Shared.TaskResourceNotFound">
         <source>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</source>
         <target state="translated">Řetězec prostředku {0} pro úlohu {1} nebyl nalezen. Zkontrolujte, jestli je název prostředku {0} napsaný správně a jestli tento prostředek existuje v sestavení úlohy.</target>

@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests
             PropertyInfo logShared = typeof(ToolTask).GetProperty("LogShared", BindingFlags.Instance | BindingFlags.NonPublic);
             TaskLoggingHelper log = (TaskLoggingHelper)logShared.GetValue(t, null);
             log.LogWarningWithCodeFromResources("Shared.CannotChangeItemSpecModifiers", "Gothic II");
-            log.LogMessageFromResources("Shared.ParameterCannotHaveZeroLength", "foo");
+            log.LogMessageFromResources("Shared.TaskResourcesNotRegistered", "foo");
 
             // Now private Utilities messages. Should be accessible with the private LogPrivate property
             PropertyInfo logPrivate = typeof(ToolTask).GetProperty("LogPrivate", BindingFlags.Instance | BindingFlags.NonPublic);

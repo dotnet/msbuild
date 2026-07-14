@@ -47,11 +47,6 @@
         <target state="translated">MSB4077: “{0}”任务已标记为 LoadInSeparateAppDomain 特性，但未派生自 MarshalByRefObject。请检查该任务是派生自 MarshalByRefObject 还是 AppDomainIsolatedTask。</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotHaveZeroLength">
-        <source>Parameter "{0}" cannot have zero length.</source>
-        <target state="translated">参数“{0}”的长度不能为零。</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Shared.TaskResourceNotFound">
         <source>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</source>
         <target state="translated">找不到“{1}”任务的资源字符串“{0}”。请确认资源名称“{0}”的拼写正确，并且任务的程序集中存在该资源。</target>

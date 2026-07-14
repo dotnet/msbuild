@@ -143,9 +143,6 @@
   <data name="Shared.ParameterCannotHaveInvalidPathChars" xml:space="preserve">
     <value>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</value>
   </data>
-  <data name="Shared.ParameterCannotHaveZeroLength" xml:space="preserve">
-    <value>Parameter "{0}" cannot have zero length.</value>
-  </data>
   <data name="Shared.TaskResourceNotFound" xml:space="preserve">
     <value>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</value>
   </data>

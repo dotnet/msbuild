@@ -47,11 +47,6 @@
         <target state="translated">MSB4077: "{0}" 작업이 LoadInSeparateAppDomain 특성으로 표시되었지만 MarshalByRefObject에서 파생되지 않습니다. 해당 작업이 MarshalByRefObject 또는 AppDomainIsolatedTask에서 파생되는지 확인하십시오.</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
       </trans-unit>
-      <trans-unit id="Shared.ParameterCannotHaveZeroLength">
-        <source>Parameter "{0}" cannot have zero length.</source>
-        <target state="translated">"{0}" 매개 변수의 길이는 0일 수 없습니다.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Shared.TaskResourceNotFound">
         <source>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</source>
         <target state="translated">"{1}" 작업의 리소스 문자열 "{0}"을(를) 찾을 수 없습니다. 리소스 이름 "{0}"의 맞춤법이 올바른지 그리고 리소스가 작업 어셈블리에 있는지 확인하세요.</target>
