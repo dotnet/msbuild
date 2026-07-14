@@ -30,7 +30,6 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.10
-- [Restore passes ExcludeRestorePackageImports=true as a global property so NuGet's restore no longer triggers a second evaluation of every project.](https://github.com/dotnet/msbuild/issues/14273)
 - [`-getProperty`/`-getItem` (without a target) stop evaluation after the pass that produces the requested data instead of running a full evaluation, avoiding later passes such as target registration.](https://github.com/dotnet/msbuild/pull/14290)arget)
 
 ### 18.9
