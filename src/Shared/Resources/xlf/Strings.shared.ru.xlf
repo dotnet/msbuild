@@ -2,16 +2,6 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="ru" original="../Strings.shared.resx">
     <body>
-      <trans-unit id="BuildAborted">
-        <source>MSB4188: Build was canceled.</source>
-        <target state="translated">MSB4188: сборка отменена.</target>
-        <note>{StrBegin="MSB4188: "} Error when the build stops suddenly for some reason. For example, because a child node died.</note>
-      </trans-unit>
-      <trans-unit id="BuildStarted">
-        <source>Build started.</source>
-        <target state="translated">Сборка начата.</target>
-        <note />
-      </trans-unit>
       <trans-unit id="CollectionCopyToFailureProvidedArrayIsTooSmall">
         <source>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</source>
         <target state="translated">Количество элементов в коллекции превышает доступное пространство в целевом массиве (при запуске с указанного индекса).</target>
@@ -22,20 +12,10 @@
         <target state="translated">MSB4008: в "{1}" обнаружена сборка, конфликтующая со сборкой задачи "{0}".</target>
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
       </trans-unit>
-      <trans-unit id="DeprecatedEventSerialization">
-        <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">Настраиваемый тип '{0}' не поддерживается, так как все пользовательские типы событий устарели. Используйте extended*EventArgs. Дополнительные сведения: https://aka.ms/msbuild/eventargs</target>
-        <note />
-      </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
         <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
         <target state="translated">Необходимо, чтобы тип события "{0}" был сериализуемым с помощью сериализатора .NET. Событие не было сериализуемым и было пропущено.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="FileLocation">
-        <source>{0} ({1},{2})</source>
-        <target state="translated">{0} ({1},{2})</target>
-        <note>A file location to be embedded in a string.</note>
       </trans-unit>
       <trans-unit id="LoggingBeforeTaskInitialization">
         <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
@@ -51,39 +31,6 @@
             High should not be localized.
             Normal should not be localized.
             Low should not be localized.</note>
-      </trans-unit>
-      <trans-unit id="InvalidProjectFile">
-        <source>MSB4025: The project file could not be loaded. {0}</source>
-        <target state="translated">MSB4025: не удалось загрузить файл проекта. {0}</target>
-        <note>{StrBegin="MSB4025: "}UE: This message is shown when the project file given to the engine cannot be loaded because the filename/path is
-    invalid, or due to lack of permissions, or incorrect XML. The project filename is not part of the message because it is
-    provided separately to loggers.
-    LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</note>
-      </trans-unit>
-      <trans-unit id="InvalidVerbosity">
-        <source>MSB4103: "{0}" is not a valid logger verbosity level.</source>
-        <target state="translated">MSB4103: "{0}" не является допустимым уровнем детализации средства ведения журнала.</target>
-        <note>{StrBegin="MSB4103: "}</note>
-      </trans-unit>
-      <trans-unit id="SolutionFilterFilterContainsProjectNotInSolution">
-        <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
-        <target state="translated">MSB5028: файл фильтра решения в "{0}" включает проект "{1}", который отсутствует в файле решения в "{2}".</target>
-        <note>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionFilterJsonParsingError">
-        <source>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</source>
-        <target state="translated">MSB5025: код JSON в файле фильтра решения "{0}" имеет неправильный формат.</target>
-        <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionFilterMissingSolutionError">
-        <source>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</source>
-        <target state="translated">MSB5026: файл фильтра решения в "{0}" указывает на то, что в "{1}" будет находиться файл решения, однако этот файл отсутствует.</target>
-        <note>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionParseNestedProjectErrorWithNameAndGuid">
-        <source>MSB5009: Error parsing the project "{0}" section with GUID: "{1}". It is nested under "{2}" but that project is not found in the solution.</source>
-        <target state="translated">MSB5009: ошибка при синтаксическом анализе раздела проекта "{0}" с GUID: "{1}". Он вложен в "{2}", но этот проект не найден в решении.</target>
-        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
       </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
@@ -130,103 +77,10 @@
         <target state="translated">Задача "{0}" не зарегистрировала свои ресурсы. Чтобы использовать метод "TaskLoggingHelper.FormatResourceString()", эта задача должна зарегистрировать свои ресурсы во время построения или через свойство "TaskResources".</target>
         <note>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</note>
       </trans-unit>
-      <trans-unit id="SolutionParseDuplicateProject">
-        <source>MSB5004: The solution file has two projects named "{0}".</source>
-        <target state="translated">MSB5004: файл решения содержит два проекта с именем "{0}".</target>
-        <note>{StrBegin="MSB5004: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionParseInvalidProjectFileNameCharacters">
-        <source>MSB5005: Error parsing project section for project "{0}". The project file name "{1}" contains invalid characters.</source>
-        <target state="translated">MSB5005: ошибка синтаксического анализа раздела проекта "{0}". Имя файла проекта "{1}" содержит недопустимые символы.</target>
-        <note>{StrBegin="MSB5005: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionParseInvalidProjectFileNameEmpty">
-        <source>MSB5006: Error parsing project section for project "{0}". The project file name is empty.</source>
-        <target state="translated">MSB5006: ошибка синтаксического анализа раздела проекта "{0}". Имя файла проекта пусто.</target>
-        <note>{StrBegin="MSB5006: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionParseInvalidProjectSolutionConfigurationEntry">
-        <source>MSB5007: Error parsing the project configuration section in solution file. The entry "{0}" is invalid.</source>
-        <target state="translated">MSB5007: ошибка синтаксического анализа раздела конфигурации проекта в файле решения. Недопустимая запись "{0}".</target>
-        <note>{StrBegin="MSB5007: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionParseInvalidSolutionConfigurationEntry">
-        <source>MSB5008: Error parsing the solution configuration section in solution file. The entry "{0}" is invalid.</source>
-        <target state="translated">MSB5008: ошибка синтаксического анализа раздела конфигурации проекта в файле решения. Недопустимая запись "{0}".</target>
-        <note>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionParseNestedProjectError">
-        <source>MSB5009: Error parsing the nested project section in solution file.</source>
-        <target state="translated">MSB5009: ошибка синтаксического анализа вложенного раздела проекта в файле решения.</target>
-        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionParseNestedProjectUndefinedError">
-        <source>MSB5023: Error parsing the nested project section in solution file. A project with the GUID "{0}" is listed as being nested under project "{1}", but does not exist in the solution.</source>
-        <target state="translated">MSB5023: ошибка синтаксического анализа вложенного раздела проекта в файле решения. Указано, что проект с GUID "{0}" вложен в проект "{1}", но сам проект отсутствует в решении.</target>
-        <note>{StrBegin="MSB5023: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionParseNoHeaderError">
-        <source>MSB5010: No file format header found.</source>
-        <target state="translated">MSB5010: заголовок формата файла не найден.</target>
-        <note>{StrBegin="MSB5010: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionParseProjectDepGuidError">
-        <source>MSB5011: Parent project GUID not found in "{0}" project dependency section.</source>
-        <target state="translated">MSB5011: родительский проект GUID не найден в разделе зависимости проекта "{0}".</target>
-        <note>{StrBegin="MSB5011: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionParseProjectEofError">
-        <source>MSB5012: Unexpected end-of-file reached inside "{0}" project section.</source>
-        <target state="translated">MSB5012: достигнуто непредвиденное окончание файла в разделе проекта "{0}".</target>
-        <note>{StrBegin="MSB5012: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionParseProjectError">
-        <source>MSB5013: Error parsing a project section.</source>
-        <target state="translated">MSB5013: ошибка при синтаксическом анализе раздела проекта.</target>
-        <note>{StrBegin="MSB5013: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionParseVersionMismatchError">
-        <source>MSB5014: File format version is not recognized.  MSBuild can only read solution files between versions {0}.0 and {1}.0, inclusive.</source>
-        <target state="translated">MSB5014: не распознана версия формата файла.  MSBuild может считывать файлы решения только версий с {0}.0 по {1}.0 включительно.</target>
-        <note>{StrBegin="MSB5014: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="SolutionParseWebProjectPropertiesError">
-        <source>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</source>
-        <target state="translated">MSB5015: не удалось прочитать свойства из раздела WebsiteProperties проекта "{0}".</target>
-        <note>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</note>
-      </trans-unit>
-      <trans-unit id="UnrecognizedSolutionComment">
-        <source>Unrecognized solution version "{0}", attempting to continue.</source>
-        <target state="translated">Нераспознанная версия решения "{0}"; попытка продолжить.</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="SubCategoryForSolutionParsingErrors">
-        <source>Solution file</source>
-        <target state="translated">Файл решения</target>
-        <note>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
-      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
-      "MSBUILD : Solution file error MSB0000: This is an error."
-      LOCALIZATION: This fragment needs to be localized.</note>
-      </trans-unit>
-      <trans-unit id="Shared.InvalidProjectFile">
-        <source>MSB5019: The project file is malformed: "{0}". {1}</source>
-        <target state="translated">MSB5019: файл проекта имеет неправильный формат: "{0}". {1}</target>
-        <note>{StrBegin="MSB5019: "}</note>
-      </trans-unit>
-      <trans-unit id="Shared.ProjectFileCouldNotBeLoaded">
-        <source>MSB5020: Could not load the project file: "{0}". {1}</source>
-        <target state="translated">MSB5020: не удалось загрузить файл проекта: "{0}". {1}</target>
-        <note>{StrBegin="MSB5020: "}</note>
-      </trans-unit>
       <trans-unit id="Shared.KillingProcessByCancellation">
         <source>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</source>
         <target state="translated">MSB5021: завершается исполняемый файл задачи "{0}" и его дочерние процессы, так как сборка отменена.</target>
         <note>{StrBegin="MSB5021: "}</note>
-      </trans-unit>
-      <trans-unit id="OM_NotSupportedReadOnlyCollection">
-        <source>This collection is read-only.</source>
-        <target state="translated">Эта коллекция доступна только для чтения.</target>
-        <note />
       </trans-unit>
       <trans-unit id="Shared.ParameterCannotHaveInvalidPathChars">
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
