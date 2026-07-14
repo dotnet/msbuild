@@ -5,11 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Testing;
-using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 
+[TestClass]
 public class PreferTypedParameterCodeFixProviderTests
 {
     private static CSharpCodeFixTest<PreferTypedParameterAnalyzer, PreferTypedParameterCodeFixProvider, DefaultVerifier> CreateFixTest(
@@ -35,7 +35,7 @@ public class PreferTypedParameterCodeFixProviderTests
         _ => new DiagnosticResult(id, DiagnosticSeverity.Info),
     };
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_NewAbsolutePath_RetypesPropertyAndRemovesConversion()
     {
         await CreateFixTest(
@@ -69,7 +69,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("InputPath", "string", "AbsolutePath")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_NewFileInfo_RetypesPropertyAndUsesTypedValue()
     {
         await CreateFixTest(
@@ -105,7 +105,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("FilePath", "string", "FileInfo")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0007_IntParse_RetypesTaskItemAndUsesValue()
     {
         await CreateFixTest(
@@ -139,7 +139,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("Item", "ITaskItem", "int", "")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0007_ConvertToInt32_RetypesTaskItemAndUsesValue()
     {
         await CreateFixTest(
@@ -175,7 +175,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("Item", "ITaskItem", "int", "")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0007_GetAbsolutePath_RetypesTaskItemAndUsesValue()
     {
         await CreateFixTest(
@@ -211,7 +211,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("Item", "ITaskItem", "AbsolutePath", "")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0007_NewAbsolutePath_FromGetMetadataFullPath_RetypesTaskItemAndUsesValue()
     {
         await CreateFixTest(
@@ -245,7 +245,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("Item", "ITaskItem", "AbsolutePath", "")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0007_ArrayForeach_RetypesArrayAndUsesValue()
     {
         await CreateFixTest(
@@ -287,7 +287,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("Items", "ITaskItem[]", "FileInfo", "[]")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_RewritesAllSitesForProperty()
     {
         await CreateFixTest(
@@ -325,7 +325,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("InputPath", "string", "AbsolutePath")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_PathGetFullPath_RetypesToAbsolutePathAndRemovesCall()
     {
         // Path.GetFullPath(prop) is the raw MSBuildTask0002 normalization. Retyping the property to AbsolutePath
@@ -363,7 +363,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("InputPath", "string", "AbsolutePath")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_FileConsumption_RetypesToFileInfoAndUsesFullName()
     {
         // File.Delete(prop) is the raw MSBuildTask0003 consumption. Retyping to FileInfo requires feeding the
@@ -401,7 +401,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("Target", "string", "FileInfo")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_DirectoryConsumption_RetypesToDirectoryInfoAndUsesFullName()
     {
         await CreateFixTest(
@@ -437,7 +437,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("DestinationFolder", "string", "DirectoryInfo")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_AbsolutePathDefault_NormalizedThroughAbsolutePath()
     {
         // A fully-qualified string default is preserved after retyping by constructing the AbsolutePath in the
@@ -474,7 +474,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("InputPath", "string", "AbsolutePath")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_AbsolutePathDefault_FileInfo_NormalizedThroughAbsolutePath()
     {
         // For FileInfo the engine goes string -> AbsolutePath -> FileInfo, so the fix constructs through
@@ -512,7 +512,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("FilePath", "string", "FileInfo")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0008_RelativeDefault_AbsolutePath_InitializedInExecute()
     {
         // A relative default cannot be rooted in a property initializer (TaskEnvironment is only available after
@@ -556,7 +556,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("InputPath", "AbsolutePath")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0008_RelativeDefault_FileInfo_InitializedInExecute()
     {
         // For a reference type the guard is a null-coalescing assignment, and the value is built through the
@@ -597,7 +597,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("LogPath", "FileInfo")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0008_RelativeDefault_DirectoryInfo_InitializedInExecute()
     {
         await CreateFixTest(
@@ -636,7 +636,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("OutputDir", "DirectoryInfo")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0008_NoTaskEnvironment_NoFixOffered()
     {
         // Without an accessible TaskEnvironment member the relative default cannot be rooted, so the diagnostic
@@ -659,7 +659,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("InputPath", "AbsolutePath"));
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0008_ExpressionBodiedExecute_NoFixOffered()
     {
         // An expression-bodied Execute() has no statement block to insert the guarded initialization into, so
@@ -680,7 +680,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("InputPath", "AbsolutePath"));
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_NonConstantDefault_NoFixOffered()
     {
         // The default is not a compile-time constant, so it can't be safely re-expressed as the new type.
@@ -703,7 +703,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("InputPath", "string", "AbsolutePath"));
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_InvalidPathDefault_NoFixOffered()
     {
         // The default contains a character that is never valid in a path, so it isn't a plausible path value.
@@ -726,7 +726,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("InputPath", "string", "AbsolutePath"));
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_PartialClass_SingleFile_AppliesFix()
     {
         // The property is declared in one partial part and converted in another (same file); the fix must
@@ -768,7 +768,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("InputPath", "string", "AbsolutePath")).RunAsync();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_PartialClass_NonRewritableReferenceInOtherFile_NoFixOffered()
     {
         // A partial part in another file uses the property as a plain string. Retyping it there would not
@@ -816,7 +816,7 @@ public class PreferTypedParameterCodeFixProviderTests
     /// Builds a code-fix test where the diagnostic is expected but no fix is offered: the fixed source is
     /// identical to the test source, so applying any offered fix would fail the comparison.
     /// </summary>
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_FileInfo_NullGuardedReference_NoFixOffered()
     {
         // The property is consumed by string.IsNullOrEmpty(prop), which is deliberately null-tolerant. Rewriting
@@ -844,7 +844,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("InputPath", "string", "FileInfo"));
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_DirectoryInfo_NullWhiteSpaceGuardedReference_NoFixOffered()
     {
         // Same null-guard hazard via string.IsNullOrWhiteSpace(prop) for a DirectoryInfo retype.
@@ -870,7 +870,7 @@ public class PreferTypedParameterCodeFixProviderTests
                 .WithArguments("OutputDir", "string", "DirectoryInfo"));
     }
 
-    [Fact]
+    [TestMethod]
     public async Task Fix_0006_AbsolutePath_NullGuardedReference_StillFixed()
     {
         // AbsolutePath is a struct with an implicit string conversion, so string.IsNullOrEmpty(prop) compiles
