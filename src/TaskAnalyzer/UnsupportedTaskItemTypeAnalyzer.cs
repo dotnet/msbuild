@@ -103,7 +103,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         GetDiagnosticLocation(property, namedType),
                         property.Name,
                         typeArg.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
-                        SupportedTaskItemTypes.DisplayNames));
+                        SupportedTaskItemTypes.SupportedTaskItemTypeDisplayNames));
                 }
             }, SymbolKind.NamedType);
         }

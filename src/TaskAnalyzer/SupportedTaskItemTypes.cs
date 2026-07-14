@@ -8,6 +8,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 {
     internal static class SupportedTaskItemTypes
     {
+        // These are the types ValueTypeParser can parse and MSBuildTask0007 may suggest. This set is
+        // intentionally broader than the ITaskItem<T> types accepted by the current engine binder below.
         private readonly struct SupportedSpecialType
         {
             internal SupportedSpecialType(SpecialType specialType, string displayName)
@@ -38,7 +40,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 new SupportedSpecialType(SpecialType.System_DateTime, "DateTime"),
                 new SupportedSpecialType(SpecialType.System_String, "string"));
 
-        internal const string DisplayNames = "AbsolutePath, FileInfo, DirectoryInfo";
+        // Keep the user-facing list next to IsSupportedTaskItemType. Both mirror the runtime Type-based
+        // TaskItemTypeDetector, which the Roslyn analyzer cannot call with compile-time ITypeSymbol values.
+        internal const string SupportedTaskItemTypeDisplayNames = "AbsolutePath, FileInfo, DirectoryInfo";
 
         internal static bool TryGetSpecialTypeDisplayName(SpecialType specialType, out string? displayName)
         {
