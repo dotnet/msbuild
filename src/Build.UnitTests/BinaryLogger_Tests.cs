@@ -1142,6 +1142,55 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
+        [MSBuildTestMethod]
+        public void DeferredMSBuildServerLifecycleEventIsWrittenToBinlog()
+        {
+            // Regression coverage for the LogDeferredMessages "glue": a DeferredBuildMessage backed by a
+            // pre-built BuildEventArgs must be raised as-is and land in the binary log as that exact typed event
+            // (mirrors how XMake records the MSBuild Server lifecycle under its own record kind).
+            var binaryLogger = new BinaryLogger { Parameters = _logFile };
+
+            var lifecycleEvent = new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.Spawned,
+                1234,
+                reason: null,
+                reasonCode: null,
+                "MSBuild Server node started for this build (process ID 1234).",
+                MessageImportance.Low);
+            var deferredMessages = new[]
+            {
+                new BuildManager.DeferredBuildMessage(lifecycleEvent),
+            };
+
+            var parameters = new BuildParameters
+            {
+                Loggers = new ILogger[] { binaryLogger },
+            };
+
+            using (var buildManager = new BuildManager())
+            {
+                buildManager.BeginBuild(parameters, deferredMessages);
+                buildManager.EndBuild();
+            }
+
+            MSBuildServerLifecycleEventArgs replayed = null;
+            var replay = new BinaryLogReplayEventSource();
+            replay.AnyEventRaised += (_, e) =>
+            {
+                if (e is MSBuildServerLifecycleEventArgs serverEvent)
+                {
+                    replayed = serverEvent;
+                }
+            };
+            replay.Replay(_logFile);
+
+            replayed.ShouldNotBeNull();
+            replayed.Kind.ShouldBe(MSBuildServerLifecycleKind.Spawned);
+            replayed.ProcessId.ShouldBe(1234);
+            replayed.Importance.ShouldBe(MessageImportance.Low);
+            replayed.Message.ShouldBe("MSBuild Server node started for this build (process ID 1234).");
+        }
+
         public void Dispose()
         {
             _env.Dispose();

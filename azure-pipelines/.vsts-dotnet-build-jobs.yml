@@ -89,23 +89,7 @@ jobs:
 
   - pwsh: Set-MpPreference -DisableRealtimeMonitoring $true
 
-  - task: PowerShell@2
-    displayName: Setup Private Feeds Credentials
-    inputs:
-      filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
-      arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
-    env:
-      Token: $(dn-bot-dnceng-artifact-feeds-rw)
-
-
-  - task: NuGetCommand@2
-    displayName: Restore internal tools
-    inputs:
-      command: restore
-      feedsToUse: config
-      restoreSolution: 'eng\common\internal\Tools.csproj'
-      nugetConfigPath: 'eng\common\internal\NuGet.config'
-      restoreDirectory: '$(Build.SourcesDirectory)\.packages'
+  - template: /eng/common/templates-official/steps/enable-internal-sources.yml
 
   - task: MicroBuildSigningPlugin@4
     displayName: Install MicroBuild plugin

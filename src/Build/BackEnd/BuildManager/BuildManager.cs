@@ -426,12 +426,22 @@ namespace Microsoft.Build.Execution
             /// </summary>
             public string? Code { get; }
 
+            /// <summary>
+            /// When set, the deferred message is logged by raising this pre-built event (via
+            /// <see cref="ILoggingService.LogBuildEvent"/>) instead of a plain comment. This lets a caller emit
+            /// a dedicated, structured event type (recorded under its own binary-log record kind) rather than
+            /// communicating build/system data through an ad-hoc message. Internal plumbing — not part of the
+            /// public deferred-message contract; callers set it via the <see cref="BuildEventArgs"/> constructor.
+            /// </summary>
+            internal BuildEventArgs? BuildEvent { get; }
+
             public DeferredBuildMessage(string text, MessageImportance importance)
             {
                 Importance = importance;
                 Text = text;
                 FilePath = null;
                 Code = null;
+                BuildEvent = null;
             }
 
             public DeferredBuildMessage(string text, MessageImportance importance, string filePath)
@@ -440,6 +450,7 @@ namespace Microsoft.Build.Execution
                 Text = text;
                 FilePath = filePath;
                 Code = null;
+                BuildEvent = null;
             }
 
             /// <summary>
@@ -455,6 +466,24 @@ namespace Microsoft.Build.Execution
                 FilePath = null;
                 Code = code;
                 MessageSeverity = messageSeverity;
+                BuildEvent = null;
+            }
+
+            /// <summary>
+            /// Creates a deferred message backed by a pre-built <see cref="BuildEventArgs"/>. When the build
+            /// begins the event is raised as-is (via <see cref="ILoggingService.LogBuildEvent"/>), letting a
+            /// caller emit a dedicated, structured event type instead of an ad-hoc comment. <see cref="Text"/>
+            /// mirrors the event's message and <see cref="Importance"/> is taken from the event when it is a
+            /// <see cref="BuildMessageEventArgs"/> (otherwise <see cref="MessageImportance.Low"/>).
+            /// </summary>
+            /// <param name="buildEvent">The pre-built event to raise.</param>
+            public DeferredBuildMessage(BuildEventArgs buildEvent)
+            {
+                Importance = (buildEvent as BuildMessageEventArgs)?.Importance ?? MessageImportance.Low;
+                Text = buildEvent.Message ?? string.Empty;
+                FilePath = null;
+                Code = null;
+                BuildEvent = buildEvent;
             }
         }
 
@@ -3403,6 +3432,13 @@ namespace Microsoft.Build.Execution
                         helpKeyword: null,
                         file: BuildEventFileInfo.Empty,
                         message: message.Text);
+                }
+                else if (message.BuildEvent is not null)
+                {
+                    // Raise the pre-built event as-is so it keeps its own event type. A deferred message has no
+                    // project/target context, so supply the Invalid context if the caller left it unset.
+                    message.BuildEvent.BuildEventContext ??= BuildEventContext.Invalid;
+                    loggingService.LogBuildEvent(message.BuildEvent);
                 }
                 else
                 {
