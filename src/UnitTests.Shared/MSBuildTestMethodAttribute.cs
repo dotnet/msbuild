@@ -10,6 +10,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -45,10 +46,12 @@ namespace Microsoft.Build.UnitTests
         // what MSBuild reads back through GetEnvironmentStringsW. Under xUnit the test ordering happened to hide this;
         // under MSTest the different ordering exposes it (e.g. Evaluator_Tests.MSBuildExtensionsPath* and
         // VerifyPropertyTrackingLogging observing the leaked value on net472). To keep tests isolated regardless of
-        // ordering, capture the clean values of these variables once and restore them (via both the managed and the
-        // native APIs on Windows) after every test.
+        // ordering, unset these variables (via both the managed and the native APIs on Windows) before and after every
+        // test. The clean state on .NET Framework is *unset*: when the variables are absent MSBuild computes the
+        // default from Program Files, which is what these tests expect. We deliberately do NOT capture-and-restore a
+        // baseline value, because the very first capture can already observe the leaked value and would then re-apply
+        // it on every scrub.
         private static readonly string[] s_extensionPathVariableNames = { "MSBuildExtensionsPath", "MSBuildExtensionsPath32", "MSBuildExtensionsPath64" };
-        private static string[] s_cleanExtensionPathValues;
 
 #if NETFRAMEWORK
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
@@ -116,13 +119,6 @@ namespace Microsoft.Build.UnitTests
             if (!s_cleanBuildEnvironmentCaptured)
             {
                 s_cleanBuildEnvironment = BuildEnvironmentHelper.Instance;
-
-                s_cleanExtensionPathValues = new string[s_extensionPathVariableNames.Length];
-                for (int i = 0; i < s_extensionPathVariableNames.Length; i++)
-                {
-                    s_cleanExtensionPathValues[i] = Environment.GetEnvironmentVariable(s_extensionPathVariableNames[i]);
-                }
-
                 s_cleanBuildEnvironmentCaptured = true;
             }
         }
@@ -141,28 +137,25 @@ namespace Microsoft.Build.UnitTests
 
         private static void ScrubExtensionPathEnvironmentVariables()
         {
-            if (s_cleanExtensionPathValues == null)
+            foreach (string name in s_extensionPathVariableNames)
             {
-                return;
-            }
-
-            for (int i = 0; i < s_extensionPathVariableNames.Length; i++)
-            {
-                string name = s_extensionPathVariableNames[i];
-                string cleanValue = s_cleanExtensionPathValues[i];
-
-                // Restore via the managed API...
-                Environment.SetEnvironmentVariable(name, cleanValue);
+                // Unset via the managed API...
+                Environment.SetEnvironmentVariable(name, null);
 #if NETFRAMEWORK
                 // ...and unconditionally via the native API, because MSBuild reads its environment through
                 // kernel32 (GetEnvironmentStringsW) and, on .NET Framework, the managed and native environment
                 // blocks can diverge: a value leaked into the native block by a prior in-proc build (or injected
                 // by the `dotnet` muxer at host launch) is often invisible to Environment.GetEnvironmentVariable.
-                // We therefore must NOT short-circuit on the managed read — always write through to the native
-                // block. Passing null clears the variable, which is what happens when the clean value was unset.
-                SetEnvironmentVariable(name, cleanValue);
+                // We therefore must NOT short-circuit on the managed read - always write through to the native
+                // block. Passing null clears the variable so MSBuild falls back to its computed default.
+                SetEnvironmentVariable(name, null);
 #endif
             }
+
+            // The native environment block we just modified is cached by CommunicationsUtilities across calls.
+            // Invalidate that cache so the next evaluation re-reads the freshly-scrubbed block rather than serving
+            // a stale snapshot that still contains the leaked MSBuildExtensionsPath value.
+            CommunicationsUtilities.ResetEnvironmentStateForUnitTestsOnly();
         }
 
         protected virtual string GetSkipReason() => null;
