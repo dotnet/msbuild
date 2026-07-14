@@ -109,15 +109,15 @@ steps:
     # Insertion outputs, so skip Arcade's AfterSigning IBC-inputs step
     # which otherwise errors on missing artifacts/VSSetup/Debug/Insertion.
     if ($IsWindows) {
-      & "$(Build.SourcesDirectory)/eng/common/build.ps1" `
-        -restore -build `
+      & "$(Build.SourcesDirectory)/build.ps1" `
+        -ci `
         -configuration $(BuildConfiguration) `
         -projects "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" `
         -verbosity minimal `
         /p:UsingToolVisualStudioIbcTraining=false
     } else {
-      bash "$(Build.SourcesDirectory)/eng/common/build.sh" `
-        --restore --build `
+      bash "$(Build.SourcesDirectory)/build.sh" `
+        --ci `
         --configuration $(BuildConfiguration) `
         --projects "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" `
         --verbosity minimal `

@@ -65,12 +65,10 @@ jobs:
   timeoutInMinutes: 120
   steps:
   - task: BatchScript@1
-    displayName: cibuild_bootstrapped_msbuild.cmd (quarantined tests only)
+    displayName: Bootstrap build with -mt mode (quarantined tests only)
     inputs:
-      filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
-      arguments: "-onlyDocChanged 0 -stage2Properties '/mt /p:RunQuarantinedTests=true'"
-    env:
-      ForceUseXCopyMSBuild: 1
+      filename: 'build.cmd'
+      arguments: "-ci -test -stage2Arguments '/mt /p:RunQuarantinedTests=true'"
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -117,8 +115,8 @@ jobs:
   steps:
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
-  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged 0 --stage2Properties '/mt /p:RunQuarantinedTests=true'
-    displayName: CI Build (quarantined tests only)
+  - bash: . 'build.sh' --ci --test --stage2Arguments '/mt /p:RunQuarantinedTests=true'
+    displayName: Bootstrap build with -mt mode (quarantined tests only)
     env:
       MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
@@ -154,8 +152,8 @@ jobs:
     vmImage: 'macOS-latest'
   timeoutInMinutes: 120
   steps:
-  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged 0 --stage2Properties '/mt /p:RunQuarantinedTests=true'
-    displayName: CI Build (quarantined tests only)
+  - bash: . 'build.sh' --ci --test --stage2Arguments '/mt /p:RunQuarantinedTests=true'
+    displayName: Bootstrap build with -mt mode (quarantined tests only)
     env:
       MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
