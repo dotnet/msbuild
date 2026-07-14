@@ -36,6 +36,26 @@ namespace Microsoft.Build.UnitTests
         private static BuildEnvironment s_cleanBuildEnvironment;
         private static bool s_cleanBuildEnvironmentCaptured;
 
+        // The MSBuildExtensionsPath[32|64] environment variables are NOT reserved: when set, they override the
+        // computed default in Utilities.GetEnvironmentProperties. On .NET Framework, MSBuild persists a build's
+        // environment block into the native process environment (via CommunicationsUtilities.SetEnvironmentVariable,
+        // a raw kernel32 P/Invoke) and does not always restore it. That can leak an MSBuildExtensionsPath that points
+        // at the test host's own output directory into later tests. Because this is written on the native side, a
+        // managed Environment.SetEnvironmentVariable(name, null) issued by an unrelated test does not reliably clear
+        // what MSBuild reads back through GetEnvironmentStringsW. Under xUnit the test ordering happened to hide this;
+        // under MSTest the different ordering exposes it (e.g. Evaluator_Tests.MSBuildExtensionsPath* and
+        // VerifyPropertyTrackingLogging observing the leaked value on net472). To keep tests isolated regardless of
+        // ordering, capture the clean values of these variables once and restore them (via both the managed and the
+        // native APIs on Windows) after every test.
+        private static readonly string[] s_extensionPathVariableNames = { "MSBuildExtensionsPath", "MSBuildExtensionsPath32", "MSBuildExtensionsPath64" };
+        private static string[] s_cleanExtensionPathValues;
+
+#if NETFRAMEWORK
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool SetEnvironmentVariable(string lpName, string lpValue);
+#endif
+
         public override async Task<TestResult[]> ExecuteAsync(ITestMethod testMethod)
         {
             CaptureCleanBuildEnvironment();
@@ -88,6 +108,13 @@ namespace Microsoft.Build.UnitTests
             if (!s_cleanBuildEnvironmentCaptured)
             {
                 s_cleanBuildEnvironment = BuildEnvironmentHelper.Instance;
+
+                s_cleanExtensionPathValues = new string[s_extensionPathVariableNames.Length];
+                for (int i = 0; i < s_extensionPathVariableNames.Length; i++)
+                {
+                    s_cleanExtensionPathValues[i] = Environment.GetEnvironmentVariable(s_extensionPathVariableNames[i]);
+                }
+
                 s_cleanBuildEnvironmentCaptured = true;
             }
         }
@@ -99,6 +126,36 @@ namespace Microsoft.Build.UnitTests
                 // Cheap: just swaps the singleton back to the captured clean instance so that any pollution
                 // left behind by the test just executed does not leak into subsequent tests.
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(s_cleanBuildEnvironment);
+            }
+
+            RestoreCleanExtensionPathEnvironmentVariables();
+        }
+
+        private static void RestoreCleanExtensionPathEnvironmentVariables()
+        {
+            if (s_cleanExtensionPathValues == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < s_extensionPathVariableNames.Length; i++)
+            {
+                string name = s_extensionPathVariableNames[i];
+                string cleanValue = s_cleanExtensionPathValues[i];
+
+                if (string.Equals(Environment.GetEnvironmentVariable(name), cleanValue, StringComparison.Ordinal))
+                {
+                    continue;
+                }
+
+                // Restore via the managed API...
+                Environment.SetEnvironmentVariable(name, cleanValue);
+#if NETFRAMEWORK
+                // ...and via the native API, because MSBuild reads its environment through kernel32 and, on
+                // .NET Framework, the managed and native environment blocks can diverge. Passing null clears
+                // the variable, which is what happens when the clean value was itself unset.
+                SetEnvironmentVariable(name, cleanValue);
+#endif
             }
         }
 
