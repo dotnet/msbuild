@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -918,7 +918,7 @@ namespace Microsoft.Build.Utilities
 
                 // Warn only -- occasionally temp files fail to delete because of virus checkers; we
                 // don't want the build to fail in such cases
-                LogPrivate.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", filePath.OriginalValue, e.Message, lockedFileMessage);
+                LogPrivate.LogWarningWithCodeFromResources("FailedDeletingTempFile", filePath.OriginalValue, e.Message, lockedFileMessage);
             }
         }
 
@@ -1051,11 +1051,11 @@ namespace Microsoft.Build.Utilities
                 {
                     Assumed.NotEqual(Timeout, System.Threading.Timeout.Infinite, "A time-out value must have been specified or the task must be cancelled.");
 
-                    LogPrivate.LogWarningWithCodeFromResources("Shared.KillingProcess", processName, Timeout);
+                    LogPrivate.LogWarningWithCodeFromResources("KillingProcess", processName, Timeout);
                 }
                 else
                 {
-                    LogPrivate.LogWarningWithCodeFromResources("Shared.KillingProcessByCancellation", processName);
+                    LogPrivate.LogWarningWithCodeFromResources("KillingProcessByCancellation", processName);
                 }
 
                 int timeout = TaskProcessTerminationTimeout >= -1 ? TaskProcessTerminationTimeout : 5000;

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
     <body>
@@ -3347,12 +3347,12 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">這是一個唯讀集合。</target>
         <note />
       </trans-unit>
-      <trans-unit id="Shared.InvalidProjectFile">
+      <trans-unit id="ProjectFileIsMalformed">
         <source>MSB5019: The project file is malformed: "{0}". {1}</source>
         <target state="translated">MSB5019: 專案檔格式不正確: "{0}"。{1}</target>
         <note>{StrBegin="MSB5019: "}</note>
       </trans-unit>
-      <trans-unit id="Shared.ProjectFileCouldNotBeLoaded">
+      <trans-unit id="ProjectFileCouldNotBeLoaded">
         <source>MSB5020: Could not load the project file: "{0}". {1}</source>
         <target state="translated">MSB5020: 無法載入專案檔: "{0}"。{1}</target>
         <note>{StrBegin="MSB5020: "}</note>

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2563,11 +2563,11 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_NotSupportedReadOnlyCollection" xml:space="preserve">
     <value>This collection is read-only.</value>
   </data>
-  <data name="Shared.InvalidProjectFile" xml:space="preserve">
+  <data name="ProjectFileIsMalformed" xml:space="preserve">
     <value>MSB5019: The project file is malformed: "{0}". {1}</value>
     <comment>{StrBegin="MSB5019: "}</comment>
   </data>
-  <data name="Shared.ProjectFileCouldNotBeLoaded" xml:space="preserve">
+  <data name="ProjectFileCouldNotBeLoaded" xml:space="preserve">
     <value>MSB5020: Could not load the project file: "{0}". {1}</value>
     <comment>{StrBegin="MSB5020: "}</comment>
   </data>
