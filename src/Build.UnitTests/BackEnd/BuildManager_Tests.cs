@@ -1489,6 +1489,27 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Cancellation outside an active build should be ignored.
+        /// </summary>
+        [Fact]
+        public void CancelAllSubmissionsWhenIdleDoesNotThrow()
+        {
+            Should.NotThrow(() => _buildManager.CancelAllSubmissions());
+        }
+
+        /// <summary>
+        /// Cancellation after a build has ended should be ignored.
+        /// </summary>
+        [Fact]
+        public void CancelAllSubmissionsAfterEndBuildDoesNotThrow()
+        {
+            _buildManager.BeginBuild(_parameters);
+            _buildManager.EndBuild();
+
+            Should.NotThrow(() => _buildManager.CancelAllSubmissions());
+        }
+
+        /// <summary>
         /// A canceled build with a submission which is not executed yet.
         /// </summary>
         [Fact]
@@ -1506,6 +1527,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.BeginBuild(_parameters);
             _buildManager.PendBuildRequest(data);
             _buildManager.CancelAllSubmissions();
+            _logger.AllBuildEvents.OfType<BuildCanceledEventArgs>().Count().ShouldBe(1);
             _buildManager.EndBuild();
         }
 
