@@ -1771,7 +1771,34 @@
     <value>could not connect to the server within the timeout window; the server may have failed to start</value>
     <comment>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known &#8212; covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</comment>
   </data>
+  <data name="MSBuildServerReasonBusy" xml:space="preserve">
+    <value>the server was busy with another build</value>
+  </data>
+  <data name="MSBuildServerReasonNodeReuseDisabled" xml:space="preserve">
+    <value>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</value>
+  </data>
+  <data name="MSBuildServerReasonStdOutForChildNodes" xml:space="preserve">
+    <value>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</value>
+  </data>
+  <data name="MSBuildServerReasonIncompatibleInvocation" xml:space="preserve">
+    <value>this invocation is not compatible with MSBuild Server</value>
+  </data>
   <!-- **** MSBuild Server fallback strings end **** -->
+
+  <!-- **** MSBuild Server status strings begin **** -->
+  <data name="MSBuildServerNodeSpawned" xml:space="preserve">
+    <value>MSBuild Server node started for this build (process ID {0}).</value>
+  </data>
+  <data name="MSBuildServerNodeSpawnedShortLived" xml:space="preserve">
+    <value>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</value>
+  </data>
+  <data name="MSBuildServerNodeReused" xml:space="preserve">
+    <value>Reusing the running MSBuild Server node for this build (process ID {0}).</value>
+  </data>
+  <data name="MSBuildServerNotUsedForBuild" xml:space="preserve">
+    <value>MSBuild Server was requested but not used for this build: {0}.</value>
+  </data>
+  <!-- **** MSBuild Server status strings end **** -->
 
     <!--
         The command line message bucket is: MSB1001 - MSB1999
