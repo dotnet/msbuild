@@ -2094,18 +2094,15 @@ namespace Microsoft.Build.CommandLine
             // Add a property to indicate that a Restore is executing
             restoreGlobalProperties[MSBuildConstants.MSBuildIsRestoring] = bool.TrueString;
 
-            // Add the property that NuGet passes when it re-invokes the build during restore. NuGet's restore targets pass
-            // ExcludeRestorePackageImports=true as a global property, which normally forces a second evaluation of every project.
-            // Setting it up front here means the initial evaluation already matches, so it is reused instead of being discarded.
-            // The value must match NuGet's exactly (the literal lowercase "true" from NuGet.targets) because global property values
-            // are compared case-sensitively when matching build configurations for evaluation reuse.
-            // Only set it when the user has not explicitly supplied a value so that an explicit opt-out (e.g.
-            // /p:ExcludeRestorePackageImports=false) is respected instead of being silently overwritten.
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
-                && !globalProperties.ContainsKey(MSBuildConstants.ExcludeRestorePackageImports))
-            {
-                restoreGlobalProperties[MSBuildConstants.ExcludeRestorePackageImports] = MSBuildConstants.ExcludeRestorePackageImportsValue;
-            }
+            // NOTE: Do NOT add ExcludeRestorePackageImports=true here to try to match the global properties that NuGet's
+            // restore targets pass when they re-invoke the build. It is tempting because it would let the initial restore
+            // evaluation be reused instead of re-evaluated, but it breaks restore for projects that have a nonexistent
+            // <ProjectReference>. When the top-level restore evaluation shares the same global property set as NuGet's inner
+            // _GenerateRestoreProjectPathWalk invocation, that walk runs in the same project instance and its unfiltered
+            // _RestoreProjectPathItems (which contains the raw ProjectReference paths, including missing ones) leaks into
+            // _GenerateRestoreGraph's _GenerateRestoreGraphProjectEntry MSBuild call, which does not set SkipNonexistentProjects
+            // and therefore fails with MSB3202 instead of skipping the missing project. See dotnet/msbuild#14274 (reverted)
+            // and dotnet/sdk#55245.
 
             // Create a new request with a Restore target only and specify:
             //  - BuildRequestDataFlags.ClearCachesAfterBuild to ensure the projects will be reloaded from disk for subsequent builds
