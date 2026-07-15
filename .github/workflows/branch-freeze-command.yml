@@ -21,9 +21,10 @@ permissions:
   # status workflow and are granted on the `fanout` job below (least privilege).
 
 concurrency:
-  # Serialize freeze/unfreeze operations so concurrent commands cannot race on
-  # the tracking issue or the fan-out.
+  # Queue and serialize freeze/unfreeze operations so concurrent commands cannot
+  # race on the tracking issue or silently replace an earlier pending command.
   group: branch-freeze-command
+  queue: max
   cancel-in-progress: false
 
 jobs:
