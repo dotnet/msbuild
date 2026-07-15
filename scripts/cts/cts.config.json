@@ -15,7 +15,9 @@
       "**/*.yml",
       "**/*.yaml",
       "**/*.png",
-      "documentation/**"
+      "documentation/**",
+      ".github/**",
+      "eng/common/**"
     ]
   },
   "Modules": {
