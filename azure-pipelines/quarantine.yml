@@ -70,7 +70,7 @@ jobs:
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
       arguments: "-onlyDocChanged 0 -stage2Properties '/mt /p:RunQuarantinedTests=true'"
-    condition: eq(variables.onlyDocChanged, 0)
+    condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
     env:
       ForceUseXCopyMSBuild: 1
   - task: PublishTestResults@2
@@ -122,7 +122,7 @@ jobs:
   - bash: sudo apt-get install -y libxml2
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged 0 --stage2Properties '/mt /p:RunQuarantinedTests=true'
     displayName: CI Build (quarantined tests only)
-    condition: eq(variables.onlyDocChanged, 0)
+    condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
     env:
       MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
@@ -161,7 +161,7 @@ jobs:
   - template: azure-pipelines/check-documentation-only-change.yml
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged 0 --stage2Properties '/mt /p:RunQuarantinedTests=true'
     displayName: CI Build (quarantined tests only)
-    condition: eq(variables.onlyDocChanged, 0)
+    condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
     env:
       MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
