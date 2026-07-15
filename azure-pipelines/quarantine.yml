@@ -72,7 +72,7 @@ jobs:
 - job: RunQuarantinedTestsWindows
   displayName: "Run quarantined tests (Windows)"
   dependsOn: EvaluateDocumentationOnlyChange
-  condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
+  condition: or(ne(variables['Build.Reason'], 'PullRequest'), not(succeeded('EvaluateDocumentationOnlyChange')), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
   pool:
     name: NetCore-Public
     demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
@@ -127,7 +127,7 @@ jobs:
 - job: RunQuarantinedTestsLinux
   displayName: "Run quarantined tests (Linux)"
   dependsOn: EvaluateDocumentationOnlyChange
-  condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
+  condition: or(ne(variables['Build.Reason'], 'PullRequest'), not(succeeded('EvaluateDocumentationOnlyChange')), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
   pool:
     name: NetCore-Public
     demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
@@ -171,7 +171,7 @@ jobs:
 - job: RunQuarantinedTestsMac
   displayName: "Run quarantined tests (macOS)"
   dependsOn: EvaluateDocumentationOnlyChange
-  condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
+  condition: or(ne(variables['Build.Reason'], 'PullRequest'), not(succeeded('EvaluateDocumentationOnlyChange')), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
   pool:
     vmImage: 'macOS-latest'
   timeoutInMinutes: 120

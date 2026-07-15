@@ -36,7 +36,7 @@ jobs:
 
 - job: BootstrapMSBuildOnFullFrameworkWindows
   dependsOn: EvaluateDocumentationOnlyChange
-  condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
+  condition: or(not(succeeded('EvaluateDocumentationOnlyChange')), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
   variables:
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
     coverageReportName: WindowsFullFrameworkCoverage
@@ -151,7 +151,7 @@ jobs:
 
 - job: BootstrapMSBuildOnCoreWindows
   dependsOn: EvaluateDocumentationOnlyChange
-  condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
+  condition: or(not(succeeded('EvaluateDocumentationOnlyChange')), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
   displayName: "Windows Core"
   variables:
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
@@ -241,7 +241,7 @@ jobs:
 # bootstrapped CI jobs (which all run /mt now too) do not need it.
 - job: BootstrapMSBuildWithMTMode
   dependsOn: EvaluateDocumentationOnlyChange
-  condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
+  condition: or(not(succeeded('EvaluateDocumentationOnlyChange')), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
   displayName: "Linux Core Multithreaded Mode"
   pool:
     vmImage: 'ubuntu-latest'
@@ -273,7 +273,7 @@ jobs:
 
 - job: FullReleaseOnWindows
   dependsOn: EvaluateDocumentationOnlyChange
-  condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
+  condition: or(not(succeeded('EvaluateDocumentationOnlyChange')), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
   displayName: "Windows Full Release (no bootstrap)"
   variables:
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
@@ -358,7 +358,7 @@ jobs:
 
 - job: CoreBootstrappedOnLinux
   dependsOn: EvaluateDocumentationOnlyChange
-  condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
+  condition: or(not(succeeded('EvaluateDocumentationOnlyChange')), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
   displayName: "Linux Core"
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
@@ -455,7 +455,7 @@ jobs:
 
 - job: CoreOnMac
   dependsOn: EvaluateDocumentationOnlyChange
-  condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
+  condition: or(not(succeeded('EvaluateDocumentationOnlyChange')), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
   displayName: "macOS Core"
   pool:
     vmImage: 'macOS-latest'
@@ -553,7 +553,7 @@ jobs:
   - FullReleaseOnWindows
   - CoreBootstrappedOnLinux
   - CoreOnMac
-  condition: and(succeeded(), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
+  condition: and(succeeded(), or(not(succeeded('EvaluateDocumentationOnlyChange')), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')))
   variables:
     onlyDocChanged: $[ dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'] ]
   pool:
@@ -625,4 +625,4 @@ jobs:
       container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-stream-10-amd64'
       jobProperties:
         dependsOn: EvaluateDocumentationOnlyChange
-        condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
+        condition: or(not(succeeded('EvaluateDocumentationOnlyChange')), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
