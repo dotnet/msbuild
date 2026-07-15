@@ -20,7 +20,23 @@ variables:
   value: none
 
 jobs:
+# Lightweight gate: determine once whether the PR changed only documentation/.github files.
+# Every heavy build/test job depends on this and is skipped entirely -- no agent is allocated --
+# when it reports onlyDocChanged=1, so a docs-only PR never waits on the build pools.
+- job: EvaluateDocumentationOnlyChange
+  displayName: "Evaluate documentation-only change"
+  pool:
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      vmImage: 'ubuntu-latest'
+  steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
+
 - job: BootstrapMSBuildOnFullFrameworkWindows
+  dependsOn: EvaluateDocumentationOnlyChange
+  condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
   variables:
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
     coverageReportName: WindowsFullFrameworkCoverage
@@ -134,6 +150,8 @@ jobs:
       ArtifactName: 'Windows-on-full Verify $(System.JobAttempt)'
 
 - job: BootstrapMSBuildOnCoreWindows
+  dependsOn: EvaluateDocumentationOnlyChange
+  condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
   displayName: "Windows Core"
   variables:
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
@@ -222,6 +240,8 @@ jobs:
 # kept as a separate Linux Core job because the analyzer is more expensive and the regular
 # bootstrapped CI jobs (which all run /mt now too) do not need it.
 - job: BootstrapMSBuildWithMTMode
+  dependsOn: EvaluateDocumentationOnlyChange
+  condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
   displayName: "Linux Core Multithreaded Mode"
   pool:
     vmImage: 'ubuntu-latest'
@@ -252,6 +272,8 @@ jobs:
     condition: always()
 
 - job: FullReleaseOnWindows
+  dependsOn: EvaluateDocumentationOnlyChange
+  condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
   displayName: "Windows Full Release (no bootstrap)"
   variables:
     coverageArtifactsDir: $(Build.SourcesDirectory)/CoverageStaging
@@ -335,6 +357,8 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
 
 - job: CoreBootstrappedOnLinux
+  dependsOn: EvaluateDocumentationOnlyChange
+  condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
   displayName: "Linux Core"
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
@@ -430,6 +454,8 @@ jobs:
       ArtifactName: 'Linux Verify $(System.JobAttempt)'
 
 - job: CoreOnMac
+  dependsOn: EvaluateDocumentationOnlyChange
+  condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
   displayName: "macOS Core"
   pool:
     vmImage: 'macOS-latest'
@@ -521,13 +547,15 @@ jobs:
 - job: CodeCoverage
   displayName: "Code Coverage"
   dependsOn:
+  - EvaluateDocumentationOnlyChange
   - BootstrapMSBuildOnFullFrameworkWindows
   - BootstrapMSBuildOnCoreWindows
   - FullReleaseOnWindows
   - CoreBootstrappedOnLinux
   - CoreOnMac
+  condition: and(succeeded(), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))
   variables:
-    onlyDocChanged: $[ dependencies.BootstrapMSBuildOnFullFrameworkWindows.outputs['CheckDocumentationOnlyChange.onlyDocChanged'] ]
+    onlyDocChanged: $[ dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'] ]
   pool:
     ${{ if eq(variables['System.TeamProject'], 'public') }}:
       name: NetCore-Public
@@ -590,3 +618,11 @@ jobs:
       pathToSources: $(Build.SourcesDirectory)
     condition: eq(variables.onlyDocChanged, 0)
 - template: /eng/common/templates/jobs/source-build.yml
+  parameters:
+    # Skip the source-build leg entirely (no agent allocated) for documentation/.github-only PRs.
+    defaultManagedPlatform:
+      name: 'Managed'
+      container: 'mcr.microsoft.com/dotnet-buildtools/prereqs:centos-stream-10-amd64'
+      jobProperties:
+        dependsOn: EvaluateDocumentationOnlyChange
+        condition: eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0')
