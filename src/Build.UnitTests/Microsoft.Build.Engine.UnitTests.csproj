@@ -75,6 +75,9 @@
     <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs">
       <Link>AssemblyNameEx_Tests.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs">
+      <Link>NativeMethodsShared_Tests.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\UnitTests\TaskParameter_Tests.cs">
       <Link>TaskParameter_Tests.cs</Link>
     </Compile>
