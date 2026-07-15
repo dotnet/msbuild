@@ -493,7 +493,7 @@ function DotNet {
     local exit_code=$?
     echo "dotnet command failed with exit code $exit_code. Check errors above."
 
-    if [[ "$ci" == true && -n ${SYSTEM_TEAMPROJECT:-} && "$from_vmr" != true ]]; then
+    if [[ "$ci" == true && -n ${SYSTEM_TEAMPROJECT:-} && "$from_vmr" != true && "$disable_pipeline_set_result" != true ]]; then
       Write-PipelineSetResult -result "Failed" -message "dotnet command execution failed."
       ExitWithExitCode 0
     else

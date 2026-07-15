@@ -852,7 +852,7 @@ function DotNet() {
   if ($exitCode -ne 0) {
     Write-Host "dotnet command failed with exit code $exitCode. Check errors above." -ForegroundColor Red
 
-    if ($ci -and $env:SYSTEM_TEAMPROJECT -ne $null -and !$fromVMR) {
+    if ($ci -and $env:SYSTEM_TEAMPROJECT -ne $null -and !$fromVMR -and !$disablePipelineSetResult) {
       Write-PipelineSetResult -Result "Failed" -Message "dotnet command execution failed."
       ExitWithExitCode 0
     } else {
