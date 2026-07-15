@@ -241,7 +241,7 @@
 
     <!--
       With exit-code, git returns 1 when the file differs from the target branch and 0 when it is unchanged.
-      --unified=0 emits no surrounding context lines, so only changed (+/-) lines appear in the diff. This
+      unified=0 emits no surrounding context lines, so only changed (+/-) lines appear in the diff. This
       ensures the "int Version =" check below can only match a genuinely changed version line, never an
       unchanged context line that happens to appear near other edits.
     -->
