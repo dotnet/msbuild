@@ -10,3 +10,5 @@ public enum AssemblyLoadingContext
     SdkResolution,
     LoggerInitialization,
 }
+
+// CI validation (mock): trivial comment to exercise a code-touching PR. Safe to revert.
