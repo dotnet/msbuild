@@ -48,6 +48,7 @@ jobs:
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
       arguments: '-onlyDocChanged $(onlyDocChanged) -stage2Properties /mt'
+    condition: eq(variables.onlyDocChanged, 0)
     env:
       ForceUseXCopyMSBuild: 1
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
@@ -160,6 +161,7 @@ jobs:
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
       arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged) -stage2Properties /mt'
+    condition: eq(variables.onlyDocChanged, 0)
     env:
       MSBUILDUSESERVER: "1"
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
@@ -278,12 +280,6 @@ jobs:
       filename: 'eng/cibuild.cmd'
       arguments: '-configuration Release -test'
     condition: eq(variables.onlyDocChanged, 0)
-  - task: BatchScript@1
-    displayName: cibuild.cmd without test
-    inputs:
-      filename: 'eng/cibuild.cmd'
-      arguments: '-configuration Release'
-    condition: eq(variables.onlyDocChanged, 1)
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
 #     displayName: Process coverage reports
@@ -360,6 +356,7 @@ jobs:
   - bash: sudo apt-get install -y libxml2
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --stage2Properties '/mt'
     displayName: CI Build
+    condition: eq(variables.onlyDocChanged, 0)
     env:
         MSBUILDUSESERVER: "1"
   - task: Bash@3
@@ -448,6 +445,7 @@ jobs:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged $(onlyDocChanged) --stage2Properties '/mt'
     displayName: CI Build
+    condition: eq(variables.onlyDocChanged, 0)
     env:
         MSBUILDUSESERVER: "1"
   - task: Bash@3
