@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.CommandLine.UnitTests;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Logging;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -134,6 +135,25 @@ namespace Microsoft.Build.UnitTests
     [UseInvariantCulture]
     public class TerminalLogger_Tests
     {
+        private sealed class ResizableTerminal(TextWriter output, int width, int height) : ITerminal
+        {
+            private readonly Terminal _terminal = new(output);
+
+            public int Width { get; set; } = width;
+            public int Height { get; } = height;
+            public bool SupportsProgressReporting => false;
+
+            public void BeginUpdate() => _terminal.BeginUpdate();
+            public void EndUpdate() => _terminal.EndUpdate();
+            public void Write(string text) => _terminal.Write(text);
+            public void Write(ReadOnlySpan<char> text) => _terminal.Write(text);
+            public void WriteLine(string text) => _terminal.WriteLine(text);
+            public void WriteLineFitToWidth(ReadOnlySpan<char> text) => _terminal.WriteLineFitToWidth(text);
+            public void WriteColor(TerminalColor color, string text) => _terminal.WriteColor(color, text);
+            public void WriteColorLine(TerminalColor color, string text) => _terminal.WriteColorLine(color, text);
+            public void Dispose() => _terminal.Dispose();
+        }
+
         private const int _nodeCount = 8;
 
         private const string _immediateMessageString =
@@ -893,6 +913,29 @@ namespace Microsoft.Build.UnitTests
             {
                 _terminallogger._createStopwatch = createStopwatch;
             }
+        }
+
+        [Fact]
+        public void RefreshChecksForTerminalResizeEveryFrame()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 120, height: 40);
+
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+            terminalLogger.Initialize(eventSource, _nodeCount);
+            eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
+            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
+            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build"));
+            eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "Task"));
+
+            terminalLogger.Refresh();
+            output.GetStringBuilder().Clear();
+            terminal.Width = 40;
+            terminalLogger.Refresh();
+
+            output.ToString().ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
         }
 
 

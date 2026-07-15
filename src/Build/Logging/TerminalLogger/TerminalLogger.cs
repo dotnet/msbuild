@@ -1472,26 +1472,23 @@ public sealed partial class TerminalLogger : INodeLogger
     private void ThreadProc()
     {
         // 1_000 / 30 is a poor approx of 30Hz
-        int count = 0;
         while (!_cts.Token.WaitHandle.WaitOne(1_000 / 30))
         {
-            count++;
-            lock (_lock)
-            {
-                // Querying the terminal for it's dimensions is expensive, so we only do it every 30 frames e.g. once a second.
-                if (count >= 30)
-                {
-                    count = 0;
-                    DisplayNodes();
-                }
-                else
-                {
-                    DisplayNodes(false);
-                }
-            }
+            Refresh();
         }
 
         EraseNodes();
+    }
+
+    /// <summary>
+    /// Refreshes the node display using the current terminal dimensions.
+    /// </summary>
+    internal void Refresh()
+    {
+        lock (_lock)
+        {
+            DisplayNodes();
+        }
     }
 
     /// <summary>
