@@ -94,6 +94,7 @@ Hot paths: `Evaluator.cs`, `Expander.cs`, file I/O operations.
 - [ ] A value recomputed on every call when cacheable
 - [ ] `Dictionary` for <10 items, or `List` for frequent lookups of >100 items
 - [ ] Optimization claim without profiling data
+- [ ] `System.Reflection` (constructor discovery, `Activator`, `MethodInfo` lookups) on hot paths — reflection results must be computed once and cached (e.g., via `Lazy<T>` or a static field), never re-invoked per task instantiation or per build request
 
 ---
 

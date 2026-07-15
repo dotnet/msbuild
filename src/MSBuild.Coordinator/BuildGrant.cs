@@ -14,6 +14,11 @@ internal sealed class BuildGrant
     public Guid ConnectionId { get; }
 
     /// <summary>
+    ///  Gets the token that nested clients can use to join this grant.
+    /// </summary>
+    public Guid GrantId { get; }
+
+    /// <summary>
     ///  Gets the process ID of the MSBuild process that requested the grant.
     /// </summary>
     public int ProcessId { get; }
@@ -27,6 +32,11 @@ internal sealed class BuildGrant
     ///  Gets the number of nodes granted to the build. Zero if the build is still waiting.
     /// </summary>
     public int GrantedNodes { get; set; }
+
+    /// <summary>
+    ///  Gets a value indicating whether this grant joins another active root grant.
+    /// </summary>
+    public bool IsNested { get; }
 
     /// <summary>
     ///  Gets the time of the last heartbeat received from this build.
@@ -44,15 +54,19 @@ internal sealed class BuildGrant
     /// <param name="connectionId">A unique identifier for this connection.</param>
     /// <param name="processId">The OS process ID of the MSBuild process requesting nodes.</param>
     /// <param name="requestedNodes">The number of nodes the build is requesting.</param>
-    public BuildGrant(Guid connectionId, int processId, int requestedNodes)
+    /// <param name="grantId">The root grant token to associate with this grant, or <see langword="null"/> to create a new root token.</param>
+    /// <param name="isNested">Whether this grant joins another active root grant.</param>
+    public BuildGrant(Guid connectionId, int processId, int requestedNodes, Guid? grantId = null, bool isNested = false)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(processId);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(requestedNodes);
 
         ConnectionId = connectionId;
+        GrantId = grantId ?? Guid.NewGuid();
         ProcessId = processId;
         RequestedNodes = requestedNodes;
         GrantedNodes = 0;
+        IsNested = isNested;
         LastHeartbeat = DateTime.UtcNow;
     }
 }

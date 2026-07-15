@@ -47,7 +47,8 @@ jobs:
     displayName: Build (with -mt in stage2)
     inputs:
       filename: 'build.cmd'
-      arguments: '-onlyDocChanged $(onlyDocChanged) -ci -test -stage2Arguments /mt'
+      arguments: '-ci -test -stage2Arguments /mt'
+    condition: eq(variables.onlyDocChanged, 0)
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
 #     displayName: Process coverage reports
@@ -157,7 +158,8 @@ jobs:
     displayName: Build (with -mt in stage2)
     inputs:
       filename: 'build.cmd'
-      arguments: '-msbuildEngine dotnet -onlyDocChanged $(onlyDocChanged) -ci -test -stage2Arguments /mt'
+      arguments: '-msbuildEngine dotnet -ci -test -stage2Arguments /mt'
+    condition: eq(variables.onlyDocChanged, 0)
     env:
       MSBUILDUSESERVER: "1"
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
@@ -277,12 +279,6 @@ jobs:
       filename: 'build.cmd'
       arguments: '-pack -sign -publish -ci -configuration Release -test'
     condition: eq(variables.onlyDocChanged, 0)
-  - task: BatchScript@1
-    displayName: Build without test
-    inputs:
-      filename: 'build.cmd'
-      arguments: '-pack -sign -publish -ci -configuration Release'
-    condition: eq(variables.onlyDocChanged, 1)
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
 #     displayName: Process coverage reports
@@ -357,8 +353,9 @@ jobs:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
-  - bash: . 'build.sh' --onlyDocChanged $(onlyDocChanged) --ci --test --stage2Arguments '/mt'
+  - bash: . 'build.sh' --ci --test --stage2Arguments '/mt'
     displayName: Build (with -mt in stage2)
+    condition: eq(variables.onlyDocChanged, 0)
     env:
         MSBUILDUSESERVER: "1"
   - task: Bash@3
@@ -445,8 +442,9 @@ jobs:
         arguments: $(Build.SourcesDirectory)/NuGet.config $Token
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
-  - bash: . 'build.sh' --onlyDocChanged $(onlyDocChanged) --ci --test --stage2Arguments '/mt'
+  - bash: . 'build.sh' --ci --test --stage2Arguments '/mt'
     displayName: Build (with -mt in stage2)
+    condition: eq(variables.onlyDocChanged, 0)
     env:
         MSBUILDUSESERVER: "1"
   - task: Bash@3
