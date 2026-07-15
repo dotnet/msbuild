@@ -30,6 +30,8 @@ internal static class CoordinatorTelemetry
     private const string QueueDepthTag = "QueueDepth";
     private const string ActiveBuildsTag = "ActiveBuilds";
     private const string AllocatedNodesTag = "AllocatedNodes";
+    private const string GrantIdTag = "GrantId";
+    private const string IsNestedTag = "IsNested";
 
     private static IActivity? StartActivity(string name)
         => TelemetryManager.Instance.DefaultActivitySource?.StartActivity(name);
@@ -41,6 +43,8 @@ internal static class CoordinatorTelemetry
     {
         using IActivity? _ = StartActivity(GrantActivity)
             ?.SetTag(ConnectionIdTag, grant.ConnectionId)
+            .SetTag(GrantIdTag, grant.GrantId)
+            .SetTag(IsNestedTag, grant.IsNested)
             .SetTag(ProcessIdTag, grant.ProcessId)
             .SetTag(NodesRequestedTag, grant.RequestedNodes)
             .SetTag(NodesGrantedTag, grant.GrantedNodes)
@@ -56,6 +60,8 @@ internal static class CoordinatorTelemetry
     {
         using IActivity? _ = StartActivity(DeferredActivity)
             ?.SetTag(ConnectionIdTag, grant.ConnectionId)
+            .SetTag(GrantIdTag, grant.GrantId)
+            .SetTag(IsNestedTag, grant.IsNested)
             .SetTag(ProcessIdTag, grant.ProcessId)
             .SetTag(NodesRequestedTag, grant.RequestedNodes)
             .SetTag(QueueDepthTag, queueDepth);
@@ -68,6 +74,8 @@ internal static class CoordinatorTelemetry
     {
         using IActivity? _ = StartActivity(DeferredGrantFulfilledActivity)
             ?.SetTag(ConnectionIdTag, grant.ConnectionId)
+            .SetTag(GrantIdTag, grant.GrantId)
+            .SetTag(IsNestedTag, grant.IsNested)
             .SetTag(ProcessIdTag, grant.ProcessId)
             .SetTag(NodesGrantedTag, grant.GrantedNodes)
             .SetTag(QueueDepthTag, queueDepth)
@@ -82,6 +90,8 @@ internal static class CoordinatorTelemetry
     {
         using IActivity? _ = StartActivity(ReleasedActivity)
             ?.SetTag(ConnectionIdTag, grant.ConnectionId)
+            .SetTag(GrantIdTag, grant.GrantId)
+            .SetTag(IsNestedTag, grant.IsNested)
             .SetTag(ProcessIdTag, grant.ProcessId)
             .SetTag(NodesReleasedTag, grant.GrantedNodes)
             .SetTag(QueueDepthTag, queueDepth)

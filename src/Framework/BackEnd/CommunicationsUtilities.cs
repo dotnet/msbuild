@@ -822,11 +822,17 @@ internal static class CommunicationsUtilities
 
                 using (StreamWriter writer = FileUtilities.OpenWrite(filePath, append: true))
                 {
-                    long now = DateTime.UtcNow.Ticks;
-                    float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;
-                    s_lastLoggedTicks = now;
+                    DateTime now = DateTime.UtcNow;
+                    long nowTicks = now.Ticks;
+                    float millisecondsSinceLastLog = (float)(nowTicks - s_lastLoggedTicks) / TimeSpan.TicksPerMillisecond;
+                    s_lastLoggedTicks = nowTicks;
 
-                    writer.WriteLine($"{Thread.CurrentThread.Name} (TID {Environment.CurrentManagedThreadId}) {now,15} +{millisecondsSinceLastLog,10}ms: {message}");
+                    string? threadName = Thread.CurrentThread.Name;
+                    string threadDisplay = threadName.IsNullOrEmpty()
+                        ? $"TID {Environment.CurrentManagedThreadId}"
+                        : $"{threadName} (TID {Environment.CurrentManagedThreadId})";
+
+                    writer.WriteLine($"{threadDisplay,-24} {now:O} +{millisecondsSinceLastLog,8:F2}ms: {message}");
                 }
             }
             catch (IOException)
