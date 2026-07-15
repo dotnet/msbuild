@@ -41,7 +41,8 @@ if ($stage2) {
   Write-Host "Stage 1 build: & `"$buildScript`" $buildArgs"
 }
 
-Invoke-Expression "& `"$buildScript`" $buildArgs"
+$pwshPath = (Get-Process -Id $PID).Path
+& $pwshPath -NoLogo -NoProfile -ExecutionPolicy ByPass -File "$buildScript" @buildArgs
 
 if (-not $stage2) {
   exit $LASTEXITCODE
