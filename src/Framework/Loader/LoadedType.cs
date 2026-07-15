@@ -199,28 +199,28 @@ namespace Microsoft.Build.Shared
         /// </remarks>
         internal ITask? CreateInstance(TaskEnvironment? taskEnvironment)
         {
-            ResolvedConstructor resolved = GetResolvedConstructor();
+            ResolvedConstructor resolvedConstructor = GetResolvedConstructor();
 
 #if NET
             // Neither a parameterless nor a TaskEnvironment constructor exists; surface the same failure
             // Activator.CreateInstance would have produced rather than a NullReferenceException.
-            if (resolved.Invoker is null)
+            if (resolvedConstructor.Invoker is null)
             {
                 throw new MissingMethodException(Type.FullName, ".ctor");
             }
 
-            return resolved.NeedsEnvironment
-                ? (ITask?)resolved.Invoker.Invoke(taskEnvironment ?? TaskEnvironment.Fallback)
-                : (ITask?)resolved.Invoker.Invoke();
+            return resolvedConstructor.NeedsEnvironment
+                ? (ITask?)resolvedConstructor.Invoker.Invoke(taskEnvironment ?? TaskEnvironment.Fallback)
+                : (ITask?)resolvedConstructor.Invoker.Invoke();
 #else
-            if (resolved.Constructor is null)
+            if (resolvedConstructor.Constructor is null)
             {
                 throw new MissingMethodException(Type.FullName, ".ctor");
             }
 
-            return resolved.NeedsEnvironment
-                ? (ITask?)resolved.Constructor.Invoke([taskEnvironment ?? TaskEnvironment.Fallback])
-                : (ITask?)resolved.Constructor.Invoke(null);
+            return resolvedConstructor.NeedsEnvironment
+                ? (ITask?)resolvedConstructor.Constructor.Invoke([taskEnvironment ?? TaskEnvironment.Fallback])
+                : (ITask?)resolvedConstructor.Constructor.Invoke(null);
 #endif
         }
 
@@ -366,14 +366,14 @@ namespace Microsoft.Build.Shared
             ConstructorInvoker? invoker = chosenConstructor is not null && !LoadedViaMetadataLoadContext
                 ? ConstructorInvoker.Create(chosenConstructor)
                 : null;
-            ResolvedConstructor resolved = new(invoker, needsEnvironment);
+            ResolvedConstructor resolvedConstructor = new(invoker, needsEnvironment);
 #else
-            ResolvedConstructor resolved = new(chosenConstructor, needsEnvironment);
+            ResolvedConstructor resolvedConstructor = new(chosenConstructor, needsEnvironment);
 #endif
 
-            _resolvedConstructor = resolved;
+            _resolvedConstructor = resolvedConstructor;
             _constructorsResolved = true;
-            return resolved;
+            return resolvedConstructor;
         }
 
         private static readonly string TaskEnvironmentTypeFullName = typeof(TaskEnvironment).FullName!;
