@@ -8,6 +8,7 @@ using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+using Shouldly;
 using Xunit;
 using TaskHostPacketHelpers = Microsoft.Build.UnitTests.BackEnd.TaskHostConfiguration_Tests.TaskHostPacketHelpers;
 
@@ -231,6 +232,79 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ITaskItem[] deserializedItemArray = (ITaskItem[])deserializedComplete.TaskOutputParameters["TaskItemArrayValue"].WrappedParameter;
 
             TaskHostPacketHelpers.AreEqual(itemArray, deserializedItemArray);
+        }
+
+        [Fact]
+        public void EnvironmentDeltaRoundTripsAgainstTaskBaseline()
+        {
+            var baseline = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["A"] = "one",
+                ["B"] = "two",
+                ["C"] = "three",
+                ["D"] = "four",
+            };
+            var current = new Dictionary<string, string>(baseline, StringComparer.OrdinalIgnoreCase)
+            {
+                ["B"] = "changed",
+                ["E"] = "five",
+            };
+            current.Remove("A");
+
+            TaskHostTaskComplete deserialized = RoundTripWithEnvironmentDelta(current, baseline);
+
+            deserialized.BuildProcessEnvironmentTransferKind.ShouldBe(TaskHostDictionaryTransferKind.Delta);
+            Dictionary<string, string> rehydrated = deserialized.RehydrateBuildProcessEnvironment(baseline);
+            AssertDictionaryEqual(current, rehydrated);
+        }
+
+        [Fact]
+        public void UnchangedEnvironmentRoundTripsAgainstTaskBaseline()
+        {
+            var baseline = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["A"] = "one",
+                ["B"] = "two",
+            };
+
+            TaskHostTaskComplete deserialized = RoundTripWithEnvironmentDelta(baseline, baseline);
+
+            deserialized.BuildProcessEnvironmentTransferKind.ShouldBe(TaskHostDictionaryTransferKind.Unchanged);
+            Dictionary<string, string> rehydrated = deserialized.RehydrateBuildProcessEnvironment(baseline);
+            AssertDictionaryEqual(baseline, rehydrated);
+        }
+
+        private static TaskHostTaskComplete RoundTripWithEnvironmentDelta(
+            IDictionary<string, string> current,
+            IDictionary<string, string> baseline)
+        {
+            var complete = new TaskHostTaskComplete(
+                new OutOfProcTaskHostTaskResult(TaskCompleteType.Success),
+#if FEATURE_REPORTFILEACCESSES
+                null,
+#endif
+                current,
+                baseline);
+
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            writeTranslator.NegotiatedPacketVersion = TaskHostDictionaryDelta.MinimumPacketVersion;
+            complete.Translate(writeTranslator);
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            readTranslator.NegotiatedPacketVersion = TaskHostDictionaryDelta.MinimumPacketVersion;
+            return (TaskHostTaskComplete)TaskHostTaskComplete.FactoryForDeserialization(readTranslator);
+        }
+
+        private static void AssertDictionaryEqual(
+            IDictionary<string, string> expected,
+            IDictionary<string, string> actual)
+        {
+            actual.Count.ShouldBe(expected.Count);
+            foreach (KeyValuePair<string, string> pair in expected)
+            {
+                actual.TryGetValue(pair.Key, out string actualValue).ShouldBeTrue();
+                actualValue.ShouldBe(pair.Value);
+            }
         }
 
         /// <summary>

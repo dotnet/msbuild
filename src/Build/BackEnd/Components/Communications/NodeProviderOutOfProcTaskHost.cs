@@ -99,6 +99,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private ConcurrentDictionary<TaskHostNodeKey, NodeContext> _nodeContexts;
 
+        private ConcurrentDictionary<TaskHostNodeKey, TaskHostNodeState> _nodeStates;
+
         /// <summary>
         /// Reverse mapping from communication node ID to TaskHostNodeKey.
         /// Used for O(1) lookup when handling node termination from ShutdownAllNodes.
@@ -131,6 +133,13 @@ namespace Microsoft.Build.BackEnd
         /// Packet factory we use if there's not already one associated with a particular context.
         /// </summary>
         private NodePacketFactory _localPacketFactory;
+
+        private sealed class TaskHostNodeState
+        {
+            public object SyncRoot { get; } = new();
+
+            public TaskHostConfigurationCache ConfigurationCache { get; } = new();
+        }
 
         /// <summary>
         /// Constructor.
@@ -244,6 +253,7 @@ namespace Microsoft.Build.BackEnd
         {
             ComponentHost = host;
             _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext>();
+            _nodeStates = new ConcurrentDictionary<TaskHostNodeKey, TaskHostNodeState>();
             _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
             _nodeIdToPacketHandlerStack = new ConcurrentDictionary<int, Stack<INodePacketHandler>>();
             _activeNodes = [];
@@ -269,6 +279,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
+            _nodeStates?.Clear();
         }
 
         #endregion
@@ -636,44 +647,80 @@ namespace Microsoft.Build.BackEnd
             hostProcessId = -1;
             wasNewlyCreated = false;
 
-            bool nodeCreationSucceeded;
-            if (!_nodeContexts.ContainsKey(nodeKey))
+            TaskHostNodeState nodeState = _nodeStates.GetOrAdd(nodeKey, static _ => new TaskHostNodeState());
+            lock (nodeState.SyncRoot)
             {
-                wasNewlyCreated = true;
-                nodeCreationSucceeded = CreateNode(nodeKey, factory, handler, configuration, taskHostParameters);
-            }
-            else
-            {
-                // node already exists, so "creation" automatically succeeded
-                nodeCreationSucceeded = true;
-            }
-
-            if (nodeCreationSucceeded)
-            {
-                NodeContext context = _nodeContexts[nodeKey];
-
-                Stack<INodePacketHandler> handlerStack = _nodeIdToPacketHandlerStack.GetOrAdd(context.NodeId, _ => new Stack<INodePacketHandler>());
-                lock (handlerStack)
+                bool nodeCreationSucceeded;
+                if (!_nodeContexts.ContainsKey(nodeKey))
                 {
-                    handlerStack.Push(handler);
+                    // The same key can represent a later process incarnation. The first packet sent
+                    // to every new process must be self-contained.
+                    nodeState.ConfigurationCache.Reset();
+                    wasNewlyCreated = true;
+                    nodeCreationSucceeded = CreateNode(nodeKey, factory, handler, configuration, taskHostParameters);
+                }
+                else
+                {
+                    // node already exists, so "creation" automatically succeeded
+                    nodeCreationSucceeded = true;
                 }
 
-                try
+                if (nodeCreationSucceeded)
                 {
-                    hostProcessId = context.Process?.Id ?? -1;
-                }
-                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-                {
-                    // Process has already exited or is otherwise inaccessible; PID is unavailable.
-                    hostProcessId = -1;
+                    NodeContext context = _nodeContexts[nodeKey];
+
+                    if (TaskHostDictionaryDelta.IsEnabled &&
+                        context.NegotiatedPacketVersion >= TaskHostDictionaryDelta.MinimumPacketVersion)
+                    {
+                        configuration.PrepareForSerialization(
+                            nodeState.ConfigurationCache,
+                            context.NegotiatedPacketVersion);
+                    }
+                    else
+                    {
+                        nodeState.ConfigurationCache.Reset();
+                    }
+
+                    Stack<INodePacketHandler> handlerStack = _nodeIdToPacketHandlerStack.GetOrAdd(context.NodeId, _ => new Stack<INodePacketHandler>());
+                    lock (handlerStack)
+                    {
+                        handlerStack.Push(handler);
+                    }
+
+                    try
+                    {
+                        try
+                        {
+                            hostProcessId = context.Process?.Id ?? -1;
+                        }
+                        catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                        {
+                            // Process has already exited or is otherwise inaccessible; PID is unavailable.
+                            hostProcessId = -1;
+                        }
+
+                        // Preparing the delta and enqueuing the packet are serialized by this lock.
+                        // NodeContext's per-node FIFO then preserves the cache chain on the wire.
+                        context.SendData(configuration);
+                        return true;
+                    }
+                    catch
+                    {
+                        lock (handlerStack)
+                        {
+                            if (handlerStack.Count > 0 && ReferenceEquals(handlerStack.Peek(), handler))
+                            {
+                                handlerStack.Pop();
+                            }
+                        }
+
+                        nodeState.ConfigurationCache.Reset();
+                        throw;
+                    }
                 }
 
-                // Configure the node.
-                context.SendData(configuration);
-                return true;
+                return false;
             }
-
-            return false;
         }
 
         /// <summary>
@@ -886,7 +933,15 @@ namespace Microsoft.Build.BackEnd
             // Remove from nodeKey-based lookup if we have it
             if (_nodeIdToNodeKey.TryRemove(nodeId, out TaskHostNodeKey nodeKey))
             {
-                _nodeContexts.TryRemove(nodeKey, out _);
+                TaskHostNodeState nodeState = _nodeStates.GetOrAdd(nodeKey, static _ => new TaskHostNodeState());
+                lock (nodeState.SyncRoot)
+                {
+                    if (_nodeContexts.TryGetValue(nodeKey, out NodeContext context) && context.NodeId == nodeId)
+                    {
+                        _nodeContexts.TryRemove(nodeKey, out _);
+                        nodeState.ConfigurationCache.Reset();
+                    }
+                }
             }
 
             // May also be removed by unnatural termination, so don't assume it's there

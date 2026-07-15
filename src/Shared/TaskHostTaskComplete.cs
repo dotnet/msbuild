@@ -89,6 +89,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Dictionary<string, string> _buildProcessEnvironment = null;
 
+        private TaskHostDictionaryTransferKind _buildProcessEnvironmentTransferKind = TaskHostDictionaryTransferKind.Full;
+        private Dictionary<string, string> _buildProcessEnvironmentTransferValues;
+        private List<string> _removedBuildProcessEnvironmentKeys;
+
 
 #pragma warning disable CS1572 // XML comment has a param tag, but there is no parameter by that name. Justification: xmldoc doesn't seem to interact well with #ifdef of params.
         /// <summary>
@@ -97,13 +101,15 @@ namespace Microsoft.Build.BackEnd
         /// <param name="result">The result of the task's execution.</param>
         /// <param name="fileAccessData">The file accesses reported by the task.</param>
         /// <param name="buildProcessEnvironment">The build process environment as it was at the end of the task's execution.</param>
+        /// <param name="baselineBuildProcessEnvironment">The environment supplied to the task before execution.</param>
 #pragma warning restore CS1572 // XML comment has a param tag, but there is no parameter by that name
         public TaskHostTaskComplete(
             OutOfProcTaskHostTaskResult result,
 #if FEATURE_REPORTFILEACCESSES
             List<FileAccessData> fileAccessData,
 #endif
-            IDictionary<string, string> buildProcessEnvironment)
+            IDictionary<string, string> buildProcessEnvironment,
+            IDictionary<string, string> baselineBuildProcessEnvironment = null)
         {
             Assumed.NotNull(result);
 
@@ -132,6 +138,17 @@ namespace Microsoft.Build.BackEnd
                 {
                     _buildProcessEnvironment = new Dictionary<string, string>(buildProcessEnvironment);
                 }
+            }
+
+            if (baselineBuildProcessEnvironment is not null)
+            {
+                Dictionary<string, string> baseline = TaskHostDictionaryDelta.Clone(baselineBuildProcessEnvironment);
+                TaskHostDictionaryDelta.Prepare(
+                    _buildProcessEnvironment,
+                    ref baseline,
+                    out _buildProcessEnvironmentTransferKind,
+                    out _buildProcessEnvironmentTransferValues,
+                    out _removedBuildProcessEnvironmentKeys);
             }
         }
 
@@ -212,6 +229,30 @@ namespace Microsoft.Build.BackEnd
             { return _buildProcessEnvironment; }
         }
 
+        internal TaskHostDictionaryTransferKind BuildProcessEnvironmentTransferKind => _buildProcessEnvironmentTransferKind;
+
+        internal Dictionary<string, string> RehydrateBuildProcessEnvironment(IDictionary<string, string> baselineBuildProcessEnvironment)
+        {
+            if (_buildProcessEnvironment is not null)
+            {
+                return _buildProcessEnvironment;
+            }
+
+            Dictionary<string, string> baseline = baselineBuildProcessEnvironment is null
+                ? null
+                : TaskHostDictionaryDelta.Clone(baselineBuildProcessEnvironment);
+
+            _buildProcessEnvironment = TaskHostDictionaryDelta.Apply(
+                _buildProcessEnvironmentTransferKind,
+                _buildProcessEnvironmentTransferValues,
+                _removedBuildProcessEnvironmentKeys,
+                ref baseline);
+
+            _buildProcessEnvironmentTransferValues = null;
+            _removedBuildProcessEnvironmentKeys = null;
+            return _buildProcessEnvironment;
+        }
+
         /// <summary>
         /// The type of this packet.
         /// </summary>
@@ -242,7 +283,36 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _taskExceptionMessage);
             translator.Translate(ref _taskExceptionMessageArgs);
             translator.TranslateDictionary(ref _taskOutputParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
-            translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+            if (translator.NegotiatedPacketVersion is >= TaskHostDictionaryDelta.MinimumPacketVersion)
+            {
+                translator.TranslateEnum(ref _buildProcessEnvironmentTransferKind, (int)_buildProcessEnvironmentTransferKind);
+
+                if (_buildProcessEnvironmentTransferKind is TaskHostDictionaryTransferKind.Full or TaskHostDictionaryTransferKind.Delta)
+                {
+                    if (translator.Mode == TranslationDirection.WriteToStream &&
+                        _buildProcessEnvironmentTransferKind == TaskHostDictionaryTransferKind.Full &&
+                        _buildProcessEnvironmentTransferValues is null)
+                    {
+                        _buildProcessEnvironmentTransferValues = _buildProcessEnvironment is null
+                            ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                            : TaskHostDictionaryDelta.Clone(_buildProcessEnvironment);
+                    }
+
+                    translator.TranslateDictionary(ref _buildProcessEnvironmentTransferValues, StringComparer.OrdinalIgnoreCase);
+                }
+
+                if (_buildProcessEnvironmentTransferKind == TaskHostDictionaryTransferKind.Delta)
+                {
+                    translator.Translate(
+                        ref _removedBuildProcessEnvironmentKeys,
+                        (ITranslator t, ref string key) => t.Translate(ref key));
+                }
+            }
+            else
+            {
+                translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+            }
+
 #if FEATURE_REPORTFILEACCESSES
             translator.Translate(ref _fileAccessData,
                 (ITranslator translator, ref FileAccessData data) => ((ITranslatable)data).Translate(translator));

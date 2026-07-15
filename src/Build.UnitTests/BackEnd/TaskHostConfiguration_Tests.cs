@@ -713,6 +713,260 @@ namespace Microsoft.Build.UnitTests.BackEnd
             config.WarningsAsMessages.SequenceEqual(deserializedConfig.WarningsAsMessages, StringComparer.Ordinal).ShouldBeTrue();
         }
 
+        [Fact]
+        public void DictionaryDeltasRoundTripAcrossSequentialConfigurations()
+        {
+            var parentCache = new TaskHostConfigurationCache();
+            var childCache = new TaskHostConfigurationCache();
+            var environment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["A"] = "one",
+                ["B"] = "two",
+                ["C"] = "three",
+                ["D"] = "four",
+            };
+            var globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Configuration"] = "Debug",
+                ["Platform"] = "AnyCPU",
+                ["TargetFramework"] = "net10.0",
+            };
+
+            TaskHostConfiguration first = RoundTripWithCache(
+                CreateConfiguration(environment, globalProperties),
+                parentCache,
+                childCache,
+                NodePacketTypeExtensions.PacketVersion);
+
+            first.BuildProcessEnvironmentTransferKind.ShouldBe(TaskHostDictionaryTransferKind.Full);
+            first.GlobalParametersTransferKind.ShouldBe(TaskHostDictionaryTransferKind.Full);
+            first.TaskParameterTransferKind.ShouldBe(TaskHostTaskParameterTransferKind.CachedValue);
+            AssertDictionaryEqual(environment, first.BuildProcessEnvironment);
+            AssertDictionaryEqual(globalProperties, first.GlobalProperties);
+
+            TaskHostConfiguration second = RoundTripWithCache(
+                CreateConfiguration(environment, globalProperties),
+                parentCache,
+                childCache,
+                NodePacketTypeExtensions.PacketVersion);
+
+            second.BuildProcessEnvironmentTransferKind.ShouldBe(TaskHostDictionaryTransferKind.Unchanged);
+            second.GlobalParametersTransferKind.ShouldBe(TaskHostDictionaryTransferKind.Unchanged);
+            second.TaskParameterTransferKind.ShouldBe(TaskHostTaskParameterTransferKind.CacheReference);
+            AssertDictionaryEqual(environment, second.BuildProcessEnvironment);
+            AssertDictionaryEqual(globalProperties, second.GlobalProperties);
+
+            environment = new Dictionary<string, string>(environment, StringComparer.OrdinalIgnoreCase)
+            {
+                ["B"] = "changed",
+                ["E"] = "five",
+            };
+            environment.Remove("A");
+            globalProperties = new Dictionary<string, string>(globalProperties, StringComparer.OrdinalIgnoreCase)
+            {
+                ["Configuration"] = "Release",
+            };
+
+            TaskHostConfiguration third = RoundTripWithCache(
+                CreateConfiguration(environment, globalProperties),
+                parentCache,
+                childCache,
+                NodePacketTypeExtensions.PacketVersion);
+
+            third.BuildProcessEnvironmentTransferKind.ShouldBe(TaskHostDictionaryTransferKind.Delta);
+            third.GlobalParametersTransferKind.ShouldBe(TaskHostDictionaryTransferKind.Delta);
+            AssertDictionaryEqual(environment, third.BuildProcessEnvironment);
+            AssertDictionaryEqual(globalProperties, third.GlobalProperties);
+
+            var replacementEnvironment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["X"] = "replacement",
+            };
+            var replacementProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Only"] = "replacement",
+            };
+
+            TaskHostConfiguration fourth = RoundTripWithCache(
+                CreateConfiguration(replacementEnvironment, replacementProperties),
+                parentCache,
+                childCache,
+                NodePacketTypeExtensions.PacketVersion);
+
+            fourth.BuildProcessEnvironmentTransferKind.ShouldBe(TaskHostDictionaryTransferKind.Full);
+            fourth.GlobalParametersTransferKind.ShouldBe(TaskHostDictionaryTransferKind.Full);
+            AssertDictionaryEqual(replacementEnvironment, fourth.BuildProcessEnvironment);
+            AssertDictionaryEqual(replacementProperties, fourth.GlobalProperties);
+        }
+
+        [Fact]
+        public void OlderPacketVersionUsesFullDictionaries()
+        {
+            var parentCache = new TaskHostConfigurationCache();
+            var childCache = new TaskHostConfigurationCache();
+            var environment = new Dictionary<string, string> { ["A"] = "one" };
+            var globalProperties = new Dictionary<string, string> { ["Configuration"] = "Debug" };
+
+            TaskHostConfiguration deserialized = RoundTripWithCache(
+                CreateConfiguration(environment, globalProperties),
+                parentCache,
+                childCache,
+                packetVersion: 4);
+
+            AssertDictionaryEqual(environment, deserialized.BuildProcessEnvironment);
+            AssertDictionaryEqual(globalProperties, deserialized.GlobalProperties);
+        }
+
+        [Fact]
+        public void CacheDisabledUsesSelfContainedVersionSixPacket()
+        {
+            var environment = new Dictionary<string, string> { ["A"] = "one" };
+            var globalProperties = new Dictionary<string, string> { ["Configuration"] = "Debug" };
+            TaskHostConfiguration configuration = CreateConfiguration(
+                environment,
+                globalProperties,
+                new Dictionary<string, object> { ["Text"] = "value" });
+
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            writeTranslator.NegotiatedPacketVersion = NodePacketTypeExtensions.PacketVersion;
+            configuration.Translate(writeTranslator);
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            readTranslator.NegotiatedPacketVersion = NodePacketTypeExtensions.PacketVersion;
+            var deserialized = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
+            deserialized.RehydrateFromCache(new TaskHostConfigurationCache());
+
+            deserialized.BuildProcessEnvironmentTransferKind.ShouldBe(TaskHostDictionaryTransferKind.Full);
+            deserialized.GlobalParametersTransferKind.ShouldBe(TaskHostDictionaryTransferKind.Full);
+            deserialized.TaskParameterTransferKind.ShouldBe(TaskHostTaskParameterTransferKind.Direct);
+            AssertDictionaryEqual(environment, deserialized.BuildProcessEnvironment);
+            AssertDictionaryEqual(globalProperties, deserialized.GlobalProperties);
+            deserialized.TaskParameters["Text"].WrappedParameter.ShouldBe("value");
+        }
+
+        [Fact]
+        public void CachedTaskParametersAreRehydratedAsFreshObjects()
+        {
+            var parentCache = new TaskHostConfigurationCache();
+            var childCache = new TaskHostConfigurationCache();
+            var environment = new Dictionary<string, string> { ["A"] = "one" };
+            var globalProperties = new Dictionary<string, string> { ["Configuration"] = "Debug" };
+            var item = new TaskItem("input.cs");
+            item.SetMetadata("Original", "value");
+            var parameters = new Dictionary<string, object>
+            {
+                ["Sources"] = new ITaskItem[] { item },
+            };
+
+            TaskHostConfiguration first = RoundTripWithCache(
+                CreateConfiguration(environment, globalProperties, parameters),
+                parentCache,
+                childCache,
+                packetVersion: NodePacketTypeExtensions.PacketVersion);
+            first.TaskParameterTransferKind.ShouldBe(TaskHostTaskParameterTransferKind.CachedValue);
+
+            var firstItems = (ITaskItem[])first.TaskParameters["Sources"].WrappedParameter;
+            firstItems[0].SetMetadata("Original", "mutated");
+
+            TaskHostConfiguration second = RoundTripWithCache(
+                CreateConfiguration(environment, globalProperties, parameters),
+                parentCache,
+                childCache,
+                packetVersion: NodePacketTypeExtensions.PacketVersion);
+            second.TaskParameterTransferKind.ShouldBe(TaskHostTaskParameterTransferKind.CacheReference);
+
+            var secondItems = (ITaskItem[])second.TaskParameters["Sources"].WrappedParameter;
+            secondItems[0].GetMetadata("Original").ShouldBe("value");
+            secondItems[0].ShouldNotBeSameAs(firstItems[0]);
+        }
+
+        [Fact]
+        public void LargeTaskParameterPayloadIsCompressed()
+        {
+            var parentCache = new TaskHostConfigurationCache();
+            var childCache = new TaskHostConfigurationCache();
+            var items = new ITaskItem[1000];
+            for (int i = 0; i < items.Length; i++)
+            {
+                var item = new TaskItem($"source-{i}.cs");
+                item.SetMetadata("RepeatedMetadata", new string('x', 100));
+                items[i] = item;
+            }
+
+            TaskHostConfiguration deserialized = RoundTripWithCache(
+                CreateConfiguration(
+                    new Dictionary<string, string> { ["A"] = "one" },
+                    new Dictionary<string, string> { ["Configuration"] = "Debug" },
+                    new Dictionary<string, object> { ["Sources"] = items }),
+                parentCache,
+                childCache,
+                NodePacketTypeExtensions.PacketVersion);
+
+            deserialized.TaskParameterTransferKind.ShouldBe(TaskHostTaskParameterTransferKind.CachedValue);
+            deserialized.SerializedTaskParametersCompressed.ShouldBeTrue();
+            ((ITaskItem[])deserialized.TaskParameters["Sources"].WrappedParameter).Length.ShouldBe(items.Length);
+        }
+
+        private TaskHostConfiguration CreateConfiguration(
+            IDictionary<string, string> environment,
+            Dictionary<string, string> globalProperties,
+            IDictionary<string, object> taskParameters = null)
+            => new(
+                nodeId: 1,
+                startupDirectory: Directory.GetCurrentDirectory(),
+                buildProcessEnvironment: environment,
+                culture: Thread.CurrentThread.CurrentCulture,
+                uiCulture: Thread.CurrentThread.CurrentUICulture,
+                hostServices: null,
+#if FEATURE_APPDOMAIN
+                appDomainSetup: null,
+#endif
+                lineNumberOfTask: 1,
+                columnNumberOfTask: 1,
+                projectFileOfTask: @"c:\my project\myproj.proj",
+                targetName: "TargetName",
+                projectFile: "proj.proj",
+                continueOnError: _continueOnErrorDefault,
+                taskName: "TaskName",
+                taskLocation: @"c:\MyTasks\MyTask.dll",
+                isTaskInputLoggingEnabled: false,
+                taskParameters: taskParameters ?? new Dictionary<string, object>(),
+                globalParameters: globalProperties,
+                warningsAsErrors: null,
+                warningsNotAsErrors: null,
+                warningsAsMessages: null);
+
+        private static TaskHostConfiguration RoundTripWithCache(
+            TaskHostConfiguration configuration,
+            TaskHostConfigurationCache parentCache,
+            TaskHostConfigurationCache childCache,
+            byte packetVersion)
+        {
+            configuration.PrepareForSerialization(parentCache, packetVersion);
+
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            writeTranslator.NegotiatedPacketVersion = packetVersion;
+            configuration.Translate(writeTranslator);
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            readTranslator.NegotiatedPacketVersion = packetVersion;
+            var deserialized = (TaskHostConfiguration)TaskHostConfiguration.FactoryForDeserialization(readTranslator);
+            deserialized.RehydrateFromCache(childCache);
+            return deserialized;
+        }
+
+        private static void AssertDictionaryEqual(
+            IDictionary<string, string> expected,
+            IDictionary<string, string> actual)
+        {
+            actual.Count.ShouldBe(expected.Count);
+            foreach (KeyValuePair<string, string> pair in expected)
+            {
+                actual.TryGetValue(pair.Key, out string actualValue).ShouldBeTrue();
+                actualValue.ShouldBe(pair.Value);
+            }
+        }
+
         /// <summary>
         /// Helper methods for testing the task host-related packets.
         /// </summary>

@@ -85,6 +85,8 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private TaskHostConfiguration _currentConfiguration;
 
+        private readonly TaskHostConfigurationCache _configurationCache = new();
+
         /// <summary>
         /// The saved environment for the process.
         /// </summary>
@@ -844,6 +846,7 @@ namespace Microsoft.Build.CommandLine
         {
             _registeredTaskObjectCache = new RegisteredTaskObjectCacheBase();
             _parentPacketVersion = parentPacketVersion;
+            _configurationCache.Reset();
 
             shutdownException = null;
 
@@ -1164,6 +1167,8 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private void HandleTaskHostConfiguration(TaskHostConfiguration taskHostConfiguration)
         {
+            taskHostConfiguration.RehydrateFromCache(_configurationCache);
+
             // Only _activeTaskCount must be zero — blocked tasks (waiting on BuildProjectFile
             // callbacks) don't prevent accepting a new nested task configuration.
             Assumed.Zero(_activeTaskCount, $"Why are we getting a TaskHostConfiguration packet while a task is actively executing? activeTaskCount={_activeTaskCount}");
@@ -1494,7 +1499,10 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_REPORTFILEACCESSES
                         _fileAccessData,
 #endif
-                        currentEnvironment);
+                        currentEnvironment,
+                        TaskHostDictionaryDelta.IsEnabled
+                            ? taskConfiguration.BuildProcessEnvironment
+                            : null);
 
 #if FEATURE_APPDOMAIN
                     foreach (TaskParameter param in taskParams.Values)

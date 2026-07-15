@@ -635,6 +635,117 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             logger.FullLog.ShouldContain("RestoreTask executed");
         }
 
+        [Fact]
+        public void TaskHostEnvironmentDeltasFlowAcrossSequentialTasks()
+        {
+            _env.SetEnvironmentVariable("MSBUILDTASKHOSTCONFIGCACHE", "1");
+
+            string projectContent = $@"
+<Project>
+    <UsingTask TaskName=""EnvironmentMutationTestTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
+
+    <Target Name=""TestTarget"">
+        <EnvironmentMutationTestTask Name=""MSBUILD_TASKHOST_CACHE_TEST"" Value=""first"" />
+        <EnvironmentMutationTestTask Name=""MSBUILD_TASKHOST_CACHE_TEST"" ExpectedValue=""first"" />
+        <EnvironmentMutationTestTask Name=""MSBUILD_TASKHOST_CACHE_TEST"" Remove=""true"" />
+        <EnvironmentMutationTestTask Name=""MSBUILD_TASKHOST_CACHE_TEST"" ExpectMissing=""true"" />
+    </Target>
+</Project>";
+
+            string projectFile = Path.Combine(_testProjectsDir, "TaskHostEnvironmentDeltas.proj");
+            File.WriteAllText(projectFile, projectContent);
+
+            var logger = new MockLogger(_output);
+            var buildParameters = new BuildParameters
+            {
+                MultiThreaded = true,
+                MaxNodeCount = 1,
+                Loggers = [logger],
+                DisableInProcNode = false,
+                EnableNodeReuse = false,
+            };
+
+            BuildResult result = BuildManager.DefaultBuildManager.Build(
+                buildParameters,
+                new BuildRequestData(
+                    projectFile,
+                    new Dictionary<string, string>(),
+                    null,
+                    ["TestTarget"],
+                    null));
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "EnvironmentMutationTestTask");
+            logger.FullLog.ShouldContain("Observed MSBUILD_TASKHOST_CACHE_TEST=first");
+            logger.FullLog.ShouldContain("Observed MSBUILD_TASKHOST_CACHE_TEST=<missing>");
+        }
+
+        [Fact]
+        public void TaskHostCacheResetsWhenSidecarProcessIsReusedAcrossBuilds()
+        {
+            _env.SetEnvironmentVariable("MSBUILDTASKHOSTCONFIGCACHE", "1");
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            _env.SetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT", $"taskhost-cache-reuse-{Guid.NewGuid():N}");
+
+            string projectContent = """
+<Project>
+    <UsingTask TaskName="CachePidTask"
+               TaskFactory="RoslynCodeTaskFactory"
+               AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll">
+        <Task>
+            <Using Namespace="System.Diagnostics" />
+            <Code Type="Fragment" Language="cs">
+                Log.LogMessage(MessageImportance.High, $"CACHE_TASKHOST_PID={Process.GetCurrentProcess().Id}");
+            </Code>
+        </Task>
+    </UsingTask>
+
+    <Target Name="TestTarget">
+        <CachePidTask />
+    </Target>
+</Project>
+""";
+
+            string projectFile = Path.Combine(_testProjectsDir, "TaskHostCacheReuse.proj");
+            File.WriteAllText(projectFile, projectContent);
+
+            try
+            {
+                string firstOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                    $"\"{projectFile}\" /t:TestTarget /mt /m:1 /v:n",
+                    out bool firstSuccess,
+                    outputHelper: _output);
+                string secondOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                    $"\"{projectFile}\" /t:TestTarget /mt /m:1 /v:n",
+                    out bool secondSuccess,
+                    outputHelper: _output);
+
+                firstSuccess.ShouldBeTrue(firstOutput);
+                secondSuccess.ShouldBeTrue(secondOutput);
+
+                Match firstPid = Regex.Match(firstOutput, @"CACHE_TASKHOST_PID=(\d+)");
+                Match secondPid = Regex.Match(secondOutput, @"CACHE_TASKHOST_PID=(\d+)");
+                firstPid.Success.ShouldBeTrue(firstOutput);
+                secondPid.Success.ShouldBeTrue(secondOutput);
+                firstPid.Groups[1].Value.ShouldBe(
+                    secondPid.Groups[1].Value,
+                    "The sidecar process should be reused, while its per-connection configuration cache is reset.");
+            }
+            finally
+            {
+                string dotnet = Path.Combine(
+                    RunnerUtilities.BootstrapRootPath,
+                    "core",
+                    Constants.DotnetProcessName);
+                _ = RunnerUtilities.RunProcessAndGetOutput(
+                    dotnet,
+                    "build-server shutdown",
+                    out _,
+                    shellExecute: false,
+                    outputHelper: _output);
+            }
+        }
+
         private string CreateTestProject(string taskName, string taskClass)
         {
             return $@"
@@ -690,7 +801,51 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     {
         public override bool Execute()
         {
-            Log.LogMessage(MessageImportance.High, "NonEnlightenedTask executed");
+            Log.LogMessage(MessageImportance.High, $"NonEnlightenedTask executed in PID={Process.GetCurrentProcess().Id}");
+            return true;
+        }
+    }
+
+    public class EnvironmentMutationTestTask : Task
+    {
+        [Required]
+        public string Name { get; set; }
+
+        public string Value { get; set; }
+
+        public string ExpectedValue { get; set; }
+
+        public bool Remove { get; set; }
+
+        public bool ExpectMissing { get; set; }
+
+        public override bool Execute()
+        {
+            string currentValue = Environment.GetEnvironmentVariable(Name);
+            if (ExpectedValue is not null && !String.Equals(currentValue, ExpectedValue, StringComparison.Ordinal))
+            {
+                Log.LogError($"Expected {Name}={ExpectedValue}, but observed {currentValue ?? "<missing>"}.");
+                return false;
+            }
+
+            if (ExpectMissing && currentValue is not null)
+            {
+                Log.LogError($"Expected {Name} to be missing, but observed {currentValue}.");
+                return false;
+            }
+
+            if (Remove)
+            {
+                Environment.SetEnvironmentVariable(Name, null);
+            }
+            else if (Value is not null)
+            {
+                Environment.SetEnvironmentVariable(Name, Value);
+            }
+
+            Log.LogMessage(
+                MessageImportance.High,
+                $"Observed {Name}={Environment.GetEnvironmentVariable(Name) ?? "<missing>"}");
             return true;
         }
     }

@@ -32,6 +32,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Dictionary<string, string> _buildProcessEnvironment;
 
+        private TaskHostDictionaryTransferKind _buildProcessEnvironmentTransferKind = TaskHostDictionaryTransferKind.Full;
+        private Dictionary<string, string> _buildProcessEnvironmentTransferValues;
+        private List<string> _removedBuildProcessEnvironmentKeys;
+
         /// <summary>
         /// The culture
         /// </summary>
@@ -101,7 +105,17 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Dictionary<string, TaskParameter> _taskParameters;
 
+        private TaskHostTaskParameterTransferKind _taskParameterTransferKind = TaskHostTaskParameterTransferKind.Direct;
+        private int _taskParameterCacheId;
+        private byte[] _serializedTaskParameters;
+        private bool _serializedTaskParametersCompressed;
+        private byte _taskParameterPayloadVersion;
+
         private Dictionary<string, string> _globalParameters;
+
+        private TaskHostDictionaryTransferKind _globalParametersTransferKind = TaskHostDictionaryTransferKind.Full;
+        private Dictionary<string, string> _globalParametersTransferValues;
+        private List<string> _removedGlobalParameterKeys;
 
         private ICollection<string> _warningsAsErrors;
         private ICollection<string> _warningsNotAsErrors;
@@ -458,6 +472,93 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        internal TaskHostDictionaryTransferKind BuildProcessEnvironmentTransferKind => _buildProcessEnvironmentTransferKind;
+
+        internal TaskHostDictionaryTransferKind GlobalParametersTransferKind => _globalParametersTransferKind;
+
+        internal TaskHostTaskParameterTransferKind TaskParameterTransferKind => _taskParameterTransferKind;
+
+        internal bool SerializedTaskParametersCompressed => _serializedTaskParametersCompressed;
+
+        internal void PrepareForSerialization(TaskHostConfigurationCache cache, byte packetVersion)
+        {
+            TaskHostDictionaryDelta.Prepare(
+                _buildProcessEnvironment,
+                ref cache.BuildProcessEnvironment,
+                out _buildProcessEnvironmentTransferKind,
+                out _buildProcessEnvironmentTransferValues,
+                out _removedBuildProcessEnvironmentKeys);
+
+            TaskHostDictionaryDelta.Prepare(
+                _globalParameters,
+                ref cache.GlobalProperties,
+                out _globalParametersTransferKind,
+                out _globalParametersTransferValues,
+                out _removedGlobalParameterKeys);
+
+            if (packetVersion >= TaskHostDictionaryDelta.TaskParameterCacheMinimumPacketVersion)
+            {
+                cache.TaskParameters.Prepare(
+                    _taskParameters,
+                    packetVersion,
+                    out _taskParameterTransferKind,
+                    out _taskParameterCacheId,
+                    out _serializedTaskParameters,
+                    out _serializedTaskParametersCompressed,
+                    out _taskParameterPayloadVersion);
+            }
+            else
+            {
+                _taskParameterTransferKind = TaskHostTaskParameterTransferKind.Direct;
+                cache.TaskParameters.Reset();
+            }
+        }
+
+        internal void RehydrateFromCache(TaskHostConfigurationCache cache)
+        {
+            if (_buildProcessEnvironment is not null)
+            {
+                cache.BuildProcessEnvironment = TaskHostDictionaryDelta.Clone(_buildProcessEnvironment);
+            }
+            else
+            {
+                _buildProcessEnvironment = TaskHostDictionaryDelta.Apply(
+                    _buildProcessEnvironmentTransferKind,
+                    _buildProcessEnvironmentTransferValues,
+                    _removedBuildProcessEnvironmentKeys,
+                    ref cache.BuildProcessEnvironment);
+            }
+
+            if (_globalParameters is not null)
+            {
+                cache.GlobalProperties = TaskHostDictionaryDelta.Clone(_globalParameters);
+            }
+            else
+            {
+                _globalParameters = TaskHostDictionaryDelta.Apply(
+                    _globalParametersTransferKind,
+                    _globalParametersTransferValues,
+                    _removedGlobalParameterKeys,
+                    ref cache.GlobalProperties);
+            }
+
+            if (_taskParameterTransferKind != TaskHostTaskParameterTransferKind.Direct)
+            {
+                _taskParameters = cache.TaskParameters.Apply(
+                    _taskParameterTransferKind,
+                    _taskParameterCacheId,
+                    _serializedTaskParameters,
+                    _serializedTaskParametersCompressed,
+                    _taskParameterPayloadVersion);
+            }
+
+            _buildProcessEnvironmentTransferValues = null;
+            _removedBuildProcessEnvironmentKeys = null;
+            _globalParametersTransferValues = null;
+            _removedGlobalParameterKeys = null;
+            _serializedTaskParameters = null;
+        }
+
         /// <summary>
         /// Translates the packet to/from binary form.
         /// </summary>
@@ -466,7 +567,20 @@ namespace Microsoft.Build.BackEnd
         {
             translator.Translate(ref _nodeId);
             translator.Translate(ref _startupDirectory);
-            translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+            if (SupportsDictionaryDeltas(translator))
+            {
+                TranslateDictionaryTransfer(
+                    translator,
+                    ref _buildProcessEnvironmentTransferKind,
+                    ref _buildProcessEnvironmentTransferValues,
+                    ref _removedBuildProcessEnvironmentKeys,
+                    _buildProcessEnvironment);
+            }
+            else
+            {
+                translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+            }
+
             translator.TranslateCulture(ref _culture);
             translator.TranslateCulture(ref _uiCulture);
 #if FEATURE_APPDOMAIN
@@ -511,9 +625,56 @@ namespace Microsoft.Build.BackEnd
 #endif
 
             translator.Translate(ref _isTaskInputLoggingEnabled);
-            translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
+            if (translator.NegotiatedPacketVersion is >= TaskHostDictionaryDelta.TaskParameterCacheMinimumPacketVersion)
+            {
+                translator.TranslateEnum(ref _taskParameterTransferKind, (int)_taskParameterTransferKind);
+                switch (_taskParameterTransferKind)
+                {
+                    case TaskHostTaskParameterTransferKind.Direct:
+                        translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
+                        break;
+
+                    case TaskHostTaskParameterTransferKind.CachedValue:
+                        translator.Translate(ref _taskParameterCacheId);
+                        translator.Translate(ref _taskParameterPayloadVersion);
+                        translator.Translate(ref _serializedTaskParametersCompressed);
+                        translator.Translate(ref _serializedTaskParameters);
+                        break;
+
+                    case TaskHostTaskParameterTransferKind.CacheReference:
+                        translator.Translate(ref _taskParameterCacheId);
+                        break;
+
+                    case TaskHostTaskParameterTransferKind.UncachedValue:
+                        translator.Translate(ref _taskParameterPayloadVersion);
+                        translator.Translate(ref _serializedTaskParametersCompressed);
+                        translator.Translate(ref _serializedTaskParameters);
+                        break;
+
+                    default:
+                        throw new InvalidOperationException($"Unknown TaskHost parameter transfer kind '{_taskParameterTransferKind}'.");
+                }
+            }
+            else
+            {
+                translator.TranslateDictionary(ref _taskParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
+            }
+
             translator.Translate(ref _continueOnError);
-            translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
+            if (SupportsDictionaryDeltas(translator))
+            {
+                TranslateDictionaryTransfer(
+                    translator,
+                    ref _globalParametersTransferKind,
+                    ref _globalParametersTransferValues,
+                    ref _removedGlobalParameterKeys,
+                    _globalParameters);
+            }
+            else
+            {
+                translator.TranslateDictionary(ref _globalParameters, StringComparer.OrdinalIgnoreCase);
+            }
+
             translator.Translate(collection: ref _warningsAsErrors,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
@@ -523,6 +684,40 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(collection: ref _warningsAsMessages,
                                  objectTranslator: (ITranslator t, ref string s) => t.Translate(ref s),
                                  collectionFactory: count => new HashSet<string>(count, StringComparer.OrdinalIgnoreCase));
+        }
+
+        private static bool SupportsDictionaryDeltas(ITranslator translator)
+            => translator.NegotiatedPacketVersion is >= TaskHostDictionaryDelta.MinimumPacketVersion;
+
+        private static void TranslateDictionaryTransfer(
+            ITranslator translator,
+            ref TaskHostDictionaryTransferKind transferKind,
+            ref Dictionary<string, string> transferValues,
+            ref List<string> removedKeys,
+            Dictionary<string, string> fullValues)
+        {
+            translator.TranslateEnum(ref transferKind, (int)transferKind);
+
+            if (transferKind is TaskHostDictionaryTransferKind.Full or TaskHostDictionaryTransferKind.Delta)
+            {
+                if (translator.Mode == TranslationDirection.WriteToStream &&
+                    transferKind == TaskHostDictionaryTransferKind.Full &&
+                    transferValues is null)
+                {
+                    transferValues = fullValues is null
+                        ? new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+                        : TaskHostDictionaryDelta.Clone(fullValues);
+                }
+
+                translator.TranslateDictionary(ref transferValues, StringComparer.OrdinalIgnoreCase);
+            }
+
+            if (transferKind == TaskHostDictionaryTransferKind.Delta)
+            {
+                translator.Translate(
+                    ref removedKeys,
+                    (ITranslator t, ref string key) => t.Translate(ref key));
+            }
         }
 
         /// <summary>

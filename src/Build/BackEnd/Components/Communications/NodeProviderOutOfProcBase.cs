@@ -1011,6 +1011,8 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             private readonly byte _negotiatedPacketVersion;
 
+            internal byte NegotiatedPacketVersion => _negotiatedPacketVersion;
+
 
 #if FEATURE_APM
             // used in BodyReadComplete callback to avoid allocations due to passing state through BeginRead

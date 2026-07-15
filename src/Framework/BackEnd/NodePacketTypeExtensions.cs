@@ -29,11 +29,13 @@ internal static class NodePacketTypeExtensions
     /// 2: Added support for translating/reading HostServices, ProjectFile, TargetName in TaskHostConfiguration.
     /// 3: Added App Host support.
     /// 4: Added IsRunningMultipleNodes, Request/ReleaseCores, BuildProjectFile callbacks support for OOP TaskHost.
+    /// 5: Added delta encoding for TaskHost environment and global-property dictionaries.
+    /// 6: Added exact caching and compression for TaskHost task-parameter payloads.
     /// 
     /// When incrementing this version, ensure compatibility with existing
     /// task hosts and update the corresponding deserialization logic.
     /// </summary>
-    public const byte PacketVersion = 4;
+    public const byte PacketVersion = 6;
 
     // Flag bits in upper 2 bits
     private const byte ExtendedHeaderFlag = 0x40;  // Bit 6: 01000000
