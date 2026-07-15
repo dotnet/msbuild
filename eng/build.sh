@@ -60,8 +60,9 @@ common_build_args="--configuration $configuration $properties"
 build_args="$common_build_args"
 
 # If the caller requested a multi-stage build, add the --prepareMachine switch to the stage 1 build so that it kills any lingering processes from stage 1 before stage 2 starts.
+# Also disable the pipeline set result masking for stage 1 so that a stage 1 failure surfaces its real exit code to this wrapper (stage 2 is the terminal build that reports the pipeline result).
 if [ "$stage2" = true ]; then
-  build_args="$build_args --prepareMachine"
+  build_args="$build_args --prepareMachine --disablePipelineSetResult"
 fi
 
 if [ "$test" = true ] && [ "$stage2" != true ]; then
