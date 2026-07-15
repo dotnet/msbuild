@@ -97,11 +97,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         public static readonly DiagnosticDescriptor CultureSensitiveTaskItemType = new(
             id: DiagnosticIds.CultureSensitiveTaskItemType,
             title: "ITaskItem<T> type argument relies on culture-sensitive conversion",
-            messageFormat: "Task property '{0}' uses ITaskItem<{1}>, which MSBuild parses through Convert.ChangeType and therefore relies on CultureInfo conversion semantics. Use ITaskItem<string> and parse explicitly with a chosen culture.",
+            messageFormat: "Task property '{0}' uses ITaskItem<{1}>, which MSBuild parses through Convert.ChangeType using CultureInfo.InvariantCulture. Use ITaskItem<string> and parse explicitly with a chosen culture.",
             category: "MSBuild.TaskAuthoring",
             defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true,
-            description: "ITaskItem<T> type arguments parsed through Convert.ChangeType rely on culture-sensitive conversion semantics. Bind the item as a string and parse it explicitly with the intended culture.");
+            description: "ITaskItem<T> type arguments parsed through Convert.ChangeType use CultureInfo.InvariantCulture. Bind the item as a string and parse it explicitly with the intended culture.");
 
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,

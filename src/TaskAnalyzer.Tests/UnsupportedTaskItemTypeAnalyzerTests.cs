@@ -61,7 +61,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
         diagnostic.Id.ShouldBe(DiagnosticIds.CultureSensitiveTaskItemType);
         diagnostic.Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Error);
         diagnostic.GetMessage().ShouldContain("Convert.ChangeType");
-        diagnostic.GetMessage().ShouldContain("CultureInfo");
+        diagnostic.GetMessage().ShouldContain("CultureInfo.InvariantCulture");
     }
 
     [Fact]

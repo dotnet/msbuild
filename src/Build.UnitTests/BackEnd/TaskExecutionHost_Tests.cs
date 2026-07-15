@@ -577,7 +577,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Validate that setting a TaskItem&lt;string&gt; parameter preserves the item identity.
+        /// Validate that setting a TaskItem&lt;string&gt; parameter preserves the item value.
         /// </summary>
         [Fact]
         public void TestSetTaskItemStringParam()
