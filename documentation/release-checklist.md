@@ -203,13 +203,13 @@ Steps are **mostly parallel** unless noted.
 
 - [ ] **5.1** Push packages to nuget.org.
 
-  > **How publishing works:** We don't push packages ourselves. We hand a link to the **Release** artifacts of the official build to the _.NET Release Team_, and they push to nuget.org. Searching past mail for the subject _"Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org" for the template.
+  > **How publishing works:** We don't push packages ourselves. We hand a link to the **Shipping** artifacts of the official build to the _.NET Release Team_, and they push to nuget.org. Search past mail for the subject _"Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org"_ for the template.
 
   - [ ] **5.1a** Determine the exact MSBuild version that actually shipped to customers.
     - **If this release is coupled with an SDK release: use the SDK as the source of truth**. Look up the MSBuild version baked into the shipped SDK build.
     - Otherwise, read the **authoritative GA'd value from VS `rel/stable`**: the `Microsoft.Build` component version in [`.corext/Configs/msbuild-components.json`](https://devdiv.visualstudio.com/DevDiv/_git/VS?path=/.corext/Configs/msbuild-components.json&version=GBrel/stable) (e.g. `18.7.1-servicing-NNNNN-NN+<sha>`). Extract just the **numeric `VersionPrefix`** from that string — drop the `-servicing-NNNNN-NN+<sha>` suffix — and use it as `{{THIS_RELEASE_EXACT_VERSION}}` (e.g. `18.7.1`). **Do not** rely solely on the VS insertion PR — that PR targets VS `main` and can be superseded by a later servicing insertion before GA, whereas `rel/stable` reflects what actually shipped.
   - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`).
-  - [ ] **5.1c** From that build, open the **Publish Artifacts** step and grab the link to the **`PackageArtifacts/Release`** drop. Verify the **Release** folder contains all of:
+  - [ ] **5.1c** From that build's **Summary**, open **Artifacts / Published artifacts**, select **`PackageArtifacts`**, and then open the **`Shipping`** folder. Copy the browser/download link for `PackageArtifacts/Shipping`; this is the link to send to the release team. Do **not** use the `Products/...` VSTS drop, which contains the VS insertion payload rather than the NuGet shipping packages. Verify the Shipping folder contains all of:
     - `Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.Framework.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
@@ -217,13 +217,13 @@ Steps are **mostly parallel** unless noted.
     - `Microsoft.Build.Tasks.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.NET.StringTools.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.Templates.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
-  - [ ] **5.1d** Email the _.NET Release Team_ with the `Release` link from 5.1c and ask them to publish to nuget.org.
+  - [ ] **5.1d** Email the _.NET Release Team_ with the `PackageArtifacts/Shipping` link from 5.1c and ask them to publish to nuget.org.
 
 - [ ] **5.2** Publish docs
 
   > **How publishing works:** The reference-publishing vendor team generates Microsoft Learn reference pages from the shipped MSBuild assemblies/xmldoc and then sends us a docs-repo PR with the regenerated content.
 
-  - [ ] **5.2a** Create a reference-publishing ticket for the new release based on [this existing ticket](https://dev.azure.com/msft-skilling/Content/_workitems/edit/565854) as a template. Then wait for the vendor team to ping you with a link to the generated PR.
+  - [ ] **5.2a** Create a reference-publishing ticket for the new release based on [this existing ticket](https://dev.azure.com/msft-skilling/Content/_workitems/edit/565854) as a template. Leave **Assigned To** empty so the vendor team can claim the ticket when work begins. Then wait for them to ping you with a link to the generated PR.
   - [ ] **5.2b** Review and approve the docs-repo PR the vendor team opens (example: [msbuild-api-docs#61](https://github.com/dotnet/msbuild-api-docs/pull/61)).
 - [ ] **5.3** Create GitHub release:
   - [ ] **5.3a** **Precondition — confirm the previous release tag exists on `upstream`.** \
