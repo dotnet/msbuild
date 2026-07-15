@@ -30,20 +30,20 @@
   </Target>
   <Target Name="GatherNuGetDependencies" AfterTargets="ResolvePackageAssets">
     <ItemGroup>
-        <!-- Collect known NuGet dependencies after resolving packages -->
-        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGet.'))' == 'true'" />
-        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Newtonsoft.Json'))' == 'true'" />
-        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGetSdkResolver'))' == 'true'" />
-        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Microsoft.Extensions.'))' == 'true'" />
-        <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Microsoft.VisualStudio.SolutionPersistence'))' == 'true'" />
-      
-        <!-- NuGet.targets and NuGet.RestoreEx.targets will be in the RuntimeTargetsCopyLocalItems ItemGroup -->
-        <_NuGetRuntimeDependencies Include="%(RuntimeTargetsCopyLocalItems.Identity)" Condition="'@(RuntimeTargetsCopyLocalItems->Contains('NuGet.'))' == 'true'" />
+      <!-- Collect known NuGet dependencies after resolving packages -->
+      <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGet.'))' == 'true'" />
+      <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Newtonsoft.Json'))' == 'true'" />
+      <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('NuGetSdkResolver'))' == 'true'" />
+      <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Microsoft.Extensions.'))' == 'true'" />
+      <_NuGetRuntimeDependencies Include="%(RuntimeCopyLocalItems.Identity)" Condition="'@(RuntimeCopyLocalItems->Contains('Microsoft.VisualStudio.SolutionPersistence'))' == 'true'" />
 
-        <!-- NuGet.Build.Tasks.Console.exe will be in the None ItemGroup -->
-        <_NuGetRuntimeDependencies Include="%(None.Identity)" Condition="'@(None->Contains('NuGet.'))' == 'true'" />
+      <!-- NuGet.targets and NuGet.RestoreEx.targets will be in the RuntimeTargetsCopyLocalItems ItemGroup -->
+      <_NuGetRuntimeDependencies Include="%(RuntimeTargetsCopyLocalItems.Identity)" Condition="'@(RuntimeTargetsCopyLocalItems->Contains('NuGet.'))' == 'true'" />
 
-        <_NuGetRuntimeDependencies Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\RuntimeIdentifierGraph.json" />
+      <!-- NuGet.Build.Tasks.Console.exe will be in the None ItemGroup -->
+      <_NuGetRuntimeDependencies Include="%(None.Identity)" Condition="'@(None->Contains('NuGet.'))' == 'true'" />
+
+      <_NuGetRuntimeDependencies Include="$(NetCoreSdkRoot)RuntimeIdentifierGraph.json" />
     </ItemGroup>
   </Target>
 
@@ -55,11 +55,11 @@
          need to be in a specific location that does not mesh with NuGet. To resolve this, we include the default
          PackageReference assets but will remove them from the Reference ItemGroup before RAR runs and avoid the warnings -->
     <ItemGroup>
-        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Build'))' == 'true'" />
-        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGet.'))' == 'true'" />
-        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Newtonsoft.Json'))' == 'true'" />
-        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGetSdkResolver'))' == 'true'" />
-        <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Extensions.'))' == 'true'" />
+      <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Build'))' == 'true'" />
+      <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGet.'))' == 'true'" />
+      <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Newtonsoft.Json'))' == 'true'" />
+      <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('NuGetSdkResolver'))' == 'true'" />
+      <Reference Remove="%(Reference.Identity)" Condition="'@(Reference->Contains('Microsoft.Extensions.'))' == 'true'" />
     </ItemGroup>
   </Target>
 
@@ -73,9 +73,9 @@
   </UsingTask>
   <Target Name="BootstrapFull" DependsOnTargets="CleanBootstrapFolder;SetBinPaths;GatherNuGetDependencies">
 
-      <LocateVisualStudioTask>
-        <Output TaskParameter="VsInstallPath" PropertyName="AvailableVsInstallPath" />
-      </LocateVisualStudioTask>
+    <LocateVisualStudioTask>
+      <Output TaskParameter="VsInstallPath" PropertyName="AvailableVsInstallPath" />
+    </LocateVisualStudioTask>
 
     <ItemGroup>
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\*.targets" />
@@ -85,7 +85,7 @@
       <InstalledVersionedExtensions Include="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\**\FileTracker*.dll" />
       <SdkResolverFiles Include="$(AvailableVsInstallPath)\MSBuild\Current\Bin\SdkResolvers\Microsoft.DotNet.MSBuildSdkResolver\**\*.*" />
       <NuGetSdkResolverManifest Include="$(RepoRoot)src\MSBuild\SdkResolvers\VS\Microsoft.Build.NuGetSdkResolver.xml" />
-      <InstalledSdks Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
+      <InstalledSdks Include="$(NetCoreSdkRoot)Sdks\**\*.*" />
 
       <InstalledStaticAnalysisTools Include="$(VsInstallRoot)\Team Tools\Static Analysis Tools\**\*.*" />
 
@@ -114,6 +114,10 @@
       <FreshlyBuiltBinaries Include="$(MSBuildTaskHostBinPath)**\*.exe.config" />
       <FreshlyBuiltBinaries Include="$(MSBuildTaskHostBinPath)**\*.dll.config" />
 
+      <FreshlyBuiltBinaries Include="$(CoordinatorBinPath)**\MSBuild.Coordinator.exe" />
+      <FreshlyBuiltBinaries Include="$(CoordinatorBinPath)**\MSBuild.Coordinator.exe.config" />
+      <FreshlyBuiltBinaries Include="$(CoordinatorBinPath)**\MSBuild.Coordinator.pdb" />
+
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.dll" />
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.exe" />
       <FreshlyBuiltBinariesx64 Include="$(X64BinPath)**\*.tlb" />
@@ -127,6 +131,10 @@
       <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.exe.config" />
       <FreshlyBuiltBinariesx64 Include="$(MSBuildTaskHostX64BinPath)**\*.dll.config" />
 
+      <FreshlyBuiltBinariesx64 Include="$(CoordinatorX64BinPath)**\MSBuild.Coordinator.exe" />
+      <FreshlyBuiltBinariesx64 Include="$(CoordinatorX64BinPath)**\MSBuild.Coordinator.exe.config" />
+      <FreshlyBuiltBinariesx64 Include="$(CoordinatorX64BinPath)**\MSBuild.Coordinator.pdb" />
+
       <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.Tasks.Core.dll" />
       <FreshlyBuiltBinariesArm64 Include="$(X64BinPath)\Microsoft.Build.dll" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.exe" />
@@ -134,6 +142,10 @@
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.pdb" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.exe.config" />
       <FreshlyBuiltBinariesArm64 Include="$(Arm64BinPath)**\*.dll.config" />
+
+      <FreshlyBuiltBinariesArm64 Include="$(CoordinatorArm64BinPath)**\MSBuild.Coordinator.exe" />
+      <FreshlyBuiltBinariesArm64 Include="$(CoordinatorArm64BinPath)**\MSBuild.Coordinator.exe.config" />
+      <FreshlyBuiltBinariesArm64 Include="$(CoordinatorArm64BinPath)**\MSBuild.Coordinator.pdb" />
 
       <FreshlyBuiltRootProjects Include="$(OutputPath)Microsoft.Common.props" />
       <FreshlyBuiltRootProjects Include="$(OutputPath)Microsoft.VisualStudioVersion.*.Common.props" />
@@ -238,16 +250,46 @@
 
     <PropertyGroup>
       <InstallDir>$(ArtifactsBinDir)bootstrap\core\</InstallDir>
+      <!-- The dotnet-install script is just a build tool, so keep it repo-local instead of writing it into
+           $(DotNetRoot), which can resolve to a machine-global, possibly non-writable path such as
+           "C:\Program Files\dotnet\" (see https://github.com/dotnet/msbuild/issues/13962). -->
+      <DotNetInstallScriptRootPath>$(ArtifactsObjDir)bootstrap\</DotNetInstallScriptRootPath>
+      <CoordinatorBinPath>$(ArtifactsBinDir)MSBuild.Coordinator\$(Configuration)\$(TargetFramework.ToLowerInvariant())\</CoordinatorBinPath>
     </PropertyGroup>
 
-    <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetRoot)" InstallDir="$(InstallDir)" Version="$(BootstrapSdkVersion)"/>
+    <!-- Download the bootstrap .NET SDK -->
+    <InstallDotNetCoreTask
+      DotNetInstallScriptRootPath="$(DotNetInstallScriptRootPath)" 
+      InstallDir="$(InstallDir)"
+      Version="$(BootstrapSdkVersion)" />
+
+    <PropertyGroup>
+      <_DotNetInstallScript>$(RepositoryEngineeringDir)common\dotnet-install.cmd</_DotNetInstallScript>
+      <_DotNetInstallScript Condition="'$(OS)' != 'Windows_NT'">$(RepositoryEngineeringDir)common\dotnet-install.sh</_DotNetInstallScript>
+    </PropertyGroup>
+
+    <Exec Condition="'$(OS)' != 'Windows_NT'" Command="chmod +x &quot;$(_DotNetInstallScript)&quot;" />
+
+    <!-- Download additional runtimes if specified in global.json -->
+    <InstallDotNetCore
+      VersionsPropsPath="$(RepositoryEngineeringDir)Versions.props"
+      GlobalJsonPath="$(RepoRoot)global.json"
+      DotNetPath="$(InstallDir.TrimEnd('/\'))"
+      DotNetInstallScript="$(_DotNetInstallScript)"
+      Platform="$(Platform)"
+      RuntimeSourceFeed="$(DotNetRuntimeSourceFeed)"
+      RuntimeSourceFeedKey="$(DotNetRuntimeSourceFeedKey)"/>
   </Target>
 
   <Target Name="BootstrapNetCore" DependsOnTargets="AcquireSdk">
-
     <ItemGroup>
-     <!-- *.deps.json are excluded because the SDK rewrites these files for consistency with the rest of the SDK, so take their version. -->
+      <!-- *.deps.json are excluded because the SDK rewrites these files for consistency with the rest of the SDK, so take their version. -->
       <FreshlyBuiltNetBinaries Include="$(OutDir)**\*.*" Exclude="$(OutDir)**\*.deps.json" />
+
+      <FreshlyBuiltNetBinaries Include="$(CoordinatorBinPath)**\MSBuild.Coordinator.dll" />
+      <FreshlyBuiltNetBinaries Include="$(CoordinatorBinPath)**\MSBuild.Coordinator.exe" />
+      <FreshlyBuiltNetBinaries Include="$(CoordinatorBinPath)**\MSBuild.Coordinator.pdb" />
+      <FreshlyBuiltNetBinaries Include="$(CoordinatorBinPath)**\MSBuild.Coordinator.runtimeconfig.json" />
     </ItemGroup>
 
     <!-- The copying of these dependencies is required by bootstrap\**\sdk\**\NuGet.RestoreEx.targets. Otherwise NuGet.Build.Tasks.dll can not be found. -->
@@ -258,11 +300,46 @@
     <Copy SourceFiles="@(FreshlyBuiltNetBinaries)"
           DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
+    <!--
+      MSBuild can target an earlier .NET runtime (e.g. net10.0) than the SDK we overlay it onto (e.g. net11.0).
+      In that case the freshly-built *.runtimeconfig.json files pin Microsoft.NETCore.App to a runtime version
+      (e.g. 10.0.0) that isn't present in the bootstrap layout, so the just-built MSBuild would fail to start.
+      Rewrite that framework version to the exact runtime version that the overlaid SDK ships, so MSBuild runs
+      against the runtime present in the bootstrap layout. This mirrors what dotnet/sdk does via its
+      UpdateRuntimeConfig task, but as a low-cost find & replace with no dedicated task.
+
+      The exact runtime version (including any prerelease suffix) is read from the restored SDK's
+      Microsoft.NETCoreSdk.BundledVersions.props ($(BundledNETCoreAppPackageVersion)). We must not derive it from
+      BootstrapSdkVersion (that's the SDK version, e.g. 11.0.100-*, not the runtime version 11.0.0-*), nor use the
+      MSBuild property $(BundledNETCoreAppPackageVersion), which resolves to the runtime of the SDK building this
+      project rather than the one restored into the bootstrap. A wrong/rounded version (e.g. 11.0.0 without the
+      prerelease suffix) still lets the top-level SDK host roll forward, but the child apphosts (worker node,
+      TaskHost) fail with hostfxr error 150. We only care about Microsoft.NETCore.App, so the replacement is keyed
+      on that framework name and leaves the version untouched (a no-op) once MSBuild targets the SDK's runtime. -->
+    <PropertyGroup>
+      <_BootstrapBundledVersionsFile>$(InstallDir)sdk\$(BootstrapSdkVersion)\Microsoft.NETCoreSdk.BundledVersions.props</_BootstrapBundledVersionsFile>
+      <!-- The exact runtime version restored into the bootstrap, e.g. 11.0.0-preview.5.26302.115. -->
+      <_BootstrapNetCoreVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(_BootstrapBundledVersionsFile)')), '&lt;BundledNETCoreAppPackageVersion&gt;([^&lt;]+)&lt;').Groups[1].Value)</_BootstrapNetCoreVersion>
+      <_BootstrapNetCoreVersionPattern>(&quot;name&quot;:\s*&quot;Microsoft\.NETCore\.App&quot;,\s*&quot;version&quot;:\s*&quot;)[^&quot;]*</_BootstrapNetCoreVersionPattern>
+      <_BootstrapNetCoreVersionReplacement>${1}$(_BootstrapNetCoreVersion)</_BootstrapNetCoreVersionReplacement>
+    </PropertyGroup>
+
+    <Error Condition="'$(_BootstrapNetCoreVersion)' == ''"
+           Text="Could not read BundledNETCoreAppPackageVersion from '$(_BootstrapBundledVersionsFile)'; the bootstrap runtimeconfig.json files cannot be rewritten to a valid runtime version." />
+
+    <ItemGroup>
+      <_BootstrapRuntimeConfigFile Include="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')"
+                                   Condition="'%(Extension)' == '.json' and $([System.String]::Copy('%(Filename)').EndsWith('.runtimeconfig'))" />
+    </ItemGroup>
+
+    <WriteLinesToFile File="%(_BootstrapRuntimeConfigFile.Identity)"
+                      Lines="$([System.Text.RegularExpressions.Regex]::Replace($([System.IO.File]::ReadAllText('%(_BootstrapRuntimeConfigFile.Identity)')), $(_BootstrapNetCoreVersionPattern), $(_BootstrapNetCoreVersionReplacement)))"
+                      Overwrite="true" />
+
     <!-- macOS Gatekeeper kills copied dotnet apphosts that lack a valid local signature.
          Ad-hoc re-sign to prevent SIGKILL (exit code 137) when tests invoke the bootstrap dotnet. -->
     <Exec Command="codesign --force --sign - &quot;$(InstallDir)dotnet&quot;"
           Condition="$([MSBuild]::IsOSPlatform('osx'))" />
-
   </Target>
 
 </Project>

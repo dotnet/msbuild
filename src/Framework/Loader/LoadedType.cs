@@ -3,6 +3,10 @@
 
 using System;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
@@ -27,6 +31,7 @@ namespace Microsoft.Build.Shared
         /// <param name="architecture">Assembly architecture extracted from PE flags</param>
         /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
         internal LoadedType(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)]
             Type type,
             AssemblyLoadInfo assemblyLoadInfo,
             Assembly loadedAssembly,
@@ -48,10 +53,18 @@ namespace Microsoft.Build.Shared
             Architecture = architecture;
             Runtime = runtime;
 
-            // For inline tasks loaded from bytes, Assembly.Location is empty, so use the original path
-            Path = string.IsNullOrEmpty(loadedAssembly.Location)
+            // Assembly.Location is empty for inline tasks loaded from bytes, and for every assembly in a
+            // single-file/Native AOT host; in those cases fall back to the original load path. On .NET the
+            // read is guarded on dynamic-code support so ILC dead-strips it (and its IL3000) under AOT, while
+            // the JIT still prefers the real loaded location.
+#if NET
+            string loadedAssemblyLocation = RuntimeFeature.IsDynamicCodeSupported ? loadedAssembly.Location : string.Empty;
+#else
+            string loadedAssemblyLocation = loadedAssembly.Location;
+#endif
+            Path = string.IsNullOrEmpty(loadedAssemblyLocation)
                 ? assemblyLoadInfo.AssemblyLocation
-                : loadedAssembly.Location;
+                : loadedAssemblyLocation;
 
             LoadedAssembly = loadedAssembly;
 
@@ -192,7 +205,7 @@ namespace Microsoft.Build.Shared
             // we changed to running all tasks in MTA.
             if (String.Equals("Microsoft.Build.Tasks.Xaml.PartialClassGenerationTask", Type.FullName, StringComparison.OrdinalIgnoreCase))
             {
-                AssemblyName assemblyName = Type.GetTypeInfo().Assembly.GetName();
+                AssemblyName assemblyName = Type.Assembly.GetName();
                 Version lastVersionToForce = new Version(3, 5);
                 if (assemblyName.Version?.CompareTo(lastVersionToForce) > 0)
                 {
@@ -212,6 +225,7 @@ namespace Microsoft.Build.Shared
         /// Gets the type that was loaded from an assembly.
         /// </summary>
         /// <value>The loaded type.</value>
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)]
         internal Type Type { get; private set; }
 
         internal AssemblyName LoadedAssemblyName { get; private set; }

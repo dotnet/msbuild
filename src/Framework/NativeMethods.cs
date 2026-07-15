@@ -3,16 +3,19 @@
 
 using System;
 using System.IO;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework.Logging;
-using Microsoft.Build.Shared;
 using Microsoft.Win32;
 #if FEATURE_WINDOWSINTEROP
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.Build.Utilities;
+using Microsoft.Build.Shared;
 using Microsoft.Win32.SafeHandles;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 using Windows.Win32;
@@ -600,11 +603,25 @@ internal static class NativeMethods
         {
             if (s_frameworkCurrentPath == null)
             {
-                var baseTypeLocation = AssemblyUtilities.GetAssemblyLocation(typeof(string).Assembly);
+#if NET
+                // Under Native AOT there is no core library on disk (typeof(string).Assembly.Location is
+                // empty), so the running runtime's directory is unknown. Every consumer of this value is
+                // locating an installed .NET Framework (or Mono) - which a Native AOT process never has -
+                // and already treats an empty path as "not found", so report empty here instead of reading
+                // the (empty) assembly location.
+                if (!RuntimeFeature.IsDynamicCodeSupported)
+                {
+                    s_frameworkCurrentPath = string.Empty;
+                }
+                else
+#endif
+                {
+                    var baseTypeLocation = typeof(string).Assembly.Location;
 
-                s_frameworkCurrentPath =
-                    Path.GetDirectoryName(baseTypeLocation)
-                    ?? string.Empty;
+                    s_frameworkCurrentPath =
+                        Path.GetDirectoryName(baseTypeLocation)
+                        ?? string.Empty;
+                }
             }
 
             return s_frameworkCurrentPath;
@@ -1168,34 +1185,6 @@ internal static class NativeMethods
     }
 #endif
 
-    /// <summary>
-    /// Internal, optimized GetCurrentDirectory implementation that simply delegates to the native method
-    /// </summary>
-    internal static string GetCurrentDirectory()
-    {
-#if FEATURE_LEGACY_GETCURRENTDIRECTORY
-        if (IsWindows)
-        {
-            using BufferScope<char> buffer = new(stackalloc char[(int)PInvoke.MAX_PATH]);
-            int pathLength = (int)PInvoke.GetCurrentDirectory(buffer);
-
-            if (pathLength > buffer.Length)
-            {
-                buffer.EnsureCapacity(pathLength);
-                pathLength = (int)PInvoke.GetCurrentDirectory(buffer);
-            }
-
-            if (pathLength != 0)
-            {
-                return buffer.Slice(0, pathLength).ToString();
-            }
-
-            HRESULT.FromLastError().ThrowOnFailure();
-        }
-#endif
-        return Directory.GetCurrentDirectory();
-    }
-
     internal static bool SetCurrentDirectory(string path)
     {
 #if FEATURE_WINDOWSINTEROP
@@ -1243,8 +1232,24 @@ internal static class NativeMethods
 
 #endif
 
+    /// <summary>
+    /// Overrides the console capabilities reported by <see cref="QueryIsScreenAndTryEnableAnsiColorCodes"/>.
+    /// Set by a node (e.g. the MSBuild Server node) to the capabilities transmitted from the client process,
+    /// so that auto-detection reflects the client's real terminal rather than the node's own redirected stdout.
+    /// Null when no override is active - i.e. during in-proc builds, or when a server node is idle between
+    /// out-of-proc builds - in which case the local <see cref="Console"/> is queried as usual.
+    /// </summary>
+    internal static (bool acceptAnsiColorCodes, bool outputIsScreen)? ConsoleConfigurationOverride { get; set; }
+
     internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes(bool useStandardError = false)
     {
+        if (ConsoleConfigurationOverride is (bool overrideAcceptAnsiColorCodes, bool overrideOutputIsScreen))
+        {
+            // The real terminal lives in a separate client process; use the capabilities it transmitted.
+            // We must not change this node's console mode, so there is no original mode to restore.
+            return (acceptAnsiColorCodes: overrideAcceptAnsiColorCodes, outputIsScreen: overrideOutputIsScreen, originalConsoleMode: null);
+        }
+
         if (Console.IsOutputRedirected)
         {
             // There's no ANSI terminal support if console output is redirected.

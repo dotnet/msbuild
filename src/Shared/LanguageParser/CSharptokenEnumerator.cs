@@ -300,6 +300,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                                                 "is",  "lock",  "long",  "namespace",  "new",
                                                 "object",  "operator",  "out",  "override",  "params",
                                                 "private",  "protected",  "public",  "readonly",
+                                                "record",
                                                 "ref",  "return",  "sbyte",  "sealed",  "short",
                                                 "sizeof",  "stackalloc",  "static",  "string",
                                                 "struct",  "switch",  "this",  "throw",  "try",

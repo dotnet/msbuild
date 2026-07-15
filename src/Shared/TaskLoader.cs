@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Reflection;
 using Microsoft.Build.Framework;
 #if FEATURE_APPDOMAIN
+using System.Reflection;
 using Microsoft.Build.Shared.Debugging;
 #endif
 
@@ -27,17 +27,6 @@ namespace Microsoft.Build.Shared
         /// Delegate for logging task loading errors.
         /// </summary>
         internal delegate void LogError(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs);
-
-        /// <summary>
-        /// Checks if the given type is a task factory.
-        /// </summary>
-        /// <remarks>This method is used as a type filter delegate.</remarks>
-        /// <returns>true, if specified type is a task</returns>
-        internal static bool IsTaskClass(Type type, object unused)
-        {
-            return type.GetTypeInfo().IsClass && !type.GetTypeInfo().IsAbstract && (
-                type.GetTypeInfo().GetInterface("Microsoft.Build.Framework.ITask") != null);
-        }
 
         /// <summary>
         /// Creates an ITask instance and returns it.
@@ -149,14 +138,14 @@ namespace Microsoft.Build.Shared
                         taskColumn,
                         "ConflictingTaskAssembly",
                         loadedType.Assembly.AssemblyFile,
-                        loadedType.Type.GetTypeInfo().Assembly.Location);
+                        loadedType.Type.Assembly.Location);
 
                         taskInstanceInOtherAppDomain = null;
                     }
                 }
                 else
                 {
-                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceAndUnwrap(loadedType.Type.GetTypeInfo().Assembly.FullName, loadedType.Type.FullName);
+                    taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceAndUnwrap(loadedType.Type.Assembly.FullName, loadedType.Type.FullName);
                 }
 
                 return  taskInstanceInOtherAppDomain;

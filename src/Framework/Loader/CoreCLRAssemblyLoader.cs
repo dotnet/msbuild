@@ -6,8 +6,10 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.Loader;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
@@ -43,6 +45,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        [RequiresUnreferencedCode("Loads task and plugin assemblies from runtime-determined paths, which is incompatible with trimming.")]
         public Assembly LoadFromPath(string fullPath)
         {
             if (fullPath == null)
@@ -57,6 +60,15 @@ namespace Microsoft.Build.Shared
             // folders in a NuGet package).
             fullPath = FileUtilities.NormalizePath(fullPath);
 
+            AssemblyName assemblyName = AssemblyLoadContext.GetAssemblyName(fullPath);
+            if (MSBuildLoadContext.WellKnownAssemblyNames.Contains(assemblyName.Name))
+            {
+                // If this is a well-known assembly, load it directly, ensuring that
+                // it is loaded only once. Some tests might pass a well-known assembly
+                // to this method.
+                return Assembly.Load(assemblyName);
+            }
+
             if (Traits.Instance.EscapeHatches.UseSingleLoadContext)
             {
                 return LoadUsingLegacyDefaultContext(fullPath);
@@ -67,6 +79,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        [RequiresUnreferencedCode("Loads task and plugin assemblies from runtime-determined paths, which is incompatible with trimming.")]
         private Assembly LoadUsingLegacyDefaultContext(string fullPath)
         {
             lock (_guard)
@@ -87,6 +100,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        [RequiresUnreferencedCode("Loads task and plugin assemblies from runtime-determined paths, which is incompatible with trimming.")]
         private Assembly LoadUsingPluginContext(string fullPath)
         {
             lock (_guard)
@@ -110,6 +124,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        [RequiresUnreferencedCode("Loads task and plugin assemblies from runtime-determined paths, which is incompatible with trimming.")]
         private Assembly TryGetWellKnownAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
         {
             if (!MSBuildLoadContext.WellKnownAssemblyNames.Contains(assemblyName.Name))
@@ -121,10 +136,19 @@ namespace Microsoft.Build.Shared
             // of the Microsoft.Build.* assembly.
             assemblyName.Version = _currentAssemblyVersion;
 
+            // Assembly.Location is empty in a single-file/Native AOT host, where the well-known MSBuild
+            // assembly is already loaded into the image; skip the path-based search there (ILC dead-strips
+            // this read and its IL3000) and let the default resolution find the loaded assembly.
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                return null;
+            }
+
             string[] searchPaths = [Assembly.GetExecutingAssembly().Location];
             return TryResolveAssemblyFromPaths(context, assemblyName, searchPaths);
         }
 
+        [RequiresUnreferencedCode("Loads task and plugin assemblies from runtime-determined paths, which is incompatible with trimming.")]
         private Assembly TryResolveAssembly(AssemblyLoadContext context, AssemblyName assemblyName)
         {
             lock (_guard)
@@ -145,6 +169,7 @@ namespace Microsoft.Build.Shared
             }
         }
 
+        [RequiresUnreferencedCode("Loads task and plugin assemblies from runtime-determined paths, which is incompatible with trimming.")]
         private Assembly TryResolveAssemblyFromPaths(AssemblyLoadContext context, AssemblyName assemblyName, IEnumerable<string> searchPaths)
         {
             foreach (string cultureSubfolder in string.IsNullOrEmpty(assemblyName.CultureName)
@@ -184,6 +209,7 @@ namespace Microsoft.Build.Shared
         /// <remarks>
         /// Assumes we have a lock on _guard
         /// </remarks>
+        [RequiresUnreferencedCode("Loads task and plugin assemblies from runtime-determined paths, which is incompatible with trimming.")]
         private Assembly LoadAndCache(AssemblyLoadContext context, string fullPath)
         {
             var assembly = context.LoadFromAssemblyPath(fullPath);

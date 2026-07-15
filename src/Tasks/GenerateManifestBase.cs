@@ -2,7 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
@@ -273,6 +277,8 @@ namespace Microsoft.Build.Tasks
             return new AssemblyIdentity(name, version, publicKeyToken, culture, _processorArchitecture);
         }
 
+        [UnconditionalSuppressMessage("TrimAnalysis", "IL2026:RequiresUnreferencedCode",
+            Justification = "ClickOnce manifest generation reads and writes manifests with XmlSerializer; this task is inherently incompatible with trimming.")]
         public override bool Execute()
         {
             if (!NativeMethodsShared.IsWindows)
@@ -280,6 +286,14 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GenerateManifestBase));
                 return false;
             }
+
+#if NET
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                Log.LogErrorWithCodeFromResources("GenerateManifest.General", "Dynamic code generation is not supported in this runtime environment.");
+                return false;
+            }
+#endif
 
             bool success = true;
 
@@ -306,6 +320,8 @@ namespace Microsoft.Build.Tasks
             return success;
         }
 
+        [RequiresUnreferencedCode("Builds and writes a ClickOnce manifest with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Builds and writes a ClickOnce manifest with XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         private bool BuildManifest()
         {
             if (!OnManifestLoaded(_manifest))
@@ -423,6 +439,8 @@ namespace Microsoft.Build.Tasks
             return GetDefaultFileName();
         }
 
+        [RequiresUnreferencedCode("Reads the input ClickOnce manifest, which deserializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Reads the input ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         private bool InitializeManifest(Type manifestType)
         {
             _startTime = Environment.TickCount;
@@ -604,6 +622,8 @@ namespace Microsoft.Build.Tasks
             return true;
         }
 
+        [RequiresUnreferencedCode("Writes the output ClickOnce manifest, which serializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Writes the output ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         private bool WriteManifest()
         {
             if (OutputManifest == null)

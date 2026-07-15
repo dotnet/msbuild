@@ -2,11 +2,11 @@
 name: "Flaky Test Triage"
 description: "Scheduled daily workflow that scans recent msbuild CI builds (approved PRs + rolling main builds) for tests that fail across multiple independent sources, files/updates flaky-test tracking issues, then quarantines the new candidates with [ActiveIssue]. It also scans the quarantine pipeline (definition 344) to un-quarantine tests that have gone consistently green, opening ONE combined ready-for-review PR per run."
 on:
-  schedule: daily
+  schedule: daily around 11:30 AM
   workflow_dispatch: # Allow manual triggering
+  permissions: {}
 
-engine:
-  id: copilot
+if: ${{ github.event_name == 'workflow_dispatch' || !github.event.repository.fork }}
 
 permissions:
   contents: read
@@ -74,6 +74,25 @@ safe-outputs:
 # Two detector scans (PR + quarantine pipelines) download many artifacts, plus one whole-repo build at
 # the end to validate the edits compile. No local reproduction loops, so a moderate budget suffices.
 timeout-minutes: 60
+
+# ###############################################################
+# Select a PAT from the pool and override COPILOT_GITHUB_TOKEN.
+# Run agentic jobs in an isolated `copilot-pat-pool` environment.
+#
+# When org-level billing is available, this will be removed.
+# See `shared/pat_pool.README.md` for more information.
+# ###############################################################
+imports:
+  - uses: shared/pat_pool.md
+    with:
+      environment: copilot-pat-pool
+
+environment: copilot-pat-pool
+
+engine:
+  id: copilot
+  env:
+     COPILOT_GITHUB_TOKEN: "${{ case( needs.pat_pool.outputs.pat_number == '0', secrets.COPILOT_PAT_0, needs.pat_pool.outputs.pat_number == '1', secrets.COPILOT_PAT_1, needs.pat_pool.outputs.pat_number == '2', secrets.COPILOT_PAT_2, needs.pat_pool.outputs.pat_number == '3', secrets.COPILOT_PAT_3, needs.pat_pool.outputs.pat_number == '4', secrets.COPILOT_PAT_4, needs.pat_pool.outputs.pat_number == '5', secrets.COPILOT_PAT_5, needs.pat_pool.outputs.pat_number == '6', secrets.COPILOT_PAT_6, needs.pat_pool.outputs.pat_number == '7', secrets.COPILOT_PAT_7, needs.pat_pool.outputs.pat_number == '8', secrets.COPILOT_PAT_8, needs.pat_pool.outputs.pat_number == '9', secrets.COPILOT_PAT_9, 'NO COPILOT PAT AVAILABLE') }}"
 ---
 
 # Flaky Test Triage (scheduled daily)
@@ -161,7 +180,7 @@ tests that have gone consistently green. (Tests still flaking there simply **sta
 detector** with `-IncludePassed`, which also records passing observations:
 
 ```bash
-pwsh -File .github/workflows/scripts/Get-FlakyTests.ps1 -DefinitionId 344 -TargetBranch main -DaysBack 21 -MinSources 2 -MaxBuilds 150 -MaxArtifactDownloads 400 -IncludePassed -JsonOut quarantine-health.json
+pwsh -File .github/workflows/scripts/Get-FlakyTests.ps1 -DefinitionId 344 -TargetBranch main -DaysBack 30 -MinSources 2 -MaxBuilds 150 -MaxArtifactDownloads 600 -IncludePassed -JsonOut quarantine-health.json
 ```
 
 This emits the usual JSON plus a `passedTests` array (per normalized test: `distinctBuilds`,
@@ -365,8 +384,9 @@ the same single PR.
 
 **Un-quarantine candidates** — a currently-quarantined test `T` (from the `grep`) qualifies only if:
 
-- `T` is in `passedTests` with `distinctBuilds >= 4` **and** `distinctDays >= 3` (genuinely green across
-  many real **main-branch** CI runs spanning multiple days — not a one-off). These counts already
+- `T` is in `passedTests` with `distinctBuilds >= 50` **and** `distinctDays >= 14` (genuinely green across
+  a large number of real **main-branch** CI runs spanning at least two weeks — not a short green streak).
+  These counts already
   exclude def-344 PR-validation builds, so a fix PR's own green (or any unmerged PR's) can never satisfy
   this — only the fix proven on `main` over time does, **and**
 - `T` is **not** in the Step 1b `flakyTests` at all (zero failures in 344 over the window), **and**

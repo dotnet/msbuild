@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if FEATURE_APPDOMAIN
+
 using System.IO;
 using System.Reflection;
 
@@ -52,7 +54,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         protected override string GetWrapperFileNameInternal(string typeLibName)
         {
-            return GetWrapperFileName("AxInterop.", typeLibName, IncludeTypeLibVersionInName, ReferenceInfo.attr.wMajorVerNum, ReferenceInfo.attr.wMinorVerNum);
+            return GetWrapperFileName("AxInterop.", typeLibName, IncludeTypeLibVersionInName, (short)ReferenceInfo.attr.wMajorVerNum, (short)ReferenceInfo.attr.wMinorVerNum);
         }
 
         /// <summary>
@@ -106,3 +108,5 @@ namespace Microsoft.Build.Tasks
         #endregion
     }
 }
+
+#endif

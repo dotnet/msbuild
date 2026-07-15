@@ -10,159 +10,113 @@ Param(
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
-# Ensure that static state in tools is aware that this is
-# a CI scenario
-$ci = $true
-
-. $PSScriptRoot\common\tools.ps1
-
 Set-StrictMode -Version 2.0
 $ErrorActionPreference = "Stop"
 
-# Opt into TLS 1.2, which is required for https://dot.net
-[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+$RepoRoot = Resolve-Path (Join-Path $PSScriptRoot '..')
+$ArtifactsDir = Join-Path $RepoRoot 'artifacts'
+$Stage1Dir = Join-Path $RepoRoot 'stage1'
+$Stage1BinDir = Join-Path $Stage1Dir 'bin'
+$PerfLogDir = Join-Path $ArtifactsDir "log\$configuration\PerformanceLogs"
 
-function Stop-Processes() {
-  Write-Host "Killing running build processes..."
-  Get-Process -Name "msbuild" -ErrorAction SilentlyContinue | Stop-Process
-  Get-Process -Name "vbcscompiler" -ErrorAction SilentlyContinue | Stop-Process
-}
+$GlobalJson = Get-Content -Raw -Path (Join-Path $RepoRoot 'global.json') | ConvertFrom-Json
 
-function KillProcessesFromRepo {
-  # Kill compiler server and MSBuild node processes from bootstrapped MSBuild (otherwise a second build will fail to copy files in use)
-  foreach ($process in Get-Process | Where-Object {'msbuild', 'dotnet', 'vbcscompiler' -contains $_.Name})
-  {
-
-    if ([string]::IsNullOrEmpty($process.Path))
-    {
-      Write-Host "Process $($process.Id) $($process.Name) does not have a Path. Skipping killing it."
-      continue
-    }
-
-    if ($process.Path.StartsWith($RepoRoot, [StringComparison]::InvariantCultureIgnoreCase))
-    {
-      Write-Host "Killing $($process.Name) from $($process.Path)"
-      taskkill /f /pid $process.Id
-    }
+# Mirror of tools.ps1 GetDefaultMSBuildEngine: presence of tools.vs => 'vs', else tools.dotnet => 'dotnet'.
+if (-not $msbuildEngine) {
+  if (Get-Member -InputObject $GlobalJson.tools -Name 'vs') {
+    $msbuildEngine = 'vs'
+  } elseif (Get-Member -InputObject $GlobalJson.tools -Name 'dotnet') {
+    $msbuildEngine = 'dotnet'
+  } else {
+    Write-Host 'error: -msbuildEngine must be specified, or global.json must specify tools.dotnet or tools.vs.'
+    exit 1
   }
 }
 
-$RepoRoot = Join-Path $PSScriptRoot "..\"
-$RepoRoot = [System.IO.Path]::GetFullPath($RepoRoot).TrimEnd($([System.IO.Path]::DirectorySeparatorChar));
+# build.ps1 is invoked out-of-proc via the host process (pwsh.exe or powershell.exe). -File starts a fresh
+# process so build.ps1 does not inherit this script's PowerShell scope. Args after -File are parsed as a
+# command line, so named switches (-restore, -build, ...) bind correctly; passing the arg arrays via
+# splatting (@args) keeps each element a distinct argument, preserving values that contain spaces.
+$pwshPath = (Get-Process -Id $PID).Path
+$buildScript = Join-Path $PSScriptRoot 'common\build.ps1'
 
-$ArtifactsDir = Join-Path $RepoRoot "artifacts"
-$Stage1Dir = Join-Path $RepoRoot "stage1"
-$Stage1BinDir = Join-Path $Stage1Dir "bin"
-$PerfLogDir = Join-Path $ArtifactsDir "log\$Configuration\PerformanceLogs"
+# Arguments common to both the stage 1 and stage 2 builds, including any caller-supplied $properties.
+$commonBuildArgs = @('-restore', '-build', '-ci', '-prepareMachine', '-configuration', $configuration, '-msbuildEngine', $msbuildEngine) + $properties
 
-if ($msbuildEngine -eq '')
+if ($buildStage1)
 {
-  $msbuildEngine = 'vs'
+  Write-Host "& $buildScript $($commonBuildArgs -join ' ')"
+  & $pwshPath -NoLogo -NoProfile -ExecutionPolicy ByPass -File $buildScript @commonBuildArgs
+  if ($LASTEXITCODE -ne 0) {
+    throw "Stage 1 build.ps1 failed with exit code $LASTEXITCODE"
+  }
+
+  # Move the stage 1 outputs aside so stage 2 gets a clean $ArtifactsDir to build into.
+  if (Test-Path $Stage1Dir)
+  {
+    Remove-Item -Force -Recurse $Stage1Dir
+  }
+
+  Move-Item -Path $ArtifactsDir -Destination $Stage1Dir -Force
 }
 
-$msbuildToUse = "msbuild"
+# Resolve the bootstrapped build tool AFTER the stage 1 outputs have been moved into $Stage1Dir, so the
+# globbed paths below point at files that actually exist.
+$bootstrapRoot = Join-Path $Stage1BinDir "bootstrap"
 
-try {
-  KillProcessesFromRepo
-
-  if ($buildStage1)
-  {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci -msbuildEngine $msbuildEngine /p:CreateBootstrap=true @properties
-  }
-
-  KillProcessesFromRepo
-
-  $bootstrapRoot = Join-Path $Stage1BinDir "bootstrap"
-
-  # we need to do this to guarantee we have/know where dotnet.exe is installed
-  $dotnetToolPath = InitializeDotNetCli $true
-  $dotnetExePath = Join-Path $dotnetToolPath "dotnet.exe"
-
-  if ($msbuildEngine -eq 'vs')
-  {
-    $buildToolPath = Join-Path $bootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.exe"
-    $buildToolCommand = "";
-    $buildToolFramework = "netframework"
-  }
-  else
-  {
-    $buildToolPath = "$bootstrapRoot\core\dotnet.exe"
-    $propsFile = Join-Path $PSScriptRoot "Versions.props"
-    $bootstrapSdkVersion = ([xml](Get-Content $propsFile)).SelectSingleNode("//PropertyGroup/BootstrapSdkVersion").InnerText
-    $buildToolCommand = "$bootstrapRoot\core\sdk\$bootstrapSdkVersion\MSBuild.dll"
-    $buildToolFramework = "net"
-
-    $env:DOTNET_ROOT="$bootstrapRoot\core"
-  }
-
-  # Use separate artifacts folder for stage 2
-  # $env:ArtifactsDir = Join-Path $ArtifactsDir "2\"
-
-  & $dotnetExePath build-server shutdown
-
-  if ($buildStage1)
-  {
-    if (Test-Path $Stage1Dir)
-    {
-      Remove-Item -Force -Recurse $Stage1Dir
-    }
-
-    Move-Item -Path $ArtifactsDir -Destination $Stage1Dir -Force
-  }
-
-  $buildTool = @{ Path = $buildToolPath; Command = $buildToolCommand; Tool = $msbuildEngine; Framework = $buildToolFramework }
-  $global:_BuildTool = $buildTool
-
-  # Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
-  $env:MSBUILDDONOTLAUNCHDEBUGGER="true"
-
-  # Opt into performance logging. https://github.com/dotnet/msbuild/issues/5900
-  $env:DOTNET_PERFLOG_DIR=$PerfLogDir
-
-  # Mirrors cibuild_bootstrapped_msbuild.sh:96. Required for some test scenarios that spawn
-  # MSBuild grandchildren which need to launch .NET task hosts (notably net472 x86 testhosts
-  # invoking .NET Core MSBuild → /mt → sidecar TaskHost). The SDK CLI `dotnet msbuild` sets
-  # DOTNET_HOST_PATH for the MSBuild process it spawns, but does not propagate it into the
-  # parent script's environment, so we set it here for child processes (tests, their MSBuild
-  # grandchildren) to inherit.
-  $env:DOTNET_HOST_PATH=$dotnetExePath
-
-  # When using bootstrapped MSBuild:
-  # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
-  # - Create bootstrap environment as it's required when also running tests
-  # - $stage2Properties are appended to the stage 2 build only (matching cibuild_bootstrapped_msbuild.sh).
-  #   Use this for switches like /mt that should not be passed to the stable MSBuild used in stage 1
-  #   until a stable version of MT is available in the images.
-  # Branches mirror cibuild_bootstrapped_msbuild.sh exactly:
-  #   onlyDocChanged=1 → bootstrap not created (artifacts not needed downstream)
-  #   skipTests        → bootstrap IS created (downstream MAY consume it), tests omitted
-  #   default          → bootstrap created, tests run
-  # The @(...) wrapper is important: when -split returns exactly one element PowerShell
-  # gives back a string, and `& cmd @stringVar` splats its characters one-per-argument
-  # (so "/mt" becomes "/", "m", "t"). Wrapping with @() forces an array even for a
-  # single token.
-  $stage2Args = @(if ($stage2Properties) { $stage2Properties -split '\s+' | Where-Object { $_ } } else { @() })
-  if ($onlyDocChanged) {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties @stage2Args
-  }
-  elseif ($skipTests) {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /nr:false @properties @stage2Args
-  }
-  else {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties @stage2Args
-  }
-
-  exit $lastExitCode
+if ($msbuildEngine -eq 'vs')
+{
+  $buildToolPath = Join-Path $bootstrapRoot "net472\MSBuild\Current\Bin\MSBuild.exe"
+  $buildToolCommand = "";
 }
-catch {
-  Write-Host $_
-  Write-Host $_.Exception
-  Write-Host $_.ScriptStackTrace
-  exit 1
+else
+{
+  $buildToolPath = "$bootstrapRoot\core\dotnet.exe"
+  $buildToolCommand = "msbuild"
+  $env:DOTNET_ROOT="$bootstrapRoot\core"
 }
-finally {
-  Pop-Location
-  if ($prepareMachine) {
-    Stop-Processes
-  }
+
+# Communicate the bootstrapped build tool to the (out-of-proc) stage 2 build.ps1 via environment
+# variables so it does not require dot-sourcing tools.ps1 here. tools.ps1's InitializeBuildTool
+# honors _BuildToolPath / _BuildToolCommand and only consumes Path and Command.
+$env:_BuildToolPath    = $buildToolPath
+$env:_BuildToolCommand = $buildToolCommand
+
+# Ensure that debug bits fail fast, rather than hanging waiting for a debugger attach.
+$env:MSBUILDDONOTLAUNCHDEBUGGER="true"
+
+# Opt into performance logging. https://github.com/dotnet/msbuild/issues/5900
+$env:DOTNET_PERFLOG_DIR=$PerfLogDir
+
+# Point child processes (stage 2 build.ps1, tests, and the MSBuild grandchildren they spawn, notably
+# net472 x86 testhosts invoking .NET Core MSBuild → /mt → sidecar TaskHost) at the freshly-built
+# bootstrap .NET host, so task hosts launch with the bits under test. This matches DOTNET_ROOT (set
+# above for the core engine) and the bootstrap's own expectation that tests invoke the bootstrap dotnet
+# (see eng/BootStrapMsBuild.targets).
+$env:DOTNET_HOST_PATH = Join-Path $bootstrapRoot 'core\dotnet.exe'
+$env:DOTNET_INSTALL_DIR = Join-Path $bootstrapRoot 'core'
+
+# $stage2Properties are appended to the stage 2 build only.
+# Use this for switches like /mt that should not be passed to the stable MSBuild used in stage 1
+# until a stable version of MT is available in the images.
+# The @(...) wrapper is important: when -split returns exactly one element PowerShell gives back a
+# string, which would later splat one character per argument (so "/mt" becomes "/", "m", "t").
+# Wrapping with @() forces an array even for a single token.
+$stage2Args = @(if ($stage2Properties) { $stage2Properties -split '\s+' | Where-Object { $_ } } else { @() })
+
+# Stage 2 shares the common build args and additionally:
+#   onlyDocChanged=1 → bootstrap not created (artifacts not needed downstream)
+#   skipTests        → bootstrap IS created (downstream MAY consume it), tests omitted
+#   default          → bootstrap created, tests run
+$stage2BuildArgs = $commonBuildArgs
+if ($onlyDocChanged) {
+  $stage2BuildArgs += '/p:CreateBootstrap=false'
 }
+elseif (-not $skipTests) {
+  $stage2BuildArgs += '-test'
+}
+$stage2BuildArgs += $stage2Args
+
+Write-Host "& $buildScript $($stage2BuildArgs -join ' ')"
+& $pwshPath -NoLogo -NoProfile -ExecutionPolicy ByPass -File $buildScript @stage2BuildArgs
+exit $LASTEXITCODE

@@ -1,12 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if FEATURE_APPDOMAIN
+
 using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices.ComTypes;
 using Microsoft.Build.Tasks;
 using Xunit;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Ole;
 using COMException = System.Runtime.InteropServices.COMException;
+using Marshal = System.Runtime.InteropServices.Marshal;
 
 #nullable disable
 
@@ -14,21 +18,31 @@ namespace Microsoft.Build.UnitTests
 {
     public class ComReferenceWalker_Tests
     {
-        private static int MockReleaseComObject(object o)
+        // Obtains a COM-callable-wrapper pointer for the managed mock type library (which implements the
+        // built-in System.Runtime.InteropServices.ComTypes.ITypeLib) and hands it to the struct-based walker.
+        private static unsafe void AnalyzeTypeLibrary(ComDependencyWalker walker, MockTypeLib typeLib)
         {
-            return 0;
+            IntPtr typeLibPtr = Marshal.GetComInterfaceForObject(typeLib, typeof(System.Runtime.InteropServices.ComTypes.ITypeLib));
+            try
+            {
+                walker.AnalyzeTypeLibrary((ITypeLib*)typeLibPtr);
+            }
+            finally
+            {
+                Marshal.Release(typeLibPtr);
+            }
         }
 
-        private void AssertDependenciesContainTypeLib(TYPELIBATTR[] dependencies, MockTypeLib typeLib, bool contains)
+        private void AssertDependenciesContainTypeLib(TLIBATTR[] dependencies, MockTypeLib typeLib, bool contains)
         {
             AssertDependenciesContainTypeLib("", dependencies, typeLib, contains);
         }
 
-        private void AssertDependenciesContainTypeLib(string message, TYPELIBATTR[] dependencies, MockTypeLib typeLib, bool contains)
+        private void AssertDependenciesContainTypeLib(string message, TLIBATTR[] dependencies, MockTypeLib typeLib, bool contains)
         {
             bool dependencyExists = false;
 
-            foreach (TYPELIBATTR attr in dependencies)
+            foreach (TLIBATTR attr in dependencies)
             {
                 if (attr.guid == typeLib.Attributes.guid)
                 {
@@ -45,8 +59,8 @@ namespace Microsoft.Build.UnitTests
         {
             MockTypeLib typeLib = new MockTypeLib();
 
-            ComDependencyWalker walker = new ComDependencyWalker(new MarshalReleaseComObject(MockReleaseComObject));
-            walker.AnalyzeTypeLibrary(typeLib);
+            ComDependencyWalker walker = new ComDependencyWalker();
+            AnalyzeTypeLibrary(walker, typeLib);
             Assert.Equal(0, walker.GetDependencies().GetLength(0));
 
             typeLib.AssertAllHandlesReleased();
@@ -61,12 +75,12 @@ namespace Microsoft.Build.UnitTests
             dependencyTypeLib.AddTypeInfo(new MockTypeInfo());
         }
 
-        private TYPELIBATTR[] RunDependencyWalker(MockTypeLib mainTypeLib, MockTypeLib dependencyTypeLib, bool dependencyShouldBePresent)
+        private TLIBATTR[] RunDependencyWalker(MockTypeLib mainTypeLib, MockTypeLib dependencyTypeLib, bool dependencyShouldBePresent)
         {
-            ComDependencyWalker walker = new ComDependencyWalker(new MarshalReleaseComObject(MockReleaseComObject));
-            walker.AnalyzeTypeLibrary(mainTypeLib);
+            ComDependencyWalker walker = new ComDependencyWalker();
+            AnalyzeTypeLibrary(walker, mainTypeLib);
 
-            TYPELIBATTR[] dependencies = walker.GetDependencies();
+            TLIBATTR[] dependencies = walker.GetDependencies();
 
             // types from the main type library should be in the dependency list
             AssertDependenciesContainTypeLib(dependencies, mainTypeLib, true);
@@ -162,7 +176,7 @@ namespace Microsoft.Build.UnitTests
                 new MockTypeInfo[] { dependencyTypeLib1.ContainedTypeInfos[0], dependencyTypeLib2.ContainedTypeInfos[0] },
                 dependencyTypeLib3.ContainedTypeInfos[0]);
 
-            TYPELIBATTR[] dependencies = RunDependencyWalker(mainTypeLib, dependencyTypeLib1, true);
+            TLIBATTR[] dependencies = RunDependencyWalker(mainTypeLib, dependencyTypeLib1, true);
 
             AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib2, true);
             AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib3, true);
@@ -178,11 +192,11 @@ namespace Microsoft.Build.UnitTests
             mainTypeLib.AddTypeInfo(new MockTypeInfo());
 
             MockTypeLib oleTypeLib = new MockTypeLib();
-            oleTypeLib.AddTypeInfo(new MockTypeInfo(NativeMethods.IID_IUnknown));
-            oleTypeLib.AddTypeInfo(new MockTypeInfo(NativeMethods.IID_IDispatch));
-            oleTypeLib.AddTypeInfo(new MockTypeInfo(NativeMethods.IID_IDispatchEx));
-            oleTypeLib.AddTypeInfo(new MockTypeInfo(NativeMethods.IID_IEnumVariant));
-            oleTypeLib.AddTypeInfo(new MockTypeInfo(NativeMethods.IID_ITypeInfo));
+            oleTypeLib.AddTypeInfo(new MockTypeInfo(IUnknown.IID_Guid));
+            oleTypeLib.AddTypeInfo(new MockTypeInfo(IDispatch.IID_Guid));
+            oleTypeLib.AddTypeInfo(new MockTypeInfo(IDispatchEx.IID_Guid));
+            oleTypeLib.AddTypeInfo(new MockTypeInfo(IEnumVARIANT.IID_Guid));
+            oleTypeLib.AddTypeInfo(new MockTypeInfo(ITypeInfo.IID_Guid));
 
             // We don't check for this type in the ComDependencyWalker, so it doesn't get counted as a known OLE type.
             // It's too late in the Dev10 cycle to add it to shipping code without phenomenally good reason, but we should
@@ -203,7 +217,7 @@ namespace Microsoft.Build.UnitTests
             MockTypeLib mainTypeLib = new MockTypeLib();
             mainTypeLib.AddTypeInfo(new MockTypeInfo());
 
-            MockTypeLib oleTypeLib = new MockTypeLib(NativeMethods.IID_StdOle);
+            MockTypeLib oleTypeLib = new MockTypeLib(NativeMethods.LIBID_StdOle);
             oleTypeLib.AddTypeInfo(new MockTypeInfo());
             oleTypeLib.ContainedTypeInfos[0].TypeName = "GUID";
 
@@ -239,7 +253,7 @@ namespace Microsoft.Build.UnitTests
                 mainTypeLib.AddTypeInfo(new MockTypeInfo());
 
                 // Make it the StdOle lib to exercise the ITypeInfo.GetDocumentation failure point
-                MockTypeLib dependencyTypeLib = new MockTypeLib(NativeMethods.IID_StdOle);
+                MockTypeLib dependencyTypeLib = new MockTypeLib(NativeMethods.LIBID_StdOle);
                 dependencyTypeLib.AddTypeInfo(new MockTypeInfo());
 
                 COMException failureException = new COMException("unhandled exception in " + failurePoint.ToString());
@@ -251,11 +265,20 @@ namespace Microsoft.Build.UnitTests
                 mainTypeLib.ContainedTypeInfos[0].DefinesFunction(
                     new MockTypeInfo[] { dependencyTypeLib.ContainedTypeInfos[0] }, dependencyTypeLib.ContainedTypeInfos[0]);
 
-                ComDependencyWalker walker = new ComDependencyWalker(new MarshalReleaseComObject(MockReleaseComObject));
-                walker.AnalyzeTypeLibrary(mainTypeLib);
+                ComDependencyWalker walker = new ComDependencyWalker();
+                AnalyzeTypeLibrary(walker, mainTypeLib);
 
-                Assert.Single(walker.EncounteredProblems); // "Test failed for failure point " + failurePoint.ToString()
-                Assert.Equal(failureException, walker.EncounteredProblems[0]); // "Test failed for failure point " + failurePoint.ToString()
+                // The primary guarantee is that a failing type library never lets an exception escape the walker
+                // (this test method would fail if one did). Injected failures reach the walker across the COM
+                // (CCW) boundary as HRESULTs, so the walker records a re-wrapped COMException rather than the
+                // original exception instance. Failure points in COM methods that cannot report an HRESULT
+                // (GetTypeInfoCount, and the void Release* methods) are swallowed at the boundary and produce no
+                // recorded problem, so allow either zero or one captured problem.
+                Assert.True(walker.EncounteredProblems.Count <= 1, "Test failed for failure point " + failurePoint.ToString());
+                foreach (Exception problem in walker.EncounteredProblems)
+                {
+                    Assert.IsType<COMException>(problem);
+                }
 
                 mainTypeLib.AssertAllHandlesReleased();
                 dependencyTypeLib.AssertAllHandlesReleased();
@@ -278,10 +301,10 @@ namespace Microsoft.Build.UnitTests
             mainTypeLib3.ContainedTypeInfos[0].DefinesVariable(dependencyTypeLib1.ContainedTypeInfos[0]);
             mainTypeLib3.ContainedTypeInfos[0].DefinesVariable(dependencyTypeLib3.ContainedTypeInfos[0]);
 
-            ComDependencyWalker walker = new ComDependencyWalker(MockReleaseComObject);
+            ComDependencyWalker walker = new ComDependencyWalker();
 
-            walker.AnalyzeTypeLibrary(mainTypeLib1);
-            TYPELIBATTR[] dependencies = walker.GetDependencies();
+            AnalyzeTypeLibrary(walker, mainTypeLib1);
+            TLIBATTR[] dependencies = walker.GetDependencies();
             ICollection<string> analyzedTypes = walker.GetAnalyzedTypeNames();
 
             AssertDependenciesContainTypeLib(dependencies, dependencyTypeLib1, true);
@@ -290,7 +313,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(2, analyzedTypes.Count);
 
             walker.ClearDependencyList();
-            walker.AnalyzeTypeLibrary(mainTypeLib2);
+            AnalyzeTypeLibrary(walker, mainTypeLib2);
             dependencies = walker.GetDependencies();
             analyzedTypes = walker.GetAnalyzedTypeNames();
 
@@ -300,7 +323,7 @@ namespace Microsoft.Build.UnitTests
             Assert.Equal(4, analyzedTypes.Count);
 
             walker.ClearDependencyList();
-            walker.AnalyzeTypeLibrary(mainTypeLib3);
+            AnalyzeTypeLibrary(walker, mainTypeLib3);
             dependencies = walker.GetDependencies();
             analyzedTypes = walker.GetAnalyzedTypeNames();
 
@@ -311,3 +334,5 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
+
+#endif

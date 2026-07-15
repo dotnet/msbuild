@@ -122,7 +122,7 @@ namespace Microsoft.Build.CommandLine
             LoadedType taskType = null;
             try
             {
-                TypeLoader typeLoader = new(TaskLoader.IsTaskClass);
+                TypeLoader typeLoader = TypeLoader.Create<ITask>();
                 taskType = typeLoader.Load(
                     taskName,
                     AssemblyLoadInfo.Create(null, taskLocation),

@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Construction;
@@ -202,7 +201,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             if (matchingResolversManifests.Count != 0)
             {
                 // First pass.
-                resolvers = GetResolvers(matchingResolversManifests, loggingContext, sdkReferenceLocation);
+                resolvers = GetResolvers(matchingResolversManifests, loggingContext, sdkReferenceLocation, sdk);
 
                 if (TryResolveSdkUsingSpecifiedResolvers(
                     resolvers,
@@ -229,7 +228,8 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             resolvers = GetResolvers(
                 _generalResolversManifestsRegistry,
                 loggingContext,
-                sdkReferenceLocation);
+                sdkReferenceLocation,
+                sdk);
 
             if (TryResolveSdkUsingSpecifiedResolvers(
                 resolvers,
@@ -271,7 +271,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return new SdkResult(sdk, null, null);
         }
 
-        private List<SdkResolver> GetResolvers(IReadOnlyList<SdkResolverManifest> resolversManifests, LoggingContext loggingContext, ElementLocation sdkReferenceLocation)
+        private List<SdkResolver> GetResolvers(IReadOnlyList<SdkResolverManifest> resolversManifests, LoggingContext loggingContext, ElementLocation sdkReferenceLocation, SdkReference sdk)
         {
             // Create a sorted by priority list of resolvers. Load them if needed.
             List<SdkResolver> resolvers = new List<SdkResolver>();
@@ -282,8 +282,25 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                 {
                     if (!_manifestToResolvers.TryGetValue(resolverManifest, out newResolvers))
                     {
-                        // Loading of the needed resolvers.
-                        newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, sdkReferenceLocation);
+                        if (Framework.FeatureSwitches.EnableSdkResolverDynamicLoading)
+                        {
+                            // Loading of the needed resolvers.
+                            newResolvers = _sdkResolverLoader.LoadResolversFromManifest(resolverManifest, sdkReferenceLocation);
+                        }
+                        else
+                        {
+                            // Trimmed / Native AOT host: we cannot load a plugin SDK resolver by reflection.
+                            // The reflection-free DefaultSdkResolver has already been tried, so an SDK that
+                            // reaches here genuinely needs a dynamically loaded resolver. Fail observably with a
+                            // reported project error (so a host such as the AOT dotnet CLI can detect it and fall
+                            // back to a JIT MSBuild) rather than attempting an Assembly.LoadFrom that cannot work here.
+                            ProjectFileErrorUtilities.ThrowInvalidProjectFile(
+                                new BuildEventFileInfo(sdkReferenceLocation),
+                                "SdkResolverDynamicLoadingNotSupported",
+                                sdk.Name,
+                                resolverManifest.DisplayName);
+                        }
+
                         _manifestToResolvers[resolverManifest] = newResolvers;
                     }
                 }
@@ -339,7 +356,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                         loggingContext.LogComment(MessageImportance.Low, "SDKResolverNullMessage", sdkResolver.Name, sdk.ToString());
                     }
                 }
-                catch (Exception e) when ((e is FileNotFoundException || e is FileLoadException) && sdkResolver.GetType().GetTypeInfo().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
+                catch (Exception e) when ((e is FileNotFoundException || e is FileLoadException) && sdkResolver.GetType().Name.Equals("NuGetSdkResolver", StringComparison.Ordinal))
                 {
                     // Since we explicitly add the NuGetSdkResolver, we special case this.  The NuGetSdkResolver has special logic
                     // to load NuGet assemblies at runtime which could fail if the user is not running installed MSBuild.  Rather
