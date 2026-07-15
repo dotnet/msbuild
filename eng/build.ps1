@@ -2,7 +2,6 @@
 Param(
   [string] $msbuildEngine,
   [string] $configuration = "Debug",
-  [bool] $onlyDocChanged = 0,
   [switch] $test,
   [switch] $stage2,
   [string] $stage2Arguments = "",
@@ -125,10 +124,6 @@ $stage2BuildArgs = $commonBuildArgs
 # Only run tests in stage2 when supplying the '-test' switch in a multi-stage build.
 if ($test) {
   $stage2BuildArgs += '-test'
-}
-
-if ($onlyDocChanged) {
-  $stage2BuildArgs += '/p:CreateBootstrap=false'
 }
 
 $stage2BuildArgs += $stage2Args

@@ -237,7 +237,7 @@ jobs:
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
   # Intentionally not running tests
-  - bash: . 'build.sh' --onlyDocChanged $(onlyDocChanged) --ci --stage2Arguments '/mt /p:BuildAnalyzer=true'
+  - bash: . 'build.sh' --ci --stage2Arguments '/mt /p:BuildAnalyzer=true'
     displayName: Build (with -mt in stage2)
     condition: eq(variables.onlyDocChanged, 0)
     env:

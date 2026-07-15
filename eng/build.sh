@@ -1,7 +1,6 @@
 #! /bin/bash
 
 configuration="Debug"
-onlyDocChanged=0
 test=false
 stage2=false
 stage2Arguments=
@@ -25,10 +24,6 @@ while [[ $# -gt 0 ]]; do
   case "$lowerI" in
     --configuration)
       configuration=$2
-      shift 2
-      ;;
-    --onlydocchanged)
-      onlyDocChanged=$2
       shift 2
       ;;
     --test)
@@ -127,10 +122,6 @@ stage2_build_args="$common_build_args"
 # Only run tests in stage2 when supplying the '--test' switch in a multi-stage build.
 if [ "$test" = true ]; then
   stage2_build_args="$stage2_build_args --test"
-fi
-
-if [ $onlyDocChanged != 0 ]; then
-  stage2_build_args="$stage2_build_args /p:CreateBootstrap=false"
 fi
 
 # $stage2Arguments are appended to the stage 2 build only.
