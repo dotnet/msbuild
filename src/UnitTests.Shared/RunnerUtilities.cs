@@ -32,11 +32,43 @@ namespace Microsoft.Build.UnitTests.Shared
 
         public static string LatestDotNetCoreForMSBuild => BootstrapLocationAttribute.LatestDotNetCoreForMSBuild;
 
+        public static string BootstrapMSBuildExecutablePath
+#if NET
+            => Path.Combine(BootstrapMsBuildBinaryLocation, "sdk", BootstrapLocationAttribute.BootstrapSdkVersion, Constants.MSBuildExecutableName);
+#else
+            => Path.Combine(BootstrapMsBuildBinaryLocation, Constants.MSBuildExecutableName);
+#endif
+
+        public static string BootstrapMSBuildCommand
+#if NET
+            => NativeMethodsShared.IsWindows
+                ? $"\"{BootstrapMSBuildExecutablePath}\""
+                : $"\"{s_dotnetExePath}\" \"{Path.Combine(BootstrapMsBuildBinaryLocation, "sdk", BootstrapLocationAttribute.BootstrapSdkVersion, Constants.MSBuildAssemblyName)}\"";
+#else
+            => $"\"{BootstrapMSBuildExecutablePath}\"";
+#endif
+
         internal static BootstrapLocationAttribute BootstrapLocationAttribute = Assembly.GetExecutingAssembly().GetCustomAttribute<BootstrapLocationAttribute>()
                                            ?? throw new InvalidOperationException("This test assembly does not have the BootstrapLocationAttribute");
 
 #if !FEATURE_RUN_EXE_IN_TESTS
         private static readonly string s_dotnetExePath = EnvironmentProvider.GetDotnetExePath();
+
+        // The dotnet host that ships inside the bootstrap layout. When we launch the bootstrapped MSBuild we must
+        // point DOTNET_HOST_PATH at this host (rather than an ambient dotnet on PATH such as the repo-local .dotnet)
+        // so that any task hosts it spawns resolve their runtime from the bootstrap. The bootstrap can target an
+        // earlier runtime (e.g. net10.0) than the SDK overlaid into .dotnet, so a task host resolving .dotnet would
+        // fail to find its runtime. See eng/BootStrapMsBuild.targets.
+        private static readonly string s_bootstrapDotnetHostPath = EnvironmentProvider.GetDotnetExePathFromFolder(BootstrapMsBuildBinaryLocation);
+
+        // Architecture-specific DOTNET_ROOT_<ARCH> variables take precedence over DOTNET_ROOT for the .NET app host.
+        // X86/X64/ARM64 cover every CI agent architecture; these are cleared when launching the bootstrapped MSBuild.
+        private static readonly string[] s_archSpecificDotnetRootVars =
+        [
+            "DOTNET_ROOT_X86",
+            "DOTNET_ROOT_X64",
+            "DOTNET_ROOT_ARM64",
+        ];
 
         public static void ApplyDotnetHostPathEnvironmentVariable(TestEnvironment testEnvironment)
         {
@@ -60,7 +92,7 @@ namespace Microsoft.Build.UnitTests.Shared
         /// </summary>
         public static string ExecMSBuild(string pathToMsBuildExe, string msbuildParameters, out bool successfulExit, bool shellExecute = false, ITestOutputHelper outputHelper = null)
         {
-            return RunProcessAndGetOutput(pathToMsBuildExe, msbuildParameters, out successfulExit, shellExecute, outputHelper, environmentVariables: GetMSBuildEnvironmentVariables());
+            return RunProcessAndGetOutput(pathToMsBuildExe, msbuildParameters, out successfulExit, shellExecute, outputHelper, environmentVariables: GetMSBuildEnvironmentVariables(useBootstrapHost: false));
         }
 
         public static Task<(bool SuccessfulExit, string BuildOutput)> ExecBootstrappedMSBuildAsync(
@@ -83,30 +115,76 @@ namespace Microsoft.Build.UnitTests.Shared
             bool attachProcessId = true,
             int timeoutMilliseconds = 30_000)
         {
-#if NET
-            string pathToExecutable = Path.Combine(BootstrapMsBuildBinaryLocation, "sdk", BootstrapLocationAttribute.BootstrapSdkVersion, Constants.MSBuildExecutableName);
-#else
-            string pathToExecutable = Path.Combine(BootstrapMsBuildBinaryLocation, Constants.MSBuildExecutableName);
-#endif
-            return RunProcessAndGetOutput(pathToExecutable, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds, environmentVariables: GetMSBuildEnvironmentVariables());
+            return RunProcessAndGetOutput(BootstrapMSBuildExecutablePath, msbuildParameters, out successfulExit, shellExecute, outputHelper, attachProcessId, timeoutMilliseconds, environmentVariables: GetMSBuildEnvironmentVariables(useBootstrapHost: true));
         }
 
         /// <summary>
         /// Returns environment variables that should be set when launching MSBuild as a child process.
         /// On .NET Core, this includes DOTNET_HOST_PATH so that tasks like RoslynCodeTaskFactory
-        /// can locate the dotnet host even when MSBuild runs as a native app host.
+        /// can locate the dotnet host even when MSBuild runs as a native app host, and so that any
+        /// task hosts MSBuild spawns resolve their runtime (DOTNET_ROOT) from the same host.
+        /// A null value in the returned dictionary means the variable should be removed from the child environment.
         /// </summary>
-        private static Dictionary<string, string> GetMSBuildEnvironmentVariables()
+        /// <param name="useBootstrapHost">
+        /// When <see langword="true"/>, the whole child process tree is pinned to the bootstrap layout: DOTNET_HOST_PATH,
+        /// DOTNET_ROOT and DOTNET_INSTALL_DIR all point at the bootstrap, and any architecture-specific DOTNET_ROOT_&lt;ARCH&gt;
+        /// variables (which take precedence over DOTNET_ROOT) are cleared. This is required because the CI two-stage build
+        /// exports DOTNET_ROOT/DOTNET_HOST_PATH/DOTNET_INSTALL_DIR pointing at the stage 1 bootstrap (it is the build tool
+        /// for stage 2). Without this override those leak into the stage 2 test run, so the launched stage 2 bootstrapped
+        /// MSBuild would resolve the stage 1 SDK/runtime and spawn a mismatched task host, failing with MSB4216. The
+        /// bootstrap can also target an earlier runtime (e.g. net10.0) than the SDK overlaid into .dotnet, so an ambient
+        /// dotnet (e.g. the repo-local .dotnet) may not contain the runtime the bootstrap targets. See
+        /// eng/BootStrapMsBuild.targets and eng/cibuild_bootstrapped_msbuild.sh.
+        /// </param>
+        private static Dictionary<string, string> GetMSBuildEnvironmentVariables(bool useBootstrapHost)
         {
 #if !FEATURE_RUN_EXE_IN_TESTS
-            return new Dictionary<string, string>
+            if (!useBootstrapHost)
             {
-                [Constants.DotnetHostPathEnvVarName] = s_dotnetExePath,
+                return new Dictionary<string, string>
+                {
+                    [Constants.DotnetHostPathEnvVarName] = s_dotnetExePath,
+                };
+            }
+
+            string bootstrapRoot = BootstrapMsBuildBinaryLocation.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+            // DOTNET_HOST_PATH/DOTNET_ROOT/DOTNET_INSTALL_DIR must point at the bootstrap layout under test so the whole
+            // child process tree resolves its SDK and runtime from the bootstrap rather than from the stage 1 build tool
+            // or an ambient dotnet. (The MSBuildSDKsPath/MSBuildExtensionsPath the CI two-stage build leaks from the
+            // stage 1 bootstrap are cleared once centrally in MSBuildTestPipelineStartup (see TestAssemblyInfo.cs), so
+            // they are already absent from this test host's environment, which the child inherits.)
+            var environmentVariables = new Dictionary<string, string>
+            {
+                [Constants.DotnetHostPathEnvVarName] = s_bootstrapDotnetHostPath,
+                ["DOTNET_ROOT"] = bootstrapRoot,
+                ["DOTNET_INSTALL_DIR"] = bootstrapRoot,
             };
+
+            // Architecture-specific DOTNET_ROOT_<ARCH> variables take precedence over DOTNET_ROOT for the app host, so a
+            // stale value leaked from the CI environment would silently override the bootstrap root. Remove them (null value).
+            foreach (string archSpecificRootVar in s_archSpecificDotnetRootVars)
+            {
+                environmentVariables[archSpecificRootVar] = null;
+            }
+
+            return environmentVariables;
 #else
             return null;
 #endif
         }
+
+        /// <summary>
+        /// The environment variables a test must apply when it launches the bootstrapped MSBuild (or an executable
+        /// from the bootstrap layout, such as an apphost) as a child process, so the whole child process tree resolves
+        /// its SDK and runtime from the bootstrap under test rather than from the CI two-stage build's stage 1 build
+        /// tool or an ambient dotnet. <see cref="ExecBootstrapedMSBuild(string, out bool, bool, ITestOutputHelper, bool, int)"/>
+        /// applies these automatically, so prefer it. Only tests that must start the process themselves (e.g. launching
+        /// an apphost directly via <see cref="RunProcessAndGetOutput"/>) need this: seed their environment dictionary
+        /// from here and then override only the entries the scenario requires.
+        /// </summary>
+        public static Dictionary<string, string> GetBootstrapMSBuildEnvironmentVariables()
+            => GetMSBuildEnvironmentVariables(useBootstrapHost: true) ?? new Dictionary<string, string>();
 
         private static void AdjustForShellExecution(ref string pathToExecutable, ref string arguments)
         {
@@ -127,6 +205,14 @@ namespace Microsoft.Build.UnitTests.Shared
         /// <summary>
         /// Run the process and get stdout and stderr.
         /// </summary>
+        /// <remarks>
+        /// If <paramref name="process"/> is the bootstrapped MSBuild (or an executable from the bootstrap layout),
+        /// prefer <see cref="ExecBootstrapedMSBuild(string, out bool, bool, ITestOutputHelper, bool, int)"/>, which
+        /// applies the required bootstrap environment automatically. If the process must be launched here directly,
+        /// seed <paramref name="environmentVariables"/> from <see cref="GetBootstrapMSBuildEnvironmentVariables"/> so
+        /// the child resolves its SDK and runtime from the bootstrap under test rather than a leaked stage 1 / ambient
+        /// dotnet; otherwise the launch can fail with MSB4216 / MSB4062 in the CI two-stage build.
+        /// </remarks>
         public static string RunProcessAndGetOutput(
             string process,
             string parameters,
@@ -157,7 +243,16 @@ namespace Microsoft.Build.UnitTests.Shared
             {
                 foreach (var kvp in environmentVariables)
                 {
-                    psi.Environment[kvp.Key] = kvp.Value;
+                    // A null value means the variable should be removed from the child environment
+                    // (e.g. arch-specific DOTNET_ROOT_<ARCH> vars leaked from the CI build environment).
+                    if (kvp.Value is null)
+                    {
+                        psi.Environment.Remove(kvp.Key);
+                    }
+                    else
+                    {
+                        psi.Environment[kvp.Key] = kvp.Value;
+                    }
                 }
             }
             string output = string.Empty;

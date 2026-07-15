@@ -55,13 +55,18 @@ public class ProjectOptions
 }
 ```
 
-The stage flows through the existing factory methods:
+The stage flows through the `ProjectInstance` factory methods:
 
 - `ProjectInstance.FromFile(path, options)` / `ProjectInstance.FromProjectRootElement(xml, options)`
-- `Project.FromFile(path, options)` / `Project.FromProjectRootElement(xml, options)` / `Project.FromXmlReader(reader, options)`
 
-Both `Project.EvaluationStage` and `ProjectInstance.EvaluationStage` report the stage the object was
-evaluated to.
+`ProjectInstance.EvaluationStage` reports the stage the instance was evaluated to.
+
+Partial evaluation is intentionally **not** supported on the mutable `Project` object model. `Project`
+is an editable model that is cached in the `ProjectCollection`; a partially-evaluated `Project` would
+either serve stale state from that cache or be silently upgraded to a full evaluation, discarding the
+work the partial evaluation saved. The `Project` factory methods (`Project.FromFile`,
+`Project.FromProjectRootElement`, `Project.FromXmlReader`) therefore throw `ArgumentException` when a
+non-`Full` `EvaluationStage` is requested; use `ProjectInstance` for partial evaluation.
 
 Example:
 
@@ -81,11 +86,10 @@ string value = instance.GetPropertyValue("PublishRelease"); // fast: only passes
 - **Properties are always valid** for any stage ≥ `Properties` (`GetProperty`, `GetPropertyValue`,
   `Properties`, `GlobalProperties`). `InitialTargets` is also available from `Properties` onward
   because it is computed during pass 1.
-- **Reading not-yet-computed state fails fast.** Members that expose state from a later pass throw
-  `InvalidOperationException` naming the member and the stage the object reached. Guarded members
-  include `ItemDefinitions` (available from `ItemDefinitions` onward), `Items`, `GetItems`,
-  `ItemsIgnoringCondition`, `AllEvaluatedItems`, `Targets`, and `DefaultTargets` (and their
-  `ProjectInstance` equivalents).
+- **Reading not-yet-computed state fails fast.** `ProjectInstance` members that expose state from a
+  later pass throw `InvalidOperationException` naming the member and the stage the instance reached.
+  Guarded members include `ItemDefinitions` (available from `ItemDefinitions` onward), `Items`,
+  `GetItems`, `Targets`, and `DefaultTargets`.
 - **A partial `ProjectInstance` cannot be built.** Constructing a `BuildRequestData` from a partial
   instance throws `InvalidOperationException`; a build requires a full evaluation.
 
@@ -93,15 +97,11 @@ The default (`Full`) is unchanged, so existing callers are unaffected.
 
 ## Evaluation caching
 
-`ProjectCollection` caches loaded `Project`s keyed on (path, global properties, tools version) — the
-evaluation stage is not part of the key. To avoid serving stale partial state:
-
-- A cached project satisfies a request only if `cachedStage >= requestedStage`.
-- `ProjectCollection.LoadProject` requests `Full`. If the only cached project for a key was
-  partially evaluated, it is **upgraded in place** (re-evaluated to `Full`) and returned, rather than
-  returning partial state or creating a duplicate cache entry.
-- Calling the public `Project.ReevaluateIfNecessary()` on a partial project upgrades it to `Full`
-  (a partial evaluation leaves the project non-dirty, so the re-evaluation is forced).
+Partial evaluation applies only to `ProjectInstance`, which is an immutable evaluation snapshot that
+is **not** stored in the `ProjectCollection` loaded-project cache. A partial `ProjectInstance` can
+therefore never be returned in place of a fully-evaluated object for a later `Full` request, so there
+is no cache-staleness or upgrade-in-place concern. This is a primary reason partial evaluation is
+limited to `ProjectInstance`: the cached, mutable `Project` model cannot expose partial state safely.
 
 ## Relationship to `EvaluationContext`
 

@@ -30,6 +30,20 @@ namespace Microsoft.Build.Experimental
         private readonly BuildCallback _buildFunction;
 
         /// <summary>
+        /// Backing field for <see cref="CurrentBuildShutsDownServerNode"/>.
+        /// </summary>
+        private static bool s_currentBuildShutsDownServerNode;
+
+        /// <summary>
+        /// Whether the build currently being served by this server node will tear the node down afterward
+        /// instead of leaving it resident for reuse (a "short-lived" server — a <c>/mt</c> build with node reuse
+        /// off). Only meaningful from within a server build callback; written and read on the same build thread,
+        /// so no synchronization is needed. Public because MSBuild.exe reads it and Microsoft.Build exposes no
+        /// InternalsVisibleTo to it.
+        /// </summary>
+        public static bool CurrentBuildShutsDownServerNode => s_currentBuildShutsDownServerNode;
+
+        /// <summary>
         /// The endpoint used to talk to the host.
         /// </summary>
         private INodeEndpoint _nodeEndpoint = default!;
@@ -443,6 +457,9 @@ namespace Microsoft.Build.Experimental
                 {
                     Console.SetOut(outWriter);
                     Console.SetError(errWriter);
+
+                    // Publish whether this build's server is short-lived so the build callback can report it.
+                    s_currentBuildShutsDownServerNode = command.ShutdownAfterBuild;
 
                     buildResult = _buildFunction(command.CommandLine);
                 }

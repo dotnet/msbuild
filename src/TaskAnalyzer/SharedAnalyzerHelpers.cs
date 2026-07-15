@@ -208,7 +208,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             if (operation is IPropertyReferenceOperation propRef && propRef.Property.Name == "FullName")
             {
                 var containingTypeName = propRef.Property.ContainingType?.ToDisplayString();
-                if (containingTypeName is "System.IO.FileSystemInfo" or "System.IO.FileInfo" or "System.IO.DirectoryInfo")
+                if (containingTypeName is WellKnownTypeNames.FileSystemInfoFullName or WellKnownTypeNames.FileInfoFullName or WellKnownTypeNames.DirectoryInfoFullName)
                 {
                     return true;
                 }
@@ -317,8 +317,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // Core System.IO file/directory types
                 "System.IO.File",
                 "System.IO.Directory",
-                "System.IO.FileInfo",
-                "System.IO.DirectoryInfo",
+                WellKnownTypeNames.FileInfoFullName,
+                WellKnownTypeNames.DirectoryInfoFullName,
                 "System.IO.FileStream",
                 "System.IO.StreamReader",
                 "System.IO.StreamWriter",
@@ -387,6 +387,29 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Enumerates the properties declared on <paramref name="type"/> and all of its base types,
+        /// most-derived first. A property hidden or overridden in a more derived type is yielded only
+        /// once, via its most-derived declaration (matched by name). The <see cref="object"/> base is
+        /// skipped since it declares no task-relevant properties.
+        /// </summary>
+        internal static IEnumerable<IPropertySymbol> GetPropertiesIncludingBaseTypes(INamedTypeSymbol type)
+        {
+            var seen = new HashSet<string>(StringComparer.Ordinal);
+            for (INamedTypeSymbol? current = type;
+                 current is not null && current.SpecialType != SpecialType.System_Object;
+                 current = current.BaseType)
+            {
+                foreach (var member in current.GetMembers())
+                {
+                    if (member is IPropertySymbol property && seen.Add(property.Name))
+                    {
+                        yield return property;
+                    }
+                }
+            }
         }
     }
 }

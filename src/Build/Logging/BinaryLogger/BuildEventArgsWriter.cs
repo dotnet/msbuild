@@ -541,6 +541,7 @@ namespace Microsoft.Build.Logging
                 case PropertyInitialValueSetEventArgs propertyInitialValueSet: return Write(propertyInitialValueSet);
                 case CriticalBuildMessageEventArgs criticalBuildMessage: return Write(criticalBuildMessage);
                 case AssemblyLoadBuildEventArgs assemblyLoad: return Write(assemblyLoad);
+                case MSBuildServerLifecycleEventArgs serverLifecycle: return Write(serverLifecycle);
 
                 default: // actual BuildMessageEventArgs
                     WriteMessageFields(e, writeImportance: true);
@@ -582,6 +583,20 @@ namespace Microsoft.Build.Logging
             Write(e.MVID);
             WriteDeduplicatedString(e.AppDomainDescriptor);
             return BinaryLogRecordKind.AssemblyLoad;
+        }
+
+        private BinaryLogRecordKind Write(MSBuildServerLifecycleEventArgs e)
+        {
+            // Field order/count MUST stay in sync with BuildEventArgsReader.ReadMSBuildServerLifecycleEventArgs
+            // and with MSBuildServerLifecycleEventArgs.WriteToStream (the node-packet path). Write(int) here is
+            // a 7-bit-encoded int (see the Write(int) overload), paired with ReadInt32() on the reader.
+            WriteMessageFields(e, writeMessage: true, writeImportance: true);
+            Write((int)e.Kind);
+            Write(e.ProcessId);
+            WriteDeduplicatedString(e.Reason);
+            WriteDeduplicatedString(e.ReasonCode);
+            Write(e.ShortLived);
+            return BinaryLogRecordKind.MSBuildServerLifecycle;
         }
 
         private BinaryLogRecordKind Write(CriticalBuildMessageEventArgs e)
