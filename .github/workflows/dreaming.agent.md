@@ -50,6 +50,13 @@ safe-outputs:
     # Belt-and-braces: never let the agent modify the workflow definitions (also enforced in the prompt).
     excluded-files:
       - ".github/workflows/**"
+    # Curating the learning atoms IS this workflow's whole job, and those files (AGENTS.md and everything
+    # under .github/) are exactly what gh-aw's default file-protection policy guards. Left at the default
+    # (request_review), the signed-commit push to a protected path is refused and the run silently falls
+    # back to opening a review *issue* instead of a PR. `allowed` lets the branch push and PR open normally;
+    # the tight `allowed-files` allowlist above is the real guardrail here, and the PR still needs maintainer
+    # approval before it can merge, so human review is preserved at the PR gate.
+    protected-files: allowed
   # When nothing clears the confidence/signal bar (quiet week, or every pattern is already captured),
   # the agent emits a `noop`. Keep it in the run summary for debuggability, but do NOT file an issue —
   # a weekly no-op should be silent.
