@@ -231,7 +231,8 @@
     <!-- Only run the check when git is available (it may be absent in some source-build/VMR environments). -->
     <Exec Command="git --version"
           IgnoreExitCode="true"
-          ContinueOnError="true">
+          ContinueOnError="true"
+          StandardOutputImportance="Low">
       <Output TaskParameter="ExitCode" PropertyName="_GitVersionExitCode" />
     </Exec>
 
