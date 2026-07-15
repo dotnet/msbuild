@@ -115,8 +115,8 @@ CTS originally could not drive this repo's tests in their native
 the CTS↔host JsonRpc session could hang indefinitely — the reason the VSTest
 wrappers exist. That hang has two independent causes, both now addressed in the
 CTS tool itself (driver resilience: wait for real host exit + bounded output
-drain, and a per-batch response timeout that kills a wedged host and lets CTS
-retry it on a fresh process):
+drain, and an **opt-in inactivity timeout** that kills a host which has gone
+completely silent and lets CTS retry it on a fresh process):
 
 1. A Windows stdout/stderr pipe-inheritance leak past host exit.
 2. A wedged JSON-RPC handshake with no timeout.
@@ -124,8 +124,14 @@ retry it on a fresh process):
 `cts.config.mtp.json` drives the **regular `*.UnitTests` MTP DLLs directly**
 (no `.VSTest` wrapper): `Filter.Include` targets
 `**/artifacts/bin/*.UnitTests/Debug/net10.0/*.UnitTests.dll`, and
-`RunConfiguration.TestHostResponseTimeoutSeconds` (120s here) tunes the new
-per-batch wedged-host timeout. Point `cts collect testingplatform` /
+`RunConfiguration.TestHostResponseTimeoutSeconds` (120s here) opts into the new
+inactivity timeout. This is **not** a cap on total batch time — it is the
+maximum time the host may go without producing *any* activity (a test-node
+update or a client log) before CTS treats it as wedged. Every update from the
+host resets the countdown, so a batch that keeps streaming progress runs as long
+as it needs; only a host that falls silent for the whole window is killed and
+retried. The CTS default is `0` (disabled), so the timeout only engages because
+this config sets it. Point `cts collect testingplatform` /
 `cts apply testingplatform` at this config instead of `cts.config.json`.
 
 **Caveat (why this is still experimental):** with xUnit.v3 3.2.2, a specific
