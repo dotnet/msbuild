@@ -9,6 +9,7 @@ Param(
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
+$pwshPath = (Get-Process -Id $PID).Path
 $buildScript = Join-Path $PSScriptRoot 'common\build.ps1'
 
 # Arguments common to the stage1 and stage2 builds, including any caller-supplied $properties.
@@ -41,7 +42,6 @@ if ($stage2) {
   Write-Host "Stage 1 build: & `"$buildScript`" $buildArgs"
 }
 
-$pwshPath = (Get-Process -Id $PID).Path
 & $pwshPath -NoLogo -NoProfile -ExecutionPolicy ByPass -File "$buildScript" @buildArgs
 
 if (-not $stage2) {
@@ -133,7 +133,6 @@ $stage2BuildArgs += $stage2Args
 
 Write-Host "Stage 2 build: & `"$buildScript`" $stage2BuildArgs"
 # Needs to run out-of-proc to not inherit the stage 1 build's state variables.
-$pwshPath = (Get-Process -Id $PID).Path
 & $pwshPath -NoLogo -NoProfile -ExecutionPolicy ByPass -File "$buildScript" @stage2BuildArgs
 
 exit $LASTEXITCODE
