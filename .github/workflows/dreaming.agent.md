@@ -1,6 +1,6 @@
 ---
 name: "Dreaming (learning atoms curation)"
-description: "Weekly (and manually triggerable) workflow inspired by Claude Managed Agents 'dreaming'. It reviews the past 7 days of pull requests, review feedback, conversations, and CI check outcomes to find recurring mistakes and misses that agents keep making, then curates the repository's 'learning atoms' — the durable agent-instruction files (AGENTS.md, .github/instructions/**, .github/skills/**, .github/agents/**) — with small, high-signal, non-duplicate changes, preferring to refine existing guidance over adding new, and opens up to three atomic, ready-for-review PRs (one per distinct recurring pattern), each requesting review from the core MSBuild team members who were involved in the discussions behind it."
+description: "Weekly (and manually triggerable) workflow inspired by Claude Managed Agents 'dreaming'. It reviews the past 7 days of pull requests, review feedback, conversations, and CI check outcomes to find recurring mistakes and misses that agents keep making, then curates the repository's 'learning atoms' — the durable agent-instruction files (AGENTS.md, .github/instructions/**, .github/skills/**, .github/agents/**) — with small, high-signal, non-duplicate changes, preferring to refine existing guidance over adding new, and opens up to three atomic, ready-for-review PRs (one per distinct recurring pattern), each naming (via @-mention in the PR body) the core MSBuild team members who were involved in the discussions behind it so a maintainer can assign them as reviewers."
 on:
   # Weekly on Monday morning; the agent looks back over the previous 7 days of activity.
   # Explicit natural-language schedule so gh-aw pins a stable cron on compile.
@@ -149,9 +149,10 @@ manifests.
    contributors toward introducing new build warnings/errors or breaking changes.
 8. **Cap the volume, keep each PR atomic.** At most **~5 distinct learning-atom changes total** across
    the run, even if you find more — pick the highest-signal, most-recurring ones. Split them into **up to
-   3 PRs so each PR is atomic**: one PR per distinct, unrelated pattern (a PR may bundle 1–2 changes only
-   if they are the *same* theme in the *same* file). Unrelated patterns must go in separate PRs. It is
-   completely fine to open only 1 PR with 1–2 changes.
+   3 PRs so each PR is atomic**: one PR per distinct, unrelated pattern. A single PR may bundle more than
+   one change only when they belong to the **same theme** — even if that theme naturally spans two files
+   (e.g. a `SKILL.md` refinement plus a matching `AGENTS.md` line). Unrelated patterns must go in separate
+   PRs. It is completely fine to open only 1 PR with 1–2 changes.
 
 ## Step 1 — Gather the past week of activity
 
@@ -211,11 +212,11 @@ including your own other edits.
 Because each PR is created from its **own git branch**, keep unrelated patterns on separate branches so
 they stay atomic. For **each** pattern you're turning into a PR:
 
-1. From up-to-date `main`, create a fresh branch for that pattern (e.g.
-   `git checkout main && git checkout -b dreaming/<short-topic>`).
+1. Refresh `main` and branch from it, so the branch is built on the latest base regardless of workspace
+   state (e.g. `git fetch origin main && git checkout -B dreaming/<short-topic> origin/main`).
 2. Make just that pattern's edit(s) with the `edit` tool and commit them on that branch.
-3. Then move to the next pattern's branch (again starting from `main`) so its changes don't pile onto the
-   previous one.
+3. Then move to the next pattern's branch (again `git fetch origin main` + branch from `origin/main`) so
+   its changes don't pile onto the previous one.
 
 After staging each branch, run `git --no-pager diff main...HEAD` (or `git --no-pager diff` before
 committing) and confirm:
@@ -230,36 +231,42 @@ If any check fails, fix or drop the offending change before proceeding.
 
 - If you have well-justified changes, emit a `create_pull_request` safe output **per distinct pattern**,
   up to **3** total, each with its `branch` set to that pattern's branch from Step 4. **Keep each PR
-  atomic**: one theme per PR, on its own branch (bundle 1–2 changes in the same PR only when they are the
-  same theme in the same file). Unrelated patterns must be separate PRs. For **each** PR, write a body
-  that, for every learning-atom change it carries, states:
-  - **What** changed and in which file (edit vs. small addition).
-  - **Why** — the recurring evidence: cite the PR numbers / comment themes / CI failure category that
-    prompted it (2+ occurrences). Keep it concise.
-  - A one-line note confirming you checked it isn't already covered elsewhere.
+  atomic**: one theme per PR, on its own branch (a PR may carry more than one change only when they are
+  the same theme, even if it spans two files — see rule 8). Unrelated patterns must be separate PRs. For
+  **each** PR, write a body that:
+  - For every learning-atom change it carries, states:
+    - **What** changed and in which file (edit vs. small addition).
+    - **Why** — the recurring evidence: cite the PR numbers / comment themes / CI failure category that
+      prompted it (2+ occurrences). Keep it concise.
+    - A one-line note confirming you checked it isn't already covered elsewhere.
+  - **Ends with the `## Reviewers (core MSBuild team)` section** from Step 5b (always include it).
   Open each PR **ready for review** (not draft) so a maintainer can approve or adjust. A human merges it —
   you never self-merge.
 - If **nothing** clears the bar this week (quiet week, or every recurring pattern is already captured),
   emit a **`noop`** explaining briefly what you looked at and why no learning-atom change was warranted.
   Do **not** open an empty or speculative PR.
 
-## Step 5b — Request reviewers (core MSBuild team, max 2 per PR)
+## Step 5b — Name reviewers to notify (core MSBuild team, max 2 per PR)
 
-For **each** PR you open, request review from the people who were actually involved in the discussions
-behind that PR's pattern (from the participant list you kept in Step 2):
+For **each** PR you open, identify the people who were actually involved in the discussions behind that
+PR's pattern (from the participant list you kept in Step 2) and @-mention them so a maintainer can assign
+them:
 
 1. Take that theme's participants and **keep only core MSBuild team members** — those whose
    `authorAssociation` was `OWNER` or `MEMBER` (see Step 1). Drop everyone else, and drop bots and the
    PR authors themselves.
 2. **Cap at 2.** If more than two qualify, pick the two most engaged in that pattern's threads (most
-   comments / the ones who requested the changes). If exactly one qualifies, request one. If **none**
-   qualify, fall back to requesting the core-team handle `@dotnet/kitten` (the MSBuild CODEOWNERS team).
-3. Because the safe-outputs channel exposes no per-PR reviewer field, record the request **in that PR's
-   body** as its own final section so a maintainer can assign with one click and the people are notified:
+   comments / the ones who requested the changes). If exactly one qualifies, name one. If **none**
+   qualify, fall back to the core-team handle `@dotnet/kitten` (the MSBuild CODEOWNERS team; verified
+   team slug `kitten`).
+3. The safe-outputs channel exposes no per-PR reviewer field, so you **cannot** create a formal GitHub
+   review request. Instead, record the chosen people **in that PR's body** as its own final section. An
+   `@`-mention here is a **notification/ping for manual assignment**, not an auto-assigned review — a
+   maintainer still clicks "Reviewers" to formally request them:
 
    ```
    ## Reviewers (core MSBuild team)
-   Requesting review from the core-team members who discussed this pattern: @login1 @login2
+   Suggested reviewers — core-team members who discussed this pattern (please assign): @login1 @login2
    ```
 
    Use real `@`-mentions (or `@dotnet/kitten` for the fallback). This is the one place contributor names
@@ -273,4 +280,4 @@ behind that PR's pattern (from the participant list you kept in Step 2):
 - Never encode secrets, credentials, individual contributor names, or transient/one-off facts **into the
   learning-atom content**. (Naming the core-team reviewers in the PR body, per Step 5b, is the sole
   exception — that is review metadata, not atom content.)
-- Keep each PR atomic and request at most **2** core-team reviewers per PR (Step 5b).
+- Keep each PR atomic and name at most **2** core-team reviewers to notify per PR (Step 5b).
