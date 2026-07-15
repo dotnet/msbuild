@@ -28,6 +28,81 @@
   </Target>
 
   <ItemGroup>
+    <!--
+      MSBuildLoadContext probes for and loads plugin dependency assemblies by path at run time, which
+      is incompatible with trimming. The switch is enabled by default at run time (probing works
+      normally) but defaults to disabled for trim analysis (Value="false"), letting the trimmer remove
+      the unreachable probing path; resolution then falls back to the default AssemblyLoadContext. This
+      library emits no runtimeconfig.json, so the AppContext switch stays unset and probing remains
+      enabled untrimmed.
+    -->
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableCustomPluginProbing" Value="false" Trim="true" />
+    <!--
+      Property functions resolve receiver types outside the curated allowlist (by probing and loading
+      assemblies at runtime) only when MSBUILDENABLEALLPROPERTYFUNCTIONS=1. That reflection is
+      incompatible with trimming, so the feature switch defaults to disabled for trim analysis, which
+      lets the trimmer remove the unreachable probing path. The environment variable is still honored
+      at run time (this library emits no runtimeconfig.json, so the AppContext switch stays unset).
+    -->
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableAllPropertyFunctions" Value="false" Trim="true" />
+    <!--
+      Instance "dotting in" is limited to a curated set of receiver types (see the engine's
+      PropertyFunctionReceiver) so the members reachable by reflection are predictable and statically
+      known. The switch defaults to enabled for trim analysis, letting the trimmer remove the unrestricted
+      path; untrimmed it stays off (it has no environment variable, and this library emits no
+      runtimeconfig.json so the AppContext switch stays unset).
+    -->
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.RestrictPropertyFunctionReceivers" Value="true" Trim="true" />
+    <!--
+      Loading SDK resolver plugin assemblies from disk reflects over their types, which is incompatible
+      with trimming. The switch defaults to disabled for trim analysis, letting the trimmer remove the
+      reflective resolver-loading branch; an SDK that needs a dynamically loaded resolver then fails
+      observably. In-box SDKs resolved by the reflection-free DefaultSdkResolver are unaffected.
+    -->
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableSdkResolverDynamicLoading" Value="false" Trim="true" />
+    <!--
+      Reading toolsets from the application .config file (the <msbuildToolsets> section) needs
+      System.Configuration.ConfigurationManager. The configuration file is not a default toolset location
+      on .NET and is unavailable to a single-file/AOT host, so the switch defaults to disabled for trim
+      analysis: the trimmer removes the ToolsetConfigurationReader branch and drops the ConfigurationManager
+      dependency entirely.
+    -->
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableConfigurationFileToolsets" Value="false" Trim="true" />
+    <!--
+      Loading and executing tasks reflects over task assemblies and task types discovered at run time,
+      which is incompatible with trimming. The switch defaults to disabled for trim analysis: the trimmer
+      removes the reflective task-instantiation branch, and a trimmed/AOT host that reaches task execution
+      fails observably with a reported TaskInstantiationFailureError instead of crashing in reflection. A
+      host that registers its tasks (Microsoft.Build.Utilities.Task.RegisterTask) runs them with this switch
+      off - the engine constructs registered and intrinsic MSBuild/CallTarget tasks reflection-free.
+    -->
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableReflectiveTaskExecution" Value="false" Trim="true" />
+    <!--
+      Resolving a task parameter type declared by name (the ParameterType of a <UsingTask> <ParameterGroup>
+      parameter) falls back to Type.GetType(string), which is incompatible with trimming. The switch defaults
+      to disabled for trim analysis: the trimmer removes the reflective by-name resolution branch, and only
+      the statically-known TaskParameterTypeRegistry (intrinsic value types, string, the MSBuild ITaskItem
+      types, plus any a host registers) resolves; an unregistered name then fails observably.
+    -->
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableReflectiveTaskParameterTypes" Value="false" Trim="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--
+      Creating a logger from a LoggerDescription (a logger named by assembly and class) loads the logger
+      assembly and type by reflection, which is incompatible with trimming. The switch defaults to disabled
+      for trim analysis: the trimmer removes the reflective forwarding-logger creation branch (and its
+      MetadataLoadContext/TypeLoader dependency), and a logger described by name fails observably. Loggers
+      supplied to the engine as already-constructed ILogger instances are unaffected.
+    -->
+    <RuntimeHostConfigurationOption Include="Microsoft.Build.EnableReflectiveLoggerLoading" Value="false" Trim="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="buildTransitive\Microsoft.Build.Framework.targets"
+          Pack="true"
+          PackagePath="buildTransitive\Microsoft.Build.Framework.targets" />
+
     <PackageReference Include="Microsoft.CodeAnalysis.Contracts" PrivateAssets="all" />
 
     <!-- Display files included by the Microsoft.CodeAnalysis.Contracts source package in a 'SourcePackages\Contracts' folder -->

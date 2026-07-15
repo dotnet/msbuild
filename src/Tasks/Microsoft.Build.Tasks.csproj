@@ -47,10 +47,10 @@
     <Compile Include="..\Shared\NodePipeServer.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
+    <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <!-- Source Files -->
+    <Compile Include="BuiltInTasks.cs" />
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>AssemblyDependency\AssemblyFoldersEx.cs</Link>
     </Compile>

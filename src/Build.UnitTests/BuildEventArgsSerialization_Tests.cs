@@ -539,6 +539,115 @@ namespace Microsoft.Build.UnitTests
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
 
+        /// <summary>
+        /// The MSBuild Server lifecycle events are logged as a dedicated <see cref="MSBuildServerLifecycleEventArgs"/>
+        /// recorded under its own <see cref="BinaryLogRecordKind.MSBuildServerLifecycle"/>. This keeps the data in a
+        /// specific, versionable event type (not an ad-hoc message); binary-log readers that predate the record kind
+        /// skip it via the forward-compatible, length-prefixed record framing.
+        /// </summary>
+        [Fact]
+        public void RoundtripMSBuildServerLifecycleEventArgs()
+        {
+            var args = new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.Spawned,
+                processId: 4321,
+                reason: null,
+                reasonCode: null,
+                "MSBuild Server node started for this build only; it will shut down afterward (process ID 4321).",
+                MessageImportance.Low,
+                shortLived: true)
+            {
+                BuildEventContext = BuildEventContext.Invalid,
+            };
+
+            var memoryStream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                new BuildEventArgsWriter(binaryWriter).Write(args);
+            }
+
+            // The event serializes under its OWN dedicated record kind (not Message), so readers that predate it
+            // skip the unknown record via the forward-compatible length-prefixed framing rather than mis-reading it.
+            memoryStream.Position = 0;
+            using (var rawReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
+            using (var eventsReader = new BuildEventArgsReader(rawReader, BinaryLogger.FileFormatVersion))
+            {
+                BinaryLogRecordKind eventRecordKind;
+                do
+                {
+                    eventRecordKind = eventsReader.ReadRaw().RecordKind;
+                }
+                while (eventRecordKind is BinaryLogRecordKind.String
+                    or BinaryLogRecordKind.NameValueList
+                    or BinaryLogRecordKind.ProjectImportArchive);
+
+                eventRecordKind.ShouldBe(BinaryLogRecordKind.MSBuildServerLifecycle);
+            }
+
+            // A current reader reconstructs the strongly-typed event with all of its structured fields.
+            memoryStream.Position = 0;
+            using (var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
+            using (var eventsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion))
+            {
+                var deserialized = eventsReader.Read().ShouldBeOfType<MSBuildServerLifecycleEventArgs>();
+                deserialized.Kind.ShouldBe(MSBuildServerLifecycleKind.Spawned);
+                deserialized.ShortLived.ShouldBeTrue();
+                deserialized.ProcessId.ShouldBe(4321);
+                deserialized.Reason.ShouldBeNull();
+                deserialized.ReasonCode.ShouldBeNull();
+                deserialized.Message.ShouldBe("MSBuild Server node started for this build only; it will shut down afterward (process ID 4321).");
+            }
+        }
+
+        /// <summary>
+        /// Companion to <see cref="RoundtripMSBuildServerLifecycleEventArgs"/> covering the <c>NotUsed</c> kind
+        /// with a non-null <see cref="MSBuildServerLifecycleEventArgs.Reason"/> /
+        /// <see cref="MSBuildServerLifecycleEventArgs.ReasonCode"/> (the deduplicated-string branch the Spawned
+        /// case leaves null) and the <c>Reused</c> kind (a non-zero enum value). Verifies every structured field
+        /// round-trips through the binary-log writer/reader.
+        /// </summary>
+        [Fact]
+        public void RoundtripMSBuildServerLifecycleEventArgs_NotUsedAndReused()
+        {
+            RoundtripAndAssert(new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.NotUsed,
+                processId: 0,
+                reason: "node reuse is disabled",
+                reasonCode: "node-reuse-disabled",
+                "MSBuild Server was requested but not used for this build: node reuse is disabled.",
+                MessageImportance.Low));
+
+            RoundtripAndAssert(new MSBuildServerLifecycleEventArgs(
+                MSBuildServerLifecycleKind.Reused,
+                processId: 9876,
+                reason: null,
+                reasonCode: null,
+                "Reusing the running MSBuild Server node for this build (process ID 9876).",
+                MessageImportance.Low));
+
+            static void RoundtripAndAssert(MSBuildServerLifecycleEventArgs args)
+            {
+                args.BuildEventContext = BuildEventContext.Invalid;
+
+                var memoryStream = new MemoryStream();
+                using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+                {
+                    new BuildEventArgsWriter(binaryWriter).Write(args);
+                }
+
+                memoryStream.Position = 0;
+                using var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true);
+                using var eventsReader = new BuildEventArgsReader(binaryReader, BinaryLogger.FileFormatVersion);
+                var deserialized = eventsReader.Read().ShouldBeOfType<MSBuildServerLifecycleEventArgs>();
+                deserialized.Kind.ShouldBe(args.Kind);
+                deserialized.ProcessId.ShouldBe(args.ProcessId);
+                deserialized.Reason.ShouldBe(args.Reason);
+                deserialized.ReasonCode.ShouldBe(args.ReasonCode);
+                deserialized.ShortLived.ShouldBe(args.ShortLived);
+                deserialized.Message.ShouldBe(args.Message);
+            }
+        }
+
         [Fact]
         public void RoundtripAssemblyLoadBuild()
         {

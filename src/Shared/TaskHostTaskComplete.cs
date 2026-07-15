@@ -89,6 +89,12 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private Dictionary<string, string> _buildProcessEnvironment = null;
 
+        /// <summary>
+        /// How <see cref="_buildProcessEnvironment"/> is represented on the wire. Defaults to
+        /// <see cref="InvariantPayloadTransferMode.Full"/> so older (legacy) code paths keep their existing behavior.
+        /// </summary>
+        private InvariantPayloadTransferMode _environmentMode = InvariantPayloadTransferMode.Full;
+
 
 #pragma warning disable CS1572 // XML comment has a param tag, but there is no parameter by that name. Justification: xmldoc doesn't seem to interact well with #ifdef of params.
         /// <summary>
@@ -213,6 +219,19 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// How the build process environment is transferred on the wire. See <see cref="InvariantPayloadTransferMode"/>.
+        /// Set by the task host when the negotiated packet version supports environment delta transfer and the task
+        /// did not change the environment.
+        /// </summary>
+        internal InvariantPayloadTransferMode EnvironmentMode
+        {
+            [DebuggerStepThrough]
+            get { return _environmentMode; }
+            [DebuggerStepThrough]
+            set { _environmentMode = value; }
+        }
+
+        /// <summary>
         /// The type of this packet.
         /// </summary>
         public NodePacketType Type
@@ -242,7 +261,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _taskExceptionMessage);
             translator.Translate(ref _taskExceptionMessageArgs);
             translator.TranslateDictionary(ref _taskOutputParameters, StringComparer.OrdinalIgnoreCase, TaskParameter.FactoryForDeserialization);
-            translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+            TranslateBuildProcessEnvironment(translator);
 #if FEATURE_REPORTFILEACCESSES
             translator.Translate(ref _fileAccessData,
                 (ITranslator translator, ref FileAccessData data) => ((ITranslatable)data).Translate(translator));
@@ -250,6 +269,23 @@ namespace Microsoft.Build.BackEnd
             bool hasFileAccessData = false;
             translator.Translate(ref hasFileAccessData);
 #endif
+        }
+
+        private void TranslateBuildProcessEnvironment(ITranslator translator)
+        {
+            if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.EnvironmentDeltaMinVersion)
+            {
+                translator.TranslateEnum(ref _environmentMode, (int)_environmentMode);
+
+                if (_environmentMode == InvariantPayloadTransferMode.Full)
+                {
+                    translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+                }
+            }
+            else
+            {
+                translator.TranslateDictionary(ref _buildProcessEnvironment, StringComparer.OrdinalIgnoreCase);
+            }
         }
 
         /// <summary>

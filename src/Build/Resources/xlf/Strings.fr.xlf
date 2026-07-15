@@ -141,6 +141,11 @@
         <target state="translated">L’écriture n’est pas recommandée.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheckCustomCheckNotSupportedInTrimmedHost">
+        <source>MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</source>
+        <target state="translated">MSB4284: le contrôle de génération personnalisé « {0} » n’a pas pu être chargé, car cet hôte MSBuild désactive l’exploration des plug-ins personnalisés, par exemple dans une génération tronquée ou Native AOT, et ne peut pas charger les assemblys de contrôle par réflexion. Effectuez la génération avec un MSBuild basé sur JIT pour exécuter des contrôles personnalisés.</target>
+        <note>{StrBegin="MSB4284: "}{0} is the path to the custom build check assembly.</note>
+      </trans-unit>
       <trans-unit id="BuildCheckEnabled">
         <source>The BuildCheck is enabled for this build.</source>
         <target state="translated">BuildCheck est activé pour cette build.</target>
@@ -423,34 +428,34 @@
       </trans-unit>
       <trans-unit id="CoordinatorFailedToConnect">
         <source>Failed to connect to the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to connect to the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Échec de la connexion au coordinateur de build. La génération se poursuit sans coordination de nœud.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToLaunch">
         <source>Failed to launch the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to launch the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Échec du lancement du coordinateur de build. La génération se poursuit sans coordination de nœud.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToNegotiate">
         <source>Failed to negotiate with the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to negotiate with the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Échec de la négociation avec le coordinateur de build. La génération se poursuit sans coordination de nœud.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorLaunchTimedOut">
         <source>Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Le délai d’attente du lancement du coordinateur de build a expiré. La génération se poursuit sans coordination de nœud.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorNodeGrantReceived">
         <source>Coordinator granted {0} node(s) for this build.</source>
-        <target state="new">Coordinator granted {0} node(s) for this build.</target>
+        <target state="translated">Le coordinateur a accordé {0} nœud(s) pour cette compilation.</target>
         <note>
       LOCALIZATION: {0} is the number of nodes granted by the coordinator.
     </note>
       </trans-unit>
       <trans-unit id="CoordinatorWaitingForNodes">
         <source>Waiting for coordinator to grant build resources...</source>
-        <target state="new">Waiting for coordinator to grant build resources...</target>
+        <target state="translated">En attente de l’octroi des ressources de build par le coordinateur...</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
@@ -689,6 +694,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
+      <trans-unit id="OM_ConfigurationFileToolsetsNotSupported">
+        <source>Reading toolset definitions from the application configuration file (ToolsetDefinitionLocations.ConfigurationFile) is not supported in this trimmed or Native AOT host. Remove ConfigurationFile from the requested toolset locations, or run a JIT-based MSBuild.</source>
+        <target state="translated">La lecture des définitions d’ensemble d’outils à partir du fichier de configuration de l’application (ToolsetDefinitionLocations.ConfigurationFile) n’est pas prise en charge dans cet hôte tronqué ou Native AOT. Supprimez ConfigurationFile des emplacements d’ensemble d’outils demandés ou exécutez un MSBuild basé sur JIT.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
         <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
         <target state="translated">Seuls les types d'élément peuvent être référencés pour la suppression à l'aide de MatchOnMetadata.</target>
@@ -708,6 +718,21 @@
         <source>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</source>
         <target state="translated">Impossible d'utiliser MatchOnMetadata en dehors de &lt;Target&gt;.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="OM_PartialEvaluationCannotBuild">
+        <source>The project instance cannot be built because it was only partially evaluated (evaluation stopped after the "{0}" stage). A full evaluation is required to build a project.</source>
+        <target state="translated">L’instance de projet ne peut pas être générée, car elle n’a été évaluée que partiellement (l’évaluation s’est arrêtée à l’étape « {0} »). Une évaluation complète est nécessaire pour générer un projet.</target>
+        <note>UE: This message is shown when the user tries to build a ProjectInstance produced by a partial evaluation. {0} is the ProjectEvaluationStage the instance was evaluated to.</note>
+      </trans-unit>
+      <trans-unit id="OM_PartialEvaluationMemberUnavailable">
+        <source>The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with at least the "{2}" evaluation stage to access this member.</source>
+        <target state="translated">Le membre « {0} » n’est pas disponible, car le projet n’a été évalué que partiellement (l’évaluation s’est arrêtée à l’étape « {1} »). Réévaluez le projet avec au moins l’étape d’évaluation « {2} » pour accéder à ce membre.</target>
+        <note>UE: This message is shown when the user reads a member (for example items or targets) that a partial evaluation did not compute. {0} is the member name, {1} is the ProjectEvaluationStage the project was evaluated to, {2} is the minimum ProjectEvaluationStage required to access the member.</note>
+      </trans-unit>
+      <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
+        <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
+        <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
+        <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
@@ -908,6 +933,16 @@
         <target state="translated">MSB4274: la désactivation du nœud inproc entraîne une détérioration des performances lors de l’utilisation de plug-ins de cache de projet qui émettent des requêtes de build proxy.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReflectiveLoggerLoadingNotSupported">
+        <source>MSB4285: A logger could not be created from its assembly and class name because loading loggers by reflection is not supported in this trimmed or Native AOT host. Provide the logger to the engine as a constructed ILogger instance, or build with a JIT-based MSBuild.</source>
+        <target state="translated">MSB4285: un journaliseur n’a pas pu être créé à partir de son assembly et de son nom de classe, car le chargement des journaliseurs par réflexion n’est pas pris en charge dans cet hôte tronqué ou Native AOT. Fournissez le journaliseur au moteur sous forme d’instance ILogger construite, ou effectuez la génération avec un MSBuild basé sur JIT.</target>
+        <note>{StrBegin="MSB4285: "}</note>
+      </trans-unit>
+      <trans-unit id="ReflectiveTaskExecutionNotSupported">
+        <source>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</source>
+        <target state="translated">MSB4283: la tâche « {0} » n’a pas pu être exécutée, car l’exécution des tâches nécessite le chargement par réflexion des assemblys et des types de tâches, ce qui n’est pas pris en charge dans cet hôte allégé ou Native AOT. Générez avec un MSBuild basé sur JIT pour exécuter des tâches.</target>
+        <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
+      </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
         <target state="translated">Les accès aux fichiers de création de rapports sont uniquement pris en charge à l’aide de la saveur x64 de MSBuild.</target>
@@ -988,6 +1023,11 @@ Erreurs : {3}</target>
         <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
         <target state="translated">Un kit de développement logiciel (SDK) a défini la variable d’environnement « {0} » sur « {1} », remplaçant la valeur « {2} » héritée du processus.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="SdkResolverDynamicLoadingNotSupported">
+        <source>MSB4282: The SDK "{0}" could not be resolved because it requires an SDK resolver ("{1}") that must be loaded dynamically, which is not supported in this trimmed or Native AOT host. SDKs available in the SDK installation are supported; build with a JIT-based MSBuild to use NuGet, workload, or custom SDK resolvers.</source>
+        <target state="translated">MSB4282: le SDK « {0} » n’a pas pu être résolu, car il nécessite un résolveur de SDK (« {1} ») qui doit être chargé dynamiquement, ce qui n’est pas pris en charge dans cet hôte tronqué ou Native AOT. Les SDK disponibles dans l’installation du SDK sont pris en charge; effectuez la génération avec un MSBuild basé sur JIT pour utiliser NuGet, un composant de charge de travail ou des résolveurs de SDK personnalisés.</target>
+        <note>{StrBegin="MSB4282: "}{0} is the SDK name; {1} is the SDK resolver manifest display name.</note>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>

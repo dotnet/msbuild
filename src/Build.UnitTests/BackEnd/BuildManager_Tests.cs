@@ -1511,6 +1511,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously: needs to be async for xunit's timeout system
 #pragma warning disable IDE0390 // Method can be made synchronous
+#pragma warning disable xUnit1069 // Test method 'CancelledBuild' has a Timeout but does not reference TestContext.Current.CancellationToken
         /// <summary>
         /// A canceled build
         /// </summary>
@@ -1518,6 +1519,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public async System.Threading.Tasks.Task CancelledBuild()
 #pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
 #pragma warning restore IDE0390 // Method can be made synchronous
+#pragma warning restore xUnit1069 // Test method 'CancelledBuild' has a Timeout but does not reference TestContext.Current.CancellationToken
         {
             Console.WriteLine("Starting CancelledBuild test that is known to hang.");
             string contents = CleanupFileContents(@"
@@ -3857,6 +3859,89 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Pins the interaction between a target's <c>Returns</c> attribute and <c>AfterTargets</c>:
+        /// a target's returned item set is captured when that target itself completes, before its
+        /// after-targets run. Items that an after-target adds to the same ItemGroup are therefore not
+        /// observed in the predecessor target's returned outputs (the same set the MSBuild task's
+        /// TargetOutputs would observe for that target).
+        /// </summary>
+        [Fact]
+        public void ReturnsCapturedBeforeAfterTargetsRun()
+        {
+            string contents = CleanupFileContents("""
+                <Project>
+                  <Target Name="A" Returns="@(MyItem)">
+                    <ItemGroup>
+                      <MyItem Include="FromA" />
+                    </ItemGroup>
+                  </Target>
+                  <Target Name="B" AfterTargets="A">
+                    <ItemGroup>
+                      <MyItem Include="FromB" />
+                    </ItemGroup>
+                    <Message Text="[B-ran]" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+            BuildRequestData data = GetBuildRequestData(contents, ["A"]);
+            ProjectInstance projectInstance = data.ProjectInstance;
+            BuildResult result = _buildManager.Build(_parameters, data);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Sanity: the after-target B must actually have run, otherwise this test would pass trivially.
+            _logger.AssertLogContains("[B-ran]");
+
+            // A's Returns snapshot is taken when A completes, before B runs, so only FromA is captured;
+            // the FromB that B adds is not present.
+            result.ResultsByTarget["A"].Items.ShouldHaveSingleItem().ItemSpec.ShouldBe("FromA");
+
+            // The live project item state, by contrast, does see B's mutation: the FromB that is
+            // absent from A's returned snapshot was genuinely added to the item group, just too late
+            // for A's Returns.
+            projectInstance.GetItems("MyItem").Select(i => i.EvaluatedInclude).ShouldBe(["FromA", "FromB"]);
+        }
+
+        /// <summary>
+        /// Pins the same <c>Returns</c>/<c>AfterTargets</c> timing as <see cref="ReturnsCapturedBeforeAfterTargetsRun"/>,
+        /// but for a <c>Returns</c> that expands a property value: the value is captured when the target
+        /// completes, before its after-targets run, so a later property change in an after-target is not
+        /// reflected in the predecessor target's returned outputs.
+        /// </summary>
+        [Fact]
+        public void ReturnsCapturedPropertyValueBeforeAfterTargetsRun()
+        {
+            string contents = CleanupFileContents("""
+                <Project>
+                  <PropertyGroup>
+                    <MyProp>FromA</MyProp>
+                  </PropertyGroup>
+                  <Target Name="A" Returns="$(MyProp)" />
+                  <Target Name="B" AfterTargets="A">
+                    <PropertyGroup>
+                      <MyProp>FromB</MyProp>
+                    </PropertyGroup>
+                    <Message Text="[B-ran]" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+            BuildRequestData data = GetBuildRequestData(contents, ["A"]);
+            ProjectInstance projectInstance = data.ProjectInstance;
+            BuildResult result = _buildManager.Build(_parameters, data);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Sanity: the after-target B must actually have run, otherwise this test would pass trivially.
+            _logger.AssertLogContains("[B-ran]");
+
+            // A's Returns expands $(MyProp) when A completes, before B runs, so it captures FromA.
+            result.ResultsByTarget["A"].Items.ShouldHaveSingleItem().ItemSpec.ShouldBe("FromA");
+
+            // The live project property state, by contrast, does see B's change to FromB.
+            projectInstance.GetPropertyValue("MyProp").ShouldBe("FromB");
+        }
+
+        /// <summary>
         /// When a <see cref="ProjectInstance"/> based <see cref="BuildRequestData"/> is built out of proc, the node should
         /// not reload it from disk but instead fully utilize the entire translate project instance state
         /// to do the build.
@@ -4628,8 +4713,10 @@ $@"<Project InitialTargets=`Sleep`>
         /// The fix uses a static lock across all engine instances so a single trace file is safe,
         /// and catches non-critical exceptions so trace failures can never crash the build engine.
         /// </summary>
+#pragma warning disable xUnit1069 // Test method 'MultiThreadedBuild_WithDebugSchedulerTracing_DoesNotDeadlock' has a Timeout but does not reference TestContext.Current.CancellationToken
         [Fact(Timeout = 30_000)]
         public async System.Threading.Tasks.Task MultiThreadedBuild_WithDebugSchedulerTracing_DoesNotDeadlock()
+#pragma warning restore xUnit1069 // Test method 'MultiThreadedBuild_WithDebugSchedulerTracing_DoesNotDeadlock' has a Timeout but does not reference TestContext.Current.CancellationToken
         {
             await System.Threading.Tasks.Task.Run(() =>
             {

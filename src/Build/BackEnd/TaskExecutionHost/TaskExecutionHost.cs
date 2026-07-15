@@ -1,13 +1,19 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Globalization;
+using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 #endif
@@ -15,6 +21,7 @@ using System.Text;
 using System.Threading;
 
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
@@ -24,7 +31,6 @@ using Microsoft.Build.Shared;
 
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using Task = System.Threading.Tasks.Task;
-using Microsoft.Build.Collections;
 
 #nullable disable
 
@@ -134,6 +140,13 @@ namespace Microsoft.Build.BackEnd
         /// The task type retrieved from the assembly.
         /// </summary>
         private TaskFactoryWrapper _taskFactoryWrapper;
+
+        /// <summary>
+        /// When the task was resolved from <see cref="TaskClassRegistry"/> (a host-registered task), the
+        /// factory that constructs it with no assembly loading or reflection. Non-null only for registered
+        /// tasks, which run even when reflective task execution is disabled (trimmed/AOT host).
+        /// </summary>
+        private RegisteredTaskFactory _registeredTaskFactory;
 
         /// <summary>
         /// Set to true if the execution has been cancelled.
@@ -299,7 +312,45 @@ namespace Microsoft.Build.BackEnd
         /// <returns>The task requirements and task factory wrapper if the task is found, (null, null) otherwise.</returns>
         public (TaskRequirements? requirements, TaskFactoryWrapper taskFactoryWrapper) FindTask(in TaskHostParameters taskIdentityParameters)
         {
-            _taskFactoryWrapper ??= FindTaskInRegistry(taskIdentityParameters);
+            if (_taskFactoryWrapper is null)
+            {
+                // A fresh task resolution: clear any registered-task factory left over from a previous task on
+                // this reused host, so an unregistered (e.g. intrinsic) task is not mistaken for the prior
+                // registered one when constructing its instance.
+                _registeredTaskFactory = null;
+
+                // A host-registered task (TaskClassRegistry) resolves with no assembly loading or by-name
+                // type resolution, so it runs even when reflective task execution is disabled - the path a
+                // trimmed/AOT host takes. Consult the registry first.
+                if (TryCreateRegisteredTaskFactory(out TaskFactoryWrapper registeredTaskFactoryWrapper))
+                {
+                    _taskFactoryWrapper = registeredTaskFactoryWrapper;
+                }
+                else if (!FeatureSwitches.EnableReflectiveTaskExecution)
+                {
+                    // The intrinsic MSBuild and CallTarget tasks are engine-internal types resolved without
+                    // reflecting over a runtime-discovered assembly, so they stay available when reflective task
+                    // execution is disabled (the trimmed/AOT path) - virtually every real build uses them.
+                    if (TryCreateIntrinsicTaskFactory(out TaskFactoryWrapper intrinsicTaskFactoryWrapper))
+                    {
+                        _taskFactoryWrapper = intrinsicTaskFactoryWrapper;
+                    }
+                    else
+                    {
+                        // Loading a task factory/type reflects over an assembly discovered at run time, which a
+                        // trimmed/AOT host cannot do. Fail observably with a reported build error (rather than
+                        // crashing in reflection) so the host can fall back to a JIT MSBuild. This is the leaf gate
+                        // that frees the whole build-execution chain above from carrying [RequiresUnreferencedCode],
+                        // and it lets the trimmer remove the reflective task-loading path from the image.
+                        ProjectErrorUtilities.ThrowInvalidProject(_taskLocation, "ReflectiveTaskExecutionNotSupported", _taskName);
+                        return (null, null);
+                    }
+                }
+                else
+                {
+                    _taskFactoryWrapper = FindTaskInRegistry(taskIdentityParameters);
+                }
+            }
 
             if (_taskFactoryWrapper is null)
             {
@@ -308,6 +359,13 @@ namespace Microsoft.Build.BackEnd
 
             TaskRequirements requirements = TaskRequirements.None;
 
+            // HasSTAThreadAttribute / HasLoadInSeparateAppDomainAttribute come from custom attributes
+            // ([RunInSTA] / [LoadInSeparateAppDomain]) on the task type. A registered task's LoadedType is
+            // rooted for trimming with PublicParameterlessConstructor | PublicProperties only, so under Native
+            // AOT those attributes are not preserved and read as false - a registered task declaring them would
+            // not get STA / separate-AppDomain treatment. That is acceptable for the in-process registered-task
+            // path (separate AppDomains do not exist on .NET Core regardless); the reflective JIT path, which
+            // loads the full type, observes the attributes exactly as before.
             if (_taskFactoryWrapper.TaskFactoryLoadedType.HasSTAThreadAttribute)
             {
                 requirements |= TaskRequirements.RequireSTAThread;
@@ -323,6 +381,70 @@ namespace Microsoft.Build.BackEnd
             }
 
             return (requirements, _taskFactoryWrapper);
+        }
+
+        /// <summary>
+        /// Attempts to resolve the current task from the host task registry (<see cref="TaskClassRegistry"/>).
+        /// A registered task is constructed with no assembly loading or by-name type resolution, so it can run
+        /// even in a trimmed/AOT host where reflective task execution is disabled.
+        /// </summary>
+        /// <param name="taskFactoryWrapper">The wrapper for the registered task, or <see langword="null"/> if the task is not registered.</param>
+        /// <returns><see langword="true"/> if the task was found in the registry.</returns>
+        private bool TryCreateRegisteredTaskFactory(out TaskFactoryWrapper taskFactoryWrapper)
+        {
+            if (TaskClassRegistry.TryGetRegistration(_taskName, out TaskClassRegistration registration))
+            {
+                LoadedType loadedType = registration.GetLoadedType();
+                _registeredTaskFactory = new RegisteredTaskFactory(registration, loadedType);
+                taskFactoryWrapper = new TaskFactoryWrapper(_registeredTaskFactory, loadedType, _taskName, TaskHostParameters.Empty);
+                return true;
+            }
+
+            taskFactoryWrapper = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Attempts to resolve the current task as an intrinsic engine task (<c>MSBuild</c> or <c>CallTarget</c>).
+        /// These map to engine-internal types via <see cref="IntrinsicTaskFactory"/> with no reflection over a
+        /// runtime-discovered assembly, so they remain usable when reflective task execution is disabled (the
+        /// trimmed/Native AOT path). The reflective path resolves them by type in <see cref="FindTaskInRegistry"/>.
+        /// </summary>
+        /// <param name="taskFactoryWrapper">The wrapper for the intrinsic task, or <see langword="null"/> if the task is not intrinsic.</param>
+        /// <returns><see langword="true"/> if the task is an intrinsic engine task.</returns>
+        private bool TryCreateIntrinsicTaskFactory(out TaskFactoryWrapper taskFactoryWrapper)
+        {
+            if (string.Equals(_taskName, "MSBuild", StringComparison.OrdinalIgnoreCase))
+            {
+                taskFactoryWrapper = CreateIntrinsicTaskFactoryWrapper(typeof(MSBuild));
+                return true;
+            }
+
+            if (string.Equals(_taskName, "CallTarget", StringComparison.OrdinalIgnoreCase))
+            {
+                taskFactoryWrapper = CreateIntrinsicTaskFactoryWrapper(typeof(CallTarget));
+                return true;
+            }
+
+            taskFactoryWrapper = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Builds a <see cref="TaskFactoryWrapper"/> for an intrinsic engine task (<c>MSBuild</c> or
+        /// <c>CallTarget</c>) by direct type reference - no assembly probing or by-name resolution. Shared by
+        /// the reflective resolution path (<see cref="FindTaskInRegistry"/>) and the reflection-free path
+        /// (<see cref="TryCreateIntrinsicTaskFactory"/>) so the two constructions cannot drift.
+        /// </summary>
+        private TaskFactoryWrapper CreateIntrinsicTaskFactoryWrapper(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)] Type intrinsicTaskType)
+        {
+            Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).Assembly;
+            return new TaskFactoryWrapper(
+                new IntrinsicTaskFactory(intrinsicTaskType),
+                new LoadedType(intrinsicTaskType, AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)),
+                _taskName,
+                TaskHostParameters.Empty);
         }
 
         /// <summary>
@@ -346,7 +468,9 @@ namespace Microsoft.Build.BackEnd
             // here. Instead, NDP will try to Load (not LoadFrom!) the task assembly into our AppDomain, and since
             // we originally used LoadFrom, it will fail miserably not knowing where to find it.
             // We need to temporarily subscribe to the AppDomain.AssemblyResolve event to fix it.
-            if (_resolver == null)
+            // A registered task's assembly is already loaded (the host referenced it statically), so it
+            // needs no assembly-resolve handler.
+            if (_registeredTaskFactory is null && _resolver == null)
             {
                 _resolver = new TaskEngineAssemblyResolver();
                 _resolver.Initialize(_taskFactoryWrapper.TaskFactoryLoadedType.Assembly.AssemblyFile);
@@ -354,40 +478,62 @@ namespace Microsoft.Build.BackEnd
             }
 #endif
 
-            // We instantiate a new task object for each batch
-            TaskInstance = InstantiateTask(scheduledNodeId, taskIdentityParameters);
+            // We instantiate a new task object for each batch.
+            if (_registeredTaskFactory is not null)
+            {
+                // Reflection-free construction via the host-supplied factory. This deliberately avoids the
+                // [RequiresUnreferencedCode] ITaskFactory.CreateTask interface member, so the registered-task
+                // path carries no trim warning and runs under Native AOT.
+                TaskInstance = _registeredTaskFactory.CreateRegisteredTask();
+            }
+            else if (!FeatureSwitches.EnableReflectiveTaskExecution && _taskFactoryWrapper.TaskFactory is IntrinsicTaskFactory intrinsicTaskFactory)
+            {
+                // Reflective-OFF (trimmed/AOT) path only: construct the intrinsic MSBuild/CallTarget task by
+                // direct `new` (no reflection), because the reflective InstantiateTask below is gated off and
+                // dead-stripped under trimming. Under the JIT default (switch on) intrinsic tasks deliberately
+                // fall through to InstantiateTask exactly as before, so they keep their TaskFactoryEngineContext
+                // lifecycle and ProjectTelemetry accounting - this branch must not alter the JIT path.
+                TaskInstance = intrinsicTaskFactory.CreateIntrinsicTask();
+            }
+            else if (!FeatureSwitches.EnableReflectiveTaskExecution)
+            {
+                // See FindTask: instantiating an unregistered task reflects over a runtime-discovered type, so
+                // a trimmed/AOT host fails observably here. Normally unreachable - FindTask already failed -
+                // but it keeps the reflective InstantiateTask below behind the feature guard.
+                ProjectErrorUtilities.ThrowInvalidProject(_taskLocation, "ReflectiveTaskExecutionNotSupported", _taskName);
+                return false;
+            }
+            else
+            {
+                TaskInstance = InstantiateTask(scheduledNodeId, taskIdentityParameters);
+            }
 
             if (TaskInstance == null)
             {
                 return false;
             }
 
-            string realTaskAssemblyLocation = TaskInstance.GetType().Assembly.Location;
-
-            // When MSBuild loads a task assembly, it uses Assembly.LoadFrom() with a specific path,
-            // but .NET then loads based on the assembly identity with that path only as a hint.
-            // This can result in the assembly being loaded from a different location than expected:
-            //
-            // 1. Assembly loading from the Global Assembly Cache (GAC) if that assembly version is GACed
-            // 2. Assembly loading from elsewhere if someone already loaded an assembly with the same 
-            //    identity from a different path
-            //
-            // Both scenarios can result in confusing task behavior because you're not loading the 
-            // assembly you intended. MSBuild tells .NET Framework to load a specific assembly,
-            // but .NET Framework may load something else entirely.
-            //
-            // Common example: A NuGet package task that doesn't change its assembly version between 
-            // package versions. When you update the package and build while worker nodes are still 
-            // alive, the task stays loaded from the old version instead of the new one.
-            //
-            // This validation helps identify these scenarios by checking if the loaded assembly 
-            // location matches what we expected, and logging a message when there's a mismatch
-            // to help diagnose confusing task behavior issues.
-            if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) && realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
+            // The task-assembly location-mismatch diagnostic reads Assembly.Location, which is empty (and
+            // meaningless) in a single-file/Native AOT host - and a registered task is already the loaded
+            // type. On .NET, guard the read on dynamic-code support so ILC dead-strips it (and its IL3000)
+            // under Native AOT while the JIT keeps the diagnostic; .NET Framework (no AOT) always runs it.
+#if NET
+            if (RuntimeFeature.IsDynamicCodeSupported)
+#endif
             {
-                if (!IsTaskAssemblyMatchFactoryType())
+                // When MSBuild loads a task assembly, it uses Assembly.LoadFrom() with a specific path, but
+                // .NET then loads based on the assembly identity with that path only as a hint. This can
+                // result in the assembly being loaded from a different location than expected (for example
+                // from the GAC, or because something already loaded the same identity from another path),
+                // which can cause confusing task behavior. This validation logs a message when the loaded
+                // assembly location does not match the path we resolved the task from.
+                string realTaskAssemblyLocation = TaskInstance.GetType().Assembly.Location;
+                if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) && realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
                 {
-                    _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
+                    if (!IsTaskAssemblyMatchFactoryType())
+                    {
+                        _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
+                    }
                 }
             }
 
@@ -413,6 +559,16 @@ namespace Microsoft.Build.BackEnd
         /// <returns>True if the parameters were set correctly, false otherwise.</returns>
         public bool SetTaskParameters(IDictionary<string, (string, ElementLocation)> parameters)
         {
+            if (_registeredTaskFactory is null && _taskFactoryWrapper.TaskFactory is not IntrinsicTaskFactory && !FeatureSwitches.EnableReflectiveTaskExecution)
+            {
+                // Binding task parameters reflects over the task type. A registered task's type is trim-rooted
+                // (so binding stays trim-safe) and is exempt, as is an intrinsic MSBuild/CallTarget task (an
+                // engine-internal type); for any other task in a trimmed/AOT host this fails observably. See
+                // FindTask: normally unreachable (FindTask fails first).
+                ProjectErrorUtilities.ThrowInvalidProject(_taskLocation, "ReflectiveTaskExecutionNotSupported", _taskName);
+                return false;
+            }
+
             ArgumentNullException.ThrowIfNull(parameters);
 
             bool taskInitialized = true;
@@ -617,6 +773,9 @@ namespace Microsoft.Build.BackEnd
 
             _taskFactoryWrapper = null;
 
+            // Clear the registered-task factory too, so it cannot leak into the next task that reuses this host.
+            _registeredTaskFactory = null;
+
             // We must null this out because it could be a COM object (or any other ref-counted object) which needs to
             // be released.
             _taskHost = null;
@@ -753,6 +912,55 @@ namespace Microsoft.Build.BackEnd
         }
 
         #region Local Methods
+
+        /// <summary>
+        /// Checks if a type is TaskItem&lt;T&gt; or ITaskItem&lt;T&gt; where T is path-like.
+        /// </summary>
+        private static bool IsPathLikeTaskItemOrITaskItemOfT(Type parameterType)
+            => TaskParameterTypeVerifier.IsPathLikeITaskItemOfT(parameterType)
+                || TaskParameterTypeVerifier.IsPathLikeTaskItemOfT(parameterType, typeof(TaskItem<>).FullName);
+
+        /// <summary>
+        /// Cache of compiled constructor delegates that wrap an <see cref="ITaskItem"/> into a
+        /// <see cref="TaskItem{T}"/>, keyed by the generic argument T. Building the closed generic type and
+        /// resolving the constructor via reflection on every parameter binding is expensive, so the delegate
+        /// is compiled once per T and reused.
+        /// </summary>
+        private static readonly ConcurrentDictionary<Type, Func<ITaskItem, ITaskItem>> s_taskItemOfTFactories = new();
+
+        /// <summary>
+        /// Wraps the given <paramref name="item"/> into a <c>TaskItem&lt;T&gt;</c> where T is
+        /// <paramref name="genericArgument"/>, using a cached compiled constructor delegate.
+        /// </summary>
+        private static ITaskItem CreateTaskItemOfT(Type genericArgument, ITaskItem item)
+        {
+            Func<ITaskItem, ITaskItem> factory = s_taskItemOfTFactories.GetOrAdd(genericArgument, static t =>
+            {
+#if NET
+                if (!RuntimeFeature.IsDynamicCodeSupported)
+                {
+                    // Wrapping an ITaskItem into a closed-generic TaskItem<T> requires Type.MakeGenericType
+                    // plus an expression-tree Compile(), both of which need runtime code generation. Fail
+                    // observably under trimming / Native AOT rather than silently mis-binding the typed task
+                    // parameter. (See documentation/aot/follow-up-work.md - the typed TaskItem<T> parameter
+                    // feature still needs a proper AOT-safe binding strategy.)
+                    throw new NotSupportedException(
+                        "Task parameters typed as TaskItem<T> or ITaskItem<T> require runtime code generation " +
+                        "(Type.MakeGenericType and expression compilation) and are not supported when MSBuild " +
+                        "runs trimmed or with Native AOT.");
+                }
+#endif
+                ConstructorInfo constructor = typeof(TaskItem<>).MakeGenericType(t).GetConstructor([typeof(ITaskItem)]);
+                ParameterExpression itemParameter = Expression.Parameter(typeof(ITaskItem), "item");
+                return Expression.Lambda<Func<ITaskItem, ITaskItem>>(
+                    Expression.Convert(Expression.New(constructor, itemParameter), typeof(ITaskItem)),
+                    itemParameter).Compile();
+            });
+
+            return factory(item);
+        }
+
+
         /// <summary>
         /// Called on the local side.
         /// </summary>
@@ -766,19 +974,33 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool SetValueParameter(TaskPropertyInfo parameter, Type parameterType, string expandedParameterValue)
         {
-            if (parameterType == typeof(bool))
+            return InternalSetTaskParameter(parameter, ConvertStringToParameterValue(expandedParameterValue, parameterType));
+        }
+
+        /// <summary>
+        /// Converts a single string value to an instance of <paramref name="targetType"/>, applying the same
+        /// conversions for both scalar parameters and the elements of array parameters.
+        /// </summary>
+        private object ConvertStringToParameterValue(string value, Type targetType)
+        {
+            // Path-like types are resolved through TaskEnvironment so the path is rooted consistently
+            // with the rest of the build before being handed to the task.
+            if (targetType == typeof(AbsolutePath))
             {
-                // Convert the string to the appropriate datatype, and set the task's parameter.
-                return InternalSetTaskParameter(parameter, ConversionUtilities.ConvertStringToBool(expandedParameterValue));
+                return TaskEnvironment.GetAbsolutePath(value);
             }
-            else if (parameterType == typeof(string))
+
+            if (targetType == typeof(FileInfo))
             {
-                return InternalSetTaskParameter(parameter, expandedParameterValue);
+                return new FileInfo(TaskEnvironment.GetAbsolutePath(value).Value);
             }
-            else
+
+            if (targetType == typeof(DirectoryInfo))
             {
-                return InternalSetTaskParameter(parameter, Convert.ChangeType(expandedParameterValue, parameterType, CultureInfo.InvariantCulture));
+                return new DirectoryInfo(TaskEnvironment.GetAbsolutePath(value).Value);
             }
+
+            return ValueTypeParser.Parse(value, targetType);
         }
 
         /// <summary>
@@ -790,41 +1012,84 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                // Loop through all the TaskItems in our arraylist, and convert them.
-                ArrayList finalTaskInputs = new ArrayList(taskItems.Count);
+                Type elementType = parameterType.GetElementType();
 
-                if (parameterType != typeof(ITaskItem[]))
+                if (parameterType == typeof(ITaskItem[]))
                 {
-                    foreach (TaskItem item in taskItems)
+                    ITaskItem[] finalInputs = new ITaskItem[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
                     {
+                        TaskItem item = taskItems[i];
                         currentItem = item;
-                        if (parameterType == typeof(string[]))
-                        {
-                            finalTaskInputs.Add(item.ItemSpec);
-                        }
-                        else if (parameterType == typeof(bool[]))
-                        {
-                            finalTaskInputs.Add(ConversionUtilities.ConvertStringToBool(item.ItemSpec));
-                        }
-                        else
-                        {
-                            finalTaskInputs.Add(Convert.ChangeType(item.ItemSpec, parameterType.GetElementType(), CultureInfo.InvariantCulture));
-                        }
-                    }
-                }
-                else
-                {
-                    foreach (TaskItem item in taskItems)
-                    {
+
                         // if we've been asked to remote these items then
                         // remember them so we can disconnect them from remoting later
                         RecordItemForDisconnectIfNecessary(item);
-
-                        finalTaskInputs.Add(item);
+                        finalInputs[i] = item;
                     }
-                }
 
-                return InternalSetTaskParameter(parameter, finalTaskInputs.ToArray(parameterType.GetElementType()));
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else if (IsPathLikeTaskItemOrITaskItemOfT(elementType))
+                {
+                    // TaskItem<T> / ITaskItem<T> arrays: wrap each item into the closed generic TaskItem<T>.
+#if NET
+                    // AOT friendly
+                    Array finalInputs = Array.CreateInstanceFromArrayType(parameterType, taskItems.Count);
+#else
+                    Array finalInputs = Array.CreateInstance(elementType, taskItems.Count);
+#endif
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        TaskItem item = taskItems[i];
+                        currentItem = item;
+                        RecordItemForDisconnectIfNecessary(item);
+                        ITaskItem taskItemOfT = CreateTaskItemOfT(elementType.GetGenericArguments()[0], item);
+                        finalInputs.SetValue(taskItemOfT, i);
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else if (parameterType == typeof(string[]))
+                {
+                    string[] finalInputs = new string[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        currentItem = taskItems[i];
+                        finalInputs[i] = currentItem.ItemSpec;
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else if (parameterType == typeof(bool[]))
+                {
+                    bool[] finalInputs = new bool[taskItems.Count];
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        currentItem = taskItems[i];
+                        finalInputs[i] = ConversionUtilities.ConvertStringToBool(currentItem.ItemSpec);
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalInputs);
+                }
+                else
+                {
+                    // Fallback for custom value types and path-like scalar types (AbsolutePath/FileInfo/DirectoryInfo).
+#if NET
+                    // AOT friendly
+                    Array finalTaskInputs = Array.CreateInstanceFromArrayType(parameterType, taskItems.Count);
+#else
+                    Array finalTaskInputs = Array.CreateInstance(elementType, taskItems.Count);
+#endif
+                    for (int i = 0; i < taskItems.Count; i++)
+                    {
+                        TaskItem item = taskItems[i];
+                        currentItem = item;
+                        finalTaskInputs.SetValue(ConvertStringToParameterValue(item.ItemSpec, elementType), i);
+                    }
+
+                    return InternalSetTaskParameter(parameter, finalTaskInputs);
+                }
             }
             catch (Exception ex)
             {
@@ -864,12 +1129,30 @@ namespace Microsoft.Build.BackEnd
         {
             object outputs = _taskFactoryWrapper.GetPropertyValue(TaskInstance, parameter);
 
-            if (!(outputs is ITaskItem[] taskItemOutputs))
+            if (outputs is ITaskItem[] taskItemOutputs)
             {
-                taskItemOutputs = [(ITaskItem)outputs];
+                return taskItemOutputs;
             }
 
-            return taskItemOutputs;
+            if (outputs == null)
+            {
+                return null;
+            }
+
+            Type outputType = outputs.GetType();
+            if (outputType.IsArray && IsPathLikeTaskItemOrITaskItemOfT(outputType.GetElementType()))
+            {
+                Array taskItemArray = (Array)outputs;
+                ITaskItem[] result = new ITaskItem[taskItemArray.Length];
+                for (int i = 0; i < taskItemArray.Length; i++)
+                {
+                    result[i] = (ITaskItem)taskItemArray.GetValue(i);
+                }
+
+                return result;
+            }
+
+            return [(ITaskItem)outputs];
         }
 
         /// <summary>
@@ -892,7 +1175,7 @@ namespace Microsoft.Build.BackEnd
                 object output = convertibleOutputs.GetValue(i);
                 if (output != null)
                 {
-                    stringOutputs[i] = (string)Convert.ChangeType(output, typeof(string), CultureInfo.InvariantCulture);
+                    stringOutputs[i] = ValueTypeParser.ToString(output);
                 }
             }
 
@@ -918,6 +1201,7 @@ namespace Microsoft.Build.BackEnd
         /// If the set of task identity parameters are defined, only tasks that match that identity are chosen.
         /// </summary>
         /// <returns>The Type of the task, or null if it was not found.</returns>
+        [RequiresUnreferencedCode("Creates and loads a task factory by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         private TaskFactoryWrapper FindTaskInRegistry(in TaskHostParameters taskIdentityParameters)
         {
             if (!_intrinsicTasks.TryGetValue(_taskName, out TaskFactoryWrapper returnClass))
@@ -964,14 +1248,12 @@ namespace Microsoft.Build.BackEnd
                 // Map to an intrinsic task, if necessary.
                 if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.MSBuild", StringComparison.OrdinalIgnoreCase))
                 {
-                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).Assembly;
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(MSBuild)), new LoadedType(typeof(MSBuild), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, TaskHostParameters.Empty);
+                    returnClass = CreateIntrinsicTaskFactoryWrapper(typeof(MSBuild));
                     _intrinsicTasks[_taskName] = returnClass;
                 }
                 else if (String.Equals(returnClass.TaskFactory.TaskType.FullName, "Microsoft.Build.Tasks.CallTarget", StringComparison.OrdinalIgnoreCase))
                 {
-                    Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).Assembly;
-                    returnClass = new TaskFactoryWrapper(new IntrinsicTaskFactory(typeof(CallTarget)), new LoadedType(typeof(CallTarget), AssemblyLoadInfo.Create(taskExecutionHostAssembly.FullName, null), taskExecutionHostAssembly, typeof(ITaskItem)), _taskName, TaskHostParameters.Empty);
+                    returnClass = CreateIntrinsicTaskFactoryWrapper(typeof(CallTarget));
                     _intrinsicTasks[_taskName] = returnClass;
                 }
             }
@@ -982,6 +1264,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Instantiates the task.
         /// </summary>
+        [RequiresUnreferencedCode("Instantiates a task by reflecting over a task type discovered at runtime, which is incompatible with trimming.")]
         private ITask InstantiateTask(int scheduledNodeId, in TaskHostParameters taskIdentityParameters)
         {
             ITask task = null;
@@ -1133,16 +1416,14 @@ namespace Microsoft.Build.BackEnd
                 if (indexOfParameter != -1)
                 {
                     parameter = loadedType.Properties[indexOfParameter];
-                    parameterType = Type.GetType(
-                        loadedType.PropertyAssemblyQualifiedNames?[indexOfParameter] ??
-                        parameter.PropertyType.AssemblyQualifiedName);
+                    parameterType = ResolveTaskParameterType(loadedType, parameter, indexOfParameter);
                 }
                 else
                 {
                     parameter = _taskFactoryWrapper.GetProperty(parameterName);
                     if (parameter != null)
                     {
-                        parameterType = Type.GetType(parameter.PropertyType.AssemblyQualifiedName);
+                        parameterType = ResolveTaskParameterType(loadedType, parameter, indexOfParameter: -1);
                     }
                 }
 
@@ -1224,6 +1505,45 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Resolves the .NET <see cref="Type"/> of a task parameter for binding.
+        /// </summary>
+        /// <remarks>
+        /// For an in-proc task the property's <see cref="TaskPropertyInfo.PropertyType"/> is already the live,
+        /// usable type, so no reflection is required - this is the path a registered task and every in-proc
+        /// task take. Only a type loaded via <c>MetadataLoadContext</c> (the out-of-proc task host) is
+        /// reflection-only and must be re-resolved by assembly-qualified name; that path is reflective and is
+        /// gated behind <see cref="FeatureSwitches.EnableReflectiveTaskExecution"/>, so a trimmed/AOT image
+        /// (which never loads task types via <c>MetadataLoadContext</c>) drops it.
+        /// </remarks>
+        private static Type ResolveTaskParameterType(LoadedType loadedType, TaskPropertyInfo parameter, int indexOfParameter)
+        {
+            if (!loadedType.LoadedViaMetadataLoadContext)
+            {
+                return parameter.PropertyType;
+            }
+
+            if (FeatureSwitches.EnableReflectiveTaskExecution)
+            {
+                return ResolveTaskParameterTypeByName(loadedType, parameter, indexOfParameter);
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Re-resolves a <c>MetadataLoadContext</c>-loaded parameter type into the live runtime by its
+        /// assembly-qualified name.
+        /// </summary>
+        [RequiresUnreferencedCode("Resolves the task parameter type from its assembly-qualified name by reflection, which is incompatible with trimming.")]
+        private static Type ResolveTaskParameterTypeByName(LoadedType loadedType, TaskPropertyInfo parameter, int indexOfParameter)
+        {
+            string assemblyQualifiedName =
+                (indexOfParameter != -1 ? loadedType.PropertyAssemblyQualifiedNames?[indexOfParameter] : null)
+                ?? parameter.PropertyType.AssemblyQualifiedName;
+            return Type.GetType(assemblyQualifiedName);
+        }
+
+        /// <summary>
         /// Given an instantiated task, this helper method sets the specified scalar parameter based on its type.
         /// </summary>
         private bool InitializeTaskScalarParameter(
@@ -1239,7 +1559,7 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                if (parameterType == typeof(ITaskItem))
+                if (parameterType == typeof(ITaskItem) || IsPathLikeTaskItemOrITaskItemOfT(parameterType))
                 {
                     // We don't know how many items we're going to end up with, but we'll
                     // keep adding them to this arraylist as we find them.
@@ -1253,7 +1573,7 @@ namespace Microsoft.Build.BackEnd
                     {
                         if (finalTaskItems.Count != 1)
                         {
-                            // We only allow a single item to be passed into a parameter of ITaskItem.
+                            // We only allow a single item to be passed into a parameter of ITaskItem or TaskItem<T>.
 
                             // Some of the computation (expansion) here is expensive, so don't switch to VerifyThrowInvalidProject.
                             ProjectErrorUtilities.ThrowInvalidProject(
@@ -1267,7 +1587,15 @@ namespace Microsoft.Build.BackEnd
 
                         RecordItemForDisconnectIfNecessary(finalTaskItems[0]);
 
-                        success = SetTaskItemParameter(parameter, finalTaskItems[0]);
+                        if (IsPathLikeTaskItemOrITaskItemOfT(parameterType))
+                        {
+                            ITaskItem taskItemOfT = CreateTaskItemOfT(parameterType.GetGenericArguments()[0], finalTaskItems[0]);
+                            success = InternalSetTaskParameter(parameter, taskItemOfT);
+                        }
+                        else
+                        {
+                            success = SetTaskItemParameter(parameter, finalTaskItems[0]);
+                        }
 
                         taskParameterSet = true;
                     }
@@ -1778,6 +2106,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="outOfProcTaskFactory">The out-of-process task factory instance.</param>
         /// <param name="scheduledNodeId">Node for which the task host should be called</param>
         /// <returns>A TaskHostTask that will execute the inner task out of process, or <code>null</code> if task creation fails.</returns>
+        [RequiresUnreferencedCode("Instantiates a task by reflecting over a task type discovered at runtime, which is incompatible with trimming.")]
         private ITask CreateTaskHostTaskForOutOfProcFactory(
             in TaskHostParameters taskIdentityParameters,
             TaskFactoryEngineContext taskFactoryEngineContext,

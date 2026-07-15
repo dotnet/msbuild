@@ -1,0 +1,149 @@
+# azure-pipelines/cts-apply.yml
+#
+# Parallel, non-blocking PR pipeline that exercises Clever Test Selection.
+#
+# Behavior:
+#   1. Download the most recent `cts-baseline-<os>` artifact from the collect
+#      pipeline on `main` (latestFromBranch).
+#   2. Build MSBuild.VSTest.slnx and run `cts apply vstest` against the
+#      wrapped projects.
+#   3. Emit cts-metrics.json per OS (schema: scripts/cts/METRICS.md).
+#
+# Fallback: if `collectPipelineId` is 0 (pipeline not yet registered) or the
+# baseline download fails, the apply step is skipped and only metrics are
+# emitted. We do NOT run a full `dotnet test` as a fallback — the regular PR
+# pipeline keeps providing test signal and duplicating it here just adds CI
+# minutes and confusing duplicate failures.
+#
+# This pipeline runs in parallel with the existing PR pipeline. It is
+# non-blocking (continueOnError on jobs) while we collect data on
+# incrementality.
+#
+# ============================================================
+# TODO(1ES): before registering this pipeline in DevDiv ADO, wrap it in
+# `extends: template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates`
+# and move PublishPipelineArtifact@1 into the templated `outputs:` block.
+# See vs-insertion.yml for the pattern in this repo.
+# ============================================================
+
+trigger: none
+
+# Shadow pipeline — runs on PR but CANNOT block merge.
+#
+# How "non-blocking" is enforced (defense in depth):
+#   1. continueOnError: true on every job below: any step failure inside
+#      the job marks the job as succeededWithIssues, not failed.
+#   2. continueOnError: true on the slow/risky steps inside apply-steps.yml
+#      (cts apply itself, baseline downloads, metrics emission), so even
+#      individual step failures don't propagate.
+#   3. The pipeline run can still end as 'partiallySucceeded' / 'failed'
+#      from ADO's perspective when something inside a `continueOnError`
+#      job goes wrong — that is fine for the *pipeline* result, but it
+#      means whoever registers this pipeline definition in ADO MUST NOT
+#      mark it as a required check in the branch policy of `main` /
+#      `exp/*` / `vs*`. See "Project Settings → Repos → Branch policies →
+#      Build Validation"; this pipeline must be either absent from that
+#      list, or present with the "Required" toggle OFF (ADO will then
+#      attach the build status to the PR for visibility but not gate the
+#      merge button on it).
+#
+# Trigger set: PRs targeting main only. Although the regular PR pipeline
+# (.vsts-dotnet-ci.yml) also covers exp/* and vs* branches, those have no
+# matching CTS-Collect runs (collect runs daily on main), so applying the
+# main baseline against a vs17.x release branch would either be stale or
+# fall back. Keep the shadow pipeline scoped to where it can produce
+# meaningful incrementality data.
+pr:
+  branches:
+    include:
+      - main
+  paths:
+    exclude:
+      - documentation/**
+      - .github/**
+
+# Manual queue is also supported. Useful for running against a specific
+# baseline branch before merge:
+#
+#   az pipelines run --id <CTS-Apply id> `
+#     --branch <source-branch> `
+#     --parameters collectSourceBranch=refs/heads/<baseline-branch>
+#
+# In normal PR flow the auto-trigger above takes care of it and you don't
+# need to touch the parameters — `collectSourceBranch` defaults to
+# `refs/heads/main`, which is where the daily CTS-Collect schedule runs.
+
+parameters:
+# NuGet feed to *install* the `cts` global tool from (read-only). We never
+# publish/push anything to this feed; it's strictly the source of the tool.
+- name: ctsFeed
+  type: string
+  default: https://devdiv.pkgs.visualstudio.com/_packaging/VS/nuget/v3/index.json
+- name: collectPipelineId
+  type: number
+  # Numeric id of the CTS-Collect pipeline definition in DevDiv ADO.
+  # Pass 0 to disable the apply step (it will short-circuit to a
+  # metrics-only run with fallbackReason=collect-pipeline-not-configured).
+  default: 28380
+- name: collectProject
+  type: string
+  default: DevDiv
+- name: collectSourceBranch
+  type: string
+  # Which branch's CTS-Collect runs we pull the baseline from. Defaults to
+  # `refs/heads/main` for the steady-state (collect runs daily on main; PRs
+  # apply against the latest such baseline). While iterating on a feature
+  # branch -- e.g. before the first successful collect-on-main run, or to
+  # exercise the pipeline pre-merge -- override this to a different branch
+  # (e.g. `refs/heads/adopt-cts`) via the Pipeline UI → Variables, or by
+  # passing `--parameters collectSourceBranch=refs/heads/<branch>` to
+  # `az pipelines run`.
+  default: refs/heads/main
+# Explicit `cts` tool version to install. Empty => latest prerelease. Keep this
+# in lockstep with cts-collect.yml's `ctsToolVersion` so apply and collect run
+# the same tool build (baseline format compatibility).
+- name: ctsToolVersion
+  type: string
+  default: ''
+
+variables:
+  BuildConfiguration: Debug
+  CtsConfigPath: $(Build.SourcesDirectory)/scripts/cts/cts.config.json
+  BaselineDir:   $(Build.SourcesDirectory)/.cts/baseline
+
+jobs:
+- job: Apply_Windows
+  displayName: CTS apply (Windows, non-blocking)
+  pool:
+    name: VSEng-MicroBuildVSStable
+    demands:
+    - agent.os -equals Windows_NT
+  timeoutInMinutes: 120
+  continueOnError: true
+  steps:
+  - template: cts-steps/apply-steps.yml
+    parameters:
+      osTag: windows
+      ctsFeed: ${{ parameters.ctsFeed }}
+      collectPipelineId: ${{ parameters.collectPipelineId }}
+      collectProject: ${{ parameters.collectProject }}
+      collectSourceBranch: ${{ parameters.collectSourceBranch }}
+      ctsToolVersion: ${{ parameters.ctsToolVersion }}
+
+- job: Apply_Linux
+  displayName: CTS apply (Linux, non-blocking)
+  pool:
+    name: AzurePipelines-EO
+    image: 1ESPT-Ubuntu22.04
+    os: linux
+  timeoutInMinutes: 120
+  continueOnError: true
+  steps:
+  - template: cts-steps/apply-steps.yml
+    parameters:
+      osTag: linux
+      ctsFeed: ${{ parameters.ctsFeed }}
+      collectPipelineId: ${{ parameters.collectPipelineId }}
+      collectProject: ${{ parameters.collectProject }}
+      collectSourceBranch: ${{ parameters.collectSourceBranch }}
+      ctsToolVersion: ${{ parameters.ctsToolVersion }}
