@@ -1,6 +1,6 @@
 ---
 name: "Dreaming (learning atoms curation)"
-description: "Weekly (and manually triggerable) workflow inspired by Claude Managed Agents 'dreaming'. It reviews the past 7 days of pull requests, review feedback, conversations, and CI check outcomes to find recurring mistakes and misses that agents keep making, then curates the repository's 'learning atoms' — the durable agent-instruction files (AGENTS.md, .github/instructions/**, .github/skills/**, .github/agents/**) — with small, high-signal, non-duplicate changes, preferring to refine existing guidance over adding new, and opens ONE ready-for-review PR with the proposed learning-atom updates."
+description: "Weekly (and manually triggerable) workflow inspired by Claude Managed Agents 'dreaming'. It reviews the past 7 days of pull requests, review feedback, conversations, and CI check outcomes to find recurring mistakes and misses that agents keep making, then curates the repository's 'learning atoms' — the durable agent-instruction files (AGENTS.md, .github/instructions/**, .github/skills/**, .github/agents/**) — with small, high-signal, non-duplicate changes, preferring to refine existing guidance over adding new, and opens up to three atomic, ready-for-review PRs (one per distinct recurring pattern), each requesting review from the core MSBuild team members who were involved in the discussions behind it."
 on:
   # Weekly on Monday morning; the agent looks back over the previous 7 days of activity.
   # Explicit natural-language schedule so gh-aw pins a stable cron on compile.
@@ -31,13 +31,16 @@ tools:
     toolsets: [repos, issues, pull_requests, actions]
 
 safe-outputs:
-  # One combined ready-for-review PR per run carrying all curated learning-atom changes.
+  # Up to three atomic, ready-for-review PRs per run — one per distinct recurring pattern.
   create-pull-request:
     title-prefix: "[Dreaming] "
     labels: ["Area: Documentation"]
     draft: false
     base-branch: main
-    max: 1
+    # Up to THREE pull requests per run, so distinct, unrelated recurring patterns each land as their own
+    # ATOMIC, independently-reviewable PR (each on its own branch) instead of one mixed bag. If everything
+    # this week belongs to a single theme, one PR is still correct — don't split for the sake of it.
+    max: 3
     # Exclusive allowlist: this workflow ONLY curates the "learning atoms" — the durable agent-instruction
     # files. It must never touch product code, tests, build manifests, or the workflows themselves.
     # AGENTS.md is the target of the `.github/copilot-instructions.md` symlink (the primary, repo-wide
@@ -94,7 +97,8 @@ Claude Managed Agents) is a between-sessions process that reviews recent activit
 patterns a single session can't see, and curates the shared **learning atoms** so future agents and
 contributors improve over time. Your job is to look back over the **past 7 days**, find the recurring
 **misses** — mistakes reviewers keep pointing out, and common CI failures — and turn a *few* of them
-into **small, durable learning atoms**, then open **one pull request** with those changes.
+into **small, durable learning atoms**, then open **up to three atomic pull requests** (one per distinct
+recurring pattern) with those changes.
 
 You are read-only against the repository's history and CI. The **only** thing you may modify is the
 **learning atoms** (defined below), and only through the `create_pull_request` safe output.
@@ -136,13 +140,18 @@ manifests.
    the evidence in the PR body.
 5. **Durable and general.** Encode lasting guidance, not transient facts (not "PR #123 broke X", not a
    specific person's preference on one PR, not a version number that will churn). No secrets, no
-   contributor call-outs, no links to internal-only resources.
+   contributor call-outs, no links to internal-only resources. This rule governs the **content of the
+   learning atoms** (the edited files). It does **not** apply to the reviewer request in the PR *body* —
+   naming the core-team reviewers there (Step 5b) is expected metadata, not atom content.
 6. **Respect existing style.** Match the tone, formatting, and bullet style of the file you edit. Keep
    the `applyTo:` front matter and headings intact.
 7. **Non-breaking.** These files steer agents, not builds, but still avoid guidance that would push
    contributors toward introducing new build warnings/errors or breaking changes.
-8. **Cap the volume.** At most **~5 distinct learning-atom changes** in a single PR, even if you find
-   more. Pick the highest-signal, most-recurring ones. It is completely fine to change only 1–2 things.
+8. **Cap the volume, keep each PR atomic.** At most **~5 distinct learning-atom changes total** across
+   the run, even if you find more — pick the highest-signal, most-recurring ones. Split them into **up to
+   3 PRs so each PR is atomic**: one PR per distinct, unrelated pattern (a PR may bundle 1–2 changes only
+   if they are the *same* theme in the *same* file). Unrelated patterns must go in separate PRs. It is
+   completely fine to open only 1 PR with 1–2 changes.
 
 ## Step 1 — Gather the past week of activity
 
@@ -159,6 +168,10 @@ Use the pre-authenticated `gh` CLI (and the GitHub tools) to collect, for the **
     paths, `is null` vs `== null`, Shouldly vs xUnit asserts, ChangeWave/opt-in gating for behavior
     changes, warnings-as-errors, cross-platform paths, missing tests, doc updates, etc.).
   - Points where an author (often an agent) clearly misunderstood a repo convention.
+  For every reviewer/commenter you read, also record their **login** and **`authorAssociation`** (the
+  GitHub `reviews`/`comments` JSON exposes `authorAssociation`). You will use this in Step 5b to pick
+  reviewers — a participant counts as **core MSBuild team** only when their `authorAssociation` is
+  `OWNER` or `MEMBER` (org members). `COLLABORATOR`, `CONTRIBUTOR`, and `NONE` do **not** qualify.
 - **CI outcomes** on those PRs: use `gh pr checks <number>` (and check-run/status conclusions) to see
   which checks failed and cluster the **categories** of failure (e.g. formatting/editorconfig, a
   specific test project, build-warning-as-error, missing localization/resx, bootstrap issues). You are
@@ -173,7 +186,9 @@ limited or sparse, work with what you can retrieve rather than failing.
 Group the raw feedback and CI failures into a small set of **themes**. For each theme, keep only those
 that (a) recurred across 2+ PRs/comments or repeated CI failures, and (b) would plausibly have been
 avoided if a learning atom had said something. Discard one-offs, subjective style debates, and anything
-already well covered by existing learning atoms.
+already well covered by existing learning atoms. For each surviving theme, also keep the list of
+**core-team participants** (login + `authorAssociation` from Step 1) who raised or discussed it — this
+feeds the per-PR reviewer request in Step 5b.
 
 ## Step 3 — Decide the minimal learning-atom change per theme
 
@@ -193,30 +208,69 @@ including your own other edits.
 
 ## Step 4 — Apply the edits and self-verify
 
-Make the edits with the `edit` tool. Then run `git --no-pager diff` and confirm:
+Because each PR is created from its **own git branch**, keep unrelated patterns on separate branches so
+they stay atomic. For **each** pattern you're turning into a PR:
+
+1. From up-to-date `main`, create a fresh branch for that pattern (e.g.
+   `git checkout main && git checkout -b dreaming/<short-topic>`).
+2. Make just that pattern's edit(s) with the `edit` tool and commit them on that branch.
+3. Then move to the next pattern's branch (again starting from `main`) so its changes don't pile onto the
+   previous one.
+
+After staging each branch, run `git --no-pager diff main...HEAD` (or `git --no-pager diff` before
+committing) and confirm:
 - Only files under `AGENTS.md`, `.github/instructions/**`, `.github/skills/**`, or `.github/agents/**`
   changed. Nothing else.
 - The diff is small (a handful of lines total), adds no duplicate guidance, and preserves each file's
   front matter/headings/style.
+- Each branch carries **only its own** pattern's changes (no cross-contamination between PRs).
 If any check fails, fix or drop the offending change before proceeding.
 
-## Step 5 — Open the pull request (or noop)
+## Step 5 — Open the pull request(s) (or noop)
 
-- If you have **one or more** well-justified changes, emit a **single** `create_pull_request` safe
-  output. Write a PR body that, for **each** learning-atom change, states:
+- If you have well-justified changes, emit a `create_pull_request` safe output **per distinct pattern**,
+  up to **3** total, each with its `branch` set to that pattern's branch from Step 4. **Keep each PR
+  atomic**: one theme per PR, on its own branch (bundle 1–2 changes in the same PR only when they are the
+  same theme in the same file). Unrelated patterns must be separate PRs. For **each** PR, write a body
+  that, for every learning-atom change it carries, states:
   - **What** changed and in which file (edit vs. small addition).
   - **Why** — the recurring evidence: cite the PR numbers / comment themes / CI failure category that
     prompted it (2+ occurrences). Keep it concise.
   - A one-line note confirming you checked it isn't already covered elsewhere.
-  Open the PR **ready for review** (not draft) so a maintainer can approve or adjust. A human merges it —
+  Open each PR **ready for review** (not draft) so a maintainer can approve or adjust. A human merges it —
   you never self-merge.
 - If **nothing** clears the bar this week (quiet week, or every recurring pattern is already captured),
   emit a **`noop`** explaining briefly what you looked at and why no learning-atom change was warranted.
   Do **not** open an empty or speculative PR.
+
+## Step 5b — Request reviewers (core MSBuild team, max 2 per PR)
+
+For **each** PR you open, request review from the people who were actually involved in the discussions
+behind that PR's pattern (from the participant list you kept in Step 2):
+
+1. Take that theme's participants and **keep only core MSBuild team members** — those whose
+   `authorAssociation` was `OWNER` or `MEMBER` (see Step 1). Drop everyone else, and drop bots and the
+   PR authors themselves.
+2. **Cap at 2.** If more than two qualify, pick the two most engaged in that pattern's threads (most
+   comments / the ones who requested the changes). If exactly one qualifies, request one. If **none**
+   qualify, fall back to requesting the core-team handle `@dotnet/kitten` (the MSBuild CODEOWNERS team).
+3. Because the safe-outputs channel exposes no per-PR reviewer field, record the request **in that PR's
+   body** as its own final section so a maintainer can assign with one click and the people are notified:
+
+   ```
+   ## Reviewers (core MSBuild team)
+   Requesting review from the core-team members who discussed this pattern: @login1 @login2
+   ```
+
+   Use real `@`-mentions (or `@dotnet/kitten` for the fallback). This is the one place contributor names
+   belong — never put them in the learning-atom content itself (guardrail 5).
 
 ## Reminders
 
 - You may only change the four learning-atom targets; the `allowed-files` allowlist enforces this, but
   you should also self-check with `git diff`.
 - Fewer, sharper learning atoms beat many shallow ones. When in doubt, leave it out.
-- Never encode secrets, credentials, individual contributor names, or transient/one-off facts.
+- Never encode secrets, credentials, individual contributor names, or transient/one-off facts **into the
+  learning-atom content**. (Naming the core-team reviewers in the PR body, per Step 5b, is the sole
+  exception — that is review metadata, not atom content.)
+- Keep each PR atomic and request at most **2** core-team reviewers per PR (Step 5b).
