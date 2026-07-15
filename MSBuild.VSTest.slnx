@@ -1,0 +1,87 @@
+<Solution>
+  <!--
+    CI-only solution used by Clever Test Selection (CTS).
+
+    Contains the production projects (mirroring MSBuild.slnx, minus
+    Samples/Package which aren't part of the test surface) plus the
+    sibling *.UnitTests.VSTest.csproj wrappers. The wrappers import their
+    original test csproj but force the VSTest runner stack (CTS does not
+    yet work with Microsoft.Testing.Platform) and pin the TFM to net10.0
+    so a single `dotnet build MSBuild.VSTest.slnx` succeeds.
+
+    MSBuild.slnx is intentionally left untouched so developer / IDE /
+    existing PR pipeline behavior is unchanged — this slnx is only built
+    by azure-pipelines/cts-collect.yml and cts-apply.yml.
+
+    KNOWN COVERAGE GAP: the wrappers run net10.0 only. The regular PR
+    pipeline runs both net10.0 and net472 (Windows). The CTS pipeline is
+    parallel and non-blocking, so net472 signal is still provided by the
+    existing PR pipeline — but CTS does not add incrementality for the
+    net472 leg today. Tracked for follow-up; see scripts/cts/README.md.
+  -->
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/Production/">
+    <Project Path="src/Build/Microsoft.Build.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Framework/Microsoft.Build.Framework.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/MSBuild/MSBuild.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/MSBuild.Bootstrap/MSBuild.Bootstrap.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/MSBuildTaskHost/MSBuildTaskHost.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/StringTools/StringTools.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Tasks/Microsoft.Build.Tasks.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Utilities/Microsoft.Build.Utilities.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/TestSupport/">
+    <Project Path="src/UnitTests.Shared/Microsoft.Build.UnitTests.Shared.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Xunit.NetCore.Extensions/Xunit.NetCore.Extensions.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="src/Build.OM.UnitTests/Microsoft.Build.Engine.OM.UnitTests.VSTest.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Build.UnitTests/Microsoft.Build.Engine.UnitTests.VSTest.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/BuildCheck.UnitTests/Microsoft.Build.BuildCheck.UnitTests.VSTest.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.VSTest.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/MSBuild.UnitTests/Microsoft.Build.CommandLine.UnitTests.VSTest.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/StringTools.UnitTests/StringTools.UnitTests.VSTest.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Tasks.UnitTests/Microsoft.Build.Tasks.UnitTests.VSTest.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+    <Project Path="src/Utilities.UnitTests/Microsoft.Build.Utilities.UnitTests.VSTest.csproj">
+      <Platform Solution="*|x64" Project="x64" />
+    </Project>
+  </Folder>
+</Solution>
+

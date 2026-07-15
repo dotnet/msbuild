@@ -141,6 +141,11 @@
         <target state="translated">쓰기는 지원되지 않습니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="BuildCheckCustomCheckNotSupportedInTrimmedHost">
+        <source>MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</source>
+        <target state="translated">MSB4284: 이 MSBuild 호스트에서는 사용자 지정 플러그 인 검색이 비활성화되어 있으므로 사용자 지정 빌드 검사 "{0}"을(를) 로드할 수 없습니다. 예를 들어 트리밍된 빌드 또는 네이티브 AOT 빌드에서는 반영으로 검사 어셈블리를 로드할 수 없습니다. 사용자 지정 검사를 실행하려면 JIT 기반 MSBuild로 빌드하세요.</target>
+        <note>{StrBegin="MSB4284: "}{0} is the path to the custom build check assembly.</note>
+      </trans-unit>
       <trans-unit id="BuildCheckEnabled">
         <source>The BuildCheck is enabled for this build.</source>
         <target state="translated">이 빌드에 대해 BuildCheck를 사용할 수 있습니다.</target>
@@ -423,34 +428,34 @@
       </trans-unit>
       <trans-unit id="CoordinatorFailedToConnect">
         <source>Failed to connect to the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to connect to the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">빌드 코디네이터에 연결하지 못했습니다. 노드 조정 없이 빌드가 진행됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToLaunch">
         <source>Failed to launch the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to launch the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">빌드 코디네이터를 시작하지 못했습니다. 노드 조정 없이 빌드가 진행됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToNegotiate">
         <source>Failed to negotiate with the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to negotiate with the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">빌드 코디네이터와 협상하지 못했습니다. 노드 조정 없이 빌드가 진행됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorLaunchTimedOut">
         <source>Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">빌드 코디네이터가 시작되기를 기다리는 동안 시간이 초과되었습니다. 노드 조정 없이 빌드가 진행됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorNodeGrantReceived">
         <source>Coordinator granted {0} node(s) for this build.</source>
-        <target state="new">Coordinator granted {0} node(s) for this build.</target>
+        <target state="translated">코디네이터가 이 빌드에 노드 {0}개를 할당했습니다.</target>
         <note>
       LOCALIZATION: {0} is the number of nodes granted by the coordinator.
     </note>
       </trans-unit>
       <trans-unit id="CoordinatorWaitingForNodes">
         <source>Waiting for coordinator to grant build resources...</source>
-        <target state="new">Waiting for coordinator to grant build resources...</target>
+        <target state="translated">코디네이터가 빌드 리소스를 할당할 때까지 기다리는 중...</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
@@ -689,6 +694,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
+      <trans-unit id="OM_ConfigurationFileToolsetsNotSupported">
+        <source>Reading toolset definitions from the application configuration file (ToolsetDefinitionLocations.ConfigurationFile) is not supported in this trimmed or Native AOT host. Remove ConfigurationFile from the requested toolset locations, or run a JIT-based MSBuild.</source>
+        <target state="translated">애플리케이션 구성 파일(ToolsetDefinitionLocations.ConfigurationFile)에서 도구 집합 정의를 읽는 것은 이 트리밍된 호스트 또는 네이티브 AOT 호스트에서 지원되지 않습니다. 요청한 도구 집합 위치에서 ConfigurationFile을 제거하거나 JIT 기반 MSBuild를 실행하세요.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
         <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
         <target state="translated">MatchOnMetadata를 사용하여 제거하는 경우 항목 종류를 하나만 참조할 수 있습니다.</target>
@@ -708,6 +718,21 @@
         <source>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</source>
         <target state="translated">MatchOnMetadata는 &lt;Target&gt; 외부에 사용할 수 없습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="OM_PartialEvaluationCannotBuild">
+        <source>The project instance cannot be built because it was only partially evaluated (evaluation stopped after the "{0}" stage). A full evaluation is required to build a project.</source>
+        <target state="translated">프로젝트 인스턴스가 부분적으로만 평가되었으므로 빌드할 수 없습니다(평가는 "{0}" 단계 이후 중지됨). 프로젝트를 빌드하려면 전체 평가가 필요합니다.</target>
+        <note>UE: This message is shown when the user tries to build a ProjectInstance produced by a partial evaluation. {0} is the ProjectEvaluationStage the instance was evaluated to.</note>
+      </trans-unit>
+      <trans-unit id="OM_PartialEvaluationMemberUnavailable">
+        <source>The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with at least the "{2}" evaluation stage to access this member.</source>
+        <target state="translated">프로젝트가 부분적으로만 평가되었으므로 "{0}" 멤버를 사용할 수 없습니다(평가는 "{1}" 단계 이후 중지됨). 이 멤버에 액세스하려면 최소 "{2}" 평가 단계로 프로젝트를 다시 평가하세요.</target>
+        <note>UE: This message is shown when the user reads a member (for example items or targets) that a partial evaluation did not compute. {0} is the member name, {1} is the ProjectEvaluationStage the project was evaluated to, {2} is the minimum ProjectEvaluationStage required to access the member.</note>
+      </trans-unit>
+      <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
+        <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
+        <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
+        <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
@@ -908,6 +933,16 @@
         <target state="translated">MSB4274: 프록시 빌드 요청을 내보내는 프로젝트 캐시 플러그 인을 사용할 때 inproc 노드를 사용하지 않도록 설정하면 성능이 저하됩니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReflectiveLoggerLoadingNotSupported">
+        <source>MSB4285: A logger could not be created from its assembly and class name because loading loggers by reflection is not supported in this trimmed or Native AOT host. Provide the logger to the engine as a constructed ILogger instance, or build with a JIT-based MSBuild.</source>
+        <target state="translated">MSB4285: 이 트리밍된 호스트 또는 네이티브 AOT 호스트에서는 반영을 사용한 로거 로드가 지원되지 않으므로 어셈블리 이름과 클래스 이름으로 로거를 만들 수 없습니다. 로거를 생성된 ILogger 인스턴스로 엔진에 제공하거나 JIT 기반 MSBuild로 빌드하세요.</target>
+        <note>{StrBegin="MSB4285: "}</note>
+      </trans-unit>
+      <trans-unit id="ReflectiveTaskExecutionNotSupported">
+        <source>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</source>
+        <target state="translated">MSB4283: "{0}" 작업을 실행하려면 반영을 통해 작업 어셈블리와 형식을 로드해야 하므로 실행할 수 없습니다. 이는 이 트리밍된 호스트 또는 네이티브 AOT 호스트에서는 지원되지 않습니다. 작업을 실행하려면 JIT 기반 MSBuild로 빌드하세요.</target>
+        <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
+      </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
         <target state="translated">파일 액세스 보고는 현재 x64 버전의 MSBuild를 사용하는 경우에만 지원됩니다.</target>
@@ -988,6 +1023,11 @@ Errors: {3}</source>
         <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
         <target state="translated">SDK가 환경 변수 "{0}"을(를) "{1}"(으)로 설정하여 프로세스에서 상속된 값 "{2}"을(를) 재정의했습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="SdkResolverDynamicLoadingNotSupported">
+        <source>MSB4282: The SDK "{0}" could not be resolved because it requires an SDK resolver ("{1}") that must be loaded dynamically, which is not supported in this trimmed or Native AOT host. SDKs available in the SDK installation are supported; build with a JIT-based MSBuild to use NuGet, workload, or custom SDK resolvers.</source>
+        <target state="translated">MSB4282: 동적으로 로드해야 하는 SDK 확인자("{0}")가 필요하므로 SDK "{1}"을(를) 확인할 수 없습니다. 이는 이 트리밍된 호스트 또는 네이티브 AOT 호스트에서 지원되지 않습니다. SDK 설치에서 사용할 수 있는 SDK는 지원됩니다. NuGet, 워크로드 또는 사용자 지정 SDK 확인자를 사용하려면 JIT 기반 MSBuild로 빌드하세요.</target>
+        <note>{StrBegin="MSB4282: "}{0} is the SDK name; {1} is the SDK resolver manifest display name.</note>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>

@@ -130,6 +130,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Gets the <see cref="Type"/> of the compiled task.
         /// </summary>
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
         public Type TaskType { get; private set; }
 
         /// <inheritdoc cref="ITaskFactory.CleanupTask(ITask)"/>
@@ -142,13 +143,12 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <inheritdoc cref="ITaskFactory.CreateTask(IBuildEngine)"/>
-        [UnconditionalSuppressMessage("TrimAnalysis", "IL2072:UnrecognizedReflectionPattern",
-            Justification = "TaskType is a type from an assembly compiled at runtime from user-supplied source, so its constructor cannot be statically preserved; this factory is inherently incompatible with trimming.")]
+        [RequiresUnreferencedCode("Instantiates a task type from an assembly compiled at runtime from user-supplied source, which is incompatible with trimming.")]
         public ITask CreateTask(IBuildEngine taskFactoryLoggingHost)
         {
             // The type of the task has already been determined and the assembly is already loaded after compilation so
             // just create an instance of the type and return it.
-            ITask taskInstance = Activator.CreateInstance(TaskType) as ITask;
+            ITask taskInstance = CreateTaskInstance(TaskType);
             if (taskInstance is null)
             {
                 TaskLoggingHelper taskInvocationLog = new TaskLoggingHelper(taskFactoryLoggingHost, _taskName)
@@ -162,6 +162,9 @@ namespace Microsoft.Build.Tasks
             return taskInstance;
         }
 
+        [RequiresUnreferencedCode("Instantiates a task type from an assembly compiled at runtime from user-supplied source; its parameterless constructor cannot be statically preserved.")]
+        private static ITask CreateTaskInstance(Type taskType) => Activator.CreateInstance(taskType) as ITask;
+
         /// <inheritdoc cref="ITaskFactory.GetTaskParameters"/>
         public TaskPropertyInfo[] GetTaskParameters()
         {
@@ -172,10 +175,7 @@ namespace Microsoft.Build.Tasks
         public string GetAssemblyPath() => _assemblyPath;
 
         /// <inheritdoc cref="ITaskFactory.Initialize"/>
-        [UnconditionalSuppressMessage("TrimAnalysis", "IL2026:RequiresUnreferencedCode",
-            Justification = "RoslynCodeTaskFactory compiles and loads a task assembly at runtime and reflects over its exported types; this is inherently incompatible with trimming.")]
-        [UnconditionalSuppressMessage("TrimAnalysis", "IL2075:UnrecognizedReflectionPattern",
-            Justification = "The task type comes from an assembly compiled at runtime from user-supplied source, so its properties cannot be statically preserved.")]
+        [RequiresUnreferencedCode("Compiles and loads a task assembly at runtime and reflects over its exported types, which is incompatible with trimming.")]
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> parameterGroup, string taskBody, IBuildEngine taskFactoryLoggingHost)
         {
             _log = new TaskLoggingHelper(taskFactoryLoggingHost, taskName)
@@ -202,6 +202,22 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
+            if (!TryResolveCompiledTaskType(assembly, parameterGroup, taskInfo, taskName))
+            {
+                return false;
+            }
+
+            // Initialization succeeded if we found a type matching the task name from the compiled assembly
+            return TaskType != null;
+        }
+
+        /// <summary>
+        /// Reflects over the exported types of the runtime-compiled <paramref name="assembly"/> to locate the task type
+        /// and, when the user supplied a whole class, derive its parameters from the type's properties.
+        /// </summary>
+        [RequiresUnreferencedCode("Reflects over the exported types of an assembly compiled at runtime from user-supplied source, which is incompatible with trimming.")]
+        private bool TryResolveCompiledTaskType(Assembly assembly, IDictionary<string, TaskPropertyInfo> parameterGroup, RoslynCodeTaskFactoryTaskInfo taskInfo, string taskName)
+        {
             if (assembly != null)
             {
                 Type[] exportedTypes = assembly.GetExportedTypes();
@@ -230,8 +246,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            // Initialization succeeded if we found a type matching the task name from the compiled assembly
-            return TaskType != null;
+            return true;
         }
 
         /// <summary>

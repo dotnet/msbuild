@@ -28,7 +28,11 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 {
     public class ProjectCacheTests : IDisposable
     {
-        private static string s_currentTargetNETFramework = $"net{RunnerUtilities.BootstrapSdkVersion.Split('.')?.FirstOrDefault()}.0";
+        // The sample plugin and the helper apps built by these tests target the runtime MSBuild itself
+        // targets (LatestDotNetCoreForMSBuild), which can lag the bootstrap SDK's TFM (e.g. MSBuild on
+        // net10.0 overlaid onto a net11.0 SDK). Derive the TFM from the runtime actually executing these
+        // tests rather than from BootstrapSdkVersion, so the plugin/app paths resolve to the built output.
+        private static string s_currentTargetNETFramework = $"net{Environment.Version.Major}.0";
 
         public ProjectCacheTests(ITestOutputHelper output)
         {

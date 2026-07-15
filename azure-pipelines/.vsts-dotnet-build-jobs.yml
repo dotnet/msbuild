@@ -89,30 +89,14 @@ jobs:
 
   - pwsh: Set-MpPreference -DisableRealtimeMonitoring $true
 
-  - task: PowerShell@2
-    displayName: Setup Private Feeds Credentials
-    inputs:
-      filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
-      arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
-    env:
-      Token: $(dn-bot-dnceng-artifact-feeds-rw)
-
-
-  - task: NuGetCommand@2
-    displayName: Restore internal tools
-    inputs:
-      command: restore
-      feedsToUse: config
-      restoreSolution: 'eng\common\internal\Tools.csproj'
-      nugetConfigPath: 'eng\common\internal\NuGet.config'
-      restoreDirectory: '$(Build.SourcesDirectory)\.packages'
+  - template: /eng/common/templates-official/steps/enable-internal-sources.yml
 
   - task: MicroBuildSigningPlugin@4
     displayName: Install MicroBuild plugin
     inputs:
       signType: ${{ parameters.signTypeParameter }}
       zipSources: false
-      feedSource: https://devdiv.pkgs.visualstudio.com/_packaging/MicroBuildToolset/nuget/v3/index.json
+      feedSource: https://pkgs.dev.azure.com/devdiv/_packaging/MicroBuildToolset/nuget/v3/index.json
       ${{ if and(eq(parameters.signTypeParameter, 'real'), eq(variables['System.TeamProject'], 'DevDiv')) }}:
         ConnectedPMEServiceName: 6cc74545-d7b9-4050-9dfa-ebefcc8961ea
     env:
@@ -124,7 +108,7 @@ jobs:
       ProfilingInputsDropName: '$(VisualStudio.DropName)'
       ShouldSkipOptimize: true
       AccessToken: '$(System.AccessToken)'
-      feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
+      feedSource: 'https://pkgs.dev.azure.com/devdiv/_packaging/MicroBuildToolset/nuget/v3/index.json'
     displayName: 'Install OptProf Plugin'
     condition: and(succeeded(), ${{ parameters.enableOptProf }})
 

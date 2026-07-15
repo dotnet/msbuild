@@ -31,6 +31,7 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.10
 - [Isolated (`-graph -isolate`) builds fail deterministically with MSB4252 on a cross-project reference to a target that is not declared via `ProjectReferenceTargets`, instead of passing or failing depending on MSBuild node scheduling. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.10` to restore the prior (scheduling-dependent) behavior.](https://github.com/dotnet/msbuild/pull/14280)
+- [`-getProperty`/`-getItem` (without a target) stop evaluation after the pass that produces the requested data instead of running a full evaluation, avoiding later passes such as target registration.](https://github.com/dotnet/msbuild/pull/14290)
 
 ### 18.9
 - [GenerateResource: typed ResX data/metadata entries in Mark-of-the-Web files are now treated as untrusted and blocked with MSB3821; unblock the file (or set MSBUILDDISABLEFEATURESFROMVERSION=18.9) to restore prior behavior. ResXFileRef entries are always blocked regardless of this wave.](https://github.com/dotnet/msbuild/pull/14015)

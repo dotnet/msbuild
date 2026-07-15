@@ -4,11 +4,8 @@
 using System;
 using Microsoft.Build.Framework;
 #if FEATURE_APPDOMAIN
-using Microsoft.Build.Shared.Debugging;
-#endif
-
-#if FEATURE_APPDOMAIN
 using System.Reflection;
+using Microsoft.Build.Shared.Debugging;
 #endif
 
 namespace Microsoft.Build.Shared
@@ -30,17 +27,6 @@ namespace Microsoft.Build.Shared
         /// Delegate for logging task loading errors.
         /// </summary>
         internal delegate void LogError(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs);
-
-        /// <summary>
-        /// Checks if the given type is a task factory.
-        /// </summary>
-        /// <remarks>This method is used as a type filter delegate.</remarks>
-        /// <returns>true, if specified type is a task</returns>
-        internal static bool IsTaskClass(Type type, object unused)
-        {
-            return type.IsClass && !type.IsAbstract &&
-                type.GetInterface("Microsoft.Build.Framework.ITask") != null;
-        }
 
         /// <summary>
         /// Creates an ITask instance and returns it.
