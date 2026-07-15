@@ -13,9 +13,9 @@ name: Branch freeze status
 #                            workflow after it toggles freeze state.
 #
 # Security: this workflow runs in the trusted base-repo context. It deliberately
-# never checks out or executes pull-request HEAD content - only the trusted base
-# checkout (which carries the composite action and shared script) is used, and
-# PR-controlled values (sha, base ref) are passed to the script as data args.
+# never checks out or executes pull-request HEAD content - only the trusted
+# default branch (which carries the composite action and shared script) is used,
+# and PR-controlled values (sha, base ref) are passed to the script as data args.
 
 on:
   pull_request_target:
@@ -63,6 +63,7 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
+          ref: ${{ github.event.repository.default_branch }}
           persist-credentials: false
       - uses: ./.github/actions/branch-freeze-status
         with:
