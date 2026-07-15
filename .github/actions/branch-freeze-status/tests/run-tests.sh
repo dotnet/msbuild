@@ -5,6 +5,8 @@
 #   * is-allowed.sh         - who may run /freeze /unfreeze (deny-by-default).
 #   * post-freeze-status.sh - a branch is frozen ONLY when an open issue carries the
 #                             marker on a WHOLE LINE, so a mere mention cannot freeze.
+#   * freeze-command.sh     - notification failure cannot suppress fanout after a
+#                             successful state change.
 #
 # Uses a mock `gh` (tests/mock-gh) on PATH; requires real `jq` (as the scripts do).
 # Run:  bash .github/actions/branch-freeze-status/tests/run-tests.sh
@@ -61,6 +63,22 @@ fresh_status
 MOCK_ISSUES='[{"number":9,"url":"u","body":"heads up: <!-- branch-freeze:main --> is the marker"}]' \
   bash "$action_dir/post-freeze-status.sh" "sha-mention" "main"
 assert_eq "$(status_field state)" "success" "marker mentioned mid-line does NOT freeze"
+
+echo "== freeze-command.sh (best-effort notification) =="
+command_output="$(mktemp)"
+if MOCK_ISSUES='[{"number":7,"body":"SDK insertion broke\n\n<!-- branch-freeze:main -->"}]' \
+  MOCK_ISSUE_COMMENT_FAILURE=1 \
+  GH_TOKEN="test-token" REPO="o/r" ACTOR="rainersigwald" ISSUE_NUMBER="42" COMMENT_ID="99" \
+  BODY="/unfreeze" GITHUB_OUTPUT="$command_output" \
+  bash "$action_dir/freeze-command.sh"; then
+  ok "failed confirmation reply does not abort unfreeze"
+else
+  bad "failed confirmation reply does not abort unfreeze"
+fi
+assert_eq "$(grep -E '^changed=' "$command_output" | cut -d= -f2-)" "true" \
+  "failed confirmation reply preserves fanout output"
+assert_eq "$(grep -E '^branch=' "$command_output" | cut -d= -f2-)" "main" \
+  "failed confirmation reply preserves fanout branch"
 
 echo
 echo "Passed: $pass   Failed: $fail"

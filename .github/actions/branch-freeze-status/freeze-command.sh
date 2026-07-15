@@ -22,7 +22,12 @@ BODY="${BODY:-}"
 label="branch-freeze"
 
 react() { gh api -X POST "repos/$REPO/issues/comments/$COMMENT_ID/reactions" -f content="$1" >/dev/null 2>&1 || true; }
-reply() { gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "$1" >/dev/null; }
+reply() {
+  if ! gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "$1" >/dev/null; then
+    echo "::warning::Failed to post confirmation comment on issue #${ISSUE_NUMBER}."
+  fi
+  return 0
+}
 set_output() { [ -n "${GITHUB_OUTPUT:-}" ] && printf '%s=%s\n' "$1" "$2" >> "$GITHUB_OUTPUT"; return 0; }
 
 # Backticks below are literal Markdown in the reply text, not command substitution.
