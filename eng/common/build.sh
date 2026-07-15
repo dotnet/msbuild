@@ -46,6 +46,7 @@ usage()
   echo "  --warnNotAsError <value> Sets a semi-colon delimited list of warning codes that should not be treated as errors"
   echo "  --buildCheck <value>     Sets /check msbuild parameter"
   echo "  --fromVMR                Set when building from within the VMR"
+  echo "  --disablePipelineSetResult Set to disable masking the actual exit code in the pipeline when the build fails"
   echo ""
   echo "Command line arguments not listed above are passed thru to msbuild."
   echo "Arguments can also be passed in with a single hyphen."
@@ -68,6 +69,7 @@ build=false
 source_build=false
 product_build=false
 from_vmr=false
+disable_pipeline_set_result=false
 rebuild=false
 test=false
 integration_test=false
@@ -151,6 +153,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     -fromvmr|-from-vmr)
       from_vmr=true
+      ;;
+    -disablepipelinesetresult|-disable-pipeline-set-result)
+      disable_pipeline_set_result=true
       ;;
     -test|-t)
       test=true
