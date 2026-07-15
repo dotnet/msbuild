@@ -9,8 +9,7 @@
     <IsShipping>false</IsShipping>
     <PlatformTarget>x86</PlatformTarget>
     <IsVisualStudioInsertionPackage>true</IsVisualStudioInsertionPackage>
-    <!-- VS insertion packages are not needed when doing a .NET product build. -->
-    <ExcludeFromDotNetBuild>true</ExcludeFromDotNetBuild>
+    <ExcludeFromBuild Condition="'$(MSBuildRuntimeType)' != 'Full'">true</ExcludeFromBuild>
   </PropertyGroup>
 
   <ItemGroup>
