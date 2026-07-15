@@ -64,11 +64,13 @@ jobs:
     demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
   timeoutInMinutes: 120
   steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
   - task: BatchScript@1
     displayName: cibuild_bootstrapped_msbuild.cmd (quarantined tests only)
     inputs:
       filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
       arguments: "-onlyDocChanged 0 -stage2Properties '/mt /p:RunQuarantinedTests=true'"
+    condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
     env:
       ForceUseXCopyMSBuild: 1
   - task: PublishTestResults@2
@@ -115,10 +117,12 @@ jobs:
     demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
   timeoutInMinutes: 120
   steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged 0 --stage2Properties '/mt /p:RunQuarantinedTests=true'
     displayName: CI Build (quarantined tests only)
+    condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
     env:
       MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
@@ -154,8 +158,10 @@ jobs:
     vmImage: 'macOS-latest'
   timeoutInMinutes: 120
   steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
   - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged 0 --stage2Properties '/mt /p:RunQuarantinedTests=true'
     displayName: CI Build (quarantined tests only)
+    condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
     env:
       MSBUILDUSESERVER: "1"
   - task: PublishTestResults@2
