@@ -18,6 +18,7 @@ Binary logger, console loggers, terminal logger, and event forwarding infrastruc
 * Must handle terminal width changes, very narrow terminals, and non-TTY output (piped to file).
 * Concurrent project builds must render without corruption.
 * ANSI escape sequences must be cross-platform compatible.
+* Use `RenderImmediateMessage` (not direct terminal writes) for any message that must appear immediately outside the normal node-status rendering cycle — for example, messages with a null `BuildEventContext` or `IsAuthProviderMessage` events. Direct terminal writes bypass the node-display logic and corrupt the rendered output.
 
 ## Console Logger
 
