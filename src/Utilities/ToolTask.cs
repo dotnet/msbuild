@@ -1381,7 +1381,7 @@ namespace Microsoft.Build.Utilities
                 }
                 catch (ArgumentException)
                 {
-                    Log.LogErrorWithCodeFromResources("Message_InvalidImportance", StandardErrorImportance);
+                    LogShared.LogErrorWithCodeFromResources("Message_InvalidImportance", StandardErrorImportance);
                     return false;
                 }
             }
@@ -1401,7 +1401,7 @@ namespace Microsoft.Build.Utilities
                 }
                 catch (ArgumentException)
                 {
-                    Log.LogErrorWithCodeFromResources("Message_InvalidImportance", StandardOutputImportance);
+                    LogShared.LogErrorWithCodeFromResources("Message_InvalidImportance", StandardOutputImportance);
                     return false;
                 }
             }
