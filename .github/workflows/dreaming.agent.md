@@ -257,13 +257,17 @@ them:
    `gh api orgs/dotnet/teams/kitten/members --jq '.[].login'` (the `@dotnet/kitten` team is the MSBuild
    CODEOWNERS team — a small, curated set, currently ~8 people, *not* the whole org). A login qualifies
    as a reviewer **only if it satisfies BOTH conditions**: (a) it is in the participant list you actually
-   collected in Steps 1–2 for *this* pattern, **and** (b) it appears verbatim in the roster output above.
+   collected in Steps 1–2 for *this* pattern, **and** (b) it appears verbatim in the roster output above
+   **or** is on the explicit allow-list below.
    Drop everyone who fails either check, plus bots and the PR authors themselves. **Never** add a name
    from memory, from general knowledge of "who works on .NET/MSBuild", or because it seems plausible — if
-   a login is not in both lists, it does not go in the PR. Do **not** use GitHub's `authorAssociation`
-   for this — `MEMBER` means any dotnet-org member and is far too broad. If the token can't read team
-   membership (the call errors/returns empty), skip individual selection and use the `@dotnet/kitten`
-   fallback in step 2.
+   a login is not in both lists and not on the allow-list, it does not go in the PR. Do **not** use
+   GitHub's `authorAssociation` for this — `MEMBER` means any dotnet-org member and is far too broad. If
+   the token can't read team membership (the call errors/returns empty), skip individual selection and use
+   the `@dotnet/kitten` fallback in step 2.
+   **Explicit allow-list (always eligible regardless of `@dotnet/kitten` roster membership, if they
+   participated in the pattern's discussions):**
+   - `@baronfel` — team PM (Chet Husk)
 2. **Cap at 2.** If more than two qualify, pick the two most engaged in that pattern's threads (most
    comments / the ones who requested the changes). If exactly one qualifies, name one. If **none**
    qualify, fall back to the core-team handle `@dotnet/kitten` (verified team slug `kitten`).
@@ -281,9 +285,10 @@ them:
    belong — never put them in the learning-atom content itself (guardrail 5).
 
 **Before emitting each PR, self-check the reviewers line:** every `@`-mention in it (other than the
-`@dotnet/kitten` fallback) must be a login that appears in the `orgs/dotnet/teams/kitten/members` output
-you fetched **and** in that pattern's discussion-participant list. If any name fails, remove it. When in
-doubt, prefer the `@dotnet/kitten` fallback over guessing an individual.
+`@dotnet/kitten` fallback) must be a login that appears in either (a) the `orgs/dotnet/teams/kitten/members`
+output you fetched or (b) the explicit allow-list in step 1 above — **and** in that pattern's
+discussion-participant list. If any name fails, remove it. When in doubt, prefer the `@dotnet/kitten`
+fallback over guessing an individual.
 
 ## Reminders
 
