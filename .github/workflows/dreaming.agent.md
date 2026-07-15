@@ -169,10 +169,11 @@ Use the pre-authenticated `gh` CLI (and the GitHub tools) to collect, for the **
     paths, `is null` vs `== null`, Shouldly vs xUnit asserts, ChangeWave/opt-in gating for behavior
     changes, warnings-as-errors, cross-platform paths, missing tests, doc updates, etc.).
   - Points where an author (often an agent) clearly misunderstood a repo convention.
-  For every reviewer/commenter you read, also record their **login** and **`authorAssociation`** (the
-  GitHub `reviews`/`comments` JSON exposes `authorAssociation`). You will use this in Step 5b to pick
-  reviewers — a participant counts as **core MSBuild team** only when their `authorAssociation` is
-  `OWNER` or `MEMBER` (org members). `COLLABORATOR`, `CONTRIBUTOR`, and `NONE` do **not** qualify.
+  For every reviewer/commenter you read, also record their **login**. You will use this in Step 5b to
+  pick reviewers, where the authoritative filter for "core MSBuild team" is **membership in the
+  `@dotnet/kitten` team** (see Step 5b) — not the coarse GitHub `authorAssociation`, which lumps in every
+  dotnet-org member. So just collect the participant logins here; the team-membership check happens in
+  Step 5b.
 - **CI outcomes** on those PRs: use `gh pr checks <number>` (and check-run/status conclusions) to see
   which checks failed and cluster the **categories** of failure (e.g. formatting/editorconfig, a
   specific test project, build-warning-as-error, missing localization/resx, bootstrap issues). You are
@@ -188,8 +189,8 @@ Group the raw feedback and CI failures into a small set of **themes**. For each 
 that (a) recurred across 2+ PRs/comments or repeated CI failures, and (b) would plausibly have been
 avoided if a learning atom had said something. Discard one-offs, subjective style debates, and anything
 already well covered by existing learning atoms. For each surviving theme, also keep the list of
-**core-team participants** (login + `authorAssociation` from Step 1) who raised or discussed it — this
-feeds the per-PR reviewer request in Step 5b.
+**participant logins** (from Step 1) who raised or discussed it — this feeds the per-PR reviewer
+selection in Step 5b, which narrows them to the core `@dotnet/kitten` team.
 
 ## Step 3 — Decide the minimal learning-atom change per theme
 
@@ -252,13 +253,16 @@ For **each** PR you open, identify the people who were actually involved in the 
 PR's pattern (from the participant list you kept in Step 2) and @-mention them so a maintainer can assign
 them:
 
-1. Take that theme's participants and **keep only core MSBuild team members** — those whose
-   `authorAssociation` was `OWNER` or `MEMBER` (see Step 1). Drop everyone else, and drop bots and the
-   PR authors themselves.
+1. **Fetch the core team roster once** for the run:
+   `gh api orgs/dotnet/teams/kitten/members --jq '.[].login'` (the `@dotnet/kitten` team is the MSBuild
+   CODEOWNERS team — a small, curated set, currently ~8 people, *not* the whole org). Keep only this
+   PR's participants whose login is in that roster. Drop everyone else, plus bots and the PR authors
+   themselves. Do **not** use GitHub's `authorAssociation` for this — `MEMBER` means any dotnet-org
+   member and is far too broad. If the token can't read team membership (the call errors/returns empty),
+   skip individual selection and use the `@dotnet/kitten` fallback in step 2.
 2. **Cap at 2.** If more than two qualify, pick the two most engaged in that pattern's threads (most
    comments / the ones who requested the changes). If exactly one qualifies, name one. If **none**
-   qualify, fall back to the core-team handle `@dotnet/kitten` (the MSBuild CODEOWNERS team; verified
-   team slug `kitten`).
+   qualify, fall back to the core-team handle `@dotnet/kitten` (verified team slug `kitten`).
 3. The safe-outputs channel exposes no per-PR reviewer field, so you **cannot** create a formal GitHub
    review request. Instead, record the chosen people **in that PR's body** as its own final section. An
    `@`-mention here is a **notification/ping for manual assignment**, not an auto-assigned review — a
