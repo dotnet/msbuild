@@ -462,33 +462,6 @@ public class FileUtilities_Tests
         });
     }
 
-    [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
-    public void NormalizePathBadUNC1()
-    {
-        Assert.Throws<ArgumentException>(() =>
-        {
-            Assert.Null(FileUtilities.NormalizePath(@"\\"));
-        });
-    }
-
-    [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
-    public void NormalizePathBadUNC2()
-    {
-        Assert.Throws<ArgumentException>(() =>
-        {
-            Assert.Null(FileUtilities.NormalizePath(@"\\XXX\"));
-        });
-    }
-
-    [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
-    public void NormalizePathBadUNC3()
-    {
-        Assert.Throws<ArgumentException>(() =>
-        {
-            Assert.Equal(@"\\localhost", FileUtilities.NormalizePath(@"\\localhost"));
-        });
-    }
-
     [WindowsOnlyFact]
     public void NormalizePathGoodUNC()
     {
@@ -502,27 +475,12 @@ public class FileUtilities_Tests
         Assert.Equal(@"c:\abc\def", FileUtilities.NormalizePath(@"c:\abc\" + longPart + @"\..\def"));
     }
 
-    [WindowsFullFrameworkOnlyFact(additionalMessage: ".NET Core 2.1+ no longer validates paths: https://github.com/dotnet/corefx/issues/27779#issuecomment-371253486.")]
-    public void NormalizePathInvalid()
-    {
-        string filePath = @"c:\aardvark\|||";
-
-        Assert.Throws<ArgumentException>(() =>
-        {
-            FileUtilities.NormalizePath(filePath);
-        });
-    }
-
     [WindowsOnlyFact]
     public void CannotNormalizePathWithNewLineAndSpace()
     {
         string filePath = "\r\n      C:\\work\\sdk3\\artifacts\\tmp\\Debug\\SimpleNamesWi---6143883E\\NETFrameworkLibrary\\bin\\Debug\\net462\\NETFrameworkLibrary.dll\r\n      ";
 
-#if FEATURE_LEGACY_GETFULLPATH
-        Assert.Throws<ArgumentException>(() => FileUtilities.NormalizePath(filePath));
-#else
         Assert.NotEqual("C:\\work\\sdk3\\artifacts\\tmp\\Debug\\SimpleNamesWi---6143883E\\NETFrameworkLibrary\\bin\\Debug\\net462\\NETFrameworkLibrary.dll", FileUtilities.NormalizePath(filePath));
-#endif
     }
 
     [Fact]
