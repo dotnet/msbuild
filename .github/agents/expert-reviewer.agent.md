@@ -686,3 +686,5 @@ Use this to prioritize dimensions based on changed files.
    **Never use APPROVE** — the agent must not count as a PR approval.
 
    All inline comments from step 5 are automatically bundled into this review submission.
+
+8. **Never resolve or dismiss reviewer threads opened by humans.** Only the maintainer who opened a thread may mark it resolved. If a finding has been addressed in the code, note that in a reply but leave the thread open for the maintainer to close. Threads that were clearly opened by another AI agent or bot (e.g., authored by `[bot]`-suffixed accounts or automated tooling) may be resolved after the finding is addressed.
