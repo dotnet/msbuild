@@ -6,18 +6,18 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class CombinePath_Tests
     {
         /// <summary>
         /// Base path is relative.  Paths are relative.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RelativeRelative1()
         {
             CombinePath t = new CombinePath();
@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests
             string path2 = Path.Combine("jkl", "mno.txt");
             string fullPath2 = Path.Combine(t.BasePath, path2);
             t.Paths = new ITaskItem[] { new TaskItem(path1), new TaskItem(path2) };
-            Assert.True(t.Execute()); // "success"
+            Assert.IsTrue(t.Execute()); // "success"
 
             ObjectModelHelpers.AssertItemsMatch(string.Format("{0}\r\n{1}", fullPath1, fullPath2), t.CombinedPaths, true);
         }
@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Base path is relative.  Paths are absolute.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RelativeAbsolute1()
         {
             CombinePath t = new CombinePath();
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests
             t.Paths = NativeMethodsShared.IsWindows
                           ? new ITaskItem[] { new TaskItem(path1), new TaskItem(path2), new TaskItem(path3) }
                           : new ITaskItem[] { new TaskItem(path1), new TaskItem(path2) };
-            Assert.True(t.Execute()); // "success"
+            Assert.IsTrue(t.Execute()); // "success"
 
             ObjectModelHelpers.AssertItemsMatch(pathsToMatch, t.CombinedPaths, true);
         }
@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Base path is absolute.  Paths are relative.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AbsoluteRelative1()
         {
             CombinePath t = new CombinePath();
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests
             string fullPath2 = Path.Combine(t.BasePath, path2);
 
             t.Paths = new ITaskItem[] { new TaskItem(path1), new TaskItem(path2) };
-            Assert.True(t.Execute()); // "success"
+            Assert.IsTrue(t.Execute()); // "success"
 
             ObjectModelHelpers.AssertItemsMatch(string.Format("{0}\r\n{1}", path1, fullPath2), t.CombinedPaths, true);
         }
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Base path is absolute.  Paths are absolute.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AbsoluteAbsolute1()
         {
             CombinePath t = new CombinePath();
@@ -108,7 +108,7 @@ namespace Microsoft.Build.UnitTests
             t.Paths = NativeMethodsShared.IsWindows
                           ? new ITaskItem[] { new TaskItem(path1), new TaskItem(path2), new TaskItem(path3) }
                           : new ITaskItem[] { new TaskItem(path1), new TaskItem(path2) };
-            Assert.True(t.Execute()); // "success"
+            Assert.IsTrue(t.Execute()); // "success"
 
             ObjectModelHelpers.AssertItemsMatch(pathsToMatch, t.CombinedPaths, true);
         }
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// All item metadata from the paths should be preserved when producing the output items.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataPreserved()
         {
             CombinePath t = new CombinePath();
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests
                 ";
             }
             t.Paths[0].SetMetadata("Culture", "english");
-            Assert.True(t.Execute()); // "success"
+            Assert.IsTrue(t.Execute()); // "success"
 
             ObjectModelHelpers.AssertItemsMatch(expected, t.CombinedPaths, true);
         }
@@ -149,14 +149,14 @@ namespace Microsoft.Build.UnitTests
         /// No base path passed in should be treated as a blank base path, which means that
         /// the original paths are returned untouched.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoBasePath()
         {
             CombinePath t = new CombinePath();
             t.BuildEngine = new MockEngine();
 
             t.Paths = new ITaskItem[] { new TaskItem(@"jkl\mno.txt"), new TaskItem(@"c:\abc\def\ghi.txt") };
-            Assert.True(t.Execute()); // "success"
+            Assert.IsTrue(t.Execute()); // "success"
 
             ObjectModelHelpers.AssertItemsMatch(@"
                 jkl\mno.txt
@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Passing in an array of zero paths.  Task should succeed and return zero paths.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoPaths()
         {
             CombinePath t = new CombinePath();
@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests
 
             t.BasePath = @"c:\abc\def";
             t.Paths = System.Array.Empty<ITaskItem>();
-            Assert.True(t.Execute()); // "success"
+            Assert.IsTrue(t.Execute()); // "success"
 
             ObjectModelHelpers.AssertItemsMatch(@"
                 ", t.CombinedPaths, true);
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Passing in a (blank) path.  Task should simply return the base path.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BlankPath()
         {
             CombinePath t = new CombinePath();
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests
 
             t.BasePath = @"c:\abc\def";
             t.Paths = new ITaskItem[] { new TaskItem("") };
-            Assert.True(t.Execute()); // "success"
+            Assert.IsTrue(t.Execute()); // "success"
 
             ObjectModelHelpers.AssertItemsMatch(@"
                 c:\abc\def
@@ -210,7 +210,7 @@ namespace Microsoft.Build.UnitTests
 
             t.BasePath = @"c:\abc\def";
             t.Paths = new ITaskItem[] { new TaskItem("ghi.txt"), new TaskItem("|.txt"), new TaskItem("jkl.txt") };
-            Assert.False(t.Execute()); // "should have failed"
+            Assert.IsFalse(t.Execute()); // "should have failed"
             ((MockEngine)t.BuildEngine).AssertLogContains("MSB3095");
 
             ObjectModelHelpers.AssertItemsMatch(@"

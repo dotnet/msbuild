@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Construction;
-using Xunit;
 
 #nullable disable
 
@@ -11,23 +10,24 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Test the ProjectPropertyGroupElement class
     /// </summary>
+    [TestClass]
     public class ProjectPropertyGroupElement_Tests
     {
         /// <summary>
         /// Read property groups in an empty project
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadNoPropertyGroup()
         {
             ProjectRootElement project = ProjectRootElement.Create();
-            Assert.Equal(0, Helpers.Count(project.Children));
-            Assert.Empty(project.PropertyGroups);
+            Assert.AreEqual(0, Helpers.Count(project.Children));
+            Assert.IsEmpty(project.PropertyGroups);
         }
 
         /// <summary>
         /// Read an empty property group
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadEmptyPropertyGroup()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -40,13 +40,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectRootElement project = projectRootElementFromString.Project;
             ProjectPropertyGroupElement group = (ProjectPropertyGroupElement)Helpers.GetFirst(project.Children);
 
-            Assert.Equal(0, Helpers.Count(group.Properties));
+            Assert.AreEqual(0, Helpers.Count(group.Properties));
         }
 
         /// <summary>
         /// Read an property group with two property children
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadPropertyGroupTwoProperties()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -63,15 +63,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyGroupElement group = (ProjectPropertyGroupElement)Helpers.GetFirst(project.Children);
 
             var properties = Helpers.MakeList(group.Properties);
-            Assert.Equal(2, properties.Count);
-            Assert.Equal("p1", properties[0].Name);
-            Assert.Equal("p2", properties[1].Name);
+            Assert.AreEqual(2, properties.Count);
+            Assert.AreEqual("p1", properties[0].Name);
+            Assert.AreEqual("p2", properties[1].Name);
         }
 
         /// <summary>
         /// Set the condition value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -81,14 +81,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyGroupElement propertyGroup = Helpers.GetFirst(project.PropertyGroups);
             propertyGroup.Condition = "c";
 
-            Assert.Equal("c", propertyGroup.Condition);
-            Assert.True(project.HasUnsavedChanges);
+            Assert.AreEqual("c", propertyGroup.Condition);
+            Assert.IsTrue(project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set the Label value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetLabel()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -98,14 +98,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyGroupElement propertyGroup = Helpers.GetFirst(project.PropertyGroups);
             propertyGroup.Label = "c";
 
-            Assert.Equal("c", propertyGroup.Label);
-            Assert.True(project.HasUnsavedChanges);
+            Assert.AreEqual("c", propertyGroup.Label);
+            Assert.IsTrue(project.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Add a property through the convenience method on a property group
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddProperty_ExistingPropertySameName()
         {
             ProjectRootElement project = ProjectRootElement.Create();

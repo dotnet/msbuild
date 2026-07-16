@@ -4,90 +4,91 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Utilities;
-using Xunit;
+using Shouldly;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
+    [TestClass]
     public class SimpleVersion_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void Ctor_Default()
         {
             VerifyVersion(new SimpleVersion(), 0, 0, 0, 0);
         }
 
-        [Theory]
-        [InlineData(0)]
-        [InlineData(2)]
-        [InlineData(int.MaxValue)]
-        public static void Ctor_Int(int major)
+        [MSBuildTestMethod]
+        [DataRow(0)]
+        [DataRow(2)]
+        [DataRow(int.MaxValue)]
+        public void Ctor_Int(int major)
         {
             VerifyVersion(new SimpleVersion(major), major, 0, 0, 0);
         }
 
-        [Theory]
-        [InlineData(0, 0)]
-        [InlineData(2, 3)]
-        [InlineData(int.MaxValue, int.MaxValue)]
-        public static void Ctor_Int_Int(int major, int minor)
+        [MSBuildTestMethod]
+        [DataRow(0, 0)]
+        [DataRow(2, 3)]
+        [DataRow(int.MaxValue, int.MaxValue)]
+        public void Ctor_Int_Int(int major, int minor)
         {
             VerifyVersion(new SimpleVersion(major, minor), major, minor, 0, 0);
         }
 
-        [Theory]
-        [InlineData(0, 0, 0)]
-        [InlineData(2, 3, 4)]
-        [InlineData(int.MaxValue, int.MaxValue, int.MaxValue)]
-        public static void Ctor_Int_Int_Int(int major, int minor, int build)
+        [MSBuildTestMethod]
+        [DataRow(0, 0, 0)]
+        [DataRow(2, 3, 4)]
+        [DataRow(int.MaxValue, int.MaxValue, int.MaxValue)]
+        public void Ctor_Int_Int_Int(int major, int minor, int build)
         {
             VerifyVersion(new SimpleVersion(major, minor, build), major, minor, build, 0);
         }
 
-        [Theory]
-        [InlineData(0, 0, 0, 0)]
-        [InlineData(2, 3, 4, 7)]
-        [InlineData(2, 3, 4, 32767)]
-        [InlineData(2, 3, 4, 32768)]
-        [InlineData(2, 3, 4, 65535)]
-        [InlineData(2, 3, 4, 65536)]
-        [InlineData(2, 3, 4, 2147483647)]
-        [InlineData(2, 3, 4, 2147450879)]
-        [InlineData(2, 3, 4, 2147418112)]
-        [InlineData(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue)]
-        public static void Ctor_Int_Int_Int_Int(int major, int minor, int build, int revision)
+        [MSBuildTestMethod]
+        [DataRow(0, 0, 0, 0)]
+        [DataRow(2, 3, 4, 7)]
+        [DataRow(2, 3, 4, 32767)]
+        [DataRow(2, 3, 4, 32768)]
+        [DataRow(2, 3, 4, 65535)]
+        [DataRow(2, 3, 4, 65536)]
+        [DataRow(2, 3, 4, 2147483647)]
+        [DataRow(2, 3, 4, 2147450879)]
+        [DataRow(2, 3, 4, 2147418112)]
+        [DataRow(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue)]
+        public void Ctor_Int_Int_Int_Int(int major, int minor, int build, int revision)
         {
             VerifyVersion(new SimpleVersion(major, minor, build, revision), major, minor, build, revision);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Ctor_NegativeMajor_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("major", () => new SimpleVersion(-1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("major", () => new SimpleVersion(-1, 0, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("major", () => new SimpleVersion(-1, 0, 0, 0));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new SimpleVersion(-1, 0));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new SimpleVersion(-1, 0, 0));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new SimpleVersion(-1, 0, 0, 0));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Ctor_NegativeMinor_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("minor", () => new SimpleVersion(0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("minor", () => new SimpleVersion(0, -1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("minor", () => new SimpleVersion(0, -1, 0, 0));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new SimpleVersion(0, -1));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new SimpleVersion(0, -1, 0));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new SimpleVersion(0, -1, 0, 0));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Ctor_NegativeBuild_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("build", () => new SimpleVersion(0, 0, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("build", () => new SimpleVersion(0, 0, -1, 0));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new SimpleVersion(0, 0, -1));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new SimpleVersion(0, 0, -1, 0));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Ctor_NegativeRevision_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("revision", () => new SimpleVersion(0, 0, 0, -1));
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() => new SimpleVersion(0, 0, 0, -1));
         }
 
         public static IEnumerable<object[]> Comparison_TestData()
@@ -118,19 +119,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Theory]
-        [MemberData(nameof(Comparison_TestData))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(Comparison_TestData))]
         public void CompareTo_ReturnsExpected(object version1Object, object version2Object, int expectedSign)
         {
             var version1 = (SimpleVersion)version1Object;
             var version2 = (SimpleVersion)version2Object;
 
-            Assert.Equal(expectedSign, Comparer<SimpleVersion>.Default.Compare(version1, version2));
-            Assert.Equal(expectedSign, Math.Sign(version1.CompareTo(version2)));
+            Assert.AreEqual(expectedSign, Comparer<SimpleVersion>.Default.Compare(version1, version2));
+            Assert.AreEqual(expectedSign, Math.Sign(version1.CompareTo(version2)));
         }
 
-        [Theory]
-        [MemberData(nameof(Comparison_TestData))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(Comparison_TestData))]
         public void ComparisonOperators_ReturnExpected(object version1Object, object version2Object, int expectedSign)
         {
             var version1 = (SimpleVersion)version1Object;
@@ -138,30 +139,30 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             if (expectedSign < 0)
             {
-                Assert.True(version1 < version2);
-                Assert.True(version1 <= version2);
-                Assert.False(version1 == version2);
-                Assert.False(version1 >= version2);
-                Assert.False(version1 > version2);
-                Assert.True(version1 != version2);
+                Assert.IsTrue(version1 < version2);
+                Assert.IsTrue(version1 <= version2);
+                Assert.IsFalse(version1 == version2);
+                Assert.IsFalse(version1 >= version2);
+                Assert.IsFalse(version1 > version2);
+                Assert.IsTrue(version1 != version2);
             }
             else if (expectedSign == 0)
             {
-                Assert.False(version1 < version2);
-                Assert.True(version1 <= version2);
-                Assert.True(version1 == version2);
-                Assert.True(version1 >= version2);
-                Assert.False(version1 > version2);
-                Assert.False(version1 != version2);
+                Assert.IsFalse(version1 < version2);
+                Assert.IsTrue(version1 <= version2);
+                Assert.IsTrue(version1 == version2);
+                Assert.IsTrue(version1 >= version2);
+                Assert.IsFalse(version1 > version2);
+                Assert.IsFalse(version1 != version2);
             }
             else
             {
-                Assert.False(version1 < version2);
-                Assert.False(version1 <= version2);
-                Assert.False(version1 == version2);
-                Assert.True(version1 >= version2);
-                Assert.True(version1 > version2);
-                Assert.True(version1 != version2);
+                Assert.IsFalse(version1 < version2);
+                Assert.IsFalse(version1 <= version2);
+                Assert.IsFalse(version1 == version2);
+                Assert.IsTrue(version1 >= version2);
+                Assert.IsTrue(version1 > version2);
+                Assert.IsTrue(version1 != version2);
             }
         }
 
@@ -187,24 +188,24 @@ namespace Microsoft.Build.UnitTests.Evaluation
             yield return new object[] { new SimpleVersion(2, 3, 4, 5), null, false };
         }
 
-        [Theory]
-        [MemberData(nameof(Equals_TestData))]
-        public static void Equals_Other_ReturnsExpected(object version1Object, object version2Object, bool expected)
+        [MSBuildTestMethod]
+        [DynamicData(nameof(Equals_TestData))]
+        public void Equals_Other_ReturnsExpected(object version1Object, object version2Object, bool expected)
         {
             var version1 = (SimpleVersion)version1Object;
 
             if (version2Object is SimpleVersion version2)
             {
-                Assert.Equal(expected, version1.Equals(version2));
-                Assert.Equal(expected, version1 == version2);
-                Assert.Equal(!expected, version1 != version2);
+                Assert.AreEqual(expected, version1.Equals(version2));
+                Assert.AreEqual(expected, version1 == version2);
+                Assert.AreEqual(!expected, version1 != version2);
             }
 
-            Assert.Equal(expected, version1.Equals(version2Object));
+            Assert.AreEqual(expected, version1.Equals(version2Object));
 
             if (version2Object != null)
             {
-                Assert.Equal(expected, version1Object.GetHashCode() == version2Object.GetHashCode());
+                Assert.AreEqual(expected, version1Object.GetHashCode() == version2Object.GetHashCode());
             }
         }
 
@@ -223,11 +224,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Theory]
-        [MemberData(nameof(Parse_Valid_TestData))]
-        public static void Parse_ValidInput_ReturnsExpected(string input, object expected)
+        [MSBuildTestMethod]
+        [DynamicData(nameof(Parse_Valid_TestData))]
+        public void Parse_ValidInput_ReturnsExpected(string input, object expected)
         {
-            Assert.Equal(expected, SimpleVersion.Parse(input));
+            Assert.AreEqual(expected, SimpleVersion.Parse(input));
         }
 
         public static IEnumerable<object[]> Parse_Invalid_TestData()
@@ -273,11 +274,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
             yield return new object[] { "vv1.2.3.4", typeof(FormatException) };
         }
 
-        [Theory]
-        [MemberData(nameof(Parse_Invalid_TestData))]
-        public static void Parse_InvalidInput_ThrowsException(string input, Type exceptionType)
+        [MSBuildTestMethod]
+        [DynamicData(nameof(Parse_Invalid_TestData))]
+        public void Parse_InvalidInput_ThrowsException(string input, Type exceptionType)
         {
-            Assert.Throws(exceptionType, () => SimpleVersion.Parse(input));
+            Should.Throw(() => SimpleVersion.Parse(input), exceptionType);
         }
 
         public static IEnumerable<object[]> ToString_TestData()
@@ -288,21 +289,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
             yield return new object[] { new SimpleVersion(1, 2, 3, 4), "1.2.3.4" };
         }
 
-        [Theory]
-        [MemberData(nameof(ToString_TestData))]
-        public static void ToString_Invoke_ReturnsExpected(object versionObject, string expected)
+        [MSBuildTestMethod]
+        [DynamicData(nameof(ToString_TestData))]
+        public void ToString_Invoke_ReturnsExpected(object versionObject, string expected)
         {
             var version = (SimpleVersion)versionObject;
 
-            Assert.Equal(expected, version.ToString());
+            Assert.AreEqual(expected, version.ToString());
         }
 
         private static void VerifyVersion(SimpleVersion version, int major, int minor, int build, int revision)
         {
-            Assert.Equal(major, version.Major);
-            Assert.Equal(minor, version.Minor);
-            Assert.Equal(build, version.Build);
-            Assert.Equal(revision, version.Revision);
+            Assert.AreEqual(major, version.Major);
+            Assert.AreEqual(minor, version.Minor);
+            Assert.AreEqual(build, version.Build);
+            Assert.AreEqual(revision, version.Revision);
         }
     }
 }

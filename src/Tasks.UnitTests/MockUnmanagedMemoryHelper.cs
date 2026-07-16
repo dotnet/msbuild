@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using Xunit;
 using Marshal = System.Runtime.InteropServices.Marshal;
 
 #nullable disable
@@ -65,7 +64,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="handle"></param>
         public void FreeHandle(IntPtr handle)
         {
-            Assert.True(_allocatedHandles.Exists(new Predicate<IntPtr>(
+            Assert.IsTrue(_allocatedHandles.Exists(new Predicate<IntPtr>(
                 delegate (IntPtr ptr) { return ptr == handle; })));
             Marshal.FreeHGlobal(handle);
             _allocatedHandles.Remove(handle);
@@ -87,7 +86,7 @@ namespace Microsoft.Build.UnitTests
         /// <param name="mainAllocation"></param>
         public void EnterSubAllocationScope(IntPtr mainAllocation)
         {
-            Assert.Equal(IntPtr.Zero, _mainAllocationHandle);
+            Assert.AreEqual(IntPtr.Zero, _mainAllocationHandle);
 
             _mainAllocationHandle = mainAllocation;
         }
@@ -97,7 +96,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public void ExitSubAllocationScope()
         {
-            Assert.NotEqual(IntPtr.Zero, _mainAllocationHandle);
+            Assert.AreNotEqual(IntPtr.Zero, _mainAllocationHandle);
 
             _mainAllocationHandle = IntPtr.Zero;
         }
@@ -107,7 +106,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public void AssertAllHandlesReleased()
         {
-            Assert.Empty(_allocatedHandles);
+            Assert.IsEmpty(_allocatedHandles);
         }
     }
 }

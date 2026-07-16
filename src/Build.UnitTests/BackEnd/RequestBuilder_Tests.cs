@@ -15,7 +15,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
 using Shouldly;
-using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
 #nullable disable
@@ -25,9 +24,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
     using System.Threading.Tasks;
     using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
+    [TestClass]
     public class RequestBuilder_Tests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
         private AutoResetEvent _newBuildRequestsEvent;
         private BuildRequestEntry _newBuildRequests_Entry;
         private FullyQualifiedBuildRequest[] _newBuildRequests_FQRequests;
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
 #pragma warning restore xUnit1013
 
-        public RequestBuilder_Tests(ITestOutputHelper output)
+        public RequestBuilder_Tests(TestContext output)
         {
             _output = output;
             _originalWorkingDirectory = Directory.GetCurrentDirectory();
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Directory.SetCurrentDirectory(_originalWorkingDirectory);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestSimpleBuildRequest()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -104,9 +104,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
 
                 WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
-                Assert.Equal(BuildRequestEntryState.Complete, entry.State);
-                Assert.Equal(entry, _buildRequestCompleted_Entry);
-                Assert.Equal(BuildResultCode.Success, _buildRequestCompleted_Entry.Result.OverallResult);
+                Assert.AreEqual(BuildRequestEntryState.Complete, entry.State);
+                Assert.AreEqual(entry, _buildRequestCompleted_Entry);
+                Assert.AreEqual(BuildResultCode.Success, _buildRequestCompleted_Entry.Result.OverallResult);
             }
             finally
             {
@@ -114,7 +114,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestSimpleBuildRequestCancelled()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -137,9 +137,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _requestBuilder.CancelRequest();
 
                 WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
-                Assert.Equal(BuildRequestEntryState.Complete, entry.State);
-                Assert.Equal(entry, _buildRequestCompleted_Entry);
-                Assert.Equal(BuildResultCode.Failure, _buildRequestCompleted_Entry.Result.OverallResult);
+                Assert.AreEqual(BuildRequestEntryState.Complete, entry.State);
+                Assert.AreEqual(entry, _buildRequestCompleted_Entry);
+                Assert.AreEqual(BuildResultCode.Failure, _buildRequestCompleted_Entry.Result.OverallResult);
             }
             finally
             {
@@ -147,7 +147,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestRequestWithReference()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
                 WaitForEvent(_newBuildRequestsEvent, "New Build Requests");
-                Assert.Equal(_newBuildRequests_Entry, entry);
+                Assert.AreEqual(_newBuildRequests_Entry, entry);
                 ObjectModelHelpers.AssertArrayContentsMatch(_newBuildRequests_FQRequests, newRequest);
 
                 BuildResult newResult = new BuildResult(_newBuildRequests_BuildRequests[0]);
@@ -176,9 +176,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _requestBuilder.ContinueRequest();
 
                 WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
-                Assert.Equal(BuildRequestEntryState.Complete, entry.State);
-                Assert.Equal(entry, _buildRequestCompleted_Entry);
-                Assert.Equal(BuildResultCode.Success, _buildRequestCompleted_Entry.Result.OverallResult);
+                Assert.AreEqual(BuildRequestEntryState.Complete, entry.State);
+                Assert.AreEqual(entry, _buildRequestCompleted_Entry);
+                Assert.AreEqual(BuildResultCode.Success, _buildRequestCompleted_Entry.Result.OverallResult);
             }
             finally
             {
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestRequestWithReferenceCancelled()
         {
             BuildRequestConfiguration configuration = CreateTestProject(1);
@@ -206,7 +206,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
                 WaitForEvent(_newBuildRequestsEvent, "New Build Requests");
-                Assert.Equal(_newBuildRequests_Entry, entry);
+                Assert.AreEqual(_newBuildRequests_Entry, entry);
                 ObjectModelHelpers.AssertArrayContentsMatch(_newBuildRequests_FQRequests, newRequest);
 
                 BuildResult newResult = new BuildResult(_newBuildRequests_BuildRequests[0]);
@@ -218,9 +218,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 _requestBuilder.CancelRequest();
 
                 WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
-                Assert.Equal(BuildRequestEntryState.Complete, entry.State);
-                Assert.Equal(entry, _buildRequestCompleted_Entry);
-                Assert.Equal(BuildResultCode.Failure, _buildRequestCompleted_Entry.Result.OverallResult);
+                Assert.AreEqual(BuildRequestEntryState.Complete, entry.State);
+                Assert.AreEqual(entry, _buildRequestCompleted_Entry);
+                Assert.AreEqual(BuildResultCode.Failure, _buildRequestCompleted_Entry.Result.OverallResult);
             }
             finally
             {
@@ -228,7 +228,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestMissingProjectFile()
         {
             TestTargetBuilder targetBuilder = (TestTargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
@@ -240,13 +240,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestEntry entry = new BuildRequestEntry(request, configuration, CreateStubTaskEnvironment());
             _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
             WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
-            Assert.Equal(BuildRequestEntryState.Complete, entry.State);
-            Assert.Equal(entry, _buildRequestCompleted_Entry);
-            Assert.Equal(BuildResultCode.Failure, _buildRequestCompleted_Entry.Result.OverallResult);
-            Assert.Equal(typeof(InvalidProjectFileException), _buildRequestCompleted_Entry.Result.Exception.GetType());
+            Assert.AreEqual(BuildRequestEntryState.Complete, entry.State);
+            Assert.AreEqual(entry, _buildRequestCompleted_Entry);
+            Assert.AreEqual(BuildResultCode.Failure, _buildRequestCompleted_Entry.Result.OverallResult);
+            Assert.AreEqual(typeof(InvalidProjectFileException), _buildRequestCompleted_Entry.Result.Exception.GetType());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RequestThreadProcEventsIncludeRequestContext()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -299,7 +299,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Directory.SetCurrentDirectory(_originalWorkingDirectory);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RequestThreadProcStopEventIsEmittedWhenBuildThrows()
         {
             using TestEnvironment env = TestEnvironment.Create(_output, ignoreBuildErrorFiles: true);
@@ -474,13 +474,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// so results are already accessible without transfer.
         /// See https://github.com/dotnet/msbuild/issues/13188
         /// </summary>
-        [Theory]
-        [InlineData(true, 1, 2, false)]                      // MT mode, results on different node → skip transfer (shared cache)
-        [InlineData(true, 1, 1, false)]                      // MT mode, results on same node → no transfer needed
-        [InlineData(true, Scheduler.InvalidNodeId, 2, false)]  // MT mode, results unset → no transfer needed
-        [InlineData(false, 1, 2, true)]                      // ST mode, results on different node → transfer needed
-        [InlineData(false, 1, 1, false)]                     // ST mode, results on same node → no transfer needed
-        [InlineData(false, Scheduler.InvalidNodeId, 2, false)] // ST mode, results unset → no transfer needed
+        [MSBuildTestMethod]
+        [DataRow(true, 1, 2, false)]                      // MT mode, results on different node → skip transfer (shared cache)
+        [DataRow(true, 1, 1, false)]                      // MT mode, results on same node → no transfer needed
+        [DataRow(true, Scheduler.InvalidNodeId, 2, false)]  // MT mode, results unset → no transfer needed
+        [DataRow(false, 1, 2, true)]                      // ST mode, results on different node → transfer needed
+        [DataRow(false, 1, 1, false)]                     // ST mode, results on same node → no transfer needed
+        [DataRow(false, Scheduler.InvalidNodeId, 2, false)] // ST mode, results unset → no transfer needed
         public void NeedsResultsTransfer_SkipsInMultiThreadedMode(
             bool isMultiThreaded, int resultsNodeId, int currentNodeId, bool expectedNeedsTransfer)
         {

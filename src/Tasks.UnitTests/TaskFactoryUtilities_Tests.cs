@@ -9,15 +9,15 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class TaskFactoryUtilities_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void GetTemporaryTaskAssemblyPath_ShouldReturnValidPath()
         {
             // Act
@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests
             assemblyPath.ShouldEndWith(".dll");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateLoadManifest_ShouldCreateFileWithDirectories()
         {
             using (var env = TestEnvironment.Create())
@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateAssemblyResolver_ShouldReturnValidHandler()
         {
             // Arrange

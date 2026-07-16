@@ -2,22 +2,22 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
-using Xunit;
 
 #nullable disable
 
-namespace Microsoft.Build.UnitTests.Framework
+namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Tests for LazyFormattedEventArgs
     /// </summary>
+    [TestClass]
     public class LazyFormattedEventArgs_Tests
     {
 #if FEATURE_CODETASKFACTORY
         /// <summary>
         /// Don't crash when task logs with too few format markers
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DoNotCrashOnInvalidFormatExpression()
         {
             string content = @"

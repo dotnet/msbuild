@@ -4,67 +4,67 @@
 using System;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class StringExtensions_Tests
     {
-        [Theory]
-        [InlineData("a", "a", "x", StringComparison.CurrentCulture, "x")]
-        [InlineData("ab", "ab", "x", StringComparison.CurrentCulture, "x")]
-        [InlineData("ab", "ab", "xyz", StringComparison.CurrentCulture, "xyz")]
+        [MSBuildTestMethod]
+        [DataRow("a", "a", "x", StringComparison.CurrentCulture, "x")]
+        [DataRow("ab", "ab", "x", StringComparison.CurrentCulture, "x")]
+        [DataRow("ab", "ab", "xyz", StringComparison.CurrentCulture, "xyz")]
 
-        [InlineData("ab12", "ab", "x", StringComparison.CurrentCulture, "x12")]
-        [InlineData("ab12", "ab", "xyz", StringComparison.CurrentCulture, "xyz12")]
-        [InlineData("a12", "a", "xyz", StringComparison.CurrentCulture, "xyz12")]
+        [DataRow("ab12", "ab", "x", StringComparison.CurrentCulture, "x12")]
+        [DataRow("ab12", "ab", "xyz", StringComparison.CurrentCulture, "xyz12")]
+        [DataRow("a12", "a", "xyz", StringComparison.CurrentCulture, "xyz12")]
 
-        [InlineData("12ab", "ab", "x", StringComparison.CurrentCulture, "12x")]
-        [InlineData("12ab", "ab", "xyz", StringComparison.CurrentCulture, "12xyz")]
-        [InlineData("12a", "a", "xyz", StringComparison.CurrentCulture, "12xyz")]
+        [DataRow("12ab", "ab", "x", StringComparison.CurrentCulture, "12x")]
+        [DataRow("12ab", "ab", "xyz", StringComparison.CurrentCulture, "12xyz")]
+        [DataRow("12a", "a", "xyz", StringComparison.CurrentCulture, "12xyz")]
 
-        [InlineData("12ab345ab56", "ab", "x", StringComparison.CurrentCulture, "12x345x56")]
-        [InlineData("12ab345ab56", "ab", "xyz", StringComparison.CurrentCulture, "12xyz345xyz56")]
+        [DataRow("12ab345ab56", "ab", "x", StringComparison.CurrentCulture, "12x345x56")]
+        [DataRow("12ab345ab56", "ab", "xyz", StringComparison.CurrentCulture, "12xyz345xyz56")]
 
-        [InlineData("ab", "ab", null, StringComparison.CurrentCulture, "")]
+        [DataRow("ab", "ab", null, StringComparison.CurrentCulture, "")]
 
-        [InlineData("ab12", "ab", null, StringComparison.CurrentCulture, "12")]
-        [InlineData("a12", "a", null, StringComparison.CurrentCulture, "12")]
+        [DataRow("ab12", "ab", null, StringComparison.CurrentCulture, "12")]
+        [DataRow("a12", "a", null, StringComparison.CurrentCulture, "12")]
 
-        [InlineData("12ab", "ab", null, StringComparison.CurrentCulture, "12")]
+        [DataRow("12ab", "ab", null, StringComparison.CurrentCulture, "12")]
 
-        [InlineData("12ab345ab56", "ab", null, StringComparison.CurrentCulture, "1234556")]
-        [InlineData("12ab345ab56", "ab", "", StringComparison.CurrentCulture, "1234556")]
+        [DataRow("12ab345ab56", "ab", null, StringComparison.CurrentCulture, "1234556")]
+        [DataRow("12ab345ab56", "ab", "", StringComparison.CurrentCulture, "1234556")]
 
-        [InlineData("aaa", "aa", "x", StringComparison.CurrentCulture, "xa")]
-        [InlineData("aaa", "aa", "a", StringComparison.CurrentCulture, "aa")]
+        [DataRow("aaa", "aa", "x", StringComparison.CurrentCulture, "xa")]
+        [DataRow("aaa", "aa", "a", StringComparison.CurrentCulture, "aa")]
 
-        [InlineData("a", "a", "a", StringComparison.CurrentCulture, "a")]
-        [InlineData("ab", "ab", "ab", StringComparison.CurrentCulture, "ab")]
+        [DataRow("a", "a", "a", StringComparison.CurrentCulture, "a")]
+        [DataRow("ab", "ab", "ab", StringComparison.CurrentCulture, "ab")]
 
-        [InlineData("abab", "ab", "", StringComparison.CurrentCulture, "")]
-        [InlineData("abab", "ab", "x", StringComparison.CurrentCulture, "xx")]
-        [InlineData("1abab2", "ab", "x", StringComparison.CurrentCulture, "1xx2")]
+        [DataRow("abab", "ab", "", StringComparison.CurrentCulture, "")]
+        [DataRow("abab", "ab", "x", StringComparison.CurrentCulture, "xx")]
+        [DataRow("1abab2", "ab", "x", StringComparison.CurrentCulture, "1xx2")]
 
-        [InlineData("12ab34", "ab", "abc", StringComparison.CurrentCulture, "12abc34")]
+        [DataRow("12ab34", "ab", "abc", StringComparison.CurrentCulture, "12abc34")]
 
-        [InlineData("", "ab", "abc", StringComparison.CurrentCulture, "")]
+        [DataRow("", "ab", "abc", StringComparison.CurrentCulture, "")]
 
-        [InlineData("abc", "x", "y", StringComparison.CurrentCulture, "abc")]
-        [InlineData("", "x", "y", StringComparison.CurrentCulture, "")]
+        [DataRow("abc", "x", "y", StringComparison.CurrentCulture, "abc")]
+        [DataRow("", "x", "y", StringComparison.CurrentCulture, "")]
 
-        [InlineData(@"$(MsBuildExtensionsPath)\build.props", "$(MSBuildExtensionsPath)", @"c:\build", StringComparison.OrdinalIgnoreCase, @"c:\build\build.props")]
+        [DataRow(@"$(MsBuildExtensionsPath)\build.props", "$(MSBuildExtensionsPath)", @"c:\build", StringComparison.OrdinalIgnoreCase, @"c:\build\build.props")]
         public void ReplaceWithStringComparerTest(string aString, string oldValue, string newValue, StringComparison stringComparison, string expectedReplace)
         {
             aString.Replace(oldValue, newValue, stringComparison).ShouldBe(expectedReplace);
         }
 
-        [Theory]
-        [InlineData(null, "ab", "x", StringComparison.CurrentCulture, typeof(ArgumentNullException))]
-        [InlineData("ab", null, "x", StringComparison.CurrentCulture, typeof(ArgumentNullException))]
-        [InlineData("ab", "", "x", StringComparison.CurrentCulture, typeof(ArgumentException))]
+        [MSBuildTestMethod]
+        [DataRow(null, "ab", "x", StringComparison.CurrentCulture, typeof(ArgumentNullException))]
+        [DataRow("ab", null, "x", StringComparison.CurrentCulture, typeof(ArgumentNullException))]
+        [DataRow("ab", "", "x", StringComparison.CurrentCulture, typeof(ArgumentException))]
         public void ReplaceWithStringComparerExceptionCases(string aString, string oldValue, string newValue, StringComparison stringComparison, Type expectedException)
         {
             Should.Throw(() => Build.Shared.StringExtensions.Replace(aString, oldValue, newValue, stringComparison), expectedException);

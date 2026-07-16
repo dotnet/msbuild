@@ -11,7 +11,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
@@ -19,13 +18,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// Tests that IMultiThreadableTask implementations always have a usable TaskEnvironment,
     /// even when explicitly instantiated or run in the out-of-proc task host.
     /// </summary>
+    [TestClass]
     public class TaskHost_MultiThreadableTask_Tests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
         private readonly TestEnvironment _env;
         private readonly string _testProjectsDir;
 
-        public TaskHost_MultiThreadableTask_Tests(ITestOutputHelper output)
+        public TaskHost_MultiThreadableTask_Tests(TestContext output)
         {
             _output = output;
             _env = TestEnvironment.Create(output);
@@ -42,7 +42,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// non-null default TaskEnvironment. This covers the scenario where someone
         /// derives from a built-in task and explicitly instantiates it.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExplicitlyInstantiated_InheritedTask_HasNonNullTaskEnvironment()
         {
             var task = new DerivedMakeDirTask();
@@ -57,7 +57,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// should be usable. The task accesses TaskEnvironment.ProjectDirectory in Execute() —
         /// without the default it would NRE.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InheritedTask_InTaskHost_HasUsableTaskEnvironment()
         {
             string projectContent = $"""
@@ -109,6 +109,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// Does NOT declare its own TaskEnvironment — it relies on the inherited default from MakeDir.
     /// Overrides Execute() to log TaskEnvironment.ProjectDirectory, proving the default works.
     /// </summary>
+    [TestClass]
     public class DerivedMakeDirTask : MakeDir
     {
         public override bool Execute()

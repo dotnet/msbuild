@@ -7,7 +7,6 @@ using System.Linq;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -17,11 +16,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectMetadataElement class
     /// </summary>
+    [TestClass]
     public class ProjectMetadataElement_Tests
     {
-        private readonly ITestOutputHelper _testOutput;
+        private readonly TestContext _testOutput;
 
-        public ProjectMetadataElement_Tests(ITestOutputHelper testOutput)
+        public ProjectMetadataElement_Tests(TestContext testOutput)
         {
             _testOutput = testOutput;
         }
@@ -29,23 +29,23 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read simple metadatum
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadMetadata()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
 
-            Assert.Equal("m", metadatum.Name);
-            Assert.Equal("m1", metadatum.Value);
-            Assert.Equal("c", metadatum.Condition);
+            Assert.AreEqual("m", metadatum.Name);
+            Assert.AreEqual("m1", metadatum.Value);
+            Assert.AreEqual("c", metadatum.Condition);
         }
 
         /// <summary>
         /// Read metadatum with invalid attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidAttribute()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -63,10 +63,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read metadatum with invalid name characters (but legal xml)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidName()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -82,15 +82,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             });
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i Include='i1' " + "\u03A3" + @"='v1' />
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <ItemDefinitionGroup>
                             <i " + "\u03A3" + @"='v1' />
@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadInvalidNameAsAttribute(string content)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             });
@@ -108,10 +108,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read metadatum with invalid built-in metadata name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidBuiltInName()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -127,15 +127,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             });
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i Include='i1' Filename='v1'/>
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <ItemDefinitionGroup>
                             <i Filename='v1'/>
@@ -144,7 +144,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadInvalidBuiltInNameAsAttribute(string content)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             });
@@ -153,10 +153,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read metadatum with invalid built-in element name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidBuiltInElementName()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -175,15 +175,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read metadatum with invalid built-in element name
         /// </summary>
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i Include='i1' PropertyGroup='v1' />
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <ItemDefinitionGroup>
                             <i PropertyGroup='v1' />
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ")]
         public void ReadInvalidBuiltInElementNameAsAttribute(string content)
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
             });
@@ -201,49 +201,49 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set metadatum value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValue()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
 
             metadatum.Value = "m1b";
-            Assert.Equal("m1b", metadatum.Value);
+            Assert.AreEqual("m1b", metadatum.Value);
         }
 
         /// <summary>
         /// Rename
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetName()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
 
             metadatum.Name = "m2";
-            Assert.Equal("m2", metadatum.Name);
-            Assert.True(metadatum.ContainingProject.HasUnsavedChanges);
+            Assert.AreEqual("m2", metadatum.Name);
+            Assert.IsTrue(metadatum.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Rename to same value should not mark dirty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetNameSame()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
             Helpers.ClearDirtyFlag(metadatum.ContainingProject);
 
             metadatum.Name = "m";
-            Assert.Equal("m", metadatum.Name);
-            Assert.False(metadatum.ContainingProject.HasUnsavedChanges);
+            Assert.AreEqual("m", metadatum.Name);
+            Assert.IsFalse(metadatum.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Rename to illegal name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetNameIllegal()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 ProjectMetadataElement metadatum = GetMetadataXml();
 
@@ -251,40 +251,40 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SetNameIllegalAsAttribute()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
             metadatum.ExpressedAsAttribute = true;
 
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 metadatum.Name = "Include";
             });
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SetExpressedAsAttributeIllegalName()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
             metadatum.Name = "Include";
 
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 metadatum.ExpressedAsAttribute = true;
             });
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i1 Include='i' />
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -301,17 +301,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Single(items);
+            Assert.ContainsSingle(items);
 
             var item = items.First();
 
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 item.AddMetadata("Include", "v1", true);
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AddMetadataAsAttributeToItemDefinitionIllegalName()
         {
             string project = @"
@@ -328,11 +328,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Single(itemDefinitions);
+            Assert.ContainsSingle(itemDefinitions);
 
             var itemDefinition = itemDefinitions.First();
 
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 itemDefinition.AddMetadata("Include", "v1", true);
             });
@@ -341,22 +341,22 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set metadatum value to empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetEmptyValue()
         {
             ProjectMetadataElement metadatum = GetMetadataXml();
 
             metadatum.Value = String.Empty;
-            Assert.Equal(String.Empty, metadatum.Value);
+            Assert.AreEqual(String.Empty, metadatum.Value);
         }
 
         /// <summary>
         /// Set metadatum value to null
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInvalidNullValue()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectMetadataElement metadatum = GetMetadataXml();
 
@@ -366,10 +366,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read a metadatum containing an expression like @(..) but whose parent is an ItemDefinitionGroup
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidItemExpressionInMetadata()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -387,7 +387,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read a metadatum containing an expression like @(..) but whose parent is NOT an ItemDefinitionGroup
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadValidItemExpressionInMetadata()
         {
             string content = @"
@@ -404,15 +404,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             using ProjectRootElementFromString projectRootElementFromString = new(content);
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i1 Include='i' m1='v1' />
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -429,16 +429,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Single(items);
-            Assert.Single(items[0].Metadata);
+            Assert.ContainsSingle(items);
+            Assert.ContainsSingle(items[0].Metadata);
 
             var metadata = items[0].Metadata.First();
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadMetadataAsAttributeOnItemDefinition()
         {
             string project = @"
@@ -454,24 +454,24 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Single(itemDefinitions);
-            Assert.Single(itemDefinitions[0].Metadata);
+            Assert.ContainsSingle(itemDefinitions);
+            Assert.ContainsSingle(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].Metadata.First();
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i1 Include='i' m1='&lt;&amp;>""' />
                         </ItemGroup>
                     </Project>
                 ")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -488,16 +488,16 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Single(items);
-            Assert.Single(items[0].Metadata);
+            Assert.ContainsSingle(items);
+            Assert.ContainsSingle(items[0].Metadata);
 
             var metadata = items[0].Metadata.First();
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal(@"<&>""", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual(@"<&>""", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadMetadataAsAttributeOnItemDefinitionWithSpecialCharacters()
         {
             var project = @"
@@ -513,17 +513,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Single(itemDefinitions);
-            Assert.Single(itemDefinitions[0].Metadata);
+            Assert.ContainsSingle(itemDefinitions);
+            Assert.ContainsSingle(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].Metadata.First();
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal(@"<&>""", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual(@"<&>""", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i1 Include=`i` m1=`v1` />
@@ -535,7 +535,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             <i1 Include=`i` m1=`v2` />
                         </ItemGroup>
                     </Project>")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -565,18 +565,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Single(items);
-            Assert.Single(items[0].Metadata);
+            Assert.ContainsSingle(items);
+            Assert.ContainsSingle(items[0].Metadata);
 
             var metadata = items[0].Metadata.First();
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
 
             metadata.Value = "v2";
 
-            Assert.True(project.IsDirty);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
 
             using StringWriter writer = new StringWriter();
             project.Save(writer);
@@ -588,7 +588,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateMetadataValueAsAttributeOnItemDefinition()
         {
             var projectContents = @"
@@ -608,18 +608,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Single(itemDefinitions);
-            Assert.Single(itemDefinitions[0].Metadata);
+            Assert.ContainsSingle(itemDefinitions);
+            Assert.ContainsSingle(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].Metadata.First();
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
 
             metadata.Value = "v2";
 
-            Assert.True(project.IsDirty);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
 
             using StringWriter writer = new StringWriter();
             project.Save(writer);
@@ -640,8 +640,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         //      &lt;&amp;>"
         //  instead of:
         //      &lt;&amp;&gt;&quot;
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i1 Include=`i` m1=`v1` />
@@ -653,7 +653,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             <i1 Include=`i` m1=`&lt;&amp;&gt;&quot;` />
                         </ItemGroup>
                     </Project>")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -682,18 +682,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Single(items);
-            Assert.Single(items[0].Metadata);
+            Assert.ContainsSingle(items);
+            Assert.ContainsSingle(items[0].Metadata);
 
             var metadata = items[0].Metadata.First();
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
 
             metadata.Value = @"<&>""";
 
-            Assert.True(project.IsDirty);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
 
             using StringWriter writer = new StringWriter();
             project.Save(writer);
@@ -705,7 +705,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateMetadataValueAsAttributeOnItemDefinitionWithSpecialCharacters()
         {
             var projectContents = @"
@@ -725,18 +725,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Single(itemDefinitions);
-            Assert.Single(itemDefinitions[0].Metadata);
+            Assert.ContainsSingle(itemDefinitions);
+            Assert.ContainsSingle(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].Metadata.First();
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
 
             metadata.Value = @"<&>""";
 
-            Assert.True(project.IsDirty);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
 
             using StringWriter writer = new StringWriter();
             project.Save(writer);
@@ -753,8 +753,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i1 Include='i'>
@@ -768,7 +768,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             <i1 Include=`i` m1=`v1` />
                         </ItemGroup>
                     </Project>")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i1 Include='i'><m1>v1</m1></i1>
@@ -780,7 +780,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             <i1 Include=`i` m1=`v1` />
                         </ItemGroup>
                     </Project>")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -811,18 +811,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Single(items);
-            Assert.Single(items[0].Metadata);
+            Assert.ContainsSingle(items);
+            Assert.ContainsSingle(items[0].Metadata);
 
             var metadata = items[0].Metadata.First();
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.False(metadata.ExpressedAsAttribute);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsFalse(metadata.ExpressedAsAttribute);
 
             metadata.ExpressedAsAttribute = true;
 
-            Assert.True(project.IsDirty);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
 
             using StringWriter writer = new StringWriter();
             project.Save(writer);
@@ -834,8 +834,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemDefinitionGroup>
                             <i1>
@@ -849,7 +849,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             <i1 m1=`v1` />
                         </ItemDefinitionGroup>
                     </Project>")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <ItemDefinitionGroup>
                             <i1><m1>v1</m1></i1>
@@ -874,18 +874,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Single(itemDefinitions);
-            Assert.Single(itemDefinitions[0].Metadata);
+            Assert.ContainsSingle(itemDefinitions);
+            Assert.ContainsSingle(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].Metadata.First();
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.False(metadata.ExpressedAsAttribute);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsFalse(metadata.ExpressedAsAttribute);
 
             metadata.ExpressedAsAttribute = true;
 
-            Assert.True(project.IsDirty);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
 
             using StringWriter writer = new StringWriter();
             project.Save(writer);
@@ -897,8 +897,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i1 Include='i' m1='v1' />
@@ -912,7 +912,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             </i1>
                         </ItemGroup>
                     </Project>")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -943,18 +943,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Single(items);
-            Assert.Single(items[0].Metadata);
+            Assert.ContainsSingle(items);
+            Assert.ContainsSingle(items[0].Metadata);
 
             var metadata = items[0].Metadata.First();
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
 
             metadata.ExpressedAsAttribute = false;
 
-            Assert.False(metadata.ExpressedAsAttribute);
-            Assert.True(project.IsDirty);
+            Assert.IsFalse(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
 
             using StringWriter writer = new StringWriter();
             project.Save(writer);
@@ -966,7 +966,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ChangeAttributeToMetadataOnItemDefinition()
         {
             var projectContents = @"
@@ -986,18 +986,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Single(itemDefinitions);
-            Assert.Single(itemDefinitions[0].Metadata);
+            Assert.ContainsSingle(itemDefinitions);
+            Assert.ContainsSingle(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].Metadata.First();
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
 
             metadata.ExpressedAsAttribute = false;
 
-            Assert.False(metadata.ExpressedAsAttribute);
-            Assert.True(project.IsDirty);
+            Assert.IsFalse(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
 
             using StringWriter writer = new StringWriter();
             project.Save(writer);
@@ -1016,8 +1016,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i1 Include='i' />
@@ -1029,7 +1029,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             <i1 Include=`i` m1=`v1` />
                         </ItemGroup>
                     </Project>")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -1058,15 +1058,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Single(items);
-            Assert.Empty(items[0].Metadata);
+            Assert.ContainsSingle(items);
+            Assert.IsEmpty(items[0].Metadata);
 
             var metadata = items[0].AddMetadata("m1", "v1", true);
 
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
-            Assert.True(project.IsDirty);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
 
             using StringWriter writer = new StringWriter();
             project.Save(writer);
@@ -1078,7 +1078,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AddMetadataAsAttributeToItemDefinition()
         {
             var projectContents = @"
@@ -1098,15 +1098,15 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Single(itemDefinitions);
-            Assert.Empty(itemDefinitions[0].Metadata);
+            Assert.ContainsSingle(itemDefinitions);
+            Assert.IsEmpty(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].AddMetadata("m1", "v1", true);
 
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
-            Assert.True(project.IsDirty);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
 
             using StringWriter writer = new StringWriter();
             project.Save(writer);
@@ -1123,8 +1123,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Theory]
-        [InlineData(@"
+        [MSBuildTestMethod]
+        [DataRow(@"
                     <Project>
                         <ItemGroup>
                             <i1 Include='i' />
@@ -1138,7 +1138,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                             </i1>
                         </ItemGroup>
                     </Project>")]
-        [InlineData(@"
+        [DataRow(@"
                     <Project>
                         <Target Name='t'>
                             <ItemGroup>
@@ -1169,22 +1169,22 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var items = Helpers.MakeList(itemGroup.Items);
 
-            Assert.Single(items);
-            Assert.Empty(items[0].Metadata);
+            Assert.ContainsSingle(items);
+            Assert.IsEmpty(items[0].Metadata);
 
             var metadata = items[0].AddMetadata("m1", "v1", true);
 
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
-            Assert.True(project.IsDirty);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
 
             metadata = items[0].AddMetadata("m2", "v2", false);
 
-            Assert.Equal("m2", metadata.Name);
-            Assert.Equal("v2", metadata.Value);
-            Assert.False(metadata.ExpressedAsAttribute);
-            Assert.True(project.IsDirty);
+            Assert.AreEqual("m2", metadata.Name);
+            Assert.AreEqual("v2", metadata.Value);
+            Assert.IsFalse(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
 
             using StringWriter writer = new StringWriter();
             project.Save(writer);
@@ -1196,7 +1196,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             VerifyAssertLineByLine(expected, actual);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AddMetadataToItemDefinitionAsAttributeAndAsElement()
         {
             var projectContents = @"
@@ -1216,22 +1216,22 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
             var itemDefinitions = Helpers.MakeList(itemDefinitionGroup.ItemDefinitions);
 
-            Assert.Single(itemDefinitions);
-            Assert.Empty(itemDefinitions[0].Metadata);
+            Assert.ContainsSingle(itemDefinitions);
+            Assert.IsEmpty(itemDefinitions[0].Metadata);
 
             var metadata = itemDefinitions[0].AddMetadata("m1", "v1", true);
 
-            Assert.Equal("m1", metadata.Name);
-            Assert.Equal("v1", metadata.Value);
-            Assert.True(metadata.ExpressedAsAttribute);
-            Assert.True(project.IsDirty);
+            Assert.AreEqual("m1", metadata.Name);
+            Assert.AreEqual("v1", metadata.Value);
+            Assert.IsTrue(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
 
             metadata = itemDefinitions[0].AddMetadata("m2", "v2", false);
 
-            Assert.Equal("m2", metadata.Name);
-            Assert.Equal("v2", metadata.Value);
-            Assert.False(metadata.ExpressedAsAttribute);
-            Assert.True(project.IsDirty);
+            Assert.AreEqual("m2", metadata.Name);
+            Assert.AreEqual("v2", metadata.Value);
+            Assert.IsFalse(metadata.ExpressedAsAttribute);
+            Assert.IsTrue(project.IsDirty);
 
             using StringWriter writer = new StringWriter();
             project.Save(writer);

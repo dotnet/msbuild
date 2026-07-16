@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections;
@@ -11,17 +11,17 @@ using Microsoft.VisualStudio.SolutionPersistence;
 using Microsoft.VisualStudio.SolutionPersistence.Model;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.Construction
 {
+    [TestClass]
     public class SolutionFile_NewParser_Tests
     {
-        public ITestOutputHelper TestOutputHelper { get; }
+        public TestContext TestOutputHelper { get; }
 
-        public SolutionFile_NewParser_Tests(ITestOutputHelper testOutputHelper)
+        public SolutionFile_NewParser_Tests(TestContext testOutputHelper)
         {
             TestOutputHelper = testOutputHelper;
         }
@@ -30,9 +30,9 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Tests to see that all the data/properties are correctly parsed out of a Venus
         /// project in a .SLN. This can be checked only here because of AspNetConfigurations protection level.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void ProjectWithWebsiteProperties(bool convertToSlnx)
         {
             string solutionFileContents =

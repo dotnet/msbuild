@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -9,17 +9,17 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public class Unzip_Tests
     {
         private readonly MockEngine _mockEngine = new MockEngine();
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanOverwriteReadOnlyFile()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanUnzip()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -105,7 +105,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanUnzip_ExplicitDirectoryEntries()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -178,12 +178,12 @@ namespace Microsoft.Build.Tasks.UnitTests
             return process.StandardOutput.ReadToEnd().Trim() != "0";
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LogsErrorIfReadOnlyFileCannotBeOverwitten()
         {
             if (!NotRunningAsRoot())
             {
-                Assert.Skip("root can write to read-only files");
+                Assert.Inconclusive("root can write to read-only files");
             }
 
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -212,7 +212,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LogsErrorIfSourceFileCannotBeOpened()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -235,7 +235,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LogsErrorIfSourceFileDoesNotExist()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -256,7 +256,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanUnzip_WithIncludeFilter()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -286,7 +286,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanUnzip_WithExcludeFilter()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -316,7 +316,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanUnzip_WithIncludeAndExcludeFilter()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -354,7 +354,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LogsErrorIfIncludeContainsInvalidPathCharacters()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -383,7 +383,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LogsErrorIfIncludeContainsPropertyReferences()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -412,7 +412,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LogsErrorIfExcludeContainsInvalidPathCharacters()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -441,7 +441,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LogsErrorIfExcludeContainsPropertyReferences()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())

@@ -12,7 +12,6 @@ using Microsoft.VisualStudio.SolutionPersistence;
 using Microsoft.VisualStudio.SolutionPersistence.Model;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -21,14 +20,15 @@ namespace Microsoft.Build.UnitTests.Construction
     /// <summary>
     /// Tests for the parts of SolutionFile that are surfaced as public API
     /// </summary>
+    [TestClass]
     public class SolutionFile_Tests
     {
         /// <summary>
         /// Test that a project with the C++ project guid and an extension of vcproj is seen as invalid.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void ParseSolution_VC(bool isOptInSlnParsingWithNewParser)
         {
             string solutionFileContents =
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests.Construction
             EndGlobalf
             """;
 
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser);
                 Assert.Fail("Should not get here");
@@ -65,10 +65,10 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test that a project with the C++ project guid and an arbitrary extension is seen as valid --
         /// we assume that all C++ projects except .vcproj are MSBuild format.
         /// </summary>
-        [Theory]
-        [InlineData(false, false)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
+        [MSBuildTestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
         public void ParseSolution_VC2(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
@@ -97,12 +97,12 @@ namespace Microsoft.Build.UnitTests.Construction
             SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
             string expectedProjectName = convertToSlnx ? "Project name" : "Project name.myvctype";
-            Assert.Equal(expectedProjectName, solution.ProjectsInOrder[0].ProjectName);
-            Assert.Equal(ConvertToUnixPathIfNeeded("Relative path\\to\\Project name.myvctype", convertToSlnx || isOptInSlnParsingWithNewParser), solution.ProjectsInOrder[0].RelativePath);
+            Assert.AreEqual(expectedProjectName, solution.ProjectsInOrder[0].ProjectName);
+            Assert.AreEqual(ConvertToUnixPathIfNeeded("Relative path\\to\\Project name.myvctype", convertToSlnx || isOptInSlnParsingWithNewParser), solution.ProjectsInOrder[0].RelativePath);
             if (!convertToSlnx)
             {
                 // When converting to SLNX, the project GUID is not preserved.
-                Assert.Equal("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
+                Assert.AreEqual("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
             }
         }
 
@@ -111,9 +111,9 @@ namespace Microsoft.Build.UnitTests.Construction
         // This is somewhat malformed, but with old parser we should still behave reasonably instead of crashing.
         // The new parser throws an exception.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void ParseSolution_EmptyProjectName(bool isOptInSlnParsingWithNewParser)
         {
             string solutionFileContents =
@@ -141,7 +141,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             if (isOptInSlnParsingWithNewParser)
             {
-                Assert.Throws<InvalidProjectFileException>(() =>
+                Assert.ThrowsExactly<InvalidProjectFileException>(() =>
                 {
                     SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser);
                 });
@@ -149,19 +149,19 @@ namespace Microsoft.Build.UnitTests.Construction
             else
             {
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser);
-                Assert.StartsWith("EmptyProjectName", solution.ProjectsInOrder[0].ProjectName);
-                Assert.Equal("src\\.proj", solution.ProjectsInOrder[0].RelativePath);
-                Assert.Equal("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
+                solution.ProjectsInOrder[0].ProjectName.ShouldStartWith("EmptyProjectName");
+                Assert.AreEqual("src\\.proj", solution.ProjectsInOrder[0].RelativePath);
+                Assert.AreEqual("{0ABED153-9451-483C-8140-9E8D7306B216}", solution.ProjectsInOrder[0].ProjectGuid);
             }
         }
 
         /// <summary>
         /// Tests the parsing of a very basic .SLN file with three independent projects.
         /// </summary>
-        [Theory]
-        [InlineData(false, false)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
+        [MSBuildTestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
         public void BasicSolution(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
@@ -201,30 +201,30 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
-            Assert.Equal(3, solution.ProjectsInOrder.Count);
+            Assert.AreEqual(3, solution.ProjectsInOrder.Count);
 
             // When converting to slnx, the order of the projects is not preserved.
             bool usesNewParser = convertToSlnx || isOptInSlnParsingWithNewParser;
             ProjectInSolution consoleApplication1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ConsoleApplication1");
-            Assert.Equal(ConvertToUnixPathIfNeeded("ConsoleApplication1\\ConsoleApplication1.vbproj", usesNewParser), consoleApplication1.RelativePath);
-            Assert.Empty(consoleApplication1.Dependencies);
-            Assert.Null(consoleApplication1.ParentProjectGuid);
+            Assert.AreEqual(ConvertToUnixPathIfNeeded("ConsoleApplication1\\ConsoleApplication1.vbproj", usesNewParser), consoleApplication1.RelativePath);
+            Assert.IsEmpty(consoleApplication1.Dependencies);
+            Assert.IsNull(consoleApplication1.ParentProjectGuid);
 
             ProjectInSolution vbClassLibrary = solution.ProjectsInOrder.First(p => p.ProjectName == "vbClassLibrary");
-            Assert.Equal(ConvertToUnixPathIfNeeded("vbClassLibrary\\vbClassLibrary.vbproj", usesNewParser), vbClassLibrary.RelativePath);
-            Assert.Empty(vbClassLibrary.Dependencies);
-            Assert.Null(vbClassLibrary.ParentProjectGuid);
+            Assert.AreEqual(ConvertToUnixPathIfNeeded("vbClassLibrary\\vbClassLibrary.vbproj", usesNewParser), vbClassLibrary.RelativePath);
+            Assert.IsEmpty(vbClassLibrary.Dependencies);
+            Assert.IsNull(vbClassLibrary.ParentProjectGuid);
 
             ProjectInSolution classLibrary1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
-            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj", usesNewParser), classLibrary1.RelativePath);
-            Assert.Empty(classLibrary1.Dependencies);
-            Assert.Null(classLibrary1.ParentProjectGuid);
+            Assert.AreEqual(ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj", usesNewParser), classLibrary1.RelativePath);
+            Assert.IsEmpty(classLibrary1.Dependencies);
+            Assert.IsNull(classLibrary1.ParentProjectGuid);
 
             if (!convertToSlnx)
             {
-                Assert.Equal("{AB3413A6-D689-486D-B7F0-A095371B3F13}", consoleApplication1.ProjectGuid);
-                Assert.Equal("{BA333A76-4511-47B8-8DF4-CA51C303AD0B}", vbClassLibrary.ProjectGuid);
-                Assert.Equal("{DEBCE986-61B9-435E-8018-44B9EF751655}", classLibrary1.ProjectGuid);
+                Assert.AreEqual("{AB3413A6-D689-486D-B7F0-A095371B3F13}", consoleApplication1.ProjectGuid);
+                Assert.AreEqual("{BA333A76-4511-47B8-8DF4-CA51C303AD0B}", vbClassLibrary.ProjectGuid);
+                Assert.AreEqual("{DEBCE986-61B9-435E-8018-44B9EF751655}", classLibrary1.ProjectGuid);
             }
         }
 
@@ -234,9 +234,9 @@ namespace Microsoft.Build.UnitTests.Construction
         /// For the new parser, solution folders are not included to ProjectsInOrder or ProjectsByGuid.
         /// See the test with the same name in SolutionFile_Tests_OldParser.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void SolutionFolders(bool convertToSlnx)
         {
             string solutionFileContents =
@@ -286,36 +286,36 @@ namespace Microsoft.Build.UnitTests.Construction
             bool isOptInSlnParsingWithNewParser = !convertToSlnx;
             SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
-            Assert.Equal(3, solution.ProjectsInOrder.Count);
+            Assert.AreEqual(3, solution.ProjectsInOrder.Count);
 
             bool usesNewParser = convertToSlnx || isOptInSlnParsingWithNewParser;
             var classLibrary1 = solution.ProjectsInOrder
                 .FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj", usesNewParser));
-            Assert.NotNull(classLibrary1);
-            Assert.Empty(classLibrary1.Dependencies);
-            Assert.Null(classLibrary1.ParentProjectGuid);
+            Assert.IsNotNull(classLibrary1);
+            Assert.IsEmpty(classLibrary1.Dependencies);
+            Assert.IsNull(classLibrary1.ParentProjectGuid);
 
             var myPhysicalFolderClassLibrary1 = solution.ProjectsInOrder
                 .FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("MyPhysicalFolder\\ClassLibrary1\\ClassLibrary1.csproj", usesNewParser));
-            Assert.NotNull(myPhysicalFolderClassLibrary1);
-            Assert.Empty(myPhysicalFolderClassLibrary1.Dependencies);
+            Assert.IsNotNull(myPhysicalFolderClassLibrary1);
+            Assert.IsEmpty(myPhysicalFolderClassLibrary1.Dependencies);
 
             var classLibrary2 = solution.ProjectsInOrder
                 .FirstOrDefault(p => p.RelativePath == ConvertToUnixPathIfNeeded("ClassLibrary2\\ClassLibrary2.csproj", usesNewParser));
-            Assert.NotNull(classLibrary2);
-            Assert.Empty(classLibrary2.Dependencies);
+            Assert.IsNotNull(classLibrary2);
+            Assert.IsEmpty(classLibrary2.Dependencies);
 
             // When converting to slnx, the guids are not preserved.
             if (!convertToSlnx)
             {
-                Assert.Equal("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", myPhysicalFolderClassLibrary1.ParentProjectGuid);
-                Assert.Equal("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}", classLibrary2.ParentProjectGuid);
+                Assert.AreEqual("{E0F97730-25D2-418A-A7BD-02CAFDC6E470}", myPhysicalFolderClassLibrary1.ParentProjectGuid);
+                Assert.AreEqual("{2AE8D6C4-FB43-430C-8AEB-15E5EEDAAE4B}", classLibrary2.ParentProjectGuid);
             }
             else
             {
                 // try at least assert not null
-                Assert.NotNull(myPhysicalFolderClassLibrary1.ParentProjectGuid);
-                Assert.NotNull(classLibrary2.ParentProjectGuid);
+                Assert.IsNotNull(myPhysicalFolderClassLibrary1.ParentProjectGuid);
+                Assert.IsNotNull(classLibrary2.ParentProjectGuid);
             }
         }
 
@@ -323,10 +323,10 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Verifies that hand-coded project-to-project dependencies listed in the .SLN file
         /// are correctly recognized by the solution parser.
         /// </summary>
-        [Theory]
-        [InlineData(false, false)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
+        [MSBuildTestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
         public void SolutionDependencies(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
@@ -373,37 +373,37 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
-            Assert.Equal(3, solution.ProjectsInOrder.Count);
+            Assert.AreEqual(3, solution.ProjectsInOrder.Count);
 
             var classLibrary1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
             var classLibrary2 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary2");
             var classLibrary3 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary3");
 
             bool usesNewParser = convertToSlnx || isOptInSlnParsingWithNewParser;
-            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj", usesNewParser), classLibrary1.RelativePath);
-            Assert.Single(classLibrary1.Dependencies);
-            Assert.Equal(classLibrary3.ProjectGuid, classLibrary1.Dependencies[0]);
-            Assert.Null(solution.ProjectsInOrder[0].ParentProjectGuid);
+            Assert.AreEqual(ConvertToUnixPathIfNeeded("ClassLibrary1\\ClassLibrary1.csproj", usesNewParser), classLibrary1.RelativePath);
+            Assert.ContainsSingle(classLibrary1.Dependencies);
+            Assert.AreEqual(classLibrary3.ProjectGuid, classLibrary1.Dependencies[0]);
+            Assert.IsNull(solution.ProjectsInOrder[0].ParentProjectGuid);
 
-            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary2\\ClassLibrary2.csproj", usesNewParser), classLibrary2.RelativePath);
-            Assert.Equal(2, classLibrary2.Dependencies.Count);
+            Assert.AreEqual(ConvertToUnixPathIfNeeded("ClassLibrary2\\ClassLibrary2.csproj", usesNewParser), classLibrary2.RelativePath);
+            Assert.AreEqual(2, classLibrary2.Dependencies.Count);
             // When converting to SLNX, the projects dependencies order is not preserved.
             Assert.Contains(classLibrary3.ProjectGuid, classLibrary2.Dependencies);
             Assert.Contains(classLibrary1.ProjectGuid, classLibrary2.Dependencies);
-            Assert.Null(solution.ProjectsInOrder[1].ParentProjectGuid);
+            Assert.IsNull(solution.ProjectsInOrder[1].ParentProjectGuid);
 
-            Assert.Equal(ConvertToUnixPathIfNeeded("ClassLibrary3\\ClassLibrary3.csproj", usesNewParser), solution.ProjectsInOrder[2].RelativePath);
-            Assert.Empty(solution.ProjectsInOrder[2].Dependencies);
-            Assert.Null(solution.ProjectsInOrder[2].ParentProjectGuid);
+            Assert.AreEqual(ConvertToUnixPathIfNeeded("ClassLibrary3\\ClassLibrary3.csproj", usesNewParser), solution.ProjectsInOrder[2].RelativePath);
+            Assert.IsEmpty(solution.ProjectsInOrder[2].Dependencies);
+            Assert.IsNull(solution.ProjectsInOrder[2].ParentProjectGuid);
         }
 
         /// <summary>
         /// Make sure the solution configurations get parsed correctly for a simple mixed C#/VC solution
         /// </summary>
-        [Theory]
-        [InlineData(false, false)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
+        [MSBuildTestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
         public void ParseSolutionConfigurations(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
@@ -456,7 +456,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
-            Assert.Equal(7, solution.SolutionConfigurations.Count);
+            Assert.AreEqual(7, solution.SolutionConfigurations.Count);
 
             List<string> configurationNames = new List<string>(6);
             foreach (SolutionConfigurationInSolution configuration in solution.SolutionConfigurations)
@@ -471,17 +471,17 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Contains("Release|Mixed Platforms", configurationNames);
             Assert.Contains("Release|Win32", configurationNames);
 
-            Assert.Equal("Debug", solution.GetDefaultConfigurationName()); // "Default solution configuration"
-            Assert.Equal("Mixed Platforms", solution.GetDefaultPlatformName()); // "Default solution platform"
+            Assert.AreEqual("Debug", solution.GetDefaultConfigurationName()); // "Default solution configuration"
+            Assert.AreEqual("Mixed Platforms", solution.GetDefaultPlatformName()); // "Default solution platform"
         }
 
         /// <summary>
         /// Make sure the solution configurations get parsed correctly for a simple C# application
         /// </summary>
-        [Theory]
-        [InlineData(false, false)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
+        [MSBuildTestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
         public void ParseSolutionConfigurationsNoMixedPlatform(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
@@ -519,7 +519,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             SolutionFile solution = ParseSolutionHelper(solutionFileContents, isOptInSlnParsingWithNewParser, convertToSlnx);
 
-            Assert.Equal(6, solution.SolutionConfigurations.Count);
+            Assert.AreEqual(6, solution.SolutionConfigurations.Count);
 
             List<string> configurationNames = new List<string>(6);
             foreach (SolutionConfigurationInSolution configuration in solution.SolutionConfigurations)
@@ -534,18 +534,18 @@ namespace Microsoft.Build.UnitTests.Construction
             Assert.Contains("Release|ARM", configurationNames);
             Assert.Contains("Release|x86", configurationNames);
 
-            Assert.Equal("Debug", solution.GetDefaultConfigurationName()); // "Default solution configuration"
-            Assert.Equal("Any CPU", solution.GetDefaultPlatformName()); // "Default solution platform"
+            Assert.AreEqual("Debug", solution.GetDefaultConfigurationName()); // "Default solution configuration"
+            Assert.AreEqual("Any CPU", solution.GetDefaultPlatformName()); // "Default solution platform"
         }
 
         /// <summary>
         /// Make sure the project configurations in solution configurations get parsed correctly
         /// for a simple mixed C#/VC solution
         /// </summary>
-        [Theory]
-        [InlineData(false, false)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
+        [MSBuildTestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
         public void ParseProjectConfigurationsInSolutionConfigurations1(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
@@ -598,51 +598,51 @@ namespace Microsoft.Build.UnitTests.Construction
             ProjectInSolution csharpProject = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
             ProjectInSolution vcProject = solution.ProjectsInOrder.First(p => p.ProjectName == "MainApp");
 
-            Assert.Equal(6, csharpProject.ProjectConfigurations.Count);
+            Assert.AreEqual(6, csharpProject.ProjectConfigurations.Count);
 
-            Assert.Equal("Debug|AnyCPU", csharpProject.ProjectConfigurations["Debug|Any CPU"].FullName);
-            Assert.True(csharpProject.ProjectConfigurations["Debug|Any CPU"].IncludeInBuild);
+            Assert.AreEqual("Debug|AnyCPU", csharpProject.ProjectConfigurations["Debug|Any CPU"].FullName);
+            Assert.IsTrue(csharpProject.ProjectConfigurations["Debug|Any CPU"].IncludeInBuild);
 
-            Assert.Equal("Release|AnyCPU", csharpProject.ProjectConfigurations["Debug|Mixed Platforms"].FullName);
-            Assert.True(csharpProject.ProjectConfigurations["Debug|Mixed Platforms"].IncludeInBuild);
+            Assert.AreEqual("Release|AnyCPU", csharpProject.ProjectConfigurations["Debug|Mixed Platforms"].FullName);
+            Assert.IsTrue(csharpProject.ProjectConfigurations["Debug|Mixed Platforms"].IncludeInBuild);
 
-            Assert.Equal("Debug|AnyCPU", csharpProject.ProjectConfigurations["Debug|Win32"].FullName);
-            Assert.False(csharpProject.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
+            Assert.AreEqual("Debug|AnyCPU", csharpProject.ProjectConfigurations["Debug|Win32"].FullName);
+            Assert.IsFalse(csharpProject.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
 
-            Assert.Equal("Release|AnyCPU", csharpProject.ProjectConfigurations["Release|Any CPU"].FullName);
-            Assert.True(csharpProject.ProjectConfigurations["Release|Any CPU"].IncludeInBuild);
+            Assert.AreEqual("Release|AnyCPU", csharpProject.ProjectConfigurations["Release|Any CPU"].FullName);
+            Assert.IsTrue(csharpProject.ProjectConfigurations["Release|Any CPU"].IncludeInBuild);
 
-            Assert.Equal("Release|AnyCPU", csharpProject.ProjectConfigurations["Release|Mixed Platforms"].FullName);
-            Assert.True(csharpProject.ProjectConfigurations["Release|Mixed Platforms"].IncludeInBuild);
+            Assert.AreEqual("Release|AnyCPU", csharpProject.ProjectConfigurations["Release|Mixed Platforms"].FullName);
+            Assert.IsTrue(csharpProject.ProjectConfigurations["Release|Mixed Platforms"].IncludeInBuild);
 
-            Assert.Equal("Release|AnyCPU", csharpProject.ProjectConfigurations["Release|Win32"].FullName);
-            Assert.False(csharpProject.ProjectConfigurations["Release|Win32"].IncludeInBuild);
+            Assert.AreEqual("Release|AnyCPU", csharpProject.ProjectConfigurations["Release|Win32"].FullName);
+            Assert.IsFalse(csharpProject.ProjectConfigurations["Release|Win32"].IncludeInBuild);
 
-            Assert.Equal(6, vcProject.ProjectConfigurations.Count);
+            Assert.AreEqual(6, vcProject.ProjectConfigurations.Count);
 
-            Assert.Equal("Debug|Win32", vcProject.ProjectConfigurations["Debug|Any CPU"].FullName);
-            Assert.False(vcProject.ProjectConfigurations["Debug|Any CPU"].IncludeInBuild);
+            Assert.AreEqual("Debug|Win32", vcProject.ProjectConfigurations["Debug|Any CPU"].FullName);
+            Assert.IsFalse(vcProject.ProjectConfigurations["Debug|Any CPU"].IncludeInBuild);
 
-            Assert.Equal("Debug|Win32", vcProject.ProjectConfigurations["Debug|Mixed Platforms"].FullName);
-            Assert.True(vcProject.ProjectConfigurations["Debug|Mixed Platforms"].IncludeInBuild);
+            Assert.AreEqual("Debug|Win32", vcProject.ProjectConfigurations["Debug|Mixed Platforms"].FullName);
+            Assert.IsTrue(vcProject.ProjectConfigurations["Debug|Mixed Platforms"].IncludeInBuild);
 
-            Assert.Equal("Debug|Win32", vcProject.ProjectConfigurations["Debug|Win32"].FullName);
-            Assert.True(vcProject.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
+            Assert.AreEqual("Debug|Win32", vcProject.ProjectConfigurations["Debug|Win32"].FullName);
+            Assert.IsTrue(vcProject.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
 
-            Assert.Equal("Release|Win32", vcProject.ProjectConfigurations["Release|Any CPU"].FullName);
-            Assert.False(vcProject.ProjectConfigurations["Release|Any CPU"].IncludeInBuild);
+            Assert.AreEqual("Release|Win32", vcProject.ProjectConfigurations["Release|Any CPU"].FullName);
+            Assert.IsFalse(vcProject.ProjectConfigurations["Release|Any CPU"].IncludeInBuild);
 
-            Assert.Equal("Release|Win32", vcProject.ProjectConfigurations["Release|Mixed Platforms"].FullName);
-            Assert.True(vcProject.ProjectConfigurations["Release|Mixed Platforms"].IncludeInBuild);
+            Assert.AreEqual("Release|Win32", vcProject.ProjectConfigurations["Release|Mixed Platforms"].FullName);
+            Assert.IsTrue(vcProject.ProjectConfigurations["Release|Mixed Platforms"].IncludeInBuild);
 
-            Assert.Equal("Release|Win32", vcProject.ProjectConfigurations["Release|Win32"].FullName);
-            Assert.True(vcProject.ProjectConfigurations["Release|Win32"].IncludeInBuild);
+            Assert.AreEqual("Release|Win32", vcProject.ProjectConfigurations["Release|Win32"].FullName);
+            Assert.IsTrue(vcProject.ProjectConfigurations["Release|Win32"].IncludeInBuild);
         }
 
-        [Theory]
-        [InlineData(false, false)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
+        [MSBuildTestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
         public void ParseProjectConfigurationsInSolutionConfigurations2(bool isOptInSlnParsingWithNewParser, bool convertToSlnx)
         {
             string solutionFileContents =
@@ -684,21 +684,21 @@ namespace Microsoft.Build.UnitTests.Construction
             ProjectInSolution winFormsApp1 = solution.ProjectsInOrder.First(p => p.ProjectName == "WinFormsApp1");
             ProjectInSolution classLibrary1 = solution.ProjectsInOrder.First(p => p.ProjectName == "ClassLibrary1");
 
-            Assert.Equal(2, winFormsApp1.ProjectConfigurations.Count);
+            Assert.AreEqual(2, winFormsApp1.ProjectConfigurations.Count);
 
-            Assert.Equal("Debug|x86", winFormsApp1.ProjectConfigurations["Debug|Win32"].FullName);
-            Assert.True(winFormsApp1.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
+            Assert.AreEqual("Debug|x86", winFormsApp1.ProjectConfigurations["Debug|Win32"].FullName);
+            Assert.IsTrue(winFormsApp1.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
 
-            Assert.Equal("Release|x86", winFormsApp1.ProjectConfigurations["Release|Win32"].FullName);
-            Assert.True(winFormsApp1.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
+            Assert.AreEqual("Release|x86", winFormsApp1.ProjectConfigurations["Release|Win32"].FullName);
+            Assert.IsTrue(winFormsApp1.ProjectConfigurations["Debug|Win32"].IncludeInBuild);
 
-            Assert.Equal(2, classLibrary1.ProjectConfigurations.Count);
+            Assert.AreEqual(2, classLibrary1.ProjectConfigurations.Count);
 
-            Assert.Equal("Debug|AnyCPU", classLibrary1.ProjectConfigurations["Debug|Any CPU"].FullName);
-            Assert.False(classLibrary1.ProjectConfigurations["Debug|Any CPU"].IncludeInBuild);
+            Assert.AreEqual("Debug|AnyCPU", classLibrary1.ProjectConfigurations["Debug|Any CPU"].FullName);
+            Assert.IsFalse(classLibrary1.ProjectConfigurations["Debug|Any CPU"].IncludeInBuild);
 
-            Assert.Equal("Release|AnyCPU", classLibrary1.ProjectConfigurations["Release|Any CPU"].FullName);
-            Assert.False(classLibrary1.ProjectConfigurations["Release|Any CPU"].IncludeInBuild);
+            Assert.AreEqual("Release|AnyCPU", classLibrary1.ProjectConfigurations["Release|Any CPU"].FullName);
+            Assert.IsFalse(classLibrary1.ProjectConfigurations["Release|Any CPU"].IncludeInBuild);
         }
 
         /// <summary>

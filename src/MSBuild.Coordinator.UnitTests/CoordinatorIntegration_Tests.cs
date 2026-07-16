@@ -5,14 +5,14 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 using Constants = Microsoft.Build.Framework.Coordinator.Constants;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
-public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
+[TestClass]
+public class CoordinatorIntegration_Tests(TestContext outputHelper)
 {
-    [Fact]
+    [MSBuildTestMethod]
     public async Task ParallelBuilds_BothSucceedWithCoordinator()
     {
         // Enable the coordinator with an isolated pipe name and a small budget.
@@ -62,7 +62,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         buildOutput2.ShouldContain("Hello from project2.proj");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task SingleBuild_CoordinatorCapsMaxNodeCount()
     {
         // Budget of 2, but the build requests 16.
@@ -92,7 +92,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         buildOutput.ShouldContain("MaxNodeCount=2");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task NestedBuild_InheritsCoordinatorGrant_DoesNotDeadlock()
     {
         using var helper = new CoordinatorTestHelper(outputHelper, nodeBudget: 1);
@@ -129,7 +129,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         buildOutput.ShouldNotContain("Failed to connect to the build coordinator");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task NuGetStaticGraphRestore_InheritsCoordinatorGrant_DoesNotDeadlock()
     {
         using var helper = new CoordinatorTestHelper(outputHelper, nodeBudget: 1);
@@ -174,7 +174,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
 
         private readonly string _debugLogPath;
 
-        public CoordinatorTestHelper(ITestOutputHelper outputHelper, int? nodeBudget = null)
+        public CoordinatorTestHelper(TestContext outputHelper, int? nodeBudget = null)
         {
             TestEnvironment = TestEnvironment.Create(outputHelper);
 

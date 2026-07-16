@@ -4,18 +4,18 @@
 using System;
 using System.IO;
 using Microsoft.Build.Shared.LanguageParser;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class StreamMappedString_Tests
     {
         /// <summary>
         /// Test for a string that has ANSI but non-ascii characters.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_ForceANSIWorks_RelatedTo172107()
         {
             // Can't embed the 'Ã' directly because the string is Unicode already and the Unicode<-->ANSI transform
@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests
             s.GetAt(11);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_BackingUpMoreThanOnePageWorks()
         {
             Stream stream = StreamHelpers.StringToStream("A" + new String('b', StreamMappedString.DefaultPageSize * 4));
@@ -42,10 +42,10 @@ namespace Microsoft.Build.UnitTests
             s.GetAt(StreamMappedString.DefaultPageSize * 4);
 
             // ...now get the first character.
-            Assert.Equal('A', s.GetAt(0));
+            Assert.AreEqual('A', s.GetAt(0));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_RetrievingFromLastPageWorks()
         {
             Stream stream = StreamHelpers.StringToStream("A" + new String('b', StreamMappedString.DefaultPageSize));
@@ -55,68 +55,68 @@ namespace Microsoft.Build.UnitTests
             s.GetAt(StreamMappedString.DefaultPageSize);
 
             // ...now get the first character (which should be saved on lastPage).
-            Assert.Equal('A', s.GetAt(0));
+            Assert.AreEqual('A', s.GetAt(0));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_LastCharacterShouldBeNewLine()
         {
             Stream stream = StreamHelpers.StringToStream("A");
             StreamMappedString s = new StreamMappedString(stream, false);
 
             // Get the last character (which should be the appended newLine).
-            Assert.Equal('\xd', s.GetAt(1));
+            Assert.AreEqual('\xd', s.GetAt(1));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_1AShouldBeStripped()
         {
             Stream stream = StreamHelpers.StringToStream("x\x1Ay");
             StreamMappedString s = new StreamMappedString(stream, false);
 
             // Get the last character (which should be 'y' and not 0x1A).
-            Assert.Equal('y', s.GetAt(1));
+            Assert.AreEqual('y', s.GetAt(1));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_MultiplePagesOf1AShouldBeStripped()
         {
             Stream stream = StreamHelpers.StringToStream(new String('\x1a', StreamMappedString.DefaultPageSize * 2) + "x");
             StreamMappedString s = new StreamMappedString(stream, false);
 
             // Get the last character (which should be 'x' and not 0x1A).
-            Assert.Equal('x', s.GetAt(0));
+            Assert.AreEqual('x', s.GetAt(0));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_NewLineGetsAppendedAcrossPageBoundaries()
         {
             Stream stream = StreamHelpers.StringToStream(new String('x', StreamMappedString.DefaultPageSize));
             StreamMappedString s = new StreamMappedString(stream, false);
 
             // Get the last character (which should be '\xd').
-            Assert.Equal('\xd', s.GetAt(StreamMappedString.DefaultPageSize));
+            Assert.AreEqual('\xd', s.GetAt(StreamMappedString.DefaultPageSize));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_SubstringWorks()
         {
             Stream stream = StreamHelpers.StringToStream("abcdefg");
             StreamMappedString s = new StreamMappedString(stream, false);
 
-            Assert.Equal("bcd", s.Substring(1, 3));
+            Assert.AreEqual("bcd", s.Substring(1, 3));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_SubstringWorksWithPageSizeOne()
         {
             Stream stream = StreamHelpers.StringToStream("abcdefg");
             StreamMappedString s = new StreamMappedString(stream, false, /* pageSize */ 1);
 
-            Assert.Equal("bcd", s.Substring(1, 3));
+            Assert.AreEqual("bcd", s.Substring(1, 3));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_SubstringWorksFromPriorPage()
         {
             Stream stream = StreamHelpers.StringToStream("abcxdef");
@@ -126,21 +126,21 @@ namespace Microsoft.Build.UnitTests
             s.GetAt(7);
 
             // And then extract a string from the beginning page.
-            Assert.Equal("abcxdef", s.Substring(0, 7));
+            Assert.AreEqual("abcxdef", s.Substring(0, 7));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_SubstringReadPastEndThrowsException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
             {
                 Stream stream = StreamHelpers.StringToStream("abcdefg");
                 StreamMappedString s = new StreamMappedString(stream, false);
 
-                Assert.Equal(String.Empty, s.Substring(1, 30));
+                Assert.AreEqual(String.Empty, s.Substring(1, 30));
             });
         }
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_SubstringOnLastPageWorks()
         {
             Stream stream = StreamHelpers.StringToStream("abcdefg" + new String('x', StreamMappedString.DefaultPageSize));
@@ -150,20 +150,20 @@ namespace Microsoft.Build.UnitTests
             s.GetAt(StreamMappedString.DefaultPageSize);
 
             // Get a string from the firstPage
-            Assert.Equal("abc", s.Substring(0, 3));
+            Assert.AreEqual("abc", s.Substring(0, 3));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_UnicodeIsDetected()
         {
             Stream stream = StreamHelpers.StringToStream("\u00C3ngelo's Steak House", System.Text.Encoding.UTF32);
             StreamMappedString s = new StreamMappedString(stream, false);
 
             // This won't read correctly with ANSI encoding.
-            Assert.Equal('\u00C3', s.GetAt(0));
+            Assert.AreEqual('\u00C3', s.GetAt(0));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_ReadingCharactersForwardOnlyShouldCauseNoAdditionalResets()
         {
             RestartCountingStream stream = new RestartCountingStream(StreamHelpers.StringToStream("abcdefg"));
@@ -177,20 +177,20 @@ namespace Microsoft.Build.UnitTests
             s.GetAt(4);
 
             // There should be exactly one reset for this.
-            Assert.Equal(0, stream.ResetCount);
+            Assert.AreEqual(0, stream.ResetCount);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_IsPastEndWorks()
         {
             RestartCountingStream stream = new RestartCountingStream(StreamHelpers.StringToStream("a"));
             StreamMappedString s = new StreamMappedString(stream, false);
 
             // There's only one character, so IsPastEnd(2) should be true.
-            Assert.True(s.IsPastEnd(2)); // <-- 2 required because of extra \xd added.
+            Assert.IsTrue(s.IsPastEnd(2)); // <-- 2 required because of extra \xd added.
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_MinimizePagesAllocated()
         {
             Stream stream = StreamHelpers.StringToStream("a" + new String('x', StreamMappedString.DefaultPageSize * 2));
@@ -202,23 +202,23 @@ namespace Microsoft.Build.UnitTests
             s.GetAt(StreamMappedString.DefaultPageSize * 2);
 
             // Even though three pages were read, only two allocations should have occurred.
-            Assert.Equal(2, s.PagesAllocated);
+            Assert.AreEqual(2, s.PagesAllocated);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_1DNotAppendedIfAlreadyThere()
         {
             RestartCountingStream stream = new RestartCountingStream(StreamHelpers.StringToStream("\xd"));
             StreamMappedString s = new StreamMappedString(stream, false);
 
             // There's only one \x1d so IsPastEnd(1) should be true.
-            Assert.True(s.IsPastEnd(1));
+            Assert.IsTrue(s.IsPastEnd(1));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Codereview_RequestPageWellPastEnd()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
             {
                 Stream stream = StreamHelpers.StringToStream("x");
                 StreamMappedString s = new StreamMappedString(stream, false);
@@ -228,10 +228,10 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_FirstCharacterOnPagePastEndDoesntExist()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
             {
                 Stream stream = StreamHelpers.StringToStream("abc");
                 StreamMappedString s = new StreamMappedString(stream, false, 256);
@@ -240,10 +240,10 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress_Mutation_RequestPageWellPastEnd()
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() =>
+            Assert.ThrowsExactly<ArgumentOutOfRangeException>(() =>
             {
                 Stream stream = StreamHelpers.StringToStream(new String('x', StreamMappedString.DefaultPageSize * 2));
                 StreamMappedString s = new StreamMappedString(stream, false);

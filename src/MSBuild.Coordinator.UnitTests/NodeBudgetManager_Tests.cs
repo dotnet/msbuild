@@ -3,22 +3,22 @@
 
 using System.Collections.Immutable;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
+[TestClass]
 public class NodeBudgetManager_Tests
 {
     private static BuildGrant NewGrant(int processId, int requestedNodes)
         => new(Guid.NewGuid(), processId, requestedNodes);
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Constructor_BudgetLessThanOne_Throws()
     {
         Should.Throw<ArgumentOutOfRangeException>(() => new NodeBudgetManager(0));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TryGrant_SingleBuild_GrantsUpToRequestedNodes()
     {
         NodeBudgetManager manager = new(totalBudget: 16);
@@ -32,7 +32,7 @@ public class NodeBudgetManager_Tests
         manager.ActiveBuildCount.ShouldBe(1);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TryGrant_SingleBuild_RequestLessThanBudget_GrantsOnlyRequested()
     {
         NodeBudgetManager manager = new(totalBudget: 16);
@@ -44,7 +44,7 @@ public class NodeBudgetManager_Tests
         manager.AvailableNodes.ShouldBe(12);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TryGrant_BudgetExhausted_QueuesBuilds()
     {
         NodeBudgetManager manager = new(totalBudget: 4);
@@ -60,7 +60,7 @@ public class NodeBudgetManager_Tests
         manager.WaitingBuildCount.ShouldBe(1);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TryGrant_FairShare_DividesBudgetAmongContenders()
     {
         // Budget of 16. First build takes 8. Second arrives with 1 waiting.
@@ -85,7 +85,7 @@ public class NodeBudgetManager_Tests
         grant2.GrantedNodes.ShouldBe(8);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TryGrant_FairShare_WithWaitingBuilds_NewArrivalGetsShare()
     {
         // Budget of 8. Exhaust it, queue two builds, release all.
@@ -110,7 +110,7 @@ public class NodeBudgetManager_Tests
         manager.AllocatedNodes.ShouldBe(8);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TryGrant_MinimumGrantIsOne()
     {
         // Budget of 1. One build active, one queued. Release active.
@@ -127,7 +127,7 @@ public class NodeBudgetManager_Tests
         grant2.GrantedNodes.ShouldBe(1);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Release_ActiveGrant_FreesNodes()
     {
         NodeBudgetManager manager = new(totalBudget: 16);
@@ -141,7 +141,7 @@ public class NodeBudgetManager_Tests
         grant.GrantedNodes.ShouldBe(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Release_WaitingGrant_RemovesFromQueue()
     {
         NodeBudgetManager manager = new(totalBudget: 4);
@@ -158,7 +158,7 @@ public class NodeBudgetManager_Tests
         manager.AllocatedNodes.ShouldBe(4); // active grant unchanged
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Release_NestedGrant_DoesNotReturnRootBudget()
     {
         NodeBudgetManager manager = new(totalBudget: 4);
@@ -181,7 +181,7 @@ public class NodeBudgetManager_Tests
         manager.WaitingBuildCount.ShouldBe(1);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TryGrant_NestedGrant_DoesNotConsumeBudget()
     {
         NodeBudgetManager manager = new(totalBudget: 4);
@@ -200,7 +200,7 @@ public class NodeBudgetManager_Tests
         manager.AvailableNodes.ShouldBe(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Release_DrainsWaitQueue_InFIFOOrder()
     {
         NodeBudgetManager manager = new(totalBudget: 8);
@@ -218,7 +218,7 @@ public class NodeBudgetManager_Tests
         newlyGranted[1].ShouldBeSameAs(waiter2);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Release_DrainsWaitQueue_StopsWhenBudgetExhausted()
     {
         NodeBudgetManager manager = new(totalBudget: 2);
@@ -242,7 +242,7 @@ public class NodeBudgetManager_Tests
         manager.AllocatedNodes.ShouldBe(2);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void MultipleBuilds_FairShare_AccountingStaysConsistent()
     {
         NodeBudgetManager manager = new(totalBudget: 16);

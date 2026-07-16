@@ -6,7 +6,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #pragma warning disable 0219
 
@@ -14,9 +13,10 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class EventArgsFormattingTests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void NoLineInfoFormatEventMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests
 
         // Valid forms for line/col number patterns:
         // (line) or (line-line) or (line,col) or (line,col-col) or (line,col,line,col)
-        [Fact]
+        [MSBuildTestMethod]
         public void LineNumberRange()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests
             s.ShouldBe("source.cs(1-2): CS error 312: Missing ;");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ColumnNumberRange()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests
             s.ShouldBe("source.cs : CS error 312: Missing ;");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LineAndColumnNumberRange()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests
             s.ShouldBe("source.cs(1,3,2,4): CS error 312: Missing ;");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LineAndColumnNumberRange2()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests
             s.ShouldBe("source.cs(1,3-4): CS error 312: Missing ;");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LineAndColumnNumberRange3()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests
             s.ShouldBe("source.cs(1-2,3): CS error 312: Missing ;");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LineAndColumnNumberRange4()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests
             s.ShouldBe("source.cs(1-2): CS error 312: Missing ;");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void LineAndColumnNumberRange5()
         {
             string s = EventArgsFormatting.FormatEventMessage("error", "CS",
@@ -83,7 +83,7 @@ namespace Microsoft.Build.UnitTests
             s.ShouldBe("source.cs(1,2): CS error 312: Missing ;");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicFormatEventMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
@@ -92,7 +92,7 @@ namespace Microsoft.Build.UnitTests
             s.ShouldBe("source.cs(42): CS error 312: Missing ;");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CarriageReturnInMessageIsUnchanged()
         {
             BuildErrorEventArgs error = new BuildErrorEventArgs("CS", "312", "source.cs", 42, 0, 0, 0, "message\r Hello", "help", "sender");
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests
             warningString.ShouldBe("source.cs(42): CS warning 312: message\r Hello");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExactLocationFormatEventMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
@@ -115,7 +115,7 @@ namespace Microsoft.Build.UnitTests
             s.ShouldBe("source.cs(233,4,236,8): CS error 312: Missing ;");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NullMessage()
         {
             // Testing the method in Shared.EventArgsFormatting directly
@@ -127,7 +127,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Mainline test FormatEventMessage(BuildErrorEvent) 's common case
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FormatEventMessageOnBEEA()
         {
             MyLogger l = new MyLogger();
@@ -141,7 +141,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Mainline test FormatEventMessage(BuildWarningEvent) 's common case
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FormatEventMessageOnBWEA()
         {
             MyLogger l = new MyLogger();
@@ -155,7 +155,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check null handling
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FormatEventMessageOnNullBEEA()
         {
             Should.Throw<ArgumentNullException>(() =>
@@ -168,7 +168,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check null handling
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FormatEventMessageOnNullBWEA()
         {
             Should.Throw<ArgumentNullException>(() =>

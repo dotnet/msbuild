@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using Microsoft.Build.Evaluation;
-using Xunit;
 
 #nullable disable
 
@@ -13,6 +12,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Test the NuGet.props import functionality in Microsoft.Common.props.
     /// </summary>
+    [TestClass]
     public sealed class NuGetPropsImportTests : IDisposable
     {
         private const string NuGetPropsContent = @"
@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Ensures that if a NuGet.props exists, it will be imported.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportNuGetPropsWhenExists()
         {
             var projectRelativePath = Path.Combine("src", "foo1", "foo1.csproj");
@@ -53,13 +53,13 @@ namespace Microsoft.Build.UnitTests
 
             Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(projectRelativePath);
 
-            Assert.Equal("true", project.GetPropertyValue("NuGetPropsIsImported"), StringComparer.OrdinalIgnoreCase);
+            Assert.AreEqual("true", project.GetPropertyValue("NuGetPropsIsImported"), StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
         /// Ensures that if the NuGet.props does not exists no exception will be produced.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportNuGetPropsWhenDoesNotExists()
         {
             var projectRelativePath = Path.Combine("src", "foo1", "foo1.csproj");
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests
 
             Project project = ObjectModelHelpers.LoadProjectFileInTempProjectDirectory(projectRelativePath);
 
-            Assert.Empty(project.GetPropertyValue("NuGetPropsIsImported"));
+            Assert.IsEmpty(project.GetPropertyValue("NuGetPropsIsImported"));
         }
     }
 }

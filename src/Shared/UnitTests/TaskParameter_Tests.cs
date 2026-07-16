@@ -13,7 +13,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.BackEnd;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 using ProjectItemInstanceTaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 
@@ -25,42 +24,43 @@ namespace Microsoft.Build.UnitTests
     /// Class to specifically test the TaskParameter class, particularly its serialization
     /// of various types of parameters.
     /// </summary>
+    [TestClass]
     public class TaskParameter_Tests
     {
         /// <summary>
         /// Verifies that construction and serialization with a null parameter is OK.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NullParameter()
         {
             TaskParameter t = new TaskParameter(null);
 
-            Assert.Null(t.WrappedParameter);
-            Assert.Equal(TaskParameterType.Null, t.ParameterType);
+            Assert.IsNull(t.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.Null, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Null(t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.Null, t2.ParameterType);
+            Assert.IsNull(t2.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.Null, t2.ParameterType);
         }
 
-        [Theory]
-        [InlineData(typeof(bool), (int)TypeCode.Boolean, "True")]
-        [InlineData(typeof(byte), (int)TypeCode.Byte, "127")]
-        [InlineData(typeof(sbyte), (int)TypeCode.SByte, "-127")]
-        [InlineData(typeof(double), (int)TypeCode.Double, "3.14")]
-        [InlineData(typeof(float), (int)TypeCode.Single, "3.14")]
-        [InlineData(typeof(short), (int)TypeCode.Int16, "-20000")]
-        [InlineData(typeof(ushort), (int)TypeCode.UInt16, "30000")]
-        [InlineData(typeof(int), (int)TypeCode.Int32, "-1")]
-        [InlineData(typeof(uint), (int)TypeCode.UInt32, "1")]
-        [InlineData(typeof(long), (int)TypeCode.Int64, "-1000000000000")]
-        [InlineData(typeof(ulong), (int)TypeCode.UInt64, "1000000000000")]
-        [InlineData(typeof(decimal), (int)TypeCode.Decimal, "29.99")]
-        [InlineData(typeof(char), (int)TypeCode.Char, "q")]
-        [InlineData(typeof(string), (int)TypeCode.String, "foo")]
-        [InlineData(typeof(DateTime), (int)TypeCode.DateTime, "1/1/2000 12:12:12")]
+        [MSBuildTestMethod]
+        [DataRow(typeof(bool), (int)TypeCode.Boolean, "True")]
+        [DataRow(typeof(byte), (int)TypeCode.Byte, "127")]
+        [DataRow(typeof(sbyte), (int)TypeCode.SByte, "-127")]
+        [DataRow(typeof(double), (int)TypeCode.Double, "3.14")]
+        [DataRow(typeof(float), (int)TypeCode.Single, "3.14")]
+        [DataRow(typeof(short), (int)TypeCode.Int16, "-20000")]
+        [DataRow(typeof(ushort), (int)TypeCode.UInt16, "30000")]
+        [DataRow(typeof(int), (int)TypeCode.Int32, "-1")]
+        [DataRow(typeof(uint), (int)TypeCode.UInt32, "1")]
+        [DataRow(typeof(long), (int)TypeCode.Int64, "-1000000000000")]
+        [DataRow(typeof(ulong), (int)TypeCode.UInt64, "1000000000000")]
+        [DataRow(typeof(decimal), (int)TypeCode.Decimal, "29.99")]
+        [DataRow(typeof(char), (int)TypeCode.Char, "q")]
+        [DataRow(typeof(string), (int)TypeCode.String, "foo")]
+        [DataRow(typeof(DateTime), (int)TypeCode.DateTime, "1/1/2000 12:12:12")]
         public void PrimitiveParameter(Type type, int expectedTypeCodeAsInt, string testValueAsString)
         {
             TypeCode expectedTypeCode = (TypeCode)expectedTypeCodeAsInt;
@@ -68,34 +68,34 @@ namespace Microsoft.Build.UnitTests
             object value = Convert.ChangeType(testValueAsString, type, CultureInfo.InvariantCulture);
             TaskParameter t = new TaskParameter(value);
 
-            Assert.Equal(value, t.WrappedParameter);
-            Assert.Equal(TaskParameterType.PrimitiveType, t.ParameterType);
-            Assert.Equal(expectedTypeCode, t.ParameterTypeCode);
+            Assert.AreEqual(value, t.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.PrimitiveType, t.ParameterType);
+            Assert.AreEqual(expectedTypeCode, t.ParameterTypeCode);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(value, t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.PrimitiveType, t2.ParameterType);
-            Assert.Equal(expectedTypeCode, t2.ParameterTypeCode);
+            Assert.AreEqual(value, t2.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.PrimitiveType, t2.ParameterType);
+            Assert.AreEqual(expectedTypeCode, t2.ParameterTypeCode);
         }
 
-        [Theory]
-        [InlineData(typeof(bool), (int)TypeCode.Boolean, "True;False;True")]
-        [InlineData(typeof(byte), (int)TypeCode.Byte, "127;100;0")]
-        [InlineData(typeof(sbyte), (int)TypeCode.SByte, "-127;-126;12")]
-        [InlineData(typeof(double), (int)TypeCode.Double, "3.14;3.15")]
-        [InlineData(typeof(float), (int)TypeCode.Single, "3.14;3.15")]
-        [InlineData(typeof(short), (int)TypeCode.Int16, "-20000;0;-1")]
-        [InlineData(typeof(ushort), (int)TypeCode.UInt16, "30000;20000;10")]
-        [InlineData(typeof(int), (int)TypeCode.Int32, "-1;-2")]
-        [InlineData(typeof(uint), (int)TypeCode.UInt32, "1;5;6")]
-        [InlineData(typeof(long), (int)TypeCode.Int64, "-1000000000000;0")]
-        [InlineData(typeof(ulong), (int)TypeCode.UInt64, "1000000000000;0")]
-        [InlineData(typeof(decimal), (int)TypeCode.Decimal, "29.99;0.88")]
-        [InlineData(typeof(char), (int)TypeCode.Char, "q;r;c")]
-        [InlineData(typeof(string), (int)TypeCode.String, "foo;bar")]
-        [InlineData(typeof(DateTime), (int)TypeCode.DateTime, "1/1/2000 12:12:12;2/2/2000 13:13:13")]
+        [MSBuildTestMethod]
+        [DataRow(typeof(bool), (int)TypeCode.Boolean, "True;False;True")]
+        [DataRow(typeof(byte), (int)TypeCode.Byte, "127;100;0")]
+        [DataRow(typeof(sbyte), (int)TypeCode.SByte, "-127;-126;12")]
+        [DataRow(typeof(double), (int)TypeCode.Double, "3.14;3.15")]
+        [DataRow(typeof(float), (int)TypeCode.Single, "3.14;3.15")]
+        [DataRow(typeof(short), (int)TypeCode.Int16, "-20000;0;-1")]
+        [DataRow(typeof(ushort), (int)TypeCode.UInt16, "30000;20000;10")]
+        [DataRow(typeof(int), (int)TypeCode.Int32, "-1;-2")]
+        [DataRow(typeof(uint), (int)TypeCode.UInt32, "1;5;6")]
+        [DataRow(typeof(long), (int)TypeCode.Int64, "-1000000000000;0")]
+        [DataRow(typeof(ulong), (int)TypeCode.UInt64, "1000000000000;0")]
+        [DataRow(typeof(decimal), (int)TypeCode.Decimal, "29.99;0.88")]
+        [DataRow(typeof(char), (int)TypeCode.Char, "q;r;c")]
+        [DataRow(typeof(string), (int)TypeCode.String, "foo;bar")]
+        [DataRow(typeof(DateTime), (int)TypeCode.DateTime, "1/1/2000 12:12:12;2/2/2000 13:13:13")]
         public void PrimitiveArrayParameter(Type type, int expectedTypeCodeAsInt, string testValueAsString)
         {
             TypeCode expectedTypeCode = (TypeCode)expectedTypeCodeAsInt;
@@ -110,36 +110,36 @@ namespace Microsoft.Build.UnitTests
 
             TaskParameter t = new TaskParameter(array);
 
-            Assert.Equal(array, t.WrappedParameter);
-            Assert.Equal(TaskParameterType.PrimitiveTypeArray, t.ParameterType);
-            Assert.Equal(expectedTypeCode, t.ParameterTypeCode);
+            CollectionAssert.AreEqual((System.Collections.ICollection)array, (System.Collections.ICollection)t.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.PrimitiveTypeArray, t.ParameterType);
+            Assert.AreEqual(expectedTypeCode, t.ParameterTypeCode);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(array, t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.PrimitiveTypeArray, t2.ParameterType);
-            Assert.Equal(expectedTypeCode, t2.ParameterTypeCode);
+            CollectionAssert.AreEqual((System.Collections.ICollection)array, (System.Collections.ICollection)t2.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.PrimitiveTypeArray, t2.ParameterType);
+            Assert.AreEqual(expectedTypeCode, t2.ParameterTypeCode);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ValueTypeParameter()
         {
             TaskBuilderTestTask.CustomStruct value = new TaskBuilderTestTask.CustomStruct(3.14);
             TaskParameter t = new TaskParameter(value);
 
-            Assert.Equal(value, t.WrappedParameter);
-            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+            Assert.AreEqual(value, t.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.ValueType, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             // Custom IConvertible structs are deserialized into strings.
-            Assert.Equal(value.ToString(CultureInfo.InvariantCulture), t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+            Assert.AreEqual(value.ToString(CultureInfo.InvariantCulture), t2.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.ValueType, t2.ParameterType);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ValueTypeArrayParameter()
         {
             TaskBuilderTestTask.CustomStruct[] value = new TaskBuilderTestTask.CustomStruct[]
@@ -149,20 +149,20 @@ namespace Microsoft.Build.UnitTests
             };
             TaskParameter t = new TaskParameter(value);
 
-            Assert.Equal(value, t.WrappedParameter);
-            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
+            CollectionAssert.AreEqual((System.Collections.ICollection)value, (System.Collections.ICollection)t.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.ValueTypeArray, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             // Custom IConvertible structs are deserialized into strings.
-            Assert.True(t2.WrappedParameter is string[]);
-            Assert.Equal(TaskParameterType.ValueTypeArray, t2.ParameterType);
+            Assert.IsTrue(t2.WrappedParameter is string[]);
+            Assert.AreEqual(TaskParameterType.ValueTypeArray, t2.ParameterType);
 
             string[] stringArray = (string[])t2.WrappedParameter;
-            Assert.Equal(2, stringArray.Length);
-            Assert.Equal(value[0].ToString(CultureInfo.InvariantCulture), stringArray[0]);
-            Assert.Equal(value[1].ToString(CultureInfo.InvariantCulture), stringArray[1]);
+            Assert.AreEqual(2, stringArray.Length);
+            Assert.AreEqual(value[0].ToString(CultureInfo.InvariantCulture), stringArray[0]);
+            Assert.AreEqual(value[1].ToString(CultureInfo.InvariantCulture), stringArray[1]);
         }
 
         /// <summary>
@@ -171,39 +171,39 @@ namespace Microsoft.Build.UnitTests
         /// it always gets serialized, and the old code threw InvalidCastException because AbsolutePath
         /// is not IConvertible. See https://github.com/dotnet/msbuild/pull/13016.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DefaultAbsolutePathParameter()
         {
             TaskParameter t = new TaskParameter(default(AbsolutePath));
 
-            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ValueType, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             // A default AbsolutePath has a null Value and serializes to the empty string.
-            Assert.Equal(string.Empty, t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+            Assert.AreEqual(string.Empty, t2.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.ValueType, t2.ParameterType);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AbsolutePathParameter()
         {
             string path = Path.Combine(Path.GetTempPath(), "TaskParameterTests_file.txt");
             AbsolutePath value = new AbsolutePath(path);
             TaskParameter t = new TaskParameter(value);
 
-            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ValueType, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             // Path types are serialized using the same canonical conversion as the in-process engine.
-            Assert.Equal(value.Value, t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+            Assert.AreEqual(value.Value, t2.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.ValueType, t2.ParameterType);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AbsolutePathArrayParameter()
         {
             AbsolutePath[] value = new AbsolutePath[]
@@ -213,48 +213,48 @@ namespace Microsoft.Build.UnitTests
             };
             TaskParameter t = new TaskParameter(value);
 
-            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ValueTypeArray, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            string[] stringArray = Assert.IsType<string[]>(t2.WrappedParameter);
-            Assert.Equal(value[0].Value, stringArray[0]);
-            Assert.Equal(value[1].Value, stringArray[1]);
+            string[] stringArray = Assert.IsExactInstanceOfType<string[]>(t2.WrappedParameter);
+            Assert.AreEqual(value[0].Value, stringArray[0]);
+            Assert.AreEqual(value[1].Value, stringArray[1]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FileInfoParameter()
         {
             FileInfo value = new FileInfo(Path.Combine(Path.GetTempPath(), "TaskParameterTests_file.txt"));
             TaskParameter t = new TaskParameter(value);
 
-            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ValueType, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
             // FileInfo is serialized as its full path, matching ValueTypeParser/the in-process engine.
-            Assert.Equal(value.FullName, t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+            Assert.AreEqual(value.FullName, t2.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.ValueType, t2.ParameterType);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DirectoryInfoParameter()
         {
             DirectoryInfo value = new DirectoryInfo(Path.Combine(Path.GetTempPath(), "TaskParameterTests_dir"));
             TaskParameter t = new TaskParameter(value);
 
-            Assert.Equal(TaskParameterType.ValueType, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ValueType, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(value.FullName, t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.ValueType, t2.ParameterType);
+            Assert.AreEqual(value.FullName, t2.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.ValueType, t2.ParameterType);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FileInfoArrayParameter()
         {
             FileInfo[] value = new FileInfo[]
@@ -264,17 +264,17 @@ namespace Microsoft.Build.UnitTests
             };
             TaskParameter t = new TaskParameter(value);
 
-            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ValueTypeArray, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            string[] stringArray = Assert.IsType<string[]>(t2.WrappedParameter);
-            Assert.Equal(value[0].FullName, stringArray[0]);
-            Assert.Equal(value[1].FullName, stringArray[1]);
+            string[] stringArray = Assert.IsExactInstanceOfType<string[]>(t2.WrappedParameter);
+            Assert.AreEqual(value[0].FullName, stringArray[0]);
+            Assert.AreEqual(value[1].FullName, stringArray[1]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DirectoryInfoArrayParameter()
         {
             DirectoryInfo[] value = new DirectoryInfo[]
@@ -284,14 +284,14 @@ namespace Microsoft.Build.UnitTests
             };
             TaskParameter t = new TaskParameter(value);
 
-            Assert.Equal(TaskParameterType.ValueTypeArray, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ValueTypeArray, t.ParameterType);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            string[] stringArray = Assert.IsType<string[]>(t2.WrappedParameter);
-            Assert.Equal(value[0].FullName, stringArray[0]);
-            Assert.Equal(value[1].FullName, stringArray[1]);
+            string[] stringArray = Assert.IsExactInstanceOfType<string[]>(t2.WrappedParameter);
+            Assert.AreEqual(value[0].FullName, stringArray[0]);
+            Assert.AreEqual(value[1].FullName, stringArray[1]);
         }
 
         private enum TestEnumForParameter
@@ -300,51 +300,51 @@ namespace Microsoft.Build.UnitTests
             SomethingElse
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EnumParameter()
         {
             TaskParameter t = new TaskParameter(TestEnumForParameter.SomethingElse);
 
-            Assert.Equal("SomethingElse", t.WrappedParameter);
-            Assert.Equal(TaskParameterType.PrimitiveType, t.ParameterType);
-            Assert.Equal(TypeCode.String, t.ParameterTypeCode);
+            Assert.AreEqual("SomethingElse", t.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.PrimitiveType, t.ParameterType);
+            Assert.AreEqual(TypeCode.String, t.ParameterTypeCode);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal("SomethingElse", t2.WrappedParameter);
-            Assert.Equal(TaskParameterType.PrimitiveType, t2.ParameterType);
-            Assert.Equal(TypeCode.String, t2.ParameterTypeCode);
+            Assert.AreEqual("SomethingElse", t2.WrappedParameter);
+            Assert.AreEqual(TaskParameterType.PrimitiveType, t2.ParameterType);
+            Assert.AreEqual(TypeCode.String, t2.ParameterTypeCode);
         }
 
         /// <summary>
         /// Verifies that construction and serialization with an ITaskItem parameter is OK.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ITaskItemParameter()
         {
             TaskParameter t = new TaskParameter(new TaskItem("foo"));
 
-            Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t.ParameterType);
 
             ITaskItem foo = t.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo);
-            Assert.Equal("foo", foo.ItemSpec);
+            Assert.IsNotNull(foo);
+            Assert.AreEqual("foo", foo.ItemSpec);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t2.ParameterType);
 
             ITaskItem foo2 = t2.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo2);
-            Assert.Equal("foo", foo2.ItemSpec);
+            Assert.IsNotNull(foo2);
+            Assert.AreEqual("foo", foo2.ItemSpec);
         }
 
         /// <summary>
         /// Verifies that construction and serialization with an ITaskItem parameter that has custom metadata is OK.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ITaskItemParameterWithMetadata()
         {
             TaskItem baseItem = new TaskItem("foo");
@@ -353,147 +353,147 @@ namespace Microsoft.Build.UnitTests
 
             TaskParameter t = new TaskParameter(baseItem);
 
-            Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t.ParameterType);
 
             ITaskItem foo = t.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo);
-            Assert.Equal("foo", foo.ItemSpec);
-            Assert.Equal("a1", foo.GetMetadata("a"));
-            Assert.Equal("b1", foo.GetMetadata("b"));
+            Assert.IsNotNull(foo);
+            Assert.AreEqual("foo", foo.ItemSpec);
+            Assert.AreEqual("a1", foo.GetMetadata("a"));
+            Assert.AreEqual("b1", foo.GetMetadata("b"));
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t2.ParameterType);
 
             ITaskItem foo2 = t2.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo2);
-            Assert.Equal("foo", foo2.ItemSpec);
-            Assert.Equal("a1", foo2.GetMetadata("a"));
-            Assert.Equal("b1", foo2.GetMetadata("b"));
+            Assert.IsNotNull(foo2);
+            Assert.AreEqual("foo", foo2.ItemSpec);
+            Assert.AreEqual("a1", foo2.GetMetadata("a"));
+            Assert.AreEqual("b1", foo2.GetMetadata("b"));
         }
 
         /// <summary>
         /// Verifies that construction and serialization with a parameter that is an array of ITaskItems is OK.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ITaskItemArrayParameter()
         {
             TaskParameter t = new TaskParameter(new ITaskItem[] { new TaskItem("foo"), new TaskItem("bar") });
 
-            Assert.Equal(TaskParameterType.ITaskItemArray, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItemArray, t.ParameterType);
 
             ITaskItem[] wrappedParameter = t.WrappedParameter as ITaskItem[];
-            Assert.NotNull(wrappedParameter);
-            Assert.Equal(2, wrappedParameter.Length);
-            Assert.Equal("foo", wrappedParameter[0].ItemSpec);
-            Assert.Equal("bar", wrappedParameter[1].ItemSpec);
+            Assert.IsNotNull(wrappedParameter);
+            Assert.AreEqual(2, wrappedParameter.Length);
+            Assert.AreEqual("foo", wrappedParameter[0].ItemSpec);
+            Assert.AreEqual("bar", wrappedParameter[1].ItemSpec);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.ITaskItemArray, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItemArray, t.ParameterType);
 
             ITaskItem[] wrappedParameter2 = t.WrappedParameter as ITaskItem[];
-            Assert.NotNull(wrappedParameter2);
-            Assert.Equal(2, wrappedParameter2.Length);
-            Assert.Equal("foo", wrappedParameter2[0].ItemSpec);
-            Assert.Equal("bar", wrappedParameter2[1].ItemSpec);
+            Assert.IsNotNull(wrappedParameter2);
+            Assert.AreEqual(2, wrappedParameter2.Length);
+            Assert.AreEqual("foo", wrappedParameter2[0].ItemSpec);
+            Assert.AreEqual("bar", wrappedParameter2[1].ItemSpec);
         }
 
         /// <summary>
         /// Verifies that construction and serialization with a parameter that is an ITaskItem with an
         /// itemspec containing escapable characters translates the escaping correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ITaskItemParameter_EscapedItemSpec()
         {
             TaskParameter t = new TaskParameter(new TaskItem("foo%3bbar"));
 
-            Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t.ParameterType);
 
             ITaskItem foo = t.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo);
-            Assert.Equal("foo;bar", foo.ItemSpec);
+            Assert.IsNotNull(foo);
+            Assert.AreEqual("foo;bar", foo.ItemSpec);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t2.ParameterType);
 
             ITaskItem foo2 = t2.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo2);
-            Assert.Equal("foo;bar", foo2.ItemSpec);
+            Assert.IsNotNull(foo2);
+            Assert.AreEqual("foo;bar", foo2.ItemSpec);
         }
 
         /// <summary>
         /// Verifies that construction and serialization with a parameter that is an ITaskItem with an
         /// itemspec containing doubly-escaped characters translates the escaping correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ITaskItemParameter_DoubleEscapedItemSpec()
         {
             TaskParameter t = new TaskParameter(new TaskItem("foo%253bbar"));
 
-            Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t.ParameterType);
 
             ITaskItem foo = t.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo);
-            Assert.Equal("foo%3bbar", foo.ItemSpec);
+            Assert.IsNotNull(foo);
+            Assert.AreEqual("foo%3bbar", foo.ItemSpec);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t2.ParameterType);
 
             ITaskItem foo2 = t2.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo2);
-            Assert.Equal("foo%3bbar", foo2.ItemSpec);
+            Assert.IsNotNull(foo2);
+            Assert.AreEqual("foo%3bbar", foo2.ItemSpec);
 
             TaskParameter t3 = new TaskParameter(t2.WrappedParameter);
 
             ((ITranslatable)t3).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t4 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.ITaskItem, t4.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t4.ParameterType);
 
             ITaskItem foo4 = t4.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo4);
-            Assert.Equal("foo%3bbar", foo4.ItemSpec);
+            Assert.IsNotNull(foo4);
+            Assert.AreEqual("foo%3bbar", foo4.ItemSpec);
         }
 
         /// <summary>
         /// Verifies that construction and serialization with a parameter that is an ITaskItem with an
         /// itemspec containing the non-escaped forms of escapable characters translates the escaping correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ITaskItemParameter_EscapableNotEscapedItemSpec()
         {
             TaskParameter t = new TaskParameter(new TaskItem("foo;bar"));
 
-            Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t.ParameterType);
 
             ITaskItem2 foo = t.WrappedParameter as ITaskItem2;
-            Assert.NotNull(foo);
-            Assert.Equal("foo;bar", foo.ItemSpec);
-            Assert.Equal("foo;bar", foo.EvaluatedIncludeEscaped);
+            Assert.IsNotNull(foo);
+            Assert.AreEqual("foo;bar", foo.ItemSpec);
+            Assert.AreEqual("foo;bar", foo.EvaluatedIncludeEscaped);
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t2.ParameterType);
 
             ITaskItem2 foo2 = t2.WrappedParameter as ITaskItem2;
-            Assert.NotNull(foo2);
-            Assert.Equal("foo;bar", foo2.ItemSpec);
-            Assert.Equal("foo;bar", foo2.EvaluatedIncludeEscaped);
+            Assert.IsNotNull(foo2);
+            Assert.AreEqual("foo;bar", foo2.ItemSpec);
+            Assert.AreEqual("foo;bar", foo2.EvaluatedIncludeEscaped);
         }
 
         /// <summary>
         /// Verifies that construction and serialization with a parameter that is an ITaskItem with
         /// metadata containing escapable characters translates the escaping correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ITaskItemParameter_EscapedMetadata()
         {
             IDictionary metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -502,31 +502,31 @@ namespace Microsoft.Build.UnitTests
 
             TaskParameter t = new TaskParameter(new TaskItem("foo", metadata));
 
-            Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t.ParameterType);
 
             ITaskItem foo = t.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo);
-            Assert.Equal("foo", foo.ItemSpec);
-            Assert.Equal("a1%b1", foo.GetMetadata("a"));
-            Assert.Equal("c1(d1", foo.GetMetadata("b"));
+            Assert.IsNotNull(foo);
+            Assert.AreEqual("foo", foo.ItemSpec);
+            Assert.AreEqual("a1%b1", foo.GetMetadata("a"));
+            Assert.AreEqual("c1(d1", foo.GetMetadata("b"));
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t2.ParameterType);
 
             ITaskItem foo2 = t2.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo2);
-            Assert.Equal("foo", foo2.ItemSpec);
-            Assert.Equal("a1%b1", foo2.GetMetadata("a"));
-            Assert.Equal("c1(d1", foo2.GetMetadata("b"));
+            Assert.IsNotNull(foo2);
+            Assert.AreEqual("foo", foo2.ItemSpec);
+            Assert.AreEqual("a1%b1", foo2.GetMetadata("a"));
+            Assert.AreEqual("c1(d1", foo2.GetMetadata("b"));
         }
 
         /// <summary>
         /// Verifies that construction and serialization with a parameter that is an ITaskItem with
         /// metadata containing doubly-escaped characters translates the escaping correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ITaskItemParameter_DoubleEscapedMetadata()
         {
             IDictionary metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -535,37 +535,37 @@ namespace Microsoft.Build.UnitTests
 
             TaskParameter t = new TaskParameter(new TaskItem("foo", metadata));
 
-            Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t.ParameterType);
 
             ITaskItem foo = t.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo);
-            Assert.Equal("foo", foo.ItemSpec);
-            Assert.Equal("a1%25b1", foo.GetMetadata("a"));
-            Assert.Equal("c1%28d1", foo.GetMetadata("b"));
+            Assert.IsNotNull(foo);
+            Assert.AreEqual("foo", foo.ItemSpec);
+            Assert.AreEqual("a1%25b1", foo.GetMetadata("a"));
+            Assert.AreEqual("c1%28d1", foo.GetMetadata("b"));
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t2.ParameterType);
 
             ITaskItem foo2 = t2.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo2);
-            Assert.Equal("foo", foo2.ItemSpec);
-            Assert.Equal("a1%25b1", foo2.GetMetadata("a"));
-            Assert.Equal("c1%28d1", foo2.GetMetadata("b"));
+            Assert.IsNotNull(foo2);
+            Assert.AreEqual("foo", foo2.ItemSpec);
+            Assert.AreEqual("a1%25b1", foo2.GetMetadata("a"));
+            Assert.AreEqual("c1%28d1", foo2.GetMetadata("b"));
 
             TaskParameter t3 = new TaskParameter(t2.WrappedParameter);
 
             ((ITranslatable)t3).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t4 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.ITaskItem, t4.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t4.ParameterType);
 
             ITaskItem foo4 = t4.WrappedParameter as ITaskItem;
-            Assert.NotNull(foo4);
-            Assert.Equal("foo", foo4.ItemSpec);
-            Assert.Equal("a1%25b1", foo4.GetMetadata("a"));
-            Assert.Equal("c1%28d1", foo4.GetMetadata("b"));
+            Assert.IsNotNull(foo4);
+            Assert.AreEqual("foo", foo4.ItemSpec);
+            Assert.AreEqual("a1%25b1", foo4.GetMetadata("a"));
+            Assert.AreEqual("c1%28d1", foo4.GetMetadata("b"));
         }
 
         /// <summary>
@@ -573,7 +573,7 @@ namespace Microsoft.Build.UnitTests
         /// metadata containing the non-escaped versions of escapable characters translates the
         /// escaping correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ITaskItemParameter_EscapableNotEscapedMetadata()
         {
             IDictionary metadata = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -582,28 +582,28 @@ namespace Microsoft.Build.UnitTests
 
             TaskParameter t = new TaskParameter(new TaskItem("foo", metadata));
 
-            Assert.Equal(TaskParameterType.ITaskItem, t.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t.ParameterType);
 
             ITaskItem2 foo = t.WrappedParameter as ITaskItem2;
-            Assert.NotNull(foo);
-            Assert.Equal("foo", foo.ItemSpec);
-            Assert.Equal("a1(b1", foo.GetMetadata("a"));
-            Assert.Equal("c1)d1", foo.GetMetadata("b"));
-            Assert.Equal("a1(b1", foo.GetMetadataValueEscaped("a"));
-            Assert.Equal("c1)d1", foo.GetMetadataValueEscaped("b"));
+            Assert.IsNotNull(foo);
+            Assert.AreEqual("foo", foo.ItemSpec);
+            Assert.AreEqual("a1(b1", foo.GetMetadata("a"));
+            Assert.AreEqual("c1)d1", foo.GetMetadata("b"));
+            Assert.AreEqual("a1(b1", foo.GetMetadataValueEscaped("a"));
+            Assert.AreEqual("c1)d1", foo.GetMetadataValueEscaped("b"));
 
             ((ITranslatable)t).Translate(TranslationHelpers.GetWriteTranslator());
             TaskParameter t2 = TaskParameter.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(TaskParameterType.ITaskItem, t2.ParameterType);
+            Assert.AreEqual(TaskParameterType.ITaskItem, t2.ParameterType);
 
             ITaskItem2 foo2 = t2.WrappedParameter as ITaskItem2;
-            Assert.NotNull(foo2);
-            Assert.Equal("foo", foo2.ItemSpec);
-            Assert.Equal("a1(b1", foo2.GetMetadata("a"));
-            Assert.Equal("c1)d1", foo2.GetMetadata("b"));
-            Assert.Equal("a1(b1", foo2.GetMetadataValueEscaped("a"));
-            Assert.Equal("c1)d1", foo2.GetMetadataValueEscaped("b"));
+            Assert.IsNotNull(foo2);
+            Assert.AreEqual("foo", foo2.ItemSpec);
+            Assert.AreEqual("a1(b1", foo2.GetMetadata("a"));
+            Assert.AreEqual("c1)d1", foo2.GetMetadata("b"));
+            Assert.AreEqual("a1(b1", foo2.GetMetadataValueEscaped("a"));
+            Assert.AreEqual("c1)d1", foo2.GetMetadataValueEscaped("b"));
         }
 
         /// <summary>
@@ -611,7 +611,7 @@ namespace Microsoft.Build.UnitTests
         /// RecursiveDir (built-in, non-derivable metadata) must survive TaskParameter
         /// serialization, which is the TaskHost boundary crossed in -mt mode.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RecursiveDirSurvivesTaskParameterSerialization()
         {
             string sep = Path.DirectorySeparatorChar.ToString();
@@ -652,7 +652,7 @@ namespace Microsoft.Build.UnitTests
         /// expecting the spec. Without the override they would get
         /// "Microsoft.Build.BackEnd.TaskParameter+TaskParameterTaskItem" instead.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ITaskItemParameter_ToStringReturnsItemSpec()
         {
             TaskParameter t = new TaskParameter(new TaskItem("some/path/foo.dll"));
@@ -688,7 +688,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ITaskItemParameter_CopyMetadataToRemoteTaskItem()
         {
             TaskItem sourceItem = new TaskItem();
@@ -707,8 +707,8 @@ namespace Microsoft.Build.UnitTests
 
                 fromItem.CopyMetadataTo(toItem);
 
-                Assert.Equal("a1", toItem.GetMetadata("a"));
-                Assert.Equal("b1", toItem.GetMetadata("b"));
+                Assert.AreEqual("a1", toItem.GetMetadata("a"));
+                Assert.AreEqual("b1", toItem.GetMetadata("b"));
             }
             finally
             {
@@ -716,7 +716,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ITaskItemParameter_CopyMetadataFromRemoteTaskItem()
         {
             TaskItem toItem = new TaskItem();
@@ -733,8 +733,8 @@ namespace Microsoft.Build.UnitTests
 
                 fromItem.CopyMetadataTo(toItem);
 
-                Assert.Equal("a1", toItem.GetMetadata("a"));
-                Assert.Equal("b1", toItem.GetMetadata("b"));
+                Assert.AreEqual("a1", toItem.GetMetadata("a"));
+                Assert.AreEqual("b1", toItem.GetMetadata("b"));
             }
             finally
             {

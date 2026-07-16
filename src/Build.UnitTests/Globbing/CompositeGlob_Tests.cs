@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 
@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Globbing.Extensions;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Engine.UnitTests.Globbing
 {
+    [TestClass]
     public class CompositeGlobTests
     {
         public static IEnumerable<object[]> CompositeMatchingTestData
@@ -90,21 +90,21 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             }
         }
 
-        [Theory]
-        [MemberData(nameof(CompositeMatchingTestData))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(CompositeMatchingTestData))]
         public void CompositeMatching(CompositeGlob compositeGlob, string stringToMatch, bool shouldMatch)
         {
             if (shouldMatch)
             {
-                Assert.True(compositeGlob.IsMatch(stringToMatch));
+                Assert.IsTrue(compositeGlob.IsMatch(stringToMatch));
             }
             else
             {
-                Assert.False(compositeGlob.IsMatch(stringToMatch));
+                Assert.IsFalse(compositeGlob.IsMatch(stringToMatch));
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildGlobVisitorShouldFindAllLeaves()
         {
             var g1 = MSBuildGlob.Parse("1*");
@@ -130,7 +130,7 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
 
             var leafGlobs = composite.GetParsedGlobs().ToArray();
 
-            Assert.Equal(4, leafGlobs.Length);
+            Assert.AreEqual(4, leafGlobs.Length);
 
             foreach (var expectedGlob in expectedCollectedGlobs)
             {
@@ -138,25 +138,25 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateShouldHandleZeroChildren()
         {
             IMSBuildGlob composite = CompositeGlob.Create(Enumerable.Empty<IMSBuildGlob>());
 
-            Assert.False(composite.IsMatch(""));
+            Assert.IsFalse(composite.IsMatch(""));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateShouldReturnSingleChildUnchanged()
         {
             var glob = MSBuildGlob.Parse("");
 
             IMSBuildGlob composite = CompositeGlob.Create(new[] { glob });
 
-            Assert.Same(glob, composite);
+            Assert.AreSame(glob, composite);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateShouldReturnNewCompositeWhenMultipleProvided()
         {
             var glob1 = MSBuildGlob.Parse("");
@@ -164,10 +164,10 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
 
             IMSBuildGlob result = CompositeGlob.Create(new[] { glob1, glob2 });
 
-            var composite = Assert.IsType<CompositeGlob>(result);
-            Assert.Same(glob1, composite.Globs.First());
-            Assert.Same(glob2, composite.Globs.Skip(1).First());
-            Assert.Equal(2, composite.Globs.Count());
+            var composite = Assert.IsExactInstanceOfType<CompositeGlob>(result);
+            Assert.AreSame(glob1, composite.Globs.First());
+            Assert.AreSame(glob2, composite.Globs.Skip(1).First());
+            Assert.AreEqual(2, composite.Globs.Count());
         }
     }
 }

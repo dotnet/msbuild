@@ -7,19 +7,19 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Tests for ProjectTelemetry class
     /// </summary>
+    [TestClass]
     public class ProjectTelemetry_Tests
     {
         /// <summary>
         /// Test that TrackTaskSubclassing tracks sealed tasks that derive from Microsoft tasks
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TrackTaskSubclassing_TracksSealedTasks()
         {
             var telemetry = new ProjectTelemetry();
@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that TrackTaskSubclassing tracks subclasses of Microsoft tasks
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TrackTaskSubclassing_TracksSubclass()
         {
             var telemetry = new ProjectTelemetry();
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that TrackTaskSubclassing does not track Microsoft-owned tasks
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TrackTaskSubclassing_IgnoresMicrosoftOwnedTasks()
         {
             var telemetry = new ProjectTelemetry();
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that TrackTaskSubclassing tracks multiple subclasses
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TrackTaskSubclassing_TracksMultipleSubclasses()
         {
             var telemetry = new ProjectTelemetry();
@@ -93,7 +93,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test that TrackTaskSubclassing handles null gracefully
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TrackTaskSubclassing_HandlesNull()
         {
             var telemetry = new ProjectTelemetry();
@@ -157,7 +157,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Integration test that verifies telemetry is logged during a build with Microsoft tasks
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildTaskTelemetry_IsLoggedDuringBuild()
         {
             string projectContent = @"

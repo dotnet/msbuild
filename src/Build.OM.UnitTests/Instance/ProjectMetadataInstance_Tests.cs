@@ -3,7 +3,6 @@
 
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Xunit;
 
 #nullable disable
 
@@ -12,18 +11,19 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// <summary>
     /// Tests for ProjectMetadataInstance public members
     /// </summary>
+    [TestClass]
     public class ProjectMetadataInstance_Tests
     {
         /// <summary>
         /// Get name and value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Accessors()
         {
             ProjectMetadataInstance metadata = GetMetadataInstance();
 
-            Assert.Equal("m", metadata.Name);
-            Assert.Equal("m1", metadata.EvaluatedValue);
+            Assert.AreEqual("m", metadata.Name);
+            Assert.AreEqual("m1", metadata.EvaluatedValue);
         }
 
         /// <summary>

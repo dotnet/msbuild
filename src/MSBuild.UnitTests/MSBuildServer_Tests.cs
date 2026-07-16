@@ -22,7 +22,6 @@ using Microsoft.IO;
 using System.IO;
 #endif
 using Shouldly;
-using Xunit;
 using Path = System.IO.Path;
 
 namespace Microsoft.Build.Engine.UnitTests
@@ -66,9 +65,10 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
+    [TestClass]
     public class MSBuildServer_Tests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
         private readonly TestEnvironment _env;
         private static string printPidContents = @$"
 <Project>
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Engine.UnitTests
     </Target>
 </Project>";
 
-        public MSBuildServer_Tests(ITestOutputHelper output)
+        public MSBuildServer_Tests(TestContext output)
         {
             _output = output;
             _env = TestEnvironment.Create(_output);
@@ -98,7 +98,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
         public void Dispose() => _env.Dispose();
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildServerTest()
         {
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
@@ -147,7 +147,7 @@ namespace Microsoft.Build.Engine.UnitTests
             pidOfServerProcess.ShouldNotBe(newServerProcessId, "Node used by both the first and second build should not be the same.");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ServerSpawnAndReuseAreLoggedToBuildLog()
         {
             // Ensure a clean slate so the first build below deterministically spawns a new server node.
@@ -179,7 +179,7 @@ namespace Microsoft.Build.Engine.UnitTests
             output.ShouldNotContain(spawnedMessage);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ServerNotUsedReasonIsLoggedToBuildLog()
         {
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
@@ -198,7 +198,7 @@ namespace Microsoft.Build.Engine.UnitTests
             output.ShouldContain(notUsedMessage);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ServerShortLivedForMultithreadedWhenNodeReuseOff()
         {
             // Ensure a clean slate so the build below deterministically spawns a new (short-lived) server node.
@@ -221,7 +221,7 @@ namespace Microsoft.Build.Engine.UnitTests
             output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeSpawned", serverPid));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ServerLifecycleMessagesAreAbsentForPlainBuild()
         {
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
@@ -246,7 +246,7 @@ namespace Microsoft.Build.Engine.UnitTests
         /// captured/redirected, so '-tl:auto' must fall back to the console logger and emit no
         /// TerminalLogger ANSI escape sequences.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TerminalLoggerAutoIsNotSelectedWhenServerOutputIsRedirected()
         {
             TransientTestFile project = _env.CreateFile("tlAutoProject.proj", printPidContents);
@@ -271,7 +271,7 @@ namespace Microsoft.Build.Engine.UnitTests
             output.ShouldNotContain("\x1b[?25l");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyMixedLegacyBehavior()
         {
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
@@ -307,7 +307,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildsWhileBuildIsRunningOnServer()
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
@@ -368,9 +368,9 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/14195", TestPlatforms.Windows)]
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void CanShutdownServerProcess(bool byBuildManager)
         {
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
@@ -402,14 +402,14 @@ namespace Microsoft.Build.Engine.UnitTests
             serverProcess.HasExited.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanShutdownServerProcessWhenNotRunning()
         {
             bool serverIsDown = MSBuildClient.ShutdownServer(CancellationToken.None);
             serverIsDown.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ServerShouldNotRunWhenNodeReuseEqualsFalse()
         {
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
@@ -422,7 +422,7 @@ namespace Microsoft.Build.Engine.UnitTests
             pidOfInitialProcess.ShouldBe(pidOfServerProcess, "We started a server node even when nodereuse is false.");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ServerShouldStartWhenBuildIsInteractive()
         {
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
@@ -443,7 +443,7 @@ namespace Microsoft.Build.Engine.UnitTests
             serverIsDown.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ServerStartsWhenMtPresentEvenWithoutEnvVar()
         {
             // Regression test for the "-mt implies MSBuild Server" routing decision
@@ -477,7 +477,7 @@ namespace Microsoft.Build.Engine.UnitTests
             MSBuildClient.ShutdownServer(CancellationToken.None);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ServerStartsWhenMtInResponseFileEvenWithoutEnvVar()
         {
             // Regression test for rainersigwald's review concern (#13758): -mt enabled via a response file
@@ -521,7 +521,7 @@ namespace Microsoft.Build.Engine.UnitTests
         /// honored by shutting the server down after the build. This test verifies both halves: the build runs in a
         /// separate server process, and that process does not survive the build (so a subsequent build gets a fresh server).
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultiThreadedServerIsUsedButShutDownWhenNodeReuseDisabled()
         {
             // Clear MSBUILDUSESERVER so we exercise the -mt-implies-server path, and isolate this test's server
@@ -581,7 +581,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 #endif
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyMSBuildStartupDirectoryOnServer()
         {
             // This test seems to be flaky, lets enable better logging to investigate it next time
@@ -667,12 +667,12 @@ namespace Microsoft.Build.Engine.UnitTests
         /// The MSBuild server (build orchestrator) process must be launched with Server GC when the
         /// build is multithreaded (/mt) - that is when the server itself does the project work.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultiThreadedServerProcessUsesServerGC()
         {
             if (Environment.ProcessorCount < 2)
             {
-                Assert.Skip("Server GC can report as Workstation GC on single-processor machines.");
+                Assert.Inconclusive("Server GC can report as Workstation GC on single-processor machines.");
             }
 
             PrepareIsolatedServerEnv();
@@ -691,7 +691,7 @@ namespace Microsoft.Build.Engine.UnitTests
         /// Without /mt the server only orchestrates (project work happens in separate worker nodes),
         /// so the server process must keep the default Workstation GC.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NonMultiThreadedServerProcessDoesNotUseServerGC()
         {
             PrepareIsolatedServerEnv();
@@ -711,12 +711,12 @@ namespace Microsoft.Build.Engine.UnitTests
         /// uses Server GC. Runs two /mt builds against the same (uniquely salted) server: one in-proc to
         /// capture the Server-GC server PID, then one that forces the task into a TaskHost.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostProcessDoesNotUseServerGC()
         {
             if (Environment.ProcessorCount < 2)
             {
-                Assert.Skip("Server GC can report as Workstation GC on single-processor machines.");
+                Assert.Inconclusive("Server GC can report as Workstation GC on single-processor machines.");
             }
 
             PrepareIsolatedServerEnv();
@@ -745,7 +745,7 @@ namespace Microsoft.Build.Engine.UnitTests
         /// <summary>
         /// An out-of-proc worker node must keep the default Workstation GC.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void WorkerNodeDoesNotUseServerGC()
         {
             PrepareIsolatedServerEnv(useServer: false);

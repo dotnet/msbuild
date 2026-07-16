@@ -8,15 +8,15 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public class RARPrecomputedCache_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void TestPrecomputedCacheOutput()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -51,7 +51,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void StandardCacheTakesPrecedence()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -105,7 +105,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestPreComputedCacheInputMatchesOutput()
         {
             using (TestEnvironment env = TestEnvironment.Create())

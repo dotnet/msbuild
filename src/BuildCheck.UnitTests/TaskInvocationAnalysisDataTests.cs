@@ -12,11 +12,11 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.Experimental.BuildCheck.Infrastructure.BuildCheckManagerProvider;
 
 namespace Microsoft.Build.BuildCheck.UnitTests
 {
+    [TestClass]
     public class TaskInvocationCheckDataTests : IDisposable
     {
         internal sealed class TestCheck : Check
@@ -51,11 +51,11 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             }
         }
 
-        private ITestOutputHelper _output;
+        private TestContext _output;
 
         private static TestCheck? s_testCheck;
 
-        public TaskInvocationCheckDataTests(ITestOutputHelper output)
+        public TaskInvocationCheckDataTests(TestContext output)
         {
             _output = output;
 
@@ -108,7 +108,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReportsSimpleTaskParameters()
         {
             BuildProject("<Message Text='Hello'/>");
@@ -121,9 +121,9 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             data.Parameters["Text"].Value.ShouldBe("Hello");
         }
 
-        [Theory]
-        [InlineData("<Output TaskParameter='CombinedPaths' ItemName='OutputDirectories' />")]
-        [InlineData("<Output TaskParameter='CombinedPaths' PropertyName='OutputDirectories' />")]
+        [MSBuildTestMethod]
+        [DataRow("<Output TaskParameter='CombinedPaths' ItemName='OutputDirectories' />")]
+        [DataRow("<Output TaskParameter='CombinedPaths' PropertyName='OutputDirectories' />")]
         public void ReportsComplexTaskParameters(string outputElement)
         {
             BuildProject($"""
@@ -152,7 +152,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             data.Parameters["CombinedPaths"].Value.ShouldNotBeNull();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskParameterEnumeratesValues()
         {
             var parameter1 = MakeParameter("string");

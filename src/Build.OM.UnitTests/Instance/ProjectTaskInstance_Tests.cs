@@ -4,7 +4,6 @@
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Xunit;
 
 #nullable disable
 
@@ -13,24 +12,25 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// <summary>
     /// Tests for ProjectTaskInstance
     /// </summary>
+    [TestClass]
     public class ProjectTaskInstance_Tests
     {
         /// <summary>
         /// Test accessors
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Accessors()
         {
             var task = GetSampleTaskInstance();
 
-            Assert.Equal("t1", task.Name);
-            Assert.Equal("c", task.Condition);
-            Assert.Equal("coe", task.ContinueOnError);
+            Assert.AreEqual("t1", task.Name);
+            Assert.AreEqual("c", task.Condition);
+            Assert.AreEqual("coe", task.ContinueOnError);
 
             var parameters = task.Parameters;
-            Assert.Equal(2, parameters.Count);
-            Assert.Equal("a1", parameters["a"]);
-            Assert.Equal("b1", parameters["b"]);
+            Assert.AreEqual(2, parameters.Count);
+            Assert.AreEqual("a1", parameters["a"]);
+            Assert.AreEqual("b1", parameters["b"]);
         }
 
         /// <summary>
@@ -39,12 +39,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// of array type, an empty array is set on the task class.
         /// Therefore empty task parameters should be returned by the parameter list.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyParameter()
         {
             var task = GetTaskInstance(@"<t1 a=''/>");
 
-            Assert.Single(task.Parameters);
+            Assert.ContainsSingle(task.Parameters);
         }
 
         /// <summary>

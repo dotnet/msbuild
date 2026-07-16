@@ -3,11 +3,10 @@
 
 using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework.Coordinator;
-using Xunit;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
-internal sealed class TestCoordinatorDebugOutput(ITestOutputHelper testOutput) : ICoordinatorDebugOutput
+internal sealed class TestCoordinatorDebugOutput(TestContext testOutput) : ICoordinatorDebugOutput
 {
     public bool IsEnabled => true;
 

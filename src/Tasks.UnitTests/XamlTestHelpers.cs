@@ -11,7 +11,6 @@ using System.Xaml;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Tasks.Xaml;
 using Microsoft.CSharp;
-using Xunit;
 
 #nullable disable
 
@@ -99,7 +98,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     Toolset currentToolset = ProjectCollection.GlobalProjectCollection.GetToolset(ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
-                    Assert.NotNull(currentToolset); // String.Format("For some reason, we couldn't get the current ({0}) toolset!", ObjectModelHelpers.MSBuildDefaultToolsVersion)
+                    Assert.IsNotNull(currentToolset); // String.Format("For some reason, we couldn't get the current ({0}) toolset!", ObjectModelHelpers.MSBuildDefaultToolsVersion)
                     s_pathToMSBuildBinaries = currentToolset.ToolsPath;
                 }
 
@@ -163,7 +162,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     Console.WriteLine(sw.ToString());
                 }
-                Assert.Empty(cr.Errors);
+                Assert.IsEmpty(cr.Errors);
                 if (cr.Errors.Count > 0)
                 {
                     foreach (CompilerError error in cr.Errors)

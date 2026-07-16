@@ -23,43 +23,41 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class XMakeAppTests : IDisposable
     {
-        public static TheoryData<string, MessageImportance> MinimumMessageImportanceTestData
+        public static IEnumerable<object[]> MinimumMessageImportanceTestData
         {
             get
             {
-                var data = new TheoryData<string, MessageImportance>
-                {
-                    { "/v:diagnostic /tl:off", MessageImportance.Low },
-                    { "/v:detailed /tl:off", MessageImportance.Low },
-                    { "/v:normal /tl:off", MessageImportance.Normal },
-                    { "/v:minimal /tl:off", MessageImportance.High },
-                    { "/v:quiet /tl:off", MessageImportance.High - 1 },
-                    { "/v:diagnostic /bl", MessageImportance.Low },
-                    { "/v:detailed /bl", MessageImportance.Low },
-                    { "/v:normal /bl", MessageImportance.Low }, // v:normal but with binary logger so everything must be logged
-                    { "/v:minimal /bl", MessageImportance.Low }, // v:minimal but with binary logger so everything must be logged
-                    { "/v:quiet /bl", MessageImportance.Low }, // v:quiet but with binary logger so everything must be logged
-                    { "/v:diagnostic /check", MessageImportance.Low },
-                    { "/v:detailed /check", MessageImportance.Low },
-                    { "/v:normal /check", MessageImportance.Normal },
-                    { "/v:minimal /check", MessageImportance.High },
-                    { "/v:quiet /check", MessageImportance.High },
-                    { "/v:diagnostic /tl:on", MessageImportance.High },
-                    { "/v:detailed /tl:on", MessageImportance.High },
-                    { "/v:normal /tl:on", MessageImportance.High },
-                    { "/v:minimal /tl:on", MessageImportance.High },
-                    { "/v:quiet /tl:on", MessageImportance.High - 1 }
-                };
-
-                return data;
+                return
+                [
+                    ["/v:diagnostic /tl:off", MessageImportance.Low],
+                    ["/v:detailed /tl:off", MessageImportance.Low],
+                    ["/v:normal /tl:off", MessageImportance.Normal],
+                    ["/v:minimal /tl:off", MessageImportance.High],
+                    ["/v:quiet /tl:off", MessageImportance.High - 1],
+                    ["/v:diagnostic /bl", MessageImportance.Low],
+                    ["/v:detailed /bl", MessageImportance.Low],
+                    ["/v:normal /bl", MessageImportance.Low], // v:normal but with binary logger so everything must be logged
+                    ["/v:minimal /bl", MessageImportance.Low], // v:minimal but with binary logger so everything must be logged
+                    ["/v:quiet /bl", MessageImportance.Low], // v:quiet but with binary logger so everything must be logged
+                    ["/v:diagnostic /check", MessageImportance.Low],
+                    ["/v:detailed /check", MessageImportance.Low],
+                    ["/v:normal /check", MessageImportance.Normal],
+                    ["/v:minimal /check", MessageImportance.High],
+                    ["/v:quiet /check", MessageImportance.High],
+                    ["/v:diagnostic /tl:on", MessageImportance.High],
+                    ["/v:detailed /tl:on", MessageImportance.High],
+                    ["/v:normal /tl:on", MessageImportance.High],
+                    ["/v:minimal /tl:on", MessageImportance.High],
+                    ["/v:quiet /tl:on", MessageImportance.High - 1]
+                ];
             }
         }
 
@@ -73,10 +71,10 @@ namespace Microsoft.Build.UnitTests
                 + "</Project>");
         }
 
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
         private readonly TestEnvironment _env;
 
-        public XMakeAppTests(ITestOutputHelper output)
+        public XMakeAppTests(TestContext output)
         {
             _output = output;
             _env = TestEnvironment.Create(_output);
@@ -86,7 +84,7 @@ namespace Microsoft.Build.UnitTests
 
         private const string AutoResponseFileName = "MSBuild.rsp";
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GatherCommandLineSwitchesTwoProperties()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -99,7 +97,7 @@ namespace Microsoft.Build.UnitTests
             parameters[1].ShouldBe("c=d");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GatherCommandLineSwitchesAnyDash()
         {
             var switches = new CommandLineSwitches();
@@ -112,7 +110,7 @@ namespace Microsoft.Build.UnitTests
             parameters[1].ShouldBe("maxcpucount=8");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GatherCommandLineSwitchesMaxCpuCountWithArgument()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -127,7 +125,7 @@ namespace Microsoft.Build.UnitTests
             switches.HaveErrors().ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GatherCommandLineSwitchesMaxCpuCountWithoutArgument()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -145,7 +143,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         ///  /m: should be an error, unlike /m:1 and /m
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GatherCommandLineSwitchesMaxCpuCountWithoutArgumentButWithColon()
         {
             CommandLineSwitches switches = new CommandLineSwitches();
@@ -186,7 +184,7 @@ namespace Microsoft.Build.UnitTests
          *      abc""cde""xyz       --> nothing is quoted
          */
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SplitUnquotedTest()
         {
             // nothing quoted
@@ -376,7 +374,7 @@ namespace Microsoft.Build.UnitTests
             sa[3].ShouldBe("z");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UnquoteTest()
         {
             // "cde" is quoted
@@ -436,7 +434,7 @@ namespace Microsoft.Build.UnitTests
             doubleQuotesRemoved.ShouldBe(4);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractSwitchParametersTest()
         {
             string commandLineArg = "\"/p:foo=\"bar";
@@ -482,7 +480,7 @@ namespace Microsoft.Build.UnitTests
             doubleQuotesRemovedFromArg.ShouldBe(6);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractSwitchParametersTestDoubleDash()
         {
             var commandLineArg = "\"--p:foo=\"bar";
@@ -521,7 +519,7 @@ namespace Microsoft.Build.UnitTests
             doubleQuotesRemovedFromArg.ShouldBe(6);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetLengthOfSwitchIndicatorTest()
         {
             var commandLineSwitchWithSlash = "/Switch";
@@ -537,18 +535,18 @@ namespace Microsoft.Build.UnitTests
             CommandLineParser.GetLengthOfSwitchIndicator(commandLineSwitchWithNoneOrIncorrectIndicator).ShouldBe(0);
         }
 
-        [Theory]
-        [InlineData("-?")]
-        [InlineData("-h")]
-        [InlineData("--help")]
-        [InlineData(@"/h")]
+        [MSBuildTestMethod]
+        [DataRow("-?")]
+        [DataRow("-h")]
+        [DataRow("--help")]
+        [DataRow(@"/h")]
         public void Help(string indicator)
         {
             MSBuildApp.Execute([@"c:\bin\msbuild.exe", indicator])
             .ShouldBe(MSBuildApp.ExitType.Success);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VersionSwitch()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -588,7 +586,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// PR: Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VersionSwitchDisableChangeWave()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -625,7 +623,7 @@ namespace Microsoft.Build.UnitTests
             process.Close();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ErrorCommandLine()
         {
             string oldValueForMSBuildLoadMicrosoftTargetsReadOnly = Environment.GetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly");
@@ -637,7 +635,7 @@ namespace Microsoft.Build.UnitTests
             Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidVerbosities()
         {
             MSBuildApp.ProcessVerbositySwitch("Q").ShouldBe(LoggerVerbosity.Quiet);
@@ -652,7 +650,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessVerbositySwitch("DIAGNOSTIC").ShouldBe(LoggerVerbosity.Diagnostic);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidVerbosity()
         {
             Should.Throw<CommandLineSwitchException>(() =>
@@ -661,7 +659,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidMaxCPUCountSwitch()
         {
             MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "1" }).ShouldBe(1);
@@ -675,7 +673,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ProcessMaxCPUCountSwitch(new[] { "8", "4" }).ShouldBe(4);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidMaxCPUCountSwitch1()
         {
             Should.Throw<CommandLineSwitchException>(() =>
@@ -684,7 +682,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidMaxCPUCountSwitch2()
         {
             Should.Throw<CommandLineSwitchException>(() =>
@@ -693,7 +691,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidMaxCPUCountSwitch3()
         {
             Should.Throw<CommandLineSwitchException>(() =>
@@ -702,7 +700,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidNodeModeSwitch_Integers()
         {
             MSBuildApp.ParseNodeMode("1").ShouldBe(NodeMode.OutOfProcNode);
@@ -711,7 +709,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ParseNodeMode("8").ShouldBe(NodeMode.OutOfProcServerNode);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidNodeModeSwitch_EnumNames()
         {
             MSBuildApp.ParseNodeMode("OutOfProcNode").ShouldBe(NodeMode.OutOfProcNode);
@@ -725,7 +723,7 @@ namespace Microsoft.Build.UnitTests
             MSBuildApp.ParseNodeMode("outofprocservernode").ShouldBe(NodeMode.OutOfProcServerNode);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidNodeModeSwitch_InvalidInteger()
         {
             Should.Throw<CommandLineSwitchException>(() =>
@@ -734,7 +732,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidNodeModeSwitch_NegativeInteger()
         {
             Should.Throw<CommandLineSwitchException>(() =>
@@ -743,7 +741,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidNodeModeSwitch_InvalidString()
         {
             Should.Throw<CommandLineSwitchException>(() =>
@@ -752,7 +750,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidNodeModeSwitch_EmptyString()
         {
             Should.Throw<CommandLineSwitchException>(() =>
@@ -761,7 +759,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidMaxCPUCountSwitch4()
         {
             Should.Throw<CommandLineSwitchException>(() =>
@@ -771,7 +769,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPropertyWithInvalidProjectThrowsInvalidProjectFileExceptionNotInternalError()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -782,24 +780,24 @@ namespace Microsoft.Build.UnitTests
             result.ShouldNotContain("MSB1025");
         }
 
-        [Theory]
-        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, true, false)]
-        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, true, false)]
-        [InlineData("-getItem:MyItem", false, "", true, false, false, true, false)]
-        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, true, false)]
-        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, true, false)]
-        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, true, false)]
-        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, true, false)]
-        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, true, false)]
-        [InlineData("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, false, false)]
-        [InlineData("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, false, false)]
-        [InlineData("-getItem:MyItem", false, "", true, false, false, false, false)]
-        [InlineData("-getItem:MyItem -t:Build", false, "", true, true, false, false, false)]
-        [InlineData("-getItem:WrongItem -t:Build", false, "", false, false, false, false, false)]
-        [InlineData("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, false, false)]
-        [InlineData("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, false, false)]
-        [InlineData("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, false, false)]
-        [InlineData("-getTargetResult:Restore", false, "", false, false, false, false, true)]
+        [MSBuildTestMethod]
+        [DataRow("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, true, false)]
+        [DataRow("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, true, false)]
+        [DataRow("-getItem:MyItem", false, "", true, false, false, true, false)]
+        [DataRow("-getItem:MyItem -t:Build", false, "", true, true, false, true, false)]
+        [DataRow("-getItem:WrongItem -t:Build", false, "", false, false, false, true, false)]
+        [DataRow("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, true, false)]
+        [DataRow("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, true, false)]
+        [DataRow("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, true, false)]
+        [DataRow("-getProperty:Foo;Bar", true, "EvalValue", false, false, false, false, false)]
+        [DataRow("-getProperty:Foo;Bar -t:Build", true, "TargetValue", false, false, false, false, false)]
+        [DataRow("-getItem:MyItem", false, "", true, false, false, false, false)]
+        [DataRow("-getItem:MyItem -t:Build", false, "", true, true, false, false, false)]
+        [DataRow("-getItem:WrongItem -t:Build", false, "", false, false, false, false, false)]
+        [DataRow("-getProperty:Foo;Bar -getItem:MyItem -t:Build", true, "TargetValue", true, true, false, false, false)]
+        [DataRow("-getProperty:Foo;Bar -getItem:MyItem", true, "EvalValue", true, false, false, false, false)]
+        [DataRow("-getProperty:Foo;Bar -getTargetResult:MyTarget", true, "TargetValue", false, false, true, false, false)]
+        [DataRow("-getTargetResult:Restore", false, "", false, false, false, false, true)]
         public void ExecuteAppWithGetPropertyItemAndTargetResult(
             string extraSwitch,
             bool fooPresent,
@@ -867,9 +865,9 @@ namespace Microsoft.Build.UnitTests
         /// in the targets pass therefore succeeds for a property-only query, but reverts to failing
         /// when the change wave is opted out (full evaluation).
         /// </summary>
-        [Theory]
-        [InlineData(null, true)]      // wave enabled (default): partial evaluation stops before the failing targets pass
-        [InlineData("18.10", false)]  // wave disabled: full evaluation hits the failing targets pass
+        [MSBuildTestMethod]
+        [DataRow(null, true)]      // wave enabled (default): partial evaluation stops before the failing targets pass
+        [DataRow("18.10", false)]  // wave disabled: full evaluation hits the failing targets pass
         public void GetPropertyWithoutTargetUsesPartialEvaluation(string disableFeaturesFromVersion, bool expectedSuccess)
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -896,7 +894,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildFailsWithBadPropertyName()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -912,10 +910,10 @@ namespace Microsoft.Build.UnitTests
             results.ShouldContain("error MSB4177");
         }
 
-        [Theory]
-        [InlineData("-getProperty:Foo", "propertyContent")]
-        [InlineData("-getItem:Bar", "ItemContent")]
-        [InlineData("-getTargetResult:Biz", "Success")]
+        [MSBuildTestMethod]
+        [DataRow("-getProperty:Foo", "propertyContent")]
+        [DataRow("-getItem:Bar", "ItemContent")]
+        [DataRow("-getTargetResult:Biz", "Success")]
         public void GetStarOutputsToFileIfRequested(string extraSwitch, string result)
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -947,9 +945,9 @@ namespace Microsoft.Build.UnitTests
         /// Regression test for issue where getTargetResult/getItem would throw an unhandled exception
         /// when the item spec contained illegal path characters (e.g. compiler command line flags).
         /// </summary>
-        [Theory]
-        [InlineData("-getTargetResult:GetCompileCommands", "\"Result\": \"Success\"")]
-        [InlineData("-getItem:CompileCommands", "\"Identity\":")]
+        [MSBuildTestMethod]
+        [DataRow("-getTargetResult:GetCompileCommands", "\"Result\": \"Success\"")]
+        [DataRow("-getItem:CompileCommands", "\"Identity\":")]
         public void GetTargetResultWithIllegalPathCharacters(string extraSwitch, string expectedContent)
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -975,9 +973,9 @@ namespace Microsoft.Build.UnitTests
             results.ShouldContain(expectedContent);
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void BuildFailsWithCompileErrorAndRestore(bool isGraphBuild)
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -1013,7 +1011,7 @@ namespace Microsoft.Build.UnitTests
         /// <remarks>
         /// fr-FR, de-DE, and fr-CA are guaranteed to be available on all BVTs, so we must use one of these
         /// </remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetConsoleUICulture()
         {
             Thread thisThread = Thread.CurrentThread;
@@ -1033,7 +1031,7 @@ namespace Microsoft.Build.UnitTests
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConsoleUIRespectsSDKLanguage()
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && !EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
@@ -1057,8 +1055,8 @@ namespace Microsoft.Build.UnitTests
                 testEnvironment.SetEnvironmentVariable(DOTNET_CLI_UI_LANGUAGE, "ja"); // Japanese chose arbitrarily.
                 MSBuildApp.SetConsoleUI();
 
-                Assert.Equal(new CultureInfo("ja"), thisThread.CurrentUICulture);
-                Assert.Equal(65001, Console.OutputEncoding.CodePage); // UTF-8 enabled for correct rendering.
+                Assert.AreEqual(new CultureInfo("ja"), thisThread.CurrentUICulture);
+                Assert.AreEqual(65001, Console.OutputEncoding.CodePage); // UTF-8 enabled for correct rendering.
             }
             finally
             {
@@ -1080,7 +1078,7 @@ namespace Microsoft.Build.UnitTests
         /// We shouldn't change the UI culture if the current UI culture is invariant.
         /// In other cases, we can get an exception on CultureInfo creation when System.Globalization.Invariant enabled.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetConsoleUICultureInInvariantCulture()
         {
             Thread thisThread = Thread.CurrentThread;
@@ -1103,7 +1101,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Invalid configuration file should not dump stack.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConfigurationInvalid()
         {
             string startDirectory = null;
@@ -1220,7 +1218,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests that the environment gets passed on to the node during build.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestEnvironmentTest()
         {
             string projectString = ObjectModelHelpers.CleanupFileContents(
@@ -1249,7 +1247,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildEngineLogger()
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -1286,7 +1284,7 @@ namespace Microsoft.Build.UnitTests
 
                 var logFileContents = File.ReadAllText(logFile);
 
-                Assert.Equal(new CultureInfo("en"), Thread.CurrentThread.CurrentUICulture);
+                Assert.AreEqual(new CultureInfo("en"), Thread.CurrentThread.CurrentUICulture);
 
                 logFileContents.ShouldContain("Process = ");
                 logFileContents.ShouldContain("MSBuild executable path = ");
@@ -1311,7 +1309,7 @@ namespace Microsoft.Build.UnitTests
         /// Basic case
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/14194", TestPlatforms.Windows)]
-        [Fact]
+        [MSBuildTestMethod]
         public void GetCommandLine()
         {
             var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
@@ -1327,7 +1325,7 @@ namespace Microsoft.Build.UnitTests
         /// Quoted path
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/14192", TestPlatforms.Windows)]
-        [Fact]
+        [MSBuildTestMethod]
         public void GetCommandLineQuotedExe()
         {
             var msbuildParameters = "\"" + _pathToArbitraryBogusFile + "\"" + (NativeMethodsShared.IsWindows ? " /v:diag" : " -v:diag");
@@ -1351,7 +1349,7 @@ namespace Microsoft.Build.UnitTests
         /// On path
         /// </summary>
         [ActiveIssue("https://github.com/dotnet/msbuild/issues/14196", TestPlatforms.Windows)]
-        [Fact]
+        [MSBuildTestMethod]
         public void GetCommandLineQuotedExeOnPath()
         {
             string output;
@@ -1378,7 +1376,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and should
         /// take priority over any other response files.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResponseFileInProjectDirectoryFoundImplicitly()
         {
             string directory = _env.DefaultTestDirectory.Path;
@@ -1400,7 +1398,7 @@ namespace Microsoft.Build.UnitTests
             output.ShouldContain("[A=1]");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ResponseFileSwitchesAppearInCommandLine()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -1423,7 +1421,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and should
         /// take priority over any other response files.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResponseFileInProjectDirectoryExplicit()
         {
             var directory = _env.CreateFolder();
@@ -1440,7 +1438,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and not any random .rsp
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResponseFileInProjectDirectoryRandomName()
         {
             var directory = _env.CreateFolder();
@@ -1460,7 +1458,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read,
         /// but lower precedence than the actual command line
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResponseFileInProjectDirectoryCommandLineWins()
         {
             var directory = _env.CreateFolder();
@@ -1481,7 +1479,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read,
         /// but lower precedence than the actual command line and higher than the msbuild.rsp next to msbuild.exe
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResponseFileInProjectDirectoryWinsOverMainMSBuildRsp()
         {
             string directory = null;
@@ -1525,7 +1523,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read,
         /// but not if it's the same as the msbuild.exe directory
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectDirectoryIsMSBuildExeDirectory()
         {
             string directory = null;
@@ -1558,7 +1556,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Any msbuild.rsp in the directory of the specified project/solution with /noautoresponse in, is an error
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResponseFileInProjectDirectoryItselfWithNoAutoResponseSwitch()
         {
             var directory = _env.CreateFolder();
@@ -1577,7 +1575,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Any msbuild.rsp in the directory of the specified project/solution should be ignored if cmd line has /noautoresponse
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResponseFileInProjectDirectoryButCommandLineNoAutoResponseSwitch()
         {
             var directory = _env.CreateFolder();
@@ -1595,7 +1593,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Directory.Build.rsp in the directory of the specified project/solution should be respected when searching the files (solution/proj) to build.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResponseFileInProjectDirectoryWithSolutionProjectDifferentNamesShouldBeRespected()
         {
             var directory = _env.CreateFolder();
@@ -1609,7 +1607,7 @@ namespace Microsoft.Build.UnitTests
             successfulExit.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ResponseFileNoticeIsPrintedOnSwitchError()
         {
             _env.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en-US");
@@ -1630,7 +1628,7 @@ namespace Microsoft.Build.UnitTests
             output.ShouldContain(rspPath);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExplicitResponseFileNoticeIsPrintedOnSwitchError()
         {
             _env.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "en-US");
@@ -1655,7 +1653,7 @@ namespace Microsoft.Build.UnitTests
         /// Any msbuild.rsp in the directory of the specified project/solution should be read, and should
         /// take priority over any other response files. Sanity test when there isn't one.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResponseFileInProjectDirectoryNullCase()
         {
             var directory = _env.CreateFolder();
@@ -1675,7 +1673,7 @@ namespace Microsoft.Build.UnitTests
         /// A response file should support path replacement (%MSBuildThisFileDirectory% becomes full path to the
         /// rsp file directory).
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResponseFileSupportsThisFileDirectory()
         {
             var content = ObjectModelHelpers.CleanupFileContents(
@@ -1696,7 +1694,8 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that low priority builds actually execute with low priority.
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/5229")]
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/5229")]
         public void LowPriorityBuild()
         {
             RunPriorityBuildTest(expectedPrority: ProcessPriorityClass.BelowNormal, arguments: "/low");
@@ -1705,7 +1704,8 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that normal builds execute with normal priority.
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/5229")]
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/5229")]
         public void NormalPriorityBuild()
         {
             // In case we are already running at a  different priority, validate
@@ -1743,14 +1743,14 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the default file to build in cases involving at least one solution filter file.
         /// </summary>
-        [Theory]
-        [InlineData(new[] { "my.proj", "my.sln", "my.slnf" }, "my.sln")]
-        [InlineData(new[] { "my.proj", "my.slnx", "my.slnf" }, "my.slnx")]
-        [InlineData(new[] { "abc.proj", "bcd.csproj", "slnf.slnf", "other.slnf" }, "abc.proj")]
-        [InlineData(new[] { "abc.sln", "slnf.slnf", "abc.slnf" }, "abc.sln")]
-        [InlineData(new[] { "abc.slnx", "slnf.slnf", "abc.slnf" }, "abc.slnx")]
-        [InlineData(new[] { "abc.csproj", "abc.slnf", "not.slnf" }, "abc.csproj")]
-        [InlineData(new[] { "abc.slnf" }, "abc.slnf")]
+        [MSBuildTestMethod]
+        [DataRow(new[] { "my.proj", "my.sln", "my.slnf" }, "my.sln")]
+        [DataRow(new[] { "my.proj", "my.slnx", "my.slnf" }, "my.slnx")]
+        [DataRow(new[] { "abc.proj", "bcd.csproj", "slnf.slnf", "other.slnf" }, "abc.proj")]
+        [DataRow(new[] { "abc.sln", "slnf.slnf", "abc.slnf" }, "abc.sln")]
+        [DataRow(new[] { "abc.slnx", "slnf.slnf", "abc.slnf" }, "abc.slnx")]
+        [DataRow(new[] { "abc.csproj", "abc.slnf", "not.slnf" }, "abc.csproj")]
+        [DataRow(new[] { "abc.slnf" }, "abc.slnf")]
         public void TestDefaultBuildWithSolutionFilter(string[] projects, string answer)
         {
             string[] extensionsToIgnore = Array.Empty<string>();
@@ -1764,7 +1764,7 @@ namespace Microsoft.Build.UnitTests
         /// Test the case where the extension is a valid extension but is not a project
         /// file extension. In this case no files should be ignored
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchOneProjNotFoundExtension()
         {
             string[] projects = { "my.proj" };
@@ -1776,7 +1776,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where two identical extensions are asked to be ignored
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTwoIdenticalExtensionsToIgnore()
         {
             string[] projects = { "my.proj" };
@@ -1788,7 +1788,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Pass a null and an empty list of project extensions to ignore, this simulates the switch not being set on the commandline
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchNullandEmptyProjectsToIgnore()
         {
             string[] projects = { "my.proj" };
@@ -1803,7 +1803,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Pass in one extension and a null value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchNullInList()
         {
             Should.Throw<InitializationException>(() =>
@@ -1818,7 +1818,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Pass in one extension and an empty string
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchEmptyInList()
         {
             Should.Throw<InitializationException>(() =>
@@ -1832,7 +1832,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// If only a dot is specified then the extension is invalid
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchExtensionWithoutDot()
         {
             Should.Throw<InitializationException>(() =>
@@ -1846,7 +1846,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Put some junk into the extension, in this case there should be an exception
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchMalformed()
         {
             Should.Throw<InitializationException>(() =>
@@ -1860,7 +1860,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test what happens if there are no project or solution files in the directory
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchWildcards()
         {
             Should.Throw<InitializationException>(() =>
@@ -1871,7 +1871,7 @@ namespace Microsoft.Build.UnitTests
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
             });
         }
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitch()
         {
             string[] projects = { "test.nativeproj", "test.vcproj" };
@@ -1944,7 +1944,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Ignore .sln and .vcproj files to replicate Building_DF_LKG functionality
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchReplicateBuildingDFLKG()
         {
             string[] projects = { "test.proj", "test.sln", "Foo.vcproj" };
@@ -1956,7 +1956,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where we remove all of the project extensions that exist in the directory
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchRemovedAllprojects()
         {
             Should.Throw<InitializationException>(() =>
@@ -1970,7 +1970,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there is a solution and a project in the same directory but they have different names
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchSlnProjDifferentNames()
         {
             Should.Throw<InitializationException>(() =>
@@ -1984,7 +1984,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there is a .slnx and a project in the same directory but they have different names
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchSlnxProjDifferentNames()
         {
             string[] projects = ["test.proj", "Different.slnx"];
@@ -1999,7 +1999,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where we have two proj files in the same directory
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchTwoProj()
         {
             Should.Throw<InitializationException>(() =>
@@ -2013,7 +2013,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where we have two native project files in the same directory
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchTwoNative()
         {
             Should.Throw<InitializationException>(() =>
@@ -2027,7 +2027,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test when there are two solutions in the same directory
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchTwoSolutions()
         {
             Should.Throw<InitializationException>(() =>
@@ -2041,7 +2041,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test when there are two solutions in the same directory - .sln and .slnx
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchSlnAndSlnx()
         {
             string[] projects = ["test.slnx", "Different.sln"];
@@ -2053,7 +2053,7 @@ namespace Microsoft.Build.UnitTests
                 MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles);
             });
         }
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchTwoSlnx()
         {
             string[] projects = ["test.slnx", "Different.slnx"];
@@ -2068,7 +2068,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check the case where there are more than two projects in the directory and one is a proj file
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchMoreThenTwoProj()
         {
             Should.Throw<InitializationException>(() =>
@@ -2082,7 +2082,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test what happens if there are no project or solution files in the directory
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchNoProjectOrSolution()
         {
             Should.Throw<InitializationException>(() =>
@@ -2147,7 +2147,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that when a directory is specified that a project can be found.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchDirectory()
         {
             string projectDirectory = Directory.CreateDirectory(Path.Combine(ObjectModelHelpers.TempProjectDir, Guid.NewGuid().ToString("N"))).FullName;
@@ -2170,7 +2170,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that when a directory is specified and there are multiple projects that the correct error is thrown.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessProjectSwitchDirectoryMultipleProjects()
         {
             string projectDirectory = Directory.CreateDirectory(Path.Combine(ObjectModelHelpers.TempProjectDir, Guid.NewGuid().ToString("N"))).FullName;
@@ -2197,7 +2197,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where no file logger switches are given, should be no file loggers attached
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessFileLoggerSwitch1()
         {
             bool distributedFileLogger = false;
@@ -2216,7 +2216,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where a central logger and distributed logger are attached
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessFileLoggerSwitch2()
         {
             bool distributedFileLogger = true;
@@ -2235,7 +2235,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where a central file logger is attached but no distributed logger
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessFileLoggerSwitch3()
         {
             bool distributedFileLogger = false;
@@ -2277,7 +2277,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where a distributed file logger is attached but no central logger
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessFileLoggerSwitch4()
         {
             bool distributedFileLogger = true;
@@ -2369,7 +2369,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when in single proc mode the file logger enables mp logging and does not show eventId
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProcessFileLoggerSwitch5()
         {
             bool distributedFileLogger = false;
@@ -2389,7 +2389,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify that DistributedLoggerRecords with null CentralLogger don't cause exceptions when creating ProjectCollection
         /// This is a regression test for the issue where -dfl flag caused MSB1025 error due to null logger not being filtered.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestNullCentralLoggerInDistributedLoggerRecord()
         {
             // Simulate the scenario when using -dfl flag
@@ -2425,7 +2425,7 @@ namespace Microsoft.Build.UnitTests
         #endregion
 
         #region ProcessConsoleLoggerSwitches
-        [Fact]
+        [MSBuildTestMethod]
         public void ProcessConsoleLoggerSwitches()
         {
             var loggers = new List<ILogger>();
@@ -2479,7 +2479,7 @@ namespace Microsoft.Build.UnitTests
         }
         #endregion
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RestoreFirstReevaluatesImportGraph()
         {
             string guid = Guid.NewGuid().ToString("N");
@@ -2512,7 +2512,7 @@ namespace Microsoft.Build.UnitTests
             logContents.ShouldContain(guid);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RestoreFirstClearsProjectRootElementCache()
         {
             string guid1 = Guid.NewGuid().ToString("N");
@@ -2559,7 +2559,7 @@ namespace Microsoft.Build.UnitTests
             logContents.ShouldContain(guid2);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RestoreIgnoresMissingImports()
         {
             string guid1 = Guid.NewGuid().ToString("N");
@@ -2609,7 +2609,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When specifying /t:restore, fail when an SDK can't be resolved.  Previous behavior was to try and continue anyway but then "restore" would succeed and build workflows continue on.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RestoreFailsOnUnresolvedSdk()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(
@@ -2628,7 +2628,7 @@ $@"<Project>
         /// <summary>
         /// Verifies restore will run InitialTargets.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RestoreRunsInitialTargets()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(
@@ -2656,7 +2656,7 @@ $@"<Project>
         /// uses, which makes a nonexistent &lt;ProjectReference&gt; leak into NuGet's _GenerateRestoreGraphProjectEntry MSBuild call
         /// (which does not skip nonexistent projects) and fail with MSB3202 instead of being skipped.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RestoreDoesNotInjectExcludeRestorePackageImports()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(
@@ -2675,7 +2675,7 @@ $@"<Project>
         /// <summary>
         /// We check if there is only one target name specified and this logic caused a regression: https://github.com/dotnet/msbuild/issues/3317
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleTargetsDoesNotCrash()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents($@"<Project>
@@ -2693,13 +2693,13 @@ $@"<Project>
             logContents.ShouldContain("E2C73B5843F94B63B067D9BEB2C4EC52", customMessage: logContents);
         }
 
-        [Theory]
-        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional;Foo", "nonExistentLogger.dll")]
-        [InlineData("-logger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo", "ClassA")]
-        [InlineData("-logger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC", "nonExistentLogger.dll")]
-        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional;Foo", "nonExistentLogger.dll")]
-        [InlineData("-distributedlogger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo", "ClassA")]
-        [InlineData("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC", "nonExistentLogger.dll")]
+        [MSBuildTestMethod]
+        [DataRow("-logger:,\"nonExistentlogger.dll\",IsOptional;Foo", "nonExistentLogger.dll")]
+        [DataRow("-logger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo", "ClassA")]
+        [DataRow("-logger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC", "nonExistentLogger.dll")]
+        [DataRow("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional;Foo", "nonExistentLogger.dll")]
+        [DataRow("-distributedlogger:ClassA,\"nonExistentlogger.dll\",IsOptional;Foo", "ClassA")]
+        [DataRow("-distributedlogger:,\"nonExistentlogger.dll\",IsOptional,OptionB,OptionC", "nonExistentLogger.dll")]
         public void MissingOptionalLoggersAreIgnored(string logger, string expectedLoggerName)
         {
             string projectString =
@@ -2717,9 +2717,9 @@ $@"<Project>
             output.ShouldContain($"The specified logger \"{expectedLoggerName}\" could not be created and will not be used.", customMessage: output);
         }
 
-        [Theory]
-        [InlineData("-logger:,CustomLogger.dll", "CustomLogger.dll")]
-        [InlineData("-logger:,Logger.dll", "Logger.dll")]
+        [MSBuildTestMethod]
+        [DataRow("-logger:,CustomLogger.dll", "CustomLogger.dll")]
+        [DataRow("-logger:,Logger.dll", "Logger.dll")]
         public void LoggerThrowsIOExceptionWhenDllNotFound(string logger, string expectedLoggerName)
         {
             string projectString = "<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
@@ -2734,9 +2734,9 @@ $@"<Project>
             output.ShouldContain($"Cannot create an instance of the logger {expectedLoggerName}.", customMessage: output);
         }
 
-        [Theory]
-        [InlineData("-logger:,BadFile.dll", "BadFile.dll")]
-        [InlineData("-distributedlogger:,BadFile.dll", "BadFile.dll")]
+        [MSBuildTestMethod]
+        [DataRow("-logger:,BadFile.dll", "BadFile.dll")]
+        [DataRow("-distributedlogger:,BadFile.dll", "BadFile.dll")]
         public void LoggerThrowsBadImageFormatExceptionWhenFileIsInvalid(string logger, string expectedLoggerName)
         {
             string projectString = "<Project><Target Name=\"t\"><Message Text=\"Hello\"/></Target></Project>";
@@ -2755,9 +2755,9 @@ $@"<Project>
             output.ShouldContain($"Cannot create an instance of the logger {expectedLoggerName}.", customMessage: output);
         }
 
-        [Theory]
-        [InlineData("MemberAccessException", "-logger:,", "CustomLogger.dll")]
-        [InlineData("MemberAccessException", "-distributedlogger:,", "CustomLogger.dll")]
+        [MSBuildTestMethod]
+        [DataRow("MemberAccessException", "-logger:,", "CustomLogger.dll")]
+        [DataRow("MemberAccessException", "-distributedlogger:,", "CustomLogger.dll")]
         public void LoggerThrowsMemberAccessExceptionWhenClassIsInvalid(string memberAccess, string loggerTemplate, string expectedLoggerName)
         {
             using (var env = TestEnvironment.Create())
@@ -2782,9 +2782,9 @@ $@"<Project>
             }
         }
 
-        [Theory]
-        [InlineData("TargetInvocationException", "-logger:,", "FaultyLogger.dll")]
-        [InlineData("TargetInvocationException", "-distributedlogger:,", "FaultyLogger.dll")]
+        [MSBuildTestMethod]
+        [DataRow("TargetInvocationException", "-logger:,", "FaultyLogger.dll")]
+        [DataRow("TargetInvocationException", "-distributedlogger:,", "FaultyLogger.dll")]
         public void LoggerThrowsTargetInvocationException(string targetInvocation, string loggerTemplate, string expectedLoggerName)
         {
             using (var env = TestEnvironment.Create())
@@ -2810,10 +2810,10 @@ $@"<Project>
             }
         }
 
-        [Theory]
-        [InlineData("/interactive")]
-        [InlineData("/p:NuGetInteractive=true")]
-        [InlineData("/interactive /p:NuGetInteractive=true")]
+        [MSBuildTestMethod]
+        [DataRow("/interactive")]
+        [DataRow("/p:NuGetInteractive=true")]
+        [DataRow("/interactive /p:NuGetInteractive=true")]
         public void InteractiveSetsBuiltInProperty(string arguments)
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"<Project>
@@ -2832,7 +2832,7 @@ $@"<Project>
         /// <summary>
         /// Regression test for https://github.com/dotnet/msbuild/issues/4631
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BinaryLogContainsImportedFiles()
         {
             var testProject = _env.CreateFile("Importer.proj", ObjectModelHelpers.CleanupFileContents(@"
@@ -2864,7 +2864,7 @@ $@"<Project>
             archive.Entries.ShouldContain(e => e.FullName.EndsWith(".proj", StringComparison.OrdinalIgnoreCase), 2);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleBinaryLogsCreatesMultipleFiles()
         {
             var testProject = _env.CreateFile("TestProject.proj", @"
@@ -2903,7 +2903,7 @@ $@"<Project>
             file1Bytes.SequenceEqual(file3Bytes).ShouldBeTrue("First and third binlog should be identical");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleBinaryLogsWithDuplicatesCreateDistinctFiles()
         {
             var testProject = _env.CreateFile("TestProject.proj", @"
@@ -2934,7 +2934,7 @@ $@"<Project>
             file1Bytes.SequenceEqual(file2Bytes).ShouldBeTrue("Binlog files should be identical");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleBinaryLogsWithDifferentConfigurationsCreatesSeparateLoggers()
         {
             var testProject = _env.CreateFile("TestProject.proj", @"
@@ -2974,15 +2974,15 @@ $@"<Project>
             size1.ShouldBeGreaterThan(size2, "Binlog with imports should be larger than one without");
         }
 
-        [Theory]
-        [InlineData("-warnaserror", "", "", false)]
-        [InlineData("-warnaserror -warnnotaserror:FOR123", "", "", true)]
-        [InlineData("-err: -warnnotaserror:FOR1234", "", "", false)]
-        [InlineData("-warnaserror", "", "FOR123", true)]
-        [InlineData("-warnaserror:FOR123", "", "FOR123", false)]
-        [InlineData("", "FOR123", "FOR123", false)]
-        [InlineData("", "", "FOR123", true)]
-        [InlineData("-warnaserror:FOR1234 -warnnotaserror:FOR123", "", "", false)] // The task should fire as a warning, but this should fail for having warnnotaserror used incorrectly.
+        [MSBuildTestMethod]
+        [DataRow("-warnaserror", "", "", false)]
+        [DataRow("-warnaserror -warnnotaserror:FOR123", "", "", true)]
+        [DataRow("-err: -warnnotaserror:FOR1234", "", "", false)]
+        [DataRow("-warnaserror", "", "FOR123", true)]
+        [DataRow("-warnaserror:FOR123", "", "FOR123", false)]
+        [DataRow("", "FOR123", "FOR123", false)]
+        [DataRow("", "", "FOR123", true)]
+        [DataRow("-warnaserror:FOR1234 -warnnotaserror:FOR123", "", "", false)] // The task should fire as a warning, but this should fail for having warnnotaserror used incorrectly.
         public void EndToEndWarnAsErrors(string switches, string errorCodes, string notErrorCodes, bool expectedSuccess)
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@$"<Project>
@@ -3003,9 +3003,9 @@ $@"<Project>
             success.ShouldBe(expectedSuccess);
         }
 
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
-        [Fact]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
+        [MSBuildTestMethod]
         public void BuildSlnOutOfProc()
         {
             string solutionFileContents =
@@ -3083,11 +3083,11 @@ EndGlobal
             }
         }
 
-        [Theory]
-        [InlineData("", true)]
-        [InlineData("/tl:true", false)]
-        [InlineData("/nologo", false)]
-        [InlineData("/getProperty:p", false)]
+        [MSBuildTestMethod]
+        [DataRow("", true)]
+        [DataRow("/tl:true", false)]
+        [DataRow("/nologo", false)]
+        [DataRow("/getProperty:p", false)]
         public void EndToEndVersionMessage(string arguments, bool shouldContainVersionMessage)
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -3118,8 +3118,8 @@ EndGlobal
             }
         }
 
-        [Theory]
-        [MemberData(nameof(MinimumMessageImportanceTestData))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(MinimumMessageImportanceTestData))]
         public void EndToEndMinimumMessageImportance_InProc(string arguments, MessageImportance expectedMinimumMessageImportance)
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -3142,8 +3142,8 @@ EndGlobal
             success.ShouldBeTrue();
         }
 
-        [Theory]
-        [MemberData(nameof(MinimumMessageImportanceTestData))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(MinimumMessageImportanceTestData))]
         public void EndToEndMinimumMessageImportance_OutOfProc(string arguments, MessageImportance expectedMinimumMessageImportance)
         {
             using var testEnvironment = TestEnvironment.Create();
@@ -3171,15 +3171,15 @@ EndGlobal
             success.ShouldBeTrue();
         }
 
-        [Theory]
-        [InlineData("-v:diag -m:1 -tl:off")]
-        [InlineData("-v:diag -m -tl:off")]
-        [InlineData("-v:m -m:1 -tl:off")]
-        [InlineData("-v:m -m -tl:off")]
-        [InlineData("-v:diag -m:1 -tl:on")]
-        [InlineData("-v:diag -m -tl:on")]
-        [InlineData("-v:m -m:1 -tl:on")]
-        [InlineData("-v:m -m -tl:on")]
+        [MSBuildTestMethod]
+        [DataRow("-v:diag -m:1 -tl:off")]
+        [DataRow("-v:diag -m -tl:off")]
+        [DataRow("-v:m -m:1 -tl:off")]
+        [DataRow("-v:m -m -tl:off")]
+        [DataRow("-v:diag -m:1 -tl:on")]
+        [DataRow("-v:diag -m -tl:on")]
+        [DataRow("-v:m -m:1 -tl:on")]
+        [DataRow("-v:m -m -tl:on")]
         public void PreprocessProjectWell(string arguments)
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(
@@ -3209,7 +3209,7 @@ EndGlobal
         /// into the default context. So put the test here and isolate the task into an MSBuild that runs in its
         /// own process, causing it to newly load the task (test) assembly in a new ALC.
         /// </remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void TasksGetAssemblyLoadContexts()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -3227,7 +3227,7 @@ EndGlobal
 
 #endif
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ThrowsWhenMaxCpuCountTooLargeForMultiThreadedAndForceAllTasksOutOfProc()
         {
             string projectContent = """
@@ -3241,7 +3241,7 @@ EndGlobal
             MSBuildApp.Execute([@"c:\bin\msbuild.exe", project, "/m:257 /mt"]).ShouldBe(MSBuildApp.ExitType.SwitchError);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildForceMultiThreadedEnvironmentVariableEnablesMultiThreadedMode()
         {
             // When MSBUILDFORCEMULTITHREADED=1 is set, IsMultiThreadedEnabled should return true
@@ -3255,7 +3255,7 @@ EndGlobal
             MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildForceMultiThreadedEnvironmentVariableUnsetDoesNotEnableMultiThreadedMode()
         {
             // When the env var is not set and the switch is not passed, IsMultiThreadedEnabled should return false.
@@ -3266,7 +3266,7 @@ EndGlobal
             MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildForceMultiThreadedEnvironmentVariableNonOneValueDoesNotEnableMultiThreadedMode()
         {
             // The env var is only honored when set to exactly "1", matching other MSBUILDFORCE* flags.
@@ -3277,17 +3277,17 @@ EndGlobal
             MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
         }
 
-        [Theory]
+        [MSBuildTestMethod]
         // MSBUILDUSESERVER value, -mt build, expected server use, expected reason.
-        [InlineData("1", false, true, "EnvVar")]
-        [InlineData("1", true, true, "EnvVar")]
-        [InlineData("0", true, false, "")]
-        [InlineData("0", false, false, "")]
-        [InlineData("false", true, false, "")] // any explicit non-"1" value opts out
-        [InlineData("true", true, false, "")]
-        [InlineData(null, true, true, "ImpliedByMt")]
-        [InlineData(null, false, false, "")]
-        [InlineData("", true, true, "ImpliedByMt")] // empty is treated as unset
+        [DataRow("1", false, true, "EnvVar")]
+        [DataRow("1", true, true, "EnvVar")]
+        [DataRow("0", true, false, "")]
+        [DataRow("0", false, false, "")]
+        [DataRow("false", true, false, "")] // any explicit non-"1" value opts out
+        [DataRow("true", true, false, "")]
+        [DataRow(null, true, true, "ImpliedByMt")]
+        [DataRow(null, false, false, "")]
+        [DataRow("", true, true, "ImpliedByMt")] // empty is treated as unset
         public void ShouldUseMSBuildServerDecisionTree(string useServerValue, bool isMultiThreaded, bool expectedUseServer, string expectedReason)
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();

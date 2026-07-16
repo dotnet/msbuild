@@ -4,10 +4,10 @@
 using System;
 using System.IO;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Framework.UnitTests
 {
+    [TestClass]
     public class MSBuildServerLifecycleEventArgs_Tests
     {
         /// <summary>
@@ -17,7 +17,7 @@ namespace Microsoft.Build.Framework.UnitTests
         /// spawned short-lived event (null reason), a reused event (null reason), and a not-used event (non-null
         /// reason/reasonCode — the WriteOptionalString branch).
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SerializationDeserializationTest()
         {
             RoundtripAndAssert(new MSBuildServerLifecycleEventArgs(

@@ -7,7 +7,6 @@ using System.Runtime.InteropServices;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
@@ -19,6 +18,7 @@ namespace Microsoft.Build.Engine.UnitTests
     /// 
     /// This is a regression test for https://github.com/dotnet/msbuild/issues/13013
     /// </summary>
+    [TestClass]
     public class TaskHostFactoryLifecycle_E2E_Tests
     {
         private static string AssemblyLocation { get; } = Path.Combine(Path.GetDirectoryName(typeof(TaskHostFactoryLifecycle_E2E_Tests).Assembly.Location) ?? AppContext.BaseDirectory);
@@ -30,9 +30,9 @@ namespace Microsoft.Build.Engine.UnitTests
         private const string CurrentRuntime = "CurrentRuntime";
         private const string NetRuntime = "NET";
 
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public TaskHostFactoryLifecycle_E2E_Tests(ITestOutputHelper output)
+        public TaskHostFactoryLifecycle_E2E_Tests(TestContext output)
         {
             _output = output;
         }
@@ -48,13 +48,13 @@ namespace Microsoft.Build.Engine.UnitTests
         /// </summary>
         /// <param name="runtimeToUse">The runtime to use for the task (CurrentRuntime or NET)</param>
         /// <param name="taskFactoryToUse">The task factory to use (TaskHostFactory or AssemblyTaskFactory)</param>
-        [Theory]
+        [MSBuildTestMethod]
 #if NET
-        [InlineData(CurrentRuntime, AssemblyTaskFactory)] // Match + No Explicit → in-proc
-        [InlineData(CurrentRuntime, TaskHostFactory)] // Match + Explicit → short-lived out-of-proc
+        [DataRow(CurrentRuntime, AssemblyTaskFactory)] // Match + No Explicit → in-proc
+        [DataRow(CurrentRuntime, TaskHostFactory)] // Match + Explicit → short-lived out-of-proc
 #endif
-        [InlineData(NetRuntime, AssemblyTaskFactory)] // No Match + No Explicit → long-lived sidecar out-of-proc
-        [InlineData(NetRuntime, TaskHostFactory)] // No Match + Explicit → short-lived out-of-proc
+        [DataRow(NetRuntime, AssemblyTaskFactory)] // No Match + No Explicit → long-lived sidecar out-of-proc
+        [DataRow(NetRuntime, TaskHostFactory)] // No Match + Explicit → short-lived out-of-proc
         public void TaskHostLifecycle_ValidatesAllScenarios(
             string runtimeToUse,
             string taskFactoryToUse)

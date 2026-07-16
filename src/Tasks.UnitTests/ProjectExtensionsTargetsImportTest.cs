@@ -10,6 +10,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests that Microsoft.Common.props successfully imports project extensions written by package management systems.
     /// </summary>
+    [TestClass]
     public sealed class ProjectExtensionsTargetsImportTest : ProjectExtensionsImportTestBase
     {
         protected override string CustomImportProjectPath => Path.Combine(ObjectModelHelpers.TempProjectDir, "obj", $"{Path.GetFileName(_projectRelativePath)}.custom.targets");

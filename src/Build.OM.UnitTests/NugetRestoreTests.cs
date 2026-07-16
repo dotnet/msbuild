@@ -6,14 +6,14 @@ using System.Reflection;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Engine.OM.UnitTests
 {
+    [TestClass]
     public sealed class NugetRestoreTests
     {
-        private ITestOutputHelper _output;
-        public NugetRestoreTests(ITestOutputHelper output)
+        private TestContext _output;
+        public NugetRestoreTests(TestContext output)
         {
             _output = output;
         }

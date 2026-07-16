@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -6,16 +6,16 @@ using Microsoft.Build.Collections;
 
 using Shouldly;
 
-using Xunit;
 
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>
     /// Tests for <see cref="CopyOnWritePropertyDictionary{T}"/>.
     /// </summary>
+    [TestClass]
     public class CopyOnWritePropertyDictionary_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void Count()
         {
             var dic = CreateInstance();
@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dic.Count.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Indexer()
         {
             var dic = CreateInstance();
@@ -61,13 +61,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dic["b"].ShouldBeSameAs(b);
 
             // Cannot set a null value
-            Assert.ThrowsAny<Exception>(() => dic["a"] = null!);
+            Assert.Throws<Exception>(() => dic["a"] = null!);
 
             // Value's key must match the specified key
-            Assert.ThrowsAny<Exception>(() => dic["a"] = b);
+            Assert.Throws<Exception>(() => dic["a"] = b);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Contains()
         {
             var dic = CreateInstance();
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dic.Contains("b").ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Clear()
         {
             var dic = CreateInstance("a", "b", "c");
@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dic.Count.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Enumeration()
         {
             var dic = CreateInstance();
@@ -115,7 +115,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dic.ShouldBeSetEquivalentTo(new[] { a, b });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Equal()
         {
             var dic1 = CreateInstance("a", "b", "c");
@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Remove()
         {
             var dic = CreateInstance("a", "b", "c");
@@ -163,7 +163,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dic.Count.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportProperties()
         {
             var dic = CreateInstance();
@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             dic.ShouldBeSetEquivalentTo(new[] { a, b });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DeepClone()
         {
             CopyOnWritePropertyDictionary<MockValue> source = CreateInstance("a", "b", "c");

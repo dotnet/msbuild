@@ -6,15 +6,15 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.AppConfig
 {
+    [TestClass]
     public sealed class NonSpecificVersionStrictPrimary : ResolveAssemblyReferenceTestFixture
     {
-        public NonSpecificVersionStrictPrimary(ITestOutputHelper output) : base(output)
+        public NonSpecificVersionStrictPrimary(TestContext output) : base(output)
         {
         }
 
@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Return the default search paths.
         /// </summary>
         /// <value></value>
-        internal new string[] DefaultPaths
+        internal string[] TestSpecificDefaultPaths
         {
             get { return new string[] { s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
         }
@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         ///     dependencies anyway to make things work consistently. This would be a significant
         ///     perf hit when loading large solutions.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Exists()
         {
             // Create the engine.
@@ -68,13 +68,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedFiles);
             t.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL", StringCompareShould.IgnoreCase);
 
             // Cleanup.
@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// One entry in the app.config file should not be able to impact the mapping of an assembly
         /// with a different name.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExistsDifferentName()
         {
             // Create the engine.
@@ -120,13 +120,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedFiles);
             t.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL", StringCompareShould.IgnoreCase);
 
             // Cleanup.
@@ -149,7 +149,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         ///     dependencies anyway to make things work consistently. This would be a significant
         ///     perf hit when loading large solutions.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExistsOldVersionRange()
         {
             // Create the engine.
@@ -173,13 +173,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedFiles);
             t.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL", StringCompareShould.IgnoreCase);
 
             // Cleanup.
@@ -201,7 +201,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         ///     dependencies anyway to make things work consistently. This would be a significant
         ///     perf hit when loading large solutions.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void HighVersionDoesntExist()
         {
             // Create the engine.
@@ -225,13 +225,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedFiles);
             t.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL", StringCompareShould.IgnoreCase);
 
             // Cleanup.
@@ -253,7 +253,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         ///     dependencies anyway to make things work consistently. This would be a significant
         ///     perf hit when loading large solutions.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LowVersionDoesntExist()
         {
             // Create the engine.
@@ -277,13 +277,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AppConfigFile = appConfigFile;
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedFiles);
             t.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL", StringCompareShould.IgnoreCase);
 
             // Cleanup.

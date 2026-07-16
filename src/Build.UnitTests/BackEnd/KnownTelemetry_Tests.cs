@@ -6,16 +6,16 @@ using System;
 using System.Globalization;
 using Microsoft.Build.Framework.Telemetry;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.BackEnd.Logging.BuildErrorTelemetryTracker;
 using static Microsoft.Build.Framework.Telemetry.BuildInsights;
 using static Microsoft.Build.Framework.Telemetry.TelemetryDataUtils;
 
 namespace Microsoft.Build.UnitTests.Telemetry;
 
+[TestClass]
 public class KnownTelemetry_Tests
 {
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryCanBeSetToNull()
     {
         KnownTelemetry.PartialBuildTelemetry = new BuildTelemetry();
@@ -24,7 +24,7 @@ public class KnownTelemetry_Tests
         KnownTelemetry.PartialBuildTelemetry.ShouldBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryCanBeSet()
     {
         BuildTelemetry buildTelemetry = new BuildTelemetry();
@@ -33,7 +33,7 @@ public class KnownTelemetry_Tests
         KnownTelemetry.PartialBuildTelemetry.ShouldBeSameAs(buildTelemetry);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryConstructedHasNoProperties()
     {
         BuildTelemetry buildTelemetry = new BuildTelemetry();
@@ -58,7 +58,7 @@ public class KnownTelemetry_Tests
         buildTelemetry.GetProperties().ShouldBeEmpty();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryCreateProperProperties()
     {
         BuildTelemetry buildTelemetry = new BuildTelemetry();
@@ -105,7 +105,7 @@ public class KnownTelemetry_Tests
         properties["InnerBuildDurationInMilliseconds"] = (finishedAt - innerStartAt).TotalMilliseconds.ToString(CultureInfo.InvariantCulture);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryHandleNullsInRecordedTimes()
     {
         BuildTelemetry buildTelemetry = new BuildTelemetry();
@@ -127,7 +127,7 @@ public class KnownTelemetry_Tests
         buildTelemetry.GetProperties().ShouldBeEmpty();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryIncludesFailureCategoryProperties()
     {
         BuildTelemetry buildTelemetry = new BuildTelemetry();
@@ -172,7 +172,7 @@ public class KnownTelemetry_Tests
         errorCounts.BuildCheck.ShouldBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryActivityPropertiesIncludesFailureData()
     {
         BuildTelemetry buildTelemetry = new BuildTelemetry();
@@ -206,7 +206,7 @@ public class KnownTelemetry_Tests
         errorCounts.Task.ShouldBe(10);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryProjectPathEmitsOnlyFileName()
     {
         BuildTelemetry buildTelemetry = new BuildTelemetry();
@@ -222,7 +222,7 @@ public class KnownTelemetry_Tests
         properties["ProjectPath"].ShouldNotContain("Users");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryBuildTargetHashesCustomTargets()
     {
         BuildTelemetry buildTelemetry = new BuildTelemetry();
@@ -237,7 +237,7 @@ public class KnownTelemetry_Tests
         properties["BuildTarget"].ShouldBe(GetHashed("MySecretCustomTarget"));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryBuildTargetPreservesKnownTargets()
     {
         string[] knownTargets = { "Build", "Clean", "Rebuild", "Restore", "Pack", "Publish", "Test" };
@@ -254,7 +254,7 @@ public class KnownTelemetry_Tests
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryActivityPropertiesHashCustomTarget()
     {
         BuildTelemetry buildTelemetry = new BuildTelemetry();
@@ -265,7 +265,7 @@ public class KnownTelemetry_Tests
         activityProperties["BuildTarget"].ShouldBe(GetHashed("InternalCustomTarget"));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryBuildTargetHandlesCommaSeparatedTargets()
     {
         BuildTelemetry buildTelemetry = new BuildTelemetry();
@@ -279,7 +279,7 @@ public class KnownTelemetry_Tests
         properties["BuildTarget"].ShouldBe("Build,Clean");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryBuildTargetHashesMixedTargets()
     {
         BuildTelemetry buildTelemetry = new BuildTelemetry();

@@ -4,7 +4,6 @@
 using System;
 
 using Microsoft.Build.Framework;
-using Xunit;
 
 #nullable disable
 
@@ -13,6 +12,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Verify the functioning of the BuildWarningEventArgs class.
     /// </summary>
+    [TestClass]
     public class BuildWarningEventArgs_Tests
     {
         /// <summary>
@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EventArgsCtors()
         {
             BuildWarningEventArgs buildWarningEvent = new BuildWarningEventArgs2();
@@ -40,7 +40,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise getHashCode.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGetHashCode()
         {
             _baseWarningEvent.GetHashCode();

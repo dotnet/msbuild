@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -19,9 +18,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
     /// <summary>
     /// Unit tests for MSBuild Net5.0 Configuration Parsing
     /// </summary>
+    [TestClass]
     public class ToolsetConfigurationNet5Test
     {
-        [Fact]
+        [MSBuildTestMethod]
         // The default ToolsetDefintionLocations is None, which results in only the local which results in only the several included
         // paths such as SDK path and RoslynTargetPath and nothing else. This behavior is expected and the exact same as before.
         public void ToolsetDefinitionLocationsIsDefault()
@@ -48,7 +48,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             toolsetProperties.ShouldNotContainKey("MSBuildExtensionsPath");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         // With ToolsetDefintionLocations set to ConfigurationFile (Which would only happen in net5.0 if the user decides to set it).
         // Most toolsets are available and the MsBuildTools and SDK paths are all in the net5.0 runtime.
         public void ToolsetDefinitionLocationsIsConfiguration()
@@ -78,7 +78,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             toolsetProperties["MSBuildExtensionsPath"].ShouldNotBeNullOrEmpty();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         // When the EnableConfigurationFileToolsets feature switch is disabled (as a trimmed or Native AOT host bakes
         // it off so System.Configuration.ConfigurationManager can be trimmed), explicitly requesting
         // ToolsetDefinitionLocations.ConfigurationFile must fail observably with an ArgumentException rather than

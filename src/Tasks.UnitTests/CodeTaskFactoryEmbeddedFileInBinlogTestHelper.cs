@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
@@ -6,7 +6,6 @@ using System.IO.Compression;
 using Microsoft.Build.Logging;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -60,7 +59,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result, out string projectDirectoryPath);
 
-            Assert.Equal(buildShouldSucceed, result);
+            Assert.AreEqual(buildShouldSucceed, result);
 
             string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
             using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
@@ -112,7 +111,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             Helpers.BuildProjectWithNewOMAndBinaryLogger(projectFileContents, binaryLogger, out bool result, out string projectDirectory);
 
-            Assert.Equal(buildShouldSucceed, result);
+            Assert.AreEqual(buildShouldSucceed, result);
 
             string projectImportsZipPath = Path.ChangeExtension(binlog.Path, ".ProjectImports.zip");
             using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);

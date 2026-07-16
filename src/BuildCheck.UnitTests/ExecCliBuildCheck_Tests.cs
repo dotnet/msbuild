@@ -6,10 +6,10 @@ using System.Runtime.InteropServices;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Checks;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.BuildCheck.UnitTests
 {
+    [TestClass]
     public sealed class ExecCliBuildCheck_Tests
     {
         private const int MaxStackSizeWindows = 1024 * 1024; // 1 MB
@@ -19,43 +19,47 @@ namespace Microsoft.Build.BuildCheck.UnitTests
 
         private readonly MockBuildCheckRegistrationContext _registrationContext;
 
-        public static TheoryData<string?> BuildCommandTestData => new TheoryData<string?>(
-            "dotnet build",
-            "dotnet build&dotnet build",
-            "dotnet     build",
-            "dotnet clean",
-            "dotnet msbuild",
-            "dotnet restore",
-            "dotnet publish",
-            "dotnet pack",
-            "dotnet test",
-            "dotnet vstest",
-            "dotnet build -p:Configuration=Release",
-            "dotnet build /t:Restore;Clean",
-            "dotnet build&some command",
-            "some command&dotnet build&some other command",
-            "some command&dotnet build",
-            "some command&amp;dotnet build&amp;some other command",
-            "msbuild",
-            "msbuild /t:Build",
-            "msbuild --t:Restore;Clean",
-            "nuget restore",
-            "dotnet run --project project.SLN",
-            "dotnet run project.csproj",
-            "dotnet run project.proj",
-            "dotnet run",
-            string.Join(";", new string('a', 1025), "dotnet build", new string('a', 1025)),
-            string.Join(";", new string('a', RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? MaxStackSizeWindows * 2 : MaxStackSizeLinux * 2), "dotnet build"));
+        public static IEnumerable<object?[]> BuildCommandTestData =>
+        [
+            ["dotnet build"],
+            ["dotnet build&dotnet build"],
+            ["dotnet     build"],
+            ["dotnet clean"],
+            ["dotnet msbuild"],
+            ["dotnet restore"],
+            ["dotnet publish"],
+            ["dotnet pack"],
+            ["dotnet test"],
+            ["dotnet vstest"],
+            ["dotnet build -p:Configuration=Release"],
+            ["dotnet build /t:Restore;Clean"],
+            ["dotnet build&some command"],
+            ["some command&dotnet build&some other command"],
+            ["some command&dotnet build"],
+            ["some command&amp;dotnet build&amp;some other command"],
+            ["msbuild"],
+            ["msbuild /t:Build"],
+            ["msbuild --t:Restore;Clean"],
+            ["nuget restore"],
+            ["dotnet run --project project.SLN"],
+            ["dotnet run project.csproj"],
+            ["dotnet run project.proj"],
+            ["dotnet run"],
+            [string.Join(";", new string('a', 1025), "dotnet build", new string('a', 1025))],
+            [string.Join(";", new string('a', RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? MaxStackSizeWindows * 2 : MaxStackSizeLinux * 2), "dotnet build")],
+        ];
 
-        public static TheoryData<string?> NonBuildCommandTestData => new TheoryData<string?>(
-            "dotnet help",
-            "where dotnet",
-            "where msbuild",
-            "where nuget",
-            "dotnet bin/net472/project.dll",
-            string.Empty,
-            null,
-            new string('a', RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? MaxStackSizeWindows * 2 : MaxStackSizeLinux * 2));
+        public static IEnumerable<object?[]> NonBuildCommandTestData =>
+        [
+            ["dotnet help"],
+            ["where dotnet"],
+            ["where msbuild"],
+            ["where nuget"],
+            ["dotnet bin/net472/project.dll"],
+            [string.Empty],
+            [null],
+            [new string('a', RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? MaxStackSizeWindows * 2 : MaxStackSizeLinux * 2)],
+        ];
 
         public ExecCliBuildCheck_Tests()
         {
@@ -64,8 +68,8 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             _check.RegisterActions(_registrationContext);
         }
 
-        [Theory]
-        [MemberData(nameof(BuildCommandTestData))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(BuildCommandTestData))]
         public void ExecTask_WithCommandExecutingBuild_ShouldShowWarning(string? command)
         {
             _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData("Exec", new Dictionary<string, TaskInvocationCheckData.TaskParameter>
@@ -77,8 +81,8 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             _registrationContext.Results[0].CheckRule.Id.ShouldBe("BC0302");
         }
 
-        [Theory]
-        [MemberData(nameof(NonBuildCommandTestData))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(NonBuildCommandTestData))]
         public void ExecTask_WithCommandNotExecutingBuild_ShouldNotShowWarning(string? command)
         {
             _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData("Exec", new Dictionary<string, TaskInvocationCheckData.TaskParameter>

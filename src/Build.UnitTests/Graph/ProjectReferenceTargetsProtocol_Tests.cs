@@ -9,7 +9,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 
 #nullable disable
@@ -25,6 +24,7 @@ namespace Microsoft.Build.Graph.UnitTests
     /// run against the production protocol, not a copy-pasted snapshot. Changes to the
     /// real ProjectReferenceTargets sections in those files will exercise these tests directly.
     /// </summary>
+    [TestClass]
     public class ProjectReferenceTargetsProtocolTests : IDisposable
     {
         private readonly TestEnvironment _env;
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// </summary>
         private readonly TransientTestFile _emptyNuGetTargets;
 
-        public ProjectReferenceTargetsProtocolTests(ITestOutputHelper output)
+        public ProjectReferenceTargetsProtocolTests(TestContext output)
         {
             _env = TestEnvironment.Create(output);
             _emptyNuGetTargets = _env.CreateFile("NuGet.targets", "<Project/>");
@@ -100,7 +100,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// A non-managed project type (importing Common targets only, not Managed.After.targets) should
         /// get the core Build/Clean/Rebuild ProjectReferenceTargets in a graph build.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NonManagedProject_GetsCoreBuildCleanRebuild_InGraphBuild()
         {
             // Project 1 → Project 2, both only importing the Common targets
@@ -151,7 +151,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// A managed project (importing both Common and Managed.After targets) should get
         /// the same core Build/Clean/Rebuild targets as before the move, plus Publish support.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ManagedProject_GraphBuildTargets_MatchExpectedProtocol()
         {
             ProjectGraph graph = Helpers.CreateProjectGraph(
@@ -190,7 +190,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// where DeployOnBuild handling was refactored from appending to the ProjectReferenceTargetsForBuild
         /// property to adding separate ProjectReferenceTargets items.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeployOnBuild_GraphBuild_IncludesPublishTargetsForBuildAndRebuild()
         {
             ProjectGraph graph = Helpers.CreateProjectGraph(
@@ -229,7 +229,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// When BuildProjectReferences=false, the Build protocol should use GetTargetPath instead of
         /// .projectReferenceTargetsOrDefaultTargets, both for Build and Publish.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildProjectReferencesFalse_UsesGetTargetPath()
         {
             ProjectGraph graph = Helpers.CreateProjectGraph(
@@ -255,7 +255,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// A multitargeting project using the cross-targeting protocol should dispatch
         /// via .default and properly handle outer/inner build target assignment.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CrossTargetingProject_UsesDefaultTargetDispatch()
         {
             // Project 1 is multitargeting (outer build dispatches to inner builds via cross-targeting imports).
@@ -305,7 +305,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// Multitargeting project with BuildProjectReferences=false should use GetTargetPath
         /// for inner builds while outer builds still dispatch via .default.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CrossTargetingProject_BuildProjectReferencesFalse_UsesGetTargetPath()
         {
             ProjectGraph graph = Helpers.CreateProjectGraph(
@@ -338,7 +338,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// Clean on a cross-targeting project should propagate Clean to inner builds
         /// and to referenced projects.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CrossTargetingProject_CleanPropagatesCorrectly()
         {
             ProjectGraph graph = Helpers.CreateProjectGraph(
@@ -377,7 +377,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// When DeployOnBuild is NOT set, Build should NOT include Publish targets.
         /// This confirms the DeployOnBuild condition is properly gating the Publish items.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoDeployOnBuild_BuildDoesNotIncludePublishTargets()
         {
             ProjectGraph graph = Helpers.CreateProjectGraph(
@@ -399,7 +399,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// Managed project with Publish entry target should call the correct Publish protocol
         /// on referenced projects regardless of DeployOnBuild setting.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ManagedProject_PublishTarget_CallsPublishProtocol()
         {
             ProjectGraph graph = Helpers.CreateProjectGraph(
@@ -423,7 +423,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// The core protocol should work for a chain of 3 projects, verifying
         /// that targets propagate transitively through the graph.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NonManagedProjectChain_PropagatesTargetsThroughGraph()
         {
             // 1 → 2 → 3
@@ -456,7 +456,7 @@ namespace Microsoft.Build.Graph.UnitTests
         /// When NoBuild=true, the Publish protocol should use GetTargetPath
         /// instead of .projectReferenceTargetsOrDefaultTargets for the main reference target.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoBuild_PublishUsesGetTargetPath()
         {
             ProjectGraph graph = Helpers.CreateProjectGraph(

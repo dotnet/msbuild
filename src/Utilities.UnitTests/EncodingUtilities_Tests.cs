@@ -4,12 +4,12 @@
 using System.Globalization;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class EncodingUtilities_Tests
     {
         /// <summary>
@@ -31,10 +31,10 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test for bug where the MSBuild does not respect "en" CultureInfo
         /// </summary>
-        [Theory]
-        [InlineData("en", "en")]
-        [InlineData("jp", "jp")]
-        [InlineData("fr", "fr")]
+        [MSBuildTestMethod]
+        [DataRow("en", "en")]
+        [DataRow("jp", "jp")]
+        [DataRow("fr", "fr")]
         public void GetExternalOverriddenUILanguageIfSupportableWithEncoding_RespectsOverriddenLanguage(string inputLanguage, string expectedLanguage)
         {
             if (!EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())

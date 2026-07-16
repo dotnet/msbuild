@@ -15,7 +15,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -25,14 +24,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     /// <summary>
     /// Tests for ProjectCollection
     /// </summary>
+    [TestClass]
     public class ProjectCollection_Tests : IDisposable
     {
         /// <summary>
         /// Gets or sets the test context.
         /// </summary>
-        public ITestOutputHelper TestOutput { get; set; }
+        public TestContext TestOutput { get; set; }
 
-        public ProjectCollection_Tests(ITestOutputHelper outputHelper)
+        public ProjectCollection_Tests(TestContext outputHelper)
         {
             TestOutput = outputHelper;
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void Dispose()
         {
             ProjectCollection.GlobalProjectCollection.UnloadAllProjects();
-            Assert.Equal(0, ProjectCollection.GlobalProjectCollection.Count);
+            Assert.AreEqual(0, ProjectCollection.GlobalProjectCollection.Count);
 
             IDictionary<string, string> globalProperties = ProjectCollection.GlobalProjectCollection.GlobalProperties;
             foreach (string propertyName in globalProperties.Keys)
@@ -52,13 +52,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectCollection.GlobalProjectCollection.RemoveGlobalProperty(propertyName);
             }
 
-            Assert.Empty(ProjectCollection.GlobalProjectCollection.GlobalProperties);
+            Assert.IsEmpty(ProjectCollection.GlobalProjectCollection.GlobalProperties);
         }
 
         /// <summary>
         /// Add a single project from disk and verify it's put in the global project collection
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddProjectFromDisk()
         {
             string path = null;
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project = new Project(path);
 
                 Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject(path);
-                Assert.True(ReferenceEquals(project, project2));
+                Assert.IsTrue(ReferenceEquals(project, project2));
             }
             finally
             {
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// When an unnamed project is saved, it gets a name, and should be entered into
         /// the appropriate project collection.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddProjectOnSave()
         {
             string path = null;
@@ -95,13 +95,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             try
             {
                 Project project = new Project();
-                Assert.Equal(0, ProjectCollection.GlobalProjectCollection.Count);
+                Assert.AreEqual(0, ProjectCollection.GlobalProjectCollection.Count);
 
                 path = FileUtilities.GetTemporaryFileName();
                 project.Save(path);
 
                 Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject(path);
-                Assert.True(ReferenceEquals(project, project2));
+                Assert.IsTrue(ReferenceEquals(project, project2));
             }
             finally
             {
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// When an unnamed project is saved, it gets a name, and should be entered into
         /// the appropriate project collection.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddProjectOnSave_SpecifiedProjectCollection()
         {
             string path = null;
@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 project.Save(path);
 
                 Project project2 = collection.LoadProject(path);
-                Assert.True(ReferenceEquals(project, project2));
+                Assert.IsTrue(ReferenceEquals(project, project2));
             }
             finally
             {
@@ -145,18 +145,18 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// When an unnamed project is given a name, it should be entered into its
         /// project collection.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddProjectOnSetName()
         {
             var project = new Project { FullPath = "c:\\x" };
             Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\x");
-            Assert.True(ReferenceEquals(project, project2));
+            Assert.IsTrue(ReferenceEquals(project, project2));
         }
 
         /// <summary>
         /// Loading a project from a file inherits the project collection's global properties
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobalPropertyInheritLoadFromFile()
         {
             string path = null;
@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 collection.SetGlobalProperty("p", "v");
                 Project project = collection.LoadProject(path);
 
-                Assert.Equal("v", project.GlobalProperties["p"]);
+                Assert.AreEqual("v", project.GlobalProperties["p"]);
             }
             finally
             {
@@ -184,9 +184,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Loading a project from a file inherits the project collection's global properties
         /// </summary>
 #if FEATURE_INSTALLED_MSBUILD
-        [Fact]
+        [MSBuildTestMethod]
 #else
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/276")]
 #endif
         public void GlobalPropertyInheritLoadFromFile2()
         {
@@ -200,7 +201,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 collection.SetGlobalProperty("p", "v");
                 Project project = collection.LoadProject(path, "4.0");
 
-                Assert.Equal("v", project.GlobalProperties["p"]);
+                Assert.AreEqual("v", project.GlobalProperties["p"]);
             }
             finally
             {
@@ -215,9 +216,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Loading a project from a file inherits the project collection's global properties
         /// </summary>
 #if FEATURE_INSTALLED_MSBUILD
-        [Fact]
+        [MSBuildTestMethod]
 #else
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/276")]
 #endif
         public void GlobalPropertyInheritLoadFromFile3()
         {
@@ -231,7 +233,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 collection.SetGlobalProperty("p", "v");
                 Project project = collection.LoadProject(path, null, "4.0");
 
-                Assert.Equal("v", project.GlobalProperties["p"]);
+                Assert.AreEqual("v", project.GlobalProperties["p"]);
             }
             finally
             {
@@ -245,7 +247,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Loading a project from a reader inherits the project collection's global properties
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobalPropertyInheritLoadFromXml1()
         {
             using XmlReader reader = CreateProjectXmlReader();
@@ -255,13 +257,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project = collection.LoadProject(reader);
 
-            Assert.Equal("v", project.GlobalProperties["p"]);
+            Assert.AreEqual("v", project.GlobalProperties["p"]);
         }
 
         /// <summary>
         /// Loading a project from a reader inherits the project collection's global properties
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobalPropertyInheritLoadFromXml2()
         {
             using XmlReader reader = CreateProjectXmlReader();
@@ -271,13 +273,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project = collection.LoadProject(reader, ObjectModelHelpers.MSBuildDefaultToolsVersion);
 
-            Assert.Equal("v", project.GlobalProperties["p"]);
+            Assert.AreEqual("v", project.GlobalProperties["p"]);
         }
 
         /// <summary>
         /// Creating a project inherits the project collection's global properties
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GlobalPropertyInheritProjectConstructor()
         {
             using var collection = new ProjectCollection();
@@ -285,13 +287,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             var project = new Project(collection);
 
-            Assert.Equal("v", project.GlobalProperties["p"]);
+            Assert.AreEqual("v", project.GlobalProperties["p"]);
         }
 
         /// <summary>
         /// Load project should load a project, if it wasn't already loaded.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetLoadedProjectNonExistent()
         {
             string path = null;
@@ -301,11 +303,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 path = FileUtilities.GetTemporaryFileName();
                 ProjectRootElement xml = ProjectRootElement.Create();
                 xml.Save(path);
-                Assert.Equal(0, ProjectCollection.GlobalProjectCollection.Count);
+                Assert.AreEqual(0, ProjectCollection.GlobalProjectCollection.Count);
 
                 ProjectCollection.GlobalProjectCollection.LoadProject(path);
 
-                Assert.Equal(1, ProjectCollection.GlobalProjectCollection.Count);
+                Assert.AreEqual(1, ProjectCollection.GlobalProjectCollection.Count);
             }
             finally
             {
@@ -319,7 +321,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Verify that one project collection doesn't contain the projects of another
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetLoadedProjectWrongCollection()
         {
             var project1 = new Project { FullPath = "c:\\1" };
@@ -327,15 +329,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             using var collection = new ProjectCollection();
             var project2 = new Project(collection) { FullPath = "c:\\1" };
 
-            Assert.True(ReferenceEquals(project2, collection.LoadProject("c:\\1")));
-            Assert.False(ReferenceEquals(project1, collection.LoadProject("c:\\1")));
+            Assert.IsTrue(ReferenceEquals(project2, collection.LoadProject("c:\\1")));
+            Assert.IsFalse(ReferenceEquals(project1, collection.LoadProject("c:\\1")));
         }
 
         /// <summary>
         /// Verify that one project collection doesn't contain the ProjectRootElements of another
         /// -- because they don't share a ProjectRootElementCache
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetLoadedProjectRootElementWrongCollection()
         {
             string path = null;
@@ -349,12 +351,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 Project project1 = collection1.LoadProject(path);
                 Project project1b = collection1.LoadProject(path);
 
-                Assert.True(ReferenceEquals(project1.Xml, project1b.Xml));
+                Assert.IsTrue(ReferenceEquals(project1.Xml, project1b.Xml));
 
                 using ProjectCollection collection2 = new ProjectCollection();
                 Project project2 = collection2.LoadProject(path);
 
-                Assert.False(ReferenceEquals(project1.Xml, project2.Xml));
+                Assert.IsFalse(ReferenceEquals(project1.Xml, project2.Xml));
             }
             finally
             {
@@ -368,11 +370,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempt to have two equivalent projects in a project collection fails.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ErrorTwoProjectsEquivalentOneCollection()
         {
             _ = new Project { FullPath = "c:\\x" };
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 _ = new Project { FullPath = "c:\\x" };
             });
@@ -382,7 +384,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Validates that when loading two projects with nominally different global properties, but that match when we take
         /// into account the ProjectCollection's global properties, we get the pre-existing project if one exists.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoProjectsEquivalentWhenOneInheritsFromProjectCollection()
         {
             var project = new Project { FullPath = "c:\\1" };
@@ -391,20 +393,20 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             // loaded projects.
             ProjectCollection.GlobalProjectCollection.SetGlobalProperty("Configuration", "Debug");
 
-            Assert.Equal("Debug", project.GlobalProperties["Configuration"]);
+            Assert.AreEqual("Debug", project.GlobalProperties["Configuration"]);
 
             // now create a global properties dictionary to pass to a new project
             var globals = new Dictionary<string, string> { { "Configuration", "Debug" } };
 
             ProjectCollection.GlobalProjectCollection.LoadProject("c:\\1", globals, null);
 
-            Assert.Equal(1, ProjectCollection.GlobalProjectCollection.Count);
+            Assert.AreEqual(1, ProjectCollection.GlobalProjectCollection.Count);
         }
 
         /// <summary>
         /// Two projects may have the same path but different global properties.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoProjectsDistinguishedByGlobalPropertiesOnly()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -424,13 +426,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                     FullPath = projectDirectory
                 };
 
-            Assert.True(ReferenceEquals(project1, ProjectCollection.GlobalProjectCollection.LoadProject(projectDirectory, globalProperties1, ObjectModelHelpers.MSBuildDefaultToolsVersion)));
-            Assert.True(ReferenceEquals(project2, ProjectCollection.GlobalProjectCollection.LoadProject(projectDirectory, globalProperties2, ObjectModelHelpers.MSBuildDefaultToolsVersion)));
+            Assert.IsTrue(ReferenceEquals(project1, ProjectCollection.GlobalProjectCollection.LoadProject(projectDirectory, globalProperties1, ObjectModelHelpers.MSBuildDefaultToolsVersion)));
+            Assert.IsTrue(ReferenceEquals(project2, ProjectCollection.GlobalProjectCollection.LoadProject(projectDirectory, globalProperties2, ObjectModelHelpers.MSBuildDefaultToolsVersion)));
 
             List<Project> projects = Helpers.MakeList(ProjectCollection.GlobalProjectCollection.LoadedProjects);
 
-            Assert.Equal(2, projects.Count);
-            Assert.Equal(2, ProjectCollection.GlobalProjectCollection.Count);
+            Assert.AreEqual(2, projects.Count);
+            Assert.AreEqual(2, ProjectCollection.GlobalProjectCollection.Count);
             Assert.Contains(project1, projects);
             Assert.Contains(project2, projects);
         }
@@ -439,7 +441,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Validates that we can correctly load two of the same project file with different global properties, even when
         /// those global properties are applied to the project by the project collection (and then overridden in one case).
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoProjectsDistinguishedByGlobalPropertiesOnly_ProjectOverridesProjectCollection()
         {
             var project = new Project { FullPath = "c:\\1" };
@@ -448,7 +450,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             // loaded projects.
             ProjectCollection.GlobalProjectCollection.SetGlobalProperty("Configuration", "Debug");
 
-            Assert.Equal("Debug", project.GlobalProperties["Configuration"]);
+            Assert.AreEqual("Debug", project.GlobalProperties["Configuration"]);
 
             // Differentiate this project from the one below
             project.SetGlobalProperty("MyProperty", "MyValue");
@@ -459,17 +461,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\1", project2Globals, null);
 
-            Assert.Equal("Release", project2.GlobalProperties["Configuration"]);
+            Assert.AreEqual("Release", project2.GlobalProperties["Configuration"]);
 
             // Setting a global property on the project collection overrides all contained projects,
             // whether they were initially loaded with the global project collection's value or not.
             ProjectCollection.GlobalProjectCollection.SetGlobalProperty("Platform", "X64");
-            Assert.Equal("X64", project.GlobalProperties["Platform"]);
-            Assert.Equal("X64", project2.GlobalProperties["Platform"]);
+            Assert.AreEqual("X64", project.GlobalProperties["Platform"]);
+            Assert.AreEqual("X64", project2.GlobalProperties["Platform"]);
 
             // But setting a global property on the project directly should override that.
             project2.SetGlobalProperty("Platform", "Itanium");
-            Assert.Equal("Itanium", project2.GlobalProperties["Platform"]);
+            Assert.AreEqual("Itanium", project2.GlobalProperties["Platform"]);
 
             // Now set global properties such that the two projects have an identical set.
             ProjectCollection.GlobalProjectCollection.SetGlobalProperty("Configuration", "Debug2");
@@ -486,13 +488,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 exceptionCaught = true;
             }
 
-            Assert.True(exceptionCaught); // "Should have caused the two projects to be identical, causing an exception to be thrown"
+            Assert.IsTrue(exceptionCaught); // "Should have caused the two projects to be identical, causing an exception to be thrown"
         }
 
         /// <summary>
         /// Two projects may have the same path but different tools version.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoProjectsDistinguishedByToolsVersionOnly()
         {
             if (ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version35) == null)
@@ -512,15 +514,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var project1 = new Project(xml, null, "2.0") { FullPath = "c:\\1" };
 
             var project2 = new Project(xml, null, ObjectModelHelpers.MSBuildDefaultToolsVersion) { FullPath = "c:\\1" };
-            Assert.True(ReferenceEquals(project1, ProjectCollection.GlobalProjectCollection.LoadProject("c:\\1", null, "2.0")));
-            Assert.True(ReferenceEquals(project2, ProjectCollection.GlobalProjectCollection.LoadProject("c:\\1", null, ObjectModelHelpers.MSBuildDefaultToolsVersion)));
+            Assert.IsTrue(ReferenceEquals(project1, ProjectCollection.GlobalProjectCollection.LoadProject("c:\\1", null, "2.0")));
+            Assert.IsTrue(ReferenceEquals(project2, ProjectCollection.GlobalProjectCollection.LoadProject("c:\\1", null, ObjectModelHelpers.MSBuildDefaultToolsVersion)));
         }
 
         /// <summary>
         /// If the ToolsVersion in the project file is bogus, we'll default to the current ToolsVersion and successfully
         /// load it.  Make sure we can RE-load it, too, and successfully pick up the correct copy of the loaded project.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadProjectWithInvalidToolsVersionInFile()
         {
             const string content = @"
@@ -535,14 +537,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\123.proj", null, null);
 
-            Assert.True(ReferenceEquals(project, project2));
+            Assert.IsTrue(ReferenceEquals(project, project2));
         }
 
         /// <summary>
         /// Make sure we can reload a project that has a ToolsVersion that doesn't match what it ends up getting
         /// forced to by default (current).
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReloadProjectWithProjectToolsVersionDifferentFromEffectiveToolsVersion()
         {
             const string content = @"
@@ -557,14 +559,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project2 = ProjectCollection.GlobalProjectCollection.LoadProject("c:\\123.proj", null, null);
 
-            Assert.True(ReferenceEquals(project, project2));
+            Assert.IsTrue(ReferenceEquals(project, project2));
         }
 
         /// <summary>
         /// Collection stores projects distinguished by path, global properties, and tools version.
         /// Changing global properties should update the collection.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ChangingGlobalPropertiesUpdatesCollection()
         {
             using ProjectCollection collection = new ProjectCollection();
@@ -574,41 +576,41 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "p", "v1" } };
             Project newProject = collection.LoadProject("c:\\x", globalProperties, null);
 
-            Assert.True(ReferenceEquals(project, newProject));
+            Assert.IsTrue(ReferenceEquals(project, newProject));
         }
 
         /// <summary>
         /// Changing global properties on collection should update the collection's defaults,
         /// and any projects even if they have defined the same global properties
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SettingGlobalPropertiesOnCollectionUpdatesProjects()
         {
             using var collection = new ProjectCollection();
             var project1 = new Project(collection) { FullPath = "c:\\y" };
-            Assert.Empty(project1.GlobalProperties);
+            Assert.IsEmpty(project1.GlobalProperties);
 
             collection.SetGlobalProperty("g1", "v1");
             collection.SetGlobalProperty("g2", "v2");
             collection.SetGlobalProperty("g2", "v2"); // try dupe
 
-            Assert.Equal(2, project1.GlobalProperties.Count);
+            Assert.AreEqual(2, project1.GlobalProperties.Count);
 
             collection.RemoveGlobalProperty("g2");
             var project2 = new Project(collection) { FullPath = "c:\\x" };
 
-            Assert.Single(project1.GlobalProperties);
-            Assert.Equal("v1", project2.GlobalProperties["g1"]);
+            Assert.ContainsSingle(project1.GlobalProperties);
+            Assert.AreEqual("v1", project2.GlobalProperties["g1"]);
 
-            Assert.Single(project2.GlobalProperties);
-            Assert.Equal("v1", project2.GlobalProperties["g1"]);
+            Assert.ContainsSingle(project2.GlobalProperties);
+            Assert.AreEqual("v1", project2.GlobalProperties["g1"]);
         }
 
         /// <summary>
         /// Changing global properties on collection should update the collection's defaults,
         /// and any projects even if they have defined the same global properties
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SettingGlobalPropertiesOnCollectionUpdatesProjects2()
         {
             using var collection = new ProjectCollection();
@@ -620,62 +622,62 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             collection.SetGlobalProperty("g1", "v1");
             collection.SetGlobalProperty("g2", "v2");
 
-            Assert.Equal(2, project1.GlobalProperties.Count);
-            Assert.Equal("v1", project1.GlobalProperties["g1"]);
-            Assert.Equal("v2", project1.GlobalProperties["g2"]); // Got overwritten
-            Assert.True(project1.IsDirty);
+            Assert.AreEqual(2, project1.GlobalProperties.Count);
+            Assert.AreEqual("v1", project1.GlobalProperties["g1"]);
+            Assert.AreEqual("v2", project1.GlobalProperties["g2"]); // Got overwritten
+            Assert.IsTrue(project1.IsDirty);
         }
 
         /// <summary>
         /// Changing global properties on collection should update the collection's defaults,
         /// and all projects as well
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RemovingGlobalPropertiesOnCollectionUpdatesProjects()
         {
             using var collection = new ProjectCollection();
             var project1 = new Project(collection) { FullPath = "c:\\y" };
-            Assert.Empty(project1.GlobalProperties);
+            Assert.IsEmpty(project1.GlobalProperties);
 
             Helpers.ClearDirtyFlag(project1.Xml);
 
             collection.SetGlobalProperty("g1", "v1"); // should make both dirty
             collection.SetGlobalProperty("g2", "v2"); // should make both dirty
 
-            Assert.True(project1.IsDirty);
+            Assert.IsTrue(project1.IsDirty);
 
             var project2 = new Project(collection) { FullPath = "c:\\x" };
 
-            Assert.True(project2.IsDirty);
+            Assert.IsTrue(project2.IsDirty);
 
-            Assert.Equal(2, project1.GlobalProperties.Count);
-            Assert.Equal("v1", project2.GlobalProperties["g1"]);
+            Assert.AreEqual(2, project1.GlobalProperties.Count);
+            Assert.AreEqual("v1", project2.GlobalProperties["g1"]);
 
-            Assert.Equal(2, project2.GlobalProperties.Count);
-            Assert.Equal("v1", project2.GlobalProperties["g1"]);
+            Assert.AreEqual(2, project2.GlobalProperties.Count);
+            Assert.AreEqual("v1", project2.GlobalProperties["g1"]);
 
             Helpers.ClearDirtyFlag(project1.Xml);
             Helpers.ClearDirtyFlag(project2.Xml);
 
             collection.RemoveGlobalProperty("g2"); // should make both dirty
 
-            Assert.True(project1.IsDirty);
-            Assert.True(project2.IsDirty);
+            Assert.IsTrue(project1.IsDirty);
+            Assert.IsTrue(project2.IsDirty);
 
-            Assert.Single(project1.GlobalProperties);
-            Assert.Single(project2.GlobalProperties);
+            Assert.ContainsSingle(project1.GlobalProperties);
+            Assert.ContainsSingle(project2.GlobalProperties);
 
             collection.RemoveGlobalProperty("g1");
 
-            Assert.Empty(project1.GlobalProperties);
-            Assert.Empty(project2.GlobalProperties);
+            Assert.IsEmpty(project1.GlobalProperties);
+            Assert.IsEmpty(project2.GlobalProperties);
         }
 
         /// <summary>
         /// Changing global properties on collection should update the collection's defaults,
         /// and all projects as well
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RemovingGlobalPropertiesOnCollectionUpdatesProjects2()
         {
             using var collection = new ProjectCollection();
@@ -687,30 +689,30 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             collection.RemoveGlobalProperty("g1"); // should modify the project
 
-            Assert.Empty(project1.GlobalProperties);
-            Assert.True(project1.IsDirty);
+            Assert.IsEmpty(project1.GlobalProperties);
+            Assert.IsTrue(project1.IsDirty);
         }
 
         /// <summary>
         /// Unloading a project should remove it from the project collection
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UnloadProject()
         {
             var project = new Project { FullPath = "c:\\x" };
 
-            Assert.Equal(1, ProjectCollection.GlobalProjectCollection.Count);
+            Assert.AreEqual(1, ProjectCollection.GlobalProjectCollection.Count);
 
             ProjectCollection.GlobalProjectCollection.UnloadProject(project); // should not throw
 
-            Assert.Equal(0, ProjectCollection.GlobalProjectCollection.Count);
-            Assert.Empty(Helpers.MakeList(ProjectCollection.GlobalProjectCollection.LoadedProjects));
+            Assert.AreEqual(0, ProjectCollection.GlobalProjectCollection.Count);
+            Assert.IsEmpty(Helpers.MakeList(ProjectCollection.GlobalProjectCollection.LoadedProjects));
         }
 
         /// <summary>
         /// Unloading project XML should remove it from the weak cache.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UnloadProjectXml()
         {
             var project = new Project { FullPath = "c:\\x" };
@@ -736,10 +738,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Unloading project XML while it is in use should result in an exception.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UnloadProjectXmlWhileInDirectUse()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 var project = new Project { FullPath = "c:\\x" };
 
@@ -751,10 +753,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Unloading project XML while it is in use should result in an exception.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UnloadProjectXmlWhileInImportUse()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 var mainProject = new Project { FullPath = "c:\\main" };
 
@@ -784,26 +786,26 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Renaming a project should correctly update the project collection's set of loaded projects.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RenameProject()
         {
             var project = new Project { FullPath = "c:\\x" };
 
             project.FullPath = "c:\\y";
 
-            Assert.Equal(1, ProjectCollection.GlobalProjectCollection.Count);
+            Assert.AreEqual(1, ProjectCollection.GlobalProjectCollection.Count);
 
-            Assert.True(ReferenceEquals(project, Helpers.MakeList(ProjectCollection.GlobalProjectCollection.LoadedProjects)[0]));
+            Assert.IsTrue(ReferenceEquals(project, Helpers.MakeList(ProjectCollection.GlobalProjectCollection.LoadedProjects)[0]));
 
             ProjectCollection.GlobalProjectCollection.UnloadProject(project); // should not throw
 
-            Assert.Equal(0, ProjectCollection.GlobalProjectCollection.Count);
+            Assert.AreEqual(0, ProjectCollection.GlobalProjectCollection.Count);
         }
 
         /// <summary>
         /// Validates that we don't somehow lose the ProjectCollection global properties when renaming the project.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RenameProjectAndVerifyStillContainsProjectCollectionGlobalProperties()
         {
             var project = new Project { FullPath = "c:\\1" };
@@ -812,18 +814,18 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             // loaded projects.
             ProjectCollection.GlobalProjectCollection.SetGlobalProperty("Configuration", "Debug");
 
-            Assert.Equal("Debug", project.GlobalProperties["Configuration"]);
+            Assert.AreEqual("Debug", project.GlobalProperties["Configuration"]);
 
             project.FullPath = "c:\\2";
 
-            Assert.Equal("Debug", project.GlobalProperties["Configuration"]);
+            Assert.AreEqual("Debug", project.GlobalProperties["Configuration"]);
         }
 
         /// <summary>
         /// Saving a project to a new name should correctly update the project collection's set of loaded projects.
         /// Reported by F#.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SaveToNewNameAndUnload()
         {
             string file1 = null;
@@ -862,7 +864,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Saving a project to a new name after loading, unloading, and reloading, should work.
         /// Reported by F#.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoadUnloadReloadSaveToNewName()
         {
             string file1 = null;
@@ -905,7 +907,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// Saving a project to a new name after loading, unloading, and reloading, should work.
         /// Reported by F#.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoadUnloadAllReloadSaveToNewName()
         {
             string file1 = null;
@@ -947,7 +949,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Add a toolset
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddToolset()
         {
             using var collection = new ProjectCollection();
@@ -956,18 +958,18 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             var toolset = new Toolset("x", "c:\\y", collection, null);
             collection.AddToolset(toolset);
 
-            Assert.Equal(toolset, collection.GetToolset("x"));
-            Assert.True(collection.ContainsToolset("x"));
+            Assert.AreEqual(toolset, collection.GetToolset("x"));
+            Assert.IsTrue(collection.ContainsToolset("x"));
 
             List<Toolset> toolsets = Helpers.MakeList(collection.Toolsets);
-            Assert.Single(toolsets);
-            Assert.Equal(toolset, toolsets[0]);
+            Assert.ContainsSingle(toolsets);
+            Assert.AreEqual(toolset, toolsets[0]);
         }
 
         /// <summary>
         /// Add two toolsets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddTwoToolsets()
         {
             using var collection = new ProjectCollection();
@@ -979,11 +981,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             collection.AddToolset(toolset1);
             collection.AddToolset(toolset2);
 
-            Assert.Equal(toolset1, collection.GetToolset("x"));
-            Assert.Equal(toolset2, collection.GetToolset("y"));
+            Assert.AreEqual(toolset1, collection.GetToolset("x"));
+            Assert.AreEqual(toolset2, collection.GetToolset("y"));
 
             List<Toolset> toolsets = Helpers.MakeList(collection.Toolsets);
-            Assert.Equal(2, toolsets.Count);
+            Assert.AreEqual(2, toolsets.Count);
             Assert.Contains(toolset1, toolsets);
             Assert.Contains(toolset2, toolsets);
         }
@@ -991,7 +993,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Add a toolset that overrides another
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReplaceToolset()
         {
             using var collection = new ProjectCollection();
@@ -1003,20 +1005,20 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             collection.AddToolset(toolset1);
             collection.AddToolset(toolset2);
 
-            Assert.Equal(toolset2, collection.GetToolset("x"));
+            Assert.AreEqual(toolset2, collection.GetToolset("x"));
 
             List<Toolset> toolsets = Helpers.MakeList(collection.Toolsets);
-            Assert.Single(toolsets);
-            Assert.Equal(toolset2, toolsets[0]);
+            Assert.ContainsSingle(toolsets);
+            Assert.AreEqual(toolset2, toolsets[0]);
         }
 
         /// <summary>
         /// Attempt to add a null toolset
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddNullToolset()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectCollection.GlobalProjectCollection.AddToolset(null);
             });
@@ -1025,7 +1027,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Remove a toolset
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveToolset()
         {
             using var collection = new ProjectCollection();
@@ -1038,29 +1040,29 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             collection.AddToolset(toolset1);
             collection.AddToolset(toolset2);
 
-            Assert.True(collection.RemoveToolset("x"));
-            Assert.False(collection.ContainsToolset("x"));
+            Assert.IsTrue(collection.RemoveToolset("x"));
+            Assert.IsFalse(collection.ContainsToolset("x"));
 
-            Assert.Equal(1, Helpers.MakeList(collection.Toolsets).Count - initial);
+            Assert.AreEqual(1, Helpers.MakeList(collection.Toolsets).Count - initial);
         }
 
         /// <summary>
         /// Remove a nonexistent toolset
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveNonexistentToolset()
         {
             using var collection = new ProjectCollection();
-            Assert.False(collection.RemoveToolset("nonexistent"));
+            Assert.IsFalse(collection.RemoveToolset("nonexistent"));
         }
 
         /// <summary>
         /// Attempt to remove a null tools version
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveNullToolsVersion()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectCollection.GlobalProjectCollection.RemoveToolset(null);
             });
@@ -1069,10 +1071,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Attempt to remove an empty string toolsversion
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RemoveEmptyToolsVersion()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 ProjectCollection.GlobalProjectCollection.RemoveToolset(String.Empty);
             });
@@ -1081,7 +1083,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Current default from registry is 2.0 if 2.0 is installed
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DefaultToolsVersion()
         {
             if (ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20) == null)
@@ -1091,16 +1093,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
 
             using var collection = new ProjectCollection();
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, collection.DefaultToolsVersion);
+            Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, collection.DefaultToolsVersion);
         }
 
         /// <summary>
         /// Current default from registry is 4.0 if 2.0 is not installed
         /// </summary>
 #if FEATURE_INSTALLED_MSBUILD
-        [Fact]
+        [MSBuildTestMethod]
 #else
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/276")]
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/276")]
 #endif
         public void DefaultToolsVersion2()
         {
@@ -1111,16 +1114,16 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             }
 
             using var collection = new ProjectCollection(null, null, ToolsetDefinitionLocations.Registry);
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, collection.DefaultToolsVersion);
+            Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, collection.DefaultToolsVersion);
         }
 
         /// <summary>
         /// Error setting default tools version to empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetDefaultToolsVersionEmpty()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 ProjectCollection.GlobalProjectCollection.DefaultToolsVersion = String.Empty;
             });
@@ -1129,10 +1132,10 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Error setting default tools version to a toolset that does not exist
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetDefaultToolsVersionNonexistentToolset()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectCollection.GlobalProjectCollection.DefaultToolsVersion = "nonexistent";
             });
@@ -1141,7 +1144,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Set default tools version; subsequent projects should use it
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetDefaultToolsVersion()
         {
             using var collection = new ProjectCollection();
@@ -1149,7 +1152,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             collection.DefaultToolsVersion = "x";
 
-            Assert.Equal("x", collection.DefaultToolsVersion);
+            Assert.AreEqual("x", collection.DefaultToolsVersion);
 
             string content = ObjectModelHelpers.CleanupFileContents(@"
                     <Project xmlns='msbuildnamespace' >
@@ -1164,13 +1167,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             // to turn this behavior (new in Dev12) off, but it requires setting an environment variable and
             // clearing some internal state to make sure that the update environment variable is picked up, so
             // there's not a good way of doing it from these deliberately public OM only tests.
-            Assert.Equal(project.ToolsVersion, ObjectModelHelpers.MSBuildDefaultToolsVersion);
+            Assert.AreEqual(project.ToolsVersion, ObjectModelHelpers.MSBuildDefaultToolsVersion);
         }
 
         /// <summary>
         /// Changes to the ProjectCollection object should raise a ProjectCollectionChanged event.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectCollectionChangedEvent()
         {
             using var collection = new ProjectCollection();
@@ -1179,88 +1182,88 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             collection.ProjectCollectionChanged +=
                 (sender, e) =>
                 {
-                    Assert.Same(collection, sender);
-                    Assert.Equal(expectedChange, e.Changed);
+                    Assert.AreSame(collection, sender);
+                    Assert.AreEqual(expectedChange, e.Changed);
                     dirtyRaised = true;
                 };
-            Assert.False(dirtyRaised);
+            Assert.IsFalse(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.DisableMarkDirty;
             dirtyRaised = false;
             collection.DisableMarkDirty = true; // LEAVE THIS TRUE for rest of the test, to verify it doesn't suppress these events
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.IsBuildEnabled;
             dirtyRaised = false;
             collection.IsBuildEnabled = !collection.IsBuildEnabled;
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.OnlyLogCriticalEvents;
             dirtyRaised = false;
             collection.OnlyLogCriticalEvents = !collection.OnlyLogCriticalEvents;
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.SkipEvaluation;
             dirtyRaised = false;
             collection.SkipEvaluation = !collection.SkipEvaluation;
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.GlobalProperties;
             dirtyRaised = false;
             collection.SetGlobalProperty("a", "b");
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.GlobalProperties;
             dirtyRaised = false;
             collection.RemoveGlobalProperty("a");
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             // Verify HostServices changes raise the event.
             expectedChange = ProjectCollectionChangedState.HostServices;
             dirtyRaised = false;
             collection.HostServices = new HostServices();
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.Loggers;
             dirtyRaised = false;
             collection.RegisterLogger(new MockLogger());
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.Loggers;
             dirtyRaised = false;
             collection.RegisterLoggers(new Build.Framework.ILogger[] { new MockLogger(), new MockLogger() });
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.Loggers;
             dirtyRaised = false;
             collection.UnregisterAllLoggers();
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.Toolsets;
             dirtyRaised = false;
             collection.AddToolset(new Toolset("testTools", Path.GetTempPath(), collection, Path.GetTempPath()));
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.DefaultToolsVersion;
             dirtyRaised = false;
             collection.DefaultToolsVersion = "testTools";
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.Toolsets;
             dirtyRaised = false;
             collection.RemoveToolset("testTools");
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             expectedChange = ProjectCollectionChangedState.Toolsets;
             dirtyRaised = false;
             collection.RemoveAllToolsets();
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
         }
 
         /// <summary>
         /// Changes to the ProjectCollection object should raise a ProjectCollectionChanged event.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectCollectionChangedEvent2()
         {
             // Verify if the project, project collection and the value we are setting in the project collection are all the same
@@ -1328,7 +1331,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Changes to project XML should raise an ProjectXmlChanged event.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectXmlChangedEvent()
         {
             using var collection = new ProjectCollection();
@@ -1337,12 +1340,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             collection.ProjectXmlChanged +=
                 (sender, e) =>
                 {
-                    Assert.Same(collection, sender);
-                    Assert.Same(pre, e.ProjectXml);
+                    Assert.AreSame(collection, sender);
+                    Assert.AreSame(pre, e.ProjectXml);
                     TestOutput.WriteLine(e.Reason ?? String.Empty);
                     dirtyRaised = true;
                 };
-            Assert.False(dirtyRaised);
+            Assert.IsFalse(dirtyRaised);
 
             // Ensure that the event is raised even when DisableMarkDirty is set.
             collection.DisableMarkDirty = true;
@@ -1350,44 +1353,44 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             // Create a new PRE but don't change the template.
             dirtyRaised = false;
             pre = ProjectRootElement.Create(collection);
-            Assert.False(dirtyRaised);
+            Assert.IsFalse(dirtyRaised);
 
             // Change PRE prior to setting a filename and thus associating the PRE with the ProjectCollection.
             dirtyRaised = false;
             pre.AppendChild(pre.CreatePropertyGroupElement());
-            Assert.False(dirtyRaised);
+            Assert.IsFalse(dirtyRaised);
 
             // Associate with the ProjectCollection
             dirtyRaised = false;
             pre.FullPath = FileUtilities.GetTemporaryFile();
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             // Now try dirtying again and see that the event is raised this time.
             dirtyRaised = false;
             pre.AppendChild(pre.CreatePropertyGroupElement());
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             // Make sure that project collection global properties don't raise this event.
             dirtyRaised = false;
             collection.SetGlobalProperty("a", "b");
-            Assert.False(dirtyRaised);
+            Assert.IsFalse(dirtyRaised);
 
             // Change GlobalProperties on a project to see that doesn't propagate as an XML change.
             dirtyRaised = false;
             var project = new Project(pre);
             project.SetGlobalProperty("q", "s");
-            Assert.False(dirtyRaised);
+            Assert.IsFalse(dirtyRaised);
 
             // Change XML via the Project to verify the event is raised.
             dirtyRaised = false;
             project.SetProperty("z", "y");
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
         }
 
         /// <summary>
         /// Changes to a Project evaluation object should raise a ProjectChanged event.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectChangedEvent()
         {
             using var collection = new ProjectCollection();
@@ -1396,11 +1399,11 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             collection.ProjectChanged +=
                 (sender, e) =>
                 {
-                    Assert.Same(collection, sender);
-                    Assert.Same(project, e.Project);
+                    Assert.AreSame(collection, sender);
+                    Assert.AreSame(project, e.Project);
                     dirtyRaised = true;
                 };
-            Assert.False(dirtyRaised);
+            Assert.IsFalse(dirtyRaised);
 
             ProjectRootElement pre = ProjectRootElement.Create(collection);
             project = new Project(pre, null, null, collection);
@@ -1411,33 +1414,33 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             dirtyRaised = false;
             pre.AppendChild(pre.CreatePropertyGroupElement());
-            Assert.False(dirtyRaised); // "Dirtying the XML directly should not result in a ProjectChanged event."
+            Assert.IsFalse(dirtyRaised); // "Dirtying the XML directly should not result in a ProjectChanged event."
 
             // No events should be raised before we associate a filename with the PRE
             dirtyRaised = false;
             project.SetGlobalProperty("someGlobal", "someValue");
-            Assert.False(dirtyRaised);
+            Assert.IsFalse(dirtyRaised);
 
             dirtyRaised = false;
             project.SetProperty("someProp", "someValue");
-            Assert.False(dirtyRaised);
+            Assert.IsFalse(dirtyRaised);
 
             pre.FullPath = FileUtilities.GetTemporaryFile();
             dirtyRaised = false;
             project.SetGlobalProperty("someGlobal", "someValue2");
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             dirtyRaised = false;
             project.RemoveGlobalProperty("someGlobal");
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             dirtyRaised = false;
             collection.SetGlobalProperty("somePCglobal", "someValue");
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
 
             dirtyRaised = false;
             project.SetProperty("someProp", "someValue2");
-            Assert.True(dirtyRaised);
+            Assert.IsTrue(dirtyRaised);
         }
 
         /// <summary>
@@ -1447,7 +1450,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// This test was written because on OS X and Ubuntu, the version is showing "0.0.0.0"
         /// while Windows was working just fine.
         /// </remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectCollectionVersionIsCorrect()
         {
             Version expectedVersion = new Version(this.GetType().Assembly.GetCustomAttribute<AssemblyFileVersionAttribute>().Version);
@@ -1487,24 +1490,24 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             collection.ProjectCollectionChanged +=
                 (sender, e) =>
                 {
-                    Assert.Same(collection, sender);
-                    Assert.Equal(expectedChange, e.Changed);
+                    Assert.AreSame(collection, sender);
+                    Assert.AreEqual(expectedChange, e.Changed);
                     raisedEvent = true;
                 };
 
             expectedChange = ProjectCollectionChangedState.GlobalProperties;
             collection.SetGlobalProperty("a", propertyValue);
-            Assert.Equal(raisedEvent, expectEventRaised);
+            Assert.AreEqual(raisedEvent, expectEventRaised);
             ProjectPropertyInstance property = collection.GetGlobalProperty("a");
-            Assert.NotNull(property);
-            Assert.Equal(ProjectCollection.Unescape(propertyValue), property.EvaluatedValue);
+            Assert.IsNotNull(property);
+            Assert.AreEqual(ProjectCollection.Unescape(propertyValue), property.EvaluatedValue);
         }
 
         /// <summary>
         /// Verifies that LoadProject(string fileName, IDictionary&lt;string, string&gt; globalProperties, string toolsVersion)
         /// can be called concurrently and consistently returns the same loaded project for equivalent inputs.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoadProject_WithGlobalPropertiesAndToolsVersion_IsThreadSafeInParallel()
         {
             string path = null;
@@ -1563,7 +1566,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// mutating the shared (non-thread-safe) Dictionary at the same time. This must not corrupt
         /// the dictionary or throw.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoadProject_SharedGlobalPropertiesDictionary_AcrossDistinctPaths_IsNotConcurrentlyMutated()
         {
             const int distinctProjects = 32;
@@ -1646,7 +1649,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// produce their own project without the "equivalent project already present" race that
         /// the per-path lock is meant to prevent.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoadProject_SamePathDifferentGlobalProperties_InParallel_CreatesDistinctProjects()
         {
             string path = null;
@@ -1705,7 +1708,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// second entry, the "project global properties win" rule is violated, and the duplicate collapses
         /// inconsistently downstream.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoadProject_CallerGlobalPropertyWithDifferentCase_WinsOverCollectionPropertyCaseInsensitively()
         {
             string path = null;

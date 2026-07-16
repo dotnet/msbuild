@@ -7,9 +7,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
     using System.Linq;
-    using Xunit;
 
-    public class LinkedProjectCollection_Tests : IClassFixture<LinkedProjectCollection_Tests.MyTestCollectionGroup>
+    [TestClass]
+    public class LinkedProjectCollection_Tests
     {
         public class MyTestCollectionGroup : TestCollectionGroup
         {
@@ -17,13 +17,22 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
         public TestCollectionGroup StdGroup { get; }
-        public LinkedProjectCollection_Tests(MyTestCollectionGroup group)
+
+        private static MyTestCollectionGroup s_stdGroup;
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context) => s_stdGroup = new MyTestCollectionGroup();
+
+        [ClassCleanup]
+        public static void ClassCleanup() => s_stdGroup?.Dispose();
+
+        public LinkedProjectCollection_Tests()
         {
-            this.StdGroup = group;
-            group.Clear();
+            this.StdGroup = s_stdGroup;
+            s_stdGroup.Clear();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EnumerationBasic()
         {
             var pcLocal = this.StdGroup.Local;
@@ -41,26 +50,26 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var loadedLocal = pcLocal.Collection.LoadedProjects;
             var loadedRemote = pcRemote.Collection.LoadedProjects;
 
-            Assert.Equal(1, loadedLocal.Count);
-            Assert.Equal(1, loadedRemote.Count);
-            Assert.Same(proj1, loadedLocal.FirstOrDefault());
-            Assert.Same(proj2, loadedRemote.FirstOrDefault());
+            Assert.AreEqual(1, loadedLocal.Count);
+            Assert.AreEqual(1, loadedRemote.Count);
+            Assert.AreSame(proj1, loadedLocal.FirstOrDefault());
+            Assert.AreSame(proj2, loadedRemote.FirstOrDefault());
 
             pcLocal.Importing = true;
 
             loadedLocal = pcLocal.Collection.LoadedProjects;
-            Assert.Equal(2, loadedLocal.Count);
+            Assert.AreEqual(2, loadedLocal.Count);
 
             // still can find it's own projects and it is the same object
             var localProj = pcLocal.Collection.GetLoadedProjects(proj1Path).FirstOrDefault();
-            Assert.Same(localProj, proj1);
+            Assert.AreSame(localProj, proj1);
 
             var remoteProj = pcLocal.Collection.GetLoadedProjects(proj2Path).FirstOrDefault();
-            Assert.NotSame(remoteProj, proj2);
+            Assert.AreNotSame(remoteProj, proj2);
             ViewValidation.VerifyLinkedNotNull(remoteProj);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EnumerationMultiple()
         {
             var pcLocal = this.StdGroup.Local;
@@ -85,40 +94,40 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var loadedRemote0 = pcRemote0.Collection.LoadedProjects;
             var loadedRemote1 = pcRemote1.Collection.LoadedProjects;
 
-            Assert.Equal(2, loadedLocal.Count);
-            Assert.Equal(2, loadedRemote0.Count);
-            Assert.Equal(2, loadedRemote1.Count);
+            Assert.AreEqual(2, loadedLocal.Count);
+            Assert.AreEqual(2, loadedRemote0.Count);
+            Assert.AreEqual(2, loadedRemote1.Count);
 
             pcLocal.Importing = true;
 
             var loadedWithExternal = pcLocal.Collection.LoadedProjects;
-            Assert.Equal(6, loadedWithExternal.Count);
+            Assert.AreEqual(6, loadedWithExternal.Count);
 
             var prj0Coll = pcLocal.Collection.GetLoadedProjects(proj0Path);
-            Assert.Equal(1, prj0Coll.Count);
-            Assert.Same(proj0local, prj0Coll.First());
+            Assert.AreEqual(1, prj0Coll.Count);
+            Assert.AreSame(proj0local, prj0Coll.First());
 
             var prj1Coll = pcLocal.Collection.GetLoadedProjects(proj1Path);
-            Assert.Equal(2, prj1Coll.Count);
-            Assert.True(prj1Coll.Contains(proj1local));
-            Assert.False(prj1Coll.Contains(proj1remote0));
+            Assert.AreEqual(2, prj1Coll.Count);
+            Assert.IsTrue(prj1Coll.Contains(proj1local));
+            Assert.IsFalse(prj1Coll.Contains(proj1remote0));
 
             var prj2Coll = pcLocal.Collection.GetLoadedProjects(proj2Path);
-            Assert.Equal(2, prj2Coll.Count);
-            Assert.False(prj2Coll.Contains(proj2remote0));
-            Assert.False(prj2Coll.Contains(proj2remote1));
+            Assert.AreEqual(2, prj2Coll.Count);
+            Assert.IsFalse(prj2Coll.Contains(proj2remote0));
+            Assert.IsFalse(prj2Coll.Contains(proj2remote1));
             foreach (var p in prj2Coll)
             {
                 ViewValidation.VerifyLinkedNotNull(p);
             }
 
             var prj3Coll = pcLocal.Collection.GetLoadedProjects(proj3Path);
-            Assert.Equal(1, prj3Coll.Count);
-            Assert.False(prj2Coll.Contains(proj3remote1));
+            Assert.AreEqual(1, prj3Coll.Count);
+            Assert.IsFalse(prj2Coll.Contains(proj3remote1));
             ViewValidation.VerifyLinkedNotNull(prj3Coll.FirstOrDefault());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DynamicEnumeration()
         {
             var pcLocal = this.StdGroup.Local;
@@ -129,36 +138,36 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var proj1Path = this.StdGroup.StdProjectFiles[1];
             var proj2Path = this.StdGroup.StdProjectFiles[2];
 
-            Assert.Equal(0, pcLocal.Collection.LoadedProjects.Count);
-            Assert.Equal(0, pcRemote.Collection.LoadedProjects.Count);
+            Assert.AreEqual(0, pcLocal.Collection.LoadedProjects.Count);
+            Assert.AreEqual(0, pcRemote.Collection.LoadedProjects.Count);
 
             pcLocal.LoadProject(proj0Path);
-            Assert.Equal(1, pcLocal.Collection.LoadedProjects.Count);
-            Assert.Equal(1, pcLocal.Collection.GetLoadedProjects(proj0Path).Count);
+            Assert.AreEqual(1, pcLocal.Collection.LoadedProjects.Count);
+            Assert.AreEqual(1, pcLocal.Collection.GetLoadedProjects(proj0Path).Count);
 
             var proj1 = pcRemote.LoadProject(proj1Path);
-            Assert.Equal(2, pcLocal.Collection.LoadedProjects.Count);
-            Assert.Equal(1, pcLocal.Collection.GetLoadedProjects(proj1Path).Count);
+            Assert.AreEqual(2, pcLocal.Collection.LoadedProjects.Count);
+            Assert.AreEqual(1, pcLocal.Collection.GetLoadedProjects(proj1Path).Count);
 
             pcRemote.LoadProject(proj2Path);
-            Assert.Equal(3, pcLocal.Collection.LoadedProjects.Count);
-            Assert.Equal(1, pcLocal.Collection.GetLoadedProjects(proj2Path).Count);
+            Assert.AreEqual(3, pcLocal.Collection.LoadedProjects.Count);
+            Assert.AreEqual(1, pcLocal.Collection.GetLoadedProjects(proj2Path).Count);
 
             pcRemote.Collection.UnloadProject(proj1);
-            Assert.Equal(2, pcLocal.Collection.LoadedProjects.Count);
-            Assert.Equal(0, pcLocal.Collection.GetLoadedProjects(proj1Path).Count);
-            Assert.Equal(1, pcLocal.Collection.GetLoadedProjects(proj2Path).Count);
+            Assert.AreEqual(2, pcLocal.Collection.LoadedProjects.Count);
+            Assert.AreEqual(0, pcLocal.Collection.GetLoadedProjects(proj1Path).Count);
+            Assert.AreEqual(1, pcLocal.Collection.GetLoadedProjects(proj2Path).Count);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CrossLinked()
         {
             this.StdGroup.Local.Importing = true;
             Array.ForEach(StdGroup.Remote, (r) => r.Importing = true);
 
-            Assert.Equal(0, this.StdGroup.Local.Collection.LoadedProjects.Count);
-            Assert.Equal(0, this.StdGroup.Remote[0].Collection.LoadedProjects.Count);
-            Assert.Equal(0, this.StdGroup.Remote[1].Collection.LoadedProjects.Count);
+            Assert.AreEqual(0, this.StdGroup.Local.Collection.LoadedProjects.Count);
+            Assert.AreEqual(0, this.StdGroup.Remote[0].Collection.LoadedProjects.Count);
+            Assert.AreEqual(0, this.StdGroup.Remote[1].Collection.LoadedProjects.Count);
 
             this.StdGroup.Local.LoadProject(this.StdGroup.StdProjectFiles[0]);
             ViewValidation.VerifyProjectCollectionLinks(this.StdGroup.Local.Collection.LoadedProjects, 1, 0);

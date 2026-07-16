@@ -7,16 +7,16 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class RemoveDir_Tests
     {
-        private ITestOutputHelper _output;
-        public RemoveDir_Tests(ITestOutputHelper output)
+        private TestContext _output;
+        public RemoveDir_Tests(TestContext output)
         {
             _output = output;
         }
@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
          *
          * Make sure that attributes set on input items are forwarded to output items.
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void AttributeForwarding()
         {
             RemoveDir t = new RemoveDir();
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
             Directory.Exists(t.RemovedDirectories[0].ItemSpec).ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SimpleDelete()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Regression test: https://github.com/dotnet/msbuild/issues/7563
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeleteEmptyDirectory_WarnsAndContinues()
         {
 

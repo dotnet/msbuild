@@ -5,7 +5,6 @@ using System;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -14,6 +13,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Tests for NodeProviderOutOfProc, specifically the node over-provisioning detection feature.
     /// </summary>
+    [TestClass]
     public class NodeProviderOutOfProc_Tests
     {
         /// <summary>
@@ -53,7 +53,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DetermineNodesForReuse_WhenReuseDisabled_AllNodesShouldTerminate()
         {
             var provider = new TestableNodeProviderOutOfProcBase(systemWideNodeCount: 10, thresholdOverride: 4);
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.ShouldAllBe(shouldReuse => shouldReuse == false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DetermineNodesForReuse_WhenThresholdIsZero_AllNodesShouldTerminate()
         {
             var provider = new TestableNodeProviderOutOfProcBase(systemWideNodeCount: 10, thresholdOverride: 0);
@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.ShouldAllBe(shouldReuse => shouldReuse == false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DetermineNodesForReuse_WhenUnderThreshold_AllNodesShouldBeReused()
         {
             // System has 3 nodes total, threshold is 4, so we're under the limit
@@ -87,7 +87,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.ShouldAllBe(shouldReuse => shouldReuse == true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DetermineNodesForReuse_WhenAtThreshold_AllNodesShouldBeReused()
         {
             // System has 4 nodes total, threshold is 4, so we're at the limit
@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.ShouldAllBe(shouldReuse => shouldReuse == true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DetermineNodesForReuse_WhenOverThreshold_ExcessNodesShouldTerminate()
         {
             // System has 10 nodes total, threshold is 4
@@ -113,7 +113,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.ShouldAllBe(shouldReuse => shouldReuse == false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DetermineNodesForReuse_WhenSlightlyOverThreshold_SomeNodesShouldBeReused()
         {
             // System has 6 nodes total, threshold is 4
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result[2].ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DetermineNodesForReuse_WithSingleNode_BehavesCorrectly()
         {
             // System has 5 nodes total, threshold is 4

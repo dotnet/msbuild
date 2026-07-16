@@ -10,7 +10,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -20,20 +19,21 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// Tests for MSBuild App Host support functionality.
     /// Tests the DOTNET_ROOT environment variable handling for app host bootstrap.
     /// </summary>
+    [TestClass]
     public sealed class AppHostSupport_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
         private readonly string _dotnetHostPath = NativeMethodsShared.IsWindows
             ? @"C:\Program Files\dotnet\dotnet.exe"
             : "/usr/share/dotnet/dotnet";
 
-        public AppHostSupport_Tests(ITestOutputHelper output)
+        public AppHostSupport_Tests(TestContext output)
         {
             _output = output;
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateDotnetRootEnvironmentOverrides_SetsDotnetRootFromHostPath()
         {
             var overrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(_dotnetHostPath);
@@ -45,7 +45,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             overrides["DOTNET_ROOT"].ShouldBe(expectedDotnetRoot);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateDotnetRootEnvironmentOverrides_ClearsArchitectureSpecificVariables()
         {
             var overrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(_dotnetHostPath);
@@ -63,8 +63,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
 
         [WindowsOnlyTheory]
-        [InlineData(@"C:\custom\sdk\dotnet.exe", @"C:\custom\sdk")]
-        [InlineData(@"D:\tools\dotnet\dotnet.exe", @"D:\tools\dotnet")]
+        [DataRow(@"C:\custom\sdk\dotnet.exe", @"C:\custom\sdk")]
+        [DataRow(@"D:\tools\dotnet\dotnet.exe", @"D:\tools\dotnet")]
         public void CreateDotnetRootEnvironmentOverrides_HandlesVariousPaths_Windows(string hostPath, string expectedRoot)
         {
             var overrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(hostPath);
@@ -73,8 +73,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [UnixOnlyTheory]
-        [InlineData("/usr/local/share/dotnet/dotnet", "/usr/local/share/dotnet")]
-        [InlineData("/home/user/.dotnet/dotnet", "/home/user/.dotnet")]
+        [DataRow("/usr/local/share/dotnet/dotnet", "/usr/local/share/dotnet")]
+        [DataRow("/home/user/.dotnet/dotnet", "/home/user/.dotnet")]
         public void CreateDotnetRootEnvironmentOverrides_HandlesVariousPaths_Unix(string hostPath, string expectedRoot)
         {
             var overrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides(hostPath);
@@ -82,7 +82,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             overrides["DOTNET_ROOT"].ShouldBe(expectedRoot);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ClearBootstrapDotnetRootEnvironment_ClearsVariablesNotInOriginalEnvironment()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
@@ -107,7 +107,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ClearBootstrapDotnetRootEnvironment_PreservesVariablesInOriginalEnvironment()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ClearBootstrapDotnetRootEnvironment_HandlesMixedScenario()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// and that omitting toolsDirectory on both sides always matches.
         /// </summary>
 #if NET
-        [Fact]
+        [MSBuildTestMethod]
         public void Handshake_ExternalPathCanMismatch_DefaultAlwaysMatches()
         {
             // Use explicit NET runtime and current architecture to ensure the NET
@@ -361,7 +361,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 #endif
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ResolveNetTaskHostLaunchPath_ReturnsAppHost_WhenAppHostFileExists()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -376,7 +376,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             launchPath.ShouldBe(appHostPath);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ResolveNetTaskHostLaunchPath_FallsBackToMSBuildDll_WhenAppHostMissing()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);

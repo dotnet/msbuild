@@ -4,7 +4,6 @@
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable enable
 
@@ -22,18 +21,19 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// task name that no real task or other test uses; the leftover registrations are harmless (a registered
     /// name only affects a build that invokes a task of exactly that name).
     /// </remarks>
+    [TestClass]
     public sealed class RegisteredTaskExecution_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public RegisteredTaskExecution_Tests(ITestOutputHelper output) => _output = output;
+        public RegisteredTaskExecution_Tests(TestContext output) => _output = output;
 
         /// <summary>
         /// A task registered through the generic overload resolves from the registry (consulted before the
         /// project's UsingTask table) and executes under the default JIT engine, and its <c>[Output]</c> binds
         /// back to a property - exercising reflective parameter binding over the registered, trim-rooted type.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RegisterTaskGeneric_ResolvesAndExecutesAndBindsOutput()
         {
             Task.RegisterTask<RegisteredEchoTestTask>("RegTaskTest_GenericEcho");
@@ -60,7 +60,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// statically known at registration) resolves and executes, exercising the lazily-built
         /// <c>LoadedType</c> and the parameter binding that depends on it.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RegisterTaskFactory_ResolvesAndExecutesAndBindsOutput()
         {
             Task.RegisterTask("RegTaskTest_FactoryEcho", static () => new RegisteredEchoTestTask());
@@ -86,7 +86,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Registering a name a second time replaces the previous registration; the most recently registered
         /// task is the one the engine constructs.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RegisterTask_RegisteringSameNameAgain_ReplacesPreviousRegistration()
         {
             Task.RegisterTask<RegisteredEchoTestTask>("RegTaskTest_Replace");
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// execute correctly: the registered-task factory does not leak across tasks. If it did, the intrinsic
         /// <c>CallTarget</c> would be mis-constructed as the registered task and its target would not run.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RegisteredTaskFollowedByIntrinsicTask_BothExecute_NoStateLeak()
         {
             Task.RegisterTask<RegisteredEchoTestTask>("RegTaskTest_ResetEcho");
@@ -141,6 +141,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// A simple host-registered task: echoes its <see cref="Input"/> with a "!" suffix into an
     /// <c>[Output]</c> property and logs a marker so a build can assert it executed and that its output bound.
     /// </summary>
+    [TestClass]
     public sealed class RegisteredEchoTestTask : Task
     {
         public string? Input { get; set; }
@@ -160,6 +161,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// A second host-registered task that logs a distinct marker, used to prove that re-registering a name
     /// replaces the previous registration.
     /// </summary>
+    [TestClass]
     public sealed class RegisteredMarkerTestTask : Task
     {
         public override bool Execute()

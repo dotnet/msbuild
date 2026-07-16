@@ -3,26 +3,26 @@
 
 using System.Runtime.InteropServices;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests
 {
+    [TestClass]
     public class PathDefaultClassifierTests
     {
         private static bool IsWindows => RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
 
-        [Theory]
-        [InlineData("")]
-        [InlineData("obj")]
-        [InlineData("obj/generated")]
-        [InlineData(@"sub\dir")]
-        [InlineData("./relative")]
+        [TestMethod]
+        [DataRow("")]
+        [DataRow("obj")]
+        [DataRow("obj/generated")]
+        [DataRow(@"sub\dir")]
+        [DataRow("./relative")]
         public void RelativeForms_AreNotFullyQualified(string value)
         {
             PathDefaultClassifier.IsFullyQualifiedPath(value).ShouldBeFalse();
         }
 
-        [Fact]
+        [TestMethod]
         public void UnixRoot_IsFullyQualifiedOnUnixOnly()
         {
             // A leading '/' is absolute on Unix; on Windows it is only rooted to the current drive, so it is
@@ -30,7 +30,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests
             PathDefaultClassifier.IsFullyQualifiedPath("/etc/config").ShouldBe(!IsWindows);
         }
 
-        [Fact]
+        [TestMethod]
         public void WindowsDriveAbsolute_IsFullyQualifiedOnWindowsOnly()
         {
             // "C:/x" and "C:\x" are absolute on Windows; on Unix they are ordinary relative paths, matching how
@@ -39,13 +39,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests
             PathDefaultClassifier.IsFullyQualifiedPath("C:/temp/out").ShouldBe(IsWindows);
         }
 
-        [Fact]
+        [TestMethod]
         public void WindowsUncPath_IsFullyQualifiedOnWindowsOnly()
         {
             PathDefaultClassifier.IsFullyQualifiedPath(@"\\server\share").ShouldBe(IsWindows);
         }
 
-        [Fact]
+        [TestMethod]
         public void WindowsDriveRelative_IsNeverFullyQualified()
         {
             // "C:foo" (no separator after the colon) is drive-relative — its meaning depends on the drive's
@@ -53,7 +53,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests
             PathDefaultClassifier.IsFullyQualifiedPath("C:foo").ShouldBeFalse();
         }
 
-        [Fact]
+        [TestMethod]
         public void RelativeDefault_IsTrueForPlausibleRelativePathsOnly()
         {
             PathDefaultClassifier.IsRelativePathDefault("obj").ShouldBeTrue();

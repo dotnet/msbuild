@@ -9,18 +9,18 @@ using System.Reflection;
 using System.Reflection.Emit;
 using Microsoft.Build.Tasks;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class StrongNameUtils_Tests
     {
         /// <summary>
         /// The BCL (mscorlib) is always a fully signed managed assembly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAssemblyStrongNameLevel_FullySignedAssembly_ReturnsFullySigned()
         {
             string bclPath = typeof(string).Assembly.Location;
@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
         /// We emit one on the fly by attaching a public key and tagging the assembly
         /// <c>[assembly: AssemblyDelaySign(true)]</c>.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAssemblyStrongNameLevel_DelaySignedAssembly_ReturnsDelaySigned()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
         /// An unsigned managed assembly (COR20 header present, no strong name signature directory)
         /// must be reported as None.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAssemblyStrongNameLevel_UnsignedManagedAssembly_ReturnsNone()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests
             StrongNameUtils.GetAssemblyStrongNameLevel(kernel32).ShouldBe(StrongNameLevel.Unknown);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAssemblyStrongNameLevel_NonExistentFile_ReturnsUnknown()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -119,7 +119,7 @@ namespace Microsoft.Build.UnitTests
             StrongNameUtils.GetAssemblyStrongNameLevel(missing.Path).ShouldBe(StrongNameLevel.Unknown);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAssemblyStrongNameLevel_GarbageFile_ReturnsUnknown()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -129,7 +129,7 @@ namespace Microsoft.Build.UnitTests
             StrongNameUtils.GetAssemblyStrongNameLevel(garbage.Path).ShouldBe(StrongNameLevel.Unknown);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAssemblyStrongNameLevel_EmptyFile_ReturnsUnknown()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -138,7 +138,7 @@ namespace Microsoft.Build.UnitTests
             StrongNameUtils.GetAssemblyStrongNameLevel(empty.Path).ShouldBe(StrongNameLevel.Unknown);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAssemblyStrongNameLevel_NullPath_Throws()
         {
             Should.Throw<ArgumentNullException>(() => StrongNameUtils.GetAssemblyStrongNameLevel(null));

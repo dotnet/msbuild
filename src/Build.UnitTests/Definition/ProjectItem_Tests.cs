@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
-using Xunit;
 using ProjectItemFactory = Microsoft.Build.Evaluation.ProjectItem.ProjectItemFactory;
 
 #nullable disable
@@ -16,12 +15,13 @@ namespace Microsoft.Build.UnitTests.Definition
     /// <summary>
     /// Class containing tests for the ProjectItem and related functionality.
     /// </summary>
+    [TestClass]
     public class ProjectItem_Tests
     {
         /// <summary>
         /// Make sure the CopyFrom actually does a clone.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyFromClonesMetadata()
         {
             ProjectItem item1 = GetOneItemFromFragment(@"<i Include='i1'><m>m1</m></i>");
@@ -31,12 +31,12 @@ namespace Microsoft.Build.UnitTests.Definition
             item1.SetMetadataValue("m", "m2");
             item1.SetMetadataValue("n", "n1");
 
-            Assert.Single(Helpers.MakeList(item2.Metadata));
-            Assert.Equal(String.Empty, item2.GetMetadataValue("n"));
-            Assert.Equal(1 + 15 /* built-in metadata */, item2.MetadataCount);
+            Assert.ContainsSingle(Helpers.MakeList(item2.Metadata));
+            Assert.AreEqual(String.Empty, item2.GetMetadataValue("n"));
+            Assert.AreEqual(1 + 15 /* built-in metadata */, item2.MetadataCount);
 
             // Should still point at the same XML items
-            Assert.True(Object.ReferenceEquals(item1.DirectMetadata.First().Xml, item2.DirectMetadata.First().Xml));
+            Assert.IsTrue(Object.ReferenceEquals(item1.DirectMetadata.First().Xml, item2.DirectMetadata.First().Xml));
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace Microsoft.Build.UnitTests.Definition
         {
             IList<ProjectItem> items = GetItemsFromFragment(fragment);
 
-            Assert.Single(items);
+            Assert.ContainsSingle(items);
             return items[0];
         }
 

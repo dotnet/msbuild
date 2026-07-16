@@ -12,7 +12,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 using FrameworkLocationHelper = Microsoft.Build.Shared.FrameworkLocationHelper;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
@@ -29,9 +28,10 @@ using XMakeElements = Microsoft.Build.Shared.XMakeElements;
 
 namespace Microsoft.Build.UnitTests.Construction
 {
+    [TestClass]
     public class SolutionProjectGenerator_Tests : IDisposable
     {
-        private readonly ITestOutputHelper output;
+        private readonly TestContext output;
 
         private string _originalVisualStudioVersion = null;
 
@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
         private const string _longLineString = "a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-a-really-long-string-";
 
-        public SolutionProjectGenerator_Tests(ITestOutputHelper output)
+        public SolutionProjectGenerator_Tests(TestContext output)
         {
             this.output = output;
 
@@ -57,10 +57,10 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test that if a before.{sln}>.targets or after.{sln}.targets file has one of the default targets (Build, Clean, etc.) that it includes only the user-defined target.
         /// </summary>
-        [Theory]
-        [InlineData("before.MySln.sln.targets")]
-        [InlineData("after.MySln.sln.targets")]
-        [InlineData("name.that.does.Not.Affect.The.Build.targets")]
+        [MSBuildTestMethod]
+        [DataRow("before.MySln.sln.targets")]
+        [DataRow("after.MySln.sln.targets")]
+        [DataRow("name.that.does.Not.Affect.The.Build.targets")]
         public void SolutionProjectIgnoresDuplicateDefaultTargets(string name)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -85,11 +85,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test that targets in before.{sln}.targets and after.{sln}.targets files are included in the project.
         /// </summary>
-        [Theory]
-        [InlineData("before.MySln.sln.targets", false)]
-        [InlineData("before.MySln.sln.targets", true)]
-        [InlineData("after.MySln.sln.targets", false)]
-        [InlineData("after.MySln.sln.targets", true)]
+        [MSBuildTestMethod]
+        [DataRow("before.MySln.sln.targets", false)]
+        [DataRow("before.MySln.sln.targets", true)]
+        [DataRow("after.MySln.sln.targets", false)]
+        [DataRow("after.MySln.sln.targets", true)]
         public void SolutionProjectIncludesBeforeAndAfterTargets(string name, bool convertToSlnx)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -112,7 +112,7 @@ namespace Microsoft.Build.UnitTests.Construction
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildProjectAsTarget()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -157,7 +157,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Build Solution with Multiple Targets (ex. Clean;Build;Custom).
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildProjectWithMultipleTargets()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Build Solution with Multiple Targets (ex. Clean;Build;Custom).
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildProjectWithMultipleTargetsInParallel()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -315,7 +315,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Verify the AddNewErrorWarningMessageElement method
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddNewErrorWarningMessageElement()
         {
             MockLogger logger = new MockLogger(output);
@@ -344,21 +344,21 @@ namespace Microsoft.Build.UnitTests.Construction
             string text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionParseUnknownProjectType", "proj1.csproj");
 
             // check the error event
-            Assert.Single(logger.Warnings);
+            Assert.ContainsSingle(logger.Warnings);
             BuildWarningEventArgs warning = logger.Warnings[0];
 
-            Assert.Equal(text, warning.Message);
-            Assert.Equal(code, warning.Code);
-            Assert.Equal(keyword, warning.HelpKeyword);
+            Assert.AreEqual(text, warning.Message);
+            Assert.AreEqual(code, warning.Code);
+            Assert.AreEqual(keyword, warning.HelpKeyword);
             text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionInvalidSolutionConfiguration");
 
             // check the warning event
-            Assert.Single(logger.Errors);
+            Assert.ContainsSingle(logger.Errors);
             BuildErrorEventArgs error = logger.Errors[0];
 
-            Assert.Equal(text, error.Message);
-            Assert.Equal(code, error.Code);
-            Assert.Equal(keyword, error.HelpKeyword);
+            Assert.AreEqual(text, error.Message);
+            Assert.AreEqual(code, error.Code);
+            Assert.AreEqual(keyword, error.HelpKeyword);
             text = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out code, out keyword, "SolutionVenusProjectNoClean");
 
             // check the message event
@@ -369,11 +369,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to make sure we properly set the ToolsVersion attribute on the in-memory project based
         /// on the Solution File Format Version.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void EmitToolsVersionAttributeToInMemoryProject9(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
@@ -402,7 +402,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
 
-                Assert.Equal("3.5", instances[0].ToolsVersion);
+                Assert.AreEqual("3.5", instances[0].ToolsVersion);
             }
         }
 
@@ -410,11 +410,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to make sure we properly set the ToolsVersion attribute on the in-memory project based
         /// on the Solution File Format Version.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void EmitToolsVersionAttributeToInMemoryProject10(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
@@ -443,7 +443,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, "3.5", _buildEventContext, CreateMockLoggingService());
 
-                Assert.Equal("3.5", instances[0].ToolsVersion);
+                Assert.AreEqual("3.5", instances[0].ToolsVersion);
             }
         }
 
@@ -451,7 +451,8 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to make sure that if the solution file version doesn't map to a sub-toolset version, we won't try
         /// to force it to be used.
         /// </summary>
-        [Fact(Skip = "Needs investigation")]
+        [MSBuildTestMethod]
+        [Ignore("Needs investigation")]
         public void DefaultSubToolsetIfSolutionVersionSubToolsetDoesntExist()
         {
             Environment.SetEnvironmentVariable("VisualStudioVersion", null);
@@ -473,19 +474,19 @@ namespace Microsoft.Build.UnitTests.Construction
 
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
+            Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
 
             Toolset t = ProjectCollection.GlobalProjectCollection.GetToolset(instances[0].ToolsVersion);
 
-            Assert.Equal(t.DefaultSubToolsetVersion, instances[0].SubToolsetVersion);
+            Assert.AreEqual(t.DefaultSubToolsetVersion, instances[0].SubToolsetVersion);
 
             if (t.DefaultSubToolsetVersion != null)
             {
-                Assert.Equal(t.DefaultSubToolsetVersion, instances[0].GetPropertyValue("VisualStudioVersion"));
+                Assert.AreEqual(t.DefaultSubToolsetVersion, instances[0].GetPropertyValue("VisualStudioVersion"));
             }
             else
             {
-                Assert.Equal(String.Empty, instances[0].GetPropertyValue("VisualStudioVersion"));
+                Assert.AreEqual(String.Empty, instances[0].GetPropertyValue("VisualStudioVersion"));
             }
         }
 
@@ -493,9 +494,9 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to make sure that if the solution version corresponds to an existing sub-toolset version,
         /// barring other factors that might override, the sub-toolset will be based on the solution version.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void SubToolsetSetBySolutionVersion(bool useNewParser)
         {
             Environment.SetEnvironmentVariable("VisualStudioVersion", null);
@@ -520,13 +521,13 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
-                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
 
                 // being cautious -- we can't expect the sub-toolset to be picked if it doesn't exist in the first place
                 if (instances[0].Toolset.SubToolsets.ContainsKey("11.0"))
                 {
-                    Assert.Equal("11.0", instances[0].SubToolsetVersion);
-                    Assert.Equal("11.0", instances[0].GetPropertyValue("VisualStudioVersion"));
+                    Assert.AreEqual("11.0", instances[0].SubToolsetVersion);
+                    Assert.AreEqual("11.0", instances[0].GetPropertyValue("VisualStudioVersion"));
                 }
             }
         }
@@ -534,9 +535,9 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test to make sure that even if the solution version corresponds to an existing sub-toolset version,
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void SolutionBasedSubToolsetVersionOverriddenByEnvironment(bool useNewParser)
         {
             Environment.SetEnvironmentVariable("VisualStudioVersion", "ABC");
@@ -561,16 +562,17 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
-                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
-                Assert.Equal("ABC", instances[0].SubToolsetVersion);
-                Assert.Equal("ABC", instances[0].GetPropertyValue("VisualStudioVersion"));
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
+                Assert.AreEqual("ABC", instances[0].SubToolsetVersion);
+                Assert.AreEqual("ABC", instances[0].GetPropertyValue("VisualStudioVersion"));
             }
         }
 
         /// <summary>
         /// Test to make sure that even if the solution version corresponds to an existing sub-toolset version
         /// </summary>
-        [Fact(Skip = "Needs investigation")]
+        [MSBuildTestMethod]
+        [Ignore("Needs investigation")]
         public void SolutionPassesSubToolsetToChildProjects2()
         {
             string classLibraryContentsToolsV4 = ObjectModelHelpers.CleanupFileContents(
@@ -715,7 +717,8 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test to make sure that, when we're not TV 4.0 -- which even for Dev11 solutions we are not by default -- that we
         /// do not pass VisualStudioVersion down to the child projects.
         /// </summary>
-        [Fact(Skip = "Needs investigation")]
+        [MSBuildTestMethod]
+        [Ignore("Needs investigation")]
         public void SolutionDoesntPassSubToolsetToChildProjects()
         {
             try
@@ -760,9 +763,9 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(sp, null, null, _buildEventContext, CreateMockLoggingService());
 
-                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
-                Assert.Equal("11.0", instances[0].SubToolsetVersion);
-                Assert.Equal("11.0", instances[0].GetPropertyValue("VisualStudioVersion"));
+                Assert.AreEqual(ObjectModelHelpers.MSBuildDefaultToolsVersion, instances[0].ToolsVersion);
+                Assert.AreEqual("11.0", instances[0].SubToolsetVersion);
+                Assert.AreEqual("11.0", instances[0].GetPropertyValue("VisualStudioVersion"));
 
                 MockLogger logger = new MockLogger(output);
                 List<ILogger> loggers = new List<ILogger>(1);
@@ -782,10 +785,10 @@ namespace Microsoft.Build.UnitTests.Construction
         /// on a project that doesn't exist.
         /// </summary>
         /// <remarks>This test would only work for the old parser. In the new parser the dependency is not added if it was not in the solution file.</remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void SolutionWithMissingDependencies()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string solutionFileContents =
                     """
@@ -827,9 +830,9 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Blob should contain dependency info
         /// Here B depends on C
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void SolutionConfigurationWithDependencies(bool useNewParser)
         {
             string solutionFileContents =
@@ -919,7 +922,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// This test forces a metaproj to be generated as part of the build. Since metaproj files are not written to disk, it will fail if its cached form does not align
         /// with the version that is being built as when a property is part of the version added to the cache, but that version is not passed to the BuildManager.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SolutionGeneratingMetaproj()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -953,7 +956,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <seealso href="https://github.com/dotnet/msbuild/issues/69">
         /// MSBuild should generate metaprojects that relay the outputs of the individual MSBuild invocations
         /// </seealso>
-        [Fact]
+        [MSBuildTestMethod]
         public void SolutionConfigurationWithDependenciesRelaysItsOutputs()
         {
             #region Large strings representing solution & projects
@@ -1095,7 +1098,7 @@ namespace Microsoft.Build.UnitTests.Construction
             var instances = SolutionProjectGenerator.Generate(solution, null, null, _buildEventContext, CreateMockLoggingService());
 
             var projectBravoMetaProject = instances[1];
-            Assert.DoesNotContain(projectBravoMetaProject.Targets, kvp => kvp.Value.Outputs.Equals("@()")); // "The outputItem parameter can be null; the Target element should not have an Outputs attribute in that case."
+            projectBravoMetaProject.Targets.ShouldNotContain(kvp => kvp.Value.Outputs.Equals("@()")); // "The outputItem parameter can be null; the Target element should not have an Outputs attribute in that case."
             // saves the in-memory metaproj to disk
             projectBravoMetaProject.ToProjectRootElement().Save(projectBravoMetaProject.FullPath);
             var automaticProjectFile = ObjectModelHelpers.CreateFileInTempProjectDirectory("automatic.msbuild", automaticProjectFileContents);
@@ -1103,15 +1106,15 @@ namespace Microsoft.Build.UnitTests.Construction
             var buildResult = automaticProject.Build(loggers);
 
             // NOTE: most of the actual assertions for this test are embedded in automaticProjectFileContents as <Error>s
-            Assert.True(buildResult, String.Join(Environment.NewLine, logger.Errors.Select(beea => beea.Message)));
+            Assert.IsTrue(buildResult, String.Join(Environment.NewLine, logger.Errors.Select(beea => beea.Message)));
         }
 
         /// <summary>
         /// Test the SolutionProjectGenerator.AddPropertyGroupForSolutionConfiguration method
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void TestAddPropertyGroupForSolutionConfiguration(bool useNewParser)
         {
             string solutionFileContents =
@@ -1158,13 +1161,13 @@ namespace Microsoft.Build.UnitTests.Construction
 
             Assert.Contains("{6185CC21-BE89-448A-B3C0-D1C27112E595}", solutionConfigurationContents);
             tempProjectPath = Path.GetFullPath(tempProjectPath);
-            Assert.True(solutionConfigurationContents.IndexOf(tempProjectPath, StringComparison.OrdinalIgnoreCase) > 0);
+            Assert.IsTrue(solutionConfigurationContents.IndexOf(tempProjectPath, StringComparison.OrdinalIgnoreCase) > 0);
             Assert.Contains("CSConfig1|AnyCPU", solutionConfigurationContents);
 
             tempProjectPath = Path.Combine(FileUtilities.TempFileDirectory, "MainApp", "MainApp.vcxproj");
             tempProjectPath = Path.GetFullPath(tempProjectPath);
             Assert.Contains("{A6F99D27-47B9-4EA4-BFC9-25157CBDC281}", solutionConfigurationContents);
-            Assert.True(solutionConfigurationContents.IndexOf(tempProjectPath, StringComparison.OrdinalIgnoreCase) > 0);
+            Assert.IsTrue(solutionConfigurationContents.IndexOf(tempProjectPath, StringComparison.OrdinalIgnoreCase) > 0);
             Assert.Contains("VCConfig1|Win32", solutionConfigurationContents);
 
             // Only the C# project should be present for solution configuration "Release|Any CPU", since the VC project
@@ -1184,9 +1187,9 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Make sure that BuildProjectInSolution is set to true of the Build.0 entry is in the solution configuration.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void TestAddPropertyGroupForSolutionConfigurationBuildProjectInSolutionSet(bool useNewParser)
         {
             string solutionFileContents =
@@ -1230,9 +1233,9 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Make sure that BuildProjectInSolution is set to false of the Build.0 entry is in the solution configuration.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void TestAddPropertyGroupForSolutionConfigurationBuildProjectInSolutionNotSet(bool useNewParser)
         {
             string solutionFileContents =
@@ -1276,11 +1279,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// In this bug, SkipNonexistentProjects was always set to 'Build'. It should be 'Build' for metaprojects and 'True' for everything else.
         /// The repro below has one of each case. WebProjects can't build so they are set as SkipNonexistentProjects='Build'
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void Regress751742_SkipNonexistentProjects(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1325,22 +1328,22 @@ namespace Microsoft.Build.UnitTests.Construction
                     string skipNonexistentProjects = item.GetMetadata("SkipNonexistentProjects");
                     if (item.ItemSpec.EndsWith("ClassLibrary1.csproj", StringComparison.Ordinal))
                     {
-                        Assert.Equal("False", skipNonexistentProjects);
+                        Assert.AreEqual("False", skipNonexistentProjects);
                     }
                     else if (item.ItemSpec.EndsWith("MainApp.metaproj", StringComparison.Ordinal))
                     {
-                        Assert.Equal("Build", skipNonexistentProjects);
+                        Assert.AreEqual("Build", skipNonexistentProjects);
                     }
                     else if (item.ItemSpec == "Debug|Mixed Platforms")
                     {
-                        Assert.Equal("Debug", item.GetMetadata("Configuration"));
-                        Assert.Equal("Mixed Platforms", item.GetMetadata("Platform"));
+                        Assert.AreEqual("Debug", item.GetMetadata("Configuration"));
+                        Assert.AreEqual("Mixed Platforms", item.GetMetadata("Platform"));
                         Assert.Contains("<SolutionConfiguration>", item.GetMetadata("Content"));
                     }
                     else if (item.ItemSpec == "Release|Any CPU")
                     {
-                        Assert.Equal("Release", item.GetMetadata("Configuration"));
-                        Assert.Equal("Any CPU", item.GetMetadata("Platform"));
+                        Assert.AreEqual("Release", item.GetMetadata("Configuration"));
+                        Assert.AreEqual("Any CPU", item.GetMetadata("Platform"));
                         Assert.Contains("<SolutionConfiguration>", item.GetMetadata("Content"));
                     }
                     else
@@ -1356,9 +1359,9 @@ namespace Microsoft.Build.UnitTests.Construction
         /// if set when building a solution, will be specified as the ToolsVersion on the MSBuild task when
         /// building the projects contained within the solution.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void ToolsVersionOverrideShouldBeSpecifiedOnMSBuildTaskInvocations(bool useNewParser)
         {
             string solutionFileContents =
@@ -1413,7 +1416,7 @@ namespace Microsoft.Build.UnitTests.Construction
                                     // ToolsVersion parameter set
                                     string toolsVersionParameter = childNode.GetParameter("ToolsVersion");
 
-                                    Assert.Equal(toolsVersionParameter, instances[0].GetPropertyValue("ProjectToolsVersion"));
+                                    Assert.AreEqual(toolsVersionParameter, instances[0].GetPropertyValue("ProjectToolsVersion"));
                                 }
                             }
                         }
@@ -1428,9 +1431,9 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Make sure that whatever the solution ToolsVersion is, it gets mapped to all its metaprojs, too.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void SolutionWithDependenciesHasCorrectToolsVersionInMetaprojs(bool useNewParser)
         {
             string solutionFileContents =
@@ -1476,10 +1479,10 @@ namespace Microsoft.Build.UnitTests.Construction
                 {
                     ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, solutionToolsVersion, _buildEventContext, CreateMockLoggingService());
 
-                    Assert.Equal(2, instances.Length);
+                    Assert.AreEqual(2, instances.Length);
 
                     // Solution metaproj
-                    Assert.Equal(solutionToolsVersion, instances[0].ToolsVersion);
+                    Assert.AreEqual(solutionToolsVersion, instances[0].ToolsVersion);
 
                     ICollection<ProjectItemInstance> projectReferences = instances[0].GetItems("ProjectReference");
 
@@ -1489,12 +1492,12 @@ namespace Microsoft.Build.UnitTests.Construction
                         // the solution ToolsVersion -- that's how the build knows which ToolsVersion to use.
                         if (projectReference.EvaluatedInclude.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase))
                         {
-                            Assert.Equal(solutionToolsVersion, projectReference.GetMetadataValue("ToolsVersion"));
+                            Assert.AreEqual(solutionToolsVersion, projectReference.GetMetadataValue("ToolsVersion"));
                         }
                     }
 
                     // Project metaproj for project with dependencies
-                    Assert.Equal(solutionToolsVersion, instances[1].ToolsVersion);
+                    Assert.AreEqual(solutionToolsVersion, instances[1].ToolsVersion);
                 }
             }
         }
@@ -1503,9 +1506,9 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Test the SolutionProjectGenerator.Generate method has its toolset redirected correctly.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void ToolsVersionOverrideCausesToolsetRedirect(bool useNewParser)
         {
             string solutionFileContents =
@@ -1546,15 +1549,15 @@ namespace Microsoft.Build.UnitTests.Construction
                 caughtException = true;
             }
 
-            Assert.True(caughtException); // "Passing an invalid ToolsVersion should have caused an InvalidProjectFileException to be thrown."
+            Assert.IsTrue(caughtException); // "Passing an invalid ToolsVersion should have caused an InvalidProjectFileException to be thrown."
         }
 
         /// <summary>
         /// Test the SolutionProjectGenerator.AddPropertyGroupForSolutionConfiguration method
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void TestDisambiguateProjectTargetName(bool useNewParser)
         {
             string solutionFileContents =
@@ -1587,10 +1590,10 @@ namespace Microsoft.Build.UnitTests.Construction
 
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
-                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase));
-                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase));
-                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase));
-                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase));
+                Assert.ContainsSingle(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)));
+                Assert.ContainsSingle(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase)));
+                Assert.ContainsSingle(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)));
+                Assert.ContainsSingle(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase)));
 
                 ProjectTargetInstance buildTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)).First().Value;
                 ProjectTargetInstance cleanTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Clean", StringComparison.OrdinalIgnoreCase)).First().Value;
@@ -1598,36 +1601,36 @@ namespace Microsoft.Build.UnitTests.Construction
                 ProjectTargetInstance publishTarget = instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Publish", StringComparison.OrdinalIgnoreCase)).First().Value;
 
                 // Check that the appropriate target is being passed to the child projects
-                Assert.Null(buildTarget.Tasks.Where(
+                Assert.IsNull(buildTarget.Tasks.Where(
                     task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
                     .First().GetParameter("Targets"));
 
-                Assert.Equal("Clean", cleanTarget.Tasks.Where(
+                Assert.AreEqual("Clean", cleanTarget.Tasks.Where(
                     task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
                     .First().GetParameter("Targets"));
 
-                Assert.Equal("Rebuild", rebuildTarget.Tasks.Where(
+                Assert.AreEqual("Rebuild", rebuildTarget.Tasks.Where(
                     task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
                     .First().GetParameter("Targets"));
 
-                Assert.Equal("Publish", publishTarget.Tasks.Where(
+                Assert.AreEqual("Publish", publishTarget.Tasks.Where(
                     task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
                     .First().GetParameter("Targets"));
 
                 // Check that the child projects in question are the members of the "ProjectReference" item group
-                Assert.Equal("@(ProjectReference)", buildTarget.Tasks.Where(
+                Assert.AreEqual("@(ProjectReference)", buildTarget.Tasks.Where(
                     task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
                     .First().GetParameter("Projects"));
 
-                Assert.Equal("@(ProjectReference->Reverse())", cleanTarget.Tasks.Where(
+                Assert.AreEqual("@(ProjectReference->Reverse())", cleanTarget.Tasks.Where(
                     task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
                     .First().GetParameter("Projects"));
 
-                Assert.Equal("@(ProjectReference)", rebuildTarget.Tasks.Where(
+                Assert.AreEqual("@(ProjectReference)", rebuildTarget.Tasks.Where(
                     task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
                     .First().GetParameter("Projects"));
 
-                Assert.Equal("@(ProjectReference)", publishTarget.Tasks.Where(
+                Assert.AreEqual("@(ProjectReference)", publishTarget.Tasks.Where(
                     task => String.Equals(task.Name, "MSBuild", StringComparison.OrdinalIgnoreCase))
                     .First().GetParameter("Projects"));
             }
@@ -1640,7 +1643,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         /// <remarks>This test would only work for the old parser. In the new parser SolutionConfigurations are not available,
         /// and constructed from projects configurations.</remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConfigurationPlatformDefaults1()
         {
             string solutionFileContents =
@@ -1669,10 +1672,10 @@ namespace Microsoft.Build.UnitTests.Construction
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
             // Default for Configuration is "Debug", if present
-            Assert.Equal("Debug", instances[0].GetPropertyValue("Configuration"));
+            Assert.AreEqual("Debug", instances[0].GetPropertyValue("Configuration"));
 
             // Default for Platform is "Mixed Platforms", if present
-            Assert.Equal("Mixed Platforms", instances[0].GetPropertyValue("Platform"));
+            Assert.AreEqual("Mixed Platforms", instances[0].GetPropertyValue("Platform"));
         }
 
         /// <summary>
@@ -1680,7 +1683,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         /// <remarks>This test would only work for the old parser. In the new parser SolutionConfigurations are not available,
         /// and constructed from projects configurations.</remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConfigurationPlatformDefaults2()
         {
             string solutionFileContents =
@@ -1701,20 +1704,20 @@ namespace Microsoft.Build.UnitTests.Construction
             ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
             // If "Debug" is not present, just pick the first configuration name
-            Assert.Equal("Release", instances[0].GetPropertyValue("Configuration"));
+            Assert.AreEqual("Release", instances[0].GetPropertyValue("Configuration"));
 
             // if "Mixed Platforms" is not present, just pick the first platform name
-            Assert.Equal("Any CPU", instances[0].GetPropertyValue("Platform"));
+            Assert.AreEqual("Any CPU", instances[0].GetPropertyValue("Platform"));
         }
 
         /// <summary>
         /// Tests the algorithm for choosing default Venus configuration values for solutions
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void TestVenusConfigurationDefaults(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1728,11 +1731,11 @@ namespace Microsoft.Build.UnitTests.Construction
             ProjectInstance msbuildProject = CreateVenusSolutionProject(globalProperties, useNewParser);
 
             // ASP.NET configuration should match the selected solution configuration
-            Assert.Equal("Debug", msbuildProject.GetPropertyValue("AspNetConfiguration"));
+            Assert.AreEqual("Debug", msbuildProject.GetPropertyValue("AspNetConfiguration"));
 
             globalProperties["Configuration"] = "Release";
             msbuildProject = CreateVenusSolutionProject(globalProperties, useNewParser);
-            Assert.Equal("Release", msbuildProject.GetPropertyValue("AspNetConfiguration"));
+            Assert.AreEqual("Release", msbuildProject.GetPropertyValue("AspNetConfiguration"));
 
             // Check that the two standard Asp.net configurations are represented on the targets
             Assert.Contains("'$(Configuration)' == 'Release'", msbuildProject.Targets["Build"].Condition);
@@ -1742,11 +1745,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests that the correct value for TargetFrameworkVersion gets set when creating Venus solutions
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void VenusSolutionDefaultTargetFrameworkVersion(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1757,7 +1760,7 @@ namespace Microsoft.Build.UnitTests.Construction
 
             // v4.0 by default
             ProjectInstance msbuildProject = CreateVenusSolutionProject(useNewParser);
-            Assert.Equal("v4.0", msbuildProject.GetPropertyValue("TargetFrameworkVersion"));
+            Assert.AreEqual("v4.0", msbuildProject.GetPropertyValue("TargetFrameworkVersion"));
 
             if (FrameworkLocationHelper.PathToDotNetFrameworkV35 == null)
             {
@@ -1767,27 +1770,27 @@ namespace Microsoft.Build.UnitTests.Construction
 
             // v3.5 if MSBuildToolsVersion is 3.5
             msbuildProject = CreateVenusSolutionProject("3.5", useNewParser);
-            Assert.Equal("v3.5", msbuildProject.GetPropertyValue("TargetFrameworkVersion"));
+            Assert.AreEqual("v3.5", msbuildProject.GetPropertyValue("TargetFrameworkVersion"));
 
             // v2.0 if MSBuildToolsVersion is 2.0
             msbuildProject = CreateVenusSolutionProject("2.0", useNewParser);
-            Assert.Equal("v2.0", msbuildProject.GetPropertyValue("TargetFrameworkVersion"));
+            Assert.AreEqual("v2.0", msbuildProject.GetPropertyValue("TargetFrameworkVersion"));
 
             // may be user defined
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
             globalProperties.Add("TargetFrameworkVersion", "userdefined");
             msbuildProject = CreateVenusSolutionProject(globalProperties, useNewParser);
-            Assert.Equal("userdefined", msbuildProject.GetPropertyValue("TargetFrameworkVersion"));
+            Assert.AreEqual("userdefined", msbuildProject.GetPropertyValue("TargetFrameworkVersion"));
         }
 
         /// <summary>
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void TestTargetFrameworkPaths0(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkSdkV20 != null)
@@ -1798,10 +1801,10 @@ namespace Microsoft.Build.UnitTests.Construction
                 ProjectInstance msbuildProject = CreateVenusSolutionProject("2.0", useNewParser);
 
                 // ToolsVersion is 2.0, TargetFrameworkVersion is v2.0 --> one item pointing to v2.0
-                Assert.Equal("2.0", msbuildProject.ToolsVersion);
+                Assert.AreEqual("2.0", msbuildProject.ToolsVersion);
 
                 bool success = msbuildProject.Build("GetFrameworkPathAndRedistList", null);
-                Assert.True(success);
+                Assert.IsTrue(success);
                 AssertProjectContainsItem(msbuildProject, "_CombinedTargetFrameworkDirectoriesItem", FrameworkLocationHelper.PathToDotNetFrameworkV20);
                 AssertProjectItemNameCount(msbuildProject, "_CombinedTargetFrameworkDirectoriesItem", 1);
             }
@@ -1810,11 +1813,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void TestTargetFrameworkPaths1(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1829,7 +1832,7 @@ namespace Microsoft.Build.UnitTests.Construction
             msbuildProject.SetProperty("TargetFrameworkVersion", "v2.0");
             MockLogger logger = new MockLogger(output);
             bool success = msbuildProject.Build("GetFrameworkPathAndRedistList", new ILogger[] { logger });
-            Assert.True(success);
+            Assert.IsTrue(success);
 
             AssertProjectContainsItem(msbuildProject, "_CombinedTargetFrameworkDirectoriesItem", FrameworkLocationHelper.PathToDotNetFrameworkV20);
             AssertProjectItemNameCount(msbuildProject, "_CombinedTargetFrameworkDirectoriesItem", 1);
@@ -1838,11 +1841,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests the algorithm for choosing target framework paths for ResolveAssemblyReferences for Venus
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void TestTargetFrameworkPaths2(bool useNewParser)
         {
             if (FrameworkLocationHelper.PathToDotNetFrameworkV20 == null)
@@ -1857,7 +1860,7 @@ namespace Microsoft.Build.UnitTests.Construction
             msbuildProject.SetProperty("TargetFrameworkVersion", "v4.0");
             // ProjectInstance projectToBuild = msbuildProject.CreateProjectInstance();
             bool success = msbuildProject.Build("GetFrameworkPathAndRedistList", null);
-            Assert.True(success);
+            Assert.IsTrue(success);
 
             int expectedCount = 0;
 
@@ -1891,7 +1894,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         /// <remarks>This test would only work for the old parser.
         /// In the new parser SolutionConfigurations are not available, and constructed from projects configurations.</remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestPredictSolutionConfigurationName()
         {
             string solutionFileContents =
@@ -1911,24 +1914,24 @@ namespace Microsoft.Build.UnitTests.Construction
 
             IDictionary<string, string> globalProperties = new Dictionary<string, string>();
 
-            Assert.Equal("Debug|Mixed Platforms", SolutionProjectGenerator.PredictActiveSolutionConfigurationName(solution, globalProperties));
+            Assert.AreEqual("Debug|Mixed Platforms", SolutionProjectGenerator.PredictActiveSolutionConfigurationName(solution, globalProperties));
 
             globalProperties.Add("Configuration", "Release");
-            Assert.Equal("Release|Mixed Platforms", SolutionProjectGenerator.PredictActiveSolutionConfigurationName(solution, globalProperties));
+            Assert.AreEqual("Release|Mixed Platforms", SolutionProjectGenerator.PredictActiveSolutionConfigurationName(solution, globalProperties));
 
             globalProperties.Add("Platform", "Win32");
-            Assert.Equal("Release|Win32", SolutionProjectGenerator.PredictActiveSolutionConfigurationName(solution, globalProperties));
+            Assert.AreEqual("Release|Win32", SolutionProjectGenerator.PredictActiveSolutionConfigurationName(solution, globalProperties));
 
             globalProperties["Configuration"] = "Nonexistent";
-            Assert.Null(SolutionProjectGenerator.PredictActiveSolutionConfigurationName(solution, globalProperties));
+            Assert.IsNull(SolutionProjectGenerator.PredictActiveSolutionConfigurationName(solution, globalProperties));
         }
 
         /// <summary>
         /// Verifies that the SolutionProjectGenerator will correctly escape project file paths
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void SolutionGeneratorEscapingProjectFilePaths(bool useNewParser)
         {
             string solutionFileContents =
@@ -1960,11 +1963,11 @@ namespace Microsoft.Build.UnitTests.Construction
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
                 // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
-                Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
+                Assert.IsEmpty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
 
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
 
-                Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
+                Assert.IsEmpty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
 
                 // Ensure that the value has been correctly stored in the ProjectReference item list
                 // Since there is only one project in the solution, there will be only one project reference
@@ -1975,9 +1978,9 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Verifies that the SolutionProjectGenerator will emit a solution file.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void SolutionGeneratorCanEmitSolutions(bool useNewParser)
         {
             string oldValueForMSBuildEmitSolution = Environment.GetEnvironmentVariable("MSBuildEmitSolution");
@@ -2021,13 +2024,13 @@ namespace Microsoft.Build.UnitTests.Construction
                     solution = ParseSolutionHelper(solutionFileContents, useNewParser, testEnvironment);
 
                     // Creating a ProjectRootElement shouldn't affect the ProjectCollection at all
-                    Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
+                    Assert.IsEmpty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
 
                     ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService());
                 }
 
                 // Instantiating the
-                Assert.Empty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
+                Assert.IsEmpty(ProjectCollection.GlobalProjectCollection.LoadedProjects);
             }
             finally
             {
@@ -2037,7 +2040,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 // Clean up.  Delete temp files and reset environment variables.
                 if (solution != null)
                 {
-                    Assert.True(File.Exists(solution.FullPath + ".metaproj")); // "Solution parser should have written in-memory project to disk"
+                    Assert.IsTrue(File.Exists(solution.FullPath + ".metaproj")); // "Solution parser should have written in-memory project to disk"
                     File.Delete(solution.FullPath + ".metaproj");
                 }
                 else
@@ -2051,11 +2054,11 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Make sure that we output a warning and don't build anything when we're given an invalid
         /// solution configuration and SkipInvalidConfigurations is set to true.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void TestSkipInvalidConfigurationsCase(bool useNewParser)
         {
             string tmpFileName = FileUtilities.GetTemporaryFileName();
@@ -2112,11 +2115,11 @@ namespace Microsoft.Build.UnitTests.Construction
                     ProjectInstance msbuildProject = instances[0];
 
                     // Build should complete successfully even with an invalid solution config if SkipInvalidConfigurations is true
-                    Assert.True(msbuildProject.Build(new ILogger[] { logger }));
+                    Assert.IsTrue(msbuildProject.Build(new ILogger[] { logger }));
                 }
 
                 // We should get the invalid solution configuration warning
-                Assert.Single(logger.Warnings);
+                Assert.ContainsSingle(logger.Warnings);
                 BuildWarningEventArgs warning = logger.Warnings[0];
 
                 // Don't look at warning.Code here -- it may be null if PseudoLoc has messed
@@ -2125,7 +2128,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 logger.AssertLogContains("MSB4126");
 
                 // No errors expected
-                Assert.Empty(logger.Errors);
+                Assert.IsEmpty(logger.Errors);
             }
             finally
             {
@@ -2136,7 +2139,8 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// When we have a bad framework moniker we expect the build to fail.
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/515")]
         public void BadFrameworkMonkierExpectBuildToFail()
         {
             string tmpFileName = FileUtilities.GetTemporaryFileName();
@@ -2203,7 +2207,7 @@ EndGlobal
 
                 BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
                 BuildResult result = buildManager.Build(parameters, request);
-                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
+                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
                 // Build should complete successfully even with an invalid solution config if SkipInvalidConfigurations is true
                 logger.AssertLogContains("MSB4203");
             }
@@ -2224,7 +2228,8 @@ EndGlobal
         /// When we have a bad framework moniker we expect the build to fail. In this case we are passing a poorly formatted framework moniker.
         /// This will test the exception path where the framework name is invalid rather than just not .netFramework
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/515")]
         public void BadFrameworkMonkierExpectBuildToFail2()
         {
             string tmpFileName = FileUtilities.GetTemporaryFileName();
@@ -2291,7 +2296,7 @@ EndGlobal
 
                 BuildRequestData request = new BuildRequestData(projectFilePath, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
                 BuildResult result = buildManager.Build(parameters, request);
-                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
+                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
                 // Build should complete successfully even with an invalid solution config if SkipInvalidConfigurations is true
                 logger.AssertLogContains("MSB4204");
             }
@@ -2312,9 +2317,9 @@ EndGlobal
         /// Bug indicated that when a target framework version greater than 4.0 was used then the solution project generator would crash.
         /// this test is to make sure the fix is not regressed.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void TestTargetFrameworkVersionGreaterThan4(bool useNewParser)
         {
             string tmpFileName = FileUtilities.GetTemporaryFileName();
@@ -2377,7 +2382,7 @@ EndGlobal
 
 #pragma warning disable format
 #if !FEATURE_ASPNET_COMPILER
-                    Assert.Throws<InvalidProjectFileException>(() =>
+                    Assert.ThrowsExactly<InvalidProjectFileException>(() =>
                     {
 #endif
                         ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, collection.LoggingService);
@@ -2419,7 +2424,7 @@ EndGlobal
         /// own request to the new requests it creates, so the inner dispatch silently skips the
         /// missing target.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Issue11025_UserSkipNonexistentTargetsAttributePropagatesThroughMetaproj()
         {
             using (TestEnvironment env = TestEnvironment.Create(output))
@@ -2492,7 +2497,7 @@ EndGlobal
         /// to surface <c>MSB4057</c> (today's behaviour). The flag-inheritance fix only fires
         /// when the parent metaproj request itself carries the flag.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Issue11025_BuildStillFailsWhenUserDidNotSetSkipNonexistentTargets()
         {
             using (TestEnvironment env = TestEnvironment.Create(output))
@@ -2558,9 +2563,9 @@ EndGlobal
         /// <summary>
         /// Verifies that when target names are specified they end up in the metaproj.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void CustomTargetNamesAreInInMetaproj(bool useNewParser)
         {
             string solutionFileContents =
@@ -2588,35 +2593,35 @@ EndGlobal
 
                 ProjectInstance[] instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "One" });
 
-                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase));
+                Assert.ContainsSingle(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "One", StringComparison.OrdinalIgnoreCase)));
 
                 instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Two", "Three", "Four" });
 
-                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase));
-                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase));
-                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase));
+                Assert.ContainsSingle(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Two", StringComparison.OrdinalIgnoreCase)));
+                Assert.ContainsSingle(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Three", StringComparison.OrdinalIgnoreCase)));
+                Assert.ContainsSingle(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Four", StringComparison.OrdinalIgnoreCase)));
 
                 instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Build" });
 
-                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase));
+                Assert.ContainsSingle(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Build", StringComparison.OrdinalIgnoreCase)));
 
                 instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "Five", "Rebuild" });
 
-                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase));
-                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase));
+                Assert.ContainsSingle(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Five", StringComparison.OrdinalIgnoreCase)));
+                Assert.ContainsSingle(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Rebuild", StringComparison.OrdinalIgnoreCase)));
 
                 instances = SolutionProjectGenerator.Generate(solution, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new List<string> { "My_Project:Six" });
         
-                Assert.Single(instances[0].Targets, target => String.Equals(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase));
+                Assert.ContainsSingle(instances[0].Targets.Where(target => String.Equals(target.Value.Name, "Six", StringComparison.OrdinalIgnoreCase)));
             }
         }
 
         /// <summary>
         /// Verifies that disambiguated target names are used when a project name matches a standard solution entry point.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void DisambiguatedTargetNamesAreInMetaproj(bool useNewParser)
         {
             foreach (string projectName in ProjectInSolution.projectNamesToDisambiguate)
@@ -2650,14 +2655,14 @@ EndGlobal
                     foreach (string targetName in ProjectInSolution.projectNamesToDisambiguate)
                     {
                         // The entry point still exists normally.
-                        Assert.True(instances[0].Targets.ContainsKey(targetName));
+                        Assert.IsTrue(instances[0].Targets.ContainsKey(targetName));
 
                         // The traversal target should be disambiguated with a "Solution:" prefix.
                         // Note: The default targets are used instead of "Build".
                         string traversalTargetName = targetName.Equals("Build", StringComparison.OrdinalIgnoreCase)
                             ? $"Solution:{projectName}"
                             : $"Solution:{projectName}:{targetName}";
-                        Assert.True(instances[0].Targets.ContainsKey(traversalTargetName));
+                        Assert.IsTrue(instances[0].Targets.ContainsKey(traversalTargetName));
                     }
                 }
             }
@@ -2666,11 +2671,11 @@ EndGlobal
         /// <summary>
         /// Verifies that illegal user target names (the ones already used internally) don't crash the SolutionProjectGenerator
         /// </summary>
-        [Theory]
-        [InlineData(false, false)]
-        [InlineData(true, false)]
-        [InlineData(false, true)]
-        [InlineData(true, true)]
+        [MSBuildTestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, false)]
+        [DataRow(false, true)]
+        [DataRow(true, true)]
         public void IllegalUserTargetNamesDoNotThrow(bool forceCaseDifference, bool useNewParser)
         {
             string solutionFileContents =
@@ -2731,23 +2736,23 @@ EndGlobal
 
                     instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), targetNames);
 
-                    Assert.Single(instances);
+                    Assert.ContainsSingle(instances);
 
-                    Assert.Equal(12, instances[0].TargetsCount);
+                    Assert.AreEqual(12, instances[0].TargetsCount);
                 }
 
                 instances = SolutionProjectGenerator.Generate(solution, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), new[] { "Foo" });
 
-                Assert.Single(instances);
+                Assert.ContainsSingle(instances);
 
-                Assert.Equal(14, instances[0].TargetsCount);
+                Assert.AreEqual(14, instances[0].TargetsCount);
             }
         }
 
         /// <summary>
         /// Verifies that when a user has an after.solution.sln.targets that the targets are not overridden by the solution project generator.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AfterTargetsComeFromImport()
         {
             string baseDirectory = Guid.NewGuid().ToString("N");
@@ -2787,15 +2792,15 @@ EndGlobal
 
                 ProjectInstance projectInstance = SolutionProjectGenerator.Generate(solutionFile, null, null, BuildEventContext.Invalid, CreateMockLoggingService(), new[] { "MyTarget" }).FirstOrDefault();
 
-                Assert.NotNull(projectInstance);
+                Assert.IsNotNull(projectInstance);
 
-                Assert.True(projectInstance.Targets.ContainsKey("MyTarget"));
+                Assert.IsTrue(projectInstance.Targets.ContainsKey("MyTarget"));
 
-                Assert.Single(projectInstance.Targets["MyTarget"].Children);
+                Assert.ContainsSingle(projectInstance.Targets["MyTarget"].Children);
 
-                ProjectTaskInstance task = Assert.IsType<ProjectTaskInstance>(projectInstance.Targets["MyTarget"].Children[0]);
+                ProjectTaskInstance task = Assert.IsExactInstanceOfType<ProjectTaskInstance>(projectInstance.Targets["MyTarget"].Children[0]);
 
-                Assert.Equal("MyTask", task.Name);
+                Assert.AreEqual("MyTask", task.Name);
             }
             finally
             {
@@ -2806,7 +2811,7 @@ EndGlobal
         /// <summary>
         /// Verifies that a target in an after.solution.sln.targets can AfterTargets/BeforeTargets a dynamically-created target.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BeforeTargetsFromImportCanHookDynamicTarget()
         {
             string baseDirectory = Guid.NewGuid().ToString("N");
@@ -2876,13 +2881,13 @@ EndGlobal
         /// </summary>
         /// <param name="projectName">The name of the project to create.</param>
         /// <param name="enable"><code>true</code> to have the functionality enabled, otherwise <code>false</code>.</param>
-        [Theory]
-        [InlineData("Directory.Solution.props", true)]
-        [InlineData("Directory.Solution.props", false)]
-        [InlineData("Directory.Solution.targets", true)]
-        [InlineData("Directory.Solution.targets", false)]
-        [InlineData("Custom.Directory.Solution.props", true)]
-        [InlineData("Custom.Directory.Solution.targets", true)]
+        [MSBuildTestMethod]
+        [DataRow("Directory.Solution.props", true)]
+        [DataRow("Directory.Solution.props", false)]
+        [DataRow("Directory.Solution.targets", true)]
+        [DataRow("Directory.Solution.targets", false)]
+        [DataRow("Custom.Directory.Solution.props", true)]
+        [DataRow("Custom.Directory.Solution.targets", true)]
         public void DirectorySolutionPropsTest(string projectName, bool enable)
         {
             const string expectedPropertyValue = "ValueA";
@@ -2965,9 +2970,9 @@ EndGlobal
 
                 ProjectInstance projectInstance = SolutionProjectGenerator.Generate(solutionFile, globalProperties, null, BuildEventContext.Invalid, CreateMockLoggingService(), new[] { "Build" }).FirstOrDefault();
 
-                Assert.NotNull(projectInstance);
+                Assert.IsNotNull(projectInstance);
 
-                Assert.Equal(enable ? expectedPropertyValue : string.Empty, projectInstance.GetPropertyValue("PropertyA"));
+                Assert.AreEqual(enable ? expectedPropertyValue : string.Empty, projectInstance.GetPropertyValue("PropertyA"));
             }
             finally
             {
@@ -2978,11 +2983,11 @@ EndGlobal
         /// <summary>
         /// Regression test for https://github.com/dotnet/msbuild/issues/6236
         /// </summary>
-        [Theory]
-        [InlineData("http://localhost:8080", false)]
-        [InlineData("http://localhost:8080", true)]
-        [InlineData(_longLineString, false)]
-        [InlineData(_longLineString, true)]
+        [MSBuildTestMethod]
+        [DataRow("http://localhost:8080", false)]
+        [DataRow("http://localhost:8080", true)]
+        [DataRow(_longLineString, false)]
+        [DataRow(_longLineString, true)]
         public void AbsolutePathWorksForUnsupportedPaths(string relativePath, bool useNewParser)
         {
             string solutionFileContents =
@@ -3098,7 +3103,7 @@ EndGlobal
         private void AssertProjectContainsItem(ProjectInstance msbuildProject, string itemType, string include)
         {
             IEnumerable<ProjectItemInstance> itemGroup = msbuildProject.GetItems(itemType);
-            Assert.NotNull(itemGroup);
+            Assert.IsNotNull(itemGroup);
 
             foreach (ProjectItemInstance item in itemGroup)
             {
@@ -3118,8 +3123,8 @@ EndGlobal
         private void AssertProjectItemNameCount(ProjectInstance msbuildProject, string itemType, int count)
         {
             IEnumerable<ProjectItemInstance> itemGroup = msbuildProject.GetItems(itemType);
-            Assert.NotNull(itemGroup);
-            Assert.Equal(count, itemGroup.Count());
+            Assert.IsNotNull(itemGroup);
+            Assert.AreEqual(count, itemGroup.Count());
         }
 
         private static SolutionFile ParseSolutionHelper(string solutionFileContents, bool isOptInSlnParsingWithNewParser)

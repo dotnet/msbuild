@@ -9,8 +9,6 @@ using Shouldly;
 using Windows.Win32;
 using Windows.Win32.Foundation;
 using Windows.Win32.System.Com;
-using Xunit;
-using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.UnitTests;
 
@@ -21,6 +19,7 @@ namespace Microsoft.Build.UnitTests;
 /// CsWin32 attaches <see cref="IComIID"/> to it on every target framework.
 /// </summary>
 [SupportedOSPlatform("windows5.0")]
+[TestClass]
 public unsafe class AgileComPointerTests
 {
     private static IRunningObjectTable* CreateRot()

@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -15,45 +14,46 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Test the ProjectOutputElement class
     /// </summary>
+    [TestClass]
     public class ProjectOutputElement_Tests
     {
         /// <summary>
         /// Read an output item
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadOutputItem()
         {
             ProjectOutputElement output = GetOutputItem();
 
-            Assert.False(output.IsOutputProperty);
-            Assert.True(output.IsOutputItem);
-            Assert.Equal("p", output.TaskParameter);
-            Assert.Equal(String.Empty, output.PropertyName);
-            Assert.Equal("i1", output.ItemType);
+            Assert.IsFalse(output.IsOutputProperty);
+            Assert.IsTrue(output.IsOutputItem);
+            Assert.AreEqual("p", output.TaskParameter);
+            Assert.AreEqual(String.Empty, output.PropertyName);
+            Assert.AreEqual("i1", output.ItemType);
         }
 
         /// <summary>
         /// Read an output property
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadOutputProperty()
         {
             ProjectOutputElement output = GetOutputProperty();
 
-            Assert.True(output.IsOutputProperty);
-            Assert.False(output.IsOutputItem);
-            Assert.Equal("p", output.TaskParameter);
-            Assert.Equal("p1", output.PropertyName);
-            Assert.Equal(String.Empty, output.ItemType);
+            Assert.IsTrue(output.IsOutputProperty);
+            Assert.IsFalse(output.IsOutputItem);
+            Assert.AreEqual("p", output.TaskParameter);
+            Assert.AreEqual("p1", output.PropertyName);
+            Assert.AreEqual(String.Empty, output.ItemType);
         }
 
         /// <summary>
         /// Read an output property with missing itemname and propertyname
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidOutputWithoutPropertyOrItem()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -72,10 +72,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property with reserved property name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidReservedOutputPropertyName()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -94,10 +94,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property with missing taskparameter
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidOutputWithoutTaskName()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -116,10 +116,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property with missing taskparameter
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidOutputWithEmptyTaskName()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -138,10 +138,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property with child element
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidOutputWithChildElement()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -162,10 +162,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property with propertyname but an empty itemname attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidPropertyValueItemBlank()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -184,10 +184,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read an output property with an itemname but an empty propertyname attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidItemValuePropertyBlank()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -206,38 +206,38 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Modify the condition
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetOutputPropertyCondition()
         {
             ProjectOutputElement output = GetOutputProperty();
             Helpers.ClearDirtyFlag(output.ContainingProject);
 
             output.Condition = "c";
-            Assert.Equal("c", output.Condition);
-            Assert.True(output.ContainingProject.HasUnsavedChanges);
+            Assert.AreEqual("c", output.Condition);
+            Assert.IsTrue(output.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Modify the property name value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetOutputPropertyName()
         {
             ProjectOutputElement output = GetOutputProperty();
             Helpers.ClearDirtyFlag(output.ContainingProject);
 
             output.PropertyName = "p1b";
-            Assert.Equal("p1b", output.PropertyName);
-            Assert.True(output.ContainingProject.HasUnsavedChanges);
+            Assert.AreEqual("p1b", output.PropertyName);
+            Assert.IsTrue(output.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Attempt to set the item name value when property name is set
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetOutputPropertyItemType()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectOutputElement output = GetOutputProperty();
 
@@ -247,24 +247,24 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set the item name value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetOutputItemItemType()
         {
             ProjectOutputElement output = GetOutputItem();
             Helpers.ClearDirtyFlag(output.ContainingProject);
 
             output.ItemType = "p1b";
-            Assert.Equal("p1b", output.ItemType);
-            Assert.True(output.ContainingProject.HasUnsavedChanges);
+            Assert.AreEqual("p1b", output.ItemType);
+            Assert.IsTrue(output.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Attempt to set the property name when the item name is set
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetOutputItemPropertyName()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectOutputElement output = GetOutputItem();
 

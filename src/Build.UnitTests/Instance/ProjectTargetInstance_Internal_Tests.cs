@@ -6,7 +6,6 @@ using System.Collections.ObjectModel;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.UnitTests.BackEnd;
-using Xunit;
 using static Microsoft.Build.Engine.UnitTests.TestComparers.ProjectInstanceModelTestComparers;
 using static Microsoft.Build.Engine.UnitTests.TestData.ProjectInstanceTestObjects;
 
@@ -14,6 +13,7 @@ using static Microsoft.Build.Engine.UnitTests.TestData.ProjectInstanceTestObject
 
 namespace Microsoft.Build.Engine.UnitTests.Instance
 {
+    [TestClass]
     public class ProjectTargetInstance_Internal_Tests
     {
         public static IEnumerable<object[]> TargetChildrenTestData
@@ -68,8 +68,8 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
             }
         }
 
-        [Theory]
-        [MemberData(nameof(TargetChildrenTestData))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(TargetChildrenTestData))]
         public void ProjectTargetInstanceCanSerializeViaTranslator(
             ReadOnlyCollection<ProjectTargetInstanceChild> children,
             ReadOnlyCollection<ProjectOnErrorInstance> errorChildren)
@@ -79,7 +79,7 @@ namespace Microsoft.Build.Engine.UnitTests.Instance
             ((ITranslatable)original).Translate(TranslationHelpers.GetWriteTranslator());
             var copy = ProjectTargetInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(original, copy, new TargetComparer());
+            Assert.AreEqual(original, copy, new TargetComparer());
         }
     }
 }

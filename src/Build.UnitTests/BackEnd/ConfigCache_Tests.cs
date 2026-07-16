@@ -8,12 +8,12 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
+    [TestClass]
     public class ConfigCache_Tests
     {
         public static IEnumerable<object[]> CacheSerializationTestData
@@ -88,8 +88,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Theory]
-        [MemberData(nameof(CacheSerializationTestData))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(CacheSerializationTestData))]
         public void ConfigCacheShouldBeTranslatable(object obj)
         {
             var initial = (ConfigCache)obj;
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var initialConfigurations = initial.ToArray();
             var copiedConfigurations = copy.ToArray();
 
-            Assert.Equal(copiedConfigurations, initialConfigurations, EqualityComparer<BuildRequestConfiguration>.Default);
+            Assert.IsTrue(copiedConfigurations.SequenceEqual(initialConfigurations, EqualityComparer<BuildRequestConfiguration>.Default));
 
             // test _configurationIdsByMetadata
             copiedConfigurations.ShouldAllBe(config => initial.GetMatchingConfiguration(new ConfigurationMetadata(config)).Equals(config));
@@ -118,18 +118,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Theory]
-        [MemberData(nameof(CacheSerializationTestDataNoConfigs))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(CacheSerializationTestDataNoConfigs))]
         public void GetSmallestConfigIdThrows(object obj)
         {
-            Assert.Throws<InternalErrorException>(() => ((ConfigCache)obj).GetSmallestConfigId());
+            Assert.ThrowsExactly<InternalErrorException>(() => ((ConfigCache)obj).GetSmallestConfigId());
         }
 
-        [Theory]
-        [MemberData(nameof(CacheSerializationTestDataMultipleConfigs))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(CacheSerializationTestDataMultipleConfigs))]
         public void HappyGetSmallestConfigId(object obj)
         {
-            Assert.Equal(1, ((ConfigCache)obj).GetSmallestConfigId());
+            Assert.AreEqual(1, ((ConfigCache)obj).GetSmallestConfigId());
         }
     }
 }

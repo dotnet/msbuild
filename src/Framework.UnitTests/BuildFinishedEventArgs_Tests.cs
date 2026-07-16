@@ -4,7 +4,6 @@
 using System;
 
 using Microsoft.Build.Framework;
-using Xunit;
 
 #nullable disable
 
@@ -13,12 +12,13 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Verify the functioning of the BuildFinishedEventArg class.
     /// </summary>
+    [TestClass]
     public class BuildFinishedEventArgs_Tests
     {
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EventArgsCtors()
         {
             BuildFinishedEventArgs buildFinishedEvent = new BuildFinishedEventArgs2();

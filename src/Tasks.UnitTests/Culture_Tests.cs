@@ -2,12 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Tasks;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class Culture_Tests
     {
         /*
@@ -15,12 +15,12 @@ namespace Microsoft.Build.UnitTests
         *
         * Test the basic functionality.
         */
-        [Fact]
+        [MSBuildTestMethod]
         public void Basic()
         {
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo("MyResource.fr.resx", null);
-            Assert.Equal("fr", info.culture);
-            Assert.Equal("MyResource.resx", info.cultureNeutralFilename);
+            Assert.AreEqual("fr", info.culture);
+            Assert.AreEqual("MyResource.resx", info.cultureNeutralFilename);
         }
 
         /*
@@ -28,12 +28,12 @@ namespace Microsoft.Build.UnitTests
         *
         * The item doesn't have a culture, and there isn't one embedded in the file name.
         */
-        [Fact]
+        [MSBuildTestMethod]
         public void NonCultureFile()
         {
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo("MyResource.resx", null);
-            Assert.Null(info.culture);
-            Assert.Equal("MyResource.resx", info.cultureNeutralFilename);
+            Assert.IsNull(info.culture);
+            Assert.AreEqual("MyResource.resx", info.cultureNeutralFilename);
         }
 
 
@@ -42,14 +42,14 @@ namespace Microsoft.Build.UnitTests
         *
         * The item has something that looks like an embedded culture, but isn't.
         */
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void BogusEmbeddedCulture()
         {
             Culture.ItemCultureInfo info = Culture.GetItemCultureInfo("MyResource.notalocale.resx", null);
-            Assert.Null(info.culture);
-            Assert.Equal("MyResource.notalocale.resx", info.cultureNeutralFilename);
+            Assert.IsNull(info.culture);
+            Assert.AreEqual("MyResource.notalocale.resx", info.cultureNeutralFilename);
         }
     }
 }

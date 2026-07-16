@@ -8,17 +8,17 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class GetAssemblyIdentity_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public GetAssemblyIdentity_Tests(ITestOutputHelper output)
+        public GetAssemblyIdentity_Tests(TestContext output)
         {
             _output = output;
         }
@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AbsolutePathToExistingAssembly_ProducesCorrectIdentity()
         {
             // Use this test assembly as the input — it's guaranteed to exist.
@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests
             task.Assemblies[0].GetMetadata("Version").ShouldBe(expectedName.Version.ToString());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonExistentFile_LogsErrorAndReturnsFalse()
         {
             var engine = new MockEngine(_output);
@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests
             engine.Log.ShouldContain("does-not-exist.dll");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonAssemblyFile_LogsErrorAndReturnsFalse()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests
             AssertCouldNotGetAssemblyName(engine);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MixedBatch_GoodAndBadItems()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -108,7 +108,7 @@ namespace Microsoft.Build.UnitTests
             engine.Errors.ShouldBe(1);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyItemSpec_LogsErrorAndReturnsFalse()
         {
             var engine = new MockEngine(_output);
@@ -120,15 +120,15 @@ namespace Microsoft.Build.UnitTests
             AssertCouldNotGetAssemblyName(engine);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NullItemSpec_LogsErrorAndReturnsFalse()
         {
             var engine = new MockEngine(_output);
             GetAssemblyIdentity task = CreateTaskUnderTest(engine);
-            Assert.Throws<ArgumentNullException>(() => task.AssemblyFiles = [new TaskItem((ITaskItem)null)]);
+            Assert.ThrowsExactly<ArgumentNullException>(() => task.AssemblyFiles = [new TaskItem((ITaskItem)null)]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RelativePath_ResolvesAgainstProjectDirectory()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -151,7 +151,7 @@ namespace Microsoft.Build.UnitTests
             task.Assemblies[0].ItemSpec.ShouldBe(expectedName.FullName);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputItem_DoesNotContainAbsolutizedPaths()
         {
             string assemblyPath = typeof(GetAssemblyIdentity_Tests).Assembly.Location;
@@ -168,7 +168,7 @@ namespace Microsoft.Build.UnitTests
             task.Assemblies[0].ItemSpec.ShouldBe(expectedName.FullName);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputItem_CopiesInputMetadataVerbatim()
         {
             string assemblyPath = typeof(GetAssemblyIdentity_Tests).Assembly.Location;

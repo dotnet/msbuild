@@ -7,22 +7,22 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Tasks.UnitTests.TestResources;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class GetFileHash_Tests
     {
         private readonly MockEngine _mockEngine;
 
-        public GetFileHash_Tests(ITestOutputHelper output)
+        public GetFileHash_Tests(TestContext output)
         {
             _mockEngine = new MockEngine(output);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetFileHash_FailsForUnknownAlgorithmName()
         {
             GetFileHash task = new GetFileHash
@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
             _mockEngine.Log.ShouldContain("MSB3953");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetFileHash_FailsForUnknownHashEncoding()
         {
             GetFileHash task = new GetFileHash
@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests
             _mockEngine.Log.ShouldContain("MSB3951");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetFileHash_FailsForMissingFile()
         {
             GetFileHash task = new GetFileHash
@@ -63,8 +63,8 @@ namespace Microsoft.Build.UnitTests
             _mockEngine.Log.ShouldContain("MSB3954");
         }
 
-        [Theory]
-        [MemberData(nameof(TestBinary.GetLorem), MemberType = typeof(TestBinary))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(TestBinary.GetLorem), typeof(TestBinary))]
         public void GetFileHash_ComputesCorrectChecksumForOneFile(TestBinary testBinary)
         {
             GetFileHash task = new GetFileHash
@@ -79,8 +79,8 @@ namespace Microsoft.Build.UnitTests
             task.Hash.ShouldBe(testBinary.FileHash);
         }
 
-        [Theory]
-        [MemberData(nameof(TestBinary.GetLorem), MemberType = typeof(TestBinary))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(TestBinary.GetLorem), typeof(TestBinary))]
         public void GetFileHash_ComputesCorrectChecksumForManyFiles(TestBinary testBinary)
         {
             GetFileHash task = new GetFileHash

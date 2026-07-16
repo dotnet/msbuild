@@ -5,19 +5,19 @@
 using System.Linq;
 using Microsoft.Build.Framework.Telemetry;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests.Telemetry;
 
+[TestClass]
 public class LoggingConfigurationTelemetry_Tests
 {
-    [Fact]
+    [MSBuildTestMethod]
     public void LoggingConfigurationTelemetryIsThere()
     {
         KnownTelemetry.LoggingConfigurationTelemetry.ShouldNotBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryConstructedHasNoProperties()
     {
         LoggingConfigurationTelemetry telemetry = new();
@@ -41,7 +41,7 @@ public class LoggingConfigurationTelemetry_Tests
             .ShouldBeEmpty();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void BuildTelemetryCreateProperProperties()
     {
         LoggingConfigurationTelemetry telemetry = new()

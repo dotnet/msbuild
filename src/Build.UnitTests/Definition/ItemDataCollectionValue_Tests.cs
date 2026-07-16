@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Evaluation;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -14,6 +13,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     /// <summary>
     /// Tests the <see cref="ItemDataCollectionValue{I}"/> data type.
     /// </summary>
+    [TestClass]
     public class ItemDataCollectionValue_Tests
     {
         private int[] MakeArray(ItemDataCollectionValue<int> value)
@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             return result.ToArray();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RepresentsSingleItem()
         {
             var value = new ItemDataCollectionValue<int>(1);
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             MakeArray(value).ShouldBe(new[] { 1 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AddsSecondItem()
         {
             var value = new ItemDataCollectionValue<int>(1);
@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             MakeArray(value).ShouldBe(new[] { 1, 2 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DeletesSingleItem()
         {
             var value = new ItemDataCollectionValue<int>(1);
@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             MakeArray(value).ShouldBe(Array.Empty<int>());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DeletesFirstItem()
         {
             var value = new ItemDataCollectionValue<int>(1);
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             MakeArray(value).ShouldBe(new[] { 2 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DeletesSecondItem()
         {
             var value = new ItemDataCollectionValue<int>(1);
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             MakeArray(value).ShouldBe(new[] { 1 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DeletesNonExistentItem()
         {
             var value = new ItemDataCollectionValue<int>(1);
@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             MakeArray(value).ShouldBe(new[] { 1, 2 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReplacesSingleItem()
         {
             var value = new ItemDataCollectionValue<int>(1);
@@ -91,7 +91,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             MakeArray(value).ShouldBe(new[] { 11 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReplacesFirstItem()
         {
             var value = new ItemDataCollectionValue<int>(1);
@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             MakeArray(value).ShouldBe(new[] { 11, 2 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReplacesSecondItem()
         {
             var value = new ItemDataCollectionValue<int>(1);
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             MakeArray(value).ShouldBe(new[] { 1, 22 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReplacesNonExistentItem()
         {
             var value = new ItemDataCollectionValue<int>(1);

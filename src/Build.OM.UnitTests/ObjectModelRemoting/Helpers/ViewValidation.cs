@@ -10,7 +10,6 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using System.Linq;
     using Microsoft.Build.Construction;
     using Microsoft.Build.Evaluation;
-    using Xunit;
 
     internal enum ObjectType
     {
@@ -34,57 +33,57 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public void VerifyNotSame(LinkPair<T> other)
         {
-            Assert.NotEqual((object)this.View, (object)other.View);
-            Assert.NotEqual((object)this.Real, (object)other.Real);
+            Assert.AreNotEqual((object)this.View, (object)other.View);
+            Assert.AreNotEqual((object)this.Real, (object)other.Real);
         }
 
         public void VerifySame(LinkPair<T> other)
         {
-            Assert.Equal((object)this.View, (object)other.View);
-            Assert.Equal((object)this.Real, (object)other.Real);
+            Assert.AreEqual((object)this.View, (object)other.View);
+            Assert.AreEqual((object)this.Real, (object)other.Real);
         }
 
         public void VerifySetter(bool finalValue, Func<T, bool> getter, Action<T, bool> setter)
         {
             var current = getter(this.Real);
-            Assert.Equal(current, getter(this.View));
+            Assert.AreEqual(current, getter(this.View));
 
             // set via the view
             setter(this.View, !current);
 
-            Assert.Equal(!current, getter(this.View));
-            Assert.Equal(!current, getter(this.Real));
+            Assert.AreEqual(!current, getter(this.View));
+            Assert.AreEqual(!current, getter(this.Real));
 
             // set via the real.
             setter(this.Real, current);
 
-            Assert.Equal(current, getter(this.View));
-            Assert.Equal(current, getter(this.Real));
+            Assert.AreEqual(current, getter(this.View));
+            Assert.AreEqual(current, getter(this.Real));
 
             setter(this.View, finalValue);
-            Assert.Equal(finalValue, getter(this.View));
-            Assert.Equal(finalValue, getter(this.Real));
+            Assert.AreEqual(finalValue, getter(this.View));
+            Assert.AreEqual(finalValue, getter(this.Real));
         }
 
         public void VerifySetter(string newValue, Func<T, string> getter, Action<T, string> setter)
         {
             var newValue1 = newValue.Ver(1);
             var current = getter(this.Real);
-            Assert.Equal(current, getter(this.View));
-            Assert.NotEqual(current, newValue);
-            Assert.NotEqual(current, newValue1);
+            Assert.AreEqual(current, getter(this.View));
+            Assert.AreNotEqual(current, newValue);
+            Assert.AreNotEqual(current, newValue1);
 
             // set via the view
             setter(this.View, newValue1);
 
-            Assert.Equal(newValue1, getter(this.View));
-            Assert.Equal(newValue1, getter(this.Real));
+            Assert.AreEqual(newValue1, getter(this.View));
+            Assert.AreEqual(newValue1, getter(this.Real));
 
             // set via the real.
             setter(this.Real, newValue);
 
-            Assert.Equal(newValue, getter(this.View));
-            Assert.Equal(newValue, getter(this.Real));
+            Assert.AreEqual(newValue, getter(this.View));
+            Assert.AreEqual(newValue, getter(this.Real));
             this.Verify();
         }
 
@@ -108,13 +107,13 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             if (view is T viewTypedXml)
             {
-                Assert.True(real is T);
+                Assert.IsTrue(real is T);
                 elementValidator(viewTypedXml, (T)real, context);
                 return true;
             }
             else
             {
-                Assert.False(real is T);
+                Assert.IsFalse(real is T);
                 return false;
             }
         }
@@ -286,10 +285,10 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             {
                 if (hasMetadata != null)
                 {
-                    Assert.True(hasMetadata(md.Key));
+                    Assert.IsTrue(hasMetadata(md.Key));
                 }
 
-                Assert.Equal(md.Value, getMetadata(md.Key));
+                Assert.AreEqual(md.Value, getMetadata(md.Key));
             }
         }
 
@@ -300,12 +299,12 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 return;
             }
 
-            Assert.NotNull(viewCollection);
-            Assert.NotNull(realCollection);
+            Assert.IsNotNull(viewCollection);
+            Assert.IsNotNull(realCollection);
 
             var viewXmlList = viewCollection.ToList();
             var realXmlList = realCollection.ToList();
-            Assert.Equal(realXmlList.Count, viewXmlList.Count);
+            Assert.AreEqual(realXmlList.Count, viewXmlList.Count);
             for (int i = 0; i < realXmlList.Count; i++)
             {
                 validator(viewXmlList[i], realXmlList[i], context);
@@ -319,14 +318,14 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 return;
             }
 
-            Assert.NotNull(viewCollection);
-            Assert.NotNull(realCollection);
+            Assert.IsNotNull(viewCollection);
+            Assert.IsNotNull(realCollection);
 
-            Assert.Equal(realCollection.Count, viewCollection.Count);
+            Assert.AreEqual(realCollection.Count, viewCollection.Count);
             foreach (var k in realCollection.Keys)
             {
-                Assert.True(viewCollection.TryGetValue(k, out var vv));
-                Assert.True(realCollection.TryGetValue(k, out var rv));
+                Assert.IsTrue(viewCollection.TryGetValue(k, out var vv));
+                Assert.IsTrue(realCollection.TryGetValue(k, out var rv));
                 validator(vv, rv, context);
             }
         }
@@ -335,7 +334,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         {
             var viewXmlList = viewXmlCollection.ToList();
             var realXmlList = realXmlCollection.ToList();
-            Assert.Equal(realXmlList.Count, viewXmlList.Count);
+            Assert.AreEqual(realXmlList.Count, viewXmlList.Count);
             for (int i = 0; i < realXmlList.Count; i++)
             {
                 VerifyFindType(viewXmlList[i], realXmlList[i], context);

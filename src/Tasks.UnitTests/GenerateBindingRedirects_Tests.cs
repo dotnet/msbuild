@@ -10,18 +10,18 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public class GenerateBindingRedirectsTests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
         private readonly TestEnvironment _env;
 
-        public GenerateBindingRedirectsTests(ITestOutputHelper output)
+        public GenerateBindingRedirectsTests(TestContext output)
         {
             _output = output;
             _env = TestEnvironment.Create(output);
@@ -40,7 +40,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// Rationale:
         /// - The only goal for <see cref="GenerateBindingRedirects"/> task is to add specified redirects to the output app.config.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TargetAppConfigShouldContainsBindingRedirects()
         {
             // Arrange
@@ -65,7 +65,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// Rationale:
         /// - The only goal for <see cref="GenerateBindingRedirects"/> task is to add specified redirects to the output app.config.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TargetAppConfigShouldContainsBindingRedirectsFromAppConfig()
         {
             // Arrange
@@ -99,7 +99,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// - assemblyBinding could have more than one dependentAssembly elements and <see cref="GenerateBindingRedirects"/>
         ///   should respect that.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GenerateBindingRedirectsFromTwoDependentAssemblySections()
         {
             // Arrange
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// - In initial implementation such app.config was considered invalid and MSB3835 was issued.
         ///   But due to MSDN documentation, dependentAssembly could have only probing element without any other elements inside.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AppConfigWithProbingPathAndWithoutDependentAssemblyShouldNotProduceWarningsBug1161241()
         {
             // Arrange
@@ -185,7 +185,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// - In initial implementation such app.config was considered invalid and MSB3835 was issued.
         ///   But due to MSDN documentation, dependentAssembly could have only probing element without any other elements inside.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AppConfigWithEmptyAssemblyBindingShouldNotProduceWarnings()
         {
             // Arrange
@@ -210,7 +210,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// Rationale:
         /// - Due to app.config xsd schema this is a valid configuration.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DependentAssemblySectionWithoutBindingRedirectShouldNotProduceWarnings()
         {
             // Arrange
@@ -240,7 +240,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// Rationale:
         /// - Due to MSDN documentation, assemblyBinding element should always have a dependentAssembly subsection.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AppConfigInvalidIfDependentAssemblyNodeIsEmpty()
         {
             // Construct the app.config.
@@ -258,7 +258,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             redirectResults.Engine.AssertLogContains("MSB3835");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AppConfigWhenFilePlacedInLocationWithGB18030Characters()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -274,7 +274,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AppConfigFileNotSavedWhenIdentical()
         {
             string appConfigFile = WriteAppConfigRuntimeSection(string.Empty);

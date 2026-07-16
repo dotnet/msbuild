@@ -9,7 +9,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 using EventSourceSink = Microsoft.Build.BackEnd.Logging.EventSourceSink;
 using Project = Microsoft.Build.Evaluation.Project;
 
@@ -17,11 +16,12 @@ using Project = Microsoft.Build.Evaluation.Project;
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class FileLogger_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public FileLogger_Tests(ITestOutputHelper output)
+        public FileLogger_Tests(TestContext output)
         {
             _output = output;
         }
@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic test of the file logger.  Writes to a log file in the temp directory.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Basic()
         {
             FileLogger fileLogger = new FileLogger();
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests
         /// Basic case of logging a message to a file
         /// Verify it logs and encoding is ANSI
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicNoExistingFile()
         {
             string log = null;
@@ -81,12 +81,12 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Invalid file should error nicely.
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void InvalidFile()
         {
-            Assert.Throws<LoggerException>(() =>
+            Assert.ThrowsExactly<LoggerException>(() =>
             {
                 string log = null;
 
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Specific verbosity overrides global verbosity
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SpecificVerbosity()
         {
             string log = null;
@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the short hand verbosity settings for the file logger
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidVerbosities()
         {
             string[] verbositySettings = new string[] { "Q", "quiet", "m", "minimal", "N", "normal", "d", "detailed", "diag", "DIAGNOSTIC" };
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests
                 EventSourceSink es = new EventSourceSink();
                 fl.Initialize(es);
                 fl.Shutdown();
-                Assert.Equal(fl.Verbosity, verbosityEnumerations[i]);
+                Assert.AreEqual(fl.Verbosity, verbosityEnumerations[i]);
             }
 
             // Do the same using the v shorthand
@@ -164,17 +164,17 @@ namespace Microsoft.Build.UnitTests
                 EventSourceSink es = new EventSourceSink();
                 fl.Initialize(es);
                 fl.Shutdown();
-                Assert.Equal(fl.Verbosity, verbosityEnumerations[i]);
+                Assert.AreEqual(fl.Verbosity, verbosityEnumerations[i]);
             }
         }
 
         /// <summary>
         /// Invalid verbosity setting
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidVerbosity()
         {
-            Assert.Throws<LoggerException>(() =>
+            Assert.ThrowsExactly<LoggerException>(() =>
             {
                 FileLogger fl = new FileLogger();
                 fl.Parameters = "verbosity=CookiesAndCream";
@@ -185,10 +185,10 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Invalid encoding setting
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidEncoding()
         {
-            Assert.Throws<LoggerException>(() =>
+            Assert.ThrowsExactly<LoggerException>(() =>
             {
                 string log = null;
 
@@ -213,7 +213,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Valid encoding setting
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidEncoding()
         {
             string log = null;
@@ -225,8 +225,8 @@ namespace Microsoft.Build.UnitTests
                 byte[] content = ReadRawBytes(log);
 
                 // FF FE is the BOM for UTF16
-                Assert.Equal((byte)255, content[0]);
-                Assert.Equal((byte)254, content[1]);
+                Assert.AreEqual((byte)255, content[0]);
+                Assert.AreEqual((byte)254, content[1]);
             }
             finally
             {
@@ -240,7 +240,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Valid encoding setting
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidEncoding2()
         {
             string log = null;
@@ -252,9 +252,9 @@ namespace Microsoft.Build.UnitTests
                 byte[] content = ReadRawBytes(log);
 
                 // EF BB BF is the BOM for UTF8
-                Assert.Equal((byte)239, content[0]);
-                Assert.Equal((byte)187, content[1]);
-                Assert.Equal((byte)191, content[2]);
+                Assert.AreEqual((byte)239, content[0]);
+                Assert.AreEqual((byte)187, content[1]);
+                Assert.AreEqual((byte)191, content[2]);
             }
             finally
             {
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Logging a message to a file that already exists should overwrite it
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicExistingFileNoAppend()
         {
             string log = null;
@@ -313,7 +313,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Logging to a file that already exists, with "append" set, should append
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicExistingFileAppend()
         {
             string log = null;
@@ -337,13 +337,13 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Logging to a file in a directory that doesn't exists
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicNoExistingDirectory()
         {
             string directory = Path.Combine(ObjectModelHelpers.TempProjectDir, Guid.NewGuid().ToString("N"));
             string log = Path.Combine(directory, "build.log");
-            Assert.False(Directory.Exists(directory));
-            Assert.False(File.Exists(log));
+            Assert.IsFalse(Directory.Exists(directory));
+            Assert.IsFalse(File.Exists(log));
 
             try
             {
@@ -356,10 +356,10 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Theory]
-        [InlineData("warningsonly")]
-        [InlineData("errorsonly")]
-        [InlineData("errorsonly;warningsonly")]
+        [MSBuildTestMethod]
+        [DataRow("warningsonly")]
+        [DataRow("errorsonly")]
+        [DataRow("errorsonly;warningsonly")]
         public void EmptyErrorLogUsingWarningsErrorsOnly(string loggerOption)
         {
             using (var env = TestEnvironment.Create())
@@ -382,20 +382,20 @@ namespace Microsoft.Build.UnitTests
 
                 // File should exist and be 0 length (no summary information, etc.)
                 var result = new FileInfo(logFile);
-                Assert.True(result.Exists);
-                Assert.Equal(0, new FileInfo(logFile).Length);
+                Assert.IsTrue(result.Exists);
+                Assert.AreEqual(0, new FileInfo(logFile).Length);
             }
         }
 
         /// <summary>
         /// File logger is writting the verbosity level as soon the build starts.
         /// </summary>
-        [Theory]
-        [InlineData(LoggerVerbosity.Quiet, false)]
-        [InlineData(LoggerVerbosity.Minimal, false)]
-        [InlineData(LoggerVerbosity.Normal, true)]
-        [InlineData(LoggerVerbosity.Detailed, true)]
-        [InlineData(LoggerVerbosity.Diagnostic, true)]
+        [MSBuildTestMethod]
+        [DataRow(LoggerVerbosity.Quiet, false)]
+        [DataRow(LoggerVerbosity.Minimal, false)]
+        [DataRow(LoggerVerbosity.Normal, true)]
+        [DataRow(LoggerVerbosity.Detailed, true)]
+        [DataRow(LoggerVerbosity.Diagnostic, true)]
         public void LogVerbosityMessage(LoggerVerbosity loggerVerbosity, bool shouldContain)
         {
             using (var testEnvironment = TestEnvironment.Create())
@@ -475,7 +475,7 @@ namespace Microsoft.Build.UnitTests
             string[] actualLines = actualContent.Split(MSBuildConstants.NewlineChar, StringSplitOptions.RemoveEmptyEntries);
             string[] expectedLines = expectedContent.Split(MSBuildConstants.NewlineChar, StringSplitOptions.RemoveEmptyEntries);
 
-            Assert.Equal(expectedLines.Length, actualLines.Length);
+            Assert.AreEqual(expectedLines.Length, actualLines.Length);
 
             for (int i = 0; i < expectedLines.Length; i++)
             {
@@ -487,7 +487,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Check the ability of the distributed logger to correctly tell its internal file logger where to log the file
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DistributedFileLoggerParameters()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -534,10 +534,10 @@ namespace Microsoft.Build.UnitTests
             fileLogger.Shutdown();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DistributedLoggerNullEmpty()
         {
-            Assert.Throws<LoggerException>(() =>
+            Assert.ThrowsExactly<LoggerException>(() =>
             {
                 DistributedFileLogger fileLogger = new DistributedFileLogger();
                 fileLogger.NodeId = 0;

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="MSTest.Sdk">
   <PropertyGroup>
     <!-- Don't build a netfx version of this unit with dotnet, as the netfx bootstrap layout created with 'dotnet build' is incomplete. -->
     <TargetFrameworks>$(LatestDotNetCoreForMSBuild)</TargetFrameworks>
@@ -6,6 +6,7 @@
 
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <IsPackable>false</IsPackable>
+    <IsUnitTestProject>true</IsUnitTestProject>
     <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
   </PropertyGroup>
 
@@ -13,7 +14,6 @@
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
-    <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
   </ItemGroup>
   
   <ItemGroup Label="TestAssests">
@@ -41,9 +41,6 @@
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
-    </None>
-    <None Include="..\Shared\UnitTests\xunit.runner.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="TestAssets\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

@@ -5,7 +5,6 @@ using System;
 using System.Linq;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
-using Xunit;
 
 
 
@@ -13,6 +12,7 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class ParserTest
     {
         /// <summary>
@@ -22,7 +22,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SimpleParseTest()
         {
             Console.WriteLine("SimpleParseTest()");
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ComplexParseTest()
         {
             Console.WriteLine("ComplexParseTest()");
@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NotParseTest()
         {
             Console.WriteLine("NegationParseTest()");
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests
         }
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FunctionCallParseTest()
         {
             Console.WriteLine("FunctionCallParseTest()");
@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests
             tree = p.Parse("SimpleFunctionCall( $(property), 1234, abcd, 'abcd efgh' )", ParserOptions.AllowAll, _elementLocation);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemListParseTest()
         {
             Console.WriteLine("FunctionCallParseTest()");
@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -158,7 +158,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -170,7 +170,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -182,7 +182,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -194,7 +194,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -206,10 +206,10 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemFuncParseTest()
         {
             Console.WriteLine("ItemFuncParseTest()");
@@ -217,19 +217,19 @@ namespace Microsoft.Build.UnitTests
             Parser p = new Parser();
             GenericExpressionNode tree = p.Parse("@(item->foo('ab'))",
                 ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
-            Assert.IsType<StringExpressionNode>(tree);
-            Assert.Equal("@(item->foo('ab'))", tree.GetUnexpandedValue(null));
+            Assert.IsExactInstanceOfType<StringExpressionNode>(tree);
+            Assert.AreEqual("@(item->foo('ab'))", tree.GetUnexpandedValue(null));
 
             tree = p.Parse("!@(item->foo())",
                 ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
-            Assert.IsType<NotExpressionNode>(tree);
+            Assert.IsExactInstanceOfType<NotExpressionNode>(tree);
 
             tree = p.Parse("(@(item->foo('ab')) and @(item->foo('bc')))",
                 ParserOptions.AllowProperties | ParserOptions.AllowItemLists, _elementLocation);
-            Assert.IsType<AndExpressionNode>(tree);
+            Assert.IsExactInstanceOfType<AndExpressionNode>(tree);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataParseTest()
         {
             Console.WriteLine("FunctionCallParseTest()");
@@ -245,7 +245,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -257,7 +257,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -269,7 +269,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -281,7 +281,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -293,7 +293,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             fExceptionCaught = false;
             try
@@ -305,12 +305,12 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
         }
 
         /// <summary>
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NegativeTests()
         {
             Console.WriteLine("NegativeTests()");
@@ -329,7 +329,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             try
             {
@@ -342,7 +342,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
             try
             {
                 fExceptionCaught = false;
@@ -354,7 +354,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             try
             {
@@ -367,7 +367,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             try
             {
@@ -380,7 +380,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             try
             {
@@ -393,7 +393,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
             try
             {
                 fExceptionCaught = false;
@@ -405,7 +405,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
 
             try
             {
@@ -418,7 +418,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
             try
             {
                 fExceptionCaught = false;
@@ -430,14 +430,14 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine(e.BaseMessage);
                 fExceptionCaught = true;
             }
-            Assert.True(fExceptionCaught);
+            Assert.IsTrue(fExceptionCaught);
         }
 
         /// <summary>
         /// This test verifies that we trigger warnings for expressions that
         /// could be incorrectly evaluated
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyWarningForOrder()
         {
             // Create a project file that has an expression
@@ -479,7 +479,7 @@ namespace Microsoft.Build.UnitTests
         /// This test verifies that we don't trigger warnings for expressions that
         /// couldn't be incorrectly evaluated
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyNoWarningForOrder()
         {
             // Create a project file that has an expression
@@ -529,9 +529,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         // see https://github.com/dotnet/msbuild/issues/5436
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void SupportItemDefinationGroupInWhenOtherwise(bool context)
         {
             var projectContent = $@"
@@ -577,23 +577,23 @@ namespace Microsoft.Build.UnitTests
             var project = ObjectModelHelpers.CreateInMemoryProject(projectContent);
 
             var projectItem = project.GetItems("A").FirstOrDefault();
-            Assert.Equal("bar", projectItem.EvaluatedInclude);
+            Assert.AreEqual("bar", projectItem.EvaluatedInclude);
 
             var metadatam = projectItem.GetMetadata("m");
             if (context)
             {
                 // Go to when
-                Assert.Equal("m1", metadatam.EvaluatedValue);
+                Assert.AreEqual("m1", metadatam.EvaluatedValue);
             }
             else
             {
                 // Go to Otherwise
-                Assert.Equal("m2", metadatam.EvaluatedValue);
+                Assert.AreEqual("m2", metadatam.EvaluatedValue);
             }
 
             var metadatan = projectItem.GetMetadata("n");
-            Assert.Equal("n1", metadatan.EvaluatedValue);
-            Assert.Equal("n2", metadatan.Predecessor.EvaluatedValue);
+            Assert.AreEqual("n1", metadatan.EvaluatedValue);
+            Assert.AreEqual("n2", metadatan.Predecessor.EvaluatedValue);
         }
     }
 }

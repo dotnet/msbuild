@@ -10,7 +10,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -19,12 +18,13 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests for write code fragment task
     /// </summary>
+    [TestClass]
     public class WriteCodeFragment_Tests
     {
         /// <summary>
         /// Need an available language
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidLanguage()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -35,14 +35,14 @@ namespace Microsoft.Build.UnitTests
             task.OutputFile = new TaskItem("foo");
             bool result = task.Execute();
 
-            Assert.False(result);
+            Assert.IsFalse(result);
             engine.AssertLogContains("MSB3712");
         }
 
         /// <summary>
         /// Need a language
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoLanguage()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -52,14 +52,14 @@ namespace Microsoft.Build.UnitTests
             task.OutputFile = new TaskItem("foo");
             bool result = task.Execute();
 
-            Assert.False(result);
+            Assert.IsFalse(result);
             engine.AssertLogContains("MSB3098");
         }
 
         /// <summary>
         /// Need a location
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoFileOrDirectory()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -69,14 +69,14 @@ namespace Microsoft.Build.UnitTests
             task.Language = "c#";
             bool result = task.Execute();
 
-            Assert.False(result);
+            Assert.IsFalse(result);
             engine.AssertLogContains("MSB3711");
         }
 
         /// <summary>
         /// Combine file and directory
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CombineFileDirectory()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -89,11 +89,11 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             string file = Path.Combine(Path.GetTempPath(), "CombineFileDirectory.tmp");
-            Assert.Equal(file, task.OutputFile.ItemSpec);
-            Assert.True(File.Exists(file));
+            Assert.AreEqual(file, task.OutputFile.ItemSpec);
+            Assert.IsTrue(File.Exists(file));
 
             File.Delete(task.OutputFile.ItemSpec);
         }
@@ -101,7 +101,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Combine file and directory where the directory does not already exist
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CombineFileDirectoryAndDirectoryDoesNotExist()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -116,15 +116,15 @@ namespace Microsoft.Build.UnitTests
             task.BuildEngine = engine;
             bool result = task.Execute();
 
-            Assert.True(result);
-            Assert.Equal(expectedFile, task.OutputFile.ItemSpec);
-            Assert.True(File.Exists(expectedFile));
+            Assert.IsTrue(result);
+            Assert.AreEqual(expectedFile, task.OutputFile.ItemSpec);
+            Assert.IsTrue(File.Exists(expectedFile));
         }
 
         /// <summary>
         /// Combine file and directory where the directory does not already exist
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FileWithPathAndDirectoryDoesNotExist()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -136,15 +136,15 @@ namespace Microsoft.Build.UnitTests
             task.BuildEngine = engine;
             bool result = task.Execute();
 
-            Assert.True(result);
-            Assert.Equal(file.ItemSpec, task.OutputFile.ItemSpec);
-            Assert.True(File.Exists(task.OutputFile.ItemSpec));
+            Assert.IsTrue(result);
+            Assert.AreEqual(file.ItemSpec, task.OutputFile.ItemSpec);
+            Assert.IsTrue(File.Exists(task.OutputFile.ItemSpec));
         }
 
         /// <summary>
         /// File name is set but no OutputDirectory
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void FileNameNoDirectory()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -160,16 +160,16 @@ namespace Microsoft.Build.UnitTests
             task.OutputFile = new TaskItem(fileName);
             bool result = task.Execute();
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
-            Assert.Equal(fileName, task.OutputFile.ItemSpec);
-            Assert.True(File.Exists(file.Path));
+            Assert.AreEqual(fileName, task.OutputFile.ItemSpec);
+            Assert.IsTrue(File.Exists(file.Path));
         }
 
         /// <summary>
         /// Ignore directory if file is rooted
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DirectoryAndRootedFile()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -186,10 +186,10 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem("c:\\");
             bool result = task.Execute();
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
-            Assert.Equal(file, task.OutputFile.ItemSpec);
-            Assert.True(File.Exists(file));
+            Assert.AreEqual(file, task.OutputFile.ItemSpec);
+            Assert.IsTrue(File.Exists(file));
 
             FileUtilities.DeleteWithoutTrailingBackslash(folder, true);
         }
@@ -198,7 +198,7 @@ namespace Microsoft.Build.UnitTests
         /// Given nothing to write, should succeed but
         /// produce no output file
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoAttributesShouldEmitNoFile()
         {
             string file = Path.Combine(Path.GetTempPath(), "NoAttributesShouldEmitNoFile.tmp");
@@ -217,16 +217,16 @@ namespace Microsoft.Build.UnitTests
             task.OutputFile = new TaskItem(file);
             bool result = task.Execute();
 
-            Assert.True(result);
-            Assert.False(File.Exists(file));
-            Assert.Null(task.OutputFile);
+            Assert.IsTrue(result);
+            Assert.IsFalse(File.Exists(file));
+            Assert.IsNull(task.OutputFile);
         }
 
         /// <summary>
         /// Given nothing to write, should succeed but
         /// produce no output file
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoAttributesShouldEmitNoFile2()
         {
             string file = Path.Combine(Path.GetTempPath(), "NoAttributesShouldEmitNoFile.tmp");
@@ -245,9 +245,9 @@ namespace Microsoft.Build.UnitTests
             task.OutputFile = new TaskItem(file);
             bool result = task.Execute();
 
-            Assert.True(result);
-            Assert.False(File.Exists(file));
-            Assert.Null(task.OutputFile);
+            Assert.IsTrue(result);
+            Assert.IsFalse(File.Exists(file));
+            Assert.IsNull(task.OutputFile);
         }
 
         /// <summary>
@@ -265,7 +265,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputFile = new TaskItem("||//invalid||");
             bool result = task.Execute();
 
-            Assert.False(result);
+            Assert.IsFalse(result);
             engine.AssertLogContains("MSB3713");
         }
 
@@ -284,14 +284,14 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem("||invalid||");
             bool result = task.Execute();
 
-            Assert.False(result);
+            Assert.IsFalse(result);
             engine.AssertLogContains("MSB3713");
         }
 
         /// <summary>
         /// Parameterless attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OneAttributeNoParams()
         {
             string file = Path.Combine(Path.GetTempPath(), "OneAttribute.tmp");
@@ -308,8 +308,8 @@ namespace Microsoft.Build.UnitTests
                 task.OutputFile = new TaskItem(file);
                 bool result = task.Execute();
 
-                Assert.True(result);
-                Assert.True(File.Exists(file));
+                Assert.IsTrue(result);
+                Assert.IsTrue(File.Exists(file));
 
                 string content = File.ReadAllText(file);
                 Console.WriteLine(content);
@@ -325,7 +325,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test with the VB language
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OneAttributeNoParamsVb()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -338,7 +338,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);
@@ -349,7 +349,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// More than one attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoAttributes()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -365,7 +365,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);
@@ -379,7 +379,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Specify directory instead
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToDirectory()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -392,10 +392,10 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.True(result);
-            Assert.True(File.Exists(task.OutputFile.ItemSpec));
-            Assert.Equal(Path.GetTempPath(), task.OutputFile.ItemSpec.Substring(0, Path.GetTempPath().Length));
-            Assert.Equal(".cs", task.OutputFile.ItemSpec.Substring(task.OutputFile.ItemSpec.Length - 3));
+            Assert.IsTrue(result);
+            Assert.IsTrue(File.Exists(task.OutputFile.ItemSpec));
+            Assert.AreEqual(Path.GetTempPath(), task.OutputFile.ItemSpec.Substring(0, Path.GetTempPath().Length));
+            Assert.AreEqual(".cs", task.OutputFile.ItemSpec.Substring(task.OutputFile.ItemSpec.Length - 3));
 
             File.Delete(task.OutputFile.ItemSpec);
         }
@@ -403,7 +403,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Specify directory where the directory does not already exist
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToDirectoryAndDirectoryDoesNotExist()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -415,16 +415,16 @@ namespace Microsoft.Build.UnitTests
             task.BuildEngine = engine;
             bool result = task.Execute();
 
-            Assert.True(result);
-            Assert.True(File.Exists(task.OutputFile.ItemSpec));
-            Assert.Equal(folder.ItemSpec, task.OutputFile.ItemSpec.Substring(0, folder.ItemSpec.Length));
-            Assert.Equal(".cs", task.OutputFile.ItemSpec.Substring(task.OutputFile.ItemSpec.Length - 3));
+            Assert.IsTrue(result);
+            Assert.IsTrue(File.Exists(task.OutputFile.ItemSpec));
+            Assert.AreEqual(folder.ItemSpec, task.OutputFile.ItemSpec.Substring(0, folder.ItemSpec.Length));
+            Assert.AreEqual(".cs", task.OutputFile.ItemSpec.Substring(task.OutputFile.ItemSpec.Length - 3));
         }
 
         /// <summary>
         /// When OutputDirectory is relative and OutputFile is not specified, the resulting OutputFile should be relative.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RelativeOutputDirectoryProducesRelativeOutputFile()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -473,7 +473,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Regular case
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OneAttributeTwoParams()
         {
             string file = Path.Combine(Path.GetTempPath(), "OneAttribute.tmp");
@@ -492,8 +492,8 @@ namespace Microsoft.Build.UnitTests
                 task.OutputFile = new TaskItem(file);
                 bool result = task.Execute();
 
-                Assert.True(result);
-                Assert.True(File.Exists(file));
+                Assert.IsTrue(result);
+                Assert.IsTrue(File.Exists(file));
 
                 string content = File.ReadAllText(file);
                 Console.WriteLine(content);
@@ -509,7 +509,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// This produces invalid code, but the task works
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OneAttributeTwoParamsSameName()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -524,7 +524,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             File.Delete(task.OutputFile.ItemSpec);
         }
@@ -533,7 +533,7 @@ namespace Microsoft.Build.UnitTests
         /// Some attributes only allow positional constructor arguments.
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OneAttributePositionalParamInvalidSuffix()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -547,7 +547,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.False(result);
+            Assert.IsFalse(result);
 
             engine.AssertLogContains("MSB3098");
         }
@@ -557,7 +557,7 @@ namespace Microsoft.Build.UnitTests
         /// Some attributes only allow positional constructor arguments.
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OneAttributeTwoPositionalParams()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -572,7 +572,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);
@@ -582,7 +582,7 @@ namespace Microsoft.Build.UnitTests
             File.Delete(task.OutputFile.ItemSpec);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OneAttributeTwoPositionalParamsWithSameValue()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -597,7 +597,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);
@@ -612,7 +612,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Multi line argument values should cause a verbatim string to be used
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultilineAttributeCSharp()
         {
             var lines = new[] { "line 1", "line 2", "line 3" };
@@ -630,7 +630,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);
@@ -649,7 +649,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Multi line argument values should cause a verbatim string to be used
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultilineAttributeVB()
         {
             var lines = new[] { "line 1", "line 2", "line 3" };
@@ -667,7 +667,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);
@@ -686,7 +686,7 @@ namespace Microsoft.Build.UnitTests
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// If a parameter is skipped, it's an error.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OneAttributeSkippedPositionalParams()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -700,7 +700,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.False(result);
+            Assert.IsFalse(result);
 
             engine.AssertLogContains("MSB3714");
         }
@@ -710,7 +710,7 @@ namespace Microsoft.Build.UnitTests
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// This test is for "_ParameterX"
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidNumber()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -724,7 +724,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.False(result);
+            Assert.IsFalse(result);
 
             engine.AssertLogContains("MSB3098");
         }
@@ -734,7 +734,7 @@ namespace Microsoft.Build.UnitTests
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// This test is for "_Parameter"
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoNumber()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -748,7 +748,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.False(result);
+            Assert.IsFalse(result);
 
             engine.AssertLogContains("MSB3098");
         }
@@ -758,7 +758,7 @@ namespace Microsoft.Build.UnitTests
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// These can also be combined with named params.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OneAttributePositionalAndNamedParams()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -774,7 +774,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);
@@ -792,7 +792,7 @@ namespace Microsoft.Build.UnitTests
         /// To set those, use metadata names like "_Parameter1", "_Parameter2" etc.
         /// These can also be combined with named params.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OneAttributePositionalAndNamedParamsVisualBasic()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -808,7 +808,7 @@ namespace Microsoft.Build.UnitTests
             task.OutputDirectory = new TaskItem(Path.GetTempPath());
             bool result = task.Execute();
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             string content = File.ReadAllText(task.OutputFile.ItemSpec);
             Console.WriteLine(content);
@@ -822,7 +822,7 @@ namespace Microsoft.Build.UnitTests
         /// A type can be declared for a positional arguments using the metadata
         /// "_Parameter1_TypeName" where the value is the full type name.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeclaredTypeForPositionalParameter()
         {
             TaskItem attribute = new("CLSCompliantAttribute");
@@ -838,7 +838,7 @@ namespace Microsoft.Build.UnitTests
         /// A type can be declared for a positional arguments using the metadata
         /// "Foo_TypeName" where the value is the full type name.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeclaredTypeForNamedParameter()
         {
             TaskItem attribute = new TaskItem("TestAttribute");
@@ -856,7 +856,7 @@ namespace Microsoft.Build.UnitTests
         /// Metadata that looks like a declared type, but doesn't have corresponding named parameter
         /// metadata should be treated as another named parameter for backward-compatibility.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeclaredTypedWithoutCorrespondingNamedParameter()
         {
             TaskItem attribute = new TaskItem("TestAttribute");
@@ -872,7 +872,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// An unknown type name for a parameter should cause a failure.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeclaredTypeIsUnknown()
         {
             TaskItem attribute = new("TestAttribute");
@@ -887,7 +887,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A parameter value that cannot be converted to the declared type should cause a failure.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeclaredTypeCausesConversionFailure()
         {
             TaskItem attribute = new("TestAttribute");
@@ -902,7 +902,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Parameter value that is too large for the declared data type should cause a failure.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeclaredTypeCausesOverflow()
         {
             TaskItem attribute = new("TestAttribute");
@@ -917,7 +917,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The metadata value should convert successfully to an enum.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeclaredTypeIsEnum()
         {
             TaskItem attribute = new("TestAttribute");
@@ -932,7 +932,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The metadata value should convert successfully to a type name in C#.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeclaredTypeIsTypeInCSharp()
         {
             TaskItem attribute = new("TestAttribute");
@@ -947,7 +947,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// The metadata value should convert successfully to a type name in VB.NET.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeclaredTypeIsTypeInVB()
         {
             TaskItem attribute = new("TestAttribute");
@@ -963,7 +963,7 @@ namespace Microsoft.Build.UnitTests
         /// Arrays are not supported for declared types. Literal arguments need to be used instead.
         /// This test confirms that it fails instead of falling back to being treated as a string.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeclaredTypeOfArrayIsNotSupported()
         {
             TaskItem attribute = new("TestAttribute");
@@ -979,7 +979,7 @@ namespace Microsoft.Build.UnitTests
         /// The exact code for a positional argument can be specified using
         /// the metadata "_Parameter1_IsLiteral" with a value of "true".
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LiteralPositionalParameter()
         {
             TaskItem attribute = new("TestAttribute");
@@ -995,7 +995,7 @@ namespace Microsoft.Build.UnitTests
         /// The exact code for a named argument can be specified using
         /// the metadata "Foo_IsLiteral" with a value of "true".
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LiteralNamedParameter()
         {
             TaskItem attribute = new("TestAttribute");
@@ -1011,7 +1011,7 @@ namespace Microsoft.Build.UnitTests
         /// The type of a positional argument can be inferred
         /// if the type of the attribute is in mscorlib.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InferredTypeForPositionalParameter()
         {
             TaskItem attribute = new("CLSCompliantAttribute");
@@ -1026,7 +1026,7 @@ namespace Microsoft.Build.UnitTests
         /// The type of a named argument can be inferred
         /// if the type of the attribute is in mscorlib.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InferredTypeForNamedParameter()
         {
             TaskItem attribute = new("System.Runtime.CompilerServices.InternalsVisibleToAttribute");
@@ -1043,7 +1043,7 @@ namespace Microsoft.Build.UnitTests
         /// of position arguments that was specified in the metadata, then the constructor that
         /// has strings for every parameter should be used.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InferredTypePrefersStringWhenMultipleConstructorsAreFound()
         {
             TaskItem attribute = new("System.Diagnostics.Contracts.ContractOptionAttribute");
@@ -1071,7 +1071,7 @@ namespace Microsoft.Build.UnitTests
         /// should be sorted by the names of the parameter types.
         /// The first constructor is then selected.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InferredTypeWithMultipleAttributeConstructorsIsDeterministic()
         {
             TaskItem attribute = new("System.Reflection.AssemblyFlagsAttribute");
@@ -1102,7 +1102,7 @@ namespace Microsoft.Build.UnitTests
         /// parameter should be treated as a string when the parameter
         /// is not given a declared type or is not marked as a literal.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InferredTypeFallsBackToStringWhenTypeCannotBeInferred()
         {
             // Use an attribute that is not in mscorlib. TypeConverterAttribute is in the "System" assembly.
@@ -1118,7 +1118,7 @@ namespace Microsoft.Build.UnitTests
         /// If the parameter type cannot be converted to the inferred type,
         /// then the parameter should be treated as a string.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InferredTypeFallsBackToStringWhenTypeConversionFails()
         {
             TaskItem attribute = new("System.Diagnostics.DebuggableAttribute");
@@ -1134,7 +1134,7 @@ namespace Microsoft.Build.UnitTests
         /// If the parameter type cannot be found,
         /// then the name of positional parameter should be displayed in the log.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MessageDisplayPositionalParameterNameWhenAttributeNotFound()
         {
             WriteCodeFragment task = new WriteCodeFragment();
@@ -1154,7 +1154,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Individual parameters can be typed differently.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UsingInferredDeclaredTypesAndLiteralsInSameAttribute()
         {
             TaskItem attribute = new("System.Diagnostics.Contracts.ContractOptionAttribute");
@@ -1197,7 +1197,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Provide the log output as the user message so that the assertion failure
                 // message is a bit more meaningful than just "Expected false to equal true".
-                Assert.True(result, engine.Log);
+                Assert.IsTrue(result, engine.Log);
 
                 string content = File.ReadAllText(task.OutputFile.ItemSpec);
                 Console.WriteLine(content);
@@ -1231,7 +1231,7 @@ namespace Microsoft.Build.UnitTests
 
                 // Provide the log output as the user message so that the assertion failure
                 // message is a bit more meaningful than just "Expected true to equal false".
-                Assert.False(result, engine.Log);
+                Assert.IsFalse(result, engine.Log);
 
                 engine.AssertLogContains(errorCode);
             }
@@ -1283,11 +1283,11 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that the generated comment is culture-invariant for reproducible builds
         /// </summary>
-        [Theory]
-        [InlineData("en-US")]
-        [InlineData("fr-FR")]
-        [InlineData("ja-JP")]
-        [InlineData("de-DE")]
+        [MSBuildTestMethod]
+        [DataRow("en-US")]
+        [DataRow("fr-FR")]
+        [DataRow("ja-JP")]
+        [DataRow("de-DE")]
         public void CommentIsInvariantCulture(string cultureName)
         {
             var originalCulture = System.Globalization.CultureInfo.CurrentUICulture;

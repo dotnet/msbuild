@@ -3,34 +3,34 @@
 
 using Microsoft.Build.Tasks;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class AssemblyRegistrationCache_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void ExerciseCache()
         {
             AssemblyRegistrationCache arc = new AssemblyRegistrationCache();
 
-            Assert.Equal(0, arc.Count);
+            Assert.AreEqual(0, arc.Count);
 
             arc.AddEntry("foo", "bar");
 
-            Assert.Equal(1, arc.Count);
+            Assert.AreEqual(1, arc.Count);
 
             string assembly;
             string tlb;
             arc.GetEntry(0, out assembly, out tlb);
 
-            Assert.Equal("foo", assembly);
-            Assert.Equal("bar", tlb);
+            Assert.AreEqual("foo", assembly);
+            Assert.AreEqual("bar", tlb);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExerciseCacheSerialization()
         {
             AssemblyRegistrationCache arc = new();

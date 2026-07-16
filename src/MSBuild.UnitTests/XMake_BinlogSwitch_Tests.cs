@@ -8,7 +8,6 @@ using Microsoft.Build.CommandLine.Experimental;
 using Microsoft.Build.Execution;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -17,12 +16,13 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests for MSBUILD_LOGGING_ARGS environment variable functionality.
     /// </summary>
+    [TestClass]
     public class XMakeBinlogSwitchTests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
         private readonly TestEnvironment _env;
 
-        public XMakeBinlogSwitchTests(ITestOutputHelper output)
+        public XMakeBinlogSwitchTests(TestContext output)
         {
             _output = output;
             _env = TestEnvironment.Create(output);
@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that MSBUILD_LOGGING_ARGS with -bl creates a binary log.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoggingArgsEnvVarWithBinaryLogger()
         {
             var directory = _env.CreateFolder();
@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that MSBUILD_LOGGING_ARGS with multiple -bl switches creates multiple binary logs.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoggingArgsEnvVarWithMultipleBinaryLoggers()
         {
             var directory = _env.CreateFolder();
@@ -73,7 +73,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that MSBUILD_LOGGING_ARGS with {} placeholder generates unique filenames.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoggingArgsEnvVarWithWildcardPlaceholder()
         {
             var directory = _env.CreateFolder();
@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that MSBUILD_LOGGING_ARGS with multiple {} placeholders generates unique filenames with each placeholder replaced.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoggingArgsEnvVarWithMultipleWildcardPlaceholders()
         {
             var directory = _env.CreateFolder();
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that MSBUILD_LOGGING_ARGS ignores unsupported arguments and continues with valid ones.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoggingArgsEnvVarIgnoresUnsupportedArguments()
         {
             var directory = _env.CreateFolder();
@@ -150,7 +150,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that MSBUILD_LOGGING_ARGS works with /noautoresponse.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoggingArgsEnvVarWorksWithNoAutoResponse()
         {
             var directory = _env.CreateFolder();
@@ -170,7 +170,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that MSBUILD_LOGGING_ARGS_LEVEL=message emits diagnostics as messages instead of warnings.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoggingArgsEnvVarLevelMessageSuppressesWarnings()
         {
             var directory = _env.CreateFolder();
@@ -189,7 +189,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that MSBUILD_LOGGING_ARGS emits warnings by default when MSBUILD_LOGGING_ARGS_LEVEL is not set.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoggingArgsEnvVarDefaultLevelEmitsWarnings()
         {
             var directory = _env.CreateFolder();
@@ -209,7 +209,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that empty or whitespace MSBUILD_LOGGING_ARGS is ignored.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoggingArgsEnvVarEmptyIsIgnored()
         {
             var directory = _env.CreateFolder();
@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that -check switch is allowed in MSBUILD_LOGGING_ARGS.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoggingArgsEnvVarAllowsCheckSwitch()
         {
             var directory = _env.CreateFolder();
@@ -243,16 +243,16 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that only logging-related switches are allowed.
         /// </summary>
-        [Theory]
-        [InlineData("-bl")]
-        [InlineData("-bl:test.binlog")]
-        [InlineData("-binarylogger")]
-        [InlineData("-binarylogger:test.binlog")]
-        [InlineData("/bl")]
-        [InlineData("/bl:test.binlog")]
-        [InlineData("--bl")]
-        [InlineData("-check")]
-        [InlineData("/check")]
+        [MSBuildTestMethod]
+        [DataRow("-bl")]
+        [DataRow("-bl:test.binlog")]
+        [DataRow("-binarylogger")]
+        [DataRow("-binarylogger:test.binlog")]
+        [DataRow("/bl")]
+        [DataRow("/bl:test.binlog")]
+        [DataRow("--bl")]
+        [DataRow("-check")]
+        [DataRow("/check")]
         public void LoggingArgsEnvVarAllowedSwitches(string switchArg)
         {
             CommandLineParser parser = new();
@@ -268,14 +268,14 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test that non-logging switches are rejected.
         /// </summary>
-        [Theory]
-        [InlineData("-property:A=1")]
-        [InlineData("-target:Build")]
-        [InlineData("-verbosity:detailed")]
-        [InlineData("-maxcpucount:4")]
-        [InlineData("/p:A=1")]
-        [InlineData("-restore")]
-        [InlineData("-nologo")]
+        [MSBuildTestMethod]
+        [DataRow("-property:A=1")]
+        [DataRow("-target:Build")]
+        [DataRow("-verbosity:detailed")]
+        [DataRow("-maxcpucount:4")]
+        [DataRow("/p:A=1")]
+        [DataRow("-restore")]
+        [DataRow("-nologo")]
         public void LoggingArgsEnvVarDisallowedSwitches(string switchArg)
         {
             var directory = _env.CreateFolder();

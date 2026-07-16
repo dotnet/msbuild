@@ -14,12 +14,12 @@ using Microsoft.Build.Utilities;
 
 using Shouldly;
 
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class XmlPoke_Tests
     {
         private const string XmlNamespaceUsedByTests = "http://nsurl";
@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests
   <method AccessModifier='public static' Name='GetVal' />
 </class>";
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PokeWithNamespace()
         {
             const string query = "//s:variable/@Name";
@@ -64,7 +64,7 @@ namespace Microsoft.Build.UnitTests
             nodes.ShouldAllBe(i => i.Value.Equals("Mert"), $"All <variable /> elements should have Name=\"Mert\" {Environment.NewLine}{xmlDocument.OuterXml}");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PokeNoNamespace()
         {
             const string query = "//variable/@Name";
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests
             nodes.ShouldAllBe(i => i.Value.Equals(value), $"All <variable /> elements should have Name=\"{value}\" {Environment.NewLine}{xmlDocument.OuterXml}");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PokeAttribute()
         {
             const string query = "//class[1]/@AccessModifier";
@@ -98,7 +98,7 @@ namespace Microsoft.Build.UnitTests
             nodes[0].Value.ShouldBe(value);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PokeChildren()
         {
             const string query = "//class/.";
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
             testNodes[0].InnerText.ShouldBe("Testing");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PokeAttributeWithCondition()
         {
             const string original = "b";
@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests
             nodes[0].Value.ShouldBe(value);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PokeWithNoParameters()
         {
             MockLogger log = new();
@@ -149,7 +149,7 @@ namespace Microsoft.Build.UnitTests
             log.AssertLogContains("MSB4044");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PokeWithMissingRequiredQuery()
         {
             const string projectContent = @"<Project><Target Name=""Test""><XmlPoke XmlInputPath=""nonesuch"" /></Target></Project>";
@@ -162,7 +162,7 @@ namespace Microsoft.Build.UnitTests
             log.AssertLogContains("\"Query\"");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PokeWithMissingRequiredXmlInputPath()
         {
             const string projectContent = @"<Project><Target Name=""Test""><XmlPoke Query=""nonesuch"" /></Target></Project>";
@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests
             log.AssertLogContains("\"XmlInputPath\"");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PokeWithRequiredParameters()
         {
             MockEngine engine = new(true);
@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests
             task.Execute().ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         // https://github.com/dotnet/msbuild/issues/5814
         public void XmlPokeWithEmptyValue()
         {
@@ -224,7 +224,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ErrorInNamespaceDecl()
         {
             MockEngine engine = new MockEngine(true);
@@ -243,7 +243,7 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("MSB3731");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PokeNoNSWPrefixedQueryError()
         {
             MockEngine engine = new MockEngine(true);
@@ -260,7 +260,7 @@ namespace Microsoft.Build.UnitTests
             engine.AssertLogContains("MSB3732");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MissingNamespaceParameters()
         {
             MockEngine engine = new MockEngine(true);
@@ -298,7 +298,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PokeElement()
         {
             const string query = "//variable/.";
@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PokeWithoutUsingTask()
         {
             string projectContents = @"
@@ -366,7 +366,7 @@ namespace Microsoft.Build.UnitTests
                 Namespaces = useNamespace ? $"<Namespace Prefix=\"s\" Uri=\"{XmlNamespaceUsedByTests}\" />" : null,
                 Value = value == null ? null : new TaskItem(value)
             };
-            Assert.True(p.Execute(), engine.Log);
+            Assert.IsTrue(p.Execute(), engine.Log);
 
             string result = File.ReadAllText(xmlInputPath);
 

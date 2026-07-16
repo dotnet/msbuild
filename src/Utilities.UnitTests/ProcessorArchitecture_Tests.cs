@@ -4,12 +4,12 @@
 using System;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class ProcessorArchitectureTests
     {
         internal static string ProcessorArchitectureIntToString()
@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
             };
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidateProcessorArchitectureStrings()
         {
             // Make sure changes to BuildUtilities.ProcessorArchitecture.cs source don't accidentally get mangle ProcessorArchitecture
@@ -48,13 +48,13 @@ namespace Microsoft.Build.UnitTests
             ProcessorArchitecture.PPC64LE.ShouldBe("PPC64LE"); // "PPC64LE ProcessorArchitecture isn't correct"
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidateCurrentProcessorArchitectureCall()
         {
             ProcessorArchitecture.CurrentProcessArchitecture.ShouldBe(ProcessorArchitectureIntToString()); // "BuildUtilities.ProcessorArchitecture.CurrentProcessArchitecture returned an invalid match"
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidateConvertDotNetFrameworkArchitectureToProcessorArchitecture()
         {
             Console.WriteLine("BuildUtilities.ProcessorArchitecture.CurrentProcessArchitecture is: {0}", ProcessorArchitecture.CurrentProcessArchitecture);

@@ -11,7 +11,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -150,15 +149,23 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
     /// <summary>
     /// Test the GetInstalledSDKLocations task
     /// </summary>W
-    public class GetInstalledSDKLocationsTestFixture : IClassFixture<FakeSDKStructure>
+    [TestClass]
+    public class GetInstalledSDKLocationsTestFixture
     {
+        private static FakeSDKStructure s_fakeSDKStructure;
         private readonly string _fakeSDKStructureRoot;
         private readonly string _fakeSDKStructureRoot2;
 
-        public GetInstalledSDKLocationsTestFixture(FakeSDKStructure fakeSDKStructure)
+        [ClassInitialize]
+        public static void ClassSetup(TestContext context) => s_fakeSDKStructure = new FakeSDKStructure();
+
+        [ClassCleanup]
+        public static void ClassTeardown() => s_fakeSDKStructure?.Dispose();
+
+        public GetInstalledSDKLocationsTestFixture()
         {
-            _fakeSDKStructureRoot = fakeSDKStructure.FakeSdkStructureRoot;
-            _fakeSDKStructureRoot2 = fakeSDKStructure.FakeSdkStructureRoot2;
+            _fakeSDKStructureRoot = s_fakeSDKStructure.FakeSdkStructureRoot;
+            _fakeSDKStructureRoot2 = s_fakeSDKStructure.FakeSdkStructureRoot2;
         }
 
         #region TestMethods
@@ -168,7 +175,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         [WindowsOnlyFact]
         public void NullTargetPlatformVersion()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 GetInstalledSDKLocations t = new GetInstalledSDKLocations();
                 t.TargetPlatformIdentifier = "Hello";
@@ -182,7 +189,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         [WindowsOnlyFact]
         public void NullTargetPlatformIdentifier()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 GetInstalledSDKLocations t = new GetInstalledSDKLocations();
                 t.TargetPlatformIdentifier = null;
@@ -202,9 +209,9 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
             t.TargetPlatformVersion = "1.0";
             t.BuildEngine = engine;
             bool success = t.Execute();
-            Assert.False(success);
+            Assert.IsFalse(success);
 
-            Assert.Equal(1, engine.Errors);
+            Assert.AreEqual(1, engine.Errors);
             engine.AssertLogContains("MSB3784");
         }
 
@@ -220,10 +227,10 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
             t.TargetPlatformVersion = String.Empty;
             t.BuildEngine = engine;
             bool success = t.Execute();
-            Assert.False(success);
+            Assert.IsFalse(success);
 
 
-            Assert.Equal(1, engine.Errors);
+            Assert.AreEqual(1, engine.Errors);
             engine.AssertLogContains("MSB3784");
         }
 
@@ -239,10 +246,10 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
             t.TargetPlatformVersion = "CAT";
             t.BuildEngine = engine;
             bool success = t.Execute();
-            Assert.False(success);
+            Assert.IsFalse(success);
 
 
-            Assert.Equal(1, engine.Errors);
+            Assert.AreEqual(1, engine.Errors);
             engine.AssertLogContains("MSB3786");
         }
 
@@ -258,9 +265,9 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
             t.TargetPlatformVersion = "1.0";
             t.BuildEngine = engine;
             bool success = t.Execute();
-            Assert.True(success);
+            Assert.IsTrue(success);
 
-            Assert.Equal(1, engine.Warnings);
+            Assert.AreEqual(1, engine.Warnings);
             engine.AssertLogContains("MSB3785");
         }
 
@@ -282,10 +289,10 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                 t.SDKRegistryRoot = "Hello;Jello";
                 t.BuildEngine = engine;
                 bool success = t.Execute();
-                Assert.True(success);
+                Assert.IsTrue(success);
 
                 ITaskItem[] installedSDKs = t.InstalledSDKs;
-                Assert.Equal(6, installedSDKs.Length);
+                Assert.AreEqual(6, installedSDKs.Length);
 
                 Dictionary<string, string> sdksAndVersions = new Dictionary<string, string>();
 
@@ -294,15 +301,15 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                     sdksAndVersions.Add(item.GetMetadata("SDKName"), item.GetMetadata("PlatformVersion"));
                 }
 
-                Assert.Equal("1.0", sdksAndVersions["MyAssembly, Version=1.0"]);
-                Assert.Equal("1.0", sdksAndVersions["MyAssembly, Version=2.0"]);
-                Assert.Equal("2.0", sdksAndVersions["MyAssembly, Version=3.0"]);
-                Assert.Equal("1.0", sdksAndVersions["MyAssembly, Version=4.0"]);
-                Assert.Equal("1.0", sdksAndVersions["MyAssembly, Version=5.0"]);
-                Assert.Equal("2.0", sdksAndVersions["MyAssembly, Version=6.0"]);
+                Assert.AreEqual("1.0", sdksAndVersions["MyAssembly, Version=1.0"]);
+                Assert.AreEqual("1.0", sdksAndVersions["MyAssembly, Version=2.0"]);
+                Assert.AreEqual("2.0", sdksAndVersions["MyAssembly, Version=3.0"]);
+                Assert.AreEqual("1.0", sdksAndVersions["MyAssembly, Version=4.0"]);
+                Assert.AreEqual("1.0", sdksAndVersions["MyAssembly, Version=5.0"]);
+                Assert.AreEqual("2.0", sdksAndVersions["MyAssembly, Version=6.0"]);
 
-                Assert.False(sdksAndVersions.ContainsValue("3.0"));
-                Assert.False(sdksAndVersions.ContainsValue("4.0"));
+                Assert.IsFalse(sdksAndVersions.ContainsValue("3.0"));
+                Assert.IsFalse(sdksAndVersions.ContainsValue("4.0"));
             }
             finally
             {
@@ -329,10 +336,10 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                 t.SDKRegistryRoot = "Hello;Jello";
                 t.BuildEngine = engine;
                 bool success = t.Execute();
-                Assert.True(success);
+                Assert.IsTrue(success);
 
                 ITaskItem[] installedSDKs = t.InstalledSDKs;
-                Assert.Equal(6, installedSDKs.Length);
+                Assert.AreEqual(6, installedSDKs.Length);
 
                 Dictionary<string, string> extensionSDKs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 foreach (ITaskItem item in installedSDKs)
@@ -340,39 +347,39 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                     extensionSDKs.Add(item.GetMetadata("SDKName"), item.ItemSpec);
                 }
 
-                Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
-                Assert.Equal(
+                Assert.IsTrue(extensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
+                Assert.AreEqual(
                     Path.Combine(
                             new[] { _fakeSDKStructureRoot, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0" })
                         + Path.DirectorySeparatorChar,
                     extensionSDKs["MyAssembly, Version=1.0"]);
-                Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=2.0"));
-                Assert.Equal(
+                Assert.IsTrue(extensionSDKs.ContainsKey("MyAssembly, Version=2.0"));
+                Assert.AreEqual(
                     Path.Combine(
                             new[] { _fakeSDKStructureRoot, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0" })
                         + Path.DirectorySeparatorChar,
                     extensionSDKs["MyAssembly, Version=2.0"]);
-                Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=3.0"));
-                Assert.Equal(
+                Assert.IsTrue(extensionSDKs.ContainsKey("MyAssembly, Version=3.0"));
+                Assert.AreEqual(
                     Path.Combine(
                             new[] { _fakeSDKStructureRoot, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0" })
                         + Path.DirectorySeparatorChar,
                     extensionSDKs["MyAssembly, Version=3.0"]);
 
-                Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=4.0"));
-                Assert.Equal(
+                Assert.IsTrue(extensionSDKs.ContainsKey("MyAssembly, Version=4.0"));
+                Assert.AreEqual(
                     Path.Combine(
                             new[] { _fakeSDKStructureRoot2, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "4.0" })
                         + Path.DirectorySeparatorChar,
                     extensionSDKs["MyAssembly, Version=4.0"]);
-                Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=5.0"));
-                Assert.Equal(
+                Assert.IsTrue(extensionSDKs.ContainsKey("MyAssembly, Version=5.0"));
+                Assert.AreEqual(
                     Path.Combine(
                             new[] { _fakeSDKStructureRoot2, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "5.0" })
                         + Path.DirectorySeparatorChar,
                     extensionSDKs["MyAssembly, Version=5.0"]);
-                Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=6.0"));
-                Assert.Equal(
+                Assert.IsTrue(extensionSDKs.ContainsKey("MyAssembly, Version=6.0"));
+                Assert.AreEqual(
                     Path.Combine(
                             new[] { _fakeSDKStructureRoot2, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "6.0" })
                         + Path.DirectorySeparatorChar,
@@ -403,10 +410,10 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                 t.SDKRegistryRoot = String.Empty;
                 t.SDKDirectoryRoots = new string[] { _fakeSDKStructureRoot, _fakeSDKStructureRoot2 };
                 bool success = t.Execute();
-                Assert.True(success);
+                Assert.IsTrue(success);
 
                 ITaskItem[] installedSDKs = t.InstalledSDKs;
-                Assert.Equal(6, installedSDKs.Length);
+                Assert.AreEqual(6, installedSDKs.Length);
 
                 Dictionary<string, string> extensionSDKs = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 foreach (ITaskItem item in installedSDKs)
@@ -414,39 +421,39 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                     extensionSDKs.Add(item.GetMetadata("SDKName"), item.ItemSpec);
                 }
 
-                Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
-                Assert.Equal(
+                Assert.IsTrue(extensionSDKs.ContainsKey("MyAssembly, Version=1.0"));
+                Assert.AreEqual(
                     Path.Combine(
                             new[] { _fakeSDKStructureRoot, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "1.0" })
                         + Path.DirectorySeparatorChar,
                     extensionSDKs["MyAssembly, Version=1.0"]);
-                Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=2.0"));
-                Assert.Equal(
+                Assert.IsTrue(extensionSDKs.ContainsKey("MyAssembly, Version=2.0"));
+                Assert.AreEqual(
                     Path.Combine(
                             new[] { _fakeSDKStructureRoot, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "2.0" })
                         + Path.DirectorySeparatorChar,
                     extensionSDKs["MyAssembly, Version=2.0"]);
-                Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=3.0"));
-                Assert.Equal(
+                Assert.IsTrue(extensionSDKs.ContainsKey("MyAssembly, Version=3.0"));
+                Assert.AreEqual(
                     Path.Combine(
                             new[] { _fakeSDKStructureRoot, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "3.0" })
                         + Path.DirectorySeparatorChar,
                     extensionSDKs["MyAssembly, Version=3.0"]);
 
-                Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=4.0"));
-                Assert.Equal(
+                Assert.IsTrue(extensionSDKs.ContainsKey("MyAssembly, Version=4.0"));
+                Assert.AreEqual(
                     Path.Combine(
                             new[] { _fakeSDKStructureRoot2, "Windows", "v1.0", "ExtensionSDKs", "MyAssembly", "4.0" })
                         + Path.DirectorySeparatorChar,
                     extensionSDKs["MyAssembly, Version=4.0"]);
-                Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=5.0"));
-                Assert.Equal(
+                Assert.IsTrue(extensionSDKs.ContainsKey("MyAssembly, Version=5.0"));
+                Assert.AreEqual(
                     Path.Combine(
                             new[] { _fakeSDKStructureRoot2, "Windows", "1.0", "ExtensionSDKs", "MyAssembly", "5.0" })
                         + Path.DirectorySeparatorChar,
                     extensionSDKs["MyAssembly, Version=5.0"]);
-                Assert.True(extensionSDKs.ContainsKey("MyAssembly, Version=6.0"));
-                Assert.Equal(
+                Assert.IsTrue(extensionSDKs.ContainsKey("MyAssembly, Version=6.0"));
+                Assert.AreEqual(
                     Path.Combine(
                             new[] { _fakeSDKStructureRoot2, "Windows", "2.0", "ExtensionSDKs", "MyAssembly", "6.0" })
                         + Path.DirectorySeparatorChar,
@@ -466,17 +473,25 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
     /// Verifies interface compliance, path absolutization via TaskEnvironment,
     /// concurrent execution safety, and behavioral equivalence across environments.
     /// </summary>
-    public sealed class GetInstalledSDKLocationsMultiThreadTests : IClassFixture<FakeSDKStructure>, IDisposable
+    [TestClass]
+    public sealed class GetInstalledSDKLocationsMultiThreadTests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
+        private static FakeSDKStructure s_fakeSDKStructure;
+        private readonly TestContext _output;
         private readonly TestEnvironment _env;
         private readonly string _fakeSDKStructureRoot;
 
-        public GetInstalledSDKLocationsMultiThreadTests(FakeSDKStructure fakeSDKStructure, ITestOutputHelper output)
+        [ClassInitialize]
+        public static void ClassSetup(TestContext context) => s_fakeSDKStructure = new FakeSDKStructure();
+
+        [ClassCleanup]
+        public static void ClassTeardown() => s_fakeSDKStructure?.Dispose();
+
+        public GetInstalledSDKLocationsMultiThreadTests(TestContext output)
         {
             _output = output;
             _env = TestEnvironment.Create(output);
-            _fakeSDKStructureRoot = fakeSDKStructure.FakeSdkStructureRoot;
+            _fakeSDKStructureRoot = s_fakeSDKStructure.FakeSdkStructureRoot;
         }
 
         public void Dispose() => _env.Dispose();

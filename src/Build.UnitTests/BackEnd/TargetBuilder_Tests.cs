@@ -16,7 +16,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
@@ -30,6 +29,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// This is the unit test for the TargetBuilder.  This particular test is confined to just using the
     /// actual TargetBuilder, and uses a mock TaskBuilder on which TargetBuilder depends.
     /// </summary>
+    [TestClass]
     public class TargetBuilder_Tests : IRequestBuilderCallback, IDisposable
     {
         /// <summary>
@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Runs the constructor.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructor()
         {
             TargetBuilder builder = new TargetBuilder();
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Runs a "simple" build with no dependencies and no outputs.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestSimpleBuild()
         {
             ProjectInstance project = CreateTestProject();
@@ -109,15 +109,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, target), cache[1], CreateStubTaskEnvironment());
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
-            Assert.True(result.HasResultsForTarget("Empty"));
-            Assert.Equal(TargetResultCode.Success, result["Empty"].ResultCode);
-            Assert.Empty(result["Empty"].Items);
+            Assert.IsTrue(result.HasResultsForTarget("Empty"));
+            Assert.AreEqual(TargetResultCode.Success, result["Empty"].ResultCode);
+            Assert.IsEmpty(result["Empty"].Items);
         }
 
         /// <summary>
         /// Runs a build with a target which depends on one other target.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestDependencyBuild()
         {
             ProjectInstance project = CreateTestProject();
@@ -131,20 +131,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
 
             // The result returned from the builder includes only those for the specified targets.
-            Assert.True(result.HasResultsForTarget("Baz"));
-            Assert.False(result.HasResultsForTarget("Bar"));
-            Assert.Equal(TargetResultCode.Success, result["Baz"].ResultCode);
+            Assert.IsTrue(result.HasResultsForTarget("Baz"));
+            Assert.IsFalse(result.HasResultsForTarget("Bar"));
+            Assert.AreEqual(TargetResultCode.Success, result["Baz"].ResultCode);
 
             // The results cache should have ALL of the results.
             IResultsCache resultsCache = (IResultsCache)_host.GetComponent(BuildComponentType.ResultsCache);
-            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Bar"));
-            Assert.Equal(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Bar"].ResultCode);
+            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Bar"));
+            Assert.AreEqual(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Bar"].ResultCode);
         }
 
         /// <summary>
         /// Tests a project with a dependency which will be skipped because its up-to-date.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestDependencyBuildWithSkip()
         {
             ProjectInstance project = CreateTestProject();
@@ -155,19 +155,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             (string name, TargetBuiltReason reason)[] target = { ("DepSkip", TargetBuiltReason.None) };
             BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, target), cache[1], CreateStubTaskEnvironment());
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
-            Assert.True(result.HasResultsForTarget("DepSkip"));
-            Assert.False(result.HasResultsForTarget("Skip"));
-            Assert.Equal(TargetResultCode.Success, result["DepSkip"].ResultCode);
+            Assert.IsTrue(result.HasResultsForTarget("DepSkip"));
+            Assert.IsFalse(result.HasResultsForTarget("Skip"));
+            Assert.AreEqual(TargetResultCode.Success, result["DepSkip"].ResultCode);
 
             IResultsCache resultsCache = (IResultsCache)_host.GetComponent(BuildComponentType.ResultsCache);
-            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("SkipCondition"));
-            Assert.Equal(TargetResultCode.Skipped, resultsCache.GetResultForRequest(entry.Request)["SkipCondition"].ResultCode);
+            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("SkipCondition"));
+            Assert.AreEqual(TargetResultCode.Skipped, resultsCache.GetResultForRequest(entry.Request)["SkipCondition"].ResultCode);
         }
 
         /// <summary>
         /// This test is currently ignored because the error tasks aren't implemented yet (due to needing the task builder.)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestDependencyBuildWithError()
         {
             ProjectInstance project = CreateTestProject();
@@ -184,31 +184,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
             (string name, TargetBuiltReason reason)[] target = { ("DepError", TargetBuiltReason.None) };
             BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, target), cache[1], CreateStubTaskEnvironment());
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
-            Assert.True(result.HasResultsForTarget("DepError"));
-            Assert.False(result.HasResultsForTarget("Foo"));
-            Assert.False(result.HasResultsForTarget("Skip"));
-            Assert.False(result.HasResultsForTarget("Error"));
-            Assert.False(result.HasResultsForTarget("Baz2"));
-            Assert.False(result.HasResultsForTarget("Bar"));
-            Assert.False(result.HasResultsForTarget("Baz"));
+            Assert.IsTrue(result.HasResultsForTarget("DepError"));
+            Assert.IsFalse(result.HasResultsForTarget("Foo"));
+            Assert.IsFalse(result.HasResultsForTarget("Skip"));
+            Assert.IsFalse(result.HasResultsForTarget("Error"));
+            Assert.IsFalse(result.HasResultsForTarget("Baz2"));
+            Assert.IsFalse(result.HasResultsForTarget("Bar"));
+            Assert.IsFalse(result.HasResultsForTarget("Baz"));
 
             IResultsCache resultsCache = (IResultsCache)_host.GetComponent(BuildComponentType.ResultsCache);
 
-            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Foo"));
-            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Skip"));
-            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Error"));
-            Assert.False(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Baz2"));
-            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Bar"));
-            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Baz"));
-            Assert.Equal(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["DepError"].ResultCode);
-            Assert.Equal(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Foo"].ResultCode);
-            Assert.Equal(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Skip"].ResultCode);
-            Assert.Equal(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["Error"].ResultCode);
-            Assert.Equal(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Bar"].ResultCode);
-            Assert.Equal(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Baz"].ResultCode);
+            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Foo"));
+            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Skip"));
+            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Error"));
+            Assert.IsFalse(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Baz2"));
+            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Bar"));
+            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Baz"));
+            Assert.AreEqual(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["DepError"].ResultCode);
+            Assert.AreEqual(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Foo"].ResultCode);
+            Assert.AreEqual(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Skip"].ResultCode);
+            Assert.AreEqual(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["Error"].ResultCode);
+            Assert.AreEqual(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Bar"].ResultCode);
+            Assert.AreEqual(TargetResultCode.Success, resultsCache.GetResultForRequest(entry.Request)["Baz"].ResultCode);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestLoggingForSkippedTargetInputsAndOutputs()
         {
             string projectContents = @"
@@ -245,7 +245,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestErrorForSkippedTargetInputsAndOutputs()
         {
             string projectContents = @"
@@ -283,7 +283,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Ensure that skipped targets only infer outputs once
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SkippedTargetsShouldOnlyInferOutputsOnce()
         {
             MockLogger logger = new MockLogger();
@@ -341,7 +341,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test empty before targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestLegacyCallTarget()
         {
             string projectBody = @"
@@ -376,7 +376,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// BeforeTargets specifies a missing target. Should not warn or error.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBeforeTargetsMissing()
         {
             string content = @"
@@ -399,7 +399,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// BeforeTargets specifies a missing target. Should not warn or error.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBeforeTargetsMissingRunsOthers()
         {
             string content = @"
@@ -431,7 +431,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// AfterTargets specifies a missing target. Should not warn or error.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsMissing()
         {
             string content = @"
@@ -454,7 +454,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// AfterTargets specifies a missing target. Should not warn or error.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsMissingRunsOthers()
         {
             string content = @"
@@ -490,7 +490,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test empty before targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBeforeTargetsEmpty()
         {
             string projectBody = @"
@@ -516,7 +516,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBeforeTargetsSingle()
         {
             string projectBody = @"
@@ -542,7 +542,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test single before targets on an escaped target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBeforeTargetsEscaped()
         {
             string projectBody = @"
@@ -568,7 +568,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBeforeTargetsSingleWithError()
         {
             string projectBody = @"
@@ -598,7 +598,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBeforeTargetsSingleWithErrorAndParent()
         {
             string projectBody = @"
@@ -633,7 +633,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test multiple before targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBeforeTargetsWithTwoReferringToOne()
         {
             string projectBody = @"
@@ -665,7 +665,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test multiple before targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBeforeTargetsWithOneReferringToTwo()
         {
             string projectBody = @"
@@ -696,7 +696,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test before target on a skipped target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBeforeTargetsSkip()
         {
             string projectBody = @"
@@ -722,7 +722,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test before target on a skipped target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBeforeTargetsDependencyOrdering()
         {
             string projectBody = @"
@@ -758,7 +758,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsEmpty()
         {
             string projectBody = @"
@@ -779,13 +779,13 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask" });
-            Assert.False(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
+            Assert.IsFalse(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsSkip()
         {
             string projectBody = @"
@@ -806,13 +806,13 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "AfterTask" });
-            Assert.False(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
+            Assert.IsFalse(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsSingleWithError()
         {
             string projectBody = @"
@@ -836,13 +836,13 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask" });
-            Assert.False(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
+            Assert.IsFalse(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
         /// Test single before targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsSingleWithErrorAndParent()
         {
             string projectBody = @"
@@ -880,13 +880,13 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask", "AfterTask", "Error2" });
-            Assert.False(result.ResultsByTarget["PostBuild"].AfterTargetsHaveFailed);
+            Assert.IsFalse(result.ResultsByTarget["PostBuild"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
         /// Test after target on a normal target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsSingle()
         {
             string projectBody = @"
@@ -907,13 +907,13 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask", "AfterTask" });
-            Assert.False(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
+            Assert.IsFalse(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
         /// Test after target on a target name which needs escaping
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsEscaped()
         {
             string projectBody = @"
@@ -934,13 +934,13 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask", "AfterTask" });
-            Assert.False(result.ResultsByTarget["Build;Me"].AfterTargetsHaveFailed);
+            Assert.IsFalse(result.ResultsByTarget["Build;Me"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsWithTwoReferringToOne()
         {
             string projectBody = @"
@@ -966,13 +966,13 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask", "AfterTask", "AfterTask2" });
-            Assert.False(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
+            Assert.IsFalse(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
         /// Test a failing after target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsWithFailure()
         {
             string projectBody = @"
@@ -993,7 +993,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test a transitively failing after target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsWithTransitiveFailure()
         {
             string projectBody = @"
@@ -1018,7 +1018,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test a project that has a cycle in AfterTargets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsWithCycleDoesNotHang()
         {
             string projectBody = @"
@@ -1038,7 +1038,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsWithOneReferringToTwo()
         {
             string projectBody = @"
@@ -1069,7 +1069,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestAfterTargetsWithDependencyOrdering()
         {
             string projectBody = @"
@@ -1104,7 +1104,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test a complex ordering with depends, before and after targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestComplexOrdering()
         {
             string projectBody = @"
@@ -1155,7 +1155,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test a complex ordering with depends, before and after targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestComplexOrdering2()
         {
             string projectBody = @"
@@ -1215,7 +1215,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test a complex ordering with depends, before and after targets
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBeforeAndAfterWithErrorTargets()
         {
             string projectBody = @"
@@ -1252,13 +1252,13 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 
             BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
             AssertTaskExecutionOrder(new string[] { "BuildTask", "BeforeErrorTargetTask", "ErrorTargetTask", "AfterErrorTargetTask" });
-            Assert.False(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
+            Assert.IsFalse(result.ResultsByTarget["Build"].AfterTargetsHaveFailed);
         }
 
         /// <summary>
         /// Test after target on a skipped target
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestBeforeAndAfterOverrides()
         {
             string projectBody = @"
@@ -1303,7 +1303,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Test that if before and after targets skip, the main target still runs (bug 476908)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestSkippingBeforeAndAfterTargets()
         {
             string projectBody = @"
@@ -1334,7 +1334,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Tests that a circular dependency within a CallTarget call correctly propagates the failure.  Bug 502570.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestCircularDependencyInCallTarget()
         {
             string projectContents = @"
@@ -1351,13 +1351,13 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             using ProjectFromString projectFromString = new(projectContents, null, null);
             Project project = projectFromString.Project;
             bool success = project.Build(_mockLogger);
-            Assert.False(success);
+            Assert.IsFalse(success);
         }
 
         /// <summary>
         /// Tests a circular dependency target.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestCircularDependencyTarget()
         {
             string projectContents = @"
@@ -1385,7 +1385,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// Tests that cancel with no entries after building does not fail.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestCancelWithNoEntriesAfterBuild()
         {
             string projectBody = @"
@@ -1410,7 +1410,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SkippedTargetWithFailedDependenciesStopsBuild()
         {
             string projectContents = @"
@@ -1437,17 +1437,17 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             var buildResult = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
 
             IResultsCache resultsCache = (IResultsCache)_host.GetComponent(BuildComponentType.ResultsCache);
-            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Build"));
-            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("ProduceError1"));
-            Assert.False(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("ProduceError2"));
-            Assert.True(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("_Error1"));
+            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("Build"));
+            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("ProduceError1"));
+            Assert.IsFalse(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("ProduceError2"));
+            Assert.IsTrue(resultsCache.GetResultForRequest(entry.Request).HasResultsForTarget("_Error1"));
 
-            Assert.Equal(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["Build"].ResultCode);
-            Assert.Equal(TargetResultCode.Skipped, resultsCache.GetResultForRequest(entry.Request)["ProduceError1"].ResultCode);
-            Assert.Equal(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["_Error1"].ResultCode);
+            Assert.AreEqual(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["Build"].ResultCode);
+            Assert.AreEqual(TargetResultCode.Skipped, resultsCache.GetResultForRequest(entry.Request)["ProduceError1"].ResultCode);
+            Assert.AreEqual(TargetResultCode.Failure, resultsCache.GetResultForRequest(entry.Request)["_Error1"].ResultCode);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SkipNonexistentTargetsDoesNotExecuteOrCacheTargetResult()
         {
             string projectContents = @"<Target Name=""Build"" />";
@@ -1468,7 +1468,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             // executed. This is different than when a target is skipped due to condition not met where the result
             // would be in the cache. In this case we can't cache the result because it is only valid for the single
             // request.
-            Assert.Throws<InternalErrorException>(() => resultsCache.GetResultForRequest(entry.Request));
+            Assert.ThrowsExactly<InternalErrorException>(() => resultsCache.GetResultForRequest(entry.Request));
         }
 
         #region IRequestBuilderCallback Members
@@ -1548,12 +1548,12 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         {
             MockTaskBuilder mockBuilder = (MockTaskBuilder)_host.GetComponent(BuildComponentType.TaskBuilder);
 
-            Assert.Equal(tasks.Length, mockBuilder.ExecutedTasks.Count);
+            Assert.AreEqual(tasks.Length, mockBuilder.ExecutedTasks.Count);
 
             int currentTask = 0;
             foreach (ProjectTaskInstance task in mockBuilder.ExecutedTasks)
             {
-                Assert.Equal(task.Name, tasks[currentTask]);
+                Assert.AreEqual(task.Name, tasks[currentTask]);
                 currentTask++;
             }
         }

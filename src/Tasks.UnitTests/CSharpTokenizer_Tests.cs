@@ -5,35 +5,35 @@ using System;
 using System.IO;
 
 using Microsoft.Build.Shared.LanguageParser;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class CSharpTokenizerTests
     {
         // Simple whitespace handling.
-        [Fact]
+        [MSBuildTestMethod]
         public void Empty() { AssertTokenize("", "", 0); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OneSpace() { AssertTokenize(" ", " \x0d", ".Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoSpace() { AssertTokenize("  ", "  \x0d", ".Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void Tab() { AssertTokenize("\t", "\t\x0d", ".Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoTab() { AssertTokenize("\t\t", "\t\t\x0d", ".Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void SpaceTab() { AssertTokenize(" \t", " \t\x0d", ".Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void CrLf() { AssertTokenize("\x0d\x0a", ".Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void SpaceCrLfSpace() { AssertTokenize(" \x0d\x0a ", " \x0d\x0a \x0d", ".Whitespace"); }
         // From section 2.3.3 of the C# spec, these are also whitespace.
-        [Fact]
+        [MSBuildTestMethod]
         public void LineSeparator() { AssertTokenizeUnicode("\x2028", ".Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void ParagraphSeparator() { AssertTokenizeUnicode("\x2029", ".Whitespace"); }
 
         /*
@@ -42,67 +42,67 @@ namespace Microsoft.Build.UnitTests
                 Vertical tab character (U+000B)
                 Form feed character (U+000C)
         */
-        [Fact]
+        [MSBuildTestMethod]
         public void SpecialWhitespace() { AssertTokenize("\x09\x0b\x0c\x0d", ".Whitespace"); }
 
         // One-line comments (i.e. those starting with //)
-        [Fact]
+        [MSBuildTestMethod]
         public void OneLineComment() { AssertTokenize("// My one line comment.\x0d", ".Comment.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void SpaceOneLineComment() { AssertTokenize(" // My one line comment.\x0d", ".Whitespace.Comment.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OneLineCommentTab() { AssertTokenize(" //\tMy one line comment.\x0d", ".Whitespace.Comment.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OneLineCommentCr() { AssertTokenize("// My one line comment.\x0d", ".Comment.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OneLineCommentLf() { AssertTokenize("// My one line comment.\x0a", ".Comment.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OneLineCommentLineSeparator() { AssertTokenizeUnicode("// My one line comment.\x2028", ".Comment.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OneLineCommentParagraphSeparator() { AssertTokenizeUnicode("// My one line comment.\x2029", ".Comment.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void OneLineCommentWithEmbeddedMultiLine() { AssertTokenize("// /*  */\x0d", ".Comment.Whitespace"); }
 
         // Multi-line comments (i.e those like /* */)
-        [Fact]
+        [MSBuildTestMethod]
         public void OneLineMultilineComment() { AssertTokenize("/* My comment. */\x0d", ".Comment.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void MultilineComment() { AssertTokenize("/* My comment. \x0d\x0a Second Line*/\x0d", ".Comment.Whitespace", 3); }
-        [Fact]
+        [MSBuildTestMethod]
         public void MultilineCommentWithEmbeddedSingleLine() { AssertTokenize("/* // */\x0d", ".Comment.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void LeftHalfOfUnbalanceMultilineComment() { AssertTokenize("/*\x0d", ".EndOfFileInsideComment"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void LeftHalfOfUnbalanceMultilineCommentWithStuff() { AssertTokenize("/* unbalanced\x0d", ".EndOfFileInsideComment"); }
 
         // If the last character of the source file is a Control-Z character (U+001A), this character is deleted.
-        [Fact]
+        [MSBuildTestMethod]
         public void NothingPlustControlZatEOF() { AssertTokenize("\x1A", "", "", 0); }
-        [Fact]
+        [MSBuildTestMethod]
         public void SomethingPlusControlZatEOF() { AssertTokenize("// My comment\x1A", "// My comment\x0d", ".Comment.Whitespace"); }
 
         // A carriage-return character (U+000D) is added to the end of the source file if that source file is non-empty and if the last character
         // of the source file is not a carriage return (U+000D), a line feed (U+000A), a line separator (U+2028), or a paragraph separator
         // (U+2029).
-        [Fact]
+        [MSBuildTestMethod]
         public void NoEOLatEOF() { AssertTokenize("// My comment", "// My comment\x0d", ".Comment.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void NoEOLatEOFButFileIsEmpty() { AssertTokenize("", "", "", 0); }
 
         // An identifier that has a "_" embedded somewhere
-        [Fact]
+        [MSBuildTestMethod]
         public void IdentifierWithEmbeddedUnderscore() { AssertTokenize("_x_\xd", ".Identifier.Whitespace"); }
 
         // An identifier with a number
-        [Fact]
+        [MSBuildTestMethod]
         public void IdentifierWithNumber() { AssertTokenize("x3\xd", ".Identifier.Whitespace"); }
 
         // An non-identifier with a @ and a number
-        [Fact]
+        [MSBuildTestMethod]
         public void EscapedIdentifierWithNumber() { AssertTokenize("@3Identifier\xd", ".ExpectedIdentifier"); }
 
         // A very simple namespace and class.
-        [Fact]
+        [MSBuildTestMethod]
         public void NamespacePlusClass()
         {
             AssertTokenize(
@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // If a keyword has '@' in front, then its treated as an identifier.
-        [Fact]
+        [MSBuildTestMethod]
         public void EscapedKeywordMakesIdentifier()
         {
             AssertTokenize(
@@ -121,121 +121,124 @@ namespace Microsoft.Build.UnitTests
         }
 
         // Check boolean literals
-        [Fact]
+        [MSBuildTestMethod]
         public void LiteralTrue() { AssertTokenize("true\x0d", ".BooleanLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void LiteralFalse() { AssertTokenize("false\x0d", ".BooleanLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void LiteralNull() { AssertTokenize("null\x0d", ".NullLiteral.Whitespace"); }
 
         // Check integer literals
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLiteral() { AssertTokenize("0x123F\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexUppercaseXIntegerLiteral() { AssertTokenize("0X1f23\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void IntegerLiteral() { AssertTokenize("123\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidHexIntegerWithNoneValid() { AssertTokenize("0xG\x0d", ".ExpectedValidHexDigit"); }
 
         // Hex literal long suffix: U u L l UL Ul uL ul LU Lu lU lu
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLiteralUpperU() { AssertTokenize("0x123FU\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLiteralLowerU() { AssertTokenize("0x123Fu\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLiteralUpperL() { AssertTokenize("0x123FL\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLiteralLowerL() { AssertTokenize("0x123Fl\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLiteralUpperUUpperL() { AssertTokenize("0x123FUL\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLiteralUpperULowerL() { AssertTokenize("0x123FUl\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLiteralLowerUUpperL() { AssertTokenize("0x123FuL\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLiteralUpperLUpperU() { AssertTokenize("0x123FLU\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLiteralUpperLLowerU() { AssertTokenize("0x123FLu\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLiteralLowerLUpperU() { AssertTokenize("0x123FlU\x0d", ".HexIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void HexIntegerLiteralLowerLLowerU() { AssertTokenize("0x123Flu\x0d", ".HexIntegerLiteral.Whitespace"); }
 
         // Decimal literal long suffix: U u L l UL Ul uL ul LU Lu lU lu
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerLiteralUpperU() { AssertTokenize("1234U\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerLiteralLowerU() { AssertTokenize("1234u\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerLiteralUpperL() { AssertTokenize("1234L\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerLiteralLowerL() { AssertTokenize("1234l\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerLiteralUpperUUpperL() { AssertTokenize("1234UL\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerLiteralUpperULowerL() { AssertTokenize("1234Ul\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerLiteralLowerUUpperL() { AssertTokenize("1234uL\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerLiteralUpperLUpperU() { AssertTokenize("1234LU\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerLiteralUpperLLowerU() { AssertTokenize("1234Lu\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerLiteralLowerLUpperU() { AssertTokenize("1234lU\x0d", ".DecimalIntegerLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void DecimalIntegerLiteralLowerLLowerU() { AssertTokenize("1234lu\x0d", ".DecimalIntegerLiteral.Whitespace"); }
 
         // Reals aren't supported yet.
         // Reals can take many different forms: 1.1, .1, 1.1e6, etc.
         // If you turn this on, please create test for the other forms too.
-        [Fact(Skip = "Ignored in MSTest")]
+        [MSBuildTestMethod]
+        [Ignore("Ignored in MSTest")]
         public void RealLiteral1() { AssertTokenize("1.1\x0d", ".RealLiteral.Whitespace"); }
 
         // Char literals aren't supported yet.
-        [Fact]
+        [MSBuildTestMethod]
         public void CharLiteral1() { AssertTokenize("'c'\x0d", ".CharLiteral.Whitespace"); }
 
-        [Fact(Skip = "Ignored in MSTest")]
+        [MSBuildTestMethod]
+        [Ignore("Ignored in MSTest")]
         public void CharLiteralIllegalEscapeSequence() { AssertTokenize("'\\z'\x0d", ".SyntaxErrorIllegalEscapeSequence"); }
 
-        [Fact(Skip = "Ignored in MSTest")]
+        [MSBuildTestMethod]
+        [Ignore("Ignored in MSTest")]
         public void CharLiteralHexEscapeSequence() { AssertTokenize("'\\x0022a'\x0d", "'\"a'\x0d", ".CharLiteral.Whitespace"); }
 
         // Check string literals
-        [Fact]
+        [MSBuildTestMethod]
         public void LiteralStringBasic() { AssertTokenize("\"string\"\x0d", ".StringLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void LiteralStringAllEscapes() { AssertTokenize("\"\\'\\\"\\\\\\0\\a\\b\\f\\n\\r\\t\\x0\\v\"\x0d", ".StringLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void LiteralStringUnclosed() { AssertTokenize("\"string\x0d", ".NewlineInsideString"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void LiteralVerbatimStringBasic() { AssertTokenize("@\"string\"\x0d", "\"string\"\x0d", ".StringLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void LiteralVerbatimStringAllEscapes() { AssertTokenize("@\"\\a\\b\\c\"\x0d", "\"\\a\\b\\c\"\x0d", ".StringLiteral.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void LiteralVerbatimStringUnclosed() { AssertTokenize("@\"string\x0d", ".EndOfFileInsideString"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void LiteralVerbatimStringQuoteEscapeSequence() { AssertTokenize("@\"\"\"\"\x0d", "\"\"\"\"\x0d", ".StringLiteral.Whitespace"); }
 
         // Single-digit operators and punctuators.
-        [Fact]
+        [MSBuildTestMethod]
         public void PunctuatorOpenBracket() { AssertTokenize("[\x0d", ".OperatorOrPunctuator.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void PunctuatorCloseBracket() { AssertTokenize("]\x0d", ".OperatorOrPunctuator.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void PunctuatorOpenParen() { AssertTokenize("(\x0d", ".OperatorOrPunctuator.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void PunctuatorCloseParen() { AssertTokenize(")\x0d", ".OperatorOrPunctuator.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void PunctuatorDot() { AssertTokenize(".\x0d", ".OperatorOrPunctuator.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void PunctuatorColon() { AssertTokenize(":\x0d", ".OperatorOrPunctuator.Whitespace"); }
-        [Fact]
+        [MSBuildTestMethod]
         public void PunctuatorSemicolon() { AssertTokenize(";\x0d", ".OperatorOrPunctuator.Whitespace"); }
 
         // Preprocessor.
-        [Fact]
+        [MSBuildTestMethod]
         public void Preprocessor() { AssertTokenize("#if\x0d", ".OpenConditionalDirective.Whitespace"); }
 
 
@@ -404,9 +407,9 @@ namespace Microsoft.Build.UnitTests
             tokenKey = tokenKey.Replace("Token", "");
             Console.WriteLine(tokenKey);
 
-            Assert.Equal(expectedSource, results);
-            Assert.Equal(expectedTokenKey, tokenKey);
-            Assert.Equal(expectedLastLineNumber, lastLine);
+            Assert.AreEqual(expectedSource, results);
+            Assert.AreEqual(expectedTokenKey, tokenKey);
+            Assert.AreEqual(expectedLastLineNumber, lastLine);
         }
     }
 }

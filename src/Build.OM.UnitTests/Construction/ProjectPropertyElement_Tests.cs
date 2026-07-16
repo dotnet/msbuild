@@ -5,7 +5,6 @@ using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -15,25 +14,26 @@ namespace Microsoft.Build.UnitTests.OM.Construction
     /// <summary>
     /// Tests for the ProjectPropertyElement class
     /// </summary>
+    [TestClass]
     public class ProjectPropertyElement_Tests
     {
         /// <summary>
         /// Read simple property
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadProperty()
         {
             ProjectPropertyElement property = GetPropertyXml();
 
-            Assert.Equal("p", property.Name);
-            Assert.Equal("v", property.Value);
-            Assert.Equal("c", property.Condition);
+            Assert.AreEqual("p", property.Name);
+            Assert.AreEqual("v", property.Value);
+            Assert.AreEqual("c", property.Condition);
         }
 
         /// <summary>
         /// Read property with children - they are merely part of its value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadPropertyWithChildren()
         {
             string content = @"
@@ -49,17 +49,17 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             ProjectPropertyGroupElement propertyGroup = (ProjectPropertyGroupElement)Helpers.GetFirst(project.Children);
             ProjectPropertyElement property = Helpers.GetFirst(propertyGroup.Properties);
 
-            Assert.Equal("p", property.Name);
-            Assert.Equal(@"A<B>C<D /></B>E", property.Value);
+            Assert.AreEqual("p", property.Name);
+            Assert.AreEqual(@"A<B>C<D /></B>E", property.Value);
         }
 
         /// <summary>
         /// Read property with invalid name (but legal xml)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidName()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -75,10 +75,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read property with invalid reserved name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidReservedName()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -94,10 +94,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read property with invalid built in name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidBuiltInName()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -113,10 +113,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read property with invalid attribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidAttribute()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -132,10 +132,10 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Read property with child element
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadInvalidChildElement()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -153,22 +153,22 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set property value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValue()
         {
             ProjectPropertyElement property = GetPropertyXml();
             Helpers.ClearDirtyFlag(property.ContainingProject);
 
             property.Value = "vb";
-            Assert.Equal("vb", property.Value);
-            Assert.True(property.ContainingProject.HasUnsavedChanges);
+            Assert.AreEqual("vb", property.Value);
+            Assert.IsTrue(property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set property value to the same value it was before.
         /// This should not dirty the project.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetSameValue()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -176,44 +176,44 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Helpers.ClearDirtyFlag(property.ContainingProject);
 
             property.Value = "v1";
-            Assert.Equal("v1", property.Value);
-            Assert.False(property.ContainingProject.HasUnsavedChanges);
+            Assert.AreEqual("v1", property.Value);
+            Assert.IsFalse(property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Rename
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetName()
         {
             ProjectPropertyElement property = GetPropertyXml();
 
             property.Name = "p2";
-            Assert.Equal("p2", property.Name);
-            Assert.True(property.ContainingProject.HasUnsavedChanges);
+            Assert.AreEqual("p2", property.Name);
+            Assert.IsTrue(property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Rename to same value should not mark dirty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetNameSame()
         {
             ProjectPropertyElement property = GetPropertyXml();
             Helpers.ClearDirtyFlag(property.ContainingProject);
 
             property.Name = "p";
-            Assert.Equal("p", property.Name);
-            Assert.False(property.ContainingProject.HasUnsavedChanges);
+            Assert.AreEqual("p", property.Name);
+            Assert.IsFalse(property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Rename to illegal name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetNameIllegal()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 ProjectPropertyElement property = GetPropertyXml();
 
@@ -223,24 +223,24 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set property value to empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetEmptyValue()
         {
             ProjectPropertyElement property = GetPropertyXml();
             Helpers.ClearDirtyFlag(property.ContainingProject);
 
             property.Value = String.Empty;
-            Assert.Equal(String.Empty, property.Value);
-            Assert.True(property.ContainingProject.HasUnsavedChanges);
+            Assert.AreEqual(String.Empty, property.Value);
+            Assert.IsTrue(property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>
         /// Set property value to null
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInvalidNullValue()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectPropertyElement property = GetPropertyXml();
 
@@ -250,7 +250,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// <summary>
         /// Set condition
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetCondition()
         {
             ProjectRootElement project = ProjectRootElement.Create();
@@ -258,8 +258,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Helpers.ClearDirtyFlag(property.ContainingProject);
 
             property.Condition = "c";
-            Assert.Equal("c", property.Condition);
-            Assert.True(property.ContainingProject.HasUnsavedChanges);
+            Assert.AreEqual("c", property.Condition);
+            Assert.IsTrue(property.ContainingProject.HasUnsavedChanges);
         }
 
         /// <summary>

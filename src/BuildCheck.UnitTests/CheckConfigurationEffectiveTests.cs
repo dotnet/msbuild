@@ -5,16 +5,16 @@ using System;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
+[TestClass]
 public class CheckConfigurationEffectiveTests
 {
-    [Theory]
-    [InlineData("ruleId", EvaluationCheckScope.ProjectFileOnly, CheckResultSeverity.Warning, true)]
-    [InlineData("ruleId2", EvaluationCheckScope.ProjectFileOnly, CheckResultSeverity.Warning, true)]
-    [InlineData("ruleId", EvaluationCheckScope.ProjectFileOnly, CheckResultSeverity.Error, false)]
+    [MSBuildTestMethod]
+    [DataRow("ruleId", EvaluationCheckScope.ProjectFileOnly, CheckResultSeverity.Warning, true)]
+    [DataRow("ruleId2", EvaluationCheckScope.ProjectFileOnly, CheckResultSeverity.Warning, true)]
+    [DataRow("ruleId", EvaluationCheckScope.ProjectFileOnly, CheckResultSeverity.Error, false)]
     public void IsSameConfigurationAsTest(
         string secondRuleId,
         EvaluationCheckScope secondScope,
@@ -34,11 +34,11 @@ public class CheckConfigurationEffectiveTests
         configuration1.IsSameConfigurationAs(configuration2).ShouldBe(isExpectedToBeSame);
     }
 
-    [Theory]
-    [InlineData(CheckResultSeverity.Warning, true)]
-    [InlineData(CheckResultSeverity.Suggestion, true)]
-    [InlineData(CheckResultSeverity.Error, true)]
-    [InlineData(CheckResultSeverity.None, false)]
+    [MSBuildTestMethod]
+    [DataRow(CheckResultSeverity.Warning, true)]
+    [DataRow(CheckResultSeverity.Suggestion, true)]
+    [DataRow(CheckResultSeverity.Error, true)]
+    [DataRow(CheckResultSeverity.None, false)]
     public void CheckConfigurationInternal_Constructor_SeverityConfig(CheckResultSeverity severity, bool isEnabledExpected)
     {
         CheckConfigurationEffective configuration = new CheckConfigurationEffective(
@@ -49,7 +49,7 @@ public class CheckConfigurationEffectiveTests
         configuration.IsEnabled.ShouldBe(isEnabledExpected);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void CheckConfigurationInternal_Constructor_SeverityConfig_Fails()
     {
         Should.Throw<ArgumentOutOfRangeException>(() =>

@@ -13,7 +13,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
-using Xunit;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using NativeMethods = Microsoft.Build.Tasks.NativeMethods;
 using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
@@ -171,9 +170,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             </FileList>
             """;
 
-        protected readonly ITestOutputHelper _output;
+        protected readonly TestContext _output;
 
-        public ResolveAssemblyReferenceTestFixture(ITestOutputHelper output)
+        public ResolveAssemblyReferenceTestFixture(TestContext output)
         {
             Environment.SetEnvironmentVariable("MSBUILDDISABLEASSEMBLYFOLDERSEXCACHE", "1");
 
@@ -3032,21 +3031,21 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     {
                         loadModeResolvedFiles = (ITaskItem[])t.ResolvedFiles.Clone();
                     }
-                    Assert.Empty(t.ResolvedDependencyFiles);
-                    Assert.Empty(t.SatelliteFiles);
-                    Assert.Empty(t.RelatedFiles);
-                    Assert.Empty(t.SuggestedRedirects);
-                    Assert.Empty(t.FilesWritten);
+                    Assert.IsEmpty(t.ResolvedDependencyFiles);
+                    Assert.IsEmpty(t.SatelliteFiles);
+                    Assert.IsEmpty(t.RelatedFiles);
+                    Assert.IsEmpty(t.SuggestedRedirects);
+                    Assert.IsEmpty(t.FilesWritten);
 
                     if (buildConsistencyCheck)
                     {
                         // Some consistency checks between load mode and build mode.
-                        Assert.Equal(loadModeResolvedFiles.Length, t.ResolvedFiles.Length);
+                        Assert.AreEqual(loadModeResolvedFiles.Length, t.ResolvedFiles.Length);
                         for (int i = 0; i < loadModeResolvedFiles.Length; i++)
                         {
-                            Assert.Equal(loadModeResolvedFiles[i].ItemSpec, t.ResolvedFiles[i].ItemSpec);
-                            Assert.Equal(loadModeResolvedFiles[i].GetMetadata("CopyLocal"), t.ResolvedFiles[i].GetMetadata("CopyLocal"));
-                            Assert.Equal(loadModeResolvedFiles[i].GetMetadata("ResolvedFrom"), t.ResolvedFiles[i].GetMetadata("ResolvedFrom"));
+                            Assert.AreEqual(loadModeResolvedFiles[i].ItemSpec, t.ResolvedFiles[i].ItemSpec);
+                            Assert.AreEqual(loadModeResolvedFiles[i].GetMetadata("CopyLocal"), t.ResolvedFiles[i].GetMetadata("CopyLocal"));
+                            Assert.AreEqual(loadModeResolvedFiles[i].GetMetadata("ResolvedFrom"), t.ResolvedFiles[i].GetMetadata("ResolvedFrom"));
                         }
                     }
                 }
@@ -3087,8 +3086,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                             readMachineTypeFromPEHeader);
                     if (FileUtilities.FileExistsNoThrow(t.StateFile))
                     {
-                        Assert.Single(t.FilesWritten);
-                        Assert.Equal(cache, t.FilesWritten[0].ItemSpec);
+                        Assert.ContainsSingle(t.FilesWritten);
+                        Assert.AreEqual(cache, t.FilesWritten[0].ItemSpec);
                     }
 
                     File.Delete(t.StateFile);
@@ -3099,7 +3098,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         // OriginalItemSpec attribute on resolved items is to support VS in figuring out which
                         // project file reference caused a particular resolved file.
                         string originalItemSpec = t.ResolvedFiles[i].GetMetadata("OriginalItemSpec");
-                        Assert.True(ContainsItem(t.Assemblies, originalItemSpec) || ContainsItem(t.AssemblyFiles, originalItemSpec)); // "Expected to find OriginalItemSpec in Assemblies or AssemblyFiles task parameters"
+                        Assert.IsTrue(ContainsItem(t.Assemblies, originalItemSpec) || ContainsItem(t.AssemblyFiles, originalItemSpec)); // "Expected to find OriginalItemSpec in Assemblies or AssemblyFiles task parameters"
                     }
                 }
             }

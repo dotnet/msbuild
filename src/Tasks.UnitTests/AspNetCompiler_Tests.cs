@@ -10,7 +10,6 @@ using Shouldly;
 #endif
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Tasks;
-using Xunit;
 
 #nullable disable
 
@@ -22,26 +21,27 @@ namespace Microsoft.Build.UnitTests
      * Test the AspNetCompiler task in various ways.
      *
      */
+    [TestClass]
     public sealed class AspNetCompilerTests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public AspNetCompilerTests(ITestOutputHelper output)
+        public AspNetCompilerTests(TestContext output)
         {
             _output = output;
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NoParameters()
         {
             AspNetCompiler t = new AspNetCompiler();
             t.BuildEngine = new MockEngine(_output);
 
             // It's invalid to have zero parameters, so we expect a "false" return value from ValidateParameters.
-            Assert.False(CommandLine.CallValidateParameters(t));
+            Assert.IsFalse(CommandLine.CallValidateParameters(t));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OnlyMetabasePath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -50,12 +50,12 @@ namespace Microsoft.Build.UnitTests
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
 
             // This should be valid.
-            Assert.True(CommandLine.CallValidateParameters(t));
+            Assert.IsTrue(CommandLine.CallValidateParameters(t));
 
             CommandLine.ValidateEquals(t, @"-m /LM/W3SVC/1/Root/MyApp", false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OnlyVirtualPath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -64,13 +64,13 @@ namespace Microsoft.Build.UnitTests
             t.VirtualPath = @"/MyApp";
 
             // This should be valid.
-            Assert.True(CommandLine.CallValidateParameters(t));
+            Assert.IsTrue(CommandLine.CallValidateParameters(t));
 
             CommandLine.ValidateEquals(t, @"-v /MyApp", false);
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OnlyPhysicalPath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -79,10 +79,10 @@ namespace Microsoft.Build.UnitTests
             t.PhysicalPath = @"c:\MyApp";
 
             // This is not valid.  Either MetabasePath or VirtualPath must be specified.
-            Assert.False(CommandLine.CallValidateParameters(t));
+            Assert.IsFalse(CommandLine.CallValidateParameters(t));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OnlyTargetPath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -91,10 +91,10 @@ namespace Microsoft.Build.UnitTests
             t.TargetPath = @"c:\MyTarget";
 
             // This is not valid.  Either MetabasePath or VirtualPath must be specified.
-            Assert.False(CommandLine.CallValidateParameters(t));
+            Assert.IsFalse(CommandLine.CallValidateParameters(t));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MetabasePathAndVirtualPath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -104,10 +104,10 @@ namespace Microsoft.Build.UnitTests
             t.VirtualPath = @"/MyApp";
 
             // This is not valid.  Can't specify both MetabasePath and (VirtualPath or PhysicalPath).
-            Assert.False(CommandLine.CallValidateParameters(t));
+            Assert.IsFalse(CommandLine.CallValidateParameters(t));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MetabasePathAndPhysicalPath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -117,10 +117,10 @@ namespace Microsoft.Build.UnitTests
             t.PhysicalPath = @"c:\MyApp";
 
             // This is not valid.  Can't specify both MetabasePath and (VirtualPath or PhysicalPath).
-            Assert.False(CommandLine.CallValidateParameters(t));
+            Assert.IsFalse(CommandLine.CallValidateParameters(t));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MetabasePathAndTargetPath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -130,12 +130,12 @@ namespace Microsoft.Build.UnitTests
             t.TargetPath = @"c:\MyTarget";
 
             // This is valid.
-            Assert.True(CommandLine.CallValidateParameters(t));
+            Assert.IsTrue(CommandLine.CallValidateParameters(t));
 
             CommandLine.ValidateEquals(t, @"-m /LM/W3SVC/1/Root/MyApp c:\MyTarget", false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VirtualPathAndPhysicalPath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -145,12 +145,12 @@ namespace Microsoft.Build.UnitTests
             t.PhysicalPath = @"c:\MyApp";
 
             // This is valid.
-            Assert.True(CommandLine.CallValidateParameters(t));
+            Assert.IsTrue(CommandLine.CallValidateParameters(t));
 
             CommandLine.ValidateEquals(t, @"-v /MyApp -p c:\MyApp", false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VirtualPathAndTargetPath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -160,12 +160,12 @@ namespace Microsoft.Build.UnitTests
             t.TargetPath = @"c:\MyTarget";
 
             // This is valid.
-            Assert.True(CommandLine.CallValidateParameters(t));
+            Assert.IsTrue(CommandLine.CallValidateParameters(t));
 
             CommandLine.ValidateEquals(t, @"-v /MyApp c:\MyTarget", false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PhysicalPathAndTargetPath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -175,10 +175,10 @@ namespace Microsoft.Build.UnitTests
             t.TargetPath = @"c:\MyTarget";
 
             // This is not valid.  Either MetabasePath or VirtualPath must be specified.
-            Assert.False(CommandLine.CallValidateParameters(t));
+            Assert.IsFalse(CommandLine.CallValidateParameters(t));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AllExceptMetabasePath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -189,12 +189,12 @@ namespace Microsoft.Build.UnitTests
             t.TargetPath = @"c:\MyTarget";
 
             // This is valid.
-            Assert.True(CommandLine.CallValidateParameters(t));
+            Assert.IsTrue(CommandLine.CallValidateParameters(t));
 
             CommandLine.ValidateEquals(t, @"-v /MyApp -p c:\MyApp c:\MyTarget", false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AllExceptVirtualPath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -205,10 +205,10 @@ namespace Microsoft.Build.UnitTests
             t.TargetPath = @"c:\MyTarget";
 
             // This is not valid.  Can't specify both MetabasePath and (VirtualPath or PhysicalPath).
-            Assert.False(CommandLine.CallValidateParameters(t));
+            Assert.IsFalse(CommandLine.CallValidateParameters(t));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AllExceptPhysicalPath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -219,10 +219,10 @@ namespace Microsoft.Build.UnitTests
             t.TargetPath = @"c:\MyTarget";
 
             // This is not valid.  Can't specify both MetabasePath and (VirtualPath or PhysicalPath).
-            Assert.False(CommandLine.CallValidateParameters(t));
+            Assert.IsFalse(CommandLine.CallValidateParameters(t));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AllExceptTargetPath()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -233,10 +233,10 @@ namespace Microsoft.Build.UnitTests
             t.PhysicalPath = @"c:\MyApp";
 
             // This is not valid.  Can't specify both MetabasePath and (VirtualPath or PhysicalPath).
-            Assert.False(CommandLine.CallValidateParameters(t));
+            Assert.IsFalse(CommandLine.CallValidateParameters(t));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AllParameters()
         {
             AspNetCompiler t = new AspNetCompiler();
@@ -248,14 +248,14 @@ namespace Microsoft.Build.UnitTests
             t.TargetPath = @"c:\MyTarget";
 
             // This is not valid.  Can't specify both MetabasePath and (VirtualPath or PhysicalPath).
-            Assert.False(CommandLine.CallValidateParameters(t));
+            Assert.IsFalse(CommandLine.CallValidateParameters(t));
         }
 
         /// <summary>
         /// Make sure AspNetCompiler sends ExternalProjectStarted/Finished events properly. The tasks will fail since
         /// the project files don't exist, but we only care about the events anyway.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestExternalProjectEvents()
         {
             string projectFileContents = @"
@@ -279,26 +279,26 @@ namespace Microsoft.Build.UnitTests
 
             MockLogger logger = new MockLogger(_output);
             Project proj = ObjectModelHelpers.CreateInMemoryProject(fullProjectFile, logger);
-            Assert.False(proj.Build(logger));
+            Assert.IsFalse(proj.Build(logger));
 
-            Assert.Equal(3, logger.ExternalProjectStartedEvents.Count);
-            Assert.Equal(3, logger.ExternalProjectFinishedEvents.Count);
+            Assert.AreEqual(3, logger.ExternalProjectStartedEvents.Count);
+            Assert.AreEqual(3, logger.ExternalProjectFinishedEvents.Count);
 
-            Assert.Equal(@"..\..\solutions\WebSite1\", logger.ExternalProjectStartedEvents[0].ProjectFile);
-            Assert.Equal("/WebSite2", logger.ExternalProjectStartedEvents[1].ProjectFile);
-            Assert.Equal("/LM/W3SVC/1/Root/MyApp", logger.ExternalProjectStartedEvents[2].ProjectFile);
+            Assert.AreEqual(@"..\..\solutions\WebSite1\", logger.ExternalProjectStartedEvents[0].ProjectFile);
+            Assert.AreEqual("/WebSite2", logger.ExternalProjectStartedEvents[1].ProjectFile);
+            Assert.AreEqual("/LM/W3SVC/1/Root/MyApp", logger.ExternalProjectStartedEvents[2].ProjectFile);
 
-            Assert.Equal(@"..\..\solutions\WebSite1\", logger.ExternalProjectFinishedEvents[0].ProjectFile);
-            Assert.Equal("/WebSite2", logger.ExternalProjectFinishedEvents[1].ProjectFile);
-            Assert.Equal("/LM/W3SVC/1/Root/MyApp", logger.ExternalProjectFinishedEvents[2].ProjectFile);
+            Assert.AreEqual(@"..\..\solutions\WebSite1\", logger.ExternalProjectFinishedEvents[0].ProjectFile);
+            Assert.AreEqual("/WebSite2", logger.ExternalProjectFinishedEvents[1].ProjectFile);
+            Assert.AreEqual("/LM/W3SVC/1/Root/MyApp", logger.ExternalProjectFinishedEvents[2].ProjectFile);
 
-            Assert.Null(logger.ExternalProjectStartedEvents[0].TargetNames);
-            Assert.Equal("Clean", logger.ExternalProjectStartedEvents[1].TargetNames);
-            Assert.Null(logger.ExternalProjectStartedEvents[2].TargetNames);
+            Assert.IsNull(logger.ExternalProjectStartedEvents[0].TargetNames);
+            Assert.AreEqual("Clean", logger.ExternalProjectStartedEvents[1].TargetNames);
+            Assert.IsNull(logger.ExternalProjectStartedEvents[2].TargetNames);
 
-            Assert.False(logger.ExternalProjectFinishedEvents[0].Succeeded);
-            Assert.False(logger.ExternalProjectFinishedEvents[1].Succeeded);
-            Assert.False(logger.ExternalProjectFinishedEvents[2].Succeeded);
+            Assert.IsFalse(logger.ExternalProjectFinishedEvents[0].Succeeded);
+            Assert.IsFalse(logger.ExternalProjectFinishedEvents[1].Succeeded);
+            Assert.IsFalse(logger.ExternalProjectFinishedEvents[2].Succeeded);
         }
 
 #if NETFRAMEWORK
@@ -307,7 +307,7 @@ namespace Microsoft.Build.UnitTests
         /// when called with a multithreaded TaskEnvironment, validating the
         /// TaskEnvironment.GetAbsolutePath() integration.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GenerateFullPathToTool_ReturnsAbsolutePathOrNull()
         {
             string projectDir = Path.GetTempPath();
@@ -331,7 +331,7 @@ namespace Microsoft.Build.UnitTests
         /// GetProcessStartInfoMultiThreaded when TaskEnvironment is set,
         /// and that the working directory comes from the TaskEnvironment.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetProcessStartInfo_UsesTaskEnvironmentWorkingDirectory()
         {
             string expectedWorkingDir = Path.GetTempPath().TrimEnd(Path.DirectorySeparatorChar);

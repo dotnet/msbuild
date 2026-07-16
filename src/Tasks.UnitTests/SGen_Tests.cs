@@ -9,23 +9,23 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class SGen_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public SGen_Tests(ITestOutputHelper output)
+        public SGen_Tests(TestContext output)
         {
             _output = output;
         }
 
 #if RUNTIME_TYPE_NETCORE
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskFailsOnCore()
         {
             using TestEnvironment testenv = TestEnvironment.Create(_output);
@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void KeyFileQuotedOnCommandLineIfNecessary()
         {
             SGenExtension sgen = new SGenExtension();
@@ -79,10 +79,10 @@ namespace Microsoft.Build.UnitTests
 
             string commandLine = sgen.CommandLine();
 
-            Assert.True(commandLine.IndexOf("/compiler:\"/keyfile:\\\"" + sgen.KeyFile + "\\\"\"", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.IsTrue(commandLine.IndexOf("/compiler:\"/keyfile:\\\"" + sgen.KeyFile + "\\\"\"", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestKeepFlagTrue()
         {
             SGenExtension sgen = new SGenExtension();
@@ -94,10 +94,10 @@ namespace Microsoft.Build.UnitTests
 
             string commandLine = sgen.CommandLine();
 
-            Assert.True(commandLine.IndexOf("/keep", StringComparison.OrdinalIgnoreCase) >= 0);
+            Assert.IsTrue(commandLine.IndexOf("/keep", StringComparison.OrdinalIgnoreCase) >= 0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestKeepFlagFalse()
         {
             SGenExtension sgen = new SGenExtension();
@@ -109,11 +109,11 @@ namespace Microsoft.Build.UnitTests
 
             string commandLine = sgen.CommandLine();
 
-            Assert.True(commandLine.IndexOf("/keep", StringComparison.OrdinalIgnoreCase) < 0);
+            Assert.IsTrue(commandLine.IndexOf("/keep", StringComparison.OrdinalIgnoreCase) < 0);
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestInputChecks1()
         {
             MockEngine engine = new MockEngine();
@@ -126,10 +126,10 @@ namespace Microsoft.Build.UnitTests
             // This should result in a quoted parameter...
             sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
             string commandLine = sgen.CommandLine();
-            Assert.Equal(1, engine.Errors);
+            Assert.AreEqual(1, engine.Errors);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestInputChecks2()
         {
             MockEngine engine = new MockEngine();
@@ -142,13 +142,13 @@ namespace Microsoft.Build.UnitTests
             // This should result in a quoted parameter...
             sgen.KeyFile = "c:\\Some Folder\\MyKeyFile.snk";
             string commandLine = sgen.CommandLine();
-            Assert.Equal(1, engine.Errors);
+            Assert.AreEqual(1, engine.Errors);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestInputChecks3()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 MockEngine engine = new MockEngine();
                 SGenExtension sgen = new SGenExtension();
@@ -163,10 +163,10 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestInputChecks4()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 MockEngine engine = new MockEngine();
                 SGenExtension sgen = new SGenExtension();
@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
                 string commandLine = sgen.CommandLine();
             });
         }
-        [Fact]
+        [MSBuildTestMethod]
         public void TestInputPlatform()
         {
             SGenExtension sgen = new SGenExtension();
@@ -196,10 +196,10 @@ namespace Microsoft.Build.UnitTests
             string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /compiler:/platform:x86";
 
-            Assert.Equal(targetCommandLine, commandLine);
+            Assert.AreEqual(targetCommandLine, commandLine);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestInputTypes()
         {
             SGenExtension sgen = new SGenExtension();
@@ -214,10 +214,10 @@ namespace Microsoft.Build.UnitTests
             string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /type:System.String /type:System.Boolean";
 
-            Assert.Equal(targetCommandLine, commandLine);
+            Assert.AreEqual(targetCommandLine, commandLine);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestInputEmptyTypesAndPlatform()
         {
             SGenExtension sgen = new SGenExtension();
@@ -229,10 +229,10 @@ namespace Microsoft.Build.UnitTests
             string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\"";
 
-            Assert.Equal(targetCommandLine, commandLine);
+            Assert.AreEqual(targetCommandLine, commandLine);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestNullReferences()
         {
             SGenExtension sgen = new SGenExtension();
@@ -245,10 +245,10 @@ namespace Microsoft.Build.UnitTests
 
             string commandLine = sgen.CommandLine();
 
-            Assert.True(commandLine.IndexOf("/reference:", StringComparison.OrdinalIgnoreCase) < 0);
+            Assert.IsTrue(commandLine.IndexOf("/reference:", StringComparison.OrdinalIgnoreCase) < 0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestEmptyReferences()
         {
             SGenExtension sgen = new SGenExtension();
@@ -261,10 +261,10 @@ namespace Microsoft.Build.UnitTests
 
             string commandLine = sgen.CommandLine();
 
-            Assert.True(commandLine.IndexOf("/reference:", StringComparison.OrdinalIgnoreCase) < 0);
+            Assert.IsTrue(commandLine.IndexOf("/reference:", StringComparison.OrdinalIgnoreCase) < 0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestReferencesCommandLine()
         {
             SGenExtension sgen = new SGenExtension();
@@ -279,7 +279,7 @@ namespace Microsoft.Build.UnitTests
             string targetCommandLine = "/assembly:\"" + sgen.BuildAssemblyPath + Path.DirectorySeparatorChar
                                        + "MyAsm, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null\" /reference:\"C:\\SomeFolder\\reference1.dll,C:\\SomeFolder\\reference2.dll\"";
 
-            Assert.Equal(targetCommandLine, commandLine);
+            Assert.AreEqual(targetCommandLine, commandLine);
         }
 
         /// <summary>
@@ -287,7 +287,7 @@ namespace Microsoft.Build.UnitTests
         /// TaskEnvironment's project directory and returns an absolute path, validating
         /// the TaskEnvironment.GetAbsolutePath() integration.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GenerateFullPathToTool_ResolvesRelativeSdkToolsPathViaTaskEnvironment()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -316,7 +316,7 @@ namespace Microsoft.Build.UnitTests
         /// Verifies that in GetProcessStartInfo
         /// working directory comes from the TaskEnvironment.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetProcessStartInfo_UsesTaskEnvironmentWorkingDirectory()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -338,7 +338,7 @@ namespace Microsoft.Build.UnitTests
         /// instead of Path.GetFullPath, by providing a relative path that resolves
         /// correctly against the TaskEnvironment's project directory.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildAssemblyPath_UsesTaskEnvironmentGetAbsolutePath()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);

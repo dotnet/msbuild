@@ -10,7 +10,6 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Xunit;
 
 #nullable disable
 
@@ -19,6 +18,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
     /// <summary>
     /// Unit tests for Importing from $(MSBuildExtensionsPath*)
     /// </summary>
+    [TestClass]
     public class ImportFromMSBuildExtensionsPathTests : IDisposable
     {
         private string toolsVersionToUse = null;
@@ -34,13 +34,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
             ToolsetConfigurationReaderTestHelper.CleanUp();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportFromExtensionsPathFound()
         {
-            CreateAndBuildProjectForImportFromExtensionsPath("MSBuildExtensionsPath", (p, l) => Assert.True(p.Build()));
+            CreateAndBuildProjectForImportFromExtensionsPath("MSBuildExtensionsPath", (p, l) => Assert.IsTrue(p.Build()));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportFromExtensionsPathNotFound()
         {
             string extnDir1 = null;
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 var logger = new MockLogger();
                 projColln.RegisterLogger(logger);
 
-                Assert.Throws<InvalidProjectFileException>(() => projColln.LoadProject(mainProjectPath));
+                Assert.ThrowsExactly<InvalidProjectFileException>(() => projColln.LoadProject(mainProjectPath));
 
                 logger.AssertLogContains("MSB4226");
             }
@@ -74,7 +74,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConditionalImportFromExtensionsPathNotFound()
         {
             string extnTargetsFileContentWithCondition = @"
@@ -97,14 +97,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                                             null,
                                                             (p, l) =>
                                                             {
-                                                                Assert.True(p.Build());
+                                                                Assert.IsTrue(p.Build());
 
                                                                 l.AssertLogContains("Running FromExtn");
                                                                 l.AssertLogContains("PropertyFromExtn1: FooBar");
                                                             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportFromExtensionsPathCircularImportError()
         {
             string extnTargetsFileContent1 = @"
@@ -136,7 +136,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                                         (p, l) => l.AssertLogContains("MSB4210"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtensionPathFallbackIsCaseInsensitive()
         {
             string mainTargetsFileContent = @"
@@ -167,13 +167,13 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 {
                     Console.WriteLine(logger.FullLog);
                     Console.WriteLine("checking FromExtn");
-                    Assert.True(project.Build("FromExtn"));
+                    Assert.IsTrue(project.Build("FromExtn"));
                     Console.WriteLine("checking logcontains");
                     logger.AssertLogDoesntContain("MSB4057"); // Should not contain TargetDoesNotExist
                 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportFromExtensionsPathWithWildCard()
         {
             string mainTargetsFileContent = @"
@@ -208,15 +208,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 {
                     Console.WriteLine(logger.FullLog);
                     Console.WriteLine("checking FromExtn1");
-                    Assert.True(project.Build("FromExtn1"));
+                    Assert.IsTrue(project.Build("FromExtn1"));
                     Console.WriteLine("checking FromExtn2");
-                    Assert.True(project.Build("FromExtn2"));
+                    Assert.IsTrue(project.Build("FromExtn2"));
                     Console.WriteLine("checking logcontains");
                     logger.AssertLogDoesntContain("MSB4057"); // Should not contain TargetDoesNotExist
                 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportFromExtensionsPathWithWildCardAndSelfImport()
         {
             string mainTargetsFileContent = @"
@@ -262,14 +262,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 (project, logger) =>
                 {
                     Console.WriteLine(logger.FullLog);
-                    Assert.True(project.Build("FromExtn1"));
-                    Assert.True(project.Build("FromExtn2"));
-                    Assert.True(project.Build("FromExtn3"));
+                    Assert.IsTrue(project.Build("FromExtn1"));
+                    Assert.IsTrue(project.Build("FromExtn2"));
+                    Assert.IsTrue(project.Build("FromExtn3"));
                     logger.AssertLogContains("MSB4210");
                 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportFromExtensionsPathWithWildCardNothingFound()
         {
             string extnTargetsFileContent = @"
@@ -285,10 +285,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string mainProjectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("main.proj", GetMainTargetFileContent());
 
             CreateAndBuildProjectForImportFromExtensionsPath(mainProjectPath, "MSBuildExtensionsPath", new string[] { Path.Combine("tmp", "nonexistent"), extnDir1 },
-                                                    null, (p, l) => Assert.True(p.Build()));
+                                                    null, (p, l) => Assert.IsTrue(p.Build()));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportFromExtensionsPathInvalidFile()
         {
             string extnTargetsFileContent = @"<Project>";
@@ -307,7 +307,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 var logger = new MockLogger();
                 projColln.RegisterLogger(logger);
 
-                Assert.Throws<InvalidProjectFileException>(() => projColln.LoadProject(mainProjectPath));
+                Assert.ThrowsExactly<InvalidProjectFileException>(() => projColln.LoadProject(mainProjectPath));
                 logger.AssertLogContains("MSB4024");
             }
             finally
@@ -323,7 +323,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportFromExtensionsPathSearchOrder()
         {
             string extnTargetsFileContent1 = @"
@@ -361,14 +361,14 @@ namespace Microsoft.Build.UnitTests.Evaluation
                                                             null,
                                                             (p, l) =>
                                                             {
-                                                                Assert.True(p.Build());
+                                                                Assert.IsTrue(p.Build());
 
                                                                 l.AssertLogContains("Running FromExtn");
                                                                 l.AssertLogContains("PropertyFromExtn1: FromSecondFile");
                                                             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportFromExtensionsPathSearchOrder2()
         {
             string extnTargetsFileContent1 = @"
@@ -412,7 +412,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 project.SetProperty("MSBuildExtensionsPath", extnDir2);
                 project.ReevaluateIfNecessary();
-                Assert.True(project.Build());
+                Assert.IsTrue(project.Build());
 
                 logger.AssertLogContains("Running FromExtn");
                 logger.AssertLogContains("PropertyFromExtn1: FromSecondFile");
@@ -434,20 +434,20 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportOrderFromExtensionsPath32()
         {
-            CreateAndBuildProjectForImportFromExtensionsPath("MSBuildExtensionsPath32", (p, l) => Assert.True(p.Build()));
+            CreateAndBuildProjectForImportFromExtensionsPath("MSBuildExtensionsPath32", (p, l) => Assert.IsTrue(p.Build()));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportOrderFromExtensionsPath64()
         {
-            CreateAndBuildProjectForImportFromExtensionsPath("MSBuildExtensionsPath64", (p, l) => Assert.True(p.Build()));
+            CreateAndBuildProjectForImportFromExtensionsPath("MSBuildExtensionsPath64", (p, l) => Assert.IsTrue(p.Build()));
         }
 
         // Use MSBuildExtensionsPath, MSBuildExtensionsPath32 and MSBuildExtensionsPath64 in the build
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportFromExtensionsPathAnd32And64()
         {
             string extnTargetsFileContentTemplate = @"
@@ -503,7 +503,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 projColln.RegisterLogger(logger);
 
                 var project = projColln.LoadProject(mainProjectPath);
-                Assert.True(project.Build("Main"));
+                Assert.IsTrue(project.Build("Main"));
                 logger.AssertLogContains("Running FromExtn3");
                 logger.AssertLogContains("Running FromExtn2");
                 logger.AssertLogContains("Running FromExtn");
@@ -530,7 +530,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         // Fall-back path that has a property in it: $(FallbackExpandDir1)
-        [Fact]
+        [MSBuildTestMethod]
         public void ExpandExtensionsPathFallback()
         {
             string extnTargetsFileContentTemplate = @"
@@ -580,7 +580,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 projectCollection.RegisterLogger(logger);
 
                 var project = projectCollection.LoadProject(mainProjectPath);
-                Assert.True(project.Build("Main"));
+                Assert.IsTrue(project.Build("Main"));
                 logger.AssertLogContains("Running FromExtn");
             }
             finally
@@ -591,7 +591,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         // Fall-back path that has a property in it: $(FallbackExpandDir1)
-        [Fact]
+        [MSBuildTestMethod]
         public void ExpandExtensionsPathFallbackInErrorMessage()
         {
             string extnTargetsFileContentTemplate = @"
@@ -640,7 +640,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 var logger = new MockLogger();
                 projectCollection.RegisterLogger(logger);
 
-                Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
+                Assert.ThrowsExactly<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
 
                 // Expanded $(FallbackExpandDir) will appear in quotes in the log
                 logger.AssertLogContains("\"" + extnDir1 + "\"");
@@ -653,7 +653,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         // Fall-back search path with custom variable
-        [Fact]
+        [MSBuildTestMethod]
         public void FallbackImportWithIndirectReference()
         {
             string mainTargetsFileContent = @"
@@ -711,7 +711,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 projectCollection.RegisterLogger(logger);
 
                 var project = projectCollection.LoadProject(mainProjectPath);
-                Assert.True(project.Build("Main"));
+                Assert.IsTrue(project.Build("Main"));
                 logger.AssertLogContains("Running FromExtn");
             }
             finally
@@ -722,7 +722,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         // Fall-back search path on a property that is not defined.
-        [Fact]
+        [MSBuildTestMethod]
         public void FallbackImportWithUndefinedProperty()
         {
             string mainTargetsFileContent = @"
@@ -776,7 +776,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 projectCollection.RegisterLogger(logger);
 
                 var project = projectCollection.LoadProject(mainProjectPath);
-                Assert.True(project.Build("Main"));
+                Assert.IsTrue(project.Build("Main"));
                 logger.AssertLogContains("Running FromExtn");
             }
             finally
@@ -786,7 +786,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FallbackImportWithFileNotFoundWhenPropertyNotDefined()
         {
             // Import something from $(UndefinedProperty)
@@ -834,7 +834,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 var logger = new MockLogger();
                 projectCollection.RegisterLogger(logger);
 
-                Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
+                Assert.ThrowsExactly<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
                 logger.AssertLogContains(@"MSB4226: The imported project """ + Path.Combine("$(UndefinedProperty)", "filenotfound.props")
                                             + @""" was not found. Also, tried to find");
             }
@@ -848,9 +848,9 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// Fall-back search path on a property that is not valid. https://github.com/dotnet/msbuild/issues/8762
         /// </summary>
         /// <param name="projectValue">imported project value expression</param>
-        [Theory]
-        [InlineData("")]
-        [InlineData("|")]
+        [MSBuildTestMethod]
+        [DataRow("")]
+        [DataRow("|")]
         public void FallbackImportWithInvalidProjectValue(string projectValue)
         {
             string mainTargetsFileContent = $"""
@@ -868,7 +868,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             projectCollection.ResetToolsetsForTests(WriteConfigFileAndGetReader("VSToolsPath", "temp"));
             var logger = new MockLogger();
             projectCollection.RegisterLogger(logger);
-            Assert.Throws<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
+            Assert.ThrowsExactly<InvalidProjectFileException>(() => projectCollection.LoadProject(mainProjectPath));
 
             if (string.IsNullOrEmpty(projectValue))
             {

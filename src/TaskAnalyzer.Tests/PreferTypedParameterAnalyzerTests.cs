@@ -4,7 +4,6 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
@@ -12,13 +11,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 /// <summary>
 /// Tests for <see cref="PreferTypedParameterAnalyzer"/> covering MSBuildTask0006 and MSBuildTask0007.
 /// </summary>
+[TestClass]
 public class PreferTypedParameterAnalyzerTests
 {
     // ═══════════════════════════════════════════════════════════════════════
     // MSBuildTask0006: Prefer typed path parameters
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task NewAbsolutePath_FromStringProp_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -41,7 +41,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("AbsolutePath");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task RelativeDefault_EmitsMoveToExecute_AndSuppressesPathDiagnostic()
     {
         // A relative default can't be rooted in the initializer, so the property is redirected from
@@ -67,7 +67,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("AbsolutePath");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FullyQualifiedDefault_StaysOnPathDiagnostic()
     {
         // A fully-qualified default can be reproduced in the initializer, so it stays on MSBuildTask0006.
@@ -90,7 +90,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.InitializeRelativeDefaultInExecute);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewFileInfo_FromStringProp_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -112,7 +112,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("FileInfo");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewDirectoryInfo_FromStringProp_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -133,7 +133,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("DirectoryInfo");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task TaskEnvironmentGetAbsolutePath_FromStringProp_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -157,7 +157,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("InputPath");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewAbsolutePath_WithLocalIndirection_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -178,7 +178,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedPathParameter);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task PathCombine_WithStringProp_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -201,7 +201,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("BasePath");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task HelperMethodWrapping_StringProp_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -226,7 +226,7 @@ public class PreferTypedParameterAnalyzerTests
 
     // ── Negative cases for MSBuildTask0006 ──
 
-    [Fact]
+    [TestMethod]
     public async Task NewAbsolutePath_FromLiteral_NoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -245,7 +245,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewAbsolutePath_FromNonTaskProperty_NoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -267,7 +267,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task OutputProperty_Excluded_NoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -288,7 +288,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task PrivateProperty_Excluded_NoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -308,7 +308,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ReadOnlyProperty_Excluded_NoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -328,7 +328,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NonTaskClass_NoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -350,7 +350,7 @@ public class PreferTypedParameterAnalyzerTests
     // MSBuildTask0007: Prefer ITaskItem<T> over manual ItemSpec parsing
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task IntParse_FromItemSpec_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -373,7 +373,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("Item");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task BoolParse_FromItemSpec_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -394,7 +394,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("bool");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ConvertToInt32_FromItemSpec_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -416,7 +416,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("int");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task TryParse_FromItemSpec_ProducesNoDiagnostic()
     {
         // TryParse is defensive (bool result + out parameter). Suggesting ITaskItem<int> would change
@@ -438,7 +438,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewAbsolutePath_FromItemSpec_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -459,7 +459,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("AbsolutePath");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewFileInfo_FromItemSpec_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -481,7 +481,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("FileInfo");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewAbsolutePath_FromGetMetadataFullPath_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -502,7 +502,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("AbsolutePath");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewFileInfo_FromGetMetadataFullPath_CaseInsensitive_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -524,7 +524,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("FileInfo");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewAbsolutePath_FromGetMetadataOtherName_DoesNotProduceItemDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -544,7 +544,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task GetAbsolutePath_FromItemSpec_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -567,7 +567,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("AbsolutePath");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task InheritsMultiThreadableInterface_WithoutAttribute_ProducesNoDiagnostic()
     {
         // The task derives from a base that implements IMultiThreadableTask but does not itself carry the
@@ -593,7 +593,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task InputPropertyDeclaredOnBaseClass_WithAttribute_ProducesDiagnostic()
     {
         // The input property is declared on a base class while the attribute is on the derived task. Applicability
@@ -619,7 +619,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("AbsolutePath");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task IntParse_FromItemSpec_WithLocalIndirection_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -640,7 +640,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task IntParse_FromArrayItemSpec_InForeach_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -664,7 +664,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("ITaskItem[]");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task IntParse_FromArrayElementItemSpec_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -684,7 +684,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task PathCombine_WithItemSpec_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -710,7 +710,7 @@ public class PreferTypedParameterAnalyzerTests
         task7[0].GetMessage().ShouldContain("OutputDir");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task PathCombine_StringProp_NotFirstArgument_ProducesNoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -732,7 +732,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedPathParameter);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task PathCombine_ItemSpec_NotFirstArgument_ProducesNoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -753,7 +753,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task HelperMethodWrapping_ItemSpec_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -777,7 +777,7 @@ public class PreferTypedParameterAnalyzerTests
         diags[0].GetMessage().ShouldContain("FileItem");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task ArrayProperty_SuggestsArrayType()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -804,7 +804,7 @@ public class PreferTypedParameterAnalyzerTests
         task7.ShouldContain(d => d.GetMessage().Contains("ITaskItem<AbsolutePath>[]"));
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewDirectoryInfo_FromAbsolutePathLocal_SuggestsDirectoryInfo()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -831,7 +831,7 @@ public class PreferTypedParameterAnalyzerTests
         task7[0].GetMessage().ShouldNotContain("AbsolutePath");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewFileInfo_FromAbsolutePathLocal_SuggestsFileInfo()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -859,7 +859,7 @@ public class PreferTypedParameterAnalyzerTests
 
     // ── Negative cases for MSBuildTask0007 ──
 
-    [Fact]
+    [TestMethod]
     public async Task IntParse_FromNonItemSpec_NoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -879,7 +879,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task IntParse_FromStringProp_NoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -900,7 +900,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.Where(d => d.Id == DiagnosticIds.PreferTypedTaskItem).ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task OutputItemProperty_Excluded_NoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -921,7 +921,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NonTaskClass_ItemSpec_NoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -939,7 +939,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NonMultiThreadableTask_NoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -960,7 +960,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldBeEmpty();
     }
 
-    [Fact]
+    [TestMethod]
     public async Task MultiThreadableAttribute_ButNotITask_NoDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -983,7 +983,7 @@ public class PreferTypedParameterAnalyzerTests
 
     // ── System.IO consumption-site inference (File.* => FileInfo, Directory.* => DirectoryInfo) ──
 
-    [Fact]
+    [TestMethod]
     public async Task FileDelete_OnItemSpec_SuggestsFileInfo()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -1007,7 +1007,7 @@ public class PreferTypedParameterAnalyzerTests
         task7[0].GetMessage().ShouldContain("FileInfo");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DirectoryCreate_OnItemSpec_SuggestsDirectoryInfo()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -1031,7 +1031,7 @@ public class PreferTypedParameterAnalyzerTests
         task7[0].GetMessage().ShouldContain("DirectoryInfo");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileReadAllLines_ThroughAbsolutePath_SuggestsFileInfoAndSuppressesAbsolutePath()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -1056,7 +1056,7 @@ public class PreferTypedParameterAnalyzerTests
         task7[0].GetMessage().ShouldNotContain("AbsolutePath");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewFileStream_OnItemSpec_SuggestsFileInfo()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -1080,7 +1080,7 @@ public class PreferTypedParameterAnalyzerTests
         task7[0].GetMessage().ShouldContain("FileInfo");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileWriteAllText_DoesNotFlagNonPathContentsArgument()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -1106,7 +1106,7 @@ public class PreferTypedParameterAnalyzerTests
         task7[0].GetMessage().ShouldContain("FileInfo");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DirectoryCreate_OnReassignedNullableLocal_SuggestsDirectoryInfo()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -1134,7 +1134,7 @@ public class PreferTypedParameterAnalyzerTests
         task7[0].GetMessage().ShouldNotContain("AbsolutePath");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileAndDirectoryConflict_FallsBackToAbsolutePath()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -1163,7 +1163,7 @@ public class PreferTypedParameterAnalyzerTests
         task7[0].GetMessage().ShouldNotContain("DirectoryInfo");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileAndDirectoryConflict_NoAbsolutePathSite_StillFlagsWithAbsolutePath()
     {
         // A string property consumed as BOTH a file and a directory, with no AbsolutePath site to carry the
@@ -1199,7 +1199,7 @@ public class PreferTypedParameterAnalyzerTests
 
     // ── MSBuildTask0006 over raw-string 0002/0003 scenarios (one-shot instead of daisy-chaining) ──
 
-    [Fact]
+    [TestMethod]
     public async Task PathGetFullPath_OnStringProp_SuggestsAbsolutePath()
     {
         // Path.GetFullPath(prop) is the raw normalization that MSBuildTask0002 flags. MSBuildTask0006 also
@@ -1226,7 +1226,7 @@ public class PreferTypedParameterAnalyzerTests
         task6[0].GetMessage().ShouldContain("AbsolutePath");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileDelete_OnStringProp_SuggestsFileInfo()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -1251,7 +1251,7 @@ public class PreferTypedParameterAnalyzerTests
         task6[0].GetMessage().ShouldContain("FileInfo");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DirectoryCreate_OnStringProp_SuggestsDirectoryInfo()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -1276,7 +1276,7 @@ public class PreferTypedParameterAnalyzerTests
         task6[0].GetMessage().ShouldContain("DirectoryInfo");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task NewFileStream_OnStringProp_SuggestsFileInfo()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""
@@ -1301,7 +1301,7 @@ public class PreferTypedParameterAnalyzerTests
         task6[0].GetMessage().ShouldContain("FileInfo");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileDelete_OnAlreadyWrappedStringProp_SuggestsAbsolutePathNotFileInfo()
     {
         // The argument is already rooted through TaskEnvironment.GetAbsolutePath, so the raw-consumption rule
@@ -1329,7 +1329,7 @@ public class PreferTypedParameterAnalyzerTests
         task6[0].GetMessage().ShouldNotContain("FileInfo");
     }
 
-    [Fact]
+    [TestMethod]
     public async Task FileWriteAllText_DoesNotFlagNonPathContentsArgument_StringProp()
     {
         // Only the path-named parameter is flagged; the "contents" string argument is not a path.
@@ -1360,7 +1360,7 @@ public class PreferTypedParameterAnalyzerTests
     // Fix #5: Restrict to ValueTypeParser-supported types only
     // ═══════════════════════════════════════════════════════════════════════
 
-    [Fact]
+    [TestMethod]
     public async Task GuidParse_FromItemSpec_NoDiagnostic()
     {
         // Guid is not supported by ValueTypeParser, so no diagnostic should be emitted.
@@ -1382,7 +1382,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task TimeSpanParse_FromItemSpec_NoDiagnostic()
     {
         // TimeSpan is not supported by ValueTypeParser, so no diagnostic should be emitted.
@@ -1404,7 +1404,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task IntParse_FromItemSpec_StillProducesDiagnostic()
     {
         // int is supported by ValueTypeParser, so the diagnostic should still fire.
@@ -1425,7 +1425,7 @@ public class PreferTypedParameterAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.PreferTypedTaskItem);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DateTimeParse_FromItemSpec_ProducesDiagnostic()
     {
         var diags = await GetTypedParameterDiagnosticsAsync("""

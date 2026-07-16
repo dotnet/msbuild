@@ -1,11 +1,10 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests;
 
@@ -15,11 +14,12 @@ namespace Microsoft.Build.Engine.UnitTests;
 /// <c>TaskFactory="TaskHostFactory"</c> and <c>Runtime="CLR2"</c>,
 /// exercising the CLR2 branch in <c>ResolveNodeLaunchConfiguration</c>.
 /// </summary>
+[TestClass]
 public class CLR2TaskHost_E2E_Tests
 {
-    private readonly ITestOutputHelper _output;
+    private readonly TestContext _output;
 
-    public CLR2TaskHost_E2E_Tests(ITestOutputHelper output)
+    public CLR2TaskHost_E2E_Tests(TestContext output)
     {
         _output = output;
     }
@@ -35,7 +35,7 @@ public class CLR2TaskHost_E2E_Tests
     ///      salt matches what the child process computes on startup
     /// Without these, the parent and child compute different pipe name hashes → MSB4216.
     /// </summary>
-    [WindowsNet35OnlyFact]
+    [WindowsNet35OnlyTestMethod]
     public void ExplicitCLR2TaskHostFactory_RunsTaskSuccessfully()
     {
         using TestEnvironment env = TestEnvironment.Create(_output);

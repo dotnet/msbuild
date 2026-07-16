@@ -11,18 +11,18 @@ using Microsoft.Build.UnitTests;
 
 using Shouldly;
 
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public sealed class OutputPathTests : IDisposable
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
         private readonly string _projectRelativePath = Path.Combine("src", "test", "test.csproj");
 
-        public OutputPathTests(ITestOutputHelper output)
+        public OutputPathTests(TestContext output)
         {
             _output = output;
             ObjectModelHelpers.DeleteTempProjectDirectory();
@@ -36,7 +36,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Test when both BaseOutputPath and OutputPath are not specified.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BothBaseOutputPathAndOutputPathWereNotSpecified()
         {
             // Arrange
@@ -73,7 +73,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Test when BaseOutputPath is specified without the OutputPath.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BaseOutputPathWasSpecifiedAndIsOverridable()
         {
             // Arrange
@@ -111,7 +111,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Test when both BaseOutputPath and OutputPath are specified.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BothBaseOutputPathAndOutputPathWereSpecified()
         {
             // Arrange
@@ -157,7 +157,8 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Test for [MSBuild]::NormalizePath and [MSBuild]::NormalizeDirectory returning current directory instead of current Project directory.
         /// </summary>
-        [WindowsOnlyFact(Skip = "Skipping this test for now until we have a consensus about this issue.")]
+        [WindowsOnlyFact]
+        [Ignore("Skipping this test for now until we have a consensus about this issue.")]
         public void MSBuildNormalizePathShouldReturnProjectDirectory()
         {
             // Arrange

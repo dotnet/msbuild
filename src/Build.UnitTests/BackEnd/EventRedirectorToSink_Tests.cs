@@ -3,7 +3,6 @@
 
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
-using Xunit;
 
 #nullable disable
 
@@ -12,15 +11,16 @@ namespace Microsoft.Build.UnitTests.Logging
     /// <summary>
     /// Test the central forwarding logger by initializing a new one and sending events through it.
     /// </summary>
+    [TestClass]
     public class EventRedirectorToSink_Tests
     {
         /// <summary>
         /// Tests the basic getting and setting of the logger parameters
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructorNegativeLoggerId()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.ThrowsExactly<InternalErrorException>(() =>
             {
                 EventSourceSink testSink = new EventSourceSink();
                 EventRedirectorToSink eventRedirector = new EventRedirectorToSink(-10, testSink);
@@ -30,10 +30,10 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify the correct exception is thrown when the logger is initialized with a null
         /// event source.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructorNullSink()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.ThrowsExactly<InternalErrorException>(() =>
             {
                 EventRedirectorToSink eventRedirector = new EventRedirectorToSink(0, null);
             });
@@ -41,19 +41,19 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify an valid inputs work and do not produce an exception
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructorValidInputs()
         {
             EventSourceSink testSink = new EventSourceSink();
             EventRedirectorToSink eventRedirector = new EventRedirectorToSink(5, testSink);
-            Assert.NotNull(eventRedirector); // "eventRedirector was not supposed to be null"
+            Assert.IsNotNull(eventRedirector); // "eventRedirector was not supposed to be null"
         }
 
         /// <summary>
         /// Verify when an event is forwarded, the event that was put in is the same event that was received on the event source
         /// also make sure the sinkId has been updated by the event redirector.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestForwardingNotNullEvent()
         {
             EventSourceSink testSink = new EventSourceSink();
@@ -65,20 +65,20 @@ namespace Microsoft.Build.UnitTests.Logging
                   {
                       wentInHandler = true;
                       BuildMessageEventArgs messageEventFromPacket = buildEvent as BuildMessageEventArgs;
-                      Assert.Equal(messageEvent, messageEventFromPacket); // "Expected messageEvent to be forwarded to match actually forwarded event"
+                      Assert.AreEqual(messageEvent, messageEventFromPacket); // "Expected messageEvent to be forwarded to match actually forwarded event"
                   });
 
             ((IEventRedirector)eventRedirector).ForwardEvent(messageEvent);
-            Assert.True(wentInHandler); // "Expected to go into event handler"
+            Assert.IsTrue(wentInHandler); // "Expected to go into event handler"
         }
 
         /// <summary>
         /// Verify when a null event is forwarded we get a null argument exception
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestForwardingNullEvent()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.ThrowsExactly<InternalErrorException>(() =>
             {
                 EventSourceSink testSink = new EventSourceSink();
                 EventRedirectorToSink eventRedirector = new EventRedirectorToSink(5, testSink);

@@ -10,9 +10,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     using System.Linq;
     using Microsoft.Build.Construction;
     using Microsoft.Build.Evaluation;
-    using Xunit;
 
-    public class LinkedConstructionModify_Tests : IClassFixture<LinkedConstructionModify_Tests.MyTestCollectionGroup>
+    [TestClass]
+    public class LinkedConstructionModify_Tests
     {
         public class MyTestCollectionGroup : TestCollectionGroup
         {
@@ -30,10 +30,19 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
         public MyTestCollectionGroup StdGroup { get; }
-        public LinkedConstructionModify_Tests(MyTestCollectionGroup group)
+
+        private static MyTestCollectionGroup s_stdGroup;
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context) => s_stdGroup = new MyTestCollectionGroup();
+
+        [ClassCleanup]
+        public static void ClassCleanup() => s_stdGroup?.Dispose();
+
+        public LinkedConstructionModify_Tests()
         {
-            this.StdGroup = group;
-            group.Clear();
+            this.StdGroup = s_stdGroup;
+            s_stdGroup.Clear();
             this.StdGroup.Local.Importing = true;
         }
 
@@ -43,14 +52,14 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var newReal = this.StdGroup.Target.LoadInMemoryWithSettings(TestCollectionGroup.SampleProjectFile);
             newReal.Xml.FullPath = tempPath;
             var newView = this.StdGroup.Local.GetLoadedProjects(tempPath).FirstOrDefault();
-            Assert.NotNull(newView);
+            Assert.IsNotNull(newView);
 
             ViewValidation.Verify(newView, newReal);
 
             return new ProjectPair(newView, newReal);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectRootElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -132,12 +141,12 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             // DeepClone
             var clone = xmlPair.View.DeepClone();
             ViewValidation.IsLinkedObject(clone);
-            Assert.NotSame(clone, xmlPair.View);
-            Assert.True(string.IsNullOrEmpty(clone.FullPath));
+            Assert.AreNotSame(clone, xmlPair.View);
+            Assert.IsTrue(string.IsNullOrEmpty(clone.FullPath));
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectTargetElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -179,12 +188,12 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             // rename target. First validate we do not change identity of the view
             const string NewTargetRenamed = "NewTargetRenamed";
             newTarget1.View.Name = NewTargetRenamed;
-            Assert.Empty(xmlPair.QueryChildrenWithValidation<ProjectTargetElement>((t) => string.Equals(t.Name, NewTargetName)));
+            Assert.IsEmpty(xmlPair.QueryChildrenWithValidation<ProjectTargetElement>((t) => string.Equals(t.Name, NewTargetName)));
             newTarget1.VerifySame(xmlPair.QuerySingleChildrenWithValidation<ProjectTargetElement>((t) => string.Equals(t.Name, NewTargetRenamed)));
 
             newTarget1.Real.Name = NewTargetRenamed.Ver(2);
-            Assert.Empty(xmlPair.QueryChildrenWithValidation<ProjectTargetElement>((t) => string.Equals(t.Name, NewTargetRenamed)));
-            Assert.Empty(xmlPair.QueryChildrenWithValidation<ProjectTargetElement>((t) => string.Equals(t.Name, NewTargetName)));
+            Assert.IsEmpty(xmlPair.QueryChildrenWithValidation<ProjectTargetElement>((t) => string.Equals(t.Name, NewTargetRenamed)));
+            Assert.IsEmpty(xmlPair.QueryChildrenWithValidation<ProjectTargetElement>((t) => string.Equals(t.Name, NewTargetName)));
 
             newTarget1.VerifySame(xmlPair.QuerySingleChildrenWithValidation<ProjectTargetElement>((t) => string.Equals(t.Name, NewTargetRenamed.Ver(2))));
 
@@ -194,24 +203,24 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
             // removes
             newTarget1.View.RemoveChild(newTask2.View);
-            Assert.ThrowsAny<ArgumentException>(() => newTarget1.Real.RemoveChild(newTask2.Real));
-            Assert.Equal(1, newTarget1.View.Tasks.Count);
+            Assert.ThrowsExactly<ArgumentException>(() => newTarget1.Real.RemoveChild(newTask2.Real));
+            Assert.AreEqual(1, newTarget1.View.Tasks.Count);
             newTarget1.Real.RemoveChild(newTask1.Real);
-            Assert.ThrowsAny<ArgumentException>(() => newTarget1.View.RemoveChild(newTask1.View));
-            Assert.Empty(newTarget1.View.Tasks);
+            Assert.ThrowsExactly<ArgumentException>(() => newTarget1.View.RemoveChild(newTask1.View));
+            Assert.IsEmpty(newTarget1.View.Tasks);
 
-            Assert.NotEmpty(newTarget1.View.ItemGroups);
-            Assert.NotEmpty(newTarget1.View.PropertyGroups);
+            Assert.IsNotEmpty(newTarget1.View.ItemGroups);
+            Assert.IsNotEmpty(newTarget1.View.PropertyGroups);
             newTarget1.View.RemoveAllChildren();
 
-            Assert.Empty(newTarget1.View.ItemGroups);
-            Assert.Empty(newTarget1.View.PropertyGroups);
+            Assert.IsEmpty(newTarget1.View.ItemGroups);
+            Assert.IsEmpty(newTarget1.View.PropertyGroups);
 
 
             newTarget1.Verify();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectTaskElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -223,30 +232,30 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var newTarget = xmlPair.AddNewChaildWithVerify<ProjectTargetElement>(ObjectType.View, "TargetToTestTask", (p, n) => p.AddTarget(n), (t, n) => string.Equals(t.Name, n));
             var newTask = newTarget.AddNewNamedChaildWithVerify<ProjectTaskElement>(ObjectType.View, NewTasktName, (t, n) => t.AddTask(n));
 
-            Assert.Equal(0, newTask.View.Outputs.Count);
+            Assert.AreEqual(0, newTask.View.Outputs.Count);
             const string NewOutputItem = "NewOutputItem";
             newTask.Add2NewChildrenWithVerify<ProjectOutputElement>(NewOutputItem, (t, n) => t.AddOutputItem(n, "CPP"), (oi, n) => oi.TaskParameter == n, out var newOutputItem1, out var newOutputItem2);
-            Assert.True(newOutputItem1.View.IsOutputItem);
-            Assert.False(newOutputItem1.View.IsOutputProperty);
+            Assert.IsTrue(newOutputItem1.View.IsOutputItem);
+            Assert.IsFalse(newOutputItem1.View.IsOutputProperty);
 
 
             const string NewOutputItemWithConfig = "NewOutputItemCfg";
             newTask.Add2NewChildrenWithVerify<ProjectOutputElement>(NewOutputItemWithConfig, (t, n) => t.AddOutputItem(n, "source", "'Configuration'='Foo'"), (oi, n) => oi.TaskParameter == n, out var newOutputItemWithConfig1, out var newOutputItemWithConfig2);
-            Assert.True(newOutputItemWithConfig1.View.IsOutputItem);
-            Assert.False(newOutputItemWithConfig1.View.IsOutputProperty);
+            Assert.IsTrue(newOutputItemWithConfig1.View.IsOutputItem);
+            Assert.IsFalse(newOutputItemWithConfig1.View.IsOutputProperty);
 
             const string NewOutputProperty = "NewOutputProperty";
             newTask.Add2NewChildrenWithVerify<ProjectOutputElement>(NewOutputProperty, (t, n) => t.AddOutputProperty(n, "taskprop"), (oi, n) => oi.TaskParameter == n, out var newOutputProp1, out var newOutputProp2);
-            Assert.False(newOutputProp1.View.IsOutputItem);
-            Assert.True(newOutputProp1.View.IsOutputProperty);
+            Assert.IsFalse(newOutputProp1.View.IsOutputItem);
+            Assert.IsTrue(newOutputProp1.View.IsOutputProperty);
 
 
             const string NewOutputPropertyWithConfig = "NewOutputPropertyCfg";
             newTask.Add2NewChildrenWithVerify<ProjectOutputElement>(NewOutputPropertyWithConfig, (t, n) => t.AddOutputProperty(n, "source", "'Configuration'='Foo'"), (oi, n) => oi.TaskParameter == n, out var newOutputPropWithConfig1, out var newOutputPropWithConfig2);
-            Assert.False(newOutputPropWithConfig1.View.IsOutputItem);
-            Assert.True(newOutputPropWithConfig1.View.IsOutputProperty);
+            Assert.IsFalse(newOutputPropWithConfig1.View.IsOutputItem);
+            Assert.IsTrue(newOutputPropWithConfig1.View.IsOutputProperty);
 
-            Assert.Equal(8, newTask.View.Outputs.Count);
+            Assert.AreEqual(8, newTask.View.Outputs.Count);
 
             newTask.VerifySetter("ErrorAndContinue", (t) => t.ContinueOnError, (t, v) => t.ContinueOnError = v);
             newTask.VerifySetter("v665+1", (t) => t.MSBuildRuntime, (t, v) => t.MSBuildRuntime = v);
@@ -256,7 +265,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             newTask.View.RemoveAllParameters();
             newTask.Verify();
 
-            Assert.Equal(0, newTask.View.Parameters.Count);
+            Assert.AreEqual(0, newTask.View.Parameters.Count);
 
             const string paramName = "paramName";
             const string paramValue = "paramValue";
@@ -266,51 +275,51 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             }
 
             newTask.Verify();
-            Assert.Equal(5, newTask.View.Parameters.Count);
+            Assert.AreEqual(5, newTask.View.Parameters.Count);
             for (int i = 1; i <= 5; i++)
             {
-                Assert.Equal(paramValue.Ver(i), newTask.View.Parameters[paramName.Ver(i)]);
+                Assert.AreEqual(paramValue.Ver(i), newTask.View.Parameters[paramName.Ver(i)]);
             }
 
             newTask.View.RemoveParameter(paramName.Ver(1));
             newTask.Real.RemoveParameter(paramName.Ver(5));
             newTask.Verify();
-            Assert.Equal(3, newTask.View.Parameters.Count);
+            Assert.AreEqual(3, newTask.View.Parameters.Count);
             for (int i = 2; i <= 4; i++)
             {
-                Assert.Equal(paramValue.Ver(i), newTask.View.Parameters[paramName.Ver(i)]);
+                Assert.AreEqual(paramValue.Ver(i), newTask.View.Parameters[paramName.Ver(i)]);
             }
 
-            Assert.False(newTask.View.Parameters.ContainsKey(paramName.Ver(1)));
-            Assert.False(newTask.Real.Parameters.ContainsKey(paramName.Ver(1)));
-            Assert.False(newTask.View.Parameters.ContainsKey(paramName.Ver(5)));
-            Assert.False(newTask.Real.Parameters.ContainsKey(paramName.Ver(5)));
+            Assert.IsFalse(newTask.View.Parameters.ContainsKey(paramName.Ver(1)));
+            Assert.IsFalse(newTask.Real.Parameters.ContainsKey(paramName.Ver(1)));
+            Assert.IsFalse(newTask.View.Parameters.ContainsKey(paramName.Ver(5)));
+            Assert.IsFalse(newTask.Real.Parameters.ContainsKey(paramName.Ver(5)));
 
 
             newTask.View.RemoveAllParameters();
             newTask.Verify();
-            Assert.Equal(0, newTask.View.Parameters.Count);
+            Assert.AreEqual(0, newTask.View.Parameters.Count);
 
 
             newTask.View.RemoveChild(newOutputItem2.View);
-            Assert.ThrowsAny<ArgumentException>(() => newTask.Real.RemoveChild(newOutputItem2.Real));
-            Assert.Equal(7, newTask.View.Outputs.Count);
+            Assert.ThrowsExactly<ArgumentException>(() => newTask.Real.RemoveChild(newOutputItem2.Real));
+            Assert.AreEqual(7, newTask.View.Outputs.Count);
             newTask.Real.RemoveChild(newOutputItemWithConfig2.Real);
-            Assert.ThrowsAny<ArgumentException>(() => newTask.View.RemoveChild(newOutputItem2.View));
+            Assert.ThrowsExactly<ArgumentException>(() => newTask.View.RemoveChild(newOutputItem2.View));
 
-            Assert.Equal(6, newTask.View.Outputs.Count);
+            Assert.AreEqual(6, newTask.View.Outputs.Count);
 
             newTask.Real.RemoveChild(newOutputProp2.Real);
-            Assert.Equal(5, newTask.View.Outputs.Count);
+            Assert.AreEqual(5, newTask.View.Outputs.Count);
             newTask.View.RemoveChild(newOutputPropWithConfig2.View);
-            Assert.Equal(4, newTask.View.Outputs.Count);
+            Assert.AreEqual(4, newTask.View.Outputs.Count);
 
             newTask.QueryChildrenWithValidation<ProjectOutputElement>((po) => po.TaskParameter.EndsWith("1", StringComparison.Ordinal), 4);
 
             newTask.Verify();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectOutputElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -323,26 +332,26 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             const string ItemType = "CPPSource";
             var newOutputItem = newTask.AddNewChaildWithVerify<ProjectOutputElement>(ObjectType.View, NewOutputItem, (t, n) => t.AddOutputItem(n, ItemType), (oi, n) => oi.TaskParameter == n);
 
-            Assert.True(newOutputItem.View.IsOutputItem);
-            Assert.False(newOutputItem.View.IsOutputProperty);
+            Assert.IsTrue(newOutputItem.View.IsOutputItem);
+            Assert.IsFalse(newOutputItem.View.IsOutputProperty);
 
             const string NewOutputProperty = "NewOutputProperty";
             const string PropertyName = "OutputPropName";
             var newOutputProp = newTask.AddNewChaildWithVerify<ProjectOutputElement>(ObjectType.View, NewOutputProperty, (t, n) => t.AddOutputProperty(n, PropertyName), (oi, n) => oi.TaskParameter == n);
-            Assert.False(newOutputProp.View.IsOutputItem);
-            Assert.True(newOutputProp.View.IsOutputProperty);
+            Assert.IsFalse(newOutputProp.View.IsOutputItem);
+            Assert.IsTrue(newOutputProp.View.IsOutputProperty);
 
             newOutputItem.VerifySetter(NewOutputItem.Ver(1), (o) => o.TaskParameter, (o, v) => o.TaskParameter = v);
             newOutputProp.VerifySetter(NewOutputProperty.Ver(1), (o) => o.TaskParameter, (o, v) => o.TaskParameter = v);
 
             newOutputItem.VerifySetter(ItemType.Ver(1), (o) => o.ItemType, (o, v) => o.ItemType = v);
-            Assert.ThrowsAny<InvalidOperationException>(() => newOutputProp.View.ItemType = "foo");
+            Assert.ThrowsExactly<InvalidOperationException>(() => newOutputProp.View.ItemType = "foo");
 
             newOutputProp.VerifySetter(PropertyName.Ver(1), (o) => o.PropertyName, (o, v) => o.PropertyName = v);
-            Assert.ThrowsAny<InvalidOperationException>(() => newOutputItem.View.PropertyName = "foo");
+            Assert.ThrowsExactly<InvalidOperationException>(() => newOutputItem.View.PropertyName = "foo");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectMetadataElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -360,7 +369,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             xmlPair.Verify(); // this will compare all up to including the XML content of entire project
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectChooseElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -373,38 +382,38 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             xmlPair.View.AppendChild(chooseCreataed.View);
             var choose = xmlPair.QuerySingleChildrenWithValidation<ProjectChooseElement>((pc) => true);
 
-            Assert.Same(choose.View, chooseCreataed.View);
+            Assert.AreSame(choose.View, chooseCreataed.View);
             // "real" must be different, the chooseCreated real is the same remote object as the View, and chooseReal is just the second created element
             // we did for validation.
-            Assert.NotSame(choose.Real, chooseCreataed.Real);
+            Assert.AreNotSame(choose.Real, chooseCreataed.Real);
 
-            Assert.ThrowsAny<InvalidOperationException>(() => choose.View.Condition = "ccc");
+            Assert.ThrowsExactly<InvalidOperationException>(() => choose.View.Condition = "ccc");
 
-            Assert.Empty(choose.View.WhenElements);
+            Assert.IsEmpty(choose.View.WhenElements);
             choose.Append2NewLabeledChildrenWithVerify<ProjectWhenElement>("when", (p, l) => p.CreateWhenElement($"'$(c)' == '{l}'"), out var when1, out var when2);
-            Assert.Equal(2, choose.View.WhenElements.Count);
+            Assert.AreEqual(2, choose.View.WhenElements.Count);
             when1.VerifySame(choose.QuerySingleChildrenWithValidation<ProjectWhenElement>((ch) => ch.Label == when1.View.Label));
             when2.VerifySame(choose.QuerySingleChildrenWithValidation<ProjectWhenElement>((ch) => ch.Label == when2.View.Label));
 
-            Assert.Null(choose.View.OtherwiseElement);
+            Assert.IsNull(choose.View.OtherwiseElement);
 
             var otherWise = choose.AppendNewChaildWithVerify<ProjectOtherwiseElement>(ObjectType.View, "when", (p, l) => p.CreateOtherwiseElement(), (p, l) => true);
-            Assert.Same(otherWise.View, choose.View.OtherwiseElement);
-            Assert.Same(otherWise.Real, choose.Real.OtherwiseElement);
+            Assert.AreSame(otherWise.View, choose.View.OtherwiseElement);
+            Assert.AreSame(otherWise.Real, choose.Real.OtherwiseElement);
 
             choose.Verify();
 
             choose.View.RemoveChild(when2.View);
-            Assert.Equal(1, choose.View.WhenElements.Count);
+            Assert.AreEqual(1, choose.View.WhenElements.Count);
             when1.VerifySame(choose.QuerySingleChildrenWithValidation<ProjectWhenElement>((ch) => ch.Label == when1.View.Label));
 
             choose.View.RemoveChild(otherWise.View);
-            Assert.Null(choose.View.OtherwiseElement);
+            Assert.IsNull(choose.View.OtherwiseElement);
             choose.Verify();
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectWhenElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -414,36 +423,36 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var when = choose.AppendNewChaildWithVerify<ProjectWhenElement>(ObjectType.View, "when", (p, s) => p.CreateWhenElement("true"), (p, s) => true);
 
             when.VerifySetter("Condition", (we) => we.Condition, (we, v) => we.Condition = v);
-            Assert.Empty(when.View.ChooseElements);
+            Assert.IsEmpty(when.View.ChooseElements);
             when.Append2NewLabeledChildrenWithVerify<ProjectChooseElement>("choose", (p, l) => p.CreateChooseElement(), out var choose1, out var choose2);
-            Assert.Equal(2, when.View.ChooseElements.Count);
+            Assert.AreEqual(2, when.View.ChooseElements.Count);
 
-            Assert.Empty(when.View.ItemGroups);
+            Assert.IsEmpty(when.View.ItemGroups);
             when.Append2NewLabeledChildrenWithVerify<ProjectItemGroupElement>("itemGroup", (p, l) => p.CreateItemGroupElement(), out var itemGroup1, out var itemGroup2);
-            Assert.Equal(2, when.View.ItemGroups.Count);
+            Assert.AreEqual(2, when.View.ItemGroups.Count);
 
-            Assert.Empty(when.View.PropertyGroups);
+            Assert.IsEmpty(when.View.PropertyGroups);
             when.Append2NewLabeledChildrenWithVerify<ProjectPropertyGroupElement>("propGroup", (p, l) => p.CreatePropertyGroupElement(), out var propGroup1, out var propGroup2);
-            Assert.Equal(2, when.View.PropertyGroups.Count);
+            Assert.AreEqual(2, when.View.PropertyGroups.Count);
 
             when.Verify(); // will verify all collections.
 
             when.View.RemoveChild(choose2.View);
-            Assert.Equal(1, when.View.ChooseElements.Count);
+            Assert.AreEqual(1, when.View.ChooseElements.Count);
             when.Real.RemoveChild(choose1.Real);
-            Assert.Empty(when.View.ChooseElements);
+            Assert.IsEmpty(when.View.ChooseElements);
 
             when.View.RemoveChild(itemGroup2.View);
-            Assert.Equal(1, when.View.ItemGroups.Count);
+            Assert.AreEqual(1, when.View.ItemGroups.Count);
 
             when.View.RemoveChild(propGroup2.View);
-            Assert.Equal(1, when.View.PropertyGroups.Count);
+            Assert.AreEqual(1, when.View.PropertyGroups.Count);
 
             when.Verify();
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectOtherwiseElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -452,35 +461,35 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var choose = xmlPair.AppendNewChaildWithVerify<ProjectChooseElement>(ObjectType.View, "choose", (p, s) => p.CreateChooseElement(), (p, s) => true);
             var otherwise = choose.AppendNewChaildWithVerify<ProjectOtherwiseElement>(ObjectType.View, "when", (p, s) => p.CreateOtherwiseElement(), (p, s) => true);
 
-            Assert.Empty(otherwise.View.ChooseElements);
+            Assert.IsEmpty(otherwise.View.ChooseElements);
             otherwise.Append2NewLabeledChildrenWithVerify<ProjectChooseElement>("choose", (p, l) => p.CreateChooseElement(), out var choose1, out var choose2);
-            Assert.Equal(2, otherwise.View.ChooseElements.Count);
+            Assert.AreEqual(2, otherwise.View.ChooseElements.Count);
 
-            Assert.Empty(otherwise.View.ItemGroups);
+            Assert.IsEmpty(otherwise.View.ItemGroups);
             otherwise.Append2NewLabeledChildrenWithVerify<ProjectItemGroupElement>("itemGroup", (p, l) => p.CreateItemGroupElement(), out var itemGroup1, out var itemGroup2);
-            Assert.Equal(2, otherwise.View.ItemGroups.Count);
+            Assert.AreEqual(2, otherwise.View.ItemGroups.Count);
 
-            Assert.Empty(otherwise.View.PropertyGroups);
+            Assert.IsEmpty(otherwise.View.PropertyGroups);
             otherwise.Append2NewLabeledChildrenWithVerify<ProjectPropertyGroupElement>("propGroup", (p, l) => p.CreatePropertyGroupElement(), out var propGroup1, out var propGroup2);
-            Assert.Equal(2, otherwise.View.PropertyGroups.Count);
+            Assert.AreEqual(2, otherwise.View.PropertyGroups.Count);
 
             otherwise.Verify(); // will verify all collections.
 
             otherwise.View.RemoveChild(choose2.View);
-            Assert.Equal(1, otherwise.View.ChooseElements.Count);
+            Assert.AreEqual(1, otherwise.View.ChooseElements.Count);
             otherwise.Real.RemoveChild(choose1.Real);
-            Assert.Empty(otherwise.View.ChooseElements);
+            Assert.IsEmpty(otherwise.View.ChooseElements);
 
             otherwise.View.RemoveChild(itemGroup2.View);
-            Assert.Equal(1, otherwise.View.ItemGroups.Count);
+            Assert.AreEqual(1, otherwise.View.ItemGroups.Count);
 
             otherwise.View.RemoveChild(propGroup2.View);
-            Assert.Equal(1, otherwise.View.PropertyGroups.Count);
+            Assert.AreEqual(1, otherwise.View.PropertyGroups.Count);
 
             otherwise.Verify();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectUsingTaskElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -493,28 +502,28 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             // this was double rename - validate overal integrity.
             usingTaskFile.VerifySame(xmlPair.QuerySingleChildrenWithValidation<ProjectUsingTaskElement>((ut) => true));
             usingTaskFile.VerifySetter("newAssemblyPath", (ut) => ut.AssemblyFile, (ut, v) => ut.AssemblyFile = v);
-            Assert.ThrowsAny<InvalidOperationException>(() => usingTaskFile.View.AssemblyName = "xxx");
+            Assert.ThrowsExactly<InvalidOperationException>(() => usingTaskFile.View.AssemblyName = "xxx");
             usingTaskFile.VerifySetter("newRuntime", (ut) => ut.Runtime, (ut, v) => ut.Runtime = v);
 
-            Assert.Null(usingTaskFile.View.TaskBody);
+            Assert.IsNull(usingTaskFile.View.TaskBody);
             var body = usingTaskFile.AddNewChaildWithVerify<ProjectUsingTaskBodyElement>(ObjectType.View, "eval", (ut, e) => ut.AddUsingTaskBody(e, "body"), (ut, e) => true);
-            Assert.Same(body.View, usingTaskFile.View.TaskBody);
-            Assert.Same(body.Real, usingTaskFile.Real.TaskBody);
+            Assert.AreSame(body.View, usingTaskFile.View.TaskBody);
+            Assert.AreSame(body.Real, usingTaskFile.Real.TaskBody);
 
-            Assert.Null(usingTaskFile.View.ParameterGroup);
+            Assert.IsNull(usingTaskFile.View.ParameterGroup);
             var pg = usingTaskFile.AddNewChaildWithVerify<UsingTaskParameterGroupElement>(ObjectType.View, "pg", (ut, e) => ut.AddParameterGroup(), (ut, e) => true);
-            Assert.Same(pg.View, usingTaskFile.View.ParameterGroup);
-            Assert.Same(pg.Real, usingTaskFile.Real.ParameterGroup);
+            Assert.AreSame(pg.View, usingTaskFile.View.ParameterGroup);
+            Assert.AreSame(pg.Real, usingTaskFile.Real.ParameterGroup);
 
 
             xmlPair.View.RemoveChild(usingTaskFile.View);
 
             var usingTaskName = xmlPair.AddNewChaildWithVerify<ProjectUsingTaskElement>(ObjectType.View, "NewUsingTask", (p, n) => p.AddUsingTask(n, null, "assemblyName"), (ut, n) => true);
             usingTaskName.VerifySetter("newAssemblyName", (ut) => ut.AssemblyName, (ut, v) => ut.AssemblyName = v);
-            Assert.ThrowsAny<InvalidOperationException>(() => usingTaskName.View.AssemblyFile = "xxx");
+            Assert.ThrowsExactly<InvalidOperationException>(() => usingTaskName.View.AssemblyFile = "xxx");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectUsingTaskBodyElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -529,7 +538,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             taskBody.VerifySetter("newEval", (tb) => tb.Evaluate, (tb, v) => tb.Evaluate = v);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UsingTaskParameterGroupElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -539,18 +548,18 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             usingTask.VerifySetter("TaskFactory", (ut) => ut.TaskFactory, (ut, v) => ut.TaskFactory = v);
             var taskParamGroup = usingTask.AddNewChaildWithVerify<UsingTaskParameterGroupElement>(ObjectType.View, "pg", (ut, e) => ut.AddParameterGroup(), (ut, e) => true);
 
-            Assert.Empty(taskParamGroup.View.Parameters);
+            Assert.IsEmpty(taskParamGroup.View.Parameters);
 
             taskParamGroup.Add2NewNamedChildrenWithVerify<ProjectUsingTaskParameterElement>("paraX", (tpg, n) => tpg.AddParameter(n), out var paraX1, out var paraX2);
-            Assert.Equal(2, taskParamGroup.View.Parameters.Count);
+            Assert.AreEqual(2, taskParamGroup.View.Parameters.Count);
             taskParamGroup.Add2NewNamedChildrenWithVerify<ProjectUsingTaskParameterElement>("paraY", (tpg, n) => tpg.AddParameter(n, "output", "required", "type"), out var paraY1, out var paraY2);
-            Assert.Equal(4, taskParamGroup.View.Parameters.Count);
+            Assert.AreEqual(4, taskParamGroup.View.Parameters.Count);
 
             taskParamGroup.Verify();
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectUsingTaskParameterElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -566,7 +575,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             paraElement.VerifySetter("newRequired", (pe) => pe.Required, (pe, v) => pe.Required = v);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectExtensionsElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -576,7 +585,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             extensionXml.VerifySetter("bla bla bla", (e) => e.Content, (e, v) => e.Content = v);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectImportElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -590,51 +599,51 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectImportGroupElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
             var xmlPair = new ProjectXmlPair(pair);
             var importGroup = xmlPair.AddNewChaildWithVerify<ProjectImportGroupElement>(ObjectType.View, "import", (p, s) => p.AddImportGroup(), (pe, s) => true);
 
-            Assert.Empty(importGroup.View.Imports);
+            Assert.IsEmpty(importGroup.View.Imports);
 
             importGroup.Add2NewChildrenWithVerify<ProjectImportElement>("projFile", (ig, prj) => ig.AddImport(prj), (i, prj) => i.Project == prj, out var imp1, out var imp2);
-            Assert.Equal(2, importGroup.View.Imports.Count);
+            Assert.AreEqual(2, importGroup.View.Imports.Count);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectItemDefinitionElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
             var xmlPair = new ProjectXmlPair(pair);
             var itemDef = xmlPair.AddNewChaildWithVerify<ProjectItemDefinitionElement>(ObjectType.View, "source", (p, s) => p.AddItemDefinition(s), (pe, s) => true);
-            Assert.Equal("source", itemDef.View.ItemType);
+            Assert.AreEqual("source", itemDef.View.ItemType);
 
-            Assert.Empty(itemDef.View.Metadata);
+            Assert.IsEmpty(itemDef.View.Metadata);
 
             itemDef.Add2NewChildrenWithVerify<ProjectMetadataElement>("mshort", (id, n) => id.AddMetadata(n, $"value{n}"), (md, n) => md.Name == n, out var mdShort1, out var mdShort2);
-            Assert.Equal(2, itemDef.View.Metadata.Count);
+            Assert.AreEqual(2, itemDef.View.Metadata.Count);
             itemDef.Add2NewChildrenWithVerify<ProjectMetadataElement>("mlong", (id, n) => id.AddMetadata(n, $"value{n}", false), (md, n) => md.Name == n, out var mdLong1, out var mdLong2);
-            Assert.Equal(4, itemDef.View.Metadata.Count);
+            Assert.AreEqual(4, itemDef.View.Metadata.Count);
 
             itemDef.Add2NewChildrenWithVerify<ProjectMetadataElement>("mlongAttrib", (id, n) => id.AddMetadata(n, $"value{n}", true), (md, n) => md.Name == n, out var mdAttrib1, out var mdAttrib2);
-            Assert.Equal(6, itemDef.View.Metadata.Count);
+            Assert.AreEqual(6, itemDef.View.Metadata.Count);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectItemDefinitionGroupElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
             var xmlPair = new ProjectXmlPair(pair);
             var itemDefGrp = xmlPair.AddNewChaildWithVerify<ProjectItemDefinitionGroupElement>(ObjectType.View, "grp", (p, s) => p.AddItemDefinitionGroup(), (pe, s) => true);
 
-            Assert.Empty(itemDefGrp.View.ItemDefinitions);
+            Assert.IsEmpty(itemDefGrp.View.ItemDefinitions);
             itemDefGrp.Add2NewChildrenWithVerify<ProjectItemDefinitionElement>("src", (idg, it) => idg.AddItemDefinition(it), (id, n) => id.ItemType == n, out var itemDef1, out var itemDef2);
-            Assert.Equal(2, itemDefGrp.View.ItemDefinitions.Count);
+            Assert.AreEqual(2, itemDefGrp.View.ItemDefinitions.Count);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectItemElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -650,52 +659,52 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             item.VerifySetter("newType", (i) => i.ItemType, (i, v) => i.ItemType = v);
             xmlPair.Verify(); // verify rename, thoroughly.
 
-            Assert.ThrowsAny<InvalidOperationException>(() => item.View.Remove = "xx"); // Include/Update/Remove are exclusive
-            Assert.ThrowsAny<InvalidOperationException>(() => item.View.Update = "xx"); // Include/Update/Remove are exclusive
+            Assert.ThrowsExactly<InvalidOperationException>(() => item.View.Remove = "xx"); // Include/Update/Remove are exclusive
+            Assert.ThrowsExactly<InvalidOperationException>(() => item.View.Update = "xx"); // Include/Update/Remove are exclusive
             item.View.Include = null;
             item.VerifySetter("newRemove", (i) => i.Remove, (i, v) => i.Remove = v);
-            Assert.ThrowsAny<InvalidOperationException>(() => item.View.Include = "xx"); // Include/Update/Remove are exclusive
-            Assert.ThrowsAny<InvalidOperationException>(() => item.View.Update = "xx"); // Include/Update/Remove are exclusive
+            Assert.ThrowsExactly<InvalidOperationException>(() => item.View.Include = "xx"); // Include/Update/Remove are exclusive
+            Assert.ThrowsExactly<InvalidOperationException>(() => item.View.Update = "xx"); // Include/Update/Remove are exclusive
             item.View.Remove = null;
             item.VerifySetter("newUpdate", (i) => i.Update, (i, v) => i.Update = v);
-            Assert.ThrowsAny<InvalidOperationException>(() => item.View.Include = "xx"); // Include/Update/Remove are exclusive
-            Assert.ThrowsAny<InvalidOperationException>(() => item.View.Remove = "xx"); // Include/Update/Remove are exclusive
+            Assert.ThrowsExactly<InvalidOperationException>(() => item.View.Include = "xx"); // Include/Update/Remove are exclusive
+            Assert.ThrowsExactly<InvalidOperationException>(() => item.View.Remove = "xx"); // Include/Update/Remove are exclusive
 
             // only for items inside "Target"
-            Assert.ThrowsAny<InvalidOperationException>(() => item.View.KeepMetadata = "xx");
-            Assert.ThrowsAny<InvalidOperationException>(() => item.View.KeepDuplicates = "xx");
-            Assert.ThrowsAny<InvalidOperationException>(() => item.View.RemoveMetadata = "xx");
+            Assert.ThrowsExactly<InvalidOperationException>(() => item.View.KeepMetadata = "xx");
+            Assert.ThrowsExactly<InvalidOperationException>(() => item.View.KeepDuplicates = "xx");
+            Assert.ThrowsExactly<InvalidOperationException>(() => item.View.RemoveMetadata = "xx");
 
-            Assert.False(item.View.HasMetadata);
-            Assert.Empty(item.View.Metadata);
+            Assert.IsFalse(item.View.HasMetadata);
+            Assert.IsEmpty(item.View.Metadata);
 
             item.Add2NewChildrenWithVerify<ProjectMetadataElement>("mshort", (id, n) => id.AddMetadata(n, $"value{n}"), (md, n) => md.Name == n, out var mdShort1, out var mdShort2);
-            Assert.Equal(2, item.View.Metadata.Count);
+            Assert.AreEqual(2, item.View.Metadata.Count);
             item.Add2NewChildrenWithVerify<ProjectMetadataElement>("mlong", (id, n) => id.AddMetadata(n, $"value{n}", false), (md, n) => md.Name == n, out var mdLong1, out var mdLong2);
-            Assert.Equal(4, item.View.Metadata.Count);
+            Assert.AreEqual(4, item.View.Metadata.Count);
             item.Add2NewChildrenWithVerify<ProjectMetadataElement>("mlongAttrib", (id, n) => id.AddMetadata(n, $"value{n}", true), (md, n) => md.Name == n, out var mdAttrib1, out var mdAttrib2);
-            Assert.Equal(6, item.View.Metadata.Count);
+            Assert.AreEqual(6, item.View.Metadata.Count);
 
 
             // verify target items only props.
             itemInTargt.VerifySetter("newKeepDups", (i) => i.KeepDuplicates, (i, v) => i.KeepDuplicates = v);
             itemInTargt.VerifySetter("newKeepMetadata", (i) => i.KeepMetadata, (i, v) => i.KeepMetadata = v);
-            Assert.ThrowsAny<InvalidOperationException>(() => itemInTargt.View.RemoveMetadata = "xx"); // RemoveMetadata/KeepDuplicate exclusive
+            Assert.ThrowsExactly<InvalidOperationException>(() => itemInTargt.View.RemoveMetadata = "xx"); // RemoveMetadata/KeepDuplicate exclusive
             itemInTargt.View.KeepMetadata = null;
             itemInTargt.VerifySetter("newRemoveMetadat", (i) => i.RemoveMetadata, (i, v) => i.RemoveMetadata = v);
-            Assert.ThrowsAny<InvalidOperationException>(() => itemInTargt.View.KeepMetadata = "xx"); // RemoveMetadata/KeepDuplicate exclusive
+            Assert.ThrowsExactly<InvalidOperationException>(() => itemInTargt.View.KeepMetadata = "xx"); // RemoveMetadata/KeepDuplicate exclusive
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectItemGroupElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
             var xmlPair = new ProjectXmlPair(pair);
             var itemGrp = xmlPair.AddNewLabeledChaildWithVerify<ProjectItemGroupElement>(ObjectType.View, "igrp", (p, s) => p.AddItemGroup());
 
-            Assert.Empty(itemGrp.View.Items);
+            Assert.IsEmpty(itemGrp.View.Items);
             itemGrp.Add2NewChildrenWithVerify<ProjectItemElement>("file.cpp", (ig, inc) => ig.AddItem("cpp", inc), (i, inc) => i.Include == inc, out var item1, out var item2);
-            Assert.Equal(2, itemGrp.View.Items.Count);
+            Assert.AreEqual(2, itemGrp.View.Items.Count);
 
             List<KeyValuePair<string, string>> itemMetadata = new List<KeyValuePair<string, string>>()
             {
@@ -703,12 +712,12 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 new KeyValuePair<string, string>("igm2", "v2"),
             };
             itemGrp.Add2NewChildrenWithVerify<ProjectItemElement>("file.cs", (ig, inc) => ig.AddItem("cs", inc, itemMetadata), (i, inc) => i.Include == inc, out var itemWithMetadata1, out var itemWithMetadata2);
-            Assert.Equal(4, itemGrp.View.Items.Count);
+            Assert.AreEqual(4, itemGrp.View.Items.Count);
             ViewValidation.VerifyMetadata(itemMetadata, (k) => itemWithMetadata1.View.Metadata.Where((md) => md.Name == k).FirstOrDefault().Value);
             ViewValidation.VerifyMetadata(itemMetadata, (k) => itemWithMetadata2.View.Metadata.Where((md) => md.Name == k).FirstOrDefault().Value);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectPropertyElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -721,38 +730,38 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             xmlPair.Verify(); // after rename
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectPropertyGroupElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
             var xmlPair = new ProjectXmlPair(pair);
             var propGrp = xmlPair.AddNewLabeledChaildWithVerify<ProjectPropertyGroupElement>(ObjectType.View, "grp", (p, l) => p.AddPropertyGroup());
 
-            Assert.Empty(propGrp.View.Properties);
-            Assert.Empty(propGrp.View.PropertiesReversed);
+            Assert.IsEmpty(propGrp.View.Properties);
+            Assert.IsEmpty(propGrp.View.PropertiesReversed);
 
             propGrp.Add2NewChildrenWithVerify<ProjectPropertyElement>("prop", (pg, n) => pg.AddProperty(n, $"value{n}"), (p, n) => p.Name == n, out var prop1, out var prop2);
-            Assert.Equal(2, propGrp.View.Properties.Count);
-            Assert.Equal(2, propGrp.View.PropertiesReversed.Count);
+            Assert.AreEqual(2, propGrp.View.Properties.Count);
+            Assert.AreEqual(2, propGrp.View.PropertiesReversed.Count);
             // set prop will add them if they dont exist
             propGrp.Add2NewChildrenWithVerify<ProjectPropertyElement>("setnewprop", (pg, n) => pg.SetProperty(n, $"value{n}"), (p, n) => p.Name == n, out var setNewProp1, out var setNewProp2);
-            Assert.Equal(4, propGrp.View.Properties.Count);
-            Assert.Equal(4, propGrp.View.PropertiesReversed.Count);
+            Assert.AreEqual(4, propGrp.View.Properties.Count);
+            Assert.AreEqual(4, propGrp.View.PropertiesReversed.Count);
             // Add Prop will add them even if they do already exist.
             propGrp.Add2NewChildrenWithVerify<ProjectPropertyElement>("prop" /*same name*/, (pg, n) => pg.AddProperty(n, $"value2{n}"), (p, n) => p.Value == $"value2{n}", out var prop1_2, out var prop2_2);
-            Assert.Equal(6, propGrp.View.Properties.Count);
-            Assert.Equal(6, propGrp.View.PropertiesReversed.Count);
+            Assert.AreEqual(6, propGrp.View.Properties.Count);
+            Assert.AreEqual(6, propGrp.View.PropertiesReversed.Count);
             prop1_2.VerifyNotSame(prop1);
             prop2_2.VerifyNotSame(prop2);
             // set prop will override them if they do.
             propGrp.Add2NewChildrenWithVerify<ProjectPropertyElement>("setnewprop" /*same name*/, (pg, n) => pg.SetProperty(n, $"value2{n}"), (p, n) => p.Value == $"value2{n}", out var setNewProp1_2, out var setNewProp2_2);
-            Assert.Equal(6, propGrp.View.Properties.Count);
-            Assert.Equal(6, propGrp.View.PropertiesReversed.Count);
+            Assert.AreEqual(6, propGrp.View.Properties.Count);
+            Assert.AreEqual(6, propGrp.View.PropertiesReversed.Count);
             setNewProp1_2.VerifySame(setNewProp1);
             setNewProp2_2.VerifySame(setNewProp2);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectSdkElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");
@@ -769,7 +778,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             var curiousOfHowToSpecifySdk2 = xmlPair.View.RawXml;
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectOnErrorElementModify()
         {
             var pair = GetNewInMemoryProject("temp.prj");

@@ -5,17 +5,17 @@ using System;
 using System.IO;
 using Microsoft.Build.Exceptions;
 
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class InvalidProjectFileExceptionTests
     {
-        private readonly ITestOutputHelper _testOutput;
+        private readonly TestContext _testOutput;
 
-        public InvalidProjectFileExceptionTests(ITestOutputHelper output)
+        public InvalidProjectFileExceptionTests(TestContext output)
         {
             _testOutput = output;
         }
@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that nesting an IPFE copies the error code
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ErrorCodeShouldAppearForCircularDependency()
         {
             string file = Path.GetTempPath() + Guid.NewGuid().ToString("N");
@@ -55,7 +55,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Regression test for https://github.com/dotnet/msbuild/issues/1286
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LogErrorShouldHavePathAndLocation()
         {
             string file = Path.GetTempPath() + Guid.NewGuid().ToString("N");
@@ -74,9 +74,9 @@ namespace Microsoft.Build.UnitTests
             }
             catch (InvalidProjectFileException e)
             {
-                Assert.Equal(3, e.LineNumber);
-                Assert.Equal(38, e.ColumnNumber);
-                Assert.Equal(file, e.ProjectFile); // https://github.com/dotnet/msbuild/issues/1286
+                Assert.AreEqual(3, e.LineNumber);
+                Assert.AreEqual(38, e.ColumnNumber);
+                Assert.AreEqual(file, e.ProjectFile); // https://github.com/dotnet/msbuild/issues/1286
             }
             finally
             {

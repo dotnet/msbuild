@@ -5,7 +5,6 @@ using System;
 
 using Microsoft.Build.Framework;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -14,6 +13,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Verify the functioning of the ProjectStartedEventArgs class.
     /// </summary>
+    [TestClass]
     public class ProjectStartedEventArgs_Tests
     {
         /// <summary>
@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Trivially exercise event args default ctors to boost Frameworks code coverage
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EventArgsCtors()
         {
             ProjectStartedEventArgs projectStartedEvent = new ProjectStartedEventArgs2();

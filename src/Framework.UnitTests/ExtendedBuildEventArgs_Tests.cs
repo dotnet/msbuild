@@ -5,15 +5,16 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
-using Xunit;
 
 namespace Microsoft.Build.Framework.UnitTests;
 
+[TestClass]
+
 public class ExtendedBuildEventArgs_Tests
 {
-    [InlineData(true)]
-    [InlineData(false)]
-    [Theory]
+    [DataRow(true)]
+    [DataRow(false)]
+    [MSBuildTestMethod]
     public void ExtendedCustomBuildEventArgs_SerializationDeserialization(bool withOptionalData)
     {
         ExtendedCustomBuildEventArgs arg = new(
@@ -41,9 +42,9 @@ public class ExtendedBuildEventArgs_Tests
         argDeserialized.Should().BeEquivalentTo(arg);
     }
 
-    [InlineData(true)]
-    [InlineData(false)]
-    [Theory]
+    [DataRow(true)]
+    [DataRow(false)]
+    [MSBuildTestMethod]
     public void ExtendedErrorEventArgs_SerializationDeserialization(bool withOptionalData)
     {
         ExtendedBuildErrorEventArgs arg = new(
@@ -80,9 +81,9 @@ public class ExtendedBuildEventArgs_Tests
     }
 
 
-    [InlineData(true)]
-    [InlineData(false)]
-    [Theory]
+    [DataRow(true)]
+    [DataRow(false)]
+    [MSBuildTestMethod]
     public void ExtendedWarningEventArgs_SerializationDeserialization(bool withOptionalData)
     {
         ExtendedBuildWarningEventArgs arg = new(
@@ -118,9 +119,9 @@ public class ExtendedBuildEventArgs_Tests
         argDeserialized.Should().BeEquivalentTo(arg);
     }
 
-    [InlineData(true)]
-    [InlineData(false)]
-    [Theory]
+    [DataRow(true)]
+    [DataRow(false)]
+    [MSBuildTestMethod]
     public void ExtendedMessageEventArgs_SerializationDeserialization(bool withOptionalData)
     {
         ExtendedBuildMessageEventArgs arg = new(
@@ -156,9 +157,9 @@ public class ExtendedBuildEventArgs_Tests
         argDeserialized.Should().BeEquivalentTo(arg);
     }
 
-    [InlineData(true)]
-    [InlineData(false)]
-    [Theory]
+    [DataRow(true)]
+    [DataRow(false)]
+    [MSBuildTestMethod]
     public void ExtendedCriticalMessageEventArgs_SerializationDeserialization(bool withOptionalData)
     {
         ExtendedCriticalBuildMessageEventArgs arg = new(
@@ -193,7 +194,7 @@ public class ExtendedBuildEventArgs_Tests
         argDeserialized.Should().BeEquivalentTo(arg);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ExtendedCustomBuildEventArgs_Ctors()
     {
         var ea = new ExtendedCustomBuildEventArgs();
@@ -207,7 +208,7 @@ public class ExtendedBuildEventArgs_Tests
         ea = new ExtendedCustomBuildEventArgs("type", null, null, null, default(DateTime), null);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ExtendedBuildErrorEventArgs_Ctors()
     {
         var ea = new ExtendedBuildErrorEventArgs();
@@ -220,7 +221,7 @@ public class ExtendedBuildEventArgs_Tests
         ea = new ExtendedBuildErrorEventArgs("type", null, null, null, 1, 2, 3, 4, null, null, null, null, DateTime.Now, null);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ExtendedBuildWarningEventArgs_Ctors()
     {
         var ea = new ExtendedBuildWarningEventArgs();
@@ -233,7 +234,7 @@ public class ExtendedBuildEventArgs_Tests
         ea = new ExtendedBuildWarningEventArgs("type", null, null, null, 1, 2, 3, 4, null, null, null, null, DateTime.Now, null);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ExtendedBuildMessageEventArgs_Ctors()
     {
         var ea = new ExtendedBuildMessageEventArgs();
@@ -253,7 +254,7 @@ public class ExtendedBuildEventArgs_Tests
         ea = new ExtendedBuildMessageEventArgs("type", null, null, null, 1, 2, 3, 4, null, null, null, default, DateTime.Now, null);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ExtendedCriticalBuildMessageEventArgs_Ctors()
     {
         var ea = new ExtendedCriticalBuildMessageEventArgs();

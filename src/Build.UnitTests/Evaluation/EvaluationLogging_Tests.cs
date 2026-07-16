@@ -9,7 +9,6 @@ using FluentAssertions;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -18,6 +17,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
     /// <summary>
     ///     Tests mainly for project evaluation logging
     /// </summary>
+    [TestClass]
     public class EvaluationLogging_Tests : IDisposable
     {
         /// <summary>
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AllEvaluationEventsShouldHaveAnEvaluationId()
         {
             AssertLoggingEvents(
@@ -120,7 +120,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GivenOneProjectThereShouldBeOneStartedAndOneEndedEvent()
         {
             AssertLoggingEvents(
@@ -134,7 +134,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectShouldHaveValidEvaluationIdDuringEvaluation()
         {
             AssertLoggingEvents(
@@ -155,7 +155,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TurnOnProfileEvaluationFromLogger()
         {
             AssertLoggingEvents(

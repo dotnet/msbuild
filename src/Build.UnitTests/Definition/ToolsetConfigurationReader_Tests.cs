@@ -7,7 +7,6 @@ using System.Configuration;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-using Xunit;
 using ToolsetConfigurationSection = Microsoft.Build.Evaluation.ToolsetConfigurationSection;
 
 #nullable disable
@@ -17,6 +16,7 @@ namespace Microsoft.Build.UnitTests.Definition
     /// <summary>
     /// Unit tests for ToolsetConfigurationReader class
     /// </summary>
+    [TestClass]
     public class ToolsetConfigurationReaderTests : IDisposable
     {
         private static string s_msbuildToolsets = "msbuildToolsets";
@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         ///  msbuildToolsets element is empty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildToolsetsTest_EmptyElement()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
@@ -45,17 +45,17 @@ namespace Microsoft.Build.UnitTests.Definition
             Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
             ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
 
-            Assert.Null(msbuildToolsetSection.MSBuildOverrideTasksPath);
-            Assert.NotNull(msbuildToolsetSection);
-            Assert.Null(msbuildToolsetSection.Default);
-            Assert.NotNull(msbuildToolsetSection.Toolsets);
-            Assert.Empty(msbuildToolsetSection.Toolsets);
+            Assert.IsNull(msbuildToolsetSection.MSBuildOverrideTasksPath);
+            Assert.IsNotNull(msbuildToolsetSection);
+            Assert.IsNull(msbuildToolsetSection.Default);
+            Assert.IsNotNull(msbuildToolsetSection.Toolsets);
+            Assert.IsEmpty(msbuildToolsetSection.Toolsets);
         }
 
         /// <summary>
         ///  tests if ToolsetConfigurationReaderTests is successfully initialized from the config file
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildToolsetsTest_Basic()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
@@ -74,24 +74,24 @@ namespace Microsoft.Build.UnitTests.Definition
             ConfigurationSection section = config.GetSection(s_msbuildToolsets);
             ToolsetConfigurationSection msbuildToolsetSection = section as ToolsetConfigurationSection;
 
-            Assert.Null(msbuildToolsetSection.MSBuildOverrideTasksPath);
-            Assert.Equal("2.0", msbuildToolsetSection.Default);
-            Assert.Single(msbuildToolsetSection.Toolsets);
+            Assert.IsNull(msbuildToolsetSection.MSBuildOverrideTasksPath);
+            Assert.AreEqual("2.0", msbuildToolsetSection.Default);
+            Assert.ContainsSingle(msbuildToolsetSection.Toolsets);
 
-            Assert.Equal("2.0", msbuildToolsetSection.Toolsets.GetElement(0).toolsVersion);
-            Assert.Single(msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements);
-            Assert.Equal(
+            Assert.AreEqual("2.0", msbuildToolsetSection.Toolsets.GetElement(0).toolsVersion);
+            Assert.ContainsSingle(msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements);
+            Assert.AreEqual(
               @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\",
               msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("MSBuildBinPath").Value);
 
-            Assert.Empty(msbuildToolsetSection.Toolsets.GetElement(0).AllProjectImportSearchPaths);
+            Assert.IsEmpty(msbuildToolsetSection.Toolsets.GetElement(0).AllProjectImportSearchPaths);
         }
 
         /// <summary>
         ///  Tests if ToolsetConfigurationReaderTests is successfully initialized from the config file when msbuildOVerrideTasksPath is set.
         ///  Also verify the msbuildOverrideTasksPath is properly read in.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildToolsetsTest_Basic2()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
@@ -110,14 +110,14 @@ namespace Microsoft.Build.UnitTests.Definition
             ConfigurationSection section = config.GetSection(s_msbuildToolsets);
             ToolsetConfigurationSection msbuildToolsetSection = section as ToolsetConfigurationSection;
 
-            Assert.Equal("c:\\foo", msbuildToolsetSection.MSBuildOverrideTasksPath);
+            Assert.AreEqual("c:\\foo", msbuildToolsetSection.MSBuildOverrideTasksPath);
         }
 
         /// <summary>
         ///  Tests if ToolsetConfigurationReaderTests is successfully initialized from the config file and that msbuildOVerrideTasksPath
         ///  is correctly read in when the value is empty.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildToolsetsTest_Basic3()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
@@ -136,13 +136,13 @@ namespace Microsoft.Build.UnitTests.Definition
             ConfigurationSection section = config.GetSection(s_msbuildToolsets);
             ToolsetConfigurationSection msbuildToolsetSection = section as ToolsetConfigurationSection;
 
-            Assert.Null(msbuildToolsetSection.MSBuildOverrideTasksPath);
+            Assert.IsNull(msbuildToolsetSection.MSBuildOverrideTasksPath);
         }
 
         /// <summary>
         ///  tests if ToolsetConfigurationReaderTests is successfully initialized from the config file
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildToolsetsTest_BasicWithOtherConfigEntries()
         {
             // NOTE: for some reason, <configSections> MUST be the first element under <configuration>
@@ -175,16 +175,16 @@ namespace Microsoft.Build.UnitTests.Definition
             Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
             ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
 
-            Assert.Equal("2.0", msbuildToolsetSection.Default);
-            Assert.Single(msbuildToolsetSection.Toolsets);
+            Assert.AreEqual("2.0", msbuildToolsetSection.Default);
+            Assert.ContainsSingle(msbuildToolsetSection.Toolsets);
 
-            Assert.Equal("2.0", msbuildToolsetSection.Toolsets.GetElement(0).toolsVersion);
-            Assert.Single(msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements);
-            Assert.Equal(
+            Assert.AreEqual("2.0", msbuildToolsetSection.Toolsets.GetElement(0).toolsVersion);
+            Assert.ContainsSingle(msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements);
+            Assert.AreEqual(
               @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\",
               msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("MSBuildBinPath").Value);
 
-            Assert.Empty(msbuildToolsetSection.Toolsets.GetElement(0).AllProjectImportSearchPaths);
+            Assert.IsEmpty(msbuildToolsetSection.Toolsets.GetElement(0).AllProjectImportSearchPaths);
         }
         #endregion
 
@@ -195,10 +195,10 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// name attribute is missing from toolset element
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolsVersionTest_NameNotSpecified()
         {
-            Assert.Throws<ConfigurationErrorsException>(() =>
+            Assert.ThrowsExactly<ConfigurationErrorsException>(() =>
             {
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
                  <configuration>
@@ -223,10 +223,10 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         ///  More than 1 toolset element with the same name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolsVersionTest_MultipleElementsWithSameName()
         {
-            Assert.Throws<ConfigurationErrorsException>(() =>
+            Assert.ThrowsExactly<ConfigurationErrorsException>(() =>
             {
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
                  <configuration>
@@ -251,10 +251,10 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// empty toolset element
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolsVersionTest_EmptyElement()
         {
-            Assert.Throws<ConfigurationErrorsException>(() =>
+            Assert.ThrowsExactly<ConfigurationErrorsException>(() =>
             {
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
                  <configuration>
@@ -281,7 +281,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// only 1 toolset is specified
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolsVersionTest_SingleElement()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
@@ -300,11 +300,11 @@ namespace Microsoft.Build.UnitTests.Definition
 
             ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
 
-            Assert.Equal("4.0", msbuildToolsetSection.Default);
-            Assert.Single(msbuildToolsetSection.Toolsets);
-            Assert.Equal("4.0", msbuildToolsetSection.Toolsets.GetElement(0).toolsVersion);
-            Assert.Single(msbuildToolsetSection.Toolsets.GetElement("4.0").PropertyElements);
-            Assert.Equal(
+            Assert.AreEqual("4.0", msbuildToolsetSection.Default);
+            Assert.ContainsSingle(msbuildToolsetSection.Toolsets);
+            Assert.AreEqual("4.0", msbuildToolsetSection.Toolsets.GetElement(0).toolsVersion);
+            Assert.ContainsSingle(msbuildToolsetSection.Toolsets.GetElement("4.0").PropertyElements);
+            Assert.AreEqual(
               @"D:\windows\Microsoft.NET\Framework\v3.5.x86ret\",
               msbuildToolsetSection.Toolsets.GetElement("4.0").PropertyElements.GetElement("MSBuildBinPath").Value);
         }
@@ -318,10 +318,10 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         ///  name attribute is missing
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyTest_NameNotSpecified()
         {
-            Assert.Throws<ConfigurationErrorsException>(() =>
+            Assert.ThrowsExactly<ConfigurationErrorsException>(() =>
             {
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
                  <configuration>
@@ -343,10 +343,10 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// value attribute is missing
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyTest_ValueNotSpecified()
         {
-            Assert.Throws<ConfigurationErrorsException>(() =>
+            Assert.ThrowsExactly<ConfigurationErrorsException>(() =>
             {
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
                  <configuration>
@@ -368,10 +368,10 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// more than 1 property element with the same name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyTest_MultipleElementsWithSameName()
         {
-            Assert.Throws<ConfigurationErrorsException>(() =>
+            Assert.ThrowsExactly<ConfigurationErrorsException>(() =>
             {
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
                  <configuration>
@@ -394,10 +394,10 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         ///  property element is an empty element
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyTest_EmptyElement()
         {
-            Assert.Throws<ConfigurationErrorsException>(() =>
+            Assert.ThrowsExactly<ConfigurationErrorsException>(() =>
             {
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
                  <configuration>
@@ -424,7 +424,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// more than 1 property element specified
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyTest_MultipleElement()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
@@ -444,14 +444,14 @@ namespace Microsoft.Build.UnitTests.Definition
 
             ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
 
-            Assert.Equal("2.0", msbuildToolsetSection.Default);
-            Assert.Single(msbuildToolsetSection.Toolsets);
-            Assert.Equal(2, msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.Count);
+            Assert.AreEqual("2.0", msbuildToolsetSection.Default);
+            Assert.ContainsSingle(msbuildToolsetSection.Toolsets);
+            Assert.AreEqual(2, msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.Count);
 
-            Assert.Equal(
+            Assert.AreEqual(
               @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\",
               msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("MSBuildBinPath").Value);
-            Assert.Equal(
+            Assert.AreEqual(
               @"SomeOtherPropertyValue",
               msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("SomeOtherPropertyName").Value);
         }
@@ -459,7 +459,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// tests GetElement(string name) function in propertycollection class
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyTest_GetValueByName()
         {
             ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
@@ -480,12 +480,12 @@ namespace Microsoft.Build.UnitTests.Definition
             ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
 
             // Verifications
-            Assert.Equal("2.0", msbuildToolsetSection.Default);
-            Assert.Single(msbuildToolsetSection.Toolsets);
-            Assert.Equal(2, msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.Count);
-            Assert.Equal(@"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\",
+            Assert.AreEqual("2.0", msbuildToolsetSection.Default);
+            Assert.ContainsSingle(msbuildToolsetSection.Toolsets);
+            Assert.AreEqual(2, msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.Count);
+            Assert.AreEqual(@"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\",
                                    msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("MSBuildBinPath").Value);
-            Assert.Equal(@"SomeOtherPropertyValue",
+            Assert.AreEqual(@"SomeOtherPropertyValue",
                                    msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("SomeOtherPropertyName").Value);
         }
 
@@ -496,7 +496,7 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         ///  Tests multiple extensions paths from the config file, specified for multiple OSes
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtensionPathsTest_Basic1()
         {
             // NOTE: for some reason, <configSections> MUST be the first element under <configuration>
@@ -531,30 +531,30 @@ namespace Microsoft.Build.UnitTests.Definition
             Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
             ToolsetConfigurationSection msbuildToolsetSection = config.GetSection(s_msbuildToolsets) as ToolsetConfigurationSection;
 
-            Assert.Equal("2.0", msbuildToolsetSection.Default);
-            Assert.Single(msbuildToolsetSection.Toolsets);
+            Assert.AreEqual("2.0", msbuildToolsetSection.Default);
+            Assert.ContainsSingle(msbuildToolsetSection.Toolsets);
 
-            Assert.Equal("2.0", msbuildToolsetSection.Toolsets.GetElement(0).toolsVersion);
-            Assert.Equal(2, msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.Count);
-            Assert.Equal(
+            Assert.AreEqual("2.0", msbuildToolsetSection.Toolsets.GetElement(0).toolsVersion);
+            Assert.AreEqual(2, msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.Count);
+            Assert.AreEqual(
               @"D:\windows\Microsoft.NET\Framework\v2.0.x86ret\",
               msbuildToolsetSection.Toolsets.GetElement("2.0").PropertyElements.GetElement("MSBuildBinPath").Value);
 
-            Assert.Equal(3, msbuildToolsetSection.Toolsets.GetElement(0).AllProjectImportSearchPaths.Count);
+            Assert.AreEqual(3, msbuildToolsetSection.Toolsets.GetElement(0).AllProjectImportSearchPaths.Count);
             var allPaths = msbuildToolsetSection.Toolsets.GetElement(0).AllProjectImportSearchPaths;
-            Assert.Equal("windows", allPaths.GetElement(0).OS);
-            Assert.Equal(2, allPaths.GetElement(0).PropertyElements.Count);
-            Assert.Equal(@"c:\foo", allPaths.GetElement(0).PropertyElements.GetElement("MSBuildExtensionsPath").Value);
-            Assert.Equal(@"c:\foo64;c:\bar64", allPaths.GetElement(0).PropertyElements.GetElement("MSBuildExtensionsPath64").Value);
+            Assert.AreEqual("windows", allPaths.GetElement(0).OS);
+            Assert.AreEqual(2, allPaths.GetElement(0).PropertyElements.Count);
+            Assert.AreEqual(@"c:\foo", allPaths.GetElement(0).PropertyElements.GetElement("MSBuildExtensionsPath").Value);
+            Assert.AreEqual(@"c:\foo64;c:\bar64", allPaths.GetElement(0).PropertyElements.GetElement("MSBuildExtensionsPath64").Value);
 
-            Assert.Equal("osx", allPaths.GetElement(1).OS);
-            Assert.Equal(2, allPaths.GetElement(1).PropertyElements.Count);
-            Assert.Equal(@"/tmp/foo", allPaths.GetElement(1).PropertyElements.GetElement("MSBuildExtensionsPath").Value);
-            Assert.Equal(@"/tmp/foo32;/tmp/bar32", allPaths.GetElement(1).PropertyElements.GetElement("MSBuildExtensionsPath32").Value);
+            Assert.AreEqual("osx", allPaths.GetElement(1).OS);
+            Assert.AreEqual(2, allPaths.GetElement(1).PropertyElements.Count);
+            Assert.AreEqual(@"/tmp/foo", allPaths.GetElement(1).PropertyElements.GetElement("MSBuildExtensionsPath").Value);
+            Assert.AreEqual(@"/tmp/foo32;/tmp/bar32", allPaths.GetElement(1).PropertyElements.GetElement("MSBuildExtensionsPath32").Value);
 
-            Assert.Equal("unix", allPaths.GetElement(2).OS);
-            Assert.Single(allPaths.GetElement(2).PropertyElements);
-            Assert.Equal(@"/tmp/bar", allPaths.GetElement(2).PropertyElements.GetElement("MSBuildExtensionsPath").Value);
+            Assert.AreEqual("unix", allPaths.GetElement(2).OS);
+            Assert.ContainsSingle(allPaths.GetElement(2).PropertyElements);
+            Assert.AreEqual(@"/tmp/bar", allPaths.GetElement(2).PropertyElements.GetElement("MSBuildExtensionsPath").Value);
 
             var reader = GetStandardConfigurationReader();
             Dictionary<string, Toolset> toolsets = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
@@ -581,23 +581,23 @@ namespace Microsoft.Build.UnitTests.Definition
 
         private void CheckPathsTable(Dictionary<string, ProjectImportPathMatch> pathsTable, string kind, string[] expectedPaths)
         {
-            Assert.True(pathsTable.ContainsKey(kind));
+            Assert.IsTrue(pathsTable.ContainsKey(kind));
             var paths = pathsTable[kind];
-            Assert.Equal(paths.SearchPaths.Count, expectedPaths.Length);
+            Assert.AreEqual(paths.SearchPaths.Count, expectedPaths.Length);
 
             for (int i = 0; i < paths.SearchPaths.Count; i++)
             {
-                Assert.Equal(paths.SearchPaths[i], expectedPaths[i]);
+                Assert.AreEqual(paths.SearchPaths[i], expectedPaths[i]);
             }
         }
 
         /// <summary>
         /// more than 1 searchPaths elements with the same OS
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtensionsPathsTest_MultipleElementsWithSameOS()
         {
-            Assert.Throws<ConfigurationErrorsException>(() =>
+            Assert.ThrowsExactly<ConfigurationErrorsException>(() =>
             {
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
                  <configuration>
@@ -629,10 +629,10 @@ namespace Microsoft.Build.UnitTests.Definition
         /// <summary>
         /// more than value is element found for a the same extensions path property name+os
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtensionsPathsTest_MultipleElementsWithSamePropertyNameForSameOS()
         {
-            Assert.Throws<ConfigurationErrorsException>(() =>
+            Assert.ThrowsExactly<ConfigurationErrorsException>(() =>
             {
                 ToolsetConfigurationReaderTestHelper.WriteConfigFile(ObjectModelHelpers.CleanupFileContents(@"
                  <configuration>

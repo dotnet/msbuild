@@ -4,22 +4,22 @@
 using System.IO;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class PerfLogTests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public PerfLogTests(ITestOutputHelper output)
+        public PerfLogTests(TestContext output)
         {
             _output = output;
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestPerfLogEnabledProducedLogFile()
         {
             using (TestEnvironment testEnv = TestEnvironment.Create(_output))
@@ -54,7 +54,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestPerfLogDirectoryGetsCreated()
         {
             using (TestEnvironment testEnv = TestEnvironment.Create(_output))

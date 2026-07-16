@@ -13,7 +13,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
 
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -23,15 +22,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     /// Tests for the TaskHostFactory functionality, which manages task host processes
     /// for executing MSBuild tasks in separate processes.
     /// </summary>
+    [TestClass]
     public sealed class TaskHostFactory_Tests
     {
         private static string AssemblyLocation { get; } =
             typeof(TaskHostFactory_Tests).Assembly.Location
             ?? Path.Combine(AppContext.BaseDirectory, "Microsoft.Build.Engine.UnitTests.dll");
 
-        private ITestOutputHelper _output;
+        private TestContext _output;
 
-        public TaskHostFactory_Tests(ITestOutputHelper testOutputHelper)
+        public TaskHostFactory_Tests(TestContext testOutputHelper)
         {
             _output = testOutputHelper;
         }
@@ -43,10 +43,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// </summary>
         /// <param name="taskHostFactorySpecified">Whether to use TaskHostFactory (transient) or AssemblyTaskFactory (sidecar)</param>
         /// <param name="envVariableSpecified">Whether to set MSBUILDFORCEALLTASKSOUTOFPROC environment variable</param>
-        [Theory]
-        [InlineData(true, false)]
-        // [InlineData(false, true)] - the process can not be spawned on CI sometimes. A new approach is needed.
-        [InlineData(true, true)]
+        [MSBuildTestMethod]
+        [DataRow(true, false)]
+        // [DataRow(false, true)] - the process can not be spawned on CI sometimes. A new approach is needed.
+        [DataRow(true, true)]
         public void TaskNodesDieAfterBuild(bool taskHostFactorySpecified, bool envVariableSpecified)
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -195,7 +195,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Verifies that transient (TaskHostFactory) and sidecar (AssemblyTaskFactory) task hosts
         /// can coexist in the same build and operate independently.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TransientAndSidecarNodeCanCoexist()
         {
             using (TestEnvironment env = TestEnvironment.Create(_output))
@@ -267,7 +267,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// apply; the dedicated coverage for apply correctness is the serialization and -mt change-propagation
         /// tests.)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostObservesEnvironmentAcrossConsecutiveTasks()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -327,7 +327,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// marked "identical", so the task host reconstructs a stale environment. This verifies that when one
         /// task-host task changes an environment variable, a subsequent task-host task observes the new value.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostObservesEnvironmentChangedByPreviousTaskInMultiThreadedMode()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -402,7 +402,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// marker (reconstructed from the updated baseline). If the mutated environment had instead been marked
         /// "identical", the readers would reconstruct a stale environment and observe an empty value.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostSendsFullEnvironmentWhenTaskMutatesItAndLaterTasksObserveChange()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -482,7 +482,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// The load-bearing assertion is that all invocations run in the SAME reused task host process (so the dedup
         /// path was actually exercised) yet each still reads the correct values.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskHostObservesGlobalPropertyAcrossConsecutiveTasks()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -550,7 +550,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// a task host process, ensuring proper serialization/deserialization of all supported types.
         /// Tests include primitive types, arrays, strings, dates, enums, and custom structures.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VariousParameterTypesCanBeTransmittedToAndReceivedFromTaskHost()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -701,7 +701,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// when executed via TaskHostFactory. This is a regression test for
         /// https://github.com/dotnet/msbuild/issues/13174
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void StringArrayWithNullsDoesNotCrashTaskHost()
         {
             using TestEnvironment env = TestEnvironment.Create();

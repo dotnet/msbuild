@@ -1,22 +1,22 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Shouldly;
-using Xunit;
 using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 
 #nullable disable
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
+    [TestClass]
     public class SdkResultItemComparison_Tests
     {
         /// <summary>
         /// Regression test for https://github.com/dotnet/msbuild/issues/13490
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResult_NotEqual_DifferentItemsCount()
         {
             var sdkRef = new SdkReference("SdkName", "1.0.0", "1.0.0");
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             result2.ShouldNotBe(result1);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResultItem_Equal_WithDefaultCtor()
         {
             var sdkResultItem1 = new SdkResultItem();
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             sdkResultItem1.ShouldBe(sdkResultItem2);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResultItem_Equal_CtorParam_MetadataNull()
         {
             var sdkResultItem1 = new SdkResultItem("anyspec", new Dictionary<string, string>());
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             sdkResultItem1.ShouldNotBe(sdkResultItem2);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResultItem_GetHashCode_Compare_MetadataIgnoreKeyOrder()
         {
             var sdkResultItem1 = new SdkResultItem();

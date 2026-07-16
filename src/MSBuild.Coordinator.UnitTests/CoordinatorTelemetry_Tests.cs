@@ -11,15 +11,15 @@ using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
-public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
+[TestClass]
+public class CoordinatorTelemetry_Tests(TestContext outputHelper)
 {
     private readonly TestCoordinatorDebugOutput _output = new(outputHelper);
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RecordGrantIssued_EmitsActivityWithExpectedTags()
     {
         using TestEnvironment env = TestEnvironment.Create(outputHelper);
@@ -59,7 +59,7 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         activity.GetTagItem("VS.MSBuild.AllocatedNodes").ShouldBe(12);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RecordGrantIssued_NestedGrant_EmitsNestedTag()
     {
         using TestEnvironment env = TestEnvironment.Create(outputHelper);
@@ -95,7 +95,7 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         activity.GetTagItem("VS.MSBuild.IsNested").ShouldBe(true);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RecordGrantDeferred_EmitsActivityWithExpectedTags()
     {
         using TestEnvironment env = TestEnvironment.Create(outputHelper);
@@ -130,7 +130,7 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         activity.GetTagItem("VS.MSBuild.QueueDepth").ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RecordGrantReleased_EmitsActivityWithExpectedTags()
     {
         using TestEnvironment env = TestEnvironment.Create(outputHelper);
@@ -169,7 +169,7 @@ public class CoordinatorTelemetry_Tests(ITestOutputHelper outputHelper)
         activity.GetTagItem("VS.MSBuild.AllocatedNodes").ShouldBe(8);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task NestedGrant_ServerPath_EmitsGrantAndReleaseTelemetry()
     {
         using TestEnvironment env = TestEnvironment.Create(outputHelper);

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -7,16 +7,16 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Engine.UnitTests
 {
+    [TestClass]
     public sealed class ChangeWaves_Tests
     {
-        private ITestOutputHelper _output;
-        public ChangeWaves_Tests(ITestOutputHelper output)
+        private TestContext _output;
+        public ChangeWaves_Tests(TestContext output)
         {
             _output = output;
         }
@@ -74,7 +74,7 @@ namespace Microsoft.Build.Engine.UnitTests
             ChangeWaves.ResetStateForTests();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EnableAllFeaturesBehindChangeWavesEnablesAllFeaturesBehindChangeWaves()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -91,11 +91,11 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Theory]
-        [InlineData("16.8")]
-        [InlineData("16.10")]
-        [InlineData("17.0")]
-        [InlineData("27.3")]
+        [MSBuildTestMethod]
+        [DataRow("16.8")]
+        [DataRow("16.10")]
+        [DataRow("17.0")]
+        [DataRow("27.3")]
         public void NoChangeWaveSetMeansAllChangeWavesAreEnabled(string featureVersion)
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -112,11 +112,11 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Theory]
-        [InlineData("test")]
-        [InlineData("16_8")]
-        [InlineData("16x8")]
-        [InlineData("garbage")]
+        [MSBuildTestMethod]
+        [DataRow("test")]
+        [DataRow("16_8")]
+        [DataRow("16x8")]
+        [DataRow("garbage")]
         public void InvalidFormatThrowsWarningAndLeavesFeaturesEnabled(string disableFeaturesFromVersion)
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -130,10 +130,10 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Theory]
-        [InlineData("0.8")]
-        [InlineData("4.5")]
-        [InlineData("10.0")]
+        [MSBuildTestMethod]
+        [DataRow("0.8")]
+        [DataRow("4.5")]
+        [DataRow("10.0")]
         public void VersionTooLowClampsToLowestVersionInRotation(string disableFeaturesFromVersion)
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -151,9 +151,9 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Theory]
-        [InlineData("100.10")]
-        [InlineData("203.45")]
+        [MSBuildTestMethod]
+        [DataRow("100.10")]
+        [DataRow("203.45")]
         public void VersionTooHighClampsToHighestVersionInRotation(string disableFeaturesFromVersion)
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -177,7 +177,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VersionSetToValidValueButInvalidVersionSetsNextVersion()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -191,7 +191,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CorrectlyDetermineEnabledFeatures()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -214,7 +214,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CorrectlyDetermineDisabledFeatures()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -231,7 +231,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NodeConnectionBufferSizeIsLargeWhenWaveEnabled()
         {
             // NOTE: these tests cover the value produced by Traits.NodeConnectionBufferSize only.
@@ -252,7 +252,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NodeConnectionBufferSizeStaysLegacyWhenWaveDisabled()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -266,7 +266,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NodeConnectionBufferSizeRespectsEnvironmentOverride()
         {
             using (TestEnvironment env = TestEnvironment.Create())

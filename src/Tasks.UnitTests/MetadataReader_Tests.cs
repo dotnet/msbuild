@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -26,11 +25,12 @@ namespace Microsoft.Build.Tasks.UnitTests
     ///  <c>IMetaDataAssemblyImport</c>) on .NET Framework. Both must expose the same public
     ///  contract; the tests run on both target frameworks via the project's TFM multitarget.
     /// </remarks>
+    [TestClass]
     public sealed class MetadataReader_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public MetadataReader_Tests(ITestOutputHelper output)
+        public MetadataReader_Tests(TestContext output)
         {
             _output = output;
         }
@@ -41,7 +41,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>Compile-time assembly identity for this test assembly, used as the baseline for property comparisons.</summary>
         private static AssemblyName ThisAssemblyName => typeof(MetadataReader_Tests).Assembly.GetName();
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Create_ValidAssembly_ReturnsReaderWithExpectedIdentity()
         {
             using MetadataReader reader = MetadataReader.Create(ThisAssemblyPath);
@@ -55,7 +55,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             reader.ProcessorArchitecture.ShouldNotBe("unknown");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Create_NonExistentPath_ReturnsNull()
         {
             // The path must not exist. Use a clearly bogus directory so we get the file-not-found
@@ -66,7 +66,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             reader.ShouldBeNull();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Create_NotAnAssembly_ReturnsNull()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             reader.ShouldBeNull();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void HasAssemblyAttribute_TargetFrameworkAttribute_ReturnsTrue()
         {
             // Modern SDK-built assemblies always carry [TargetFrameworkAttribute(...)] on the assembly.
@@ -86,7 +86,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             reader.HasAssemblyAttribute("System.Runtime.Versioning.TargetFrameworkAttribute").ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void HasAssemblyAttribute_UnknownAttribute_ReturnsFalse()
         {
             using MetadataReader reader = MetadataReader.Create(ThisAssemblyPath);
@@ -95,7 +95,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             reader.HasAssemblyAttribute("ThisAttribute.Definitely.DoesNotExist.OnAnyAssembly.Ever").ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void HasAssemblyAttribute_CaseSensitiveFullName()
         {
             // The lookup uses the full type name and is case-sensitive — verify the mismatch path.
@@ -105,7 +105,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             reader.HasAssemblyAttribute("system.runtime.versioning.targetframeworkattribute").ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Properties_AreCachedAndIdempotent()
         {
             // Properties are populated lazily under a lock; second access must return the same value
@@ -120,7 +120,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             reader.Version.ShouldBe(versionFirst);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Dispose_IsIdempotent()
         {
             // Calling Close()/Dispose() any number of times must be a no-op after the first.
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             Should.NotThrow(reader.Close);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void HasAssemblyAttribute_AfterCachingProperties_StillWorks()
         {
             // The two lookup paths (custom-attribute cache on .NETCORE / IMetaData* on netfx) and the
@@ -175,7 +175,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             string accessibilityPath = TryGetFramework4AccessibilityDllPath();
             if (accessibilityPath is null)
             {
-                Assert.Skip(".NET Framework 4 Accessibility.dll not present on this machine.");
+                Assert.Inconclusive(".NET Framework 4 Accessibility.dll not present on this machine.");
             }
 
             using MetadataReader reader = MetadataReader.Create(accessibilityPath);
@@ -201,7 +201,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             string accessibilityPath = TryGetFramework4AccessibilityDllPath();
             if (accessibilityPath is null)
             {
-                Assert.Skip(".NET Framework 4 Accessibility.dll not present on this machine.");
+                Assert.Inconclusive(".NET Framework 4 Accessibility.dll not present on this machine.");
             }
 
             using MetadataReader r1 = MetadataReader.Create(accessibilityPath);
@@ -219,7 +219,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             r2.Version.ShouldBe(ThisAssemblyName.Version.ToString());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConcurrentPropertyAccess_OnSameInstance_IsThreadSafe()
         {
             // The Name/Version/Culture/PKT/ProcessorArchitecture properties and the custom-attribute
@@ -265,7 +265,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             Task.WaitAll(tasks);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void HasAssemblyAttributes_Batch_AgreesWithSingular()
         {
             // The batch overload was added to share a single GIT acquisition + GetAssemblyFromScope

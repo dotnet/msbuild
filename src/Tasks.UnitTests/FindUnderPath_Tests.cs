@@ -8,7 +8,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 
 
@@ -16,9 +15,10 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class FindUnderPath_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicFilter()
         {
             FindUnderPath t = new FindUnderPath();
@@ -30,11 +30,11 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.True(success);
-            Assert.Single(t.InPath);
-            Assert.Single(t.OutOfPath);
-            Assert.Equal(FileUtilities.FixFilePath(@"C:\MyProject\File1.txt"), t.InPath[0].ItemSpec);
-            Assert.Equal(FileUtilities.FixFilePath(@"C:\SomeoneElsesProject\File2.txt"), t.OutOfPath[0].ItemSpec);
+            Assert.IsTrue(success);
+            Assert.ContainsSingle(t.InPath);
+            Assert.ContainsSingle(t.OutOfPath);
+            Assert.AreEqual(FileUtilities.FixFilePath(@"C:\MyProject\File1.txt"), t.InPath[0].ItemSpec);
+            Assert.AreEqual(FileUtilities.FixFilePath(@"C:\SomeoneElsesProject\File2.txt"), t.OutOfPath[0].ItemSpec);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.False(success);
+            Assert.IsFalse(success);
 
             ChangeWaves.ResetStateForTests();
 
@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests
 
             bool success = t.Execute();
 
-            Assert.False(success);
+            Assert.IsFalse(success);
 
             ChangeWaves.ResetStateForTests();
 
@@ -118,9 +118,9 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void VerifyFullPath()
         {
             FindUnderPath t = new FindUnderPath();
@@ -133,17 +133,17 @@ namespace Microsoft.Build.UnitTests
             bool success;
             RunTask(t, out testFile, out success);
 
-            Assert.True(success);
-            Assert.Single(t.InPath);
-            Assert.Single(t.OutOfPath);
-            Assert.Equal(testFile.FullName, t.InPath[0].ItemSpec);
-            Assert.Equal(NativeMethodsShared.IsWindows ? @"C:\SomeoneElsesProject\File2.txt" : "/SomeoneElsesProject/File2.txt",
+            Assert.IsTrue(success);
+            Assert.ContainsSingle(t.InPath);
+            Assert.ContainsSingle(t.OutOfPath);
+            Assert.AreEqual(testFile.FullName, t.InPath[0].ItemSpec);
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"C:\SomeoneElsesProject\File2.txt" : "/SomeoneElsesProject/File2.txt",
                 t.OutOfPath[0].ItemSpec);
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void VerifyFullPathNegative()
         {
             FindUnderPath t = new FindUnderPath();
@@ -156,11 +156,11 @@ namespace Microsoft.Build.UnitTests
             bool success;
             RunTask(t, out testFile, out success);
 
-            Assert.True(success);
-            Assert.Single(t.InPath);
-            Assert.Single(t.OutOfPath);
-            Assert.Equal(testFile.Name, t.InPath[0].ItemSpec);
-            Assert.Equal(NativeMethodsShared.IsWindows ? @"C:\SomeoneElsesProject\File2.txt" : "/SomeoneElsesProject/File2.txt",
+            Assert.IsTrue(success);
+            Assert.ContainsSingle(t.InPath);
+            Assert.ContainsSingle(t.OutOfPath);
+            Assert.AreEqual(testFile.Name, t.InPath[0].ItemSpec);
+            Assert.AreEqual(NativeMethodsShared.IsWindows ? @"C:\SomeoneElsesProject\File2.txt" : "/SomeoneElsesProject/File2.txt",
                 t.OutOfPath[0].ItemSpec);
         }
     }

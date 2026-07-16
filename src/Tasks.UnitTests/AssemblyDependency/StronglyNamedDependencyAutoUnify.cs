@@ -8,15 +8,15 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.AutoUnify
 {
+    [TestClass]
     public sealed class StronglyNamedDependencyAutoUnify : ResolveAssemblyReferenceTestFixture
     {
-        public StronglyNamedDependencyAutoUnify(ITestOutputHelper output) : base(output)
+        public StronglyNamedDependencyAutoUnify(TestContext output) : base(output)
         {
         }
 
@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Return the default search paths.
         /// </summary>
         /// <value></value>
-        internal new string[] DefaultPaths
+        internal string[] TestSpecificDefaultPaths
         {
             get { return new string[] { s_myApp_V05Path, s_myApp_V10Path, s_myApp_V20Path, s_myApp_V30Path, s_myComponentsV05Path, s_myComponentsV10Path, s_myComponentsV20Path, s_myComponentsV30Path }; }
         }
@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// dependency seen.
         /// </summary>
         /// <param name="rarSimulationMode"></param>
-        [Fact]
+        [MSBuildTestMethod]
         public void Exists()
         {
             ExistsImpl();
@@ -72,14 +72,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AutoUnify = true;
 
             bool succeeded = Execute(t, rarSimulationMode);
 
             if (rarSimulationMode.HasFlag(RARSimulationMode.LoadAndBuildProject))
             {
-                Assert.True(succeeded);
+                Assert.IsTrue(succeeded);
                 t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
                 t.ResolvedDependencyFiles[0].ItemSpec.ShouldBe(s_unifyMeDll_V20Path, StringCompareShould.IgnoreCase);
 
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly
         /// dependency seen. However if the higher assembly is a dependency of an assembly in the deny list it should not be considered during unification.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExistsWithPrimaryReferenceOnDenyList()
         {
             string implicitRedistListContents =
@@ -143,15 +143,15 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 t.InstalledAssemblySubsetTables = new TaskItem[] { new TaskItem(subsetListPath) };
                 t.BuildEngine = engine;
                 t.Assemblies = assemblyNames;
-                t.SearchPaths = DefaultPaths;
+                t.SearchPaths = TestSpecificDefaultPaths;
                 t.AutoUnify = true;
 
                 bool succeeded = Execute(t);
 
-                Assert.True(succeeded);
-                Assert.Single(t.ResolvedFiles); // "Expected there to only be one resolved file"
+                Assert.IsTrue(succeeded);
+                Assert.ContainsSingle(t.ResolvedFiles); // "Expected there to only be one resolved file"
                 Assert.Contains(Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"), t.ResolvedFiles[0].ItemSpec); // "Expected the ItemSpec of the resolved file to be the item spec of the 1.0.0.0 assembly");
-                Assert.Single(t.ResolvedDependencyFiles); // "Expected there to be two resolved dependencies"
+                Assert.ContainsSingle(t.ResolvedDependencyFiles); // "Expected there to be two resolved dependencies"
                 t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
                 t.ResolvedDependencyFiles[0].ItemSpec.ShouldBe(s_unifyMeDll_V10Path, StringCompareShould.IgnoreCase);
 
@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// When AutoUnify is true, we need to resolve to the highest version of each particular assembly
         /// dependency seen. However if the higher assembly is a dependency of an assembly in the deny list it should not be considered during unification.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExistsPromotedDependencyInTheDenyList()
         {
             string implicitRedistListContents =
@@ -229,13 +229,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
                 t.BuildEngine = engine;
                 t.Assemblies = assemblyNames;
-                t.SearchPaths = DefaultPaths;
+                t.SearchPaths = TestSpecificDefaultPaths;
                 t.AppConfigFile = appConfigFile;
 
                 bool succeeded = Execute(t, false);
 
-                Assert.True(succeeded);
-                Assert.Empty(t.ResolvedDependencyFiles);
+                Assert.IsTrue(succeeded);
+                Assert.IsEmpty(t.ResolvedDependencyFiles);
                 engine.AssertLogDoesntContain(
                         String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll")));
             }
@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// There should be a warning indicating the primary reference DependsOnUnified 1.0.0.0 has a dependency that in the deny list
         /// There should be a warning indicating the primary reference DependsOnUnified 2.0.0.0 has a dependency that in the deny list
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExistsWithBothDependentReferenceOnDenyList()
         {
             string implicitRedistListContents =
@@ -300,16 +300,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
                 t.InstalledAssemblySubsetTables = new TaskItem[] { new TaskItem(subsetListPath) };
                 t.BuildEngine = engine;
                 t.Assemblies = assemblyNames;
-                t.SearchPaths = DefaultPaths;
+                t.SearchPaths = TestSpecificDefaultPaths;
                 t.AutoUnify = true;
 
                 bool succeeded = Execute(t, false);
 
-                Assert.True(succeeded);
-                Assert.Empty(t.ResolvedFiles); // "Expected there to be no resolved files"
+                Assert.IsTrue(succeeded);
+                Assert.IsEmpty(t.ResolvedFiles); // "Expected there to be no resolved files"
 
-                Assert.False(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))); // "Expected the ItemSpec of the resolved file to not be the item spec of the 1.0.0.0 assembly");
-                Assert.False(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"))); // "Expected the ItemSpec of the resolved file to not be the item spec of the 2.0.0.0 assembly"
+                Assert.IsFalse(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))); // "Expected the ItemSpec of the resolved file to not be the item spec of the 1.0.0.0 assembly");
+                Assert.IsFalse(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"))); // "Expected the ItemSpec of the resolved file to not be the item spec of the 2.0.0.0 assembly"
 
                 string stringList = ResolveAssemblyReference.GenerateSubSetName(null, new ITaskItem[] { new TaskItem(subsetListPath) });
                 engine.AssertLogContains(t.Log.FormatResourceString("ResolveAssemblyReference.FailBecauseDependentAssemblyInExclusionList", assemblyNames[0].ItemSpec, "UniFYme, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", stringList));
@@ -339,7 +339,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// AutoUnify works even when unifying multiple prior versions.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleUnifiedFromNamesMiddlePrimaryOnDenyList()
         {
             string implicitRedistListContents =
@@ -374,16 +374,16 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.TargetFrameworkDirectories = new string[] { @"c:\myfx" };
             t.AutoUnify = true;
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Equal(2, t.ResolvedFiles.Length); // "Expected to find two resolved assemblies"
-            Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))); // "Expected the ItemSpec of the resolved file to be the item spec of the 1.0.0.0 assembly");
-            Assert.True(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"))); // "Expected the ItemSpec of the resolved file to be the item spec of the 2.0.0.0 assembly");
+            Assert.IsTrue(succeeded);
+            Assert.AreEqual(2, t.ResolvedFiles.Length); // "Expected to find two resolved assemblies"
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"))); // "Expected the ItemSpec of the resolved file to be the item spec of the 1.0.0.0 assembly");
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"))); // "Expected the ItemSpec of the resolved file to be the item spec of the 2.0.0.0 assembly");
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
             t.ResolvedDependencyFiles[0].ItemSpec.ShouldBe(s_unifyMeDll_V20Path, StringCompareShould.IgnoreCase);
 
@@ -413,7 +413,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// AutoUnify works even when unifying multiple prior versions.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleUnifiedFromNames()
         {
             // Create the engine.
@@ -431,13 +431,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.TargetFrameworkDirectories = new string[] { @"c:\myfx" };
             t.AutoUnify = true;
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
+            Assert.IsTrue(succeeded);
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=3.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
             t.ResolvedDependencyFiles[0].ItemSpec.ShouldBe(s_unifyMeDll_V30Path, StringCompareShould.IgnoreCase);
 
@@ -465,7 +465,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// AutoUnify works even when unifying prior versions that don't exist on disk.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LowVersionDoesntExist()
         {
             // Create the engine.
@@ -483,13 +483,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
             t.AutoUnify = true;
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedDependencyFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedDependencyFiles);
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", StringCompareShould.IgnoreCase);
             engine.AssertLogContains(
                     String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAutoUnify"), "0.5.0.0", Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll")));

@@ -6,16 +6,17 @@ using System.Collections;
 using System.Collections.Generic;
 using Microsoft.Build.Internal;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests;
+
+[TestClass]
 
 public class CommunicationUtilitiesTests
 {
     /// <summary>
     /// Verify our custom way of getting env vars gives the same results as the BCL.
     /// </summary>
-    [Fact]
+    [MSBuildTestMethod]
     public void GetEnvVars()
     {
         IDictionary<string, string> envVars = CommunicationsUtilities.GetEnvironmentVariables();
@@ -33,7 +34,7 @@ public class CommunicationUtilitiesTests
     /// <summary>
     /// Verify that we correctly restore environment variables.
     /// </summary>
-    [Fact]
+    [MSBuildTestMethod]
     public void RestoreEnvVars()
     {
         string testName1 = "_MSBUILD_TEST_ENV_VAR1";

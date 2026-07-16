@@ -4,7 +4,6 @@
 using System.Collections.Generic;
 using Microsoft.Build.Collections;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -13,9 +12,10 @@ namespace Microsoft.Build.UnitTests.OM.Collections
     /// <summary>
     /// Tests for CopyOnReadEnumerable
     /// </summary>
+    [TestClass]
     public class CopyOnReadEnumerable_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void EnumeratesBackingCollection()
         {
             List<int> values = new List<int>(new int[] { 1, 2, 3 });
@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CopiesBackingCollection()
         {
             List<string> values = new List<string>(new string[] { "a", "b", "c" });

@@ -15,7 +15,6 @@ using System.Reflection;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -44,11 +43,12 @@ namespace Microsoft.Build.Tasks.UnitTests
     ///   </item>
     ///  </list>
     /// </summary>
+    [TestClass]
     public sealed class AssemblyInformation_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public AssemblyInformation_Tests(ITestOutputHelper output)
+        public AssemblyInformation_Tests(TestContext output)
         {
             _output = output;
         }
@@ -157,7 +157,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             string? source = TryGetCandidateFrameworkDll();
             if (source is null)
             {
-                Assert.Skip("No candidate framework DLL available on this machine.");
+                Assert.Inconclusive("No candidate framework DLL available on this machine.");
             }
 
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -186,7 +186,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             string? source = TryGetCandidateFrameworkDll();
             if (source is null)
             {
-                Assert.Skip("No candidate framework DLL available on this machine.");
+                Assert.Inconclusive("No candidate framework DLL available on this machine.");
             }
 
             using TestEnvironment env = TestEnvironment.Create(_output);

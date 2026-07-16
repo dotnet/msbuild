@@ -8,17 +8,17 @@ using System.Runtime.Versioning;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Tasks;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
+    [TestClass]
     public class TaskTranslatorHelpers
     {
         private MemoryStream _serializationStream;
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NullFrameworkName()
         {
             FrameworkName value = null;
@@ -29,8 +29,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             value.ShouldBeNull();
         }
 
-        [Theory]
-        [MemberData(nameof(SampleFrameworkNames))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(SampleFrameworkNames))]
         public void ValidFrameworkName(FrameworkName value)
         {
             FrameworkName deserialized = null;

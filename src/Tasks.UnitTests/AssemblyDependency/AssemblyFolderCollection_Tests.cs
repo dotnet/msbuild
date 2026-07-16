@@ -5,7 +5,6 @@ using System.IO;
 using System.Xml;
 using Microsoft.Build.Shared.AssemblyFoldersFromConfig;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -16,6 +15,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
     /// every target framework (unlike the RAR-driven AssemblyFoldersFromConfig_Tests, which are net472
     /// only), so they guard the parser - including under the trim/AOT analyzers on net10.0.
     /// </summary>
+    [TestClass]
     public class AssemblyFolderCollection_Tests
     {
         private static AssemblyFolderCollection LoadXml(string xml)
@@ -32,7 +32,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ParsesAllFields()
         {
             string xml = @"
@@ -54,7 +54,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             folder.Platform.ShouldBe("x64");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OptionalFieldsMayBeOmitted()
         {
             string xml = @"
@@ -74,7 +74,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             folder.Platform.ShouldBeNull();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PreservesDocumentOrderAndAllFolders()
         {
             string xml = @"
@@ -96,7 +96,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             folders[2].Platform.ShouldBe("x64");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ChildElementOrderIsNotSignificant()
         {
             string xml = @"
@@ -118,7 +118,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             folder.Platform.ShouldBe("x86");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void IgnoresUnrecognizedElements()
         {
             // <Unknown> carries nested content to confirm the whole subtree is skipped.
@@ -139,7 +139,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             folder.Path.ShouldBe(@"C:\folder");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ToleratesXmlDeclarationAndComments()
         {
             string xml = @"<?xml version=""1.0"" encoding=""utf-8""?>
@@ -159,15 +159,15 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             folder.Path.ShouldBe(@"C:\folder");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyConfig_ReturnsEmptyCollection() =>
             LoadXml("<AssemblyFoldersConfig />").AssemblyFolders.ShouldBeEmpty();
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyAssemblyFoldersElement_ReturnsEmptyCollection() =>
             LoadXml("<AssemblyFoldersConfig><AssemblyFolders></AssemblyFolders></AssemblyFoldersConfig>").AssemblyFolders.ShouldBeEmpty();
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SelfClosingAssemblyFolder_ThrowsXmlException()
         {
             // FrameworkVersion and Path are required; a folder missing them is a malformed config.
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             Should.Throw<XmlException>(() => LoadXml(xml));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MissingFrameworkVersion_ThrowsXmlException()
         {
             string xml = @"
@@ -193,7 +193,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             Should.Throw<XmlException>(() => LoadXml(xml));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MissingPath_ThrowsXmlException()
         {
             string xml = @"
@@ -208,7 +208,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             Should.Throw<XmlException>(() => LoadXml(xml));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WrongRootElement_ThrowsXmlException()
         {
             // A document with stray <AssemblyFolder> nodes under an unexpected root must be rejected,
@@ -226,7 +226,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
             Should.Throw<XmlException>(() => LoadXml(xml));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MalformedXml_ThrowsXmlException()
         {
             // Mirrors the input used by AssemblyFoldersFromConfig_Tests.AssemblyFoldersFromConfigFileMalformed.

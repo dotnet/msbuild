@@ -7,9 +7,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System.Linq;
     using Microsoft.Build.Evaluation;
-    using Xunit;
 
-    public class LinkedEvaluationReadOnly_Tests : IClassFixture<LinkedEvaluationReadOnly_Tests.ROTestCollectionGroup>
+    [TestClass]
+    public class LinkedEvaluationReadOnly_Tests
     {
         public class ROTestCollectionGroup : TestCollectionGroup
         {
@@ -23,11 +23,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 this.BigFile = this.ImmutableDisk.WriteProjectFile($"Big.proj", TestCollectionGroup.BigProjectFile);
                 var projReal = this.Remote[0].LoadProjectWithSettings(this.BigFile, ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.RecordDuplicateButNotCircularImports);
                 this.Local.Importing = true;
-                Assert.NotNull(projReal);
+                Assert.IsNotNull(projReal);
                 this.Real = projReal;
-                Assert.NotNull(this.Real);
+                Assert.IsNotNull(this.Real);
                 var projView = this.Local.GetLoadedProjects(this.BigFile).FirstOrDefault();
-                Assert.NotNull(projView);
+                Assert.IsNotNull(projView);
                 this.View = projView;
 
                 ViewValidation.VerifyNotLinkedNotNull(this.Real);
@@ -39,8 +39,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 this.Group.ClearAllRemotes();
 
                 var projView = this.Local.GetLoadedProjects(this.BigFile).FirstOrDefault();
-                Assert.NotNull(projView);
-                Assert.NotSame(projView, this.View);
+                Assert.IsNotNull(projView);
+                Assert.AreNotSame(projView, this.View);
                 this.View = projView;
 
                 ViewValidation.VerifyLinkedNotNull(this.View);
@@ -49,56 +49,64 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         private ROTestCollectionGroup StdGroup { get; }
 
-        public LinkedEvaluationReadOnly_Tests(ROTestCollectionGroup group)
+        private static ROTestCollectionGroup s_stdGroup;
+
+        [ClassInitialize]
+        public static void ClassInitialize(TestContext context) => s_stdGroup = new ROTestCollectionGroup();
+
+        [ClassCleanup]
+        public static void ClassCleanup() => s_stdGroup?.Dispose();
+
+        public LinkedEvaluationReadOnly_Tests()
         {
-            this.StdGroup = group;
+            this.StdGroup = s_stdGroup;
             this.StdGroup.ResetBeforeTests();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectReadOnly_Tests()
         {
             // this is actually very elaborate and caught quite a few issues.
             ViewValidation.Verify(this.StdGroup.View, this.StdGroup.Real);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectItemReadOnly_Tests()
         {
             var viewItems = this.StdGroup.View.AllEvaluatedItems;
             var realItems = this.StdGroup.Real.AllEvaluatedItems;
 
-            Assert.NotEmpty(viewItems);
+            Assert.IsNotEmpty(viewItems);
             ViewValidation.Verify(viewItems, realItems);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectItemDefinitionReadOnly_Tests()
         {
             var viewItemDefinitions = this.StdGroup.View.ItemDefinitions;
             var realItemDefinitions = this.StdGroup.Real.ItemDefinitions;
 
-            Assert.NotEmpty(viewItemDefinitions);
+            Assert.IsNotEmpty(viewItemDefinitions);
             ViewValidation.Verify(viewItemDefinitions, realItemDefinitions, ViewValidation.Verify);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectPropertiesReadOnly_Tests()
         {
             var viewProperties = this.StdGroup.View.Properties;
             var realProperties = this.StdGroup.Real.Properties;
 
-            Assert.NotEmpty(viewProperties);
+            Assert.IsNotEmpty(viewProperties);
             ViewValidation.Verify(viewProperties, realProperties);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectMetadataReadOnly_Tests()
         {
             var viewMetadata = this.StdGroup.View.AllEvaluatedItemDefinitionMetadata;
             var realMetadata = this.StdGroup.Real.AllEvaluatedItemDefinitionMetadata;
 
-            Assert.NotEmpty(viewMetadata);
+            Assert.IsNotEmpty(viewMetadata);
             ViewValidation.Verify(viewMetadata, realMetadata);
         }
     }

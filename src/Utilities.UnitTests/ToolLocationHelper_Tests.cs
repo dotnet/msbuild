@@ -21,19 +21,19 @@ using Microsoft.Win32;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 using UtilitiesDotNetFrameworkArchitecture = Microsoft.Build.Utilities.DotNetFrameworkArchitecture;
 using SharedDotNetFrameworkArchitecture = Microsoft.Build.Shared.DotNetFrameworkArchitecture;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class ToolLocationHelper_Tests
     {
 #if FEATURE_CODETASKFACTORY
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 #endif
 
-        public ToolLocationHelper_Tests(ITestOutputHelper output)
+        public ToolLocationHelper_Tests(TestContext output)
         {
 #if FEATURE_CODETASKFACTORY
             _output = output;
@@ -41,23 +41,23 @@ namespace Microsoft.Build.UnitTests
             ToolLocationHelper.ClearStaticCaches();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetApiContractReferencesHandlesEmptyContracts()
         {
             string[] returnValue = ToolLocationHelper.GetApiContractReferences(Enumerable.Empty<ApiContract>(), string.Empty);
             returnValue.Length.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetApiContractReferencesHandlesNullContracts()
         {
             string[] returnValue = ToolLocationHelper.GetApiContractReferences(null, string.Empty);
             returnValue.Length.ShouldBe(0);
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void GetApiContractReferencesHandlesNonExistingLocation()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -143,9 +143,11 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if RUNTIME_TYPE_NETCORE
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/1250")]
+        [WindowsOnlyFact]
+        [Ignore("https://github.com/dotnet/msbuild/issues/1250")]
 #else
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/2569")]
+        [WindowsOnlyFact]
+        [Ignore("https://github.com/dotnet/msbuild/issues/2569")]
 #endif
         public void GetUnversionedSDKUnionMetadataLocation()
         {
@@ -216,9 +218,9 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void GatherExtensionSDKsInvalidVersionDirectory()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -241,9 +243,9 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void GatherExtensionSDKsNoManifest()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -266,9 +268,9 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void GatherExtensionSDKsEmptyManifest()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -292,9 +294,9 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void GatherExtensionSDKsGarbageManifest()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
@@ -322,7 +324,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify the case where we ask for a tool using a target framework version of 3.5
         /// We make sure in the fake sdk path we also create a 4.0 folder in order to make sure we do not return that when we only want the bin directory.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyinternalGetPathToDotNetFrameworkSdkFileNot40()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "VGPTDNFSFN40");
@@ -364,7 +366,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure that if a unknown framework identifier with a root directory which does not exist in it is passed in then we get an empty list back out.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetFrameworkIdentifiersNoReferenceAssemblies()
         {
             IList<string> installedIdentifiers =
@@ -376,7 +378,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When the root does not exist make sure nothing is returned
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void HighestVersionOfTargetFrameworkIdentifierRootDoesNotExist()
         {
             FrameworkNameVersioning highestMoniker =
@@ -389,7 +391,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// When the root contains no folders with versions on them make sure nothing is returned
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void HighestVersionOfTargetFrameworkIdentifierRootNoVersions()
         {
             string tempPath = Path.GetTempPath();
@@ -408,7 +410,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// If a directory contains multiple versions make sure we pick the highest one.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void HighestVersionOfTargetFrameworkIdentifierRootMultipleVersions()
         {
             string tempPath = Path.GetTempPath();
@@ -441,7 +443,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the case where we ask for a tool using a target framework version of 4.0
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyinternalGetPathToDotNetFrameworkSdkFile40()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "VGPTDNFSF40");
@@ -483,7 +485,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure if null is passed in for any of the arguments that the method returns null and does not crash.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyinternalGetPathToDotNetFrameworkSdkFileNullPassedIn()
         {
             string foundToolPath = ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("MyTool.exe", "C:\\Path", null);
@@ -501,7 +503,7 @@ namespace Microsoft.Build.UnitTests
           *
           * Our FX path should be resolved as the one we're running on by default
           */
-        [Fact]
+        [MSBuildTestMethod]
         public void FindFrameworksPathRunningThisTest()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath(
@@ -575,7 +577,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Trying to find a non-existent path should return null.
         */
-        [Fact]
+        [MSBuildTestMethod]
         public void FindPathForNonexistentFrameworks()
         {
             string path = FrameworkLocationHelper.FindDotNetFrameworkPath(
@@ -593,7 +595,7 @@ namespace Microsoft.Build.UnitTests
         *
         * Trying to find a path if GetRequestedRuntimeInfo fails and useHeuristic=false should return null.
         */
-        [Fact]
+        [MSBuildTestMethod]
         public void FindPathForEverettThatIsntProperlyInstalled()
         {
             string tempPath = Path.GetTempPath();
@@ -612,9 +614,9 @@ namespace Microsoft.Build.UnitTests
             path.ShouldBeNull();
         }
 
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void ExerciseMiscToolLocationHelperMethods()
         {
             ToolLocationHelper.GetDotNetFrameworkVersionFolderPrefix(TargetDotNetFrameworkVersion.Version11).ShouldBe(FrameworkLocationHelper.dotNetFrameworkVersionFolderPrefixV11);
@@ -672,7 +674,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGetPathToBuildToolsFile()
         {
             string net20Path = ToolLocationHelper.GetPathToDotNetFrameworkFile(Constants.MSBuildExecutableName, TargetDotNetFrameworkVersion.Version20);
@@ -692,9 +694,10 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if RUNTIME_TYPE_NETCORE
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/722")]
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/722")]
 #else
-        [Fact]
+        [MSBuildTestMethod]
 #endif
         public void TestGetPathToBuildToolsFile_32Bit()
         {
@@ -714,7 +717,7 @@ namespace Microsoft.Build.UnitTests
             tv12path.ShouldBe(ToolLocationHelper.GetPathToBuildToolsFile(Constants.MSBuildExecutableName, ToolLocationHelper.CurrentToolsVersion, UtilitiesDotNetFrameworkArchitecture.Bitness32));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGetDotNetFrameworkSdkRootRegistryKey()
         {
             // Test out of range .net version.
@@ -839,7 +842,7 @@ namespace Microsoft.Build.UnitTests
             ToolLocationHelper.GetDotNetFrameworkSdkRootRegistryKey(TargetDotNetFrameworkVersion.Latest, VisualStudioVersion.Version170).ShouldBe(fullDotNetFrameworkSdkRegistryPathForV4ToolsOnManagedToolsSDK481);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGetDotNetFrameworkSdkInstallKeyValue()
         {
             // Test out of range .net version.
@@ -891,9 +894,11 @@ namespace Microsoft.Build.UnitTests
         }
 
 #if FEATURE_REGISTRY_SDKS
-        [WindowsOnlyFact(Skip = "https://github.com/dotnet/msbuild/issues/995")]
+        [WindowsOnlyFact]
+        [Ignore("https://github.com/dotnet/msbuild/issues/995")]
 #else
-        [WindowsOnlyFact(Skip = "Registry SDKs not supported")]
+        [WindowsOnlyFact]
+        [Ignore("Registry SDKs not supported")]
 #endif
         public void GetPathToDotNetFrameworkSdk()
         {
@@ -1061,7 +1066,9 @@ namespace Microsoft.Build.UnitTests
                                     }
   ";
 
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/995")]
+        [MSBuildTestMethod]
+
+        [Ignore("https://github.com/dotnet/msbuild/issues/995")]
         public void VerifyToolsetAndToolLocationHelperAgree()
         {
             string projectContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -1115,7 +1122,7 @@ namespace Microsoft.Build.UnitTests
             success.ShouldBeTrue(); // "Build Failed.  See Std Out for details."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIsEmpty()
         {
             string projectContents = @"
@@ -1156,7 +1163,7 @@ namespace Microsoft.Build.UnitTests
             success.ShouldBeTrue(); // "Build Failed.  See Std Out for details."
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyToolsetAndToolLocationHelperAgreeWhenVisualStudioVersionIs10()
         {
             string projectContents = @"
@@ -1254,7 +1261,7 @@ namespace Microsoft.Build.UnitTests
 #endif
 
         #region GenerateReferenceAssemblyPath
-        [Fact]
+        [MSBuildTestMethod]
         public void GenerateReferencAssemblyPathAllElements()
         {
             string targetFrameworkRootPath = NativeMethodsShared.IsWindows
@@ -1275,7 +1282,7 @@ namespace Microsoft.Build.UnitTests
             path.ShouldBe(expectedPath, StringCompareShould.IgnoreCase);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GenerateReferencAssemblyPathNoProfile()
         {
             string targetFrameworkRootPath = NativeMethodsShared.IsWindows
@@ -1295,7 +1302,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure if the profile has invalid chars which would be used as part of path generation that we get an InvalidOperationException
         /// which indicates there was a problem generating the reference assembly path.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GenerateReferencAssemblyInvalidProfile()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -1316,7 +1323,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure if the identifier has invalid chars which would be used as part of path generation that we get an InvalidOperationException
         /// which indicates there was a problem generating the reference assembly path.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GenerateReferencAssemblyInvalidIdentifier()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -1364,7 +1371,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify the chaining method returns a null if there is no redist list file for the framework we are trying to chain with. This is ok because the lack of a redist list file means we
         /// do not have anything to chain with.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ChainReferenceAssembliesRedistExistsNoRedistList()
         {
             string path = ToolLocationHelper.ChainReferenceAssemblyPath(@"PathDoesNotExistSoICannotChain");
@@ -1375,7 +1382,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify we do not hang, crash, go on forever if there is a circular reference with the include frameworks. What should happen is
         /// we should notice that we have already chained to a given framework and not try and chain with it again.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ChainReferenceAssembliesRedistExistsCircularRefernce()
         {
             string redistString41 = "<FileList Redist='Random' IncludeFramework='v4.0'>" +
@@ -1421,7 +1428,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the case where there is no Included framework attribute, there should be no errors and we should continue on as if there were no further framework chained with the current one
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ChainReferenceAssembliesRedistExistsNoInclude()
         {
             string redistString41 = "<FileList Redist='Random'>" +
@@ -1451,7 +1458,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the case where the include framework is empty, this is ok, we should error but should just continue on as if there was no chaining of the redist list file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ChainReferenceAssembliesRedistExistsEmptyInclude()
         {
             string redistString41 = "<FileList Redist='Random' IncludeFramework=''>" +
@@ -1481,7 +1488,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the case where the redist is a valid xml file but does not have the FileListElement, this is to make sure we do not crash or get an exception if the FileList element cannot be found
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ChainReferenceAssembliesRedistExistsNoFileList()
         {
             string redistString41 = "<FileListNOT Redist='Random'>" +
@@ -1511,7 +1518,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we get the correct exception when there is no xml in the redist list file
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ChainReferenceAssembliesRedistExistsBadFile()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -1541,7 +1548,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we get the correct exception when the xml file points to an included framework which does not exist.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ChainReferenceAssembliesRedistPointsToInvalidInclude()
         {
             string redistString41 = "<FileList Redist='Random' IncludeFramework='IDontExist'>" +
@@ -1573,7 +1580,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we get the correct exception when the xml file points to an included framework which has invalid path chars.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ChainReferenceAssembliesRedistInvalidPathChars()
         {
             Should.Throw<InvalidOperationException>(() =>
@@ -1646,7 +1653,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the case where we are chaining redist lists and they are properly formatted
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesWithRootGoodWithChain()
         {
             string redistString41 = "<FileList Redist='Random' IncludeFramework='v4.0'>" +
@@ -1715,7 +1722,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify the correct display name returned
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DisplayNameGeneration()
         {
             string redistString40 = "<FileList Redist='Random' Name='MyFramework 4.0' >" +
@@ -1772,7 +1779,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure we do not crash if there is a circular reference in the redist lists, we should only have a path in our reference assembly list once.
         ///
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesWithRootCircularReference()
         {
             string redistString41 = "<FileList Redist='Random' IncludeFramework='v4.0'>" +
@@ -1828,7 +1835,7 @@ namespace Microsoft.Build.UnitTests
         /// Test the case where the root path is a string but the framework name is null.
         /// We should expect the correct argument null exception
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesNullFrameworkName()
         {
             Should.Throw<ArgumentNullException>(() =>
@@ -1839,7 +1846,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we get the correct exception when both parameters are null
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesNullArgumentNameandFrameworkName()
         {
             Should.Throw<ArgumentNullException>(() =>
@@ -1850,7 +1857,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure we get the correct exception when the root is null but the frameworkname is not null
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesNullArgumentGoodFrameworkNameNullRoot()
         {
             Should.Throw<ArgumentNullException>(() =>
@@ -1863,7 +1870,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure we get the correct exception when the root is null but the frameworkname is not null
         /// With no framework name we cannot generate the path
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesNullArgumentGoodFrameworkNameEmptyRoot()
         {
             Should.Throw<ArgumentException>(() =>
@@ -1876,7 +1883,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure we get the correct exception when the root is null but the frameworkname is not empty to make sure we cover the different input cases
         /// With no root we cannot properly generate the path.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesNullArgumentGoodFrameworkNameEmptyRoot2()
         {
             Should.Throw<ArgumentException>(() =>
@@ -1893,7 +1900,7 @@ namespace Microsoft.Build.UnitTests
         /// Test the case where the method which only takes in a FrameworkName will throw an exception when
         /// the input is null since a null framework name is not useful
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesDefaultLocationNullFrameworkName()
         {
             Should.Throw<ArgumentNullException>(() =>
@@ -1910,7 +1917,7 @@ namespace Microsoft.Build.UnitTests
         /// returns something reasonable because later versions of the framework overwrote the current version in
         /// place, which means it just looks for a folder starting with v4.0 in the right spot for any higher version.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesDefaultLocation48()
         {
             if (ToolLocationHelper.GetPathToDotNetFrameworkReferenceAssemblies(TargetDotNetFrameworkVersion.Version48) != null)
@@ -1929,7 +1936,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the framework requested does not exist. Since we do an existence check before returning the path this non existent path should return an empty list
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesDefaultLocation99()
         {
             string targetFrameworkIdentifier = ".Net Framework";
@@ -1978,7 +1985,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when 20 is simulated to be installed that the method returns the 2.0 directory
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework20Good()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("2.0"));
@@ -1993,7 +2000,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when 20 is simulated to not be installed that the method returns an empty list
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework20NotInstalled()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("2.0"));
@@ -2006,7 +2013,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when 30 is simulated to be installed that the method returns the 3.0 directory
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework30Good()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("3.0"));
@@ -2025,7 +2032,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when 30 is simulated to not be installed that the method returns an empty list
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework30NotInstalled()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("3.0"));
@@ -2039,7 +2046,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when the 30 reference assemblies are simulated to not be installed that the method returns an empty list
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework30ReferenceAssembliesNotInstalled()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("3.0"));
@@ -2053,7 +2060,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when 30 is installed but 2.0 is not installed that we only get one of the paths back.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework30WithNo20Installed()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("3.0"));
@@ -2071,7 +2078,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when 35 is simulated to be installed that the method returns the 3.5 directory
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework35Good()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("3.5"));
@@ -2094,7 +2101,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when 35 is simulated to not be installed that the method returns an empty list
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework35NotInstalled()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("3.5"));
@@ -2108,7 +2115,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when 35 reference assembly are simulated to not be installed that the method returns an empty list
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework35ReferenceAssembliesNotInstalled()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("3.5"));
@@ -2131,7 +2138,7 @@ namespace Microsoft.Build.UnitTests
         /// 3) Target platform is some other value (AnyCpu, or anything else)  expect the framework directory for the "current" bitness of the process we are running under.
         ///
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToStandardLibraries64Bit35()
         {
             string frameworkDirectory2032bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Bitness32);
@@ -2179,7 +2186,7 @@ namespace Microsoft.Build.UnitTests
         ///
         /// We expect to always get the same path which is returned by GetPathToReferenceAssemblies.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToStandardLibraries64Bit40()
         {
             IList<string> referencePaths = ToolLocationHelper.GetPathToReferenceAssemblies(new FrameworkNameVersioning(".NETFramework", new Version("4.0")));
@@ -2223,7 +2230,7 @@ namespace Microsoft.Build.UnitTests
         ///    case of the unit test this should be the 32 bit framework directory.
         ///
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToStandardLibraries32Bit35()
         {
             string frameworkDirectory2032bit = FrameworkLocationHelper.GetPathToDotNetFrameworkV20(SharedDotNetFrameworkArchitecture.Bitness32);
@@ -2262,7 +2269,7 @@ namespace Microsoft.Build.UnitTests
         ///
         /// We expect to always get the same path which is returned by GetPathToReferenceAssemblies.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToStandardLibraries32Bit40()
         {
             IList<string> referencePaths = ToolLocationHelper.GetPathToReferenceAssemblies(new FrameworkNameVersioning(".NETFramework", new Version("4.0")));
@@ -2296,7 +2303,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when 35 is installed but 2.0 is not installed we to find 3.5 and 3.0 but no 2.0 because it does not exist.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework35WithNo20Installed()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("3.5"));
@@ -2318,7 +2325,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when 35 is installed but 3.0 is not installed we expect not to find 3.0 or 2.0.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework35WithNo30Installed()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("3.5"));
@@ -2337,7 +2344,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when 40 is simulated to not be installed that the method returns an empty list
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework40NotInstalled()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("4.0"));
@@ -2350,7 +2357,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when 40 reference assemblies are installed but the dot net framework is not, in this case we return empty indicating .net 4.0 is not properly installed
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework40DotNetFrameworkDirectoryNotInstalled()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("4.0"));
@@ -2364,7 +2371,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify when 40 reference assemblies are installed but the dot net framework is not we only get one of the paths back, this is because right now the assemblies are not in the right location
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LegacyFramework40DotNetReferenceAssemblyDirectoryNotInstalled()
         {
             FrameworkNameVersioning frameworkName = new FrameworkNameVersioning("Anything", new Version("4.0"));
@@ -2380,7 +2387,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can an argument exception if we try and pass a empty registry root
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAssemblyFoldersExInfoTestEmptyRegistryRoot()
         {
             Should.Throw<ArgumentException>(() =>
@@ -2391,7 +2398,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can an argumentNull exception if we try and pass a null registry root
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAssemblyFoldersExInfoListTestNullRegistryRoot()
         {
             Should.Throw<ArgumentNullException>(() =>
@@ -2402,7 +2409,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can an argument exception if we try and pass a empty registry suffix
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAssemblyFoldersExInfoTestEmptyRegistrySuffix()
         {
             Should.Throw<ArgumentException>(() =>
@@ -2413,7 +2420,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can an argumentNull exception if we try and pass a null registry suffix
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAssemblyFoldersExInfoTestNullRegistrySuffix()
         {
             Should.Throw<ArgumentNullException>(() =>
@@ -2424,7 +2431,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can an argument exception if we try and pass a empty registry suffix
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAssemblyFoldersExInfoTestEmptyTargetRuntime()
         {
             Should.Throw<ArgumentException>(() =>
@@ -2435,7 +2442,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can an argumentNull exception if we try and pass a null target runtime version
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAssemblyFoldersExInfoTestNullTargetRuntimeVersion()
         {
             Should.Throw<ArgumentNullException>(() =>
@@ -2490,7 +2497,7 @@ namespace Microsoft.Build.UnitTests
         }
 #endif
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToStandardLibrariesWithCustomTargetFrameworkRoot()
         {
             using (var env = TestEnvironment.Create())
@@ -2506,7 +2513,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToStandardLibrariesWithNullTargetFrameworkRootPath()
         {
             string frameworkName = ".NETFramework";
@@ -2519,7 +2526,7 @@ namespace Microsoft.Build.UnitTests
             v45PathWithNullRoot.ShouldBe(v45Path);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToStandardLibrariesWithCustomTargetFrameworkInFallbackSearchPathAndNullRoot()
         {
             using (var env = TestEnvironment.Create())
@@ -2536,7 +2543,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToStandardLibrariesWithCustomRootAndCustomTargetFrameworkInFallbackSearchPath()
         {
             // We are creating the same framework in the root path and in a second location, used as a
@@ -2562,7 +2569,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToStandardLibrariesWithNullTargetFrameworkFallbackSearchPaths()
         {
             string frameworkName = ".NETFramework";
@@ -2575,7 +2582,7 @@ namespace Microsoft.Build.UnitTests
             v45PathWithNullRoot.ShouldBe(v45Path);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesWithCustomTargetFrameworkInRoot()
         {
             using (var env = TestEnvironment.Create())
@@ -2588,7 +2595,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesWithCustomTargetFrameworkInFallbackPath()
         {
             using (var env = TestEnvironment.Create())
@@ -2605,7 +2612,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesWithCustomTargetFrameworkInFallbackPathAndNullRoot()
         {
             using (var env = TestEnvironment.Create())
@@ -2622,7 +2629,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // second overload of GetPathToReferenceAssemblies
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesWithCustomTargetFrameworkInRoot2()
         {
             using (var env = TestEnvironment.Create())
@@ -2637,7 +2644,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         // second overload of GetPathToReferenceAssemblies
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesWithCustomTargetFrameworkRootInFallbackPath2()
         {
             using (var env = TestEnvironment.Create())
@@ -2654,7 +2661,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesWithCustomTargetFrameworkRootInFallbackPathAndNullRoot2()
         {
             using (var env = TestEnvironment.Create())
@@ -2683,7 +2690,7 @@ namespace Microsoft.Build.UnitTests
             stdLibPaths[0].ShouldBe(Path.Combine(customFrameworkDir, frameworkName, frameworkVersionWithV) + Path.DirectorySeparatorChar, stdLibPaths[0]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesWithNullTargetFrameworkRootPath()
         {
             string frameworkName = ".NETFramework";
@@ -2697,7 +2704,7 @@ namespace Microsoft.Build.UnitTests
             v45PathsWithNullRoot.ShouldBe(v45Paths);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPathToReferenceAssembliesWithNullTargetFrameworkFallbackSearchPaths()
         {
             string frameworkName = ".NETFramework";
@@ -2907,6 +2914,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Verify the toolLocation helper method that enumerates the disk and registry to get the list of installed SDKs.
     /// </summary>
+    [TestClass]
     public class GetPlatformExtensionSDKLocationsTestFixture : IDisposable
     {
 #if FEATURE_WIN32_REGISTRY
@@ -2920,7 +2928,7 @@ namespace Microsoft.Build.UnitTests
         private readonly string _fakeStructureRoot;
         private readonly string _fakeStructureRoot2;
 
-        public GetPlatformExtensionSDKLocationsTestFixture(ITestOutputHelper output)
+        public GetPlatformExtensionSDKLocationsTestFixture(TestContext output)
         {
 #if FEATURE_WIN32_REGISTRY
             getRegistrySubKeyDefaultValue = GetRegistrySubKeyDefaultValue;
@@ -2954,7 +2962,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Pass empty and null target platform identifier and target platform version string to make sure we get the correct exceptions out.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PassEmptyAndNullTPM()
         {
             VerifyExceptionOnEmptyOrNullPlatformAttributes(string.Empty, new Version("1.0"));
@@ -2975,7 +2983,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can get a list of extension sdks out of the API
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGetExtensionSDKLocations()
         {
             try
@@ -3012,7 +3020,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify we can get a single extension sdk location out of the API
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGetExtensionSDKLocation()
         {
             try
@@ -3094,7 +3102,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify we get no resolved paths when we pass in a path which does not exist.
         ///
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResolveFromDirectoryNotExist()
         {
             var targetPlatform = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
@@ -3106,7 +3114,7 @@ namespace Microsoft.Build.UnitTests
             targetPlatform.Count.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifySDKManifestWithNullOrEmptyParameter()
         {
             Should.Throw<ArgumentNullException>(() => new SDKManifest(null));
@@ -3268,7 +3276,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that SDKManifest properties map correctly to properties in SDKManifest.xml.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifySDKManifest()
         {
             string manifestPath = Path.Combine(Path.GetTempPath(), "ManifestTmp");
@@ -3403,7 +3411,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify ExtensionSDK
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyExtensionSDK()
         {
             string manifestPath = Path.Combine(Path.GetTempPath(), "ManifestTmp");
@@ -3464,7 +3472,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify Platform SDKs are filtered correctly
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyFilterPlatformSdks()
         {
             try
@@ -3507,7 +3515,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify Extension SDKs are filtered correctly
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyFilterPlatformExtensionSdks()
         {
             // Create fake directory tree
@@ -3533,7 +3541,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the GetPlatformExtensionSDKLocation method can be correctly called during evaluation time as a msbuild function.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyGetInstalledSDKLocations()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetInstalledSDKLocations");
@@ -3602,7 +3610,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the GetPlatformExtensionSDKLocation method can be correctly called during evaluation time as a msbuild function.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyGetInstalledSDKLocations2()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetInstalledSDKLocations2");
@@ -3672,7 +3680,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Setup some fake entries in the registry and verify we get the correct sdk from there.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyGetInstalledSDKLocations3()
         {
             string testDirectoryRoot = Path.Combine(Path.GetTempPath(), "VerifyGetInstalledSDKLocations3");
@@ -3774,7 +3782,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify based on a fake directory structure with some good directories and some invalid ones at each level that we
         /// get the expected set out.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResolveSDKFromDirectory()
         {
             var paths = new List<string> { _fakeStructureRoot, _fakeStructureRoot2 };
@@ -3895,7 +3903,7 @@ namespace Microsoft.Build.UnitTests
         /// get the expected set out. Make sure that when we resolve from both the disk and registry that there are no duplicates
         /// and make sure we get the expected results.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResolveSDKFromRegistryAndDisk()
         {
             var targetPlatforms = new Dictionary<TargetPlatformSDK, TargetPlatformSDK>();
@@ -3964,7 +3972,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure if the sdk identifier is null we get an ArgumentNullException because without specifying the
         /// sdk identifier we can't get any platforms back.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPlatformsForSDKNullSDKIdentifier()
         {
             Should.Throw<ArgumentNullException>(() => ToolLocationHelper.GetPlatformsForSDK(null, new Version("1.0")));
@@ -3974,7 +3982,7 @@ namespace Microsoft.Build.UnitTests
         /// Make sure if the sdk version is null we get an ArgumentNullException because without specifying the
         /// sdk version we can't get any platforms back.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPlatformsForSDKNullSDKVersion()
         {
             Should.Throw<ArgumentNullException>(() => ToolLocationHelper.GetPlatformsForSDK("AnySDK", null));
@@ -3984,7 +3992,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify that when there are no sdks with target platforms installed, our list of platforms is empty
         /// to make sure we are not getting platforms from somewhere else.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPlatformsForSDKWithNoInstalledTargetPlatforms()
         {
             ToolLocationHelper.GetPlatformsForSDK("AnySDK", new Version("1.0"), Array.Empty<string>(), "").Any().ShouldBeFalse();
@@ -3995,7 +4003,7 @@ namespace Microsoft.Build.UnitTests
         /// installed and we pass in a matching sdk identifier and version number for one of the
         /// installed platforms.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPlatformsForSDKWithMatchingInstalledTargetPlatforms()
         {
             IEnumerable<string> myPlatforms = ToolLocationHelper.GetPlatformsForSDK("MyPlatform", new Version("8.0"), new[] { _fakeStructureRoot }, null);
@@ -4008,7 +4016,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the list of platforms is empty if we ask for an sdk that is not installed.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPlatformsForSDKWithInstalledTargetPlatformsNoMatch()
         {
             ToolLocationHelper.GetPlatformsForSDK("DoesNotExistPlatform", new Version("0.0.0.0"), new[] { _fakeStructureRoot }, null).Any().ShouldBeFalse();
@@ -4018,7 +4026,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the list of platforms is empty if we ask for a valid sdk identifier but
         /// a version number that isn't installed.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPlatformsForSDKWithMatchingPlatformNotMatchingVersion()
         {
             ToolLocationHelper.GetPlatformsForSDK("MyPlatform", new Version("0.0.0.0"), new[] { _fakeStructureRoot }, null).Any().ShouldBeFalse();
@@ -4028,7 +4036,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify that if we pass in an sdk identifier and version for an installed legacy platform sdk
         /// that the list of platforms is empty because it has no platforms.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetPlatformsForSDKForLegacyPlatformSDK()
         {
             ToolLocationHelper.GetPlatformsForSDK("Windows", new Version("8.0"), new[] { _fakeStructureRoot }, null).Any().ShouldBeFalse();
@@ -4039,7 +4047,7 @@ namespace Microsoft.Build.UnitTests
         /// get the expected set out. Make sure that when we resolve from both the disk and registry that there are no duplicates
         /// and make sure we get the expected results.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetALLTargetPlatformSDKs()
         {
             try
@@ -4125,7 +4133,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the GetPlatformSDKPropsFileLocation method can be correctly called for pre-OneCore SDKs during evaluation time as a msbuild function.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyGetPreOneCoreSDKPropsLocation()
         {
             // This is the mockup layout for SDKs before One Core SDK.
@@ -4201,7 +4209,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the GetPlatformSDKPropsFileLocation method can be correctly called for OneCore SDK during evaluation time as a msbuild function.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyGetOneCoreSDKPropsLocation()
         {
             // This is the mockup layout for One Core SDK.

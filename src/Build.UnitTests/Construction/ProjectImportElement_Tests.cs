@@ -6,15 +6,15 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.Construction
 {
+    [TestClass]
     public class ProjectImportElement_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkReferenceIsCorrect_CreatedFromOnDiskProject_SdkAndVersionAttributeSet()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests.Construction
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkReferenceIsCorrect_CreatedFromOnDiskProject_SdkAttributeSet()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -91,7 +91,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Verifies that the <see cref="ProjectImportElement.SdkReference" /> object is correctly set when creating <see cref="ProjectImportElement" /> objects.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkReferenceIsCorrect_CreatedInMemory()
         {
             using (var env = TestEnvironment.Create())

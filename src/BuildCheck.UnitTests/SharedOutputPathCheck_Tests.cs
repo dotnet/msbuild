@@ -5,10 +5,10 @@ using System.Collections.Generic;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Checks;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.BuildCheck.UnitTests
 {
+    [TestClass]
     public class SharedOutputPathCheck_Tests
     {
         private readonly SharedOutputPathCheck _check;
@@ -34,7 +34,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
                 new Dictionary<string, string>());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTwoProjectsWithSameRelativeOutputPath()
         {
             // Full output and intermediate paths are different: "C:/fake1/bin/Debug" and "C:/fake1/obj/Debug".
@@ -61,7 +61,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             _registrationContext.Results.Count.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestProjectsWithDifferentPathsSeparators()
         {
             // Paths separators are messed up.
@@ -102,7 +102,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestThreeProjectsWithSameOutputPath()
         {
             string projectFolder = Framework.NativeMethods.IsWindows ? "C:\\fake\\" : "/fake/";

@@ -7,7 +7,6 @@ using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
@@ -18,11 +17,12 @@ namespace Microsoft.Build.UnitTests
     /// in ResolveNonMSBuildProjectOutput_Tests.
     /// Here, only test the AssignProjectConfiguration specific code
     /// </summary>
+    [TestClass]
     public sealed class AssignProjectConfiguration_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public AssignProjectConfiguration_Tests(ITestOutputHelper output)
+        public AssignProjectConfiguration_Tests(TestContext output)
         {
             _output = output;
         }
@@ -47,23 +47,23 @@ namespace Microsoft.Build.UnitTests
                 itemSpec, projectGuid, package, name, xmlString, expectedResult, result, expectedFullConfiguration,
                 (resolvedProjectWithConfiguration == null) ? string.Empty : resolvedProjectWithConfiguration.GetMetadata("FullConfiguration"));
 
-            Assert.Equal(expectedResult, result);
+            Assert.AreEqual(expectedResult, result);
             if (result)
             {
-                Assert.Equal(expectedFullConfiguration, resolvedProjectWithConfiguration.GetMetadata("FullConfiguration"));
-                Assert.Equal(expectedConfiguration, resolvedProjectWithConfiguration.GetMetadata("Configuration"));
-                Assert.Equal(expectedPlatform, resolvedProjectWithConfiguration.GetMetadata("Platform"));
-                Assert.Equal("Configuration=" + expectedConfiguration, resolvedProjectWithConfiguration.GetMetadata("SetConfiguration"));
-                Assert.Equal("Platform=" + expectedPlatform, resolvedProjectWithConfiguration.GetMetadata("SetPlatform"));
-                Assert.Equal(reference.ItemSpec, resolvedProjectWithConfiguration.ItemSpec);
+                Assert.AreEqual(expectedFullConfiguration, resolvedProjectWithConfiguration.GetMetadata("FullConfiguration"));
+                Assert.AreEqual(expectedConfiguration, resolvedProjectWithConfiguration.GetMetadata("Configuration"));
+                Assert.AreEqual(expectedPlatform, resolvedProjectWithConfiguration.GetMetadata("Platform"));
+                Assert.AreEqual("Configuration=" + expectedConfiguration, resolvedProjectWithConfiguration.GetMetadata("SetConfiguration"));
+                Assert.AreEqual("Platform=" + expectedPlatform, resolvedProjectWithConfiguration.GetMetadata("SetPlatform"));
+                Assert.AreEqual(reference.ItemSpec, resolvedProjectWithConfiguration.ItemSpec);
             }
             else
             {
-                Assert.Null(resolvedProjectWithConfiguration);
+                Assert.IsNull(resolvedProjectWithConfiguration);
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestResolve()
         {
             // empty pre-generated string
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests
         /// 1) The xml element does not have the BuildProjectInSolution attribute set
         ///     Expect none of the metadata to be set
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestReferenceWithNoMetadataBadBuildInProjectAttribute()
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
@@ -125,8 +125,8 @@ namespace Microsoft.Build.UnitTests
             XmlElement element = doc.CreateElement("TestElement");
             element.SetAttribute("BuildProjectInSolution", "IAmReallyABadOne");
             AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
-            Assert.Empty(referenceItem.GetMetadata("BuildReference"));
-            Assert.Empty(referenceItem.GetMetadata("ReferenceOutputAssembly"));
+            Assert.IsEmpty(referenceItem.GetMetadata("BuildReference"));
+            Assert.IsEmpty(referenceItem.GetMetadata("ReferenceOutputAssembly"));
         }
 
         /// <summary>
@@ -137,7 +137,7 @@ namespace Microsoft.Build.UnitTests
         /// 1) The xml element does not have the BuildProjectInSolution attribute set
         ///     Expect none of the metadata to be set
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestReferenceWithNoMetadataNoBuildInProjectAttribute()
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
@@ -145,8 +145,8 @@ namespace Microsoft.Build.UnitTests
             XmlDocument doc = new XmlDocument();
             XmlElement element = doc.CreateElement("TestElement");
             AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
-            Assert.Empty(referenceItem.GetMetadata("BuildReference"));
-            Assert.Empty(referenceItem.GetMetadata("ReferenceOutputAssembly"));
+            Assert.IsEmpty(referenceItem.GetMetadata("BuildReference"));
+            Assert.IsEmpty(referenceItem.GetMetadata("ReferenceOutputAssembly"));
         }
 
         /// <summary>
@@ -156,7 +156,7 @@ namespace Microsoft.Build.UnitTests
         /// 1) The xml element has BuildProjectInSolution set to true
         ///     Expect none of the metadata to be set
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestReferenceWithNoMetadataBuildInProjectAttributeTrue()
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
@@ -165,8 +165,8 @@ namespace Microsoft.Build.UnitTests
             XmlElement element = doc.CreateElement("TestElement");
             element.SetAttribute("BuildProjectInSolution", "true");
             AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
-            Assert.Empty(referenceItem.GetMetadata("BuildReference"));
-            Assert.Empty(referenceItem.GetMetadata("ReferenceOutputAssembly"));
+            Assert.IsEmpty(referenceItem.GetMetadata("BuildReference"));
+            Assert.IsEmpty(referenceItem.GetMetadata("ReferenceOutputAssembly"));
         }
 
 
@@ -179,7 +179,7 @@ namespace Microsoft.Build.UnitTests
         /// 1) The xml element has BuildProjectInSolution set to false
         ///     Expect no pieces of metadata to be set on the reference item
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestReferenceWithNoMetadataBuildInProjectAttributeFalseReferenceAndBuildProjectsDisabledInProjectConfiguration()
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
@@ -188,8 +188,8 @@ namespace Microsoft.Build.UnitTests
             XmlElement element = doc.CreateElement("TestElement");
             element.SetAttribute("BuildProjectInSolution", "false");
             AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(false, referenceItem, element);
-            Assert.Empty(referenceItem.GetMetadata("BuildReference"));
-            Assert.Empty(referenceItem.GetMetadata("ReferenceOutputAssembly"));
+            Assert.IsEmpty(referenceItem.GetMetadata("BuildReference"));
+            Assert.IsEmpty(referenceItem.GetMetadata("ReferenceOutputAssembly"));
         }
 
         /// <summary>
@@ -199,7 +199,7 @@ namespace Microsoft.Build.UnitTests
         /// 1) The xml element has BuildProjectInSolution set to false
         ///     Expect two pieces of metadata to be put on the item and be set to false (BuildReference, and ReferenceOutputAssembly)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestReferenceWithNoMetadataBuildInProjectAttributeFalse()
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
@@ -208,8 +208,8 @@ namespace Microsoft.Build.UnitTests
             XmlElement element = doc.CreateElement("TestElement");
             element.SetAttribute("BuildProjectInSolution", "false");
             AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
-            Assert.Equal("false", referenceItem.GetMetadata("BuildReference"));
-            Assert.Equal("false", referenceItem.GetMetadata("ReferenceOutputAssembly"));
+            Assert.AreEqual("false", referenceItem.GetMetadata("BuildReference"));
+            Assert.AreEqual("false", referenceItem.GetMetadata("ReferenceOutputAssembly"));
         }
 
 
@@ -220,7 +220,7 @@ namespace Microsoft.Build.UnitTests
         /// 1) The xml element has BuildProjectInSolution set to false
         ///     Expect two pieces of metadata to be put on the item and be set to true since they were already set (BuildReference, and ReferenceOutputAssembly)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestReferenceWithMetadataAlreadySetBuildInProjectAttributeFalse()
         {
             // Test the case where the metadata is missing and we are not supposed to build the reference
@@ -232,8 +232,8 @@ namespace Microsoft.Build.UnitTests
             XmlElement element = doc.CreateElement("TestElement");
             element.SetAttribute("BuildProjectInSolution", "false");
             AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
-            Assert.Equal("true", referenceItem.GetMetadata("BuildReference"));
-            Assert.Equal("true", referenceItem.GetMetadata("ReferenceOutputAssembly"));
+            Assert.AreEqual("true", referenceItem.GetMetadata("BuildReference"));
+            Assert.AreEqual("true", referenceItem.GetMetadata("ReferenceOutputAssembly"));
 
             // Test the case where only ReferenceOutputAssembly is not set
             referenceItem = new TaskItem("TestItem");
@@ -242,8 +242,8 @@ namespace Microsoft.Build.UnitTests
             element = doc.CreateElement("TestElement");
             element.SetAttribute("BuildProjectInSolution", "false");
             AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
-            Assert.Equal("true", referenceItem.GetMetadata("BuildReference"));
-            Assert.Equal("false", referenceItem.GetMetadata("ReferenceOutputAssembly"));
+            Assert.AreEqual("true", referenceItem.GetMetadata("BuildReference"));
+            Assert.AreEqual("false", referenceItem.GetMetadata("ReferenceOutputAssembly"));
 
             // Test the case where only BuildReference is not set
             referenceItem = new TaskItem("TestItem");
@@ -252,8 +252,8 @@ namespace Microsoft.Build.UnitTests
             element = doc.CreateElement("TestElement");
             element.SetAttribute("BuildProjectInSolution", "false");
             AssignProjectConfiguration.SetBuildInProjectAndReferenceOutputAssemblyMetadata(true, referenceItem, element);
-            Assert.Equal("false", referenceItem.GetMetadata("BuildReference"));
-            Assert.Equal("true", referenceItem.GetMetadata("ReferenceOutputAssembly"));
+            Assert.AreEqual("false", referenceItem.GetMetadata("BuildReference"));
+            Assert.AreEqual("true", referenceItem.GetMetadata("ReferenceOutputAssembly"));
         }
 
 
@@ -288,7 +288,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies that the UnresolvedProjectReferences output parameter is populated correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestUnresolvedReferences()
         {
             ArrayList projectRefs = new ArrayList();
@@ -307,10 +307,10 @@ namespace Microsoft.Build.UnitTests
             Hashtable resolvedProjects;
             TestUnresolvedReferencesHelper(projectRefs, projectConfigurations, out unresolvedProjects, out resolvedProjects);
 
-            Assert.Empty(resolvedProjects); // "No resolved refs expected for case 1"
-            Assert.Equal(2, unresolvedProjects.Count); // "Two unresolved refs expected for case 1"
-            Assert.Equal(unresolvedProjects["MCDep1.vcproj"], projectRefs[0]);
-            Assert.Equal(unresolvedProjects["MCDep2.vcproj"], projectRefs[1]);
+            Assert.IsEmpty(resolvedProjects); // "No resolved refs expected for case 1"
+            Assert.AreEqual(2, unresolvedProjects.Count); // "Two unresolved refs expected for case 1"
+            Assert.AreEqual(unresolvedProjects["MCDep1.vcproj"], projectRefs[0]);
+            Assert.AreEqual(unresolvedProjects["MCDep2.vcproj"], projectRefs[1]);
 
             // 2. multiple projects, one resolvable
             projectConfigurations = new Hashtable();
@@ -321,10 +321,10 @@ namespace Microsoft.Build.UnitTests
 
             TestUnresolvedReferencesHelper(projectRefs, projectConfigurations, out unresolvedProjects, out resolvedProjects);
 
-            Assert.Single(resolvedProjects); // "One resolved ref expected for case 2"
-            Assert.True(resolvedProjects.ContainsKey(@"CorrectProjectConfig|Platform"));
-            Assert.Single(unresolvedProjects); // "One unresolved ref expected for case 2"
-            Assert.Equal(unresolvedProjects["MCDep1.vcproj"], projectRefs[0]);
+            Assert.ContainsSingle(resolvedProjects); // "One resolved ref expected for case 2"
+            Assert.IsTrue(resolvedProjects.ContainsKey(@"CorrectProjectConfig|Platform"));
+            Assert.ContainsSingle(unresolvedProjects); // "One unresolved ref expected for case 2"
+            Assert.AreEqual(unresolvedProjects["MCDep1.vcproj"], projectRefs[0]);
 
             // 3. multiple projects, all resolvable
             projectConfigurations = new Hashtable();
@@ -336,17 +336,17 @@ namespace Microsoft.Build.UnitTests
 
             TestUnresolvedReferencesHelper(projectRefs, projectConfigurations, out unresolvedProjects, out resolvedProjects);
 
-            Assert.Equal(2, resolvedProjects.Count); // "Two resolved refs expected for case 3"
-            Assert.True(resolvedProjects.ContainsKey(@"CorrectProjectConfig|Platform"));
-            Assert.True(resolvedProjects.ContainsKey(@"CorrectProjectConfig2|Platform"));
-            Assert.Empty(unresolvedProjects); // "No unresolved refs expected for case 3"
+            Assert.AreEqual(2, resolvedProjects.Count); // "Two resolved refs expected for case 3"
+            Assert.IsTrue(resolvedProjects.ContainsKey(@"CorrectProjectConfig|Platform"));
+            Assert.IsTrue(resolvedProjects.ContainsKey(@"CorrectProjectConfig2|Platform"));
+            Assert.IsEmpty(unresolvedProjects); // "No unresolved refs expected for case 3"
         }
 
         #region Test Defaults
         /// <summary>
         /// Verify if no values are passed in for certain properties that their default values are used.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyDefaultValueDefaultToVcxPlatformMappings()
         {
             string expectedDefaultToVcxPlatformMapping = "AnyCPU=Win32;X86=Win32;X64=X64;Itanium=Itanium";
@@ -355,21 +355,21 @@ namespace Microsoft.Build.UnitTests
 
             // Test defaults with nothing set
             string actualDefaultToVcxPlatformMapping = assignProjectConfiguration.DefaultToVcxPlatformMapping;
-            Assert.Equal(actualDefaultToVcxPlatformMapping, expectedDefaultToVcxPlatformMapping);
+            Assert.AreEqual(expectedDefaultToVcxPlatformMapping, actualDefaultToVcxPlatformMapping);
 
             assignProjectConfiguration.DefaultToVcxPlatformMapping = String.Empty;
             actualDefaultToVcxPlatformMapping = assignProjectConfiguration.DefaultToVcxPlatformMapping;
-            Assert.Equal(actualDefaultToVcxPlatformMapping, expectedDefaultToVcxPlatformMapping);
+            Assert.AreEqual(expectedDefaultToVcxPlatformMapping, actualDefaultToVcxPlatformMapping);
 
             assignProjectConfiguration.DefaultToVcxPlatformMapping = null;
             actualDefaultToVcxPlatformMapping = assignProjectConfiguration.DefaultToVcxPlatformMapping;
-            Assert.Equal(actualDefaultToVcxPlatformMapping, expectedDefaultToVcxPlatformMapping);
+            Assert.AreEqual(expectedDefaultToVcxPlatformMapping, actualDefaultToVcxPlatformMapping);
         }
 
         /// <summary>
         /// Verify if no values are passed in for certain properties that their default values are used.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyDefaultValuesVcxToDefaultPlatformMappingNoOutput()
         {
             string expectedVcxToDefaultPlatformMappingNoOutput = "Win32=X86;X64=X64;Itanium=Itanium";
@@ -377,21 +377,21 @@ namespace Microsoft.Build.UnitTests
 
             // Test the case for VcxToDefaultPlatformMapping when the outputType is not library
             string actualVcxToDefaultPlatformMappingNoOutput = assignProjectConfiguration.VcxToDefaultPlatformMapping;
-            Assert.Equal(actualVcxToDefaultPlatformMappingNoOutput, expectedVcxToDefaultPlatformMappingNoOutput);
+            Assert.AreEqual(expectedVcxToDefaultPlatformMappingNoOutput, actualVcxToDefaultPlatformMappingNoOutput);
 
             assignProjectConfiguration.VcxToDefaultPlatformMapping = String.Empty;
             actualVcxToDefaultPlatformMappingNoOutput = assignProjectConfiguration.VcxToDefaultPlatformMapping;
-            Assert.Equal(actualVcxToDefaultPlatformMappingNoOutput, expectedVcxToDefaultPlatformMappingNoOutput);
+            Assert.AreEqual(expectedVcxToDefaultPlatformMappingNoOutput, actualVcxToDefaultPlatformMappingNoOutput);
 
             assignProjectConfiguration.VcxToDefaultPlatformMapping = null;
             actualVcxToDefaultPlatformMappingNoOutput = assignProjectConfiguration.VcxToDefaultPlatformMapping;
-            Assert.Equal(actualVcxToDefaultPlatformMappingNoOutput, expectedVcxToDefaultPlatformMappingNoOutput);
+            Assert.AreEqual(expectedVcxToDefaultPlatformMappingNoOutput, actualVcxToDefaultPlatformMappingNoOutput);
         }
 
         /// <summary>
         /// Verify if no values are passed in for certain properties that their default values are used.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyDefaultValuesVcxToDefaultPlatformMappingLibraryOutput()
         {
             string expectedVcxToDefaultPlatformMappingLibraryOutput = "Win32=AnyCPU;X64=X64;Itanium=Itanium";
@@ -400,15 +400,15 @@ namespace Microsoft.Build.UnitTests
             // Test the case for VcxToDefaultPlatformMapping when the outputType is library
             assignProjectConfiguration.OutputType = "Library";
             string actualVcxToDefaultPlatformMappingNoOutput = assignProjectConfiguration.VcxToDefaultPlatformMapping;
-            Assert.Equal(actualVcxToDefaultPlatformMappingNoOutput, expectedVcxToDefaultPlatformMappingLibraryOutput);
+            Assert.AreEqual(expectedVcxToDefaultPlatformMappingLibraryOutput, actualVcxToDefaultPlatformMappingNoOutput);
 
             assignProjectConfiguration.VcxToDefaultPlatformMapping = String.Empty;
             actualVcxToDefaultPlatformMappingNoOutput = assignProjectConfiguration.VcxToDefaultPlatformMapping;
-            Assert.Equal(actualVcxToDefaultPlatformMappingNoOutput, expectedVcxToDefaultPlatformMappingLibraryOutput);
+            Assert.AreEqual(expectedVcxToDefaultPlatformMappingLibraryOutput, actualVcxToDefaultPlatformMappingNoOutput);
 
             assignProjectConfiguration.VcxToDefaultPlatformMapping = null;
             actualVcxToDefaultPlatformMappingNoOutput = assignProjectConfiguration.VcxToDefaultPlatformMapping;
-            Assert.Equal(actualVcxToDefaultPlatformMappingNoOutput, expectedVcxToDefaultPlatformMappingLibraryOutput);
+            Assert.AreEqual(expectedVcxToDefaultPlatformMappingLibraryOutput, actualVcxToDefaultPlatformMappingNoOutput);
         }
         #endregion
     }

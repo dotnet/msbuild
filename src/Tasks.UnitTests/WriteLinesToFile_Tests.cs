@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -13,17 +13,17 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public sealed class WriteLinesToFile_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public WriteLinesToFile_Tests(ITestOutputHelper output)
+        public WriteLinesToFile_Tests(TestContext output)
         {
             _output = output;
         }
@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Invalid encoding
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidEncoding()
         {
             var a = new WriteLinesToFile
@@ -43,15 +43,15 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Lines = new TaskItem[] { new TaskItem("x") }
             };
 
-            Assert.False(a.Execute());
+            Assert.IsFalse(a.Execute());
             ((MockEngine)a.BuildEngine).AssertLogContains("MSB3098");
-            Assert.False(File.Exists(a.File.ItemSpec));
+            Assert.IsFalse(File.Exists(a.File.ItemSpec));
         }
 
         /// <summary>
         /// Reading blank lines from a file should be ignored.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Encoding()
         {
             var file = FileUtilities.GetTemporaryFile();
@@ -65,16 +65,16 @@ namespace Microsoft.Build.Tasks.UnitTests
                     File = new TaskItem(file),
                     Lines = new ITaskItem[] { new TaskItem("\uBDEA") }
                 };
-                Assert.True(a.Execute());
+                Assert.IsTrue(a.Execute());
 
                 var r = new ReadLinesFromFile
                 {
                     File = new TaskItem(file),
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
-                Assert.True(r.Execute());
+                Assert.IsTrue(r.Execute());
 
-                Assert.Equal("\uBDEA", r.Lines[0].ItemSpec);
+                Assert.AreEqual("\uBDEA", r.Lines[0].ItemSpec);
 
                 File.Delete(file);
 
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                     Lines = new ITaskItem[] { new TaskItem("\uBDEA") },
                     Encoding = "ASCII"
                 };
-                Assert.True(a.Execute());
+                Assert.IsTrue(a.Execute());
 
                 // Read the line from the file.
                 r = new ReadLinesFromFile
@@ -95,9 +95,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                     File = new TaskItem(file),
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest()
                 };
-                Assert.True(r.Execute());
+                Assert.IsTrue(r.Execute());
 
-                Assert.NotEqual("\uBDEA", r.Lines[0].ItemSpec);
+                Assert.AreNotEqual("\uBDEA", r.Lines[0].ItemSpec);
             }
             finally
             {
@@ -105,7 +105,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WriteLinesWriteOnlyWhenDifferentTest()
         {
             var file = FileUtilities.GetTemporaryFile();
@@ -169,10 +169,10 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// With a custom encoding, WriteOnlyWhenDifferent must compare using that encoding (BOM included).
         /// </summary>
-        [Theory]
-        [InlineData("utf-8")]
-        [InlineData("unicode")]
-        [InlineData("utf-32")]
+        [MSBuildTestMethod]
+        [DataRow("utf-8")]
+        [DataRow("unicode")]
+        [DataRow("utf-32")]
         public void WriteOnlyWhenDifferentRespectsEncoding(string encoding)
         {
             var file = FileUtilities.GetTemporaryFile();
@@ -228,7 +228,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RedundantParametersAreLogged()
         {
             using TestEnvironment testEnv = TestEnvironment.Create(_output);
@@ -254,7 +254,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Question WriteLines to return false when a write will be required.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void QuestionWriteLinesWriteOnlyWhenDifferentTest()
         {
             var file = FileUtilities.GetTemporaryFile();
@@ -319,7 +319,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Question WriteLines to return true when Lines are empty.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void QuestionWriteLinesWhenLinesAreEmpty()
         {
             // Test the combination of:
@@ -372,7 +372,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         /// <summary>
         /// Should create directory structure when target <see cref="WriteLinesToFile.File"/> does not exist.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void WriteLinesToFileDoesCreateDirectory()
         {
             using (var testEnv = TestEnvironment.Create())
@@ -397,9 +397,9 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void WritingNothingErasesExistingFile(bool useNullLines)
         {
             ITaskItem[] lines = useNullLines ? null : Array.Empty<ITaskItem>();
@@ -425,9 +425,9 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void WritingNothingCreatesNewFile(bool useNullLines)
         {
             ITaskItem[] lines = useNullLines ? null : Array.Empty<ITaskItem>();
@@ -452,7 +452,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TransactionalModeHandlesConcurrentWritesSuccessfully()
         {
             using (var testEnv = TestEnvironment.Create(_output))
@@ -513,7 +513,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TransactionalModeSucceedsWithConcurrentOverwrites()
         {
             using (var testEnv = TestEnvironment.Create(_output))
@@ -590,7 +590,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NonTransactionalModeCausesDataLoss()
         {
             using (var testEnv = TestEnvironment.Create(_output))

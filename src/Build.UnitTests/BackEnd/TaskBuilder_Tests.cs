@@ -17,7 +17,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
@@ -29,14 +28,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Unit tests for the TaskBuilder component
     /// </summary>
+    [TestClass]
     public class TaskBuilder_Tests : ITargetBuilderCallback
     {
-        private readonly ITestOutputHelper _testOutput;
+        private readonly TestContext _testOutput;
 
         /// <summary>
         /// Prepares the environment for the test.
         /// </summary>
-        public TaskBuilder_Tests(ITestOutputHelper output)
+        public TaskBuilder_Tests(TestContext output)
         {
             _testOutput = output;
         }
@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verifies that we do look up the task during execute when the condition is true.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TasksAreDiscoveredWhenTaskConditionTrue()
         {
             MockLogger logger = new MockLogger();
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogDoesntContain("Made it");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TasksOnlyLogStartedEventOnceEach()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -103,7 +103,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// the task.  We verify that we never loaded the task because if we did try, the task load itself would
         /// have failed, resulting in an error.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TasksNotDiscoveredWhenTaskConditionFalse()
         {
             MockLogger logger = new MockLogger();
@@ -124,7 +124,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains("Made it");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanceledTasksDoNotLogMSB4181()
         {
             using (TestEnvironment env = TestEnvironment.Create(_testOutput))
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify when task outputs are overridden the override messages are correctly displayed
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OverridePropertiesInCreateProperty()
         {
             MockLogger logger = new MockLogger();
@@ -236,7 +236,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify that when a task outputs are inferred the override messages are displayed
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OverridePropertiesInInferredCreateProperty()
         {
             string[] files = null;
@@ -298,7 +298,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that tasks batch on outputs correctly.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TaskOutputBatching()
         {
             MockLogger logger = new MockLogger();
@@ -363,7 +363,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// MSbuildLastTaskResult property contains true or false indicating
         /// the success or failure of the last task.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildLastTaskResult()
         {
             string projectFileContents = ObjectModelHelpers.CleanupFileContents(@"
@@ -417,7 +417,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// This is to support wildcards in CreateItem. Allowing anything
         /// else could let the item get corrupt (inconsistent values for Filename and FullPath, for example)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TasksCanAddRecursiveDirBuiltInMetadata()
         {
             MockLogger logger = new MockLogger(this._testOutput);
@@ -448,7 +448,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Verify CreateItem prevents adding any built-in metadata explicitly, even recursivedir.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OtherBuiltInMetadataErrors()
         {
             MockLogger logger = new MockLogger();
@@ -467,14 +467,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.False(result);
+            Assert.IsFalse(result);
             logger.AssertLogContains("MSB3031");
         }
 
         /// <summary>
         /// Verify CreateItem prevents adding any built-in metadata explicitly, even recursivedir.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OtherBuiltInMetadataErrors2()
         {
             MockLogger logger = new MockLogger();
@@ -491,7 +491,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.False(result);
+            Assert.IsFalse(result);
             logger.AssertLogContains("MSB3031");
         }
 
@@ -499,7 +499,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that properties can be passed in to a task and out as items, despite the
         /// built-in metadata restrictions.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertiesInItemsOutOfTask()
         {
             MockLogger logger = new MockLogger();
@@ -522,7 +522,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.True(result);
+            Assert.IsTrue(result);
             logger.AssertLogContains("[.ext]");
         }
 
@@ -530,7 +530,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that properties can be passed in to a task and out as items, despite
         /// having illegal characters for a file name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void IllegalFileCharsInItemsOutOfTask()
         {
             MockLogger logger = new MockLogger();
@@ -553,14 +553,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             loggers.Add(logger);
             bool result = project.Build("t", loggers);
 
-            Assert.True(result);
+            Assert.IsTrue(result);
             logger.AssertLogContains("[||illegal||]");
         }
 
         /// <summary>
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NullMetadataOnOutputItems()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -584,7 +584,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// If an item being output from a task has null metadata, we shouldn't crash.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NullMetadataOnLegacyOutputItems()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -608,7 +608,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// If an item returned from a task has bare-minimum metadata implementation, we shouldn't crash.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MinimalLegacyOutputItems()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -633,7 +633,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Regression test for https://github.com/dotnet/msbuild/issues/5080
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SameAssemblyFromDifferentRelativePathsSharesAssemblyLoadContext()
         {
             string realTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -666,7 +666,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Regression test for https://github.com/dotnet/msbuild/issues/12370
         /// Verifies that MSBuildLoadContext accepts newer assembly versions when older versions are requested (version roll-forward).
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildLoadContext_AcceptsNewerAssemblyVersions()
         {
             string realTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -692,7 +692,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// If an item being output from an inline task has null metadata, we shouldn't crash.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NullMetadataOnOutputItems_InlineTask()
         {
             string projectContents = @"
@@ -734,7 +734,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// various task output-related operations, using a task built against the current
         /// version of MSBuild.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidateDefiningProjectMetadataOnTaskOutputs()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -746,7 +746,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// various task output-related operations, using a task built against V4 MSBuild,
         /// which didn't support the defining project metadata.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidateDefiningProjectMetadataOnTaskOutputs_LegacyItems()
         {
             string customTaskPath = Assembly.GetExecutingAssembly().Location;
@@ -757,7 +757,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that putting the RunInSTA attribute on a task causes it to run in the STA thread.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestSTAThreadRequired()
         {
             TestSTATask(true, false, false);
@@ -766,7 +766,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests an STA task with an exception
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestSTAThreadRequiredWithException()
         {
             TestSTATask(true, false, true);
@@ -775,7 +775,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests an STA task with failure.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestSTAThreadRequiredWithFailure()
         {
             TestSTATask(true, true, false);
@@ -784,7 +784,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests an MTA task.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestSTAThreadNotRequired()
         {
             TestSTATask(false, false, false);
@@ -793,7 +793,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests an MTA task with an exception.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestSTAThreadNotRequiredWithException()
         {
             TestSTATask(false, false, true);
@@ -802,7 +802,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests an MTA task with failure.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestSTAThreadNotRequiredWithFailure()
         {
             TestSTATask(false, true, false);
@@ -985,7 +985,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             if (throwException)
             {
                 logger.AssertLogContains("EXCEPTION");
-                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
+                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
                 return;
             }
             else
@@ -996,7 +996,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             if (failTask)
             {
                 logger.AssertLogContains("FAIL");
-                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
+                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
             }
             else
             {
@@ -1005,7 +1005,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             if (!throwException && !failTask)
             {
-                Assert.Equal(BuildResultCode.Success, result.OverallResult);
+                Assert.AreEqual(BuildResultCode.Success, result.OverallResult);
             }
         }
 

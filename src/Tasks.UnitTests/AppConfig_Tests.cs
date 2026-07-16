@@ -6,7 +6,6 @@ using System.IO;
 using System.Text;
 using System.Xml;
 using Microsoft.Build.Tasks;
-using Xunit;
 
 #nullable disable
 
@@ -15,12 +14,13 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Unit tests for the AppConfig class
     /// </summary>
+    [TestClass]
     public class AppConfig_Tests
     {
         /// <summary>
         /// A simple app.config.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Simple()
         {
             AppConfig app = new AppConfig();
@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A simple app.config.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SimpleRange()
         {
             AppConfig app = new AppConfig();
@@ -72,7 +72,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// An app.config taken from rascal, that has some bindingRedirects.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RascalTest()
         {
             AppConfig app = new AppConfig();
@@ -121,7 +121,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A machine.config file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MachineConfig()
         {
             AppConfig app = new AppConfig();
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Make sure that only dependent assemblies under the configuration-->runtime tag work.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress339840_DependentAssemblyUnderAlienTag()
         {
             AppConfig app = new AppConfig();

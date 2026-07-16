@@ -11,7 +11,6 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
-using Xunit;
 
 #nullable disable
 
@@ -20,6 +19,7 @@ namespace Microsoft.Build.UnitTests.Construction
     /// <summary>
     /// Tests for the ElementLocation class
     /// </summary>
+    [TestClass]
     public class ElementLocation_Tests
     {
         /// <summary>
@@ -35,46 +35,46 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests constructor specifying only file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructorTest1()
         {
             IElementLocation location = ElementLocation.Create("file", 65536, 0);
-            Assert.Equal("file", location.File);
-            Assert.Equal(65536, location.Line);
-            Assert.Equal(0, location.Column);
+            Assert.AreEqual("file", location.File);
+            Assert.AreEqual(65536, location.Line);
+            Assert.AreEqual(0, location.Column);
             Assert.Contains("RegularElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
         /// Tests constructor specifying only file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructorTest2()
         {
             IElementLocation location = ElementLocation.Create("file", 0, 65536);
-            Assert.Equal("file", location.File);
-            Assert.Equal(0, location.Line);
-            Assert.Equal(65536, location.Column);
+            Assert.AreEqual("file", location.File);
+            Assert.AreEqual(0, location.Line);
+            Assert.AreEqual(65536, location.Column);
             Assert.Contains("RegularElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
         /// Tests constructor specifying only file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructorTest3()
         {
             IElementLocation location = ElementLocation.Create("file", 65536, 65537);
-            Assert.Equal("file", location.File);
-            Assert.Equal(65536, location.Line);
-            Assert.Equal(65537, location.Column);
+            Assert.AreEqual("file", location.File);
+            Assert.AreEqual(65536, location.Line);
+            Assert.AreEqual(65537, location.Column);
             Assert.Contains("RegularElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
         /// Test equality
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Equality()
         {
             IElementLocation location1 = ElementLocation.Create("file", 65536, 65537);
@@ -84,18 +84,18 @@ namespace Microsoft.Build.UnitTests.Construction
             IElementLocation location5 = ElementLocation.Create("file", 0, 1);
             IElementLocation location6 = ElementLocation.Create("file", 65536, 65537);
 
-            Assert.True(location1.Equals(location6));
-            Assert.True(location2.Equals(location5));
-            Assert.False(location3.Equals(location1));
-            Assert.False(location4.Equals(location2));
-            Assert.False(location4.Equals(location6));
+            Assert.IsTrue(location1.Equals(location6));
+            Assert.IsTrue(location2.Equals(location5));
+            Assert.IsFalse(location3.Equals(location1));
+            Assert.IsFalse(location4.Equals(location2));
+            Assert.IsFalse(location4.Equals(location6));
         }
 
         /// <summary>
         /// Check it will use large element location when it should.
         /// Using file as BIZARRELY XmlTextReader+StringReader crops or trims.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestLargeElementLocationUsedLargeColumn()
         {
             string file = null;
@@ -110,8 +110,8 @@ namespace Microsoft.Build.UnitTests.Construction
             }
             catch (InvalidProjectFileException ex)
             {
-                Assert.Equal(70012, ex.ColumnNumber);
-                Assert.Equal(2, ex.LineNumber);
+                Assert.AreEqual(70012, ex.ColumnNumber);
+                Assert.AreEqual(2, ex.LineNumber);
             }
             finally
             {
@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Check it will use large element location when it should.
         /// Using file as BIZARRELY XmlTextReader+StringReader crops or trims.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestLargeElementLocationUsedLargeLine()
         {
             string file = null;
@@ -145,8 +145,8 @@ namespace Microsoft.Build.UnitTests.Construction
             }
             catch (InvalidProjectFileException ex)
             {
-                Assert.Equal(70002, ex.LineNumber);
-                Assert.Equal(2, ex.ColumnNumber);
+                Assert.AreEqual(70002, ex.LineNumber);
+                Assert.AreEqual(2, ex.ColumnNumber);
             }
             finally
             {
@@ -157,7 +157,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests serialization.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SerializationTest()
         {
             IElementLocation location = ElementLocation.Create("file", 65536, 65537);
@@ -166,16 +166,16 @@ namespace Microsoft.Build.UnitTests.Construction
             IElementLocation deserializedLocation = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedLocation, ElementLocation.FactoryForDeserialization);
 
-            Assert.Equal(location.File, deserializedLocation.File);
-            Assert.Equal(location.Line, deserializedLocation.Line);
-            Assert.Equal(location.Column, deserializedLocation.Column);
+            Assert.AreEqual(location.File, deserializedLocation.File);
+            Assert.AreEqual(location.Line, deserializedLocation.Line);
+            Assert.AreEqual(location.Column, deserializedLocation.Column);
             Assert.Contains("RegularElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
         /// Tests serialization of empty location.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SerializationTestForEmptyLocation()
         {
             IElementLocation location = ElementLocation.EmptyLocation;
@@ -184,32 +184,32 @@ namespace Microsoft.Build.UnitTests.Construction
             IElementLocation deserializedLocation = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedLocation, ElementLocation.FactoryForDeserialization);
 
-            Assert.Equal(location.File, deserializedLocation.File);
-            Assert.Equal(location.Line, deserializedLocation.Line);
-            Assert.Equal(location.Column, deserializedLocation.Column);
+            Assert.AreEqual(location.File, deserializedLocation.File);
+            Assert.AreEqual(location.Line, deserializedLocation.Line);
+            Assert.AreEqual(location.Column, deserializedLocation.Column);
             Assert.Contains("SmallElementLocation", deserializedLocation.GetType().FullName);
         }
 
         /// <summary>
         /// Tests constructor specifying file, line and column.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructorWithIndicesTest_SmallElementLocation()
         {
             IElementLocation location = ElementLocation.Create("file", 65535, 65534);
-            Assert.Equal("file", location.File);
-            Assert.Equal(65535, location.Line);
-            Assert.Equal(65534, location.Column);
+            Assert.AreEqual("file", location.File);
+            Assert.AreEqual(65535, location.Line);
+            Assert.AreEqual(65534, location.Column);
             Assert.Contains("SmallElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
         /// Tests constructor specifying file, negative line, column
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructorWithNegativeIndicesTest1()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.ThrowsExactly<InternalErrorException>(() =>
             {
                 ElementLocation.Create("file", -1, 2);
             });
@@ -217,10 +217,10 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests constructor specifying file, line, negative column
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructorWithNegativeIndicesTest2n()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.ThrowsExactly<InternalErrorException>(() =>
             {
                 ElementLocation.Create("file", 1, -2);
             });
@@ -228,56 +228,56 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Tests constructor with invalid null file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructorTestNullFile()
         {
             IElementLocation location = ElementLocation.Create(null);
-            Assert.Equal(location.File, String.Empty);
+            Assert.AreEqual(location.File, String.Empty);
         }
 
         /// <summary>
         /// Tests constructor specifying only file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructorTest1_SmallElementLocation()
         {
             IElementLocation location = ElementLocation.Create("file", 65535, 0);
-            Assert.Equal("file", location.File);
-            Assert.Equal(65535, location.Line);
-            Assert.Equal(0, location.Column);
+            Assert.AreEqual("file", location.File);
+            Assert.AreEqual(65535, location.Line);
+            Assert.AreEqual(0, location.Column);
             Assert.Contains("SmallElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
         /// Tests constructor specifying only file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructorTest2_SmallElementLocation()
         {
             IElementLocation location = ElementLocation.Create("file", 0, 65535);
-            Assert.Equal("file", location.File);
-            Assert.Equal(0, location.Line);
-            Assert.Equal(65535, location.Column);
+            Assert.AreEqual("file", location.File);
+            Assert.AreEqual(0, location.Line);
+            Assert.AreEqual(65535, location.Column);
             Assert.Contains("SmallElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
         /// Tests constructor specifying only file.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructorTest3_SmallElementLocation()
         {
             IElementLocation location = ElementLocation.Create("file", 65535, 65534);
-            Assert.Equal("file", location.File);
-            Assert.Equal(65535, location.Line);
-            Assert.Equal(65534, location.Column);
+            Assert.AreEqual("file", location.File);
+            Assert.AreEqual(65535, location.Line);
+            Assert.AreEqual(65534, location.Column);
             Assert.Contains("SmallElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
         /// Tests serialization.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SerializationTest_SmallElementLocation()
         {
             IElementLocation location = ElementLocation.Create("file", 65535, 2);
@@ -286,18 +286,18 @@ namespace Microsoft.Build.UnitTests.Construction
             IElementLocation deserializedLocation = null;
             TranslationHelpers.GetReadTranslator().Translate(ref deserializedLocation, ElementLocation.FactoryForDeserialization);
 
-            Assert.Equal(location.File, deserializedLocation.File);
-            Assert.Equal(location.Line, deserializedLocation.Line);
-            Assert.Equal(location.Column, deserializedLocation.Column);
+            Assert.AreEqual(location.File, deserializedLocation.File);
+            Assert.AreEqual(location.Line, deserializedLocation.Line);
+            Assert.AreEqual(location.Column, deserializedLocation.Column);
             Assert.Contains("SmallElementLocation", location.GetType().FullName);
         }
 
         /// <summary>
         /// Test many of the getters
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void LocationStringsMedleyReadOnlyLoad()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -344,14 +344,14 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Save read only fails
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SaveReadOnly1()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
                 LoadXmlDocumentWithLocation(doc, _pathToCommonTargets);
-                Assert.True(doc.IsReadOnly);
+                Assert.IsTrue(doc.IsReadOnly);
                 doc.Save(FileUtilities.GetTemporaryFile());
             });
         }
@@ -359,15 +359,15 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Save read only fails
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void SaveReadOnly2()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
             LoadXmlDocumentWithLocation(doc, _pathToCommonTargets);
-            Assert.True(doc.IsReadOnly);
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.IsTrue(doc.IsReadOnly);
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 doc.Save(new MemoryStream());
             });
@@ -376,15 +376,15 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Save read only fails
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void SaveReadOnly3()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
             LoadXmlDocumentWithLocation(doc, _pathToCommonTargets);
-            Assert.True(doc.IsReadOnly);
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.IsTrue(doc.IsReadOnly);
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 doc.Save(new StringWriter());
             });
@@ -393,17 +393,17 @@ namespace Microsoft.Build.UnitTests.Construction
         /// <summary>
         /// Save read only fails
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void SaveReadOnly4()
         {
             var doc = new XmlDocumentWithLocation(loadAsReadOnly: true);
             LoadXmlDocumentWithLocation(doc, _pathToCommonTargets);
-            Assert.True(doc.IsReadOnly);
+            Assert.IsTrue(doc.IsReadOnly);
             using (XmlWriter wr = XmlWriter.Create(new FileStream(FileUtilities.GetTemporaryFileName(), FileMode.Create)))
             {
-                Assert.Throws<InvalidOperationException>(() =>
+                Assert.ThrowsExactly<InvalidOperationException>(() =>
                 {
                     doc.Save(wr);
                 });
@@ -440,7 +440,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 File.WriteAllText(file, content);
                 var doc = new XmlDocumentWithLocation(loadAsReadOnly: readOnly);
                 LoadXmlDocumentWithLocation(doc, file);
-                Assert.Equal(readOnly, doc.IsReadOnly);
+                Assert.AreEqual(readOnly, doc.IsReadOnly);
                 var allNodes = doc.SelectNodes("//*|//@*");
 
                 string locations = String.Empty;

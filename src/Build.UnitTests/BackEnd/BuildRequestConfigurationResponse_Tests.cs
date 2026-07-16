@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.BackEnd;
-using Xunit;
 
 #nullable disable
 
@@ -11,13 +10,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// <summary>
     /// Tests for the BuildRequestConfigurationResponse class.
     /// </summary>
+    [TestClass]
     public class BuildRequestConfigurationResponse_Tests
     {
         /// <summary>
         /// Validate the constructor takes any combination of arguments.  It is not the purpose of this class to enforce
         /// rules on configuration IDs.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructor()
         {
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(0, 0, 0);
@@ -43,49 +43,49 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Test the NodeConfigurationId property
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestNodeConfigurationId()
         {
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(1, 0, 0);
-            Assert.Equal(1, response.NodeConfigurationId);
+            Assert.AreEqual(1, response.NodeConfigurationId);
         }
 
         /// <summary>
         /// Test the GlobalConfigurationId property
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGlobalConfigurationId()
         {
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(0, 1, 0);
-            Assert.Equal(1, response.GlobalConfigurationId);
+            Assert.AreEqual(1, response.GlobalConfigurationId);
         }
 
         /// <summary>
         /// Test the ResultsNodeId property
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestResultsNodeId()
         {
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(0, 1, 2);
-            Assert.Equal(2, response.ResultsNodeId);
+            Assert.AreEqual(2, response.ResultsNodeId);
         }
 
         /// <summary>
         /// Test the Serialize method
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTranslation()
         {
             BuildRequestConfigurationResponse response = new BuildRequestConfigurationResponse(1, 2, 3);
-            Assert.Equal(NodePacketType.BuildRequestConfigurationResponse, response.Type);
+            Assert.AreEqual(NodePacketType.BuildRequestConfigurationResponse, response.Type);
 
             ((ITranslatable)response).Translate(TranslationHelpers.GetWriteTranslator());
 
             INodePacket deserializedPacket = BuildRequestConfigurationResponse.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
             BuildRequestConfigurationResponse deserializedResponse = deserializedPacket as BuildRequestConfigurationResponse;
-            Assert.Equal(response.NodeConfigurationId, deserializedResponse.NodeConfigurationId);
-            Assert.Equal(response.GlobalConfigurationId, deserializedResponse.GlobalConfigurationId);
-            Assert.Equal(response.ResultsNodeId, deserializedResponse.ResultsNodeId);
+            Assert.AreEqual(response.NodeConfigurationId, deserializedResponse.NodeConfigurationId);
+            Assert.AreEqual(response.GlobalConfigurationId, deserializedResponse.GlobalConfigurationId);
+            Assert.AreEqual(response.ResultsNodeId, deserializedResponse.ResultsNodeId);
         }
     }
 }

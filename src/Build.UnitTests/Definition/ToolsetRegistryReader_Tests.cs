@@ -14,8 +14,6 @@ using Microsoft.Build.Internal;
 using Microsoft.Win32;
 using Constants = Microsoft.Build.Framework.Constants;
 
-using Xunit;
-using Xunit.NetCore.Extensions;
 
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 
@@ -26,6 +24,7 @@ namespace Microsoft.Build.UnitTests.Definition
     /// <summary>
     /// Unit test for ToolsetRegistryReader class
     /// </summary>
+    [TestClass]
     public class ToolsetRegistryReader_Tests : IDisposable
     {
         // Subkey "3.5"
@@ -88,13 +87,14 @@ namespace Microsoft.Build.UnitTests.Definition
             string msbuildOverrideTasksPath;
             string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
-            Assert.Empty(values);
+            Assert.IsEmpty(values);
         }
 
         /// <summary>
         /// Tests the tools version 4.0 is written to the registry at install time
         /// </summary>
-        [Fact(Skip = "Test requires installed toolset.")]
+        [MSBuildTestMethod]
+        [Ignore("Test requires installed toolset.")]
         public void DefaultValuesInRegistryCreatedBySetup()
         {
             if (NativeMethodsShared.IsUnixLike)
@@ -110,9 +110,9 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
             // Check the values in the data
-            Assert.True(values.ContainsKey("4.0")); // "Tools version 4.0 should be defined by default"
-            Assert.True(values.ContainsKey(ObjectModelHelpers.MSBuildDefaultToolsVersion), String.Format("Tools version {0} should be defined by default", ObjectModelHelpers.MSBuildDefaultToolsVersion));
-            Assert.Equal("2.0", defaultToolsVersion); // "Default tools version should be 2.0"
+            Assert.IsTrue(values.ContainsKey("4.0")); // "Tools version 4.0 should be defined by default"
+            Assert.IsTrue(values.ContainsKey(ObjectModelHelpers.MSBuildDefaultToolsVersion), String.Format("Tools version {0} should be defined by default", ObjectModelHelpers.MSBuildDefaultToolsVersion));
+            Assert.AreEqual("2.0", defaultToolsVersion); // "Default tools version should be 2.0"
         }
 
         /// <summary>
@@ -133,7 +133,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Null(defaultToolsVersion);
+            Assert.IsNull(defaultToolsVersion);
         }
 
         /// <summary>
@@ -148,8 +148,8 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Empty(values);
-            Assert.Null(defaultToolsVersion);
+            Assert.IsEmpty(values);
+            Assert.IsNull(defaultToolsVersion);
         }
 
         /// <summary>
@@ -168,8 +168,8 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Empty(values);
-            Assert.Null(defaultToolsVersion);
+            Assert.IsEmpty(values);
+            Assert.IsNull(defaultToolsVersion);
         }
 
         /// <summary>
@@ -189,10 +189,10 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Null(defaultToolsVersion);
-            Assert.Single(values);
-            Assert.Empty(values["tv1"].Properties);
-            Assert.Equal(0, String.Compare(xdir, values["tv1"].ToolsPath, StringComparison.OrdinalIgnoreCase));
+            Assert.IsNull(defaultToolsVersion);
+            Assert.ContainsSingle(values);
+            Assert.IsEmpty(values["tv1"].Properties);
+            Assert.AreEqual(0, String.Compare(xdir, values["tv1"].ToolsPath, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -216,13 +216,13 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Equal(2, values.Count);
-            Assert.Single(values["tv1"].Properties);
-            Assert.Equal(0, String.Compare(xdir, values["tv1"].ToolsPath, StringComparison.OrdinalIgnoreCase));
-            Assert.Equal(0, String.Compare("value1", values["tv1"].Properties["name1"].EvaluatedValue, StringComparison.OrdinalIgnoreCase));
-            Assert.Single(values["tv2"].Properties);
-            Assert.Equal(0, String.Compare(ydir, values["tv2"].ToolsPath, StringComparison.OrdinalIgnoreCase));
-            Assert.Equal(0, String.Compare("value2", values["tv2"].Properties["name2"].EvaluatedValue, StringComparison.OrdinalIgnoreCase));
+            Assert.AreEqual(2, values.Count);
+            Assert.ContainsSingle(values["tv1"].Properties);
+            Assert.AreEqual(0, String.Compare(xdir, values["tv1"].ToolsPath, StringComparison.OrdinalIgnoreCase));
+            Assert.AreEqual(0, String.Compare("value1", values["tv1"].Properties["name1"].EvaluatedValue, StringComparison.OrdinalIgnoreCase));
+            Assert.ContainsSingle(values["tv2"].Properties);
+            Assert.AreEqual(0, String.Compare(ydir, values["tv2"].ToolsPath, StringComparison.OrdinalIgnoreCase));
+            Assert.AreEqual(0, String.Compare("value2", values["tv2"].Properties["name2"].EvaluatedValue, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
@@ -231,7 +231,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [WindowsOnlyFact]
         public void ReadRegistry_NonStringData()
         {
-            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            Assert.ThrowsExactly<InvalidToolsetDefinitionException>(() =>
             {
                 RegistryKey key1 = _toolsVersionsRegistryKey.CreateSubKey("tv1");
                 key1.SetValue("msbuildtoolspath", "c:\\xxx");
@@ -285,25 +285,25 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Equal(2, values.Count);
-            Assert.Single(values["tv1"].Properties);
-            Assert.Equal(xdir, values["tv1"].ToolsPath);
-            Assert.Equal("value1", values["tv1"].Properties["name1"].EvaluatedValue);
-            Assert.Single(values["tv1"].SubToolsets);
-            Assert.Equal(2, values["tv1"].SubToolsets["SubKey1"].Properties.Count);
-            Assert.Equal("value1a", values["tv1"].SubToolsets["SubKey1"].Properties["name1a"].EvaluatedValue);
-            Assert.Equal("value2a", values["tv1"].SubToolsets["SubKey1"].Properties["name2a"].EvaluatedValue);
+            Assert.AreEqual(2, values.Count);
+            Assert.ContainsSingle(values["tv1"].Properties);
+            Assert.AreEqual(xdir, values["tv1"].ToolsPath);
+            Assert.AreEqual("value1", values["tv1"].Properties["name1"].EvaluatedValue);
+            Assert.ContainsSingle(values["tv1"].SubToolsets);
+            Assert.AreEqual(2, values["tv1"].SubToolsets["SubKey1"].Properties.Count);
+            Assert.AreEqual("value1a", values["tv1"].SubToolsets["SubKey1"].Properties["name1a"].EvaluatedValue);
+            Assert.AreEqual("value2a", values["tv1"].SubToolsets["SubKey1"].Properties["name2a"].EvaluatedValue);
 
-            Assert.Single(values["tv2"].Properties);
-            Assert.Equal(ydir, values["tv2"].ToolsPath);
-            Assert.Equal("value2", values["tv2"].Properties["name2"].EvaluatedValue);
-            Assert.Equal(2, values["tv2"].SubToolsets.Count);
-            Assert.Equal(2, values["tv2"].SubToolsets["SubKey2"].Properties.Count);
-            Assert.Equal("value3a", values["tv2"].SubToolsets["SubKey2"].Properties["name3a"].EvaluatedValue);
-            Assert.Equal("value2a", values["tv2"].SubToolsets["SubKey2"].Properties["name2a"].EvaluatedValue);
-            Assert.Equal(2, values["tv2"].SubToolsets["SubKey3"].Properties.Count);
-            Assert.Equal("value4a", values["tv2"].SubToolsets["SubKey3"].Properties["name4a"].EvaluatedValue);
-            Assert.Equal("value5a", values["tv2"].SubToolsets["SubKey3"].Properties["name5a"].EvaluatedValue);
+            Assert.ContainsSingle(values["tv2"].Properties);
+            Assert.AreEqual(ydir, values["tv2"].ToolsPath);
+            Assert.AreEqual("value2", values["tv2"].Properties["name2"].EvaluatedValue);
+            Assert.AreEqual(2, values["tv2"].SubToolsets.Count);
+            Assert.AreEqual(2, values["tv2"].SubToolsets["SubKey2"].Properties.Count);
+            Assert.AreEqual("value3a", values["tv2"].SubToolsets["SubKey2"].Properties["name3a"].EvaluatedValue);
+            Assert.AreEqual("value2a", values["tv2"].SubToolsets["SubKey2"].Properties["name2a"].EvaluatedValue);
+            Assert.AreEqual(2, values["tv2"].SubToolsets["SubKey3"].Properties.Count);
+            Assert.AreEqual("value4a", values["tv2"].SubToolsets["SubKey3"].Properties["name4a"].EvaluatedValue);
+            Assert.AreEqual("value5a", values["tv2"].SubToolsets["SubKey3"].Properties["name5a"].EvaluatedValue);
         }
 
         /// <summary>
@@ -333,14 +333,14 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Single(values);
-            Assert.Single(values["tv1"].Properties);
-            Assert.Equal(xdir, values["tv1"].ToolsPath);
-            Assert.Equal("value1", values["tv1"].Properties["name1"].EvaluatedValue);
-            Assert.Single(values["tv1"].SubToolsets);
-            Assert.Equal(2, values["tv1"].SubToolsets["SubKey1"].Properties.Count);
-            Assert.Equal("value1a", values["tv1"].SubToolsets["SubKey1"].Properties["name1a"].EvaluatedValue);
-            Assert.Equal("value2a", values["tv1"].SubToolsets["SubKey1"].Properties["name2a"].EvaluatedValue);
+            Assert.ContainsSingle(values);
+            Assert.ContainsSingle(values["tv1"].Properties);
+            Assert.AreEqual(xdir, values["tv1"].ToolsPath);
+            Assert.AreEqual("value1", values["tv1"].Properties["name1"].EvaluatedValue);
+            Assert.ContainsSingle(values["tv1"].SubToolsets);
+            Assert.AreEqual(2, values["tv1"].SubToolsets["SubKey1"].Properties.Count);
+            Assert.AreEqual("value1a", values["tv1"].SubToolsets["SubKey1"].Properties["name1a"].EvaluatedValue);
+            Assert.AreEqual("value2a", values["tv1"].SubToolsets["SubKey1"].Properties["name2a"].EvaluatedValue);
         }
 
         /// <summary>
@@ -367,20 +367,20 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Single(values);
-            Assert.Equal(2, values["tv1"].Properties.Count);
-            Assert.Equal(xdir, values["tv1"].ToolsPath);
-            Assert.Equal("value1", values["tv1"].Properties["name1"].EvaluatedValue);
-            Assert.Equal("value2", values["tv1"].Properties["name2"].EvaluatedValue);
-            Assert.Single(values["tv1"].SubToolsets);
-            Assert.Equal(2, values["tv1"].SubToolsets["Foo"].Properties.Count);
-            Assert.Equal("value1a", values["tv1"].SubToolsets["Foo"].Properties["name1"].EvaluatedValue);
-            Assert.Equal("", values["tv1"].SubToolsets["Foo"].Properties["name2"].EvaluatedValue);
+            Assert.ContainsSingle(values);
+            Assert.AreEqual(2, values["tv1"].Properties.Count);
+            Assert.AreEqual(xdir, values["tv1"].ToolsPath);
+            Assert.AreEqual("value1", values["tv1"].Properties["name1"].EvaluatedValue);
+            Assert.AreEqual("value2", values["tv1"].Properties["name2"].EvaluatedValue);
+            Assert.ContainsSingle(values["tv1"].SubToolsets);
+            Assert.AreEqual(2, values["tv1"].SubToolsets["Foo"].Properties.Count);
+            Assert.AreEqual("value1a", values["tv1"].SubToolsets["Foo"].Properties["name1"].EvaluatedValue);
+            Assert.AreEqual("", values["tv1"].SubToolsets["Foo"].Properties["name2"].EvaluatedValue);
 
             // Check when requesting the final evaluated value of the property in the context of its sub-toolset
             // that the sub-toolset overrides
-            Assert.Equal("value1a", values["tv1"].GetProperty("name1", "Foo").EvaluatedValue);
-            Assert.Equal("", values["tv1"].GetProperty("name2", "Foo").EvaluatedValue);
+            Assert.AreEqual("value1a", values["tv1"].GetProperty("name1", "Foo").EvaluatedValue);
+            Assert.AreEqual("", values["tv1"].GetProperty("name2", "Foo").EvaluatedValue);
         }
 
         /// <summary>
@@ -407,11 +407,11 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Single(values);
-            Assert.Equal(2, values["tv1"].Properties.Count);
-            Assert.Equal(xdir, values["tv1"].ToolsPath);
-            Assert.Equal("value1", values["tv1"].Properties["name1"].EvaluatedValue);
-            Assert.Equal("value2", values["tv1"].Properties["name2"].EvaluatedValue);
+            Assert.ContainsSingle(values);
+            Assert.AreEqual(2, values["tv1"].Properties.Count);
+            Assert.AreEqual(xdir, values["tv1"].ToolsPath);
+            Assert.AreEqual("value1", values["tv1"].Properties["name1"].EvaluatedValue);
+            Assert.AreEqual("value2", values["tv1"].Properties["name2"].EvaluatedValue);
         }
 
         /// <summary>
@@ -430,7 +430,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Equal("tv1", defaultToolsVersion);
+            Assert.AreEqual("tv1", defaultToolsVersion);
         }
 
         /// <summary>
@@ -445,7 +445,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             string defaultToolsVersion = reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Null(defaultToolsVersion);
+            Assert.IsNull(defaultToolsVersion);
         }
 
         /// <summary>
@@ -454,7 +454,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [WindowsOnlyFact]
         public void GetDefaultToolsVersionFromRegistry_NonStringData()
         {
-            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            Assert.ThrowsExactly<InvalidToolsetDefinitionException>(() =>
             {
                 _currentVersionRegistryKey.SetValue("DefaultToolsVersion", new String[] { "2.0.xxxx.a", "2.0.xxxx.b" }, RegistryValueKind.MultiString);
 
@@ -494,7 +494,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Equal("c:\\Foo", msbuildOverrideTasksPath);
+            Assert.AreEqual("c:\\Foo", msbuildOverrideTasksPath);
         }
 
         /// <summary>
@@ -509,7 +509,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Null(msbuildOverrideTasksPath);
+            Assert.IsNull(msbuildOverrideTasksPath);
         }
 
         /// <summary>
@@ -518,7 +518,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [WindowsOnlyFact]
         public void GetOverrideTasksPathFromRegistry_NonStringData()
         {
-            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            Assert.ThrowsExactly<InvalidToolsetDefinitionException>(() =>
             {
                 _currentVersionRegistryKey.SetValue("MsBuildOverrideTasksPath", new String[] { "2938304894", "3948394.2.3.3.3" }, RegistryValueKind.MultiString);
 
@@ -543,7 +543,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Equal("Current", defaultOverrideToolsVersion);
+            Assert.AreEqual("Current", defaultOverrideToolsVersion);
         }
 
         /// <summary>
@@ -558,7 +558,7 @@ namespace Microsoft.Build.UnitTests.Definition
             string defaultOverrideToolsVersion;
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.Null(defaultOverrideToolsVersion);
+            Assert.IsNull(defaultOverrideToolsVersion);
         }
 
         /// <summary>
@@ -567,7 +567,7 @@ namespace Microsoft.Build.UnitTests.Definition
         [WindowsOnlyFact]
         public void GetDefaultOverrideToolsVersionFromRegistry_NonStringData()
         {
-            Assert.Throws<InvalidToolsetDefinitionException>(() =>
+            Assert.ThrowsExactly<InvalidToolsetDefinitionException>(() =>
             {
                 _currentVersionRegistryKey.SetValue("DefaultOverrideToolsVersion", new String[] { "2938304894", "3948394.2.3.3.3" }, RegistryValueKind.MultiString);
 
@@ -598,12 +598,12 @@ namespace Microsoft.Build.UnitTests.Definition
             // should not throw
             reader.ReadToolsets(values, new PropertyDictionary<ProjectPropertyInstance>(), new PropertyDictionary<ProjectPropertyInstance>(), false, out msbuildOverrideTasksPath, out defaultOverrideToolsVersion);
 
-            Assert.True(values.ContainsKey("tv1"));
+            Assert.IsTrue(values.ContainsKey("tv1"));
 
             // should not contain the second toolset because it does not define a tools/bin path
-            Assert.False(values.ContainsKey("tv2"));
+            Assert.IsFalse(values.ContainsKey("tv2"));
 
-            Assert.True(values.ContainsKey("tv3"));
+            Assert.IsTrue(values.ContainsKey("tv3"));
         }
     }
 }

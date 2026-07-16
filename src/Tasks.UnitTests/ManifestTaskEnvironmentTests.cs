@@ -8,7 +8,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
@@ -16,14 +15,15 @@ namespace Microsoft.Build.Tasks.UnitTests
     /// Tests verifying TaskEnvironment migration compatibility for manifest tasks.
     /// These tests focus on path handling changes from the migration.
     /// </summary>
+    [TestClass]
     public class ManifestTaskEnvironmentTests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public ManifestTaskEnvironmentTests(ITestOutputHelper output) => _output = output;
+        public ManifestTaskEnvironmentTests(TestContext output) => _output = output;
         // Test 1: Empty ItemSpec - verifies exception handling matches pre-migration behavior
         // GetAbsolutePath throws on empty, but this flows through existing exception handling
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateManifestResourceName_EmptyItemSpec_ShouldFail()
         {
             var engine = new MockEngine(_output);
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
         // Test 2: Path with .. segments - critical test for canonicalization
         // GetAbsolutePath does NOT canonicalize, so we wrap with Path.GetFullPath where needed
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateManifestResourceName_PathWithDotDot_ShouldResolve()
         {
             using var env = TestEnvironment.Create(_output);
@@ -76,7 +76,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         // Test 3: Forward slashes - tests path normalization
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateManifestResourceName_ForwardSlashes_ShouldWork()
         {
             using var env = TestEnvironment.Create(_output);
@@ -102,7 +102,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         // Test 4: Mixed slashes - tests path normalization handles both
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateManifestResourceName_MixedSlashes_ShouldWork()
         {
             using var env = TestEnvironment.Create(_output);
@@ -128,7 +128,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         // Test 5: AddToWin32Manifest with null ApplicationManifest - tests graceful handling
-        [Fact]
+        [MSBuildTestMethod]
         public void AddToWin32Manifest_NullApplicationManifest_HandledGracefully()
         {
             using var env = TestEnvironment.Create(_output);
@@ -148,7 +148,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         // Test 6: Batch processing - one error should not abort remaining items
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateManifestResourceName_BatchProcessing_ContinuesAfterError()
         {
             using var env = TestEnvironment.Create(_output);
@@ -184,7 +184,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         // Test 7: Deeply nested folder - tests path handling with many segments
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateManifestResourceName_DeepNesting_ShouldWork()
         {
             using var env = TestEnvironment.Create(_output);
@@ -207,7 +207,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         // Test 8: Path with spaces - tests no issues with space handling
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateManifestResourceName_PathWithSpaces_ShouldWork()
         {
             using var env = TestEnvironment.Create(_output);

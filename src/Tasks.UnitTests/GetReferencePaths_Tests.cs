@@ -8,7 +8,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
 
 #if !RUNTIME_TYPE_NETCORE
@@ -19,11 +18,12 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests for the task which gets the reference assembly paths for a given target framework version / moniker
     /// </summary>
+    [TestClass]
     public sealed class GetReferenceAssmeblyPath_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public GetReferenceAssmeblyPath_Tests(ITestOutputHelper output)
+        public GetReferenceAssmeblyPath_Tests(TestContext output)
         {
             _output = output;
         }
@@ -31,7 +31,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGeneralFrameworkMonikerGood()
         {
             string targetFrameworkMoniker = ".NetFramework, Version=v4.8";
@@ -41,14 +41,14 @@ namespace Microsoft.Build.UnitTests
             getReferencePaths.TargetFrameworkMoniker = targetFrameworkMoniker;
             getReferencePaths.Execute();
             string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
-            Assert.Equal(ToolLocationHelper.GetPathToReferenceAssemblies(new FrameworkNameVersioning(targetFrameworkMoniker)).Count, returnedPaths.Length);
-            Assert.Equal(0, engine.Errors); // "Expected the log to contain no errors"
+            Assert.AreEqual(ToolLocationHelper.GetPathToReferenceAssemblies(new FrameworkNameVersioning(targetFrameworkMoniker)).Count, returnedPaths.Length);
+            Assert.AreEqual(0, engine.Errors); // "Expected the log to contain no errors"
         }
 
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGeneralFrameworkMonikerGoodWithRoot()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "TestGeneralFrameworkMonikerGoodWithRoot");
@@ -77,10 +77,10 @@ namespace Microsoft.Build.UnitTests
                 getReferencePaths.Execute();
                 string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
                 string displayName = getReferencePaths.TargetFrameworkMonikerDisplayName;
-                Assert.Single(returnedPaths);
-                Assert.Equal(framework41Directory, returnedPaths[0]);
-                Assert.Equal(0, engine.Log.Length); // "Expected the log to contain nothing"
-                Assert.Equal(".NET Framework 4.1", displayName);
+                Assert.ContainsSingle(returnedPaths);
+                Assert.AreEqual(framework41Directory, returnedPaths[0]);
+                Assert.AreEqual(0, engine.Log.Length); // "Expected the log to contain nothing"
+                Assert.AreEqual(".NET Framework 4.1", displayName);
             }
             finally
             {
@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGeneralFrameworkMonikerGoodWithRootWithProfile()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "TestGeneralFrameworkMonikerGoodWithRootWithProfile");
@@ -123,9 +123,9 @@ namespace Microsoft.Build.UnitTests
                 getReferencePaths.Execute();
                 string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
                 string displayName = getReferencePaths.TargetFrameworkMonikerDisplayName;
-                Assert.Single(returnedPaths);
-                Assert.Equal(framework41Directory + Path.DirectorySeparatorChar, returnedPaths[0]);
-                Assert.Equal(".NET Framework 4.1 Client", displayName);
+                Assert.ContainsSingle(returnedPaths);
+                Assert.AreEqual(framework41Directory + Path.DirectorySeparatorChar, returnedPaths[0]);
+                Assert.AreEqual(".NET Framework 4.1 Client", displayName);
             }
             finally
             {
@@ -139,7 +139,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where the target framework moniker is null. Expect there to be an error logged.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGeneralFrameworkMonikerNull()
         {
             MockEngine engine = new MockEngine();
@@ -148,15 +148,15 @@ namespace Microsoft.Build.UnitTests
             getReferencePaths.TargetFrameworkMoniker = null;
             getReferencePaths.Execute();
             string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
-            Assert.Null(getReferencePaths.TargetFrameworkMonikerDisplayName);
-            Assert.Empty(returnedPaths);
-            Assert.Equal(1, engine.Errors);
+            Assert.IsNull(getReferencePaths.TargetFrameworkMonikerDisplayName);
+            Assert.IsEmpty(returnedPaths);
+            Assert.AreEqual(1, engine.Errors);
         }
 
         /// <summary>
         /// Test the case where the target framework moniker is empty. Expect there to be an error logged.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGeneralFrameworkMonikerNonExistent()
         {
             MockEngine engine = new MockEngine();
@@ -165,17 +165,17 @@ namespace Microsoft.Build.UnitTests
             // Make a framework which does not exist, intentional misspelling of framework
             getReferencePaths.TargetFrameworkMoniker = ".NetFramewok, Version=v99.0";
             bool success = getReferencePaths.Execute();
-            Assert.False(success);
+            Assert.IsFalse(success);
             string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
-            Assert.Empty(returnedPaths);
+            Assert.IsEmpty(returnedPaths);
             string displayName = getReferencePaths.TargetFrameworkMonikerDisplayName;
-            Assert.Null(displayName);
+            Assert.IsNull(displayName);
             FrameworkNameVersioning frameworkMoniker = new FrameworkNameVersioning(getReferencePaths.TargetFrameworkMoniker);
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkMoniker.ToString());
             engine.AssertLogContains("ERROR MSB3644: " + message);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestSuppressNotFoundError()
         {
             MockEngine engine = new MockEngine();
@@ -185,18 +185,18 @@ namespace Microsoft.Build.UnitTests
             getReferencePaths.TargetFrameworkMoniker = ".NetFramewok, Version=v99.0";
             getReferencePaths.SuppressNotFoundError = true;
             bool success = getReferencePaths.Execute();
-            Assert.True(success);
+            Assert.IsTrue(success);
             string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
-            Assert.Empty(returnedPaths);
+            Assert.IsEmpty(returnedPaths);
             string displayName = getReferencePaths.TargetFrameworkMonikerDisplayName;
-            Assert.Null(displayName);
-            Assert.Equal(0, engine.Errors);
+            Assert.IsNull(displayName);
+            Assert.AreEqual(0, engine.Errors);
         }
 
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGeneralFrameworkMonikerGoodWithInvalidIncludePath()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "TestGeneralFrameworkMonikerGoodWithInvalidIncludePath");
@@ -224,9 +224,9 @@ namespace Microsoft.Build.UnitTests
                 getReferencePaths.RootPath = tempDirectory;
                 getReferencePaths.Execute();
                 string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
-                Assert.Empty(returnedPaths);
+                Assert.IsEmpty(returnedPaths);
                 string displayName = getReferencePaths.TargetFrameworkMonikerDisplayName;
-                Assert.Null(displayName);
+                Assert.IsNull(displayName);
                 FrameworkNameVersioning frameworkMoniker = new FrameworkNameVersioning(getReferencePaths.TargetFrameworkMoniker);
                 string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("GetReferenceAssemblyPaths.NoReferenceAssemblyDirectoryFound", frameworkMoniker.ToString());
                 engine.AssertLogContains(message);
@@ -243,7 +243,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in but there is a problem with the RedistList.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGeneralFrameworkMonikerGoodWithInvalidCharInIncludePath()
         {
             string tempDirectory = Path.Combine(Path.GetTempPath(), "TestGeneralFrameworkMonikerGoodWithInvalidCharInIncludePath");
@@ -271,9 +271,9 @@ namespace Microsoft.Build.UnitTests
                 getReferencePaths.RootPath = tempDirectory;
                 getReferencePaths.Execute();
                 string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
-                Assert.Empty(returnedPaths);
+                Assert.IsEmpty(returnedPaths);
                 string displayName = getReferencePaths.TargetFrameworkMonikerDisplayName;
-                Assert.Null(displayName);
+                Assert.IsNull(displayName);
                 FrameworkNameVersioning frameworkMoniker = new FrameworkNameVersioning(getReferencePaths.TargetFrameworkMoniker);
                 if (NativeMethodsShared.IsWindows)
                 {
@@ -302,7 +302,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where there is a good target framework moniker passed in.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestGeneralFrameworkMonikerGoodWithFrameworkInFallbackPaths()
         {
             using (var env = TestEnvironment.Create())
@@ -330,17 +330,17 @@ namespace Microsoft.Build.UnitTests
                 getReferencePaths.Execute();
                 string[] returnedPaths = getReferencePaths.ReferenceAssemblyPaths;
                 string displayName = getReferencePaths.TargetFrameworkMonikerDisplayName;
-                Assert.Single(returnedPaths);
-                Assert.Equal(framework41Directory.Path, returnedPaths[0]);
-                Assert.Equal(0, engine.Log.Length); // "Expected the log to contain nothing"
-                Assert.Equal(".NET Framework 4.1", displayName);
+                Assert.ContainsSingle(returnedPaths);
+                Assert.AreEqual(framework41Directory.Path, returnedPaths[0]);
+                Assert.AreEqual(0, engine.Log.Length); // "Expected the log to contain nothing"
+                Assert.AreEqual(".NET Framework 4.1", displayName);
             }
         }
 
         /// <summary>
         /// Test that a relative RootPath resolved via TaskEnvironment produces the same result as an absolute RootPath.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestRelativeRootPathProducesSameResultAsAbsolute()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -381,7 +381,7 @@ namespace Microsoft.Build.UnitTests
         /// Test that a relative path in TargetFrameworkFallbackSearchPaths resolved via TaskEnvironment
         /// produces the same result as an absolute fallback path.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestRelativeFallbackSearchPathProducesSameResultAsAbsolute()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);

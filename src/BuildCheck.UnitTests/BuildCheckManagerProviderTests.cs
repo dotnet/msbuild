@@ -13,18 +13,18 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.Experimental.BuildCheck.Infrastructure.BuildCheckManagerProvider;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
+[TestClass]
 public class BuildCheckManagerTests
 {
     private readonly IBuildCheckManager _testedInstance;
     private readonly ILoggingService _loggingService;
     private readonly MockLogger _logger;
 
-    public BuildCheckManagerTests(ITestOutputHelper output)
+    public BuildCheckManagerTests(TestContext output)
     {
         _loggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
         _logger = new MockLogger(output);
@@ -32,9 +32,9 @@ public class BuildCheckManagerTests
         _testedInstance = new BuildCheckManager();
     }
 
-    [Theory]
-    [InlineData(true, new[] { "Custom check rule: 'Rule1' has been registered successfully.", "Custom check rule: 'Rule2' has been registered successfully." })]
-    [InlineData(false, new[] { "Failed to register the custom check: 'DummyPath'." })]
+    [MSBuildTestMethod]
+    [DataRow(true, new[] { "Custom check rule: 'Rule1' has been registered successfully.", "Custom check rule: 'Rule2' has been registered successfully." })]
+    [DataRow(false, new[] { "Failed to register the custom check: 'DummyPath'." })]
     public void ProcessCheckAcquisitionTest(bool isCheckRuleExist, string[] expectedMessages)
     {
         MockConfigurationProvider();

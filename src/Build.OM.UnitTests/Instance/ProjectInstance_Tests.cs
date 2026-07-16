@@ -10,7 +10,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Xunit;
 using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 
 #nullable disable
@@ -20,11 +19,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// <summary>
     /// Tests for ProjectInstance public members
     /// </summary>
+    [TestClass]
     public class ProjectInstance_Tests
     {
-        private readonly ITestOutputHelper _testOutput;
+        private readonly TestContext _testOutput;
 
-        public ProjectInstance_Tests(ITestOutputHelper output)
+        public ProjectInstance_Tests(TestContext output)
         {
             _testOutput = output;
         }
@@ -32,93 +32,93 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Verify that a cloned off project instance can see environment variables
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateProjectInstancePassesEnvironment()
         {
             Project p = new Project();
             ProjectInstance i = p.CreateProjectInstance();
 
-            Assert.True(i.GetPropertyValue("username") != null);
+            Assert.IsTrue(i.GetPropertyValue("username") != null);
         }
 
         /// <summary>
         /// Read off properties
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertiesAccessors()
         {
             ProjectInstance p = GetSampleProjectInstance();
 
-            Assert.Equal("v1", p.GetPropertyValue("p1"));
-            Assert.Equal("v2X", p.GetPropertyValue("p2"));
+            Assert.AreEqual("v1", p.GetPropertyValue("p1"));
+            Assert.AreEqual("v2X", p.GetPropertyValue("p2"));
         }
 
         /// <summary>
         /// Read off items
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemsAccessors()
         {
             ProjectInstance p = GetSampleProjectInstance();
 
             IList<ProjectItemInstance> items = Helpers.MakeList(p.GetItems("i"));
-            Assert.Equal(3, items.Count);
-            Assert.Equal("i", items[0].ItemType);
-            Assert.Equal("i0", items[0].EvaluatedInclude);
-            Assert.Equal(String.Empty, items[0].GetMetadataValue("m"));
-            Assert.Null(items[0].GetMetadata("m"));
-            Assert.Equal("i1", items[1].EvaluatedInclude);
-            Assert.Equal("m1", items[1].GetMetadataValue("m"));
-            Assert.Equal("m1", items[1].GetMetadata("m").EvaluatedValue);
-            Assert.Equal("v1", items[2].EvaluatedInclude);
+            Assert.AreEqual(3, items.Count);
+            Assert.AreEqual("i", items[0].ItemType);
+            Assert.AreEqual("i0", items[0].EvaluatedInclude);
+            Assert.AreEqual(String.Empty, items[0].GetMetadataValue("m"));
+            Assert.IsNull(items[0].GetMetadata("m"));
+            Assert.AreEqual("i1", items[1].EvaluatedInclude);
+            Assert.AreEqual("m1", items[1].GetMetadataValue("m"));
+            Assert.AreEqual("m1", items[1].GetMetadata("m").EvaluatedValue);
+            Assert.AreEqual("v1", items[2].EvaluatedInclude);
         }
 
         /// <summary>
         /// Add item
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddItemWithoutMetadata()
         {
             ProjectInstance p = GetEmptyProjectInstance();
 
             ProjectItemInstance returned = p.AddItem("i", "i1");
 
-            Assert.Equal("i", returned.ItemType);
-            Assert.Equal("i1", returned.EvaluatedInclude);
-            Assert.False(returned.Metadata.GetEnumerator().MoveNext());
+            Assert.AreEqual("i", returned.ItemType);
+            Assert.AreEqual("i1", returned.EvaluatedInclude);
+            Assert.IsFalse(returned.Metadata.GetEnumerator().MoveNext());
 
             foreach (ProjectItemInstance item in p.Items)
             {
-                Assert.Equal("i1", item.EvaluatedInclude);
-                Assert.False(item.Metadata.GetEnumerator().MoveNext());
+                Assert.AreEqual("i1", item.EvaluatedInclude);
+                Assert.IsFalse(item.Metadata.GetEnumerator().MoveNext());
             }
         }
 
         /// <summary>
         /// Add item
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddItemWithoutMetadata_Escaped()
         {
             ProjectInstance p = GetEmptyProjectInstance();
 
             ProjectItemInstance returned = p.AddItem("i", "i%3b1");
 
-            Assert.Equal("i", returned.ItemType);
-            Assert.Equal("i;1", returned.EvaluatedInclude);
-            Assert.False(returned.Metadata.GetEnumerator().MoveNext());
+            Assert.AreEqual("i", returned.ItemType);
+            Assert.AreEqual("i;1", returned.EvaluatedInclude);
+            Assert.IsFalse(returned.Metadata.GetEnumerator().MoveNext());
 
             foreach (ProjectItemInstance item in p.Items)
             {
-                Assert.Equal("i;1", item.EvaluatedInclude);
-                Assert.False(item.Metadata.GetEnumerator().MoveNext());
+                Assert.AreEqual("i;1", item.EvaluatedInclude);
+                Assert.IsFalse(item.Metadata.GetEnumerator().MoveNext());
             }
         }
 
         /// <summary>
         /// Add item with metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddItemWithMetadata()
         {
             ProjectInstance p = GetEmptyProjectInstance();
@@ -130,27 +130,27 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectItemInstance returned = p.AddItem("i", "i1", metadata);
 
-            Assert.True(object.ReferenceEquals(returned, Helpers.MakeList(p.GetItems("i"))[0]));
+            Assert.IsTrue(object.ReferenceEquals(returned, Helpers.MakeList(p.GetItems("i"))[0]));
 
             foreach (ProjectItemInstance item in p.Items)
             {
-                Assert.Same(returned, item);
-                Assert.Equal("i1", item.EvaluatedInclude);
+                Assert.AreSame(returned, item);
+                Assert.AreEqual("i1", item.EvaluatedInclude);
                 var metadataOut = Helpers.MakeList(item.Metadata);
-                Assert.Equal(3, metadataOut.Count);
-                Assert.Equal("m1", item.GetMetadataValue("m"));
-                Assert.Equal("n1", item.GetMetadataValue("n"));
-                Assert.Equal("o@", item.GetMetadataValue("o"));
+                Assert.AreEqual(3, metadataOut.Count);
+                Assert.AreEqual("m1", item.GetMetadataValue("m"));
+                Assert.AreEqual("n1", item.GetMetadataValue("n"));
+                Assert.AreEqual("o@", item.GetMetadataValue("o"));
             }
         }
 
         /// <summary>
         /// Add item null item type
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddItemInvalidNullItemType()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectInstance p = GetEmptyProjectInstance();
                 p.AddItem(null, "i1");
@@ -159,10 +159,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Add item empty item type
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddItemInvalidEmptyItemType()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 ProjectInstance p = GetEmptyProjectInstance();
                 p.AddItem(String.Empty, "i1");
@@ -171,10 +171,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Add item null include
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddItemInvalidNullInclude()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectInstance p = GetEmptyProjectInstance();
                 p.AddItem("i", null);
@@ -183,19 +183,19 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Add item null metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AddItemNullMetadata()
         {
             ProjectInstance p = GetEmptyProjectInstance();
             ProjectItemInstance item = p.AddItem("i", "i1", null);
 
-            Assert.False(item.Metadata.GetEnumerator().MoveNext());
+            Assert.IsFalse(item.Metadata.GetEnumerator().MoveNext());
         }
 
         /// <summary>
         /// It's okay to set properties that are also global properties, masking their value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetGlobalPropertyOnInstance()
         {
             Dictionary<string, string> globals = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase) { { "p", "p1" } };
@@ -204,47 +204,47 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             instance.SetProperty("p", "p2");
 
-            Assert.Equal("p2", instance.GetPropertyValue("p"));
+            Assert.AreEqual("p2", instance.GetPropertyValue("p"));
 
             // And clearing it should not expose the original global property value
             instance.SetProperty("p", "");
 
-            Assert.Equal("", instance.GetPropertyValue("p"));
+            Assert.AreEqual("", instance.GetPropertyValue("p"));
         }
 
         /// <summary>
         /// ProjectInstance itself is cloned properly
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneProjectItself()
         {
             ProjectInstance first = GetSampleProjectInstance();
             ProjectInstance second = first.DeepCopy();
 
-            Assert.False(Object.ReferenceEquals(first, second));
+            Assert.IsFalse(Object.ReferenceEquals(first, second));
         }
 
         /// <summary>
         /// Properties are cloned properly
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneProperties()
         {
             ProjectInstance first = GetSampleProjectInstance();
             ProjectInstance second = first.DeepCopy();
 
-            Assert.False(Object.ReferenceEquals(first.GetProperty("p1"), second.GetProperty("p1")));
+            Assert.IsFalse(Object.ReferenceEquals(first.GetProperty("p1"), second.GetProperty("p1")));
 
             ProjectPropertyInstance newProperty = first.SetProperty("p1", "v1b");
-            Assert.True(Object.ReferenceEquals(newProperty, first.GetProperty("p1")));
-            Assert.Equal("v1b", first.GetPropertyValue("p1"));
-            Assert.Equal("v1", second.GetPropertyValue("p1"));
+            Assert.IsTrue(Object.ReferenceEquals(newProperty, first.GetProperty("p1")));
+            Assert.AreEqual("v1b", first.GetPropertyValue("p1"));
+            Assert.AreEqual("v1", second.GetPropertyValue("p1"));
         }
 
         /// <summary>
         /// Passing an item list into another list should copy the metadata too
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemEvaluationCopiesMetadata()
         {
             string content = @"
@@ -260,18 +260,18 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectInstance project = GetProjectInstance(content);
 
-            Assert.Single(Helpers.MakeList(project.GetItems("j")));
-            Assert.Equal("i1", Helpers.MakeList(project.GetItems("j"))[0].EvaluatedInclude);
-            Assert.Equal("m1", Helpers.MakeList(project.GetItems("j"))[0].GetMetadataValue("m"));
-            Assert.Equal("n;;", Helpers.MakeList(project.GetItems("j"))[0].GetMetadataValue("n"));
+            Assert.ContainsSingle(Helpers.MakeList(project.GetItems("j")));
+            Assert.AreEqual("i1", Helpers.MakeList(project.GetItems("j"))[0].EvaluatedInclude);
+            Assert.AreEqual("m1", Helpers.MakeList(project.GetItems("j"))[0].GetMetadataValue("m"));
+            Assert.AreEqual("n;;", Helpers.MakeList(project.GetItems("j"))[0].GetMetadataValue("n"));
         }
 
         /// <summary>
         /// Wildcards are expanded in item groups inside targets, and the evaluatedinclude
         /// is not the wildcard itself!
         /// </summary>
-        [Fact]
-        [Trait("Category", "serialize")]
+        [MSBuildTestMethod]
+        [TestCategory("serialize")]
         public void WildcardsInsideTargets()
         {
             string directory = null;
@@ -304,9 +304,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 ProjectInstance projectInstance = GetProjectInstance(content);
                 projectInstance.Build();
 
-                Assert.Equal(2, Helpers.MakeList(projectInstance.GetItems("i")).Count);
-                Assert.Equal(file1, Helpers.MakeList(projectInstance.GetItems("i"))[0].EvaluatedInclude);
-                Assert.Equal(file2, Helpers.MakeList(projectInstance.GetItems("i"))[1].EvaluatedInclude);
+                Assert.AreEqual(2, Helpers.MakeList(projectInstance.GetItems("i")).Count);
+                Assert.AreEqual(file1, Helpers.MakeList(projectInstance.GetItems("i"))[0].EvaluatedInclude);
+                Assert.AreEqual(file2, Helpers.MakeList(projectInstance.GetItems("i"))[1].EvaluatedInclude);
             }
             finally
             {
@@ -320,26 +320,26 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Items are cloned properly
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CloneItems()
         {
             ProjectInstance first = GetSampleProjectInstance();
             ProjectInstance second = first.DeepCopy();
 
-            Assert.False(Object.ReferenceEquals(Helpers.MakeList(first.GetItems("i"))[0], Helpers.MakeList(second.GetItems("i"))[0]));
+            Assert.IsFalse(Object.ReferenceEquals(Helpers.MakeList(first.GetItems("i"))[0], Helpers.MakeList(second.GetItems("i"))[0]));
 
             first.AddItem("i", "i3");
-            Assert.Equal(4, Helpers.MakeList(first.GetItems("i")).Count);
-            Assert.Equal(3, Helpers.MakeList(second.GetItems("i")).Count);
+            Assert.AreEqual(4, Helpers.MakeList(first.GetItems("i")).Count);
+            Assert.AreEqual(3, Helpers.MakeList(second.GetItems("i")).Count);
         }
 
         /// <summary>
         /// Null target in array should give ArgumentNullException
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildNullTargetInArray()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectInstance instance = new ProjectInstance(ProjectRootElement.Create());
                 instance.Build(new string[] { null }, null);
@@ -348,10 +348,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Null logger in array should give ArgumentNullException
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildNullLoggerInArray()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectInstance instance = new ProjectInstance(ProjectRootElement.Create());
                 instance.Build("t", new ILogger[] { null });
@@ -360,10 +360,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Null remote logger in array should give ArgumentNullException
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildNullRemoteLoggerInArray()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectInstance instance = new ProjectInstance(ProjectRootElement.Create());
                 instance.Build("t", null, new ForwardingLoggerRecord[] { null });
@@ -372,8 +372,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Null target name should imply the default target
         /// </summary>
-        [Fact]
-        [Trait("Category", "serialize")]
+        [MSBuildTestMethod]
+        [TestCategory("serialize")]
         public void BuildNullTargetNameIsDefaultTarget()
         {
             ProjectRootElement xml = ProjectRootElement.Create();
@@ -389,8 +389,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Build system should correctly reset itself between builds of
         /// project instances.
         /// </summary>
-        [Fact]
-        [Trait("Category", "serialize")]
+        [MSBuildTestMethod]
+        [TestCategory("serialize")]
         public void BuildProjectInstancesConsecutively()
         {
             ProjectInstance instance1 = new Project().CreateProjectInstance();
@@ -409,7 +409,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Verifies that the built-in metadata for specialized ProjectInstances is present when items are the simplest (no macros or wildcards).
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateProjectInstanceWithItemsContainingProjects()
         {
             const string CapturedMetadataName = "DefiningProjectFullPath";
@@ -426,26 +426,26 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var projBInstance = projBEval.CreateProjectInstance();
             var projBInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "bItem.cs").Single();
             var projAInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "aItem.cs").Single();
-            Assert.Equal(projB.FullPath, projBInstanceItem.GetMetadataValue(CapturedMetadataName));
-            Assert.Equal(projA.FullPath, projAInstanceItem.GetMetadataValue(CapturedMetadataName));
+            Assert.AreEqual(projB.FullPath, projBInstanceItem.GetMetadataValue(CapturedMetadataName));
+            Assert.AreEqual(projA.FullPath, projAInstanceItem.GetMetadataValue(CapturedMetadataName));
 
             // Although GetMetadataValue returns non-null, GetMetadata returns null...
-            Assert.Null(projAInstanceItem.GetMetadata(CapturedMetadataName));
+            Assert.IsNull(projAInstanceItem.GetMetadata(CapturedMetadataName));
 
             // .. Just like built-in metadata does: (this segment just demonstrates similar functionality -- it's not meant to test built-in metadata)
-            Assert.NotNull(projAInstanceItem.GetMetadataValue("Identity"));
-            Assert.Null(projAInstanceItem.GetMetadata("Identity"));
+            Assert.IsNotNull(projAInstanceItem.GetMetadataValue("Identity"));
+            Assert.IsNull(projAInstanceItem.GetMetadata("Identity"));
 
-            Assert.True(projAInstanceItem.HasMetadata(CapturedMetadataName));
-            Assert.False(projAInstanceItem.Metadata.Any());
+            Assert.IsTrue(projAInstanceItem.HasMetadata(CapturedMetadataName));
+            Assert.IsFalse(projAInstanceItem.Metadata.Any());
             Assert.Contains(CapturedMetadataName, projAInstanceItem.MetadataNames);
-            Assert.Equal(projAInstanceItem.MetadataCount, projAInstanceItem.MetadataNames.Count);
+            Assert.AreEqual(projAInstanceItem.MetadataCount, projAInstanceItem.MetadataNames.Count);
         }
 
         /// <summary>
         /// Constructs a new ProjectInstances from Project.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateProjectInstanceFromProject()
         {
             const string CapturedMetadataName = "DefiningProjectFullPath";
@@ -468,26 +468,26 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var projBInstance = new ProjectInstance(projBEval, ProjectInstanceSettings.ImmutableWithFastItemLookup);
             var projBInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "bItem.cs").Single();
             var projAInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "aItem.cs").Single();
-            Assert.Equal(projB.FullPath, projBInstanceItem.GetMetadataValue(CapturedMetadataName));
-            Assert.Equal(projA.FullPath, projAInstanceItem.GetMetadataValue(CapturedMetadataName));
+            Assert.AreEqual(projB.FullPath, projBInstanceItem.GetMetadataValue(CapturedMetadataName));
+            Assert.AreEqual(projA.FullPath, projAInstanceItem.GetMetadataValue(CapturedMetadataName));
 
             // Although GetMetadataValue returns non-null, GetMetadata returns null...
-            Assert.Null(projAInstanceItem.GetMetadata(CapturedMetadataName));
+            Assert.IsNull(projAInstanceItem.GetMetadata(CapturedMetadataName));
 
             // .. Just like built-in metadata does: (this segment just demonstrates similar functionality -- it's not meant to test built-in metadata)
-            Assert.NotNull(projAInstanceItem.GetMetadataValue("Identity"));
-            Assert.Null(projAInstanceItem.GetMetadata("Identity"));
+            Assert.IsNotNull(projAInstanceItem.GetMetadataValue("Identity"));
+            Assert.IsNull(projAInstanceItem.GetMetadata("Identity"));
 
-            Assert.True(projAInstanceItem.HasMetadata(CapturedMetadataName));
-            Assert.False(projAInstanceItem.Metadata.Any());
+            Assert.IsTrue(projAInstanceItem.HasMetadata(CapturedMetadataName));
+            Assert.IsFalse(projAInstanceItem.Metadata.Any());
             Assert.Contains(CapturedMetadataName, projAInstanceItem.MetadataNames);
-            Assert.Equal(projAInstanceItem.MetadataCount, projAInstanceItem.MetadataNames.Count);
+            Assert.AreEqual(projAInstanceItem.MetadataCount, projAInstanceItem.MetadataNames.Count);
         }
 
         /// <summary>
         /// Verifies that the built-in metadata for specialized ProjectInstances is present when items are based on wildcards in the construction model.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DefiningProjectItemBuiltInMetadataFromWildcards()
         {
             const string CapturedMetadataName = "DefiningProjectFullPath";
@@ -510,20 +510,20 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             var projBInstance = projBEval.CreateProjectInstance();
             var projAInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("Compile", "aItem.cs").Single();
             var projBInstanceItem = projBInstance.GetItemsByItemTypeAndEvaluatedInclude("CompileB", "aItem.cs").Single();
-            Assert.Equal(projA.FullPath, projAInstanceItem.GetMetadataValue(CapturedMetadataName));
-            Assert.Equal(projB.FullPath, projBInstanceItem.GetMetadataValue(CapturedMetadataName));
+            Assert.AreEqual(projA.FullPath, projAInstanceItem.GetMetadataValue(CapturedMetadataName));
+            Assert.AreEqual(projB.FullPath, projBInstanceItem.GetMetadataValue(CapturedMetadataName));
 
-            Assert.True(projAInstanceItem.HasMetadata(CapturedMetadataName));
-            Assert.False(projAInstanceItem.Metadata.Any());
+            Assert.IsTrue(projAInstanceItem.HasMetadata(CapturedMetadataName));
+            Assert.IsFalse(projAInstanceItem.Metadata.Any());
             Assert.Contains(CapturedMetadataName, projAInstanceItem.MetadataNames);
-            Assert.Equal(projAInstanceItem.MetadataCount, projAInstanceItem.MetadataNames.Count);
+            Assert.AreEqual(projAInstanceItem.MetadataCount, projAInstanceItem.MetadataNames.Count);
         }
 
         /// <summary>
         /// Validate that the DefiningProject* metadata is set to the correct project based on a variety
         /// of means of item creation.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestDefiningProjectMetadata()
         {
             string projectA = Path.Combine(ObjectModelHelpers.TempProjectDir, "a.proj");
@@ -661,7 +661,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_SetProperty()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -672,7 +672,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_RemoveProperty()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -683,7 +683,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_RemoveItem()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -694,7 +694,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_AddItem()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -705,7 +705,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_AddItemWithMetadata()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -716,7 +716,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_Build()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -727,7 +727,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_SetEvaluatedInclude()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -738,7 +738,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_SetEvaluatedIncludeEscaped()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -749,7 +749,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_SetItemSpec()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -760,7 +760,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_SetMetadataOnItem1()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -771,7 +771,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_SetMetadataOnItem2()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -782,7 +782,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_SetMetadataOnItem3()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -793,7 +793,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_RemoveMetadataFromItem()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -804,7 +804,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_SetEvaluatedValueOnProperty()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -815,7 +815,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_SetEvaluatedValueOnPropertyFromProject()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -826,7 +826,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Test operation fails on immutable project instance
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_SetNewProperty()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -838,7 +838,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Setting global properties should fail if the project is immutable, even though the property
         /// was originally created as mutable
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_SetGlobalProperty()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -850,7 +850,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Setting environment originating properties should fail if the project is immutable, even though the property
         /// was originally created as mutable
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_SetEnvironmentProperty()
         {
             var instance = GetSampleProjectInstance(true /* immutable */);
@@ -861,7 +861,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning inherits unless otherwise specified
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_CloneMutableFromImmutable()
         {
             var protoInstance = GetSampleProjectInstance(true /* immutable */);
@@ -878,9 +878,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning inherits unless otherwise specified
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void ImmutableProjectInstance_CloneImmutableFromMutable()
         {
             var protoInstance = GetSampleProjectInstance(false /* mutable */);
@@ -900,16 +900,16 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning inherits unless otherwise specified
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void ImmutableProjectInstance_CloneImmutableFromImmutable()
         {
             var protoInstance = GetSampleProjectInstance(true /* immutable */);
             var instance = protoInstance.DeepCopy(/* inherit */);
 
             // Should not have bothered cloning
-            Assert.True(Object.ReferenceEquals(protoInstance, instance));
+            Assert.IsTrue(Object.ReferenceEquals(protoInstance, instance));
 
             Helpers.VerifyAssertThrowsInvalidOperation(delegate () { instance.GetProperty("g").EvaluatedValue = "v2"; });
             Helpers.VerifyAssertThrowsInvalidOperation(
@@ -925,9 +925,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning inherits unless otherwise specified
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void ImmutableProjectInstance_CloneImmutableFromImmutable2()
         {
             var protoInstance = GetSampleProjectInstance(true /* immutable */);
@@ -947,9 +947,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning inherits unless otherwise specified
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void ImmutableProjectInstance_CloneMutableFromMutable()
         {
             var protoInstance = GetSampleProjectInstance(false /* mutable */);
@@ -966,7 +966,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cloning inherits unless otherwise specified
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImmutableProjectInstance_CloneMutableFromMutable2()
         {
             var protoInstance = GetSampleProjectInstance(false /* mutable */);

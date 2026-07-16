@@ -7,17 +7,17 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public class HintPathResolver_Tests : IDisposable
     {
         private readonly TestEnvironment _env;
 
-        public HintPathResolver_Tests(ITestOutputHelper testOutput)
+        public HintPathResolver_Tests(TestContext testOutput)
         {
             _env = TestEnvironment.Create(testOutput);
         }
@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             _env.Dispose();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanResolveHintPath()
         {
             var tempFile = _env.CreateFile("FakeSystem.Net.Http.dll", "");
@@ -47,7 +47,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             result.ShouldBe(true);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanNotResolveHintPathWithNewLine()
         {
             var tempFile = _env.CreateFile("FakeSystem.Net.Http.dll", "");
@@ -56,7 +56,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             result.ShouldBe(false);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CanNotResolveHintPathWithSpace()
         {
             var tempFile = _env.CreateFile("FakeSystem.Net.Http.dll", "");

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -7,15 +7,15 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Engine.UnitTests
 {
+    [TestClass]
     public class BuildEnvironmentHelper_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void GetExecutablePath()
         {
             var msbuildPath = Path.GetDirectoryName(typeof(BuildEnvironmentHelper).GetAssemblyPath());
@@ -35,7 +35,7 @@ namespace Microsoft.Build.Engine.UnitTests
             BuildEnvironmentHelper.Instance.Mode.ShouldBe(BuildEnvironmentMode.Standalone);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FindBuildEnvironmentByEnvironmentVariable()
         {
             using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName))
@@ -108,7 +108,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FindBuildEnvironmentFromCommandLineStandalone()
         {
             // Path will not be under a Visual Studio install like path.
@@ -141,7 +141,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FindBuildEnvironmentFromRunningProcessStandalone()
         {
             // Path will not be under a Visual Studio install like path.
@@ -158,7 +158,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FindBuildEnvironmentFromExecutingAssemblyAsDll()
         {
             // Ensure the correct file is found
@@ -175,7 +175,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FindBuildEnvironmentFromAppContextDirectory()
         {
             using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName))
@@ -194,7 +194,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FindBuildEnvironmentFromSdkRoot()
         {
             using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName))
@@ -235,8 +235,8 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [WindowsFullFrameworkOnlyTheory(additionalMessage: "No Visual Studio installed for .NET.")]
-        [InlineData(MSBuildConstants.CurrentVisualStudioVersion, true)]
-        [InlineData("15.0", false)]
+        [DataRow(MSBuildConstants.CurrentVisualStudioVersion, true)]
+        [DataRow("15.0", false)]
         public void BuildEnvironmentDetectsVisualStudioByEnvironment(string visualStudioVersion, bool shouldBeValid)
         {
             using (var env = new EmptyVSEnviroment())
@@ -286,10 +286,10 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [WindowsFullFrameworkOnlyTheory(additionalMessage: "No Visual Studio installed for .NET.")]
-        [InlineData("18.0", true)]
-        [InlineData("17.0", false)]
-        [InlineData("17.3", false)]
-        [InlineData("16.0", false)]
+        [DataRow("18.0", true)]
+        [DataRow("17.0", false)]
+        [DataRow("17.3", false)]
+        [DataRow("16.0", false)]
         public void BuildEnvironmentDetectsVisualStudioFromSetupInstance(string visualStudioVersion, bool shouldBeValid)
         {
             using (var env = new EmptyVSEnviroment())
@@ -314,7 +314,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildEnvironmentVisualStudioNotFoundWhenVersionMismatch()
         {
             using (var env = new EmptyVSEnviroment())
@@ -330,7 +330,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildEnvironmentDetectsRunningTests()
         {
             BuildEnvironmentHelper.Instance.RunningTests.ShouldBeTrue();
@@ -422,7 +422,7 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildEnvironmentNoneWhenNotAvailable()
         {
             using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName))
@@ -535,8 +535,15 @@ namespace Microsoft.Build.Engine.UnitTests
 
             private readonly List<VisualStudioInstance> _mockInstances = new List<VisualStudioInstance>();
 
+            private readonly BuildEnvironment _originalBuildEnvironment;
+
             public EmptyStandaloneEnviroment(string msBuildExeName, bool writeFakeFiles = true, bool includeAmd64Folder = false)
             {
+                // Capture the environment that existed before this test mutated the singleton so we can restore it on
+                // dispose. Restoring (rather than re-detecting) keeps these tests from leaking a re-detected environment
+                // into tests that happen to run afterwards, which is order-dependent and differs between test runners.
+                _originalBuildEnvironment = BuildEnvironmentHelper.Instance;
+
                 try
                 {
                     MSBuildExecutableName = msBuildExeName;
@@ -587,7 +594,15 @@ namespace Microsoft.Build.Engine.UnitTests
             public void Dispose()
             {
                 FileUtilities.DeleteDirectoryNoThrow(TempFolderRoot, true);
+
+                // Reset the mocked detection delegates back to their production defaults...
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(runningTests: () => true);
+
+                // ...then restore the environment instance that existed before this test ran, so tests executing
+                // afterwards (in whatever order the test runner chooses) observe the assembly-initialized environment
+                // rather than one re-detected from the current process (which resolves paths like MSBuildExtensionsPath
+                // to the test host directory and breaks downstream tests).
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(_originalBuildEnvironment);
             }
         }
     }

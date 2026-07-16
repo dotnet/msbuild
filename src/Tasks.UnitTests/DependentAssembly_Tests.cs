@@ -5,18 +5,18 @@ using System.IO;
 using System.Xml;
 
 using Microsoft.Build.Tasks;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class DependentAssembly_Tests
     {
         /// <summary>
         /// Verify that a reference without a public key works correctly
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SerializeDeserialize()
         {
             var dependentAssembly = new DependentAssembly();
@@ -26,7 +26,7 @@ namespace Microsoft.Build.UnitTests
             using var xmlReader = XmlReader.Create(new StringReader(xml));
             dependentAssembly.Read(xmlReader);
 
-            Assert.NotNull(dependentAssembly.PartialAssemblyName);
+            Assert.IsNotNull(dependentAssembly.PartialAssemblyName);
         }
     }
 }

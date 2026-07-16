@@ -7,7 +7,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -16,6 +15,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Unit tests for the LC task
     /// </summary>
+    [TestClass]
     public class LC_Tests
     {
         /// <summary>
@@ -41,13 +41,13 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(task, "/i:OtherControl.dll", false /* don't use response file */);
             CommandLine.ValidateHasParameter(task, "/nologo", false /* don't use response file */);
 
-            Assert.Equal(Path.Combine("bin\\debug", "target.exe.licenses"), task.OutputLicense.ItemSpec);
+            Assert.AreEqual(Path.Combine("bin\\debug", "target.exe.licenses"), task.OutputLicense.ItemSpec);
         }
 
         /// <summary>
         /// Verifies that LC resolves a relative SdkToolsPath against the task project directory before probing for lc.exe.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GenerateFullPathToToolResolvesRelativeSdkToolsPath()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests
             CommandLine.ValidateHasParameter(task, "/i:OtherControl.dll", true /* use response file */);
             CommandLine.ValidateHasParameter(task, "/nologo", true /* use response file */);
 
-            Assert.Equal(Path.Combine("bin\\debug", "target.exe.licenses"), task.OutputLicense.ItemSpec);
+            Assert.AreEqual(Path.Combine("bin\\debug", "target.exe.licenses"), task.OutputLicense.ItemSpec);
         }
 
         private static string GetProjectDir()

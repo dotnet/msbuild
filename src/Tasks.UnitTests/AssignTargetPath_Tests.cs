@@ -6,15 +6,15 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class AssignTargetPath_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress314791()
         {
             AssignTargetPath t = new AssignTargetPath();
@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests
             t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe("abc.efg");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AtConeRoot()
         {
             AssignTargetPath t = new AssignTargetPath();
@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests
             t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe("file.txt");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutOfCone()
         {
             AssignTargetPath t = new AssignTargetPath();
@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests
             t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe("file.txt");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void InConeButAbsolute()
         {
             AssignTargetPath t = new AssignTargetPath();
@@ -85,12 +85,12 @@ namespace Microsoft.Build.UnitTests
             t.AssignedFiles[0].GetMetadata("TargetPath").ShouldBe(NativeMethodsShared.IsWindows ? @"f3\f4\file.txt" : "f3/f4/file.txt");
         }
 
-        [Theory]
-        [InlineData("c:/fully/qualified/path.txt")]
-        [InlineData("test/output/file.txt")]
-        [InlineData(@"some\dir\to\file.txt")]
-        [InlineData("file.txt")]
-        [InlineData("file")]
+        [MSBuildTestMethod]
+        [DataRow("c:/fully/qualified/path.txt")]
+        [DataRow("test/output/file.txt")]
+        [DataRow(@"some\dir\to\file.txt")]
+        [DataRow("file.txt")]
+        [DataRow("file")]
         public void TargetPathAlreadySet(string targetPath)
         {
             AssignTargetPath t = new AssignTargetPath();

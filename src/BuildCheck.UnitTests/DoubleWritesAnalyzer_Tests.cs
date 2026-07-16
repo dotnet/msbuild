@@ -6,10 +6,10 @@ using System.IO;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Checks;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.BuildCheck.UnitTests
 {
+    [TestClass]
     public sealed class DoubleWritesCheck_Tests
     {
         private readonly DoubleWritesCheck _check;
@@ -35,7 +35,7 @@ namespace Microsoft.Build.BuildCheck.UnitTests
                 parameters);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestCopyTask()
         {
             _registrationContext.TriggerTaskInvocationAction(MakeTaskInvocationData("Copy", new Dictionary<string, TaskInvocationCheckData.TaskParameter>
@@ -53,10 +53,10 @@ namespace Microsoft.Build.BuildCheck.UnitTests
             _registrationContext.Results[0].CheckRule.Id.ShouldBe("BC0102");
         }
 
-        [Theory]
-        [InlineData("Csc")]
-        [InlineData("Vbc")]
-        [InlineData("Fsc")]
+        [MSBuildTestMethod]
+        [DataRow("Csc")]
+        [DataRow("Vbc")]
+        [DataRow("Fsc")]
         public void TestCompilerTask(string taskName)
         {
             for (int i = 0; i < 2; i++)

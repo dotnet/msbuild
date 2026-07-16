@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -8,11 +8,11 @@ using System.Reflection;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests;
 
-public class MSBuildTaskHostTests(ITestOutputHelper testOutput) : IDisposable
+[TestClass]
+public class MSBuildTaskHostTests(TestContext testOutput) : IDisposable
 {
     private static string AssemblyLocation
         => field ??= Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? AppContext.BaseDirectory);
@@ -26,7 +26,7 @@ public class MSBuildTaskHostTests(ITestOutputHelper testOutput) : IDisposable
         => _environment.Dispose();
 
     [ActiveIssue("https://github.com/dotnet/msbuild/issues/13933", TestPlatforms.Windows)]
-    [WindowsNet35OnlyFact]
+    [WindowsNet35OnlyTestMethod]
     public void CompileNet35WinFormsApp()
     {
         TransientTestFolder testFolder = _environment.CreateFolder(createFolder: true);

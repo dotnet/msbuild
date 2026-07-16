@@ -4,18 +4,18 @@
 using System;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class ErrorWarningMessage_Tests
     {
         /// <summary>
         /// Simple case
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Message()
         {
             MockEngine e = new MockEngine();
@@ -30,14 +30,14 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(e.Log);
             Console.WriteLine("===");
 
-            Assert.True(retval);
-            Assert.NotEqual(-1, e.Log.IndexOf("messagetext", StringComparison.Ordinal));
+            Assert.IsTrue(retval);
+            Assert.AreNotEqual(-1, e.Log.IndexOf("messagetext", StringComparison.Ordinal));
         }
 
         /// <summary>
         /// Multiple lines
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultilineMessage()
         {
             MockEngine e = new MockEngine();
@@ -52,14 +52,14 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(e.Log);
             Console.WriteLine("===");
 
-            Assert.True(retval);
-            Assert.NotEqual(-1, e.Log.IndexOf("messagetext\n  messagetext2  \n\nmessagetext3", StringComparison.Ordinal));
+            Assert.IsTrue(retval);
+            Assert.AreNotEqual(-1, e.Log.IndexOf("messagetext\n  messagetext2  \n\nmessagetext3", StringComparison.Ordinal));
         }
 
         /// <summary>
         /// Empty message should not log an event
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyMessage()
         {
             MockEngine e = new MockEngine();
@@ -74,14 +74,14 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(e.Log);
             Console.WriteLine("===");
 
-            Assert.True(retval);
-            Assert.Equal(0, e.Messages);
+            Assert.IsTrue(retval);
+            Assert.AreEqual(0, e.Messages);
         }
 
         /// <summary>
         /// Simple case
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Warning()
         {
             MockEngine e = new MockEngine(true);
@@ -97,15 +97,15 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(e.Log);
             Console.WriteLine("===");
 
-            Assert.True(retval);
+            Assert.IsTrue(retval);
             e.AssertLogContains("c:\\file(0,0): WARNING : warningtext");
-            Assert.Equal(1, e.Warnings);
+            Assert.AreEqual(1, e.Warnings);
         }
 
         /// <summary>
         /// Empty warning SHOULD log an event
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyWarning()
         {
             MockEngine e = new MockEngine();
@@ -121,15 +121,15 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(e.Log);
             Console.WriteLine("===");
 
-            Assert.True(retval);
-            Assert.Equal(1, e.Warnings);
+            Assert.IsTrue(retval);
+            Assert.AreEqual(1, e.Warnings);
             Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
         /// <summary>
         /// Empty warning message but a code specified should still be logged
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyWarningMessageButCodeSpecified()
         {
             MockEngine e = new MockEngine();
@@ -146,15 +146,15 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(e.Log);
             Console.WriteLine("===");
 
-            Assert.True(retval);
-            Assert.Equal(1, e.Warnings);
+            Assert.IsTrue(retval);
+            Assert.AreEqual(1, e.Warnings);
             Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
         /// <summary>
         /// Empty error SHOULD log an event
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyError()
         {
             MockEngine e = new MockEngine();
@@ -172,15 +172,15 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(e.Log);
             Console.WriteLine("===");
 
-            Assert.False(retval);
-            Assert.Equal(1, e.Errors);
+            Assert.IsFalse(retval);
+            Assert.AreEqual(1, e.Errors);
             Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
         /// <summary>
         /// Empty error message but a code specified should still be logged
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyErrorMessageButCodeSpecified()
         {
             MockEngine e = new MockEngine();
@@ -198,15 +198,15 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(e.Log);
             Console.WriteLine("===");
 
-            Assert.False(retval);
-            Assert.Equal(1, e.Errors);
+            Assert.IsFalse(retval);
+            Assert.AreEqual(1, e.Errors);
             Assert.Contains(AssemblyResources.GetString("ErrorAndWarning.EmptyMessage"), e.Log);
         }
 
         /// <summary>
         /// Simple case
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Error()
         {
             MockEngine e = new MockEngine(true);
@@ -222,15 +222,15 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(e.Log);
             Console.WriteLine("===");
 
-            Assert.False(retval);
+            Assert.IsFalse(retval);
             e.AssertLogContains("c:\\file(0,0): ERROR : errortext");
-            Assert.Equal(1, e.Errors);
+            Assert.AreEqual(1, e.Errors);
         }
 
         /// <summary>
         /// Simple case for error message coming from a resource string
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ErrorFromResources()
         {
             MockEngine e = new MockEngine(true);
@@ -245,18 +245,18 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(e.Log);
             Console.WriteLine("===");
 
-            Assert.False(retval);
+            Assert.IsFalse(retval);
 
             string message = AssemblyResources.GetString(err.Resource);
             e.AssertLogContains(message);
-            Assert.Equal(1, e.Errors);
+            Assert.AreEqual(1, e.Errors);
         }
 
         /// <summary>
         /// If a "Code" is passed to the task, use it to override the code
         /// (if any) defined in the error message.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ErrorFromResourcesWithOverriddenCode()
         {
             MockEngine e = new MockEngine(true);
@@ -272,19 +272,19 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(e.Log);
             Console.WriteLine("===");
 
-            Assert.False(retval);
+            Assert.IsFalse(retval);
 
             string message = AssemblyResources.GetString(err.Resource);
             string updatedMessage = message.Replace("MSB3072", "ABC1234");
             e.AssertLogContains(updatedMessage);
-            Assert.Equal(1, e.Errors);
+            Assert.AreEqual(1, e.Errors);
         }
 
         /// <summary>
         /// Simple case of logging a resource-based error that takes
         /// arguments
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ErrorFromResourcesWithArguments()
         {
             MockEngine e = new MockEngine(true);
@@ -300,18 +300,18 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(e.Log);
             Console.WriteLine("===");
 
-            Assert.False(retval);
+            Assert.IsFalse(retval);
 
             string message = String.Format(AssemblyResources.GetString(err.Resource), err.Arguments);
             e.AssertLogContains(message);
-            Assert.Equal(1, e.Errors);
+            Assert.AreEqual(1, e.Errors);
         }
 
         /// <summary>
         /// If invalid arguments are passed to the task, it should still
         /// log an error informing the user of that.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ErrorFromResourcesWithInvalidArguments()
         {
             MockEngine e = new MockEngine(true);
@@ -327,18 +327,18 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine(e.Log);
             Console.WriteLine("===");
 
-            Assert.False(retval);
+            Assert.IsFalse(retval);
 
             e.AssertLogDoesntContain("a.txt");
             e.AssertLogContains("MSB3861");
-            Assert.Equal(1, e.Errors);
+            Assert.AreEqual(1, e.Errors);
         }
 
         /// <summary>
         /// If no resource string is passed to ErrorFromResources, we should error
         /// because a required parameter is missing.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ErrorFromResourcesNoResources()
         {
             string projectContents = @"

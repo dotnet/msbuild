@@ -10,7 +10,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Win32;
 using Shouldly;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 namespace Microsoft.Build.UnitTests.Evaluation;
@@ -26,6 +25,7 @@ namespace Microsoft.Build.UnitTests.Evaluation;
 /// an AppContext switch, once set, cannot be returned to the "unset" state in process. The new
 /// restriction switch intentionally has no environment variable.
 /// </remarks>
+[TestClass]
 public class PropertyFunctionReceiverRestriction_Tests
 {
     private const string RestrictSwitch = "Microsoft.Build.RestrictPropertyFunctionReceivers";
@@ -70,7 +70,7 @@ public class PropertyFunctionReceiverRestriction_Tests
 
     // ---- Restricted: side-effect-free receivers remain callable ----
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Restricted_StringChain_IsAllowed()
     {
         using (SetSwitch(RestrictSwitch, true))
@@ -79,7 +79,7 @@ public class PropertyFunctionReceiverRestriction_Tests
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Restricted_ArrayMembers_AreAllowed()
     {
         using (SetSwitch(RestrictSwitch, true))
@@ -90,7 +90,7 @@ public class PropertyFunctionReceiverRestriction_Tests
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Restricted_AllowListedStaticFunction_StillWorks()
     {
         using (SetSwitch(RestrictSwitch, true))
@@ -99,7 +99,7 @@ public class PropertyFunctionReceiverRestriction_Tests
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Restricted_DirectoryInfoReadOnlyNavigation_IsAllowed()
     {
         using TestEnvironment env = TestEnvironment.Create();
@@ -117,7 +117,7 @@ public class PropertyFunctionReceiverRestriction_Tests
 
     // ---- Restricted: chains to non-listed receivers are not permitted ----
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Restricted_DirectoryInfoMutation_IsBlocked()
     {
         using TestEnvironment env = TestEnvironment.Create();
@@ -127,12 +127,12 @@ public class PropertyFunctionReceiverRestriction_Tests
         {
             // CreateSubdirectory changes the file system; it is not in the read-only navigation allowlist
             // and is rejected before invocation (so no directory is created).
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
                 Evaluate("$([System.IO.Directory]::GetParent($(File)).CreateSubdirectory('sub'))", ("File", file)));
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Restricted_DirectoryInfoEnumeration_IsBlocked()
     {
         using TestEnvironment env = TestEnvironment.Create();
@@ -142,12 +142,12 @@ public class PropertyFunctionReceiverRestriction_Tests
         {
             // GetFiles returns FileInfo[] and is not in the navigation allowlist, so the chain to FileInfo
             // (and OpenRead/OpenWrite) stops here.
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
                 Evaluate("$([System.IO.Directory]::GetParent($(File)).GetFiles())", ("File", file)));
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Restricted_FileOpenChain_IsBlocked()
     {
         using TestEnvironment env = TestEnvironment.Create();
@@ -156,24 +156,24 @@ public class PropertyFunctionReceiverRestriction_Tests
         using (SetSwitch(RestrictSwitch, true))
         {
             // The chain to OpenWrite is not permitted; it stops at GetFiles, before any FileInfo is produced.
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
                 Evaluate("$([System.IO.Directory]::GetParent($(File)).GetFiles().GetValue(0).OpenWrite().CanWrite)", ("File", file)));
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Restricted_GetType_IsBlocked()
     {
         using (SetSwitch(RestrictSwitch, true))
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
                 Evaluate("$(S.GetType())", ("S", "HelloWorld")));
         }
     }
 
     // ---- Default (unrestricted) behavior is preserved ----
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Unrestricted_DirectoryInfoEnumeration_IsAllowed()
     {
         using TestEnvironment env = TestEnvironment.Create();
@@ -189,7 +189,7 @@ public class PropertyFunctionReceiverRestriction_Tests
 
     // ---- The new restriction switch has no environment-variable opt-in ----
 
-    [Fact]
+    [MSBuildTestMethod]
     public void EnvironmentVariable_DoesNotEnableRestriction()
     {
         using TestEnvironment env = TestEnvironment.Create();
@@ -205,7 +205,7 @@ public class PropertyFunctionReceiverRestriction_Tests
 
     // ---- EnableAll escape hatch bypasses the restriction ----
 
-    [Fact]
+    [MSBuildTestMethod]
     public void EnableAllPropertyFunctions_BypassesRestriction()
     {
         using TestEnvironment env = TestEnvironment.Create();
@@ -221,11 +221,11 @@ public class PropertyFunctionReceiverRestriction_Tests
 
     // ---- Restricted: property setters and their special method names cannot run ----
 
-    [Theory]
-    [InlineData("set_Attributes(2)")] // FileSystemInfo.Attributes setter mutates the file system
-    [InlineData("set_CreationTime('2000-01-01')")]
-    [InlineData("set_LastWriteTime('2000-01-01')")]
-    [InlineData("set_LastAccessTime('2000-01-01')")]
+    [MSBuildTestMethod]
+    [DataRow("set_Attributes(2)")] // FileSystemInfo.Attributes setter mutates the file system
+    [DataRow("set_CreationTime('2000-01-01')")]
+    [DataRow("set_LastWriteTime('2000-01-01')")]
+    [DataRow("set_LastAccessTime('2000-01-01')")]
     public void Restricted_FileSystemInfoSetter_IsBlocked(string setterCall)
     {
         using TestEnvironment env = TestEnvironment.Create();
@@ -238,7 +238,7 @@ public class PropertyFunctionReceiverRestriction_Tests
             // form is getter-only - it binds with GetProperty/GetField, never SetProperty). That name is
             // not in the FileSystemInfo navigation allowlist, so the call is rejected at the receiver
             // check, before any argument is bound or the setter runs.
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
                 Evaluate($"$([System.IO.Directory]::GetParent($(File)).{setterCall})", ("File", file)));
         }
 
@@ -246,7 +246,7 @@ public class PropertyFunctionReceiverRestriction_Tests
         File.GetAttributes(folder).ShouldBe(attributesBefore);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Restricted_PropertyGetter_IsAllowed()
     {
         using TestEnvironment env = TestEnvironment.Create();
@@ -261,7 +261,7 @@ public class PropertyFunctionReceiverRestriction_Tests
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Restricted_GetterSpecialMethodName_IsBlocked()
     {
         using TestEnvironment env = TestEnvironment.Create();
@@ -271,12 +271,12 @@ public class PropertyFunctionReceiverRestriction_Tests
         {
             // Even the getter's get_ special method name is a method that is not in the navigation
             // allowlist, so it too is blocked; only the property-access form (validated by name) works.
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
                 Evaluate("$([System.IO.Directory]::GetParent($(File)).get_Attributes())", ("File", file)));
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Unrestricted_SpecialMethodName_IsReachable()
     {
         using TestEnvironment env = TestEnvironment.Create();
@@ -293,9 +293,9 @@ public class PropertyFunctionReceiverRestriction_Tests
 
     // ---- Restricted: state-mutating static functions stay blocked ----
 
-    [Theory]
-    [InlineData("$([System.Environment]::SetEnvironmentVariable('MSBUILD_RPF_TEST', 'x'))")]
-    [InlineData("$([System.Environment]::set_CurrentDirectory('.'))")]
+    [MSBuildTestMethod]
+    [DataRow("$([System.Environment]::SetEnvironmentVariable('MSBUILD_RPF_TEST', 'x'))")]
+    [DataRow("$([System.Environment]::set_CurrentDirectory('.'))")]
     public void Restricted_StaticStateMutation_StaysBlocked(string expression)
     {
         using (SetSwitch(RestrictSwitch, true))
@@ -303,7 +303,7 @@ public class PropertyFunctionReceiverRestriction_Tests
             // The receiver restriction governs instance "dotting in"; static calls remain governed by
             // the static allowlist. Neither process-state mutator is allowlisted, so both stay blocked
             // (and never run).
-            Assert.Throws<InvalidProjectFileException>(() => Evaluate(expression));
+            Assert.ThrowsExactly<InvalidProjectFileException>(() => Evaluate(expression));
         }
 
         Environment.GetEnvironmentVariable("MSBUILD_RPF_TEST").ShouldBeNull();
@@ -311,7 +311,7 @@ public class PropertyFunctionReceiverRestriction_Tests
 
     // ---- Restricted: registry reads are unaffected ----
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Restricted_RegistryValue_NonexistentKey_IsNotBlocked()
     {
         using (SetSwitch(RestrictSwitch, true))

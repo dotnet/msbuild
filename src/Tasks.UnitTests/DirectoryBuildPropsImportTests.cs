@@ -8,6 +8,7 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests that Microsoft.Common.props successfully imports a directory build project in the directory tree of the project being built.
     /// </summary>
+    [TestClass]
     public sealed class DirectoryBuildPropsImportTests : DirectoryBuildProjectImportTestBase
     {
         protected override string CustomBuildProjectFile => "customBuild.props";

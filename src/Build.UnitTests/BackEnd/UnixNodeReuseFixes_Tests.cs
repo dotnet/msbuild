@@ -6,7 +6,6 @@
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
@@ -14,6 +13,7 @@ namespace Microsoft.Build.UnitTests
     /// Tests for Unix node reuse bug fixes:
     /// - SessionId = 0 on Unix (cross-terminal node reuse)
     /// </summary>
+    [TestClass]
     public class UnixNodeReuseFixes_Tests
     {
         [UnixOnlyFact]

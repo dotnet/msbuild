@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -14,7 +14,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 using Exception = System.Exception;
 using SdkResolverBase = Microsoft.Build.Framework.SdkResolver;
 using SdkResolverContextBase = Microsoft.Build.Framework.SdkResolverContext;
@@ -25,12 +24,13 @@ using SdkResultFactoryBase = Microsoft.Build.Framework.SdkResultFactory;
 
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
+    [TestClass]
     public class SdkResolverLoader_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
         private readonly MockLogger _logger;
 
-        public SdkResolverLoader_Tests(ITestOutputHelper output)
+        public SdkResolverLoader_Tests(TestContext output)
         {
             _output = output;
             _logger = new MockLogger(output);
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             loggingService.RegisterLogger(_logger);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AssertDefaultLoaderReturnsDefaultResolvers()
         {
             var loader = new SdkResolverLoader();
@@ -51,7 +51,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.WarningCount.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifySdkResolverLoaderFileDiscoveryPattern()
         {
             var root = FileUtilities.GetTemporaryDirectory();
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResolverLoaderPrefersManifestFile()
         {
             var root = FileUtilities.GetTemporaryDirectory();
@@ -120,7 +120,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// <summary>
         /// Verifies that if an SDK resolver throws while creating an instance that a warning is logged.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyThrowsWhenResolverFailsToLoad()
         {
             SdkResolverLoader sdkResolverLoader = new MockSdkResolverLoader
@@ -152,7 +152,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Verifies that when we attempt to create an instance of a resolver with no public constructor that a warning
         /// is logged with the appropriate message.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyThrowsWhenResolverHasNoPublicConstructor()
         {
             SdkResolverLoader sdkResolverLoader = new MockSdkResolverLoader
@@ -181,7 +181,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// <summary>
         /// Verifies that when a resolver assembly cannot be loaded, that a warning is logged and other resolvers are still loaded.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyWarningLoggedWhenResolverAssemblyCannotBeLoaded()
         {
             const string assemblyPath = @"C:\foo\bar\myresolver.dll";
@@ -211,7 +211,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             _logger.ErrorCount.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResolverLoaderReadsManifestFile()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -236,7 +236,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResolverLoaderReadsManifestFileWithResolvableSdkPattern()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -263,7 +263,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResolverLoaderErrorsWithInvalidManifestFile()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -287,7 +287,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResolverLoaderErrorsWhenNoDllOrAssemblyFound()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -303,7 +303,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResolverLoaderErrorsWhenManifestTargetMissing()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -327,7 +327,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResolverLoaderHonorsIncludeDefaultEnvVar()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -355,7 +355,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkResolverLoaderHonorsAdditionalResolversFolder()
         {
             using (var env = TestEnvironment.Create(_output))
@@ -399,9 +399,9 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Test that LoadResolverAssembly handles fallback behavior correctly based on BuildEnvironment flags.
         /// This test calls the actual LoadResolverAssembly method to ensure it fails when the fix is reverted.
         /// </summary>
-        [Theory]
-        [InlineData(false, false)]   // needsFallback = false (VS/MSBuild.exe), no fallback, should fail when Assembly.Load fails
-        [InlineData(true, true)]     // needsFallback = true (API/dotnet CLI), has fallback, should succeed with LoadFrom
+        [MSBuildTestMethod]
+        [DataRow(false, false)]   // needsFallback = false (VS/MSBuild.exe), no fallback, should fail when Assembly.Load fails
+        [DataRow(true, true)]     // needsFallback = true (API/dotnet CLI), has fallback, should succeed with LoadFrom
         public void LoadResolverAssembly_MSBuildSdkResolver_WithAndWithoutFallback(bool needsFallback, bool shouldSucceed)
         {
             using (var env = TestEnvironment.Create(_output))

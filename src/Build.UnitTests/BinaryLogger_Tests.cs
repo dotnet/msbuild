@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -18,12 +18,12 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class BinaryLoggerTests : IDisposable
     {
         private const string s_testProject = @"
@@ -76,7 +76,7 @@ namespace Microsoft.Build.UnitTests
         private readonly TestEnvironment _env;
         private string _logFile;
 
-        public BinaryLoggerTests(ITestOutputHelper output)
+        public BinaryLoggerTests(TestContext output)
         {
             _env = TestEnvironment.Create(output);
 
@@ -93,13 +93,13 @@ namespace Microsoft.Build.UnitTests
             RawEvents
         }
 
-        [Theory]
-        [InlineData(s_testProject, BinlogRoundtripTestReplayMode.NoReplay)]
-        [InlineData(s_testProject, BinlogRoundtripTestReplayMode.Structured)]
-        [InlineData(s_testProject, BinlogRoundtripTestReplayMode.RawEvents)]
-        [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.NoReplay)]
-        [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.Structured)]
-        [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
+        [MSBuildTestMethod]
+        [DataRow(s_testProject, BinlogRoundtripTestReplayMode.NoReplay)]
+        [DataRow(s_testProject, BinlogRoundtripTestReplayMode.Structured)]
+        [DataRow(s_testProject, BinlogRoundtripTestReplayMode.RawEvents)]
+        [DataRow(s_testProject2, BinlogRoundtripTestReplayMode.NoReplay)]
+        [DataRow(s_testProject2, BinlogRoundtripTestReplayMode.Structured)]
+        [DataRow(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
         public void TestBinaryLoggerRoundtrip(string projectText, BinlogRoundtripTestReplayMode replayMode)
         {
             // NOTE:
@@ -200,11 +200,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="projectText"></param>
         /// <param name="replayMode"></param>
-        [Theory]
-        [InlineData(s_testProject, BinlogRoundtripTestReplayMode.Structured)]
-        [InlineData(s_testProject, BinlogRoundtripTestReplayMode.RawEvents)]
-        [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.Structured)]
-        [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
+        [MSBuildTestMethod]
+        [DataRow(s_testProject, BinlogRoundtripTestReplayMode.Structured)]
+        [DataRow(s_testProject, BinlogRoundtripTestReplayMode.RawEvents)]
+        [DataRow(s_testProject2, BinlogRoundtripTestReplayMode.Structured)]
+        [DataRow(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
         public void TestBinaryLoggerRoundtripEquality(string projectText, BinlogRoundtripTestReplayMode replayMode)
         {
             var binaryLogger = new BinaryLogger();
@@ -296,7 +296,7 @@ namespace Microsoft.Build.UnitTests
             //  and to force the embedded files to be read.
             reader2.Read().ShouldBeNull($"Binlogs ({firstPath} and {secondPath}) are not equal - second has more events >{i + 1}");
 
-            Assert.Equal(embedFiles1, embedFiles2);
+            Helpers.AssertDictionariesEqual(embedFiles1, embedFiles2);
 
             void AddArchiveFile(Dictionary<string, string> files, ArchiveFileEventArgs arg)
             {
@@ -317,7 +317,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BinaryLoggerShouldSupportFilePathExplicitParameter()
         {
             var binaryLogger = new BinaryLogger();
@@ -326,7 +326,7 @@ namespace Microsoft.Build.UnitTests
             ObjectModelHelpers.BuildProjectExpectSuccess(s_testProject, binaryLogger);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UnusedEnvironmentVariablesDoNotAppearInBinaryLog()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -434,7 +434,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BinaryLoggerShouldEmbedFilesViaTaskOutput()
         {
             using var buildManager = new BuildManager();
@@ -463,7 +463,7 @@ namespace Microsoft.Build.UnitTests
                 $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BinaryLoggerShouldEmbedFilesWithRelativePathFromChildProjects()
         {
             // Repro for https://github.com/dotnet/msbuild/issues/13789: EmbedInBinlog items with a
@@ -521,7 +521,7 @@ namespace Microsoft.Build.UnitTests
             generatedFileCount.ShouldBe(2, $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
-        [RequiresSymbolicLinksFact]
+        [RequiresSymbolicLinksTestMethod]
         public void BinaryLoggerShouldEmbedSymlinkFilesViaTaskOutput()
         {
             string testFileName = "foobar.txt";
@@ -536,8 +536,8 @@ namespace Microsoft.Build.UnitTests
             string emptyFile = testFolder.CreateFile(emptyFileName).Path;
 
             string errorMessage = string.Empty;
-            Assert.True(NativeMethodsShared.MakeSymbolicLink(symlinkPath, testFile.Path, ref errorMessage), errorMessage);
-            Assert.True(NativeMethodsShared.MakeSymbolicLink(symlinkLvl2Path, symlinkPath, ref errorMessage), errorMessage);
+            Assert.IsTrue(NativeMethodsShared.MakeSymbolicLink(symlinkPath, testFile.Path, ref errorMessage), errorMessage);
+            Assert.IsTrue(NativeMethodsShared.MakeSymbolicLink(symlinkLvl2Path, symlinkPath, ref errorMessage), errorMessage);
 
             using var buildManager = new BuildManager();
             var binaryLogger = new BinaryLogger()
@@ -587,7 +587,7 @@ namespace Microsoft.Build.UnitTests
                 customMessage: $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BinaryLoggerShouldNotThrowWhenMetadataCannotBeExpanded()
         {
             var binaryLogger = new BinaryLogger
@@ -615,7 +615,7 @@ namespace Microsoft.Build.UnitTests
         /// Regression test for dotnet/dotnet#5433 — ClearCacheDirectory must not destroy the
         /// ProjectImports archive before it is embedded in the binlog.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BinlogEmbeddedImportsSurviveClearCacheDirectory()
         {
             string logFilePath = Path.Combine(_env.DefaultTestDirectory.Path, "test.binlog");
@@ -651,7 +651,7 @@ namespace Microsoft.Build.UnitTests
         /// This isn't strictly a binlog test, but it fits here because
         /// all log event types will be used when the binlog is attached.
         /// </remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void MessagesCanBeLoggedWhenProjectsAreCached()
         {
             using var env = TestEnvironment.Create();
@@ -695,7 +695,7 @@ namespace Microsoft.Build.UnitTests
         /// 1. When binary log and verbosity=diagnostic are both set, the equivalent command line is printed.
         /// 2. When binary log and non-diag verbosity are set, the equivalent command line is NOT printed.
         /// </remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void SuppressCommandOutputForNonDiagVerbosity()
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -727,18 +727,18 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Theory]
+        [MSBuildTestMethod]
         // Wildcard - new scenario
-        [InlineData("mylog-{}-foo", "mylog-xxxxx-foo.binlog")]
-        [InlineData("mylog-{}-foo-{}", "mylog-xxxxx-foo-xxxxx.binlog")]
-        [InlineData("\"mylog-{}-foo\"", "mylog-xxxxx-foo.binlog")]
-        [InlineData("foo\\bar\\mylog-{}-foo.binlog", "foo\\bar\\mylog-xxxxx-foo.binlog")]
-        [InlineData("ProjectImports=None;LogFile=mylog-{}-foo", "mylog-xxxxx-foo.binlog")]
+        [DataRow("mylog-{}-foo", "mylog-xxxxx-foo.binlog")]
+        [DataRow("mylog-{}-foo-{}", "mylog-xxxxx-foo-xxxxx.binlog")]
+        [DataRow("\"mylog-{}-foo\"", "mylog-xxxxx-foo.binlog")]
+        [DataRow("foo\\bar\\mylog-{}-foo.binlog", "foo\\bar\\mylog-xxxxx-foo.binlog")]
+        [DataRow("ProjectImports=None;LogFile=mylog-{}-foo", "mylog-xxxxx-foo.binlog")]
         // No wildcard - pre-existing scenarios
-        [InlineData("mylog-foo.binlog", "mylog-foo.binlog")]
-        [InlineData("\"mylog-foo.binlog\"", "mylog-foo.binlog")]
-        [InlineData("foo\\bar\\mylog-foo.binlog", "foo\\bar\\mylog-foo.binlog")]
-        [InlineData("ProjectImports=None;LogFile=mylog-foo.binlog", "mylog-foo.binlog")]
+        [DataRow("mylog-foo.binlog", "mylog-foo.binlog")]
+        [DataRow("\"mylog-foo.binlog\"", "mylog-foo.binlog")]
+        [DataRow("foo\\bar\\mylog-foo.binlog", "foo\\bar\\mylog-foo.binlog")]
+        [DataRow("ProjectImports=None;LogFile=mylog-foo.binlog", "mylog-foo.binlog")]
         public void BinlogFileNameParameterParsing(string parameters, string expectedBinlogFile)
         {
             var binaryLogger = new BinaryLogger
@@ -761,7 +761,7 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BinlogFileNameWildcardGeneration()
         {
             var binaryLogger = new BinaryLogger
@@ -782,18 +782,18 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
-        [Theory]
-        [InlineData("mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
-        [InlineData("LogFile=mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
-        [InlineData("\"mylog.binlog\"", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
-        [InlineData("LogFile=\"mylog.binlog\"", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
-        [InlineData("mylog.binlog;ProjectImports=None", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.None, false)]
-        [InlineData("ProjectImports=None;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.None, false)]
-        [InlineData("ProjectImports=Embed;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
-        [InlineData("ProjectImports=ZipFile;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.ZipFile, false)]
-        [InlineData("mylog.binlog;OmitInitialInfo", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, true)]
-        [InlineData("OmitInitialInfo;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, true)]
-        [InlineData("ProjectImports=None;OmitInitialInfo;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.None, true)]
+        [MSBuildTestMethod]
+        [DataRow("mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [DataRow("LogFile=mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [DataRow("\"mylog.binlog\"", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [DataRow("LogFile=\"mylog.binlog\"", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [DataRow("mylog.binlog;ProjectImports=None", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.None, false)]
+        [DataRow("ProjectImports=None;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.None, false)]
+        [DataRow("ProjectImports=Embed;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, false)]
+        [DataRow("ProjectImports=ZipFile;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.ZipFile, false)]
+        [DataRow("mylog.binlog;OmitInitialInfo", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, true)]
+        [DataRow("OmitInitialInfo;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.Embed, true)]
+        [DataRow("ProjectImports=None;OmitInitialInfo;mylog.binlog", "mylog.binlog", BinaryLogger.ProjectImportsCollectionMode.None, true)]
         public void ParseParametersTests(string parametersString, string expectedLogFilePath, BinaryLogger.ProjectImportsCollectionMode expectedImportsMode, bool expectedOmitInitialInfo)
         {
             var result = BinaryLogger.ParseParameters(parametersString);
@@ -806,11 +806,11 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
-        [Theory]
-        [InlineData("{}")]  // Wildcard without extension
-        [InlineData("{}.binlog")]  // Wildcard with extension
-        [InlineData("mylog-{}.binlog")]  // Wildcard with prefix
-        [InlineData("LogFile={}.binlog")]  // Wildcard with LogFile= prefix
+        [MSBuildTestMethod]
+        [DataRow("{}")]  // Wildcard without extension
+        [DataRow("{}.binlog")]  // Wildcard with extension
+        [DataRow("mylog-{}.binlog")]  // Wildcard with prefix
+        [DataRow("LogFile={}.binlog")]  // Wildcard with LogFile= prefix
         public void ParseParameters_WildcardPath_ReturnsNullPath(string parametersString)
         {
             using (TestEnvironment env = TestEnvironment.Create())
@@ -829,7 +829,7 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ParseParameters_NullParameter_ThrowsLoggerException()
         {
             Should.Throw<LoggerException>(() => BinaryLogger.ParseParameters(null));
@@ -838,10 +838,10 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
-        [Theory]
-        [InlineData("invalidparameter")]
-        [InlineData("mylog.txt")]  // Wrong extension
-        [InlineData("LogFile=mylog.txt")]  // Wrong extension with LogFile prefix
+        [MSBuildTestMethod]
+        [DataRow("invalidparameter")]
+        [DataRow("mylog.txt")]  // Wrong extension
+        [DataRow("LogFile=mylog.txt")]  // Wrong extension with LogFile prefix
         public void ParseParameters_InvalidParameter_ThrowsLoggerException(string parametersString)
         {
             Should.Throw<LoggerException>(() => BinaryLogger.ParseParameters(parametersString));
@@ -852,16 +852,16 @@ namespace Microsoft.Build.UnitTests
 
         #region ExtractFilePathFromParameters Tests
 
-        [Theory]
-        [InlineData(null, "msbuild.binlog")]
-        [InlineData("", "msbuild.binlog")]
-        [InlineData("output.binlog", "output.binlog")]
-        [InlineData("LogFile=output.binlog", "output.binlog")]
-        [InlineData("output.binlog;ProjectImports=None", "output.binlog")]
-        [InlineData("ProjectImports=None;output.binlog", "output.binlog")]
-        [InlineData("ProjectImports=None;LogFile=output.binlog;OmitInitialInfo", "output.binlog")]
-        [InlineData("ProjectImports=None", "msbuild.binlog")]  // No path specified
-        [InlineData("OmitInitialInfo", "msbuild.binlog")]  // No path specified
+        [MSBuildTestMethod]
+        [DataRow(null, "msbuild.binlog")]
+        [DataRow("", "msbuild.binlog")]
+        [DataRow("output.binlog", "output.binlog")]
+        [DataRow("LogFile=output.binlog", "output.binlog")]
+        [DataRow("output.binlog;ProjectImports=None", "output.binlog")]
+        [DataRow("ProjectImports=None;output.binlog", "output.binlog")]
+        [DataRow("ProjectImports=None;LogFile=output.binlog;OmitInitialInfo", "output.binlog")]
+        [DataRow("ProjectImports=None", "msbuild.binlog")]  // No path specified
+        [DataRow("OmitInitialInfo", "msbuild.binlog")]  // No path specified
         public void ExtractFilePathFromParameters_ReturnsExpectedPath(string parameters, string expectedFileName)
         {
             string result = BinaryLogger.ExtractFilePathFromParameters(parameters);
@@ -873,7 +873,7 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractFilePathFromParameters_ReturnsFullPath()
         {
             string result = BinaryLogger.ExtractFilePathFromParameters("mylog.binlog");
@@ -889,16 +889,16 @@ namespace Microsoft.Build.UnitTests
 
         #region ExtractNonPathParameters Tests
 
-        [Theory]
-        [InlineData(null, "")]
-        [InlineData("", "")]
-        [InlineData("output.binlog", "")]  // Path only, no config
-        [InlineData("LogFile=output.binlog", "")]  // Path only, no config
-        [InlineData("ProjectImports=None", "ProjectImports=None")]
-        [InlineData("OmitInitialInfo", "OmitInitialInfo")]
-        [InlineData("output.binlog;ProjectImports=None", "ProjectImports=None")]
-        [InlineData("output.binlog;ProjectImports=None;OmitInitialInfo", "OmitInitialInfo;ProjectImports=None")]  // Sorted
-        [InlineData("OmitInitialInfo;output.binlog;ProjectImports=None", "OmitInitialInfo;ProjectImports=None")]  // Sorted
+        [MSBuildTestMethod]
+        [DataRow(null, "")]
+        [DataRow("", "")]
+        [DataRow("output.binlog", "")]  // Path only, no config
+        [DataRow("LogFile=output.binlog", "")]  // Path only, no config
+        [DataRow("ProjectImports=None", "ProjectImports=None")]
+        [DataRow("OmitInitialInfo", "OmitInitialInfo")]
+        [DataRow("output.binlog;ProjectImports=None", "ProjectImports=None")]
+        [DataRow("output.binlog;ProjectImports=None;OmitInitialInfo", "OmitInitialInfo;ProjectImports=None")]  // Sorted
+        [DataRow("OmitInitialInfo;output.binlog;ProjectImports=None", "OmitInitialInfo;ProjectImports=None")]  // Sorted
         public void ExtractNonPathParameters_ReturnsExpectedConfig(string parameters, string expectedConfig)
         {
             string result = BinaryLogger.ExtractNonPathParameters(parameters);
@@ -912,7 +912,7 @@ namespace Microsoft.Build.UnitTests
 
         #region ProcessParameters Tests
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProcessParameters_NullArray_ReturnsEmptyResult()
         {
             var result = BinaryLogger.ProcessParameters(null);
@@ -926,7 +926,7 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProcessParameters_EmptyArray_ReturnsEmptyResult()
         {
             var result = BinaryLogger.ProcessParameters(Array.Empty<string>());
@@ -940,7 +940,7 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProcessParameters_SingleParameter_ReturnsOneParameterSet()
         {
             var result = BinaryLogger.ProcessParameters(new[] { "output.binlog" });
@@ -955,7 +955,7 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProcessParameters_MultipleIdenticalConfigs_OptimizesWithAdditionalPaths()
         {
             var result = BinaryLogger.ProcessParameters(new[] { "1.binlog", "2.binlog", "3.binlog" });
@@ -969,7 +969,7 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProcessParameters_DifferentConfigs_NoOptimization()
         {
             var result = BinaryLogger.ProcessParameters(new[] { "1.binlog", "2.binlog;ProjectImports=None" });
@@ -983,7 +983,7 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProcessParameters_DuplicatePaths_FilteredOut()
         {
             var result = BinaryLogger.ProcessParameters(new[] { "1.binlog", "1.binlog", "2.binlog" });
@@ -995,7 +995,7 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProcessParameters_DuplicatePaths_CaseInsensitive()
         {
             var result = BinaryLogger.ProcessParameters(new[] { "Output.binlog", "output.BINLOG", "other.binlog" });
@@ -1007,7 +1007,7 @@ namespace Microsoft.Build.UnitTests
             File.Create(_logFile).Dispose();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProcessParameters_MixedConfigsWithDuplicates_HandledCorrectly()
         {
             var result = BinaryLogger.ProcessParameters(new[] { 
@@ -1030,7 +1030,7 @@ namespace Microsoft.Build.UnitTests
         // These tests exercise in-memory streams rather than .binlog files,
         // but the fixture's _logFile must exist at Dispose time.
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OpenBuildEventsReader_ThrowsForIncompatibleVersion()
         {
             // fileFormatVersion > current AND minimumReaderVersion > current => fatal
@@ -1048,7 +1048,7 @@ namespace Microsoft.Build.UnitTests
             CreateExpectedLogFile();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OpenBuildEventsReader_SucceedsForForwardCompatibleVersion()
         {
             // fileFormatVersion > current but minimumReaderVersion <= current => should succeed
@@ -1067,7 +1067,7 @@ namespace Microsoft.Build.UnitTests
             CreateExpectedLogFile();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OpenBuildEventsReader_ThrowsWithoutForwardCompatibility()
         {
             // fileFormatVersion > current, allowForwardCompatibility = false => fatal even if minimumReaderVersion is ok
@@ -1091,7 +1091,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private void CreateExpectedLogFile() => File.Create(_logFile).Dispose();
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FormatVersionMismatchWarning_NullForCurrentVersion()
         {
             _env.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "1");
@@ -1112,7 +1112,7 @@ namespace Microsoft.Build.UnitTests
             replayEventSource.FormatVersionMismatchWarning.ShouldBeNull();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FormatVersionMismatchWarning_NonNullForNewerVersion()
         {
             int newerVersion = BinaryLogger.FileFormatVersion + 5;
@@ -1142,7 +1142,7 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DeferredMSBuildServerLifecycleEventIsWrittenToBinlog()
         {
             // Regression coverage for the LogDeferredMessages "glue": a DeferredBuildMessage backed by a

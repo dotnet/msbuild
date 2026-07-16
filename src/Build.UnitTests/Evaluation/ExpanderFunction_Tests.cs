@@ -6,23 +6,23 @@ using System.Threading;
 
 using Shouldly;
 
-using Xunit;
 using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 
 namespace Microsoft.Build.Engine.UnitTests.Evaluation
 {
+    [TestClass]
     public class ExpanderFunction_Tests
     {
         /* Tests for TryConvertToInt */
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToIntGivenNull()
         {
             ParseArgs.TryConvertToInt(null, out int actual).ShouldBeFalse();
             actual.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToIntGivenDouble()
         {
             const double value = 10.0;
@@ -30,7 +30,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(10);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToIntGivenLong()
         {
             const long value = 10;
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(10);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToIntGivenInt()
         {
             const int value = 10;
@@ -46,7 +46,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(10);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToIntGivenString()
         {
             const string value = "10";
@@ -54,7 +54,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(10);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToIntGivenDoubleWithIntMinValue()
         {
             const int expected = int.MinValue;
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToIntGivenDoubleWithIntMaxValue()
         {
             const int expected = int.MaxValue;
@@ -72,7 +72,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToIntGivenDoubleWithLessThanIntMinValue()
         {
             const double value = int.MinValue - 1.0;
@@ -80,7 +80,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToIntGivenDoubleWithGreaterThanIntMaxValue()
         {
             const double value = int.MaxValue + 1.0;
@@ -88,7 +88,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToIntGivenLongWithGreaterThanIntMaxValue()
         {
             const long value = int.MaxValue + 1L;
@@ -98,14 +98,14 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
         /* Tests for TryConvertToLong */
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToLongGivenNull()
         {
             ParseArgs.TryConvertToLong(null, out long actual).ShouldBeFalse();
             actual.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToLongGivenDouble()
         {
             const double value = 10.0;
@@ -113,7 +113,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(10);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToLongGivenLong()
         {
             const long value = 10;
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(10);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToLongGivenInt()
         {
             const int value = 10;
@@ -129,7 +129,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(10);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToLongGivenString()
         {
             const string value = "10";
@@ -137,7 +137,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(10);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToLongGivenDoubleWithLongMinValue()
         {
             const long expected = long.MinValue;
@@ -146,7 +146,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToLongGivenDoubleWithLongMaxValueShouldNotThrow()
         {
             // An OverflowException should not be thrown from TryConvertToLong().
@@ -177,7 +177,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(longMaxValue);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToLongGivenDoubleWithVeryLargeLongValue()
         {
             // Because of loss of precision, veryLargeLong will not 'round trip' but within TryConvertToLong
@@ -189,7 +189,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToLongGivenDoubleWithLessThanLongMinValue()
         {
             const double value = -92233720368547758081D;
@@ -197,7 +197,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToLongGivenDoubleWithGreaterThanLongMaxValue()
         {
             const double value = (double)long.MaxValue + long.MaxValue;
@@ -207,14 +207,14 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
 
         /* Tests for TryConvertToDouble */
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToDoubleGivenNull()
         {
             ParseArgs.TryConvertToDouble(null, out double actual).ShouldBeFalse();
             actual.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToDoubleGivenDouble()
         {
             const double value = 10.0;
@@ -222,7 +222,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(10.0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToDoubleGivenLong()
         {
             const long value = 10;
@@ -230,7 +230,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(10.0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToDoubleGivenInt()
         {
             const int value = 10;
@@ -238,7 +238,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(10.0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToDoubleGivenString()
         {
             const string value = "10";
@@ -246,7 +246,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actual.ShouldBe(10.0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TryConvertToDoubleGivenStringAndLocale()
         {
             const string value = "1,2";

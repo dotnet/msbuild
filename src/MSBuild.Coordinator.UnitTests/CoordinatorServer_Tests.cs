@@ -7,11 +7,11 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Coordinator;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
-public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
+[TestClass]
+public class CoordinatorServer_Tests(TestContext testOutput) : IDisposable
 {
     private readonly string _pipeName = NamedPipeUtil.GetPlatformSpecificPipeName($"msbuild-coordinator-test-{Guid.NewGuid():N}");
     private readonly CancellationTokenSource _cts = new();
@@ -30,7 +30,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         _cts.Dispose();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task SingleClient_ReceivesNodeGrant()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
@@ -53,7 +53,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task SingleClient_RequestLessThanBudget_GrantsOnlyRequested()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
@@ -76,7 +76,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task ClientWithNestedGrantCapability_ReceivesGrantId()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
@@ -98,7 +98,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task ClientWithoutNestedGrantCapability_ReceivesLegacyNodeGrant()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
@@ -119,7 +119,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task JoinGrantWithoutNestedGrantCapability_ReceivesError()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
@@ -138,7 +138,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task NestedClient_JoinsRootGrant_WithoutConsumingAdditionalBudget()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
@@ -186,7 +186,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task MultipleClients_FairShareAllocation()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 8);
@@ -222,7 +222,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task MultipleWaiters_FairShareDistribution()
     {
         // Budget of 8. One active client holds all 8. Two clients wait.
@@ -276,7 +276,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task WaitingClientDisconnects_DoesNotAffectOtherWaiters()
     {
         // Budget of 4. One active client holds all 4. Two clients wait.
@@ -332,7 +332,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     }
 
     [ActiveIssue("https://github.com/dotnet/msbuild/issues/14193", TestPlatforms.Windows)]
-    [Fact]
+    [MSBuildTestMethod]
     public async Task ConcurrentClients_AllReceiveGrants()
     {
 #pragma warning disable CA2000 // Dispose objects before losing scope
@@ -390,7 +390,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
 #pragma warning restore CA2000 // Dispose objects before losing scope
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task Heartbeat_DoesNotCauseError()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
@@ -417,7 +417,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task ClientDisconnect_ReleasesGrant()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
@@ -457,7 +457,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task InvalidFirstMessage_ReceivesError()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
@@ -478,7 +478,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task InvalidHandshakeProcessId_ReceivesError()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
@@ -496,7 +496,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task UnexpectedMessageAfterGrant_ReleasesGrant()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
@@ -530,7 +530,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task AutoShutdown_ExitsWhenNoBuildsActive()
     {
         using CoordinatorServer server = CreateServer(
@@ -549,7 +549,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         completed.ShouldBeSameAs(serverTask);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task SamePidReconnects_CleanlyHandled()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 8);

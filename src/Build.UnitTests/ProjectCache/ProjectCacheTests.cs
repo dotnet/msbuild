@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -21,11 +21,11 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 using Task = System.Threading.Tasks.Task;
 
 namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 {
+    [TestClass]
     public class ProjectCacheTests : IDisposable
     {
         // The sample plugin and the helper apps built by these tests target the runtime MSBuild itself
@@ -34,7 +34,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         // tests rather than from BootstrapSdkVersion, so the plugin/app paths resolve to the built output.
         private static string s_currentTargetNETFramework = $"net{Environment.Version.Major}.0";
 
-        public ProjectCacheTests(ITestOutputHelper output)
+        public ProjectCacheTests(TestContext output)
         {
             _output = output;
             _env = TestEnvironment.Create(output);
@@ -251,6 +251,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             LoggedError
         }
 
+        [TestClass]
         public class ConfigurableMockCache : ProjectCachePluginBase
         {
             public Func<CacheContext, PluginLoggerBase, CancellationToken, Task>? BeginBuildImplementation { get; set; }
@@ -348,7 +349,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
 
         private readonly TestEnvironment _env;
 
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
         public static IEnumerable<GraphCacheResponse> SuccessfulGraphs
         {
@@ -470,8 +471,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
         }
 
-        [Theory]
-        [MemberData(nameof(SuccessfulGraphsWithBuildParameters))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(SuccessfulGraphsWithBuildParameters))]
         public void ProjectCacheByBuildParametersAndGraphBuildWorks(GraphCacheResponse testData, BuildParameters buildParameters)
         {
             _output.WriteLine(testData.ToString());
@@ -497,8 +498,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             AssertCacheBuild(graph, testData, mockCache, logger, graphResult.ResultsByNode, targets: "Build");
         }
 
-        [Theory]
-        [MemberData(nameof(SuccessfulGraphsWithBuildParameters))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(SuccessfulGraphsWithBuildParameters))]
         public void ProjectCacheByBuildParametersAndBottomUpBuildWorks(GraphCacheResponse testData, BuildParameters buildParameters)
         {
             var graph = testData.CreateGraph(_env);
@@ -532,8 +533,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             AssertCacheBuild(graph, testData, mockCache, logger, nodesToBuildResults, targets: null);
         }
 
-        [Theory]
-        [MemberData(nameof(SuccessfulGraphsWithBuildParameters))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(SuccessfulGraphsWithBuildParameters))]
         public void ProjectCacheByVsScenarioWorks(GraphCacheResponse testData, BuildParameters buildParameters)
         {
             (MockLogger logger, ProjectGraph graph, Dictionary<ProjectGraphNode, BuildResult> nodesToBuildResults) = BuildGraphVsScenario(testData, buildParameters);
@@ -541,7 +542,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             AssertCacheBuild(graph, testData, null, logger, nodesToBuildResults, targets: null);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectCacheByVsScenarioIgnoresSlnDisabledProjects()
         {
             var testData = new GraphCacheResponse(
@@ -675,7 +676,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             return sb.ToString();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DesignTimeBuildsDuringVsScenarioShouldDisableTheCache()
         {
             var currentBuildEnvironment = BuildEnvironmentHelper.Instance;
@@ -742,9 +743,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void RunningProxyBuildsOnOutOfProcNodesShouldIssueWarning(bool disableInprocNodeViaEnvironmentVariable)
         {
             var testData = new GraphCacheResponse(
@@ -887,8 +888,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             itemResult.GetMetadata(expectedMetadata).ShouldBe("true");
         }
 
-        [Theory]
-        [MemberData(nameof(MultiProcWithAndWithoutInProcNode))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(MultiProcWithAndWithoutInProcNode))]
         public void CacheShouldNotGetQueriedForNestedBuildRequests(BuildParameters buildParameters)
         {
             var project1 = _env.CreateFile("1.proj", @"
@@ -924,7 +925,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             mockCache.Requests.First().ProjectFullPath.ShouldEndWith("1.proj");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CacheViaBuildParametersCanDiscoverAndLoadPluginFromAssembly()
         {
             var testData = new GraphCacheResponse(
@@ -955,7 +956,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             AssertCacheBuild(graph, testData, null, logger, graphResult.ResultsByNode, targets: "Build");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GraphBuildCanDiscoverAndLoadPluginFromAssembly()
         {
             var testData = new GraphCacheResponse(
@@ -979,7 +980,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             AssertCacheBuild(graph, testData, null, logger, graphResult.ResultsByNode, targets: "Build");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BuildFailsWhenCacheBuildResultIsWrong()
         {
             var testData = new GraphCacheResponse(
@@ -1035,7 +1036,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             logger.FullLog.ShouldContain("Reference file [Invalid file] does not exist");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultiplePlugins()
         {
             // One from the project, one from BuildParameters.
@@ -1068,7 +1069,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             graphResult.ShouldHaveSucceeded();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NotAllNodesDefineAPlugin()
         {
             var graph = Helpers.CreateProjectGraph(
@@ -1122,8 +1123,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
         }
 
-        [Theory]
-        [MemberData(nameof(CacheExceptionLocationsTestData))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(CacheExceptionLocationsTestData))]
         public void EngineShouldHandleExceptionsFromCachePluginViaBuildParameters(ErrorLocations errorLocations, ErrorKind errorKind)
         {
             SetEnvironmentForErrorLocations(errorLocations, errorKind);
@@ -1239,8 +1240,8 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
         }
 
-        [Theory]
-        [MemberData(nameof(CacheExceptionLocationsTestData))]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(CacheExceptionLocationsTestData))]
         public void EngineShouldHandleExceptionsFromCachePluginViaGraphBuild(ErrorLocations errorLocations, ErrorKind errorKind)
         {
             const ErrorLocations exceptionsThatShouldPreventCacheQueryAndEndBuildAsync = ErrorLocations.Constructor | ErrorLocations.BeginBuildAsync;
@@ -1342,7 +1343,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EndBuildShouldGetCalledOnceWhenItThrowsExceptionsFromGraphBuilds()
         {
             var project = _env.CreateFile(
@@ -1372,9 +1373,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             StringShouldContainSubstring(buildSession.Logger.FullLog, $"{nameof(AssemblyMockCache)}: EndBuildAsync", expectedOccurrences: 1);
         }
 
-        [Theory]
-        [InlineData(false, false)]
-        [InlineData(true, true)]
+        [MSBuildTestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, true)]
         public void CacheShouldBeQueriedInParallelDuringGraphBuilds(bool useSynchronousLogging, bool disableInprocNode)
         {
             var referenceNumbers = new[] { 2, 3, 4 };
@@ -1450,9 +1451,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
         }
 
-        [Theory]
-        [InlineData(false, false)]
-        [InlineData(true, true)]
+        [MSBuildTestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, true)]
         public void ParallelStressTestForVsScenario(bool useSynchronousLogging, bool disableInprocNode)
         {
             var currentBuildEnvironment = BuildEnvironmentHelper.Instance;
@@ -1528,9 +1529,9 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             }
         }
 
-        [Theory]
-        [InlineData(false, false)]
-        [InlineData(true, true)]
+        [MSBuildTestMethod]
+        [DataRow(false, false)]
+        [DataRow(true, true)]
         public void ParallelStressTest(bool useSynchronousLogging, bool disableInprocNode)
         {
             var referenceNumbers = Enumerable.Range(2, NativeMethodsShared.GetLogicalCoreCount() * 2).ToArray();
@@ -1565,7 +1566,7 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
             cache.QueryStartStops.Count.ShouldBe(graph.ProjectNodes.Count * 2);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         // Schedules different requests for the same BuildRequestConfiguration in parallel.
         // The first batch of the requests are cache misses, the second batch are cache hits via proxy builds.
         // The first batch is delayed so it starts intermingling with the second batch.

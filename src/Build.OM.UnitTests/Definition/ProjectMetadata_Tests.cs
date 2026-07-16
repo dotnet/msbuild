@@ -8,7 +8,6 @@ using System.Linq;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
-using Xunit;
 
 #nullable disable
 
@@ -17,25 +16,26 @@ namespace Microsoft.Build.UnitTests.OM.Definition
     /// <summary>
     /// Tests for ProjectMetadata
     /// </summary>
+    [TestClass]
     public class ProjectMetadata_Tests
     {
         /// <summary>
         /// Project getter
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ProjectGetter()
         {
             Project project = new Project();
             ProjectItem item = project.AddItem("i", "i1")[0];
             ProjectMetadata metadatum = item.SetMetadataValue("m", "m1");
 
-            Assert.True(Object.ReferenceEquals(project, metadatum.Project));
+            Assert.IsTrue(Object.ReferenceEquals(project, metadatum.Project));
         }
 
         /// <summary>
         /// Set a new metadata value via the evaluated ProjectMetadata object
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetUnevaluatedValue()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -54,12 +54,12 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             Project project = new Project(projectXml);
 
-            Assert.False(project.IsDirty);
+            Assert.IsFalse(project.IsDirty);
 
             Helpers.GetFirst(project.GetItems("i")).SetMetadataValue("m1", "v2");
             Helpers.GetFirst(project.GetItems("i")).SetMetadataValue("m2", "v%214");
 
-            Assert.True(project.IsDirty);
+            Assert.IsTrue(project.IsDirty);
 
             using StringWriter writer = new EncodingStringWriter();
             projectXml.Save(writer);
@@ -76,13 +76,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ");
 
             Helpers.CompareProjectXml(expected, writer.ToString());
-            Assert.Equal("v!4", Helpers.GetFirst(project.GetItems("i")).GetMetadataValue("m2"));
+            Assert.AreEqual("v!4", Helpers.GetFirst(project.GetItems("i")).GetMetadataValue("m2"));
         }
 
         /// <summary>
         /// If the value doesn't change then the project shouldn't dirty
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetUnchangedValue()
         {
             Project project = new Project();
@@ -92,17 +92,17 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             item.SetMetadataValue("m", "m1");
 
-            Assert.False(project.IsDirty);
+            Assert.IsFalse(project.IsDirty);
 
             item.GetMetadata("m").UnevaluatedValue = "m1";
 
-            Assert.False(project.IsDirty);
+            Assert.IsFalse(project.IsDirty);
         }
 
         /// <summary>
         /// Properties should be expanded
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValueWithPropertyExpression()
         {
             Project project = new Project();
@@ -113,14 +113,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             metadatum.UnevaluatedValue = "$(p)";
 
-            Assert.Equal("$(p)", metadatum.UnevaluatedValue);
-            Assert.Equal("p0", metadatum.EvaluatedValue);
+            Assert.AreEqual("$(p)", metadatum.UnevaluatedValue);
+            Assert.AreEqual("p0", metadatum.EvaluatedValue);
         }
 
         /// <summary>
         /// Items should be expanded
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValueWithItemExpression()
         {
             Project project = new Project();
@@ -131,15 +131,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
             metadatum.UnevaluatedValue = "@(i)";
 
-            Assert.Equal("@(i)", metadatum.UnevaluatedValue);
-            Assert.Equal("i1", metadatum.EvaluatedValue);
+            Assert.AreEqual("@(i)", metadatum.UnevaluatedValue);
+            Assert.AreEqual("i1", metadatum.EvaluatedValue);
         }
 
         /// <summary>
         /// Set a new metadata value with a qualified metadata expression.
         /// Per 3.5, this expands to nothing.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValueWithQualifiedMetadataExpressionOtherItemType()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -161,14 +161,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("j")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(i.m1)";
 
-            Assert.Equal("%(i.m1)", metadatum.UnevaluatedValue);
-            Assert.Equal(String.Empty, metadatum.EvaluatedValue);
+            Assert.AreEqual("%(i.m1)", metadatum.UnevaluatedValue);
+            Assert.AreEqual(String.Empty, metadatum.EvaluatedValue);
         }
 
         /// <summary>
         /// Set a new metadata value with a qualified metadata expression of the same item type
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValueWithQualifiedMetadataExpressionSameItemType()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -188,14 +188,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(i.m0)";
 
-            Assert.Equal("%(i.m0)", metadatum.UnevaluatedValue);
-            Assert.Equal("v0", metadatum.EvaluatedValue);
+            Assert.AreEqual("%(i.m0)", metadatum.UnevaluatedValue);
+            Assert.AreEqual("v0", metadatum.EvaluatedValue);
         }
 
         /// <summary>
         /// Set a new metadata value with a qualified metadata expression of the same item type
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValueWithQualifiedMetadataExpressionSameMetadata()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -214,14 +214,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(i.m1)";
 
-            Assert.Equal("%(i.m1)", metadatum.UnevaluatedValue);
-            Assert.Equal(String.Empty, metadatum.EvaluatedValue);
+            Assert.AreEqual("%(i.m1)", metadatum.UnevaluatedValue);
+            Assert.AreEqual(String.Empty, metadatum.EvaluatedValue);
         }
 
         /// <summary>
         /// Set a new metadata value with an unqualified metadata expression
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValueWithUnqualifiedMetadataExpression()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -241,15 +241,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(m0)";
 
-            Assert.Equal("%(m0)", metadatum.UnevaluatedValue);
-            Assert.Equal("v0", metadatum.EvaluatedValue);
+            Assert.AreEqual("%(m0)", metadatum.UnevaluatedValue);
+            Assert.AreEqual("v0", metadatum.EvaluatedValue);
         }
 
         /// <summary>
         /// Set a new metadata value with an unqualified metadata expression
         /// Value from an item definition
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValueWithUnqualifiedMetadataExpressionFromItemDefinition()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -273,15 +273,15 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(m0)";
 
-            Assert.Equal("%(m0)", metadatum.UnevaluatedValue);
-            Assert.Equal("v0", metadatum.EvaluatedValue);
+            Assert.AreEqual("%(m0)", metadatum.UnevaluatedValue);
+            Assert.AreEqual("v0", metadatum.EvaluatedValue);
         }
 
         /// <summary>
         /// Set a new metadata value with a qualified metadata expression
         /// Value from an item definition
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValueWithQualifiedMetadataExpressionFromItemDefinition()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -305,8 +305,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(i.m0)";
 
-            Assert.Equal("%(i.m0)", metadatum.UnevaluatedValue);
-            Assert.Equal("v0", metadatum.EvaluatedValue);
+            Assert.AreEqual("%(i.m0)", metadatum.UnevaluatedValue);
+            Assert.AreEqual("v0", metadatum.EvaluatedValue);
         }
 
         /// <summary>
@@ -314,7 +314,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// of the wrong item type.
         /// Per 3.5, this evaluates to nothing.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValueWithQualifiedMetadataExpressionWrongItemType()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -337,14 +337,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectMetadata metadatum = Helpers.GetFirst(project.GetItems("i")).GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(j.m0)";
 
-            Assert.Equal("%(j.m0)", metadatum.UnevaluatedValue);
-            Assert.Equal(String.Empty, metadatum.EvaluatedValue);
+            Assert.AreEqual("%(j.m0)", metadatum.UnevaluatedValue);
+            Assert.AreEqual(String.Empty, metadatum.EvaluatedValue);
         }
 
         /// <summary>
         /// Set a new metadata value on an item definition with an unqualified metadata expression
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValueOnItemDefinitionWithUnqualifiedMetadataExpression()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -370,14 +370,14 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectMetadata metadatum = itemDefinition.GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(m0)";
 
-            Assert.Equal("%(m0)", metadatum.UnevaluatedValue);
-            Assert.Equal("v0", metadatum.EvaluatedValue);
+            Assert.AreEqual("%(m0)", metadatum.UnevaluatedValue);
+            Assert.AreEqual("v0", metadatum.EvaluatedValue);
         }
 
         /// <summary>
         /// Set a new metadata value on an item definition with an qualified metadata expression
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValueOnItemDefinitionWithQualifiedMetadataExpression()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -399,8 +399,8 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectMetadata metadatum = itemDefinition.GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(i.m0)";
 
-            Assert.Equal("%(i.m0)", metadatum.UnevaluatedValue);
-            Assert.Equal("v0", metadatum.EvaluatedValue);
+            Assert.AreEqual("%(i.m0)", metadatum.UnevaluatedValue);
+            Assert.AreEqual("v0", metadatum.EvaluatedValue);
         }
 
         /// <summary>
@@ -408,7 +408,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// of the wrong item type.
         /// Per 3.5, this evaluates to empty string.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetValueOnItemDefinitionWithQualifiedMetadataExpressionWrongItemType()
         {
             string content = ObjectModelHelpers.CleanupFileContents(@"
@@ -433,29 +433,29 @@ namespace Microsoft.Build.UnitTests.OM.Definition
             ProjectMetadata metadatum = itemDefinition.GetMetadata("m1");
             metadatum.UnevaluatedValue = "%(j.m0)";
 
-            Assert.Equal("%(j.m0)", metadatum.UnevaluatedValue);
-            Assert.Equal(String.Empty, metadatum.EvaluatedValue);
+            Assert.AreEqual("%(j.m0)", metadatum.UnevaluatedValue);
+            Assert.AreEqual(String.Empty, metadatum.EvaluatedValue);
         }
 
         /// <summary>
         /// IsImported = false
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void IsImportedFalse()
         {
             Project project = new Project();
             ProjectMetadata metadata = project.AddItem("i", "i1")[0].SetMetadataValue("m", "m1");
 
-            Assert.False(metadata.IsImported);
+            Assert.IsFalse(metadata.IsImported);
         }
 
         /// <summary>
         /// Attempt to set metadata on imported item should fail
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetMetadataImported()
         {
-            Assert.Throws<InvalidOperationException>(() =>
+            Assert.ThrowsExactly<InvalidOperationException>(() =>
             {
                 ProjectRootElement import = ProjectRootElement.Create("import");
                 ProjectItemElement itemXml = import.AddItem("i", "i1");
@@ -469,7 +469,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 ProjectMetadata metadata = item.GetMetadata("m");
 
-                Assert.True(metadata.IsImported);
+                Assert.IsTrue(metadata.IsImported);
 
                 metadata.UnevaluatedValue = "m1";
             });
@@ -477,7 +477,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Escaping in metadata values
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SpecialCharactersInMetadataValueConstruction()
         {
             string projectString = ObjectModelHelpers.CleanupFileContents(@"<Project DefaultTargets=""Build"" ToolsVersion=""msbuilddefaulttoolsversion"" xmlns=""msbuildnamespace"">
@@ -498,7 +498,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Escaping in metadata values
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SpecialCharactersInMetadataValueEvaluation()
         {
             Microsoft.Build.Evaluation.Project project = new Microsoft.Build.Evaluation.Project();
@@ -522,13 +522,13 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// </summary>
         private void SpecialCharactersInMetadataValueTests(Microsoft.Build.Evaluation.ProjectItem item)
         {
-            Assert.Equal("%3B", item.GetMetadata("EscapedSemicolon").UnevaluatedValue);
-            Assert.Equal(";", item.GetMetadata("EscapedSemicolon").EvaluatedValue);
-            Assert.Equal(";", item.GetMetadataValue("EscapedSemicolon"));
+            Assert.AreEqual("%3B", item.GetMetadata("EscapedSemicolon").UnevaluatedValue);
+            Assert.AreEqual(";", item.GetMetadata("EscapedSemicolon").EvaluatedValue);
+            Assert.AreEqual(";", item.GetMetadataValue("EscapedSemicolon"));
 
-            Assert.Equal("%24", item.GetMetadata("EscapedDollarSign").UnevaluatedValue);
-            Assert.Equal("$", item.GetMetadata("EscapedDollarSign").EvaluatedValue);
-            Assert.Equal("$", item.GetMetadataValue("EscapedDollarSign"));
+            Assert.AreEqual("%24", item.GetMetadata("EscapedDollarSign").UnevaluatedValue);
+            Assert.AreEqual("$", item.GetMetadata("EscapedDollarSign").EvaluatedValue);
+            Assert.AreEqual("$", item.GetMetadataValue("EscapedDollarSign"));
         }
     }
 }

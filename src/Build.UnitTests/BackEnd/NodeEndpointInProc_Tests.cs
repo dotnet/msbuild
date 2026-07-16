@@ -8,13 +8,13 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Xunit;
 using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
+    [TestClass]
     public class NodeEndpointInProc_Tests
     {
         private delegate void EndpointOperationDelegate(NodeEndpointInProc endpoint);
@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private Dictionary<INodeEndpoint, LinkStatusContext> _linkStatusTable;
         private MockHost _host;
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructionWithValidHost()
         {
             NodeEndpointInProc.EndpointPair endpoints =
@@ -184,20 +184,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     NodeEndpointInProc.EndpointMode.Asynchronous, _host, nodeId: 1);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructionSynchronousWithInvalidHost()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 NodeEndpointInProc.CreateInProcEndpoints(
                     NodeEndpointInProc.EndpointMode.Synchronous, null, nodeId: 1);
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConstructionAsynchronousWithInvalidHost()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 NodeEndpointInProc.CreateInProcEndpoints(
                     NodeEndpointInProc.EndpointMode.Asynchronous, null, nodeId: 1);
@@ -209,7 +209,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// 2. and that attempting to send data while they are
         /// inactive throws the expected exception.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InactiveLinkTestSynchronous()
         {
             NodeEndpointInProc.EndpointPair endpoints =
@@ -229,7 +229,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Verify that the links are marked inactive and that attempting to send data while they are
         /// inactive throws the expected exception.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InactiveLinkTestAsynchronous()
         {
             NodeEndpointInProc.EndpointPair endpoints =
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             endpoints.ManagerEndpoint.Disconnect();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ConnectionTestSynchronous()
         {
             NodeEndpointInProc.EndpointPair endpoints =
@@ -261,31 +261,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
             endpoints.ManagerEndpoint.Listen(_host);
             CallOpOnEndpoints(endpoints, VerifyLinkInactive);
             // No link status callback should have occurred.
-            Assert.False(_linkStatusTable.ContainsKey(endpoints.NodeEndpoint));
-            Assert.False(_linkStatusTable.ContainsKey(endpoints.ManagerEndpoint));
+            Assert.IsFalse(_linkStatusTable.ContainsKey(endpoints.NodeEndpoint));
+            Assert.IsFalse(_linkStatusTable.ContainsKey(endpoints.ManagerEndpoint));
 
             // Now call connect on the node side.  This should activate the link on both ends.
             endpoints.NodeEndpoint.Connect(_host);
             CallOpOnEndpoints(endpoints, VerifyLinkActive);
 
             // We should have received callbacks informing us of the link change.
-            Assert.Equal(LinkStatus.Active, _linkStatusTable[endpoints.NodeEndpoint].status);
-            Assert.Equal(LinkStatus.Active, _linkStatusTable[endpoints.ManagerEndpoint].status);
+            Assert.AreEqual(LinkStatus.Active, _linkStatusTable[endpoints.NodeEndpoint].status);
+            Assert.AreEqual(LinkStatus.Active, _linkStatusTable[endpoints.ManagerEndpoint].status);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DisconnectionTestSynchronous()
         {
             DisconnectionTestHelper(NodeEndpointInProc.EndpointMode.Synchronous);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DisconnectionTestAsynchronous()
         {
             DisconnectionTestHelper(NodeEndpointInProc.EndpointMode.Asynchronous);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SynchronousData()
         {
             // Create the endpoints
@@ -304,17 +304,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Send data from the manager. We expect to receive it from the node endpoint, and it should
             // be on the same thread.
             endpoints.ManagerEndpoint.SendData(managerPacket);
-            Assert.Equal(_host.DataReceivedContext.packet, managerPacket);
-            Assert.Equal(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
+            Assert.AreEqual(_host.DataReceivedContext.packet, managerPacket);
+            Assert.AreEqual(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
 
             // Send data from the node.  We expect to receive it from the manager endpoint, and it should
             // be on the same thread.
             endpoints.NodeEndpoint.SendData(nodePacket);
-            Assert.Equal(_host.DataReceivedContext.packet, nodePacket);
-            Assert.Equal(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
+            Assert.AreEqual(_host.DataReceivedContext.packet, nodePacket);
+            Assert.AreEqual(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AsynchronousData()
         {
             // Create the endpoints
@@ -337,8 +337,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 Assert.Fail("Data not received before timeout expired.");
             }
-            Assert.Equal(_host.DataReceivedContext.packet, managerPacket);
-            Assert.NotEqual(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
+            Assert.AreEqual(_host.DataReceivedContext.packet, managerPacket);
+            Assert.AreNotEqual(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
 
             // Send data from the node.  We expect to receive it from the manager endpoint, and it should
             // be on the same thread.
@@ -347,8 +347,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 Assert.Fail("Data not received before timeout expired.");
             }
-            Assert.Equal(_host.DataReceivedContext.packet, nodePacket);
-            Assert.NotEqual(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
+            Assert.AreEqual(_host.DataReceivedContext.packet, nodePacket);
+            Assert.AreNotEqual(_host.DataReceivedContext.thread.ManagedThreadId, Thread.CurrentThread.ManagedThreadId);
 
             endpoints.ManagerEndpoint.Disconnect();
         }
@@ -367,12 +367,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private void VerifyLinkInactive(NodeEndpointInProc endpoint)
         {
-            Assert.Equal(LinkStatus.Inactive, endpoint.LinkStatus); // "Expected LinkStatus to be Inactive"
+            Assert.AreEqual(LinkStatus.Inactive, endpoint.LinkStatus); // "Expected LinkStatus to be Inactive"
         }
 
         private void VerifyLinkActive(NodeEndpointInProc endpoint)
         {
-            Assert.Equal(LinkStatus.Active, endpoint.LinkStatus); // "Expected LinkStatus to be Active"
+            Assert.AreEqual(LinkStatus.Active, endpoint.LinkStatus); // "Expected LinkStatus to be Active"
         }
 
         private void VerifySendDataInvalidOperation(NodeEndpointInProc endpoint)
@@ -387,7 +387,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 caught = true;
             }
 
-            Assert.True(caught); // "Did not receive InternalErrorException."
+            Assert.IsTrue(caught); // "Did not receive InternalErrorException."
         }
 
         private void VerifyDisconnectInvalidOperation(NodeEndpointInProc endpoint)
@@ -401,7 +401,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 caught = true;
             }
-            Assert.True(caught); // "Did not receive InternalErrorException."
+            Assert.IsTrue(caught); // "Did not receive InternalErrorException."
         }
 
         private void DisconnectionTestHelper(NodeEndpointInProc.EndpointMode mode)
@@ -418,8 +418,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private void VerifyLinksAndCallbacksInactive(NodeEndpointInProc.EndpointPair endpoints)
         {
             CallOpOnEndpoints(endpoints, VerifyLinkInactive);
-            Assert.Equal(LinkStatus.Inactive, _linkStatusTable[endpoints.NodeEndpoint].status);
-            Assert.Equal(LinkStatus.Inactive, _linkStatusTable[endpoints.ManagerEndpoint].status);
+            Assert.AreEqual(LinkStatus.Inactive, _linkStatusTable[endpoints.NodeEndpoint].status);
+            Assert.AreEqual(LinkStatus.Inactive, _linkStatusTable[endpoints.ManagerEndpoint].status);
         }
 
         private NodeEndpointInProc.EndpointPair SetupConnection(NodeEndpointInProc.EndpointMode mode)

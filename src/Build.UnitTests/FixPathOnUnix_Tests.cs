@@ -1,16 +1,16 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class FixPathOnUnixTests
     {
         [UnixOnlyFact]
@@ -47,12 +47,13 @@ namespace Microsoft.Build.UnitTests
             var project = projColln.LoadProject(buildProjectPath);
             var result = project.Build("Build");
 
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             logger.AssertLogContains($"ItemMetadata: Md0 = {Path.Combine("lib", "foo.dll")}");
         }
     }
 
+    [TestClass]
     public class LogTaskPropertiesTask : Task
     {
         public ITaskItem[] Items { get; set; }

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -9,15 +9,14 @@ using Microsoft.Build.UnitTests;
 
 using Shouldly;
 
-using Xunit;
-using Xunit.NetCore.Extensions;
 
 namespace Microsoft.Build.Engine.UnitTests.Evaluation
 {
     [UseInvariantCulture]
+    [TestClass]
     public class IntrinsicFunctionOverload_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildAddInteger()
         {
             const string projectContent = @"
@@ -39,7 +38,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildAddIntegerGreaterThanMax()
         {
             const string projectContent = @"
@@ -61,7 +60,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildAddIntegerLessThanMin()
         {
             const string projectContent = @"
@@ -83,7 +82,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildAddReal()
         {
             const string projectContent = @"
@@ -105,7 +104,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildSubtractInteger()
         {
             const string projectContent = @"
@@ -125,7 +124,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FileExists_WhenFileExists_ReturnsTrue()
         {          
             using TestEnvironment env = TestEnvironment.Create();
@@ -148,7 +147,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe("True");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void FileExists_WhenFileDoesNotExist_ReturnsFalse()
         {
             const string projectContent = @"
@@ -166,7 +165,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe("False");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SystemIODirectoryExists_WhenDirectoryExists_ReturnsTrue()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -189,7 +188,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe("True");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SystemIODirectoryExists_WhenDirectoryDoesNotExist_ReturnsFalse()
         {
             const string projectContent = @"
@@ -207,7 +206,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe("False");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DirectoryExists_WhenDirectoryExists_ReturnsTrue()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -230,7 +229,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe("True");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DirectoryExists_WhenDirectoryDoesNotExists_ReturnsFalse()
         {
             const string projectContent = @"
@@ -248,7 +247,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe("False");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildSubtractIntegerGreaterThanMax()
         {
             const string projectContent = @"
@@ -270,7 +269,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildSubtractIntegerLessThanMin()
         {
             const string projectContent = @"
@@ -292,7 +291,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildSubtractReal()
         {
             const string projectContent = @"
@@ -314,7 +313,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildMultiplyInteger()
         {
             const string projectContent = @"
@@ -334,7 +333,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildMultiplyIntegerGreaterThanMax()
         {
             const string projectContent = @"
@@ -356,7 +355,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildMultiplyIntegerLessThanMin()
         {
             const string projectContent = @"
@@ -378,7 +377,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildMultiplyReal()
         {
             const string projectContent = @"
@@ -400,7 +399,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildDivideInteger()
         {
             const string projectContent = @"
@@ -420,7 +419,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildDivideIntegerGreaterThanMax()
         {
             const string projectContent = @"
@@ -442,7 +441,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildDivideIntegerLessThanMin()
         {
             const string projectContent = @"
@@ -464,7 +463,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildDivideReal()
         {
             const string projectContent = @"
@@ -486,7 +485,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildModuloInteger()
         {
             const string projectContent = @"
@@ -506,7 +505,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildModuloIntegerGreaterThanMax()
         {
             const string projectContent = @"
@@ -528,7 +527,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildModuloIntegerLessThanMin()
         {
             const string projectContent = @"
@@ -550,7 +549,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MSBuildModuloReal()
         {
             const string projectContent = @"
@@ -572,7 +571,7 @@ namespace Microsoft.Build.Engine.UnitTests.Evaluation
             actualProperty.EvaluatedValue.ShouldBe(expected);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SystemUriEscapeDataString()
         {
             const string projectContent = @"

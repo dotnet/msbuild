@@ -12,7 +12,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
-using Xunit;
 using ObjectModel = System.Collections.ObjectModel;
 
 #nullable disable
@@ -22,12 +21,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
     /// <summary>
     /// Tests for several of the collections classes
     /// </summary>
+    [TestClass]
     public class OMcollections_Tests
     {
         /// <summary>
         /// End to end test of PropertyDictionary
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicPropertyDictionary()
         {
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
@@ -43,24 +43,24 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             properties.Set(p1);
             properties.Set(p4);
 
-            Assert.Equal(2, properties.Count);
-            Assert.Equal("v1", properties["p1"].EvaluatedValue);
-            Assert.Equal("v3", properties["p2"].EvaluatedValue);
+            Assert.AreEqual(2, properties.Count);
+            Assert.AreEqual("v1", properties["p1"].EvaluatedValue);
+            Assert.AreEqual("v3", properties["p2"].EvaluatedValue);
 
-            Assert.True(properties.Remove("p1"));
-            Assert.Null(properties["p1"]);
+            Assert.IsTrue(properties.Remove("p1"));
+            Assert.IsNull(properties["p1"]);
 
-            Assert.False(properties.Remove("x"));
+            Assert.IsFalse(properties.Remove("x"));
 
             properties.Clear();
 
-            Assert.Empty(properties);
+            Assert.IsEmpty(properties);
         }
 
         /// <summary>
         /// Test dictionary serialization with properties
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyDictionarySerialization()
         {
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
@@ -80,13 +80,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             PropertyDictionary<ProjectPropertyInstance> deserializedProperties = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref deserializedProperties, ProjectPropertyInstance.FactoryForDeserialization);
 
-            Assert.Equal(properties, deserializedProperties);
+            Assert.IsTrue(EqualityComparer<PropertyDictionary<ProjectPropertyInstance>>.Default.Equals(properties, deserializedProperties));
         }
 
         /// <summary>
         /// Test dictionary serialization with no properties
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyDictionarySerializationEmpty()
         {
             PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
@@ -95,13 +95,13 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             PropertyDictionary<ProjectPropertyInstance> deserializedProperties = null;
             TranslationHelpers.GetReadTranslator().TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref deserializedProperties, ProjectPropertyInstance.FactoryForDeserialization);
 
-            Assert.Equal(properties, deserializedProperties);
+            Assert.IsTrue(EqualityComparer<PropertyDictionary<ProjectPropertyInstance>>.Default.Equals(properties, deserializedProperties));
         }
 
         /// <summary>
         /// End to end test of ItemDictionary
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicItemDictionary()
         {
             ItemDictionary<ProjectItemInstance> items = new ItemDictionary<ProjectItemInstance>();
@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 list.Add(item);
             }
 
-            Assert.Empty(list);
+            Assert.IsEmpty(list);
 
             // Cause an empty list for type 'x' to be added
             ICollection<ProjectItemInstance> itemList = items["x"];
@@ -137,16 +137,16 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 list.Add(item);
             }
 
-            Assert.Empty(list);
+            Assert.IsEmpty(list);
 
             // Add and remove some items
             ProjectItemInstance item1 = GetItemInstance("i", "i1");
-            Assert.False(items.Remove(item1));
-            Assert.Empty(items["j"]);
+            Assert.IsFalse(items.Remove(item1));
+            Assert.IsEmpty(items["j"]);
 
             items.Add(item1);
-            Assert.Single(items["i"]);
-            Assert.Equal(item1, items["i"].First());
+            Assert.ContainsSingle(items["i"]);
+            Assert.AreEqual(item1, items["i"].First());
 
             ProjectItemInstance item2 = GetItemInstance("i", "i2");
             items.Add(item2);
@@ -161,47 +161,47 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             }
 
             list.Sort(ProjectItemInstanceComparer);
-            Assert.Equal(item1, list[0]);
-            Assert.Equal(item2, list[1]);
-            Assert.Equal(item3, list[2]);
+            Assert.AreEqual(item1, list[0]);
+            Assert.AreEqual(item2, list[1]);
+            Assert.AreEqual(item3, list[2]);
 
             // Direct operations on the enumerator
             using (IEnumerator<ProjectItemInstance> enumerator = items.GetEnumerator())
             {
-                Assert.Null(enumerator.Current);
-                Assert.True(enumerator.MoveNext());
-                Assert.NotNull(enumerator.Current);
+                Assert.IsNull(enumerator.Current);
+                Assert.IsTrue(enumerator.MoveNext());
+                Assert.IsNotNull(enumerator.Current);
                 enumerator.Reset();
-                Assert.Null(enumerator.Current);
-                Assert.True(enumerator.MoveNext());
-                Assert.NotNull(enumerator.Current);
+                Assert.IsNull(enumerator.Current);
+                Assert.IsTrue(enumerator.MoveNext());
+                Assert.IsNotNull(enumerator.Current);
             }
         }
 
         /// <summary>
         /// Null backing collection should be like empty collection
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadOnlyDictionaryNullBackingClone()
         {
             var dictionary = CreateCloneDictionary<string>(null, StringComparer.OrdinalIgnoreCase);
-            Assert.Empty(dictionary);
+            Assert.IsEmpty(dictionary);
         }
 
         /// <summary>
         /// Null backing collection should be like empty collection
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadOnlyDictionaryNullBackingWrapper()
         {
             var dictionary = new ObjectModel.ReadOnlyDictionary<string, string>(new Dictionary<string, string>(0));
-            Assert.Empty(dictionary);
+            Assert.IsEmpty(dictionary);
         }
 
         /// <summary>
         /// Cloning constructor should not see subsequent changes
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadOnlyDictionaryClone()
         {
             var dictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -210,15 +210,15 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             var readOnlyDictionary = CreateCloneDictionary(dictionary, StringComparer.OrdinalIgnoreCase);
             dictionary.Add("p2", "v2");
 
-            Assert.Single(readOnlyDictionary);
-            Assert.True(readOnlyDictionary.ContainsKey("P"));
-            Assert.False(readOnlyDictionary.ContainsKey("p2"));
+            Assert.ContainsSingle(readOnlyDictionary);
+            Assert.IsTrue(readOnlyDictionary.ContainsKey("P"));
+            Assert.IsFalse(readOnlyDictionary.ContainsKey("p2"));
         }
 
         /// <summary>
         /// Wrapping constructor should be "live"
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadOnlyDictionaryWrapper()
         {
             var dictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -227,17 +227,17 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             var readOnlyDictionary = new ObjectModel.ReadOnlyDictionary<string, string>(dictionary);
             dictionary.Add("p2", "v2");
 
-            Assert.Equal(2, dictionary.Count);
-            Assert.True(dictionary.ContainsKey("p2"));
+            Assert.AreEqual(2, dictionary.Count);
+            Assert.IsTrue(dictionary.ContainsKey("p2"));
         }
 
         /// <summary>
         /// Null backing collection should be an error
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadOnlyCollectionNullBacking()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.ThrowsExactly<InternalErrorException>(() =>
             {
                 new ReadOnlyCollection<string>(null);
             });
@@ -246,7 +246,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// Verify non generic enumeration does not recurse
         /// ie., GetEnumerator() does not call itself
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadOnlyDictionaryNonGenericEnumeration()
         {
             var backing = new Dictionary<string, string>();
@@ -262,7 +262,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// <summary>
         /// Verify that the converting dictionary functions.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadOnlyConvertingDictionary()
         {
             Dictionary<string, string> values = new Dictionary<string, string>();
@@ -276,12 +276,12 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             convertedValues["three"] = 3;
 
             ReadOnlyConvertingDictionary<string, string, int> convertingCollection = new ReadOnlyConvertingDictionary<string, string, int>(values, delegate (string x) { return Convert.ToInt32(x); });
-            Assert.Equal(3, convertingCollection.Count);
-            Assert.True(convertingCollection.IsReadOnly);
+            Assert.AreEqual(3, convertingCollection.Count);
+            Assert.IsTrue(convertingCollection.IsReadOnly);
 
             foreach (KeyValuePair<string, int> value in convertingCollection)
             {
-                Assert.Equal(convertedValues[value.Key], value.Value);
+                Assert.AreEqual(convertedValues[value.Key], value.Value);
             }
         }
 
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         /// Verify non generic enumeration does not recurse
         /// ie., GetEnumerator() does not call itself
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadOnlyCollectionNonGenericEnumeration()
         {
             var backing = new List<string>();

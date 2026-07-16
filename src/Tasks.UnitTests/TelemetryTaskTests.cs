@@ -1,16 +1,16 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.UnitTests;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public sealed class TelemetryTaskTests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void TelemetryTaskSendsEvents()
         {
             MockEngine engine = new MockEngine();
@@ -23,12 +23,12 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             bool retVal = telemetryTask.Execute();
 
-            Assert.True(retVal);
+            Assert.IsTrue(retVal);
 
             Assert.Contains(telemetryTask.EventName, engine.Log);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TelemetryTaskSendsEventsWithProperties()
         {
             const string propertyName = "9B7DA92A89914E2CA1D88DCEB9DAAD72";
@@ -45,14 +45,14 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             bool retVal = telemetryTask.Execute();
 
-            Assert.True(retVal);
+            Assert.IsTrue(retVal);
 
             Assert.Contains(propertyName, engine.Log);
 
             Assert.Contains(propertyValue, engine.Log);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TelemetryTaskInvalidEventData()
         {
             MockEngine engine = new MockEngine();
@@ -66,14 +66,14 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             bool retVal = telemetryTask.Execute();
 
-            Assert.False(retVal);
+            Assert.IsFalse(retVal);
             Assert.Contains($"The property \"Property2\" in the telemetry event data property list \"{telemetryTask.EventData}\" is malformed.", engine.Log);
         }
 
         /// <summary>
         /// Verifies that when there are duplicate property names specified that the last one wins.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TelemetryTaskDuplicateEventDataProperty()
         {
             MockEngine engine = new MockEngine();
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             bool retVal = telemetryTask.Execute();
 
-            Assert.True(retVal);
+            Assert.IsTrue(retVal);
 
             // Should not contain the first value
             Assert.DoesNotContain("EE2493A167D24F00996DE7C8E769EAE6", engine.Log);

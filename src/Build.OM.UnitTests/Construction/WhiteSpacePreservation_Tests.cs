@@ -9,17 +9,17 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Xunit;
 
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
+    [TestClass]
     public class WhitespacePreservation_Tests
     {
-        [Theory]
-        [InlineData(
+        [MSBuildTestMethod]
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
 </Project>",
 
@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   <ItemGroup />
 </Project>")]
 
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
 
 
@@ -42,12 +42,12 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 pe.AddItemGroup();
 
-                Assert.True(p.IsDirty);
+                Assert.IsTrue(p.IsDirty);
             });
         }
 
-        [Theory]
-        [InlineData(
+        [MSBuildTestMethod]
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
 
   <ItemGroup>
@@ -67,7 +67,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   </ItemGroup>
 
 </Project>")]
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
 
 
@@ -104,14 +104,14 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 
                 itemGroup.AddItem("i2", "b");
 
-                Assert.True(p.IsDirty);
+                Assert.IsTrue(p.IsDirty);
             });
         }
 
-        [Theory]
+        [MSBuildTestMethod]
 
         // no new lines are added
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
   <ItemGroup>
     <i Include=`a` />
@@ -130,7 +130,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>")]
 
         // new lines between parents are preserved
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
 
 
@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>")]
 
         // parent has no indentation but has leading whitespace. Indentation is the whitespace after the last new line in the parent's entire leading whitespace
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
 
   <ItemGroup>
@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>")]
 
         // parent has no leading whitespace
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
 
   <ItemGroup>
@@ -201,7 +201,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>")]
 
         // empty parent has no whitespace in it; append new line and the parent's indentation
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
 
   <ItemGroup>
@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>")]
 
         // the initial whitespace in the empty parent gets replaced with newline + parent_indentation
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
 
   <ItemGroup>
@@ -258,8 +258,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 (pe, p) => { pe.ItemGroups.ElementAt(1).AddItem("i2", "b"); });
         }
 
-        [Theory]
-        [InlineData(
+        [MSBuildTestMethod]
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
   <ItemGroup>
     <i Include=`a` />
@@ -273,7 +273,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   </ItemGroup>
 </Project>")]
 
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
   <ItemGroup>
     <i Include=`a` />
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   </ItemGroup>
 </Project>")]
 
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
   <ItemGroup>
 
@@ -306,7 +306,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   </ItemGroup>
 </Project>")]
 
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
   <ItemGroup>
 
@@ -331,8 +331,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 (pe, p) => { pe.ItemGroups.First().AddItem("i2", "b"); });
         }
 
-        [Theory]
-        [InlineData(
+        [MSBuildTestMethod]
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
   <ItemGroup>
     <i Include=`a` />
@@ -346,7 +346,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   </ItemGroup>
 </Project>")]
 
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
   <ItemGroup>
     <i Include=`a` />
@@ -362,7 +362,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   </ItemGroup>
 </Project>")]
 
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
   <ItemGroup>
 
@@ -379,7 +379,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
   </ItemGroup>
 </Project>")]
 
-        [InlineData(
+        [DataRow(
 @"<Project xmlns=`msbuildnamespace`>
   <ItemGroup>
 
@@ -410,7 +410,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifySaveProjectContainsCorrectLineEndings()
         {
             var project = @"<Project xmlns=`msbuildnamespace`>
@@ -508,12 +508,12 @@ multi-line comment here
                 var nlCount = Regex.Matches(projectResults, @"\n").Count;
 
                 // Compare number of \r\n to number of \n, they should be equal.
-                Assert.Equal(crlfCount, nlCount);
+                Assert.AreEqual(crlfCount, nlCount);
             }
             else
             {
                 // Ensure we did not add \r\n
-                Assert.Empty(Regex.Matches(projectResults, @"\r\n", RegexOptions.Multiline));
+                Assert.IsEmpty(Regex.Matches(projectResults, @"\r\n", RegexOptions.Multiline));
             }
         }
     }

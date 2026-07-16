@@ -5,16 +5,16 @@ using System;
 using System.Collections.Generic;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
     /// <summary>
     /// Tests for <see cref="TypeInfo{T}"/>.
     /// </summary>
+    [TestClass]
     public class TypeInfo_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void PrimitiveTypes_AreNotReferences()
         {
             TypeInfo<int>.IsReferenceOrContainsReferences().ShouldBeFalse();
@@ -25,68 +25,68 @@ namespace Microsoft.Build.UnitTests
             TypeInfo<double>.IsReferenceOrContainsReferences().ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DateTime_IsNotReference()
         {
             TypeInfo<DateTime>.IsReferenceOrContainsReferences().ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EnumTypes_AreNotReferences()
         {
             TypeInfo<DayOfWeek>.IsReferenceOrContainsReferences().ShouldBeFalse();
             TypeInfo<StringComparison>.IsReferenceOrContainsReferences().ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void StringType_IsReference()
         {
             TypeInfo<string>.IsReferenceOrContainsReferences().ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ObjectType_IsReference()
         {
             TypeInfo<object>.IsReferenceOrContainsReferences().ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ReferenceType_IsReference()
         {
             TypeInfo<List<int>>.IsReferenceOrContainsReferences().ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ContainingTestType_IsReference()
         {
             TypeInfo<TypeInfo_Tests>.IsReferenceOrContainsReferences().ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void StructContainingReference_ContainsReferences()
         {
             TypeInfo<StructWithReference>.IsReferenceOrContainsReferences().ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void StructContainingString_ContainsReferences()
         {
             TypeInfo<StructWithString>.IsReferenceOrContainsReferences().ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SimpleStruct_DoesNotContainReferences()
         {
             TypeInfo<SimpleStruct>.IsReferenceOrContainsReferences().ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void PureValueStruct_DoesNotContainReferences()
         {
             TypeInfo<PureValueStruct>.IsReferenceOrContainsReferences().ShouldBeFalse();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Result_IsCached_ReturnsConsistentValue()
         {
             // Call multiple times to exercise the cached code path.
@@ -99,7 +99,7 @@ namespace Microsoft.Build.UnitTests
             first.ShouldBeTrue();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Result_IsCached_ForValueType_ReturnsConsistentValue()
         {
             bool first = TypeInfo<int>.IsReferenceOrContainsReferences();

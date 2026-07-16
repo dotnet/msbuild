@@ -8,13 +8,13 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Unittest;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.Unittest.BuildResultUtilities;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
+    [TestClass]
     public class CacheAggregator_Tests
     {
         private CacheAggregator aggregator;
@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             aggregator = new CacheAggregator(() => i++);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NoCachesProducesEmptyCaches()
         {
             var aggregation = aggregator.Aggregate();
@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             aggregation.LastConfigurationId.ShouldBe(0);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CannotCallAggregateTwice()
         {
             aggregator.Aggregate();
@@ -52,7 +52,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CannotAddAfterAggregation()
         {
             aggregator.Aggregate();
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RejectCachesWithMoreConfigEntriesThanResultEntries()
         {
             var configCache = new ConfigCache();
@@ -91,7 +91,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RejectCachesWithMoreResultEntriesThanConfigEntries()
         {
             var configCache = new ConfigCache();
@@ -118,7 +118,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RejectCachesWithMismatchedIds()
         {
             // one entry in each cache but different config ids
@@ -141,7 +141,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RejectCollidingConfigurationsFromSeparateCaches()
         {
             // collides with the config id from configCache2
@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SingleEmpty()
         {
             var configCache = new ConfigCache();
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             AssertAggregation(new[] { (configCache, resultsCache) }, results);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SingleCacheWithSingleEntry()
         {
             var configCache = new ConfigCache();
@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             AssertAggregation(new[] { (configCache, resultsCache) }, results);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MultipleCachesMultipleEntries()
         {
             var configCache1 = new ConfigCache();

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -19,17 +19,17 @@ using Microsoft.VisualStudio.SolutionPersistence;
 using Microsoft.VisualStudio.SolutionPersistence.Model;
 using Microsoft.VisualStudio.SolutionPersistence.Serializer;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests.Construction
 {
+    [TestClass]
     public class SolutionFilter_Tests : IDisposable
     {
-        private readonly ITestOutputHelper output;
+        private readonly TestContext output;
 
         private static readonly BuildEventContext _buildEventContext = new BuildEventContext(0, 0, BuildEventContext.InvalidProjectContextId, 0);
 
-        public SolutionFilter_Tests(ITestOutputHelper output)
+        public SolutionFilter_Tests(TestContext output)
         {
             this.output = output;
         }
@@ -42,9 +42,9 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
         /// <summary>
         /// Test that a solution filter file excludes projects not covered by its list of projects or their dependencies.
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void SolutionFilterFiltersProjects(bool graphBuild)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -151,8 +151,8 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
             }
         }
 
-        [Theory]
-        [InlineData(/*lang=json,strict*/ """
+        [MSBuildTestMethod]
+        [DataRow(/*lang=json,strict*/ """
             {
               "solution": {
                 "path": "C:\\notAPath\\MSBuild.Dev.sln",
@@ -165,7 +165,7 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                 }
             }
             """, "MSBuild.SolutionFilterJsonParsingError")]
-        [InlineData(/*lang=json,strict*/ """
+        [DataRow(/*lang=json,strict*/ """
             [{
               "solution": {
                 "path": "C:\\notAPath\\MSBuild.Dev.sln",
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                 }
             }]
             """, "MSBuild.SolutionFilterJsonParsingError")]
-        [InlineData(/*lang=json,strict*/ """
+        [DataRow(/*lang=json,strict*/ """
             {
               "solution": {
                 "path": "C:\\notAPath\\MSBuild.Dev.sln",
@@ -191,7 +191,7 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                 }
             }
             """, "MSBuild.SolutionFilterJsonParsingError")]
-        [InlineData(/*lang=json,strict*/ """
+        [DataRow(/*lang=json,strict*/ """
             {
               "solution": {
                 "path": "C:\\notAPath2\\MSBuild.Dev.sln",
@@ -206,7 +206,7 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
             """, "MSBuild.SolutionFilterMissingSolutionError")]
         public void InvalidSolutionFilters([StringSyntax(StringSyntaxAttribute.Json)] string slnfValue, string exceptionReason)
         {
-            Assert.False(File.Exists("C:\\notAPath2\\MSBuild.Dev.sln"));
+            Assert.IsFalse(File.Exists("C:\\notAPath2\\MSBuild.Dev.sln"));
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
                 TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
@@ -220,9 +220,9 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
         /// <summary>
         /// Test that a solution filter file is parsed correctly, and it can accurately respond as to whether a project should be filtered out.
         /// </summary>
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
+        [MSBuildTestMethod]
+        [DataRow(false)]
+        [DataRow(true)]
         public void ParseSolutionFilter(bool convertToSlnx)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -283,7 +283,7 @@ EndGlobal
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SolutionFilterWithSpecialSymbolInThePath()
         {
             using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -330,15 +330,15 @@ EndGlobal
             SolutionFile sp = SolutionFile.Parse(slnf.Path);
 
             // just assert that no error is thrown
-            Assert.True(sp.ProjectShouldBuild("SolutionTest.csproj"));
+            Assert.IsTrue(sp.ProjectShouldBuild("SolutionTest.csproj"));
         }
 
         /// <summary>
         /// Test that solution filter files work with Unix-style paths (forward slashes) on all platforms.
         /// </summary>
-        [Theory]
-        [InlineData(false)] // .sln
-        [InlineData(true)]  // .slnx
+        [MSBuildTestMethod]
+        [DataRow(false)] // .sln
+        [DataRow(true)]  // .slnx
         public void SolutionFilterSupportsUnixStylePaths(bool convertToSlnx)
         {
             TestSolutionFilterWithPathSeparators(
@@ -351,9 +351,9 @@ EndGlobal
         /// <summary>
         /// Test that solution filter files work with Windows-style paths (backslashes) on all platforms.
         /// </summary>
-        [Theory]
-        [InlineData(false)] // .sln
-        [InlineData(true)]  // .slnx
+        [MSBuildTestMethod]
+        [DataRow(false)] // .sln
+        [DataRow(true)]  // .slnx
         public void SolutionFilterSupportsWindowsStylePaths(bool convertToSlnx)
         {
             TestSolutionFilterWithPathSeparators(
@@ -366,9 +366,9 @@ EndGlobal
         /// <summary>
         /// Test that solution filter files work with mixed path separators.
         /// </summary>
-        [Theory]
-        [InlineData(false)] // .sln
-        [InlineData(true)]  // .slnx
+        [MSBuildTestMethod]
+        [DataRow(false)] // .sln
+        [DataRow(true)]  // .slnx
         public void SolutionFilterSupportsMixedPathSeparators(bool convertToSlnx)
         {
             TestSolutionFilterWithPathSeparators(

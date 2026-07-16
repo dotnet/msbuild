@@ -5,7 +5,6 @@ using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
 
 #nullable disable
 
@@ -14,16 +13,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit tests for the InstalledSDKResolver task.
     /// </summary>
+    [TestClass]
     public sealed class InstalledSDKResolverFixture : ResolveAssemblyReferenceTestFixture
     {
-        public InstalledSDKResolverFixture(ITestOutputHelper output) : base(output)
+        public InstalledSDKResolverFixture(TestContext output) : base(output)
         {
         }
 
         /// <summary>
         /// Verify that we do not find the winmd file even if it on the search path if the sdkname does not match something passed into the ResolvedSDKs property.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SDkNameNotInResolvedSDKListButOnSearchPath()
         {
             // Create the engine.
@@ -41,17 +41,17 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new String[] { @"C:\FakeSDK\References" };
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Empty(t.ResolvedFiles);
+            Assert.IsTrue(succeeded);
+            Assert.IsEmpty(t.ResolvedFiles);
 
-            Assert.Equal(0, engine.Errors);
-            Assert.Equal(1, engine.Warnings);
+            Assert.AreEqual(0, engine.Errors);
+            Assert.AreEqual(1, engine.Warnings);
         }
 
         /// <summary>
         /// Verify when we are trying to match a name which is the reference assembly directory
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SDkNameMatchInRADirectory()
         {
             ResolveSDKFromRefereneAssemblyLocation("DebugX86SDKWinMD", @"C:\FakeSDK\References\Debug\X86\DebugX86SDKWinMD.Winmd", _output);
@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             ResolveSDKFromRefereneAssemblyLocation("NeutralSDKRA", @"C:\FakeSDK\References\CommonConfiguration\Neutral\NeutralSDKRA.dll", _output);
         }
 
-        private static void ResolveSDKFromRefereneAssemblyLocation(string referenceName, string expectedPath, ITestOutputHelper output)
+        private static void ResolveSDKFromRefereneAssemblyLocation(string referenceName, string expectedPath, TestContext output)
         {
             // Create the engine.
             MockEngine engine = new MockEngine(output);
@@ -88,11 +88,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             t.SearchPaths = new String[] { @"C:\SomeOtherPlace" };
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles);
-            Assert.Equal(0, engine.Errors);
-            Assert.Equal(0, engine.Warnings);
-            Assert.Equal(expectedPath, t.ResolvedFiles[0].ItemSpec, true);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedFiles);
+            Assert.AreEqual(0, engine.Errors);
+            Assert.AreEqual(0, engine.Warnings);
+            Assert.AreEqual(expectedPath, t.ResolvedFiles[0].ItemSpec, true);
         }
     }
 }

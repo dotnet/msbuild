@@ -4,14 +4,14 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 
+[TestClass]
 public class RequiredTaskPropertyInitializationSuppressorTests
 {
-    [Fact]
+    [TestMethod]
     public async Task RequiredProperty_InTask_DiagnosticIsSuppressed()
     {
         var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(
@@ -32,7 +32,7 @@ public class RequiredTaskPropertyInitializationSuppressorTests
         diagnostics.ShouldNotContain(d => d.Id == "CS8618" && !d.IsSuppressed);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task RequiredProperty_InIndirectTaskSubclass_DiagnosticIsSuppressed()
     {
         var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(
@@ -57,7 +57,7 @@ public class RequiredTaskPropertyInitializationSuppressorTests
         diagnostics.ShouldNotContain(d => d.Id == "CS8618" && !d.IsSuppressed);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task MixedRequiredAndOptionalProperties_WithExplicitConstructor_SuppressesOnlyRequiredProperty()
     {
         var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(
@@ -86,7 +86,7 @@ public class RequiredTaskPropertyInitializationSuppressorTests
         cs8618Diagnostics.Count(d => !d.IsSuppressed).ShouldBe(1);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task DataAnnotationsRequired_InTask_DiagnosticIsNotSuppressed()
     {
         var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(
@@ -106,7 +106,7 @@ public class RequiredTaskPropertyInitializationSuppressorTests
         diagnostics.ShouldContain(d => d.Id == "CS8618" && !d.IsSuppressed);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task RequiredProperty_InDirectITaskImplementation_DiagnosticIsSuppressed()
     {
         var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(
@@ -129,7 +129,7 @@ public class RequiredTaskPropertyInitializationSuppressorTests
         diagnostics.ShouldNotContain(d => d.Id == "CS8618" && !d.IsSuppressed);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task RequiredProperty_InNonTaskClass_DiagnosticIsNotSuppressed()
     {
         var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(
@@ -147,7 +147,7 @@ public class RequiredTaskPropertyInitializationSuppressorTests
         diagnostics.ShouldContain(d => d.Id == "CS8618" && !d.IsSuppressed);
     }
 
-    [Fact]
+    [TestMethod]
     public async Task RequiredGetOnlyProperty_InTask_DiagnosticIsNotSuppressed()
     {
         var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(

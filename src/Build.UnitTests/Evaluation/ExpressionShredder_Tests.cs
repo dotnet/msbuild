@@ -7,7 +7,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
-using Xunit;
+using System.Linq;
 
 #nullable disable
 
@@ -18,6 +18,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
     /// with the results from the old regexes to make sure they're identical
     /// in every case.
     /// </summary>
+    [TestClass]
     public class ExpressionShredder_Tests
     {
         private string[] _medleyTests = new string[]
@@ -260,7 +261,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                             "@(_OutputPathItem->'%(FullPath)', ';');$(MSBuildAllProjects);"
         };
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Medley()
         {
             foreach (string test in _medleyTests)
@@ -269,121 +270,121 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NoOpSplit()
         {
             VerifySplitSemiColonSeparatedList("a", "a");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicSplit()
         {
             VerifySplitSemiColonSeparatedList("a;b", "a", "b");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void Empty()
         {
             VerifySplitSemiColonSeparatedList("", null);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SemicolonOnly()
         {
             VerifySplitSemiColonSeparatedList(";", null);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoSemicolons()
         {
             VerifySplitSemiColonSeparatedList(";;", null);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoSemicolonsAndOneEntryAtStart()
         {
             VerifySplitSemiColonSeparatedList("a;;", "a");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TwoSemicolonsAndOneEntryAtEnd()
         {
             VerifySplitSemiColonSeparatedList(";;a", "a");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AtSignAtEnd()
         {
             VerifySplitSemiColonSeparatedList("@", "@");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void AtSignParenAtEnd()
         {
             VerifySplitSemiColonSeparatedList("foo@(", "foo@(");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyEntriesRemoved()
         {
             VerifySplitSemiColonSeparatedList(";a;bbb;;c;;", "a", "bbb", "c");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EntriesTrimmed()
         {
             VerifySplitSemiColonSeparatedList("  ;  a   ;b   ;   ;c\n;  \r;  ", "a", "b", "c");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NoSplittingOnMacros()
         {
             VerifySplitSemiColonSeparatedList("@(foo->';')", "@(foo->';')");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NoSplittingOnSeparators()
         {
             VerifySplitSemiColonSeparatedList("@(foo, ';')", "@(foo, ';')");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void NoSplittingOnSeparatorsAndMacros()
         {
             VerifySplitSemiColonSeparatedList("@(foo->'abc;def', 'ghi;jkl')", "@(foo->'abc;def', 'ghi;jkl')");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CloseParensInMacro()
         {
             VerifySplitSemiColonSeparatedList("@(foo->');')", "@(foo->');')");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CloseParensInSeparator()
         {
             VerifySplitSemiColonSeparatedList("a;@(foo,');');b", "a", "@(foo,');')", "b");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CloseParensInMacroAndSeparator()
         {
             VerifySplitSemiColonSeparatedList("@(foo->';);', ';);')", "@(foo->';);', ';);')");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void EmptyQuotesInMacroAndSeparator()
         {
             VerifySplitSemiColonSeparatedList(" @(foo->'', '')", "@(foo->'', '')");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void MoreParensAndAtSigns()
         {
             VerifySplitSemiColonSeparatedList("@(foo->';());', ';@();')", "@(foo->';());', ';@();')");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SplittingExceptForMacros()
         {
             VerifySplitSemiColonSeparatedList("@(foo->';');def;@ghi;", "@(foo->';')", "def", "@ghi");
@@ -391,7 +392,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
         // Invalid item expressions shouldn't cause an error in the splitting function.
         // The caller will emit an error later when it tries to parse the results.
-        [Fact]
+        [MSBuildTestMethod]
         public void InvalidItemExpressions()
         {
             VerifySplitSemiColonSeparatedList("@(x", "@(x");
@@ -408,7 +409,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             VerifySplitSemiColonSeparatedList("@(x''';", "@(x''';");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RealisticExample()
         {
             VerifySplitSemiColonSeparatedList("@(_OutputPathItem->'%(FullPath)', ';');$(MSBuildAllProjects);\n                @(Compile);\n                @(ManifestResourceWithNoCulture);\n                $(ApplicationIcon);\n                $(AssemblyOriginatorKeyFile);\n                @(ManifestNonResxWithNoCultureOnDisk);\n                @(ReferencePath);\n                @(CompiledLicenseFile);\n                @(EmbeddedDocumentation);                \n                @(CustomAdditionalCompileInputs)",
@@ -424,7 +425,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         // We need to support any item expressions that satisfy this expression.
         //
         // Try spaces everywhere that regex allows spaces:
-        [Fact]
+        [MSBuildTestMethod]
         public void SpacingInItemListExpression()
         {
             VerifySplitSemiColonSeparatedList("@(   foo  \n ->  \t  ';abc;def;'   , \t  'ghi;jkl'   )", "@(   foo  \n ->  \t  ';abc;def;'   , \t  'ghi;jkl'   )");
@@ -446,7 +447,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 expected = Array.Empty<string>();
             }
 
-            Assert.Equal(actual, expected, StringComparer.Ordinal);
+            Assert.IsTrue(actual.SequenceEqual(expected, StringComparer.Ordinal));
         }
 
         private void VerifyExpression(string test)
@@ -515,7 +516,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Console.WriteLine(message);
             }
 
-            Assert.Empty(messages);
+            Assert.IsEmpty(messages);
         }
 
         private static void VerifyAgainstCanonicalResults(string test, IDictionary actual, IDictionary expected)
@@ -564,24 +565,24 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 Console.WriteLine(message);
             }
 
-            Assert.Empty(messages);
+            Assert.IsEmpty(messages);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorTransform1()
         {
             string expression = "@(i->'%(Meta0)'->'%(Filename)'->Substring($(Val)))";
             ExpressionShredder.ReferencedItemExpressionsEnumerator expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
 
             ExpressionShredder.ItemExpressionCapture capture = expressions.Current;
 
-            Assert.False(expressions.MoveNext());
-            Assert.Null(capture.Separator);
-            Assert.Equal("i", capture.ItemType);
-            Assert.Equal("%(Meta0)", capture.Captures[0].Value);
-            Assert.Equal("%(Filename)", capture.Captures[1].Value);
-            Assert.Equal("Substring($(Val))", capture.Captures[2].Value);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("i", capture.ItemType);
+            Assert.AreEqual("%(Meta0)", capture.Captures[0].Value);
+            Assert.AreEqual("%(Filename)", capture.Captures[1].Value);
+            Assert.AreEqual("Substring($(Val))", capture.Captures[2].Value);
         }
 
         /// <summary>
@@ -589,7 +590,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         /// NOTE: The medley of tests needs to be parsable by the old regex. This is a regression test against that
         /// regex. New expression types should be added in other tests
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ItemExpressionMedleyRegressionTestAgainstOldRegex()
         {
             ExpressionShredder.ReferencedItemExpressionsEnumerator expressions;
@@ -605,7 +606,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     Match match = matches[expressionCount];
                     ExpressionShredder.ItemExpressionCapture capture = expressions.Current;
 
-                    Assert.Equal(match.Value, capture.Value);
+                    Assert.AreEqual(match.Value, capture.Value);
 
                     Group transformGroup = match.Groups["TRANSFORM"];
 
@@ -613,12 +614,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
                     {
                         for (int i = 0; i < transformGroup.Captures.Count; i++)
                         {
-                            Assert.Equal(transformGroup.Captures[i].Value, capture.Captures[i].Value);
+                            Assert.AreEqual(transformGroup.Captures[i].Value, capture.Captures[i].Value);
                         }
                     }
                     else
                     {
-                        Assert.Equal(0, transformGroup.Length);
+                        Assert.AreEqual(0, transformGroup.Length);
                     }
 
                     ++expressionCount;
@@ -626,16 +627,16 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
                 if (expressionCount == 0)
                 {
-                    Assert.Empty(matches);
+                    Assert.IsEmpty(matches);
                 }
                 else
                 {
-                    Assert.Equal(matches.Count, expressionCount);
+                    Assert.AreEqual(matches.Count, expressionCount);
                 }
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpressionInvalid1()
         {
             string expression;
@@ -643,10 +644,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(type-&gt;'%($(a)), '%'')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.False(expressions.MoveNext());
+            Assert.IsFalse(expressions.MoveNext());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression1()
         {
             string expression;
@@ -655,16 +656,16 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo)";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Null(capture.Separator);
-            Assert.Null(capture.Captures);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Null(capture.Captures);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.IsNull(capture.Separator);
+            Assert.IsNull(capture.Captures);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.IsNull(capture.Captures);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression2()
         {
             string expression;
@@ -673,16 +674,16 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo, ';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Null(capture.Captures);
-            Assert.Equal(";", capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Null(capture.Captures);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.IsNull(capture.Captures);
+            Assert.AreEqual(";", capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.IsNull(capture.Captures);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression3()
         {
             string expression;
@@ -691,17 +692,17 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Fullpath)')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Single(capture.Captures);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Single(capture.Captures);
-            Assert.Equal("%(Fullpath)", capture.Captures[0].Value);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.ContainsSingle(capture.Captures);
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.ContainsSingle(capture.Captures);
+            Assert.AreEqual("%(Fullpath)", capture.Captures[0].Value);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression4()
         {
             string expression;
@@ -710,17 +711,17 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Fullpath)',';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Single(capture.Captures);
-            Assert.Equal(";", capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Single(capture.Captures);
-            Assert.Equal("%(Fullpath)", capture.Captures[0].Value);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.ContainsSingle(capture.Captures);
+            Assert.AreEqual(";", capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.ContainsSingle(capture.Captures);
+            Assert.AreEqual("%(Fullpath)", capture.Captures[0].Value);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression5()
         {
             string expression;
@@ -729,19 +730,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->Bar(a,b))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Single(capture.Captures);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Single(capture.Captures);
-            Assert.Equal("Bar(a,b)", capture.Captures[0].Value);
-            Assert.Equal("Bar", capture.Captures[0].FunctionName);
-            Assert.Equal("a,b", capture.Captures[0].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.ContainsSingle(capture.Captures);
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.ContainsSingle(capture.Captures);
+            Assert.AreEqual("Bar(a,b)", capture.Captures[0].Value);
+            Assert.AreEqual("Bar", capture.Captures[0].FunctionName);
+            Assert.AreEqual("a,b", capture.Captures[0].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression6()
         {
             string expression;
@@ -750,19 +751,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->Bar(a,b),';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Single(capture.Captures);
-            Assert.Equal(";", capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Single(capture.Captures);
-            Assert.Equal("Bar(a,b)", capture.Captures[0].Value);
-            Assert.Equal("Bar", capture.Captures[0].FunctionName);
-            Assert.Equal("a,b", capture.Captures[0].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.ContainsSingle(capture.Captures);
+            Assert.AreEqual(";", capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.ContainsSingle(capture.Captures);
+            Assert.AreEqual("Bar(a,b)", capture.Captures[0].Value);
+            Assert.AreEqual("Bar", capture.Captures[0].FunctionName);
+            Assert.AreEqual("a,b", capture.Captures[0].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression7()
         {
             string expression;
@@ -771,21 +772,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->Metadata('Meta0')->Directory())";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("Metadata('Meta0')", capture.Captures[0].Value);
-            Assert.Equal("Metadata", capture.Captures[0].FunctionName);
-            Assert.Equal("'Meta0'", capture.Captures[0].FunctionArguments);
-            Assert.Equal("Directory()", capture.Captures[1].Value);
-            Assert.Equal("Directory", capture.Captures[1].FunctionName);
-            Assert.Null(capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("Metadata('Meta0')", capture.Captures[0].Value);
+            Assert.AreEqual("Metadata", capture.Captures[0].FunctionName);
+            Assert.AreEqual("'Meta0'", capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Directory()", capture.Captures[1].Value);
+            Assert.AreEqual("Directory", capture.Captures[1].FunctionName);
+            Assert.IsNull(capture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression8()
         {
             string expression;
@@ -794,21 +795,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->Metadata('Meta0')->Directory(),';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Equal(";", capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("Metadata('Meta0')", capture.Captures[0].Value);
-            Assert.Equal("Metadata", capture.Captures[0].FunctionName);
-            Assert.Equal("'Meta0'", capture.Captures[0].FunctionArguments);
-            Assert.Equal("Directory()", capture.Captures[1].Value);
-            Assert.Equal("Directory", capture.Captures[1].FunctionName);
-            Assert.Null(capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.AreEqual(";", capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("Metadata('Meta0')", capture.Captures[0].Value);
+            Assert.AreEqual("Metadata", capture.Captures[0].FunctionName);
+            Assert.AreEqual("'Meta0'", capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Directory()", capture.Captures[1].Value);
+            Assert.AreEqual("Directory", capture.Captures[1].FunctionName);
+            Assert.IsNull(capture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression9()
         {
             string expression;
@@ -817,21 +818,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Fullpath)'->Directory(), '|')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Equal("|", capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("%(Fullpath)", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
-            Assert.Null(capture.Captures[0].FunctionArguments);
-            Assert.Equal("Directory()", capture.Captures[1].Value);
-            Assert.Equal("Directory", capture.Captures[1].FunctionName);
-            Assert.Null(capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.AreEqual("|", capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("%(Fullpath)", capture.Captures[0].Value);
+            Assert.IsNull(capture.Captures[0].FunctionName);
+            Assert.IsNull(capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Directory()", capture.Captures[1].Value);
+            Assert.AreEqual("Directory", capture.Captures[1].FunctionName);
+            Assert.IsNull(capture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression10()
         {
             string expression;
@@ -840,21 +841,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Fullpath)'->Directory(),';')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Equal(";", capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("%(Fullpath)", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
-            Assert.Null(capture.Captures[0].FunctionArguments);
-            Assert.Equal("Directory()", capture.Captures[1].Value);
-            Assert.Equal("Directory", capture.Captures[1].FunctionName);
-            Assert.Null(capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.AreEqual(";", capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("%(Fullpath)", capture.Captures[0].Value);
+            Assert.IsNull(capture.Captures[0].FunctionName);
+            Assert.IsNull(capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Directory()", capture.Captures[1].Value);
+            Assert.AreEqual("Directory", capture.Captures[1].FunctionName);
+            Assert.IsNull(capture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression11()
         {
             string expression;
@@ -863,18 +864,18 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'$(SOMEPROP)%(Fullpath)')";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Single(capture.Captures);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("$(SOMEPROP)%(Fullpath)", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
-            Assert.Null(capture.Captures[0].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.ContainsSingle(capture.Captures);
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("$(SOMEPROP)%(Fullpath)", capture.Captures[0].Value);
+            Assert.IsNull(capture.Captures[0].FunctionName);
+            Assert.IsNull(capture.Captures[0].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression12()
         {
             string expression;
@@ -883,21 +884,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring($(Val), $(Boo)))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("%(Filename)", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
-            Assert.Null(capture.Captures[0].FunctionArguments);
-            Assert.Equal("Substring($(Val), $(Boo))", capture.Captures[1].Value);
-            Assert.Equal("Substring", capture.Captures[1].FunctionName);
-            Assert.Equal("$(Val), $(Boo)", capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("%(Filename)", capture.Captures[0].Value);
+            Assert.IsNull(capture.Captures[0].FunctionName);
+            Assert.IsNull(capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Substring($(Val), $(Boo))", capture.Captures[1].Value);
+            Assert.AreEqual("Substring", capture.Captures[1].FunctionName);
+            Assert.AreEqual("$(Val), $(Boo)", capture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression13()
         {
             string expression;
@@ -906,21 +907,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring(\"AA\", 'BB', `cc`))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("%(Filename)", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
-            Assert.Null(capture.Captures[0].FunctionArguments);
-            Assert.Equal("Substring(\"AA\", 'BB', `cc`)", capture.Captures[1].Value);
-            Assert.Equal("Substring", capture.Captures[1].FunctionName);
-            Assert.Equal("\"AA\", 'BB', `cc`", capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("%(Filename)", capture.Captures[0].Value);
+            Assert.IsNull(capture.Captures[0].FunctionName);
+            Assert.IsNull(capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Substring(\"AA\", 'BB', `cc`)", capture.Captures[1].Value);
+            Assert.AreEqual("Substring", capture.Captures[1].FunctionName);
+            Assert.AreEqual("\"AA\", 'BB', `cc`", capture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression14()
         {
             string expression;
@@ -929,21 +930,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring('()', $(Boo), ')('))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("%(Filename)", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
-            Assert.Null(capture.Captures[0].FunctionArguments);
-            Assert.Equal("Substring('()', $(Boo), ')(')", capture.Captures[1].Value);
-            Assert.Equal("Substring", capture.Captures[1].FunctionName);
-            Assert.Equal("'()', $(Boo), ')('", capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("%(Filename)", capture.Captures[0].Value);
+            Assert.IsNull(capture.Captures[0].FunctionName);
+            Assert.IsNull(capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Substring('()', $(Boo), ')(')", capture.Captures[1].Value);
+            Assert.AreEqual("Substring", capture.Captures[1].FunctionName);
+            Assert.AreEqual("'()', $(Boo), ')('", capture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression15()
         {
             string expression;
@@ -952,21 +953,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring(`()`, $(Boo), \"AA\"))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("%(Filename)", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
-            Assert.Null(capture.Captures[0].FunctionArguments);
-            Assert.Equal("Substring(`()`, $(Boo), \"AA\")", capture.Captures[1].Value);
-            Assert.Equal("Substring", capture.Captures[1].FunctionName);
-            Assert.Equal("`()`, $(Boo), \"AA\"", capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("%(Filename)", capture.Captures[0].Value);
+            Assert.IsNull(capture.Captures[0].FunctionName);
+            Assert.IsNull(capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Substring(`()`, $(Boo), \"AA\")", capture.Captures[1].Value);
+            Assert.AreEqual("Substring", capture.Captures[1].FunctionName);
+            Assert.AreEqual("`()`, $(Boo), \"AA\"", capture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression16()
         {
             string expression;
@@ -975,21 +976,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring(`()`, $(Boo), \")(\"))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("%(Filename)", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
-            Assert.Null(capture.Captures[0].FunctionArguments);
-            Assert.Equal("Substring(`()`, $(Boo), \")(\")", capture.Captures[1].Value);
-            Assert.Equal("Substring", capture.Captures[1].FunctionName);
-            Assert.Equal("`()`, $(Boo), \")(\"", capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("%(Filename)", capture.Captures[0].Value);
+            Assert.IsNull(capture.Captures[0].FunctionName);
+            Assert.IsNull(capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Substring(`()`, $(Boo), \")(\")", capture.Captures[1].Value);
+            Assert.AreEqual("Substring", capture.Captures[1].FunctionName);
+            Assert.AreEqual("`()`, $(Boo), \")(\"", capture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsSingleExpression17()
         {
             string expression;
@@ -998,21 +999,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring(\"()\", $(Boo), `)(`))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("%(Filename)", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
-            Assert.Null(capture.Captures[0].FunctionArguments);
-            Assert.Equal("Substring(\"()\", $(Boo), `)(`)", capture.Captures[1].Value);
-            Assert.Equal("Substring", capture.Captures[1].FunctionName);
-            Assert.Equal("\"()\", $(Boo), `)(`", capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("%(Filename)", capture.Captures[0].Value);
+            Assert.IsNull(capture.Captures[0].FunctionName);
+            Assert.IsNull(capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Substring(\"()\", $(Boo), `)(`)", capture.Captures[1].Value);
+            Assert.AreEqual("Substring", capture.Captures[1].FunctionName);
+            Assert.AreEqual("\"()\", $(Boo), `)(`", capture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsMultipleExpression1()
         {
             string expression;
@@ -1022,25 +1023,25 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Bar);@(Foo->'%(Filename)'->Substring(\"()\", $(Boo), `)(`))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             firstCapture = expressions.Current;
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal("Bar", firstCapture.ItemType);
-            Assert.Null(firstCapture.Captures);
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("%(Filename)", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
-            Assert.Null(capture.Captures[0].FunctionArguments);
-            Assert.Equal("Substring(\"()\", $(Boo), `)(`)", capture.Captures[1].Value);
-            Assert.Equal("Substring", capture.Captures[1].FunctionName);
-            Assert.Equal("\"()\", $(Boo), `)(`", capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual("Bar", firstCapture.ItemType);
+            Assert.IsNull(firstCapture.Captures);
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("%(Filename)", capture.Captures[0].Value);
+            Assert.IsNull(capture.Captures[0].FunctionName);
+            Assert.IsNull(capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Substring(\"()\", $(Boo), `)(`)", capture.Captures[1].Value);
+            Assert.AreEqual("Substring", capture.Captures[1].FunctionName);
+            Assert.AreEqual("\"()\", $(Boo), `)(`", capture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsMultipleExpression2()
         {
             string expression;
@@ -1050,25 +1051,25 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring(\"()\", $(Boo), `)(`));@(Bar)";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             firstCapture = expressions.Current;
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             secondCapture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal("Bar", secondCapture.ItemType);
-            Assert.Null(secondCapture.Captures);
-            Assert.Equal(2, firstCapture.Captures.Count);
-            Assert.Null(firstCapture.Separator);
-            Assert.Equal("Foo", firstCapture.ItemType);
-            Assert.Equal("%(Filename)", firstCapture.Captures[0].Value);
-            Assert.Null(firstCapture.Captures[0].FunctionName);
-            Assert.Null(firstCapture.Captures[0].FunctionArguments);
-            Assert.Equal("Substring(\"()\", $(Boo), `)(`)", firstCapture.Captures[1].Value);
-            Assert.Equal("Substring", firstCapture.Captures[1].FunctionName);
-            Assert.Equal("\"()\", $(Boo), `)(`", firstCapture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual("Bar", secondCapture.ItemType);
+            Assert.IsNull(secondCapture.Captures);
+            Assert.AreEqual(2, firstCapture.Captures.Count);
+            Assert.IsNull(firstCapture.Separator);
+            Assert.AreEqual("Foo", firstCapture.ItemType);
+            Assert.AreEqual("%(Filename)", firstCapture.Captures[0].Value);
+            Assert.IsNull(firstCapture.Captures[0].FunctionName);
+            Assert.IsNull(firstCapture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Substring(\"()\", $(Boo), `)(`)", firstCapture.Captures[1].Value);
+            Assert.AreEqual("Substring", firstCapture.Captures[1].FunctionName);
+            Assert.AreEqual("\"()\", $(Boo), `)(`", firstCapture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsMultipleExpression3()
         {
             string expression;
@@ -1078,25 +1079,25 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring(\"()\", $(Boo), `)(`));AAAAAA;@(Bar)";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             secondCapture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal("Bar", secondCapture.ItemType);
-            Assert.Null(secondCapture.Captures);
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("%(Filename)", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
-            Assert.Null(capture.Captures[0].FunctionArguments);
-            Assert.Equal("Substring(\"()\", $(Boo), `)(`)", capture.Captures[1].Value);
-            Assert.Equal("Substring", capture.Captures[1].FunctionName);
-            Assert.Equal("\"()\", $(Boo), `)(`", capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual("Bar", secondCapture.ItemType);
+            Assert.IsNull(secondCapture.Captures);
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("%(Filename)", capture.Captures[0].Value);
+            Assert.IsNull(capture.Captures[0].FunctionName);
+            Assert.IsNull(capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Substring(\"()\", $(Boo), `)(`)", capture.Captures[1].Value);
+            Assert.AreEqual("Substring", capture.Captures[1].FunctionName);
+            Assert.AreEqual("\"()\", $(Boo), `)(`", capture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsMultipleExpression4()
         {
             string expression;
@@ -1106,25 +1107,25 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expression = "@(Foo->'%(Filename)'->Substring(\"()\", $(Boo), `)(\"`));@(;);@(aaa->;b);@(bbb->'d);@(`Foo->'%(Filename)'->Distinct());@(Bar)";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             secondCapture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal("Bar", secondCapture.ItemType);
-            Assert.Null(secondCapture.Captures);
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Null(capture.Separator);
-            Assert.Equal("Foo", capture.ItemType);
-            Assert.Equal("%(Filename)", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
-            Assert.Null(capture.Captures[0].FunctionArguments);
-            Assert.Equal("Substring(\"()\", $(Boo), `)(\"`)", capture.Captures[1].Value);
-            Assert.Equal("Substring", capture.Captures[1].FunctionName);
-            Assert.Equal("\"()\", $(Boo), `)(\"`", capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual("Bar", secondCapture.ItemType);
+            Assert.IsNull(secondCapture.Captures);
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.IsNull(capture.Separator);
+            Assert.AreEqual("Foo", capture.ItemType);
+            Assert.AreEqual("%(Filename)", capture.Captures[0].Value);
+            Assert.IsNull(capture.Captures[0].FunctionName);
+            Assert.IsNull(capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("Substring(\"()\", $(Boo), `)(\"`)", capture.Captures[1].Value);
+            Assert.AreEqual("Substring", capture.Captures[1].FunctionName);
+            Assert.AreEqual("\"()\", $(Boo), `)(\"`", capture.Captures[1].FunctionArguments);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsMultipleExpression5()
         {
             string expression;
@@ -1133,33 +1134,33 @@ namespace Microsoft.Build.UnitTests.Evaluation
             expression = "@(foo);@(foo,'-');@(foo);@(foo,',');@(foo)";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
 
-            Assert.True(expressions.MoveNext());
-            Assert.Equal("foo", expressions.Current.ItemType);
-            Assert.Null(expressions.Current.Separator);
+            Assert.IsTrue(expressions.MoveNext());
+            Assert.AreEqual("foo", expressions.Current.ItemType);
+            Assert.IsNull(expressions.Current.Separator);
 
-            Assert.True(expressions.MoveNext());
-            Assert.Equal("foo", expressions.Current.ItemType);
-            Assert.Equal("-", expressions.Current.Separator);
+            Assert.IsTrue(expressions.MoveNext());
+            Assert.AreEqual("foo", expressions.Current.ItemType);
+            Assert.AreEqual("-", expressions.Current.Separator);
 
-            Assert.True(expressions.MoveNext());
-            Assert.Equal("foo", expressions.Current.ItemType);
-            Assert.Null(expressions.Current.Separator);
+            Assert.IsTrue(expressions.MoveNext());
+            Assert.AreEqual("foo", expressions.Current.ItemType);
+            Assert.IsNull(expressions.Current.Separator);
 
-            Assert.True(expressions.MoveNext());
-            Assert.Equal("foo", expressions.Current.ItemType);
-            Assert.Equal(",", expressions.Current.Separator);
+            Assert.IsTrue(expressions.MoveNext());
+            Assert.AreEqual("foo", expressions.Current.ItemType);
+            Assert.AreEqual(",", expressions.Current.Separator);
 
-            Assert.True(expressions.MoveNext());
-            Assert.Equal("foo", expressions.Current.ItemType);
-            Assert.Null(expressions.Current.Separator);
+            Assert.IsTrue(expressions.MoveNext());
+            Assert.AreEqual("foo", expressions.Current.ItemType);
+            Assert.IsNull(expressions.Current.Separator);
 
-            Assert.False(expressions.MoveNext());
+            Assert.IsFalse(expressions.MoveNext());
         }
 
         /// <summary>
         /// Test that item function chaining works with whitespace before arrow operators
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsChainedFunctionsWithWhitespace()
         {
             string expression;
@@ -1169,67 +1170,67 @@ namespace Microsoft.Build.UnitTests.Evaluation
             // Test with space before second arrow: ") ->"
             expression = "@(I -> WithMetadataValue('M', 'T') -> WithMetadataValue('M', 'T'))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal("I", capture.ItemType);
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Equal("WithMetadataValue", capture.Captures[0].FunctionName);
-            Assert.Equal("'M', 'T'", capture.Captures[0].FunctionArguments);
-            Assert.Equal("WithMetadataValue", capture.Captures[1].FunctionName);
-            Assert.Equal("'M', 'T'", capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual("I", capture.ItemType);
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.AreEqual("WithMetadataValue", capture.Captures[0].FunctionName);
+            Assert.AreEqual("'M', 'T'", capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("WithMetadataValue", capture.Captures[1].FunctionName);
+            Assert.AreEqual("'M', 'T'", capture.Captures[1].FunctionArguments);
 
             // Test without space before second arrow: ")->"
             expression = "@(I -> WithMetadataValue('M', 'T')-> WithMetadataValue('M', 'T'))";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal("I", capture.ItemType);
-            Assert.Equal(2, capture.Captures.Count);
-            Assert.Equal("WithMetadataValue", capture.Captures[0].FunctionName);
-            Assert.Equal("'M', 'T'", capture.Captures[0].FunctionArguments);
-            Assert.Equal("WithMetadataValue", capture.Captures[1].FunctionName);
-            Assert.Equal("'M', 'T'", capture.Captures[1].FunctionArguments);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual("I", capture.ItemType);
+            Assert.AreEqual(2, capture.Captures.Count);
+            Assert.AreEqual("WithMetadataValue", capture.Captures[0].FunctionName);
+            Assert.AreEqual("'M', 'T'", capture.Captures[0].FunctionArguments);
+            Assert.AreEqual("WithMetadataValue", capture.Captures[1].FunctionName);
+            Assert.AreEqual("'M', 'T'", capture.Captures[1].FunctionArguments);
 
             // Test with multiple spaces and chained functions
             expression = "@(I->Distinct() -> Reverse() ->Count())";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal("I", capture.ItemType);
-            Assert.Equal(3, capture.Captures.Count);
-            Assert.Equal("Distinct", capture.Captures[0].FunctionName);
-            Assert.Equal("Reverse", capture.Captures[1].FunctionName);
-            Assert.Equal("Count", capture.Captures[2].FunctionName);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual("I", capture.ItemType);
+            Assert.AreEqual(3, capture.Captures.Count);
+            Assert.AreEqual("Distinct", capture.Captures[0].FunctionName);
+            Assert.AreEqual("Reverse", capture.Captures[1].FunctionName);
+            Assert.AreEqual("Count", capture.Captures[2].FunctionName);
 
             // Test trailing whitespace after function call
             expression = "@(I -> Count() )";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal("I", capture.ItemType);
-            Assert.Equal(1, capture.Captures.Count);
-            Assert.Equal("Count", capture.Captures[0].FunctionName);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual("I", capture.ItemType);
+            Assert.AreEqual(1, capture.Captures.Count);
+            Assert.AreEqual("Count", capture.Captures[0].FunctionName);
 
             // Test trailing whitespace after quoted transform
             expression = "@(I -> 'Replacement' )";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
-            Assert.True(expressions.MoveNext());
+            Assert.IsTrue(expressions.MoveNext());
             capture = expressions.Current;
-            Assert.False(expressions.MoveNext());
-            Assert.Equal("I", capture.ItemType);
-            Assert.Equal(1, capture.Captures.Count);
-            Assert.Equal("Replacement", capture.Captures[0].Value);
-            Assert.Null(capture.Captures[0].FunctionName);
+            Assert.IsFalse(expressions.MoveNext());
+            Assert.AreEqual("I", capture.ItemType);
+            Assert.AreEqual(1, capture.Captures.Count);
+            Assert.AreEqual("Replacement", capture.Captures[0].Value);
+            Assert.IsNull(capture.Captures[0].FunctionName);
         }
 
         /// <summary>
         /// Test that invalid syntax after whitespace is properly rejected
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExtractItemVectorExpressionsInvalidSyntaxAfterWhitespace()
         {
             string expression;
@@ -1239,7 +1240,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             expression = "@(I -> Count() invalid)";
             expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
             // Should not find a valid expression due to invalid syntax
-            Assert.False(expressions.MoveNext());
+            Assert.IsFalse(expressions.MoveNext());
         }
 
         #region Original code to produce canonical results

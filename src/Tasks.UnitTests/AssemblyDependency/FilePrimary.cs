@@ -8,15 +8,15 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.AppConfig
 {
+    [TestClass]
     public sealed class FilePrimary : ResolveAssemblyReferenceTestFixture
     {
-        public FilePrimary(ITestOutputHelper output) : base(output)
+        public FilePrimary(TestContext output) : base(output)
         {
         }
 
@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         ///     dependencies anyway to make things work consistently. This would be a significant
         ///     perf hit when loading large solutions.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Exists()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -68,8 +68,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedFiles);
             t.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL", StringCompareShould.IgnoreCase);
 
             // Cleanup.
@@ -80,7 +80,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// <summary>
         /// Test the case where the appconfig has a malformed binding redirect version.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BadAppconfigOldVersion()
         {
             // Create the engine.
@@ -115,7 +115,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
                 bool succeeded = Execute(t);
 
-                Assert.False(succeeded);
+                Assert.IsFalse(succeeded);
                 engine.AssertLogContains("MSB3249");
             }
             finally
@@ -131,7 +131,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// <summary>
         /// Test the case where the appconfig has a malformed binding redirect version.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BadAppconfigNewVersion()
         {
             // Create the engine.
@@ -166,7 +166,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
                 bool succeeded = Execute(t);
 
-                Assert.False(succeeded);
+                Assert.IsFalse(succeeded);
                 engine.AssertLogContains("MSB3249");
             }
             finally
@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// Strongly named dependencies should unify according to the bindingRedirects in the app.config, if the unified version is in the deny list it should be removed and warned.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExistsPromotedDependencyInTheDenyList()
         {
             string implicitRedistListContents =
@@ -242,8 +242,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
                 bool succeeded = Execute(t);
 
-                Assert.True(succeeded);
-                Assert.Empty(t.ResolvedDependencyFiles);
+                Assert.IsTrue(succeeded);
+                Assert.IsEmpty(t.ResolvedDependencyFiles);
                 engine.AssertLogDoesntContain(
                         String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByAppConfig"), "1.0.0.0", appConfigFile, Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll")));
             }
@@ -270,7 +270,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// One entry in the app.config file should not be able to impact the mapping of an assembly
         /// with a different name.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExistsDifferentName()
         {
             // Create the engine.
@@ -298,8 +298,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedFiles);
             t.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL", StringCompareShould.IgnoreCase);
 
             // Cleanup.
@@ -321,7 +321,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         ///     dependencies anyway to make things work consistently. This would be a significant
         ///     perf hit when loading large solutions.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExistsOldVersionRange()
         {
             // Create the engine.
@@ -349,8 +349,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedFiles);
             t.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL", StringCompareShould.IgnoreCase);
 
             // Cleanup.
@@ -372,7 +372,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         ///     dependencies anyway to make things work consistently. This would be a significant
         ///     perf hit when loading large solutions.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void HighVersionDoesntExist()
         {
             // Create the engine.
@@ -400,8 +400,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedFiles);
             t.ResolvedFiles[0].GetMetadata("FusionName").ShouldBe("UnifyMe, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, ProcessorArchitecture=MSIL", StringCompareShould.IgnoreCase);
 
             // Cleanup.
@@ -421,7 +421,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// to a particular AssemblyName. Because of this, there's no way to determine that we want to
         /// promote from 0.5.0.0 to 2.0.0.0. In this case, just use the assembly name that was passed in.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LowVersionDoesntExist()
         {
             // Create the engine.
@@ -449,9 +449,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedFiles);
-            Assert.Equal(t.ResolvedFiles[0].ItemSpec, assemblyFiles[0].ItemSpec);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedFiles);
+            Assert.AreEqual(t.ResolvedFiles[0].ItemSpec, assemblyFiles[0].ItemSpec);
 
 
             // Cleanup.

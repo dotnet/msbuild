@@ -24,7 +24,7 @@ using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 #nullable disable
 
@@ -107,11 +107,11 @@ namespace Microsoft.Build.UnitTests
             int count = 0;
             foreach (ProjectItem item in items)
             {
-                Assert.Equal(itemInclude.ToUpperInvariant(), item.EvaluatedInclude.ToUpperInvariant());
+                Assert.AreEqual(itemInclude.ToUpperInvariant(), item.EvaluatedInclude.ToUpperInvariant());
                 ++count;
             }
 
-            Assert.Equal(1, count);
+            Assert.AreEqual(1, count);
 
             return items[0];
         }
@@ -402,7 +402,7 @@ namespace Microsoft.Build.UnitTests
                     }
                 }
 
-                Assert.NotNull(expectedItem); // String.Format("Item '{0}' was returned but not expected.", actualItem.ItemSpec));
+                Assert.IsNotNull(expectedItem); // String.Format("Item '{0}' was returned but not expected.", actualItem.ItemSpec));
 
                 // Make sure all the metadata on the expected item matches the metadata on the actual item.
                 // Don't check built-in metadata ... only check custom metadata.
@@ -414,15 +414,15 @@ namespace Microsoft.Build.UnitTests
                         string expectedMetadataValue = expectedItem.GetMetadata(metadataName);
                         string actualMetadataValue = actualItem.GetMetadata(metadataName);
 
-                        Assert.True(
+                        Assert.IsTrue(
                                 actualMetadataValue.Length > 0 || expectedMetadataValue.Length == 0,
                                 string.Format("Item '{0}' does not have expected metadata '{1}'.", actualItem.ItemSpec, metadataName));
 
-                        Assert.True(
+                        Assert.IsTrue(
                                 actualMetadataValue.Length == 0 || expectedMetadataValue.Length > 0,
                                 string.Format("Item '{0}' has unexpected metadata {1}={2}.", actualItem.ItemSpec, metadataName, actualMetadataValue));
 
-                        Assert.Equal(expectedMetadataValue, actualMetadataValue);
+                        Assert.AreEqual(expectedMetadataValue, actualMetadataValue);
 
                         // string.Format
                         //    (
@@ -482,17 +482,17 @@ namespace Microsoft.Build.UnitTests
         {
             if (expected == null)
             {
-                Assert.Null(actual); // "Expected a null array"
+                Assert.IsNull(actual); // "Expected a null array"
                 return;
             }
 
-            Assert.NotNull(actual); // "Result should be non-null."
-            Assert.Equal(expected.Length, actual.Length); // "Expected array length of <" + expected.Length + "> but was <" + actual.Length + ">.");
+            Assert.IsNotNull(actual); // "Result should be non-null."
+            Assert.AreEqual(expected.Length, actual.Length); // "Expected array length of <" + expected.Length + "> but was <" + actual.Length + ">.");
 
             // Now that we've verified they're both non-null and of the same length, compare each item in the array.
             for (int i = 0; i < expected.Length; i++)
             {
-                Assert.Equal(expected[i], actual[i]); // "At index " + i + " expected " + expected[i].ToString() + " but was " + actual.ToString());
+                Assert.AreEqual(expected[i], actual[i]); // "At index " + i + " expected " + expected[i].ToString() + " but was " + actual.ToString());
             }
         }
 
@@ -537,7 +537,7 @@ namespace Microsoft.Build.UnitTests
                             if (itemMetadataPieceTrimmed.Length > 0)
                             {
                                 int indexOfEquals = itemMetadataPieceTrimmed.IndexOf('=');
-                                Assert.NotEqual(-1, indexOfEquals);
+                                Assert.AreNotEqual(-1, indexOfEquals);
 
                                 string itemMetadataName = itemMetadataPieceTrimmed.Substring(0, indexOfEquals).Trim();
                                 string itemMetadataValue = itemMetadataPieceTrimmed.Substring(indexOfEquals + 1).Trim();
@@ -575,7 +575,7 @@ namespace Microsoft.Build.UnitTests
                 message = fileRelativePath + " doesn't exist, but it should.";
             }
 
-            Assert.True(FileSystems.Default.FileExists(Path.Combine(TempProjectDir, fileRelativePath)), message);
+            Assert.IsTrue(FileSystems.Default.FileExists(Path.Combine(TempProjectDir, fileRelativePath)), message);
         }
 
         /// <summary>
@@ -755,7 +755,7 @@ namespace Microsoft.Build.UnitTests
         /// <returns>The <see cref="MockLogger"/> that was used during evaluation and build.</returns>
         public static MockLogger BuildProjectExpectSuccess(
             [StringSyntax(StringSyntaxAttribute.Xml)] string projectContents,
-            ITestOutputHelper testOutputHelper = null,
+            object testOutputHelper = null,
             LoggerVerbosity loggerVerbosity = LoggerVerbosity.Normal)
         {
             MockLogger logger = new MockLogger(testOutputHelper, verbosity: loggerVerbosity);
@@ -829,7 +829,7 @@ namespace Microsoft.Build.UnitTests
             Console.WriteLine("================================== ACTUAL ============================================");
             Console.WriteLine(newActualProjectContents);
             Console.WriteLine();
-            Assert.Equal(newExpectedProjectContents, newActualProjectContents); // "Project XML does not match expected XML.  See 'Standard Out' tab for details."
+            Assert.AreEqual(newExpectedProjectContents, newActualProjectContents); // "Project XML does not match expected XML.  See 'Standard Out' tab for details."
         }
 
         private static string s_tempProjectDir;
@@ -904,7 +904,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static string CreateFileInTempProjectDirectory(string fileRelativePath, [StringSyntax(StringSyntaxAttribute.Xml)] string fileContents, Encoding encoding = null)
         {
-            Assert.False(string.IsNullOrEmpty(fileRelativePath));
+            Assert.IsFalse(string.IsNullOrEmpty(fileRelativePath));
             string fullFilePath = Path.Combine(TempProjectDir, fileRelativePath);
             Directory.CreateDirectory(Path.GetDirectoryName(fullFilePath));
 
@@ -1243,11 +1243,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static void AssertListsValueEqual<T>(IList<T> one, IList<T> two)
         {
-            Assert.Equal(one.Count, two.Count);
+            Assert.AreEqual(one.Count, two.Count);
 
             for (int i = 0; i < one.Count; i++)
             {
-                Assert.Equal(one[i], two[i]);
+                Assert.AreEqual(one[i], two[i]);
             }
         }
 
@@ -1256,16 +1256,16 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static void AssertCollectionsValueEqual<T>(ICollection<T> one, ICollection<T> two)
         {
-            Assert.Equal(one.Count, two.Count);
+            Assert.AreEqual(one.Count, two.Count);
 
             foreach (T item in one)
             {
-                Assert.True(two.Contains(item));
+                Assert.IsTrue(two.Contains(item));
             }
 
             foreach (T item in two)
             {
-                Assert.True(one.Contains(item));
+                Assert.IsTrue(one.Contains(item));
             }
         }
 
@@ -1273,11 +1273,11 @@ namespace Microsoft.Build.UnitTests
         {
             if (x == null || y == null)
             {
-                Assert.True(x == null && y == null);
+                Assert.IsTrue(x == null && y == null);
                 return;
             }
 
-            Assert.Equal(x.Count, y.Count);
+            Assert.AreEqual(x.Count, y.Count);
 
             for (var i = 0; i < x.Count; i++)
             {
@@ -1293,8 +1293,8 @@ namespace Microsoft.Build.UnitTests
             AssertDictionariesEqual(x, y,
                 (xPair, yPair) =>
                 {
-                    Assert.Equal(xPair.Key, yPair.Key);
-                    Assert.Equal(xPair.Value, yPair.Value);
+                    Assert.AreEqual(xPair.Key, yPair.Key);
+                    Assert.AreEqual(xPair.Value, yPair.Value);
                 });
         }
 
@@ -1346,7 +1346,7 @@ namespace Microsoft.Build.UnitTests
         public static MockLogger BuildProjectWithNewOMExpectSuccess(string content, Dictionary<string, string> globalProperties = null, MockLogger logger = null, bool enableTargetOutputLogging = false)
         {
             BuildProjectWithNewOM(content, ref logger, out bool result, false, globalProperties, enableTargetOutputLogging);
-            Assert.True(result);
+            Assert.IsTrue(result);
 
             return logger;
         }
@@ -1466,7 +1466,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that a drive enumerating wildcard warning is logged or exception is thrown.
         /// </summary>
-        public static void CleanContentsAndBuildTargetWithDriveEnumeratingWildcard([StringSyntax(StringSyntaxAttribute.Xml)] string content, string failOnDriveEnumerationEnvVar, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
+        public static void CleanContentsAndBuildTargetWithDriveEnumeratingWildcard([StringSyntax(StringSyntaxAttribute.Xml)] string content, string failOnDriveEnumerationEnvVar, string targetName, ExpectedBuildResult expectedBuildResult, object testOutput = null)
         {
             using (var env = TestEnvironment.Create(testOutput))
             {
@@ -1489,7 +1489,7 @@ namespace Microsoft.Build.UnitTests
             BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
         }
 
-        public static void BuildTargetWithDriveEnumeratingWildcardUsingBuildManager(TestEnvironment env, string testProjectFile, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
+        public static void BuildTargetWithDriveEnumeratingWildcardUsingBuildManager(TestEnvironment env, string testProjectFile, string targetName, ExpectedBuildResult expectedBuildResult, object testOutput = null)
         {
             try
             {
@@ -1564,7 +1564,7 @@ namespace Microsoft.Build.UnitTests
         {
             bool result;
             BuildProjectWithNewOM(content, ref logger, out result, allowTaskCrash);
-            Assert.False(result);
+            Assert.IsFalse(result);
             return logger;
         }
 
@@ -1592,7 +1592,7 @@ namespace Microsoft.Build.UnitTests
                 Console.WriteLine("================================== ACTUAL ============================================");
                 Console.WriteLine(newActualProjectContents);
                 Console.WriteLine();
-                Assert.Equal(newExpectedProjectContents, newActualProjectContents); // "Project XML does not match expected XML.  See 'Standard Out' tab for details."
+                Assert.AreEqual(newExpectedProjectContents, newActualProjectContents); // "Project XML does not match expected XML.  See 'Standard Out' tab for details."
             }
         }
 
@@ -1668,7 +1668,7 @@ namespace Microsoft.Build.UnitTests
                 return null;
             }
 
-            Assert.True(FileSystems.Default.DirectoryExists(rootDirectory), $"Directory {rootDirectory} does not exist");
+            Assert.IsTrue(FileSystems.Default.DirectoryExists(rootDirectory), $"Directory {rootDirectory} does not exist");
 
             var result = new string[files.Length];
 
@@ -1685,10 +1685,10 @@ namespace Microsoft.Build.UnitTests
                 var directoryName = Path.GetDirectoryName(fullPath);
 
                 Directory.CreateDirectory(directoryName);
-                Assert.True(FileSystems.Default.DirectoryExists(directoryName));
+                Assert.IsTrue(FileSystems.Default.DirectoryExists(directoryName));
 
                 File.WriteAllText(fullPath, string.Empty);
-                Assert.True(FileSystems.Default.FileExists(fullPath));
+                Assert.IsTrue(FileSystems.Default.FileExists(fullPath));
 
                 result[i] = fullPath;
             }
@@ -1918,9 +1918,9 @@ namespace Microsoft.Build.UnitTests
                 Assert.Fail("Neither threw");
             }
 
-            Assert.NotNull(ex1); // "First method did not throw, second: {0}", ex2 == null ? "" : ex2.GetType() + ex2.Message);
-            Assert.NotNull(ex2); // "Second method did not throw, first: {0}", ex1 == null ? "" : ex1.GetType() + ex1.Message);
-            Assert.Equal(ex1.GetType(), ex2.GetType()); // "Both methods threw but the first threw {0} '{1}' and the second threw {2} '{3}'", ex1.GetType(), ex1.Message, ex2.GetType(), ex2.Message);
+            Assert.IsNotNull(ex1); // "First method did not throw, second: {0}", ex2 == null ? "" : ex2.GetType() + ex2.Message);
+            Assert.IsNotNull(ex2); // "Second method did not throw, first: {0}", ex1 == null ? "" : ex1.GetType() + ex1.Message);
+            Assert.AreEqual(ex1.GetType(), ex2.GetType()); // "Both methods threw but the first threw {0} '{1}' and the second threw {2} '{3}'", ex1.GetType(), ex1.Message, ex2.GetType(), ex2.Message);
 
             Console.WriteLine("COMPARE EXCEPTIONS:\n\n#1: {0}\n\n#2: {1}", ex1.Message, ex2.Message);
         }
@@ -1930,15 +1930,16 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static void VerifyAssertThrowsInvalidOperation(Action method)
         {
-            Assert.Throws<InvalidOperationException>(method);
+            Assert.ThrowsExactly<InvalidOperationException>(method);
         }
 
         /// <summary>
         /// Verify that the expected content matches the actual content
         /// </summary>
-        public static void VerifyAssertLineByLine(string expected, string actual, bool ignoreFirstLineOfActual, ITestOutputHelper testOutput = null)
+        public static void VerifyAssertLineByLine(string expected, string actual, bool ignoreFirstLineOfActual, object testOutput = null)
         {
-            Action<string> LogLine = testOutput == null ? (Action<string>)Console.WriteLine : testOutput.WriteLine;
+            ITestOutputWriter outputWriter = TestOutputWriter.Create(testOutput);
+            Action<string> LogLine = outputWriter == null ? (Action<string>)Console.WriteLine : outputWriter.WriteLine;
 
             string[] actualLines = SplitIntoLines(actual);
 
@@ -1999,7 +2000,7 @@ namespace Microsoft.Build.UnitTests
         {
             using var sw = new StringWriter();
             project.Save(sw);
-            Assert.False(project.HasUnsavedChanges);
+            Assert.IsFalse(project.HasUnsavedChanges);
         }
 
         /// <summary>

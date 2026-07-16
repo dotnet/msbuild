@@ -9,15 +9,15 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAndUnification.Prerequisite
 {
+    [TestClass]
     public sealed class StronglyNamedDependency : ResolveAssemblyReferenceTestFixture
     {
-        public StronglyNamedDependency(ITestOutputHelper output) : base(output)
+        public StronglyNamedDependency(TestContext output) : base(output)
         {
         }
 
@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Return the default search paths.
         /// </summary>
         /// <value></value>
-        internal new string[] DefaultPaths
+        internal string[] TestSpecificDefaultPaths
         {
             get { return new string[] { s_myApp_V10Path, @"C:\Framework\Whidbey", @"C:\Framework\Everett" }; }
         }
@@ -42,7 +42,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// Rationale:
         /// We automatically unify FX dependencies.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Exists()
         {
             // This WriteLine is a hack.  On a slow machine, the Tasks unittest fails because remoting
@@ -63,14 +63,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
-            t.SearchPaths = DefaultPaths;
+            t.SearchPaths = TestSpecificDefaultPaths;
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Single(t.ResolvedDependencyFiles);
-            Assert.Equal(0, engine.Errors);
-            Assert.Equal(0, engine.Warnings);
+            Assert.IsTrue(succeeded);
+            Assert.ContainsSingle(t.ResolvedDependencyFiles);
+            Assert.AreEqual(0, engine.Errors);
+            Assert.AreEqual(0, engine.Warnings);
             t.ResolvedDependencyFiles[0].GetMetadata("FusionName")
                 .ShouldBe("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=" + AssemblyRef.EcmaPublicKey, StringCompareShould.IgnoreCase);
 
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// feeding it the wrong version, and the drawback is that builds would be different from
         /// machine-to-machine.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void HighVersionDoesntExist()
         {
             // Create the engine.
@@ -117,13 +117,13 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
 
             bool succeeded = Execute(t);
 
-            Assert.True(succeeded);
-            Assert.Empty(t.ResolvedDependencyFiles);
+            Assert.IsTrue(succeeded);
+            Assert.IsEmpty(t.ResolvedDependencyFiles);
             engine.AssertLogContains(
                     String.Format(AssemblyResources.GetString("ResolveAssemblyReference.UnificationByFrameworkRetarget"), "1.0.5000.0", Path.Combine(s_myApp_V10Path, "DependsOnEverettSystem.dll")));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyAssemblyPulledOutOfFrameworkDoesntGetFrameworkFileAttribute()
         {
             MockEngine e = new MockEngine(_output);
@@ -143,7 +143,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             t1.TargetFrameworkDirectories = new string[] { actualFrameworkDirectory };
             ExecuteRAROnItemsAndRedist(t1, e, items, redistString1, true, new List<string>() { "{RawFileName}" });
 
-            Assert.False(String.IsNullOrEmpty(t1.ResolvedFiles[0].GetMetadata("FrameworkFile")));
+            Assert.IsFalse(String.IsNullOrEmpty(t1.ResolvedFiles[0].GetMetadata("FrameworkFile")));
 
             // Higher version than framework, but directory matches - it is a framework assembly
             string redistString2 = "<FileList Redist='Microsoft-Windows-CLRCoreComp-Random' >" +
@@ -155,7 +155,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             t2.TargetFrameworkDirectories = new string[] { actualFrameworkDirectory };
             ExecuteRAROnItemsAndRedist(t2, e, items, redistString2, true, new List<string>() { "{RawFileName}" });
 
-            Assert.False(String.IsNullOrEmpty(t2.ResolvedFiles[0].GetMetadata("FrameworkFile")));
+            Assert.IsFalse(String.IsNullOrEmpty(t2.ResolvedFiles[0].GetMetadata("FrameworkFile")));
 
             // Version is lower but directory does not match - it is a framework assembly
             string redistString3 = "<FileList Redist='Microsoft-Windows-CLRCoreComp-Random' >" +
@@ -167,7 +167,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             t3.TargetFrameworkDirectories = new string[] { alternativeFrameworkDirectory };
             ExecuteRAROnItemsAndRedist(t3, e, items, redistString3, true, new List<string>() { "{RawFileName}" });
 
-            Assert.False(String.IsNullOrEmpty(t3.ResolvedFiles[0].GetMetadata("FrameworkFile")));
+            Assert.IsFalse(String.IsNullOrEmpty(t3.ResolvedFiles[0].GetMetadata("FrameworkFile")));
 
             // Version is higher and directory does not match - this assembly has been pulled out of .NET
             string redistString4 = "<FileList Redist='Microsoft-Windows-CLRCoreComp-Random' >" +
@@ -179,7 +179,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
             t4.TargetFrameworkDirectories = new string[] { alternativeFrameworkDirectory };
             ExecuteRAROnItemsAndRedist(t4, e, items, redistString4, true, new List<string>() { "{RawFileName}" });
 
-            Assert.True(String.IsNullOrEmpty(t4.ResolvedFiles[0].GetMetadata("FrameworkFile")));
+            Assert.IsTrue(String.IsNullOrEmpty(t4.ResolvedFiles[0].GetMetadata("FrameworkFile")));
         }
     }
 }

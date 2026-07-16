@@ -14,10 +14,10 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
+[TestClass]
 public class EndToEndTests : IDisposable
 {
     private const string EditorConfigFileName = ".editorconfig";
@@ -26,7 +26,7 @@ public class EndToEndTests : IDisposable
 
     private int timeoutInMilliseconds = 900_000;
 
-    public EndToEndTests(ITestOutputHelper output)
+    public EndToEndTests(TestContext output)
     {
         _env = TestEnvironment.Create(output);
 
@@ -40,9 +40,9 @@ public class EndToEndTests : IDisposable
 
     public void Dispose() => _env.Dispose();
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
+    [MSBuildTestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
     public void PropertiesUsageAnalyzerTest(bool buildInOutOfProcessNode)
     {
         PrepareSampleProjectsAndConfig(
@@ -66,10 +66,10 @@ public class EndToEndTests : IDisposable
         Regex.Matches(output, "BC0203 .* Property").Count.ShouldBe(2);
     }
 
-    [Theory]
+    [MSBuildTestMethod]
     // The culture is not set explicitly, but the extension is a known culture
     //  - a buildcheck warning will occur, but otherwise works
-    [InlineData(
+    [DataRow(
         "cs",
         "cs",
         """<EmbeddedResource Update = "Resource1.cs.resx" />""",
@@ -78,7 +78,7 @@ public class EndToEndTests : IDisposable
         true)]
     // The culture is not set explicitly, and is not a known culture
     //  - a buildcheck warning will occur, and resource is not recognized as culture specific - won't be copied around
-    [InlineData(
+    [DataRow(
         "xyz",
         "xyz",
         """<EmbeddedResource Update = "Resource1.xyz.resx" />""",
@@ -87,7 +87,7 @@ public class EndToEndTests : IDisposable
         false)]
     // The culture is explicitly set, and it is not a known culture, but $(RespectAlreadyAssignedItemCulture) is set to true
     //  - no warning will occur, and resource is recognized as culture specific - and copied around
-    [InlineData(
+    [DataRow(
         "xyz",
         "xyz",
         """<EmbeddedResource Update = "Resource1.xyz.resx" Culture="xyz" />""",
@@ -96,7 +96,7 @@ public class EndToEndTests : IDisposable
         true)]
     // The culture is explicitly set, and it is not a known culture and $(RespectAlreadyAssignedItemCulture) is not set to true
     //  - so culture is overwritten, and resource is not recognized as culture specific - won't be copied around
-    [InlineData(
+    [DataRow(
         "xyz",
         "zyx",
         """<EmbeddedResource Update = "Resource1.zyx.resx" Culture="xyz" />""",
@@ -105,7 +105,7 @@ public class EndToEndTests : IDisposable
         false)]
     // The culture is explicitly set, and it is not a known culture, but $(RespectAlreadyAssignedItemCulture) is set to true
     //  - no warning will occur, and resource is recognized as culture specific - and copied around
-    [InlineData(
+    [DataRow(
         "xyz",
         "zyx",
         """<EmbeddedResource Update = "Resource1.zyx.resx" Culture="xyz" />""",
@@ -247,9 +247,9 @@ public class EndToEndTests : IDisposable
             File.GetLastAccessTimeUtc(outFile2[0]));
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
+    [MSBuildTestMethod]
+    [DataRow(false)]
+    [DataRow(true)]
     public void CopyToOutputTest(bool skipUnchangedDuringCopy)
     {
         string testAssetsFolderName = "CopyAlwaysTest";
@@ -303,11 +303,11 @@ public class EndToEndTests : IDisposable
     }
 
 
-    [Theory]
-    [InlineData(true, true)]
-    [InlineData(true, false)]
-    [InlineData(false, true)]
-    [InlineData(false, false)]
+    [MSBuildTestMethod]
+    [DataRow(true, true)]
+    [DataRow(true, false)]
+    [DataRow(false, true)]
+    [DataRow(false, false)]
     public void WarningsCountExceedsLimitTest(bool buildInOutOfProcessNode, bool limitReportsCount)
     {
         PrepareSampleProjectsAndConfig(
@@ -359,8 +359,8 @@ public class EndToEndTests : IDisposable
         yield return [$"""<TargetFramework>{RunnerUtilities.LatestDotNetCoreForMSBuild}</TargetFramework><TargetFrameworks>{RunnerUtilities.LatestDotNetCoreForMSBuild};net472</TargetFrameworks>""", "", true];
     }
 
-    [Theory]
-    [MemberData(nameof(TFMConfusionCheckTestData))]
+    [MSBuildTestMethod]
+    [DynamicData(nameof(TFMConfusionCheckTestData))]
     public void TFMConfusionCheckTest(string tfmString, string cliSuffix, bool shouldTriggerCheck)
     {
         const string testAssetsFolderName = "TFMConfusionCheck";
@@ -452,7 +452,7 @@ public class EndToEndTests : IDisposable
 
     // Windows only - due to targeting NetFx
     [WindowsOnlyTheory]
-    [MemberData(nameof(TFMinNonSdkCheckTestData))]
+    [DynamicData(nameof(TFMinNonSdkCheckTestData))]
     public void TFMinNonSdkCheckTest(string projectContent, bool expectCheckTrigger)
     {
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);
@@ -473,7 +473,7 @@ public class EndToEndTests : IDisposable
     }
 
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ConfigChangeReflectedOnReuse()
     {
         PrepareSampleProjectsAndConfig(
@@ -532,10 +532,10 @@ public class EndToEndTests : IDisposable
     }
 
 
-    [Theory]
-    [InlineData(true, true)]
-    [InlineData(false, true)]
-    [InlineData(false, false)]
+    [MSBuildTestMethod]
+    [DataRow(true, true)]
+    [DataRow(false, true)]
+    [DataRow(false, false)]
     public void SampleCheckIntegrationTest_CheckOnBuild(bool buildInOutOfProcessNode, bool checkRequested)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", "warning") });
@@ -564,14 +564,14 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
-    [InlineData(true, true, "warning")]
-    [InlineData(true, true, "error")]
-    [InlineData(true, true, "suggestion")]
-    [InlineData(false, true, "warning")]
-    [InlineData(false, true, "error")]
-    [InlineData(false, true, "suggestion")]
-    [InlineData(false, false, "warning")]
+    [MSBuildTestMethod]
+    [DataRow(true, true, "warning")]
+    [DataRow(true, true, "error")]
+    [DataRow(true, true, "suggestion")]
+    [DataRow(false, true, "warning")]
+    [DataRow(false, true, "error")]
+    [DataRow(false, true, "suggestion")]
+    [DataRow(false, false, "warning")]
     public void SampleCheckIntegrationTest_ReplayBinaryLogOfCheckedBuild(bool buildInOutOfProcessNode, bool checkRequested, string BC0101Severity)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", BC0101Severity) });
@@ -620,12 +620,12 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
-    [InlineData("warning", "warning BC0101", new string[] { "error BC0101" })]
-    [InlineData("error", "error BC0101", new string[] { "warning BC0101" })]
-    [InlineData("suggestion", "BC0101", new string[] { "error BC0101", "warning BC0101" })]
-    [InlineData("default", "warning BC0101", new string[] { "error BC0101" })]
-    [InlineData("none", null, new string[] { "BC0101" })]
+    [MSBuildTestMethod]
+    [DataRow("warning", "warning BC0101", new string[] { "error BC0101" })]
+    [DataRow("error", "error BC0101", new string[] { "warning BC0101" })]
+    [DataRow("suggestion", "BC0101", new string[] { "error BC0101", "warning BC0101" })]
+    [DataRow("default", "warning BC0101", new string[] { "error BC0101" })]
+    [DataRow("none", null, new string[] { "BC0101" })]
     public void EditorConfig_SeverityAppliedCorrectly(string BC0101Severity, string? expectedOutputValues, string[] unexpectedOutputValues)
     {
         PrepareSampleProjectsAndConfig(true, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", BC0101Severity) });
@@ -650,7 +650,7 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void CheckHasAccessToAllConfigs()
     {
         using (var env = TestEnvironment.Create())
@@ -682,10 +682,10 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
-    [InlineData(true, true)]
-    [InlineData(false, true)]
-    [InlineData(false, false)]
+    [MSBuildTestMethod]
+    [DataRow(true, true)]
+    [DataRow(false, true)]
+    [DataRow(false, false)]
     public void SampleCheckIntegrationTest_CheckOnBinaryLogReplay(bool buildInOutOfProcessNode, bool checkRequested)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", "warning") });
@@ -722,10 +722,10 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
-    [InlineData(null, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." })]
-    [InlineData(true, new[] { "Property is derived from environment variable: 'TestFromTarget' with value: 'FromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation' with value: 'FromEvaluation'." })]
-    [InlineData(false, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." })]
+    [MSBuildTestMethod]
+    [DataRow(null, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." })]
+    [DataRow(true, new[] { "Property is derived from environment variable: 'TestFromTarget' with value: 'FromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation' with value: 'FromEvaluation'." })]
+    [DataRow(false, new[] { "Property is derived from environment variable: 'TestFromTarget'.", "Property is derived from environment variable: 'TestFromEvaluation'." })]
     public void NoEnvironmentVariableProperty_Test(bool? customConfigEnabled, string[] expectedMessages)
     {
         List<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? customConfigData = null;
@@ -753,10 +753,10 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
-    [InlineData(EvaluationCheckScope.ProjectFileOnly)]
-    [InlineData(EvaluationCheckScope.WorkTreeImports)]
-    [InlineData(EvaluationCheckScope.All)]
+    [MSBuildTestMethod]
+    [DataRow(EvaluationCheckScope.ProjectFileOnly)]
+    [DataRow(EvaluationCheckScope.WorkTreeImports)]
+    [DataRow(EvaluationCheckScope.All)]
     public void NoEnvironmentVariableProperty_Scoping(EvaluationCheckScope scope)
     {
         List<(string RuleId, (string ConfigKey, string Value) CustomConfig)>? customConfigData = null;
@@ -793,10 +793,10 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
-    [InlineData(true, false)]
-    [InlineData(false, false)]
-    [InlineData(false, true)]
+    [MSBuildTestMethod]
+    [DataRow(true, false)]
+    [DataRow(false, false)]
+    [DataRow(false, true)]
     public void NoEnvironmentVariableProperty_DeferredProcessing(bool warnAsError, bool warnAsMessage)
     {
         PrepareSampleProjectsAndConfig(
@@ -828,9 +828,9 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
-    [InlineData("CheckCandidate", new[] { "CustomRule1", "CustomRule2" })]
-    [InlineData("CheckCandidateWithMultipleChecksInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
+    [MSBuildTestMethod]
+    [DataRow("CheckCandidate", new[] { "CustomRule1", "CustomRule2" })]
+    [DataRow("CheckCandidateWithMultipleChecksInjected", new[] { "CustomRule1", "CustomRule2", "CustomRule3" }, true)]
     public void CustomCheckTest_NoEditorConfig(string checkCandidate, string[] expectedRegisteredRules, bool expectedRejectedChecks = false)
     {
         using (var env = TestEnvironment.Create())
@@ -861,9 +861,9 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
-    [InlineData("CheckCandidate", "X01234", "error", "error X01234: http://samplelink.com/X01234")]
-    [InlineData("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234: http://samplelink.com/X01234")]
+    [MSBuildTestMethod]
+    [DataRow("CheckCandidate", "X01234", "error", "error X01234: http://samplelink.com/X01234")]
+    [DataRow("CheckCandidateWithMultipleChecksInjected", "X01234", "warning", "warning X01234: http://samplelink.com/X01234")]
     public void CustomCheckTest_WithEditorConfig(string checkCandidate, string ruleId, string severity, string expectedMessage)
     {
         using (var env = TestEnvironment.Create())
@@ -888,10 +888,10 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
-    [InlineData("X01236", "ErrorOnInitializeCheck", "Something went wrong initializing")]
-    [InlineData("X01237", "ErrorOnRegisteredAction", "something went wrong when executing registered action")]
-    [InlineData("X01238", "ErrorWhenRegisteringActions", "something went wrong when registering actions")]
+    [MSBuildTestMethod]
+    [DataRow("X01236", "ErrorOnInitializeCheck", "Something went wrong initializing")]
+    [DataRow("X01237", "ErrorOnRegisteredAction", "something went wrong when executing registered action")]
+    [DataRow("X01238", "ErrorWhenRegisteringActions", "something went wrong when registering actions")]
     public void CustomChecksFailGracefully(string ruleId, string friendlyName, string expectedMessage)
     {
         using (var env = TestEnvironment.Create())
@@ -920,9 +920,9 @@ public class EndToEndTests : IDisposable
         }
     }
 
-    [Theory]
-    [InlineData(true)]
-    [InlineData(false)]
+    [MSBuildTestMethod]
+    [DataRow(true)]
+    [DataRow(false)]
     public void DoesNotRunOnRestore(bool buildInOutOfProcessNode)
     {
         PrepareSampleProjectsAndConfig(buildInOutOfProcessNode, out TransientTestFile projectFile, new List<(string, string)>() { ("BC0101", "warning") });
@@ -938,7 +938,7 @@ public class EndToEndTests : IDisposable
     }
 
 #if NET
-    [Fact]
+    [MSBuildTestMethod]
     public void TestBuildCheckTemplate()
     {
         TransientTestFolder workFolder = _env.CreateFolder(createFolder: true);

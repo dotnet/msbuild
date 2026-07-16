@@ -4,20 +4,21 @@
 using System;
 using Microsoft.Build.Collections;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests.Collections;
 
+[TestClass]
+
 public class RefArrayBuilder_Tests
 {
-    [Fact]
+    [MSBuildTestMethod]
     public void Constructor_InitializesWithCapacity()
     {
         using RefArrayBuilder<int> builder = new(10);
         builder.Count.ShouldBe(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Constructor_WithScratchBuffer_UsesScratchBuffer()
     {
         using RefArrayBuilder<int> builder = new(stackalloc int[10]);
@@ -29,7 +30,7 @@ public class RefArrayBuilder_Tests
         builder[0].ShouldBe(42);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Constructor_WithScratchBuffer_CanGrowBeyondInitialCapacity()
     {
         using RefArrayBuilder<int> builder = new(stackalloc int[2]);
@@ -44,7 +45,7 @@ public class RefArrayBuilder_Tests
         builder[2].ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Constructor_WithEmptyScratchBuffer_CanStillAdd()
     {
         using RefArrayBuilder<int> builder = new(scratchBuffer: []);
@@ -56,7 +57,7 @@ public class RefArrayBuilder_Tests
         builder[0].ShouldBe(42);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Constructor_WithScratchBuffer_AddRangeWorks()
     {
         using RefArrayBuilder<int> builder = new(stackalloc int[10]);
@@ -69,7 +70,7 @@ public class RefArrayBuilder_Tests
         builder[2].ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Add_SingleItem_IncreasesLength()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -79,7 +80,7 @@ public class RefArrayBuilder_Tests
         builder[0].ShouldBe(42);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Add_MultipleItems_MaintainsOrder()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -93,7 +94,7 @@ public class RefArrayBuilder_Tests
         builder[2].ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Add_ExceedsCapacity_GrowsAutomatically()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -108,7 +109,7 @@ public class RefArrayBuilder_Tests
         builder[4].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Add_ScratchBuffer_ExceedsCapacity_GrowsAutomatically()
     {
         using RefArrayBuilder<int> builder = new(stackalloc int[4]);
@@ -123,7 +124,7 @@ public class RefArrayBuilder_Tests
         builder[4].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void AddRange_SingleElement_AddsCorrectly()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -133,7 +134,7 @@ public class RefArrayBuilder_Tests
         builder[0].ShouldBe(42);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void AddRange_MultipleElements_AddsAllInOrder()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -147,7 +148,7 @@ public class RefArrayBuilder_Tests
         builder[3].ShouldBe(4);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void AddRange_ExceedsCapacity_GrowsAutomatically()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -158,7 +159,7 @@ public class RefArrayBuilder_Tests
         builder[4].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void AddRange_ScratchBuffer_ExceedsCapacity_GrowsAutomatically()
     {
         using RefArrayBuilder<int> builder = new(stackalloc int[4]);
@@ -169,7 +170,7 @@ public class RefArrayBuilder_Tests
         builder[4].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void AddRange_EmptySpan_DoesNothing()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -180,7 +181,7 @@ public class RefArrayBuilder_Tests
         builder[0].ShouldBe(1);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Insert_AtBeginning_ShiftsExistingElements()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -194,7 +195,7 @@ public class RefArrayBuilder_Tests
         builder[2].ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Insert_InMiddle_ShiftsSubsequentElements()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -208,7 +209,7 @@ public class RefArrayBuilder_Tests
         builder[2].ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Insert_AtEnd_AppendsElement()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -220,7 +221,7 @@ public class RefArrayBuilder_Tests
         builder[2].ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Insert_ExceedsCapacity_GrowsAutomatically()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -238,7 +239,7 @@ public class RefArrayBuilder_Tests
         builder[4].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Insert_ScratchBuffer_ExceedsCapacity_GrowsAutomatically()
     {
         using RefArrayBuilder<int> builder = new(stackalloc int[4]);
@@ -256,7 +257,7 @@ public class RefArrayBuilder_Tests
         builder[4].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InsertRange_AtBeginning_ShiftsExistingElements()
     {
         using RefArrayBuilder<int> builder = new(10);
@@ -272,7 +273,7 @@ public class RefArrayBuilder_Tests
         builder[4].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InsertRange_InMiddle_ShiftsSubsequentElements()
     {
         using RefArrayBuilder<int> builder = new(10);
@@ -288,7 +289,7 @@ public class RefArrayBuilder_Tests
         builder[4].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InsertRange_AtEnd_AppendsElements()
     {
         using RefArrayBuilder<int> builder = new(10);
@@ -302,7 +303,7 @@ public class RefArrayBuilder_Tests
         builder[4].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InsertRange_ExceedsCapacity_GrowsAutomatically()
     {
         using RefArrayBuilder<int> builder = new(2);
@@ -318,7 +319,7 @@ public class RefArrayBuilder_Tests
         builder[4].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InsertRange_ScratchBuffer_ExceedsCapacity_GrowsAutomatically()
     {
         using RefArrayBuilder<int> builder = new(stackalloc int[2]);
@@ -334,7 +335,7 @@ public class RefArrayBuilder_Tests
         builder[4].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InsertRange_AtBeginning_NearCapacity_ShiftsCorrectly()
     {
         // Use a capacity that we know ArrayPool will give us, then fill most of it.
@@ -363,7 +364,7 @@ public class RefArrayBuilder_Tests
         builder[fillCount + 4].ShouldBe(fillCount);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InsertRange_ScratchBuffer_AtBeginning_NearCapacity_ShiftsCorrectly()
     {
         using RefArrayBuilder<int> builder = new(stackalloc int[12]);
@@ -384,7 +385,7 @@ public class RefArrayBuilder_Tests
         builder[14].ShouldBe(12);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void InsertRange_EmptySpan_DoesNothing()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -397,7 +398,7 @@ public class RefArrayBuilder_Tests
         builder[1].ShouldBe(2);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Count_CanBeSet()
     {
         var builder = new RefArrayBuilder<int>(4);
@@ -418,7 +419,7 @@ public class RefArrayBuilder_Tests
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Indexer_ReturnsReference()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -431,7 +432,7 @@ public class RefArrayBuilder_Tests
         builder[1].ShouldBe(42);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void IsEmpty_NewBuilder_ReturnsTrue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -439,7 +440,7 @@ public class RefArrayBuilder_Tests
         builder.IsEmpty.ShouldBeTrue();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void IsEmpty_AfterAdd_ReturnsFalse()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -448,7 +449,7 @@ public class RefArrayBuilder_Tests
         builder.IsEmpty.ShouldBeFalse();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void IsEmpty_AfterRemovingAllElements_ReturnsTrue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -458,7 +459,7 @@ public class RefArrayBuilder_Tests
         builder.IsEmpty.ShouldBeTrue();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void IsEmpty_AfterSettingCountToZero_ReturnsTrue()
     {
         var builder = new RefArrayBuilder<int>(4);
@@ -476,7 +477,7 @@ public class RefArrayBuilder_Tests
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void AsSpan_ReturnsCorrectSlice()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -492,7 +493,7 @@ public class RefArrayBuilder_Tests
         span[2].ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void AsSpan_EmptyBuilder_ReturnsEmptySpan()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -502,7 +503,7 @@ public class RefArrayBuilder_Tests
         span.Length.ShouldBe(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void AsSpan_ReflectsChanges()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -519,7 +520,7 @@ public class RefArrayBuilder_Tests
         span2[2].ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void WithReferenceTypes_WorksCorrectly()
     {
         using RefArrayBuilder<string> builder = new(4);
@@ -531,7 +532,7 @@ public class RefArrayBuilder_Tests
         builder[1].ShouldBe("world");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void WithReferenceTypes_AddRange_WorksCorrectly()
     {
         using RefArrayBuilder<string> builder = new(4);
@@ -543,7 +544,7 @@ public class RefArrayBuilder_Tests
         builder[2].ShouldBe("three");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void WithReferenceTypes_Insert_WorksCorrectly()
     {
         using RefArrayBuilder<string> builder = new(4);
@@ -557,7 +558,7 @@ public class RefArrayBuilder_Tests
         builder[2].ShouldBe("third");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void MultipleOperations_ComplexScenario()
     {
         using RefArrayBuilder<int> builder = new(2);
@@ -578,7 +579,7 @@ public class RefArrayBuilder_Tests
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LargeCapacity_HandlesGrowthCorrectly()
     {
         using RefArrayBuilder<int> builder = new(2);
@@ -595,7 +596,7 @@ public class RefArrayBuilder_Tests
         builder[99].ShouldBe(99);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Dispose_CanBeCalledMultipleTimes()
     {
         RefArrayBuilder<int> builder = new(4);
@@ -606,7 +607,7 @@ public class RefArrayBuilder_Tests
         builder.Dispose(); // Should not throw
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RemoveAt_FirstElement_ShiftsSubsequentElements()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -620,7 +621,7 @@ public class RefArrayBuilder_Tests
         builder[1].ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RemoveAt_MiddleElement_ShiftsSubsequentElements()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -636,7 +637,7 @@ public class RefArrayBuilder_Tests
         builder[2].ShouldBe(4);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RemoveAt_LastElement_RemovesCorrectly()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -650,7 +651,7 @@ public class RefArrayBuilder_Tests
         builder[1].ShouldBe(2);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RemoveAt_SingleElement_BecomesEmpty()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -660,7 +661,7 @@ public class RefArrayBuilder_Tests
         builder.Count.ShouldBe(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RemoveAt_WithReferenceTypes_ClearsReference()
     {
         using RefArrayBuilder<string> builder = new(4);
@@ -674,7 +675,7 @@ public class RefArrayBuilder_Tests
         builder[1].ShouldBe("third");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RemoveAt_MultipleRemovals_WorksCorrectly()
     {
         using RefArrayBuilder<int> builder = new(10);
@@ -688,7 +689,7 @@ public class RefArrayBuilder_Tests
         builder[2].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RemoveAt_RemoveAllElements_LeavesEmpty()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -702,7 +703,7 @@ public class RefArrayBuilder_Tests
         builder.Count.ShouldBe(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RemoveAt_AfterGrowth_WorksCorrectly()
     {
         using RefArrayBuilder<int> builder = new(2);
@@ -718,7 +719,7 @@ public class RefArrayBuilder_Tests
         builder[2].ShouldBe(4);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RemoveAt_CanAddAfterRemoval()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -734,7 +735,7 @@ public class RefArrayBuilder_Tests
         builder[2].ShouldBe(4);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void RemoveAt_WithScratchBuffer_WorksCorrectly()
     {
         using RefArrayBuilder<int> builder = new(stackalloc int[10]);
@@ -748,7 +749,7 @@ public class RefArrayBuilder_Tests
         builder[3].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ToImmutable_EmptyBuilder_ReturnsEmptyImmutableArray()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -758,7 +759,7 @@ public class RefArrayBuilder_Tests
         result.IsEmpty.ShouldBeTrue();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ToImmutable_WithItems_ReturnsImmutableArrayWithCorrectElements()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -774,7 +775,7 @@ public class RefArrayBuilder_Tests
         result[2].ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ToImmutable_WithReferenceTypes_ReturnsImmutableArrayWithCorrectElements()
     {
         using RefArrayBuilder<string> builder = new(4);
@@ -788,7 +789,7 @@ public class RefArrayBuilder_Tests
         result[1].ShouldBe("world");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ToImmutable_AfterMultipleOperations_ReturnsCorrectImmutableArray()
     {
         using RefArrayBuilder<int> builder = new(2);
@@ -806,7 +807,7 @@ public class RefArrayBuilder_Tests
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ToImmutable_DoesNotModifyBuilder()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -827,7 +828,7 @@ public class RefArrayBuilder_Tests
         result2[2].ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ToImmutable_AfterCountSet_ReturnsCorrectImmutableArray()
     {
         var builder = new RefArrayBuilder<int>(4);
@@ -850,7 +851,7 @@ public class RefArrayBuilder_Tests
         }
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Any_EmptyBuilder_ReturnsFalse()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -858,7 +859,7 @@ public class RefArrayBuilder_Tests
         builder.Any().ShouldBeFalse();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Any_WithElements_ReturnsTrue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -867,7 +868,7 @@ public class RefArrayBuilder_Tests
         builder.Any().ShouldBeTrue();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Any_WithPredicate_NoMatch_ReturnsFalse()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -876,7 +877,7 @@ public class RefArrayBuilder_Tests
         builder.Any(x => x > 5).ShouldBeFalse();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Any_WithPredicate_HasMatch_ReturnsTrue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -885,7 +886,7 @@ public class RefArrayBuilder_Tests
         builder.Any(x => x > 3).ShouldBeTrue();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Any_WithPredicate_EmptyBuilder_ReturnsFalse()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -893,7 +894,7 @@ public class RefArrayBuilder_Tests
         builder.Any(x => x > 0).ShouldBeFalse();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Any_WithPredicateAndArg_NoMatch_ReturnsFalse()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -902,7 +903,7 @@ public class RefArrayBuilder_Tests
         builder.Any(5, (x, threshold) => x > threshold).ShouldBeFalse();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Any_WithPredicateAndArg_HasMatch_ReturnsTrue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -911,7 +912,7 @@ public class RefArrayBuilder_Tests
         builder.Any(3, (x, threshold) => x > threshold).ShouldBeTrue();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Any_WithNullPredicate_ThrowsArgumentNullException()
     {
         Should.Throw<ArgumentNullException>(() =>
@@ -923,7 +924,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Any_WithPredicateAndArg_NullPredicate_ThrowsArgumentNullException()
     {
         Should.Throw<ArgumentNullException>(() =>
@@ -935,7 +936,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void All_EmptyBuilder_ReturnsTrue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -943,7 +944,7 @@ public class RefArrayBuilder_Tests
         builder.All(x => x > 0).ShouldBeTrue();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void All_AllElementsMatch_ReturnsTrue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -952,7 +953,7 @@ public class RefArrayBuilder_Tests
         builder.All(x => x % 2 == 0).ShouldBeTrue();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void All_SomeElementsDontMatch_ReturnsFalse()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -961,7 +962,7 @@ public class RefArrayBuilder_Tests
         builder.All(x => x % 2 == 0).ShouldBeFalse();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void All_NoElementsMatch_ReturnsFalse()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -970,7 +971,7 @@ public class RefArrayBuilder_Tests
         builder.All(x => x % 2 == 0).ShouldBeFalse();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void All_WithPredicateAndArg_AllMatch_ReturnsTrue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -979,7 +980,7 @@ public class RefArrayBuilder_Tests
         builder.All(5, (x, divisor) => x % divisor == 0).ShouldBeTrue();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void All_WithPredicateAndArg_SomeDontMatch_ReturnsFalse()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -988,7 +989,7 @@ public class RefArrayBuilder_Tests
         builder.All(5, (x, divisor) => x % divisor == 0).ShouldBeFalse();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void All_WithNullPredicate_ThrowsArgumentNullException()
     {
         Should.Throw<ArgumentNullException>(() =>
@@ -1000,7 +1001,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void All_WithPredicateAndArg_NullPredicate_ThrowsArgumentNullException()
     {
         Should.Throw<ArgumentNullException>(() =>
@@ -1012,7 +1013,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void First_EmptyBuilder_ThrowsInvalidOperationException()
     {
         Should.Throw<InvalidOperationException>(() =>
@@ -1023,7 +1024,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void First_WithElements_ReturnsFirstElement()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1032,7 +1033,7 @@ public class RefArrayBuilder_Tests
         builder.First().ShouldBe(1);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void First_SingleElement_ReturnsThatElement()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1041,7 +1042,7 @@ public class RefArrayBuilder_Tests
         builder.First().ShouldBe(42);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void First_WithPredicate_NoMatch_ThrowsInvalidOperationException()
     {
         Should.Throw<InvalidOperationException>(() =>
@@ -1053,7 +1054,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void First_WithPredicate_HasMatch_ReturnsFirstMatch()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1062,7 +1063,7 @@ public class RefArrayBuilder_Tests
         builder.First(x => x > 2).ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void First_WithPredicate_EmptyBuilder_ThrowsInvalidOperationException()
     {
         Should.Throw<InvalidOperationException>(() =>
@@ -1073,7 +1074,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void First_WithPredicateAndArg_NoMatch_ThrowsInvalidOperationException()
     {
         Should.Throw<InvalidOperationException>(() =>
@@ -1085,7 +1086,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void First_WithPredicateAndArg_HasMatch_ReturnsFirstMatch()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1094,7 +1095,7 @@ public class RefArrayBuilder_Tests
         builder.First(2, (x, threshold) => x > threshold).ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void First_WithNullPredicate_ThrowsArgumentNullException()
     {
         Should.Throw<ArgumentNullException>(() =>
@@ -1106,7 +1107,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void First_WithPredicateAndArg_NullPredicate_ThrowsArgumentNullException()
     {
         Should.Throw<ArgumentNullException>(() =>
@@ -1118,7 +1119,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_EmptyBuilder_ReturnsDefault()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1126,7 +1127,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault().ShouldBe(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithElements_ReturnsFirstElement()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1135,7 +1136,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault().ShouldBe(1);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithDefaultValue_EmptyBuilder_ReturnsDefaultValue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1143,7 +1144,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault(99).ShouldBe(99);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithDefaultValue_WithElements_ReturnsFirstElement()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1152,7 +1153,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault(99).ShouldBe(1);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithPredicate_NoMatch_ReturnsDefault()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1161,7 +1162,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault(x => x > 5).ShouldBe(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithPredicate_HasMatch_ReturnsFirstMatch()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1170,7 +1171,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault(x => x > 2).ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithPredicateAndDefaultValue_NoMatch_ReturnsDefaultValue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1179,7 +1180,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault(x => x > 5, 99).ShouldBe(99);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithPredicateAndDefaultValue_HasMatch_ReturnsFirstMatch()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1188,7 +1189,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault(x => x > 2, 99).ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithPredicateAndArg_NoMatch_ReturnsDefault()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1197,7 +1198,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault(5, (x, threshold) => x > threshold).ShouldBe(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithPredicateAndArg_HasMatch_ReturnsFirstMatch()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1206,7 +1207,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault(2, (x, threshold) => x > threshold).ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithPredicateArgAndDefaultValue_NoMatch_ReturnsDefaultValue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1215,7 +1216,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault(5, (x, threshold) => x > threshold, 99).ShouldBe(99);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithPredicateArgAndDefaultValue_HasMatch_ReturnsFirstMatch()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1224,7 +1225,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault(2, (x, threshold) => x > threshold, 99).ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithNullPredicate_ThrowsArgumentNullException()
     {
         Should.Throw<ArgumentNullException>(() =>
@@ -1236,7 +1237,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithReferenceType_EmptyBuilder_ReturnsNull()
     {
         using RefArrayBuilder<string> builder = new(4);
@@ -1244,7 +1245,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault().ShouldBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void FirstOrDefault_WithReferenceType_WithElements_ReturnsFirstElement()
     {
         using RefArrayBuilder<string> builder = new(4);
@@ -1253,7 +1254,7 @@ public class RefArrayBuilder_Tests
         builder.FirstOrDefault().ShouldBe("hello");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Last_EmptyBuilder_ThrowsInvalidOperationException()
     {
         Should.Throw<InvalidOperationException>(() =>
@@ -1264,7 +1265,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Last_WithElements_ReturnsLastElement()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1273,7 +1274,7 @@ public class RefArrayBuilder_Tests
         builder.Last().ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Last_SingleElement_ReturnsThatElement()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1282,7 +1283,7 @@ public class RefArrayBuilder_Tests
         builder.Last().ShouldBe(42);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Last_WithPredicate_NoMatch_ThrowsInvalidOperationException()
     {
         Should.Throw<InvalidOperationException>(() =>
@@ -1294,7 +1295,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Last_WithPredicate_HasMatch_ReturnsLastMatch()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1303,7 +1304,7 @@ public class RefArrayBuilder_Tests
         builder.Last(x => x < 4).ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Last_WithPredicate_EmptyBuilder_ThrowsInvalidOperationException()
     {
         Should.Throw<InvalidOperationException>(() =>
@@ -1314,7 +1315,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Last_WithPredicateAndArg_NoMatch_ThrowsInvalidOperationException()
     {
         Should.Throw<InvalidOperationException>(() =>
@@ -1326,7 +1327,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Last_WithPredicateAndArg_HasMatch_ReturnsLastMatch()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1335,7 +1336,7 @@ public class RefArrayBuilder_Tests
         builder.Last(3, (x, threshold) => x < threshold).ShouldBe(2);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Last_WithNullPredicate_ThrowsArgumentNullException()
     {
         Should.Throw<ArgumentNullException>(() =>
@@ -1347,7 +1348,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void Last_WithPredicateAndArg_NullPredicate_ThrowsArgumentNullException()
     {
         Should.Throw<ArgumentNullException>(() =>
@@ -1359,7 +1360,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_EmptyBuilder_ReturnsDefault()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1367,7 +1368,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault().ShouldBe(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithElements_ReturnsLastElement()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1376,7 +1377,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault().ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithDefaultValue_EmptyBuilder_ReturnsDefaultValue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1384,7 +1385,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault(99).ShouldBe(99);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithDefaultValue_WithElements_ReturnsLastElement()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1393,7 +1394,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault(99).ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithPredicate_NoMatch_ReturnsDefault()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1402,7 +1403,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault(x => x > 5).ShouldBe(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithPredicate_HasMatch_ReturnsLastMatch()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1411,7 +1412,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault(x => x < 4).ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithPredicateAndDefaultValue_NoMatch_ReturnsDefaultValue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1420,7 +1421,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault(x => x > 5, 99).ShouldBe(99);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithPredicateAndDefaultValue_HasMatch_ReturnsLastMatch()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1429,7 +1430,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault(x => x < 4, 99).ShouldBe(3);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithPredicateAndArg_NoMatch_ReturnsDefault()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1438,7 +1439,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault(5, (x, threshold) => x > threshold).ShouldBe(0);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithPredicateAndArg_HasMatch_ReturnsLastMatch()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1447,7 +1448,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault(3, (x, threshold) => x < threshold).ShouldBe(2);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithPredicateArgAndDefaultValue_NoMatch_ReturnsDefaultValue()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1456,7 +1457,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault(5, (x, threshold) => x > threshold, 99).ShouldBe(99);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithPredicateArgAndDefaultValue_HasMatch_ReturnsLastMatch()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1465,7 +1466,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault(3, (x, threshold) => x < threshold, 99).ShouldBe(2);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithNullPredicate_ThrowsArgumentNullException()
     {
         Should.Throw<ArgumentNullException>(() =>
@@ -1477,7 +1478,7 @@ public class RefArrayBuilder_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithReferenceType_EmptyBuilder_ReturnsNull()
     {
         using RefArrayBuilder<string> builder = new(4);
@@ -1485,7 +1486,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault().ShouldBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void LastOrDefault_WithReferenceType_WithElements_ReturnsLastElement()
     {
         using RefArrayBuilder<string> builder = new(4);
@@ -1494,7 +1495,7 @@ public class RefArrayBuilder_Tests
         builder.LastOrDefault().ShouldBe("world");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void AsRef_ModificationsViaRef_AreReflectedInOriginalBuilder()
     {
         using RefArrayBuilder<int> builder = new(stackalloc int[4]);
@@ -1510,7 +1511,7 @@ public class RefArrayBuilder_Tests
         builder[2].ShouldBe(30);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void AsRef_AllowsPassingUsingDeclaredBuilderToRefMethod()
     {
         using RefArrayBuilder<int> builder = new(4);
@@ -1525,7 +1526,7 @@ public class RefArrayBuilder_Tests
         builder[4].ShouldBe(5);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void AsRef_AllowsGrowthThroughRef()
     {
         using RefArrayBuilder<int> builder = new(stackalloc int[2]);

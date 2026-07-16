@@ -7,12 +7,12 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class ConfigureableForwardingLogger_Tests
     {
         private readonly BuildFinishedEventArgs _buildFinished = new BuildFinishedEventArgs("Message", "Keyword", true);
@@ -56,13 +56,13 @@ namespace Microsoft.Build.UnitTests
             _targetFinished.BuildEventContext = context;
         }
 
-        [InlineData(null)]
-        [InlineData(LoggerVerbosity.Quiet)]
-        [InlineData(LoggerVerbosity.Minimal)]
-        [InlineData(LoggerVerbosity.Normal)]
-        [InlineData(LoggerVerbosity.Detailed)]
-        [InlineData(LoggerVerbosity.Diagnostic)]
-        [Theory]
+        [DataRow(null)]
+        [DataRow(LoggerVerbosity.Quiet)]
+        [DataRow(LoggerVerbosity.Minimal)]
+        [DataRow(LoggerVerbosity.Normal)]
+        [DataRow(LoggerVerbosity.Detailed)]
+        [DataRow(LoggerVerbosity.Diagnostic)]
+        [MSBuildTestMethod]
         public void ForwardingLoggingEventsBasedOnVerbosity(LoggerVerbosity? loggerVerbosity)
         {
             EventSourceSink source = new EventSourceSink();
@@ -168,7 +168,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ForwardingLoggingPerformanceSummary()
         {
             EventSourceSink source = new EventSourceSink();
@@ -199,7 +199,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ForwardingLoggingNoSummary()
         {
             EventSourceSink source = new EventSourceSink();
@@ -230,7 +230,7 @@ namespace Microsoft.Build.UnitTests
             });
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ForwardingLoggingShowCommandLine()
         {
             EventSourceSink source = new EventSourceSink();

@@ -16,7 +16,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Xunit;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 
 #nullable disable
@@ -27,6 +26,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// Test for the TargetEntry class used by the TargetBuilder.  This class does most of the
     /// actual work to build a target.
     /// </summary>
+    [TestClass]
     public class TargetEntry_Tests : ITargetBuilderCallback, IDisposable
     {
         /// <summary>
@@ -39,7 +39,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private int _nodeRequestId;
 
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
         /// <summary>
         /// Creates a stub TaskEnvironment for testing that uses the current process environment.
@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Called prior to each test.
         /// </summary>
-        public TargetEntry_Tests(ITestOutputHelper output)
+        public TargetEntry_Tests(TestContext output)
         {
             _output = output;
             _nodeRequestId = 1;
@@ -81,10 +81,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests a constructor with a null target.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructorNullTarget()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
@@ -96,10 +96,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests a constructor with a null lookup.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructorNullLookup()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
@@ -110,10 +110,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests a constructor with a null host.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructorNullHost()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string>(), "foo", Array.Empty<string>(), null), "2.0");
@@ -126,85 +126,85 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests a valid constructor call.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructorValid()
         {
             ProjectInstance project = CreateTestProject(true /* Returns enabled */);
             TargetEntry entry = CreateStandardTargetEntry(project, "Empty");
-            Assert.Equal(TargetEntryState.Dependencies, entry.State);
+            Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
         }
 
         /// <summary>
         /// Tests incorrect invocation of ExecuteTarget
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestInvalidState_Execution()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.ThrowsExactly<InternalErrorException>(() =>
             {
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
                 TargetEntry entry = CreateStandardTargetEntry(project, "Empty");
-                Assert.Equal(TargetEntryState.Dependencies, entry.State);
+                Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
                 ExecuteEntry(project, entry);
             });
         }
         /// <summary>
         /// Tests incorrect invocation of GatherResults.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestInvalidState_Completed()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.ThrowsExactly<InternalErrorException>(() =>
             {
                 ProjectInstance project = CreateTestProject(true /* Returns enabled */);
                 TargetEntry entry = CreateStandardTargetEntry(project, "Empty");
-                Assert.Equal(TargetEntryState.Dependencies, entry.State);
+                Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
                 entry.GatherResults();
             });
         }
         /// <summary>
         /// Verifies that the dependencies specified for a target are returned by the GetDependencies call.
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void TestDependencies(bool returnsEnabledForThisProject)
         {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
                 TargetEntry entry = CreateStandardTargetEntry(project, "Empty");
 
-                Assert.Equal(TargetEntryState.Dependencies, entry.State);
+                Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
-                Assert.Equal(TargetEntryState.Execution, entry.State);
-                Assert.Empty(deps);
+                Assert.AreEqual(TargetEntryState.Execution, entry.State);
+                Assert.IsEmpty(deps);
 
                 entry = CreateStandardTargetEntry(project, "Baz");
-                Assert.Equal(TargetEntryState.Dependencies, entry.State);
+                Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
-                Assert.Equal(TargetEntryState.Execution, entry.State);
-                Assert.Single(deps);
+                Assert.AreEqual(TargetEntryState.Execution, entry.State);
+                Assert.ContainsSingle(deps);
                 IEnumerator<TargetSpecification> depsEnum = deps.GetEnumerator();
                 depsEnum.MoveNext();
-                Assert.Equal("Bar", depsEnum.Current.TargetName);
+                Assert.AreEqual("Bar", depsEnum.Current.TargetName);
 
                 entry = CreateStandardTargetEntry(project, "Baz2");
-                Assert.Equal(TargetEntryState.Dependencies, entry.State);
+                Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
-                Assert.Equal(TargetEntryState.Execution, entry.State);
-                Assert.Equal(2, deps.Count);
+                Assert.AreEqual(TargetEntryState.Execution, entry.State);
+                Assert.AreEqual(2, deps.Count);
                 depsEnum = deps.GetEnumerator();
                 depsEnum.MoveNext();
-                Assert.Equal("Bar", depsEnum.Current.TargetName);
+                Assert.AreEqual("Bar", depsEnum.Current.TargetName);
                 depsEnum.MoveNext();
-                Assert.Equal("Foo", depsEnum.Current.TargetName);
+                Assert.AreEqual("Foo", depsEnum.Current.TargetName);
         }
 
         /// <summary>
         /// Tests normal target execution and verifies the tasks expected to be executed are.
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void TestExecution(bool returnsEnabledForThisProject)
         {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
@@ -212,41 +212,41 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 taskBuilder.Reset();
                 TargetEntry entry = CreateStandardTargetEntry(project, "Empty");
-                Assert.Equal(TargetEntryState.Dependencies, entry.State);
+                Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
-                Assert.Equal(TargetEntryState.Execution, entry.State);
+                Assert.AreEqual(TargetEntryState.Execution, entry.State);
                 ExecuteEntry(project, entry);
-                Assert.Empty(taskBuilder.ExecutedTasks);
+                Assert.IsEmpty(taskBuilder.ExecutedTasks);
 
                 taskBuilder.Reset();
                 entry = CreateStandardTargetEntry(project, "Baz");
-                Assert.Equal(TargetEntryState.Dependencies, entry.State);
+                Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
-                Assert.Equal(TargetEntryState.Execution, entry.State);
+                Assert.AreEqual(TargetEntryState.Execution, entry.State);
                 ExecuteEntry(project, entry);
-                Assert.Equal(2, taskBuilder.ExecutedTasks.Count);
-                Assert.Equal("BazTask1", taskBuilder.ExecutedTasks[0].Name);
-                Assert.Equal("BazTask2", taskBuilder.ExecutedTasks[1].Name);
+                Assert.AreEqual(2, taskBuilder.ExecutedTasks.Count);
+                Assert.AreEqual("BazTask1", taskBuilder.ExecutedTasks[0].Name);
+                Assert.AreEqual("BazTask2", taskBuilder.ExecutedTasks[1].Name);
 
                 taskBuilder.Reset();
                 entry = CreateStandardTargetEntry(project, "Baz2");
-                Assert.Equal(TargetEntryState.Dependencies, entry.State);
+                Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
-                Assert.Equal(TargetEntryState.Execution, entry.State);
+                Assert.AreEqual(TargetEntryState.Execution, entry.State);
                 ExecuteEntry(project, entry);
-                Assert.Equal(3, taskBuilder.ExecutedTasks.Count);
-                Assert.Equal("Baz2Task1", taskBuilder.ExecutedTasks[0].Name);
-                Assert.Equal("Baz2Task2", taskBuilder.ExecutedTasks[1].Name);
-                Assert.Equal("Baz2Task3", taskBuilder.ExecutedTasks[2].Name);
+                Assert.AreEqual(3, taskBuilder.ExecutedTasks.Count);
+                Assert.AreEqual("Baz2Task1", taskBuilder.ExecutedTasks[0].Name);
+                Assert.AreEqual("Baz2Task2", taskBuilder.ExecutedTasks[1].Name);
+                Assert.AreEqual("Baz2Task3", taskBuilder.ExecutedTasks[2].Name);
         }
 
         /// <summary>
         /// Executes various cases where tasks cause an error.  Verifies that the expected tasks
         /// executed.
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void TestExecutionWithErrors(bool returnsEnabledForThisProject)
         {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
@@ -254,64 +254,64 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 taskBuilder.Reset();
                 TargetEntry entry = CreateStandardTargetEntry(project, "Error");
-                Assert.Equal(TargetEntryState.Dependencies, entry.State);
+                Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
-                Assert.Equal(TargetEntryState.Execution, entry.State);
+                Assert.AreEqual(TargetEntryState.Execution, entry.State);
                 taskBuilder.FailTaskNumber = 1;
                 ExecuteEntry(project, entry);
-                Assert.Equal(3, taskBuilder.ExecutedTasks.Count);
-                Assert.Equal("ErrorTask1", taskBuilder.ExecutedTasks[0].Name);
-                Assert.Equal("ErrorTask2", taskBuilder.ExecutedTasks[1].Name);
-                Assert.Equal("ErrorTask3", taskBuilder.ExecutedTasks[2].Name);
-                Assert.Equal(TargetEntryState.Completed, entry.State);
+                Assert.AreEqual(3, taskBuilder.ExecutedTasks.Count);
+                Assert.AreEqual("ErrorTask1", taskBuilder.ExecutedTasks[0].Name);
+                Assert.AreEqual("ErrorTask2", taskBuilder.ExecutedTasks[1].Name);
+                Assert.AreEqual("ErrorTask3", taskBuilder.ExecutedTasks[2].Name);
+                Assert.AreEqual(TargetEntryState.Completed, entry.State);
 
                 taskBuilder.Reset();
                 entry = CreateStandardTargetEntry(project, "Error");
-                Assert.Equal(TargetEntryState.Dependencies, entry.State);
+                Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
-                Assert.Equal(TargetEntryState.Execution, entry.State);
+                Assert.AreEqual(TargetEntryState.Execution, entry.State);
                 taskBuilder.FailTaskNumber = 2;
                 ExecuteEntry(project, entry);
-                Assert.Equal(2, taskBuilder.ExecutedTasks.Count);
-                Assert.Equal("ErrorTask1", taskBuilder.ExecutedTasks[0].Name);
-                Assert.Equal("ErrorTask2", taskBuilder.ExecutedTasks[1].Name);
-                Assert.Equal(TargetEntryState.ErrorExecution, entry.State);
-                Assert.Equal(2, entry.GetErrorTargets(GetProjectLoggingContext(entry.RequestEntry)).Count);
+                Assert.AreEqual(2, taskBuilder.ExecutedTasks.Count);
+                Assert.AreEqual("ErrorTask1", taskBuilder.ExecutedTasks[0].Name);
+                Assert.AreEqual("ErrorTask2", taskBuilder.ExecutedTasks[1].Name);
+                Assert.AreEqual(TargetEntryState.ErrorExecution, entry.State);
+                Assert.AreEqual(2, entry.GetErrorTargets(GetProjectLoggingContext(entry.RequestEntry)).Count);
 
                 taskBuilder.Reset();
                 entry = CreateStandardTargetEntry(project, "Error");
-                Assert.Equal(TargetEntryState.Dependencies, entry.State);
+                Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
-                Assert.Equal(TargetEntryState.Execution, entry.State);
+                Assert.AreEqual(TargetEntryState.Execution, entry.State);
                 taskBuilder.FailTaskNumber = 3;
                 ExecuteEntry(project, entry);
-                Assert.Equal(3, taskBuilder.ExecutedTasks.Count);
-                Assert.Equal("ErrorTask1", taskBuilder.ExecutedTasks[0].Name);
-                Assert.Equal("ErrorTask2", taskBuilder.ExecutedTasks[1].Name);
-                Assert.Equal("ErrorTask3", taskBuilder.ExecutedTasks[2].Name);
-                Assert.Equal(TargetEntryState.ErrorExecution, entry.State);
-                Assert.Equal(2, entry.GetErrorTargets(GetProjectLoggingContext(entry.RequestEntry)).Count);
+                Assert.AreEqual(3, taskBuilder.ExecutedTasks.Count);
+                Assert.AreEqual("ErrorTask1", taskBuilder.ExecutedTasks[0].Name);
+                Assert.AreEqual("ErrorTask2", taskBuilder.ExecutedTasks[1].Name);
+                Assert.AreEqual("ErrorTask3", taskBuilder.ExecutedTasks[2].Name);
+                Assert.AreEqual(TargetEntryState.ErrorExecution, entry.State);
+                Assert.AreEqual(2, entry.GetErrorTargets(GetProjectLoggingContext(entry.RequestEntry)).Count);
 
                 taskBuilder.Reset();
                 entry = CreateStandardTargetEntry(project, "Error");
-                Assert.Equal(TargetEntryState.Dependencies, entry.State);
+                Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
-                Assert.Equal(TargetEntryState.Execution, entry.State);
+                Assert.AreEqual(TargetEntryState.Execution, entry.State);
                 ExecuteEntry(project, entry);
-                Assert.Equal(3, taskBuilder.ExecutedTasks.Count);
-                Assert.Equal("ErrorTask1", taskBuilder.ExecutedTasks[0].Name);
-                Assert.Equal("ErrorTask2", taskBuilder.ExecutedTasks[1].Name);
-                Assert.Equal("ErrorTask3", taskBuilder.ExecutedTasks[2].Name);
-                Assert.Equal(TargetEntryState.Completed, entry.State);
+                Assert.AreEqual(3, taskBuilder.ExecutedTasks.Count);
+                Assert.AreEqual("ErrorTask1", taskBuilder.ExecutedTasks[0].Name);
+                Assert.AreEqual("ErrorTask2", taskBuilder.ExecutedTasks[1].Name);
+                Assert.AreEqual("ErrorTask3", taskBuilder.ExecutedTasks[2].Name);
+                Assert.AreEqual(TargetEntryState.Completed, entry.State);
         }
 
         /// <summary>
         /// Tests that the dependencies returned can also be built and that their entries in the lookup
         /// are appropriately aggregated into the parent target entry.
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void TestBuildDependencies(bool returnsEnabledForThisProject)
         {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
@@ -329,18 +329,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
 
                 ExecuteEntry(project, entry);
-                Assert.Equal(TargetEntryState.Completed, entry.State);
-                Assert.Equal(2, entry.Lookup.GetItems("Compile").Count);
-                Assert.Single(entry.Lookup.GetItems("FooTask1_Item"));
-                Assert.Single(entry.Lookup.GetItems("BarTask1_Item"));
+                Assert.AreEqual(TargetEntryState.Completed, entry.State);
+                Assert.AreEqual(2, entry.Lookup.GetItems("Compile").Count);
+                Assert.ContainsSingle(entry.Lookup.GetItems("FooTask1_Item"));
+                Assert.ContainsSingle(entry.Lookup.GetItems("BarTask1_Item"));
         }
 
         /// <summary>
         /// Tests a variety of situations returning various results
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void TestGatherResults(bool returnsEnabledForThisProject)
         {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
@@ -351,102 +351,102 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 TargetEntry entry = CreateStandardTargetEntry(project, "Empty");
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 ExecuteEntry(project, entry);
-                Assert.Equal(TargetEntryState.Completed, entry.State);
+                Assert.AreEqual(TargetEntryState.Completed, entry.State);
                 TargetResult results = entry.GatherResults();
-                Assert.Equal(2, entry.Lookup.GetItems("Compile").Count);
-                Assert.Empty(results.Items);
-                Assert.Equal(TargetResultCode.Success, results.ResultCode);
+                Assert.AreEqual(2, entry.Lookup.GetItems("Compile").Count);
+                Assert.IsEmpty(results.Items);
+                Assert.AreEqual(TargetResultCode.Success, results.ResultCode);
 
                 // Foo produces one item of its own and has an output
                 taskBuilder.Reset();
                 entry = CreateStandardTargetEntry(project, "Foo");
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 ExecuteEntry(project, entry);
-                Assert.Equal(TargetEntryState.Completed, entry.State);
+                Assert.AreEqual(TargetEntryState.Completed, entry.State);
                 results = entry.GatherResults();
-                Assert.Equal(2, entry.Lookup.GetItems("Compile").Count);
-                Assert.Single(entry.Lookup.GetItems("FooTask1_Item"));
+                Assert.AreEqual(2, entry.Lookup.GetItems("Compile").Count);
+                Assert.ContainsSingle(entry.Lookup.GetItems("FooTask1_Item"));
 
                 if (returnsEnabledForThisProject)
                 {
                     // If returns are enabled, since this is a target with "Outputs", they won't
                     // be returned.
-                    Assert.Empty(results.Items);
+                    Assert.IsEmpty(results.Items);
                 }
                 else
                 {
-                    Assert.Single(results.Items);
-                    Assert.Equal("foo.o", results.Items[0].ItemSpec);
+                    Assert.ContainsSingle(results.Items);
+                    Assert.AreEqual("foo.o", results.Items[0].ItemSpec);
                 }
 
-                Assert.Equal(TargetResultCode.Success, results.ResultCode);
+                Assert.AreEqual(TargetResultCode.Success, results.ResultCode);
 
                 // Skip produces outputs but is up to date, so should record success
                 taskBuilder.Reset();
                 entry = CreateStandardTargetEntry(project, "Skip");
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 ExecuteEntry(project, entry);
-                Assert.Equal(TargetEntryState.Completed, entry.State);
+                Assert.AreEqual(TargetEntryState.Completed, entry.State);
                 results = entry.GatherResults();
 
                 if (returnsEnabledForThisProject)
                 {
-                    Assert.Empty(results.Items);
+                    Assert.IsEmpty(results.Items);
                 }
                 else
                 {
-                    Assert.Single(results.Items);
-                    Assert.Equal("testProject.proj", results.Items[0].ItemSpec);
+                    Assert.ContainsSingle(results.Items);
+                    Assert.AreEqual("testProject.proj", results.Items[0].ItemSpec);
                 }
 
-                Assert.Equal(TargetResultCode.Success, results.ResultCode);
+                Assert.AreEqual(TargetResultCode.Success, results.ResultCode);
 
                 // SkipCondition is skipped due to condition.
                 taskBuilder.Reset();
                 entry = CreateStandardTargetEntry(project, "SkipCondition");
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
-                Assert.Equal(TargetEntryState.Completed, entry.State);
+                Assert.AreEqual(TargetEntryState.Completed, entry.State);
                 results = entry.GatherResults();
-                Assert.Equal(TargetResultCode.Skipped, results.ResultCode);
+                Assert.AreEqual(TargetResultCode.Skipped, results.ResultCode);
 
                 // DepSkip produces no outputs and calls Empty and Skip.  The result should be success
                 taskBuilder.Reset();
                 entry = CreateStandardTargetEntry(project, "DepSkip");
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 ExecuteEntry(project, entry);
-                Assert.Equal(TargetEntryState.Completed, entry.State);
+                Assert.AreEqual(TargetEntryState.Completed, entry.State);
                 results = entry.GatherResults();
-                Assert.Equal(TargetResultCode.Success, results.ResultCode);
+                Assert.AreEqual(TargetResultCode.Success, results.ResultCode);
 
                 // DepSkip2 calls Skip.  The result should be success because both DepSkip and Skip are up-to-date.
                 taskBuilder.Reset();
                 entry = CreateStandardTargetEntry(project, "DepSkip2");
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 ExecuteEntry(project, entry);
-                Assert.Equal(TargetEntryState.Completed, entry.State);
+                Assert.AreEqual(TargetEntryState.Completed, entry.State);
                 results = entry.GatherResults();
-                Assert.Equal(TargetResultCode.Success, results.ResultCode);
+                Assert.AreEqual(TargetResultCode.Success, results.ResultCode);
 
                 // Error target should produce error results
                 taskBuilder.Reset();
                 entry = CreateStandardTargetEntry(project, "Error");
-                Assert.Equal(TargetEntryState.Dependencies, entry.State);
+                Assert.AreEqual(TargetEntryState.Dependencies, entry.State);
                 deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
-                Assert.Equal(TargetEntryState.Execution, entry.State);
+                Assert.AreEqual(TargetEntryState.Execution, entry.State);
                 taskBuilder.FailTaskNumber = 2;
                 ExecuteEntry(project, entry);
-                Assert.Equal(TargetEntryState.ErrorExecution, entry.State);
+                Assert.AreEqual(TargetEntryState.ErrorExecution, entry.State);
                 entry.GetErrorTargets(GetProjectLoggingContext(entry.RequestEntry));
                 results = entry.GatherResults();
-                Assert.Equal(TargetResultCode.Failure, results.ResultCode);
+                Assert.AreEqual(TargetResultCode.Failure, results.ResultCode);
         }
 
         /// <summary>
         /// Tests that multiple outputs are allowed
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void TestMultipleOutputs(bool returnsEnabledForThisProject)
         {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
@@ -461,18 +461,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     // If returns are enabled, since this is a target with "Outputs", they won't
                     // be returned.
-                    Assert.Empty(results.Items);
+                    Assert.IsEmpty(results.Items);
                 }
                 else
                 {
-                    Assert.Equal(2, results.Items.Length);
+                    Assert.AreEqual(2, results.Items.Length);
                 }
         }
 
         /// <summary>
         /// Tests that multiple return values are still passed through, even when there is no Outputs specified.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestMultipleReturnsNoOutputs()
         {
             ProjectInstance project = CreateTestProject(true /* returns are enabled */);
@@ -483,14 +483,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteEntry(project, entry);
             TargetResult results = entry.GatherResults();
 
-            Assert.Equal(3, results.Items.Length);
+            Assert.AreEqual(3, results.Items.Length);
         }
 
         /// <summary>
         /// Tests that multiple return values are still passed through, and verifies that when both Outputs and Returns
         /// are specified, Returns is what controls the return value of the target.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestMultipleReturnsWithOutputs()
         {
             ProjectInstance project = CreateTestProject(true /* returns are enabled */);
@@ -501,15 +501,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ExecuteEntry(project, entry);
             TargetResult results = entry.GatherResults();
 
-            Assert.Equal(3, results.Items.Length);
+            Assert.AreEqual(3, results.Items.Length);
         }
 
         /// <summary>
         /// Tests that duplicate outputs are allowed
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void TestDuplicateOutputs(bool returnsEnabledForThisProject)
         {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
@@ -519,15 +519,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 ExecuteEntry(project, entry);
                 TargetResult results = entry.GatherResults();
-                Assert.Single(results.Items);
+                Assert.ContainsSingle(results.Items);
         }
 
         /// <summary>
         /// Tests that duplicate outputs are not trimmed under the false trim condition
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void TestKeepDuplicateOutputsTrue(bool returnsEnabledForThisProject)
         {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
@@ -537,15 +537,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 ExecuteEntry(project, entry);
                 TargetResult results = entry.GatherResults();
-                Assert.Equal(2, results.Items.Length);
+                Assert.AreEqual(2, results.Items.Length);
         }
 
         /// <summary>
         /// Tests that duplicate outputs are trimmed under the false keep condition
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void TestKeepDuplicateOutputsFalse(bool returnsEnabledForThisProject)
         {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
@@ -555,15 +555,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 ExecuteEntry(project, entry);
                 TargetResult results = entry.GatherResults();
-                Assert.Single(results.Items);
+                Assert.ContainsSingle(results.Items);
         }
 
         /// <summary>
         /// Tests that duplicate outputs are trimmed if they have the same metadata
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void TestKeepDuplicateOutputsSameMetadata(bool returnsEnabledForThisProject)
         {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
@@ -573,15 +573,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 ExecuteEntry(project, entry);
                 TargetResult results = entry.GatherResults();
-                Assert.Single(results.Items);
+                Assert.ContainsSingle(results.Items);
         }
 
         /// <summary>
         /// Tests that duplicate outputs are not trimmed if they have different metadata
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void TestKeepDuplicateOutputsDiffMetadata(bool returnsEnabledForThisProject)
         {
                 ProjectInstance project = CreateTestProject(returnsEnabledForThisProject);
@@ -591,15 +591,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 ICollection<TargetSpecification> deps = entry.GetDependencies(GetProjectLoggingContext(entry.RequestEntry));
                 ExecuteEntry(project, entry);
                 TargetResult results = entry.GatherResults();
-                Assert.Equal(4, results.Items.Length);
+                Assert.AreEqual(4, results.Items.Length);
         }
 
         /// <summary>
         /// Tests that metadata references in target outputs are correctly expanded
         /// </summary>
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
+        [MSBuildTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
         public void TestMetadataReferenceInTargetOutputs(bool returnsEnabledForThisProject)
         {
                 string content = @"
@@ -635,11 +635,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Tests that we get the target outputs correctly.
         /// </summary>
-        [Theory]
-        [InlineData(false, false)]
-        [InlineData(false, true)]
-        [InlineData(true, false)]
-        [InlineData(true, true)]
+        [MSBuildTestMethod]
+        [DataRow(false, false)]
+        [DataRow(false, true)]
+        [DataRow(true, false)]
+        [DataRow(true, true)]
         public void TestTargetOutputsOnFinishedEvent(bool returnsEnabledForThisProject, bool allowTargetOutputsLogging)
         {
             using (var env = TestEnvironment.Create(_output))
@@ -665,56 +665,56 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 var logger = new MockLogger(_output);
                 Helpers.BuildProjectWithNewOMExpectSuccess(content, enableTargetOutputLogging: allowTargetOutputsLogging, logger: logger);
 
-                Assert.Equal(3, logger.TargetFinishedEvents.Count);
+                Assert.AreEqual(3, logger.TargetFinishedEvents.Count);
 
                 TargetFinishedEventArgs targeta = logger.TargetFinishedEvents[2];
                 TargetFinishedEventArgs targetb = logger.TargetFinishedEvents[0];
                 TargetFinishedEventArgs targetc = logger.TargetFinishedEvents[1];
 
-                Assert.NotNull(targeta);
-                Assert.NotNull(targetb);
-                Assert.NotNull(targetc);
+                Assert.IsNotNull(targeta);
+                Assert.IsNotNull(targetb);
+                Assert.IsNotNull(targetc);
 
-                Assert.Equal("a", targeta.TargetName);
-                Assert.Equal("b", targetb.TargetName);
-                Assert.Equal("c", targetc.TargetName);
+                Assert.AreEqual("a", targeta.TargetName);
+                Assert.AreEqual("b", targetb.TargetName);
+                Assert.AreEqual("c", targetc.TargetName);
 
                 IEnumerable targetOutputsA = targeta.TargetOutputs;
                 IEnumerable targetOutputsB = targetb.TargetOutputs;
                 IEnumerable targetOutputsC = targetc.TargetOutputs;
 
-                Assert.Null(targetOutputsA);
+                Assert.IsNull(targetOutputsA);
                 if (allowTargetOutputsLogging)
                 {
                     if (returnsEnabledForThisProject)
                     {
                         // b should have stuff, c should not have stuff, because only B has Returns
-                        Assert.NotNull(targetOutputsB);
+                        Assert.IsNotNull(targetOutputsB);
                         List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem> ];
-                        Assert.Single(outputListB);
-                        Assert.Equal("item1", outputListB[0].ItemSpec);
+                        Assert.ContainsSingle(outputListB);
+                        Assert.AreEqual("item1", outputListB[0].ItemSpec);
 
-                        Assert.Null(targetOutputsC);
+                        Assert.IsNull(targetOutputsC);
                     }
                     else
                     {
                         // b and c should have stuff because everything has Outputs
-                        Assert.NotNull(targetOutputsB);
-                        Assert.NotNull(targetOutputsC);
+                        Assert.IsNotNull(targetOutputsB);
+                        Assert.IsNotNull(targetOutputsC);
 
                         List<ITaskItem> outputListB = [.. targetOutputsB as IEnumerable<ITaskItem> ];
-                        Assert.Single(outputListB);
-                        Assert.Equal("item1", outputListB[0].ItemSpec);
+                        Assert.ContainsSingle(outputListB);
+                        Assert.AreEqual("item1", outputListB[0].ItemSpec);
 
                         List<ITaskItem> outputListC = [.. targetOutputsC as IEnumerable<ITaskItem> ];
-                        Assert.Single(outputListC);
-                        Assert.Equal("item2", outputListC[0].ItemSpec);
+                        Assert.ContainsSingle(outputListC);
+                        Assert.AreEqual("item2", outputListC[0].ItemSpec);
                     }
                 }
                 else
                 {
-                    Assert.Null(targetOutputsB);
-                    Assert.Null(targetOutputsC);
+                    Assert.IsNull(targetOutputsB);
+                    Assert.IsNull(targetOutputsC);
                 }
             }
         }
@@ -722,7 +722,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// <summary>
         /// Make sure that if an after target fails that the build result is reported as failed.
         /// </summary>
-        [Fact(Skip = "https://github.com/dotnet/msbuild/issues/515")]
+        [MSBuildTestMethod]
+        [Ignore("https://github.com/dotnet/msbuild/issues/515")]
         public void AfterTargetsShouldReportFailedBuild()
         {
             // Since we're creating our own BuildManager, we need to make sure that the default
@@ -776,10 +777,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildResult result = manager.Build(parameters, data);
 
                 // Make sure the overall result is failed
-                Assert.Equal(BuildResultCode.Failure, result.OverallResult);
+                Assert.AreEqual(BuildResultCode.Failure, result.OverallResult);
 
                 // Expect the build target to pass
-                Assert.Equal(TargetResultCode.Success, result.ResultsByTarget["Build"].ResultCode);
+                Assert.AreEqual(TargetResultCode.Success, result.ResultsByTarget["Build"].ResultCode);
             }
             finally
             {
@@ -798,7 +799,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// Tests that with an invalid target specification (inputs but no outputs) we
         /// still raise the TargetFinished event.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestTargetFinishedRaisedOnInvalidTarget()
         {
             string content = @"
@@ -812,7 +813,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Only log critical event is false by default
             MockLogger log = Helpers.BuildProjectWithNewOMExpectFailure(content, allowTaskCrash: true);
 
-            Assert.Single(log.TargetFinishedEvents);
+            Assert.ContainsSingle(log.TargetFinishedEvents);
         }
 
         #region ITargetBuilderCallback Members

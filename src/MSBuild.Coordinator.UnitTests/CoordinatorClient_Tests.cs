@@ -6,11 +6,11 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Coordinator.UnitTests;
 
-public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
+[TestClass]
+public class CoordinatorClient_Tests(TestContext testOutput) : IDisposable
 {
     // Use fake PIDs that won't collide with each other or the real process.
     // The coordinator server only uses PIDs for keying connections and liveness checks.
@@ -35,7 +35,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
         _cts.Dispose();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public Task TryConnect_ReceivesNodeGrant()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
@@ -52,7 +52,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
         return serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public Task TryConnect_GrantCapsToRequestedNodes()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
@@ -69,7 +69,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
         return serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public Task TryConnect_GrantCapsToTotalBudget()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
@@ -86,7 +86,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
         return serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public Task TryConnect_RootGrant_DoesNotMutateProcessEnvironment()
     {
         using TestEnvironment env = TestEnvironment.Create(testOutput);
@@ -108,7 +108,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
         return serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public Task TryConnect_WithInheritedGrantId_JoinsExistingGrant()
     {
         using TestEnvironment env = TestEnvironment.Create(testOutput);
@@ -139,7 +139,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
         return serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TryConnect_NoServer_ReturnsNull()
     {
         // Use a pipe name that no server is listening on.
@@ -155,7 +155,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
         client.ShouldBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task TryConnect_WithInheritedGrantIdAndServerWithoutNestedGrantCapability_RequestsRootGrant()
     {
         using TestEnvironment env = TestEnvironment.Create(testOutput);
@@ -200,7 +200,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public Task TryConnect_CustomSettings_UsesSettingsPipeName()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 16);
@@ -223,7 +223,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
         return serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public async Task Dispose_ReleasesGrant_SecondClientGetsNodes()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 4);
@@ -254,7 +254,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
         await serverTask;
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public Task MultipleClients_SequentialReuse()
     {
         using CoordinatorServer server = CreateServer(totalNodeBudget: 8);

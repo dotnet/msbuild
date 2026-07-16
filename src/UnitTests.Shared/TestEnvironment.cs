@@ -17,7 +17,7 @@ using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
 using TempPaths = System.Collections.Generic.Dictionary<string, string>;
 
@@ -37,7 +37,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private readonly List<TransientTestState> _variants = new List<TransientTestState>();
 
-        public ITestOutputHelper Output { get; }
+        public ITestOutputWriter Output { get; }
 
         private readonly Lazy<TransientTestFolder> _defaultTestDirectory;
 
@@ -61,9 +61,9 @@ namespace Microsoft.Build.UnitTests
         /// <returns>
         /// A configured TestEnvironment instance with the specified settings applied.
         /// </returns>
-        public static TestEnvironment Create(ITestOutputHelper output = null, bool ignoreBuildErrorFiles = false)
+        public static TestEnvironment Create(object output = null, bool ignoreBuildErrorFiles = false)
         {
-            var env = new TestEnvironment(output ?? new DefaultOutput());
+            var env = new TestEnvironment(TestOutputWriter.Create(output) ?? new DefaultOutput());
 
             // In most cases, if MSBuild wrote an MSBuild_*.txt to the temp path something went wrong.
             if (!ignoreBuildErrorFiles)
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests
             return env;
         }
 
-        private TestEnvironment(ITestOutputHelper output)
+        private TestEnvironment(ITestOutputWriter output)
         {
             Output = output;
             _defaultTestDirectory = new Lazy<TransientTestFolder>(() => CreateFolder());
@@ -306,7 +306,7 @@ namespace Microsoft.Build.UnitTests
         {
             var folder = WithTransientTestState(new TransientTestFolder(folderPath, createFolder, subfolder));
 
-            Assert.True(!(createFolder ^ FileSystems.Default.DirectoryExists(folder.Path)));
+            Assert.IsTrue(!(createFolder ^ FileSystems.Default.DirectoryExists(folder.Path)));
 
             return folder;
         }
@@ -337,7 +337,7 @@ namespace Microsoft.Build.UnitTests
             Assumed.NotNull(Output);
             return WithTransientTestState(new TransientPrintLineDebugger(this, OutPutHelperWriter(Output)));
 
-            CommonWriterType OutPutHelperWriter(ITestOutputHelper output)
+            CommonWriterType OutPutHelperWriter(ITestOutputWriter output)
             {
                 return (id, callsite, args) => output.WriteLine(PrintLineDebuggerWriters.SimpleFormat(id, callsite, args));
             }
@@ -394,7 +394,7 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
-        private sealed class DefaultOutput : ITestOutputHelper
+        private sealed class DefaultOutput : ITestOutputWriter
         {
             // Probably unreachable. Don't bother implementing it unless we hit this exception.
             public string Output => throw new InvalidOperationException();
@@ -430,7 +430,7 @@ namespace Microsoft.Build.UnitTests
     /// </summary>
     public abstract class TestInvariant
     {
-        public abstract void AssertInvariant(ITestOutputHelper output);
+        public abstract void AssertInvariant(ITestOutputWriter output);
     }
 
     /// <summary>
@@ -454,15 +454,15 @@ namespace Microsoft.Build.UnitTests
             _originalValue = accessorFunc();
         }
 
-        public override void AssertInvariant(ITestOutputHelper output)
+        public override void AssertInvariant(ITestOutputWriter output)
         {
             var currentValue = _accessorFunc();
 
             // Something like the following might be preferrable, but the assertion method truncates the values leaving us without
             //  useful information.  So use Assert.True instead
-            //  Assert.Equal($"{_name}: {_originalValue}", $"{_name}: {_accessorFunc()}");
+            //  Assert.AreEqual($"{_name}: {_originalValue}", $"{_name}: {_accessorFunc()}");
 
-            Assert.True(currentValue == _originalValue, $"Expected {_name} to be '{_originalValue}', but it was '{currentValue}'");
+            Assert.IsTrue(currentValue == _originalValue, $"Expected {_name} to be '{_originalValue}', but it was '{currentValue}'");
         }
     }
 
@@ -475,7 +475,7 @@ namespace Microsoft.Build.UnitTests
             _initialEnvironment = Environment.GetEnvironmentVariables();
         }
 
-        public override void AssertInvariant(ITestOutputHelper output)
+        public override void AssertInvariant(ITestOutputWriter output)
         {
             var environment = Environment.GetEnvironmentVariables();
 
@@ -570,7 +570,7 @@ namespace Microsoft.Build.UnitTests
             return files.Distinct(StringComparer.InvariantCultureIgnoreCase).ToArray();
         }
 
-        public override void AssertInvariant(ITestOutputHelper output)
+        public override void AssertInvariant(ITestOutputWriter output)
         {
             var newFiles = GetMSBuildLogFiles();
 
@@ -604,7 +604,7 @@ namespace Microsoft.Build.UnitTests
             }
 
             // Assert file count is equal minus any files that were OK
-            Assert.Equal(_originalFiles.Length, newFilesCount);
+            Assert.AreEqual(_originalFiles.Length, newFilesCount);
         }
     }
 
@@ -617,7 +617,7 @@ namespace Microsoft.Build.UnitTests
             _condition = condition;
         }
 
-        public override void AssertInvariant(ITestOutputHelper output)
+        public override void AssertInvariant(ITestOutputWriter output)
         {
             _condition().ShouldBeTrue();
         }
@@ -789,7 +789,7 @@ namespace Microsoft.Build.UnitTests
             {
                 if (_expectedAsOutput)
                 {
-                    Assert.True(FileSystems.Default.FileExists(Path), $"A file expected as an output does not exist: {Path}");
+                    Assert.IsTrue(FileSystems.Default.FileExists(Path), $"A file expected as an output does not exist: {Path}");
                 }
             }
             finally

@@ -9,7 +9,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests.Shared;
-using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 
 #nullable disable
@@ -19,6 +18,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
     /// <summary>
     /// Tests for ProjectItemInstance public members
     /// </summary>
+    [TestClass]
     public class ProjectItemInstance_Tests : IDisposable
     {
         /// <summary>
@@ -69,20 +69,20 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Basic ProjectItemInstance without metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AccessorsWithoutMetadata()
         {
             ProjectItemInstance item = GetItemInstance();
 
-            Assert.Equal("i", item.ItemType);
-            Assert.Equal("i1", item.EvaluatedInclude);
-            Assert.False(item.Metadata.GetEnumerator().MoveNext());
+            Assert.AreEqual("i", item.ItemType);
+            Assert.AreEqual("i1", item.EvaluatedInclude);
+            Assert.IsFalse(item.Metadata.GetEnumerator().MoveNext());
         }
 
         /// <summary>
         /// Basic ProjectItemInstance with metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AccessorsWithMetadata()
         {
             ProjectItemInstance item = GetItemInstance();
@@ -91,16 +91,16 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             item.SetMetadata("m1", "v1");
             item.SetMetadata("m2", "v2");
 
-            Assert.Equal("m1", item.GetMetadata("m1").Name);
-            Assert.Equal("m2", item.GetMetadata("m2").Name);
-            Assert.Equal("v1", item.GetMetadataValue("m1"));
-            Assert.Equal("v2", item.GetMetadataValue("m2"));
+            Assert.AreEqual("m1", item.GetMetadata("m1").Name);
+            Assert.AreEqual("m2", item.GetMetadata("m2").Name);
+            Assert.AreEqual("v1", item.GetMetadataValue("m1"));
+            Assert.AreEqual("v2", item.GetMetadataValue("m2"));
         }
 
         /// <summary>
         /// Basic ProjectItemInstance with metadata added using ImportMetadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AccessorsWithImportedMetadata()
         {
             ProjectItemInstance item = GetItemInstance();
@@ -111,16 +111,16 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 { "m2", "v2" },
             });
 
-            Assert.Equal("m1", item.GetMetadata("m1").Name);
-            Assert.Equal("m2", item.GetMetadata("m2").Name);
-            Assert.Equal("v1", item.GetMetadataValue("m1"));
-            Assert.Equal("v2", item.GetMetadataValue("m2"));
+            Assert.AreEqual("m1", item.GetMetadata("m1").Name);
+            Assert.AreEqual("m2", item.GetMetadata("m2").Name);
+            Assert.AreEqual("v1", item.GetMetadataValue("m1"));
+            Assert.AreEqual("v2", item.GetMetadataValue("m2"));
         }
 
         /// <summary>
         /// ImportMetadata adds and overwrites metadata, does not delete existing metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ImportMetadataAddsAndOverwrites()
         {
             ProjectItemInstance item = GetItemInstance();
@@ -135,23 +135,23 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             });
 
             // m1 was not deleted, m2 was overwritten, m3 was added
-            Assert.Equal("v1", item.GetMetadataValue("m1"));
-            Assert.Equal("v2", item.GetMetadataValue("m2"));
-            Assert.Equal("v3", item.GetMetadataValue("m3"));
+            Assert.AreEqual("v1", item.GetMetadataValue("m1"));
+            Assert.AreEqual("v2", item.GetMetadataValue("m2"));
+            Assert.AreEqual("v3", item.GetMetadataValue("m3"));
         }
 
         /// <summary>
         /// Get metadata not present
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetMissingMetadata()
         {
             ProjectItemInstance item = GetItemInstance();
-            Assert.Null(item.GetMetadata("X"));
-            Assert.Equal(String.Empty, item.GetMetadataValue("X"));
+            Assert.IsNull(item.GetMetadata("X"));
+            Assert.AreEqual(String.Empty, item.GetMetadataValue("X"));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyMetadataToTaskItem()
         {
             ProjectItemInstance fromItem = GetItemInstance();
@@ -163,8 +163,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ((ITaskItem)fromItem).CopyMetadataTo(toItem);
 
-            Assert.Equal("v1", toItem.GetMetadata("m1"));
-            Assert.Equal("v2", toItem.GetMetadata("m2"));
+            Assert.AreEqual("v1", toItem.GetMetadata("m1"));
+            Assert.AreEqual("v2", toItem.GetMetadata("m2"));
         }
 
 #if FEATURE_APPDOMAIN
@@ -173,7 +173,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             public ITaskItem CreateTaskItem() => new Utilities.TaskItem();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CopyMetadataToRemoteTaskItem()
         {
             ProjectItemInstance fromItem = GetItemInstance();
@@ -191,8 +191,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 ((ITaskItem)fromItem).CopyMetadataTo(toItem);
 
-                Assert.Equal("v1", toItem.GetMetadata("m1"));
-                Assert.Equal("v2", toItem.GetMetadata("m2"));
+                Assert.AreEqual("v1", toItem.GetMetadata("m1"));
+                Assert.AreEqual("v2", toItem.GetMetadata("m2"));
             }
             finally
             {
@@ -204,21 +204,21 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set include
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInclude()
         {
             ProjectItemInstance item = GetItemInstance();
             item.EvaluatedInclude = "i1b";
-            Assert.Equal("i1b", item.EvaluatedInclude);
+            Assert.AreEqual("i1b", item.EvaluatedInclude);
         }
 
         /// <summary>
         /// Set include to empty string
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInvalidEmptyInclude()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 ProjectItemInstance item = GetItemInstance();
                 item.EvaluatedInclude = String.Empty;
@@ -227,10 +227,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set include to invalid null value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInvalidNullInclude()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectItemInstance item = GetItemInstance();
                 item.EvaluatedInclude = null;
@@ -239,7 +239,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Create an item with a metadatum that has a null value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CreateItemWithNullMetadataValue()
         {
             Project project = new Project();
@@ -249,50 +249,50 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             metadata.Add("m", null);
 
             ProjectItemInstance item = projectInstance.AddItem("i", "i1", metadata);
-            Assert.Equal(String.Empty, item.GetMetadataValue("m"));
+            Assert.AreEqual(String.Empty, item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Set metadata value
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetMetadata()
         {
             ProjectItemInstance item = GetItemInstance();
             item.SetMetadata("m", "m1");
-            Assert.Equal("m1", item.GetMetadataValue("m"));
+            Assert.AreEqual("m1", item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Set metadata value to empty string
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetMetadataEmptyString()
         {
             ProjectItemInstance item = GetItemInstance();
             item.SetMetadata("m", String.Empty);
-            Assert.Equal(String.Empty, item.GetMetadataValue("m"));
+            Assert.AreEqual(String.Empty, item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Set metadata value to null value -- this is allowed, but
         /// internally converted to the empty string.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetNullMetadataValue()
         {
             ProjectItemInstance item = GetItemInstance();
             item.SetMetadata("m", null);
-            Assert.Equal(String.Empty, item.GetMetadataValue("m"));
+            Assert.AreEqual(String.Empty, item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Set metadata with invalid empty name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInvalidNullMetadataName()
         {
-            Assert.Throws<ArgumentNullException>(() =>
+            Assert.ThrowsExactly<ArgumentNullException>(() =>
             {
                 ProjectItemInstance item = GetItemInstance();
                 item.SetMetadata(null, "m1");
@@ -301,10 +301,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Set metadata with invalid empty name
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SetInvalidEmptyMetadataName()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 ProjectItemInstance item = GetItemInstance();
                 item.SetMetadata(String.Empty, "m1");
@@ -313,7 +313,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cast to ITaskItem
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CastToITaskItem()
         {
             ProjectItemInstance item = GetItemInstance();
@@ -321,12 +321,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ITaskItem taskItem = (ITaskItem)item;
 
-            Assert.Equal(item.EvaluatedInclude, taskItem.ItemSpec);
-            Assert.Equal(1 + BuiltInMetadataCount, taskItem.MetadataCount);
-            Assert.Equal(1 + BuiltInMetadataCount, taskItem.MetadataNames.Count);
-            Assert.Equal("m1", taskItem.GetMetadata("m"));
+            Assert.AreEqual(item.EvaluatedInclude, taskItem.ItemSpec);
+            Assert.AreEqual(1 + BuiltInMetadataCount, taskItem.MetadataCount);
+            Assert.AreEqual(1 + BuiltInMetadataCount, taskItem.MetadataNames.Count);
+            Assert.AreEqual("m1", taskItem.GetMetadata("m"));
             taskItem.SetMetadata("m", "m2");
-            Assert.Equal("m2", item.GetMetadataValue("m"));
+            Assert.AreEqual("m2", item.GetMetadataValue("m"));
         }
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// maintained correctly.  Also creates a new Microsoft.Build.Utilities.TaskItem from the ProjectItemInstance
         /// and verifies that none of the information is lost.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ITaskItem2Operations()
         {
             Project project = new Project();
@@ -345,62 +345,62 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             item.SetMetadata("m;", "m%3b1");
             ITaskItem2 taskItem = (ITaskItem2)item;
 
-            Assert.Equal("esca%20ped%3bitem", taskItem.EvaluatedIncludeEscaped);
-            Assert.Equal("esca ped;item", taskItem.ItemSpec);
+            Assert.AreEqual("esca%20ped%3bitem", taskItem.EvaluatedIncludeEscaped);
+            Assert.AreEqual("esca ped;item", taskItem.ItemSpec);
 
-            Assert.Equal("m;1", taskItem.GetMetadata("m;"));
-            Assert.Equal("m%3b1", taskItem.GetMetadataValueEscaped("m;"));
-            Assert.Equal("m1", taskItem.GetMetadataValueEscaped("m"));
+            Assert.AreEqual("m;1", taskItem.GetMetadata("m;"));
+            Assert.AreEqual("m%3b1", taskItem.GetMetadataValueEscaped("m;"));
+            Assert.AreEqual("m1", taskItem.GetMetadataValueEscaped("m"));
 
-            Assert.Equal("esca%20ped%3bitem", taskItem.EvaluatedIncludeEscaped);
-            Assert.Equal("esca ped;item", taskItem.ItemSpec);
+            Assert.AreEqual("esca%20ped%3bitem", taskItem.EvaluatedIncludeEscaped);
+            Assert.AreEqual("esca ped;item", taskItem.ItemSpec);
 
             ITaskItem2 taskItem2 = new Microsoft.Build.Utilities.TaskItem(taskItem);
 
             taskItem2.SetMetadataValueLiteral("m;", "m;2");
 
-            Assert.Equal("m%3b2", taskItem2.GetMetadataValueEscaped("m;"));
-            Assert.Equal("m;2", taskItem2.GetMetadata("m;"));
+            Assert.AreEqual("m%3b2", taskItem2.GetMetadataValueEscaped("m;"));
+            Assert.AreEqual("m;2", taskItem2.GetMetadata("m;"));
 
             IDictionary<string, string> taskItem2Metadata = (IDictionary<string, string>)taskItem2.CloneCustomMetadata();
-            Assert.Equal(3, taskItem2Metadata.Count);
+            Assert.AreEqual(3, taskItem2Metadata.Count);
 
             foreach (KeyValuePair<string, string> pair in taskItem2Metadata)
             {
                 if (pair.Key.Equals("m"))
                 {
-                    Assert.Equal("m1", pair.Value);
+                    Assert.AreEqual("m1", pair.Value);
                 }
 
                 if (pair.Key.Equals("m;"))
                 {
-                    Assert.Equal("m;2", pair.Value);
+                    Assert.AreEqual("m;2", pair.Value);
                 }
 
                 if (pair.Key.Equals("OriginalItemSpec"))
                 {
-                    Assert.Equal("esca ped;item", pair.Value);
+                    Assert.AreEqual("esca ped;item", pair.Value);
                 }
             }
 
             IDictionary<string, string> taskItem2MetadataEscaped = (IDictionary<string, string>)taskItem2.CloneCustomMetadataEscaped();
-            Assert.Equal(3, taskItem2MetadataEscaped.Count);
+            Assert.AreEqual(3, taskItem2MetadataEscaped.Count);
 
             foreach (KeyValuePair<string, string> pair in taskItem2MetadataEscaped)
             {
                 if (pair.Key.Equals("m"))
                 {
-                    Assert.Equal("m1", pair.Value);
+                    Assert.AreEqual("m1", pair.Value);
                 }
 
                 if (pair.Key.Equals("m;"))
                 {
-                    Assert.Equal("m%3b2", pair.Value);
+                    Assert.AreEqual("m%3b2", pair.Value);
                 }
 
                 if (pair.Key.Equals("OriginalItemSpec"))
                 {
-                    Assert.Equal("esca%20ped%3bitem", pair.Value);
+                    Assert.AreEqual("esca%20ped%3bitem", pair.Value);
                 }
             }
         }
@@ -408,16 +408,16 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Cast to ITaskItem
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CastToITaskItemNoMetadata()
         {
             ProjectItemInstance item = GetItemInstance();
 
             ITaskItem taskItem = (ITaskItem)item;
 
-            Assert.Equal(0 + BuiltInMetadataCount, taskItem.MetadataCount);
-            Assert.Equal(0 + BuiltInMetadataCount, taskItem.MetadataNames.Count);
-            Assert.Equal(String.Empty, taskItem.GetMetadata("m"));
+            Assert.AreEqual(0 + BuiltInMetadataCount, taskItem.MetadataCount);
+            Assert.AreEqual(0 + BuiltInMetadataCount, taskItem.MetadataNames.Count);
+            Assert.AreEqual(String.Empty, taskItem.GetMetadata("m"));
         }
 
         /*
@@ -430,7 +430,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// No metadata, simple case
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void NoMetadata()
         {
             string content = @"
@@ -443,17 +443,17 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectItemInstance item = GetOneItem(content);
 
-            Assert.Equal("i", item.ItemType);
-            Assert.Equal("i1", item.EvaluatedInclude);
-            Assert.False(item.Metadata.GetEnumerator().MoveNext());
-            Assert.Equal(0 + BuiltInMetadataCount, Helpers.MakeList(item.MetadataNames).Count);
-            Assert.Equal(0 + BuiltInMetadataCount, item.MetadataCount);
+            Assert.AreEqual("i", item.ItemType);
+            Assert.AreEqual("i1", item.EvaluatedInclude);
+            Assert.IsFalse(item.Metadata.GetEnumerator().MoveNext());
+            Assert.AreEqual(0 + BuiltInMetadataCount, Helpers.MakeList(item.MetadataNames).Count);
+            Assert.AreEqual(0 + BuiltInMetadataCount, item.MetadataCount);
         }
 
         /// <summary>
         /// Read off metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ReadMetadata()
         {
             string content = @"
@@ -473,14 +473,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             itemMetadata = itemMetadata.OrderBy(pmi => pmi.Name).ToList();
 
-            Assert.Equal(2, itemMetadata.Count);
-            Assert.Equal("m1", itemMetadata[0].Name);
-            Assert.Equal("m2", itemMetadata[1].Name);
-            Assert.Equal("v1", itemMetadata[0].EvaluatedValue);
-            Assert.Equal("v2", itemMetadata[1].EvaluatedValue);
+            Assert.AreEqual(2, itemMetadata.Count);
+            Assert.AreEqual("m1", itemMetadata[0].Name);
+            Assert.AreEqual("m2", itemMetadata[1].Name);
+            Assert.AreEqual("v1", itemMetadata[0].EvaluatedValue);
+            Assert.AreEqual("v2", itemMetadata[1].EvaluatedValue);
 
-            Assert.Equal(itemMetadata[0], item.GetMetadata("m1"));
-            Assert.Equal(itemMetadata[1], item.GetMetadata("m2"));
+            Assert.AreEqual(itemMetadata[0], item.GetMetadata("m1"));
+            Assert.AreEqual(itemMetadata[1], item.GetMetadata("m2"));
         }
 
         /// <summary>
@@ -489,7 +489,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         ///
         /// Verify the Utilities task item gets the expanded metadata from the ItemDefinitionGroup.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InstanceItemToUtilItemIDG()
         {
             string content = @"
@@ -513,17 +513,17 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             Microsoft.Build.Utilities.TaskItem taskItem = new Microsoft.Build.Utilities.TaskItem(item);
 
-            Assert.Equal(";x86;", taskItem.GetMetadata("m0"));
-            Assert.Equal("foo.extension", taskItem.GetMetadata("m1"));
-            Assert.Equal(";foo.extension;", taskItem.GetMetadata("m2"));
-            Assert.Equal("v1", taskItem.GetMetadata("m3"));
-            Assert.Equal(";x86;", taskItem.GetMetadata("m4"));
+            Assert.AreEqual(";x86;", taskItem.GetMetadata("m0"));
+            Assert.AreEqual("foo.extension", taskItem.GetMetadata("m1"));
+            Assert.AreEqual(";foo.extension;", taskItem.GetMetadata("m2"));
+            Assert.AreEqual("v1", taskItem.GetMetadata("m3"));
+            Assert.AreEqual(";x86;", taskItem.GetMetadata("m4"));
         }
 
         /// <summary>
         /// Get metadata values inherited from item definitions
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetMetadataValuesFromDefinition()
         {
             string content = @"
@@ -544,19 +544,19 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 ";
 
             ProjectItemInstance item = GetOneItem(content);
-            Assert.Equal("v0", item.GetMetadataValue("m0"));
-            Assert.Equal("v1b", item.GetMetadataValue("m1"));
-            Assert.Equal("v2", item.GetMetadataValue("m2"));
+            Assert.AreEqual("v0", item.GetMetadataValue("m0"));
+            Assert.AreEqual("v1b", item.GetMetadataValue("m1"));
+            Assert.AreEqual("v2", item.GetMetadataValue("m2"));
 
-            Assert.Equal(3, Helpers.MakeList(item.Metadata).Count);
-            Assert.Equal(3 + BuiltInMetadataCount, Helpers.MakeList(item.MetadataNames).Count);
-            Assert.Equal(3 + BuiltInMetadataCount, item.MetadataCount);
+            Assert.AreEqual(3, Helpers.MakeList(item.Metadata).Count);
+            Assert.AreEqual(3 + BuiltInMetadataCount, Helpers.MakeList(item.MetadataNames).Count);
+            Assert.AreEqual(3 + BuiltInMetadataCount, item.MetadataCount);
         }
 
         /// <summary>
         /// Exclude against an include with item vectors in it
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExcludeWithIncludeVector()
         {
             string content = @"
@@ -576,14 +576,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             IList<ProjectItemInstance> items = GetItems(content);
 
             // Should contain a, b, c, x, z, a, c, u, w
-            Assert.Equal(9, items.Count);
+            Assert.AreEqual(9, items.Count);
             AssertEvaluatedIncludes(items, new string[] { "a", "b", "c", "x", "z", "a", "c", "u", "w" });
         }
 
         /// <summary>
         /// Exclude with item vectors against an include with item vectors in it
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ExcludeVectorWithIncludeVector()
         {
             string content = @"
@@ -604,14 +604,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             IList<ProjectItemInstance> items = GetItems(content);
 
             // Should contain a, b, c, z, a, c, u
-            Assert.Equal(7, items.Count);
+            Assert.AreEqual(7, items.Count);
             AssertEvaluatedIncludes(items, new string[] { "a", "b", "c", "z", "a", "c", "u" });
         }
 
         /// <summary>
         /// Metadata on items can refer to metadata above
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataReferringToMetadataAbove()
         {
             string content = @"
@@ -628,8 +628,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectItemInstance item = GetOneItem(content);
 
             var itemMetadata = Helpers.MakeList(item.Metadata);
-            Assert.Equal(2, itemMetadata.Count);
-            Assert.Equal("v1;v2;", item.GetMetadataValue("m2"));
+            Assert.AreEqual(2, itemMetadata.Count);
+            Assert.AreEqual("v1;v2;", item.GetMetadataValue("m2"));
         }
 
         /// <summary>
@@ -637,7 +637,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// NOTE: To work properly, this should batch. This is a temporary "patch" to make it work for now.
         /// It will only give correct results if there is exactly one item in the Include. Otherwise Batching would be needed.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataExpression()
         {
             string content = @"
@@ -652,13 +652,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectItemInstance item = GetOneItem(content);
 
-            Assert.Equal("i1", item.GetMetadataValue("m"));
+            Assert.AreEqual("i1", item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Qualified built in metadata should work
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInQualifiedMetadataExpression()
         {
             string content = @"
@@ -673,13 +673,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectItemInstance item = GetOneItem(content);
 
-            Assert.Equal("i1", item.GetMetadataValue("m"));
+            Assert.AreEqual("i1", item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Mis-qualified built in metadata should not work
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMisqualifiedMetadataExpression()
         {
             string content = @"
@@ -694,13 +694,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectItemInstance item = GetOneItem(content);
 
-            Assert.Equal(String.Empty, item.GetMetadataValue("m"));
+            Assert.AreEqual(String.Empty, item.GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Metadata condition should work correctly with built-in metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataInMetadataCondition()
         {
             string content = @"
@@ -716,17 +716,17 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectItemInstance item = GetOneItem(content);
 
-            Assert.Equal("m1", item.GetMetadataValue("m"));
-            Assert.Equal(String.Empty, item.GetMetadataValue("n"));
+            Assert.AreEqual("m1", item.GetMetadataValue("m"));
+            Assert.AreEqual(String.Empty, item.GetMetadataValue("n"));
         }
 
         /// <summary>
         /// Metadata on item condition not allowed (currently)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataInItemCondition()
         {
-            Assert.Throws<InvalidProjectFileException>(() =>
+            Assert.ThrowsExactly<InvalidProjectFileException>(() =>
             {
                 string content = @"
                     <Project>
@@ -742,7 +742,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// <summary>
         /// Two items should each get their own values for built-in metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataTwoItems()
         {
             string content = @"
@@ -757,14 +757,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             IList<ProjectItemInstance> items = GetItems(content);
 
-            Assert.Equal(@"i1.obj", items[0].GetMetadataValue("m"));
-            Assert.Equal(@"i2.obj", items[1].GetMetadataValue("m"));
+            Assert.AreEqual(@"i1.obj", items[0].GetMetadataValue("m"));
+            Assert.AreEqual(@"i2.obj", items[1].GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Items from another list, but with different metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DifferentMetadataItemsFromOtherList()
         {
             string content = @"
@@ -784,14 +784,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             IList<ProjectItemInstance> items = GetItems(content);
 
-            Assert.Equal(@"m1", items[0].GetMetadataValue("m"));
-            Assert.Equal(String.Empty, items[1].GetMetadataValue("m"));
+            Assert.AreEqual(@"m1", items[0].GetMetadataValue("m"));
+            Assert.AreEqual(String.Empty, items[1].GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Items from another list, but with different metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DifferentBuiltInMetadataItemsFromOtherList()
         {
             string content = @"
@@ -809,14 +809,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             IList<ProjectItemInstance> items = GetItems(content);
 
-            Assert.Equal(@".x", items[0].GetMetadataValue("m"));
-            Assert.Equal(@".y", items[1].GetMetadataValue("m"));
+            Assert.AreEqual(@".x", items[0].GetMetadataValue("m"));
+            Assert.AreEqual(@".y", items[1].GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Two items coming from a transform
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataTransformInInclude()
         {
             string content = @"
@@ -834,14 +834,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             IList<ProjectItemInstance> items = GetItems(content);
 
-            Assert.Equal(@"h0.baz.obj", items[0].GetMetadataValue("m"));
-            Assert.Equal(@"h1.baz.obj", items[1].GetMetadataValue("m"));
+            Assert.AreEqual(@"h0.baz.obj", items[0].GetMetadataValue("m"));
+            Assert.AreEqual(@"h1.baz.obj", items[1].GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Transform in the metadata value; no bare metadata involved
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataTransformInMetadataValue()
         {
             string content = @"
@@ -859,14 +859,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             IList<ProjectItemInstance> items = GetItems(content);
 
-            Assert.Equal(@"i0;h0;h1", items[1].GetMetadataValue("m"));
-            Assert.Equal(@"i0;h0;h1", items[2].GetMetadataValue("m"));
+            Assert.AreEqual(@"i0;h0;h1", items[1].GetMetadataValue("m"));
+            Assert.AreEqual(@"i0;h0;h1", items[2].GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Transform in the metadata value; bare metadata involved
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BuiltInMetadataTransformInMetadataValueBareMetadataPresent()
         {
             string content = @"
@@ -884,14 +884,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             IList<ProjectItemInstance> items = GetItems(content);
 
-            Assert.Equal(@"i0.x;h0;h1;.y", items[1].GetMetadataValue("m"));
-            Assert.Equal(@"i0.x;h0;h1;", items[2].GetMetadataValue("m"));
+            Assert.AreEqual(@"i0.x;h0;h1;.y", items[1].GetMetadataValue("m"));
+            Assert.AreEqual(@"i0.x;h0;h1;", items[2].GetMetadataValue("m"));
         }
 
         /// <summary>
         /// Metadata on items can refer to item lists
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataValueReferringToItems()
         {
             string content = @"
@@ -908,13 +908,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             IList<ProjectItemInstance> items = GetItems(content);
 
-            Assert.Equal("h0;i0", items[1].GetMetadataValue("m1"));
+            Assert.AreEqual("h0;i0", items[1].GetMetadataValue("m1"));
         }
 
         /// <summary>
         /// Metadata on items' conditions can refer to item lists
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataConditionReferringToItems()
         {
             string content = @"
@@ -932,14 +932,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             IList<ProjectItemInstance> items = GetItems(content);
 
-            Assert.Equal("v1", items[1].GetMetadataValue("m1"));
-            Assert.Equal(String.Empty, items[1].GetMetadataValue("m2"));
+            Assert.AreEqual("v1", items[1].GetMetadataValue("m1"));
+            Assert.AreEqual(String.Empty, items[1].GetMetadataValue("m2"));
         }
 
         /// <summary>
         /// Metadata on items' conditions can refer to other metadata
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MetadataConditionReferringToMetadataOnSameItem()
         {
             string content = @"
@@ -956,30 +956,30 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             IList<ProjectItemInstance> items = GetItems(content);
 
-            Assert.Equal("0", items[0].GetMetadataValue("m0"));
-            Assert.Equal("1", items[0].GetMetadataValue("m1"));
-            Assert.Equal(String.Empty, items[0].GetMetadataValue("m2"));
+            Assert.AreEqual("0", items[0].GetMetadataValue("m0"));
+            Assert.AreEqual("1", items[0].GetMetadataValue("m1"));
+            Assert.AreEqual(String.Empty, items[0].GetMetadataValue("m2"));
         }
 
         /// <summary>
         /// Fail build for drive enumerating wildcards that exist in projects on any platform.
         /// </summary>
-        [Theory]
-        [InlineData(
+        [MSBuildTestMethod]
+        [DataRow(
             TargetItemWithIncludeAndExclude,
             @"$(Microsoft_WindowsAzure_EngSys)\**\*",
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
 
-        [InlineData(
+        [DataRow(
             TargetItemWithIncludeAndExclude,
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb",
             @"$(Microsoft_WindowsAzure_EngSys)\**\*")]
 
-        [InlineData(
+        [DataRow(
             TargetItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)\**\*")]
 
-        [InlineData(
+        [DataRow(
             TargetWithDefinedPropertyAndItemWithInclude,
             "$(Microsoft_WindowsAzure_EngSys)**",
             null,
@@ -1002,19 +1002,19 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Log warning for drive enumerating wildcards that exist in projects on Windows platform.
         /// </summary>
         [WindowsOnlyTheory]
-        [InlineData(
+        [DataRow(
             TargetItemWithIncludeAndExclude,
             @"%DRIVE%:$(Microsoft_WindowsAzure_EngSys)\**\*",
             @"$(Microsoft_WindowsAzure_EngSys)\*.pdb;$(Microsoft_WindowsAzure_EngSys)\Microsoft.WindowsAzure.Storage.dll;$(Microsoft_WindowsAzure_EngSys)\Certificates\**\*")]
 
-        [InlineData(
+        [DataRow(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)**",
             null,
             "Microsoft_WindowsAzure_EngSys",
             @"%DRIVE%:\")]
 
-        [InlineData(
+        [DataRow(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)\**\*",
             null,
@@ -1040,14 +1040,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Log warning for drive enumerating wildcards that exist in projects on Unix platform.
         /// </summary>
         [UnixOnlyTheory]
-        [InlineData(
+        [DataRow(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)**",
             null,
             "Microsoft_WindowsAzure_EngSys",
             @"/")]
 
-        [InlineData(
+        [DataRow(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)*/*.log",
             null,
@@ -1070,28 +1070,28 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         /// Tests target item evaluation resulting in no build failures.
         /// </summary>
         [WindowsOnlyTheory]
-        [InlineData(
+        [DataRow(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)*.cs",
             null,
             "Microsoft_WindowsAzure_EngSys",
             @"c:\*\")]
 
-        [InlineData(
+        [DataRow(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"\$(Microsoft_WindowsAzure_EngSys)*\*.cs",
             null,
             "Microsoft_WindowsAzure_EngSys",
             @"c:")]
 
-        [InlineData(
+        [DataRow(
             TargetWithDefinedPropertyAndItemWithInclude,
             @":\$(Microsoft_WindowsAzure_EngSys)*\*.log",
             null,
             "Microsoft_WindowsAzure_EngSys",
             @"c")]
 
-        [InlineData(
+        [DataRow(
             TargetWithDefinedPropertyAndItemWithInclude,
             @"$(Microsoft_WindowsAzure_EngSys)*\*.log",
             null,
@@ -1110,7 +1110,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 Helpers.ExpectedBuildResult.SucceedWithNoErrorsAndWarnings);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UpdateShouldRespectConditions()
         {
             string content = @"
@@ -1174,7 +1174,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             for (int i = 0; i < includes.Length; i++)
             {
-                Assert.Equal(includes[i], items[i].EvaluatedInclude);
+                Assert.AreEqual(includes[i], items[i].EvaluatedInclude);
             }
         }
 
@@ -1191,11 +1191,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
         private static void AssertItemHasMetadata(Dictionary<string, string> expected, ProjectItemInstance item)
         {
-            Assert.Equal(expected.Keys.Count, item.DirectMetadataCount);
+            Assert.AreEqual(expected.Keys.Count, item.DirectMetadataCount);
 
             foreach (var key in expected.Keys)
             {
-                Assert.Equal(expected[key], item.GetMetadataValue(key));
+                Assert.AreEqual(expected[key], item.GetMetadataValue(key));
             }
         }
     }

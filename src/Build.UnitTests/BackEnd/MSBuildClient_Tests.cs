@@ -11,18 +11,18 @@ using Microsoft.Build.BackEnd.Client;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
     /// <summary>
     /// Tests for the <see cref="MSBuildClient"/> fallback behaviour.
     /// </summary>
+    [TestClass]
     public class MSBuildClient_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public MSBuildClient_Tests(ITestOutputHelper output)
+        public MSBuildClient_Tests(TestContext output)
         {
             _output = output;
         }
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// no-exception-escape contract by simply calling <c>Execute</c> outside any try/catch
         /// and asserting on the structured result.
         /// </remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void Execute_WithUnreachableServer_DoesNotPropagateException()
         {
             // Isolate from any real MSBuild server / DOTNET_CLI_USE_MSBUILD_SERVER state on
@@ -105,7 +105,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// ordering deterministically (both events pre-signaled with the result already queued, so
         /// <c>WaitAny</c> returns the completed branch) and asserts the result is still processed.
         /// </remarks>
-        [Fact]
+        [MSBuildTestMethod]
         public void ProcessPackets_WhenPumpCompletedRacesQueuedResult_DoesNotDropBuildResult()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);

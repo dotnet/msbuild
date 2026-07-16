@@ -7,12 +7,12 @@ using System.Windows.Markup;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.XamlTypes;
 using Microsoft.Build.Tasks.Xaml;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class CommandLineGenerator_Tests
     {
         private const string testXamlFile = @"<?xml version='1.0' encoding='utf-8'?>
@@ -97,36 +97,36 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests a command line generated from all of the specified switch values.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void BasicCommandLine()
         {
             CommandLineGenerator generator = CreateGenerator();
             string commandLine = generator.GenerateCommandLine();
-            Assert.Equal("/P /SSubstituteThis!_postfix SubstituteThis!AsWell /AtEndSubstitute\\ /I42_postfix /Xone /Xtwo /Xthree a.cs b.cs /Z7", commandLine);
+            Assert.AreEqual("/P /SSubstituteThis!_postfix SubstituteThis!AsWell /AtEndSubstitute\\ /I42_postfix /Xone /Xtwo /Xthree a.cs b.cs /Z7", commandLine);
         }
 
         /// <summary>
         /// Tests a command line generated from a specific template
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TemplatedCommandLine()
         {
             CommandLineGenerator generator = CreateGenerator();
             generator.CommandLineTemplate = "[Sources] [Program]";
             string commandLine = generator.GenerateCommandLine();
-            Assert.Equal("a.cs b.cs /P", commandLine);
+            Assert.AreEqual("a.cs b.cs /P", commandLine);
         }
 
         /// <summary>
         /// Tests a command line generated from a specific template is not case sensitive on the parameter names.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TemplateParametersAreCaseInsensitive()
         {
             CommandLineGenerator generator = CreateGenerator();
             generator.CommandLineTemplate = "[sources]";
             string commandLine = generator.GenerateCommandLine();
-            Assert.Equal("a.cs b.cs", commandLine);
+            Assert.AreEqual("a.cs b.cs", commandLine);
         }
 
         private CommandLineGenerator CreateGenerator()

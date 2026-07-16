@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="MSTest.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>$(RuntimeOutputTargetFrameworks)</TargetFrameworks>
     <PlatformTarget>$(RuntimeOutputPlatformTarget)</PlatformTarget>
     <IsPackable>false</IsPackable>
+    <IsUnitTestProject>true</IsUnitTestProject>
     <AssemblyName>Microsoft.Build.Engine.UnitTests</AssemblyName>
 
     <DefineConstants>$(DefineConstants);MICROSOFT_BUILD_ENGINE_UNITTESTS</DefineConstants>
@@ -28,7 +29,7 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" />
     <PackageReference Include="Shouldly" />
     <PackageReference Include="FakeItEasy" />
-    <PackageReference Include="Verify.XunitV3" />
+    <PackageReference Include="Verify.MSTest" />
     <PackageReference Include="Microsoft.VisualStudio.SolutionPersistence" />
     <PackageReference Include="NuGet.Frameworks">
       <PrivateAssets>all</PrivateAssets>
@@ -40,7 +41,6 @@
     <ProjectReference Include="..\MSBuildTaskHost\MSBuildTaskHost.csproj" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" Aliases="MSBuildTaskHost" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
-    <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
 
     <ProjectReference Include="..\Samples\TaskWithDependency\TaskWithDependency.csproj" Private="false" ReferenceOutputAssembly="false" OutputItemType="TaskWithDependencyResolvedProjectReferencePath">
@@ -75,17 +75,17 @@
     <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs">
       <Link>AssemblyNameEx_Tests.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs">
+      <Link>NativeMethodsShared_Tests.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\UnitTests\TaskParameter_Tests.cs">
       <Link>TaskParameter_Tests.cs</Link>
     </Compile>
-    <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
+    <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.Shared.cs" />
 
     <None Include="..\Shared\UnitTests\App.config">
       <Link>App.config</Link>
       <SubType>Designer</SubType>
-    </None>
-    <None Include="..\Shared\UnitTests\xunit.runner.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
 
     <None Include="TestAssets\**\*">

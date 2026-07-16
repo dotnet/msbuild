@@ -9,13 +9,13 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
+[TestClass]
 public class ConfigurationProvider_Tests
 {
-    [Fact]
+    [MSBuildTestMethod]
     public void GetRuleIdConfiguration_ReturnsEmptyConfig()
     {
         using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -36,7 +36,7 @@ public class ConfigurationProvider_Tests
         configs.ShouldBe(new Dictionary<string, string>());
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetRuleIdConfiguration_ReturnsConfiguration()
     {
         using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -63,7 +63,7 @@ public class ConfigurationProvider_Tests
         configs["property1"].ShouldBe("value1");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetRuleIdConfiguration_CustomConfigurationData()
     {
         using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -96,7 +96,7 @@ public class ConfigurationProvider_Tests
         configs.ContainsKey("is_enabled_2").ShouldBeTrue();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetRuleIdConfiguration_ReturnsBuildRuleConfiguration()
     {
         using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -121,7 +121,7 @@ public class ConfigurationProvider_Tests
         buildConfig.EvaluationCheckScope.ShouldBe(EvaluationCheckScope.ProjectFileOnly);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetRuleIdConfiguration_CustomConfigurationValidity_NotValid_DifferentValues()
     {
         using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -152,7 +152,7 @@ public class ConfigurationProvider_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetRuleIdConfiguration_CustomConfigurationValidity_NotValid_DifferentKeys()
     {
         using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -184,7 +184,7 @@ public class ConfigurationProvider_Tests
         });
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetRuleIdConfiguration_CustomConfigurationValidity_Valid()
     {
         using TestEnvironment testEnvironment = TestEnvironment.Create();
@@ -215,13 +215,13 @@ public class ConfigurationProvider_Tests
         });
     }
 
-    [Theory]
-    [InlineData(CheckResultSeverity.Warning, CheckResultSeverity.Warning, true)]
-    [InlineData(CheckResultSeverity.Error, CheckResultSeverity.Error, true)]
-    [InlineData(CheckResultSeverity.Default, CheckResultSeverity.Warning, true)]
-    [InlineData(CheckResultSeverity.Suggestion, CheckResultSeverity.Suggestion, true)]
-    [InlineData(CheckResultSeverity.None, CheckResultSeverity.None, false)]
-    [InlineData(null, CheckResultSeverity.Warning, true)]
+    [MSBuildTestMethod]
+    [DataRow(CheckResultSeverity.Warning, CheckResultSeverity.Warning, true)]
+    [DataRow(CheckResultSeverity.Error, CheckResultSeverity.Error, true)]
+    [DataRow(CheckResultSeverity.Default, CheckResultSeverity.Warning, true)]
+    [DataRow(CheckResultSeverity.Suggestion, CheckResultSeverity.Suggestion, true)]
+    [DataRow(CheckResultSeverity.None, CheckResultSeverity.None, false)]
+    [DataRow(null, CheckResultSeverity.Warning, true)]
     public void GetConfigurationProvider_MergesSeverity_Correctly(CheckResultSeverity? checkResultSeverity, CheckResultSeverity expectedSeverity, bool expectedEnablment)
     {
         var configurationProvider = new ConfigurationProvider();

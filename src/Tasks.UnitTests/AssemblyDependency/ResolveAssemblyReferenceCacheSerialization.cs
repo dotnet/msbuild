@@ -10,12 +10,12 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
+    [TestClass]
     public class ResolveAssemblyReferenceCacheSerialization : IDisposable
     {
         private readonly string _rarCacheFile;
@@ -49,7 +49,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             _ => throw new ArgumentException(),
         };
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RoundTripEmptyState()
         {
             SystemState systemState = new();
@@ -61,7 +61,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             deserialized.ShouldNotBeNull();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CorrectFileVersion()
         {
             SystemState systemState = new();
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             deserialized.ShouldNotBeNull();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void WrongFileVersion()
         {
             SystemState systemState = new();
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             deserialized.ShouldBeNull();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ValidateSerializationAndDeserialization()
         {
             Dictionary<string, SystemState.FileState> cache = new() {
@@ -140,7 +140,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             dll2.scatterFiles[1].ShouldBe(dll.scatterFiles[1]);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutgoingCacheIsSmallerThanIncomingCache()
         {
             Dictionary<string, SystemState.FileState> cache = new() {
@@ -169,7 +169,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             cache2.ShouldContainKey("path1");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutgoingCacheIsEmpty()
         {
             Dictionary<string, SystemState.FileState> cache = new() {
@@ -199,7 +199,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// A relative state file path that exists in CWD but not in the project directory should
         /// fail to deserialize.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeserializePrecomputedCaches_AbsolutizesStateFilePathViaTaskEnvironment()
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -235,7 +235,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// stateFile.ToString() path which means a relative state file path is opened relative
         /// to the process current working directory — NOT relative to TaskEnvironment.ProjectDirectory.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void DeserializePrecomputedCaches_Wave18_8_Disabled_UsesRawPathRelativeToCwd()
         {
             using TestEnvironment env = TestEnvironment.Create();

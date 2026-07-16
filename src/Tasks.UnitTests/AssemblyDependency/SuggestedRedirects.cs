@@ -10,7 +10,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
@@ -19,9 +18,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
     /// <summary>
     /// Unit tests for the ResolveAssemblyReference task that involve, among other things, checking suggested redirects
     /// </summary>
+    [TestClass]
     public sealed class SuggestedRedirects : ResolveAssemblyReferenceTestFixture
     {
-        public SuggestedRedirects(ITestOutputHelper output) : base(output)
+        public SuggestedRedirects(TestContext output) : base(output)
         {
         }
 
@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// And neither D1 nor D2 are CopyLocal = true. In this case, both dependencies
         /// are kept because this will work in a SxS manner.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConflictBetweenNonCopyLocalDependencies()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -61,14 +61,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            Assert.Equal(3, t.ResolvedDependencyFiles.Length);
-            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_DDllPath));
-            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath));
-            Assert.True(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_GDllPath));
+            Assert.AreEqual(3, t.ResolvedDependencyFiles.Length);
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_DDllPath));
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V1_DDllPath));
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, s_myLibraries_V2_GDllPath));
 
-            Assert.Single(t.SuggestedRedirects);
-            Assert.True(ContainsItem(t.SuggestedRedirects, @"D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")); // "Expected to find suggested redirect, but didn't"
-            Assert.Equal(1, e.Warnings); // "Should only be one warning for suggested redirects."
+            Assert.ContainsSingle(t.SuggestedRedirects);
+            Assert.IsTrue(ContainsItem(t.SuggestedRedirects, @"D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")); // "Expected to find suggested redirect, but didn't"
+            Assert.AreEqual(1, e.Warnings); // "Should only be one warning for suggested redirects."
         }
 
         /// <summary>
@@ -83,7 +83,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// And both D1 and D2 are CopyLocal = true. This case is a warning because both
         /// assemblies can't be copied to the output directory.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConflictBetweenCopyLocalDependencies()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -103,10 +103,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             bool result = Execute(t);
 
-            Assert.Equal(1, engine.Warnings); // @"Expected a warning because this is an unresolvable conflict."
-            Assert.Single(t.SuggestedRedirects);
-            Assert.True(ContainsItem(t.SuggestedRedirects, @"D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")); // "Expected to find suggested redirect, but didn't"
-            Assert.Equal(1, engine.Warnings); // "Should only be one warning for suggested redirects."
+            Assert.AreEqual(1, engine.Warnings); // @"Expected a warning because this is an unresolvable conflict."
+            Assert.ContainsSingle(t.SuggestedRedirects);
+            Assert.IsTrue(ContainsItem(t.SuggestedRedirects, @"D, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa")); // "Expected to find suggested redirect, but didn't"
+            Assert.AreEqual(1, engine.Warnings); // "Should only be one warning for suggested redirects."
             Assert.Contains(
                 String.Format(
                         AssemblyResources.GetString(
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// And both D1 and D2 are CopyLocal = true. In this case, there is no warning because
         /// AutoUnify is set to true.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConflictBetweenCopyLocalDependenciesWithAutoUnify()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -154,8 +154,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             bool result = Execute(t);
 
             // RAR will now produce suggested redirects even if AutoUnify is on.
-            Assert.Single(t.SuggestedRedirects);
-            Assert.Equal(0, engine.Warnings); // "Should be no warning for suggested redirects."
+            Assert.ContainsSingle(t.SuggestedRedirects);
+            Assert.AreEqual(0, engine.Warnings); // "Should be no warning for suggested redirects."
         }
 
         /// <summary>
@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// than D2 so that can't unify. These means that eventually when they're copied
         /// to the output directory they'll conflict.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConflictWithBackVersionPrimary()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -196,7 +196,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             bool result = Execute(t);
 
-            Assert.Equal(1, e.Warnings); // @"Expected one warning."
+            Assert.AreEqual(1, e.Warnings); // @"Expected one warning."
 
             // Check that we have a message identifying conflicts with "D"
             string warningMessage = e.WarningEvents[0].Message;
@@ -204,9 +204,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
             warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
 
-            Assert.Empty(t.SuggestedRedirects);
-            Assert.Equal(3, t.ResolvedFiles.Length);
-            Assert.True(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
+            Assert.IsEmpty(t.SuggestedRedirects);
+            Assert.AreEqual(3, t.ResolvedFiles.Length);
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
         }
 
 
@@ -215,7 +215,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Even when AutoUnify is set we should see a warning since the binder will not allow
         /// an older version to satisfy a reference to a newer version.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConflictWithBackVersionPrimaryWithAutoUnify()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -241,7 +241,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             bool result = Execute(t);
 
-            Assert.Equal(1, e.Warnings); // @"Expected one warning."
+            Assert.AreEqual(1, e.Warnings); // @"Expected one warning."
 
             // Check that we have a message identifying conflicts with "D"
             string warningMessage = e.WarningEvents[0].Message;
@@ -249,9 +249,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ConflictFound", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa"));
             warningMessage.ShouldContain(ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.FourSpaceIndent", ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("ResolveAssemblyReference.ReferenceDependsOn", "D, Version=1.0.0.0, CulTUre=neutral, PublicKeyToken=aaaaaaaaaaaaaaaa", Path.Combine(s_myLibraries_V1Path, "D.dll"))));
 
-            Assert.Empty(t.SuggestedRedirects);
-            Assert.Equal(3, t.ResolvedFiles.Length);
-            Assert.True(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
+            Assert.IsEmpty(t.SuggestedRedirects);
+            Assert.AreEqual(3, t.ResolvedFiles.Length);
+            Assert.IsTrue(ContainsItem(t.ResolvedFiles, s_myLibraries_V1_DDllPath)); // "Expected to find assembly, but didn't."
         }
 
 
@@ -268,7 +268,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// Notice that the two primaries have dependencies that only differ by PKT. Suggested redirects should
         /// only happen if the two assemblies differ by nothing but version.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void Regress313747_FalseSuggestedRedirectsWhenAssembliesDifferOnlyByPkt()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            Assert.Empty(t.SuggestedRedirects);
+            Assert.IsEmpty(t.SuggestedRedirects);
         }
 
         /// <summary>
@@ -305,9 +305,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// redirect to function. Without a binding redirect, loading B will cause A.V1 to try to load. It won't be
         /// there and there won't be a binding redirect to point it at 2.0.0.0.
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void Regress442570_MissingBackVersionShouldWarn()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -329,8 +329,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             // Expect a suggested redirect plus a warning
-            Assert.Single(t.SuggestedRedirects);
-            Assert.Equal(1, e.Warnings);
+            Assert.ContainsSingle(t.SuggestedRedirects);
+            Assert.AreEqual(1, e.Warnings);
         }
 
         /// <summary>
@@ -342,7 +342,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// When AutoGenerateBindingRedirects is used, we need to find the redirect
         /// in the externally resolved graph.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RedirectsAreSuggestedInExternallyResolvedGraph()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -368,8 +368,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Execute(t);
 
             // Expect a suggested redirect with no warning.
-            Assert.Single(t.SuggestedRedirects);
-            Assert.Equal(0, e.Warnings);
+            Assert.ContainsSingle(t.SuggestedRedirects);
+            Assert.AreEqual(0, e.Warnings);
         }
 
         /// <summary>
@@ -384,9 +384,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// There should be no suggested redirect because only strongly named assemblies can have
         /// binding redirects.
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void Regress387218_UnificationRequiresStrongName()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -409,11 +409,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            Assert.Equal(2, t.ResolvedDependencyFiles.Length);
-            Assert.True(ContainsItem(t.ResolvedDependencyFiles, @"c:\Regress387218\v2\D.dll")); // "Expected to find assembly, but didn't."
-            Assert.True(ContainsItem(t.ResolvedDependencyFiles, @"c:\Regress387218\v1\D.dll")); // "Expected to find assembly, but didn't."
-            Assert.Empty(t.SuggestedRedirects);
-            Assert.Equal(0, e.Warnings); // "Should only be no warning about suggested redirects."
+            Assert.AreEqual(2, t.ResolvedDependencyFiles.Length);
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, @"c:\Regress387218\v2\D.dll")); // "Expected to find assembly, but didn't."
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, @"c:\Regress387218\v1\D.dll")); // "Expected to find assembly, but didn't."
+            Assert.IsEmpty(t.SuggestedRedirects);
+            Assert.AreEqual(0, e.Warnings); // "Should only be no warning about suggested redirects."
         }
 
         /// <summary>
@@ -427,9 +427,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         ///
         /// There should be no suggested redirect because assemblies with different cultures cannot unify.
         /// </summary>
-        [Fact]
-        [Trait("Category", "netcore-osx-failing")]
-        [Trait("Category", "netcore-linux-failing")]
+        [MSBuildTestMethod]
+        [TestCategory("netcore-osx-failing")]
+        [TestCategory("netcore-linux-failing")]
         public void Regress390219_UnificationRequiresSameCulture()
         {
             ResolveAssemblyReference t = new ResolveAssemblyReference();
@@ -452,11 +452,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Execute(t);
 
-            Assert.Equal(2, t.ResolvedDependencyFiles.Length);
-            Assert.True(ContainsItem(t.ResolvedDependencyFiles, @"c:\Regress390219\v2\D.dll")); // "Expected to find assembly, but didn't."
-            Assert.True(ContainsItem(t.ResolvedDependencyFiles, @"c:\Regress390219\v1\D.dll")); // "Expected to find assembly, but didn't."
-            Assert.Empty(t.SuggestedRedirects);
-            Assert.Equal(0, e.Warnings); // "Should only be no warning about suggested redirects."
+            Assert.AreEqual(2, t.ResolvedDependencyFiles.Length);
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, @"c:\Regress390219\v2\D.dll")); // "Expected to find assembly, but didn't."
+            Assert.IsTrue(ContainsItem(t.ResolvedDependencyFiles, @"c:\Regress390219\v1\D.dll")); // "Expected to find assembly, but didn't."
+            Assert.IsEmpty(t.SuggestedRedirects);
+            Assert.AreEqual(0, e.Warnings); // "Should only be no warning about suggested redirects."
         }
 
         // It is hard to write a test that will fail with the root cause of https://github.com/dotnet/msbuild/issues/4002
@@ -464,7 +464,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         //
         // So to add some coverage, simply check that we get a Culture=neutral when enumerating references of this test
         // assembly.
-        [Fact]
+        [MSBuildTestMethod]
         public void RealGetAssemblyNameIncludesCulture()
         {
             using (var info = new AssemblyInformation(Assembly.GetExecutingAssembly().Location))

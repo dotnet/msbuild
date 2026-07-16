@@ -5,18 +5,18 @@ using System.Reflection;
 
 using Microsoft.Build.Framework;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class AttributeTests
     {
         /// <summary>
         /// Test RequiredRuntimeAttribute
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RequiredRuntimeAttribute()
         {
             RequiredRuntimeAttribute attribute =
@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests
             attribute.RuntimeVersion.ShouldBe("v5");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputAttribute()
         {
             OutputAttribute attribute =
@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests
             attribute.ShouldNotBeNull();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void RequiredAttribute()
         {
             RequiredAttribute attribute =

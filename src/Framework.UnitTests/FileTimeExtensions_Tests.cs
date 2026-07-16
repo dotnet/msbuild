@@ -3,7 +3,6 @@
 
 using System;
 using Shouldly;
-using Xunit;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 
 namespace Microsoft.Build.UnitTests
@@ -11,9 +10,10 @@ namespace Microsoft.Build.UnitTests
     /// <summary>
     /// Tests for the <see cref="FILETIME"/> extension helpers.
     /// </summary>
+    [TestClass]
     public class FileTimeExtensions_Tests
     {
-        [Fact]
+        [MSBuildTestMethod]
         public void ToLong_RoundTripsThroughDateTime()
         {
             DateTime utc = new(2024, 6, 15, 12, 30, 45, DateTimeKind.Utc);
@@ -28,7 +28,7 @@ namespace Microsoft.Build.UnitTests
             ft.ToLong().ShouldBe(ticks);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ToDateTime_ReturnsLocalDateTime()
         {
             DateTime utc = new(2024, 6, 15, 12, 30, 45, DateTimeKind.Utc);
@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests
             result.ShouldBe(utc.ToLocalTime());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ToDateTimeUtc_ReturnsUtcDateTime()
         {
             DateTime utc = new(2024, 6, 15, 12, 30, 45, DateTimeKind.Utc);
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests
             result.ShouldBe(utc);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void ToLong_HighBitInLowField_ReadsAsUnsigned()
         {
             // dwLowDateTime is uint at the FILETIME level on Win32; ComTypes uses int.

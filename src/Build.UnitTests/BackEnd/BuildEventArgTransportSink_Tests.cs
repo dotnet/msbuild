@@ -5,7 +5,6 @@ using System;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
-using Xunit;
 
 #nullable disable
 
@@ -14,29 +13,30 @@ namespace Microsoft.Build.UnitTests.Logging
     /// <summary>
     /// Test the central forwarding logger by initializing a new one and sending events through it.
     /// </summary>
+    [TestClass]
     public class BuildEventArgTransportSink_Tests
     {
         /// <summary>
         /// Verify the properties on BuildEventArgTransportSink properly work
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyTests()
         {
             BuildEventArgTransportSink sink = new BuildEventArgTransportSink(PacketProcessor);
-            Assert.Null(sink.Name);
+            Assert.IsNull(sink.Name);
 
             const string name = "Test Name";
             sink.Name = name;
-            Assert.Equal(0, string.Compare(sink.Name, name, StringComparison.OrdinalIgnoreCase));
+            Assert.AreEqual(0, string.Compare(sink.Name, name, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// Make sure we throw an exception if the transport delegate is null
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConstructorNullSendDataDelegate()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.ThrowsExactly<InternalErrorException>(() =>
             {
                 var transportSink = new BuildEventArgTransportSink(null);
             });
@@ -44,10 +44,10 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify consume throws the correct exception when a null build event is passed in
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConsumeNullBuildEvent()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.ThrowsExactly<InternalErrorException>(() =>
             {
                 BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(PacketProcessor);
                 transportSink.Consume(null, 0);
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// Verify consume properly packages up the message event into a packet and send it to the
         /// transport delegate
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConsumeMessageBuildEvent()
         {
             bool wentInHandler = false;
@@ -67,20 +67,20 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 wentInHandler = true;
                 LogMessagePacket loggingPacket = packet as LogMessagePacket;
-                Assert.NotNull(loggingPacket);
+                Assert.IsNotNull(loggingPacket);
                 BuildMessageEventArgs messageEventFromPacket = loggingPacket.NodeBuildEvent.Value.Value as BuildMessageEventArgs;
-                Assert.Equal(messageEventFromPacket, messageEvent);
+                Assert.AreEqual(messageEventFromPacket, messageEvent);
             }
 
             BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(TransportDelegate);
             transportSink.Consume(messageEvent, 0);
-            Assert.True(wentInHandler); // "Expected to go into transport delegate"
+            Assert.IsTrue(wentInHandler); // "Expected to go into transport delegate"
         }
 
         /// <summary>
         /// Verify consume ignores BuildStarted events
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConsumeBuildStartedEvent()
         {
             bool wentInHandler = false;
@@ -93,15 +93,15 @@ namespace Microsoft.Build.UnitTests.Logging
 
             BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(TransportDelegate);
             transportSink.Consume(buildStarted, 0);
-            Assert.True(transportSink.HaveLoggedBuildStartedEvent);
-            Assert.False(transportSink.HaveLoggedBuildFinishedEvent);
-            Assert.False(wentInHandler); // "Expected not to go into transport delegate"
+            Assert.IsTrue(transportSink.HaveLoggedBuildStartedEvent);
+            Assert.IsFalse(transportSink.HaveLoggedBuildFinishedEvent);
+            Assert.IsFalse(wentInHandler); // "Expected not to go into transport delegate"
         }
 
         /// <summary>
         /// Verify consume ignores BuildFinished events
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestConsumeBuildFinishedEvent()
         {
             bool wentInHandler = false;
@@ -114,9 +114,9 @@ namespace Microsoft.Build.UnitTests.Logging
 
             BuildEventArgTransportSink transportSink = new BuildEventArgTransportSink(TransportDelegate);
             transportSink.Consume(buildFinished, 0);
-            Assert.False(transportSink.HaveLoggedBuildStartedEvent);
-            Assert.True(transportSink.HaveLoggedBuildFinishedEvent);
-            Assert.False(wentInHandler); // "Expected not to go into transport delegate"
+            Assert.IsFalse(transportSink.HaveLoggedBuildStartedEvent);
+            Assert.IsTrue(transportSink.HaveLoggedBuildFinishedEvent);
+            Assert.IsFalse(wentInHandler); // "Expected not to go into transport delegate"
         }
 
         /// <summary>
@@ -131,14 +131,14 @@ namespace Microsoft.Build.UnitTests.Logging
 
             transportSink.ShutDown();
 
-            Assert.NotNull(weakTransportDelegateReference.Target);
+            Assert.IsNotNull(weakTransportDelegateReference.Target);
             transportDelegate = null;
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
             // Expected shutdown to null out the sendData delegate, the two garbage collections
             // should have collected the sendDataDelegate causing the weak reference to die.
-            Assert.Null(weakTransportDelegateReference.Target);  // " Expected delegate to be dead"
+            Assert.IsNull(weakTransportDelegateReference.Target);  // " Expected delegate to be dead"
         }
 
         /// <summary>

@@ -6,12 +6,13 @@ using System.Reflection;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Xunit;
+using Shouldly;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class ToolTaskExtensionTests
     {
         /// <summary>
@@ -19,7 +20,7 @@ namespace Microsoft.Build.UnitTests
         /// With moving ToolTask into Utilities, tasks inheriting from it now have to deal with 3 (THREE!) resource streams,
         /// which has a lot of potential for breaking. Make sure that tasks can access all of them using the correct logger helpers.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestResourceAccess()
         {
             MyToolTaskExtension t = new MyToolTaskExtension();
@@ -52,10 +53,10 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify that the above method actually tests something, that is make sure that non-existent resources throw
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ResourceAccessSanityCheck()
         {
-            Assert.Throws<ArgumentException>(() =>
+            Assert.ThrowsExactly<ArgumentException>(() =>
             {
                 MyToolTaskExtension t = new MyToolTaskExtension();
                 MockEngine engine = new MockEngine();
@@ -67,40 +68,40 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Retrieve a non-existent value but ask for a default.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetNonExistentBoolWithDefault()
         {
             MyToolTaskExtension t = new MyToolTaskExtension();
-            Assert.Equal(5, t.GetIntParameterWithDefault("Key", 5));
+            Assert.AreEqual(5, t.GetIntParameterWithDefault("Key", 5));
         }
 
         /// <summary>
         /// Retrieve a value that exists, but ask for a default. We expect the
         /// real value to win.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetBoolWithDefault()
         {
             MyToolTaskExtension t = new MyToolTaskExtension();
             t.Bag["Key"] = true;
 
-            Assert.True(t.GetBoolParameterWithDefault("Key", false));
+            Assert.IsTrue(t.GetBoolParameterWithDefault("Key", false));
         }
 
         /// <summary>
         /// Retrieve a value that exists, but ask for a default. We expect the
         /// real value to win.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetIntWithDefault()
         {
             MyToolTaskExtension t = new MyToolTaskExtension();
             t.Bag["Key"] = 5;
 
-            Assert.Equal(5, t.GetIntParameterWithDefault("Key", 9));
+            Assert.AreEqual(5, t.GetIntParameterWithDefault("Key", 9));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void UseNewLineSeparatorseInResponseFile()
         {
             Action<CommandLineBuilderExtension> addResponseFileCommands = (commandLineBuilder) =>
@@ -118,7 +119,7 @@ namespace Microsoft.Build.UnitTests
                 "/B:F9E03765A87543F4B385664B8DB7619D"
             };
 
-            Assert.Equal(expected, actual);
+            actual.ShouldBe(expected);
         }
 
         private sealed class MyToolTaskExtension : ToolTaskExtension

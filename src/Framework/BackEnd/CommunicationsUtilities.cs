@@ -83,6 +83,18 @@ internal static class CommunicationsUtilities
     /// </summary>
     private static EnvironmentState? s_environmentState;
 
+    /// <summary>
+    ///  Clears the cached environment block so the next call to <see cref="GetEnvironmentVariables"/> re-reads the
+    ///  live process environment instead of returning the previously cached snapshot.
+    /// </summary>
+    /// <remarks>
+    ///  Test-only. The unit-test harness (MSBuildTestMethodAttribute) calls this after scrubbing the
+    ///  MSBuildExtensionsPath* environment variables between serially-executed tests. On .NET Framework a value
+    ///  leaked into the native environment block by a prior in-proc build can otherwise be served from this cache,
+    ///  overriding the computed default and destabilizing environment-sensitive tests.
+    /// </remarks>
+    internal static void ResetEnvironmentStateForUnitTestsOnly() => s_environmentState = null;
+
 #if NETFRAMEWORK
     /// <summary>
     ///  Sets an environment variable using P/Invoke to workaround the .NET Framework BCL implementation.

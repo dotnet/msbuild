@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Xunit;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 
 #nullable disable
@@ -16,25 +15,26 @@ namespace Microsoft.Build.UnitTests.Logging
     /// <summary>
     /// Verify the event source sink functions correctly.
     /// </summary>
+    [TestClass]
     public class EventSourceSink_Tests
     {
         /// <summary>
         /// Verify the properties on EventSourceSink properly work
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PropertyTests()
         {
             EventSourceSink sink = new EventSourceSink();
-            Assert.Null(sink.Name);
+            Assert.IsNull(sink.Name);
             string name = "Test Name";
             sink.Name = name;
-            Assert.Equal(0, string.Compare(sink.Name, name, StringComparison.OrdinalIgnoreCase));
+            Assert.AreEqual(0, string.Compare(sink.Name, name, StringComparison.OrdinalIgnoreCase));
         }
 
         /// <summary>
         /// Test out events
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConsumeEventsGoodEvents()
         {
             EventSourceSink sink = new EventSourceSink();
@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Test out events when no event handlers are registered
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ConsumeEventsGoodEventsNoHandlers()
         {
             EventSourceSink sink = new EventSourceSink();
@@ -88,7 +88,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify when exceptions are thrown in the event handler, they are properly handled
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void LoggerExceptionInEventHandler()
         {
             List<Exception> exceptionList = new List<Exception>();
@@ -119,10 +119,10 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify raising a generic event derived from BuildEventArgs rather than CustomBuildEventArgs causes an internalErrorException
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void RaiseGenericBuildEventArgs()
         {
-            Assert.Throws<InternalErrorException>(() =>
+            Assert.ThrowsExactly<InternalErrorException>(() =>
             {
                 EventSourceSink sink = new EventSourceSink();
                 RaiseEventHelper eventHelper = new RaiseEventHelper(sink);
@@ -132,7 +132,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         /// Verify that shutdown unregisters all of the event handlers
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyShutdown()
         {
             EventSourceSink sink = new EventSourceSink();
@@ -142,29 +142,29 @@ namespace Microsoft.Build.UnitTests.Logging
             RaiseEventHelper raiseEventHelper = new RaiseEventHelper(sink);
 
             raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.ProjectStarted);
-            Assert.True(handlerHelper.EnteredEventHandler);
-            Assert.True(handlerHelper.EnteredAnyEventHandler);
-            Assert.True(handlerHelper.EnteredStatusEventHandler);
-            Assert.Equal(handlerHelper.RaisedEvent, RaiseEventHelper.ProjectStarted);
-            Assert.Equal(handlerHelper.RaisedAnyEvent, RaiseEventHelper.ProjectStarted);
-            Assert.Equal(handlerHelper.RaisedStatusEvent, RaiseEventHelper.ProjectStarted);
+            Assert.IsTrue(handlerHelper.EnteredEventHandler);
+            Assert.IsTrue(handlerHelper.EnteredAnyEventHandler);
+            Assert.IsTrue(handlerHelper.EnteredStatusEventHandler);
+            Assert.AreEqual(handlerHelper.RaisedEvent, RaiseEventHelper.ProjectStarted);
+            Assert.AreEqual(handlerHelper.RaisedAnyEvent, RaiseEventHelper.ProjectStarted);
+            Assert.AreEqual(handlerHelper.RaisedStatusEvent, RaiseEventHelper.ProjectStarted);
 
             sink.ShutDown();
 
             handlerHelper.ResetRaisedEvent();
             raiseEventHelper.RaiseBuildEvent(RaiseEventHelper.ProjectStarted);
-            Assert.False(handlerHelper.EnteredEventHandler);
-            Assert.False(handlerHelper.EnteredAnyEventHandler);
-            Assert.False(handlerHelper.EnteredStatusEventHandler);
-            Assert.Null(handlerHelper.RaisedEvent);
-            Assert.Null(handlerHelper.RaisedAnyEvent);
-            Assert.Null(handlerHelper.RaisedStatusEvent);
+            Assert.IsFalse(handlerHelper.EnteredEventHandler);
+            Assert.IsFalse(handlerHelper.EnteredAnyEventHandler);
+            Assert.IsFalse(handlerHelper.EnteredStatusEventHandler);
+            Assert.IsNull(handlerHelper.RaisedEvent);
+            Assert.IsNull(handlerHelper.RaisedAnyEvent);
+            Assert.IsNull(handlerHelper.RaisedStatusEvent);
         }
 
         /// <summary>
         /// Verify aggregate exceptions are caught as critical if they contain critical exceptions
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void VerifyAggregateExceptionHandling()
         {
             try
@@ -174,7 +174,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
             catch (Exception e)
             {
-                Assert.False(ExceptionHandling.IsCriticalException(e));
+                Assert.IsFalse(ExceptionHandling.IsCriticalException(e));
             }
 
             try
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
             catch (Exception e)
             {
-                Assert.False(ExceptionHandling.IsCriticalException(e));
+                Assert.IsFalse(ExceptionHandling.IsCriticalException(e));
             }
 
             try
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
             catch (Exception e)
             {
-                Assert.False(ExceptionHandling.IsCriticalException(e));
+                Assert.IsFalse(ExceptionHandling.IsCriticalException(e));
             }
 
             try
@@ -209,7 +209,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
             catch (Exception e)
             {
-                Assert.False(ExceptionHandling.IsCriticalException(e));
+                Assert.IsFalse(ExceptionHandling.IsCriticalException(e));
             }
 
             try
@@ -219,7 +219,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
             catch (Exception e)
             {
-                Assert.True(ExceptionHandling.IsCriticalException(e));
+                Assert.IsTrue(ExceptionHandling.IsCriticalException(e));
             }
 
             try
@@ -230,7 +230,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
             catch (Exception e)
             {
-                Assert.True(ExceptionHandling.IsCriticalException(e));
+                Assert.IsTrue(ExceptionHandling.IsCriticalException(e));
             }
 
             try
@@ -244,7 +244,7 @@ namespace Microsoft.Build.UnitTests.Logging
             }
             catch (Exception e)
             {
-                Assert.True(ExceptionHandling.IsCriticalException(e));
+                Assert.IsTrue(ExceptionHandling.IsCriticalException(e));
             }
         }
 
@@ -269,18 +269,18 @@ namespace Microsoft.Build.UnitTests.Logging
                 // Logger exceptions should be rethrown as is with no wrapping
                 if (exceptionToRaise is LoggerException)
                 {
-                    Assert.Equal(e, exceptionToRaise); // "Expected Logger exception to be raised in event handler and re-thrown by event source"
+                    Assert.AreEqual(e, exceptionToRaise); // "Expected Logger exception to be raised in event handler and re-thrown by event source"
                 }
                 else
                 {
                     if (ExceptionHandling.IsCriticalException(e))
                     {
-                        Assert.Equal(e, exceptionToRaise); // "Expected Logger exception to be raised in event handler and re-thrown by event source"
+                        Assert.AreEqual(e, exceptionToRaise); // "Expected Logger exception to be raised in event handler and re-thrown by event source"
                     }
                     else
                     {
                         // All other exceptions should be wrapped in an InternalLoggerException, with the original exception as the inner exception
-                        Assert.True(e is InternalLoggerException); // "Expected general exception to be raised in event handler and re-thrown by event source as a InternalLoggerException"
+                        Assert.IsTrue(e is InternalLoggerException); // "Expected general exception to be raised in event handler and re-thrown by event source as a InternalLoggerException"
                     }
                 }
             }
@@ -302,23 +302,23 @@ namespace Microsoft.Build.UnitTests.Logging
                 if (eventType != typeof(GenericBuildStatusEventArgs) &&
                     eventType != typeof(BuildCanceledEventArgs))
                 {
-                    Assert.Equal(testHandlers.RaisedEvent, buildEventToRaise); // "Expected buildevent in handler to match buildevent raised on event source"
-                    Assert.Equal(testHandlers.RaisedEvent, testHandlers.RaisedAnyEvent); // "Expected RaisedEvent and RaisedAnyEvent to match"
-                    Assert.True(testHandlers.EnteredEventHandler); // "Expected to enter into event handler"
+                    Assert.AreEqual(testHandlers.RaisedEvent, buildEventToRaise); // "Expected buildevent in handler to match buildevent raised on event source"
+                    Assert.AreEqual(testHandlers.RaisedEvent, testHandlers.RaisedAnyEvent); // "Expected RaisedEvent and RaisedAnyEvent to match"
+                    Assert.IsTrue(testHandlers.EnteredEventHandler); // "Expected to enter into event handler"
                 }
 
-                Assert.Equal(testHandlers.RaisedAnyEvent, buildEventToRaise); // "Expected buildEvent in any event handler to match buildevent raised on event source"
-                Assert.True(testHandlers.EnteredAnyEventHandler); // "Expected  to enter into AnyEvent handler"
+                Assert.AreEqual(testHandlers.RaisedAnyEvent, buildEventToRaise); // "Expected buildEvent in any event handler to match buildevent raised on event source"
+                Assert.IsTrue(testHandlers.EnteredAnyEventHandler); // "Expected  to enter into AnyEvent handler"
 
                 if (buildEventToRaise is BuildStatusEventArgs)
                 {
-                    Assert.Equal(testHandlers.RaisedStatusEvent, buildEventToRaise); // "Expected buildevent in handler to match buildevent raised on event source"
-                    Assert.True(testHandlers.EnteredStatusEventHandler); // "Expected to enter into Status event handler"
+                    Assert.AreEqual(testHandlers.RaisedStatusEvent, buildEventToRaise); // "Expected buildevent in handler to match buildevent raised on event source"
+                    Assert.IsTrue(testHandlers.EnteredStatusEventHandler); // "Expected to enter into Status event handler"
                 }
                 else
                 {
-                    Assert.Null(testHandlers.RaisedStatusEvent);
-                    Assert.False(testHandlers.EnteredStatusEventHandler);
+                    Assert.IsNull(testHandlers.RaisedStatusEvent);
+                    Assert.IsFalse(testHandlers.EnteredStatusEventHandler);
                 }
             }
             finally
@@ -1003,15 +1003,15 @@ namespace Microsoft.Build.UnitTests.Logging
                 _sourceForEvents.Consume(buildEvent);
                 if (buildEvent is BuildStartedEventArgs)
                 {
-                    Assert.True(_sourceForEvents.HaveLoggedBuildStartedEvent);
+                    Assert.IsTrue(_sourceForEvents.HaveLoggedBuildStartedEvent);
                     _sourceForEvents.HaveLoggedBuildStartedEvent = false;
-                    Assert.False(_sourceForEvents.HaveLoggedBuildStartedEvent);
+                    Assert.IsFalse(_sourceForEvents.HaveLoggedBuildStartedEvent);
                 }
                 else if (buildEvent is BuildFinishedEventArgs)
                 {
-                    Assert.True(_sourceForEvents.HaveLoggedBuildFinishedEvent);
+                    Assert.IsTrue(_sourceForEvents.HaveLoggedBuildFinishedEvent);
                     _sourceForEvents.HaveLoggedBuildFinishedEvent = false;
-                    Assert.False(_sourceForEvents.HaveLoggedBuildFinishedEvent);
+                    Assert.IsFalse(_sourceForEvents.HaveLoggedBuildFinishedEvent);
                 }
             }
         }

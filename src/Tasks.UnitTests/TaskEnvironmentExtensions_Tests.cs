@@ -5,12 +5,12 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks;
 using Shouldly;
-using Xunit;
 
 #nullable enable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class TaskEnvironmentExtensions_Tests
     {
         private static readonly string s_projectDir =
@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests
         private static TaskEnvironment CreateTaskEnvironment()
             => TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(s_projectDir);
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetCanonicalFormNoThrow_ResolvesRelativeSegments()
         {
             string pathWithDotDot = Path.Combine(s_projectDir, "a", "..", "b");
@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests
             result.Value.ShouldBe(Path.GetFullPath(pathWithDotDot));
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAbsolutePathsOrNull_NullEmptyAndRelativeEntries()
         {
             TaskEnvironment env = CreateTaskEnvironment();
@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
             result[2].OriginalValue.ShouldBe("foo.txt");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GetAbsolutePathOrEmpty_PassesThroughNullOrEmptyAndAbsolutizesRelative()
         {
             TaskEnvironment env = CreateTaskEnvironment();

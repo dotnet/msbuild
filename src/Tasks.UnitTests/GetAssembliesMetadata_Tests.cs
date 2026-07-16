@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if NETFRAMEWORK
@@ -12,23 +12,22 @@ using System.Threading.Tasks;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
-using Xunit.Sdk;
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
+    [TestClass]
     public class GetAssembliesMetadata_Tests
     {
         private static string TestAssembliesPaths { get; } = Path.Combine(AppContext.BaseDirectory, "TestResources", "Projects");
 
-        private readonly ITestOutputHelper _testOutput;
+        private readonly TestContext _testOutput;
 
-        public GetAssembliesMetadata_Tests(ITestOutputHelper testOutput)
+        public GetAssembliesMetadata_Tests(TestContext testOutput)
         {
             _testOutput = testOutput;
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckPresenceOfCustomCOMAssemblyAttributes()
         {
             string testSolutionPath = Path.Combine(TestAssembliesPaths, "Custom_COM");
@@ -57,7 +56,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             t.AssembliesMetadata[0].GetMetadata("PublicHexKey").ShouldBeEmpty();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckPresenceOfCOMAssemblyAttributes()
         {
             string pathToWinFolder = Environment.GetFolderPath(Environment.SpecialFolder.Windows);

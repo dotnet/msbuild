@@ -6,13 +6,14 @@ using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework.Telemetry;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Framework.UnitTests;
 
+[TestClass]
+
 public class CrashTelemetry_Tests
 {
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_SetsAllFields()
     {
         var inner = new ArgumentException("inner");
@@ -38,7 +39,7 @@ public class CrashTelemetry_Tests
         telemetry.StackTop.ShouldNotBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_NoInnerException_SetsInnerToNull()
     {
         CrashTelemetry telemetry = new();
@@ -59,7 +60,7 @@ public class CrashTelemetry_Tests
         telemetry.LoggerEventType.ShouldBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void StackHash_IsDeterministic()
     {
         CrashTelemetry t1 = new();
@@ -78,7 +79,7 @@ public class CrashTelemetry_Tests
         t1.StackHash.ShouldBe(t2.StackHash);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void StackTop_RedactsFilePaths()
     {
         CrashTelemetry telemetry = new();
@@ -99,7 +100,7 @@ public class CrashTelemetry_Tests
         stackTop.ShouldNotContain(nameof(CrashTelemetry_Tests) + ".cs");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetProperties_IncludesAllSetFields()
     {
         CrashTelemetry telemetry = new()
@@ -131,7 +132,7 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.BuildEngineHost)].ShouldBe("VS");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetProperties_OmitsNullFields()
     {
         CrashTelemetry telemetry = new()
@@ -151,7 +152,7 @@ public class CrashTelemetry_Tests
         props.ShouldNotContainKey(nameof(CrashTelemetry.BuildEngineHost));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetActivityProperties_IncludesAllSetFields()
     {
         CrashTelemetry telemetry = new()
@@ -181,14 +182,14 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.BuildEngineHost)].ShouldBe("CLI");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void EventName_IsCrash()
     {
         CrashTelemetry telemetry = new();
         telemetry.EventName.ShouldBe("crash");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_SetsInnermostExceptionType_ForNestedExceptions()
     {
         var root = new IOException("root cause");
@@ -211,7 +212,7 @@ public class CrashTelemetry_Tests
         telemetry.InnermostExceptionType.ShouldBe("System.IO.IOException");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_InnermostExceptionType_IsNull_WhenNoInnerException()
     {
         CrashTelemetry telemetry = new();
@@ -228,7 +229,7 @@ public class CrashTelemetry_Tests
         telemetry.InnermostExceptionType.ShouldBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_InnermostExceptionType_EqualsInner_WhenSingleInner()
     {
         var inner = new ArgumentException("inner");
@@ -250,7 +251,7 @@ public class CrashTelemetry_Tests
         telemetry.InnermostExceptionType.ShouldBe("System.ArgumentException");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_SetsCrashOriginToMSBuild_WhenExceptionFromMSBuildCode()
     {
         CrashTelemetry telemetry = new();
@@ -270,13 +271,13 @@ public class CrashTelemetry_Tests
         telemetry.CrashOriginNamespace.ShouldStartWith("Microsoft.Build");
     }
 
-    [Theory]
-    [InlineData("Microsoft.Build.BackEnd.SomeClass.Method", "Microsoft.Build.BackEnd")]
-    [InlineData("Microsoft.Build.Evaluation.ProjectParser.Parse", "Microsoft.Build.Evaluation")]
-    [InlineData("Microsoft.Build.Execution.BuildManager.Build", "Microsoft.Build.Execution")]
-    [InlineData("Microsoft.VisualStudio.RemoteControl.RemoteControlClient.GetFileAsync", "Microsoft.VisualStudio.RemoteControl")]
-    [InlineData("System.IO.File.ReadAllText", "System.IO")]
-    [InlineData("Newtonsoft.Json.JsonConvert.DeserializeObject", "Newtonsoft.Json")]
+    [MSBuildTestMethod]
+    [DataRow("Microsoft.Build.BackEnd.SomeClass.Method", "Microsoft.Build.BackEnd")]
+    [DataRow("Microsoft.Build.Evaluation.ProjectParser.Parse", "Microsoft.Build.Evaluation")]
+    [DataRow("Microsoft.Build.Execution.BuildManager.Build", "Microsoft.Build.Execution")]
+    [DataRow("Microsoft.VisualStudio.RemoteControl.RemoteControlClient.GetFileAsync", "Microsoft.VisualStudio.RemoteControl")]
+    [DataRow("System.IO.File.ReadAllText", "System.IO")]
+    [DataRow("Newtonsoft.Json.JsonConvert.DeserializeObject", "Newtonsoft.Json")]
     public void ExtractOriginNamespace_ExtractsCorrectNamespace(string qualifiedMethod, string expectedNamespace)
     {
         // Build a fake stack trace with the given qualified method.
@@ -288,22 +289,22 @@ public class CrashTelemetry_Tests
         result.ShouldBe(expectedNamespace);
     }
 
-    [Theory]
-    [InlineData("Microsoft.Build.BackEnd", "MSBuild")]
-    [InlineData("Microsoft.Build.Evaluation", "MSBuild")]
-    [InlineData("Microsoft.Build", "MSBuild")]
-    [InlineData("Microsoft.VisualStudio.RemoteControl", "ThirdParty")]
-    [InlineData("System.IO", "ThirdParty")]
-    [InlineData("Newtonsoft.Json", "ThirdParty")]
-    [InlineData(null, "Unknown")]
-    [InlineData("", "Unknown")]
+    [MSBuildTestMethod]
+    [DataRow("Microsoft.Build.BackEnd", "MSBuild")]
+    [DataRow("Microsoft.Build.Evaluation", "MSBuild")]
+    [DataRow("Microsoft.Build", "MSBuild")]
+    [DataRow("Microsoft.VisualStudio.RemoteControl", "ThirdParty")]
+    [DataRow("System.IO", "ThirdParty")]
+    [DataRow("Newtonsoft.Json", "ThirdParty")]
+    [DataRow(null, "Unknown")]
+    [DataRow("", "Unknown")]
     public void ClassifyOrigin_ReturnsCorrectCategory(string? originNamespace, string expectedOrigin)
     {
         CrashOriginKind result = CrashTelemetry.ClassifyOrigin(originNamespace);
         result.ToString().ShouldBe(expectedOrigin);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ExtractOriginNamespace_ReturnsNull_WhenNoStackTrace()
     {
         // An exception that was never thrown has no stack trace.
@@ -312,7 +313,7 @@ public class CrashTelemetry_Tests
         result.ShouldBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetProperties_IncludesNewFields()
     {
         CrashTelemetry telemetry = new()
@@ -336,7 +337,7 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.LoggerEventType)].ShouldBe("BuildFinishedEventArgs");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetActivityProperties_IncludesNewFields()
     {
         CrashTelemetry telemetry = new()
@@ -360,7 +361,7 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.LoggerEventType)].ShouldBe("BuildMessageEventArgs");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ExtractStackCaller_ReturnsCallerFrame_WhenTopIsThrowHelper()
     {
         string fakeStack =
@@ -374,7 +375,7 @@ public class CrashTelemetry_Tests
         caller.ShouldContain("Microsoft.Build.BackEnd.RequestBuilder.BuildProject");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ExtractStackCaller_ReturnsNull_WhenTopIsNotThrowHelper()
     {
         string fakeStack =
@@ -387,7 +388,7 @@ public class CrashTelemetry_Tests
         caller.ShouldBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ExtractStackCaller_ReturnsNull_WhenThrowHelperIsOnlyFrame()
     {
         string fakeStack = "   at Microsoft.Build.Shared.ErrorUtilities.ThrowInternalError(String message, Object[] args)";
@@ -398,7 +399,7 @@ public class CrashTelemetry_Tests
         caller.ShouldBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ExtractStackCaller_ReturnsNull_WhenNoStackTrace()
     {
         Exception ex = new Exception("no stack");
@@ -408,12 +409,12 @@ public class CrashTelemetry_Tests
         caller.ShouldBeNull();
     }
 
-    [Theory]
-    [InlineData("ErrorUtilities.VerifyThrowInternalError(")]
-    [InlineData("ErrorUtilities.ThrowInternalErrorUnreachable(")]
-    [InlineData("ErrorUtilities.VerifyThrowInternalNull(")]
-    [InlineData("ErrorUtilities.ThrowInvalidOperation(")]
-    [InlineData("ErrorUtilities.VerifyThrow(")]
+    [MSBuildTestMethod]
+    [DataRow("ErrorUtilities.VerifyThrowInternalError(")]
+    [DataRow("ErrorUtilities.ThrowInternalErrorUnreachable(")]
+    [DataRow("ErrorUtilities.VerifyThrowInternalNull(")]
+    [DataRow("ErrorUtilities.ThrowInvalidOperation(")]
+    [DataRow("ErrorUtilities.VerifyThrow(")]
     public void ExtractStackCaller_RecognizesAllThrowHelpers(string helperMethod)
     {
         string fakeStack =
@@ -427,7 +428,7 @@ public class CrashTelemetry_Tests
         caller.ShouldContain("Microsoft.Build.Evaluation.Evaluator.Evaluate");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ExtractStackCaller_RedactsFilePaths_InCallerFrame()
     {
         string fakeStack =
@@ -443,7 +444,7 @@ public class CrashTelemetry_Tests
         caller.ShouldContain(":line 42");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_SetsStackCaller_WhenThrowHelperIsOnTop()
     {
         CrashTelemetry telemetry = new();
@@ -462,7 +463,7 @@ public class CrashTelemetry_Tests
         telemetry.StackCaller!.ShouldContain("Microsoft.Build.Scheduler.ScheduleRequest");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_SetsExceptionMessage()
     {
         CrashTelemetry telemetry = new();
@@ -479,7 +480,7 @@ public class CrashTelemetry_Tests
         telemetry.ExceptionMessage.ShouldBe("something went wrong");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_StripsInternalErrorPrefix()
     {
         CrashTelemetry telemetry = new();
@@ -496,14 +497,14 @@ public class CrashTelemetry_Tests
         telemetry.ExceptionMessage.ShouldBe("All submissions not yet complete.");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TruncateMessage_ReturnsNull_WhenEmpty()
     {
         CrashTelemetry.TruncateMessage(null).ShouldBeNull();
         CrashTelemetry.TruncateMessage("").ShouldBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TruncateMessage_TruncatesLongMessages()
     {
         string longMessage = new string('x', 500);
@@ -513,7 +514,7 @@ public class CrashTelemetry_Tests
         result.Length.ShouldBe(256);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TruncateMessage_RedactsWindowsPaths()
     {
         string message = @"C:\Users\useralias\src\project.csproj unexpectedly not a rooted path";
@@ -526,7 +527,7 @@ public class CrashTelemetry_Tests
         result.ShouldContain("unexpectedly not a rooted path");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TruncateMessage_RedactsUnixPaths()
     {
         string message = @"/home/useralias/src/project.csproj unexpectedly not a rooted path";
@@ -537,7 +538,7 @@ public class CrashTelemetry_Tests
         result.ShouldContain("<path>");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TruncateMessage_PreservesNonPathMessages()
     {
         string message = "All submissions not yet complete.";
@@ -545,7 +546,7 @@ public class CrashTelemetry_Tests
         result.ShouldBe("All submissions not yet complete.");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_SetsCrashThreadName()
     {
         CrashTelemetry telemetry = new();
@@ -564,7 +565,7 @@ public class CrashTelemetry_Tests
         // In a named-thread scenario, it would capture the name.
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetProperties_IncludesStackCaller_WhenSet()
     {
         CrashTelemetry telemetry = new()
@@ -581,7 +582,7 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.ExceptionMessage)].ShouldBe("All submissions not yet complete.");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetProperties_OmitsStackCaller_WhenNull()
     {
         CrashTelemetry telemetry = new()
@@ -596,7 +597,7 @@ public class CrashTelemetry_Tests
         props.ShouldNotContainKey(nameof(CrashTelemetry.StackCaller));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetActivityProperties_IncludesStackCaller_WhenSet()
     {
         CrashTelemetry telemetry = new()
@@ -611,7 +612,7 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.StackCaller)].ShouldBe("at Microsoft.Build.BackEnd.RequestBuilder.BuildProject(String projectFile)");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_SetsFullStackTrace()
     {
         string fakeStack =
@@ -633,14 +634,14 @@ public class CrashTelemetry_Tests
         telemetry.FullStackTrace.ShouldContain("in <redacted>:line 42");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ExtractFullStackTrace_ReturnsNull_WhenNoStackTrace()
     {
         Exception ex = CreateExceptionWithStack(null!);
         CrashTelemetry.ExtractFullStackTrace(ex).ShouldBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void ExtractFullStackTrace_TruncatesLongStackTraces()
     {
         // Build a stack trace longer than MaxStackTraceLength
@@ -657,7 +658,7 @@ public class CrashTelemetry_Tests
         result.ShouldEndWith("... [truncated]");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void GetProperties_IncludesFullStackTrace_WhenSet()
     {
         CrashTelemetry telemetry = new()
@@ -670,7 +671,7 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.FullStackTrace)].ShouldBe("   at Foo.Bar()\n   at Baz.Qux()");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void SanitizeFilePathsInText_RedactsPathsInStackFrames()
     {
         string input = "   at Foo.Bar() in C:\\Users\\secret\\src\\file.cs:line 99";
@@ -679,7 +680,7 @@ public class CrashTelemetry_Tests
         result.ShouldContain("in <redacted>:line 99");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void SanitizeFilePathsInText_LeavesNonPathLinesUnchanged()
     {
         string input = "System.Exception: something broke\n   at Foo.Bar()";
@@ -687,7 +688,7 @@ public class CrashTelemetry_Tests
         result.ShouldBe(input);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void EndBuildHang_GetProperties_IncludesHangDiagnostics()
     {
         CrashTelemetry telemetry = new()
@@ -727,7 +728,7 @@ public class CrashTelemetry_Tests
         props.ShouldNotContainKey(nameof(CrashTelemetry.ActiveNodeDetails));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void EndBuildHang_GetActivityProperties_IncludesHangDiagnostics()
     {
         CrashTelemetry telemetry = new()
@@ -770,7 +771,7 @@ public class CrashTelemetry_Tests
         props[nameof(CrashTelemetry.ActiveNodeDetails)].ShouldBe("2:10:MyProject.csproj;3:idle;5:12:OtherProject.csproj;7:idle;9:error");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void EndBuildHang_GetProperties_OmitsNullHangProperties()
     {
         CrashTelemetry telemetry = new()
@@ -785,7 +786,7 @@ public class CrashTelemetry_Tests
         props.ShouldNotContainKey(nameof(CrashTelemetry.ThreadExceptionRecorded));
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void EndBuildHang_DroppedProperties_NotPresent()
     {
         // Verify that the dropped properties from the critical evaluation
@@ -817,7 +818,7 @@ public class CrashTelemetry_Tests
         return new ExceptionWithFakeStack(fakeStack);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TruncateMessage_RedactsUncPaths()
     {
         string message = @"Could not access \\server\share\builds\project.sln during build";
@@ -829,7 +830,7 @@ public class CrashTelemetry_Tests
         result.ShouldContain("<path>");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void TruncateMessage_RedactsPathsWithSpaces()
     {
         // Paths containing spaces are partially redacted — each non-space segment
@@ -844,7 +845,7 @@ public class CrashTelemetry_Tests
         result.ShouldContain("<path>");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void SanitizeFilePathsInText_RedactsPathsInNonStackFrameLines()
     {
         string input = "System.IO.FileNotFoundException: Could not find C:\\Users\\useralias\\project.csproj";
@@ -853,7 +854,7 @@ public class CrashTelemetry_Tests
         result.ShouldContain("<path>");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void SanitizeFilePathsInText_RedactsUncPathsInNonStackFrameLines()
     {
         string input = "Failed to load assembly from \\\\server\\share\\assembly.dll";
@@ -862,7 +863,7 @@ public class CrashTelemetry_Tests
         result.ShouldContain("<path>");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_CapturesInnerExceptionStack()
     {
         CrashTelemetry telemetry = new();
@@ -892,7 +893,7 @@ public class CrashTelemetry_Tests
         telemetry.InnerExceptionMessage!.ShouldContain("StreamWriter");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_InnerExceptionStack_SanitizesFilePaths()
     {
         string fakeInnerStack = "   at SomeLogger.HandleEvent() in C:\\Users\\useralias\\src\\Logger.cs:line 42";
@@ -908,7 +909,7 @@ public class CrashTelemetry_Tests
         telemetry.InnerExceptionStackTrace.ShouldContain("SomeLogger.HandleEvent");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_InnerExceptionMessage_SanitizesFilePaths()
     {
         var inner = new Exception("Cannot access C:\\Users\\useralias\\file.txt");
@@ -922,7 +923,7 @@ public class CrashTelemetry_Tests
         telemetry.InnerExceptionMessage.ShouldContain("<path>");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_LoggerEventType_IsNull_WhenNotLoggerException()
     {
         CrashTelemetry telemetry = new();
@@ -939,7 +940,7 @@ public class CrashTelemetry_Tests
         telemetry.LoggerEventType.ShouldBeNull();
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void PopulateFromException_LoggerEventType_FromExceptionWithBuildEventArgs()
     {
         // Simulate an exception type that has a BuildEventArgs property,
@@ -953,7 +954,7 @@ public class CrashTelemetry_Tests
         telemetry.LoggerEventType.ShouldBe("BuildFinishedEventArgs");
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void StackHash_IncludesInnerExceptionStack()
     {
         // Two wrapper exceptions with the same outer stack but different inner stacks
@@ -975,7 +976,7 @@ public class CrashTelemetry_Tests
         t1.StackHash.ShouldNotBe(t2.StackHash);
     }
 
-    [Fact]
+    [MSBuildTestMethod]
     public void StackHash_SameInnerException_ProducesSameHash()
     {
         var inner = new ExceptionWithFakeStack("   at LoggerA.Handle()");

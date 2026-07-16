@@ -8,13 +8,13 @@ using System.Reflection;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-using Xunit;
 using ResGen = Microsoft.Build.Tasks.GenerateResource.ResGen;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class ResGen_Tests
     {
         /// <summary>
@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests
         ///  - If there are InputFiles, verify that they all show up on the command line
         ///  - Verify that OutputFiles defaults appropriately
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void InputFiles()
         {
             ResGen t = new ResGen();
@@ -33,8 +33,8 @@ namespace Microsoft.Build.UnitTests
             ITaskItem[] multipleOutputs = { new TaskItem("hello.resources"), new TaskItem("world.resources"), new TaskItem("!.resources") };
 
             // Default:  InputFiles is null
-            Assert.Null(t.InputFiles); // "InputFiles is null by default"
-            Assert.Null(t.OutputFiles); // "OutputFiles is null by default"
+            Assert.IsNull(t.InputFiles); // "InputFiles is null by default"
+            Assert.IsNull(t.OutputFiles); // "OutputFiles is null by default"
             ExecuteTaskAndVerifyLogContainsResource(t, true /* task passes */, "ResGen.NoInputFiles");
 
             // One input file -- compile
@@ -42,8 +42,8 @@ namespace Microsoft.Build.UnitTests
             t.StronglyTypedLanguage = null;
             t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version45));
 
-            Assert.Equal(singleTestFile, t.InputFiles); // "New InputFiles value should be set"
-            Assert.Null(t.OutputFiles); // "OutputFiles is null until default name generation is triggered"
+            Assert.AreSequenceEqual(singleTestFile, t.InputFiles); // "New InputFiles value should be set"
+            Assert.IsNull(t.OutputFiles); // "OutputFiles is null until default name generation is triggered"
 
             string commandLineParameter = String.Join(",", new string[] { singleTestFile[0].ItemSpec, singleOutput[0].ItemSpec });
             CommandLine.ValidateHasParameter(t, commandLineParameter, true /* resgen 4.0 supports response files */);
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests
             t.OutputFiles = null; // want it to reset to default
             t.StronglyTypedLanguage = null;
 
-            Assert.Equal(multipleTestFiles, t.InputFiles); // "New InputFiles value should be set"
+            Assert.AreSequenceEqual(multipleTestFiles, t.InputFiles); // "New InputFiles value should be set"
 
             CommandLine.ValidateHasParameter(t, @"/compile", true /* resgen 4.0 supports response files */);
             for (int i = 0; i < multipleTestFiles.Length; i++)
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests
         ///  - Verify that if InputFiles and OutputFiles are different lengths (and both exist), an error is logged
         ///  - Verify that if OutputFiles are set explicitly, they map and show up on the command line as expected
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void OutputFiles()
         {
             ResGen t = new ResGen();
@@ -98,8 +98,8 @@ namespace Microsoft.Build.UnitTests
             t.OutputFiles = differentLengthOutput;
             t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version45));
 
-            Assert.Equal(differentLengthInput, t.InputFiles); // "New InputFiles value should be set"
-            Assert.Equal(differentLengthOutput, t.OutputFiles); // "New OutputFiles value should be set"
+            Assert.AreSequenceEqual(differentLengthInput, t.InputFiles); // "New InputFiles value should be set"
+            Assert.AreSequenceEqual(differentLengthOutput, t.OutputFiles); // "New OutputFiles value should be set"
 
             ExecuteTaskAndVerifyLogContainsErrorFromResource(
                 t,
@@ -116,8 +116,8 @@ namespace Microsoft.Build.UnitTests
             t.OutputFiles = differentLengthOutput;
             t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Version45));
 
-            Assert.Null(t.InputFiles); // "New InputFiles value should be set"
-            Assert.Equal(differentLengthOutput, t.OutputFiles); // "New OutputFiles value should be set"
+            Assert.IsNull(t.InputFiles); // "New InputFiles value should be set"
+            Assert.AreSequenceEqual(differentLengthOutput, t.OutputFiles); // "New OutputFiles value should be set"
 
             ExecuteTaskAndVerifyLogContainsResource(t, true /* task passes */, "ResGen.NoInputFiles");
 
@@ -125,8 +125,8 @@ namespace Microsoft.Build.UnitTests
             t.InputFiles = differentLengthInput;
             t.OutputFiles = null;
 
-            Assert.Equal(differentLengthInput, t.InputFiles); // "New InputFiles value should be set"
-            Assert.Null(t.OutputFiles); // "OutputFiles is null until default name generation is triggered"
+            Assert.AreSequenceEqual(differentLengthInput, t.InputFiles); // "New InputFiles value should be set"
+            Assert.IsNull(t.OutputFiles); // "OutputFiles is null until default name generation is triggered"
 
             string commandLineParameter = String.Join(",", new string[] { differentLengthInput[0].ItemSpec, differentLengthDefaultOutput[0].ItemSpec });
             CommandLine.ValidateHasParameter(t, commandLineParameter, true /* resgen 4.0 supports response files */);
@@ -140,8 +140,8 @@ namespace Microsoft.Build.UnitTests
             t.InputFiles = inputFiles;
             t.OutputFiles = null;
 
-            Assert.Equal(inputFiles, t.InputFiles); // "New InputFiles value should be set"
-            Assert.Null(t.OutputFiles); // "OutputFiles is null until default name generation is triggered"
+            Assert.AreSequenceEqual(inputFiles, t.InputFiles); // "New InputFiles value should be set"
+            Assert.IsNull(t.OutputFiles); // "OutputFiles is null until default name generation is triggered"
 
             commandLineParameter = String.Join(",", new string[] { inputFiles[0].ItemSpec, defaultOutput[0].ItemSpec });
             CommandLine.ValidateHasParameter(t, commandLineParameter, true /* resgen 4.0 supports response files */);
@@ -149,8 +149,8 @@ namespace Microsoft.Build.UnitTests
 
             t.OutputFiles = explicitOutput;
 
-            Assert.Equal(inputFiles, t.InputFiles); // "New InputFiles value should be set"
-            Assert.Equal(explicitOutput, t.OutputFiles); // "New OutputFiles value should be set"
+            Assert.AreSequenceEqual(inputFiles, t.InputFiles); // "New InputFiles value should be set"
+            Assert.AreSequenceEqual(explicitOutput, t.OutputFiles); // "New OutputFiles value should be set"
 
             commandLineParameter = String.Join(",", new string[] { inputFiles[0].ItemSpec, explicitOutput[0].ItemSpec });
             CommandLine.ValidateHasParameter(t, commandLineParameter, true /* resgen 4.0 supports response files */);
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests ResGen's /publicClass switch
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void PublicClass()
         {
             ResGen t = new ResGen();
@@ -169,18 +169,18 @@ namespace Microsoft.Build.UnitTests
             t.InputFiles = throwawayInput;
             t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Latest));
 
-            Assert.False(t.PublicClass); // "PublicClass should be false by default"
+            Assert.IsFalse(t.PublicClass); // "PublicClass should be false by default"
             CommandLine.ValidateNoParameterStartsWith(t, @"/publicClass", true /* resgen 4.0 supports response files */);
 
             t.PublicClass = true;
-            Assert.True(t.PublicClass); // "PublicClass should be true"
+            Assert.IsTrue(t.PublicClass); // "PublicClass should be true"
             CommandLine.ValidateHasParameter(t, @"/publicClass", true /* resgen 4.0 supports response files */);
         }
 
         /// <summary>
         /// Tests the /r: parameter (passing in reference assemblies)
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void References()
         {
             ResGen t = new ResGen();
@@ -197,17 +197,17 @@ namespace Microsoft.Build.UnitTests
             ITaskItem[] singleReference = { a };
             ITaskItem[] multipleReferences = { a, b };
 
-            Assert.Null(t.References); // "References should be null by default"
+            Assert.IsNull(t.References); // "References should be null by default"
             CommandLine.ValidateNoParameterStartsWith(t, "/r:", true /* resgen 4.0 supports response files */);
 
             // Single reference
             t.References = singleReference;
-            Assert.Equal(singleReference, t.References); // "New References value should be set"
+            Assert.AreSequenceEqual(singleReference, t.References); // "New References value should be set"
             CommandLine.ValidateHasParameter(t, "/r:" + singleReference[0].ItemSpec, true /* resgen 4.0 supports response files */);
 
             // MultipleReferences
             t.References = multipleReferences;
-            Assert.Equal(multipleReferences, t.References); // "New References value should be set"
+            Assert.AreSequenceEqual(multipleReferences, t.References); // "New References value should be set"
 
             foreach (ITaskItem reference in multipleReferences)
             {
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests
             t.References = references.ToArray();
             int baseCommandLineLength = CommandLine.GetCommandLine(t, false).Length;
 
-            Assert.True(baseCommandLineLength < maxCommandLineLength); // "Cannot create command line less than the maximum allowed command line"
+            Assert.IsTrue(baseCommandLineLength < maxCommandLineLength); // "Cannot create command line less than the maximum allowed command line"
 
             // calculate how many reference arguments will need to be added and what the length of the last argument
             // should be so that the command line length is equal to the maximum allowed length
@@ -283,7 +283,7 @@ namespace Microsoft.Build.UnitTests
             t.References = references.ToArray();
 
             int commandLineLength = CommandLine.GetCommandLine(t, false).Length;
-            Assert.Equal(commandLineLength, maxCommandLineLength);
+            Assert.AreEqual(commandLineLength, maxCommandLineLength);
 
             ExecuteTaskAndVerifyLogDoesNotContainResource(
                 t,
@@ -307,7 +307,7 @@ namespace Microsoft.Build.UnitTests
             t.References = references.ToArray();
 
             commandLineLength = CommandLine.GetCommandLine(t, false).Length;
-            Assert.Equal(commandLineLength, maxCommandLineLength + 1);
+            Assert.AreEqual(commandLineLength, maxCommandLineLength + 1);
 
             ExecuteTaskAndVerifyLogContainsErrorFromResource(
                 t,
@@ -334,7 +334,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests the SdkToolsPath property:  Should log an error if it's null or a bad path.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void SdkToolsPath()
         {
             ResGen t = new ResGen();
@@ -345,21 +345,21 @@ namespace Microsoft.Build.UnitTests
             // Without any inputs, the task just passes
             t.InputFiles = throwawayInput;
 
-            Assert.Null(t.SdkToolsPath); // "SdkToolsPath should be null by default"
+            Assert.IsNull(t.SdkToolsPath); // "SdkToolsPath should be null by default"
             ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "ResGen.SdkOrToolPathNotSpecifiedOrInvalid", t.SdkToolsPath, t.ToolPath);
 
             t.SdkToolsPath = badParameterValue;
-            Assert.Equal(badParameterValue, t.SdkToolsPath); // "New SdkToolsPath value should be set"
+            Assert.AreEqual(badParameterValue, t.SdkToolsPath); // "New SdkToolsPath value should be set"
             ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "ResGen.SdkOrToolPathNotSpecifiedOrInvalid", t.SdkToolsPath, t.ToolPath);
 
             MockEngine e = new MockEngine();
             t.BuildEngine = e;
             t.SdkToolsPath = goodParameterValue;
 
-            Assert.Equal(goodParameterValue, t.SdkToolsPath); // "New SdkToolsPath value should be set"
+            Assert.AreEqual(goodParameterValue, t.SdkToolsPath); // "New SdkToolsPath value should be set"
 
             bool taskPassed = t.Execute();
-            Assert.False(taskPassed); // "Task should still fail -- there are other things wrong with it."
+            Assert.IsFalse(taskPassed); // "Task should still fail -- there are other things wrong with it."
 
             // but that particular error shouldn't be there anymore.
             string sdkToolsPathMessage = t.Log.FormatResourceString("ResGen.SdkOrToolPathNotSpecifiedOrInvalid", t.SdkToolsPath, t.ToolPath);
@@ -371,7 +371,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verifies the parameters that for resgen.exe's /str: switch
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void StronglyTypedParameters()
         {
             ResGen t = new ResGen();
@@ -387,7 +387,7 @@ namespace Microsoft.Build.UnitTests
             t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Latest));
 
             // Language is null by default
-            Assert.Null(t.StronglyTypedLanguage); // "StronglyTypedLanguage should be null by default"
+            Assert.IsNull(t.StronglyTypedLanguage); // "StronglyTypedLanguage should be null by default"
             CommandLine.ValidateNoParameterStartsWith(t, "/str:", false /* resgen 4.0 does not appear to support response files for STR */);
 
             // If other STR parameters are passed, we error, suggesting they might want a language as well.
@@ -426,7 +426,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests the ToolPath property:  Should log an error if it's null or a bad path.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void ToolPath()
         {
             ResGen t = new ResGen();
@@ -437,21 +437,21 @@ namespace Microsoft.Build.UnitTests
             // Without any inputs, the task just passes
             t.InputFiles = throwawayInput;
 
-            Assert.Null(t.ToolPath); // "ToolPath should be null by default"
+            Assert.IsNull(t.ToolPath); // "ToolPath should be null by default"
             ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "ResGen.SdkOrToolPathNotSpecifiedOrInvalid", t.SdkToolsPath, t.ToolPath);
 
             t.ToolPath = badParameterValue;
-            Assert.Equal(badParameterValue, t.ToolPath); // "New ToolPath value should be set"
+            Assert.AreEqual(badParameterValue, t.ToolPath); // "New ToolPath value should be set"
             ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "ResGen.SdkOrToolPathNotSpecifiedOrInvalid", t.SdkToolsPath, t.ToolPath);
 
             MockEngine e = new MockEngine();
             t.BuildEngine = e;
             t.ToolPath = goodParameterValue;
 
-            Assert.Equal(goodParameterValue, t.ToolPath); // "New ToolPath value should be set"
+            Assert.AreEqual(goodParameterValue, t.ToolPath); // "New ToolPath value should be set"
 
             bool taskPassed = t.Execute();
-            Assert.False(taskPassed); // "Task should still fail -- there are other things wrong with it."
+            Assert.IsFalse(taskPassed); // "Task should still fail -- there are other things wrong with it."
 
             // but that particular error shouldn't be there anymore.
             string toolPathMessage = t.Log.FormatResourceString("ResGen.SdkOrToolPathNotSpecifiedOrInvalid", t.SdkToolsPath, t.ToolPath);
@@ -463,7 +463,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Tests ResGen's /useSourcePath switch
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void UseSourcePath()
         {
             ResGen t = new ResGen();
@@ -472,11 +472,11 @@ namespace Microsoft.Build.UnitTests
             t.InputFiles = throwawayInput;
             t.ToolPath = Path.GetDirectoryName(ToolLocationHelper.GetPathToDotNetFrameworkSdkFile("resgen.exe", TargetDotNetFrameworkVersion.Latest));
 
-            Assert.False(t.UseSourcePath); // "UseSourcePath should be false by default"
+            Assert.IsFalse(t.UseSourcePath); // "UseSourcePath should be false by default"
             CommandLine.ValidateNoParameterStartsWith(t, @"/useSourcePath", true /* resgen 4.0 supports response files */);
 
             t.UseSourcePath = true;
-            Assert.True(t.UseSourcePath); // "UseSourcePath should be true"
+            Assert.IsTrue(t.UseSourcePath); // "UseSourcePath should be true"
             CommandLine.ValidateHasParameter(t, @"/useSourcePath", true /* resgen 4.0 supports response files */);
         }
 
@@ -510,7 +510,7 @@ namespace Microsoft.Build.UnitTests
             t.BuildEngine = e;
 
             bool taskPassed = t.Execute();
-            Assert.Equal(taskPassed, expectedResult); // "Unexpected task result"
+            Assert.AreEqual(expectedResult, taskPassed); // "Unexpected task result"
 
             VerifyLogContainsResource(e, t.Log, resourceString, args);
         }
@@ -544,7 +544,7 @@ namespace Microsoft.Build.UnitTests
             t.BuildEngine = e;
 
             bool taskPassed = t.Execute();
-            Assert.Equal(taskPassed, expectedResult); // "Unexpected task result"
+            Assert.AreEqual(expectedResult, taskPassed); // "Unexpected task result"
 
             VerifyLogDoesNotContainResource(e, t.Log, resourceString, args);
         }

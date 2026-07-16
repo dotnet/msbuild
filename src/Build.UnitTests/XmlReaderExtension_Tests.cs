@@ -7,17 +7,17 @@ using System.Linq;
 
 using Microsoft.Build.Evaluation;
 using Shouldly;
-using Xunit;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public class XmlReaderExtension_Tests
     {
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public XmlReaderExtension_Tests(ITestOutputHelper output)
+        public XmlReaderExtension_Tests(TestContext output)
         {
             _output = output;
         }

@@ -10,13 +10,13 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
-using Xunit;
 using TYPELIBATTR = Windows.Win32.System.Com.TLIBATTR;
 
 #nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
+    [TestClass]
     public sealed class ResolveComReference_Tests
     {
         /// <summary>
@@ -38,26 +38,26 @@ namespace Microsoft.Build.UnitTests
         private void AssertReference(ITaskItem item, bool valid, string attribute)
         {
             string missingOrInvalidAttribute;
-            Assert.Equal(ResolveComReference.VerifyReferenceMetadataForNameItem(item, out missingOrInvalidAttribute), valid);
-            Assert.Equal(missingOrInvalidAttribute, attribute);
+            Assert.AreEqual(ResolveComReference.VerifyReferenceMetadataForNameItem(item, out missingOrInvalidAttribute), valid);
+            Assert.AreEqual(missingOrInvalidAttribute, attribute);
         }
 
         private void AssertMetadataInitialized(ITaskItem item, string metadataName, string metadataValue)
         {
-            Assert.Equal(item.GetMetadata(metadataName), metadataValue);
+            Assert.AreEqual(item.GetMetadata(metadataName), metadataValue);
         }
 
         /// <summary>
         /// Issue in this bug was an ArgumentNullException when ResolvedAssemblyReferences was null
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void GetResolvedASsemblyReferenceSpecNotNull()
         {
             var task = new ResolveComReference();
-            Assert.NotNull(task.GetResolvedAssemblyReferenceItemSpecs());
+            Assert.IsNotNull(task.GetResolvedAssemblyReferenceItemSpecs());
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void TestSerializationAndDeserialization()
         {
             ResolveComReferenceCache cache = new("path1", "path2");
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests
          *
          * Checks if verification of Com reference item metadata works properly
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckComReferenceMetadataVerificationForNameItems()
         {
             // valid item
@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests
          *
          * Checks if missing optional attributes for COM name references get initialized correctly
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckComReferenceMetadataInitializationForNameItems()
         {
             // missing lcid - should get initialized to 0
@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
          *
          * Checks if missing optional attributes for COM file references get initialized correctly
          */
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckComReferenceMetadataInitializationForFileItems()
         {
             // missing wrapperTool - should get initialized to tlbimp
@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the ResolveComReference.TaskItemToTypeLibAttr method
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckTaskItemToTypeLibAttr()
         {
             Guid refGuid = Guid.NewGuid();
@@ -233,10 +233,10 @@ namespace Microsoft.Build.UnitTests
             TaskItem reference = CreateComReferenceTaskItem("ref", refGuid.ToString(), "11", "0", "1033", ComReferenceTypes.tlbimp);
             TYPELIBATTR refAttr = ResolveComReference.TaskItemToTypeLibAttr(reference);
 
-            Assert.Equal(refGuid, refAttr.guid); // "incorrect guid"
-            Assert.Equal(11, (int)refAttr.wMajorVerNum); // "incorrect version major"
-            Assert.Equal(0, (int)refAttr.wMinorVerNum); // "incorrect version minor"
-            Assert.Equal(1033, (int)refAttr.lcid); // "incorrect lcid"
+            Assert.AreEqual(refGuid, refAttr.guid); // "incorrect guid"
+            Assert.AreEqual(11, (int)refAttr.wMajorVerNum); // "incorrect version major"
+            Assert.AreEqual(0, (int)refAttr.wMinorVerNum); // "incorrect version minor"
+            Assert.AreEqual(1033, (int)refAttr.lcid); // "incorrect lcid"
         }
 
         /// <summary>
@@ -296,7 +296,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Unit test for the ResolveComReference.IsExistingProjectReference() method
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckIsExistingProjectReference()
         {
             TYPELIBATTR axAttr, tlbAttr, piaAttr, notInProjectAttr;
@@ -315,51 +315,51 @@ namespace Microsoft.Build.UnitTests
 
             // find the Ax ref, matching with any type of reference - should NOT find it
             bool retValue = rcr.IsExistingProjectReference(axAttr, null, out ComReferenceInfo referenceInfo);
-            Assert.True(!retValue && referenceInfo == null); // "ActiveX ref should NOT be found for any type of ref"
+            Assert.IsTrue(!retValue && referenceInfo == null); // "ActiveX ref should NOT be found for any type of ref"
 
             // find the Ax ref, matching with aximp types - should find it
             retValue = rcr.IsExistingProjectReference(axAttr, ComReferenceTypes.aximp, out referenceInfo);
-            Assert.True(retValue && referenceInfo == axRefInfo); // "ActiveX ref should be found for aximp ref types"
+            Assert.IsTrue(retValue && referenceInfo == axRefInfo); // "ActiveX ref should be found for aximp ref types"
 
             // find the Ax ref, matching with tlbimp types - should NOT find it
             retValue = rcr.IsExistingProjectReference(axAttr, ComReferenceTypes.tlbimp, out referenceInfo);
-            Assert.True(!retValue && referenceInfo == null); // "ActiveX ref should NOT be found for tlbimp ref types"
+            Assert.IsTrue(!retValue && referenceInfo == null); // "ActiveX ref should NOT be found for tlbimp ref types"
 
 
             // find the Tlb ref, matching with any type of reference - should find it
             retValue = rcr.IsExistingProjectReference(tlbAttr, null, out referenceInfo);
-            Assert.True(retValue && referenceInfo == tlbRefInfo); // "Tlb ref should be found for any type of ref"
+            Assert.IsTrue(retValue && referenceInfo == tlbRefInfo); // "Tlb ref should be found for any type of ref"
 
             // find the Tlb ref, matching with tlbimp types - should find it
             retValue = rcr.IsExistingProjectReference(tlbAttr, ComReferenceTypes.tlbimp, out referenceInfo);
-            Assert.True(retValue && referenceInfo == tlbRefInfo); // "Tlb ref should be found for tlbimp ref types"
+            Assert.IsTrue(retValue && referenceInfo == tlbRefInfo); // "Tlb ref should be found for tlbimp ref types"
 
             // find the Tlb ref, matching with pia types - should NOT find it
             retValue = rcr.IsExistingProjectReference(tlbAttr, ComReferenceTypes.primary, out referenceInfo);
-            Assert.True(!retValue && referenceInfo == null); // "Tlb ref should NOT be found for primary ref types"
+            Assert.IsTrue(!retValue && referenceInfo == null); // "Tlb ref should NOT be found for primary ref types"
 
 
             // find the Pia ref, matching with any type of reference - should find it
             retValue = rcr.IsExistingProjectReference(piaAttr, null, out referenceInfo);
-            Assert.True(retValue && referenceInfo == piaRefInfo); // "Pia ref should be found for any type of ref"
+            Assert.IsTrue(retValue && referenceInfo == piaRefInfo); // "Pia ref should be found for any type of ref"
 
             // find the Pia ref, matching with pia types - should find it
             retValue = rcr.IsExistingProjectReference(piaAttr, ComReferenceTypes.primary, out referenceInfo);
-            Assert.True(retValue && referenceInfo == piaRefInfo); // "Pia ref should be found for pia ref types"
+            Assert.IsTrue(retValue && referenceInfo == piaRefInfo); // "Pia ref should be found for pia ref types"
 
             // find the Pia ref, matching with pia types - should NOT find it
             retValue = rcr.IsExistingProjectReference(piaAttr, ComReferenceTypes.aximp, out referenceInfo);
-            Assert.True(!retValue && referenceInfo == null); // "Pia ref should NOT be found for aximp ref types"
+            Assert.IsTrue(!retValue && referenceInfo == null); // "Pia ref should NOT be found for aximp ref types"
 
             // try to find a non existing reference
             retValue = rcr.IsExistingProjectReference(notInProjectAttr, null, out referenceInfo);
-            Assert.True(!retValue && referenceInfo == null); // "not in project ref should not be found"
+            Assert.IsTrue(!retValue && referenceInfo == null); // "not in project ref should not be found"
         }
 
         /// <summary>
         /// Unit test for the ResolveComReference.IsExistingDependencyReference() method
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckIsExistingDependencyReference()
         {
             TYPELIBATTR axAttr, tlbAttr, piaAttr, notInProjectAttr;
@@ -378,32 +378,32 @@ namespace Microsoft.Build.UnitTests
 
             // find the Ax ref - should find it
             bool retValue = rcr.IsExistingDependencyReference(axAttr, out ComReferenceInfo referenceInfo);
-            Assert.True(retValue && referenceInfo == axRefInfo); // "ActiveX ref should be found"
+            Assert.IsTrue(retValue && referenceInfo == axRefInfo); // "ActiveX ref should be found"
 
             // find the Tlb ref - should find it
             retValue = rcr.IsExistingDependencyReference(tlbAttr, out referenceInfo);
-            Assert.True(retValue && referenceInfo == tlbRefInfo); // "Tlb ref should be found"
+            Assert.IsTrue(retValue && referenceInfo == tlbRefInfo); // "Tlb ref should be found"
 
             // find the Pia ref - should find it
             retValue = rcr.IsExistingDependencyReference(piaAttr, out referenceInfo);
-            Assert.True(retValue && referenceInfo == piaRefInfo); // "Pia ref should be found"
+            Assert.IsTrue(retValue && referenceInfo == piaRefInfo); // "Pia ref should be found"
 
             // try to find a non existing reference - should not find it
             retValue = rcr.IsExistingDependencyReference(notInProjectAttr, out referenceInfo);
-            Assert.True(!retValue && referenceInfo == null); // "not in project ref should not be found"
+            Assert.IsTrue(!retValue && referenceInfo == null); // "not in project ref should not be found"
 
             // Now, try to resolve a non-existent ComAssemblyReference.
             string path;
             IComReferenceResolver resolver = (IComReferenceResolver)rcr;
-            Assert.False(resolver.ResolveComAssemblyReference("MyAssembly", out path));
-            Assert.Null(path);
+            Assert.IsFalse(resolver.ResolveComAssemblyReference("MyAssembly", out path));
+            Assert.IsNull(path);
         }
 
         /// <summary>
         /// ResolveComReference automatically adds missing tlbimp references for aximp references.
         /// This test verifies we actually create the missing references.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckAddMissingTlbReference()
         {
             TYPELIBATTR axAttr, tlbAttr, piaAttr, notInProjectAttr;
@@ -423,22 +423,22 @@ namespace Microsoft.Build.UnitTests
 
             rcr.AddMissingTlbReferences();
 
-            Assert.Equal(4, rcr.allProjectRefs.Count); // "There should be four references now"
+            Assert.AreEqual(4, rcr.allProjectRefs.Count); // "There should be four references now"
 
             ComReferenceInfo newTlbInfo = (ComReferenceInfo)rcr.allProjectRefs[3];
-            Assert.Equal(axRefInfo.primaryOfAxImpRef, newTlbInfo); // "axRefInfo should hold back reference to tlbRefInfo"
-            Assert.True(ComReference.AreTypeLibAttrEqual(newTlbInfo.attr, axRefInfo.attr)); // "The added reference should have the same attributes as the Ax reference"
-            Assert.Equal(axRefInfo.typeLibName, newTlbInfo.typeLibName); // "The added reference should have the same type lib name as the Ax reference"
-            Assert.Equal(axRefInfo.strippedTypeLibPath, newTlbInfo.strippedTypeLibPath); // "The added reference should have the same type lib path as the Ax reference"
+            Assert.AreEqual(axRefInfo.primaryOfAxImpRef, newTlbInfo); // "axRefInfo should hold back reference to tlbRefInfo"
+            Assert.IsTrue(ComReference.AreTypeLibAttrEqual(newTlbInfo.attr, axRefInfo.attr)); // "The added reference should have the same attributes as the Ax reference"
+            Assert.AreEqual(axRefInfo.typeLibName, newTlbInfo.typeLibName); // "The added reference should have the same type lib name as the Ax reference"
+            Assert.AreEqual(axRefInfo.strippedTypeLibPath, newTlbInfo.strippedTypeLibPath); // "The added reference should have the same type lib path as the Ax reference"
 
-            Assert.Equal(newTlbInfo.taskItem.ItemSpec, axRefInfo.taskItem.ItemSpec); // "The added reference should have the same task item spec as the Ax reference"
-            Assert.Equal(ComReferenceTypes.primaryortlbimp, newTlbInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.wrapperTool)); // "The added reference should have the tlbimp/primary wrapper tool"
+            Assert.AreEqual(newTlbInfo.taskItem.ItemSpec, axRefInfo.taskItem.ItemSpec); // "The added reference should have the same task item spec as the Ax reference"
+            Assert.AreEqual(ComReferenceTypes.primaryortlbimp, newTlbInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.wrapperTool)); // "The added reference should have the tlbimp/primary wrapper tool"
 
             rcr.AddMissingTlbReferences();
-            Assert.Equal(4, rcr.allProjectRefs.Count); // "There should still be four references"
+            Assert.AreEqual(4, rcr.allProjectRefs.Count); // "There should still be four references"
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void BothKeyFileAndKeyContainer()
         {
             var rcr = new ResolveComReference();
@@ -448,12 +448,12 @@ namespace Microsoft.Build.UnitTests
             rcr.KeyFile = "foo";
             rcr.KeyContainer = "bar";
 
-            Assert.False(rcr.Execute());
+            Assert.IsFalse(rcr.Execute());
 
             e.AssertLogContains("MSB3300");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void DelaySignWithoutEitherKeyFileOrKeyContainer()
         {
             var rcr = new ResolveComReference();
@@ -461,7 +461,7 @@ namespace Microsoft.Build.UnitTests
             rcr.BuildEngine = e;
 
             rcr.DelaySign = true;
-            Assert.False(rcr.Execute());
+            Assert.IsFalse(rcr.Execute());
 
             e.AssertLogContains("MSB3301");
         }
@@ -469,7 +469,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test if assemblies located in the gac get their CopyLocal attribute set to False
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckSetCopyLocalToFalseOnEmbedInteropTypesAssemblies()
         {
             string gacPath = @"C:\windows\gac";
@@ -539,25 +539,25 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 // if Private is missing, by default GAC items are CopyLocal=false, non GAC CopyLocal=true
-                Assert.Equal(nonGacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "true");
+                Assert.AreEqual(nonGacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "true");
 
-                Assert.Equal(gacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "false");
+                Assert.AreEqual(gacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "false");
 
                 // if Private is set, it takes precedence
-                Assert.Equal(nonGacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "false");
+                Assert.AreEqual(nonGacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "false");
 
-                Assert.Equal(gacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "false");
+                Assert.AreEqual(gacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "false");
 
-                Assert.Equal(nonGacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "true");
+                Assert.AreEqual(nonGacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "true");
 
-                Assert.Equal(gacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "true");
+                Assert.AreEqual(gacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal), enabledNoPIA ? "false" : "true");
             }
         }
 
         /// <summary>
         /// Test if assemblies located in the gac get their CopyLocal attribute set to False
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void CheckSetCopyLocalToFalseOnGacAssemblies()
         {
             string gacPath = @"C:\windows\gac";
@@ -591,24 +591,24 @@ namespace Microsoft.Build.UnitTests
             rcr.SetCopyLocalToFalseOnGacOrNoPIAAssemblies(taskItems, gacPath);
 
             // if Private is missing, by default GAC items are CopyLocal=false, non GAC CopyLocal=true
-            Assert.Equal("true", nonGacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal)); // "Non Gac assembly, missing Private, should be TRUE"
+            Assert.AreEqual("true", nonGacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal)); // "Non Gac assembly, missing Private, should be TRUE"
 
-            Assert.Equal("false", gacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal)); // "Gac assembly, missing Private, should be FALSE"
+            Assert.AreEqual("false", gacNoPrivate.GetMetadata(ItemMetadataNames.copyLocal)); // "Gac assembly, missing Private, should be FALSE"
 
             // if Private is set, it takes precedence
-            Assert.Equal("false", nonGacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal)); // "Non Gac assembly, Private false, should be FALSE"
+            Assert.AreEqual("false", nonGacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal)); // "Non Gac assembly, Private false, should be FALSE"
 
-            Assert.Equal("false", gacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal)); // "Gac assembly, Private false, should be FALSE"
+            Assert.AreEqual("false", gacPrivateFalse.GetMetadata(ItemMetadataNames.copyLocal)); // "Gac assembly, Private false, should be FALSE"
 
-            Assert.Equal("true", nonGacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal)); // "Non Gac assembly, Private true, should be TRUE"
+            Assert.AreEqual("true", nonGacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal)); // "Non Gac assembly, Private true, should be TRUE"
 
-            Assert.Equal("true", gacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal)); // "Gac assembly, Private true, should be TRUE"
+            Assert.AreEqual("true", gacPrivateTrue.GetMetadata(ItemMetadataNames.copyLocal)); // "Gac assembly, Private true, should be TRUE"
         }
 
         /// <summary>
         /// Make sure the conflicting references are detected correctly
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void TestCheckForConflictingReferences()
         {
             TYPELIBATTR axAttr, tlbAttr, piaAttr, notInProjectAttr;
@@ -627,8 +627,8 @@ namespace Microsoft.Build.UnitTests
             rcr.allProjectRefs.Add(piaRefInfo);
 
             // no conflicts should be found with just the three initial refs
-            Assert.True(rcr.CheckForConflictingReferences());
-            Assert.Equal(3, rcr.allProjectRefs.Count);
+            Assert.IsTrue(rcr.CheckForConflictingReferences());
+            Assert.AreEqual(3, rcr.allProjectRefs.Count);
 
 
             // duplicate refs should not be treated as conflicts
@@ -639,8 +639,8 @@ namespace Microsoft.Build.UnitTests
             referenceInfo = new ComReferenceInfo(piaRefInfo);
             rcr.allProjectRefs.Add(referenceInfo);
 
-            Assert.True(rcr.CheckForConflictingReferences());
-            Assert.Equal(6, rcr.allProjectRefs.Count);
+            Assert.IsTrue(rcr.CheckForConflictingReferences());
+            Assert.AreEqual(6, rcr.allProjectRefs.Count);
 
             // tlb and ax refs with same lib name but different attributes should be considered conflicting
             // We don't care about typelib name conflicts for PIA refs, because we don't have to create wrappers for them
@@ -654,10 +654,10 @@ namespace Microsoft.Build.UnitTests
             piaRef.attr = notInProjectAttr;
             rcr.allProjectRefs.Add(piaRef);
 
-            Assert.False(rcr.CheckForConflictingReferences());
+            Assert.IsFalse(rcr.CheckForConflictingReferences());
 
             // ... and conflicting references should have been removed
-            Assert.Equal(7, rcr.allProjectRefs.Count);
+            Assert.AreEqual(7, rcr.allProjectRefs.Count);
             Assert.DoesNotContain(conflictTlb, rcr.allProjectRefs);
             Assert.DoesNotContain(conflictAx, rcr.allProjectRefs);
             Assert.Contains(piaRef, rcr.allProjectRefs);
@@ -670,12 +670,12 @@ namespace Microsoft.Build.UnitTests
         /// v3.5 path.  It is difficult to verify the tool paths in a unit test, however, so
         /// this was done by ad hoc testing and will be maintained by the dev suites.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void MultiTargetingDefaultSetCorrectly()
         {
             ResolveComReference t = new ResolveComReference();
 
-            Assert.True(t.ExecuteAsTool); // "ExecuteAsTool should default to true"
+            Assert.IsTrue(t.ExecuteAsTool); // "ExecuteAsTool should default to true"
         }
 
         /// <summary>
@@ -683,7 +683,7 @@ namespace Microsoft.Build.UnitTests
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
         /// its corresponding TLB wrapper.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AxReferenceKnowsItsRCWCreateTlb()
         {
             CheckAxReferenceRCWTlbExists(RcwStyle.GenerateTlb /* have RCR create the TLB reference */, false /* don't include TLB version in the interop name */);
@@ -694,7 +694,7 @@ namespace Microsoft.Build.UnitTests
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
         /// its corresponding TLB wrapper.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AxReferenceKnowsItsRCWCreateTlb_IncludeVersion()
         {
             CheckAxReferenceRCWTlbExists(RcwStyle.GenerateTlb /* have RCR create the TLB reference */, true /* include TLB version in the interop name */);
@@ -705,7 +705,7 @@ namespace Microsoft.Build.UnitTests
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
         /// its corresponding TLB wrapper.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AxReferenceKnowsItsRCWTlbExists()
         {
             CheckAxReferenceRCWTlbExists(RcwStyle.PreexistingTlb /* pass in the TLB reference */, false /* don't include TLB version in the interop name */);
@@ -718,7 +718,7 @@ namespace Microsoft.Build.UnitTests
         ///
         /// Tests that still works when IncludeVersionInInteropName = true
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AxReferenceKnowsItsRCWTlbExists_IncludeVersion()
         {
             CheckAxReferenceRCWTlbExists(RcwStyle.PreexistingTlb /* pass in the TLB reference */, true /* include TLB version in the interop name */);
@@ -729,7 +729,7 @@ namespace Microsoft.Build.UnitTests
         /// passed via the /rcw switch, so RCR needs to make sure that the ax reference knows about
         /// its corresponding TLB wrapper.
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AxReferenceKnowsItsRCWPiaExists()
         {
             CheckAxReferenceRCWTlbExists(RcwStyle.PreexistingPia /* pass in the TLB reference */, false /* don't include version in the interop name */);
@@ -742,7 +742,7 @@ namespace Microsoft.Build.UnitTests
         ///
         /// Tests that still works when IncludeVersionInInteropName = true
         /// </summary>
-        [Fact]
+        [MSBuildTestMethod]
         public void AxReferenceKnowsItsRCWPiaExists_IncludeVersion()
         {
             CheckAxReferenceRCWTlbExists(RcwStyle.PreexistingPia /* pass in the PIA reference */, true /* include version in the interop name */);
@@ -794,13 +794,13 @@ namespace Microsoft.Build.UnitTests
 
             rcr.AddMissingTlbReferences();
 
-            Assert.Equal(2, rcr.allProjectRefs.Count); // "Should be two references"
+            Assert.AreEqual(2, rcr.allProjectRefs.Count); // "Should be two references"
 
             tlbRefInfo = rcr.allProjectRefs[1];
             var embedInteropTypes = tlbRefInfo.taskItem.GetMetadata(ItemMetadataNames.embedInteropTypes);
-            Assert.Equal("false", embedInteropTypes); // "The tlb wrapper for the activex control should have EmbedInteropTypes=false not " + embedInteropTypes);
-            Assert.True(ComReference.AreTypeLibAttrEqual(tlbRefInfo.attr, axRefInfo.attr)); // "reference information should be the same"
-            Assert.Equal(TlbReference.GetWrapperFileName(
+            Assert.AreEqual("false", embedInteropTypes); // "The tlb wrapper for the activex control should have EmbedInteropTypes=false not " + embedInteropTypes);
+            Assert.IsTrue(ComReference.AreTypeLibAttrEqual(tlbRefInfo.attr, axRefInfo.attr)); // "reference information should be the same"
+            Assert.AreEqual(TlbReference.GetWrapperFileName(
                         axRefInfo.taskItem.GetMetadata(ComReferenceItemMetadataNames.tlbReferenceName),
                         includeVersionInInteropName,
                         (short)axRefInfo.attr.wMajorVerNum,

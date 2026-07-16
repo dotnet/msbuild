@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -7,19 +7,19 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
-using Xunit;
 
 namespace Microsoft.Build.Engine.UnitTests
 {
+    [TestClass]
     public class AssemblyTaskFactory_E2E_Tests
     {
         private static string AssemblyLocation { get; } = Path.Combine(Path.GetDirectoryName(typeof(NetTaskHost_E2E_Tests).Assembly.Location) ?? AppContext.BaseDirectory);
 
         private static string TestAssetsRootPath { get; } = Path.Combine(AssemblyLocation, "TestAssets");
 
-        private readonly ITestOutputHelper _output;
+        private readonly TestContext _output;
 
-        public AssemblyTaskFactory_E2E_Tests(ITestOutputHelper output)
+        public AssemblyTaskFactory_E2E_Tests(TestContext output)
         {
             _output = output;
         }

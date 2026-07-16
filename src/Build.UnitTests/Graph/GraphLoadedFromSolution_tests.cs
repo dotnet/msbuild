@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -12,7 +12,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
-using Xunit;
 using static Microsoft.Build.Graph.UnitTests.GraphTestingUtilities;
 using static Microsoft.Build.UnitTests.Helpers;
 
@@ -20,18 +19,19 @@ using static Microsoft.Build.UnitTests.Helpers;
 
 namespace Microsoft.Build.Graph.UnitTests
 {
+    [TestClass]
     public class GraphLoadedFromSolutionTests : IDisposable
     {
         private TestEnvironment _env;
 
-        public GraphLoadedFromSolutionTests(ITestOutputHelper output)
+        public GraphLoadedFromSolutionTests(TestContext output)
         {
             _env = TestEnvironment.Create(output);
         }
 
-        [Theory]
-        [InlineData("1.sln", "2.sln")]
-        [InlineData("1.sln", "2.proj")]
+        [MSBuildTestMethod]
+        [DataRow("1.sln", "2.sln")]
+        [DataRow("1.sln", "2.proj")]
         public void ASolutionShouldBeTheSingleEntryPoint(params string[] files)
         {
             for (var i = 0; i < files.Length; i++)
@@ -48,7 +48,7 @@ namespace Microsoft.Build.Graph.UnitTests
             exception.Message.ShouldContain("MSB4261");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void GraphConstructionFailsOnNonExistentSolution()
         {
             var exception = Should.Throw<InvalidProjectFileException>(
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Graph.UnitTests
             exception.Message.ShouldContain("Could not find file");
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void StaticGraphShouldNotSupportNestedSolutions()
         {
             var solutionFile = _env.CreateFile("solutionReference.sln", string.Empty).Path;
@@ -188,8 +188,9 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Theory(Skip = "hangs in CI, can't repro locally: https://github.com/dotnet/msbuild/issues/5453")]
-        [MemberData(nameof(GraphsWithUniformSolutionConfigurations))]
+        [MSBuildTestMethod]
+        [Ignore("hangs in CI, can't repro locally: https://github.com/dotnet/msbuild/issues/5453")]
+        [DynamicData(nameof(GraphsWithUniformSolutionConfigurations))]
         public void GraphConstructionCanLoadEntryPointsFromSolution(
             Dictionary<int, int[]> edges,
             SolutionConfigurationInSolution currentSolutionConfiguration,
@@ -198,8 +199,9 @@ namespace Microsoft.Build.Graph.UnitTests
             AssertSolutionBasedGraph(edges, currentSolutionConfiguration, solutionConfigurations);
         }
 
-        [Theory(Skip = "hangs in CI, can't repro locally: https://github.com/dotnet/msbuild/issues/5453")]
-        [MemberData(nameof(GraphsWithUniformSolutionConfigurations))]
+        [MSBuildTestMethod]
+        [Ignore("hangs in CI, can't repro locally: https://github.com/dotnet/msbuild/issues/5453")]
+        [DynamicData(nameof(GraphsWithUniformSolutionConfigurations))]
         public void SolutionBasedGraphCanMatchProjectSpecificConfigurations(
             Dictionary<int, int[]> edges,
             SolutionConfigurationInSolution currentSolutionConfiguration,
@@ -219,7 +221,7 @@ namespace Microsoft.Build.Graph.UnitTests
             AssertSolutionBasedGraph(edges, currentSolutionConfiguration, solutionConfigurations, projectSpecificConfigurations);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SolutionParserIgnoresProjectConfigurationsThatDoNotFullyMatchAnySolutionConfiguration()
         {
             var solutionContents = new SolutionFileBuilder
@@ -474,8 +476,8 @@ namespace Microsoft.Build.Graph.UnitTests
             }
         }
 
-        [Theory]
-        [MemberData(nameof(SolutionOnlyDependenciesData), DisableDiscoveryEnumeration = true)]
+        [MSBuildTestMethod]
+        [DynamicData(nameof(SolutionOnlyDependenciesData))]
         public void SolutionsCanInjectEdgesIntoTheProjectGraph(Dictionary<int, int[]> edges, (int, int)[] solutionDependencies, bool hasCycle, bool solutionEdgesOverlapGraphEdges)
         {
             // Use the same global properties as the solution would use so all ConfigurationMetadata objects would match on global properties.
@@ -581,7 +583,7 @@ namespace Microsoft.Build.Graph.UnitTests
             solutionOnlyEdges.ShouldBeEmpty();
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SolutionEdgesShouldNotOverwriteProjectReferenceEdges()
         {
             var solutionContents = SolutionFileBuilder.FromGraphEdges(
@@ -600,7 +602,7 @@ namespace Microsoft.Build.Graph.UnitTests
             edges.First().Value.ItemType.ShouldBe(ItemTypeNames.ProjectReference);
         }
 
-        [Fact]
+        [MSBuildTestMethod]
         public void SolutionEdgesShouldNotOverwriteMultitargetingEdges()
         {
             var solutionContents = new SolutionFileBuilder
