@@ -73,6 +73,8 @@ In multi-process execution (out-of-proc task host) and when a task is instantiat
 
 Constructor injection also applies to host-registered tasks (the reflection-free `Microsoft.Build.Utilities.Task.RegisterTask` path used for trimming/Native AOT). The generic `RegisterTask<T>(string)` overload injects the `TaskEnvironment` when `T` declares such a constructor (its public constructors are already trim-rooted). Because that overload's `new()` constraint requires a parameterless constructor, a task whose *only* constructor takes a `TaskEnvironment` is registered through the `RegisterTask(string, Func<TaskEnvironment, ITask>)` factory overload, which hands the environment to the factory. See [task-class-registration-api.md](../task-class-registration-api.md).
 
+The task-authoring analyzer reports `MSBuildTask0010` at Info severity for concrete `IMultiThreadableTask` implementations that rely only on post-construction property injection. Add a public constructor whose single parameter is `TaskEnvironment` to make the environment available during construction. A task may retain a public parameterless constructor for callers that instantiate it directly; the engine prefers the injecting constructor when both are present.
+
 Task authors who want to support older MSBuild versions need to:
 - Maintain both thread-safe and legacy implementations.
 - Use conditional task declarations based on MSBuild version to select which assembly to load the task from.

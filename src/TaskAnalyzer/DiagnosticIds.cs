@@ -35,5 +35,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>Task property uses ITaskItem&lt;T&gt; with a type argument not supported by MSBuild's task parameter binder.</summary>
         public const string UnsupportedTaskItemType = "MSBuildTask0009";
+
+        /// <summary>Task should receive TaskEnvironment through constructor injection.</summary>
+        public const string PreferTaskEnvironmentConstructorInjection = "MSBuildTask0010";
     }
 }
