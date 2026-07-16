@@ -188,34 +188,6 @@ namespace Microsoft.Build.Utilities
 
         /// <summary>
         /// Registers a task under the name a target uses to invoke it (the <c>TaskName</c> of a
-        /// <c>&lt;UsingTask&gt;</c>) with a factory that receives the <see cref="TaskEnvironment"/> the engine is
-        /// running the task with, while still statically rooting the task type's public constructors and
-        /// properties for trimming. Use this trim-safe overload for tasks that do not have a public parameterless
-        /// constructor (for example tasks that require a <see cref="TaskEnvironment"/> at construction time).
-        /// </summary>
-        /// <typeparam name="T">
-        /// The task type to register. The <c>[DynamicallyAccessedMembers]</c> roots the type's public
-        /// constructors and properties so a trimmer preserves them, keeping reflective parameter binding working.
-        /// </typeparam>
-        /// <param name="taskName">
-        /// The name a target uses to invoke the task. This is the <c>TaskName</c> of the corresponding
-        /// <c>&lt;UsingTask&gt;</c> (typically the task's class name, optionally namespace-qualified).
-        /// </param>
-        /// <param name="factory">A delegate that creates a new instance of the task given the current <see cref="TaskEnvironment"/>.</param>
-        /// <remarks>
-        /// Intended to be called once per task during host initialization, before the first build. This method is
-        /// thread-safe; registering the same name again replaces the previous registration. A registered name
-        /// takes precedence over a project-level <c>&lt;UsingTask&gt;</c> of the same name.
-        /// </remarks>
-        public static void RegisterTask<
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>(
-            string taskName,
-            Func<TaskEnvironment, ITask> factory)
-            where T : ITask
-            => TaskClassRegistry.Register<T>(taskName, factory);
-
-        /// <summary>
-        /// Registers a task under the name a target uses to invoke it (the <c>TaskName</c> of a
         /// <c>&lt;UsingTask&gt;</c>) with an explicit factory, so construction is fully reflection-free (the
         /// host supplies the constructor). Use this for tasks without a public parameterless constructor or
         /// that need custom construction.
