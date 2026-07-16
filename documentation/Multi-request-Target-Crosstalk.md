@@ -94,21 +94,21 @@ This can make the ordering inconsistent even when the projects are unchanged.
 
 ## Relationship to static graph builds
 
-[Static graph builds](specs/static-graph.md#inferring-which-targets-to-run-for-a-project-within-the-graph) address an important source of multi-request target crosstalk. Before execution, the graph propagates the `ProjectReferenceTargets` mappings, aggregates the target lists that reach each graph node, and submits one build request for that node with the combined target list. When the graph and its target mappings are complete, separately arriving project-reference requests therefore cannot determine which subset of targets starts the project instance.
+[Static graph builds](specs/static-graph.md#inferring-which-targets-to-run-for-a-project-within-the-graph) address one source of multi-request target crosstalk. Before execution, the graph propagates `ProjectReferenceTargets` mappings, aggregates each node’s target lists, and submits one request with the combined list. With a complete graph and target mappings, separately arriving project-reference requests cannot determine which targets start the project instance.
 
-This fully addresses the request-arrival aspect of crosstalk for target requests represented by the graph, but it does not eliminate the broader problem in every graph build:
+This eliminates request-arrival crosstalk for targets represented by the graph, but not in every graph build:
 
-- A non-isolated graph build can encounter an `MSBuild` task invocation or target list that was not predicted by the graph and fall back to classic just-in-time execution. That late request can still produce crosstalk. An isolated graph build instead reports the missing result as an error.
-- Aggregation removes arrival-order dependence between the represented requests, but the aggregate target list still has an order. Static graph preserves order within each propagated target list, while target lists from different incoming edges are concatenated. Targets still share mutable project state and execute only once, so correctness can remain sensitive to ordering that is not encoded in target dependencies.
+- A non-isolated graph build can encounter an `MSBuild` task invocation or target list that was not predicted by the graph and fall back to just-in-time execution, allowing crosstalk. An isolated graph build instead reports the missing result as an error.
+- Aggregation removes arrival-order dependence, but the combined target list remains ordered. Static graph preserves order within each propagated list and concatenates lists from different incoming edges. Targets still share mutable state and execute once, so correctness can depend on ordering that is not clearly declared.
 
-Static graph therefore prevents this crosstalk when its model is complete, but does not make arbitrary target sets freely composable.
+A complete static graph therefore prevents this crosstalk but does not make arbitrary target sets freely composable.
 
 ## Why the behavior is surprising
 
-Each contributing behavior is independently established:
+Each contributing behavior is established:
 
 - Targets can mutate project properties and items during execution.
-- Targets are guaranteed to execute exactly once per build per project instance/configuration.
-- Requests can arrive after execution of the configuration has already begun.
+- Targets are guaranteed to execute at most once per build for a given configuration.
+- Requests can arrive after the configuration starts executing.
 
-Multi-request target crosstalk is the unexpected composition of those behaviors. It is a consequence of current engine semantics, but it is often difficult for project authors and engine contributors to predict or diagnose.
+The _composition_ is often difficult for project authors and engine contributors to predict or diagnose.
