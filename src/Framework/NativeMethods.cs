@@ -821,29 +821,19 @@ internal static class NativeMethods
             errorMessage = e.Message;
             return false;
         }
-#else
-        bool symbolicLinkCreated;
-#if FEATURE_WINDOWSINTEROP
-        if (IsWindows)
+#elif FEATURE_WINDOWSINTEROP
+        Version osVersion = Environment.OSVersion.Version;
+        SYMBOLIC_LINK_FLAGS flags = 0; // File = 0 (no named constant)
+        if (osVersion.Major >= 11 || (osVersion.Major == 10 && osVersion.Build >= 14972))
         {
-            Version osVersion = Environment.OSVersion.Version;
-            SYMBOLIC_LINK_FLAGS flags = 0; // File = 0 (no named constant)
-            if (osVersion.Major >= 11 || (osVersion.Major == 10 && osVersion.Build >= 14972))
-            {
-                flags |= SYMBOLIC_LINK_FLAGS.SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE;
-            }
-
-            symbolicLinkCreated = PInvoke.CreateSymbolicLink(newFileName, existingFileName, flags);
-            errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
-        }
-        else
-#endif
-        {
-            symbolicLinkCreated = symlink(existingFileName, newFileName) == 0;
-            errorMessage = symbolicLinkCreated ? null : Marshal.GetLastWin32Error().ToString();
+            flags |= SYMBOLIC_LINK_FLAGS.SYMBOLIC_LINK_FLAG_ALLOW_UNPRIVILEGED_CREATE;
         }
 
+        bool symbolicLinkCreated = PInvoke.CreateSymbolicLink(newFileName, existingFileName, flags);
+        errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
         return symbolicLinkCreated;
+#else // This would be hit on .NET Standard under source build, but we are producing only a reference assembly there, so just return false.
+        return false;
 #endif
     }
 
@@ -1315,17 +1305,6 @@ internal static class NativeMethods
         }
 #endif
     }
-
-    [SupportedOSPlatform("linux")]
-    [DllImport("libc", SetLastError = true)]
-    internal static extern int chmod(string pathname, int mode);
-
-    [SupportedOSPlatform("linux")]
-    [DllImport("libc", SetLastError = true)]
-    internal static extern int mkdir(string path, int mode);
-
-    [DllImport("libc", SetLastError = true)]
-    internal static extern int symlink(string oldpath, string newpath);
 
 #if FEATURE_WINDOWSINTEROP
     [SupportedOSPlatform("windows6.1")]
