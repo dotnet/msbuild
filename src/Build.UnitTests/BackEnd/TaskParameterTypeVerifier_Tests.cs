@@ -72,6 +72,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.False(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(string[])));
         }
 
+        [Fact]
+        public void IsValidScalarInputParameter_CustomValueType_ReturnsTrue()
+        {
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(TestStruct)).ShouldBeTrue();
+        }
+
         #endregion
 
         #region IsValidVectorInputParameter Tests
@@ -192,6 +198,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void IsValueTypeOutputParameter_Object_ReturnsFalse()
         {
             Assert.False(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(object)));
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_TaskItemOfInt_ReturnsFalse()
+        {
+            TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(TaskItem<int>)).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_CustomValueType_ReturnsTrue()
+        {
+            TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(TestStruct)).ShouldBeTrue();
         }
 
         #endregion
@@ -373,6 +391,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             AssertTaskItemTypeArgumentSupport(typeof(TaskItem<>), typeArgument, expected: false);
         }
 
+        [Fact]
+        public void DerivedTaskItemInterface_IsRejectedForInputAndAcceptedForOutput()
+        {
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ICustomTaskItem<int>)).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(ICustomTaskItem<int>[])).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ICustomTaskItem<int>)).ShouldBeTrue();
+            TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ICustomTaskItem<int>[])).ShouldBeTrue();
+        }
+
         private static void AssertTaskItemTypeArgumentSupport(Type genericTaskItemType, Type typeArgument, bool expected)
         {
             Type taskItemType = genericTaskItemType.MakeGenericType(typeArgument);
@@ -418,6 +445,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         private readonly struct TestStruct
+        {
+        }
+
+        private interface ICustomTaskItem<T> : ITaskItem<T>
         {
         }
 

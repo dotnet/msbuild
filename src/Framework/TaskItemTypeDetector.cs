@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Microsoft.Build.Framework;
 
@@ -9,10 +10,6 @@ namespace Microsoft.Build.Shared
 {
     internal static class TaskItemTypeDetector
     {
-        // The generic type definitions (ITaskItem<T>/TaskItem<T>) are matched by full type name because
-        // callers pass the FullName of whichever definition they care about (see IsSupportedTaskItemOfT).
-        private const string GenericITaskItemFullName = "Microsoft.Build.Framework.ITaskItem`1";
-
         internal static bool IsAbsolutePathType(Type type) => type == typeof(AbsolutePath);
 
         /// <summary>
@@ -26,62 +23,26 @@ namespace Microsoft.Build.Shared
             => type == typeof(AbsolutePath) || type == typeof(FileInfo) || type == typeof(DirectoryInfo);
 
         /// <summary>
-        /// Returns true if <paramref name="type"/> is supported by <see cref="ValueTypeParser"/>.
+        /// Gets the value type from a declared <see cref="ITaskItem{T}"/> or <see cref="TaskItem{T}"/> type.
         /// </summary>
-        internal static bool IsSupportedTaskItemType(Type type)
-            => type == typeof(string)
-                || type == typeof(bool)
-                || type == typeof(char)
-                || type == typeof(byte)
-                || type == typeof(sbyte)
-                || type == typeof(short)
-                || type == typeof(ushort)
-                || type == typeof(int)
-                || type == typeof(uint)
-                || type == typeof(long)
-                || type == typeof(ulong)
-                || type == typeof(float)
-                || type == typeof(double)
-                || type == typeof(decimal)
-                || type == typeof(DateTime)
-                || IsSupportedPathType(type);
-
-        /// <summary>
-        /// Checks if <paramref name="parameterType"/> is the generic TaskItem type identified by
-        /// <paramref name="genericTaskItemTypeDefinitionFullName"/>.
-        /// </summary>
-        internal static bool IsTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
+        internal static bool TryGetTaskItemValueType(Type parameterType, [NotNullWhen(true)] out Type? valueType)
         {
             if (!parameterType.IsGenericType)
             {
+                valueType = null;
                 return false;
             }
 
             Type genericTypeDefinition = parameterType.GetGenericTypeDefinition();
-            if (!string.Equals(genericTypeDefinition.FullName, genericTaskItemTypeDefinitionFullName, StringComparison.Ordinal))
+            if (genericTypeDefinition != typeof(ITaskItem<>)
+                && genericTypeDefinition != typeof(TaskItem<>))
             {
+                valueType = null;
                 return false;
             }
 
-            return parameterType.GetGenericArguments().Length == 1;
+            valueType = parameterType.GetGenericArguments()[0];
+            return true;
         }
-
-        /// <summary>
-        /// Checks if <paramref name="parameterType"/> is the generic TaskItem type identified by
-        /// <paramref name="genericTaskItemTypeDefinitionFullName"/> where <c>T</c> is supported by
-        /// <see cref="ValueTypeParser"/>.
-        /// </summary>
-        internal static bool IsSupportedTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
-        {
-            if (!IsTaskItemOfT(parameterType, genericTaskItemTypeDefinitionFullName))
-            {
-                return false;
-            }
-
-            return IsSupportedTaskItemType(parameterType.GetGenericArguments()[0]);
-        }
-
-        internal static bool IsSupportedITaskItemOfT(Type parameterType)
-            => IsSupportedTaskItemOfT(parameterType, GenericITaskItemFullName);
     }
 }
