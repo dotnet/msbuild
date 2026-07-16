@@ -27,10 +27,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         {
             INamedTypeSymbol? multiThreadableTaskType =
                 context.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
+            if (multiThreadableTaskType is null)
+            {
+                return;
+            }
+
             INamedTypeSymbol? taskEnvironmentType =
                 context.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
-
-            if (multiThreadableTaskType is null || taskEnvironmentType is null)
+            if (taskEnvironmentType is null)
             {
                 return;
             }
