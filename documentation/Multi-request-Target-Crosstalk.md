@@ -68,7 +68,7 @@ Auxiliary targets often are not intended to affect `Build`, but can accidentally
 
 Crosstalk can also change target execution order, and thus build outputs, without directly overwriting state.
 
-Suppose an auxiliary target depends on a target that is also part of `Build`:
+Suppose an auxiliary target depends on a target also depended on by `Build`:
 
 ```xml
 <Target Name="Auxiliary"
@@ -78,19 +78,19 @@ Suppose an auxiliary target depends on a target that is also part of `Build`:
         DependsOnTargets="Prepare;ResolveReferences;Compile" />
 ```
 
-If `Auxiliary` runs first, it pulls `ResolveReferences` forward. When `Build` later reaches `ResolveReferences`, MSBuild reuses its existing result.
+If `Auxiliary` runs first, it pulls `ResolveReferences` forward; `Build` later reuses that result.
 
-The effective sequence is therefore different from the sequence produced by a standalone `Build` request. In this simplified case, that means that `Prepare` doesn’t run before `ResolveReferences`.
+The order differs from a standalone `Build`; here, `Prepare` doesn’t run before `ResolveReferences`.
 
 ## Why arrival order varies
 
-Which request reaches a project first can change because of:
+Request arrival order can change because of:
 
 - Parallel scheduling and ordinary timing variation.
 - Solution or traversal edges competing with project-reference edges.
 - Incremental builds changing which projects or targets perform work.
 
-This can make the ordering inconsistent even when the project graph and inputs are unchanged.
+This can make the ordering inconsistent even when the projects are unchanged.
 
 ## Relationship to static graph builds
 
@@ -101,7 +101,7 @@ This fully addresses the request-arrival aspect of crosstalk for target requests
 - A non-isolated graph build can encounter an `MSBuild` task invocation or target list that was not predicted by the graph and fall back to classic just-in-time execution. That late request can still produce crosstalk. An isolated graph build instead reports the missing result as an error.
 - Aggregation removes arrival-order dependence between the represented requests, but the aggregate target list still has an order. Static graph preserves order within each propagated target list, while target lists from different incoming edges are concatenated. Targets still share mutable project state and execute only once, so correctness can remain sensitive to ordering that is not encoded in target dependencies.
 
-Static graph therefore prevents this form of crosstalk when its model is complete, but it does not make arbitrary target sets freely composable.
+Static graph therefore prevents this crosstalk when its model is complete, but does not make arbitrary target sets freely composable.
 
 ## Why the behavior is surprising
 
