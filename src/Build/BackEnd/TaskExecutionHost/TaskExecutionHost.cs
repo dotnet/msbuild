@@ -914,13 +914,6 @@ namespace Microsoft.Build.BackEnd
         #region Local Methods
 
         /// <summary>
-        /// Checks if a type is TaskItem&lt;T&gt; or ITaskItem&lt;T&gt; where T is path-like.
-        /// </summary>
-        private static bool IsPathLikeTaskItemOrITaskItemOfT(Type parameterType)
-            => TaskParameterTypeVerifier.IsPathLikeITaskItemOfT(parameterType)
-                || TaskParameterTypeVerifier.IsPathLikeTaskItemOfT(parameterType, typeof(TaskItem<>).FullName);
-
-        /// <summary>
         /// Cache of compiled constructor delegates that wrap an <see cref="ITaskItem"/> into a
         /// <see cref="TaskItem{T}"/>, keyed by the generic argument T. Building the closed generic type and
         /// resolving the constructor via reflection on every parameter binding is expensive, so the delegate
@@ -1030,7 +1023,7 @@ namespace Microsoft.Build.BackEnd
 
                     return InternalSetTaskParameter(parameter, finalInputs);
                 }
-                else if (IsPathLikeTaskItemOrITaskItemOfT(elementType))
+                else if (TaskParameterTypeVerifier.TryGetSupportedTaskItemValueType(elementType, out Type taskItemValueType))
                 {
                     // TaskItem<T> / ITaskItem<T> arrays: wrap each item into the closed generic TaskItem<T>.
 #if NET
@@ -1044,7 +1037,7 @@ namespace Microsoft.Build.BackEnd
                         TaskItem item = taskItems[i];
                         currentItem = item;
                         RecordItemForDisconnectIfNecessary(item);
-                        ITaskItem taskItemOfT = CreateTaskItemOfT(elementType.GetGenericArguments()[0], item);
+                        ITaskItem taskItemOfT = CreateTaskItemOfT(taskItemValueType, item);
                         finalInputs.SetValue(taskItemOfT, i);
                     }
 
@@ -1140,7 +1133,7 @@ namespace Microsoft.Build.BackEnd
             }
 
             Type outputType = outputs.GetType();
-            if (outputType.IsArray && IsPathLikeTaskItemOrITaskItemOfT(outputType.GetElementType()))
+            if (outputType.IsArray && typeof(ITaskItem).IsAssignableFrom(outputType.GetElementType()))
             {
                 Array taskItemArray = (Array)outputs;
                 ITaskItem[] result = new ITaskItem[taskItemArray.Length];
@@ -1559,7 +1552,8 @@ namespace Microsoft.Build.BackEnd
 
             try
             {
-                if (parameterType == typeof(ITaskItem) || IsPathLikeTaskItemOrITaskItemOfT(parameterType))
+                bool isSupportedTypedTaskItem = TaskParameterTypeVerifier.TryGetSupportedTaskItemValueType(parameterType, out Type taskItemValueType);
+                if (parameterType == typeof(ITaskItem) || isSupportedTypedTaskItem)
                 {
                     // We don't know how many items we're going to end up with, but we'll
                     // keep adding them to this arraylist as we find them.
@@ -1587,9 +1581,9 @@ namespace Microsoft.Build.BackEnd
 
                         RecordItemForDisconnectIfNecessary(finalTaskItems[0]);
 
-                        if (IsPathLikeTaskItemOrITaskItemOfT(parameterType))
+                        if (isSupportedTypedTaskItem)
                         {
-                            ITaskItem taskItemOfT = CreateTaskItemOfT(parameterType.GetGenericArguments()[0], finalTaskItems[0]);
+                            ITaskItem taskItemOfT = CreateTaskItemOfT(taskItemValueType, finalTaskItems[0]);
                             success = InternalSetTaskParameter(parameter, taskItemOfT);
                         }
                         else

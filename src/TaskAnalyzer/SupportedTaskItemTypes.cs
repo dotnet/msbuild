@@ -8,8 +8,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 {
     internal static class SupportedTaskItemTypes
     {
-        // These are the types ValueTypeParser can parse and MSBuildTask0007 may suggest. This set is
-        // intentionally broader than the ITaskItem<T> types accepted by the current engine binder below.
+        // These are the special types supported by ValueTypeParser and the ITaskItem<T> binder.
         private readonly struct SupportedSpecialType
         {
             internal SupportedSpecialType(SpecialType specialType, string displayName)
@@ -40,9 +39,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 new SupportedSpecialType(SpecialType.System_DateTime, "DateTime"),
                 new SupportedSpecialType(SpecialType.System_String, "string"));
 
-        // Keep the user-facing list next to IsSupportedTaskItemType. Both mirror the runtime Type-based
-        // TaskItemTypeDetector, which the Roslyn analyzer cannot call with compile-time ITypeSymbol values.
-        internal const string SupportedTaskItemTypeDisplayNames = "AbsolutePath, FileInfo, DirectoryInfo";
+        // These types have dedicated parsing paths and do not rely on Convert.ChangeType.
+        internal const string DirectlyParsedTaskItemTypeDisplayNames =
+            "string, bool, AbsolutePath, FileInfo, DirectoryInfo";
 
         internal static bool TryGetSpecialTypeDisplayName(SpecialType specialType, out string? displayName)
         {
@@ -59,13 +58,30 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             return false;
         }
 
+        internal static bool IsConvertChangeTypeTaskItemType(SpecialType specialType)
+            => specialType is
+                SpecialType.System_Char or
+                SpecialType.System_Byte or
+                SpecialType.System_SByte or
+                SpecialType.System_Int16 or
+                SpecialType.System_UInt16 or
+                SpecialType.System_Int32 or
+                SpecialType.System_UInt32 or
+                SpecialType.System_Int64 or
+                SpecialType.System_UInt64 or
+                SpecialType.System_Single or
+                SpecialType.System_Double or
+                SpecialType.System_Decimal or
+                SpecialType.System_DateTime;
+
         internal static bool IsSupportedTaskItemType(
             ITypeSymbol type,
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? fileInfoType,
             INamedTypeSymbol? directoryInfoType)
         {
-            return (absolutePathType is not null && SymbolEqualityComparer.Default.Equals(type, absolutePathType))
+            return TryGetSpecialTypeDisplayName(type.SpecialType, out _)
+                || (absolutePathType is not null && SymbolEqualityComparer.Default.Equals(type, absolutePathType))
                 || (fileInfoType is not null && SymbolEqualityComparer.Default.Equals(type, fileInfoType))
                 || (directoryInfoType is not null && SymbolEqualityComparer.Default.Equals(type, directoryInfoType));
         }

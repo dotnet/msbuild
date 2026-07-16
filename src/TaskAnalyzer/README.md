@@ -23,6 +23,7 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0007** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
 | **MSBuildTask0008** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
 | **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
+| **MSBuildTask0010** | Error | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -230,7 +231,9 @@ For a reference-typed target (`FileInfo`/`DirectoryInfo`) the guard is a null-co
 
 When a task property is typed as `ITaskItem<T>` or `ITaskItem<T>[]` but `T` is not supported by MSBuild's task parameter binder, a **Warning** is emitted. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.
 
-**Supported type arguments:** `AbsolutePath`, `FileInfo`, `DirectoryInfo`.
+**Directly parsed type arguments:** `string`, `bool`, `AbsolutePath`, `FileInfo`, `DirectoryInfo`.
+
+The binder also accepts `char`, numeric primitives, `decimal`, and `DateTime`, but MSBuildTask0010 rejects those types because they rely on `Convert.ChangeType`.
 
 ```csharp
 // ⚠️ MSBuildTask0009: Task property 'Id' uses ITaskItem<Guid> but 'Guid' is not supported
@@ -238,7 +241,7 @@ public class MyTask : Task
 {
     public ITaskItem<System.Guid> Id { get; set; }       // warning
     public ITaskItem<System.TimeSpan>[] Durations { get; set; }  // warning
-    public ITaskItem<int> Count { get; set; }             // warning until value-type binding is supported
+    public ITaskItem<int> Count { get; set; }             // MSBuildTask0010 error
 }
 ```
 
@@ -246,15 +249,31 @@ No code fix is offered for MSBuildTask0009 — the resolution depends on the int
 
 **Scope:** All `ITask` implementations (not just multithreaded tasks), since using an unsupported T is always a runtime correctness problem.
 
+### MSBuildTask0010 — Culture-Sensitive `ITaskItem<T>` Conversion
+
+MSBuild binds `ITaskItem<T>` for `char`, numeric primitives, `decimal`, and `DateTime` through `Convert.ChangeType` using `CultureInfo.InvariantCulture`. Because this implicit conversion may not match the task's intended culture, the analyzer reports an **Error** whenever one of these types is used.
+
+```csharp
+public class MyTask : Task
+{
+    public ITaskItem<int> Count { get; set; }       // error
+    public ITaskItem<DateTime>[] Dates { get; set; } // error
+}
+```
+
+Use `ITaskItem<string>` and parse `Value` explicitly with the intended culture. `ITaskItem<bool>`, `ITaskItem<AbsolutePath>`, `ITaskItem<FileInfo>`, and `ITaskItem<DirectoryInfo>` use dedicated parser paths and do not produce MSBuildTask0010.
+
+**Scope:** All `ITask` implementations, including input, output, scalar, and array properties.
+
 ## Analysis Scope
 
 The analyzer determines what to check based on the type declaration:
 
 | Type | Rules Applied |
 |---|---|
-| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009 |
+| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009–MSBuildTask0010 |
 | Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
-| Class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009 only |
+| Class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0010 only |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
 | Regular class (no task interface or attribute) | Not analyzed |
 
@@ -267,6 +286,7 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 ### Severity Levels
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
+- **MSBuildTask0010** is always **Error** — task item conversions must not rely on `Convert.ChangeType`.
 - **MSBuildTask0002–MSBuildTask0005 and MSBuildTask0009** report as **Warning** for all task types.
 - **MSBuildTask0006–MSBuildTask0008** report as **Info** — these are modernization suggestions, not correctness issues.
 
