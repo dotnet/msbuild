@@ -397,9 +397,9 @@ namespace Microsoft.Build.Tasks
             return true;
         }
 
-        private delegate bool CreateLinkProc(string source, string destination, ref string errorMessage);
+        private delegate bool CreateLinkDelegate(string source, string destination, ref string errorMessage);
 
-        private void TryCopyViaLink(string linkComment, FileState sourceFileState, FileState destinationFileState, out bool linkCreated, ref string errorMessage, CreateLinkProc createLink)
+        private void TryCopyViaLink(string linkComment, FileState sourceFileState, FileState destinationFileState, out bool linkCreated, ref string errorMessage, CreateLinkDelegate createLink)
         {
             // Do not log a fake command line as well, as it's superfluous, and also potentially expensive
             Log.LogMessage(MessageImportance.Normal, linkComment, sourceFileState.Path, destinationFileState.Path);
