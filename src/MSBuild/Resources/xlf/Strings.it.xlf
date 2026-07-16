@@ -397,42 +397,42 @@ Questo flag è sperimentale e potrebbe non funzionare come previsto.
       </trans-unit>
       <trans-unit id="MSBuildServerNodeReused">
         <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
-        <target state="new">Reusing the running MSBuild Server node for this build (process ID {0}).</target>
+        <target state="translated">Riutilizzo del nodo del server MSBuild in esecuzione per questa compilazione (ID del processo {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawned">
         <source>MSBuild Server node started for this build (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build (process ID {0}).</target>
+        <target state="translated">Nodo del server MSBuild avviato per questa compilazione (ID del processo {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawnedShortLived">
         <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</target>
+        <target state="translated">Nodo del server MSBuild avviato solo per questa compilazione; verrà arrestato in seguito (ID del processo {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNotUsedForBuild">
         <source>MSBuild Server was requested but not used for this build: {0}.</source>
-        <target state="new">MSBuild Server was requested but not used for this build: {0}.</target>
+        <target state="translated">Il server MSBuild è stato richiesto ma non è stato usato per questa compilazione: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonBusy">
         <source>the server was busy with another build</source>
-        <target state="new">the server was busy with another build</target>
+        <target state="translated">il server era impegnato con un'altra compilazione</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
         <source>this invocation is not compatible with MSBuild Server</source>
-        <target state="new">this invocation is not compatible with MSBuild Server</target>
+        <target state="translated">questa chiamata non è compatibile con MSBuild Server</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
         <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
-        <target state="new">node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</target>
+        <target state="translated">Il riutilizzo dei nodi è disabilitato (-nodeReuse:false o MSBUILDDISABLENODEREUSE=1)</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
         <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
-        <target state="new">the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</target>
+        <target state="translated">l'opzione di emergenza MSBUILDENSURESTDOUTFORTASKPROCESSES è abilitata</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
