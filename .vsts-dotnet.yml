@@ -2,12 +2,6 @@ trigger:
 - main
 - vs*
 
-# If defined here, these values are not overrideable
-# Once they exist, we should define these as "runtime parameters"
-# https://github.com/Microsoft/azure-pipelines-yaml/pull/129
-# variables:
-#   SkipApplyOptimizationData: false
-
 parameters:
 - name: OptProfDropName
   displayName: Optional OptProfDrop Override
@@ -59,10 +53,10 @@ variables:
       value: ${{ parameters.OptProfDropName }}
     - name: SourceBranch
       value: ''
-  # Override SkipApplyOptimizationData to true when disabling OptProf data collection
+  # Set SkipApplyOptimizationDataArg when disabling OptProf data collection
   - ${{ if eq(parameters.enableOptProf, false) }}:
-    - name: SkipApplyOptimizationData
-      value: true
+    - name: SkipApplyOptimizationDataArg
+      value: '/p:EnableNgenOptimization=false'
   - name: EnableReleaseOneLocBuild
     value: false
   - ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:

@@ -66,13 +66,11 @@ jobs:
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
   - task: BatchScript@1
-    displayName: cibuild_bootstrapped_msbuild.cmd (quarantined tests only)
+    displayName: Build (quarantined tests only)
     inputs:
-      filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
-      arguments: "-onlyDocChanged 0 -stage2Properties '/mt /p:RunQuarantinedTests=true'"
+      filename: 'build.cmd'
+      arguments: "-ci -test -stage2Arguments '/p:RunQuarantinedTests=true'"
     condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
-    env:
-      ForceUseXCopyMSBuild: 1
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
     inputs:
@@ -120,8 +118,8 @@ jobs:
   - template: azure-pipelines/check-documentation-only-change.yml
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
-  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged 0 --stage2Properties '/mt /p:RunQuarantinedTests=true'
-    displayName: CI Build (quarantined tests only)
+  - bash: . 'build.sh' --ci --test --stage2Arguments '/p:RunQuarantinedTests=true'
+    displayName: Build (quarantined tests only)
     condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
     env:
       MSBUILDUSESERVER: "1"
@@ -159,8 +157,8 @@ jobs:
   timeoutInMinutes: 120
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
-  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged 0 --stage2Properties '/mt /p:RunQuarantinedTests=true'
-    displayName: CI Build (quarantined tests only)
+  - bash: . 'build.sh' --ci --test --stage2Arguments '/p:RunQuarantinedTests=true'
+    displayName: Build (quarantined tests only)
     condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
     env:
       MSBUILDUSESERVER: "1"
