@@ -397,42 +397,42 @@
       </trans-unit>
       <trans-unit id="MSBuildServerNodeReused">
         <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
-        <target state="new">Reusing the running MSBuild Server node for this build (process ID {0}).</target>
+        <target state="translated">正在針對此組建重複使用執行中的 MSBuild 伺服器節點 (處理序識別碼 {0})。</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawned">
         <source>MSBuild Server node started for this build (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build (process ID {0}).</target>
+        <target state="translated">MSBuild 伺服器節點已針對此組建啟動 (處理序識別碼 {0})。</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawnedShortLived">
         <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</target>
+        <target state="translated">MSBuild 伺服器節點已僅針對此組建啟動; 之後會將其關閉 (處理序識別碼 {0})。</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNotUsedForBuild">
         <source>MSBuild Server was requested but not used for this build: {0}.</source>
-        <target state="new">MSBuild Server was requested but not used for this build: {0}.</target>
+        <target state="translated">已要求 MSBuild 伺服器，但未用於此組建: {0}。</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonBusy">
         <source>the server was busy with another build</source>
-        <target state="new">the server was busy with another build</target>
+        <target state="translated">伺服器正在忙碌於另一個組建</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
         <source>this invocation is not compatible with MSBuild Server</source>
-        <target state="new">this invocation is not compatible with MSBuild Server</target>
+        <target state="translated">此叫用與 MSBuild 伺服器不相容</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
         <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
-        <target state="new">node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</target>
+        <target state="translated">節點重複使用已停用 (-nodeReuse:false 或 MSBUILDDISABLENODEREUSE=1)</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
         <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
-        <target state="new">the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</target>
+        <target state="translated">MSBUILDENSURESTDOUTFORTASKPROCESSES 逸出交錯線已啟用</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
