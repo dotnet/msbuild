@@ -498,6 +498,7 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         public static Project FromFile(string file, ProjectOptions options)
         {
+            ThrowIfPartialEvaluationRequested(options);
             return new Project(
                 file,
                 options.GlobalProperties,
@@ -517,6 +518,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="options">The <see cref="ProjectOptions"/> to use.</param>
         public static Project FromProjectRootElement(ProjectRootElement rootElement, ProjectOptions options)
         {
+            ThrowIfPartialEvaluationRequested(options);
             return new Project(
                 rootElement,
                 options.GlobalProperties,
@@ -536,6 +538,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="options">The <see cref="ProjectOptions"/> to use.</param>
         public static Project FromXmlReader(XmlReader reader, ProjectOptions options)
         {
+            ThrowIfPartialEvaluationRequested(options);
             return new Project(
                 reader,
                 options.GlobalProperties,
@@ -546,6 +549,21 @@ namespace Microsoft.Build.Evaluation
                 options.EvaluationContext,
                 options.DirectoryCacheFactory,
                 options.Interactive);
+        }
+
+        /// <summary>
+        /// <see cref="Project"/> only supports full evaluation. Throws if a caller requests a partial
+        /// evaluation via <see cref="ProjectOptions.EvaluationStage"/>; use <see cref="ProjectInstance"/>
+        /// for partial (stop-after-pass) evaluation.
+        /// </summary>
+        private static void ThrowIfPartialEvaluationRequested(ProjectOptions options)
+        {
+            ArgumentNullException.ThrowIfNull(options);
+
+            if (options.EvaluationStage != ProjectEvaluationStage.Full)
+            {
+                ErrorUtilities.ThrowArgument("OM_PartialEvaluationNotSupportedForProject", options.EvaluationStage);
+            }
         }
 
         /// <summary>
@@ -2226,13 +2244,25 @@ namespace Microsoft.Build.Evaluation
             /// Read-only dictionary of item definitions in this project.
             /// Keyed by item type.
             /// </summary>
-            public override IDictionary<string, ProjectItemDefinition> ItemDefinitions => _data.ItemDefinitions;
+            public override IDictionary<string, ProjectItemDefinition> ItemDefinitions
+            {
+                get
+                {
+                    return _data.ItemDefinitions;
+                }
+            }
 
             /// <summary>
             /// Items in this project, ordered within groups of item types.
             /// </summary>
             [SuppressMessage("Microsoft.Naming", "CA1721:PropertyNamesShouldNotMatchGetMethods", Justification = "This is a reasonable choice. API review approved")]
-            public override ICollection<ProjectItem> Items => new ReadOnlyCollection<ProjectItem>(_data.Items);
+            public override ICollection<ProjectItem> Items
+            {
+                get
+                {
+                    return new ReadOnlyCollection<ProjectItem>(_data.Items);
+                }
+            }
 
             /// <summary>
             /// Items in this project, ordered within groups of item types,
@@ -3824,7 +3854,7 @@ namespace Microsoft.Build.Evaluation
 
                 Assumed.Equal(LastEvaluationId, BuildEventContext.InvalidEvaluationId, "This is the first evaluation therefore the last evaluation id is invalid");
 
-                ReevaluateIfNecessary(evaluationContext);
+                ReevaluateIfNecessary(LoggingService, evaluationContext);
 
                 Assumed.NotEqual(LastEvaluationId, BuildEventContext.InvalidEvaluationId, "Last evaluation ID must be valid after the first evaluation");
 
