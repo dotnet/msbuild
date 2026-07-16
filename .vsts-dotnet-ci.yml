@@ -35,17 +35,12 @@ jobs:
 # when it reports onlyDocChanged=1, so a docs-only PR never waits on the build pools.
 - job: EvaluateDocumentationOnlyChange
   displayName: "Evaluate documentation-only change"
-  # Runs on the Microsoft-hosted pool (free and uncongested for this public project), NOT the
-  # self-hosted NetCore-Public pool that the heavy legs use. This always-on gate exists only to let
-  # a docs-only PR skip the heavy legs without allocating a self-hosted agent; running it on the
-  # self-hosted pool would add it to the very queue it is meant to relieve. So: a docs-only PR
-  # allocates zero self-hosted agents, and a code PR waits only for this short hosted job before the
-  # heavy legs start.
-  # NOTE: the true zero-job fix is a Path filter on the AzDO branch-policy build validation for this
-  # pipeline (exclude documentation/* and .github/*). If that is ever configured, this gate job and
-  # every "condition: ${{ parameters.runUnlessDocumentationOnly }}" below can be removed.
   pool:
-    vmImage: 'ubuntu-latest'
+    ${{ if eq(variables['System.TeamProject'], 'public') }}:
+      name: NetCore-Public
+      demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+    ${{ if ne(variables['System.TeamProject'], 'public') }}:
+      vmImage: 'ubuntu-latest'
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
 
