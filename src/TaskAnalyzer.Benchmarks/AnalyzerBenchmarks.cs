@@ -18,10 +18,10 @@ public class AnalyzerNoOpBenchmark
 {
     private AnalyzerRunner _runner = null!;
 
-    public IEnumerable<AnalyzerNoOpScenario> Scenarios => AnalyzerScenarios.NoOpScenarios;
+    public IEnumerable<AnalyzerScenario> Scenarios => AnalyzerScenarios.Analyzers;
 
     [ParamsSource(nameof(Scenarios))]
-    public AnalyzerNoOpScenario Scenario { get; set; } = null!;
+    public AnalyzerScenario Scenario { get; set; } = null!;
 
     [GlobalSetup]
     public void Setup()
@@ -40,6 +40,35 @@ public class AnalyzerNoOpBenchmark
 
     [Benchmark]
     public ImmutableArray<Diagnostic> NoOp() => _runner.Run();
+}
+
+[MemoryDiagnoser]
+public class AnalyzerCompliantTaskBenchmark
+{
+    private AnalyzerRunner _runner = null!;
+
+    public IEnumerable<AnalyzerScenario> Scenarios => AnalyzerScenarios.Analyzers;
+
+    [ParamsSource(nameof(Scenarios))]
+    public AnalyzerScenario Scenario { get; set; } = null!;
+
+    [GlobalSetup]
+    public void Setup()
+    {
+        _runner = new AnalyzerRunner(
+            AnalyzerCompilation.CreateWithFrameworkStubs(AnalyzerSourceFactory.CompliantTask),
+            Scenario.Analyzer,
+            includeCompilerDiagnostics: Scenario.IncludeCompilerDiagnostics);
+
+        AnalyzerBenchmarkValidation.Validate(
+            _runner.Run(),
+            Scenario.DiagnosticId,
+            expectedCount: 0,
+            requireSuppressed: false);
+    }
+
+    [Benchmark]
+    public ImmutableArray<Diagnostic> AnalyzeCompliantTask() => _runner.Run();
 }
 
 [MemoryDiagnoser]
@@ -101,9 +130,9 @@ public class AnalyzerSuppressorBenchmark
     public ImmutableArray<Diagnostic> SuppressDiagnostics() => _runner.Run();
 }
 
-public sealed class AnalyzerNoOpScenario
+public sealed class AnalyzerScenario
 {
-    internal AnalyzerNoOpScenario(
+    internal AnalyzerScenario(
         string name,
         DiagnosticAnalyzer analyzer,
         string diagnosticId,
@@ -151,7 +180,7 @@ public sealed class AnalyzerDiagnosticScenario
 
 internal static class AnalyzerScenarios
 {
-    public static readonly AnalyzerNoOpScenario[] NoOpScenarios =
+    public static readonly AnalyzerScenario[] Analyzers =
     [
         new(
             nameof(MultiThreadableTaskAnalyzer),
@@ -194,7 +223,10 @@ internal sealed class AnalyzerRunner
 {
     private static readonly CompilationWithAnalyzersOptions s_options = new(
         new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty),
-        onAnalyzerException: null,
+        onAnalyzerException: static (exception, analyzer, _) =>
+            throw new InvalidOperationException(
+                $"Analyzer '{analyzer.GetType().FullName}' threw during benchmark execution.",
+                exception),
         concurrentAnalysis: true,
         logAnalyzerExecutionTime: false,
         reportSuppressedDiagnostics: true);
@@ -308,6 +340,24 @@ internal static class AnalyzerCompilation
 
 internal static class AnalyzerSourceFactory
 {
+    public const string CompliantTask = """
+        public static class BenchmarkHelper
+        {
+            public static bool Run(string value) => System.Math.Abs(value.Length) >= 0;
+        }
+
+        [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+        public sealed class BenchmarkTask : Microsoft.Build.Utilities.Task
+        {
+            [Microsoft.Build.Framework.Required]
+            public string Input { get; set; } = "";
+
+            public Microsoft.Build.Framework.ITaskItem Item { get; set; } = null!;
+
+            public override bool Execute() => BenchmarkHelper.Run(Input);
+        }
+        """;
+
     public const string FrameworkStubs = """
         namespace Microsoft.Build.Framework
         {

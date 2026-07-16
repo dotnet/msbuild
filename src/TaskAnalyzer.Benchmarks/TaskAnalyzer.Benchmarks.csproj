@@ -6,6 +6,7 @@
     <UseAppHost>false</UseAppHost>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <IsShipping>false</IsShipping>
   </PropertyGroup>
 
   <ItemGroup>

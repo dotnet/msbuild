@@ -175,11 +175,12 @@ Keep `TestHelpers.FrameworkStubs` and `AnalyzerSourceFactory.FrameworkStubs` syn
 
 Every new rule must extend `src/TaskAnalyzer.Benchmarks/AnalyzerBenchmarks.cs`. The harness is not merely a regression test: it provides the common workload needed to compare a new analyzer with the analyzers already shipped in the package.
 
-1. Add each new `DiagnosticAnalyzer` class to `AnalyzerScenarios.NoOpScenarios`. An analyzer class implementing several IDs needs one no-op entry. For a suppressor, use the suppressed compiler diagnostic ID and set `includeCompilerDiagnostics: true`.
-2. Add every diagnostic ID to `AnalyzerScenarios.DiagnosticScenarios`.
-3. Add a source factory that produces exactly `count` independent diagnostics. The harness runs 1, 10, and 100 instances.
-4. Keep setup validation exact; a benchmark that produces the wrong diagnostic count is invalid.
-5. For suppressors, measure no-op cost and 1, 10, and 100 suppressed diagnostics. Construct `AnalyzerRunner` with `includeCompilerDiagnostics: true`, validate the suppressed compiler diagnostic ID, and set `requireSuppressed: true`. Generalize `AnalyzerSuppressorBenchmark` if another suppressor is added.
+1. Add each new `DiagnosticAnalyzer` class to `AnalyzerScenarios.Analyzers`. An analyzer class implementing several IDs needs one entry. This covers both the early-exit no-op benchmark and the compliant-task benchmark. For a suppressor, use the suppressed compiler diagnostic ID and set `includeCompilerDiagnostics: true`.
+2. Extend `AnalyzerSourceFactory.CompliantTask` when necessary so the new analyzer reaches its normal analysis path without producing a diagnostic. Do not replace the early-exit benchmark; the two scenarios measure different fixed costs.
+3. Add every diagnostic ID to `AnalyzerScenarios.DiagnosticScenarios`.
+4. Add a source factory that produces exactly `count` independent diagnostics. The harness runs 1, 10, and 100 instances.
+5. Keep setup validation exact; a benchmark that produces the wrong diagnostic count is invalid.
+6. For suppressors, measure no-op cost, compliant-task cost, and 1, 10, and 100 suppressed diagnostics. Construct `AnalyzerRunner` with `includeCompilerDiagnostics: true`, validate the suppressed compiler diagnostic ID, and set `requireSuppressed: true`. Generalize `AnalyzerSuppressorBenchmark` if another suppressor is added.
 
 Benchmark sources should isolate analyzer work, avoid unrelated compiler diagnostics, reuse the existing framework stubs, and run with production concurrent-analysis settings.
 
@@ -190,9 +191,10 @@ dotnet run -c Release --project src\TaskAnalyzer.Benchmarks\TaskAnalyzer.Benchma
 dotnet run -c Release --project src\TaskAnalyzer.Benchmarks\TaskAnalyzer.Benchmarks.csproj
 ```
 
-Review execution time and managed allocations for all three dimensions:
+Review execution time and managed allocations for all four dimensions:
 
-- **No-op cost:** compare the new analyzer's fixed cost with existing analyzer classes, especially analyzers registering similar Roslyn actions.
+- **Early-exit no-op cost:** compare initialization and fast-exit cost when required MSBuild symbols are unavailable.
+- **Compliant-task cost:** compare the fixed cost of running the normal analysis path over valid task code that produces no diagnostic.
 - **One-diagnostic cost:** compare the cost of doing useful analysis and reporting one diagnostic.
 - **Scaling:** compare the change from 1 to 10 to 100 diagnostics. Consider both the absolute 100-diagnostic cost and whether time or allocations grow disproportionately.
 
@@ -214,6 +216,7 @@ Include the comparison and the optimize-or-stop decision in the pull request. Do
 - [ ] Code fix is withheld unless every required rewrite is safe
 - [ ] Positive, negative, inheritance, deduplication, and cross-platform tests added as applicable
 - [ ] Benchmark no-op scenario added for a new analyzer class
+- [ ] Compliant-task benchmark reaches the normal analysis path and produces zero diagnostics
 - [ ] Exact-count 1/10/100 benchmark scenario added for every diagnostic
 - [ ] Suppressor benchmarks added when applicable
 - [ ] New results compared with existing analyzers under the same benchmark environment
