@@ -120,8 +120,8 @@ jobs:
   - script: build.cmd
               -pack -sign -publish -ci
               -configuration $(BuildConfiguration)
-              -officialBuildId $(Build.BuildNumber)
               $(SkipApplyOptimizationDataArg)
+              /p:OfficialBuildId=$(Build.BuildNumber)
               /p:RepositoryName=$(Build.Repository.Name)
               /p:VisualStudioIbcSourceBranchName=$(SourceBranch)
               /p:VisualStudioDropAccessToken=$(System.AccessToken)
