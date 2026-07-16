@@ -27,20 +27,19 @@ tracking issue and blocks merge. `/unfreeze` turns the check green again.
 
 ## How it works
 
-* **State** lives in a GitHub issue labeled `branch-freeze`, one per frozen branch.
+* **Tracking issue state** lives in a GitHub issue labeled `branch-freeze`, one per frozen branch.
   The issue body holds the reason plus marker lines `<!-- branch-freeze:<branch> -->`
   and `<!-- branch-freeze-by:<login> -->` (who froze it).
   `/freeze` opens/updates it; `/unfreeze` closes it. The issue is the audit trail.
 * **Enforcement** is the `branch-freeze` commit status, a required status check in
-  the repository ruleset. The [`branch-freeze-status`](../.github/workflows/branch-freeze-status.yml)
-  workflow stamps it:
-  * `pull_request_target` (opened / synchronize / reopened / **edited**) stamps the
-    single PR that changed — `edited` covers a PR being **retargeted** onto a frozen branch.
-  * `workflow_dispatch` / `workflow_call` bulk-stamp open PRs (rollout seed and the
-    `/freeze` `/unfreeze` fan-out).
+  the repository ruleset. The [`branch-freeze-pr-status`](../.github/workflows/branch-freeze-pr-status.yml)
+  workflow evaluates one changed PR; `edited` covers a PR being **retargeted** onto
+  a frozen branch. The [`branch-freeze-refresh`](../.github/workflows/branch-freeze-refresh.yml)
+  workflow refreshes existing open PRs after `/freeze` or `/unfreeze`, and supports
+  manual rollout seeding or repair.
 * **The command** ([`branch-freeze-command`](../.github/workflows/branch-freeze-command.yml))
   verifies the commenter is on the allowlist, toggles the tracking issue, then
-  re-stamps the affected branch's PRs through the status workflow. All status writers
+  refreshes the affected branch's PR statuses. All status writers
   for a branch share a `branch-freeze-write-<branch>` concurrency group, so a freeze
   fan-out can never be overwritten by a concurrent per-PR stamp.
 
@@ -48,11 +47,12 @@ tracking issue and blocks merge. `/unfreeze` turns the check green again.
 
 | File | Role |
 |---|---|
-| [`.github/workflows/branch-freeze-command.yml`](../.github/workflows/branch-freeze-command.yml) | `/freeze` `/unfreeze` entry point + allowlist auth + fan-out |
-| [`.github/workflows/branch-freeze-status.yml`](../.github/workflows/branch-freeze-status.yml) | Stamps the `branch-freeze` status (single PR + bulk) |
+| [`.github/workflows/branch-freeze-command.yml`](../.github/workflows/branch-freeze-command.yml) | Processes `/freeze` and `/unfreeze` and changes tracking issue state |
+| [`.github/workflows/branch-freeze-pr-status.yml`](../.github/workflows/branch-freeze-pr-status.yml) | Evaluates the `branch-freeze` status for one changed PR |
+| [`.github/workflows/branch-freeze-refresh.yml`](../.github/workflows/branch-freeze-refresh.yml) | Refreshes the status on existing open PRs |
 | [`.github/workflows/branch-freeze-tests.yml`](../.github/workflows/branch-freeze-tests.yml) | Runs shellcheck + the shell unit tests on branch-freeze changes |
 | [`.github/branch-freeze-allowlist.txt`](../.github/branch-freeze-allowlist.txt) | GitHub logins allowed to run `/freeze` `/unfreeze` |
-| [`.github/actions/branch-freeze-status/`](../.github/actions/branch-freeze-status/) | Composite action + shared scripts (`is-allowed.sh`, `post-freeze-status.sh`, `stamp-open-prs.sh`, `freeze-command.sh`) and `tests/` |
+| [`.github/branch-freeze/`](../.github/branch-freeze/) | Shared command and status scripts |
 
 ### Tests
 
@@ -62,7 +62,7 @@ them (plus a shellcheck pass) on any change under the branch-freeze paths. Run t
 locally with `jq` installed:
 
 ```bash
-bash .github/actions/branch-freeze-status/tests/run-tests.sh
+bash .github/branch-freeze/tests/run-tests.sh
 ```
 
 ## One-time setup (admin)
@@ -82,7 +82,7 @@ block every open PR.
    may operate the freeze. No GitHub App or org-level permissions are required.
 3. **Merge the workflows** (this PR). At this point nothing is enforced yet.
 4. **Seed existing PRs** so they all carry a green status before the check becomes
-   required: run the `branch-freeze-status` workflow via **Actions → Run workflow**
+   required: run the `branch-freeze-refresh` workflow via **Actions → Run workflow**
    (leave `base_ref` blank to stamp all open PRs). Confirm a few PRs show a green
    `branch-freeze` check.
 5. **End-to-end test** on a throwaway branch/PR: `/freeze --branch <test> testing`

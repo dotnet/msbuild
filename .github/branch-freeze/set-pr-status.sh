@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Posts the `branch-freeze` commit status for a single pull request head commit.
 #
-# Usage:   post-freeze-status.sh <head-sha> <base-ref>
+# Usage:   set-pr-status.sh <head-sha> <base-ref>
 # Env:     GH_TOKEN  (required) token with `statuses: write` + `issues: read`
 #          REPO      (optional) owner/repo; defaults to $GITHUB_REPOSITORY
 #
@@ -14,14 +14,17 @@
 # mentions the marker from freezing a branch.
 set -euo pipefail
 
+# Step 1: Read the PR commit, target branch, and repository.
 sha="${1:?head sha required}"
 base_ref="${2:?base ref required}"
 repo="${REPO:-${GITHUB_REPOSITORY:?REPO or GITHUB_REPOSITORY must be set}}"
 
+# Step 2: Define the required check name and tracking issue marker.
 context="branch-freeze"
 label="branch-freeze"
 marker="<!-- branch-freeze:${base_ref} -->"
 
+# Step 3: Load all open branch-freeze tracking issues.
 issues="$(gh issue list \
   --repo "$repo" \
   --label "$label" \
@@ -29,12 +32,14 @@ issues="$(gh issue list \
   --limit 200 \
   --json number,body,url)"
 
+# Step 4: Find the tracking issue for this PR's target branch.
 match="$(printf '%s' "$issues" \
   | jq -c --arg m "$marker" \
       'map(select((.body // "") | split("\n") | any(.[]; (gsub("^\\s+|\\s+$";"")) == $m)))
        | first // empty')"
 
 if [ -n "$match" ]; then
+  # Step 5a: The branch is frozen. Read the issue details for the check message.
   issue_url="$(printf '%s' "$match" | jq -r '.url')"
   body="$(printf '%s' "$match" | jq -r '.body // ""')"
 
@@ -60,6 +65,7 @@ if [ -n "$match" ]; then
     description="${description:0:137}..."
   fi
 
+  # Step 6a: Mark the required check as failed and link the tracking issue.
   echo "Branch '$base_ref' is FROZEN -> reporting failure on $sha"
   gh api -X POST "repos/$repo/statuses/$sha" \
     -f state=failure \
@@ -67,6 +73,7 @@ if [ -n "$match" ]; then
     -f description="$description" \
     -f target_url="$issue_url" >/dev/null
 else
+  # Step 5b: The branch is open, so mark the required check as successful.
   echo "Branch '$base_ref' is open -> reporting success on $sha"
   gh api -X POST "repos/$repo/statuses/$sha" \
     -f state=success \

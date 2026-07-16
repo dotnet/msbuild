@@ -1,0 +1,45 @@
+name: Branch freeze PR status
+
+# Evaluates the required `branch-freeze` commit status for one pull request when
+# that pull request is opened, updated, reopened, or retargeted.
+#
+# Security: this workflow runs in the trusted base-repo context. It never checks
+# out or executes pull-request HEAD content. The trusted default branch supplies
+# the status script, and pull-request values are passed to it only as data.
+
+on:
+  pull_request_target:
+    # `edited` catches a PR retargeted onto a different, possibly frozen branch.
+    types: [opened, synchronize, reopened, edited]
+
+permissions:
+  contents: read   # checkout the shared scripts
+  statuses: write  # post the branch-freeze commit status
+  issues: read     # read the branch-freeze tracking issue
+
+jobs:
+  status:
+    name: Evaluate pull request
+    # Ignore title/body edits; only a base branch change requires re-evaluation.
+    if: >-
+      github.event.action != 'edited' ||
+      github.event.changes.base != null
+    runs-on: ubuntu-latest
+    concurrency:
+      group: branch-freeze-write-${{ github.event.pull_request.base.ref }}
+      queue: max
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Set required branch-freeze status
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+        shell: bash
+        run: bash "${GITHUB_WORKSPACE}/.github/branch-freeze/set-pr-status.sh" "$HEAD_SHA" "$BASE_REF"

@@ -3,18 +3,18 @@
 #
 # These pin the two behaviors that matter most if they silently break:
 #   * is-allowed.sh         - who may run /freeze /unfreeze (deny-by-default).
-#   * post-freeze-status.sh - a branch is frozen ONLY when an open issue carries the
-#                             marker on a WHOLE LINE, so a mere mention cannot freeze.
-#   * freeze-command.sh     - notification failure cannot suppress fanout after a
-#                             successful state change.
+#   * set-pr-status.sh - a branch is frozen ONLY when an open issue carries the
+#                        marker on a WHOLE LINE, so a mere mention cannot freeze.
+#   * handle-command.sh - notification failure cannot suppress refresh after a
+#                         successful state change.
 #
 # Uses a mock `gh` (tests/mock-gh) on PATH; requires real `jq` (as the scripts do).
-# Run:  bash .github/actions/branch-freeze-status/tests/run-tests.sh
+# Run:  bash .github/branch-freeze/tests/run-tests.sh
 set -uo pipefail
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-action_dir="$(cd "$here/.." && pwd)"
-repo_root="$(cd "$action_dir/../../.." && pwd)"
+branch_freeze_dir="$(cd "$here/.." && pwd)"
+repo_root="$(cd "$branch_freeze_dir/../.." && pwd)"
 
 if ! command -v jq >/dev/null 2>&1; then
   echo "SKIP: 'jq' is not available; these tests require jq (as the scripts do)."
@@ -37,40 +37,40 @@ fresh_status() { GH_STATUS_FILE="$(mktemp)"; export GH_STATUS_FILE; : > "$GH_STA
 
 echo "== is-allowed.sh (authorization boundary) =="
 allow="$repo_root/.github/branch-freeze-allowlist.txt"
-bash "$action_dir/is-allowed.sh" "rainersigwald"   "$allow" && ok "listed login is allowed"          || bad "listed login is allowed"
-bash "$action_dir/is-allowed.sh" "RAINERSIGWALD"   "$allow" && ok "match is case-insensitive"         || bad "match is case-insensitive"
-bash "$action_dir/is-allowed.sh" "not-a-real-user" "$allow" && bad "unknown login is denied"          || ok  "unknown login is denied"
+bash "$branch_freeze_dir/is-allowed.sh" "rainersigwald"   "$allow" && ok "listed login is allowed"          || bad "listed login is allowed"
+bash "$branch_freeze_dir/is-allowed.sh" "RAINERSIGWALD"   "$allow" && ok "match is case-insensitive"         || bad "match is case-insensitive"
+bash "$branch_freeze_dir/is-allowed.sh" "not-a-real-user" "$allow" && bad "unknown login is denied"          || ok  "unknown login is denied"
 
 empty="$(mktemp)"; printf '# only a comment\n\n' > "$empty"
-bash "$action_dir/is-allowed.sh" "anyone" "$empty"          && bad "empty allowlist denies (deny-by-default)" || ok "empty allowlist denies (deny-by-default)"
-bash "$action_dir/is-allowed.sh" "anyone" "$empty.missing"; [ "$?" -eq 2 ] && ok "missing allowlist file denies (exit 2)" || bad "missing allowlist file denies (exit 2)"
+bash "$branch_freeze_dir/is-allowed.sh" "anyone" "$empty"          && bad "empty allowlist denies (deny-by-default)" || ok "empty allowlist denies (deny-by-default)"
+bash "$branch_freeze_dir/is-allowed.sh" "anyone" "$empty.missing"; [ "$?" -eq 2 ] && ok "missing allowlist file denies (exit 2)" || bad "missing allowlist file denies (exit 2)"
 
-echo "== post-freeze-status.sh (freeze detection) =="
+echo "== set-pr-status.sh (freeze detection) =="
 export REPO="o/r"
 
 fresh_status
-MOCK_ISSUES='[]' bash "$action_dir/post-freeze-status.sh" "sha-open" "main"
+MOCK_ISSUES='[]' bash "$branch_freeze_dir/set-pr-status.sh" "sha-open" "main"
 assert_eq "$(status_field state)" "success" "no tracking issue -> branch open (success)"
 
 fresh_status
 MOCK_ISSUES='[{"number":7,"url":"https://github.com/o/r/issues/7","body":"SDK insertion broke\n\n<!-- branch-freeze:main -->\n<!-- branch-freeze-by:rainersigwald -->"}]' \
-  bash "$action_dir/post-freeze-status.sh" "sha-frozen" "main"
+  bash "$branch_freeze_dir/set-pr-status.sh" "sha-frozen" "main"
 assert_eq "$(status_field state)" "failure" "whole-line marker -> branch frozen (failure)"
 assert_eq "$(status_field description)" "Frozen by @rainersigwald: SDK insertion broke" "status names who froze it"
 assert_eq "$(status_field target_url)" "https://github.com/o/r/issues/7" "status links the tracking issue"
 
 fresh_status
 MOCK_ISSUES='[{"number":9,"url":"u","body":"heads up: <!-- branch-freeze:main --> is the marker"}]' \
-  bash "$action_dir/post-freeze-status.sh" "sha-mention" "main"
+  bash "$branch_freeze_dir/set-pr-status.sh" "sha-mention" "main"
 assert_eq "$(status_field state)" "success" "marker mentioned mid-line does NOT freeze"
 
-echo "== freeze-command.sh (best-effort notification) =="
+echo "== handle-command.sh (best-effort notification) =="
 command_output="$(mktemp)"
 if MOCK_ISSUES='[{"number":7,"body":"SDK insertion broke\n\n<!-- branch-freeze:main -->"}]' \
   MOCK_ISSUE_COMMENT_FAILURE=1 \
   GH_TOKEN="test-token" REPO="o/r" ACTOR="rainersigwald" ISSUE_NUMBER="42" COMMENT_ID="99" \
   BODY="/unfreeze" GITHUB_OUTPUT="$command_output" \
-  bash "$action_dir/freeze-command.sh"; then
+  bash "$branch_freeze_dir/handle-command.sh"; then
   ok "failed confirmation reply does not abort unfreeze"
 else
   bad "failed confirmation reply does not abort unfreeze"

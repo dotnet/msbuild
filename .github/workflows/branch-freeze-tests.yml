@@ -8,9 +8,10 @@ on:
   pull_request:
     paths:
       - ".github/workflows/branch-freeze-command.yml"
-      - ".github/workflows/branch-freeze-status.yml"
+      - ".github/workflows/branch-freeze-pr-status.yml"
+      - ".github/workflows/branch-freeze-refresh.yml"
       - ".github/workflows/branch-freeze-tests.yml"
-      - ".github/actions/branch-freeze-status/**"
+      - ".github/branch-freeze/**"
       - ".github/branch-freeze-allowlist.txt"
   workflow_dispatch:
 
@@ -32,13 +33,13 @@ jobs:
         run: |
           set -euo pipefail
           shellcheck --severity=error \
-            .github/actions/branch-freeze-status/is-allowed.sh \
-            .github/actions/branch-freeze-status/post-freeze-status.sh \
-            .github/actions/branch-freeze-status/stamp-open-prs.sh \
-            .github/actions/branch-freeze-status/freeze-command.sh \
-            .github/actions/branch-freeze-status/tests/mock-gh \
-            .github/actions/branch-freeze-status/tests/run-tests.sh
+            .github/branch-freeze/is-allowed.sh \
+            .github/branch-freeze/set-pr-status.sh \
+            .github/branch-freeze/refresh-pr-statuses.sh \
+            .github/branch-freeze/handle-command.sh \
+            .github/branch-freeze/tests/mock-gh \
+            .github/branch-freeze/tests/run-tests.sh
 
       - name: Run unit tests
         shell: bash
-        run: bash .github/actions/branch-freeze-status/tests/run-tests.sh
+        run: bash .github/branch-freeze/tests/run-tests.sh

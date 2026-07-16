@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Executes a /freeze or /unfreeze command. Authorization (kitten-team membership)
-# is performed by the calling workflow BEFORE this script runs.
+# Handles a /freeze or /unfreeze command. Authorization is performed by the
+# calling workflow BEFORE this script runs.
 #
 # Command is read from the FIRST line of the triggering comment ($BODY):
 #   /freeze   [--branch <name>] <reason...>   branch defaults to `main`; reason required
@@ -11,16 +11,18 @@
 #
 #   <!-- branch-freeze:<branch> -->
 # This script only toggles that state and replies; it emits `branch` and
-# `changed` step outputs so the calling workflow can fan out the status re-stamp
-# (via branch-freeze-status.yml) under a per-branch concurrency group.
+# `changed` step outputs so the calling workflow can refresh the affected PR
+# statuses via branch-freeze-refresh.yml.
 #
 # Env (required): GH_TOKEN, REPO, ACTOR, ISSUE_NUMBER, COMMENT_ID, BODY
 set -euo pipefail
 
+# Step 1: Read the values supplied by the command workflow.
 : "${GH_TOKEN:?}"; : "${REPO:?}"; : "${ACTOR:?}"; : "${ISSUE_NUMBER:?}"; : "${COMMENT_ID:?}"
 BODY="${BODY:-}"
 label="branch-freeze"
 
+# Step 2: Define helpers for reacting, replying, and returning workflow outputs.
 react() { gh api -X POST "repos/$REPO/issues/comments/$COMMENT_ID/reactions" -f content="$1" >/dev/null 2>&1 || true; }
 reply() {
   if ! gh issue comment "$ISSUE_NUMBER" --repo "$REPO" --body "$1" >/dev/null; then
@@ -38,18 +40,20 @@ usage='**Usage**
 
 fail_usage() { react "confused"; reply "$1"$'\n\n'"$usage"; exit 0; }
 
-# --- parse first line --------------------------------------------------------
+# Step 3: Read the command and arguments from the comment's first line.
 line="$(printf '%s' "$BODY" | head -n1 | tr -d '\r')"
 cmd="${line%%[[:space:]]*}"
 rest="${line#"$cmd"}"
 rest="${rest#"${rest%%[![:space:]]*}"}"   # left-trim
 
+# Step 4: Decide whether this is a freeze or unfreeze request.
 case "$cmd" in
   /freeze)   action="freeze" ;;
   /unfreeze) action="unfreeze" ;;
   *) echo "Ignoring non-command first token: '$cmd'"; exit 0 ;;
 esac
 
+# Step 5: Read the optional branch and the freeze reason.
 branch="main"
 case "$rest" in
   --branch|-b)
@@ -60,11 +64,9 @@ case "$rest" in
     ;;
 esac
 reason="$(printf '%s' "$rest" | sed -E 's/[[:space:]]+$//')"
-
 [ -n "$branch" ] || fail_usage "No branch name was given after the \`--branch\` flag."
 
-# Reject obviously malformed branch tokens early (defense-in-depth; the real
-# check is existence below).
+# Step 6: Validate the branch name and confirm that the branch exists.
 case "$branch" in
   *[!A-Za-z0-9._/-]*) fail_usage "Branch \`$branch\` contains unexpected characters." ;;
 esac
@@ -75,25 +77,25 @@ fi
 
 marker="<!-- branch-freeze:$branch -->"
 
-# Ensure the label exists (idempotent; tolerant if it already does).
+# Step 7: Ensure the tracking label exists.
 gh label create "$label" --repo "$REPO" --color B60205 \
   --description "Tracks a frozen branch" >/dev/null 2>&1 || true
 
-# All OPEN tracking issues for this branch (whole-line marker match); duplicates
-# are included so they can be reconciled below.
+# Step 8: Find any open tracking issues for this branch.
 existing_nums="$(gh issue list --repo "$REPO" --label "$label" --state open --limit 200 --json number,body \
   | jq -r --arg m "$marker" \
       'map(select((.body // "") | split("\n") | any(.[]; (gsub("^\\s+|\\s+$";"")) == $m))) | .[].number')"
 
 if [ "$action" = "freeze" ]; then
+  # Step 9a: Freeze the branch by creating or updating its tracking issue.
   [ -n "$reason" ] || fail_usage "A reason is required to freeze \`$branch\`."
 
   # The branch marker makes the issue machine-detectable; the actor marker records
   # who froze the branch so the blocking status can name them. Both marker lines
-  # are stripped from the human-readable reason by post-freeze-status.sh.
+  # are stripped from the human-readable reason by set-pr-status.sh.
   issue_body="${reason}"$'\n\n'"${marker}"$'\n'"<!-- branch-freeze-by:${ACTOR} -->"
 
-  # Reconcile existing tracking issues: keep the first, close any duplicates.
+  # Keep one tracking issue and close any duplicates.
   primary=""
   while IFS= read -r n; do
     [ -n "$n" ] || continue
@@ -114,6 +116,7 @@ if [ "$action" = "freeze" ]; then
     issue_num="${url##*/}"; verb="opened"
   fi
 
+  # Tell the workflow to refresh PR statuses, then acknowledge the command.
   set_output branch "$branch"
   set_output changed "true"
   react "+1"
@@ -123,6 +126,7 @@ if [ "$action" = "freeze" ]; then
 
 Pull requests targeting \`${branch}\` will be blocked by the \`branch-freeze\` check until someone runs \`/unfreeze --branch ${branch}\` (or \`/unfreeze\` for \`main\`)."
 else
+  # Step 9b: Unfreeze the branch by closing its tracking issues.
   closed=""
   while IFS= read -r n; do
     [ -n "$n" ] || continue
@@ -132,12 +136,14 @@ else
   done <<< "$existing_nums"
 
   if [ -z "$closed" ]; then
+    # The branch was already open, so no PR status refresh is needed.
     set_output changed "false"
     react "+1"
     reply "\`${branch}\` is not currently frozen — nothing to do."
     exit 0
   fi
 
+  # Tell the workflow to refresh PR statuses, then acknowledge the command.
   set_output branch "$branch"
   set_output changed "true"
   react "+1"

@@ -2,8 +2,8 @@ name: Branch freeze command
 
 # `/freeze` and `/unfreeze` slash commands that toggle a branch merge-freeze.
 # Restricted to accounts listed in .github/branch-freeze-allowlist.txt. State is
-# stored as an open issue labeled `branch-freeze` (see freeze-command.sh); after
-# toggling, all open PRs on the branch are re-stamped so the required
+# stored as an open issue labeled `branch-freeze` (see handle-command.sh); after
+# toggling, all open PRs on the branch are refreshed so the required
 # `branch-freeze` status updates at once.
 #
 # Authorization is a checked-in allowlist of GitHub logins; all repository
@@ -18,7 +18,7 @@ permissions:
   contents: read        # checkout the shared scripts
   issues: write         # create/close/label the tracking issue, react, comment
   # `statuses: write` and `pull-requests: read` are required only by the reusable
-  # status workflow and are granted on the `fanout` job below (least privilege).
+  # refresh workflow and are granted on the `refresh` job below (least privilege).
 
 concurrency:
   # Queue and serialize freeze/unfreeze operations so concurrent commands cannot
@@ -54,7 +54,7 @@ jobs:
           set -uo pipefail
           # Authorization logic lives in is-allowed.sh (single source of truth,
           # unit-tested); exit 0 = allowed, non-zero = denied (incl. missing file).
-          if bash "${GITHUB_WORKSPACE}/.github/actions/branch-freeze-status/is-allowed.sh" "$ACTOR" "$ALLOWLIST"; then
+          if bash "${GITHUB_WORKSPACE}/.github/branch-freeze/is-allowed.sh" "$ACTOR" "$ALLOWLIST"; then
             echo "authorized=true" >> "$GITHUB_OUTPUT"
             echo "@$ACTOR is on the branch-freeze allowlist."
           else
@@ -90,16 +90,15 @@ jobs:
           # into the command line) and parsed inside the script.
           BODY: ${{ github.event.comment.body }}
         shell: bash
-        run: bash "${GITHUB_WORKSPACE}/.github/actions/branch-freeze-status/freeze-command.sh"
+        run: bash "${GITHUB_WORKSPACE}/.github/branch-freeze/handle-command.sh"
 
-  # Re-stamp every open PR on the affected branch via the reusable status
-  # workflow. Running through that workflow places the fan-out in the same
-  # per-branch `branch-freeze-write-<branch>` concurrency group as the single-PR
-  # stamps, so a freeze fan-out cannot be overwritten by a concurrent stale stamp.
-  fanout:
+  # Refresh every open PR on the affected branch. The refresh and single-PR
+  # workflows share the same per-branch concurrency group, preventing a stale
+  # status write from winning a race with /freeze or /unfreeze.
+  refresh:
     needs: command
     if: needs.command.outputs.changed == 'true'
-    uses: ./.github/workflows/branch-freeze-status.yml
+    uses: ./.github/workflows/branch-freeze-refresh.yml
     with:
       base_ref: ${{ needs.command.outputs.branch }}
     permissions:
