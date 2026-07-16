@@ -52,7 +52,7 @@ For every new diagnostic:
 4. Add the rule to `src/TaskAnalyzer/AnalyzerReleases.Unshipped.md`.
 5. Document its scope, rationale, examples, and safe alternatives in `src/TaskAnalyzer/README.md`.
 6. Add analyzer tests in `src/TaskAnalyzer.Tests`.
-7. Add performance scenarios in `src/TaskAnalyzer.Benchmarks/AnalyzerBenchmarks.cs`.
+7. Add performance scenarios in `src/TaskAnalyzer.Benchmarks/AnalyzerScenarios.cs`.
 
 New analyzer and code-fix implementations belong in `src/TaskAnalyzer`. Add reusable metadata names to `WellKnownTypeNames.cs` and shared semantic helpers to `SharedAnalyzerHelpers.cs` instead of duplicating strings or logic.
 
@@ -173,7 +173,7 @@ Keep `TestHelpers.FrameworkStubs` and `AnalyzerSourceFactory.FrameworkStubs` syn
 
 ## Performance Harness
 
-Every new rule must extend `src/TaskAnalyzer.Benchmarks/AnalyzerBenchmarks.cs`. The harness is not merely a regression test: it provides the common workload needed to compare a new analyzer with the analyzers already shipped in the package.
+Every new rule must extend `src/TaskAnalyzer.Benchmarks/AnalyzerScenarios.cs`. The harness is not merely a regression test: it provides the common workload needed to compare a new analyzer with the analyzers already shipped in the package. Benchmark mechanics belong in `AnalyzerBenchmarks.cs` and `AnalyzerBenchmarkInfrastructure.cs`; an ordinary new rule should not need to modify them.
 
 1. Add each new `DiagnosticAnalyzer` class to `AnalyzerScenarios.Analyzers`. An analyzer class implementing several IDs needs one entry. This covers both the early-exit no-op benchmark and the compliant-task benchmark. For a suppressor, use the suppressed compiler diagnostic ID and set `includeCompilerDiagnostics: true`.
 2. Extend `AnalyzerSourceFactory.CompliantTask` when necessary so the new analyzer reaches its normal analysis path without producing a diagnostic. Do not replace the early-exit benchmark; the two scenarios measure different fixed costs.
