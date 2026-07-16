@@ -594,14 +594,6 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Single(_initializedService.LoggerDescriptions);
         }
 
-        /// <summary>
-        /// Regression test for https://github.com/dotnet/msbuild/issues/14237.
-        /// When a central logger is already registered via RegisterLogger as a ReusableLogger wrapper
-        /// (because it was passed to ProjectCollection for eval-time logging and then flowed into
-        /// BuildParameters.Loggers), RegisterDistributedLogger must still initialize the forwarding
-        /// logger and add it to the logger descriptions — it must NOT return false and skip the whole
-        /// distributed registration.
-        /// </summary>
         [Fact]
         public void RegisterDistributedLogger_WhenCentralLoggerAlreadyWrappedInReusableLogger_ForwardingLoggerIsRegistered()
         {
@@ -609,43 +601,24 @@ namespace Microsoft.Build.UnitTests.Logging
             LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).Assembly.FullName, true);
 
             RegularILogger centralLogger = new RegularILogger();
-            // Simulate the ProjectCollection-then-BuildParameters path: wrap the central logger in a
-            // ReusableLogger and register it as a regular logger (as BuildManager does when it processes
-            // parameters.Loggers coming from projectCollection.Loggers).
             ReusableLogger reusableWrapper = new ReusableLogger(centralLogger);
             _initializedService.RegisterLogger(reusableWrapper);
 
-            // Now register the same underlying logger as the central logger of a distributed pair.
-            // This must succeed and register the forwarding logger.
             bool result = _initializedService.RegisterDistributedLogger(centralLogger, description);
 
             result.ShouldBeTrue("RegisterDistributedLogger should return true when the central logger is already registered only as a ReusableLogger wrapper, not as a direct registration.");
 
-            // The forwarding logger must have been initialized and added to the logger descriptions so
-            // that it can be dispatched to out-of-proc nodes.
             _initializedService.LoggerDescriptions.ShouldNotBeEmpty("The forwarding logger description must be present so it is propagated to out-of-proc nodes.");
             _initializedService.RegisteredLoggerTypeNames.ShouldContain(
                 "Microsoft.Build.Logging.ConfigurableForwardingLogger",
                 "The forwarding logger must have been initialized.");
         }
 
-        /// <summary>
-        /// Companion to the regression test above. When the central logger is pre-registered as a
-        /// ReusableLogger wrapper (and therefore wired to the all-events CentralForwardingLogger sink),
-        /// pairing it with a dedicated forwarding logger must honor that forwarding logger's filtering:
-        /// the central logger should receive only the forwarded subset of events, exactly once, and must
-        /// not receive events the forwarding logger filtered out. Here the forwarding logger forwards only
-        /// error events, so logging both a message and an error must deliver only the error to the central
-        /// logger. Before the fix, the central logger received the unfiltered stream via the
-        /// CentralForwardingLogger path, so it would also have seen the message.
-        /// </summary>
         [Fact]
         public void RegisterDistributedLogger_WhenCentralLoggerAlreadyWrapped_HonorsForwardingLoggerFiltering()
         {
             string className = "Microsoft.Build.Logging.ConfigurableForwardingLogger";
 
-            // Forward ONLY error events so we can observe that the central logger receives the filtered
-            // subset rather than the full, unfiltered stream.
             LoggerDescription description = new LoggerDescription(
                 className,
                 typeof(ProjectCollection).Assembly.FullName,
@@ -673,20 +646,10 @@ namespace Microsoft.Build.UnitTests.Logging
             _initializedService.LogBuildEvent(messageArgs);
             _initializedService.LogBuildEvent(errorArgs);
 
-            // The forwarding logger forwards only errors, so the central logger must see the error exactly
-            // once (no double delivery) and must not see the message that was filtered out.
             centralLogger.ErrorCount.ShouldBe(1, "The central logger should receive the forwarded error exactly once (no duplicate delivery).");
             centralLogger.MessageCount.ShouldBe(0, "The central logger must not receive events the forwarding logger filtered out.");
         }
 
-        /// <summary>
-        /// A central logger may back only a single distributed registration. The direct-registration path
-        /// enforces this (see <see cref="RegisterDuplicateDistributedCentralLogger"/>); this test verifies the
-        /// same contract holds when the central logger is reached through a pre-registered
-        /// <see cref="ReusableLogger"/> wrapper. The second distributed registration of the same underlying
-        /// central logger must return false, and the first forwarding logger's sink must keep delivering events
-        /// (i.e. it must not be orphaned by rerouting the shared wrapper).
-        /// </summary>
         [Fact]
         public void RegisterDistributedLogger_DuplicateCentralViaReusableWrapper_SecondRegistrationRejected()
         {
@@ -703,12 +666,9 @@ namespace Microsoft.Build.UnitTests.Logging
 
             _initializedService.RegisterDistributedLogger(centralLogger, firstForwarder).ShouldBeTrue();
 
-            // Registering the same underlying central logger a second time must be rejected, exactly as the
-            // direct-registration path rejects it.
             _initializedService.RegisterDistributedLogger(centralLogger, secondForwarder).ShouldBeFalse(
                 "A central logger already backing a distributed registration must not be registered again, even when reached through a ReusableLogger wrapper.");
 
-            // The first forwarding logger's sink must still be wired to the central logger.
             BuildEventContext context = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidProjectContextId, 5, 6);
             BuildErrorEventArgs errorArgs = new("subcategory", "ERR001", "file", 0, 0, 0, 0, "error message", null, "sender")
             {
