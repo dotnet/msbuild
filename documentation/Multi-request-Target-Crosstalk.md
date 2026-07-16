@@ -4,30 +4,30 @@
 
 ## Summary
 
-MSBuild will begin executing a project as soon as one request for that project is processed. Multiple requests for the same build request configuration share mutable project state and configuration-scoped target results. Consequently, separately arriving target requests are not necessarily composable: their combined behavior can depend on which request arrives first.
+MSBuild begins executing a project as soon as it sees one request for it. All requests for the same build request configuration share mutable project state and configuration-scoped target results. Separately arriving requests are therefore not necessarily composable: behavior can depend on which arrives first.
 
 We call this **multi-request target crosstalk**.
 
 ## Relevant engine concepts
 
-A `BuildRequest` identifies targets to execute and references a project (plus global properties) by its `ConfigurationId`.
+A `BuildRequest` references a project (plus global properties) and targets.
 
-A `BuildRequestConfiguration` represents the project path, tools version, and global properties used to build the project. Equivalent requests resolve to the same configuration. The configuration owns the loaded `ProjectInstance` and the `BaseLookup` containing the project's current properties and items.
+A `BuildRequestConfiguration` represents the project path, tools version, and global properties. Equivalent requests resolve to the same configuration, which owns the loaded `ProjectInstance` and the current properties and items.
 
-Separately, `ResultsCache` retains an aggregate `BuildResult` for each `ConfigurationId`. Once a target has completed, later requests for that configuration reuse its result rather than executing it again.
+Separately, `ResultsCache` keeps an aggregate `BuildResult` for each `ConfigurationId`. Later requests reuse target results instead of executing the targets again.
 
 Requests for the same configuration therefore share:
 
 1. The mutable state of the project instance.
 2. The accumulated history and results of completed targets.
 
-The remainder of this document uses **project instance** for the shared execution context and **configuration** when configuration identity or target-result caching is specifically relevant.
+Here, **project instance** means the shared execution context; **configuration** is used when identity or target-result caching matters.
 
 ## Definition
 
-**Multi-request target crosstalk** occurs when multiple requests for the same configuration (but different targets) interact through shared project state or completed target results, causing behavior to depend on request arrival order.
+**Multi-request target crosstalk** occurs when requests for different targets in the same configuration interact through shared project state or completed target results, making behavior depend on arrival order.
 
-The requests do not need to execute simultaneously. Crosstalk can occur whenever one request begins before the complete set of requests for that configuration is known.
+The requests do not need to execute concurrently. Because there is no aggregation of target lists, crosstalk will occur whenever multiple target lists are specified for a configuration.
 
 ## Mutable-state example
 
@@ -53,16 +53,16 @@ Suppose a project contains an auxiliary target that modifies an item consumed by
 
 Two callers request different target sets:
 
-- One requests `Build`.
-- Another requests `Auxiliary;Build`.
+- `Build`.
+- `Auxiliary;Build`
 
-If `Build` arrives first, `Compile` runs without `Additional.cs`. The later request runs `Auxiliary`, but `Build` and `Compile` already have results and are not executed again.
+If `Build` arrives first, `Compile` omits `Additional.cs`. The later request runs `Auxiliary` but reuses the existing `Compile` and `Build` results.
 
 If `Auxiliary;Build` arrives first, `Auxiliary` adds `Additional.cs` before `Compile` runs. The plain `Build` request then reuses those target results.
 
-The project files and requested targets are identical in both cases, but the compiled inputs depend on which request reaches the project first.
+The project files and requested targets are identical, but the compiled inputs depend on which request is scheduled first.
 
-In practice, auxiliary targets often are not intended to affect `Build`. Nevertheless, they can accidentally modify properties or items that build targets consume.
+Auxiliary targets often are not intended to affect `Build`, but can accidentally modify properties or items it consumes.
 
 ## Target-order example
 
