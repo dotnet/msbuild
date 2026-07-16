@@ -72,9 +72,10 @@ jobs:
 # run, so the quarantined-test signal keeps tracking main regardless of this gate.
 - job: EvaluateDocumentationOnlyChange
   displayName: "Evaluate documentation-only change"
+  # Microsoft-hosted (free and uncongested for public), not the self-hosted NetCore-Public pool the
+  # quarantine legs use, so this always-on gate never adds to that queue.
   pool:
-    name: NetCore-Public
-    demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+    vmImage: 'ubuntu-latest'
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
 
