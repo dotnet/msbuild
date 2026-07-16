@@ -45,6 +45,34 @@ public abstract class MultiThreadableTask : Task, IMultiThreadableTask
 
 Built-in MSBuild tasks initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. This ensures tasks have a usable `TaskEnvironment` even when explicitly instantiated outside the engine (e.g., `new Copy()`) or run in the out-of-proc task host. The engine's in-proc path (`TaskExecutionHost.InitializeForBatch`) overwrites the default with the appropriate driver before `Execute()` is called.
 
+#### Constructor Injection of `TaskEnvironment`
+
+When the engine instantiates a task type, it first looks for a public constructor that accepts a single `TaskEnvironment` parameter. If one exists, the engine calls it with the current `TaskEnvironment` instead of the parameterless constructor; otherwise it falls back to the parameterless constructor as before. The engine still assigns the `IMultiThreadableTask.TaskEnvironment` property after construction, so tasks that use the constructor should assign the property from within it.
+
+This exists because C# property initializers run during object construction (before the constructor body completes)—before the engine can assign the `TaskEnvironment` property—so an initializer cannot rely on the environment. Constructor injection lets a task compute environment-dependent default values (for example, rooting a default output directory) during construction:
+
+```csharp
+[MSBuildMultiThreadableTask]
+public sealed class MyTask : Task, IMultiThreadableTask
+{
+    public MyTask(TaskEnvironment taskEnvironment)
+    {
+        TaskEnvironment = taskEnvironment;
+
+        // Now a reasonable default can be computed using the environment.
+        IntermediateOutputDir = new DirectoryInfo(TaskEnvironment.GetAbsolutePath("obj").Value);
+    }
+
+    public TaskEnvironment TaskEnvironment { get; set; }
+
+    public DirectoryInfo IntermediateOutputDir { get; set; }
+}
+```
+
+In multi-process execution (out-of-proc task host) and when a task is instantiated outside the engine, `TaskEnvironment.Fallback` is supplied to the constructor. A task that declares only a `TaskEnvironment` constructor (no parameterless constructor) is therefore still instantiable everywhere the engine runs it. This should not be combined with `LoadInSeparateAppDomain`, because `TaskEnvironment` is not marshalable across AppDomain boundaries.
+
+Constructor injection also applies to host-registered tasks (the reflection-free `Microsoft.Build.Utilities.Task.RegisterTask` path used for trimming/Native AOT). The generic `RegisterTask<T>(string)` overload injects the `TaskEnvironment` when `T` declares such a constructor (its public constructors are already trim-rooted). Because that overload's `new()` constraint requires a parameterless constructor, a task whose *only* constructor takes a `TaskEnvironment` is registered through the `RegisterTask(string, Func<TaskEnvironment, ITask>)` factory overload, which hands the environment to the factory. See [task-class-registration-api.md](../task-class-registration-api.md).
+
 Task authors who want to support older MSBuild versions need to:
 - Maintain both thread-safe and legacy implementations.
 - Use conditional task declarations based on MSBuild version to select which assembly to load the task from.

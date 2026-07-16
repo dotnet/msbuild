@@ -437,7 +437,7 @@ namespace Microsoft.Build.BackEnd
         /// (<see cref="TryCreateIntrinsicTaskFactory"/>) so the two constructions cannot drift.
         /// </summary>
         private TaskFactoryWrapper CreateIntrinsicTaskFactoryWrapper(
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)] Type intrinsicTaskType)
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type intrinsicTaskType)
         {
             Assembly taskExecutionHostAssembly = typeof(TaskExecutionHost).Assembly;
             return new TaskFactoryWrapper(
@@ -484,7 +484,7 @@ namespace Microsoft.Build.BackEnd
                 // Reflection-free construction via the host-supplied factory. This deliberately avoids the
                 // [RequiresUnreferencedCode] ITaskFactory.CreateTask interface member, so the registered-task
                 // path carries no trim warning and runs under Native AOT.
-                TaskInstance = _registeredTaskFactory.CreateRegisteredTask();
+                TaskInstance = _registeredTaskFactory.CreateRegisteredTask(TaskEnvironment);
             }
             else if (!FeatureSwitches.EnableReflectiveTaskExecution && _taskFactoryWrapper.TaskFactory is IntrinsicTaskFactory intrinsicTaskFactory)
             {
