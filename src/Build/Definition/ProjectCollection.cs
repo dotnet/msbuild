@@ -251,7 +251,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="loggers">The loggers to register. May be null.</param>
         /// <param name="toolsetDefinitionLocations">The locations from which to load toolsets.</param>
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, ToolsetDefinitionLocations toolsetDefinitionLocations)
-            : this(globalProperties, loggers, null, toolsetDefinitionLocations, 1 /* node count */, false /* do not only log critical events */)
+            : this(globalProperties, loggers, toolsetDefinitionLocations, 1 /* node count */, false /* do not only log critical events */, loadProjectsReadOnly: false, useAsynchronousLogging: false, reuseProjectRootElementCache: false, enableTargetOutputLogging: false)
         {
         }
 
@@ -268,6 +268,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="toolsetDefinitionLocations">The locations from which to load toolsets.</param>
         /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
+        [RequiresUnreferencedCode("Registers loggers, which can load forwarding logger assemblies by reflection at runtime; incompatible with trimming.")]
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents)
             : this(globalProperties, loggers, null, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly: false)
         {
@@ -287,6 +288,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
         /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
+        [RequiresUnreferencedCode("Registers loggers, which can load forwarding logger assemblies by reflection at runtime; incompatible with trimming.")]
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly)
             : this(globalProperties, loggers, remoteLoggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging: false, reuseProjectRootElementCache: false, enableTargetOutputLogging: false)
         {
@@ -311,6 +313,7 @@ namespace Microsoft.Build.Evaluation
         /// <remarks>
         /// This constructor disables target output logging, so TerminalLogger and other loggers may not work well. Prefer <see cref="ProjectCollection(IDictionary{string, string}, IEnumerable{ILogger}, IEnumerable{ForwardingLoggerRecord}, ToolsetDefinitionLocations, int, bool, bool, bool, bool, bool)"/> instead to control this behavior.
         /// </remarks>
+        [RequiresUnreferencedCode("Registers loggers, which can load forwarding logger assemblies by reflection at runtime; incompatible with trimming.")]
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache) :
             this(globalProperties: globalProperties, loggers: loggers, remoteLoggers: remoteLoggers, toolsetDefinitionLocations: toolsetDefinitionLocations, maxNodeCount: maxNodeCount, onlyLogCriticalEvents: onlyLogCriticalEvents, loadProjectsReadOnly: loadProjectsReadOnly, useAsynchronousLogging: useAsynchronousLogging, reuseProjectRootElementCache: reuseProjectRootElementCache, enableTargetOutputLogging: false)
         {
@@ -333,7 +336,31 @@ namespace Microsoft.Build.Evaluation
         /// <param name="useAsynchronousLogging">If set to true, asynchronous logging will be used. <see cref="Dispose()"/> has to called to clear resources used by async logging.</param>
         /// <param name="reuseProjectRootElementCache">If set to true, it will try to reuse <see cref="ProjectRootElementCacheBase"/> singleton.</param>
         /// <param name="enableTargetOutputLogging">If set to true, loggers will collect and send Target outputs when targets are finished executing.</param>
+        [RequiresUnreferencedCode("Registers loggers, which can load forwarding logger assemblies by reflection at runtime; incompatible with trimming.")]
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging)
+            : this(globalProperties, loggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging, reuseProjectRootElementCache, enableTargetOutputLogging)
+        {
+            // Forwarding loggers load logger assemblies by reflection, which is incompatible with
+            // trimming - that is why every overload taking forwarding loggers is RequiresUnreferencedCode
+            // while the overloads taking none are not. The trim-safe construction happens in the chained
+            // private constructor above; only this reflective registration is gated behind the attribute.
+            try
+            {
+                RegisterForwardingLoggers(remoteLoggers);
+            }
+            catch (Exception)
+            {
+                ShutDownLoggingService();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Trim-safe construction shared by every constructor overload. Builds the collection and
+        /// registers ordinary (non-forwarding) loggers, but does not load forwarding loggers by
+        /// reflection, so the overloads that take none can be called without RequiresUnreferencedCode.
+        /// </summary>
+        private ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging)
         {
             _loadedProjects = new LoadedProjectCollection();
             ToolsetLocations = toolsetDefinitionLocations;
@@ -369,7 +396,6 @@ namespace Microsoft.Build.Evaluation
                 CreateLoggingService(maxNodeCount, onlyLogCriticalEvents, enableTargetOutputLogging);
 
                 RegisterLoggers(loggers);
-                RegisterForwardingLoggers(remoteLoggers);
 
                 if (globalProperties != null)
                 {
@@ -465,7 +491,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Take care to ensure that there is never more than one value observed
                     // from this property even in the case of race conditions while lazily initializing.
-                    var local = new ProjectCollection(null, null, null, ToolsetDefinitionLocations.Default,
+                    var local = new ProjectCollection(null, null, ToolsetDefinitionLocations.Default,
                         maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true, reuseProjectRootElementCache: false, enableTargetOutputLogging: false);
 
                     if (Interlocked.CompareExchange(ref s_globalProjectCollection, local, null) != null)
@@ -494,12 +520,13 @@ namespace Microsoft.Build.Evaluation
             {
                 if (s_engineVersion == null)
                 {
-                    // Get the file version from the currently executing assembly.
-                    // Use .CodeBase instead of .Location, because .Location doesn't
-                    // work when Microsoft.Build.dll has been shadow-copied, for example
-                    // in scenarios where NUnit is loading Microsoft.Build.
-                    var versionInfo = FileVersionInfo.GetVersionInfo(typeof(ProjectCollection).GetAssemblyPath());
-                    s_engineVersion = new Version(versionInfo.FileMajorPart, versionInfo.FileMinorPart, versionInfo.FileBuildPart, versionInfo.FilePrivatePart);
+                    // Read the file version from the assembly's AssemblyFileVersionAttribute rather than
+                    // from the file on disk. FileVersionInfo.GetVersionInfo requires an assembly path, but
+                    // Assembly.Location is empty in single-file and Native AOT apps (and unreliable under
+                    // shadow-copy), which would throw. The attribute carries the same file version.
+                    string fileVersion = typeof(ProjectCollection).Assembly
+                        .GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
+                    s_engineVersion = fileVersion != null ? Version.Parse(fileVersion) : new Version(0, 0, 0, 0);
                 }
 
                 return s_engineVersion;
@@ -1383,6 +1410,7 @@ namespace Microsoft.Build.Evaluation
         /// Adds some remote loggers to the collection of remote loggers used for builds of projects in this collection.
         /// May be null.
         /// </summary>
+        [RequiresUnreferencedCode("Creates forwarding loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         public void RegisterForwardingLoggers(IEnumerable<ForwardingLoggerRecord> remoteLoggers)
         {
             using (_locker.EnterDisposableWriteLock())
@@ -2014,9 +2042,9 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
-
-                    return null;
                 }
+
+                return null;
             }
 
             /// <summary>

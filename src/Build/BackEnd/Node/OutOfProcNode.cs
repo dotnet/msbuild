@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Threading;
@@ -627,6 +628,8 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Dispatches the packet to the correct handler.
         /// </summary>
+        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
+            Justification = "The build-request arms now reach task execution through the EnableReflectiveTaskExecution leaf gate, which fails observably under trimming. The remaining RequiresUnreferencedCode reached here is HandleNodeConfiguration, which initializes node forwarding loggers by reflection - a separate subsystem this task-execution gate does not cover. This message-pump switch cannot carry RequiresUnreferencedCode.")]
         private void HandlePacket(INodePacket packet)
         {
             // Console.WriteLine("Handling packet {0} at {1}", packet.Type, DateTime.Now);
@@ -706,6 +709,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Handles the NodeConfiguration packet.
         /// </summary>
+        [RequiresUnreferencedCode("Initializes node loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         private void HandleNodeConfiguration(NodeConfiguration configuration)
         {
             // Grab the system parameters.

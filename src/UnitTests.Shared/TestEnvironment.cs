@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -486,7 +486,10 @@ namespace Microsoft.Build.UnitTests
             {
                 foreach (var key in subset.Keys)
                 {
-                    if (key is "_MSBUILDTLENABLED")
+                    if (key is "_MSBUILDTLENABLED"
+                        or "MSBuildLoadMicrosoftTargetsReadOnly"
+                        or "MSBUILDLOADALLFILESASWRITEABLE"
+                        || IsInstrumentationEnvironmentVariable((string)key))
                     {
                         continue;
                     }
@@ -500,6 +503,19 @@ namespace Microsoft.Build.UnitTests
                     }
                 }
             }
+
+            // Skip env vars injected by .NET profiler-based instrumentation tools (e.g. Clever Test Selection,
+            // code coverage). These are set by the host process for the test runner but are not present in the
+            // parent process, so they appear as "added" entries that would otherwise fail this invariant.
+            static bool IsInstrumentationEnvironmentVariable(string key) =>
+                key.StartsWith("CORECLR_PROFILER", StringComparison.OrdinalIgnoreCase) ||
+                key.StartsWith("COR_PROFILER", StringComparison.OrdinalIgnoreCase) ||
+                key.StartsWith("CORECLR_ENABLE_PROFILING", StringComparison.OrdinalIgnoreCase) ||
+                key.StartsWith("COR_ENABLE_PROFILING", StringComparison.OrdinalIgnoreCase) ||
+                key.StartsWith("MicrosoftInstrumentationEngine_", StringComparison.OrdinalIgnoreCase) ||
+                key.StartsWith("MicrosoftCodeCoverage", StringComparison.OrdinalIgnoreCase) ||
+                key.StartsWith("CleverTestsSelection", StringComparison.OrdinalIgnoreCase) ||
+                key.StartsWith("CTS_", StringComparison.OrdinalIgnoreCase);
         }
     }
 
@@ -526,6 +542,19 @@ namespace Microsoft.Build.UnitTests
                 catch (DirectoryNotFoundException)
                 {
                     // Temp folder might have been deleted by other TestEnvironment logic
+                }
+            }
+
+            debugPath = FrameworkDebugUtils.DebugPath;
+            if (debugPath != null)
+            {
+                try
+                {
+                    files.AddRange(Directory.GetFiles(debugPath, MSBuildLogFiles));
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    // Debug folder might not have been created
                 }
             }
 
@@ -561,9 +590,10 @@ namespace Microsoft.Build.UnitTests
                     continue;
                 }
 
-                // Com trace file. This is probably fine, but output it as it was likely turned on
-                // for a reason.
-                if (Regex.IsMatch(file.Name, @"MSBuild_CommTrace_PID_\d+\.txt"))
+                // Communication or coordinator trace file.
+                // This is probably fine, but add it to the test output, because it was likely turned on for a reason.
+                if (Regex.IsMatch(file.Name, @"MSBuild_CommTrace_PID_\d+\.txt") ||
+                    Regex.IsMatch(file.Name, @"MSBuild_CoordinatorTrace_PID_\d+\.txt"))
                 {
                     output.WriteLine($"{file.Name}: {contents}");
                     newFilesCount--;

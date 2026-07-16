@@ -1276,9 +1276,12 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
-                buildCheckManager?.EndProjectRequest(
-                    new CheckLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext.BuildEventContext),
-                    _requestEntry.RequestConfiguration.ProjectFullPath);
+                if (buildCheckManager is not null && _projectLoggingContext is not null)
+                {
+                    buildCheckManager.EndProjectRequest(
+                        new CheckLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext.BuildEventContext),
+                        _requestEntry.RequestConfiguration.ProjectFullPath);
+                }
             }
 
             BuildResult CopyTargetResultsFromProxyTargetsToRealTargets(BuildResult resultFromTargetBuilder)

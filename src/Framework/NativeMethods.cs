@@ -3,6 +3,9 @@
 
 using System;
 using System.IO;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework.Logging;
@@ -600,11 +603,25 @@ internal static class NativeMethods
         {
             if (s_frameworkCurrentPath == null)
             {
-                var baseTypeLocation = typeof(string).Assembly.Location;
+#if NET
+                // Under Native AOT there is no core library on disk (typeof(string).Assembly.Location is
+                // empty), so the running runtime's directory is unknown. Every consumer of this value is
+                // locating an installed .NET Framework (or Mono) - which a Native AOT process never has -
+                // and already treats an empty path as "not found", so report empty here instead of reading
+                // the (empty) assembly location.
+                if (!RuntimeFeature.IsDynamicCodeSupported)
+                {
+                    s_frameworkCurrentPath = string.Empty;
+                }
+                else
+#endif
+                {
+                    var baseTypeLocation = typeof(string).Assembly.Location;
 
-                s_frameworkCurrentPath =
-                    Path.GetDirectoryName(baseTypeLocation)
-                    ?? string.Empty;
+                    s_frameworkCurrentPath =
+                        Path.GetDirectoryName(baseTypeLocation)
+                        ?? string.Empty;
+                }
             }
 
             return s_frameworkCurrentPath;
@@ -1188,32 +1205,6 @@ internal static class NativeMethods
 
         return true;
     }
-
-#if FEATURE_WINDOWSINTEROP
-    [SupportedOSPlatform("windows6.1")]
-    internal static unsafe string GetFullPath(string path)
-    {
-        using BufferScope<char> buffer = new(stackalloc char[(int)PInvoke.MAX_PATH]);
-        int fullPathLength = (int)PInvoke.GetFullPathName(path, buffer, out _);
-
-        // If user is using long paths we could need to allocate a larger buffer
-        if (fullPathLength > buffer.Length)
-        {
-            buffer.EnsureCapacity(fullPathLength);
-            fullPathLength = (int)PInvoke.GetFullPathName(path, buffer, out _);
-        }
-
-        if (fullPathLength == 0)
-        {
-            HRESULT.FromLastError().ThrowOnFailure();
-        }
-
-        // Avoid creating new strings unnecessarily
-        ReadOnlySpan<char> result = buffer.AsSpan().Slice(0, fullPathLength);
-        return result.SequenceEqual(path.AsSpan()) ? path : result.ToString();
-    }
-
-#endif
 
     /// <summary>
     /// Overrides the console capabilities reported by <see cref="QueryIsScreenAndTryEnableAnsiColorCodes"/>.

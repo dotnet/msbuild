@@ -1337,6 +1337,22 @@
     <value>MSB4236: The SDK '{0}' specified could not be found.</value>
     <comment>{StrBegin="MSB4236: "}</comment>
   </data>
+  <data name="SdkResolverDynamicLoadingNotSupported" xml:space="preserve">
+    <value>MSB4282: The SDK "{0}" could not be resolved because it requires an SDK resolver ("{1}") that must be loaded dynamically, which is not supported in this trimmed or Native AOT host. SDKs available in the SDK installation are supported; build with a JIT-based MSBuild to use NuGet, workload, or custom SDK resolvers.</value>
+    <comment>{StrBegin="MSB4282: "}{0} is the SDK name; {1} is the SDK resolver manifest display name.</comment>
+  </data>
+  <data name="ReflectiveTaskExecutionNotSupported" xml:space="preserve">
+    <value>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</value>
+    <comment>{StrBegin="MSB4283: "}{0} is the task name.</comment>
+  </data>
+  <data name="BuildCheckCustomCheckNotSupportedInTrimmedHost" xml:space="preserve">
+    <value>MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</value>
+    <comment>{StrBegin="MSB4284: "}{0} is the path to the custom build check assembly.</comment>
+  </data>
+  <data name="ReflectiveLoggerLoadingNotSupported" xml:space="preserve">
+    <value>MSB4285: A logger could not be created from its assembly and class name because loading loggers by reflection is not supported in this trimmed or Native AOT host. Provide the logger to the engine as a constructed ILogger instance, or build with a JIT-based MSBuild.</value>
+    <comment>{StrBegin="MSB4285: "}</comment>
+  </data>
   <data name="CouldNotLoadSdkResolver" xml:space="preserve">
     <value>MSB4237: The SDK resolver type "{0}" failed to load. {1}</value>
     <comment>{StrBegin="MSB4237: "}</comment>
@@ -1571,6 +1587,18 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="OM_NotSupportedConvertingCollectionValueToBacking" xml:space="preserve">
     <value>This collection cannot convert from the specified value to the backing value.</value>
   </data>
+  <data name="OM_PartialEvaluationMemberUnavailable" xml:space="preserve">
+    <value>The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with at least the "{2}" evaluation stage to access this member.</value>
+    <comment>UE: This message is shown when the user reads a member (for example items or targets) that a partial evaluation did not compute. {0} is the member name, {1} is the ProjectEvaluationStage the project was evaluated to, {2} is the minimum ProjectEvaluationStage required to access the member.</comment>
+  </data>
+  <data name="OM_PartialEvaluationCannotBuild" xml:space="preserve">
+    <value>The project instance cannot be built because it was only partially evaluated (evaluation stopped after the "{0}" stage). A full evaluation is required to build a project.</value>
+    <comment>UE: This message is shown when the user tries to build a ProjectInstance produced by a partial evaluation. {0} is the ProjectEvaluationStage the instance was evaluated to.</comment>
+  </data>
+  <data name="OM_PartialEvaluationNotSupportedForProject" xml:space="preserve">
+    <value>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</value>
+    <comment>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</comment>
+  </data>
   <data name="OM_CannotCreateReservedProperty" xml:space="preserve">
     <value>The "{0}" property name is reserved.</value>
     <comment>UE: This message is shown when the user tries to redefine one of the reserved MSBuild properties e.g. $(MSBuildProjectFile) through the object model</comment>
@@ -1627,6 +1655,9 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   </data>
   <data name="OM_TargetNameNullOrEmpty" xml:space="preserve">
     <value>Method {0} cannot be called with a collection containing null or empty target names.</value>
+  </data>
+  <data name="OM_ConfigurationFileToolsetsNotSupported" xml:space="preserve">
+    <value>Reading toolset definitions from the application configuration file (ToolsetDefinitionLocations.ConfigurationFile) is not supported in this trimmed or Native AOT host. Remove ConfigurationFile from the requested toolset locations, or run a JIT-based MSBuild.</value>
   </data>
   <data name="OM_NoOtherwiseBeforeWhenOrOtherwise" xml:space="preserve">
     <value>An &lt;Otherwise&gt; element cannot be located before a &lt;When&gt; or &lt;Otherwise&gt; element.</value>

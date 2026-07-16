@@ -15,18 +15,8 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
     [Fact]
     public async Task ParallelBuilds_BothSucceedWithCoordinator()
     {
-        string pipeName = $"msbuild-coordinator-test-{Guid.NewGuid():N}";
-
         // Enable the coordinator with an isolated pipe name and a small budget.
-        using var env = TestEnvironment.Create(outputHelper);
-
-        env.SetEnvironmentVariable(Traits.UseCoordinatorEnvVarName, "1");
-        env.SetEnvironmentVariable(Constants.PipeNameEnvVarName, pipeName);
-        env.SetEnvironmentVariable(Constants.NodeBudgetEnvVarName, "4");
-        env.SetEnvironmentVariable(Constants.ShutdownTimeoutEnvVarName, "5000");
-
-        // Enable comm tracing so we can verify coordinator participation.
-        env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
+        using var helper = new CoordinatorTestHelper(outputHelper, nodeBudget: 4);
 
         string projectContents = """
             <Project>
@@ -36,8 +26,8 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
             </Project>
             """;
 
-        TransientTestFile project1 = env.CreateFile("project1.proj", projectContents);
-        TransientTestFile project2 = env.CreateFile("project2.proj", projectContents);
+        TransientTestFile project1 = helper.CreateFile("project1.proj", projectContents);
+        TransientTestFile project2 = helper.CreateFile("project2.proj", projectContents);
 
         // Launch two builds in parallel, each requesting 8 nodes.
         // The coordinator has a budget of 4, so the total granted across both
@@ -75,16 +65,8 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
     [Fact]
     public async Task SingleBuild_CoordinatorCapsMaxNodeCount()
     {
-        string pipeName = $"msbuild-coordinator-test-{Guid.NewGuid():N}";
-
         // Budget of 2, but the build requests 16.
-        using var env = TestEnvironment.Create(outputHelper);
-
-        env.SetEnvironmentVariable(Traits.UseCoordinatorEnvVarName, "1");
-        env.SetEnvironmentVariable(Constants.PipeNameEnvVarName, pipeName);
-        env.SetEnvironmentVariable(Constants.NodeBudgetEnvVarName, "2");
-        env.SetEnvironmentVariable(Constants.ShutdownTimeoutEnvVarName, "5000");
-        env.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
+        using var helper = new CoordinatorTestHelper(outputHelper, nodeBudget: 2);
 
         // This project logs the effective MaxNodeCount via the reserved property.
         string projectContents = """
@@ -95,7 +77,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
             </Project>
             """;
 
-        TransientTestFile project = env.CreateFile("captest.proj", projectContents);
+        TransientTestFile project = helper.CreateFile("captest.proj", projectContents);
 
         var (success, buildOutput) = await RunnerUtilities.ExecBootstrappedMSBuildAsync(
             $"\"{project.Path}\" /m:16 /v:n",
@@ -108,5 +90,125 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
 
         // The coordinator should have capped the node count to 2.
         buildOutput.ShouldContain("MaxNodeCount=2");
+    }
+
+    [Fact]
+    public async Task NestedBuild_InheritsCoordinatorGrant_DoesNotDeadlock()
+    {
+        using var helper = new CoordinatorTestHelper(outputHelper, nodeBudget: 1);
+
+        TransientTestFile childProject = helper.CreateFile(
+            "nested.proj",
+            """
+            <Project>
+              <Target Name="Build">
+                <Message Text="NestedMaxNodeCount=$(MSBuildNodeCount)" Importance="High" />
+              </Target>
+            </Project>
+            """);
+
+        TransientTestFile rootProject = helper.CreateFile(
+            "root.proj",
+            """
+            <Project>
+              <Target Name="Build">
+                <Exec Command="$(NestedMSBuildCommand) &quot;$(ChildProject)&quot; /m:8 /p:UseSharedCompilation=false /v:n" />
+              </Target>
+            </Project>
+            """);
+
+        var (success, buildOutput) = await RunnerUtilities.ExecBootstrappedMSBuildAsync(
+            $"\"{rootProject.Path}\" /m:1 /v:n /p:NestedMSBuildCommand=\"{RunnerUtilities.BootstrapMSBuildCommand}\" /p:ChildProject=\"{childProject.Path}\"",
+            outputHelper: outputHelper,
+            timeoutMilliseconds: 60_000);
+
+        outputHelper.WriteLine(buildOutput);
+
+        success.ShouldBeTrue("Build failed");
+        buildOutput.ShouldContain("NestedMaxNodeCount=1");
+        buildOutput.ShouldNotContain("Failed to connect to the build coordinator");
+    }
+
+    [Fact]
+    public async Task NuGetStaticGraphRestore_InheritsCoordinatorGrant_DoesNotDeadlock()
+    {
+        using var helper = new CoordinatorTestHelper(outputHelper, nodeBudget: 1);
+
+        TransientTestFolder projectFolder = helper.CreateFolder();
+        TransientTestFile project = helper.CreateFile(
+            projectFolder,
+            "StaticGraphRestoreRepro.csproj",
+            """
+            <Project Sdk="Microsoft.NET.Sdk">
+              <PropertyGroup>
+                <TargetFramework>net10.0</TargetFramework>
+              </PropertyGroup>
+            </Project>
+            """);
+
+        helper.CreateFile(
+            projectFolder,
+            "Class1.cs",
+            """
+            namespace StaticGraphRestoreRepro;
+
+            public class Class1
+            {
+            }
+            """);
+
+        var (success, buildOutput) = await RunnerUtilities.ExecBootstrappedMSBuildAsync(
+            $"\"{project.Path}\" /restore /m:16 /p:RestoreUseStaticGraphEvaluation=true /p:RestoreIgnoreFailedSources=true /p:UseSharedCompilation=false /v:n",
+            outputHelper: outputHelper,
+            timeoutMilliseconds: 60_000);
+
+        outputHelper.WriteLine(buildOutput);
+
+        success.ShouldBeTrue("Build failed");
+        buildOutput.ShouldNotContain("Failed to connect to the build coordinator");
+    }
+
+    private sealed class CoordinatorTestHelper : IDisposable
+    {
+        public TestEnvironment TestEnvironment { get; }
+
+        private readonly string _debugLogPath;
+
+        public CoordinatorTestHelper(ITestOutputHelper outputHelper, int? nodeBudget = null)
+        {
+            TestEnvironment = TestEnvironment.Create(outputHelper);
+
+            string pipeName = $"msbuild-coordinator-test-{Guid.NewGuid():N}";
+            TestEnvironment.SetEnvironmentVariable(Traits.UseCoordinatorEnvVarName, "1");
+            TestEnvironment.SetEnvironmentVariable(Constants.PipeNameEnvVarName, pipeName);
+
+            if (nodeBudget is int nodeBudgetValue)
+            {
+                TestEnvironment.SetEnvironmentVariable(Constants.NodeBudgetEnvVarName, nodeBudgetValue.ToString());
+            }
+
+            TestEnvironment.SetEnvironmentVariable(Constants.ShutdownTimeoutEnvVarName, "100");
+
+            _debugLogPath = Path.Combine(Path.GetTempPath(), $"msbuild-coordinator-test-debug-{Guid.NewGuid():N}");
+            TestEnvironment.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
+            TestEnvironment.SetEnvironmentVariable("MSBUILDDEBUGPATH", _debugLogPath);
+
+            FrameworkDebugUtils.SetDebugPath();
+        }
+
+        public void Dispose()
+        {
+            TestEnvironment.Dispose();
+            FileUtilities.DeleteDirectoryNoThrow(_debugLogPath, recursive: true);
+        }
+
+        public TransientTestFile CreateFile(TransientTestFolder folder, string fileName, string contents)
+            => TestEnvironment.CreateFile(folder, fileName, contents);
+
+        public TransientTestFile CreateFile(string fileName, string contents)
+            => TestEnvironment.CreateFile(fileName, contents);
+
+        public TransientTestFolder CreateFolder()
+            => TestEnvironment.CreateFolder();
     }
 }
