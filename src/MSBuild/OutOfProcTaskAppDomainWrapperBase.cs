@@ -325,6 +325,10 @@ namespace Microsoft.Build.CommandLine
                     taskLine,
                     taskColumn,
                     new TaskLoader.LogError(LogErrorDelegate),
+                    // The out-of-proc task host runs tasks in multi-process mode, where each process provides
+                    // its own isolated environment. Supply the fallback environment so a task that only declares
+                    // a TaskEnvironment constructor can still be instantiated here.
+                    TaskEnvironment.Fallback,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
                     // custom app domain assembly loading won't be available for task host
