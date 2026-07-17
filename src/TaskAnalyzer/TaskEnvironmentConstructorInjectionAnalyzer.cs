@@ -13,7 +13,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class TaskEnvironmentConstructorInjectionAnalyzer : DiagnosticAnalyzer
     {
-        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics =>
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
             ImmutableArray.Create(DiagnosticDescriptors.PreferTaskEnvironmentConstructorInjection);
 
         public override void Initialize(AnalysisContext context)
