@@ -37,7 +37,7 @@
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
-    <ProjectReference Include="..\MSBuildTaskHost\MSBuildTaskHost.csproj" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" Aliases="MSBuildTaskHost" />
+    <ProjectReference Include="..\MSBuildTaskHost\MSBuildTaskHost.csproj" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(MSBuildRuntimeType)' == 'Full'" Aliases="MSBuildTaskHost" />
     <ProjectReference Include="..\Tasks\Microsoft.Build.Tasks.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
@@ -53,8 +53,6 @@
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">TargetFramework=$(FullFrameworkTFM)</SetTargetFramework>
       <SetTargetFramework Condition="'$(TargetFrameworkIdentifier)' != '.NETFramework'">TargetFramework=$(LatestDotNetCoreForMSBuild)</SetTargetFramework>
     </ProjectReference>
-
-    <Reference Include="System.IO.Compression" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' " />
   </ItemGroup>
 
   <ItemGroup>
@@ -65,7 +63,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\TypeLoader_Tests.cs" />
@@ -150,4 +147,5 @@
   <ItemGroup>
     <Service Include="{82a7f48d-3b50-4b1e-b82e-3ada8210c358}" />
   </ItemGroup>
+
 </Project>

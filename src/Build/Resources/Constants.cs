@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -221,8 +222,86 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
+        /// The reflection surface that property-function evaluation uses on an allowlisted receiver
+        /// type: public constructors (for <c>[Type]::new(...)</c>) plus public methods, properties, and
+        /// fields, reached as static or instance members via <c>Type.InvokeMember</c>, <c>GetMethod(s)</c>,
+        /// and <c>GetConstructor(s)</c> (see Expander.Function.Execute and LateBindExecute). The
+        /// property-function path never sets <c>BindingFlags.NonPublic</c>, so events, nested types,
+        /// interfaces, and non-public members are never reflected over.
+        /// </summary>
+        private const DynamicallyAccessedMemberTypes PropertyFunctionMembers =
+            DynamicallyAccessedMemberTypes.PublicConstructors
+            | DynamicallyAccessedMemberTypes.PublicMethods
+            | DynamicallyAccessedMemberTypes.PublicProperties
+            | DynamicallyAccessedMemberTypes.PublicFields;
+
+        /// <summary>
         /// Fill up the dictionary for first use
         /// </summary>
+        // Preserve the PropertyFunctionMembers set on every type in the property-function allowlist
+        // below. Property functions dispatch over the allowlisted receiver type by reflection (see
+        // Expander.Function), and receiver types are restricted to this allowlist unless the
+        // MSBUILDENABLEALLPROPERTYFUNCTIONS feature switch is enabled. Preserving these members is what
+        // makes the IL2072/IL2074/IL2080/IL2096 suppressions in Expander honest under trimming. Keep in
+        // sync with the entries added below.
+        [DynamicDependency(PropertyFunctionMembers, typeof(Environment))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Directory))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(File))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(RuntimeInformation))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(OSPlatform))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(CultureInfo))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(IntrinsicFunctions))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(byte))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(char))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Convert))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(DateTime))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(DateTimeOffset))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(decimal))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(double))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Enum))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Guid))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(short))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(int))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(long))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Path))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Math))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(ushort))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(uint))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(ulong))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(sbyte))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(float))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(string))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(StringComparer))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(TimeSpan))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Regex))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Uri))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(UriBuilder))]
+        [DynamicDependency(PropertyFunctionMembers, typeof(Version))]
+#if NET
+        // ToolLocationHelper lives in Microsoft.Build.Utilities.Core in the SDK, which Microsoft.Build does not
+        // directly reference, so it cannot be named with typeof here like the entries above. Root it with the
+        // (memberTypes, typeName, assemblyName) string overload instead - it is otherwise an ordinary allowlist
+        // entry (see the TryAdd for it below). That overload (and trimming itself) exists only on .NET, so this
+        // entry is guarded for the .NET build; the allowlist still includes the type at run time on .NET Framework.
+        [DynamicDependency(PropertyFunctionMembers, "Microsoft.Build.Utilities.ToolLocationHelper", "Microsoft.Build.Utilities.Core")]
+        [DynamicDependency(PropertyFunctionMembers, typeof(OperatingSystem))]
+#endif
+        // The DynamicDependency allowlist above preserves each property-function receiver type's public
+        // surface so trimming keeps it. Across all of those types the only member carrying
+        // [RequiresDynamicCode] is Enum.GetValues(Type) (rooted by typeof(Enum)) - this is the IL3050
+        // suppressed below.
+        //
+        // It is rooted but unreachable from a property function: an author cannot invoke Enum.GetValues(Type)
+        // (or any reflective Type-taking method) because there is no way to supply a System.Type argument.
+        //   - string does not coerce to Type, so the overload never binds and evaluation reports MSB4186
+        //     ("method not found ... parameters of the correct type").
+        //   - [System.Type]::GetType(...) is not an available property function (MSB4185), and stays
+        //     unavailable even with MSBUILDENABLEALLPROPERTYFUNCTIONS=1.
+        // So the case is blocked before any reflective invoke, identically on JIT and AOT, and would still
+        // fail observably (InvalidProjectFileException) if it were ever reached - never silently. This is
+        // verified end to end under Native AOT by src/aot-validation/PropertyFunctionAotTests.cs.
+        [UnconditionalSuppressMessage("AOT", "IL3050:RequiresDynamicCode",
+            Justification = "Enum.GetValues(Type) is rooted for the allowlist but is unreachable via property functions; see comment above.")]
         private static void InitializeAvailableMethods()
         {
             if (s_availableStaticMethods == null)
@@ -270,14 +349,17 @@ namespace Microsoft.Build.Internal
                         availableStaticMethods.TryAdd("System.IO.Directory::GetFiles", directoryType);
                         availableStaticMethods.TryAdd("System.IO.Directory::GetLastAccessTime", directoryType);
                         availableStaticMethods.TryAdd("System.IO.Directory::GetLastWriteTime", directoryType);
-                        availableStaticMethods.TryAdd("System.IO.Directory::GetParent", directoryType);                      
+                        availableStaticMethods.TryAdd("System.IO.Directory::GetParent", directoryType);
 
                         availableStaticMethods.TryAdd("System.IO.File::Exists", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::GetCreationTime", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::GetAttributes", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::GetLastAccessTime", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::GetLastWriteTime", fileType);
+                        availableStaticMethods.TryAdd("System.IO.File::GetCreationTimeUtc", fileType);
+                        availableStaticMethods.TryAdd("System.IO.File::GetLastWriteTimeUtc", fileType);
                         availableStaticMethods.TryAdd("System.IO.File::ReadAllText", fileType);
+                        availableStaticMethods.TryAdd("System.IO.File::ReadAllBytes", fileType);
 
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::GetCultureInfo", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request
                         availableStaticMethods.TryAdd("System.Globalization.CultureInfo::new", new Tuple<string, Type>(null, typeof(CultureInfo))); // user request

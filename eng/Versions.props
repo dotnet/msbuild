@@ -1,25 +1,20 @@
-﻿<Project>
+<Project>
 
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.9.0</VersionPrefix>
-    <PreReleaseVersionLabel>preview</PreReleaseVersionLabel>
-    <PackageValidationBaselineVersion>18.8.0-preview-26276-02</PackageValidationBaselineVersion>
+    <VersionPrefix>18.10.0</VersionPrefix>
+    <PreReleaseVersionLabel>1</PreReleaseVersionLabel>
+    <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">$(PreReleaseVersionLabel)-test</PreReleaseVersionLabel>
+    <PackageValidationBaselineVersion>18.9.0-preview-26330-01</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
-    <!-- differentiate experimental insertions to avoid package id conflicts, 
-     it has to be alphabetically after "preview" to avoid downgrade errors in VS -->
-    <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">test</PreReleaseVersionLabel>
     <!--
       Don't use shipping versions when building in the VMR unless the VMR directs the build to use shipping versions.
       This can cause issues when building downstream repos in the orchestrated build if the time MSBuild
       is built crosses a UTC date boundary.
     -->
     <DotNetUseShippingVersions Condition="'$(DotNetBuildFromVMR)' != 'true'">true</DotNetUseShippingVersions>
-    <!-- Workaround for https://github.com/dotnet/roslyn/issues/35793 -->
-    <SemanticVersioningV1>true</SemanticVersioningV1>
-    <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
   </PropertyGroup>
 
   <!-- Arcade features -->
@@ -28,6 +23,9 @@
     <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
+    <UsingToolNuGetRepack>true</UsingToolNuGetRepack>
+
+    <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
   </PropertyGroup>
 
   <!-- Production Dependencies -->
@@ -57,31 +55,22 @@
   <PropertyGroup>
     <!-- dotnet/runtime packages -->
     <SystemSecurityPrincipalWindowsVersion>5.0.0</SystemSecurityPrincipalWindowsVersion>
-  </PropertyGroup>
 
-  <PropertyGroup>
     <MicrosoftVisualStudioTelemetryVersion>17.14.18</MicrosoftVisualStudioTelemetryVersion>
     <!-- Microsoft.VisualStudio.SolutionPersistence is maintained in eng/dependabot/Packages.props -->
-  </PropertyGroup>
 
-  <!-- Toolset Dependencies -->
-  <PropertyGroup>
     <!-- DotNetCliVersion MUST match the dotnet version in global.json.
          Otherwise, this version of dotnet will not be installed and the build will error out. -->
     <DotNetCliVersion>$([System.Text.RegularExpressions.Regex]::Match($([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)..\global.json')), '"dotnet": "([^"]*)"').Groups.get_Item(1))</DotNetCliVersion>
-  </PropertyGroup>
 
-  <PropertyGroup>
     <!-- These are manually updated since they are text-only source packages and can't be
        overridden in source-build, see https://github.com/dotnet/msbuild/issues/6960.
        When updating the version make sure to add the new version to source-build-assets first. -->
     <MicrosoftCodeAnalysisCollectionsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisCollectionsVersion>
     <MicrosoftCodeAnalysisContractsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisContractsVersion>
     <MicrosoftCodeAnalysisPooledObjectsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisPooledObjectsVersion>
-  </PropertyGroup>
 
-  <PropertyGroup>
-    <BootstrapSdkVersion>10.0.300</BootstrapSdkVersion>
+    <BootstrapSdkVersion>11.0.100-preview.7.26360.111</BootstrapSdkVersion>
   </PropertyGroup>
 
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
@@ -92,7 +81,7 @@
          not ok for MSBuild because we have a fixed AssemblyVersion for
          compat (15.1.0.0), but varied FileVersion, which is user-visible
          via $(MSBuildVersion) and msbuild -version.
-
+  
          So: we want this to match the NuGet package version and also the
          AssemblyInformationalVersion. Jump through hoops to do so.
          -->
@@ -102,4 +91,3 @@
   </Target>
 
 </Project>
-

@@ -94,6 +94,7 @@ Hot paths: `Evaluator.cs`, `Expander.cs`, file I/O operations.
 - [ ] A value recomputed on every call when cacheable
 - [ ] `Dictionary` for <10 items, or `List` for frequent lookups of >100 items
 - [ ] Optimization claim without profiling data
+- [ ] `System.Reflection` (constructor discovery, `Activator`, `MethodInfo` lookups) on hot paths — reflection results must be computed once and cached (e.g., via `Lazy<T>` or a static field), never re-invoked per task instantiation or per build request
 
 ---
 
@@ -232,6 +233,8 @@ See `../../documentation/wiki/Microsoft.Build.Framework.md`.
 5. For bug fix PRs, read the original issue and feature PR discussions to understand the design intent. Verify the fix aligns with it.
 6. When code works around an API limitation (try/catch chains, TOCTOU patterns, fallback sequences), check whether a better API exists in already-referenced packages that would eliminate the workaround.
 7. When a pattern is borrowed from another codebase or context, verify its assumptions still hold in the new context.
+8. Respect abstraction layers: a layer should not depend on the internals or concrete types of another, and logic should live in the layer responsible for it. Flag dependency inversions (a lower layer depending on a higher one), leaks (one layer's implementation details exposed across its boundary), and misplaced logic (a decision made outside the layer that owns it), even when functionally correct.
+9. When code is placed in a particular spot because some constraint supposedly requires it, confirm that constraint is real before accepting the placement. A justification that holds for one path may not hold here, and a cleaner location may be available.
 
 **CHECK — Flag if:**
 - [ ] Large feature PR with no linked spec
@@ -241,6 +244,7 @@ See `../../documentation/wiki/Microsoft.Build.Framework.md`.
 - [ ] Fix contradicts design intent established in original feature discussions
 - [ ] Workaround for an API limitation when a better API is available in existing dependencies
 - [ ] Pattern borrowed from a different context without validating its assumptions apply here
+- [ ] Abstraction-layer violation: dependency inversion, a leak across a boundary, or logic placed outside the layer that owns it
 
 ---
 
@@ -312,14 +316,16 @@ See `../../documentation/wiki/Nodes-Orchestration.md`, `../../documentation/spec
 
 **Rules:**
 1. Use clear, descriptive names. Avoid abbreviations unless universally understood (e.g., `PRE` for `ProjectRootElement`).
-2. Be consistent with surrounding code naming.
-3. Test methods: `MethodUnderTest_Scenario_ExpectedResult`.
+2. Names should describe what a member is or does, not why it was introduced. Names should not be misleading.
+3. Be consistent with surrounding code naming.
+4. Test methods: `MethodUnderTest_Scenario_ExpectedResult`.
 
 **CHECK — Flag if:**
 - [ ] Ambiguous names (`data`, `result`, `temp`, `flag`)
 - [ ] Naming inconsistent with adjacent code
 - [ ] Boolean parameter meaning unclear
 - [ ] Test method names don't describe what they test
+- [ ] Misleading names: a name implies semantics different from what the member actually represents or does
 
 ---
 
@@ -680,3 +686,5 @@ Use this to prioritize dimensions based on changed files.
    **Never use APPROVE** — the agent must not count as a PR approval.
 
    All inline comments from step 5 are automatically bundled into this review submission.
+
+8. **Never resolve or dismiss reviewer threads opened by humans.** Only the maintainer who opened a thread may mark it resolved. If a finding has been addressed in the code, note that in a reply but leave the thread open for the maintainer to close. Threads that were clearly opened by another AI agent or bot (e.g., authored by `[bot]`-suffixed accounts or automated tooling) may be resolved after the finding is addressed.

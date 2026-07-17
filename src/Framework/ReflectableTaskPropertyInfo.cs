@@ -24,7 +24,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The type of the generated tasks.
         /// </summary>
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
         private Type _taskType;
 
         /// <summary>
@@ -34,7 +34,7 @@ namespace Microsoft.Build.Execution
         /// <param name="taskType">The type to reflect over to get the reflection propertyinfo later.</param>
         internal ReflectableTaskPropertyInfo(
             TaskPropertyInfo taskPropertyInfo,
-            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties | DynamicallyAccessedMemberTypes.NonPublicProperties)]
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
             Type taskType)
             : base(taskPropertyInfo.Name, taskPropertyInfo.PropertyType, taskPropertyInfo.Output, taskPropertyInfo.Required)
         {
@@ -81,8 +81,25 @@ namespace Microsoft.Build.Execution
             {
                 if (_propertyInfo == null)
                 {
-                    _propertyInfo = _taskType.GetProperty(Name, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
-                    Assumed.NotNull(_propertyInfo, $"Could not find property {Name} on type {_taskType.FullName} that the task factory indicated should exist.");
+                    PropertyInfo foundProperty = null;
+                    foreach (PropertyInfo propertyInfo in _taskType.GetProperties(BindingFlags.Instance | BindingFlags.Public))
+                    {
+                        if (string.Equals(propertyInfo.Name, Name, StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (foundProperty != null)
+                            {
+                                // Multiple case-insensitive matches indicate shadowed properties or a malformed task type.
+                                throw new AmbiguousMatchException($"""
+                                    Multiple properties matching '{Name}' (case-insensitive) found on type '{_taskType.FullName}'.
+                                    Shadowed or duplicate property definitions are not supported.
+                                    """);
+                            }
+                            foundProperty = propertyInfo;
+                        }
+                    }
+
+                    Assumed.NotNull(foundProperty, $"Could not find property {Name} on type {_taskType.FullName} that the task factory indicated should exist.");
+                    _propertyInfo = foundProperty;
                 }
 
                 return _propertyInfo;

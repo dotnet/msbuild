@@ -1346,30 +1346,28 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void FileEnumerationCacheTakesExcludesIntoAccount()
         {
-            try
+            using (var env = TestEnvironment.Create())
             {
-                using (var env = TestEnvironment.Create())
-                {
-                    env.SetEnvironmentVariable("MsBuildCacheFileEnumerations", "1");
+                // Use a dedicated cache-enabled FileMatcher instead of the process-global FileMatcher.Default.
+                // Passing an explicit cache dictionary enables caching for this instance alone (see FileMatcher
+                // constructor), so the test exercises the cache deterministically without setting the process-wide
+                // MsBuildCacheFileEnumerations env var, which would otherwise pin caching on for FileMatcher.Default
+                // and leak into unrelated tests (e.g. DriveEnumeratingWildcardFailsAndReturns).
+                var fileMatcher = new FileMatcher(FileSystems.Default, new ConcurrentDictionary<string, IReadOnlyList<string>>());
 
-                    var testProject = env.CreateTestProjectWithFiles(string.Empty, new[] { "a.cs", "b.cs", "c.cs" });
+                var testProject = env.CreateTestProjectWithFiles(string.Empty, new[] { "a.cs", "b.cs", "c.cs" });
 
-                    var files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs").FileList;
-                    Array.Sort(files);
-                    Assert.Equal(new[] { "a.cs", "b.cs", "c.cs" }, files);
+                var files = fileMatcher.GetFiles(testProject.TestRoot, "**/*.cs").FileList;
+                Array.Sort(files);
+                Assert.Equal(new[] { "a.cs", "b.cs", "c.cs" }, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> { "a.cs" }).FileList;
-                    Array.Sort(files);
-                    Assert.Equal(new[] { "b.cs", "c.cs" }, files);
+                files = fileMatcher.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> { "a.cs" }).FileList;
+                Array.Sort(files);
+                Assert.Equal(new[] { "b.cs", "c.cs" }, files);
 
-                    files = FileMatcher.Default.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> { "a.cs", "c.cs" }).FileList;
-                    Array.Sort(files);
-                    Assert.Equal(new[] { "b.cs" }, files);
-                }
-            }
-            finally
-            {
-                FileMatcher.ClearCaches();
+                files = fileMatcher.GetFiles(testProject.TestRoot, "**/*.cs", new List<string> { "a.cs", "c.cs" }).FileList;
+                Array.Sort(files);
+                Assert.Equal(new[] { "b.cs" }, files);
             }
         }
 

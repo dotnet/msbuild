@@ -10,13 +10,17 @@
     "runner": "Microsoft.Testing.Platform"
   },
   "tools": {
-    "dotnet": "10.0.300",
-    "vs": {
-      "version": "18.0"
+    "dotnet": "11.0.100-preview.7.26360.111",
+    "runtimes": {
+      "dotnet": [
+        "10.0.0"
+      ]
     },
-    "xcopy-msbuild": "18.0.0"
+    "vs": {
+      "version": "18.6"
+    }
   },
   "msbuild-sdks": {
-    "Microsoft.DotNet.Arcade.Sdk": "10.0.0-beta.26304.4"
+    "Microsoft.DotNet.Arcade.Sdk": "11.0.0-beta.26360.7"
   }
 }

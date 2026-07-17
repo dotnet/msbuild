@@ -774,6 +774,13 @@ namespace Microsoft.Build.BackEnd
         {
             Exception thrownException = null;
             BuildResult result = null;
+            BuildRequest request = _requestEntry.Request;
+            BuildRequestConfiguration requestConfiguration = _requestEntry.RequestConfiguration;
+            string projectPath = requestConfiguration.ProjectFullPath;
+            int configurationId = requestConfiguration.ConfigurationId;
+            int globalRequestId = request.GlobalRequestId;
+            int nodeRequestId = request.NodeRequestId;
+            bool requestThreadProcEventSourceStarted = false;
 
             try
             {
@@ -781,10 +788,10 @@ namespace Microsoft.Build.BackEnd
                 {
                     SetCommonWorkerThreadParameters();
                 }
-                MSBuildEventSource.Log.RequestThreadProcStart();
+                MSBuildEventSource.Log.RequestThreadProcStart(projectPath, configurationId, globalRequestId, nodeRequestId);
+                requestThreadProcEventSourceStarted = true;
                 VerifyEntryInActiveState();
                 result = await BuildProject();
-                MSBuildEventSource.Log.RequestThreadProcStop();
             }
             catch (InvalidProjectFileException ex)
             {
@@ -861,6 +868,11 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
+                if (requestThreadProcEventSourceStarted)
+                {
+                    MSBuildEventSource.Log.RequestThreadProcStop(projectPath, configurationId, globalRequestId, nodeRequestId);
+                }
+
                 _blockType = BlockType.Unblocked;
 
                 if (thrownException != null)
@@ -1264,9 +1276,12 @@ namespace Microsoft.Build.BackEnd
             }
             finally
             {
-                buildCheckManager?.EndProjectRequest(
-                    new CheckLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext.BuildEventContext),
-                    _requestEntry.RequestConfiguration.ProjectFullPath);
+                if (buildCheckManager is not null && _projectLoggingContext is not null)
+                {
+                    buildCheckManager.EndProjectRequest(
+                        new CheckLoggingContext(_nodeLoggingContext.LoggingService, _projectLoggingContext.BuildEventContext),
+                        _requestEntry.RequestConfiguration.ProjectFullPath);
+                }
             }
 
             BuildResult CopyTargetResultsFromProxyTargetsToRealTargets(BuildResult resultFromTargetBuilder)

@@ -20,6 +20,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
+using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -471,6 +472,612 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #endregion
 
+        #region AbsolutePath Params
+
+        /// <summary>
+        /// Validate that setting an AbsolutePath parameter with a valid absolute path works.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathParam()
+        {
+            string absolutePath = NativeMethodsShared.IsWindows ? @"C:\temp\file.txt" : "/tmp/file.txt";
+            ValidateTaskParameter("AbsolutePathParam", absolutePath, new AbsolutePath(absolutePath));
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("AbsolutePathParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("AbsolutePathParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("AbsolutePathParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
+        #region AbsolutePath Array Params
+
+        /// <summary>
+        /// Validate that setting an AbsolutePath array with a single value sets the correct value.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathArrayParam()
+        {
+            string absolutePath = NativeMethodsShared.IsWindows ? @"C:\temp\file.txt" : "/tmp/file.txt";
+            ValidateTaskParameterArray("AbsolutePathArrayParam", absolutePath, new AbsolutePath[] { new AbsolutePath(absolutePath) });
+        }
+
+        /// <summary>
+        /// Validate that setting an AbsolutePath array with multiple values sets the correct values.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathArrayParamMultiple()
+        {
+            string path1 = NativeMethodsShared.IsWindows ? @"C:\temp\file1.txt" : "/tmp/file1.txt";
+            string path2 = NativeMethodsShared.IsWindows ? @"C:\temp\file2.txt" : "/tmp/file2.txt";
+            ValidateTaskParameterArray("AbsolutePathArrayParam", path1 + ";" + path2, new AbsolutePath[] { new AbsolutePath(path1), new AbsolutePath(path2) });
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathArrayParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("AbsolutePathArrayParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathArrayParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("AbsolutePathArrayParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetAbsolutePathArrayParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("AbsolutePathArrayParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
+        #region TaskItem<T> Params
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;int&gt; parameter with a valid integer works.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntParam()
+        {
+            ValidateTaskParameter("TaskItemIntParam", "42", new Microsoft.Build.Framework.TaskItem<int>(42));
+        }
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;string&gt; parameter preserves the item value.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemStringParam()
+        {
+            ValidateTaskParameter("TaskItemStringParam", "value", new Microsoft.Build.Framework.TaskItem<string>("value"));
+        }
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;bool&gt; parameter uses MSBuild boolean parsing.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemBoolParam()
+        {
+            ValidateTaskParameter("TaskItemBoolParam", "yes", new Microsoft.Build.Framework.TaskItem<bool>(true));
+        }
+
+        /// <summary>
+        /// Validate that parse failures from TaskItem&lt;T&gt; scalar binding are reported as invalid task parameter values.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntParamInvalidValue()
+        {
+            var parameters = GetStandardParametersDictionary(true);
+            parameters["TaskItemIntParam"] = ("not-an-int", ElementLocation.Create("foo.proj"));
+
+            Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("TaskItemIntParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("TaskItemIntParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("TaskItemIntParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
+        #region TaskItem<T> Array Params
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;int&gt; array with a single value sets the correct value.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntArrayParam()
+        {
+            ValidateTaskParameterArray("TaskItemIntArrayParam", "42", new Microsoft.Build.Framework.TaskItem<int>[] { new Microsoft.Build.Framework.TaskItem<int>(42) });
+        }
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;int&gt; array with multiple values sets the correct values.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntArrayParamMultiple()
+        {
+            ValidateTaskParameterArray("TaskItemIntArrayParam", "10;20;30", new Microsoft.Build.Framework.TaskItem<int>[] {
+                new Microsoft.Build.Framework.TaskItem<int>(10),
+                new Microsoft.Build.Framework.TaskItem<int>(20),
+                new Microsoft.Build.Framework.TaskItem<int>(30)
+            });
+        }
+
+        /// <summary>
+        /// Validate that parse failures from TaskItem&lt;T&gt; array binding are reported as invalid task parameter values.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntArrayParamInvalidValue()
+        {
+            var parameters = GetStandardParametersDictionary(true);
+            parameters["TaskItemIntArrayParam"] = ("10;not-an-int", ElementLocation.Create("foo.proj"));
+
+            Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntArrayParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("TaskItemIntArrayParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntArrayParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("TaskItemIntArrayParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntArrayParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("TaskItemIntArrayParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
+        #region FileInfo Params
+
+        /// <summary>
+        /// Validate that setting a FileInfo parameter with a valid file path works.
+        /// </summary>
+        [Fact]
+        public void TestSetFileInfoParam()
+        {
+            string filePath = NativeMethodsShared.IsWindows ? @"C:\temp\file.txt" : "/tmp/file.txt";
+            ValidateTaskParameter("FileInfoParam", filePath, new FileInfo(filePath));
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetFileInfoParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("FileInfoParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetFileInfoParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("FileInfoParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetFileInfoParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("FileInfoParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
+        #region FileInfo Array Params
+
+        /// <summary>
+        /// Validate that setting a FileInfo array with a single value sets the correct value.
+        /// </summary>
+        [Fact]
+        public void TestSetFileInfoArrayParam()
+        {
+            string filePath = NativeMethodsShared.IsWindows ? @"C:\temp\file.txt" : "/tmp/file.txt";
+            ValidateTaskParameterArray("FileInfoArrayParam", filePath, new FileInfo[] { new FileInfo(filePath) });
+        }
+
+        /// <summary>
+        /// Validate that setting a FileInfo array with multiple values sets the correct values.
+        /// </summary>
+        [Fact]
+        public void TestSetFileInfoArrayParamMultiple()
+        {
+            string path1 = NativeMethodsShared.IsWindows ? @"C:\temp\file1.txt" : "/tmp/file1.txt";
+            string path2 = NativeMethodsShared.IsWindows ? @"C:\temp\file2.txt" : "/tmp/file2.txt";
+            ValidateTaskParameterArray("FileInfoArrayParam", path1 + ";" + path2, new FileInfo[] { new FileInfo(path1), new FileInfo(path2) });
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetFileInfoArrayParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("FileInfoArrayParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetFileInfoArrayParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("FileInfoArrayParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetFileInfoArrayParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("FileInfoArrayParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
+        #region DirectoryInfo Params
+
+        /// <summary>
+        /// Validate that setting a DirectoryInfo parameter with a valid directory path works.
+        /// </summary>
+        [Fact]
+        public void TestSetDirectoryInfoParam()
+        {
+            string dirPath = NativeMethodsShared.IsWindows ? @"C:\temp" : "/tmp";
+            ValidateTaskParameter("DirectoryInfoParam", dirPath, new DirectoryInfo(dirPath));
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetDirectoryInfoParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("DirectoryInfoParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetDirectoryInfoParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("DirectoryInfoParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetDirectoryInfoParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("DirectoryInfoParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
+        #region DirectoryInfo Array Params
+
+        /// <summary>
+        /// Validate that setting a DirectoryInfo array with a single value sets the correct value.
+        /// </summary>
+        [Fact]
+        public void TestSetDirectoryInfoArrayParam()
+        {
+            string dirPath = NativeMethodsShared.IsWindows ? @"C:\temp" : "/tmp";
+            ValidateTaskParameterArray("DirectoryInfoArrayParam", dirPath, new DirectoryInfo[] { new DirectoryInfo(dirPath) });
+        }
+
+        /// <summary>
+        /// Validate that setting a DirectoryInfo array with multiple values sets the correct values.
+        /// </summary>
+        [Fact]
+        public void TestSetDirectoryInfoArrayParamMultiple()
+        {
+            string path1 = NativeMethodsShared.IsWindows ? @"C:\temp" : "/tmp";
+            string path2 = NativeMethodsShared.IsWindows ? @"C:\Windows" : "/usr";
+            ValidateTaskParameterArray("DirectoryInfoArrayParam", path1 + ";" + path2, new DirectoryInfo[] { new DirectoryInfo(path1), new DirectoryInfo(path2) });
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetDirectoryInfoArrayParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("DirectoryInfoArrayParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetDirectoryInfoArrayParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("DirectoryInfoArrayParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetDirectoryInfoArrayParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("DirectoryInfoArrayParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
+        #region TaskItem<FileInfo> Params
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;FileInfo&gt; parameter with a valid file path works.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemFileInfoParam()
+        {
+            string filePath = NativeMethodsShared.IsWindows ? @"C:\temp\file.txt" : "/tmp/file.txt";
+            ValidateTaskParameter("TaskItemFileInfoParam", filePath, new Microsoft.Build.Framework.TaskItem<FileInfo>(new FileInfo(filePath)));
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemFileInfoParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("TaskItemFileInfoParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemFileInfoParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("TaskItemFileInfoParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemFileInfoParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("TaskItemFileInfoParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
+        #region TaskItem<FileInfo> Array Params
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;FileInfo&gt; array with a single value sets the correct value.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemFileInfoArrayParam()
+        {
+            string filePath = NativeMethodsShared.IsWindows ? @"C:\temp\file.txt" : "/tmp/file.txt";
+            ValidateTaskParameterArray("TaskItemFileInfoArrayParam", filePath, new Microsoft.Build.Framework.TaskItem<FileInfo>[] { new Microsoft.Build.Framework.TaskItem<FileInfo>(new FileInfo(filePath)) });
+        }
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;FileInfo&gt; array with multiple values sets the correct values.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemFileInfoArrayParamMultiple()
+        {
+            string path1 = NativeMethodsShared.IsWindows ? @"C:\temp\file1.txt" : "/tmp/file1.txt";
+            string path2 = NativeMethodsShared.IsWindows ? @"C:\temp\file2.txt" : "/tmp/file2.txt";
+            ValidateTaskParameterArray("TaskItemFileInfoArrayParam", path1 + ";" + path2, new Microsoft.Build.Framework.TaskItem<FileInfo>[] {
+                new Microsoft.Build.Framework.TaskItem<FileInfo>(new FileInfo(path1)),
+                new Microsoft.Build.Framework.TaskItem<FileInfo>(new FileInfo(path2))
+            });
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemFileInfoArrayParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("TaskItemFileInfoArrayParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemFileInfoArrayParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("TaskItemFileInfoArrayParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemFileInfoArrayParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("TaskItemFileInfoArrayParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
+        #region TaskItem<DirectoryInfo> Params
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;DirectoryInfo&gt; parameter with a valid directory path works.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemDirectoryInfoParam()
+        {
+            string dirPath = NativeMethodsShared.IsWindows ? @"C:\temp" : "/tmp";
+            ValidateTaskParameter("TaskItemDirectoryInfoParam", dirPath, new Microsoft.Build.Framework.TaskItem<DirectoryInfo>(new DirectoryInfo(dirPath)));
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemDirectoryInfoParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("TaskItemDirectoryInfoParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemDirectoryInfoParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("TaskItemDirectoryInfoParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemDirectoryInfoParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("TaskItemDirectoryInfoParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
+        #region TaskItem<DirectoryInfo> Array Params
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;DirectoryInfo&gt; array with a single value sets the correct value.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemDirectoryInfoArrayParam()
+        {
+            string dirPath = NativeMethodsShared.IsWindows ? @"C:\temp" : "/tmp";
+            ValidateTaskParameterArray("TaskItemDirectoryInfoArrayParam", dirPath, new Microsoft.Build.Framework.TaskItem<DirectoryInfo>[] { new Microsoft.Build.Framework.TaskItem<DirectoryInfo>(new DirectoryInfo(dirPath)) });
+        }
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;DirectoryInfo&gt; array with multiple values sets the correct values.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemDirectoryInfoArrayParamMultiple()
+        {
+            string path1 = NativeMethodsShared.IsWindows ? @"C:\temp" : "/tmp";
+            string path2 = NativeMethodsShared.IsWindows ? @"C:\Windows" : "/usr";
+            ValidateTaskParameterArray("TaskItemDirectoryInfoArrayParam", path1 + ";" + path2, new Microsoft.Build.Framework.TaskItem<DirectoryInfo>[] {
+                new Microsoft.Build.Framework.TaskItem<DirectoryInfo>(new DirectoryInfo(path1)),
+                new Microsoft.Build.Framework.TaskItem<DirectoryInfo>(new DirectoryInfo(path2))
+            });
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemDirectoryInfoArrayParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("TaskItemDirectoryInfoArrayParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemDirectoryInfoArrayParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("TaskItemDirectoryInfoArrayParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemDirectoryInfoArrayParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("TaskItemDirectoryInfoArrayParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
         #region ITaskItem Params
 
         /// <summary>
@@ -888,6 +1495,50 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #endregion
 
+        #region TaskItem<T> Outputs
+
+        /// <summary>
+        /// Validate that a TaskItem&lt;int&gt; output to an item produces the correct evaluated include.
+        /// </summary>
+        [Fact]
+        public void TestOutputTaskItemIntToItem()
+        {
+            SetTaskParameter("TaskItemIntParam", "42");
+            ValidateOutputItem("TaskItemIntOutput", "42");
+        }
+
+        /// <summary>
+        /// Validate that a TaskItem&lt;int&gt; output to a property produces the correct evaluated value.
+        /// </summary>
+        [Fact]
+        public void TestOutputTaskItemIntToProperty()
+        {
+            SetTaskParameter("TaskItemIntParam", "42");
+            ValidateOutputProperty("TaskItemIntOutput", "42");
+        }
+
+        /// <summary>
+        /// Validate that a TaskItem&lt;int&gt; array output to items produces the correct evaluated includes.
+        /// </summary>
+        [Fact]
+        public void TestOutputTaskItemIntArrayToItems()
+        {
+            SetTaskParameter("TaskItemIntArrayParam", "42;99");
+            ValidateOutputItems("TaskItemIntArrayOutput", new string[] { "42", "99" });
+        }
+
+        /// <summary>
+        /// Validate that a TaskItem&lt;int&gt; array output to a property produces the correct semi-colon-delimited evaluated value.
+        /// </summary>
+        [Fact]
+        public void TestOutputTaskItemIntArrayToProperty()
+        {
+            SetTaskParameter("TaskItemIntArrayParam", "42;99");
+            ValidateOutputProperty("TaskItemIntArrayOutput", "42;99");
+        }
+
+        #endregion
+
         #region Other Output Tests
 
         /// <summary>
@@ -1032,6 +1683,53 @@ namespace Microsoft.Build.UnitTests.BackEnd
             host.FindTask(TaskHostParameters.Empty);
             host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
             _logger.AssertLogContains("MSB4036");
+        }
+
+        /// <summary>
+        /// In a trimmed / Native AOT host, reflective task loading/execution is disabled
+        /// (EnableReflectiveTaskExecution is substituted false). FindTask - the leaf that loads a task
+        /// factory/type by reflection - must fail observably with a reported project error (MSB4283)
+        /// rather than crashing in reflection, so the host can detect the unsupported path and fall back
+        /// to a JIT MSBuild.
+        /// </summary>
+        [Fact]
+        public void ReflectiveTaskExecutionDisabledFailsObservably()
+        {
+            bool switchWasSet = AppContext.TryGetSwitch("Microsoft.Build.EnableReflectiveTaskExecution", out bool originalValue);
+            try
+            {
+                AppContext.SetSwitch("Microsoft.Build.EnableReflectiveTaskExecution", false);
+
+                using var host = new TaskExecutionHost();
+                TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));
+
+                ProjectInstance project = CreateTestProject();
+                host.InitializeForTask(
+                    this,
+                    tlc,
+                    project,
+                    "TaskWithNoUsingTask",
+                    ElementLocation.Create("none", 1, 1),
+                    this,
+                    false,
+                    projectFile: "proj.proj",
+#if FEATURE_APPDOMAIN
+                    null,
+#endif
+                    null,
+                    false,
+                    CancellationToken.None,
+                    TaskEnvironmentHelper.CreateForTest());
+
+                InvalidProjectFileException exception = Assert.Throws<InvalidProjectFileException>(() => host.FindTask(TaskHostParameters.Empty));
+                exception.ErrorCode.ShouldBe("MSB4283");
+            }
+            finally
+            {
+                // AppContext switches cannot be returned to "unset"; restore the prior value (the default
+                // is enabled when unset) so other tests keep reflective task execution on.
+                AppContext.SetSwitch("Microsoft.Build.EnableReflectiveTaskExecution", !switchWasSet || originalValue);
+            }
         }
 
         /// <summary>
@@ -1222,16 +1920,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         #region Validation Routines
 
         /// <summary>
-        /// Is the class a task factory
-        /// </summary>
-        private static bool IsTaskFactoryClass(Type type, object unused)
-        {
-            return type.GetTypeInfo().IsClass &&
-                !type.GetTypeInfo().IsAbstract &&
-                (type.GetInterface("Microsoft.Build.Framework.ITaskFactory") != null);
-        }
-
-        /// <summary>
         /// Initialize the host object
         /// </summary>
         private void InitializeHost()
@@ -1245,11 +1933,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Set up a temporary project and add some items to it.
             ProjectInstance project = CreateTestProject();
 
-            TypeLoader typeLoader = new TypeLoader(IsTaskFactoryClass);
+            TypeLoader typeLoader = TypeLoader.Create<ITaskFactory>();
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(Assembly.GetAssembly(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory)).FullName, null);
 #else
-            AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).GetTypeInfo().FullName, null);
+            AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).FullName, null);
 #endif
             LoadedType loadedType = new LoadedType(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory), loadInfo, typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory).Assembly, typeof(ITaskItem));
 
@@ -1361,7 +2049,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
             SetTaskParameter(parameterName, value);
 
             Assert.True(_parametersSetOnTask.ContainsKey(parameterName));
-            Assert.Equal(expectedValue, _parametersSetOnTask[parameterName]);
+
+            object actualValue = _parametersSetOnTask[parameterName];
+
+            // Special handling for FileInfo and DirectoryInfo - compare FullName instead of object equality
+            if (expectedValue is FileInfo expectedFileInfo && actualValue is FileInfo actualFileInfo)
+            {
+                Assert.Equal(expectedFileInfo.FullName, actualFileInfo.FullName);
+            }
+            else if (expectedValue is DirectoryInfo expectedDirInfo && actualValue is DirectoryInfo actualDirInfo)
+            {
+                Assert.Equal(expectedDirInfo.FullName, actualDirInfo.FullName);
+            }
+            // Special handling for TaskItem<FileInfo> and TaskItem<DirectoryInfo> - compare FullName through ItemSpec
+            else if (expectedValue is ITaskItem<FileInfo> expectedTaskItemFileInfo && actualValue is ITaskItem<FileInfo> actualTaskItemFileInfo)
+            {
+                Assert.Equal(expectedTaskItemFileInfo.Value.FullName, actualTaskItemFileInfo.Value.FullName);
+            }
+            else if (expectedValue is ITaskItem<DirectoryInfo> expectedTaskItemDirInfo && actualValue is ITaskItem<DirectoryInfo> actualTaskItemDirInfo)
+            {
+                Assert.Equal(expectedTaskItemDirInfo.Value.FullName, actualTaskItemDirInfo.Value.FullName);
+            }
+            else
+            {
+                Assert.Equal(expectedValue, actualValue);
+            }
         }
 
         /// <summary>
@@ -1456,7 +2168,31 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(expectedArray.Length, actualArray.Length);
             for (int i = 0; i < expectedArray.Length; i++)
             {
-                Assert.Equal(expectedArray.GetValue(i), actualArray.GetValue(i));
+                object expected = expectedArray.GetValue(i);
+                object actual = actualArray.GetValue(i);
+
+                // Special handling for FileInfo and DirectoryInfo - compare FullName instead of object equality
+                if (expected is FileInfo expectedFileInfo && actual is FileInfo actualFileInfo)
+                {
+                    Assert.Equal(expectedFileInfo.FullName, actualFileInfo.FullName);
+                }
+                else if (expected is DirectoryInfo expectedDirInfo && actual is DirectoryInfo actualDirInfo)
+                {
+                    Assert.Equal(expectedDirInfo.FullName, actualDirInfo.FullName);
+                }
+                // Special handling for TaskItem<FileInfo> and TaskItem<DirectoryInfo> - compare FullName through ItemSpec
+                else if (expected is ITaskItem<FileInfo> expectedTaskItemFileInfo && actual is ITaskItem<FileInfo> actualTaskItemFileInfo)
+                {
+                    Assert.Equal(expectedTaskItemFileInfo.Value.FullName, actualTaskItemFileInfo.Value.FullName);
+                }
+                else if (expected is ITaskItem<DirectoryInfo> expectedTaskItemDirInfo && actual is ITaskItem<DirectoryInfo> actualTaskItemDirInfo)
+                {
+                    Assert.Equal(expectedTaskItemDirInfo.Value.FullName, actualTaskItemDirInfo.Value.FullName);
+                }
+                else
+                {
+                    Assert.Equal(expected, actual);
+                }
             }
         }
 

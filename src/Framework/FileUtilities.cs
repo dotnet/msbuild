@@ -666,7 +666,7 @@ namespace Microsoft.Build.Framework
         internal static string NormalizePath(string path)
         {
             ArgumentException.ThrowIfNullOrEmpty(path);
-            string fullPath = GetFullPath(path);
+            string fullPath = NewPath.GetFullPath(path);
             return FixFilePath(fullPath);
         }
 
@@ -679,68 +679,6 @@ namespace Microsoft.Build.Framework
         {
             return NormalizePath(Path.Combine(paths));
         }
-
-        private static string GetFullPath(string path)
-        {
-#if FEATURE_LEGACY_GETFULLPATH
-            if (NativeMethods.IsWindows)
-            {
-                string uncheckedFullPath = NativeMethods.GetFullPath(path);
-
-                if (IsPathTooLong(uncheckedFullPath))
-                {
-                    throw new PathTooLongException(SR.FormatPathTooLong(path, NativeMethods.MaxPath));
-                }
-
-                // We really don't care about extensions here, but Path.HasExtension provides a great way to
-                // invoke the CLR's invalid path checks (these are independent of path length)
-                Path.HasExtension(uncheckedFullPath);
-
-                // If we detect we are a UNC path then we need to use the regular get full path in order to do the correct checks for UNC formatting
-                // and security checks for strings like \\?\GlobalRoot
-                return IsUNCPath(uncheckedFullPath) ? Path.GetFullPath(uncheckedFullPath) : uncheckedFullPath;
-            }
-#endif
-
-            return Path.GetFullPath(path);
-        }
-
-#if FEATURE_LEGACY_GETFULLPATH
-        private static bool IsUNCPath(string path)
-        {
-            if (!NativeMethods.IsWindows || !path.StartsWith(@"\\", StringComparison.Ordinal))
-            {
-                return false;
-            }
-            bool isUNC = true;
-            for (int i = 2; i < path.Length - 1; i++)
-            {
-                if (path[i] == '\\')
-                {
-                    isUNC = false;
-                    break;
-                }
-            }
-
-            /*
-              From Path.cs in the CLR
-
-              Throw an ArgumentException for paths like \\, \\server, \\server\
-              This check can only be properly done after normalizing, so
-              \\foo\.. will be properly rejected.  Also, reject \\?\GLOBALROOT\
-              (an internal kernel path) because it provides aliases for drives.
-
-              throw new ArgumentException(Environment.GetResourceString("Arg_PathIllegalUNC"));
-
-               // Check for \\?\Globalroot, an internal mechanism to the kernel
-               // that provides aliases for drives and other undocumented stuff.
-               // The kernel team won't even describe the full set of what
-               // is available here - we don't want managed apps mucking
-               // with this for security reasons.
-            */
-            return isUNC || path.IndexOf(@"\\?\globalroot", StringComparison.OrdinalIgnoreCase) != -1;
-        }
-#endif // FEATURE_LEGACY_GETFULLPATH
 
         /// <summary>
         /// Normalizes all path separators (both forward and back slashes) to forward slashes.
@@ -1379,8 +1317,8 @@ namespace Microsoft.Build.Framework
             ArgumentNullException.ThrowIfNull(basePath);
             ArgumentException.ThrowIfNullOrEmpty(path);
 
-            string fullBase = GetFullPath(basePath);
-            string fullPath = GetFullPath(path);
+            string fullBase = NewPath.GetFullPath(basePath);
+            string fullPath = NewPath.GetFullPath(path);
 
             string[] splitBase = fullBase.Split(MSBuildConstants.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
             string[] splitPath = fullPath.Split(MSBuildConstants.DirectorySeparatorChar, StringSplitOptions.RemoveEmptyEntries);
@@ -1454,7 +1392,7 @@ namespace Microsoft.Build.Framework
             bool hasMaxPath = NativeMethods.HasMaxPath;
             int maxPath = NativeMethods.MaxPath;
             // >= not > because MAX_PATH assumes a trailing null
-            return hasMaxPath && !IsRootedNoThrow(path) && NativeMethods.GetCurrentDirectory().Length + path.Length + 1 /* slash */ >= maxPath;
+            return hasMaxPath && !IsRootedNoThrow(path) && Environment.CurrentDirectory.Length + path.Length + 1 /* slash */ >= maxPath;
         }
 
         /// <summary>
@@ -1678,7 +1616,7 @@ namespace Microsoft.Build.Framework
             fileSystem ??= DefaultFileSystem;
 
             // Canonicalize our starting location
-            string? lookInDirectory = GetFullPath(startingDirectory);
+            string? lookInDirectory = NewPath.GetFullPath(startingDirectory);
 
             do
             {

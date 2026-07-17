@@ -3,10 +3,13 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Reflection;
+using System.Resources;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Build.CommandLine;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework;
@@ -144,6 +147,98 @@ namespace Microsoft.Build.Engine.UnitTests
             pidOfServerProcess.ShouldNotBe(newServerProcessId, "Node used by both the first and second build should not be the same.");
         }
 
+        [Fact]
+        public void ServerSpawnAndReuseAreLoggedToBuildLog()
+        {
+            // Ensure a clean slate so the first build below deterministically spawns a new server node.
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
+            // First (cold) build: the server node is spawned for this build. The lifecycle message is
+            // logged at low importance, so it only appears at diagnostic verbosity (and in a binary log).
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -verbosity:diagnostic", out bool success, false, _output);
+            success.ShouldBeTrue();
+            int serverPid = ParseNumber(output, "Server ID is ");
+            _env.WithTransientProcess(serverPid);
+            ParseNumber(output, "Process ID is ").ShouldNotBe(serverPid, "The build should have run on a separate server node.");
+
+            string spawnedMessage = GetServerStatusMessage("MSBuildServerNodeSpawned", serverPid);
+            string reusedMessage = GetServerStatusMessage("MSBuildServerNodeReused", serverPid);
+
+            output.ShouldContain(spawnedMessage);
+            output.ShouldNotContain(reusedMessage);
+
+            // Second (warm) build: the running server node is reused.
+            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -verbosity:diagnostic", out success, false, _output);
+            success.ShouldBeTrue();
+            ParseNumber(output, "Server ID is ").ShouldBe(serverPid, "The second build should reuse the same server node.");
+
+            output.ShouldContain(reusedMessage);
+            output.ShouldNotContain(spawnedMessage);
+        }
+
+        [Fact]
+        public void ServerNotUsedReasonIsLoggedToBuildLog()
+        {
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
+            // MSBuild Server is requested via the environment variable, but /nodereuse:false makes the
+            // command line incompatible with the server, so the build falls back to running in-process.
+            // The specific reason (node reuse disabled) must be recorded in the build log.
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} /nodereuse:false -verbosity:diagnostic", out bool success, false, _output);
+            success.ShouldBeTrue();
+            ParseNumber(output, "Process ID is ").ShouldBe(ParseNumber(output, "Server ID is "), "The build should have run in-process, not on a server node.");
+
+            string reason = GetServerStatusMessage("MSBuildServerReasonNodeReuseDisabled");
+            string notUsedMessage = GetServerStatusMessage("MSBuildServerNotUsedForBuild", reason);
+
+            output.ShouldContain(notUsedMessage);
+        }
+
+        [Fact]
+        public void ServerShortLivedForMultithreadedWhenNodeReuseOff()
+        {
+            // Ensure a clean slate so the build below deterministically spawns a new (short-lived) server node.
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+
+            // A multithreaded (/mt) build with node reuse off still uses the server (for Server GC), but as a
+            // short-lived node that tears itself down after this build. The lifecycle message must say so.
+            _env.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "1");
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} /nodereuse:false -verbosity:diagnostic", out bool success, false, _output);
+            success.ShouldBeTrue();
+            int serverPid = ParseNumber(output, "Server ID is ");
+            _env.WithTransientProcess(serverPid);
+            ParseNumber(output, "Process ID is ").ShouldNotBe(serverPid, "The build should have run on a separate (short-lived) server node.");
+
+            output.ShouldContain(GetServerStatusMessage("MSBuildServerNodeSpawnedShortLived", serverPid));
+            // The ordinary (resident) spawn message must not appear for a short-lived server.
+            output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeSpawned", serverPid));
+        }
+
+        [Fact]
+        public void ServerLifecycleMessagesAreAbsentForPlainBuild()
+        {
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+
+            // MSBuild Server is not requested for this invocation, so none of the server lifecycle messages
+            // should be logged even at diagnostic verbosity (and the build runs in-process).
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "");
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -verbosity:diagnostic", out bool success, false, _output);
+            success.ShouldBeTrue();
+            ParseNumber(output, "Process ID is ").ShouldBe(ParseNumber(output, "Server ID is "), "The build should have run in-process, not on a server node.");
+
+            output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeSpawned", ParseNumber(output, "Server ID is ")));
+            output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNodeReused", ParseNumber(output, "Server ID is ")));
+            // The not-used template (with its substituted reason) must not appear because the server was never requested.
+            output.ShouldNotContain(GetServerStatusMessage("MSBuildServerNotUsedForBuild", GetServerStatusMessage("MSBuildServerReasonNodeReuseDisabled")));
+        }
+
         /// <summary>
         /// Regression test for dotnet/msbuild#13940. With the server enabled, TerminalLogger
         /// auto-detection runs in the server node. It must honor the client's transmitted console
@@ -272,6 +367,7 @@ namespace Microsoft.Build.Engine.UnitTests
             t.Wait();
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14195", TestPlatforms.Windows)]
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -417,6 +513,73 @@ namespace Microsoft.Build.Engine.UnitTests
             // Clean up the server we spun up.
             MSBuildClient.ShutdownServer(CancellationToken.None);
         }
+
+#if NET
+        /// <summary>
+        /// Disabling node reuse (e.g. <c>-nr:false</c>, as <c>dotnet restore</c> does) must NOT prevent a
+        /// multithreaded (/mt) build from using the server. Instead of skipping the server, the no-reuse intent is
+        /// honored by shutting the server down after the build. This test verifies both halves: the build runs in a
+        /// separate server process, and that process does not survive the build (so a subsequent build gets a fresh server).
+        /// </summary>
+        [Fact]
+        public void MultiThreadedServerIsUsedButShutDownWhenNodeReuseDisabled()
+        {
+            // Clear MSBUILDUSESERVER so we exercise the -mt-implies-server path, and isolate this test's server
+            // with a unique handshake salt and a clean environment.
+            PrepareIsolatedServerEnv(useServer: false);
+            TransientTestFile project = _env.CreateFile("mtNoReuseProbe.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
+
+            // Make sure we start with no server running.
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            try
+            {
+                // -mt forces the server on even though node reuse is disabled.
+                string output1 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -mt -nr:false", out bool success1, false, _output);
+                success1.ShouldBeTrue();
+                int clientPid1 = ParseNumber(output1, "Process ID is ");
+                int serverPid1 = ParseNumber(output1, "TaskRanInPID=");
+                // Register cleanup before any assertion so the server does not leak if an assertion throws.
+                _env.WithTransientProcess(serverPid1);
+
+                // The build ran in a separate server process: proof the server was engaged despite -nr:false.
+                serverPid1.ShouldNotBe(clientPid1, "Even with node reuse disabled, -mt must run the build in the server node, not the entry process.");
+
+                // Because node reuse is disabled, the server must not persist past the build: its process should exit.
+                WaitForProcessExit(serverPid1).ShouldBeTrue($"Server process {serverPid1} should have been shut down after the build when node reuse is disabled.");
+
+                // A second build cannot reuse the (now gone) server, so it must launch a fresh server process.
+                string output2 = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -mt -nr:false", out bool success2, false, _output);
+                success2.ShouldBeTrue();
+                int serverPid2 = ParseNumber(output2, "TaskRanInPID=");
+                _env.WithTransientProcess(serverPid2);
+                serverPid2.ShouldNotBe(serverPid1, "With node reuse disabled, each -mt build should get a fresh, non-persistent server process.");
+            }
+            finally
+            {
+                // Ensure any server we spun up is torn down even if an assertion above fails.
+                MSBuildClient.ShutdownServer(CancellationToken.None);
+            }
+        }
+
+        /// <summary>
+        /// Waits up to <paramref name="timeoutMs"/> for the process with the given PID to exit. Returns true if
+        /// the process exited (or was already gone), false if it was still running when the timeout elapsed.
+        /// </summary>
+        private static bool WaitForProcessExit(int pid, int timeoutMs = 10000)
+        {
+            try
+            {
+                using Process process = Process.GetProcessById(pid);
+                return process.WaitForExit(timeoutMs);
+            }
+            catch (ArgumentException)
+            {
+                // No process with that PID is running - it has already exited.
+                return true;
+            }
+        }
+#endif
 
         [Fact]
         public void PropertyMSBuildStartupDirectoryOnServer()
@@ -604,6 +767,19 @@ namespace Microsoft.Build.Engine.UnitTests
             Regex regex = new(@$"{toFind}(\d+)");
             Match match = regex.Match(searchString);
             return int.Parse(match.Groups[1].Value);
+        }
+
+        /// <summary>
+        /// Resolves an MSBuild Server status message from the MSBuild executable's own resources so the
+        /// assertions stay locale-independent (the child build process and this resource lookup share the
+        /// same culture and resource set).
+        /// </summary>
+        private static string GetServerStatusMessage(string resourceName, params object[] args)
+        {
+            ResourceManager resourceManager = new("MSBuild.Strings", typeof(MSBuildApp).Assembly);
+            string format = resourceManager.GetString(resourceName, CultureInfo.CurrentUICulture)
+                ?? throw new InvalidOperationException($"Resource '{resourceName}' was not found in the MSBuild executable resources.");
+            return args.Length == 0 ? format : string.Format(CultureInfo.CurrentCulture, format, args);
         }
     }
 }

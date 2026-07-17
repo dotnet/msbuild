@@ -382,16 +382,20 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 string testProjectPath = Path.Combine(TestAssetsRootPath, "ExampleNetTask", "TestNetTask", "TestNetTask.csproj");
 
+                // Launching the bootstrap apphost directly bypasses ExecBootstrapedMSBuild, so seed the environment
+                // from the shared helper to pick up the bootstrap DOTNET_ROOT/HOST_PATH/INSTALL_DIR pinning (and the
+                // central SDK-path clearing done in MSBuildTestPipelineStartup). This test additionally points the
+                // child's dotnet host at the *real* (non-symlinked) SDK path to exercise the symlink handshake.
+                Dictionary<string, string> symlinkEnvironment = RunnerUtilities.GetBootstrapMSBuildEnvironmentVariables();
+                symlinkEnvironment[Constants.DotnetHostPathEnvVarName] = Path.Combine(realSdkPath, "dotnet");
+
                 string testTaskOutput = RunnerUtilities.RunProcessAndGetOutput(
                     apphostPath,
                     $"\"{testProjectPath}\" -restore -v:n -p:LatestDotNetCoreForMSBuild={RunnerUtilities.LatestDotNetCoreForMSBuild}",
                     out bool successTestTask,
                     shellExecute: false,
                     outputHelper: _output,
-                    environmentVariables: new Dictionary<string, string>
-                    {
-                        [Constants.DotnetHostPathEnvVarName] = Path.Combine(realSdkPath, "dotnet"),
-                    });
+                    environmentVariables: symlinkEnvironment);
 
                 _output.WriteLine(testTaskOutput);
 

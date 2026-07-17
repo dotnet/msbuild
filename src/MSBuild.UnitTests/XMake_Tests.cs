@@ -861,6 +861,41 @@ namespace Microsoft.Build.UnitTests
             results.ShouldNotContain(ResourceUtilities.GetResourceString("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
         }
 
+        /// <summary>
+        /// When no target is requested, <c>-getProperty</c>/<c>-getItem</c> evaluate only as far as
+        /// needed (partial evaluation, gated behind change wave 18.10). A project whose only error is
+        /// in the targets pass therefore succeeds for a property-only query, but reverts to failing
+        /// when the change wave is opted out (full evaluation).
+        /// </summary>
+        [Theory]
+        [InlineData(null, true)]      // wave enabled (default): partial evaluation stops before the failing targets pass
+        [InlineData("18.10", false)]  // wave disabled: full evaluation hits the failing targets pass
+        public void GetPropertyWithoutTargetUsesPartialEvaluation(string disableFeaturesFromVersion, bool expectedSuccess)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            if (disableFeaturesFromVersion is not null)
+            {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFeaturesFromVersion);
+            }
+
+            // The BeforeTargets expression only fails when the targets pass runs (pass 5); properties
+            // (pass 1) are unaffected, so a partial evaluation reads Foo without hitting the error.
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <PropertyGroup>
+    <Foo>EvalValue</Foo>
+  </PropertyGroup>
+  <Target Name=""Bad"" BeforeTargets=""$([System.Int32]::Parse('notanumber'))"" />
+</Project>
+");
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} -getProperty:Foo", out bool success);
+            success.ShouldBe(expectedSuccess, results);
+            if (expectedSuccess)
+            {
+                results.ShouldContain("EvalValue");
+            }
+        }
+
         [Fact]
         public void BuildFailsWithBadPropertyName()
         {
@@ -1275,6 +1310,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic case
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14194", TestPlatforms.Windows)]
         [Fact]
         public void GetCommandLine()
         {
@@ -1290,6 +1326,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Quoted path
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14192", TestPlatforms.Windows)]
         [Fact]
         public void GetCommandLineQuotedExe()
         {
@@ -1313,6 +1350,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// On path
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14196", TestPlatforms.Windows)]
         [Fact]
         public void GetCommandLineQuotedExeOnPath()
         {
@@ -2610,6 +2648,28 @@ $@"<Project>
 
             logContents.ShouldContain("InitialTarget target ran");
             logContents.ShouldContain("Restore target ran");
+        }
+
+        /// <summary>
+        /// Regression test for dotnet/msbuild#14274 / dotnet/sdk#55245: restore must not inject the ExcludeRestorePackageImports
+        /// global property. Doing so aligns MSBuild's restore evaluation with the global property set NuGet's inner restore walk
+        /// uses, which makes a nonexistent &lt;ProjectReference&gt; leak into NuGet's _GenerateRestoreGraphProjectEntry MSBuild call
+        /// (which does not skip nonexistent projects) and fail with MSB3202 instead of being skipped.
+        /// </summary>
+        [Fact]
+        public void RestoreDoesNotInjectExcludeRestorePackageImports()
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project>
+  <Target Name=""Restore"">
+    <Message Text=""ExcludeRestorePackageImports=[$(ExcludeRestorePackageImports)]"" Importance=""High"" />
+  </Target>
+</Project>");
+
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: "/t:restore");
+
+            // The property must remain empty; MSBuild must not set it during restore.
+            logContents.ShouldContain("ExcludeRestorePackageImports=[]");
         }
 
         /// <summary>
