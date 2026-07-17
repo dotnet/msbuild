@@ -3,9 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using Microsoft.Build.CommandLine.Experimental;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
@@ -204,6 +207,48 @@ namespace Microsoft.Build.UnitTests
 
             // Warning SHOULD appear when level is not set (default behavior)
             output.ShouldContain("MSB1070");
+        }
+
+        [Fact]
+        public void LoggingArgsEnvVarWarningUsesConfiguredUILanguage()
+        {
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
+                !EncodingUtilities.CurrentPlatformIsWindowsAndOfficiallySupportsUTF8Encoding())
+            {
+                return;
+            }
+
+            var directory = _env.CreateFolder();
+            string content = ObjectModelHelpers.CleanupFileContents("<Project><Target Name='t' /></Project>");
+            string projectPath = directory.CreateFile("my.proj", content).Path;
+
+            _env.SetEnvironmentVariable("DOTNET_CLI_UI_LANGUAGE", "ja");
+            _env.SetEnvironmentVariable("MSBUILD_LOGGING_ARGS", "-maxcpucount:4");
+
+            string output = RunnerUtilities.ExecMSBuild($"\"{projectPath}\"", out bool successfulExit, _output);
+            successfulExit.ShouldBeTrue(output);
+
+            CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
+            string expectedMessage;
+            string englishMessage;
+            try
+            {
+                CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("ja");
+                expectedMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                    "LoggingArgsEnvVarUnsupportedArgument",
+                    "-maxcpucount:4");
+                CultureInfo.CurrentUICulture = CultureInfo.GetCultureInfo("en");
+                englishMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                    "LoggingArgsEnvVarUnsupportedArgument",
+                    "-maxcpucount:4");
+            }
+            finally
+            {
+                CultureInfo.CurrentUICulture = originalUICulture;
+            }
+
+            expectedMessage.ShouldNotBe(englishMessage);
+            output.ShouldContain(expectedMessage);
         }
 
         /// <summary>
