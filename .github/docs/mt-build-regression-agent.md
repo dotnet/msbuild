@@ -30,8 +30,11 @@ Azure credential to the AI agent.
    revisions, downloads only candidate-specific artifacts, extracts allowlisted metrics plus safe
    Hosted timing/completion lines, then deletes the raw files.
 6. The derived evidence is uploaded as a workflow artifact.
-7. The Agentic Workflow downloads only that evidence into its secret-free sandbox.
-8. The agent investigates every candidate and:
+7. `Add-MtBuildTimeDiagnosticEvidence.ps1` finds scheduled diagnostic runs from definition 28394
+   that use the exact current or last-healthy MSBuild source SHA, then queries Kusto task, target,
+   evaluation-pass, and task-migration data.
+8. The Agentic Workflow downloads only the derived evidence into its secret-free sandbox.
+9. The agent investigates every candidate and:
    - creates one aggregate issue when new candidates need tracking;
    - opens one draft PR only when it can safely address every actionable regression; or
    - emits a no-op when the complete candidate set is already tracked.
@@ -75,6 +78,7 @@ It also needs Azure DevOps `View builds` access to:
 - PerfStar-Scheduled, definition 25429;
 - PerfStar-DevOpsHosted-Worker, definition 28338; and
 - MSBuild, definition 9434, to resolve the component source revision.
+- PerfStar-DevOpsHosted-Diagnostics, definition 28394, to match scheduled binlog runs by source SHA.
 
 No Azure DevOps queue permission is required for the initial workflow.
 
@@ -87,6 +91,10 @@ mechanism used by the other Agentic Workflows.
 - The source comparison narrows the candidate commit range but does not prove causality.
 - The agent receives allowlisted metrics and bounded timing/completion excerpts, not raw logs or
   binlogs.
+- Scheduled binlog evidence is direct for Hosted candidates and supporting corroboration only for
+  Gold candidates.
+- Task and target wall-clock totals can include nested or repeated work; migrated task controls are
+  included as the contention/noise floor.
 - The workflow creates candidate fixes but does not run PerfStar against them.
 - A draft PR is opened only when the agent can address every actionable candidate without claiming
   that noisy or insufficient-evidence candidates were fixed.

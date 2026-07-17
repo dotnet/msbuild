@@ -155,6 +155,14 @@ jobs:
             -InputReport "$env:RUNNER_TEMP/mt-regression-data/mt-regressions.json" `
             -OutputDirectory "$env:RUNNER_TEMP/mt-regression-data"
 
+      - name: Collect scheduled-binlog supporting evidence
+        if: steps.scan.outputs.has_regressions == 'true'
+        shell: pwsh
+        run: |
+          ./.github/workflows/scripts/Add-MtBuildTimeDiagnosticEvidence.ps1 `
+            -InputEvidence "$env:RUNNER_TEMP/mt-regression-data/mt-regression-evidence.json" `
+            -OutputDirectory "$env:RUNNER_TEMP/mt-regression-data"
+
       - name: Upload regression evidence
         uses: actions/upload-artifact@v7.0.1
         with:
@@ -201,12 +209,20 @@ non-secret output:
 - `/tmp/gh-aw/agent/mt-regression-data/mt-regression-context.md`
 - `/tmp/gh-aw/agent/mt-regression-data/mt-regression-evidence.json`
 - `/tmp/gh-aw/agent/mt-regression-data/mt-regression-evidence.md`
+- `/tmp/gh-aw/agent/mt-regression-data/mt-regression-diagnostics.json`
+- `/tmp/gh-aw/agent/mt-regression-data/mt-regression-diagnostics.md`
 
 The evidence includes exact current and last-healthy PerfStar runs, their MSBuild component build
 IDs and source revisions, candidate-specific current/healthy allowlisted metrics, safe Hosted timing
 and completion lines, and Gold scenario result metrics. Raw artifacts are downloaded only in the
 trusted scan job, reduced to an explicit allowlist, bounded, and deleted before the evidence is
 uploaded.
+
+When definition 28394 has a scheduled binlog run for the exact current or last-healthy MSBuild
+source SHA, the diagnostic evidence also includes task, target, and evaluation-pass MT/non-MT
+deltas from Kusto plus task migration markers. Overall diagnostic pipeline failure does not
+invalidate scenario evidence when the affected scenario and OS have paired task data. For Gold
+candidates, this Hosted diagnostic data is corroboration rather than direct backend evidence.
 
 The workflow intentionally does **not** give you Azure, Kusto, or Azure DevOps credentials.
 
@@ -239,7 +255,13 @@ measurement variance, SDK changes, or unrelated non-MT movement can still produc
    - non-MT movement;
    - MT-minus-non-MT differential movement;
    - baseline run count and time window.
-5. Treat every row as **possible/flaky until investigated**. Never state that PerfStar proved a code
+5. Where scheduled-binlog evidence is available, inspect:
+   - the largest task and target MT-minus-non-MT deltas;
+   - how those deltas changed between the last-healthy and current source revisions;
+   - evaluation-pass deltas;
+   - `[MSBuildMultiThreadableTask]` migration state; and
+   - migrated task controls as the machine-contention/noise floor.
+6. Treat every row as **possible/flaky until investigated**. Never state that PerfStar proved a code
    regression merely because the detector emitted it.
 
 ## Phase 2 — Check for existing work and recent changes
@@ -251,7 +273,9 @@ measurement variance, SDK changes, or unrelated non-MT movement can still produc
    comparison range. Prioritize changes touching shared code paths used by all affected scenarios.
 4. Compare evaluation subphase metrics and current Hosted log excerpts or Gold result metrics before
    attributing the regression to a source change.
-5. Use `git log`, `git diff`, `git blame`, GitHub issues/PRs, and source inspection to establish a
+5. Treat task/target wall-clock totals as supporting evidence, not additive attribution: nested and
+   repeated work can be counted in multiple rows, and even migrated controls move under contention.
+6. Use `git log`, `git diff`, `git blame`, GitHub issues/PRs, and source inspection to establish a
    concrete hypothesis. The source range narrows investigation but does not prove which commit caused
    the measurement change.
 

@@ -36,7 +36,24 @@ function Invoke-AzdoJson
 {
     param([Parameter(Mandatory)][string]$Uri)
 
-    Invoke-RestMethod -Method Get -Uri $Uri -Headers $script:headers
+    for ($attempt = 1; $attempt -le 4; $attempt++)
+    {
+        try
+        {
+            return Invoke-RestMethod -Method Get -Uri $Uri -Headers $script:headers
+        }
+        catch
+        {
+            $statusCode = if ($null -ne $_.Exception.Response) { [int]$_.Exception.Response.StatusCode } else { 0 }
+            $retryable = $statusCode -in @(0, 408, 429, 500, 502, 503, 504)
+            if (-not $retryable -or $attempt -eq 4)
+            {
+                throw
+            }
+
+            Start-Sleep -Seconds ([Math]::Pow(2, $attempt))
+        }
+    }
 }
 
 function Get-PipelineDefinitionId
@@ -150,7 +167,25 @@ function Get-ArtifactDirectory
     $extractPath = Join-Path $script:rawDirectory $safeName
     New-Item -ItemType Directory -Force -Path $extractPath | Out-Null
 
-    Invoke-WebRequest -Uri $downloadUrl -Headers $script:headers -OutFile $zipPath
+    for ($attempt = 1; $attempt -le 4; $attempt++)
+    {
+        try
+        {
+            Invoke-WebRequest -Uri $downloadUrl -Headers $script:headers -OutFile $zipPath
+            break
+        }
+        catch
+        {
+            $statusCode = if ($null -ne $_.Exception.Response) { [int]$_.Exception.Response.StatusCode } else { 0 }
+            $retryable = $statusCode -in @(0, 408, 429, 500, 502, 503, 504)
+            if (-not $retryable -or $attempt -eq 4)
+            {
+                throw
+            }
+
+            Start-Sleep -Seconds ([Math]::Pow(2, $attempt))
+        }
+    }
     $zipLength = (Get-Item -LiteralPath $zipPath).Length
     if ($zipLength -gt 100MB)
     {
