@@ -1,6 +1,6 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
-// The .NET Foundation licenses this file to you under the MIT license.
+PLEASE READ
 
+<<<<<<<< HEAD:src/Framework/Utilities/FileMatcher.cs
 using System;
 using System.Buffers;
 using System.Collections.Concurrent;
@@ -2700,3 +2700,9 @@ namespace Microsoft.Build.Shared
         internal static bool IsRecursiveDirectoryMatch(string path) => path.TrimTrailingSlashes() == recursiveDirectoryMatch;
     }
 }
+========
+Please remove this file during conflict resolution in your PR.
+This file has been reverted (removed) in the source repository but the PR branch
+does not have the file yet as it's based on an older commit. This means the file is
+not getting removed in the PR due to the other conflicts.
+>>>>>>>> darc/back/463e0cf-337c123:src/Shared/FileMatcher.cs
