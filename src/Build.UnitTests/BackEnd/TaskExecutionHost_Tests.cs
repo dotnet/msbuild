@@ -565,6 +565,141 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #endregion
 
+        #region TaskItem<T> Params
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;int&gt; parameter with a valid integer works.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntParam()
+        {
+            ValidateTaskParameter("TaskItemIntParam", "42", new Microsoft.Build.Framework.TaskItem<int>(42));
+        }
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;string&gt; parameter preserves the item value.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemStringParam()
+        {
+            ValidateTaskParameter("TaskItemStringParam", "value", new Microsoft.Build.Framework.TaskItem<string>("value"));
+        }
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;bool&gt; parameter uses MSBuild boolean parsing.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemBoolParam()
+        {
+            ValidateTaskParameter("TaskItemBoolParam", "yes", new Microsoft.Build.Framework.TaskItem<bool>(true));
+        }
+
+        /// <summary>
+        /// Validate that parse failures from TaskItem&lt;T&gt; scalar binding are reported as invalid task parameter values.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntParamInvalidValue()
+        {
+            var parameters = GetStandardParametersDictionary(true);
+            parameters["TaskItemIntParam"] = ("not-an-int", ElementLocation.Create("foo.proj"));
+
+            Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("TaskItemIntParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("TaskItemIntParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("TaskItemIntParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
+        #region TaskItem<T> Array Params
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;int&gt; array with a single value sets the correct value.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntArrayParam()
+        {
+            ValidateTaskParameterArray("TaskItemIntArrayParam", "42", new Microsoft.Build.Framework.TaskItem<int>[] { new Microsoft.Build.Framework.TaskItem<int>(42) });
+        }
+
+        /// <summary>
+        /// Validate that setting a TaskItem&lt;int&gt; array with multiple values sets the correct values.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntArrayParamMultiple()
+        {
+            ValidateTaskParameterArray("TaskItemIntArrayParam", "10;20;30", new Microsoft.Build.Framework.TaskItem<int>[] {
+                new Microsoft.Build.Framework.TaskItem<int>(10),
+                new Microsoft.Build.Framework.TaskItem<int>(20),
+                new Microsoft.Build.Framework.TaskItem<int>(30)
+            });
+        }
+
+        /// <summary>
+        /// Validate that parse failures from TaskItem&lt;T&gt; array binding are reported as invalid task parameter values.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntArrayParamInvalidValue()
+        {
+            var parameters = GetStandardParametersDictionary(true);
+            parameters["TaskItemIntArrayParam"] = ("10;not-an-int", ElementLocation.Create("foo.proj"));
+
+            Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntArrayParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("TaskItemIntArrayParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with a property which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntArrayParamEmptyProperty()
+        {
+            ValidateTaskParameterNotSet("TaskItemIntArrayParam", "$(NonExistentProperty)");
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an item which evaluates to an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetTaskItemIntArrayParamEmptyItem()
+        {
+            ValidateTaskParameterNotSet("TaskItemIntArrayParam", "@(NonExistentItem)");
+        }
+
+        #endregion
+
         #region FileInfo Params
 
         /// <summary>
@@ -1360,6 +1495,50 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #endregion
 
+        #region TaskItem<T> Outputs
+
+        /// <summary>
+        /// Validate that a TaskItem&lt;int&gt; output to an item produces the correct evaluated include.
+        /// </summary>
+        [Fact]
+        public void TestOutputTaskItemIntToItem()
+        {
+            SetTaskParameter("TaskItemIntParam", "42");
+            ValidateOutputItem("TaskItemIntOutput", "42");
+        }
+
+        /// <summary>
+        /// Validate that a TaskItem&lt;int&gt; output to a property produces the correct evaluated value.
+        /// </summary>
+        [Fact]
+        public void TestOutputTaskItemIntToProperty()
+        {
+            SetTaskParameter("TaskItemIntParam", "42");
+            ValidateOutputProperty("TaskItemIntOutput", "42");
+        }
+
+        /// <summary>
+        /// Validate that a TaskItem&lt;int&gt; array output to items produces the correct evaluated includes.
+        /// </summary>
+        [Fact]
+        public void TestOutputTaskItemIntArrayToItems()
+        {
+            SetTaskParameter("TaskItemIntArrayParam", "42;99");
+            ValidateOutputItems("TaskItemIntArrayOutput", new string[] { "42", "99" });
+        }
+
+        /// <summary>
+        /// Validate that a TaskItem&lt;int&gt; array output to a property produces the correct semi-colon-delimited evaluated value.
+        /// </summary>
+        [Fact]
+        public void TestOutputTaskItemIntArrayToProperty()
+        {
+            SetTaskParameter("TaskItemIntArrayParam", "42;99");
+            ValidateOutputProperty("TaskItemIntArrayOutput", "42;99");
+        }
+
+        #endregion
+
         #region Other Output Tests
 
         /// <summary>
@@ -1504,6 +1683,53 @@ namespace Microsoft.Build.UnitTests.BackEnd
             host.FindTask(TaskHostParameters.Empty);
             host.InitializeForBatch(new TaskLoggingContext(_loggingService, tlc.BuildEventContext), _bucket, TaskHostParameters.Empty, scheduledNodeId: 1);
             _logger.AssertLogContains("MSB4036");
+        }
+
+        /// <summary>
+        /// In a trimmed / Native AOT host, reflective task loading/execution is disabled
+        /// (EnableReflectiveTaskExecution is substituted false). FindTask - the leaf that loads a task
+        /// factory/type by reflection - must fail observably with a reported project error (MSB4283)
+        /// rather than crashing in reflection, so the host can detect the unsupported path and fall back
+        /// to a JIT MSBuild.
+        /// </summary>
+        [Fact]
+        public void ReflectiveTaskExecutionDisabledFailsObservably()
+        {
+            bool switchWasSet = AppContext.TryGetSwitch("Microsoft.Build.EnableReflectiveTaskExecution", out bool originalValue);
+            try
+            {
+                AppContext.SetSwitch("Microsoft.Build.EnableReflectiveTaskExecution", false);
+
+                using var host = new TaskExecutionHost();
+                TargetLoggingContext tlc = new TargetLoggingContext(_loggingService, new BuildEventContext(1, 1, BuildEventContext.InvalidProjectContextId, 1));
+
+                ProjectInstance project = CreateTestProject();
+                host.InitializeForTask(
+                    this,
+                    tlc,
+                    project,
+                    "TaskWithNoUsingTask",
+                    ElementLocation.Create("none", 1, 1),
+                    this,
+                    false,
+                    projectFile: "proj.proj",
+#if FEATURE_APPDOMAIN
+                    null,
+#endif
+                    null,
+                    false,
+                    CancellationToken.None,
+                    TaskEnvironmentHelper.CreateForTest());
+
+                InvalidProjectFileException exception = Assert.Throws<InvalidProjectFileException>(() => host.FindTask(TaskHostParameters.Empty));
+                exception.ErrorCode.ShouldBe("MSB4283");
+            }
+            finally
+            {
+                // AppContext switches cannot be returned to "unset"; restore the prior value (the default
+                // is enabled when unset) so other tests keep reflective task execution on.
+                AppContext.SetSwitch("Microsoft.Build.EnableReflectiveTaskExecution", !switchWasSet || originalValue);
+            }
         }
 
         /// <summary>
@@ -1694,16 +1920,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         #region Validation Routines
 
         /// <summary>
-        /// Is the class a task factory
-        /// </summary>
-        private static bool IsTaskFactoryClass(Type type, object unused)
-        {
-            return type.IsClass &&
-                !type.IsAbstract &&
-                (type.GetInterface("Microsoft.Build.Framework.ITaskFactory") != null);
-        }
-
-        /// <summary>
         /// Initialize the host object
         /// </summary>
         private void InitializeHost()
@@ -1717,7 +1933,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Set up a temporary project and add some items to it.
             ProjectInstance project = CreateTestProject();
 
-            TypeLoader typeLoader = new TypeLoader(IsTaskFactoryClass);
+            TypeLoader typeLoader = TypeLoader.Create<ITaskFactory>();
 #if !FEATURE_ASSEMBLYLOADCONTEXT
             AssemblyLoadInfo loadInfo = AssemblyLoadInfo.Create(Assembly.GetAssembly(typeof(TaskBuilderTestTask.TaskBuilderTestTaskFactory)).FullName, null);
 #else

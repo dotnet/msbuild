@@ -161,6 +161,20 @@ namespace System.Diagnostics.CodeAnalysis
 
         public string SwitchName { get; }
     }
+
+    /// <summary>
+    /// Indicates that the annotated static boolean property guards access to a feature that requires
+    /// the referenced capability (for example <see cref="RequiresUnreferencedCodeAttribute"/> or
+    /// <see cref="RequiresDynamicCodeAttribute"/>). The trim/AOT analyzer treats a check of the property
+    /// as a guard, so calls to the referenced capability inside the guarded branch do not warn.
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Property, Inherited = false, AllowMultiple = true)]
+    internal sealed class FeatureGuardAttribute : Attribute
+    {
+        public FeatureGuardAttribute(Type featureType) => FeatureType = featureType;
+
+        public Type FeatureType { get; }
+    }
 }
 
 #endif

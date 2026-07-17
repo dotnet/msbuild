@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Microsoft.Build.Framework;
 
@@ -9,10 +10,6 @@ namespace Microsoft.Build.Shared
 {
     internal static class TaskItemTypeDetector
     {
-        // The generic type definitions (ITaskItem<T>/TaskItem<T>) are matched by full type name because
-        // callers pass the FullName of whichever definition they care about (see IsPathLikeTaskItemOfT).
-        private const string GenericITaskItemFullName = "Microsoft.Build.Framework.ITaskItem`1";
-
         internal static bool IsAbsolutePathType(Type type) => type == typeof(AbsolutePath);
 
         /// <summary>
@@ -25,30 +22,27 @@ namespace Microsoft.Build.Shared
         internal static bool IsSupportedPathType(Type type)
             => type == typeof(AbsolutePath) || type == typeof(FileInfo) || type == typeof(DirectoryInfo);
 
-        internal static bool IsPathLikeTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
+        /// <summary>
+        /// Gets the value type from a declared <see cref="ITaskItem{T}"/> or <see cref="TaskItem{T}"/> type.
+        /// </summary>
+        internal static bool TryGetTaskItemValueType(Type parameterType, [NotNullWhen(true)] out Type? valueType)
         {
             if (!parameterType.IsGenericType)
             {
+                valueType = null;
                 return false;
             }
 
             Type genericTypeDefinition = parameterType.GetGenericTypeDefinition();
-            if (!string.Equals(genericTypeDefinition.FullName, genericTaskItemTypeDefinitionFullName, StringComparison.Ordinal))
+            if (genericTypeDefinition != typeof(ITaskItem<>)
+                && genericTypeDefinition != typeof(TaskItem<>))
             {
+                valueType = null;
                 return false;
             }
 
-            Type[] genericArguments = parameterType.GetGenericArguments();
-            if (genericArguments.Length != 1)
-            {
-                return false;
-            }
-
-            Type typeArg = genericArguments[0];
-            return IsSupportedPathType(typeArg);
+            valueType = parameterType.GetGenericArguments()[0];
+            return true;
         }
-
-        internal static bool IsPathLikeITaskItemOfT(Type parameterType)
-            => IsPathLikeTaskItemOfT(parameterType, GenericITaskItemFullName);
     }
 }

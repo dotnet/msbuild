@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -1110,6 +1111,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">If forwardingLogger is null</exception>
         /// <exception cref="LoggerException">If a logger exception is thrown while creating or initializing the distributed or central logger</exception>
         /// <exception cref="InternalLoggerException">If any exception (other than a loggerException)is thrown while creating or initializing the distributed or central logger, we will wrap these exceptions in an InternalLoggerException</exception>
+        [RequiresUnreferencedCode("Creates forwarding loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool RegisterDistributedLogger(ILogger centralLogger, LoggerDescription forwardingLogger)
         {
             lock (_lockObject)
@@ -1121,8 +1123,28 @@ namespace Microsoft.Build.BackEnd.Logging
                     centralLogger = new NullCentralLogger();
                 }
 
+                if (!FeatureSwitches.EnableReflectiveLoggerLoading)
+                {
+                    throw CreateReflectiveLoggerLoadingDisabledException();
+                }
+
                 return RegisterDistributedLoggerCore(centralLogger, forwardingLogger, forwardingLogger.CreateForwardingLogger());
             }
+        }
+
+        /// <summary>
+        /// Creates the exception thrown when a logger described by its assembly and class name cannot be
+        /// created because reflective logger loading is disabled (a trimmed or Native AOT host). Loggers
+        /// supplied to the engine as already-constructed <see cref="ILogger"/> instances are unaffected and
+        /// are the supported way to log under trimming/AOT.
+        /// </summary>
+        private static InternalLoggerException CreateReflectiveLoggerLoadingDisabledException()
+        {
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                out string errorCode,
+                out string helpKeyword,
+                "ReflectiveLoggerLoadingNotSupported");
+            return new InternalLoggerException(message, innerException: null, e: null, errorCode, helpKeyword, initializationException: true);
         }
 
         private bool RegisterDistributedLoggerCore(ILogger centralLogger, LoggerDescription forwardingLogger, IForwardingLogger localForwardingLogger)
@@ -1187,6 +1209,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="nodeId">The id of the node the logging services is on</param>
         /// <exception cref="InternalErrorException">When forwardingLoggerSink is null</exception>
         /// <exception cref="InternalErrorException">When loggerDescriptions is null</exception>
+        [RequiresUnreferencedCode("Creates forwarding loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         public void InitializeNodeLoggers(ICollection<LoggerDescription> descriptions, IBuildEventSink forwardingLoggerSink, int nodeId)
         {
             lock (_lockObject)
@@ -1216,6 +1239,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 CreateFilterEventSource();
+
+                if (!FeatureSwitches.EnableReflectiveLoggerLoading)
+                {
+                    throw CreateReflectiveLoggerLoadingDisabledException();
+                }
 
                 foreach (LoggerDescription description in descriptions)
                 {
@@ -1395,6 +1423,16 @@ namespace Microsoft.Build.BackEnd.Logging
                     {
                         _projectFileMap[projectStartedEventArgs.BuildEventContext.ProjectContextId] = projectStartedEventArgs.ProjectFile;
                     }
+                }
+                else if (loggingPacket.NodeBuildEvent.Value.Value is TaskParameterEventArgs taskParameterEventArgs &&
+                         string.Equals(taskParameterEventArgs.ItemType, ItemTypeNames.EmbedInBinlog, StringComparison.OrdinalIgnoreCase) &&
+                         string.IsNullOrEmpty(taskParameterEventArgs.ProjectFile) &&
+                         taskParameterEventArgs.BuildEventContext != null &&
+                         taskParameterEventArgs.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+                {
+                    // ProjectFile isn't serialized across nodes (perf), but the binary logger needs it to resolve
+                    // relative EmbedInBinlog paths (#13789). Restore it like LogBuildEvent does for in-proc events.
+                    taskParameterEventArgs.ProjectFile = GetAndVerifyProjectFileFromContext(taskParameterEventArgs, allowCacheMiss: true);
                 }
             }
         }
