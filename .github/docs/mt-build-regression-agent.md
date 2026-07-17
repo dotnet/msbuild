@@ -25,10 +25,13 @@ Azure credential to the AI agent.
 1. A deterministic custom job runs daily or through `workflow_dispatch`.
 2. The job uses GitHub OIDC to authenticate as `msbuild-azdo-reader`.
 3. `Get-MtBuildTimeRegressions.kql` queries `perfstar-dev/PerfStarDataRaw`.
-4. `Invoke-MtBuildTimeRegressionScan.ps1` writes bounded JSON and Markdown evidence.
-5. The evidence is uploaded as a workflow artifact.
-6. The Agentic Workflow downloads only that evidence into its secret-free sandbox.
-7. The agent investigates every candidate and:
+4. `Invoke-MtBuildTimeRegressionScan.ps1` writes bounded JSON and Markdown statistical evidence.
+5. `Add-MtBuildTimeRegressionEvidence.ps1` resolves the exact current and last-healthy MSBuild
+   revisions, downloads only candidate-specific artifacts, extracts allowlisted metrics plus safe
+   Hosted timing/completion lines, then deletes the raw files.
+6. The derived evidence is uploaded as a workflow artifact.
+7. The Agentic Workflow downloads only that evidence into its secret-free sandbox.
+8. The agent investigates every candidate and:
    - creates one aggregate issue when new candidates need tracking;
    - opens one draft PR only when it can safely address every actionable regression; or
    - emits a no-op when the complete candidate set is already tracked.
@@ -67,6 +70,12 @@ The existing OIDC identity needs Kusto read access:
 2. Add the `msbuild-azdo-reader` managed identity.
 3. Grant `Database Viewer`.
 
+It also needs Azure DevOps `View builds` access to:
+
+- PerfStar-Scheduled, definition 25429;
+- PerfStar-DevOpsHosted-Worker, definition 28338; and
+- MSBuild, definition 9434, to resolve the component source revision.
+
 No Azure DevOps queue permission is required for the initial workflow.
 
 The workflow reuses the repository's existing `copilot-pat-pool` environment and PAT rotation
@@ -75,9 +84,9 @@ mechanism used by the other Agentic Workflows.
 ## Current limitations
 
 - The detector uses robust thresholds but cannot prove causality.
-- The initial evidence identifies PerfStar builds but not the exact MSBuild commit consumed by each
-  build, so commit attribution remains an investigation hypothesis.
-- The agent receives summarized Kusto evidence, not raw binlogs.
+- The source comparison narrows the candidate commit range but does not prove causality.
+- The agent receives allowlisted metrics and bounded timing/completion excerpts, not raw logs or
+  binlogs.
 - The workflow creates candidate fixes but does not run PerfStar against them.
 - A draft PR is opened only when the agent can address every actionable candidate without claiming
   that noisy or insufficient-evidence candidates were fixed.

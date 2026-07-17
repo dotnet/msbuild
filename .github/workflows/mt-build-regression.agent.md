@@ -1,6 +1,6 @@
 ---
 name: "PerfStar MT Build Regression Investigator"
-description: "Scans production PerfStar Gold and Hosted data for possible MT build-time regressions, investigates all candidates as one batch, creates at most one aggregate tracking issue, and opens at most one draft PR containing all high-confidence fixes."
+description: "Scans production PerfStar Gold and Hosted data for possible MT build-time regressions, enriches candidates with exact run artifacts and source revisions, investigates all candidates as one batch, creates at most one aggregate tracking issue, and opens at most one draft PR containing all high-confidence fixes."
 on:
   schedule:
     - cron: "17 19 * * *"
@@ -111,6 +111,32 @@ jobs:
           echo "::add-mask::$kusto_token"
           echo "KUSTO_ACCESS_TOKEN=$kusto_token" >> "$GITHUB_ENV"
 
+      - name: Exchange OIDC token for Azure DevOps token
+        shell: bash
+        env:
+          OIDC_TOKEN: ${{ steps.oidc.outputs.token }}
+          CLIENT_ID: ${{ secrets.AZDO_READER_CLIENT_ID }}
+          TENANT_ID: ${{ secrets.AZDO_READER_TENANT_ID }}
+        run: |
+          set -euo pipefail
+          response=$(
+            curl --fail-with-body --silent --show-error \
+              -X POST "https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token" \
+              --data-urlencode "grant_type=client_credentials" \
+              --data-urlencode "client_id=${CLIENT_ID}" \
+              --data-urlencode "client_assertion_type=urn:ietf:params:oauth:client-assertion-type:jwt-bearer" \
+              --data-urlencode "client_assertion=${OIDC_TOKEN}" \
+              --data-urlencode "scope=499b84ac-1321-427f-aa17-267ca6975798/.default"
+          )
+          azdo_token=$(jq -r '.access_token' <<< "$response")
+          if [[ -z "$azdo_token" || "$azdo_token" == "null" ]]; then
+            echo "::error::Microsoft Entra ID did not issue an Azure DevOps token."
+            jq '{error, error_description, error_codes}' <<< "$response" || true
+            exit 1
+          fi
+          echo "::add-mask::$azdo_token"
+          echo "AZDO_ACCESS_TOKEN=$azdo_token" >> "$GITHUB_ENV"
+
       - name: Scan PerfStar MT build-time data
         id: scan
         shell: pwsh
@@ -119,6 +145,14 @@ jobs:
             -ClusterUri 'https://perfstar-experimental.swedencentral.kusto.windows.net' `
             -Database 'perfstar-dev' `
             -QueryPath './.github/workflows/scripts/Get-MtBuildTimeRegressions.kql' `
+            -OutputDirectory "$env:RUNNER_TEMP/mt-regression-data"
+
+      - name: Collect actual-run evidence
+        if: steps.scan.outputs.has_regressions == 'true'
+        shell: pwsh
+        run: |
+          ./.github/workflows/scripts/Add-MtBuildTimeRegressionEvidence.ps1 `
+            -InputReport "$env:RUNNER_TEMP/mt-regression-data/mt-regressions.json" `
             -OutputDirectory "$env:RUNNER_TEMP/mt-regression-data"
 
       - name: Upload regression evidence
@@ -165,6 +199,14 @@ non-secret output:
 
 - `/tmp/gh-aw/agent/mt-regression-data/mt-regressions.json`
 - `/tmp/gh-aw/agent/mt-regression-data/mt-regression-context.md`
+- `/tmp/gh-aw/agent/mt-regression-data/mt-regression-evidence.json`
+- `/tmp/gh-aw/agent/mt-regression-data/mt-regression-evidence.md`
+
+The evidence includes exact current and last-healthy PerfStar runs, their MSBuild component build
+IDs and source revisions, candidate-specific current/healthy allowlisted metrics, safe Hosted timing
+and completion lines, and Gold scenario result metrics. Raw artifacts are downloaded only in the
+trusted scan job, reduced to an explicit allowlist, bounded, and deleted before the evidence is
+uploaded.
 
 The workflow intentionally does **not** give you Azure, Kusto, or Azure DevOps credentials.
 
@@ -185,7 +227,7 @@ measurement variance, SDK changes, or unrelated non-MT movement can still produc
 
 ## Phase 1 — Read and validate all evidence
 
-1. Read both evidence files completely.
+1. Read all four evidence files completely.
 2. Confirm `candidateCount` is greater than zero and that every candidate has the expected fields.
 3. Group candidates by likely shared root cause. A regression appearing across Gold and Hosted or
    across both operating systems is stronger evidence than a single-backend observation, but it can
@@ -205,13 +247,13 @@ measurement variance, SDK changes, or unrelated non-MT movement can still produc
 1. Search open issues and pull requests for each scenario pair and for `PerfStar MT Regression`.
 2. If one existing open issue or PR already covers the complete candidate set, do not duplicate it.
    Emit `noop` with links and a concise explanation.
-3. Inspect recent commits in the candidate baseline window. Prioritize changes touching shared code
-   paths used by all affected scenarios.
-4. Use `git log`, `git blame`, GitHub issues/PRs, and source inspection to establish a concrete
-   hypothesis. Do not guess from scenario names alone.
-5. The evidence identifies PerfStar run IDs, not the exact MSBuild source commit consumed by each
-   run. Treat commit timing as a hypothesis only; never claim a specific introducing commit or
-   commit range unless repository evidence independently establishes it.
+3. Use each candidate's last-healthy and current MSBuild source revisions to inspect the exact
+   comparison range. Prioritize changes touching shared code paths used by all affected scenarios.
+4. Compare evaluation subphase metrics and current Hosted log excerpts or Gold result metrics before
+   attributing the regression to a source change.
+5. Use `git log`, `git diff`, `git blame`, GitHub issues/PRs, and source inspection to establish a
+   concrete hypothesis. The source range narrows investigation but does not prove which commit caused
+   the measurement change.
 
 ## Phase 3 — Investigate whether the signal is actionable
 

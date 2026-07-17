@@ -57,12 +57,14 @@ let current =
     pairedRuns
     | summarize arg_max(RunTimestamp, *) by Backend, Os, ScenarioPair
     | where RunTimestamp >= ago(freshness);
-let baseline =
+let baselineRuns =
     pairedRuns
     | join kind=leftanti (
         current
         | project BuildId, Backend, Os, ScenarioPair)
-      on BuildId, Backend, Os, ScenarioPair
+      on BuildId, Backend, Os, ScenarioPair;
+let baseline =
+    baselineRuns
     | summarize
         BaselineRunCount = dcount(BuildId),
         BaselineMtMedianMs = percentile(MtMedianMs, 50),
@@ -73,8 +75,24 @@ let baseline =
         BaselineFirstTimestamp = min(RunTimestamp),
         BaselineLastTimestamp = max(RunTimestamp)
       by Backend, Os, ScenarioPair;
+let healthyBaseline =
+    baselineRuns
+    | join kind=inner baseline on Backend, Os, ScenarioPair
+    | where MtMedianMs <= BaselineMtP90Ms and MtVsNonMtDeltaMs <= BaselineDeltaP90Ms
+    | summarize arg_max(RunTimestamp, *) by Backend, Os, ScenarioPair
+    | project
+        Backend,
+        Os,
+        ScenarioPair,
+        HealthyBuildId = BuildId,
+        HealthyBuildNumber = BuildNumber,
+        HealthyTimestamp = RunTimestamp,
+        HealthyMtMedianMs = round(MtMedianMs, 1),
+        HealthyNonMtMedianMs = round(NonMtMedianMs, 1),
+        HealthyMtVsNonMtDeltaMs = round(MtVsNonMtDeltaMs, 1);
 current
 | join kind=inner baseline on Backend, Os, ScenarioPair
+| join kind=leftouter healthyBaseline on Backend, Os, ScenarioPair
 | extend
     MtRegressionMs = MtMedianMs - BaselineMtMedianMs,
     MtRegressionPercent = 100.0 * (MtMedianMs - BaselineMtMedianMs) / BaselineMtMedianMs,
@@ -115,6 +133,12 @@ current
     MtRegressionPercent = round(MtRegressionPercent, 1),
     NonMtRegressionMs = round(NonMtRegressionMs, 1),
     DifferentialRegressionMs = round(DifferentialRegressionMs, 1),
+    HealthyBuildId,
+    HealthyBuildNumber,
+    HealthyTimestamp,
+    HealthyMtMedianMs,
+    HealthyNonMtMedianMs,
+    HealthyMtVsNonMtDeltaMs,
     BaselineFirstTimestamp,
     BaselineLastTimestamp,
     BuildUrl
