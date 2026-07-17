@@ -4,7 +4,9 @@ Param(
   [string] $task,
   [string] $verbosity = 'minimal',
   [string] $msbuildEngine = $null,
-  [switch] $restore,
+  # -restore is always on now; the switch is retained only so existing consumers that pass it don't break. Use -norestore to opt out.
+  [switch] $restore = $true,
+  [switch] $norestore,
   [switch] $prepareMachine,
   [switch][Alias('nobl')]$excludeCIBinaryLog,
   [switch]$noWarnAsError,
@@ -22,8 +24,9 @@ $warnAsError = if ($noWarnAsError) { $false } else { $true }
 
 function Print-Usage() {
   Write-Host "Common settings:"
-  Write-Host "  -task <value>           Name of Arcade task (name of a project in SdkTasks directory of the Arcade SDK package)"
-  Write-Host "  -restore                Restore dependencies"
+  Write-Host "  -task <value>           Name of Arcade task (name of a project in toolset directory of the Arcade SDK package)"
+  Write-Host "  -restore                (Legacy/no-op) Restore is always on; retained for backward compatibility"
+  Write-Host "  -norestore              Skip restoring dependencies"
   Write-Host "  -verbosity <value>      Msbuild verbosity: q[uiet], m[inimal], n[ormal], d[etailed], and diag[nostic]"
   Write-Host "  -help                   Print help and exit"
   Write-Host ""
@@ -66,20 +69,7 @@ try {
 
   if( $msbuildEngine -eq "vs") {
     # Ensure desktop MSBuild is available for sdk tasks.
-    if( -not ($GlobalJson.tools.PSObject.Properties.Name -contains "vs" )) {
-      $GlobalJson.tools | Add-Member -Name "vs" -Value (ConvertFrom-Json "{ `"version`": `"16.5`" }") -MemberType NoteProperty
-    }
-    if( -not ($GlobalJson.tools.PSObject.Properties.Name -match "xcopy-msbuild" )) {
-      $GlobalJson.tools | Add-Member -Name "xcopy-msbuild" -Value "18.0.0" -MemberType NoteProperty
-    }
-    if ($GlobalJson.tools."xcopy-msbuild".Trim() -ine "none") {
-        $xcopyMSBuildToolsFolder = InitializeXCopyMSBuild $GlobalJson.tools."xcopy-msbuild" -install $true
-    }
-    if ($xcopyMSBuildToolsFolder -eq $null) {
-      throw 'Unable to get xcopy downloadable version of msbuild'
-    }
-
-    $global:_MSBuildExe = "$($xcopyMSBuildToolsFolder)\MSBuild\Current\Bin\MSBuild.exe"
+    $global:_MSBuildExe = InitializeVisualStudioMSBuild
   }
 
   $taskProject = GetSdkTaskProject $task
@@ -88,7 +78,7 @@ try {
     ExitWithExitCode 1
   }
 
-  if ($restore) {
+  if (-not $norestore) {
     Build 'Restore'
   }
 

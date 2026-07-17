@@ -2042,9 +2042,9 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
-
-                    return null;
                 }
+
+                return null;
             }
 
             /// <summary>

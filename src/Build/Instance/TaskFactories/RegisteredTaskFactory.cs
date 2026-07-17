@@ -51,7 +51,11 @@ namespace Microsoft.Build.BackEnd
         /// factory. The engine calls this instead of <see cref="CreateTask"/> so no trim-unsafe interface
         /// member is reached on the registered-task path.
         /// </summary>
-        internal ITask CreateRegisteredTask() => _registration.CreateInstance();
+        /// <param name="taskEnvironment">
+        /// The environment the engine is running the task with, supplied to a registered task that declares a
+        /// <see cref="TaskEnvironment"/> constructor so it can consume it during construction.
+        /// </param>
+        internal ITask CreateRegisteredTask(TaskEnvironment taskEnvironment) => _registration.CreateInstance(taskEnvironment);
 
         /// <inheritdoc />
         public TaskPropertyInfo[] GetTaskParameters() => _loadedType.Properties;
@@ -62,7 +66,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <inheritdoc />
         [RequiresUnreferencedCode("Task factories create tasks by reflecting over a task type discovered or generated at runtime, which is incompatible with trimming.")]
-        public ITask CreateTask(IBuildEngine taskFactoryLoggingHost) => _registration.CreateInstance();
+        public ITask CreateTask(IBuildEngine taskFactoryLoggingHost) => _registration.CreateInstance(TaskEnvironment.Fallback);
 
         /// <inheritdoc />
         public void CleanupTask(ITask task)

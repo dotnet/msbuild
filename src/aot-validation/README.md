@@ -173,7 +173,7 @@ Native AOT. The harness bakes `EnableReflectiveTaskExecution=false`, so the refl
 host instead pre-registers its tasks with the host task registry (see
 [task-class-registration-api.md](../../documentation/specs/task-class-registration-api.md)): the
 common built-in tasks through `Microsoft.Build.Tasks.BuiltInTasks.RegisterAll()`, and its own tasks through
-`Microsoft.Build.Utilities.Task.RegisterTask<T>(name)`. A registered task is constructed and bound with no
+`Microsoft.Build.Utilities.Task.RegisterTask<T>()`. A registered task is constructed and bound with no
 assembly loading or by-name type resolution, so `RegisteredBuiltInAndCustomTasks_Build_UnderAot` runs a real
 in-process build of a hand-authored project - `MakeDir`/`WriteLinesToFile`/`Copy` produce files, and a
 host-registered custom task's `[Output]` is bound back to a property - entirely under AOT.

@@ -2,12 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.IO;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -16,56 +13,59 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal static class TaskParameterTypeVerifier
     {
-        /// <summary>
-        /// The non-value scalar types (and array element types) that MSBuild supports as task parameters
-        /// by converting them to/from their string representation.
-        /// </summary>
-        private static readonly HashSet<Type> s_supportedTypes =
-        [
-            typeof(string),
-            typeof(AbsolutePath),
-            typeof(FileInfo),
-            typeof(DirectoryInfo),
-        ];
-
-        /// <summary>
-        /// Checks if a type is the provided generic TaskItem type where T is a path-like type
-        /// (AbsolutePath, FileInfo, or DirectoryInfo).
-        /// </summary>
-        internal static bool IsPathLikeTaskItemOfT(Type parameterType, string genericTaskItemTypeDefinitionFullName)
-            => TaskItemTypeDetector.IsPathLikeTaskItemOfT(parameterType, genericTaskItemTypeDefinitionFullName);
-
-        /// <summary>
-        /// Checks if a type is ITaskItem&lt;T&gt; where T is path-like.
-        /// </summary>
-        internal static bool IsPathLikeITaskItemOfT(Type parameterType)
-            => TaskItemTypeDetector.IsPathLikeITaskItemOfT(parameterType);
-
-        /// <summary>
-        /// Is the parameter type a valid scalar input value
-        /// </summary>
-        internal static bool IsValidScalarInputParameter(Type parameterType) =>
-            parameterType.IsValueType ||
-            parameterType == typeof(ITaskItem) ||
-            s_supportedTypes.Contains(parameterType) ||
-            IsPathLikeITaskItemOfT(parameterType);
-
-        /// <summary>
-        /// Is the passed in parameterType a valid vector input parameter
-        /// </summary>
-        internal static bool IsValidVectorInputParameter(Type parameterType)
+        internal static bool TryGetSupportedTaskItemValueType(Type parameterType, [NotNullWhen(true)] out Type? valueType)
         {
-            if (!parameterType.IsArray)
+            if (TaskItemTypeDetector.TryGetTaskItemValueType(parameterType, out valueType))
             {
-                return false;
+                return ValueTypeParser.IsSupportedType(valueType);
             }
 
-            Type elementType = parameterType.GetElementType();
+            return false;
+        }
 
-            return elementType.IsValueType ||
-                        parameterType == typeof(ITaskItem[]) ||
-                        s_supportedTypes.Contains(elementType) ||
-                        IsPathLikeITaskItemOfT(elementType);
+        private static bool IsValidValueParameterType(Type parameterType)
+            => parameterType.IsValueType || ValueTypeParser.IsSupportedType(parameterType);
+
+        private static bool IsValidInputElementType(Type parameterType)
+        {
+            if (TaskItemTypeDetector.TryGetTaskItemValueType(parameterType, out Type? valueType))
+            {
+                return ValueTypeParser.IsSupportedType(valueType);
+            }
+
+            if (typeof(ITaskItem).IsAssignableFrom(parameterType))
+            {
+                return parameterType == typeof(ITaskItem);
+            }
+
+            return IsValidValueParameterType(parameterType);
+        }
+
+        /// <summary>
+        /// Is the parameter type a valid scalar input value - meaning not an array and a valid input element type
+        /// </summary>
+        internal static bool IsValidScalarInputParameter(Type parameterType) =>
+            !TryGetArrayElement(parameterType, out _) && IsValidInputElementType(parameterType);
+
+        /// <summary>
+        /// Is the passed in parameterType a valid vector input parameter - meaning is an array and the element type is a valid input element type
+        /// </summary>
+        internal static bool IsValidVectorInputParameter(Type parameterType) =>
+            TryGetArrayElement(parameterType, out Type? elementType) && IsValidInputElementType(elementType);
+
+        /// <summary>
+        /// Helper that returns the element type of an array parameter type, or null if the parameter type is not an array - useful to handle nullability flow analysis for array element types in the calling code.
+        /// </summary>
+        private static bool TryGetArrayElement(Type parameterType, [NotNullWhen(true)] out Type? elementType)
+        {
+            if (parameterType.IsArray)
+            {
+                elementType = parameterType.GetElementType()!; // GetElementType is non-null because parameterType is an array
+                return true;
+            }
+
+            elementType = null;
+            return false;
         }
 
         /// <summary>
@@ -73,42 +73,24 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static bool IsAssignableToITaskItem(Type parameterType)
         {
-            if (parameterType.IsArray && typeof(ITaskItem).IsAssignableFrom(parameterType.GetElementType()))
+            Type elementType = TryGetArrayElement(parameterType, out Type? arrayElementType) ? arrayElementType : parameterType;
+            if (TaskItemTypeDetector.TryGetTaskItemValueType(elementType, out Type? valueType))
             {
-                return true;
+                return ValueTypeParser.IsSupportedType(valueType);
             }
 
-            // Check if it's directly assignable
-            bool result = typeof(ITaskItem[]).IsAssignableFrom(parameterType) ||    /* ITaskItem array or derived type, or */
-                          typeof(ITaskItem).IsAssignableFrom(parameterType);        /* ITaskItem or derived type */
-
-            // Also check for TaskItem<T> or TaskItem<T>[]
-            if (!result)
-            {
-                if (parameterType.IsArray)
-                {
-                    result = IsPathLikeITaskItemOfT(parameterType.GetElementType());
-                }
-                else
-                {
-                    result = IsPathLikeITaskItemOfT(parameterType);
-                }
-            }
-
-            return result;
+            return typeof(ITaskItem).IsAssignableFrom(elementType);
         }
 
         /// <summary>
         /// Is the passed parameter a valid value type output parameter
         /// </summary>
         internal static bool IsValueTypeOutputParameter(Type parameterType)
-            => parameterType switch
-            {
-                { IsValueType: true } => true,                                      // value type
-                { IsArray: true } => parameterType.GetElementType() is { } element
-                    && (element.IsValueType || s_supportedTypes.Contains(element)), // array of value type or supported type
-                _ => s_supportedTypes.Contains(parameterType),                      // supported scalar type
-            };
+        {
+            Type elementType = TryGetArrayElement(parameterType, out Type? arrayElementType) ? arrayElementType : parameterType;
+            return !typeof(ITaskItem).IsAssignableFrom(elementType)
+                && IsValidValueParameterType(elementType);
+        }
 
         /// <summary>
         /// Is the parameter type a valid scalar or value type input parameter

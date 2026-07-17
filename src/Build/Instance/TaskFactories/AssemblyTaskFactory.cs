@@ -343,23 +343,6 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            // Workaround for tasks whose static singleton state would leak across invocations
-            // (e.g., NuGet RestoreTask). In MT mode or when MSBuild server is active, these tasks
-            // must run in a transient (non-sidecar) TaskHost so static state is cleaned up after
-            // each invocation. See https://github.com/dotnet/msbuild/issues/13315
-            bool forceTransientTaskHost = false;
-            if (_loadedType?.Type != null && TaskRouter.RequiresTransientTaskHost(_loadedType.Type))
-            {
-                bool isMultiThreaded = buildComponentHost?.BuildParameters?.MultiThreaded == true;
-                bool isLongLivedHost = buildComponentHost?.BuildParameters?.IsLongLivedHost == true;
-
-                if (isMultiThreaded || isLongLivedHost)
-                {
-                    useTaskFactory = true;
-                    forceTransientTaskHost = true;
-                }
-            }
-
             taskLoggingContext?.TargetLoggingContext?.ProjectLoggingContext?.ProjectTelemetry?.AddTaskExecution(GetType().FullName, isTaskHost: useTaskFactory);
 
             if (useTaskFactory)
@@ -374,9 +357,7 @@ namespace Microsoft.Build.BackEnd
                 // If the task host factory is explicitly requested, do not act as a sidecar task host.
                 // This is important as customers use task host factories for short lived tasks to release
                 // potential locks.
-                // Also disable sidecar for tasks that require a transient TaskHost so their
-                // static state is cleaned up between invocations.
-                bool useSidecarTaskHost = !forceTransientTaskHost && !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
+                bool useSidecarTaskHost = !(_factoryIdentityParameters.TaskHostFactoryExplicitlyRequested ?? false);
 
                 TaskHostTask task = new(
                     taskLocation,
@@ -409,6 +390,7 @@ namespace Microsoft.Build.BackEnd
                     taskLocation.Column,
                     new TaskLoader.LogError((taskLoc, taskLine, taskColumn, message, messageArgs) =>
                         taskLoggingContext.LogError(new BuildEventFileInfo(taskLoc, taskLine, taskColumn), message, messageArgs)),
+                    taskEnvironment,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
                     appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _loadedType.Type, appDomain),
