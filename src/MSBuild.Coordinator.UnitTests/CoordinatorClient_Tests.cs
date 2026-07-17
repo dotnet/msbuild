@@ -173,7 +173,7 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
             await serverPipe.WaitForConnectionAsync(_cts.Token);
 
             using BinaryReader reader = new(serverPipe, System.Text.Encoding.UTF8, leaveOpen: true);
-            BinaryWriter writer = new(serverPipe, System.Text.Encoding.UTF8, leaveOpen: true);
+            using BinaryWriter writer = new(serverPipe, System.Text.Encoding.UTF8, leaveOpen: true);
 
             reader.ReadClientMessage().ShouldBeOfType<ClientHandshakeMessage>()
                 .Capabilities.ShouldContain(Capabilities.NestedGrants);
@@ -216,19 +216,25 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
 
             using BinaryReader reader = new(serverPipe, System.Text.Encoding.UTF8, leaveOpen: true);
             BinaryWriter writer = new(serverPipe, System.Text.Encoding.UTF8, leaveOpen: true);
+            try
+            {
+                reader.ReadClientMessage().ShouldBeOfType<ClientHandshakeMessage>();
+                writer.Write(new ServerHandshakeMessage([Capabilities.NestedGrants]));
 
-            reader.ReadClientMessage().ShouldBeOfType<ClientHandshakeMessage>();
-            writer.Write(new ServerHandshakeMessage([Capabilities.NestedGrants]));
+                reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(requestedNodes: 8));
+                writer.Write(new NodeGrantMessage(Guid.NewGuid(), grantedNodes: 4));
 
-            reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(requestedNodes: 8));
-            writer.Write(new NodeGrantMessage(Guid.NewGuid(), grantedNodes: 4));
+                (await ReadClientMessageWithTimeout(reader)).ShouldBe(ReleaseNodesMessage.Instance);
 
-            (await ReadClientMessageWithTimeout(reader)).ShouldBe(ReleaseNodesMessage.Instance);
-
-            Task<ClientMessage> secondRead = Task.Run(reader.ReadClientMessage);
-            (await Task.WhenAny(secondRead, Task.Delay(5000))).ShouldBe(secondRead);
-            Exception ex = await Should.ThrowAsync<Exception>(async () => await secondRead);
-            (ex is IOException or EndOfStreamException).ShouldBeTrue($"Expected {nameof(IOException)} or {nameof(EndOfStreamException)}, got {ex.GetType().FullName}");
+                Task<ClientMessage> secondRead = Task.Run(reader.ReadClientMessage);
+                (await Task.WhenAny(secondRead, Task.Delay(5000))).ShouldBe(secondRead);
+                Exception ex = await Should.ThrowAsync<Exception>(async () => await secondRead);
+                (ex is IOException or EndOfStreamException).ShouldBeTrue($"Expected {nameof(IOException)} or {nameof(EndOfStreamException)}, got {ex.GetType().FullName}");
+            }
+            finally
+            {
+                DisposeWriterIgnoringBrokenPipe(writer);
+            }
         });
 
         CoordinatorClient? client = TryConnectToServer(
@@ -396,5 +402,17 @@ public class CoordinatorClient_Tests(ITestOutputHelper testOutput) : IDisposable
         Task<ClientMessage> readTask = Task.Run(reader.ReadClientMessage);
         (await Task.WhenAny(readTask, Task.Delay(5000))).ShouldBe(readTask);
         return await readTask;
+    }
+
+    private static void DisposeWriterIgnoringBrokenPipe(BinaryWriter writer)
+    {
+        try
+        {
+            writer.Dispose();
+        }
+        catch (IOException)
+        {
+            // BinaryWriter.Dispose flushes; the client may already have closed the test pipe.
+        }
     }
 }
