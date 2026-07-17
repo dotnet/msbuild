@@ -17,6 +17,11 @@ namespace Microsoft.Build.Tasks
     internal static class XmlTaskUtility
     {
         /// <summary>
+        /// The DOCTYPE declaration marker to search for in XML content.
+        /// </summary>
+        private const string DoctypeMarker = "<!DOCTYPE";
+
+        /// <summary>
         /// Determines whether an exception is likely caused by prohibited DTD processing.
         /// </summary>
         /// <param name="exception">The thrown exception to inspect.</param>
@@ -42,7 +47,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Determines whether XML text contains a DOCTYPE declaration.
+        /// Determines whether XML text contains a DOCTYPE declaration using text-based search.
         /// </summary>
         /// <param name="xml">The XML text to inspect.</param>
         /// <returns>True when a DOCTYPE declaration is present.</returns>
@@ -53,29 +58,13 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            try
-            {
-                var settings = new XmlReaderSettings
-                {
-                    DtdProcessing = DtdProcessing.Parse,
-                    XmlResolver = null,
-                    MaxCharactersFromEntities = 0
-                };
-
-                using (var reader = XmlReader.Create(new System.IO.StringReader(xml), settings))
-                {
-                    return ContainsDtd(reader);
-                }
-            }
-            catch (XmlException)
-            {
-                // Let the actual XML parsing handle the malformed XML error.
-                return false;
-            }
+            // Simple text-based detection - no XML parsing required.
+            // DOCTYPE declaration syntax is fixed, so string search is safe and efficient.
+            return xml.Contains(DoctypeMarker, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
-        /// Determines whether the XML file contains a DOCTYPE declaration.
+        /// Determines whether the XML file contains a DOCTYPE declaration using text-based search.
         /// </summary>
         /// <param name="filePath">The XML file path to inspect.</param>
         /// <returns>True when a DOCTYPE declaration is present.</returns>
@@ -83,22 +72,18 @@ namespace Microsoft.Build.Tasks
         {
             try
             {
-                var settings = new XmlReaderSettings
-                {
-                    DtdProcessing = DtdProcessing.Parse,
-                    XmlResolver = null,
-                    MaxCharactersFromEntities = 0
-                };
-
-                using (var stream = File.OpenRead(filePath.Value))
-                using (var reader = XmlReader.Create(stream, settings, filePath.Value))
-                {
-                    return ContainsDtd(reader);
-                }
+                // Read only the beginning of the file - DOCTYPE must appear before the root element.
+                // 8KB should be more than enough to find it in any reasonable XML file.
+                using var stream = File.OpenRead(filePath.Value);
+                using var reader = new StreamReader(stream);
+                var buffer = new char[8192];
+                int charsRead = reader.Read(buffer, 0, buffer.Length);
+                var content = new string(buffer, 0, charsRead);
+                return content.Contains(DoctypeMarker, StringComparison.OrdinalIgnoreCase);
             }
-            catch (XmlException)
+            catch
             {
-                // Let the actual XML parsing handle the malformed XML error.
+                // If we cannot read the file, don't classify as containing DTD.
                 return false;
             }
         }
@@ -115,25 +100,6 @@ namespace Microsoft.Build.Tasks
                 if (current is XmlException)
                 {
                     return true;
-                }
-            }
-
-            return false;
-        }
-
-        private static bool ContainsDtd(XmlReader reader)
-        {
-            while (reader.Read())
-            {
-                if (reader.NodeType == XmlNodeType.DocumentType)
-                {
-                    return true;
-                }
-
-                if (reader.NodeType == XmlNodeType.Element)
-                {
-                    // A DOCTYPE declaration must appear before the root element.
-                    return false;
                 }
             }
 
