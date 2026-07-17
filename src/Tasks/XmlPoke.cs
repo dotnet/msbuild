@@ -49,9 +49,10 @@ namespace Microsoft.Build.Tasks
         public string Namespaces { get; set; }
 
         /// <summary>
-        /// Set to true to prohibit loading XML with embedded DTD. By default, DTDs are prohibited. Set to false to allow XML that contains a DTD (the DTD is ignored).
+        /// Prohibits loading XML with embedded DTD. When true (default), an error is raised if a DTD is present.
+        /// When false, DTDs are ignored. Never set to false for untrusted input.
         /// </summary>
-        public bool ProhibitDtd { get; set; } = true;
+        public bool ProhibitDtd { get; set; } = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10);
 
         #endregion
 
@@ -70,7 +71,7 @@ namespace Microsoft.Build.Tasks
             // Load the XPath Document
             XmlDocument xmlDoc = new XmlDocument();
 
-            AbsolutePath inputPath = default;
+            AbsolutePath inputPath;
             try
             {
                 inputPath = TaskEnvironment.GetAbsolutePath(XmlInputPath.ItemSpec);
