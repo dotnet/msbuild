@@ -21,7 +21,7 @@ parameters:
 - name: extraPropertiesStage2
   displayName: 'Extra MSBuild properties for stage 2 (e.g., /p:DotNetBuildMT=true)'
   type: string
-  default: '/p:DotNetBuildMT=true /p:MSBuildMTExcludedReposOverride=noexclusion'
+  default: '/p:DotNetBuildMT=true'
 
 variables:
 - template: /eng/common/templates/variables/pool-providers.yml@self
