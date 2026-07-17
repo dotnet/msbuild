@@ -368,7 +368,8 @@ jobs:
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
     continueOnError: true
-    condition: eq(variables.onlyDocChanged, 0)
+    # Pipeline artifact names are immutable within a build, so reuse the first attempt's artifact on job retries.
+    condition: and(eq(variables.onlyDocChanged, 0), eq(variables['System.JobAttempt'], 1))
     inputs:
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
       artifact: 'LinuxCoreCoverage'
@@ -457,7 +458,8 @@ jobs:
   - task: PublishPipelineArtifact@1
     displayName: Publish Code Coverage Results
     continueOnError: true
-    condition: eq(variables.onlyDocChanged, 0)
+    # Pipeline artifact names are immutable within a build, so reuse the first attempt's artifact on job retries.
+    condition: and(eq(variables.onlyDocChanged, 0), eq(variables['System.JobAttempt'], 1))
     inputs:
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
       artifact: 'MacCoreCoverage'
