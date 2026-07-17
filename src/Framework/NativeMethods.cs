@@ -816,7 +816,7 @@ internal static class NativeMethods
             errorMessage = null;
             return true;
         }
-        catch (Exception e)
+        catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
         {
             errorMessage = e.Message;
             return false;
