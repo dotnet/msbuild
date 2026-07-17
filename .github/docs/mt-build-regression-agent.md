@@ -20,6 +20,58 @@ for that proof of concept:
 The workflow exchanges the OIDC token for a Kusto-scoped token. It does not expose that token or any
 Azure credential to the AI agent.
 
+## Data flow at a glance
+
+The diagram below shows the data sources, the credentialed deterministic scan job, and the
+secret-free agent sandbox. Every external data source is reached only by the trusted
+`mt_regression_scan` job. The agent receives nothing but the derived evidence artifact.
+
+```mermaid
+flowchart TD
+    trigger["Schedule 17:19 UTC / workflow_dispatch"] --> scan
+
+    subgraph sources["External data sources (credentialed access only)"]
+        direction TB
+        kusto[("Kusto perfstar-dev<br/>PerfStarDataRaw +<br/>task_wallclock / target_wallclock /<br/>eval_pass / task_inventory")]
+        azdoGold[["Azure DevOps 25429<br/>PerfStar-Scheduled (Gold)"]]
+        azdoHosted[["Azure DevOps 28338<br/>PerfStar-DevOpsHosted-Worker (Hosted)"]]
+        azdoMsbuild[["Azure DevOps 9434<br/>MSBuild (component source SHA)"]]
+        azdoDiag[["Azure DevOps 28394<br/>PerfStar-DevOpsHosted-Diagnostics"]]
+    end
+
+    subgraph scan["Job: mt_regression_scan (trusted, has secrets)"]
+        direction TB
+        oidc["GitHub OIDC -> Entra<br/>Kusto + Azure DevOps tokens<br/>(msbuild-azdo-reader)"]
+        step1["1. Get-MtBuildTimeRegressions.kql<br/>detect MT/non-MT paired regressions"]
+        step2["2. Invoke-MtBuildTimeRegressionScan.ps1<br/>write bounded JSON + Markdown stats"]
+        step3["3. Add-MtBuildTimeRegressionEvidence.ps1<br/>resolve current/healthy SHAs, download<br/>candidate artifacts, allowlist + delete raw"]
+        step4["4. Add-MtBuildTimeDiagnosticEvidence.ps1<br/>match diagnostics by SHA, query task/target/<br/>eval/migration deltas"]
+        oidc --> step1 --> step2 --> step3 --> step4
+    end
+
+    kusto --> step1
+    azdoMsbuild --> step3
+    azdoGold --> step3
+    azdoHosted --> step3
+    azdoDiag --> step4
+    kusto --> step4
+
+    step4 --> artifact[["Derived evidence artifact<br/>mt-regressions.json / -context.md<br/>mt-regression-evidence.json / .md<br/>mt-regression-diagnostics.json / .md<br/>(bounded, no raw logs/binlogs)"]]
+
+    artifact --> agent
+
+    subgraph agent["Job: agent (secret-free sandbox, no Azure/Kusto/AzDO)"]
+        direction TB
+        investigate["Read evidence, group candidates,<br/>inspect source range, classify each"]
+        decide{"Complete high-confidence<br/>fix possible?"}
+        investigate --> decide
+    end
+
+    decide -->|actionable, all fixable| pr["&lt;= 1 draft PR (src/** only)"]
+    decide -->|new candidates to track| issue["exactly 1 aggregate issue"]
+    decide -->|already tracked / all noise| noop["noop"]
+```
+
 ## Execution flow
 
 1. A deterministic custom job runs daily or through `workflow_dispatch`.
