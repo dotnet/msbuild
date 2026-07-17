@@ -17,21 +17,6 @@ namespace Microsoft.Build.Tasks
     internal static class XmlTaskUtility
     {
         /// <summary>
-        /// Creates an <see cref="XmlReaderSettings"/> instance with the requested DTD behavior.
-        /// </summary>
-        /// <param name="prohibitDtd">True to prohibit DTDs; false to ignore DTDs.</param>
-        /// <param name="closeInput">True to close the underlying input when the reader is disposed.</param>
-        /// <returns>The configured reader settings.</returns>
-        internal static XmlReaderSettings CreateReaderSettings(bool prohibitDtd, bool closeInput = false)
-        {
-            return new XmlReaderSettings
-            {
-                CloseInput = closeInput,
-                DtdProcessing = prohibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore,
-            };
-        }
-
-        /// <summary>
         /// Determines whether an exception is likely caused by prohibited DTD processing.
         /// </summary>
         /// <param name="exception">The thrown exception to inspect.</param>

@@ -77,7 +77,7 @@ namespace Microsoft.Build.Tasks
                 inputPath = TaskEnvironment.GetAbsolutePath(XmlInputPath.ItemSpec);
                 using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    XmlReaderSettings xrs = XmlTaskUtility.CreateReaderSettings(ProhibitDtd);
+                    var xrs = new XmlReaderSettings { DtdProcessing = ProhibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore };
                     using (XmlReader sr = XmlReader.Create(fs, xrs))
                     {
                         xmlDoc.Load(sr);
@@ -181,7 +181,7 @@ namespace Microsoft.Build.Tasks
             var doc = new XmlDocument();
             try
             {
-                var settings = XmlTaskUtility.CreateReaderSettings(prohibitDtd: false);
+                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 using (XmlReader reader = XmlReader.Create(new StringReader("<Namespaces>" + namepaces + "</Namespaces>"), settings))
                 {
                     doc.Load(reader);

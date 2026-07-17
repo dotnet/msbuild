@@ -263,7 +263,7 @@ namespace Microsoft.Build.Tasks
             XmlDocument doc = new XmlDocument();
             try
             {
-                XmlReaderSettings settings = XmlTaskUtility.CreateReaderSettings(prohibitDtd);
+                var settings = new XmlReaderSettings { DtdProcessing = prohibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore };
                 using (XmlReader reader = XmlReader.Create(new StringReader("<XsltParameters>" + xsltParametersXml + "</XsltParameters>"), settings))
                 {
                     doc.Load(reader);
@@ -379,13 +379,15 @@ namespace Microsoft.Build.Tasks
             /// <returns>The XmlReader object</returns>
             public XmlReader CreateReader(int itemPos, bool prohibitDtd)
             {
+                var settings = new XmlReaderSettings { DtdProcessing = prohibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore };
                 if (XmlMode == XmlModes.XmlFile)
                 {
-                    return XmlReader.Create(new StreamReader(_filePaths[itemPos]), XmlTaskUtility.CreateReaderSettings(prohibitDtd, closeInput: true), _filePaths[itemPos]);
+                    settings.CloseInput = true;
+                    return XmlReader.Create(new StreamReader(_filePaths[itemPos]), settings, _filePaths[itemPos]);
                 }
                 else // xmlModes.Xml
                 {
-                    return XmlReader.Create(new StringReader(_xmlContent), XmlTaskUtility.CreateReaderSettings(prohibitDtd));
+                    return XmlReader.Create(new StringReader(_xmlContent), settings);
                 }
             }
 
@@ -530,7 +532,8 @@ namespace Microsoft.Build.Tasks
                     case XslModes.Xslt:
                         {
                             using var sr = new StringReader(_data);
-                            using var xmlReader = XmlReader.Create(sr, XmlTaskUtility.CreateReaderSettings(prohibitDtd));
+                            var settings = new XmlReaderSettings { DtdProcessing = prohibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore };
+                            using var xmlReader = XmlReader.Create(sr, settings);
                             xslct.Load(xmlReader, XsltSettings.Default, new XmlUrlResolver());
                             break;
                         }
@@ -540,7 +543,8 @@ namespace Microsoft.Build.Tasks
                             _log.LogMessageFromResources(MessageImportance.Low, "XslTransform.UseTrustedSettings", _filePath.Value.OriginalValue);
                         }
 
-                        using (XmlReader reader = XmlReader.Create(new StreamReader(_filePath.Value), XmlTaskUtility.CreateReaderSettings(prohibitDtd, closeInput: true), _filePath.Value))
+                        var fileSettings = new XmlReaderSettings { DtdProcessing = prohibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore, CloseInput = true };
+                        using (XmlReader reader = XmlReader.Create(new StreamReader(_filePath.Value), fileSettings, _filePath.Value))
                         {
                             XmlSpace xmlSpaceOption = _preserveWhitespace ? XmlSpace.Preserve : XmlSpace.Default;
                             // Preserve existing behavior: XSLT files can use local xsl:import/xsl:include paths resolved relative to the stylesheet.

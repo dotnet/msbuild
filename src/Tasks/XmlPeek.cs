@@ -188,7 +188,7 @@ namespace Microsoft.Build.Tasks
             var doc = new XmlDocument();
             try
             {
-                var settings = XmlTaskUtility.CreateReaderSettings(prohibitDtd: false);
+                var settings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
                 using (XmlReader reader = XmlReader.Create(new StringReader("<Namespaces>" + namepaces + "</Namespaces>"), settings))
                 {
                     doc.Load(reader);
