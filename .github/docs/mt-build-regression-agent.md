@@ -73,6 +73,14 @@ The existing OIDC identity needs Kusto read access:
 2. Add the `msbuild-azdo-reader` managed identity.
 3. Grant `Database Viewer`.
 
+Confirm the OIDC setup inherited from #13743:
+
+- `AZDO_READER_CLIENT_ID` and `AZDO_READER_TENANT_ID` must be repository- or
+  organization-scoped Actions secrets. The scan job deliberately does not use the
+  `copilot-pat-pool` environment, so environment-only copies are not visible to it.
+- The `msbuild-azdo-reader` federated credential must trust the exact subject
+  `repo:dotnet/msbuild:ref:refs/heads/main` with audience `api://AzureADTokenExchange`.
+
 It also needs Azure DevOps `View builds` access to:
 
 - PerfStar-Scheduled, definition 25429;
@@ -84,6 +92,14 @@ No Azure DevOps queue permission is required for the initial workflow.
 
 The workflow reuses the repository's existing `copilot-pat-pool` environment and PAT rotation
 mechanism used by the other Agentic Workflows.
+
+## Issue deduplication
+
+The deterministic scan hashes the sorted unique `Backend/Os/ScenarioPair` candidate set into a
+stable `candidateSetKey`. The agent searches for that exact visible marker before creating an issue,
+uses the key in a deterministic title, and the `create-issue` safe output independently enforces
+exact-title deduplication. The separate workflow run ID remains an audit marker, not a deduplication
+key.
 
 ## Current limitations
 

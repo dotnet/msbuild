@@ -15,6 +15,9 @@ permissions:
   issues: read
   pull-requests: read
 
+# The AI sandbox can reach GitHub and the approved .NET/NuGet ecosystem for source investigation,
+# restore, and validation. Azure DevOps, Entra, and Kusto are intentionally absent: only the
+# deterministic scan job receives those credentials and passes derived evidence through an artifact.
 network:
   allowed:
     - defaults
@@ -23,6 +26,7 @@ network:
 
 tools:
   edit:
+  # The agent needs git/source inspection plus targeted tests and the repository build.
   bash: [":*"]
   github:
     mode: gh-proxy
@@ -34,6 +38,9 @@ safe-outputs:
     labels: ["Area: PerfStar", "Area: Performance", automation]
     max: 1
     expires: false
+    # The prompt mandates a deterministic title containing candidateSetKey. gh-aw enforces exact
+    # title deduplication again when applying the safe output, preventing repeated daily issues.
+    deduplicate-by-title: true
   create-pull-request:
     title-prefix: "[PerfStar MT Regression] "
     labels: ["Area: PerfStar", "Area: Performance", automation]
@@ -41,13 +48,18 @@ safe-outputs:
     base-branch: main
     max: 1
     auto-close-issue: false
+    # Performance fixes may touch C#, targets, tasks, or resources, but never files outside src/.
+    # gh-aw v0.82.9 compiles this directory glob into the generated safe-output allowlist.
     allowed-files:
       - "src/**"
+    # Redundant with the allowlist by design: keep workflow definitions explicitly forbidden.
     excluded-files:
       - ".github/**"
   noop:
     report-as-issue: false
 
+# Allows source investigation, focused tests, and the 2-3 minute whole-repository build while
+# keeping the scheduled automation bounded.
 timeout-minutes: 75
 
 jobs:
@@ -243,8 +255,10 @@ measurement variance, SDK changes, or unrelated non-MT movement can still produc
 
 ## Phase 1 — Read and validate all evidence
 
-1. Read all four evidence files completely.
+1. Read all six evidence files completely.
 2. Confirm `candidateCount` is greater than zero and that every candidate has the expected fields.
+   Read `candidateSetKey`; it is a deterministic SHA-256-derived key for the sorted unique
+   `Backend/Os/ScenarioPair` set and is stable across runs while that set is unchanged.
 3. Group candidates by likely shared root cause. A regression appearing across Gold and Hosted or
    across both operating systems is stronger evidence than a single-backend observation, but it can
    also indicate a shared SDK/asset change.
@@ -266,7 +280,8 @@ measurement variance, SDK changes, or unrelated non-MT movement can still produc
 
 ## Phase 2 — Check for existing work and recent changes
 
-1. Search open issues and pull requests for each scenario pair and for `PerfStar MT Regression`.
+1. Search open issues and pull requests for each scenario pair and for the exact visible marker
+   `perfstar-mt-regression-key: <candidateSetKey>`.
 2. If one existing open issue or PR already covers the complete candidate set, do not duplicate it.
    Emit `noop` with links and a concise explanation.
 3. Use each candidate's last-healthy and current MSBuild source revisions to inspect the exact
@@ -315,7 +330,14 @@ When the candidates are not already fully tracked, create **one issue total** fo
 The issue must cover every candidate, including candidates classified as noise or insufficient
 evidence.
 
-Issue title: summarize the number of candidates and strongest affected scope.
+Issue title: use this exact deterministic format:
+
+```text
+<candidateCount> possible MT build-time regressions [<candidateSetKey>]
+```
+
+Do not vary this title format. The safe-output layer uses exact-title deduplication as a second
+cross-run guard.
 
 Issue body:
 
@@ -326,9 +348,10 @@ Issue body:
 4. Describe any shared root-cause hypothesis and relevant commits/files.
 5. State whether a draft fix PR was proposed.
 6. Include the workflow run URL: `${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}`.
-7. Include this visible deduplication key:
+7. Include these visible markers:
 
    ```text
+   perfstar-mt-regression-key: <candidateSetKey>
    perfstar-mt-regression-run: ${{ github.run_id }}
    ```
 

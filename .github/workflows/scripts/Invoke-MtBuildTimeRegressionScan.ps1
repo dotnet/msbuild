@@ -64,8 +64,21 @@ $candidates = @(
 )
 
 $generatedAtUtc = [DateTimeOffset]::UtcNow
+$candidateKeyInputs = @(
+    $candidates |
+        ForEach-Object { "$($_.Backend)/$($_.Os)/$($_.ScenarioPair)" } |
+        Sort-Object -Unique)
+$candidateKeyText = $candidateKeyInputs -join "`n"
+$candidateKeyBytes = [System.Text.Encoding]::UTF8.GetBytes($candidateKeyText)
+$candidateSetKey = [Convert]::ToHexString([System.Security.Cryptography.SHA256]::HashData($candidateKeyBytes))
+$candidateSetKey = $candidateSetKey.Substring(0, 16).ToLowerInvariant()
+
 $report = [ordered]@{
     generatedAtUtc = $generatedAtUtc.ToString('o')
+    candidateSetKey = $candidateSetKey
+    candidateKeyInputs = $candidateKeyInputs
+    # Keep this metadata and the Markdown wording below synchronized with
+    # Get-MtBuildTimeRegressions.kql, which is the executable source of truth.
     detector = [ordered]@{
         lookbackDays = 21
         freshnessDays = 2
@@ -96,6 +109,7 @@ $markdown = [System.Text.StringBuilder]::new()
 [void]$markdown.AppendLine('- show at least 250 ms of deterioration in the MT-minus-non-MT differential.')
 [void]$markdown.AppendLine()
 [void]$markdown.AppendLine("Candidate count: **$($candidates.Count)**")
+[void]$markdown.AppendLine("Candidate-set key: ``$candidateSetKey``")
 
 if ($candidates.Count -gt 0)
 {
