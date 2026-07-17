@@ -521,6 +521,60 @@ namespace Microsoft.Build.UnitTests
             generatedFileCount.ShouldBe(2, $"Embedded files: {string.Join(",", zipArchive.Entries)}");
         }
 
+        [Fact]
+        public void BinaryLoggerGraphBuildSolutionEmbedsSolutionFile()
+        {
+            TransientTestFolder root = _env.CreateFolder(createFolder: true);
+            TransientTestFolder projectFolder = _env.CreateFolder(Path.Combine(root.Path, "SimpleProject"), createFolder: true);
+            _env.CreateFile(projectFolder, "SimpleProject.csproj",
+                """
+                <Project>
+                  <Target Name="Build">
+                    <Message Text="ProjectBuilt" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+
+            TransientTestFile solutionFile = _env.CreateFile(root, "SimpleProject.sln",
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 16
+                VisualStudioVersion = 16.0.29326.124
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleProject", "SimpleProject\SimpleProject.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                    EndGlobalSection
+                    GlobalSection(SolutionProperties) = preSolution
+                        HideSolutionNode = FALSE
+                    EndGlobalSection
+                EndGlobal
+                """);
+
+            RunnerUtilities.ExecMSBuild(
+                $"\"{solutionFile.Path}\" /graphBuild /bl:\"{_logFile};ProjectImports=ZipFile\"",
+                out bool success);
+            success.ShouldBeTrue();
+
+            string projectImportsZipPath = Path.ChangeExtension(_logFile, ".ProjectImports.zip");
+            using var fileStream = new FileStream(projectImportsZipPath, FileMode.Open);
+            using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
+
+            string solutionFileName = Path.GetFileName(solutionFile.Path);
+            ZipArchiveEntry embeddedSolutionEntry = zipArchive.Entries
+                .FirstOrDefault(entry => entry.Name.Equals(solutionFileName, StringComparison.OrdinalIgnoreCase));
+
+            embeddedSolutionEntry.ShouldNotBeNull(
+                $"Expected solution file '{solutionFileName}' in project imports archive. Embedded files: {string.Join(",", zipArchive.Entries.Select(e => e.FullName))}");
+            embeddedSolutionEntry.Length.ShouldBeGreaterThan(0);
+        }
+
         [RequiresSymbolicLinksFact]
         public void BinaryLoggerShouldEmbedSymlinkFilesViaTaskOutput()
         {

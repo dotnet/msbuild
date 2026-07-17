@@ -639,19 +639,31 @@ namespace Microsoft.Build.Graph
         {
             ThrowOnEmptyTargetNames(entryProjectTargets);
 
-            // Seed the dictionary with empty lists for every node. In this particular case though an empty list means "build nothing" rather than "default targets".
-            var targetLists = ProjectNodes.ToDictionary(node => node, node => ImmutableList<string>.Empty);
+            // Seed the dictionary with empty lists for every buildable node. In this particular case though an empty list means "build nothing" rather than "default targets".
+            var targetLists = new Dictionary<ProjectGraphNode, ImmutableList<string>>(ProjectNodes.Count + EntryPointNodes.Count);
+            var projectNodeSet = new HashSet<ProjectGraphNode>(ProjectNodes);
+            foreach (ProjectGraphNode projectNode in ProjectNodes)
+            {
+                targetLists[projectNode] = ImmutableList<string>.Empty;
+            }
+
+            foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
+            {
+                if (!targetLists.ContainsKey(entryPointNode))
+                {
+                    targetLists[entryPointNode] = ImmutableList<string>.Empty;
+                }
+            }
 
             var encounteredEdges = new HashSet<ProjectGraphBuildRequest>();
             var edgesToVisit = new Queue<ProjectGraphBuildRequest>();
 
             if (entryProjectTargets == null || entryProjectTargets.Count == 0)
             {
-                // If no targets were specified, use every project's default targets.
+                // If no targets were specified, use every entry point's default targets.
                 foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
                 {
-                    string[] entryTargets = entryPointNode.ProjectInstance.DefaultTargets.ToArray();
-                    var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);
+                    var entryEdge = new ProjectGraphBuildRequest(entryPointNode, GetEntryTargets(entryPointNode));
                     encounteredEdges.Add(entryEdge);
                     edgesToVisit.Enqueue(entryEdge);
                 }
@@ -660,13 +672,12 @@ namespace Microsoft.Build.Graph
             {
                 foreach (string targetName in entryProjectTargets)
                 {
-                    // Special-case the "Build" target. The solution's metaproj invokes each project's default targets
+                    // Special-case the "Build" target. The solution's metaproj invokes each project's default targets.
                     if (targetName.Equals("Build", StringComparison.OrdinalIgnoreCase))
                     {
                         foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
                         {
-                            string[] entryTargets = entryPointNode.ProjectInstance.DefaultTargets.ToArray();
-                            var entryEdge = new ProjectGraphBuildRequest(entryPointNode, entryTargets);
+                            var entryEdge = new ProjectGraphBuildRequest(entryPointNode, GetEntryTargets(entryPointNode));
                             encounteredEdges.Add(entryEdge);
                             edgesToVisit.Enqueue(entryEdge);
                         }
@@ -716,8 +727,9 @@ namespace Microsoft.Build.Graph
                                 isSolutionTraversalTarget = true;
                             }
 
-                            // For solutions, there should only be exactly one entry node per project file
-                            ProjectGraphNode GetNodeForProject(ProjectInSolution project) => EntryPointNodes.First(node => string.Equals(node.ProjectInstance.FullPath, project.AbsolutePath));
+                            // For solutions, there should only be exactly one buildable graph node per project file.
+                            ProjectGraphNode GetNodeForProject(ProjectInSolution project) =>
+                                ProjectNodes.First(node => string.Equals(node.ProjectInstance.FullPath, project.AbsolutePath, StringComparison.OrdinalIgnoreCase));
                         }
                     }
 
@@ -731,6 +743,16 @@ namespace Microsoft.Build.Graph
                         }
                     }
                 }
+            }
+
+            string[] GetEntryTargets(ProjectGraphNode entryPointNode)
+            {
+                if (Solution != null && !projectNodeSet.Contains(entryPointNode))
+                {
+                    return ["Build"];
+                }
+
+                return entryPointNode.ProjectInstance.DefaultTargets.ToArray();
             }
 
             // Traverse the entire graph, visiting each edge once.

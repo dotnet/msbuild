@@ -52,6 +52,7 @@ namespace Microsoft.Build.Graph
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
         private readonly ProjectGraphMode _graphMode;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
+        private ImmutableDictionary<string, string> _solutionGlobalProperties;
         private ConcurrentDictionary<ConfigurationMetadata, Lazy<ProjectInstance>> _platformNegotiationInstancesCache = new();
 
         /// <summary>
@@ -71,9 +72,10 @@ namespace Microsoft.Build.Graph
             ProjectGraphMode mode,
             CancellationToken cancellationToken)
         {
-            var (actualEntryPoints, solutionDependencies) = ExpandSolutionIfPresent(entryPoints.ToImmutableArray());
+            var (actualEntryPoints, solutionDependencies, solutionGlobalProperties) = ExpandSolutionIfPresent(entryPoints.ToImmutableArray());
 
             _solutionDependencies = solutionDependencies;
+            _solutionGlobalProperties = solutionGlobalProperties;
 
             _entryPointConfigurationMetadata = AddGraphBuildPropertyToEntryPoints(actualEntryPoints);
 
@@ -101,11 +103,22 @@ namespace Microsoft.Build.Graph
 
             AddEdges(allParsedProjects);
 
-            EntryPointNodes = _entryPointConfigurationMetadata.Select(e => allParsedProjects[e].GraphNode).ToList();
+            var originalEntryPointNodes = _entryPointConfigurationMetadata.Select(e => allParsedProjects[e].GraphNode).ToList();
 
-            DetectCycles(EntryPointNodes, _projectInterpretation, allParsedProjects);
+            DetectCycles(originalEntryPointNodes, _projectInterpretation, allParsedProjects);
 
-            RootNodes = GetGraphRoots(EntryPointNodes);
+            if (Solution != null && _solutionGlobalProperties != null)
+            {
+                var syntheticSolutionNode = CreateSyntheticSolutionNode(originalEntryPointNodes);
+                EntryPointNodes = [syntheticSolutionNode];
+                RootNodes = [syntheticSolutionNode];
+            }
+            else
+            {
+                EntryPointNodes = originalEntryPointNodes;
+                RootNodes = GetGraphRoots(originalEntryPointNodes);
+            }
+
             ProjectNodes = allParsedProjects.Values.Select(p => p.GraphNode).ToList();
 
             // Clean and release some temporary used large memory objects.
@@ -127,6 +140,53 @@ namespace Microsoft.Build.Graph
             graphRoots.TrimExcess();
 
             return graphRoots;
+        }
+
+        private ProjectGraphNode CreateSyntheticSolutionNode(IReadOnlyCollection<ProjectGraphNode> projectNodes)
+        {
+            var solutionGlobalProperties = new Dictionary<string, string>(_solutionGlobalProperties.Count, StringComparer.OrdinalIgnoreCase);
+            foreach (var kvp in _solutionGlobalProperties)
+            {
+                solutionGlobalProperties[kvp.Key] = kvp.Value;
+            }
+
+            solutionGlobalProperties[PropertyNames.IsGraphBuild] = "true";
+
+            ProjectInstance syntheticSolutionInstance;
+            ProjectGraphNode projectNodeToInheritFrom = projectNodes.FirstOrDefault();
+            if (projectNodeToInheritFrom is not null)
+            {
+                syntheticSolutionInstance = new ProjectInstance(
+                    Solution.FullPath,
+                    projectNodeToInheritFrom.ProjectInstance,
+                    solutionGlobalProperties);
+            }
+            else
+            {
+                ProjectRootElement syntheticRootElement = ProjectRootElement.Create(_projectCollection);
+                syntheticRootElement.FullPath = Solution.FullPath;
+                syntheticSolutionInstance = new ProjectInstance(
+                    syntheticRootElement,
+                    solutionGlobalProperties,
+                    toolsVersion: null,
+                    _projectCollection);
+            }
+
+            var syntheticSolutionNode = new ProjectGraphNode(syntheticSolutionInstance);
+
+            var stubItem = new ProjectItemInstance(
+                syntheticSolutionInstance,
+                SolutionItemReference,
+                Solution.FullPath,
+                Solution.FullPath);
+            var syntheticEdges = new GraphEdges();
+
+            foreach (var projectNode in projectNodes)
+            {
+                syntheticSolutionNode.AddProjectReference(projectNode, stubItem, syntheticEdges);
+            }
+
+            return syntheticSolutionNode;
         }
 
         private void AddEdges(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects)
@@ -256,11 +316,11 @@ namespace Microsoft.Build.Graph
             }
         }
 
-        private (IReadOnlyCollection<ProjectGraphEntryPoint> NewEntryPoints, IReadOnlyDictionary<string, IReadOnlyCollection<string>> SolutionDependencies) ExpandSolutionIfPresent(IReadOnlyCollection<ProjectGraphEntryPoint> entryPoints)
+        private (IReadOnlyCollection<ProjectGraphEntryPoint> NewEntryPoints, IReadOnlyDictionary<string, IReadOnlyCollection<string>> SolutionDependencies, ImmutableDictionary<string, string> SolutionGlobalProperties) ExpandSolutionIfPresent(IReadOnlyCollection<ProjectGraphEntryPoint> entryPoints)
         {
             if (entryPoints.Count == 0 || !entryPoints.Any(e => FileUtilities.IsSolutionFilename(e.ProjectFile)))
             {
-                return (entryPoints, null);
+                return (entryPoints, null, null);
             }
 
             if (entryPoints.Count != 1)
@@ -383,7 +443,7 @@ namespace Microsoft.Build.Graph
 
             newEntryPoints.TrimExcess();
 
-            return (newEntryPoints, solutionDependencies);
+             return (newEntryPoints, solutionDependencies, solutionGlobalPropertiesBuilder.ToImmutable());
 
             SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, IDictionary<string, string> globalProperties)
             {
