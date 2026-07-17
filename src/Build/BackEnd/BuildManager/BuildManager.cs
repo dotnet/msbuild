@@ -1772,9 +1772,9 @@ namespace Microsoft.Build.Execution
                             {
                                 ExecuteGraphBuildScheduler(submission);
                             }
-                            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                            catch (Exception ex)
                             {
-                                HandleSubmissionException(submission, ex);
+                                HandleGraphSubmissionException(submission, ex);
                             }
                         },
                         _executionCancellationTokenSource!.Token,
@@ -1783,10 +1783,22 @@ namespace Microsoft.Build.Execution
                 }
             }
             // The handling of submission exception needs to be done outside of the lock
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            catch (Exception ex)
+            {
+                HandleGraphSubmissionException(submission, ex);
+                throw;
+            }
+        }
+
+        private void HandleGraphSubmissionException(GraphBuildSubmission submission, Exception ex)
+        {
+            if (ExceptionHandling.IsCriticalException(ex))
+            {
+                OnThreadException(ex);
+            }
+            else
             {
                 HandleSubmissionException(submission, ex);
-                throw;
             }
         }
 
