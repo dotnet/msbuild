@@ -24,7 +24,7 @@ namespace Microsoft.Build.Framework;
 /// </para>
 /// <para>
 /// A registration captures everything reflection-sensitive at registration time, where the task type is
-/// statically known. The generic <see cref="Register{T}(string)"/> overload roots the task type's public
+/// statically known. The generic <see cref="Register{T}()"/> overload roots the task type's public
 /// constructor and properties for trimming via its <c>[DynamicallyAccessedMembers]</c>, so the
 /// <see cref="LoadedType"/> it builds (a <see cref="Type.GetProperties()"/> walk) stays trim-safe and the
 /// engine never re-reflects the type by name. Hosts register through the public
@@ -53,22 +53,20 @@ internal static class TaskClassRegistry
     private static volatile bool s_hasRegistrations;
 
     /// <summary>
-    /// Registers a task type under the given name so the engine can instantiate it without loading its
-    /// assembly or resolving its type by reflection. The <c>[DynamicallyAccessedMembers]</c> roots the
-    /// type's public constructor and properties so construction and reflective parameter binding stay
-    /// trim-safe in a trimmed/AOT image.
+    /// Registers a task type under its type name (<c>typeof(T).Name</c> - the name a target uses to invoke
+    /// it) so the engine can instantiate it without loading its assembly or resolving its type by reflection.
+    /// The <c>[DynamicallyAccessedMembers]</c> roots the type's public constructor and properties so
+    /// construction and reflective parameter binding stay trim-safe in a trimmed/AOT image.
     /// </summary>
-    /// <typeparam name="T">The task type to register.</typeparam>
-    /// <param name="taskName">The name a target uses to invoke the task (the <c>TaskName</c> of a <c>&lt;UsingTask&gt;</c>).</param>
-    internal static void Register<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)] T>(string taskName)
-        where T : ITask, new()
+    /// <typeparam name="T">The task type to register. The registration key is <c>typeof(T).Name</c>.</typeparam>
+    internal static void Register<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] T>()
+        where T : ITask
     {
-        ArgumentException.ThrowIfNullOrEmpty(taskName);
-
-        // typeof(T) carries T's [DynamicallyAccessedMembers] here, so building the LoadedType (a
-        // GetProperties walk) is trim-safe and is done once, eagerly, at registration.
         LoadedType loadedType = CreateLoadedType(typeof(T));
-        s_tasksByName[taskName] = new TaskClassRegistration(static () => new T(), loadedType);
+
+        // The LoadedType owns construction: it prefers a TaskEnvironment constructor (so environment-dependent
+        // property defaults can run) over the parameterless one, reflection- and dynamic-code-free.
+        s_tasksByName[typeof(T).Name] = new TaskClassRegistration(taskEnvironment => loadedType.CreateInstance(taskEnvironment)!, loadedType);
         s_hasRegistrations = true;
     }
 
@@ -83,11 +81,34 @@ internal static class TaskClassRegistry
         ArgumentException.ThrowIfNullOrEmpty(taskName);
         ArgumentNullException.ThrowIfNull(factory);
 
-        // The host-supplied factory's task type is not statically known here, so the LoadedType (needed to
-        // bind parameters) is built lazily from the first constructed instance's type. The host is
-        // responsible for preserving that type's public properties under trimming (for example via the
-        // generic Register<T> overload or a TrimmerRootAssembly entry).
+        // The task type is not statically known here, so the LoadedType is built lazily from a probed
+        // instance's runtime type. The host must preserve that type's public properties under trimming.
         s_tasksByName[taskName] = new TaskClassRegistration(factory);
+        s_hasRegistrations = true;
+    }
+
+    /// <summary>
+    /// Registers a task type with a factory that receives the <see cref="TaskEnvironment"/> the engine is
+    /// running the task with, so a task can consume it during construction (for example to compute property
+    /// defaults that depend on the environment). Construction is fully reflection-free, and the registration is
+    /// keyed by the task type's name (the name a target uses to invoke it).
+    /// </summary>
+    /// <typeparam name="TTask">
+    /// The task type to register. The registration key is <c>typeof(TTask).Name</c>. The
+    /// <c>[DynamicallyAccessedMembers]</c> roots the type's public properties so a trimmer preserves them,
+    /// keeping parameter binding working; the host-supplied factory handles construction.
+    /// </typeparam>
+    /// <param name="factory">A delegate that creates a new instance of the task given the current <see cref="TaskEnvironment"/>.</param>
+    internal static void Register<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] TTask>(Func<TaskEnvironment, TTask> factory)
+        where TTask : ITask
+    {
+        ArgumentNullException.ThrowIfNull(factory);
+
+        LoadedType loadedType = CreateLoadedType(typeof(TTask));
+
+        // Accepting Func<TaskEnvironment, TTask> (rather than ...ITask) lets callers rely on type inference for
+        // TTask; TTask : ITask, so the typed factory coerces to the ITask-returning factory stored here.
+        s_tasksByName[typeof(TTask).Name] = new TaskClassRegistration(taskEnvironment => factory(taskEnvironment), loadedType);
         s_hasRegistrations = true;
     }
 
@@ -116,7 +137,7 @@ internal static class TaskClassRegistry
     /// with synthetic assembly-name load info so no assembly is loaded by path.
     /// </summary>
     internal static LoadedType CreateLoadedType(
-        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor | DynamicallyAccessedMemberTypes.PublicProperties)] Type taskType)
+        [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors | DynamicallyAccessedMemberTypes.PublicProperties)] Type taskType)
     {
         Assembly assembly = taskType.Assembly;
         return new LoadedType(taskType, AssemblyLoadInfo.Create(assembly.FullName, null), assembly, typeof(ITaskItem));

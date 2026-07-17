@@ -72,6 +72,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.False(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(string[])));
         }
 
+        [Fact]
+        public void IsValidScalarInputParameter_CustomValueType_ReturnsTrue()
+        {
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(TestStruct)).ShouldBeTrue();
+        }
+
         #endregion
 
         #region IsValidVectorInputParameter Tests
@@ -192,6 +198,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void IsValueTypeOutputParameter_Object_ReturnsFalse()
         {
             Assert.False(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(object)));
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_TaskItemOfInt_ReturnsFalse()
+        {
+            TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(TaskItem<int>)).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_CustomValueType_ReturnsTrue()
+        {
+            TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(TestStruct)).ShouldBeTrue();
         }
 
         #endregion
@@ -322,54 +340,77 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.False(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(object[])));
         }
 
-        // ─── ITaskItem<T> and ITaskItem<T>[] coverage (path-like types) ────────
+        // ─── ITaskItem<T> and ITaskItem<T>[] coverage ─────────────────────────
 
-        [Fact]
-        public void IsValidScalarInputParameter_ITaskItemOfAbsolutePath_ReturnsTrue()
+        public static TheoryData<Type> SupportedTaskItemTypeArguments =>
+            new TheoryData<Type>
+            {
+                typeof(string),
+                typeof(bool),
+                typeof(char),
+                typeof(byte),
+                typeof(sbyte),
+                typeof(short),
+                typeof(ushort),
+                typeof(int),
+                typeof(uint),
+                typeof(long),
+                typeof(ulong),
+                typeof(float),
+                typeof(double),
+                typeof(decimal),
+                typeof(DateTime),
+                typeof(AbsolutePath),
+                typeof(FileInfo),
+                typeof(DirectoryInfo),
+            };
+
+        public static TheoryData<Type> UnsupportedTaskItemTypeArguments =>
+            new TheoryData<Type>
+            {
+                typeof(Guid),
+                typeof(TimeSpan),
+                typeof(int?),
+                typeof(TestEnum),
+                typeof(TestStruct),
+            };
+
+        [Theory]
+        [MemberData(nameof(SupportedTaskItemTypeArguments))]
+        public void SupportedITaskItemTypeArgument_IsAccepted(Type typeArgument)
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<AbsolutePath>)));
+            AssertTaskItemTypeArgumentSupport(typeof(ITaskItem<>), typeArgument, expected: true);
+            AssertTaskItemTypeArgumentSupport(typeof(TaskItem<>), typeArgument, expected: true);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnsupportedTaskItemTypeArguments))]
+        public void UnsupportedITaskItemTypeArgument_IsRejected(Type typeArgument)
+        {
+            AssertTaskItemTypeArgumentSupport(typeof(ITaskItem<>), typeArgument, expected: false);
+            AssertTaskItemTypeArgumentSupport(typeof(TaskItem<>), typeArgument, expected: false);
         }
 
         [Fact]
-        public void IsValidScalarInputParameter_ITaskItemOfFileInfo_ReturnsTrue()
+        public void DerivedTaskItemInterface_IsRejectedForInputAndAcceptedForOutput()
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<FileInfo>)));
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ICustomTaskItem<int>)).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(ICustomTaskItem<int>[])).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ICustomTaskItem<int>)).ShouldBeTrue();
+            TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ICustomTaskItem<int>[])).ShouldBeTrue();
         }
 
-        [Fact]
-        public void IsValidScalarInputParameter_ITaskItemOfDirectoryInfo_ReturnsTrue()
+        private static void AssertTaskItemTypeArgumentSupport(Type genericTaskItemType, Type typeArgument, bool expected)
         {
-            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem<DirectoryInfo>)));
-        }
+            Type taskItemType = genericTaskItemType.MakeGenericType(typeArgument);
+            Type taskItemArrayType = taskItemType.MakeArrayType();
 
-        [Fact]
-        public void IsValidVectorInputParameter_ITaskItemOfAbsolutePathArray_ReturnsTrue()
-        {
-            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(ITaskItem<AbsolutePath>[])));
-        }
-
-        [Fact]
-        public void IsAssignableToITaskItem_ITaskItemOfAbsolutePath_ReturnsTrue()
-        {
-            Assert.True(TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(ITaskItem<AbsolutePath>)));
-        }
-
-        [Fact]
-        public void IsAssignableToITaskItem_ITaskItemOfAbsolutePathArray_ReturnsTrue()
-        {
-            Assert.True(TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(ITaskItem<AbsolutePath>[])));
-        }
-
-        [Fact]
-        public void IsValidOutputParameter_ITaskItemOfAbsolutePath_ReturnsTrue()
-        {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem<AbsolutePath>)));
-        }
-
-        [Fact]
-        public void IsValidOutputParameter_ITaskItemOfAbsolutePathArray_ReturnsTrue()
-        {
-            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem<AbsolutePath>[])));
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(taskItemType).ShouldBe(expected);
+            TaskParameterTypeVerifier.IsValidVectorInputParameter(taskItemArrayType).ShouldBe(expected);
+            TaskParameterTypeVerifier.IsAssignableToITaskItem(taskItemType).ShouldBe(expected);
+            TaskParameterTypeVerifier.IsAssignableToITaskItem(taskItemArrayType).ShouldBe(expected);
+            TaskParameterTypeVerifier.IsValidOutputParameter(taskItemType).ShouldBe(expected);
+            TaskParameterTypeVerifier.IsValidOutputParameter(taskItemArrayType).ShouldBe(expected);
         }
 
         [Fact]
@@ -383,6 +424,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void IsValidOutputParameter_TaskItemOfAbsolutePathArray_ReturnsTrue()
         {
             TaskParameterTypeVerifier.IsValidOutputParameter(typeof(TaskItem<AbsolutePath>[])).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void IsAssignableToITaskItem_TaskItemOfIntArray_ReturnsTrue()
+        {
+            typeof(ITaskItem[]).IsAssignableFrom(typeof(TaskItem<int>[])).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(TaskItem<int>[])).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_TaskItemOfIntArray_ReturnsTrue()
+        {
+            TaskParameterTypeVerifier.IsValidOutputParameter(typeof(TaskItem<int>[])).ShouldBeTrue();
+        }
+
+        private enum TestEnum
+        {
+            Value,
+        }
+
+        private readonly struct TestStruct
+        {
+        }
+
+        private interface ICustomTaskItem<T> : ITaskItem<T>
+        {
         }
 
         #endregion

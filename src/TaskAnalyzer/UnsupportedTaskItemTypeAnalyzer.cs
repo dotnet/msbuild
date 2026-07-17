@@ -10,16 +10,19 @@ using static Microsoft.Build.TaskAuthoring.Analyzer.SharedAnalyzerHelpers;
 namespace Microsoft.Build.TaskAuthoring.Analyzer
 {
     /// <summary>
-    /// Roslyn analyzer that warns when a task property is typed as <c>ITaskItem&lt;T&gt;</c> or
-    /// <c>ITaskItem&lt;T&gt;[]</c> where <c>T</c> is not supported by MSBuild's task parameter binder.
+    /// Roslyn analyzer that reports when a task property is typed as <c>ITaskItem&lt;T&gt;</c> or
+    /// <c>ITaskItem&lt;T&gt;[]</c> where <c>T</c> is unsupported or relies on Convert.ChangeType.
     ///
     /// MSBuildTask0009: ITaskItem&lt;T&gt; used with unsupported type argument.
+    /// MSBuildTask0010: ITaskItem&lt;T&gt; type argument relies on culture-sensitive conversion.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class UnsupportedTaskItemTypeAnalyzer : DiagnosticAnalyzer
     {
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
-            ImmutableArray.Create(DiagnosticDescriptors.UnsupportedTaskItemType);
+            ImmutableArray.Create(
+                DiagnosticDescriptors.UnsupportedTaskItemType,
+                DiagnosticDescriptors.CultureSensitiveTaskItemType);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -92,6 +95,16 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                     ITypeSymbol typeArg = namedPropertyType.TypeArguments[0];
 
+                    if (SupportedTaskItemTypes.IsConvertChangeTypeTaskItemType(typeArg.SpecialType))
+                    {
+                        symbolContext.ReportDiagnostic(Diagnostic.Create(
+                            DiagnosticDescriptors.CultureSensitiveTaskItemType,
+                            GetDiagnosticLocation(property, namedType),
+                            property.Name,
+                            typeArg.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat)));
+                        continue;
+                    }
+
                     // Check if T is in the supported set
                     if (SupportedTaskItemTypes.IsSupportedTaskItemType(typeArg, absolutePathType, fileInfoType, directoryInfoType))
                     {
@@ -103,7 +116,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         GetDiagnosticLocation(property, namedType),
                         property.Name,
                         typeArg.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat),
-                        SupportedTaskItemTypes.SupportedTaskItemTypeDisplayNames));
+                        SupportedTaskItemTypes.DirectlyParsedTaskItemTypeDisplayNames));
                 }
             }, SymbolKind.NamedType);
         }

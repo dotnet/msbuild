@@ -2377,6 +2377,36 @@ Esegue la profilatura della valutazione di MSBuild e scrive
         <target state="translated">MSBUILD : error MSB4192: il file di progetto "{0}" è in formato ".vcproj" o ".dsp", che non è possibile compilare direttamente con MSBuild. Per convertire il progetto, aprirlo in Visual Studio IDE o eseguire lo strumento di conversione oppure, per ".vcproj", usare MSBuild per compilare il file della soluzione contenente il progetto.</target>
         <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
       </trans-unit>
+      <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
+        <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
+        <target state="translated">MSB5022: l'host attività MSBuild non supporta l'esecuzione di attività che eseguono callback IBuildEngine. Per eseguire tali operazioni, eseguire l'attività nel processo MSBuild di base. Un'attività verrà automaticamente eseguita nell'host attività se per UsingTask è stato definito un attributo con valore "Runtime" o "Architecture" o se per la chiamata all'attività è stato definito un attributo con valore "MSBuildRuntime" o "MSBuildArchitecture" che non corrisponde al runtime corrente o all'architettura di MSBuild.</target>
+        <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="InvalidLogFileFormat">
+        <source>MSB4233: There was an exception while reading the log file: {0}</source>
+        <target state="translated">MSB4233: si è verificata un'eccezione durante la lettura del file di log: {0}</target>
+        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentHeader">
+        <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
+        <target state="translated">Le modifiche seguenti verranno apportate all'ambiente ricevuto dal nodo padre prima dell'applicazione all'host attività:</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentVariable">
+        <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
+        <target state="translated">  Impostazione di '{0}' su '{1}' anziché sul valore dell'ambiente padre, '{2}'.</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="SubCategoryForSchemaValidationErrors">
+        <source>Schema validation</source>
+        <target state="translated">Convalida schema</target>
+        <note>
+      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
+      "MSBUILD : Schema validation error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.
+    </note>
+      </trans-unit>
     </body>
   </file>
 </xliff>
