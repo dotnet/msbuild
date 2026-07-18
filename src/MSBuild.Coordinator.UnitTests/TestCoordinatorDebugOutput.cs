@@ -12,8 +12,10 @@ internal sealed class TestCoordinatorDebugOutput(ITestOutputHelper testOutput) :
     public bool IsEnabled => true;
 
     public void WriteLine(string message)
-        => testOutput.WriteLine(message);
+    {
+        testOutput.WriteLine(message);
+    }
 
     public void WriteLine([InterpolatedStringHandlerArgument("")] ref ICoordinatorDebugOutput.WriteLineInterpolatedStringHandler handler)
-        => testOutput.WriteLine(handler.GetFormattedText());
+        => WriteLine(handler.GetFormattedText());
 }
