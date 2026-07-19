@@ -68,6 +68,11 @@
         <target state="translated">匯入的檔案封存超過 2 GB 限制，且未內嵌。</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_InvalidGZipHeader">
+        <source>The binary log stream does not use the supported GZip compression format. Expected header bytes 1F 8B 08.</source>
+        <target state="new">The binary log stream does not use the supported GZip compression format. Expected header bytes 1F 8B 08.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Binlog_MissingRecoverableErrorSubscribeError">
         <source>Subscription to RecoverableReadError is mandatory during forward compatible reading.</source>
         <target state="translated">在正向相容讀取期間，必須訂閱 RecoverableReadError。</target>
