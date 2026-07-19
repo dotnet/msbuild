@@ -146,7 +146,15 @@ namespace Microsoft.Build.Logging
         public static BinaryReader OpenReader(Stream sourceFileStream)
         {
             ArgumentNullException.ThrowIfNull(sourceFileStream);
-            ValidateGZipHeader(sourceFileStream);
+            try
+            {
+                ValidateGZipHeader(sourceFileStream);
+            }
+            catch
+            {
+                sourceFileStream.Dispose();
+                throw;
+            }
 
             var gzipStream = new GZipStream(sourceFileStream, CompressionMode.Decompress, leaveOpen: false);
 

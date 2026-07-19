@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void OpenReaderRejectsInvalidGZipHeader()
+        public void OpenReaderRejectsInvalidGZipHeaderAndDisposesSourceStream()
         {
             using var stream = new MemoryStream([0x1F, 0x8B, 0x00]);
 
@@ -273,7 +273,7 @@ namespace Microsoft.Build.UnitTests
             });
 
             exception.Message.ShouldBe(ResourceUtilities.GetResourceString("Binlog_InvalidGZipHeader"));
-            stream.Position.ShouldBe(0);
+            stream.CanRead.ShouldBeFalse();
             CreateExpectedLogFile();
         }
 
