@@ -1242,6 +1242,61 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.False(expressions.MoveNext());
         }
 
+        /// <summary>
+        /// The transform text, separator, and function name captured by the shredder are weak-interned.
+        /// When the same text appears in two distinct backing expression strings, the shredder must
+        /// return the exact same string instance (reference identity), not a fresh per-expression copy.
+        /// This both documents the deduplication behavior and proves the interning path is exercised:
+        /// the pre-interning implementation used <c>Substring</c>, which always allocated a distinct
+        /// instance and would therefore fail the <see cref="Assert.Same(object, object)"/> checks below.
+        /// </summary>
+        [Fact]
+        public void WeakInternedCaptures_ReturnSharedInstanceAcrossDistinctExpressions()
+        {
+            // Build two distinct string instances (not reference-equal) with identical content so the
+            // captured spans are byte-equal but backed by different parent strings.
+            string transformExprA = string.Concat("@(i->'", "%(Filename).weakintern.obj", "')");
+            string transformExprB = new string(transformExprA.ToCharArray());
+            string separatorExprA = string.Concat("@(i->'%(Filename)', '", ";weakintern;", "')");
+            string separatorExprB = new string(separatorExprA.ToCharArray());
+            string functionExprA = string.Concat("@(i->", "WeakInternDistinct", "())");
+            string functionExprB = new string(functionExprA.ToCharArray());
+
+            Assert.False(ReferenceEquals(transformExprA, transformExprB));
+            Assert.False(ReferenceEquals(separatorExprA, separatorExprB));
+            Assert.False(ReferenceEquals(functionExprA, functionExprB));
+
+            // Quoted transform text (ExpressionShredder ~line 187).
+            string transformValueA = SingleCapture(transformExprA).Captures[0].Value;
+            string transformValueB = SingleCapture(transformExprB).Captures[0].Value;
+            Assert.Equal("%(Filename).weakintern.obj", transformValueA);
+            Assert.Equal(transformValueA, transformValueB);
+            Assert.Same(transformValueA, transformValueB);
+
+            // Separator (ExpressionShredder ~line 243).
+            string separatorA = SingleCapture(separatorExprA).Separator;
+            string separatorB = SingleCapture(separatorExprB).Separator;
+            Assert.Equal(";weakintern;", separatorA);
+            Assert.Equal(separatorA, separatorB);
+            Assert.Same(separatorA, separatorB);
+
+            // Function name (ExpressionShredder ~line 642).
+            string functionNameA = SingleCapture(functionExprA).Captures[0].FunctionName;
+            string functionNameB = SingleCapture(functionExprB).Captures[0].FunctionName;
+            Assert.Equal("WeakInternDistinct", functionNameA);
+            Assert.Equal(functionNameA, functionNameB);
+            Assert.Same(functionNameA, functionNameB);
+        }
+
+        private static ExpressionShredder.ItemExpressionCapture SingleCapture(string expression)
+        {
+            ExpressionShredder.ReferencedItemExpressionsEnumerator expressions = ExpressionShredder.GetReferencedItemExpressions(expression);
+            Assert.True(expressions.MoveNext());
+            ExpressionShredder.ItemExpressionCapture capture = expressions.Current;
+            Assert.False(expressions.MoveNext());
+            return capture;
+        }
+
         #region Original code to produce canonical results
 
         /// <summary>
