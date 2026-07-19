@@ -10,19 +10,6 @@ using static MSBuild.Benchmarks.Extensions;
 
 var argList = new List<string>(args);
 
-// Controlled A/B probe for ExpressionShredder that bypasses BenchmarkDotNet so the same probe
-// binary can be run against different Microsoft.Build.dll builds (exact-parent A vs final B).
-if (argList.Count > 0 && argList[0] == "--shredder-probe")
-{
-    return MSBuild.Benchmarks.ShredderProbe.Run([.. argList.GetRange(1, argList.Count - 1)]);
-}
-
-// Cold single-scenario ExpressionShredder measurement (launch one process per scenario for a cold intern table).
-if (argList.Count > 0 && argList[0] == "--shredder-cold")
-{
-    return MSBuild.Benchmarks.ShredderProbe.RunCold([.. argList.GetRange(1, argList.Count - 1)]);
-}
-
 ParseAndRemoveBooleanParameter(argList, "--collect-etw", out bool collectEtw);
 ParseAndRemoveBooleanParameter(argList, "--disable-ngen", out bool disableNGen);
 ParseAndRemoveBooleanParameter(argList, "--disable-inlining", out bool disableJitInlining);
