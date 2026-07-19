@@ -2364,27 +2364,27 @@
       </trans-unit>
       <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
         <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
-        <target state="new">MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</target>
+        <target state="translated">MSB5022: MSBuild 작업 호스트는 IBuildEngine 콜백을 수행하는 작업의 실행을 지원하지 않습니다. 이러한 작업을 수행하려면 대신 코어 MSBuild 프로세스에서 작업을 실행하세요.  UsingTask에 "Runtime" 또는 "Architecture" 값이 사용되었거나 작업 호출에 MSBuild의 현재 런타임 또는 아키텍처와 일치하지 않는 "MSBuildRuntime" 또는 "MSBuildArchitecture" 값이 사용된 경우 작업 호스트에서 작업이 자동으로 실행됩니다.</target>
         <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
       </trans-unit>
       <trans-unit id="InvalidLogFileFormat">
         <source>MSB4233: There was an exception while reading the log file: {0}</source>
-        <target state="new">MSB4233: There was an exception while reading the log file: {0}</target>
+        <target state="translated">MSB4233: 로그 파일을 읽는 동안 예외가 발생했습니다. {0}</target>
         <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
       </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentHeader">
         <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
-        <target state="new">Making the following modifications to the environment received from the parent node before applying it to the task host:</target>
+        <target state="translated">작업 호스트에 적용하기 전에 부모 노드로부터 받은 환경을 다음과 같이 수정하고 있습니다.</target>
         <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
       </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentVariable">
         <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
-        <target state="new">  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</target>
+        <target state="translated">  '{0}'을(를) 부모 환경 값인 '{2}' 대신 '{1}'(으)로 설정하고 있습니다.</target>
         <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
       </trans-unit>
       <trans-unit id="SubCategoryForSchemaValidationErrors">
         <source>Schema validation</source>
-        <target state="new">Schema validation</target>
+        <target state="translated">스키마 유효성 검사</target>
         <note>
       UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
       displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:

@@ -149,32 +149,32 @@
       </trans-unit>
       <trans-unit id="CollectionCopyToFailureProvidedArrayIsTooSmall">
         <source>The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</source>
-        <target state="new">The number of elements in the collection is greater than the available space in the destination array (when starting at the specified index).</target>
+        <target state="translated">컬렉션의 요소 수가 대상 배열에서 사용 가능한 공간보다 큽니다(지정된 인덱스에서 시작할 때).</target>
         <note />
       </trans-unit>
       <trans-unit id="ParameterCannotHaveInvalidPathChars">
         <source>Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</source>
-        <target state="new">Parameter "{0}" with assigned value "{1}" cannot have invalid path or invalid file characters.</target>
+        <target state="translated">"{1}" 값이 할당된 "{0}" 매개 변수는 유효하지 않은 경로 또는 파일 문자를 포함할 수 없습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ConflictingTaskAssembly">
         <source>MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</source>
-        <target state="new">MSB4008: A conflicting assembly for the task assembly "{0}" has been found at "{1}".</target>
+        <target state="translated">MSB4008: 작업 어셈블리 "{0}"과(와) 충돌하는 어셈블리가 "{1}"에 있습니다.</target>
         <note>{StrBegin="MSB4008: "}UE: This message is shown when the type/class of a task cannot be resolved uniquely from a single assembly.</note>
       </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">
         <source>Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</source>
-        <target state="new">Event type "{0}" was expected to be serializable using the .NET serializer. The event was not serializable and has been ignored.</target>
+        <target state="translated">이벤트 유형 "{0}"은(는) .NET serializer를 사용하여 serialize할 수 있어야 합니다. 이 이벤트는 serialize할 수 없으므로 무시되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="LoggingBeforeTaskInitialization">
         <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="new">MSB6005: Task attempted to log before it was initialized. Message was: {0}</target>
+        <target state="translated">MSB6005: 작업을 초기화하기 전에 로깅하려고 했습니다. 메시지: {0}</target>
         <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
       </trans-unit>
       <trans-unit id="Message_InvalidImportance">
         <source>MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</source>
-        <target state="new">MSB3511: "{0}" is an invalid value for the "Importance" parameter. Valid values are: High, Normal and Low.</target>
+        <target state="translated">MSB3511: "{0}"은(는) "Importance" 매개 변수에 사용할 수 없는 값입니다. 유효한 값은 High, Normal 및 Low입니다.</target>
         <note>{StrBegin="MSB3511: "}UE: This message is shown when a user specifies a value for the importance attribute of Message which is not valid.
             The importance enumeration is: High, Normal and Low.  Specifying any other importance will result in this message being shown
             LOCALIZATION: "Importance" should not be localized.
@@ -184,37 +184,37 @@
       </trans-unit>
       <trans-unit id="UnrecognizedToolsVersion">
         <source>MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</source>
-        <target state="new">MSB4132: The tools version "{0}" is unrecognized. Available tools versions are {1}.</target>
+        <target state="translated">MSB4132: 도구 버전 "{0}"을(를) 인식할 수 없습니다. 사용할 수 있는 도구 버전은 {1}입니다.</target>
         <note>{StrBegin="MSB4132: "}LOCALIZATION: {1} contains a comma separated list.</note>
       </trans-unit>
       <trans-unit id="NameInvalid">
         <source>MSB5016: The name "{0}" contains an invalid character "{1}".</source>
-        <target state="new">MSB5016: The name "{0}" contains an invalid character "{1}".</target>
+        <target state="translated">MSB5016: 이름 "{0}"에 잘못된 문자 "{1}"이(가) 사용되었습니다.</target>
         <note>{StrBegin="MSB5016: "}</note>
       </trans-unit>
       <trans-unit id="CannotChangeItemSpecModifiers">
         <source>"{0}" is a reserved item metadata, and cannot be modified or deleted.</source>
-        <target state="new">"{0}" is a reserved item metadata, and cannot be modified or deleted.</target>
+        <target state="translated">"{0}"은(는) 예약된 항목 메타데이터이므로 수정 또는 삭제할 수 없습니다.</target>
         <note>UE: Tasks and OM users are not allowed to remove or change the value of the built-in metadata on items e.g. the meta-data "FullPath", "RelativeDir", etc. are reserved.</note>
       </trans-unit>
       <trans-unit id="TaskNotMarshalByRef">
         <source>MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</source>
-        <target state="new">MSB4077: The "{0}" task has been marked with the attribute LoadInSeparateAppDomain, but does not derive from MarshalByRefObject. Check that the task derives from MarshalByRefObject or AppDomainIsolatedTask.</target>
+        <target state="translated">MSB4077: "{0}" 작업이 LoadInSeparateAppDomain 특성으로 표시되었지만 MarshalByRefObject에서 파생되지 않습니다. 해당 작업이 MarshalByRefObject 또는 AppDomainIsolatedTask에서 파생되는지 확인하십시오.</target>
         <note>{StrBegin="MSB4077: "}LOCALIZATION: &lt;LoadInSeparateAppDomain&gt;, &lt;MarshalByRefObject&gt;, &lt;AppDomainIsolatedTask&gt; should not be localized.</note>
       </trans-unit>
       <trans-unit id="TaskResourceNotFound">
         <source>The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</source>
-        <target state="new">The resource string "{0}" for the "{1}" task cannot be found. Confirm that the resource name "{0}" is correctly spelled, and the resource exists in the task's assembly.</target>
+        <target state="translated">"{1}" 작업의 리소스 문자열 "{0}"을(를) 찾을 수 없습니다. 리소스 이름 "{0}"의 맞춤법이 올바른지 그리고 리소스가 작업 어셈블리에 있는지 확인하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="TaskResourcesNotRegistered">
         <source>The "{0}" task has not registered its resources. In order to use the "TaskLoggingHelper.FormatResourceString()" method this task needs to register its resources either during construction, or via the "TaskResources" property.</source>
-        <target state="new">The "{0}" task has not registered its resources. In order to use the "TaskLoggingHelper.FormatResourceString()" method this task needs to register its resources either during construction, or via the "TaskResources" property.</target>
+        <target state="translated">{0} 작업의 리소스가 등록되지 않았습니다. "TaskLoggingHelper.FormatResourceString()" 메서드를 사용하려면 생성 시 또는 "TaskResources" 속성을 통해 이 작업의 리소스를 등록해야 합니다.</target>
         <note>LOCALIZATION: "TaskLoggingHelper.FormatResourceString()" and "TaskResources" should not be localized.</note>
       </trans-unit>
       <trans-unit id="WildcardResultsInDriveEnumeration">
         <source>MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</source>
-        <target state="new">MSB5029: The value "{0}" of the "{1}" attribute in element &lt;{2}&gt; in file "{3}" is a wildcard that results in enumerating all files on the drive, which was likely not intended. Check that referenced properties are always defined and that the project and current working directory are not at the drive root.</target>
+        <target state="translated">MSB5029: 파일 "{0}"에 있는 요소 &lt;{1}&gt; 요소의 "{2}" 특성의 값 "{3}"은(는) 의도하지 않은 드라이브의 모든 파일을 열거하는 와일드카드입니다. 참조된 속성이 항상 정의되어 있고 프로젝트 및 현재 작업 디렉터리가 드라이브 루트에 없는지 확인합니다.</target>
         <note>{StrBegin="MSB5029: "}UE: This is a generic message that is displayed when we find a project element that has a drive enumerating wildcard value for one of its
       attributes e.g. &lt;Compile Include="$(NotAlwaysDefined)\**\*.cs"&gt; -- if the property is undefined, the value of Include should not result in enumerating all files on drive.</note>
       </trans-unit>

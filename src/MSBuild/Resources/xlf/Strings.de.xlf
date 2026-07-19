@@ -2363,27 +2363,27 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
       </trans-unit>
       <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
         <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
-        <target state="new">MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</target>
+        <target state="translated">MSB5022: Der MSBuild-Aufgabenhost unterstützt das Ausführen von Aufgaben nicht, die IBuildEngine-Rückrufe tätigen. Führen Sie Ihre Aufgabe stattdessen im MSBuild-Kernprozess aus, wenn Sie diese Vorgänge durchführen möchten.  Wenn UsingTask mit einem Runtime- oder Architecture-Wert oder der Aufgabenaufruf mit einem MSBuildRuntime- oder MSBuildArchitecture-Wert attribuiert wurde, der nicht mit der aktuellen Laufzeit oder Architektur von MSBuild übereinstimmt, wird eine Aufgabe automatisch im Aufgabenhost ausgeführt.</target>
         <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
       </trans-unit>
       <trans-unit id="InvalidLogFileFormat">
         <source>MSB4233: There was an exception while reading the log file: {0}</source>
-        <target state="new">MSB4233: There was an exception while reading the log file: {0}</target>
+        <target state="translated">MSB4233: Beim Lesen der Protokolldatei ist eine Ausnahme aufgetreten: {0}.</target>
         <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
       </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentHeader">
         <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
-        <target state="new">Making the following modifications to the environment received from the parent node before applying it to the task host:</target>
+        <target state="translated">Es werden folgende vom übergeordneten Knoten empfangene Änderungen an der Umgebung vorgenommen, bevor sie auf den Aufgabenhost angewendet wird:</target>
         <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
       </trans-unit>
       <trans-unit id="ModifyingTaskHostEnvironmentVariable">
         <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
-        <target state="new">  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</target>
+        <target state="translated">  Festlegen von "{0}" auf "{1}" statt auf den Wert "{2}" der übergeordneten Umgebung.</target>
         <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
       </trans-unit>
       <trans-unit id="SubCategoryForSchemaValidationErrors">
         <source>Schema validation</source>
-        <target state="new">Schema validation</target>
+        <target state="translated">Schemavalidierung</target>
         <note>
       UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
       displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
