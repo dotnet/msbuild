@@ -72,6 +72,7 @@
     <Reference Include="System.IO.Compression" />
     <PackageReference Include="System.Memory" />
     <PackageReference Include="System.Security.Principal.Windows" />
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" />
     <PackageReference Include="System.Text.Json" />
     <PackageReference Include="System.Collections.Immutable" />
     <PackageReference Include="System.Threading.Tasks.Dataflow" />
@@ -218,6 +219,7 @@
     <Compile Include="Logging\BuildEventArgsExtensions.cs" />
     <Compile Include="Logging\TerminalLogger\**\*.cs" />
     <Compile Include="Logging\ReusableLogger.cs" />
+    <Compile Include="TelemetryInfra\EvaluationMetrics.cs" />
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryCollector.cs" />
     <Compile Include="TelemetryInfra\TelemetryCollectorProvider.cs" />
