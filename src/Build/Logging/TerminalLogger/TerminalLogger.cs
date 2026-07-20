@@ -1485,9 +1485,12 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     internal void Refresh()
     {
+        int width = Terminal.Width;
+        int height = Terminal.Height;
+
         lock (_lock)
         {
-            DisplayNodes();
+            DisplayNodes(width, height);
         }
     }
 
@@ -1495,10 +1498,10 @@ public sealed partial class TerminalLogger : INodeLogger
     /// Render Nodes section.
     /// It shows what all build nodes do.
     /// </summary>
-    internal void DisplayNodes(bool updateSize = true)
+    internal void DisplayNodes() => DisplayNodes(Terminal.Width, Terminal.Height);
+
+    private void DisplayNodes(int width, int height)
     {
-        int width = updateSize ? Terminal.Width : _currentFrame.Width;
-        int height = updateSize ? Terminal.Height : _currentFrame.Height;
         TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height);
 
         // Do not render delta but clear everything if Terminal width or height have changed.

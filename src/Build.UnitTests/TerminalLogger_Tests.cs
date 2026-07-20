@@ -151,7 +151,9 @@ namespace Microsoft.Build.UnitTests
             public void WriteLineFitToWidth(ReadOnlySpan<char> text) => _terminal.WriteLineFitToWidth(text);
             public void WriteColor(TerminalColor color, string text) => _terminal.WriteColor(color, text);
             public void WriteColorLine(TerminalColor color, string text) => _terminal.WriteColorLine(color, text);
-            public void Dispose() => _terminal.Dispose();
+            public void Dispose()
+            {
+            }
         }
 
         private const int _nodeCount = 8;
@@ -923,19 +925,26 @@ namespace Microsoft.Build.UnitTests
 
             MockBuildEventSink eventSource = new(0);
             TerminalLogger terminalLogger = new(terminal);
-            terminalLogger.Initialize(eventSource, _nodeCount);
-            eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
-            eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
-            eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
-            eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build"));
-            eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "Task"));
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
+                eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
+                eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build"));
+                eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "Task"));
 
-            terminalLogger.Refresh();
-            output.GetStringBuilder().Clear();
-            terminal.Width = 40;
-            terminalLogger.Refresh();
+                terminalLogger.Refresh();
+                output.GetStringBuilder().Clear();
+                terminal.Width = 40;
+                terminalLogger.Refresh();
 
-            output.ToString().ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+                output.ToString().ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
         }
 
 
