@@ -21,13 +21,13 @@
           AfterTargets="AfterBuild"
           Condition="'$(CreateBootstrap)' != 'false'"/>
 
+  <!-- This sometimes fails so it might need be retried. -->
   <Target Name="CleanBootstrapFolder">
-    <!-- This sometimes fails so it might need be retried. -->
     <RemoveDir
-            Directories="$(BootstrapDestination)"
-            ContinueOnError="true"/>
-
+      Directories="$(BootstrapDestination)"
+      ContinueOnError="true"/>
   </Target>
+
   <Target Name="GatherNuGetDependencies" AfterTargets="ResolvePackageAssets">
     <ItemGroup>
       <!-- Collect known NuGet dependencies after resolving packages -->
@@ -71,8 +71,8 @@
       <Code Source="$(MSBuildThisFileDirectory)..\src\MSBuild.Bootstrap.Utils\Tasks\LocateVisualStudioTask.cs" Language="cs" />
     </Task>
   </UsingTask>
-  <Target Name="BootstrapFull" DependsOnTargets="CleanBootstrapFolder;SetBinPaths;GatherNuGetDependencies">
 
+  <Target Name="BootstrapFull" DependsOnTargets="CleanBootstrapFolder;SetBinPaths;GatherNuGetDependencies">
     <LocateVisualStudioTask>
       <Output TaskParameter="VsInstallPath" PropertyName="AvailableVsInstallPath" />
     </LocateVisualStudioTask>
@@ -284,7 +284,10 @@
   <Target Name="BootstrapNetCore" DependsOnTargets="AcquireSdk">
     <ItemGroup>
       <!-- *.deps.json are excluded because the SDK rewrites these files for consistency with the rest of the SDK, so take their version. -->
-      <FreshlyBuiltNetBinaries Include="$(OutDir)**\*.*" Exclude="$(OutDir)**\*.deps.json" />
+      <!-- NuGet.Build.Tasks.Console.* is excluded because it belongs to the NuGet toolset family that the acquired SDK
+           already ships (aligned with its restore/pack tooling). Overlaying our PackageReference version here would
+           re-introduce the torn NuGet state this target deliberately avoids (see the note above the copy below). -->
+      <FreshlyBuiltNetBinaries Include="$(OutDir)**\*.*" Exclude="$(OutDir)**\*.deps.json;$(OutDir)**\NuGet.Build.Tasks.Console.*" />
 
       <FreshlyBuiltNetBinaries Include="$(CoordinatorBinPath)**\MSBuild.Coordinator.dll" />
       <FreshlyBuiltNetBinaries Include="$(CoordinatorBinPath)**\MSBuild.Coordinator.exe" />
@@ -292,16 +295,18 @@
       <FreshlyBuiltNetBinaries Include="$(CoordinatorBinPath)**\MSBuild.Coordinator.runtimeconfig.json" />
     </ItemGroup>
 
-    <!-- The copying of these dependencies is required by bootstrap\**\sdk\**\NuGet.RestoreEx.targets. Otherwise NuGet.Build.Tasks.dll can not be found. -->
-    <Copy SourceFiles="@(_NuGetRuntimeDependencies)"
-          DestinationFolder="$(InstallDir)sdk\$(BootstrapSdkVersion)\"
-          SkipUnchangedFiles="true" />
-
+    <!-- Do NOT overlay the NuGet package family (@(_NuGetRuntimeDependencies)) onto the acquired SDK here.
+         The SDK downloaded by AcquireSdk already ships a complete, internally-aligned NuGet tooling stack
+         (restore + pack, plus the NuGet SDK resolver) at both sdk\<ver>\ and sdk\<ver>\Sdks\Microsoft.NET.Sdk\tools\.
+         Copying the older PackageReference versions (a toolset dependency per eng/Version.Details.xml) over just the
+         SDK root produced a torn state: restore bound to the package version while pack bound to the SDK's bundled
+         version. Per the design intent documented in Version.Details.xml ("at runtime we bind to whatever the host
+         SDK ships"), let the SDK's aligned NuGet tooling win. -->
     <Copy SourceFiles="@(FreshlyBuiltNetBinaries)"
           DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
     <!--
-      MSBuild can target an earlier .NET runtime (e.g. net10.0) than the SDK we overlay it onto (e.g. net11.0).
+      MSBuild can target an earlier .NET runtime than the SDK we overlay it onto.
       In that case the freshly-built *.runtimeconfig.json files pin Microsoft.NETCore.App to a runtime version
       (e.g. 10.0.0) that isn't present in the bootstrap layout, so the just-built MSBuild would fail to start.
       Rewrite that framework version to the exact runtime version that the overlaid SDK ships, so MSBuild runs
