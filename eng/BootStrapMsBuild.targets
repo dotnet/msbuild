@@ -21,13 +21,13 @@
           AfterTargets="AfterBuild"
           Condition="'$(CreateBootstrap)' != 'false'"/>
 
+  <!-- This sometimes fails so it might need be retried. -->
   <Target Name="CleanBootstrapFolder">
-    <!-- This sometimes fails so it might need be retried. -->
     <RemoveDir
-            Directories="$(BootstrapDestination)"
-            ContinueOnError="true"/>
-
+      Directories="$(BootstrapDestination)"
+      ContinueOnError="true"/>
   </Target>
+
   <Target Name="GatherNuGetDependencies" AfterTargets="ResolvePackageAssets">
     <ItemGroup>
       <!-- Collect known NuGet dependencies after resolving packages -->
@@ -71,8 +71,8 @@
       <Code Source="$(MSBuildThisFileDirectory)..\src\MSBuild.Bootstrap.Utils\Tasks\LocateVisualStudioTask.cs" Language="cs" />
     </Task>
   </UsingTask>
-  <Target Name="BootstrapFull" DependsOnTargets="CleanBootstrapFolder;SetBinPaths;GatherNuGetDependencies">
 
+  <Target Name="BootstrapFull" DependsOnTargets="CleanBootstrapFolder;SetBinPaths;GatherNuGetDependencies">
     <LocateVisualStudioTask>
       <Output TaskParameter="VsInstallPath" PropertyName="AvailableVsInstallPath" />
     </LocateVisualStudioTask>
