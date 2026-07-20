@@ -141,7 +141,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void LogsWarningForInvalidCompression()
+        public void LogsErrorForInvalidCompression()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
@@ -160,13 +160,12 @@ namespace Microsoft.Build.Tasks.UnitTests
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
-                // Invalid compression is a warning, not an error; an uncompressed tar is created instead.
-                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+                // Invalid compression is an error and no archive is created.
+                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
 
                 _mockEngine.Log.ShouldContain("MSB4324", customMessage: _mockEngine.Log);
 
-                GetTarEntryNames(tarFilePath, isGZip: false)
-                    .ShouldBe(["9E0A4E0F5C8D4F0FA0B33F79C2F0B0C1.txt"]);
+                File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);
             }
         }
 

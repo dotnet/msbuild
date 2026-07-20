@@ -2692,9 +2692,9 @@
         <target state="new">MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
         <note>{StrBegin="MSB4322: "}</note>
       </trans-unit>
-      <trans-unit id="TarDirectory.WarningInvalidCompression">
-        <source>MSB4324: Unsupported compression '{0}'. Valid values are 'None' and 'GZip'. Creating an uncompressed tar archive instead.</source>
-        <target state="new">MSB4324: Unsupported compression '{0}'. Valid values are 'None' and 'GZip'. Creating an uncompressed tar archive instead.</target>
+      <trans-unit id="TarDirectory.ErrorInvalidCompression">
+        <source>MSB4324: Unsupported compression '{0}'. Valid values are 'None' and 'GZip'.</source>
+        <target state="new">MSB4324: Unsupported compression '{0}'. Valid values are 'None' and 'GZip'.</target>
         <note>{StrBegin="MSB4324: "}</note>
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">

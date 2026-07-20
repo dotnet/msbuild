@@ -110,7 +110,9 @@ namespace Microsoft.Build.Tasks
                         bool useGZip = false;
                         if (!string.IsNullOrEmpty(Compression) && !TryParseCompression(Compression, out useGZip))
                         {
-                            Log.LogWarningWithCodeFromResources("TarDirectory.WarningInvalidCompression", Compression);
+                            Log.LogErrorWithCodeFromResources("TarDirectory.ErrorInvalidCompression", Compression);
+
+                            return false;
                         }
 
                         if (useGZip)

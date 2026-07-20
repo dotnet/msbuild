@@ -3110,8 +3110,8 @@
     <value>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</value>
     <comment>{StrBegin="MSB4323: "}</comment>
   </data>
-  <data name="TarDirectory.WarningInvalidCompression">
-    <value>MSB4324: Unsupported compression '{0}'. Valid values are 'None' and 'GZip'. Creating an uncompressed tar archive instead.</value>
+  <data name="TarDirectory.ErrorInvalidCompression">
+    <value>MSB4324: Unsupported compression '{0}'. Valid values are 'None' and 'GZip'.</value>
     <comment>{StrBegin="MSB4324: "}</comment>
   </data>
   <data name="TarDirectory.Comment">
