@@ -3,6 +3,9 @@ Param(
   [string] $msbuildEngine,
   [string] $configuration = "Debug",
   [switch] $test,
+  [switch] $ci,
+  [switch][Alias('bl')] $binaryLog,
+  [switch][Alias('nobl')] $excludeCIBinarylog,
   [switch] $stage2,
   [string] $stage2Arguments = "",
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
@@ -18,6 +21,17 @@ $commonBuildArgs = @('-configuration', $configuration) + $properties
 if ($msbuildEngine) {
   $commonBuildArgs += '-msbuildEngine'
   $commonBuildArgs += $msbuildEngine
+}
+
+# Forward the binary-log-related switches to both the stage 1 and stage 2 builds.
+if ($ci) {
+  $commonBuildArgs += '-ci'
+}
+if ($binaryLog) {
+  $commonBuildArgs += '-binaryLog'
+}
+if ($excludeCIBinarylog) {
+  $commonBuildArgs += '-excludeCIBinarylog'
 }
 
 # Supplying stage2Arguments implies a multi-stage build
@@ -120,6 +134,16 @@ $env:DOTNET_INSTALL_DIR = Join-Path $BootstrapRoot 'core'
 $stage2Args = @(if ($stage2Arguments) { $stage2Arguments -split '\s+' | Where-Object { $_ } } else { @() })
 
 $stage2BuildArgs = $commonBuildArgs
+
+# Give the stage 2 binary log a distinct name so it doesn't collide with the stage 1 binlog
+# (both otherwise default to Build.binlog) when CI publishes them to the same artifacts location.
+# Only do this when a binary log will actually be produced, so we don't force one to be created:
+# Arcade emits a binlog for CI builds (-ci) or when -binaryLog is passed explicitly, unless it's
+# suppressed with -excludeCIBinarylog.
+if (($ci -or $binaryLog) -and -not $excludeCIBinarylog) {
+  $stage2BuildArgs += '-binaryLogName'
+  $stage2BuildArgs += 'Build.stage2.binlog'
+}
 
 # Only run tests in stage2 when supplying the '-test' switch in a multi-stage build.
 if ($test) {

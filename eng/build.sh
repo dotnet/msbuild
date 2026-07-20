@@ -2,6 +2,9 @@
 
 configuration="Debug"
 test=false
+ci=false
+binary_log=false
+exclude_ci_binary_log=false
 stage2=false
 stage2Arguments=
 properties=
@@ -30,6 +33,18 @@ while [[ $# -gt 0 ]]; do
       test=true
       shift 1
       ;;
+    --ci)
+      ci=true
+      shift 1
+      ;;
+    --binarylog|-bl)
+      binary_log=true
+      shift 1
+      ;;
+    --excludecibinarylog|-nobl)
+      exclude_ci_binary_log=true
+      shift 1
+      ;;
     --stage2)
       stage2=true
       shift 1
@@ -51,6 +66,17 @@ build_script="$scriptroot/common/build.sh"
 
 # Arguments common to the stage1 and stage2 builds, including any caller-supplied properties.
 common_build_args="--configuration $configuration $properties"
+
+# Forward the binary-log-related switches to both the stage 1 and stage 2 builds.
+if [ "$ci" = true ]; then
+  common_build_args="$common_build_args --ci"
+fi
+if [ "$binary_log" = true ]; then
+  common_build_args="$common_build_args --binaryLog"
+fi
+if [ "$exclude_ci_binary_log" = true ]; then
+  common_build_args="$common_build_args --excludeCIBinarylog"
+fi
 
 build_args="$common_build_args"
 
@@ -118,6 +144,15 @@ export DOTNET_HOST_PATH="$bootstrap_root/core/dotnet"
 export DOTNET_INSTALL_DIR="$bootstrap_root/core"
 
 stage2_build_args="$common_build_args"
+
+# Give the stage 2 binary log a distinct name so it doesn't collide with the stage 1 binlog
+# (both otherwise default to Build.binlog) when CI publishes them to the same artifacts location.
+# Only do this when a binary log will actually be produced, so we don't force one to be created:
+# Arcade emits a binlog for CI builds (--ci) or when --binaryLog is passed explicitly, unless it's
+# suppressed with --excludeCIBinarylog.
+if { [ "$ci" = true ] || [ "$binary_log" = true ]; } && [ "$exclude_ci_binary_log" != true ]; then
+  stage2_build_args="$stage2_build_args --binaryLogName Build.stage2.binlog"
+fi
 
 # Only run tests in stage2 when supplying the '--test' switch in a multi-stage build.
 if [ "$test" = true ]; then
