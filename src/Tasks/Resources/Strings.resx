@@ -3111,7 +3111,7 @@
     <comment>{StrBegin="MSB4323: "}</comment>
   </data>
   <data name="TarDirectory.ErrorInvalidCompression">
-    <value>MSB4324: Unsupported compression '{0}'. Valid values are 'None' and 'GZip'.</value>
+    <value>MSB4324: Unsupported compression '{0}'. Valid values are 'None', 'GZip', and 'ZStandard'.</value>
     <comment>{StrBegin="MSB4324: "}</comment>
   </data>
   <data name="TarDirectory.ErrorInvalidFormat">

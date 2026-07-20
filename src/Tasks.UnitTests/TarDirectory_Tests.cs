@@ -25,6 +25,8 @@ namespace Microsoft.Build.Tasks.UnitTests
         [InlineData("None")]
         [InlineData("GZip")]
         [InlineData("gz")]
+        [InlineData("ZStandard")]
+        [InlineData("zstd")]
         public void CanTarDirectory(string? compression)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
@@ -53,9 +55,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 // Should not contain any warnings in the TarDirectory bucket (MSB4321 - MSB4330).
                 _mockEngine.Log.ShouldNotContain("MSB432", customMessage: _mockEngine.Log);
 
-                bool isGZip = compression is not null && !StringComparer.OrdinalIgnoreCase.Equals(compression, "None");
-
-                GetTarEntryNames(tarFilePath, isGZip)
+                GetTarEntryNames(tarFilePath, compression)
                     .ShouldBe(
                         [
                             "6DE6060259C44DB6B145159376751C22.txt",
@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 _mockEngine.Log.ShouldContain(sourceFolder.Path, customMessage: _mockEngine.Log);
                 _mockEngine.Log.ShouldContain(file.Path, customMessage: _mockEngine.Log);
 
-                GetTarEntryNames(file.Path, isGZip: false)
+                GetTarEntryNames(file.Path, compression: null)
                     .ShouldBe(
                         [
                             "F1C22D660B0D4DAAA296C1B980320B03.txt",
@@ -198,7 +198,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 GetTarEntryFormats(tarFilePath)
                     .ShouldAllBe(entryFormat => entryFormat == expectedFormat, _mockEngine.Log);
 
-                GetTarEntryNames(tarFilePath, isGZip: false)
+                GetTarEntryNames(tarFilePath, compression: null)
                     .ShouldBe(["3F6D2F2E3C1A4B5C8D9E0F1A2B3C4D5E.txt"]);
             }
         }
@@ -262,29 +262,35 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        private static List<string> GetTarEntryNames(string tarFilePath, bool isGZip)
+        private static List<string> GetTarEntryNames(string tarFilePath, string? compression)
         {
             List<string> names = new List<string>();
 
             using FileStream stream = new FileStream(tarFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            Stream tarStream = isGZip ? new GZipStream(stream, CompressionMode.Decompress) : stream;
 
-            try
+            // Wrap the file stream in a matching decompression stream, if the archive was compressed.
+            Stream? decompressionStream = compression switch
             {
-                using TarReader reader = new TarReader(tarStream);
+                null => null,
+                _ when StringComparer.OrdinalIgnoreCase.Equals(compression, "None") => null,
+                _ when StringComparer.OrdinalIgnoreCase.Equals(compression, "GZip")
+                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "gz")
+                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "gzip") => new GZipStream(stream, CompressionMode.Decompress),
+                _ when StringComparer.OrdinalIgnoreCase.Equals(compression, "ZStandard")
+                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "zstd")
+                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "zst") => new ZstandardStream(stream, CompressionMode.Decompress),
+                _ => throw new ArgumentException($"Unexpected compression '{compression}'.", nameof(compression)),
+            };
+
+            using (decompressionStream)
+            {
+                using TarReader reader = new TarReader(decompressionStream ?? stream);
                 for (TarEntry? entry = reader.GetNextEntry(); entry is not null; entry = reader.GetNextEntry())
                 {
                     if (entry.EntryType is TarEntryType.RegularFile or TarEntryType.V7RegularFile)
                     {
                         names.Add(entry.Name);
                     }
-                }
-            }
-            finally
-            {
-                if (isGZip)
-                {
-                    tarStream.Dispose();
                 }
             }
 

@@ -2693,8 +2693,8 @@
         <note>{StrBegin="MSB4322: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorInvalidCompression">
-        <source>MSB4324: Unsupported compression '{0}'. Valid values are 'None' and 'GZip'.</source>
-        <target state="new">MSB4324: Unsupported compression '{0}'. Valid values are 'None' and 'GZip'.</target>
+        <source>MSB4324: Unsupported compression '{0}'. Valid values are 'None', 'GZip', and 'ZStandard'.</source>
+        <target state="new">MSB4324: Unsupported compression '{0}'. Valid values are 'None', 'GZip', and 'ZStandard'.</target>
         <note>{StrBegin="MSB4324: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorInvalidFormat">

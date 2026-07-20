@@ -2,11 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
-using System.IO.Enumeration;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -25,6 +23,7 @@ namespace Microsoft.Build.Tasks
     {
         public const string CompressionNone = "None";
         public const string CompressionGZip = "GZip";
+        public const string CompressionZStandard = "ZStandard";
 
         /// <summary>
         /// Gets or sets a <see cref="ITaskItem"/> containing the full path to the destination file to create.
@@ -51,7 +50,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Gets or sets the compression to apply to the tar archive.
-        /// Valid values are "None" (the default) and "GZip".
+        /// Valid values are "None" (the default), "GZip", and "ZStandard".
         /// This parameter is optional.
         /// </summary>
         public string? Compression { get; set; }
@@ -116,8 +115,7 @@ namespace Microsoft.Build.Tasks
                     {
                         Log.LogMessageFromResources(MessageImportance.High, "TarDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
 
-                        bool useGZip = false;
-                        if (!string.IsNullOrEmpty(Compression) && !TryParseCompression(Compression, out useGZip))
+                        if (!TryParseCompression(Compression, out TarCompression compression))
                         {
                             Log.LogErrorWithCodeFromResources("TarDirectory.ErrorInvalidCompression", Compression);
 
@@ -134,14 +132,19 @@ namespace Microsoft.Build.Tasks
 
                         using FileStream destinationStream = new FileStream(destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None);
 
-                        if (useGZip)
+                        // Wrap the destination stream in the requested compression, if any. The tar archive is always
+                        // written to the (optionally compressed) stream using the new .NET 11 overload that honors the
+                        // requested TarEntryFormat.
+                        Stream? compressionStream = compression switch
                         {
-                            using GZipStream gzipStream = new GZipStream(destinationStream, CompressionLevel.Optimal);
-                            CreateTarFromDirectory(sourceDirectory.FullName, gzipStream, format);
-                        }
-                        else
+                            TarCompression.GZip => new GZipStream(destinationStream, CompressionLevel.Optimal),
+                            TarCompression.ZStandard => new ZstandardStream(destinationStream, CompressionLevel.Optimal),
+                            _ => null,
+                        };
+
+                        using (compressionStream)
                         {
-                            CreateTarFromDirectory(sourceDirectory.FullName, destinationStream, format);
+                            TarFile.CreateFromDirectory(sourceDirectory.FullName, compressionStream ?? destinationStream, includeBaseDirectory: false, format);
                         }
                     }
                 }
@@ -157,21 +160,28 @@ namespace Microsoft.Build.Tasks
 
             return !Log.HasLoggedErrors;
 
-            static bool TryParseCompression(string compression, out bool useGZip)
+            static bool TryParseCompression(string? compression, out TarCompression result)
             {
-                if (StringComparer.OrdinalIgnoreCase.Equals(compression, CompressionNone))
+                if (string.IsNullOrEmpty(compression)
+                    || StringComparer.OrdinalIgnoreCase.Equals(compression, CompressionNone))
                 {
-                    useGZip = false;
+                    result = TarCompression.None;
                 }
                 else if (StringComparer.OrdinalIgnoreCase.Equals(compression, CompressionGZip)
                     || StringComparer.OrdinalIgnoreCase.Equals(compression, "gz")
                     || StringComparer.OrdinalIgnoreCase.Equals(compression, "gzip"))
                 {
-                    useGZip = true;
+                    result = TarCompression.GZip;
+                }
+                else if (StringComparer.OrdinalIgnoreCase.Equals(compression, CompressionZStandard)
+                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "zstd")
+                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "zst"))
+                {
+                    result = TarCompression.ZStandard;
                 }
                 else
                 {
-                    useGZip = false;
+                    result = TarCompression.None;
                     return false;
                 }
 
@@ -183,67 +193,13 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Writes all filesystem entries under <paramref name="sourceDirectoryFullPath"/> to <paramref name="destination"/> as a tar archive.
+        /// Identifies the compression to apply to the tar archive stream.
         /// </summary>
-        /// <remarks>
-        /// This mirrors the behavior of <see cref="TarFile.CreateFromDirectory(string, System.IO.Stream, bool)"/> with
-        /// <c>includeBaseDirectory: false</c>, but additionally honors the requested <paramref name="format"/>. The
-        /// <see cref="TarFile"/> overloads that accept a <see cref="TarEntryFormat"/> are not available on the
-        /// <c>net10.0</c> API surface MSBuild targets, so the directory walk is performed directly against a
-        /// <see cref="TarWriter"/>.
-        /// </remarks>
-        private static void CreateTarFromDirectory(string sourceDirectoryFullPath, Stream destination, TarEntryFormat format)
+        private enum TarCompression
         {
-            using TarWriter writer = new TarWriter(destination, format, leaveOpen: true);
-
-            foreach ((string fullPath, string entryName) in EnumerateEntries(sourceDirectoryFullPath, sourceDirectoryFullPath.Length))
-            {
-                writer.WriteEntry(fullPath, entryName);
-            }
-        }
-
-        /// <summary>
-        /// Recursively enumerates the filesystem entries under <paramref name="directory"/>, yielding the full path and
-        /// the corresponding archive entry name for each, while avoiding recursion into directory symlinks.
-        /// </summary>
-        private static IEnumerable<(string fullPath, string entryName)> EnumerateEntries(string directory, int basePathLength)
-        {
-            // Recurse into subdirectories after yielding their own entry so that directory entries precede their contents,
-            // matching the ordering produced by TarFile.CreateFromDirectory.
-            FileSystemEnumerable<(string fullPath, string entryName, bool recurse)> enumerable = new(
-                directory,
-                (ref FileSystemEntry entry) =>
-                {
-                    string fullPath = entry.ToFullPath();
-                    bool isRealDirectory = entry.IsDirectory && (entry.Attributes & FileAttributes.ReparsePoint) == 0;
-                    string entryName = GetEntryName(fullPath.AsSpan(basePathLength), appendDirectorySeparator: isRealDirectory);
-                    return (fullPath, entryName, isRealDirectory);
-                });
-
-            foreach ((string fullPath, string entryName, bool recurse) in enumerable)
-            {
-                yield return (fullPath, entryName);
-
-                if (recurse)
-                {
-                    foreach (var childEntry in EnumerateEntries(fullPath, basePathLength))
-                    {
-                        yield return childEntry;
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Converts a filesystem path that is relative to the archive root into a tar entry name using forward slashes,
-        /// appending a trailing slash for directory entries.
-        /// </summary>
-        private static string GetEntryName(ReadOnlySpan<char> relativePath, bool appendDirectorySeparator)
-        {
-            relativePath = relativePath.TrimStart("/\\".AsSpan());
-            string entryName = relativePath.ToString().Replace('\\', '/');
-
-            return appendDirectorySeparator ? entryName + '/' : entryName;
+            None,
+            GZip,
+            ZStandard,
         }
     }
 }
