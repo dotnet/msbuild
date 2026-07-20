@@ -68,7 +68,7 @@ steps:
   displayName: Install .NET runtime (testhost)
   inputs:
     packageType: runtime
-    useGlobalJson: true
+    version: 11.0.x
     includePreviewVersions: true
 
 - task: NuGetAuthenticate@1
