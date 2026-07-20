@@ -15,6 +15,27 @@ namespace Microsoft.Build.Shared
     internal static class ValueTypeParser
     {
         /// <summary>
+        /// Returns true if <paramref name="type"/> is an intended target type for typed task-item binding.
+        /// </summary>
+        internal static bool IsSupportedType(Type type)
+            => type == typeof(string)
+                || type == typeof(bool)
+                || type == typeof(char)
+                || type == typeof(byte)
+                || type == typeof(sbyte)
+                || type == typeof(short)
+                || type == typeof(ushort)
+                || type == typeof(int)
+                || type == typeof(uint)
+                || type == typeof(long)
+                || type == typeof(ulong)
+                || type == typeof(float)
+                || type == typeof(double)
+                || type == typeof(decimal)
+                || type == typeof(DateTime)
+                || TaskItemTypeDetector.IsSupportedPathType(type);
+
+        /// <summary>
         /// Parses a boolean value using MSBuild's boolean conventions.
         /// Supports: true/on/yes/!false/!off/!no for true, false/off/no/!true/!on/!yes for false.
         /// </summary>

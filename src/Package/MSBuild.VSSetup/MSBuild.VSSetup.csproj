@@ -1,13 +1,12 @@
-﻿<!-- Copyright (c)  Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information. -->
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
     <TargetFramework>$(FullFrameworkTFM)</TargetFramework>
     <!-- VS Insertion -->
     <TargetVsixContainerName>Microsoft.Build.vsix</TargetVsixContainerName>
     <VisualStudioInsertionComponent>Microsoft.Build</VisualStudioInsertionComponent>
 
-    <ShouldSkipProject>false</ShouldSkipProject>
-    <ShouldSkipProject Condition="'$(MSBuildRuntimeType)' != 'Full'">true</ShouldSkipProject>
+    <ExcludeFromBuild Condition="'$(MSBuildRuntimeType)' != 'Full'">true</ExcludeFromBuild>
   </PropertyGroup>
 
   <ItemGroup>
@@ -23,13 +22,13 @@
     <SwrFile Include="files.swr" Condition=" '$(MSBuildRuntimeType)' == 'Full' " />
   </ItemGroup>
 
-  <!-- GetBinPaths depends on GetBuildVersion which does not get imported if ProducesNoOutput.Settings.props is imported-->
-  <Import Project="..\GetBinPaths.targets" Condition="!$(ShouldSkipProject)"/>
+  <!-- GetBinPaths depends on GetBuildVersion which does not get imported if ExcludeFromBuild is true. -->
+  <Import Project="..\GetBinPaths.targets" Condition="'$(ExcludeFromBuild)' != 'true'" />
 
   <Target Name="SetVsixProperties"
     BeforeTargets="Build"
     DependsOnTargets="SetBinPaths"
-    Condition="!$(ShouldSkipProject)">
+    Condition="'$(ExcludeFromBuild)' != 'true'">
     <ItemGroup>
       <SwrProperty Include="Version=$(VsixVersion)" />
       <SwrProperty Include="X86BinPath=$(X86BinPath)" />
@@ -42,5 +41,4 @@
     </ItemGroup>
   </Target>
 
-  <Import Project="$(RepoRoot)eng\ProducesNoOutput.Settings.props" Condition="$(ShouldSkipProject)"/>
 </Project>

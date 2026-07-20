@@ -153,8 +153,10 @@
     <Compile Include="BackEnd\BuildManager\BuildSubmissionBase.cs" />
     <Compile Include="BackEnd\BuildManager\CacheSerialization.cs" />
     <Compile Include="BackEnd\BuildManager\CacheAggregator.cs" />
+    <Compile Include="BackEnd\BuildManager\CoordinatorClient.Connection.cs" />
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.cs" />
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.DefaultDebugOutput.cs" />
+    <Compile Include="BackEnd\BuildManager\CoordinatorClient.GrantOwnership.cs" />
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.TestAccessor.cs" />
     <Compile Include="BackEnd\BuildManager\EnvironmentVariableValidator.cs" />
     <Compile Include="BackEnd\BuildManager\GlobalPropertiesLookup.cs" />
@@ -676,11 +678,6 @@
     <EmbeddedResource Include="Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
-      <Link>Resources\Strings.shared.resx</Link>
-      <SubType>Designer</SubType>
-      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 

@@ -105,18 +105,34 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
-        public void PropertiesStage_ExposesPropertiesButNotItemsOrTargets_Project()
+        public void ProjectFactories_RejectPartialEvaluationStage()
         {
-            Project project = Project.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Properties));
+            // Project only supports full evaluation. A partial stage passed through ProjectOptions
+            // must be rejected up front rather than silently ignored.
+            Should.Throw<ArgumentException>(() =>
+                Project.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Properties)));
 
-            project.EvaluationStage.ShouldBe(ProjectEvaluationStage.Properties);
+            Should.Throw<ArgumentException>(() =>
+                Project.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Items)));
+        }
+
+        [Fact]
+        public void ProjectFactories_RejectNullOptions()
+        {
+            // The partial-stage guard is the first thing the factories do, so it must not dereference
+            // a null ProjectOptions; callers get the canonical ArgumentNullException instead.
+            Should.Throw<ArgumentNullException>(() =>
+                Project.FromProjectRootElement(CreateRootElement(), null));
+        }
+
+        [Fact]
+        public void ProjectFactories_AllowFullEvaluationStage()
+        {
+            Project project = Project.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Full));
+
             project.GetPropertyValue("Derived").ShouldBe("Debug-x");
-
-            Should.Throw<InvalidOperationException>(() => project.Items);
-            Should.Throw<InvalidOperationException>(() => project.ItemDefinitions);
-            Should.Throw<InvalidOperationException>(() => project.GetItems("Compile"));
-            Should.Throw<InvalidOperationException>(() => project.AllEvaluatedItems);
-            Should.Throw<InvalidOperationException>(() => project.Targets);
+            project.GetItems("Compile").Count.ShouldBe(2);
+            project.Targets.ShouldContainKey("Build");
         }
 
         [Fact]
@@ -166,62 +182,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
-        public void ReevaluateUpgradesPartialProjectToFull()
-        {
-            Project project = Project.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Properties));
-
-            project.EvaluationStage.ShouldBe(ProjectEvaluationStage.Properties);
-            Should.Throw<InvalidOperationException>(() => project.Targets);
-
-            project.ReevaluateIfNecessary();
-
-            project.EvaluationStage.ShouldBe(ProjectEvaluationStage.Full);
-            project.Targets.ShouldContainKey("Build");
-            project.GetItems("Compile").Count.ShouldBe(2);
-        }
-
-        [Fact]
-        public void CreateProjectInstanceFromPartialProjectUpgradesToFull()
-        {
-            Project project = Project.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Properties));
-            project.EvaluationStage.ShouldBe(ProjectEvaluationStage.Properties);
-
-            ProjectInstance instance = project.CreateProjectInstance();
-
-            instance.EvaluationStage.ShouldBe(ProjectEvaluationStage.Full);
-            instance.Targets.ShouldContainKey("Build");
-            project.EvaluationStage.ShouldBe(ProjectEvaluationStage.Full);
-        }
-
-        [Fact]
         public void PartialProjectInstanceCannotBeBuilt()
         {
             ProjectInstance instance = ProjectInstance.FromProjectRootElement(CreateRootElement(), OptionsFor(ProjectEvaluationStage.Properties));
 
             Should.Throw<InvalidOperationException>(() => new BuildRequestData(instance, new[] { "Build" }));
-        }
-
-        [Fact]
-        public void CacheDoesNotServePartialProjectForFullLoad()
-        {
-            TransientTestFile file = _env.CreateFile("test.proj", ProjectXml);
-
-            Project partial = Project.FromFile(file.Path, new ProjectOptions
-            {
-                EvaluationStage = ProjectEvaluationStage.Properties,
-                ProjectCollection = _collection,
-            });
-            partial.EvaluationStage.ShouldBe(ProjectEvaluationStage.Properties);
-
-            // A subsequent full LoadProject on the same key must return a fully-evaluated project
-            // (the cached partial one is upgraded in place), never partial state.
-            Project full = _collection.LoadProject(file.Path);
-            full.EvaluationStage.ShouldBe(ProjectEvaluationStage.Full);
-            full.Targets.ShouldContainKey("Build");
-
-            // The partial and full references point at the same upgraded cached project.
-            ReferenceEquals(partial, full).ShouldBeTrue();
-            partial.EvaluationStage.ShouldBe(ProjectEvaluationStage.Full);
         }
     }
 }

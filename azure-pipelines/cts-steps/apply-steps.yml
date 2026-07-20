@@ -186,15 +186,15 @@ steps:
     # + the bundled SDK props). See collect-steps.yml.
     # UsingToolVisualStudioIbcTraining=false: see collect-steps.yml note.
     if ($IsWindows) {
-      & "$(Build.SourcesDirectory)/eng/common/build.ps1" `
-        -restore -build `
+      & "$(Build.SourcesDirectory)/build.cmd" `
+        -ci `
         -configuration $(BuildConfiguration) `
         -projects "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" `
         -verbosity minimal `
         /p:UsingToolVisualStudioIbcTraining=false
     } else {
-      bash "$(Build.SourcesDirectory)/eng/common/build.sh" `
-        --restore --build `
+      bash "$(Build.SourcesDirectory)/build.sh" `
+        --ci `
         --configuration $(BuildConfiguration) `
         --projects "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" `
         --verbosity minimal `
