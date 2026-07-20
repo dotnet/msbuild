@@ -918,7 +918,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void RefreshChecksForTerminalResizeEveryFrame()
+        public void RefreshRedrawsAfterTerminalResizeSettles()
         {
             using StringWriter output = new();
             using ResizableTerminal terminal = new(output, width: 120, height: 40);
@@ -936,9 +936,20 @@ namespace Microsoft.Build.UnitTests
 
                 terminalLogger.Refresh();
                 output.GetStringBuilder().Clear();
-                terminal.Width = 40;
+
+                foreach (int width in new[] { 100, 80, 60, 40 })
+                {
+                    terminal.Width = width;
+                    terminalLogger.Refresh();
+                }
+
+                output.ToString().ShouldBeEmpty();
+
+                terminalLogger.Refresh();
+                terminalLogger.Refresh();
                 terminalLogger.Refresh();
 
+                output.ToString().ShouldStartWith($"{AnsiCodes.CSI}4{AnsiCodes.MoveUpToLineStart}");
                 output.ToString().ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
             }
             finally
