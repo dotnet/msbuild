@@ -287,6 +287,13 @@ matches = {
     test_name: {"exactMatches": [], "legacyCandidates": []}
     for test_name in test_names
 }
+short_name_patterns = {
+    test_name: re.compile(
+        rf"(?<![A-Za-z0-9_]){re.escape(test_name.rsplit('.', 1)[-1])}(?![A-Za-z0-9_])"
+    )
+    for test_name in test_names
+}
+flaky_title_prefix = "[Flaky Test] "
 
 open_issue_count = 0
 for path, is_open_set in (
@@ -309,7 +316,11 @@ for path, is_open_set in (
             title = item["title"]
             body = item.get("body") or ""
             body_lines = body.splitlines()
-            normalized_title = title.removeprefix("[Flaky Test] ")
+            normalized_title = (
+                title[len(flaky_title_prefix):]
+                if title.startswith(flaky_title_prefix)
+                else title
+            )
             issue = {
                 "number": item["number"],
                 "state": item["state"],
@@ -324,11 +335,7 @@ for path, is_open_set in (
                     matches[test_name]["exactMatches"].append(issue)
                     continue
 
-                short_name = test_name.rsplit(".", 1)[-1]
-                short_name_pattern = (
-                    rf"(?<![A-Za-z0-9_]){re.escape(short_name)}(?![A-Za-z0-9_])"
-                )
-                if is_open_set and re.search(short_name_pattern, title):
+                if is_open_set and short_name_patterns[test_name].search(title):
                     matches[test_name]["legacyCandidates"].append({
                         **issue,
                         "body": body,
