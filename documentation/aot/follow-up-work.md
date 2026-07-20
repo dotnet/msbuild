@@ -52,8 +52,8 @@ All work here still follows the strategy guide's rule: **fail observably, never 
 
 - **Strategy:** P-E validation / packaging follow-up.
 - **Implementation surface:** [`Microsoft.Build.Framework.targets`](../../src/Framework/buildTransitive/Microsoft.Build.Framework.targets) in the Framework package and the consuming .NET SDK AOT publish.
-- **Why it remains:** the Framework package now carries buildTransitive `RuntimeHostConfigurationOption` defaults for package consumers, and the in-repo AOT harness re-declares them for project-reference validation. The remaining work is to verify the SDK's real AOT publish consumes the package defaults as intended.
-- **Expected shape:** inspect the SDK publish response file or equivalent output and confirm the `Microsoft.Build.*` feature settings are supplied without manual duplication.
+- **Why it remains:** the Framework package now carries a single buildTransitive target with both the TFM-support check and the `RuntimeHostConfigurationOption` defaults for package consumers, and the in-repo AOT harness re-declares the defaults for project-reference validation. The remaining work is to verify the SDK's real AOT publish consumes the package target through generated NuGet imports.
+- **Expected shape:** inspect the SDK publish response file or equivalent output, confirm the `Microsoft.Build.*` feature settings are supplied without manual duplication, and remove any explicit import of the package's internal target path.
 - **Deeper context:** [managing-trimming-and-aot.md §6.5](managing-trimming-and-aot.md#65-how-a-librarys-switch-reaches-a-consumer-transitivity-defaulting-override) and [sdk-msbuild-object-model-audit.md](sdk-msbuild-object-model-audit.md).
 
 ### 7. Design an AOT-safe binding for typed `TaskItem<T>` / `ITaskItem<T>` parameters

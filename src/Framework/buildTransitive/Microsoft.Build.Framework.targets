@@ -1,4 +1,4 @@
-<Project>
+<Project InitialTargets="NETStandardCompatError_Microsoft_Build_Framework">
 
   <!--
     MSBuild's trim/AOT feature switches are defined in Microsoft.Build.Framework, but a library's
@@ -6,6 +6,20 @@
     target supplies the same trim-safe defaults to package consumers only when they publish trimmed or
     Native AOT, preserving normal JIT behavior for untrimmed apps.
   -->
+
+  <!-- Keep the package-family support check in this root target so TFM-specific assets cannot mask
+       the trim/AOT settings below. Other MSBuild library packages depend on Microsoft.Build.Framework. -->
+  <PropertyGroup>
+    <_MicrosoftBuildFrameworkMinimumSupportedTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">net10.0</_MicrosoftBuildFrameworkMinimumSupportedTargetFramework>
+    <_MicrosoftBuildFrameworkMinimumSupportedTargetFramework Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">net472</_MicrosoftBuildFrameworkMinimumSupportedTargetFramework>
+  </PropertyGroup>
+
+  <Target Name="NETStandardCompatError_Microsoft_Build_Framework"
+          Condition="'$(SuppressTfmSupportBuildWarnings)' == '' and
+                     '$(_MicrosoftBuildFrameworkMinimumSupportedTargetFramework)' != '' and
+                     !$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', '$(_MicrosoftBuildFrameworkMinimumSupportedTargetFramework)'))">
+    <Warning Text="Microsoft.Build.Framework doesn't support $(TargetFramework) and has not been tested with it. Consider upgrading your TargetFramework to $(_MicrosoftBuildFrameworkMinimumSupportedTargetFramework) or later. You may also set &lt;SuppressTfmSupportBuildWarnings&gt;true&lt;/SuppressTfmSupportBuildWarnings&gt; in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk." />
+  </Target>
 
   <PropertyGroup Condition="'$(PublishTrimmed)' == 'true' or '$(PublishAot)' == 'true'">
     <MicrosoftBuildEnableCustomPluginProbing Condition="'$(MicrosoftBuildEnableCustomPluginProbing)' == ''">false</MicrosoftBuildEnableCustomPluginProbing>

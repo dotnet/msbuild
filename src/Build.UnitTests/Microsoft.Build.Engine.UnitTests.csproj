@@ -89,6 +89,9 @@
     <None Include="TestAssets\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Include="..\Framework\buildTransitive\Microsoft.Build.Framework.targets"
+          Link="TestAssets\Microsoft.Build.Framework.targets"
+          CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
   <Target Name="CopyTestProjects" AfterTargets="ResolveProjectReferences">
