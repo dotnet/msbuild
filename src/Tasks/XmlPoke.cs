@@ -71,7 +71,7 @@ namespace Microsoft.Build.Tasks
             // Load the XPath Document
             XmlDocument xmlDoc = new XmlDocument();
 
-            AbsolutePath inputPath;
+            AbsolutePath inputPath = default;
             try
             {
                 inputPath = TaskEnvironment.GetAbsolutePath(XmlInputPath.ItemSpec);
