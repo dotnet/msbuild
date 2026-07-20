@@ -3029,7 +3029,7 @@ $@"
             TransientTestFile project1 = env.CreateFile("project1.proj", """
                 <Project>
                   <PropertyGroup>
-                    <TargetFrameworks>net472;net10.0</TargetFrameworks>
+                    <TargetFrameworks>net472;net11.0</TargetFrameworks>
                     <InnerBuildProperty>TargetFramework</InnerBuildProperty>
                     <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
                   </PropertyGroup>
@@ -3061,12 +3061,14 @@ $@"
             // In Full mode, all target frameworks should be loaded despite SetTargetFramework constraint
             sorted.Count.ShouldBe(4);
 
-            // Find the inner builds for net10.0 and net472
-            var net10Build = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project1.Path &&
-                n.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out var tf) && tf == "net10.0");
-            net10Build.ShouldNotBeNull("Should load inner build for net10.0");
-            net10Build.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.InnerBuild);
-            net10Build.ProjectReferences.ShouldBeEmpty();
+            // Find the inner builds for net11.0 and net472
+            var net11Build = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project1.Path &&
+                n.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out var tf) && tf == "net11.0");
+            net11Build.ShouldNotBeNull("Should load inner build for net11.0");
+            net11Build.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.InnerBuild);
+            net11Build.ProjectReferences.ShouldBeEmpty();
+            net11Build.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.InnerBuild);
+            net11Build.ProjectReferences.ShouldBeEmpty();
 
             var net472Build = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project1.Path &&
                 n.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out var tf) && tf == "net472");
@@ -3094,7 +3096,7 @@ $@"
             TransientTestFile project1 = env.CreateFile("project1.proj", """
                 <Project>
                   <PropertyGroup>
-                    <TargetFramework>net10.0</TargetFramework>
+                    <TargetFramework>net11.0</TargetFramework>
                   </PropertyGroup>
                 </Project>
                 """);

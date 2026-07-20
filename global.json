@@ -1,5 +1,6 @@
 {
   "sdk": {
+    "version": "11.0.100-preview.7.26360.111",
     "allowPrerelease": true,
     "paths": [
       "$host$"
@@ -11,11 +12,6 @@
   },
   "tools": {
     "dotnet": "11.0.100-preview.7.26360.111",
-    "runtimes": {
-      "dotnet": [
-        "10.0.0"
-      ]
-    },
     "vs": {
       "version": "18.6"
     }
