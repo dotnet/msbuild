@@ -135,17 +135,14 @@ namespace Microsoft.Build.Tasks
                         // Wrap the destination stream in the requested compression, if any. The tar archive is always
                         // written to the (optionally compressed) stream using the new .NET 11 overload that honors the
                         // requested TarEntryFormat.
-                        Stream? compressionStream = compression switch
+                        using Stream? compressionStream = compression switch
                         {
                             TarCompression.GZip => new GZipStream(destinationStream, CompressionLevel.Optimal),
                             TarCompression.ZStandard => new ZstandardStream(destinationStream, CompressionLevel.Optimal),
                             _ => null,
                         };
 
-                        using (compressionStream)
-                        {
-                            TarFile.CreateFromDirectory(sourceDirectory.FullName, compressionStream ?? destinationStream, includeBaseDirectory: false, format);
-                        }
+                        TarFile.CreateFromDirectory(sourceDirectory.FullName, compressionStream ?? destinationStream, includeBaseDirectory: false, format);
                     }
                 }
                 catch (Exception e)
