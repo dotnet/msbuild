@@ -3067,8 +3067,6 @@ $@"
             net11Build.ShouldNotBeNull("Should load inner build for net11.0");
             net11Build.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.InnerBuild);
             net11Build.ProjectReferences.ShouldBeEmpty();
-            net11Build.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.InnerBuild);
-            net11Build.ProjectReferences.ShouldBeEmpty();
 
             var net472Build = sorted.FirstOrDefault(n => n.ProjectInstance.FullPath == project1.Path &&
                 n.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out var tf) && tf == "net472");
