@@ -275,6 +275,10 @@
     <Compile Include="DependencyFile.cs" />
     <Compile Include="ZipDirectory.cs" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <!-- TarDirectory relies on System.Formats.Tar which is only available on .NET (not .NET Framework). -->
+    <Compile Include="TarDirectory.cs" />
+  </ItemGroup>
   <ItemGroup>
     <Compile Include="TaskRequiresFramework.cs" />
     <!-- Tasks with NET/NETSTANDARD stubs -->

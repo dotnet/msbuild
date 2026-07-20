@@ -2672,6 +2672,31 @@
         <target state="translated">MSB3353: chiave pubblica necessaria per la firma ritardata non specificata.</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
+      <trans-unit id="TarDirectory.Comment">
+        <source>Creating tar archive from directory "{0}" to "{1}".</source>
+        <target state="new">Creating tar archive from directory "{0}" to "{1}".</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorDirectoryDoesNotExist">
+        <source>MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</source>
+        <target state="new">MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</target>
+        <note>{StrBegin="MSB4321: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorFailed">
+        <source>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</source>
+        <target state="new">MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</target>
+        <note>{StrBegin="MSB4323: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorFileExists">
+        <source>MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
+        <target state="new">MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
+        <note>{StrBegin="MSB4322: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.WarningInvalidCompression">
+        <source>MSB4324: Unsupported compression '{0}'. Valid values are 'None' and 'GZip'. Creating an uncompressed tar archive instead.</source>
+        <target state="new">MSB4324: Unsupported compression '{0}'. Valid values are 'None' and 'GZip'. Creating an uncompressed tar archive instead.</target>
+        <note>{StrBegin="MSB4324: "}</note>
+      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: l'attività "{0}" non è supportata nella versione .NET Core di MSBuild. Usare la versione .NET Framework di MSBuild. Per altri dettagli, vedere https://aka.ms/msbuild/MSB4803.</target>

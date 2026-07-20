@@ -3096,6 +3096,29 @@
   </data>
 
   <!--
+        MSB4321 - MSB4330   Task: TarDirectory
+  -->
+  <data name="TarDirectory.ErrorDirectoryDoesNotExist">
+    <value>MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</value>
+    <comment>{StrBegin="MSB4321: "}</comment>
+  </data>
+  <data name="TarDirectory.ErrorFileExists">
+    <value>MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</value>
+    <comment>{StrBegin="MSB4322: "}</comment>
+  </data>
+  <data name="TarDirectory.ErrorFailed">
+    <value>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</value>
+    <comment>{StrBegin="MSB4323: "}</comment>
+  </data>
+  <data name="TarDirectory.WarningInvalidCompression">
+    <value>MSB4324: Unsupported compression '{0}'. Valid values are 'None' and 'GZip'. Creating an uncompressed tar archive instead.</value>
+    <comment>{StrBegin="MSB4324: "}</comment>
+  </data>
+  <data name="TarDirectory.Comment">
+    <value>Creating tar archive from directory "{0}" to "{1}".</value>
+  </data>
+
+  <!--
         MSB9901 - MSB9990   MSBuild common targets messages
   -->
   <data name="CommonSdk.SpecifiedSeverityDoesNotExist">
@@ -3260,7 +3283,7 @@
             MSB3991 - MSB3999   Task: CombineTargetFrameworkInfoProperties
             MSB4300 - MSB4310   Task: AddToWin32Manifest
             MSB4311 - MSB4320   Task: FormatUrl
-
+            MSB4321 - MSB4330   Task: TarDirectory
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)
 
