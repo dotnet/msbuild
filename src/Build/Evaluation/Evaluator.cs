@@ -25,6 +25,7 @@ using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.TelemetryInfra;
 using static Microsoft.Build.Execution.ProjectPropertyInstance;
 using Constants = Microsoft.Build.Framework.Constants;
 using EngineFileUtilities = Microsoft.Build.Internal.EngineFileUtilities;
@@ -348,9 +349,12 @@ namespace Microsoft.Build.Evaluation
                 loggingService,
                 buildEventContext);
 
+            long evaluationStartTimestamp = EvaluationMetrics.GetEvaluationStartTimestamp();
+            bool evaluationSucceeded = false;
             try
             {
                 evaluator.Evaluate();
+                evaluationSucceeded = true;
             }
             catch (PathTooLongException ex)
             {
@@ -359,6 +363,12 @@ namespace Microsoft.Build.Evaluation
             }
             finally
             {
+                EvaluationMetrics.RecordProjectEvaluation(
+                    evaluationStartTimestamp,
+                    evaluationStage,
+                    submissionId != BuildEventContext.InvalidSubmissionId,
+                    evaluationSucceeded);
+
                 IEnumerable globalProperties = null;
                 IEnumerable properties = null;
                 IEnumerable items = null;
