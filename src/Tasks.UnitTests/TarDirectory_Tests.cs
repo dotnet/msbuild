@@ -169,6 +169,99 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [Theory]
+        [InlineData("Pax", TarEntryFormat.Pax)]
+        [InlineData("gnu", TarEntryFormat.Gnu)]
+        [InlineData("Ustar", TarEntryFormat.Ustar)]
+        [InlineData("V7", TarEntryFormat.V7)]
+        public void CanTarDirectoryWithFormat(string format, TarEntryFormat expectedFormat)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "3F6D2F2E3C1A4B5C8D9E0F1A2B3C4D5E.txt", "content");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    Format = format,
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                GetTarEntryFormats(tarFilePath)
+                    .ShouldAllBe(entryFormat => entryFormat == expectedFormat, _mockEngine.Log);
+
+                GetTarEntryNames(tarFilePath, isGZip: false)
+                    .ShouldBe(["3F6D2F2E3C1A4B5C8D9E0F1A2B3C4D5E.txt"]);
+            }
+        }
+
+        [Fact]
+        public void LogsErrorForInvalidFormat()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "8B0F5A2D6E1C4F0FB1C44F80D3F1C1D2.txt", "content");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    Format = "RandomUnsupportedValue",
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                // Invalid format is an error and no archive is created.
+                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain("MSB4325", customMessage: _mockEngine.Log);
+
+                File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);
+            }
+        }
+
+        [Fact]
+        public void LogsErrorForUnknownFormat()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "1A2B3C4D5E6F70819AABBCCDDEEFF001.txt", "content");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+
+                    // "Unknown" parses to TarEntryFormat.Unknown, which is not a valid archive format.
+                    Format = "Unknown",
+                    DestinationFile = new TaskItem(tarFilePath),
+                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain("MSB4325", customMessage: _mockEngine.Log);
+
+                File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);
+            }
+        }
+
         private static List<string> GetTarEntryNames(string tarFilePath, bool isGZip)
         {
             List<string> names = new List<string>();
@@ -196,6 +289,20 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
 
             return names;
+        }
+
+        private static List<TarEntryFormat> GetTarEntryFormats(string tarFilePath)
+        {
+            List<TarEntryFormat> formats = new List<TarEntryFormat>();
+
+            using FileStream stream = new FileStream(tarFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using TarReader reader = new TarReader(stream);
+            for (TarEntry? entry = reader.GetNextEntry(); entry is not null; entry = reader.GetNextEntry())
+            {
+                formats.Add(entry.Format);
+            }
+
+            return formats;
         }
     }
 }

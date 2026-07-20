@@ -3114,6 +3114,10 @@
     <value>MSB4324: Unsupported compression '{0}'. Valid values are 'None' and 'GZip'.</value>
     <comment>{StrBegin="MSB4324: "}</comment>
   </data>
+  <data name="TarDirectory.ErrorInvalidFormat">
+    <value>MSB4325: Unsupported tar format '{0}'. Valid values are 'Pax', 'Gnu', 'Ustar', and 'V7'.</value>
+    <comment>{StrBegin="MSB4325: "}</comment>
+  </data>
   <data name="TarDirectory.Comment">
     <value>Creating tar archive from directory "{0}" to "{1}".</value>
   </data>

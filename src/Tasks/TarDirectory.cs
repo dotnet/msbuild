@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
+using System.IO.Enumeration;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -53,6 +55,13 @@ namespace Microsoft.Build.Tasks
         /// This parameter is optional.
         /// </summary>
         public string? Compression { get; set; }
+
+        /// <summary>
+        /// Gets or sets the tar entry format to use for the archive.
+        /// Valid values are "Pax" (the default), "Gnu", "Ustar", and "V7".
+        /// This parameter is optional.
+        /// </summary>
+        public string? Format { get; set; }
 
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
@@ -115,15 +124,24 @@ namespace Microsoft.Build.Tasks
                             return false;
                         }
 
+                        TarEntryFormat format = TarEntryFormat.Pax;
+                        if (!string.IsNullOrEmpty(Format) && !TryParseFormat(Format, out format))
+                        {
+                            Log.LogErrorWithCodeFromResources("TarDirectory.ErrorInvalidFormat", Format);
+
+                            return false;
+                        }
+
+                        using FileStream destinationStream = new FileStream(destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None);
+
                         if (useGZip)
                         {
-                            using FileStream destinationStream = new FileStream(destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None);
                             using GZipStream gzipStream = new GZipStream(destinationStream, CompressionLevel.Optimal);
-                            TarFile.CreateFromDirectory(sourceDirectory.FullName, gzipStream, includeBaseDirectory: false);
+                            CreateTarFromDirectory(sourceDirectory.FullName, gzipStream, format);
                         }
                         else
                         {
-                            TarFile.CreateFromDirectory(sourceDirectory.FullName, destinationFile.FullName, includeBaseDirectory: false);
+                            CreateTarFromDirectory(sourceDirectory.FullName, destinationStream, format);
                         }
                     }
                 }
@@ -159,6 +177,73 @@ namespace Microsoft.Build.Tasks
 
                 return true;
             }
+
+            static bool TryParseFormat(string format, out TarEntryFormat tarFormat) =>
+                Enum.TryParse(format, ignoreCase: true, out tarFormat) && tarFormat != TarEntryFormat.Unknown;
+        }
+
+        /// <summary>
+        /// Writes all filesystem entries under <paramref name="sourceDirectoryFullPath"/> to <paramref name="destination"/> as a tar archive.
+        /// </summary>
+        /// <remarks>
+        /// This mirrors the behavior of <see cref="TarFile.CreateFromDirectory(string, System.IO.Stream, bool)"/> with
+        /// <c>includeBaseDirectory: false</c>, but additionally honors the requested <paramref name="format"/>. The
+        /// <see cref="TarFile"/> overloads that accept a <see cref="TarEntryFormat"/> are not available on the
+        /// <c>net10.0</c> API surface MSBuild targets, so the directory walk is performed directly against a
+        /// <see cref="TarWriter"/>.
+        /// </remarks>
+        private static void CreateTarFromDirectory(string sourceDirectoryFullPath, Stream destination, TarEntryFormat format)
+        {
+            using TarWriter writer = new TarWriter(destination, format, leaveOpen: true);
+
+            foreach ((string fullPath, string entryName) in EnumerateEntries(sourceDirectoryFullPath, sourceDirectoryFullPath.Length))
+            {
+                writer.WriteEntry(fullPath, entryName);
+            }
+        }
+
+        /// <summary>
+        /// Recursively enumerates the filesystem entries under <paramref name="directory"/>, yielding the full path and
+        /// the corresponding archive entry name for each, while avoiding recursion into directory symlinks.
+        /// </summary>
+        private static IEnumerable<(string fullPath, string entryName)> EnumerateEntries(string directory, int basePathLength)
+        {
+            // Recurse into subdirectories after yielding their own entry so that directory entries precede their contents,
+            // matching the ordering produced by TarFile.CreateFromDirectory.
+            FileSystemEnumerable<(string fullPath, string entryName, bool recurse)> enumerable = new(
+                directory,
+                (ref FileSystemEntry entry) =>
+                {
+                    string fullPath = entry.ToFullPath();
+                    bool isRealDirectory = entry.IsDirectory && (entry.Attributes & FileAttributes.ReparsePoint) == 0;
+                    string entryName = GetEntryName(fullPath.AsSpan(basePathLength), appendDirectorySeparator: isRealDirectory);
+                    return (fullPath, entryName, isRealDirectory);
+                });
+
+            foreach ((string fullPath, string entryName, bool recurse) in enumerable)
+            {
+                yield return (fullPath, entryName);
+
+                if (recurse)
+                {
+                    foreach ((string fullPath, string entryName) inner in EnumerateEntries(fullPath, basePathLength))
+                    {
+                        yield return inner;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Converts a filesystem path that is relative to the archive root into a tar entry name using forward slashes,
+        /// appending a trailing slash for directory entries.
+        /// </summary>
+        private static string GetEntryName(ReadOnlySpan<char> relativePath, bool appendDirectorySeparator)
+        {
+            relativePath = relativePath.TrimStart(['/', '\\']);
+            string entryName = relativePath.ToString().Replace('\\', '/');
+
+            return appendDirectorySeparator ? entryName + '/' : entryName;
         }
     }
 }
