@@ -1,6 +1,6 @@
-PLEASE READ
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-<<<<<<<< HEAD:src/Framework/Utilities/AssemblyLoadInfo.cs
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -234,9 +234,3 @@ namespace Microsoft.Build.Shared
         }
     }
 }
-========
-Please remove this file during conflict resolution in your PR.
-This file has been reverted (removed) in the source repository but the PR branch
-does not have the file yet as it's based on an older commit. This means the file is
-not getting removed in the PR due to the other conflicts.
->>>>>>>> darc/back/463e0cf-337c123:src/Shared/AssemblyLoadInfo.cs
