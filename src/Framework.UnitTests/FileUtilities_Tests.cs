@@ -332,6 +332,29 @@ public class FileUtilities_Tests
         Assert.Equal(FileUtilities.FixFilePath(@"foo\bar/"), FileUtilities.EnsureTrailingSlash(@"foo\bar/")); // "test 5"
     }
 
+    [Theory]
+    [InlineData("", false)]
+    [InlineData(".", false)]
+    [InlineData("...", false)]
+    [InlineData("foo..", false)]
+    [InlineData("..foo", false)]
+    [InlineData("foo/.../bar", false)]
+    [InlineData("foo/..bar/bar", false)]
+    [InlineData("/\\/", false)]
+    [InlineData("..", true)]
+    [InlineData("../foo", true)]
+    [InlineData(@"..\foo", true)]
+    [InlineData("foo/..", true)]
+    [InlineData(@"foo\..", true)]
+    [InlineData("foo/../bar", true)]
+    [InlineData(@"foo\..\bar", true)]
+    [InlineData(@"foo/\../bar", true)]
+    [InlineData("foo//../bar", true)]
+    public void ContainsParentTraversalSegmentDetectsOnlyCompleteSegments(string path, bool expected)
+    {
+        FileUtilities.ContainsParentTraversalSegment(path).ShouldBe(expected);
+    }
+
     /// <summary>
     /// Exercises ItemSpecModifiers.IsItemSpecModifier
     /// </summary>

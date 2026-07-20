@@ -1400,8 +1400,10 @@ namespace Microsoft.Build.UnitTests
             output.ShouldContain("[A=1]");
         }
 
-        [UnixOnlyFact]
-        public void ResponseFileInLogicalProjectDirectoryFoundImplicitly()
+        [UnixOnlyTheory]
+        [InlineData("")]
+        [InlineData("my.proj")]
+        public void ResponseFileInLogicalProjectDirectoryFoundImplicitly(string projectArgument)
         {
             string root = _env.CreateFolder().Path;
             string realDirectory = Path.Combine(root, "repo", "project");
@@ -1425,7 +1427,7 @@ namespace Microsoft.Build.UnitTests
             _env.SetCurrentDirectory(linkDirectory);
             _env.SetEnvironmentVariable("PWD", linkDirectory);
 
-            string output = RunnerUtilities.ExecMSBuild("my.proj", out var successfulExit, _output);
+            string output = RunnerUtilities.ExecMSBuild(projectArgument, out var successfulExit, _output);
             successfulExit.ShouldBeTrue();
 
             output.ShouldContain("[A=logical]");

@@ -567,7 +567,7 @@ namespace Microsoft.Build.CommandLine.Experimental
                 }
             }
 
-            return projectDirectory;
+            return MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(projectDirectory);
         }
 
         /// <summary>

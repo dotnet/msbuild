@@ -3627,10 +3627,10 @@ namespace Microsoft.Build.CommandLine
                 || NativeMethodsShared.IsWindows
                 || string.IsNullOrEmpty(projectFile)
                 || Path.IsPathRooted(projectFile)
-                || FileUtilities.ContainsParentTraversalSegment(projectFile))
-            {
                 // Bail on ".." segments: lexical normalization can escape the shared physical prefix,
                 // so the logical and physical resolutions can end up pointing at different files.
+                || FileUtilities.ContainsParentTraversalSegment(projectFile))
+            {
                 return projectFile;
             }
 
