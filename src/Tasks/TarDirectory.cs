@@ -226,9 +226,9 @@ namespace Microsoft.Build.Tasks
 
                 if (recurse)
                 {
-                    foreach ((string fullPath, string entryName) inner in EnumerateEntries(fullPath, basePathLength))
+                    foreach ((string fullPath, string entryName) childEntry in EnumerateEntries(fullPath, basePathLength))
                     {
-                        yield return inner;
+                        yield return childEntry;
                     }
                 }
             }
@@ -240,7 +240,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static string GetEntryName(ReadOnlySpan<char> relativePath, bool appendDirectorySeparator)
         {
-            relativePath = relativePath.TrimStart(['/', '\\']);
+            relativePath = relativePath.TrimStart("/\\".AsSpan());
             string entryName = relativePath.ToString().Replace('\\', '/');
 
             return appendDirectorySeparator ? entryName + '/' : entryName;
