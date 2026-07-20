@@ -226,7 +226,7 @@ namespace Microsoft.Build.Tasks
 
                 if (recurse)
                 {
-                    foreach ((string fullPath, string entryName) childEntry in EnumerateEntries(fullPath, basePathLength))
+                    foreach (var childEntry in EnumerateEntries(fullPath, basePathLength))
                     {
                         yield return childEntry;
                     }
