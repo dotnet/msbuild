@@ -80,14 +80,15 @@ $BootstrapRoot = Join-Path $Stage1BinDir "bootstrap"
 Remove-Item -Force -Recurse $Stage1Dir -ErrorAction SilentlyContinue
 Move-Item -Path $ArtifactsDir -Destination $Stage1Dir -Force
 
-# The move above relocated the stage 1 binlog out of the published $ArtifactsDir\log directory. Copy it
-# back so CI publishes it alongside the stage 2 binlog. Best-effort: never fail the build if the stage 1
-# binlog isn't there (e.g. when no binary log was produced).
-$stage1Binlog = Join-Path $Stage1Dir "log\$configuration\Build.binlog"
-if (Test-Path $stage1Binlog) {
-  $publishedLogDir = Join-Path $ArtifactsDir "log\$configuration"
-  New-Item -ItemType Directory -Force -Path $publishedLogDir | Out-Null
-  Copy-Item -Path $stage1Binlog -Destination (Join-Path $publishedLogDir 'Build.stage1.binlog') -Force -ErrorAction SilentlyContinue
+# The move above relocated the stage 1 log directory (including its binlog) out of the published
+# $ArtifactsDir\log location. Copy the whole log folder back so CI publishes the stage 1 logs alongside
+# the stage 2 ones. This runs before the stage 2 build, so it won't clobber any stage 2 output. The
+# stage 1 binlog keeps its default Build.binlog name, distinct from the stage 2 Build.stage2.binlog.
+# Best-effort: never fail the build if the stage 1 log folder isn't there (e.g. when no logs were produced).
+$stage1LogDir = Join-Path $Stage1Dir 'log'
+if (Test-Path $stage1LogDir) {
+  New-Item -ItemType Directory -Force -Path $ArtifactsDir | Out-Null
+  Copy-Item -Path $stage1LogDir -Destination $ArtifactsDir -Recurse -Force -ErrorAction SilentlyContinue
 }
 
 # Mirror of tools.ps1 GetDefaultMSBuildEngine: presence of tools.vs => 'vs', else tools.dotnet => 'dotnet'.

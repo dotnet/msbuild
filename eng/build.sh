@@ -120,14 +120,14 @@ bootstrap_root="$stage1_bin_dir/bootstrap"
 rm -rf "$stage1_dir"
 mv "$artifacts_dir" "$stage1_dir"
 
-# The move above relocated the stage 1 binlog out of the published $artifacts_dir/log directory. Copy it
-# back so CI publishes it alongside the stage 2 binlog. Best-effort: never fail the build if the stage 1
-# binlog isn't there (e.g. when no binary log was produced).
-stage1_binlog="$stage1_dir/log/$configuration/Build.binlog"
-if [ -f "$stage1_binlog" ]; then
-  published_log_dir="$artifacts_dir/log/$configuration"
-  mkdir -p "$published_log_dir"
-  cp -f "$stage1_binlog" "$published_log_dir/Build.stage1.binlog" || true
+# The move above relocated the stage 1 log directory (including its binlog) out of the published
+# $artifacts_dir/log location. Copy the whole log folder back so CI publishes the stage 1 logs alongside
+# the stage 2 ones. This runs before the stage 2 build, so it won't clobber any stage 2 output. The
+# stage 1 binlog keeps its default Build.binlog name, distinct from the stage 2 Build.stage2.binlog.
+# Best-effort: never fail the build if the stage 1 log folder isn't there (e.g. when no logs were produced).
+if [ -d "$stage1_dir/log" ]; then
+  mkdir -p "$artifacts_dir"
+  cp -rf "$stage1_dir/log" "$artifacts_dir/" || true
 fi
 
 build_tool_path="$bootstrap_root/core/dotnet"
