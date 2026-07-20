@@ -78,6 +78,9 @@ Error when SkipUnchangedFiles is true.
 `ZipDirectory`
 Error if the destination zip file doesn't exists.
 
+`TarDirectory`
+Error if the destination tar file doesn't exists.
+
 ## Common Error
 
 - **Typographical error**. Spelling, casing, or incorrect path.  Check if the target inputs and outputs real files.
