@@ -30,6 +30,7 @@ Change wave checks around features will be removed in the release that accompani
 ## Current Rotation of Change Waves
 
 ### 18.10
+- [Isolated (`-graph -isolate`) builds fail deterministically with MSB4252 on a cross-project reference to a target that is not declared via `ProjectReferenceTargets`, instead of passing or failing depending on MSBuild node scheduling. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.10` to restore the prior (scheduling-dependent) behavior.](https://github.com/dotnet/msbuild/pull/14280)
 - [`-getProperty`/`-getItem` (without a target) stop evaluation after the pass that produces the requested data instead of running a full evaluation, avoiding later passes such as target registration.](https://github.com/dotnet/msbuild/pull/14290)
 
 ### 18.9

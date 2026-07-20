@@ -219,6 +219,96 @@ BuildEngine5.BuildProjectFilesInParallel(
                 addContinueOnError: addContinueOnError);
         }
 
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/14225. A cross-project reference to a target that
+        /// only has a cached result because it ran as a DependsOnTargets dependency (and was never declared via
+        /// ProjectReferenceTargets) must be rejected deterministically with MSB4252, rather than being satisfied from the
+        /// cache depending on whether the referenced project happened to build on the same node.
+        /// </summary>
+        [Fact]
+        public void UndeclaredTargetSatisfiedFromDependencyResultFailsDeterministically()
+        {
+            ChangeWaves.ResetStateForTests();
+
+            AssertDependencyResultLeakBuild(
+                (result, logger) =>
+                {
+                    result.OverallResult.ShouldBe(BuildResultCode.Failure);
+                    logger.ErrorCount.ShouldBe(1);
+                    logger.Errors.First().Message.ShouldStartWith("MSB4252:");
+                });
+        }
+
+        /// <summary>
+        /// Companion to <see cref="UndeclaredTargetSatisfiedFromDependencyResultFailsDeterministically"/>: when the change wave
+        /// is opted out, the previous (scheduling-dependent) behavior is preserved and the dependency-produced result satisfies
+        /// the undeclared reference on a single node.
+        /// </summary>
+        [Fact]
+        public void UndeclaredTargetSatisfiedFromDependencyResultIsAllowedWhenChangeWaveDisabled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                ChangeWaves.ResetStateForTests();
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString());
+
+                AssertDependencyResultLeakBuild(
+                    (result, logger) =>
+                    {
+                        result.OverallResult.ShouldBe(BuildResultCode.Success);
+                        logger.Errors.ShouldBeEmpty();
+                    });
+
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        private void AssertDependencyResultLeakBuild(Action<BuildResult, MockLogger> assert)
+        {
+            // The referenced project declares EntryTarget (which the static graph would request) and SpecialTarget, which
+            // only runs because EntryTarget depends on it. SpecialTarget is never a declared entry target of this project.
+            string referenceContents = @"
+                <Project>
+                    <Target Name='EntryTarget' DependsOnTargets='SpecialTarget'>
+                        <Message Text='Entry' Importance='High' />
+                    </Target>
+                    <Target Name='SpecialTarget'>
+                        <Message Text='Special' Importance='High' />
+                    </Target>
+                </Project>";
+
+            string referenceFile = _env.CreateFile("reference.proj", referenceContents).Path;
+
+            // The root declares only Build -> EntryTarget in the reference protocol, but its Build target calls the reference
+            // with the undeclared SpecialTarget.
+            string rootContents = $@"
+                <Project DefaultTargets='Build'>
+                    <ItemGroup>
+                        <ProjectReference Include='{referenceFile}' />
+                        <ProjectReferenceTargets Include='Build' Targets='EntryTarget' />
+                    </ItemGroup>
+                    <Target Name='Build'>
+                        <MSBuild Projects='{referenceFile}' Targets='SpecialTarget' />
+                    </Target>
+                </Project>";
+
+            string rootFile = _env.CreateFile("root.proj", rootContents).Path;
+
+            BuildParameters buildParameters = _buildParametersPrototype.Clone();
+
+            using (var buildManagerSession = new Helpers.BuildManagerSession(_env, buildParameters))
+            {
+                // Seed the results cache the way the static graph would: build the reference with its declared entry target.
+                // This runs SpecialTarget as a dependency, leaving its result in the (single-node) local results cache.
+                buildManagerSession.BuildProjectFile(referenceFile, new[] { "EntryTarget" })
+                    .OverallResult.ShouldBe(BuildResultCode.Success);
+
+                BuildResult result = buildManagerSession.BuildProjectFile(rootFile, new[] { "Build" });
+
+                assert(result, buildManagerSession.Logger);
+            }
+        }
+
         [Fact]
         public void IsolationRelatedMessagesShouldNotBePresentInNonIsolatedBuilds()
         {

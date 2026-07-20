@@ -711,5 +711,45 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             deserialized.ProjectEvaluationId.ShouldBe(expectedEvalId);
         }
+
+        [Fact]
+        public void TestRequestedTargetsPreservedAcrossTranslateForFutureUse()
+        {
+            string projectBody = """
+                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='EntryTarget' />
+                    <Target Name='OtherTarget' />
+                </Project>
+                """.Cleanup();
+
+            using var collection = new ProjectCollection();
+            using ProjectFromString projectFromString = new(
+                projectBody,
+                new Dictionary<string, string>(),
+                ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                collection);
+            Project project = projectFromString.Project;
+            project.FullPath = "foo";
+            ProjectInstance instance = project.CreateProjectInstance();
+
+            // The requested (graph-declared) top-level targets must survive the persisted (input/output cache)
+            // serialization path, otherwise the strict-isolation allow-list is bypassed when the config is consumed
+            // from an input cache. Regression test for the MSB4252 determinism fix.
+            BuildRequestConfiguration configuration = new(new BuildRequestData(instance, ["EntryTarget"], null), "2.0")
+            {
+                ConfigurationId = 1,
+            };
+
+            configuration.RequestedTargets.ShouldBe(new[] { "EntryTarget" });
+
+            // TranslateForFutureUse uses a different serialization path.
+            configuration.TranslateForFutureUse(TranslationHelpers.GetWriteTranslator());
+            ITranslator reader = TranslationHelpers.GetReadTranslator();
+
+            BuildRequestConfiguration deserialized = new();
+            deserialized.TranslateForFutureUse(reader);
+
+            deserialized.RequestedTargets.ShouldBe(new[] { "EntryTarget" });
+        }
     }
 }

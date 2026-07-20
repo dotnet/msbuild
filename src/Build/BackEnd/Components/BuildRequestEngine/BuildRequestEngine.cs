@@ -1270,7 +1270,8 @@ namespace Microsoft.Build.BackEnd
                             request: newRequest,
                             configInitialTargets: matchingConfig.ProjectInitialTargets,
                             configDefaultTargets: matchingConfig.ProjectDefaultTargets,
-                            skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+                            skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(),
+                            allowedTopLevelTargets: BuildRequestConfiguration.GetIsolationAllowedTopLevelTargets(_componentHost.BuildParameters.ProjectIsolationMode, issuingEntry.RequestConfiguration, matchingConfig, newRequest));
 
                         if (response.Type == ResultsCacheResponseType.Satisfied)
                         {
