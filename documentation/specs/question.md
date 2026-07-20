@@ -79,7 +79,7 @@ Error when SkipUnchangedFiles is true.
 Error if the destination zip file doesn't exists.
 
 `TarDirectory`
-Error if the destination tar file doesn't exists.
+Error if the destination tar file doesn't exist.
 
 ## Common Error
 

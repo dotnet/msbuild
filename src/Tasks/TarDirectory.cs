@@ -108,7 +108,7 @@ namespace Microsoft.Build.Tasks
                         Log.LogMessageFromResources(MessageImportance.High, "TarDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
 
                         bool useGZip = false;
-                        if (!string.IsNullOrEmpty(Compression) && !TryParseCompression(Compression!, out useGZip))
+                        if (!string.IsNullOrEmpty(Compression) && !TryParseCompression(Compression, out useGZip))
                         {
                             Log.LogWarningWithCodeFromResources("TarDirectory.WarningInvalidCompression", Compression);
                         }
