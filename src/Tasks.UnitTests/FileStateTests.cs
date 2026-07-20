@@ -6,6 +6,7 @@ using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -417,6 +418,51 @@ namespace Microsoft.Build.UnitTests
 
             Assert.False(new FileState(TestPath(file)).FileExists);
             Assert.False(new FileState(TestPath(file)).DirectoryExists);
+        }
+
+        /// <summary>
+        /// FileState.FileExists must return true for a file whose path exceeds MAX_PATH in a
+        /// non-longPathAware process (regression: GetFileAttributesEx without the \\?\ prefix).
+        /// </summary>
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Long-path regression only reproduces in a non-longPathAware process; the .NET Core test host is longPathAware.")]
+        public void ExistsWithLongPath()
+        {
+            if (NativeMethodsShared.HasMaxPath)
+            {
+                Assert.Skip("Requires Windows long path support to be enabled (LongPathsEnabled=1).");
+            }
+
+            string longDir = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(longDir);
+
+            string longFilePath = null;
+            try
+            {
+                // 230 A's guarantees the path exceeds MAX_PATH regardless of temp root length.
+                string longFileName = new string('A', 230) + ".txt";
+                longFilePath = Path.Combine(longDir, longFileName);
+
+                longFilePath.Length.ShouldBeGreaterThan(NativeMethodsShared.MAX_PATH,
+                    $"Test setup error: path length {longFilePath.Length} should exceed MAX_PATH ({NativeMethodsShared.MAX_PATH}).");
+
+                // Create via \\?\ since the net472 test host is not longPathAware.
+                File.WriteAllText(@"\\?\" + longFilePath, "test");
+
+                // Pass the plain path to exercise FileState's own \\?\ logic (the fix under test).
+                var state = new FileState(TestPath(longFilePath));
+                state.FileExists.ShouldBeTrue($"FileState.FileExists should be true for existing long-path file (length={longFilePath.Length}).");
+                state.DirectoryExists.ShouldBeFalse();
+            }
+            finally
+            {
+                if (longFilePath != null)
+                {
+                    // Delete using \\?\ because the test host may not be longPathAware.
+                    FileUtilities.DeleteNoThrow(@"\\?\" + longFilePath);
+                }
+
+                FileUtilities.DeleteDirectoryNoThrow(longDir, recursive: false);
+            }
         }
     }
 }

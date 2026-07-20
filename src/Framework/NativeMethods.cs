@@ -701,7 +701,7 @@ internal static class NativeMethods
 #if FEATURE_WINDOWSINTEROP
         if (IsWindows)
         {
-            if (PInvoke.GetFileAttributesEx(fullPath, out WIN32_FILE_ATTRIBUTE_DATA data)
+            if (PInvoke.GetFileAttributesEx(EnsureExtendedLengthPath(fullPath), out WIN32_FILE_ATTRIBUTE_DATA data)
                 && ((FILE_FLAGS_AND_ATTRIBUTES)data.dwFileAttributes & FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY) != 0)
             {
                 fileModifiedTimeUtc = DateTime.FromFileTimeUtc(data.ftLastWriteTime.ToLong());
@@ -897,7 +897,7 @@ internal static class NativeMethods
                     return GetContentLastWriteFileUtcTime(path);
                 }
 
-                bool success = PInvoke.GetFileAttributesEx(path, out WIN32_FILE_ATTRIBUTE_DATA data);
+                bool success = PInvoke.GetFileAttributesEx(EnsureExtendedLengthPath(path), out WIN32_FILE_ATTRIBUTE_DATA data);
 
                 if (success && ((FILE_FLAGS_AND_ATTRIBUTES)data.dwFileAttributes & FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_DIRECTORY) == 0)
                 {
@@ -931,7 +931,7 @@ internal static class NativeMethods
     private static unsafe SafeFileHandle OpenFileThroughSymlinks(string fullPath)
     {
         HANDLE h = PInvoke.CreateFile(
-            fullPath,
+            EnsureExtendedLengthPath(fullPath),
             (uint)FILE_ACCESS_RIGHTS.FILE_GENERIC_READ,
             FILE_SHARE_MODE.FILE_SHARE_READ,
             null,
@@ -1303,6 +1303,63 @@ internal static class NativeMethods
 
     [DllImport("libc", SetLastError = true)]
     internal static extern int symlink(string oldpath, string newpath);
+
+    internal static string EnsureExtendedLengthPath(string path)
+    {
+        if (!IsWindows || path is null || path.Length < MAX_PATH ||
+            path.StartsWith(@"\\?\", StringComparison.Ordinal) || HasMaxPath)
+        {
+            return path;
+        }
+
+        string normalizedPath = path.Replace('/', '\\');
+
+        // \\?\ disables path normalization, so it is only safe on a fully-qualified path
+        // (drive-absolute or UNC) with no "." or ".." segments for Win32 to resolve.
+        if (!IsFullyQualifiedWindowsPath(normalizedPath) || HasRelativeSegment(normalizedPath))
+        {
+            return path;
+        }
+
+        return normalizedPath.StartsWith(@"\\", StringComparison.Ordinal)
+            ? @"\\?\UNC\" + normalizedPath.Substring(2)
+            : @"\\?\" + normalizedPath;
+    }
+
+    private static bool IsFullyQualifiedWindowsPath(string path)
+    {
+        // UNC path: \\server\share.
+        if (path.Length >= 2 && path[0] == '\\' && path[1] == '\\')
+        {
+            return true;
+        }
+
+        // Drive-absolute path: C:\... (rejects drive-relative "C:foo" and root-relative "\foo").
+        return path.Length >= 3
+            && path[1] == ':'
+            && path[2] == '\\'
+            && ((path[0] >= 'A' && path[0] <= 'Z') || (path[0] >= 'a' && path[0] <= 'z'));
+    }
+
+    private static bool HasRelativeSegment(string path)
+    {
+        // True if any component between backslashes is "." or "..".
+        int start = 0;
+        for (int i = 0; i <= path.Length; i++)
+        {
+            if (i == path.Length || path[i] == '\\')
+            {
+                int length = i - start;
+                if ((length == 1 && path[start] == '.') ||
+                    (length == 2 && path[start] == '.' && path[start + 1] == '.'))
+                {
+                    return true;
+                }
+                start = i + 1;
+            }
+        }
+        return false;
+    }
 
 #if FEATURE_WINDOWSINTEROP
     [SupportedOSPlatform("windows6.1")]
