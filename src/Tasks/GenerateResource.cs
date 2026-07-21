@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -2716,8 +2716,7 @@ namespace Microsoft.Build.Tasks
                 {
                     currentOutputFile = outFileOrDir;
                     ErrorUtilities.VerifyThrow(_readers.Count == 1,
-                        "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
-                        _readers.Count);
+                        $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
                     WriteResources(_readers[0], outFileOrDir);
                 }
 
@@ -2726,8 +2725,7 @@ namespace Microsoft.Build.Tasks
                     try
                     {
                         ErrorUtilities.VerifyThrow(_readers.Count == 1,
-                            "We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {0}",
-                            _readers.Count);
+                            $"We have no readers, or we have multiple readers & are ignoring subsequent ones.  Num readers: {_readers.Count}");
                         CreateStronglyTypedResources(_readers[0], outFileOrDir, inFile, out currentOutputSourceCodeFile);
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
@@ -3049,7 +3047,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private void AddResourcesUsingMinimalCoreResxParsing(string filename, ReaderInfo reader)
         {
-            using (var xmlReader = new XmlTextReader(filename))
+            using (var xmlReader = new XmlTextReader(filename) { DtdProcessing = DtdProcessing.Ignore, XmlResolver = null })
             {
                 xmlReader.WhitespaceHandling = WhitespaceHandling.None;
                 XDocument doc = XDocument.Load(xmlReader, LoadOptions.PreserveWhitespace);

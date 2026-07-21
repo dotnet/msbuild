@@ -1067,7 +1067,7 @@ namespace Microsoft.Build.Construction
         private (ProjectImportElement ImportBeforeSln, ProjectImportElement ImportAfterSln) CreateBeforeAndAfterSolutionImports(ProjectRootElement traversalProject)
         {
             string escapedSolutionFileName = EscapingUtilities.Escape(Path.GetFileName(_solutionFile.FullPath));
-            if (escapedSolutionFileName.EndsWith(".slnx"))
+            if (escapedSolutionFileName.EndsWith(".slnx", StringComparison.Ordinal))
             {
                 // We want to load only after.{solutionFileName}.sln.targets for solution files with .slnx extension
                 escapedSolutionFileName = escapedSolutionFileName.Substring(0, escapedSolutionFileName.Length - 1);

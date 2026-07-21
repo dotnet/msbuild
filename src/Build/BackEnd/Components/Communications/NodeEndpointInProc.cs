@@ -217,7 +217,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         public void SendData(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrow(_status == LinkStatus.Active, "Cannot send when link status is not active. Current status {0}", _status);
+            ErrorUtilities.VerifyThrow(_status == LinkStatus.Active, $"Cannot send when link status is not active. Current status {_status}");
 
             if (_mode == EndpointMode.Synchronous)
             {
@@ -309,7 +309,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void InternalDisconnect()
         {
-            ErrorUtilities.VerifyThrow(_status == LinkStatus.Active, "Endpoint is not connected. Current status {0}", _status);
+            ErrorUtilities.VerifyThrow(_status == LinkStatus.Active, $"Endpoint is not connected. Current status {_status}");
 
             ChangeLinkStatus(LinkStatus.Inactive);
 
@@ -326,7 +326,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newStatus">The status the node should now be in.</param>
         private void ChangeLinkStatus(LinkStatus newStatus)
         {
-            ErrorUtilities.VerifyThrow(_status != newStatus, "Attempting to change status to existing status {0}.", _status);
+            ErrorUtilities.VerifyThrow(_status != newStatus, $"Attempting to change status to existing status {_status}.");
             _status = newStatus;
             RaiseLinkStatusChanged(_status);
         }
@@ -451,7 +451,7 @@ namespace Microsoft.Build.BackEnd
                             break;
 
                         default:
-                            ErrorUtilities.ThrowInternalError("waitId {0} out of range.", waitId);
+                            ErrorUtilities.ThrowInternalError($"waitId {waitId} out of range.");
                             break;
                     }
                 }

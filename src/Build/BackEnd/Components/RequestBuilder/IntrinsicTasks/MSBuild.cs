@@ -182,7 +182,7 @@ namespace Microsoft.Build.BackEnd
                         return "True";
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Unexpected case {0}", _skipNonExistentProjects);
+                        ErrorUtilities.ThrowInternalError($"Unexpected case {_skipNonExistentProjects}");
                         break;
                 }
 
@@ -394,7 +394,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        ErrorUtilities.VerifyThrow(skipNonExistProjects == SkipNonExistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", skipNonExistProjects);
+                        ErrorUtilities.VerifyThrow(skipNonExistProjects == SkipNonExistentProjectsBehavior.Error, $"skipNonexistentProjects has unexpected value {skipNonExistProjects}");
                         Log.LogErrorWithCodeFromResources("MSBuild.ProjectFileNotFound", project.ItemSpec);
                         success = false;
                     }

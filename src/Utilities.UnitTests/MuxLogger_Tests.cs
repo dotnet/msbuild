@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -126,7 +127,13 @@ namespace Microsoft.VisualStudio.Build.UnitTest
 
             // This test was changed to not compare new lines because of https://github.com/dotnet/msbuild/issues/10493
             // It will need to be changed once we fix the root cause of the issue
-            mockLogger.FullLog.Replace(Environment.NewLine, "").ShouldBe(mockLogger2.FullLog.Replace(Environment.NewLine, ""));
+            // Strip "Enabled loggers: ..." because the direct logger is registered before BeginBuild and receives all
+            // BuildStarted-time events. The MuxLogger itself is also registered before BeginBuild, but its per-submission
+            // sub-logger is added only after PendBuildRequest returns a submission ID. By then the global BuildStarted
+            // event has already been processed, so the MuxLogger replays BuildStarted to the sub-logger but cannot replay
+            // follow-up messages emitted during BuildStarted processing.
+            string StripEnabledLoggers(string log) => Regex.Replace(log.Replace(Environment.NewLine, ""), @"Enabled loggers: .+?(?=Project |$)", "");
+            StripEnabledLoggers(mockLogger.FullLog).ShouldBe(StripEnabledLoggers(mockLogger2.FullLog));
         }
 
         /// <summary>

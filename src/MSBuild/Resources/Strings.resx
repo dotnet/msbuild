@@ -1321,6 +1321,20 @@
       where the switches are coming from.
     </comment>
   </data>
+  <data name="PickedUpSwitchesFromResponseFile" xml:space="preserve">
+    <value>Some command line switches were read from this response file:</value>
+    <comment>
+      UE: This message appears before a command-line parsing error when switches were read from a response file: otherwise the user may be unaware where the switches are coming from.
+      LOCALIZATION: The response file path is printed on a separate line after this message.
+    </comment>
+  </data>
+  <data name="PickedUpSwitchesFromResponseFiles" xml:space="preserve">
+    <value>Some command line switches were read from these response files:</value>
+    <comment>
+      UE: This message appears before a command-line parsing error when switches were read from response files: otherwise the user may be unaware where the switches are coming from.
+      LOCALIZATION: The response file paths are printed on separate lines after this message.
+    </comment>
+  </data>
   <data name="ProjectNotFoundError" xml:space="preserve">
     <value>MSBUILD : error MSB1009: Project file does not exist.</value>
     <comment>{StrBegin="MSBUILD : error MSB1009: "}UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
@@ -1735,6 +1749,29 @@
     <comment>LOCALIZATION: {0} is the name of the task output parameter, {1} is the count of null elements filtered.</comment>
   </data>
   <!-- **** TaskHost strings end **** -->
+
+  <!-- **** MSBuild Server fallback strings begin **** -->
+  <data name="MSBuildServerUnavailable" xml:space="preserve">
+    <value>MSBuild server unavailable: {0}. Falling back to an in-process build.</value>
+    <comment>LOCALIZATION: {0} is a sub-message describing why the MSBuild server could not be used. It is one of MSBuildServerCrashedOnLaunch / MSBuildServerLaunchError / MSBuildServerStateUnknown / MSBuildServerConnectFailed. The outer template supplies the trailing period after {0}; sub-messages must NOT end with a period or other sentence-final punctuation.</comment>
+  </data>
+  <data name="MSBuildServerCrashedOnLaunch" xml:space="preserve">
+    <value>the server process exited with code {0} immediately after launch</value>
+    <comment>LOCALIZATION: {0} is the integer process exit code; rendered with InvariantCulture as a decimal integer, do not localize the digits. This message is concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</comment>
+  </data>
+  <data name="MSBuildServerLaunchError" xml:space="preserve">
+    <value>the server process could not be launched</value>
+    <comment>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</comment>
+  </data>
+  <data name="MSBuildServerStateUnknown" xml:space="preserve">
+    <value>the current server state could not be determined</value>
+    <comment>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</comment>
+  </data>
+  <data name="MSBuildServerConnectFailed" xml:space="preserve">
+    <value>could not connect to the server within the timeout window; the server may have failed to start</value>
+    <comment>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known &#8212; covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</comment>
+  </data>
+  <!-- **** MSBuild Server fallback strings end **** -->
 
     <!--
         The command line message bucket is: MSB1001 - MSB1999
