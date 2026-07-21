@@ -15,14 +15,6 @@ namespace Microsoft.Build.Shared;
 /// </summary>
 internal static class ErrorUtilities
 {
-    /// <inheritdoc cref="FrameworkErrorUtilities.DebugTraceMessage(string, string)"/>
-    public static void DebugTraceMessage(string category, string message)
-        => FrameworkErrorUtilities.DebugTraceMessage(category, message);
-
-    /// <inheritdoc cref="FrameworkErrorUtilities.DebugTraceMessage(string, ref FrameworkErrorUtilities.DebugTraceInterpolatedStringHandler)"/>
-    public static void DebugTraceMessage(string category, ref FrameworkErrorUtilities.DebugTraceInterpolatedStringHandler handler)
-        => FrameworkErrorUtilities.DebugTraceMessage(category, ref handler);
-
     /// <summary>
     /// Throws InternalErrorException.
     /// Indicates the code path followed should not have been possible.
