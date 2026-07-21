@@ -21,10 +21,6 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public sealed class TarDirectory : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
-        public const string CompressionNone = "None";
-        public const string CompressionGZip = "GZip";
-        public const string CompressionZStandard = "ZStandard";
-
         /// <summary>
         /// Gets or sets a <see cref="ITaskItem"/> containing the full path to the destination file to create.
         /// </summary>
@@ -160,30 +156,27 @@ namespace Microsoft.Build.Tasks
 
             static bool TryParseCompression(string? compression, out TarCompression result)
             {
-                if (string.IsNullOrEmpty(compression)
-                    || StringComparer.OrdinalIgnoreCase.Equals(compression, CompressionNone))
+                if (string.IsNullOrEmpty(compression))
                 {
                     result = TarCompression.None;
+                    return true;
                 }
-                else if (StringComparer.OrdinalIgnoreCase.Equals(compression, CompressionGZip)
-                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "gz")
+
+                if (StringComparer.OrdinalIgnoreCase.Equals(compression, "gz")
                     || StringComparer.OrdinalIgnoreCase.Equals(compression, "gzip"))
                 {
                     result = TarCompression.GZip;
+                    return true;
                 }
-                else if (StringComparer.OrdinalIgnoreCase.Equals(compression, CompressionZStandard)
-                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "zstd")
+
+                if (StringComparer.OrdinalIgnoreCase.Equals(compression, "zstd")
                     || StringComparer.OrdinalIgnoreCase.Equals(compression, "zst"))
                 {
                     result = TarCompression.ZStandard;
-                }
-                else
-                {
-                    result = TarCompression.None;
-                    return false;
+                    return true;
                 }
 
-                return true;
+                return Enum.TryParse(compression, ignoreCase: true, out result) && Enum.IsDefined(result);
             }
         }
 
