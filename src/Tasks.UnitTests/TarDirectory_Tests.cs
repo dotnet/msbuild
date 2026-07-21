@@ -10,7 +10,6 @@ using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
 using Microsoft.Build.UnitTests;
-using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
@@ -21,13 +20,10 @@ namespace Microsoft.Build.Tasks.UnitTests
         private readonly MockEngine _mockEngine = new MockEngine();
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("None")]
-        [InlineData("GZip")]
-        [InlineData("gz")]
-        [InlineData("ZStandard")]
-        [InlineData("zstd")]
-        public void CanTarDirectory(string? compression)
+        [InlineData(TarDirectory.TarCompression.None)]
+        [InlineData(TarDirectory.TarCompression.GZip)]
+        [InlineData(TarDirectory.TarCompression.ZStandard)]
+        public void CanTarDirectory(TarDirectory.TarCompression compression)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
@@ -42,8 +38,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     BuildEngine = _mockEngine,
                     Compression = compression,
-                    DestinationFile = new TaskItem(tarFilePath),
-                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    DestinationFile = new FileInfo(tarFilePath),
+                    SourceDirectory = new DirectoryInfo(sourceFolder.Path),
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
@@ -80,9 +76,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TarDirectory tarDirectory = new TarDirectory
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFile = new TaskItem(file.Path),
+                    DestinationFile = new FileInfo(file.Path),
                     Overwrite = true,
-                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    SourceDirectory = new DirectoryInfo(sourceFolder.Path),
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
@@ -91,7 +87,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 _mockEngine.Log.ShouldContain(sourceFolder.Path, customMessage: _mockEngine.Log);
                 _mockEngine.Log.ShouldContain(file.Path, customMessage: _mockEngine.Log);
 
-                GetTarEntryNames(file.Path, compression: null)
+                GetTarEntryNames(file.Path, TarDirectory.TarCompression.None)
                     .ShouldBe(
                         [
                             "F1C22D660B0D4DAAA296C1B980320B03.txt",
@@ -113,8 +109,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TarDirectory tarDirectory = new TarDirectory
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFile = new TaskItem(file.Path),
-                    SourceDirectory = new TaskItem(folder.Path),
+                    DestinationFile = new FileInfo(file.Path),
+                    SourceDirectory = new DirectoryInfo(folder.Path),
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
@@ -130,8 +126,8 @@ namespace Microsoft.Build.Tasks.UnitTests
             TarDirectory tarDirectory = new TarDirectory
             {
                 BuildEngine = _mockEngine,
-                DestinationFile = new TaskItem(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "test.tar")),
-                SourceDirectory = new TaskItem(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))),
+                DestinationFile = new FileInfo(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "test.tar")),
+                SourceDirectory = new DirectoryInfo(Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"))),
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             };
 
@@ -140,41 +136,12 @@ namespace Microsoft.Build.Tasks.UnitTests
             _mockEngine.Log.ShouldContain("MSB4321", customMessage: _mockEngine.Log);
         }
 
-        [Fact]
-        public void LogsErrorForInvalidCompression()
-        {
-            using (TestEnvironment testEnvironment = TestEnvironment.Create())
-            {
-                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
-
-                testEnvironment.CreateFile(sourceFolder, "9E0A4E0F5C8D4F0FA0B33F79C2F0B0C1.txt", "content");
-
-                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
-
-                TarDirectory tarDirectory = new TarDirectory
-                {
-                    BuildEngine = _mockEngine,
-                    Compression = "RandomUnsupportedValue",
-                    DestinationFile = new TaskItem(tarFilePath),
-                    SourceDirectory = new TaskItem(sourceFolder.Path),
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
-                };
-
-                // Invalid compression is an error and no archive is created.
-                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
-
-                _mockEngine.Log.ShouldContain("MSB4324", customMessage: _mockEngine.Log);
-
-                File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);
-            }
-        }
-
         [Theory]
-        [InlineData("Pax", TarEntryFormat.Pax)]
-        [InlineData("gnu", TarEntryFormat.Gnu)]
-        [InlineData("Ustar", TarEntryFormat.Ustar)]
-        [InlineData("V7", TarEntryFormat.V7)]
-        public void CanTarDirectoryWithFormat(string format, TarEntryFormat expectedFormat)
+        [InlineData(TarEntryFormat.Pax)]
+        [InlineData(TarEntryFormat.Gnu)]
+        [InlineData(TarEntryFormat.Ustar)]
+        [InlineData(TarEntryFormat.V7)]
+        public void CanTarDirectoryWithFormat(TarEntryFormat format)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
@@ -188,52 +155,23 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     BuildEngine = _mockEngine,
                     Format = format,
-                    DestinationFile = new TaskItem(tarFilePath),
-                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    DestinationFile = new FileInfo(tarFilePath),
+                    SourceDirectory = new DirectoryInfo(sourceFolder.Path),
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
                 tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
 
                 GetTarEntryFormats(tarFilePath)
-                    .ShouldAllBe(entryFormat => entryFormat == expectedFormat, _mockEngine.Log);
+                    .ShouldAllBe(entryFormat => entryFormat == format, _mockEngine.Log);
 
-                GetTarEntryNames(tarFilePath, compression: null)
+                GetTarEntryNames(tarFilePath, TarDirectory.TarCompression.None)
                     .ShouldBe(["3F6D2F2E3C1A4B5C8D9E0F1A2B3C4D5E.txt"]);
             }
         }
 
         [Fact]
-        public void LogsErrorForInvalidFormat()
-        {
-            using (TestEnvironment testEnvironment = TestEnvironment.Create())
-            {
-                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
-
-                testEnvironment.CreateFile(sourceFolder, "8B0F5A2D6E1C4F0FB1C44F80D3F1C1D2.txt", "content");
-
-                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
-
-                TarDirectory tarDirectory = new TarDirectory
-                {
-                    BuildEngine = _mockEngine,
-                    Format = "RandomUnsupportedValue",
-                    DestinationFile = new TaskItem(tarFilePath),
-                    SourceDirectory = new TaskItem(sourceFolder.Path),
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
-                };
-
-                // Invalid format is an error and no archive is created.
-                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
-
-                _mockEngine.Log.ShouldContain("MSB4325", customMessage: _mockEngine.Log);
-
-                File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);
-            }
-        }
-
-        [Fact]
-        public void LogsErrorForUnknownFormat()
+        public void UnknownFormatFallsBackToPax()
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
@@ -247,22 +185,21 @@ namespace Microsoft.Build.Tasks.UnitTests
                 {
                     BuildEngine = _mockEngine,
 
-                    // "Unknown" parses to TarEntryFormat.Unknown, which is not a valid archive format.
-                    Format = "Unknown",
-                    DestinationFile = new TaskItem(tarFilePath),
-                    SourceDirectory = new TaskItem(sourceFolder.Path),
+                    // TarEntryFormat.Unknown is not a real archive format; the task falls back to the Pax default.
+                    Format = TarEntryFormat.Unknown,
+                    DestinationFile = new FileInfo(tarFilePath),
+                    SourceDirectory = new DirectoryInfo(sourceFolder.Path),
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
-                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
+                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
 
-                _mockEngine.Log.ShouldContain("MSB4325", customMessage: _mockEngine.Log);
-
-                File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);
+                GetTarEntryFormats(tarFilePath)
+                    .ShouldAllBe(entryFormat => entryFormat == TarEntryFormat.Pax, _mockEngine.Log);
             }
         }
 
-        private static List<string> GetTarEntryNames(string tarFilePath, string? compression)
+        private static List<string> GetTarEntryNames(string tarFilePath, TarDirectory.TarCompression compression)
         {
             List<string> names = new List<string>();
 
@@ -271,14 +208,9 @@ namespace Microsoft.Build.Tasks.UnitTests
             // Wrap the file stream in a matching decompression stream, if the archive was compressed.
             Stream? decompressionStream = compression switch
             {
-                null => null,
-                _ when StringComparer.OrdinalIgnoreCase.Equals(compression, "None") => null,
-                _ when StringComparer.OrdinalIgnoreCase.Equals(compression, "GZip")
-                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "gz")
-                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "gzip") => new GZipStream(stream, CompressionMode.Decompress),
-                _ when StringComparer.OrdinalIgnoreCase.Equals(compression, "ZStandard")
-                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "zstd")
-                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "zst") => new ZstandardStream(stream, CompressionMode.Decompress),
+                TarDirectory.TarCompression.None => null,
+                TarDirectory.TarCompression.GZip => new GZipStream(stream, CompressionMode.Decompress),
+                TarDirectory.TarCompression.ZStandard => new ZstandardStream(stream, CompressionMode.Decompress),
                 _ => throw new ArgumentException($"Unexpected compression '{compression}'.", nameof(compression)),
             };
 

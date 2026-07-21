@@ -22,10 +22,10 @@ namespace Microsoft.Build.Tasks
     public sealed class TarDirectory : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
         /// <summary>
-        /// Gets or sets a <see cref="ITaskItem"/> containing the full path to the destination file to create.
+        /// Gets or sets the full path to the destination file to create.
         /// </summary>
         [Required]
-        public ITaskItem DestinationFile { get; set; } = null!;
+        public FileInfo DestinationFile { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets a value indicating whether the destination file should be overwritten.
@@ -33,10 +33,10 @@ namespace Microsoft.Build.Tasks
         public bool Overwrite { get; set; }
 
         /// <summary>
-        /// Gets or sets a <see cref="ITaskItem"/> containing the full path to the source directory to create a tar archive from.
+        /// Gets or sets the full path to the source directory to create a tar archive from.
         /// </summary>
         [Required]
-        public ITaskItem SourceDirectory { get; set; } = null!;
+        public DirectoryInfo SourceDirectory { get; set; } = null!;
 
         /// <summary>
         /// Question the incremental nature of this task.
@@ -46,56 +46,50 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Gets or sets the compression to apply to the tar archive.
-        /// Valid values are "None" (the default), "GZip", and "ZStandard".
+        /// The default is <see cref="TarCompression.None"/>.
         /// This parameter is optional.
         /// </summary>
-        public string? Compression { get; set; }
+        public TarCompression Compression { get; set; } = TarCompression.None;
 
         /// <summary>
         /// Gets or sets the tar entry format to use for the archive.
-        /// Valid values are "Pax" (the default), "Gnu", "Ustar", and "V7".
+        /// The default is <see cref="TarEntryFormat.Pax"/>.
         /// This parameter is optional.
         /// </summary>
-        public string? Format { get; set; }
+        public TarEntryFormat Format { get; set; } = TarEntryFormat.Pax;
 
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         public override bool Execute()
         {
-            AbsolutePath sourceDirectoryAbsolutePath = TaskEnvironment.GetAbsolutePath(SourceDirectory.ItemSpec);
-            DirectoryInfo sourceDirectory = new DirectoryInfo(sourceDirectoryAbsolutePath);
-
-            if (!sourceDirectory.Exists)
+            if (!SourceDirectory.Exists)
             {
-                Log.LogErrorWithCodeFromResources("TarDirectory.ErrorDirectoryDoesNotExist", sourceDirectory.FullName);
+                Log.LogErrorWithCodeFromResources("TarDirectory.ErrorDirectoryDoesNotExist", SourceDirectory.FullName);
                 return false;
             }
-
-            AbsolutePath destinationFileAbsolutePath = TaskEnvironment.GetAbsolutePath(DestinationFile.ItemSpec);
-            FileInfo destinationFile = new FileInfo(destinationFileAbsolutePath);
 
             BuildEngine3.Yield();
 
             try
             {
-                if (destinationFile.Exists)
+                if (DestinationFile.Exists)
                 {
                     if (!Overwrite || FailIfNotIncremental)
                     {
-                        Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFileExists", destinationFile.FullName);
+                        Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFileExists", DestinationFile.FullName);
 
                         return false;
                     }
 
                     try
                     {
-                        File.Delete(destinationFile.FullName);
+                        File.Delete(DestinationFile.FullName);
                     }
                     catch (Exception e)
                     {
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(destinationFile.FullName);
-                        Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message, lockedFileMessage);
+                        string lockedFileMessage = LockCheck.GetLockedFileMessage(DestinationFile.FullName);
+                        Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", SourceDirectory.FullName, DestinationFile.FullName, e.Message, lockedFileMessage);
 
                         return false;
                     }
@@ -105,46 +99,33 @@ namespace Microsoft.Build.Tasks
                 {
                     if (FailIfNotIncremental)
                     {
-                        Log.LogErrorFromResources("TarDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
+                        Log.LogErrorFromResources("TarDirectory.Comment", SourceDirectory.FullName, DestinationFile.FullName);
                     }
                     else
                     {
-                        Log.LogMessageFromResources(MessageImportance.High, "TarDirectory.Comment", sourceDirectory.FullName, destinationFile.FullName);
+                        Log.LogMessageFromResources(MessageImportance.High, "TarDirectory.Comment", SourceDirectory.FullName, DestinationFile.FullName);
 
-                        if (!TryParseCompression(Compression, out TarCompression compression))
-                        {
-                            Log.LogErrorWithCodeFromResources("TarDirectory.ErrorInvalidCompression", Compression);
+                        // Unknown is only reachable if it was explicitly set; fall back to the Pax default.
+                        TarEntryFormat format = Format == TarEntryFormat.Unknown ? TarEntryFormat.Pax : Format;
 
-                            return false;
-                        }
-
-                        TarEntryFormat format = TarEntryFormat.Pax;
-                        if (!string.IsNullOrEmpty(Format)
-                            && (!Enum.TryParse(Format, ignoreCase: true, out format) || format == TarEntryFormat.Unknown))
-                        {
-                            Log.LogErrorWithCodeFromResources("TarDirectory.ErrorInvalidFormat", Format);
-
-                            return false;
-                        }
-
-                        using FileStream destinationStream = new FileStream(destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None);
+                        using FileStream destinationStream = new FileStream(DestinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None);
 
                         // Wrap the destination stream in the requested compression, if any. The tar archive is always
                         // written to the (optionally compressed) stream using the new .NET 11 overload that honors the
                         // requested TarEntryFormat.
-                        using Stream? compressionStream = compression switch
+                        using Stream? compressionStream = Compression switch
                         {
                             TarCompression.GZip => new GZipStream(destinationStream, CompressionLevel.Optimal),
                             TarCompression.ZStandard => new ZstandardStream(destinationStream, CompressionLevel.Optimal),
                             _ => null,
                         };
 
-                        TarFile.CreateFromDirectory(sourceDirectory.FullName, compressionStream ?? destinationStream, includeBaseDirectory: false, format);
+                        TarFile.CreateFromDirectory(SourceDirectory.FullName, compressionStream ?? destinationStream, includeBaseDirectory: false, format);
                     }
                 }
                 catch (Exception e)
                 {
-                    Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", sourceDirectory.FullName, destinationFile.FullName, e.Message, string.Empty);
+                    Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", SourceDirectory.FullName, DestinationFile.FullName, e.Message, string.Empty);
                 }
             }
             finally
@@ -153,37 +134,12 @@ namespace Microsoft.Build.Tasks
             }
 
             return !Log.HasLoggedErrors;
-
-            static bool TryParseCompression(string? compression, out TarCompression result)
-            {
-                if (string.IsNullOrEmpty(compression))
-                {
-                    result = TarCompression.None;
-                    return true;
-                }
-
-                if (StringComparer.OrdinalIgnoreCase.Equals(compression, "gz")
-                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "gzip"))
-                {
-                    result = TarCompression.GZip;
-                    return true;
-                }
-
-                if (StringComparer.OrdinalIgnoreCase.Equals(compression, "zstd")
-                    || StringComparer.OrdinalIgnoreCase.Equals(compression, "zst"))
-                {
-                    result = TarCompression.ZStandard;
-                    return true;
-                }
-
-                return Enum.TryParse(compression, ignoreCase: true, out result) && Enum.IsDefined(result);
-            }
         }
 
         /// <summary>
         /// Identifies the compression to apply to the tar archive stream.
         /// </summary>
-        private enum TarCompression
+        public enum TarCompression
         {
             None,
             GZip,

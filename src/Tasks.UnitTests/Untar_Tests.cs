@@ -18,11 +18,10 @@ namespace Microsoft.Build.Tasks.UnitTests
         private readonly MockEngine _mockEngine = new MockEngine();
 
         [Theory]
-        [InlineData(null)]
-        [InlineData("None")]
-        [InlineData("GZip")]
-        [InlineData("ZStandard")]
-        public void CanUntar(string? compression)
+        [InlineData(TarDirectory.TarCompression.None)]
+        [InlineData(TarDirectory.TarCompression.GZip)]
+        [InlineData(TarDirectory.TarCompression.ZStandard)]
+        public void CanUntar(TarDirectory.TarCompression compression)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
@@ -59,7 +58,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 testEnvironment.CreateFile(sourceFolder, "included.txt", "included");
                 testEnvironment.CreateFile(sourceFolder, "excluded.txt", "excluded");
 
-                string tarFilePath = CreateTar(testEnvironment, sourceFolder, compression: null);
+                string tarFilePath = CreateTar(testEnvironment, sourceFolder);
 
                 TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
 
@@ -89,7 +88,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 testEnvironment.CreateFile(sourceFolder, "kept.txt", "kept");
                 testEnvironment.CreateFile(sourceFolder, "dropped.txt", "dropped");
 
-                string tarFilePath = CreateTar(testEnvironment, sourceFolder, compression: null);
+                string tarFilePath = CreateTar(testEnvironment, sourceFolder);
 
                 TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
 
@@ -118,7 +117,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
                 testEnvironment.CreateFile(sourceFolder, "unchanged.txt", "unchanged");
 
-                string tarFilePath = CreateTar(testEnvironment, sourceFolder, compression: null);
+                string tarFilePath = CreateTar(testEnvironment, sourceFolder);
 
                 TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
 
@@ -148,7 +147,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
                 testEnvironment.CreateFile(sourceFolder, "file.txt", "new-content");
 
-                string tarFilePath = CreateTar(testEnvironment, sourceFolder, compression: null);
+                string tarFilePath = CreateTar(testEnvironment, sourceFolder);
 
                 TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: true);
                 testEnvironment.CreateFile(destination, "file.txt", "old-content");
@@ -221,7 +220,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
                 testEnvironment.CreateFile(sourceFolder, "file.txt", "file");
 
-                string tarFilePath = CreateTar(testEnvironment, sourceFolder, compression: null);
+                string tarFilePath = CreateTar(testEnvironment, sourceFolder);
 
                 TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
 
@@ -248,7 +247,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
                 testEnvironment.CreateFile(sourceFolder, "file.txt", "file");
 
-                string tarFilePath = CreateTar(testEnvironment, sourceFolder, compression: null);
+                string tarFilePath = CreateTar(testEnvironment, sourceFolder);
 
                 TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
 
@@ -266,7 +265,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        private string CreateTar(TestEnvironment testEnvironment, TransientTestFolder sourceFolder, string? compression)
+        private string CreateTar(TestEnvironment testEnvironment, TransientTestFolder sourceFolder, TarDirectory.TarCompression compression = TarDirectory.TarCompression.None)
         {
             string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
 
@@ -274,8 +273,8 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 BuildEngine = _mockEngine,
                 Compression = compression,
-                DestinationFile = new TaskItem(tarFilePath),
-                SourceDirectory = new TaskItem(sourceFolder.Path),
+                DestinationFile = new FileInfo(tarFilePath),
+                SourceDirectory = new DirectoryInfo(sourceFolder.Path),
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
             };
 

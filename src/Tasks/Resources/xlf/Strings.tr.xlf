@@ -2692,16 +2692,6 @@
         <target state="new">MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
         <note>{StrBegin="MSB4322: "}</note>
       </trans-unit>
-      <trans-unit id="TarDirectory.ErrorInvalidCompression">
-        <source>MSB4324: Unsupported compression '{0}'. Valid values are 'None', 'GZip', and 'ZStandard'.</source>
-        <target state="new">MSB4324: Unsupported compression '{0}'. Valid values are 'None', 'GZip', and 'ZStandard'.</target>
-        <note>{StrBegin="MSB4324: "}</note>
-      </trans-unit>
-      <trans-unit id="TarDirectory.ErrorInvalidFormat">
-        <source>MSB4325: Unsupported tar format '{0}'. Valid values are 'Pax', 'Gnu', 'Ustar', and 'V7'.</source>
-        <target state="new">MSB4325: Unsupported tar format '{0}'. Valid values are 'Pax', 'Gnu', 'Ustar', and 'V7'.</target>
-        <note>{StrBegin="MSB4325: "}</note>
-      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: MSBuild’in .NET Core sürümünde "{0}" görevi desteklenmiyor. Lütfen MSBuild’in .NET Framework sürümünü kullanın. Daha ayrıntılı bilgi için bkz. https://aka.ms/msbuild/MSB4803.</target>
