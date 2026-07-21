@@ -60,7 +60,7 @@ namespace Microsoft.Build.BackEnd
             string exeName = ResolveExecutableName(nodeLaunchData.MSBuildLocation, out bool isNativeAppHost);
             uint creationFlags = GetCreationFlags(out bool redirectStreams);
 
-            CommunicationsUtilities.Trace("Launching node from {0}", nodeLaunchData.MSBuildLocation);
+            CommunicationsUtilities.Trace($"Launching node from {nodeLaunchData.MSBuildLocation}");
 
             return NativeMethodsShared.IsWindows
                 ? StartProcessWindows(nodeLaunchData, exeName, creationFlags, redirectStreams, isNativeAppHost)
@@ -141,16 +141,13 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 Process process = Process.Start(processStartInfo);
-                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", process.Id, exeName);
+                CommunicationsUtilities.Trace($"Successfully launched {exeName} node with PID {process.Id}");
                 return process;
             }
             catch (Exception ex)
             {
                 CommunicationsUtilities.Trace(
-                    "Failed to launch node from {0}. CommandLine: {1}" + Environment.NewLine + "{2}",
-                    nodeLaunchData.MSBuildLocation,
-                    commandLineArgs,
-                    ex.ToString());
+                    $"Failed to launch node from {nodeLaunchData.MSBuildLocation}. CommandLine: {commandLineArgs}{Environment.NewLine}{ex}");
 
                 throw new NodeFailedToLaunchException(ex);
             }
@@ -203,18 +200,14 @@ namespace Microsoft.Build.BackEnd
                     var e = new System.ComponentModel.Win32Exception();
 
                     CommunicationsUtilities.Trace(
-                        "Failed to launch node from {0}. System32 Error code {1}. Description {2}. CommandLine: {3}",
-                        nodeLaunchData.MSBuildLocation,
-                        e.NativeErrorCode.ToString(CultureInfo.InvariantCulture),
-                        e.Message,
-                        commandLineArgs);
+                        $"Failed to launch node from {nodeLaunchData.MSBuildLocation}. System32 Error code {e.NativeErrorCode.ToString(CultureInfo.InvariantCulture)}. Description {e.Message}. CommandLine: {commandLineArgs}");
 
                     throw new NodeFailedToLaunchException(e.NativeErrorCode.ToString(CultureInfo.InvariantCulture), e.Message);
                 }
 
                 CloseProcessHandles(processInfo);
 
-                CommunicationsUtilities.Trace("Successfully launched {1} node with PID {0}", processInfo.dwProcessId, exeName);
+                CommunicationsUtilities.Trace($"Successfully launched {exeName} node with PID {processInfo.dwProcessId}");
                 return Process.GetProcessById(processInfo.dwProcessId);
             }
             finally

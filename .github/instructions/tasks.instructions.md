@@ -30,6 +30,7 @@ Built-in tasks ship with MSBuild and cannot be independently versioned.
 
 * Use `FileUtilities` helpers — do not roll custom path manipulation.
 * Support UNC paths, long paths (> 260 chars), and cross-platform separators.
+* The `Microsoft.IO.Redist` package is referenced and backports .NET Core file APIs to .NET Framework. Check `Microsoft.IO.File`, `Microsoft.IO.Path`, `Microsoft.IO.Directory` for better overloads before writing workarounds (e.g., `Microsoft.IO.File.Move(src, dst, overwrite: true)` eliminates TOCTOU patterns around `File.Move` + `File.Replace`).
 
 ## Multithreaded Task Migration
 

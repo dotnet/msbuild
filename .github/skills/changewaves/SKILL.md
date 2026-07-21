@@ -8,7 +8,7 @@ argument-hint: 'Add, query, or remove changewaves and changewave checks.'
 
 A Change Wave is an opt-out flag that groups risky features together. Users disable features by setting the environment variable `MSBUILDDISABLEFEATURESFROMVERSION` to the wave version. This skill covers the **how** — the full lifecycle: creating a wave, conditioning code on it, testing, documenting, and retiring.
 
-For the **when** — deciding whether a change is a breaking change and whether it needs a ChangeWave at all — see [assessing-breaking-changes](../backwards-compatibility/SKILL.md).
+For the **when** — deciding whether a change is a breaking change and whether it needs a ChangeWave at all — see [assessing-breaking-changes](../assessing-breaking-changes/SKILL.md).
 
 
 ## Decide Whether a Change Wave Is Appropriate
