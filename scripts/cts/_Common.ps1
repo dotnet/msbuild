@@ -56,7 +56,7 @@ function Build-Project {
     $csproj = Join-Path $script:RepoRoot $Project.CsProj
     Write-Host "  build $($Project.Key) ..." -ForegroundColor DarkGray -NoNewline
     $sw = [Diagnostics.Stopwatch]::StartNew()
-    $out = & $script:DotnetExe build -c Debug $csproj -f net10.0 -v:q -nologo 2>&1
+    $out = & $script:DotnetExe build -c Debug $csproj -f net11.0 -v:q -nologo 2>&1
     $sw.Stop()
     if ($LASTEXITCODE -ne 0) {
         Write-Host " FAIL ($([int]$sw.Elapsed.TotalSeconds)s)" -ForegroundColor Red
@@ -68,13 +68,13 @@ function Build-Project {
 
 function Get-ProjectDllPath {
     param([Parameter(Mandatory)] $Project)
-    return (Join-Path $script:RepoRoot ("artifacts/bin/{0}/Debug/net10.0/{1}" -f $Project.BinDir, $Project.Dll))
+    return (Join-Path $script:RepoRoot ("artifacts/bin/{0}/Debug/net11.0/{1}" -f $Project.BinDir, $Project.Dll))
 }
 
 function Get-ProjectDllFilter {
     param([Parameter(Mandatory)] $Project)
     # CTS --filter is a glob relative to --rootPath (repo root).
-    return "artifacts/bin/$($Project.BinDir)/Debug/net10.0/$($Project.Dll)"
+    return "artifacts/bin/$($Project.BinDir)/Debug/net11.0/$($Project.Dll)"
 }
 
 function Get-ProjectTag {

@@ -80,10 +80,10 @@ public class ExpanderBenchmark
         // Add well-known properties used in expressions.
         properties.Set(ProjectPropertyInstance.Create("Configuration", "Release"));
         properties.Set(ProjectPropertyInstance.Create("Platform", "AnyCPU"));
-        properties.Set(ProjectPropertyInstance.Create("OutputPath", @"bin\Release\net10.0"));
+        properties.Set(ProjectPropertyInstance.Create("OutputPath", @"bin\Release\net11.0"));
         properties.Set(ProjectPropertyInstance.Create("RootNamespace", "MyProject.Core"));
         properties.Set(ProjectPropertyInstance.Create("AssemblyName", "MyProject.Core"));
-        properties.Set(ProjectPropertyInstance.Create("TargetFramework", "net10.0"));
+        properties.Set(ProjectPropertyInstance.Create("TargetFramework", "net11.0"));
 
         // --- Items ---
         var itemBag = new ItemDictionary<ProjectItemInstance>();
@@ -99,7 +99,7 @@ public class ExpanderBenchmark
         for (int i = 0; i < ItemCount / 2; i++)
         {
             var item = new ProjectItemInstance(project, "Reference", $"System.Lib{i}", project.FullPath);
-            item.SetMetadata("HintPath", $@"packages\lib{i}\lib\net10.0\System.Lib{i}.dll");
+            item.SetMetadata("HintPath", $@"packages\lib{i}\lib\net11.0\System.Lib{i}.dll");
             item.SetMetadata("Private", "true");
             itemBag.Add(item);
         }

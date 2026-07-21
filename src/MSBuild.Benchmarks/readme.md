@@ -16,19 +16,19 @@ dotnet run -c Release
 ```
 cd src/MSBuild.Benchmarks
 dotnet run -c Release -f net472
-dotnet run -c Release -f net10.0
+dotnet run -c Release -f net11.0
 ```
 
 ### Filter to a Specific Benchmark Class
 
 ```
-dotnet run -c Release -f net10.0 -- --filter "*ItemSpecModifiersBenchmark*"
+dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark*"
 ```
 
 ### Filter to a Single Benchmark Method
 
 ```
-dotnet run -c Release -f net10.0 -- --filter "*ItemSpecModifiersBenchmark.IncludeOnly"
+dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark.IncludeOnly"
 ```
 ## Command-Line Options
 
@@ -41,5 +41,5 @@ dotnet run -c Release -f net10.0 -- --filter "*ItemSpecModifiersBenchmark.Includ
 These custom options can be combined with any BenchmarkDotNet options:
 
 ```
-dotnet run -c Release -f net10.0 -- --filter "*ItemSpecModifiersBenchmark*" --job short --disable-ngen
+dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark*" --job short --disable-ngen
 ```

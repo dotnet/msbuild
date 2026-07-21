@@ -2,42 +2,45 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Globalization;
-using System.Reflection;
 using System.Resources;
+using Microsoft.Build.Framework;
 
-#nullable disable
+namespace Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Shared
+/// <summary>
+///  This class provides access to the assembly's resources.
+/// </summary>
+internal static class AssemblyResources
 {
     /// <summary>
-    /// This class provides access to the assembly's resources.
+    ///  Gets the assembly's primary resources, i.e. the resources exclusively owned by this assembly.
     /// </summary>
-    internal static class AssemblyResources
+    internal static ResourceManager PrimaryResources { get; } = new ResourceManager("MSBuild.Strings", typeof(AssemblyResources).Assembly);
+
+    /// <summary>
+    ///  Gets the assembly's shared resources, i.e. the resources this assembly shares with other assemblies.
+    /// </summary>
+    internal static ResourceManager SharedResources => Framework.Resources.SR.ResourceManager;
+
+    /// <summary>
+    ///  Loads the specified resource string, either from the assembly's primary resources, or its shared resources.
+    /// </summary>
+    /// <param name="name">The name of the resource to load.</param>
+    /// <param name="culture">
+    ///  The culture to use when looking up the resource. If <see langword="null"/>, the current UI culture is used.
+    /// </param>
+    /// <returns>
+    ///  The resource string.
+    /// </returns>
+    /// <exception cref="InternalErrorException">Thrown if the resource is not found.</exception>
+    internal static string GetString(string name, CultureInfo? culture = null)
     {
-        /// <summary>
-        /// Loads the specified resource string, either from the assembly's primary resources, or its shared resources.
-        /// </summary>
-        /// <remarks>This method is thread-safe.</remarks>
-        /// <param name="name"></param>
-        /// <returns>The resource string, or null if not found.</returns>
-        internal static string GetString(string name)
-        {
-            // NOTE: the ResourceManager.GetString() method is thread-safe
-            string resource = s_resources.GetString(name, CultureInfo.CurrentUICulture);
+        culture ??= CultureInfo.CurrentUICulture;
+        string? resource = PrimaryResources.GetString(name, culture) ??
+                           SharedResources.GetString(name, culture);
 
-            if (resource == null)
-            {
-                resource = s_sharedResources.GetString(name, CultureInfo.CurrentUICulture);
-            }
+        Assumed.NotNull(resource, $"Missing resource '{name}'");
 
-            Assumed.NotNull(resource, $"Missing resource '{name}'");
-
-            return resource;
-        }
-
-        // assembly resources
-        private static readonly ResourceManager s_resources = new ResourceManager("MSBuild.Strings", typeof(AssemblyResources).Assembly);
-        // shared resources
-        private static readonly ResourceManager s_sharedResources = new ResourceManager("MSBuild.Strings.shared", typeof(AssemblyResources).Assembly);
+        return resource;
     }
 }

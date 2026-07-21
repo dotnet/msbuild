@@ -287,48 +287,17 @@ internal static class ErrorUtilities
         throw new ArgumentOutOfRangeException(parameterName);
     }
 
-    /// <summary>
-    /// Throws an ArgumentException if the given collection is not null but of zero length.
-    /// </summary>
-    internal static void VerifyThrowArgumentLengthIfNotNull<T>([MaybeNull] IReadOnlyCollection<T>? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        if (parameter?.Count == 0)
-        {
-            ThrowArgumentLength(parameterName);
-        }
-    }
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull{T}(IReadOnlyCollection{T}, string)"/>
+    internal static void VerifyThrowArgumentLengthIfNotNull<T>(IReadOnlyCollection<T>? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+        => FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(parameter, parameterName);
 
-    [DoesNotReturn]
-    private static void ThrowArgumentLength(string? parameterName)
-    {
-        throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
-    }
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowArgumentInvalidPath(string, string)"/>
+    internal static void VerifyThrowArgumentInvalidPath([NotNull] string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+        => FrameworkErrorUtilities.VerifyThrowArgumentInvalidPath(parameter, parameterName);
 
-    /// <summary>
-    /// Throws an ArgumentNullException if the given string parameter is null
-    /// and ArgumentException if it has zero length.
-    /// </summary>
-    internal static void VerifyThrowArgumentInvalidPath([NotNull] string parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        ArgumentNullException.ThrowIfNull(parameter, parameterName);
-
-        if (FileUtilities.PathIsInvalid(parameter))
-        {
-            ThrowArgument("Shared.ParameterCannotHaveInvalidPathChars", parameterName, parameter);
-        }
-    }
-
-    /// <summary>
-    /// Throws an ArgumentException if the string has zero length, unless it is
-    /// null, in which case no exception is thrown.
-    /// </summary>
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(string, string)"/>
     internal static void VerifyThrowArgumentLengthIfNotNull(string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        if (parameter?.Length == 0)
-        {
-            ThrowArgumentLength(parameterName);
-        }
-    }
+        => FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(parameter, parameterName);
 
     /// <summary>
     /// Throws an ArgumentNullException if the given parameter is null.
@@ -349,36 +318,12 @@ internal static class ErrorUtilities
         throw new ArgumentNullException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, parameterName), (Exception?)null);
     }
 
-    /// <summary>
-    /// A utility that verifies the parameters provided to a standard <see cref="ICollection{T}.CopyTo"/> call.
-    /// </summary>
-    /// <typeparam name="T">The element type of the collection.</typeparam>
-    /// <param name="collection">The destination collection to copy into.</param>
-    /// <param name="index">The zero-based index in <paramref name="collection"/> at which copying begins.</param>
-    /// <param name="requiredCapacity">The number of elements that need to be copied.</param>
-    /// <param name="collectionParamName">The name of the <paramref name="collection"/> parameter.</param>
-    /// <param name="indexParamName">The name of the <paramref name="index"/> parameter.</param>
-    /// <exception cref="ArgumentNullException">If <paramref name="collection"/> is null.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/> falls outside of the bounds of <paramref name="collection"/>.</exception>
-    /// <exception cref="ArgumentException">If there is insufficient capacity to copy the collection contents into <paramref name="collection"/>
-    /// when starting at <paramref name="index"/>.</exception>
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyCollectionCopyToArguments{T}(ICollection{T}, int, int, string, string)"/>
     internal static void VerifyCollectionCopyToArguments<T>(
         [NotNull] ICollection<T>? collection,
         int index,
         int requiredCapacity,
         [CallerArgumentExpression(nameof(collection))] string? collectionParamName = null,
         [CallerArgumentExpression(nameof(index))] string? indexParamName = null)
-    {
-        ArgumentNullException.ThrowIfNull(collection, collectionParamName);
-        ArgumentOutOfRangeException.ThrowIfNegative(index, indexParamName);
-        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(index, collection.Count, indexParamName);
-
-        int capacity = collection.Count - index;
-        if (requiredCapacity > capacity)
-        {
-            throw new ArgumentException(
-                ResourceUtilities.GetResourceString("CollectionCopyToFailureProvidedArrayIsTooSmall"),
-                collectionParamName);
-        }
-    }
+        => FrameworkErrorUtilities.VerifyCollectionCopyToArguments(collection, index, requiredCapacity, collectionParamName, indexParamName);
 }

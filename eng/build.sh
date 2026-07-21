@@ -2,6 +2,9 @@
 
 configuration="Debug"
 test=false
+ci=false
+binary_log=false
+exclude_ci_binary_log=false
 stage2=false
 stage2Arguments=
 properties=
@@ -30,6 +33,18 @@ while [[ $# -gt 0 ]]; do
       test=true
       shift 1
       ;;
+    --ci)
+      ci=true
+      shift 1
+      ;;
+    --binarylog|-bl)
+      binary_log=true
+      shift 1
+      ;;
+    --excludecibinarylog|-nobl)
+      exclude_ci_binary_log=true
+      shift 1
+      ;;
     --stage2)
       stage2=true
       shift 1
@@ -51,6 +66,17 @@ build_script="$scriptroot/common/build.sh"
 
 # Arguments common to the stage1 and stage2 builds, including any caller-supplied properties.
 common_build_args="--configuration $configuration $properties"
+
+# Forward the binary-log-related switches to both the stage 1 and stage 2 builds.
+if [ "$ci" = true ]; then
+  common_build_args="$common_build_args --ci"
+fi
+if [ "$binary_log" = true ]; then
+  common_build_args="$common_build_args --binaryLog"
+fi
+if [ "$exclude_ci_binary_log" = true ]; then
+  common_build_args="$common_build_args --excludeCIBinarylog"
+fi
 
 build_args="$common_build_args"
 
@@ -94,6 +120,16 @@ bootstrap_root="$stage1_bin_dir/bootstrap"
 rm -rf "$stage1_dir"
 mv "$artifacts_dir" "$stage1_dir"
 
+# The move above relocated the stage 1 log directory (including its binlog) out of the published
+# $artifacts_dir/log location. Copy the whole log folder back so CI publishes the stage 1 logs alongside
+# the stage 2 ones. This runs before the stage 2 build, so it won't clobber any stage 2 output. The
+# stage 1 binlog keeps its default Build.binlog name, distinct from the stage 2 Build.stage2.binlog.
+# Best-effort: never fail the build if the stage 1 log folder isn't there (e.g. when no logs were produced).
+if [ -d "$stage1_dir/log" ]; then
+  mkdir -p "$artifacts_dir"
+  cp -rf "$stage1_dir/log" "$artifacts_dir/" || true
+fi
+
 build_tool_path="$bootstrap_root/core/dotnet"
 build_tool_command="msbuild"
 export DOTNET_ROOT="$bootstrap_root/core"
@@ -118,6 +154,15 @@ export DOTNET_HOST_PATH="$bootstrap_root/core/dotnet"
 export DOTNET_INSTALL_DIR="$bootstrap_root/core"
 
 stage2_build_args="$common_build_args"
+
+# Give the stage 2 binary log a distinct name so it doesn't collide with the stage 1 binlog
+# (both otherwise default to Build.binlog) when CI publishes them to the same artifacts location.
+# Only do this when a binary log will actually be produced, so we don't force one to be created:
+# Arcade emits a binlog for CI builds (--ci) or when --binaryLog is passed explicitly, unless it's
+# suppressed with --excludeCIBinarylog.
+if { [ "$ci" = true ] || [ "$binary_log" = true ]; } && [ "$exclude_ci_binary_log" != true ]; then
+  stage2_build_args="$stage2_build_args --binaryLogName Build.stage2.binlog"
+fi
 
 # Only run tests in stage2 when supplying the '--test' switch in a multi-stage build.
 if [ "$test" = true ]; then

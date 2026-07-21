@@ -42,7 +42,7 @@
   },
   "Filter": {
     "Include": [
-      "**/artifacts/bin/*.VSTest/Debug/net10.0/*.UnitTests.dll"
+      "**/artifacts/bin/*.VSTest/Debug/net11.0/*.UnitTests.dll"
     ],
     "Exclude": [
       "**/*.resources.dll"
