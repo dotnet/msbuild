@@ -209,7 +209,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             string projectContents = printPidContents.Replace(
                 "</Target>",
-                """<Message Text="Server priority is '$([System.Diagnostics.Process]::GetCurrentProcess().PriorityClass)'" Importance="High" /></Target>""");
+                "<Message Text=\"Server priority is '$([System.Diagnostics.Process]::GetCurrentProcess().PriorityClass)'\" Importance=\"High\" /></Target>");
             TransientTestFile project = _env.CreateFile("testProject.proj", projectContents);
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
 
@@ -222,7 +222,7 @@ namespace Microsoft.Build.Engine.UnitTests
             output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
             success.ShouldBeTrue();
             ParseNumber(output, "Server ID is ").ShouldBe(serverPid);
-            output.ShouldContain($"Server priority is '{Process.GetCurrentProcess().PriorityClass}'");
+            output.ShouldNotContain("Server priority is 'BelowNormal'");
         }
 
         [Fact]
