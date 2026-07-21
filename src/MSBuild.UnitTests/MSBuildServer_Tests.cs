@@ -224,7 +224,7 @@ namespace Microsoft.Build.Engine.UnitTests
             output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
             success.ShouldBeTrue();
             ParseNumber(output, "Server ID is ").ShouldBe(serverPid);
-            output.ShouldNotContain("Server priority is 'BelowNormal'");
+            output.ShouldContain("Server priority is 'Normal'");
         }
 
         [Fact]
