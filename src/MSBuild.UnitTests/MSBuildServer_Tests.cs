@@ -208,12 +208,15 @@ namespace Microsoft.Build.Engine.UnitTests
         public void ProcessPriorityDoesNotLeakAcrossServerBuilds()
         {
             MSBuildClient.ShutdownServer(CancellationToken.None);
+            ProcessPriorityClass originalPriority = Process.GetCurrentProcess().PriorityClass;
 
             string projectContents = printPidContents.Replace(
                 "</Target>",
                 "<Message Text=\"Server priority is '$([System.Diagnostics.Process]::GetCurrentProcess().PriorityClass)'\" Importance=\"High\" /></Target>");
             TransientTestFile project = _env.CreateFile("testProject.proj", projectContents);
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            // System.Diagnostics.Process is not allowlisted for .NET Framework property functions.
+            _env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
 
             string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -low", out bool success, false, _output);
             success.ShouldBeTrue();
@@ -224,7 +227,7 @@ namespace Microsoft.Build.Engine.UnitTests
             output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
             success.ShouldBeTrue();
             ParseNumber(output, "Server ID is ").ShouldBe(serverPid);
-            output.ShouldContain("Server priority is 'Normal'");
+            output.ShouldContain($"Server priority is '{originalPriority}'");
         }
 
         [Fact]
