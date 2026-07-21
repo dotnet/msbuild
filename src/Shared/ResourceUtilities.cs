@@ -2,18 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-#if !BUILDINGAPPXTASKS
-using System.Resources;
 using System.Diagnostics;
-#endif
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Resources;
+using Microsoft.Build.Framework.Utilities;
 
-#if BUILDINGAPPXTASKS
-namespace Microsoft.Build.AppxPackage.Shared
-#else
 namespace Microsoft.Build.Shared
-#endif
 {
     /// <summary>
     /// This class contains utility methods for dealing with resources.
@@ -32,96 +26,16 @@ namespace Microsoft.Build.Shared
         /// <param name="message">The string to parse.</param>
         /// <param name="code">[out] The message code, or null if there was no code.</param>
         /// <returns>The string without its message code prefix, if any.</returns>
-        [SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Scope = "member", Target = "Microsoft.Build.Shared.ResourceUtilities.#ExtractMessageCode(System.Boolean,System.String,System.String&)", Justification = "Unavoidable complexity")]
         internal static string ExtractMessageCode(bool msbuildCodeOnly, string message, out string? code)
         {
-#if !BUILDINGAPPXTASKS
-            Assumed.NotNull(message);
-#endif
+            if (msbuildCodeOnly
+                ? MessageParser.TryParseMSBuildCode(message, out code, out string? result)
+                : MessageParser.TryParseAnyCode(message, out code, out result))
+            {
+                return result;
+            }
 
             code = null;
-            int i = 0;
-
-            while (i < message.Length && Char.IsWhiteSpace(message[i]))
-            {
-                i++;
-            }
-
-#if !BUILDINGAPPXTASKS
-            if (msbuildCodeOnly)
-            {
-                if (
-                    message.Length < i + 8 ||
-                    message[i] != 'M' ||
-                    message[i + 1] != 'S' ||
-                    message[i + 2] != 'B' ||
-                    message[i + 3] < '0' || message[i + 3] > '9' ||
-                    message[i + 4] < '0' || message[i + 4] > '9' ||
-                    message[i + 5] < '0' || message[i + 5] > '9' ||
-                    message[i + 6] < '0' || message[i + 6] > '9' ||
-                    message[i + 7] != ':')
-                {
-                    return message;
-                }
-
-                code = message.Substring(i, 7);
-
-                i += 8;
-            }
-            else
-#endif
-            {
-                int j = i;
-                for (; j < message.Length; j++)
-                {
-                    char c = message[j];
-                    if (((c < 'a') || (c > 'z')) && ((c < 'A') || (c > 'Z')))
-                    {
-                        break;
-                    }
-                }
-
-                if (j == i)
-                {
-                    return message; // Should have been at least one letter
-                }
-
-                int k = j;
-
-                for (; k < message.Length; k++)
-                {
-                    char c = message[k];
-                    if (c < '0' || c > '9')
-                    {
-                        break;
-                    }
-                }
-
-                if (k == j)
-                {
-                    return message; // Should have been at least one digit
-                }
-
-                if (k == message.Length || message[k] != ':')
-                {
-                    return message;
-                }
-
-                code = message.Substring(i, k - i);
-
-                i = k + 1;
-            }
-
-            while (i < message.Length && Char.IsWhiteSpace(message[i]))
-            {
-                i++;
-            }
-
-            if (i < message.Length)
-            {
-                message = message.Substring(i);
-            }
-
             return message;
         }
 
@@ -134,7 +48,6 @@ namespace Microsoft.Build.Shared
         private static string GetHelpKeyword(string resourceName)
             => "MSBuild." + resourceName;
 
-#if !BUILDINGAPPXTASKS
         /// <summary>
         /// Retrieves the contents of the named resource string.
         /// </summary>
@@ -470,7 +383,6 @@ namespace Microsoft.Build.Shared
 #endif
                 InternalError.Throw(e.Message);
             }
-#endif
         }
     }
 }
