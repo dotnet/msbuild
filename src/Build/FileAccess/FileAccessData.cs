@@ -24,6 +24,8 @@ namespace Microsoft.Build.Experimental.FileAccess
         private string _path;
         private string? _processArgs;
         private bool _isAnAugmentedFileAccess;
+        private string? _enumeratePattern;
+        private FlagsAndAttributes _openedFileOrDirectoryAttributes;
 
         public FileAccessData(
             ReportedFileOperation operation,
@@ -37,6 +39,39 @@ namespace Microsoft.Build.Experimental.FileAccess
             string path,
             string? processArgs,
             bool isAnAugmentedFileAccess)
+            // This overload predates EnumeratePattern and OpenedFileOrDirectoryAttributes; callers using it have
+            // no values to supply, so they default to "not provided": no enumeration pattern and no attributes.
+            : this(
+                operation,
+                requestedAccess,
+                processId,
+                id,
+                correlationId,
+                error,
+                desiredAccess,
+                flagsAndAttributes,
+                path,
+                processArgs,
+                isAnAugmentedFileAccess,
+                enumeratePattern: null,
+                openedFileOrDirectoryAttributes: 0)
+        {
+        }
+
+        public FileAccessData(
+            ReportedFileOperation operation,
+            RequestedAccess requestedAccess,
+            uint processId,
+            uint id,
+            uint correlationId,
+            uint error,
+            DesiredAccess desiredAccess,
+            FlagsAndAttributes flagsAndAttributes,
+            string path,
+            string? processArgs,
+            bool isAnAugmentedFileAccess,
+            string? enumeratePattern,
+            FlagsAndAttributes openedFileOrDirectoryAttributes)
         {
             _operation = operation;
             _requestedAccess = requestedAccess;
@@ -49,6 +84,8 @@ namespace Microsoft.Build.Experimental.FileAccess
             _path = path;
             _processArgs = processArgs;
             _isAnAugmentedFileAccess = isAnAugmentedFileAccess;
+            _enumeratePattern = enumeratePattern;
+            _openedFileOrDirectoryAttributes = openedFileOrDirectoryAttributes;
         }
 
         /// <summary>The operation that performed the file access.</summary>
@@ -130,6 +167,28 @@ namespace Microsoft.Build.Experimental.FileAccess
             private set => _isAnAugmentedFileAccess = value;
         }
 
+        /// <summary>
+        /// The search pattern passed to a directory enumeration API (e.g., the <c>lpFileName</c>
+        /// pattern argument to <c>FindFirstFileEx</c> such as <c>*.cs</c>). <see langword="null"/>
+        /// for accesses that are not directory enumerations.
+        /// </summary>
+        public string? EnumeratePattern
+        {
+            readonly get => _enumeratePattern;
+            private set => _enumeratePattern = value;
+        }
+
+        /// <summary>
+        /// The actual flags and attributes of the opened file or directory as resolved by the
+        /// kernel. Contrast with <see cref="FlagsAndAttributes"/>, which reflects what the caller
+        /// requested when opening the handle.
+        /// </summary>
+        public FlagsAndAttributes OpenedFileOrDirectoryAttributes
+        {
+            readonly get => _openedFileOrDirectoryAttributes;
+            private set => _openedFileOrDirectoryAttributes = value;
+        }
+
         void ITranslatable.Translate(ITranslator translator)
         {
             translator.TranslateEnum(ref _operation, (int)_operation);
@@ -143,6 +202,8 @@ namespace Microsoft.Build.Experimental.FileAccess
             translator.Translate(ref _path);
             translator.Translate(ref _processArgs);
             translator.Translate(ref _isAnAugmentedFileAccess);
+            translator.Translate(ref _enumeratePattern);
+            translator.TranslateEnum(ref _openedFileOrDirectoryAttributes, (int)_openedFileOrDirectoryAttributes);
         }
     }
 }
