@@ -2,8 +2,8 @@ name: Branch freeze command
 
 # `/freeze` and `/unfreeze` slash commands that toggle a branch merge-freeze.
 # Restricted to accounts listed in .github/branch-freeze-allowlist.txt. State is
-# stored as an open issue labeled `branch-freeze` (see handle-command.ps1); after
-# toggling, all open PRs on the branch are refreshed so the required
+# stored as one permanent issue per branch, labeled `branch-freeze`; after toggling,
+# all open PRs on the branch are refreshed so the required
 # `branch-freeze` status updates at once.
 #
 # Authorization is a checked-in allowlist of GitHub logins; all repository
@@ -38,6 +38,7 @@ jobs:
       branch: ${{ steps.cmd.outputs.branch }}
       changed: ${{ steps.cmd.outputs.changed }}
     steps:
+      # Keep checkout pinned to the immutable v7.0.0 commit; the @v7 tag can move.
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
@@ -94,6 +95,8 @@ jobs:
           # into the command line) and parsed inside the script.
           BODY: ${{ github.event.comment.body }}
         shell: pwsh
+        # The script reopens/closes the branch's permanent tracking issue and
+        # exposes the affected branch for the refresh job below.
         run: pwsh -NoLogo -NoProfile -File "$env:GITHUB_WORKSPACE/.github/branch-freeze/handle-command.ps1"
 
   # Refresh every open PR on the affected branch. The refresh and single-PR

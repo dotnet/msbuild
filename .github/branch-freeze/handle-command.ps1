@@ -6,13 +6,9 @@
 #   /freeze   [--branch <name>] <reason...>   branch defaults to `main`; reason required
 #   /unfreeze [--branch <name>]               branch defaults to `main`
 #
-# Freeze state is stored as an open issue labeled `branch-freeze` whose body is
-#   <reason>
-#
-#   <!-- branch-freeze:<branch> -->
-# This script only toggles that state and replies; it emits `branch` and
-# `changed` step outputs so the calling workflow can refresh the affected PR
-# statuses via branch-freeze-refresh.yml.
+# Each branch has one permanent tracking issue named `Branch freeze: <branch>`.
+# Open means frozen; closed means open. The issue body shows the current state,
+# while timeline comments preserve previous freeze and unfreeze transitions.
 #
 # Env (required): GH_TOKEN, REPO, ACTOR, ISSUE_NUMBER, COMMENT_ID, BODY
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute(
@@ -23,250 +19,186 @@
 [CmdletBinding()]
 param()
 
-$ErrorActionPreference = 'Stop'
-
-function Get-RequiredEnvironmentValue {
-  param([Parameter(Mandatory)][string]$Name)
-
-  $value = [Environment]::GetEnvironmentVariable($Name)
-  if ([string]::IsNullOrEmpty($value)) {
-    throw "Environment variable '$Name' is required."
-  }
-
-  return $value
-}
-
-function Invoke-GitHubCli {
-  param(
-    [Parameter(Mandatory)][string[]]$Arguments,
-    [switch]$DiscardOutput
-  )
-
-  $output = & gh @Arguments
-  if ($LASTEXITCODE -ne 0) {
-    throw "gh command failed with exit code $LASTEXITCODE."
-  }
-
-  if (-not $DiscardOutput) {
-    return $output -join [Environment]::NewLine
-  }
-}
-
-function Test-BodyContainsMarker {
-  param(
-    [AllowNull()][string]$Body,
-    [Parameter(Mandatory)][string]$Marker
-  )
-
-  foreach ($line in [regex]::Split([string]$Body, '\r?\n')) {
-    if ($line.Trim() -ceq $Marker) {
-      return $true
-    }
-  }
-
-  return $false
-}
-
-# Step 1: Read the values supplied by the command workflow.
-$repo = Get-RequiredEnvironmentValue 'REPO'
-$actor = Get-RequiredEnvironmentValue 'ACTOR'
-$issueNumber = Get-RequiredEnvironmentValue 'ISSUE_NUMBER'
-$commentId = Get-RequiredEnvironmentValue 'COMMENT_ID'
-$null = Get-RequiredEnvironmentValue 'GH_TOKEN'
-$body = if ($null -eq $env:BODY) { '' } else { $env:BODY }
-$label = 'branch-freeze'
-
-# Step 2: Define helpers for reacting, replying, and returning workflow outputs.
 function Add-Reaction {
-  param([Parameter(Mandatory)][string]$Content)
+    param(
+        [Parameter(Mandatory)][string]$Repository,
+        [Parameter(Mandatory)][string]$CommentId,
+        [Parameter(Mandatory)][string]$Content
+    )
 
-  & gh api -X POST "repos/$repo/issues/comments/$commentId/reactions" -f "content=$Content" *> $null
+    & gh api -X POST "repos/$Repository/issues/comments/$CommentId/reactions" `
+        -f "content=$Content" *> $null
 }
 
 function Add-Reply {
-  param([Parameter(Mandatory)][string]$Message)
+    param(
+        [Parameter(Mandatory)][string]$Repository,
+        [Parameter(Mandatory)][string]$IssueNumber,
+        [Parameter(Mandatory)][string]$Message
+    )
 
-  & gh issue comment $issueNumber --repo $repo --body $Message *> $null
-  if ($LASTEXITCODE -ne 0) {
-    Write-Output "::warning::Failed to post confirmation comment on issue #$issueNumber."
-  }
+    & gh issue comment $IssueNumber --repo $Repository --body $Message *> $null
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "::warning::Failed to post confirmation comment on issue #$IssueNumber."
+    }
 }
 
 function Write-WorkflowOutput {
-  param(
-    [Parameter(Mandatory)][string]$Name,
-    [Parameter(Mandatory)][string]$Value
-  )
+    param(
+        [Parameter(Mandatory)][string]$Name,
+        [Parameter(Mandatory)][string]$Value
+    )
 
-  if (-not [string]::IsNullOrEmpty($env:GITHUB_OUTPUT)) {
-    Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value "$Name=$Value" -Encoding utf8
-  }
+    if (-not [string]::IsNullOrEmpty($env:GITHUB_OUTPUT)) {
+        Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value "$Name=$Value" -Encoding utf8
+    }
 }
 
-$usage = @'
+function Get-CommandRequest {
+    param([AllowEmptyString()][string]$Body)
+
+    $line = ([regex]::Split($Body, '\r?\n', 2)[0]).TrimEnd("`r")
+    if ($line -notmatch '^(\S+)(?:\s+(.*))?$') {
+        return $null
+    }
+
+    $command = $Matches[1]
+    $remaining = if ($Matches.Count -gt 2) { $Matches[2] } else { '' }
+    $action = switch -CaseSensitive ($command) {
+        '/freeze' { 'freeze' }
+        '/unfreeze' { 'unfreeze' }
+        default { return $null }
+    }
+
+    if ($remaining -match '^(--branch|-b)$') {
+        throw "Missing a branch name after ``$remaining``."
+    }
+    if ($remaining -match '^(?:--branch|-b)\s+$') {
+        throw 'No branch name was given after the `--branch` flag.'
+    }
+
+    $branch = 'main'
+    if ($remaining -match '^(?:--branch|-b)\s+(\S+)(?:\s+(.*))?$') {
+        $branch = $Matches[1]
+        $remaining = if ($Matches.Count -gt 2) { $Matches[2] } else { '' }
+    }
+
+    return [pscustomobject]@{
+        Action = $action
+        Branch = $branch
+        Reason = $remaining.TrimEnd()
+    }
+}
+
+function Test-BranchExists {
+    param(
+        [Parameter(Mandatory)][string]$Repository,
+        [Parameter(Mandatory)][string]$Branch
+    )
+
+    if ($Branch -notmatch '^[A-Za-z0-9._/-]+$') {
+        return $false
+    }
+
+    $encodedBranch = [uri]::EscapeDataString($Branch)
+    & gh api "repos/$Repository/branches/$encodedBranch" *> $null
+    return $LASTEXITCODE -eq 0
+}
+
+function Get-Usage {
+    return @'
 **Usage**
 - `/freeze [--branch <name>] <reason>` — freeze a branch (default `main`); a reason is required.
 - `/unfreeze [--branch <name>]` — unfreeze a branch (default `main`).
 '@
-
-function Exit-WithUsage {
-  param([Parameter(Mandatory)][string]$Message)
-
-  Add-Reaction 'confused'
-  Add-Reply "$Message`n`n$usage"
-  exit 0
 }
 
-# Step 3: Read the command and arguments from the comment's first line.
-$line = ([regex]::Split($body, '\r?\n', 2)[0]).TrimEnd("`r")
-if ($line -match '^(\S+)(?:\s+(.*))?$') {
-  $command = $Matches[1]
-  $remaining = if ($Matches.Count -gt 2) { $Matches[2] } else { '' }
-} else {
-  $command = ''
-  $remaining = ''
-}
+function Invoke-Main {
+    # Step 1: Read values supplied by the command workflow.
+    $repository = Get-RequiredEnvironmentValue 'REPO'
+    $actor = Get-RequiredEnvironmentValue 'ACTOR'
+    $sourceIssueNumber = Get-RequiredEnvironmentValue 'ISSUE_NUMBER'
+    $commentId = Get-RequiredEnvironmentValue 'COMMENT_ID'
+    $null = Get-RequiredEnvironmentValue 'GH_TOKEN'
+    $body = if ($null -eq $env:BODY) { '' } else { $env:BODY }
 
-# Step 4: Decide whether this is a freeze or unfreeze request.
-switch -CaseSensitive ($command) {
-  '/freeze' { $action = 'freeze' }
-  '/unfreeze' { $action = 'unfreeze' }
-  default {
-    Write-Output "Ignoring non-command first token: '$command'"
-    exit 0
-  }
-}
-
-# Step 5: Read the optional branch and the freeze reason.
-$branch = 'main'
-if ($remaining -match '^(--branch|-b)$') {
-  Exit-WithUsage "Missing a branch name after ``$remaining``."
-}
-
-if ($remaining -match '^(?:--branch|-b)\s+$') {
-  Exit-WithUsage 'No branch name was given after the `--branch` flag.'
-}
-
-if ($remaining -match '^(?:--branch|-b)\s+(\S+)(?:\s+(.*))?$') {
-  $branch = $Matches[1]
-  $remaining = if ($Matches.Count -gt 2) { $Matches[2] } else { '' }
-}
-
-$reason = $remaining.TrimEnd()
-
-# Step 6: Validate the branch name and confirm that the branch exists.
-if ($branch -notmatch '^[A-Za-z0-9._/-]+$') {
-  Exit-WithUsage "Branch ``$branch`` contains unexpected characters."
-}
-
-& gh api "repos/$repo/branches/$branch" *> $null
-if ($LASTEXITCODE -ne 0) {
-  Exit-WithUsage "Branch ``$branch`` was not found in ``$repo``."
-}
-
-$marker = "<!-- branch-freeze:$branch -->"
-
-# Step 7: Ensure the tracking label exists.
-& gh label create $label --repo $repo --color B60205 --description 'Tracks a frozen branch' *> $null
-
-# Step 8: Find any open tracking issues for this branch.
-$issuesJson = Invoke-GitHubCli -Arguments @(
-  'issue', 'list',
-  '--repo', $repo,
-  '--label', $label,
-  '--state', 'open',
-  '--limit', '200',
-  '--json', 'number,body'
-)
-$issues = @($issuesJson | ConvertFrom-Json)
-$existingNumbers = @(
-  $issues |
-    Where-Object { Test-BodyContainsMarker -Body $_.body -Marker $marker } |
-    ForEach-Object { $_.number }
-)
-
-if ($action -eq 'freeze') {
-  # Step 9a: Freeze the branch by creating or updating its tracking issue.
-  if ([string]::IsNullOrEmpty($reason)) {
-    Exit-WithUsage "A reason is required to freeze ``$branch``."
-  }
-
-  # The branch marker makes the issue machine-detectable; the actor marker records
-  # who froze the branch so the blocking status can name them. Both marker lines
-  # are stripped from the human-readable reason by set-pr-status.ps1.
-  $issueBody = "$reason`n`n$marker`n<!-- branch-freeze-by:$actor -->"
-
-  # Keep one tracking issue and close any duplicates.
-  $primary = $null
-  foreach ($number in $existingNumbers) {
-    if ($null -eq $primary) {
-      $primary = $number
-    } else {
-      & gh issue close $number --repo $repo --comment (
-        'Superseded by #{0} (duplicate `{1}` freeze tracking issue).' -f $primary, $branch
-      ) *> $null
+    # Step 2: Parse the first line into an action, branch, and optional reason.
+    try {
+        $request = Get-CommandRequest -Body $body
     }
-  }
+    catch {
+        Add-Reaction -Repository $repository -CommentId $commentId -Content 'confused'
+        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber `
+            -Message "$($_.Exception.Message)`n`n$(Get-Usage)"
+        return 0
+    }
+    if ($null -eq $request) {
+        Write-Host 'Ignoring comment because its first token is not a freeze command.'
+        return 0
+    }
 
-  if ($null -ne $primary) {
-    Invoke-GitHubCli -Arguments @(
-      'issue', 'edit', [string]$primary,
-      '--repo', $repo,
-      '--body', $issueBody
-    ) -DiscardOutput
-    $trackingIssueNumber = $primary
-    $verb = 'updated'
-  } else {
-    $url = Invoke-GitHubCli -Arguments @(
-      'issue', 'create',
-      '--repo', $repo,
-      '--label', $label,
-      '--title', "Branch frozen: $branch",
-      '--body', $issueBody
-    )
-    $trackingIssueNumber = ($url.TrimEnd('/') -split '/')[-1]
-    $verb = 'opened'
-  }
+    # Step 3: Validate the requested branch and freeze reason.
+    if (-not (Test-BranchExists -Repository $repository -Branch $request.Branch)) {
+        Add-Reaction -Repository $repository -CommentId $commentId -Content 'confused'
+        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber `
+            -Message "Branch ``$($request.Branch)`` was not found in ``$repository``.`n`n$(Get-Usage)"
+        return 0
+    }
+    if ($request.Action -eq 'freeze' -and [string]::IsNullOrEmpty($request.Reason)) {
+        Add-Reaction -Repository $repository -CommentId $commentId -Content 'confused'
+        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber `
+            -Message "A reason is required to freeze ``$($request.Branch)``.`n`n$(Get-Usage)"
+        return 0
+    }
 
-  # Tell the workflow to refresh PR statuses, then acknowledge the command.
-  Write-WorkflowOutput 'branch' $branch
-  Write-WorkflowOutput 'changed' 'true'
-  Add-Reaction '+1'
-  Add-Reply (@'
-❄️ **`{0}` is now frozen** by @{1} — tracking issue #{2} ({3}).
+    # Step 4: Reopen or close the branch's permanent tracking issue.
+    if ($request.Action -eq 'freeze') {
+        $issue = Open-BranchFreezeIssue -Repository $repository -Branch $request.Branch `
+            -Actor $actor -Reason $request.Reason
+
+        Write-WorkflowOutput 'branch' $request.Branch
+        Write-WorkflowOutput 'changed' 'true'
+        Add-Reaction -Repository $repository -CommentId $commentId -Content '+1'
+        $verb = if ($issue.WasCreated) {
+            'created'
+        }
+        elseif ($issue.WasReopened) {
+            'reopened'
+        }
+        else {
+            'updated'
+        }
+        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber -Message (@'
+❄️ **`{0}` is now frozen** by @{1} — permanent tracking issue #{2} ({3}).
 
 > {4}
 
 Pull requests targeting `{0}` will be blocked by the `branch-freeze` check until someone runs `/unfreeze --branch {0}` (or `/unfreeze` for `main`).
-'@ -f $branch, $actor, $trackingIssueNumber, $verb, $reason)
-} else {
-  # Step 9b: Unfreeze the branch by closing its tracking issues.
-  $closedIssues = @()
-  foreach ($number in $existingNumbers) {
-    Invoke-GitHubCli -Arguments @(
-      'issue', 'close', [string]$number,
-      '--repo', $repo,
-      '--comment', ('Unfrozen by @{0} via `/unfreeze`.' -f $actor)
-    ) -DiscardOutput
-    $closedIssues += "#$number"
-  }
+'@ -f $request.Branch, $actor, $issue.Number, $verb, $request.Reason)
+        return 0
+    }
 
-  if ($closedIssues.Count -eq 0) {
-    # The branch was already open, so no PR status refresh is needed.
-    Write-WorkflowOutput 'changed' 'false'
-    Add-Reaction '+1'
-    Add-Reply "``$branch`` is not currently frozen — nothing to do."
-    exit 0
-  }
+    $result = Close-BranchFreezeIssue -Repository $repository -Branch $request.Branch `
+        -Actor $actor
+    if (-not $result.Changed) {
+        Write-WorkflowOutput 'changed' 'false'
+        Add-Reaction -Repository $repository -CommentId $commentId -Content '+1'
+        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber `
+            -Message "``$($request.Branch)`` is not currently frozen — nothing to do."
+        return 0
+    }
 
-  # Tell the workflow to refresh PR statuses, then acknowledge the command.
-  Write-WorkflowOutput 'branch' $branch
-  Write-WorkflowOutput 'changed' 'true'
-  Add-Reaction '+1'
-  Add-Reply (
-    '✅ **`{0}` is now unfrozen** by @{1} — closed tracking issue(s) {2}. The `branch-freeze` check now passes on open PRs targeting `{0}`.' -f
-      $branch, $actor, ($closedIssues -join ', ')
-  )
+    Write-WorkflowOutput 'branch' $request.Branch
+    Write-WorkflowOutput 'changed' 'true'
+    Add-Reaction -Repository $repository -CommentId $commentId -Content '+1'
+    Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber -Message (
+        '✅ **`{0}` is now unfrozen** by @{1} — closed permanent tracking issue #{2}. The `branch-freeze` check now passes on open PRs targeting `{0}`.' -f
+            $request.Branch, $actor, $result.Number
+    )
+    return 0
 }
 
-exit 0
+$ErrorActionPreference = 'Stop'
+Import-Module (Join-Path $PSScriptRoot 'BranchFreeze.psm1') -Force
+$exitCode = Invoke-Main
+exit $exitCode

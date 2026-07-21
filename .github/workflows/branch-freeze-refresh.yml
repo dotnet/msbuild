@@ -35,6 +35,7 @@ jobs:
       group: branch-freeze-write-${{ inputs.base_ref }}
       cancel-in-progress: false
     steps:
+      # Keep checkout pinned to the immutable v7.0.0 commit; the @v7 tag can move.
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false

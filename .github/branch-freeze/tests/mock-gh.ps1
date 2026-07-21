@@ -1,9 +1,11 @@
 #!/usr/bin/env pwsh
 # Minimal mock of the GitHub CLI (`gh`) for the branch-freeze tests.
 # Implements ONLY the gh surface used by the scripts under test:
-#   * `gh issue list ... --json ...`                  -> prints $env:MOCK_ISSUES (default [])
-#   * `gh issue comment ...`                          -> fails when
-#                                                        $env:MOCK_ISSUE_COMMENT_FAILURE=1
+#   * `gh issue list ... --json ...`                   -> prints $env:MOCK_ISSUES (default [])
+#   * `gh issue create/edit/reopen/close/comment ...`  -> records the operation in
+#                                                         $env:GH_ISSUE_FILE
+#   * `gh issue comment ...`                           -> fails when
+#                                                         $env:MOCK_ISSUE_COMMENT_FAILURE=1
 #   * `gh api -X POST .../statuses/<sha> -f key=value` -> appends each key=value
 #                                                        line to $env:GH_STATUS_FILE.
 [CmdletBinding()]
@@ -40,9 +42,14 @@ function Write-IssueOperation {
   $record = [ordered]@{
     command = $Command
     number = if ($Arguments.Count -gt 0 -and -not $Arguments[0].StartsWith('-')) { $Arguments[0] } else { $null }
-    label = Get-OptionValue $Arguments '--label'
+    label = if ($null -ne (Get-OptionValue $Arguments '--label')) {
+        Get-OptionValue $Arguments '--label'
+    } else {
+        Get-OptionValue $Arguments '--add-label'
+    }
     title = Get-OptionValue $Arguments '--title'
     body = Get-OptionValue $Arguments '--body'
+    comment = Get-OptionValue $Arguments '--comment'
   }
   Add-Content -LiteralPath $env:GH_ISSUE_FILE -Value ($record | ConvertTo-Json -Compress) -Encoding utf8
 }
@@ -63,6 +70,7 @@ switch -CaseSensitive ($command) {
         if ($env:MOCK_ISSUE_COMMENT_FAILURE -eq '1') {
           exit 1
         }
+        Write-IssueOperation -Command $subcommand -Arguments $CliArguments[2..($CliArguments.Count - 1)]
       }
       'create' {
         Write-IssueOperation -Command $subcommand -Arguments $CliArguments[2..($CliArguments.Count - 1)]
@@ -73,6 +81,9 @@ switch -CaseSensitive ($command) {
         })
       }
       'edit' {
+        Write-IssueOperation -Command $subcommand -Arguments $CliArguments[2..($CliArguments.Count - 1)]
+      }
+      'reopen' {
         Write-IssueOperation -Command $subcommand -Arguments $CliArguments[2..($CliArguments.Count - 1)]
       }
       'close' {
@@ -110,6 +121,12 @@ switch -CaseSensitive ($command) {
     }
 
     if ($endpoint -like '*/statuses/*') {
+      if (
+        -not [string]::IsNullOrEmpty($env:MOCK_STATUS_FAILURE_SHA) -and
+        $endpoint.EndsWith("/$($env:MOCK_STATUS_FAILURE_SHA)", [StringComparison]::Ordinal)
+      ) {
+        exit 1
+      }
       if (-not [string]::IsNullOrEmpty($env:GH_STATUS_FILE)) {
         Add-Content -LiteralPath $env:GH_STATUS_FILE -Value $fields -Encoding utf8
       }

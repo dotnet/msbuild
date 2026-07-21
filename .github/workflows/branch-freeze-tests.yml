@@ -23,6 +23,7 @@ jobs:
     name: PowerShell unit tests
     runs-on: ubuntu-latest
     steps:
+      # Keep checkout pinned to the immutable v7.0.0 commit; the @v7 tag can move.
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
@@ -31,7 +32,7 @@ jobs:
         shell: pwsh
         run: |
           $failed = $false
-          Get-ChildItem .github/branch-freeze -Recurse -Filter *.ps1 | ForEach-Object {
+          Get-ChildItem .github/branch-freeze -Recurse -Include *.ps1,*.psm1 | ForEach-Object {
             $tokens = $null
             $errors = $null
             [void][System.Management.Automation.Language.Parser]::ParseFile(

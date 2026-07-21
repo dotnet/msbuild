@@ -27,10 +27,12 @@ tracking issue and blocks merge. `/unfreeze` turns the check green again.
 
 ## How it works
 
-* **Tracking issue state** lives in a GitHub issue labeled `branch-freeze`, one per frozen branch.
-  The issue body holds the reason plus marker lines `<!-- branch-freeze:<branch> -->`
-  and `<!-- branch-freeze-by:<login> -->` (who froze it).
-  `/freeze` opens/updates it; `/unfreeze` closes it. The issue is the audit trail.
+* **Tracking issue state** lives in one permanent GitHub issue per branch, labeled
+  `branch-freeze` and titled `Branch freeze: <branch>`. An open issue means the
+  branch is frozen; a closed issue means it is open. `/freeze` creates the issue
+  once, then updates and reopens it on later freezes. `/unfreeze` updates and
+  closes the same issue. The body shows the current state; concise timeline
+  comments preserve previous freeze and unfreeze reasons.
 * **Enforcement** is the `branch-freeze` commit status, a required status check in
   the repository ruleset. The [`branch-freeze-pr-status`](../.github/workflows/branch-freeze-pr-status.yml)
   workflow evaluates one changed PR; `edited` covers a PR being **retargeted** onto
@@ -52,7 +54,8 @@ tracking issue and blocks merge. `/unfreeze` turns the check green again.
 | [`.github/workflows/branch-freeze-refresh.yml`](../.github/workflows/branch-freeze-refresh.yml) | Refreshes the status on existing open PRs |
 | [`.github/workflows/branch-freeze-tests.yml`](../.github/workflows/branch-freeze-tests.yml) | Validates PowerShell syntax and runs unit tests on branch-freeze changes |
 | [`.github/branch-freeze-allowlist.txt`](../.github/branch-freeze-allowlist.txt) | GitHub logins allowed to run `/freeze` `/unfreeze` |
-| [`.github/branch-freeze/`](../.github/branch-freeze/) | Shared command and status scripts |
+| [`.github/branch-freeze/BranchFreeze.psm1`](../.github/branch-freeze/BranchFreeze.psm1) | Shared issue lookup, lifecycle, GitHub CLI, and status functions |
+| [`.github/branch-freeze/`](../.github/branch-freeze/) | Command, status, refresh, authorization, and test scripts |
 
 ### Tests
 
@@ -98,8 +101,8 @@ block every open PR.
 ### Rollback / disable
 
 Remove the `branch-freeze` context from the ruleset's required checks — enforcement
-stops immediately. Close any open `branch-freeze` issues to clear residual statuses
-(or run the bulk stamp again).
+stops immediately. Close any open `branch-freeze` issues, then run the bulk refresh
+again to clear residual statuses.
 
 ### Notes
 
