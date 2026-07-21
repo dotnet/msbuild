@@ -1511,6 +1511,18 @@ namespace Microsoft.Build.CommandLine
         private static void ResetBuildState()
         {
             commandLineParser.ResetGatheringSwitchesState();
+            s_globalMessagesToLogInBuildLoggers.Clear();
+
+            if (s_originalProcessPriority is { } originalProcessPriority)
+            {
+                try
+                {
+                    using Process currentProcess = Process.GetCurrentProcess();
+                    currentProcess.PriorityClass = originalProcessPriority;
+                    s_originalProcessPriority = null;
+                }
+                catch (Win32Exception) { }
+            }
         }
 
         /// <summary>
@@ -1535,6 +1547,11 @@ namespace Microsoft.Build.CommandLine
         /// List of messages to be sent to the logger when it is attached
         /// </summary>
         private static readonly List<BuildManager.DeferredBuildMessage> s_globalMessagesToLogInBuildLoggers = new();
+
+        /// <summary>
+        /// The process priority to restore after a low-priority build.
+        /// </summary>
+        private static ProcessPriorityClass? s_originalProcessPriority;
 
         /// <summary>
         /// The original console output mode if we changed it as part of initialization.
@@ -2483,6 +2500,7 @@ namespace Microsoft.Build.CommandLine
                     using Process currentProcess = Process.GetCurrentProcess();
                     if (currentProcess.PriorityClass != ProcessPriorityClass.Idle)
                     {
+                        s_originalProcessPriority ??= currentProcess.PriorityClass;
                         currentProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
                     }
                 }
