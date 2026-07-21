@@ -33,7 +33,6 @@ jobs:
     runs-on: ubuntu-latest
     concurrency:
       group: branch-freeze-write-${{ inputs.base_ref }}
-      queue: max
       cancel-in-progress: false
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -44,5 +43,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           BASE_REF: ${{ inputs.base_ref }}
-        shell: bash
-        run: bash "${GITHUB_WORKSPACE}/.github/branch-freeze/refresh-pr-statuses.sh" "$BASE_REF"
+        shell: pwsh
+        run: |
+          pwsh -NoLogo -NoProfile -File `
+            "$env:GITHUB_WORKSPACE/.github/branch-freeze/refresh-pr-statuses.ps1" `
+            $env:BASE_REF

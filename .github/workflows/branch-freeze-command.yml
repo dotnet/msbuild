@@ -2,7 +2,7 @@ name: Branch freeze command
 
 # `/freeze` and `/unfreeze` slash commands that toggle a branch merge-freeze.
 # Restricted to accounts listed in .github/branch-freeze-allowlist.txt. State is
-# stored as an open issue labeled `branch-freeze` (see handle-command.sh); after
+# stored as an open issue labeled `branch-freeze` (see handle-command.ps1); after
 # toggling, all open PRs on the branch are refreshed so the required
 # `branch-freeze` status updates at once.
 #
@@ -21,10 +21,8 @@ permissions:
   # refresh workflow and are granted on the `refresh` job below (least privilege).
 
 concurrency:
-  # Queue and serialize freeze/unfreeze operations so concurrent commands cannot
-  # race on the tracking issue or silently replace an earlier pending command.
+  # Do not let two freeze/unfreeze operations modify tracking issues at once.
   group: branch-freeze-command
-  queue: max
   cancel-in-progress: false
 
 jobs:
@@ -49,18 +47,22 @@ jobs:
         env:
           ACTOR: ${{ github.event.comment.user.login }}
           ALLOWLIST: .github/branch-freeze-allowlist.txt
-        shell: bash
+        shell: pwsh
         run: |
-          set -uo pipefail
-          # Authorization logic lives in is-allowed.sh (single source of truth,
+          # Authorization logic lives in is-allowed.ps1 (single source of truth,
           # unit-tested); exit 0 = allowed, non-zero = denied (incl. missing file).
-          if bash "${GITHUB_WORKSPACE}/.github/branch-freeze/is-allowed.sh" "$ACTOR" "$ALLOWLIST"; then
-            echo "authorized=true" >> "$GITHUB_OUTPUT"
-            echo "@$ACTOR is on the branch-freeze allowlist."
-          else
-            echo "authorized=false" >> "$GITHUB_OUTPUT"
-            echo "@$ACTOR is NOT on the branch-freeze allowlist ($ALLOWLIST)."
-          fi
+          pwsh -NoLogo -NoProfile -File `
+            "$env:GITHUB_WORKSPACE/.github/branch-freeze/is-allowed.ps1" `
+            $env:ACTOR `
+            $env:ALLOWLIST
+          if ($LASTEXITCODE -eq 0) {
+            Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value 'authorized=true' -Encoding utf8
+            Write-Output "@$env:ACTOR is on the branch-freeze allowlist."
+          } else {
+            Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value 'authorized=false' -Encoding utf8
+            Write-Output "@$env:ACTOR is NOT on the branch-freeze allowlist ($env:ALLOWLIST)."
+          }
+          exit 0
 
       - name: Deny commenter who is not on the allowlist
         if: steps.auth.outputs.authorized != 'true'
@@ -70,12 +72,14 @@ jobs:
           COMMENT_ID: ${{ github.event.comment.id }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           ACTOR: ${{ github.event.comment.user.login }}
-        shell: bash
+        shell: pwsh
         run: |
-          set -uo pipefail
-          gh api -X POST "repos/$REPO/issues/comments/$COMMENT_ID/reactions" -f content="-1" >/dev/null 2>&1 || true
-          gh issue comment "$ISSUE_NUMBER" --repo "$REPO" \
-            --body "Sorry @$ACTOR — branch freeze/unfreeze is restricted to accounts listed in \`.github/branch-freeze-allowlist.txt\`."
+          & gh api -X POST "repos/$env:REPO/issues/comments/$env:COMMENT_ID/reactions" -f 'content=-1' *> $null
+          & gh issue comment $env:ISSUE_NUMBER --repo $env:REPO `
+            --body "Sorry @$env:ACTOR — branch freeze/unfreeze is restricted to accounts listed in ``.github/branch-freeze-allowlist.txt``."
+          if ($LASTEXITCODE -ne 0) {
+            throw 'Failed to post the authorization denial comment.'
+          }
 
       - name: Execute command
         id: cmd
@@ -89,8 +93,8 @@ jobs:
           # Untrusted comment body is passed as data via env (never interpolated
           # into the command line) and parsed inside the script.
           BODY: ${{ github.event.comment.body }}
-        shell: bash
-        run: bash "${GITHUB_WORKSPACE}/.github/branch-freeze/handle-command.sh"
+        shell: pwsh
+        run: pwsh -NoLogo -NoProfile -File "$env:GITHUB_WORKSPACE/.github/branch-freeze/handle-command.ps1"
 
   # Refresh every open PR on the affected branch. The refresh and single-PR
   # workflows share the same per-branch concurrency group, preventing a stale

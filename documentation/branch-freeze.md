@@ -50,19 +50,19 @@ tracking issue and blocks merge. `/unfreeze` turns the check green again.
 | [`.github/workflows/branch-freeze-command.yml`](../.github/workflows/branch-freeze-command.yml) | Processes `/freeze` and `/unfreeze` and changes tracking issue state |
 | [`.github/workflows/branch-freeze-pr-status.yml`](../.github/workflows/branch-freeze-pr-status.yml) | Evaluates the `branch-freeze` status for one changed PR |
 | [`.github/workflows/branch-freeze-refresh.yml`](../.github/workflows/branch-freeze-refresh.yml) | Refreshes the status on existing open PRs |
-| [`.github/workflows/branch-freeze-tests.yml`](../.github/workflows/branch-freeze-tests.yml) | Runs shellcheck + the shell unit tests on branch-freeze changes |
+| [`.github/workflows/branch-freeze-tests.yml`](../.github/workflows/branch-freeze-tests.yml) | Validates PowerShell syntax and runs unit tests on branch-freeze changes |
 | [`.github/branch-freeze-allowlist.txt`](../.github/branch-freeze-allowlist.txt) | GitHub logins allowed to run `/freeze` `/unfreeze` |
 | [`.github/branch-freeze/`](../.github/branch-freeze/) | Shared command and status scripts |
 
 ### Tests
 
-The shell scripts are unit-tested with a mock `gh` (no live repo required). The
+The PowerShell scripts are unit-tested with a mock `gh` (no live repo required). The
 [`branch-freeze-tests`](../.github/workflows/branch-freeze-tests.yml) workflow runs
-them (plus a shellcheck pass) on any change under the branch-freeze paths. Run them
-locally with `jq` installed:
+them (plus PowerShell parser validation) on any change under the branch-freeze paths.
+Run them locally with PowerShell 7:
 
-```bash
-bash .github/branch-freeze/tests/run-tests.sh
+```powershell
+pwsh .github/branch-freeze/tests/run-tests.ps1
 ```
 
 ## One-time setup (admin)

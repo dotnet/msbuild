@@ -1,6 +1,6 @@
 name: Branch freeze tests
 
-# Runs the branch-freeze shell unit tests (and a shellcheck pass) whenever the
+# Runs the branch-freeze PowerShell unit tests and parser validation whenever the
 # branch-freeze scripts, workflows, or allowlist change. This validates the
 # freeze/unfreeze logic without needing a live repo or the real GitHub CLI.
 
@@ -20,26 +20,36 @@ permissions:
 
 jobs:
   test:
-    name: Shell unit tests
+    name: PowerShell unit tests
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
 
-      - name: shellcheck
-        shell: bash
-        # Fail only on errors; style warnings/info are non-blocking here.
+      - name: Validate PowerShell syntax
+        shell: pwsh
         run: |
-          set -euo pipefail
-          shellcheck --severity=error \
-            .github/branch-freeze/is-allowed.sh \
-            .github/branch-freeze/set-pr-status.sh \
-            .github/branch-freeze/refresh-pr-statuses.sh \
-            .github/branch-freeze/handle-command.sh \
-            .github/branch-freeze/tests/mock-gh \
-            .github/branch-freeze/tests/run-tests.sh
+          $failed = $false
+          Get-ChildItem .github/branch-freeze -Recurse -Filter *.ps1 | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile(
+              $_.FullName,
+              [ref]$tokens,
+              [ref]$errors
+            )
+
+            foreach ($parseError in $errors) {
+              Write-Output "::error file=$($_.FullName),line=$($parseError.Extent.StartLineNumber)::$($parseError.Message)"
+              $failed = $true
+            }
+          }
+
+          if ($failed) {
+            exit 1
+          }
 
       - name: Run unit tests
-        shell: bash
-        run: bash .github/branch-freeze/tests/run-tests.sh
+        shell: pwsh
+        run: pwsh -NoLogo -NoProfile -File .github/branch-freeze/tests/run-tests.ps1
