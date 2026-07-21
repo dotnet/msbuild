@@ -278,6 +278,8 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
     <!-- TarDirectory relies on System.Formats.Tar which is only available on .NET (not .NET Framework). -->
     <Compile Include="TarDirectory.cs" />
+    <!-- Untar relies on System.Formats.Tar which is only available on .NET (not .NET Framework). -->
+    <Compile Include="Untar.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="TaskRequiresFramework.cs" />

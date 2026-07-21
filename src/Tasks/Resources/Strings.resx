@@ -3123,6 +3123,57 @@
   </data>
 
   <!--
+        MSB4331 - MSB4340   Task: Untar
+  -->
+  <data name="Untar.ErrorCouldNotCreateDestinationDirectory">
+    <value>MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</value>
+    <comment>{StrBegin="MSB4331: "}</comment>
+  </data>
+  <data name="Untar.ErrorFileDoesNotExist">
+    <value>MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</value>
+    <comment>{StrBegin="MSB4332: "}</comment>
+  </data>
+  <data name="Untar.ErrorCouldNotOpenFile">
+    <value>MSB4333: Failed to open tar file "{0}".  {1}</value>
+    <comment>{StrBegin="MSB4333: "}</comment>
+  </data>
+  <data name="Untar.ErrorExtractingResultsInFilesOutsideDestination">
+    <value>MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</value>
+    <comment>{StrBegin="MSB4334: "}</comment>
+  </data>
+  <data name="Untar.ErrorCouldNotMakeFileWriteable">
+    <value>MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</value>
+    <comment>{StrBegin="MSB4335: "}</comment>
+  </data>
+  <data name="Untar.ErrorCouldNotExtractFile">
+    <value>MSB4336: Failed to untar file "{0}" to "{1}".  {2}</value>
+    <comment>{StrBegin="MSB4336: "}</comment>
+  </data>
+  <data name="Untar.ErrorParsingPatternInvalidPath">
+    <value>MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</value>
+    <comment>{StrBegin="MSB4337: "}</comment>
+  </data>
+  <data name="Untar.ErrorParsingPatternPropertyReferences">
+    <value>MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</value>
+    <comment>{StrBegin="MSB4338: "}</comment>
+  </data>
+  <data name="Untar.DidNotUntarBecauseOfFileMatch">
+    <value>Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</value>
+  </data>
+  <data name="Untar.DidNotUntarBecauseOfFilter">
+    <value>Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</value>
+  </data>
+  <data name="Untar.DidNotUntarBecauseOfEntryType">
+    <value>Did not untar entry "{0}" because its entry type "{1}" is not supported.</value>
+  </data>
+  <data name="Untar.TarSlipExploit">
+    <value>Entry is outside the target directory: "{0}"</value>
+  </data>
+  <data name="Untar.FileComment">
+    <value>Untarring file "{0}" to "{1}".</value>
+  </data>
+
+  <!--
         MSB9901 - MSB9990   MSBuild common targets messages
   -->
   <data name="CommonSdk.SpecifiedSeverityDoesNotExist">
@@ -3288,6 +3339,7 @@
             MSB4300 - MSB4310   Task: AddToWin32Manifest
             MSB4311 - MSB4320   Task: FormatUrl
             MSB4321 - MSB4330   Task: TarDirectory
+            MSB4331 - MSB4340   Task: Untar
             MSB4000 - MSB4200   Portable targets & tasks (vsproject\flavors\portable\msbuild)
             MSB9000 - MSB9900   MSBuild targets files (C++)
 
