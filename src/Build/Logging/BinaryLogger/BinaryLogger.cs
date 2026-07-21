@@ -111,6 +111,8 @@ namespace Microsoft.Build.Logging
         //    - add extra information to PropertyInitialValueSetEventArgs and PropertyReassignmentEventArgs and change message formatting logic.
         // version 26:
         //    - new record kind: LoggersRegisteredEventArgs (reports registered loggers and their output file paths)
+        // version 27:
+        //    - new record kind: MSBuildServerLifecycleEventArgs (reports how a build related to the MSBuild Server node)
 
         // MAKE SURE YOU KEEP BuildEventArgsWriter AND StructuredLogViewer.BuildEventArgsWriter IN SYNC WITH THE CHANGES ABOVE.
         // Both components must stay in sync to avoid issues with logging or event handling in the products.
@@ -121,7 +123,7 @@ namespace Microsoft.Build.Logging
 
         // The current version of the binary log representation.
         // Changes with each update of the binary log format.
-        internal const int FileFormatVersion = 26;
+        internal const int FileFormatVersion = 27;
 
         // The minimum version of the binary log reader that can read log of above version.
         // This should be changed only when the binary log format is changed in a way that would prevent it from being

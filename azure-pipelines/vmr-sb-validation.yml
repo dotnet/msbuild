@@ -3,17 +3,25 @@
 # Builds the VMR in source-build mode to validate MSBuild changes.
 # Supports passing extra MSBuild properties to stage 2 builds (e.g., -mt mode).
 #
-# Trigger: Manual only (queue from Azure DevOps UI)
+# Trigger: Monday, Wednesday, and Friday at 04:00 UTC or manual (queue from Azure DevOps UI)
 # Uses the same pattern as runtime's vmr-build-pr.yml.
 
 trigger: none
 pr: none
 
+schedules:
+- cron: '0 4 * * 1,3,5'
+  displayName: Mon/Wed/Fri -mt VMR build validation (04:00 UTC)
+  branches:
+    include:
+    - main
+  always: true
+
 parameters:
 - name: extraPropertiesStage2
   displayName: 'Extra MSBuild properties for stage 2 (e.g., /p:DotNetBuildMT=true)'
   type: string
-  default: '/p:DotNetBuildMT=true /p:MSBuildMTExcludedReposOverride=roslyn'
+  default: '/p:DotNetBuildMT=true'
 
 variables:
 - template: /eng/common/templates/variables/pool-providers.yml@self

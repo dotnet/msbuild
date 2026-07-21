@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -478,7 +479,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Delegate which will get the resource from the correct resource manager
         /// </summary>
-        public delegate string GetStringDelegate(string resourceName);
+        public delegate string GetStringDelegate(string resourceName, CultureInfo culture = null);
 
         public object GetRegisteredTaskObject(object key, RegisteredTaskObjectLifetime lifetime)
         {

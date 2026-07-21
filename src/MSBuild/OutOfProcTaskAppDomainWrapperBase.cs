@@ -143,6 +143,18 @@ namespace Microsoft.Build.CommandLine
                                 [taskName, taskLocation, String.Empty]);
             }
 
+            // TypeLoader.Load returns null (rather than throwing) when the requested type cannot be
+            // found in the assembly. Guard against that here so we surface an actionable diagnostic
+            // instead of crashing later with an opaque NullReferenceException.
+            if (taskType == null)
+            {
+                return new OutOfProcTaskHostTaskResult(
+                                TaskCompleteType.CrashedDuringInitialization,
+                                new TypeLoadException(),
+                                "TaskInstantiationFailureError",
+                                [taskName, taskLocation, String.Empty]);
+            }
+
             OutOfProcTaskHostTaskResult taskResult;
             if (taskType.HasSTAThreadAttribute)
             {
@@ -325,6 +337,10 @@ namespace Microsoft.Build.CommandLine
                     taskLine,
                     taskColumn,
                     new TaskLoader.LogError(LogErrorDelegate),
+                    // The out-of-proc task host runs tasks in multi-process mode, where each process provides
+                    // its own isolated environment. Supply the fallback environment so a task that only declares
+                    // a TaskEnvironment constructor can still be instantiated here.
+                    TaskEnvironment.Fallback,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
                     // custom app domain assembly loading won't be available for task host

@@ -552,6 +552,9 @@ namespace Microsoft.Build.CommandLine.Experimental
             {
                 var projectFile = FileUtilities.FixFilePath(projectSwitchParameters[0]);
 
+                // Rebase relative paths onto the logical ($PWD) directory so response-file discovery matches the build's project full path.
+                projectFile = MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(projectFile);
+
                 if (FileSystems.Default.DirectoryExists(projectFile))
                 {
                     // the provided argument value is actually the directory
@@ -564,7 +567,7 @@ namespace Microsoft.Build.CommandLine.Experimental
                 }
             }
 
-            return projectDirectory;
+            return MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(projectDirectory);
         }
 
         /// <summary>

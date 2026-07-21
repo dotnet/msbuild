@@ -64,11 +64,11 @@ steps:
     version: 8.0.x
 
 - task: UseDotNet@2
-  # net10.0 runtime for vstest's testhost.exe; see collect-steps.yml.
-  displayName: Install .NET 10 runtime (testhost)
+  # For vstest's testhost.exe; see collect-steps.yml.
+  displayName: Install .NET runtime (testhost)
   inputs:
     packageType: runtime
-    version: 10.0.x
+    version: 11.0.x
     includePreviewVersions: true
 
 - task: NuGetAuthenticate@1
@@ -186,15 +186,15 @@ steps:
     # + the bundled SDK props). See collect-steps.yml.
     # UsingToolVisualStudioIbcTraining=false: see collect-steps.yml note.
     if ($IsWindows) {
-      & "$(Build.SourcesDirectory)/eng/common/build.ps1" `
-        -restore -build `
+      & "$(Build.SourcesDirectory)/build.cmd" `
+        -ci `
         -configuration $(BuildConfiguration) `
         -projects "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" `
         -verbosity minimal `
         /p:UsingToolVisualStudioIbcTraining=false
     } else {
-      bash "$(Build.SourcesDirectory)/eng/common/build.sh" `
-        --restore --build `
+      bash "$(Build.SourcesDirectory)/build.sh" `
+        --ci `
         --configuration $(BuildConfiguration) `
         --projects "$(Build.SourcesDirectory)/MSBuild.VSTest.slnx" `
         --verbosity minimal `

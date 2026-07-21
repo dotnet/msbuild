@@ -6,15 +6,16 @@
     Samples/Package which aren't part of the test surface) plus the
     sibling *.UnitTests.VSTest.csproj wrappers. The wrappers import their
     original test csproj but force the VSTest runner stack (CTS does not
-    yet work with Microsoft.Testing.Platform) and pin the TFM to net10.0
-    so a single `dotnet build MSBuild.VSTest.slnx` succeeds.
+    yet work with Microsoft.Testing.Platform) and pin the TFM to
+    $(LatestDotNetCoreForMSBuild) so a single `dotnet build MSBuild.VSTest.slnx`
+    succeeds.
 
     MSBuild.slnx is intentionally left untouched so developer / IDE /
     existing PR pipeline behavior is unchanged — this slnx is only built
     by azure-pipelines/cts-collect.yml and cts-apply.yml.
 
-    KNOWN COVERAGE GAP: the wrappers run net10.0 only. The regular PR
-    pipeline runs both net10.0 and net472 (Windows). The CTS pipeline is
+    KNOWN COVERAGE GAP: the wrappers run $(LatestDotNetCoreForMSBuild) only. The regular PR
+    pipeline runs both $(LatestDotNetCoreForMSBuild) and net472 (Windows). The CTS pipeline is
     parallel and non-blocking, so net472 signal is still provided by the
     existing PR pipeline — but CTS does not add incrementality for the
     net472 leg today. Tracked for follow-up; see scripts/cts/README.md.

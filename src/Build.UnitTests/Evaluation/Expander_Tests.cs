@@ -924,27 +924,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("Item CleanFiles=foo.obj;bar.obj");
         }
 
-#if FEATURE_LEGACY_GETFULLPATH
-        /// <summary>
-        /// Bad path when getting metadata through ->Metadata function
-        /// </summary>
-        [LongPathSupportDisabledFact]
-        public void InvalidPathAndMetadataItemFunctionPathTooLong()
-        {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build'>
-                    <ItemGroup>
-                        <x Include='" + new string('x', 250) + @"'/>
-                    </ItemGroup>
-                    <Target Name='Build'>
-                        <Message Text=""@(x->Metadata('FullPath'))"" />
-                    </Target>
-                </Project>", false);
-
-            logger.AssertLogContains("MSB4023");
-        }
-#endif
-
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->Metadata function
         /// </summary>
@@ -983,27 +962,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4023");
         }
 
-#if FEATURE_LEGACY_GETFULLPATH
-        /// <summary>
-        /// Bad path when getting metadata through ->WithMetadataValue function
-        /// </summary>
-        [LongPathSupportDisabledFact]
-        public void InvalidPathAndMetadataItemFunctionPathTooLong2()
-        {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build'>
-                    <ItemGroup>
-                        <x Include='" + new string('x', 250) + @"'/>
-                    </ItemGroup>
-                    <Target Name='Build'>
-                        <Message Text=""@(x->WithMetadataValue('FullPath', 'x'))"" />
-                    </Target>
-                </Project>", false);
-
-            logger.AssertLogContains("MSB4023");
-        }
-#endif
-
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->WithMetadataValue function
         /// </summary>
@@ -1041,27 +999,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             logger.AssertLogContains("MSB4023");
         }
-
-#if FEATURE_LEGACY_GETFULLPATH
-        /// <summary>
-        /// Bad path when getting metadata through ->AnyHaveMetadataValue function
-        /// </summary>
-        [LongPathSupportDisabledFact]
-        public void InvalidPathAndMetadataItemFunctionPathTooLong3()
-        {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build'>
-                    <ItemGroup>
-                        <x Include='" + new string('x', 250) + @"'/>
-                    </ItemGroup>
-                    <Target Name='Build'>
-                        <Message Text=""@(x->AnyHaveMetadataValue('FullPath', 'x'))"" />
-                    </Target>
-                </Project>", false);
-
-            logger.AssertLogContains("MSB4023");
-        }
-#endif
 
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->AnyHaveMetadataValue function

@@ -321,13 +321,16 @@ namespace Microsoft.Build.CommandLine
                 out bool multiThreaded,
                 out bool shutdownServerAfterBuild,
                 out CommandLineSwitches switchesFromAutoResponseFile,
-                out CommandLineSwitches switchesNotFromAutoResponseFile);
+                out CommandLineSwitches switchesNotFromAutoResponseFile,
+                out ServerNotUsedReason? serverDisabled);
 
             int exitCode;
+            bool shouldUseServer = ShouldUseMSBuildServer(multiThreaded, out string serverEnableReason);
+            bool stdOutHatchPreventsServer = Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout;
             if (
                 canRunServer &&
-                ShouldUseMSBuildServer(multiThreaded, out string serverEnableReason) &&
-                !Traits.Instance.EscapeHatches.EnsureStdOutForChildNodesIsPrimaryStdout)
+                shouldUseServer &&
+                !stdOutHatchPreventsServer)
             {
                 Console.CancelKeyPress += Console_CancelKeyPress;
 
@@ -343,6 +346,20 @@ namespace Microsoft.Build.CommandLine
             }
             else
             {
+                // If the server was requested but this build runs in-process instead, record why so the build
+                // log explains it. Skip when the server was never requested (an ordinary build logs nothing) or
+                // when the client fallback path already recorded a more specific reason (s_serverNotUsed set).
+                if (shouldUseServer && s_serverNotUsed is null)
+                {
+                    // canRunServer here means only the stdout escape hatch blocked the server; otherwise the
+                    // switches disabled it and serverDisabled carries the reason.
+                    s_serverNotUsed = canRunServer
+                        ? new ServerNotUsedReason(
+                            ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerReasonStdOutForChildNodes"),
+                            ServerNotUsedReasonCodeStdOutRedirected)
+                        : serverDisabled;
+                }
+
                 // return 0 on success, non-zero on failure. Reuse the switches already gathered above (when the
                 // parse succeeded) so the command line is not parsed a second time; on parse failure they are null
                 // and Execute re-parses to surface the error.
@@ -378,18 +395,23 @@ namespace Microsoft.Build.CommandLine
         /// project <c>Directory.Build.rsp</c>), or <see langword="null"/> if parsing failed.</param>
         /// <param name="switchesNotFromAutoResponseFile">The gathered command-line/environment switches, or
         /// <see langword="null"/> if parsing failed.</param>
+        /// <param name="serverDisabled">When the return value is <see langword="false"/>, the localized,
+        /// human-readable reason the switches preclude MSBuild Server (e.g. node reuse disabled) paired with a
+        /// stable reason code; <see langword="null"/> when the server can run.</param>
         private static bool CanRunServerBasedOnCommandLineSwitches(
             string[] commandLine,
             out bool multiThreaded,
             out bool shutdownServerAfterBuild,
             out CommandLineSwitches switchesFromAutoResponseFile,
-            out CommandLineSwitches switchesNotFromAutoResponseFile)
+            out CommandLineSwitches switchesNotFromAutoResponseFile,
+            out ServerNotUsedReason? serverDisabled)
         {
             bool canRunServer = true;
             multiThreaded = false;
             shutdownServerAfterBuild = false;
             switchesFromAutoResponseFile = null;
             switchesNotFromAutoResponseFile = null;
+            serverDisabled = null;
             bool switchesFullyGathered = false;
             try
             {
@@ -410,13 +432,22 @@ namespace Microsoft.Build.CommandLine
                 // From here the switches are fully gathered (including any project Directory.Build.rsp), so the
                 // in-proc build path can safely reuse them - and the gather's response-file bookkeeping
                 // (commandLineParser.IncludedResponseFiles) stays intact - even if a validation step below throws.
+                // ProcessProjectSwitch only resolves/validates the project path (it can throw on an ambiguous or
+                // missing project) and reads no further response files, so the flag is set before it runs to keep
+                // the gathered switches on those error paths instead of forcing Execute to re-read response files.
                 switchesFullyGathered = true;
 
+                string projectFile = ResolveProjectPathAgainstLogicalCurrentDirectory(
+                    ProcessProjectSwitch(
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project],
+                        commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions],
+                        Directory.GetFiles));
+
+                // Determine multithreaded mode from the fully-parsed switches (which include any
+                // response-file-provided switches) using the same logic as the in-proc build path.
                 multiThreaded = IsMultiThreadedEnabled(commandLineSwitches);
 
                 bool nodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);
-
-                string projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
 
                 // These switches are fundamentally incompatible with hosting the build in a separate server
                 // process (help/version produce immediate output, -nodeMode is itself a node, and a binary-log
@@ -427,24 +458,44 @@ namespace Microsoft.Build.CommandLine
                     commandLineSwitches[CommandLineSwitches.ParameterlessSwitch.Version] ||
                     FileUtilities.IsBinaryLogFilename(projectFile);
 
-                // Node reuse being disabled normally disqualifies the server. The exception is a multithreaded (/mt) build: it requires the server purely to enable Server GC. 
+                // Node reuse being disabled normally disqualifies the server. The exception is a multithreaded (/mt)
+                // build: it requires the server purely to enable Server GC, so it uses a short-lived server instead
+                // of falling back in-process.
                 bool nodeReuseDisqualifies = !nodeReuse && !multiThreaded;
 
-                if (serverIncompatibleSwitch || nodeReuseDisqualifies)
+                if (serverIncompatibleSwitch)
                 {
                     canRunServer = false;
+                    serverDisabled = new ServerNotUsedReason(
+                        ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerReasonIncompatibleInvocation"),
+                        ServerNotUsedReasonCodeIncompatibleInvocation);
+                    if (KnownTelemetry.PartialBuildTelemetry is not null)
+                    {
+                        KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "Arguments";
+                    }
+                }
+                else if (nodeReuseDisqualifies)
+                {
+                    canRunServer = false;
+                    serverDisabled = new ServerNotUsedReason(
+                        ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerReasonNodeReuseDisabled"),
+                        ServerNotUsedReasonCodeNodeReuseDisabled);
                     if (KnownTelemetry.PartialBuildTelemetry is not null)
                     {
                         KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "Arguments";
                     }
                 }
 
-                // When /mt forced the server on despite node reuse being disabled, the server must not persist past this build. 
+                // When /mt forced the server on despite node reuse being disabled, the server must not persist
+                // past this build (a "short-lived" server: fresh process, torn down afterward).
                 shutdownServerAfterBuild = canRunServer && multiThreaded && !nodeReuse;
             }
             catch (Exception ex)
             {
                 CommunicationsUtilities.Trace($"Unexpected exception during command line parsing. Can not determine if it is allowed to use Server. Fall back to old behavior. Exception: {ex}");
+                serverDisabled = new ServerNotUsedReason(
+                    ResourceUtilities.FormatResourceStringStripCodeAndKeyword("MSBuildServerReasonIncompatibleInvocation"),
+                    ServerNotUsedReasonCodeCommandLineParseError);
                 if (KnownTelemetry.PartialBuildTelemetry is not null)
                 {
                     KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason = "ErrorParsingCommandLine";
@@ -1006,12 +1057,15 @@ namespace Microsoft.Build.CommandLine
                                 // Properties pass; items require the Items pass. This skips the later passes
                                 // (using-tasks and target registration) entirely. Gated behind change wave 18.10
                                 // so the historical full-evaluation behavior can be restored if needed.
+                                // A ProjectInstance (an uncached evaluation snapshot) is used rather than a Project
+                                // because this is a read-only "evaluate, read, discard" scenario and partial
+                                // evaluation is only supported on ProjectInstance.
                                 ProjectEvaluationStage evaluationStage =
                                     ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
                                         ? (getItem.Length == 0 ? ProjectEvaluationStage.Properties : ProjectEvaluationStage.Items)
                                         : ProjectEvaluationStage.Full;
 
-                                Project project = Project.FromFile(projectFile, new ProjectOptions
+                                ProjectInstance project = ProjectInstance.FromFile(projectFile, new ProjectOptions
                                 {
                                     ProjectCollection = collection,
                                     GlobalProperties = globalProperties,
@@ -1033,8 +1087,17 @@ namespace Microsoft.Build.CommandLine
                                 collection.LogBuildFinishedEvent(exitType == ExitType.Success);
                             }
                         }
-                        catch (InvalidProjectFileException)
+                        catch (InvalidProjectFileException ex)
                         {
+                            // ProjectInstance evaluation logs semantic evaluation errors through the collection's
+                            // loggers, but a pre-evaluation failure (for example malformed project XML) throws
+                            // before any logging occurs. Surface the latter in canonical format so the CLI still
+                            // reports the project load error (for example MSB4025) rather than failing silently.
+                            if (!ex.HasBeenLogged)
+                            {
+                                Console.WriteLine($"MSBUILD : error {ex.ErrorCode}: {ex.Message}");
+                            }
+
                             exitType = ExitType.BuildError;
                         }
                     }
@@ -1315,7 +1378,7 @@ namespace Microsoft.Build.CommandLine
                 isStandaloneExecution: !s_isNodeMode);
         }
 
-        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, Project project, TextWriter outputStream)
+        private static ExitType OutputPropertiesAfterEvaluation(string[] getProperty, string[] getItem, ProjectInstance project, TextWriter outputStream)
         {
             // Special case if the user requests exactly one property: skip json formatting
             if (getProperty.Length == 1 && getItem.Length == 0)
@@ -1326,7 +1389,7 @@ namespace Microsoft.Build.CommandLine
             {
                 JsonOutputFormatter jsonOutputFormatter = new();
                 jsonOutputFormatter.AddPropertiesInJsonFormat(getProperty, property => project.GetPropertyValue(property));
-                jsonOutputFormatter.AddItemsInJsonFormat(getItem, project);
+                jsonOutputFormatter.AddItemInstancesInJsonFormat(getItem, project);
                 outputStream.WriteLine(jsonOutputFormatter.ToString());
             }
 
@@ -1994,6 +2057,13 @@ namespace Microsoft.Build.CommandLine
                     MessageImportance.Low),
             };
 
+            // Record how this build relates to MSBuild Server (spawned/reused/not-used) as a dedicated,
+            // structured event, visible in binary logs and at -v:diag.
+            if (TryCreateServerLifecycleEvent() is { } serverLifecycleEvent)
+            {
+                messages.Add(new BuildManager.DeferredBuildMessage(serverLifecycleEvent));
+            }
+
             NativeMethodsShared.LongPathsStatus longPaths = NativeMethodsShared.IsLongPathsEnabled();
             if (longPaths != NativeMethodsShared.LongPathsStatus.NotApplicable)
             {
@@ -2029,6 +2099,63 @@ namespace Microsoft.Build.CommandLine
             }
 
             return messages;
+        }
+
+        /// <summary>
+        /// Builds the <see cref="MSBuildServerLifecycleEventArgs"/> describing how this build relates to MSBuild
+        /// Server, or <see langword="null"/> when the server was neither used nor requested (an ordinary build,
+        /// which logs nothing). In a server process the event is always a spawn/reuse status; any "not used"
+        /// reason the server may have recorded from its own <c>-nodeMode</c> startup command line does not apply
+        /// to the builds it serves and is ignored.
+        /// </summary>
+        private static MSBuildServerLifecycleEventArgs TryCreateServerLifecycleEvent()
+        {
+            if (s_isServerNode)
+            {
+                // s_serverBuildCounter is 1 for the first build a freshly spawned node serves and greater when a
+                // resident node is reused. A spawned node that tears down after this build (a /mt build with node
+                // reuse off) reports a distinct short-lived status.
+                bool spawned = s_serverBuildCounter == 1;
+                bool shortLived = spawned && OutOfProcServerNode.CurrentBuildShutsDownServerNode;
+                string statusResource = (spawned, shortLived) switch
+                {
+                    (true, true) => "MSBuildServerNodeSpawnedShortLived",
+                    (true, false) => "MSBuildServerNodeSpawned",
+                    _ => "MSBuildServerNodeReused",
+                };
+
+                return CreateLifecycleEvent(
+                    spawned ? MSBuildServerLifecycleKind.Spawned : MSBuildServerLifecycleKind.Reused,
+                    processId: EnvironmentUtilities.CurrentProcessId,
+                    reason: null,
+                    reasonCode: null,
+                    message: ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(statusResource, EnvironmentUtilities.CurrentProcessId),
+                    shortLived: shortLived);
+            }
+
+            if (s_serverNotUsed is { } serverNotUsed)
+            {
+                // Clear it so a later in-process build in this process does not report a stale reason.
+                s_serverNotUsed = null;
+
+                return CreateLifecycleEvent(
+                    MSBuildServerLifecycleKind.NotUsed,
+                    processId: 0,
+                    reason: serverNotUsed.Message,
+                    reasonCode: serverNotUsed.Code,
+                    message: ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("MSBuildServerNotUsedForBuild", serverNotUsed.Message));
+            }
+
+            return null;
+
+            static MSBuildServerLifecycleEventArgs CreateLifecycleEvent(
+                MSBuildServerLifecycleKind kind, int processId, string reason, string reasonCode, string message, bool shortLived = false) =>
+                new(kind, processId, reason, reasonCode, message, MessageImportance.Low, shortLived)
+                {
+                    // A deferred message has no project/target context; use the Invalid context so loggers that
+                    // require a non-null context accept the event.
+                    BuildEventContext = BuildEventContext.Invalid,
+                };
         }
 
         private static BuildResult ExecuteBuild(BuildManager buildManager, BuildRequestData request)
@@ -2082,18 +2209,15 @@ namespace Microsoft.Build.CommandLine
             // Add a property to indicate that a Restore is executing
             restoreGlobalProperties[MSBuildConstants.MSBuildIsRestoring] = bool.TrueString;
 
-            // Add the property that NuGet passes when it re-invokes the build during restore. NuGet's restore targets pass
-            // ExcludeRestorePackageImports=true as a global property, which normally forces a second evaluation of every project.
-            // Setting it up front here means the initial evaluation already matches, so it is reused instead of being discarded.
-            // The value must match NuGet's exactly (the literal lowercase "true" from NuGet.targets) because global property values
-            // are compared case-sensitively when matching build configurations for evaluation reuse.
-            // Only set it when the user has not explicitly supplied a value so that an explicit opt-out (e.g.
-            // /p:ExcludeRestorePackageImports=false) is respected instead of being silently overwritten.
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
-                && !globalProperties.ContainsKey(MSBuildConstants.ExcludeRestorePackageImports))
-            {
-                restoreGlobalProperties[MSBuildConstants.ExcludeRestorePackageImports] = MSBuildConstants.ExcludeRestorePackageImportsValue;
-            }
+            // NOTE: Do NOT add ExcludeRestorePackageImports=true here to try to match the global properties that NuGet's
+            // restore targets pass when they re-invoke the build. It is tempting because it would let the initial restore
+            // evaluation be reused instead of re-evaluated, but it breaks restore for projects that have a nonexistent
+            // <ProjectReference>. When the top-level restore evaluation shares the same global property set as NuGet's inner
+            // _GenerateRestoreProjectPathWalk invocation, that walk runs in the same project instance and its unfiltered
+            // _RestoreProjectPathItems (which contains the raw ProjectReference paths, including missing ones) leaks into
+            // _GenerateRestoreGraph's _GenerateRestoreGraphProjectEntry MSBuild call, which does not set SkipNonexistentProjects
+            // and therefore fails with MSB3202 instead of skipping the missing project. See dotnet/msbuild#14274 (reverted)
+            // and dotnet/sdk#55245.
 
             // Create a new request with a Restore target only and specify:
             //  - BuildRequestDataFlags.ClearCachesAfterBuild to ensure the projects will be reloaded from disk for subsequent builds
@@ -2212,6 +2336,43 @@ namespace Microsoft.Build.CommandLine
         /// Indicates that this process is working as a server.
         /// </summary>
         private static bool s_isServerNode;
+
+        /// <summary>
+        /// Number of builds this MSBuild Server node has executed (only meaningful when
+        /// <see cref="s_isServerNode"/> is true). Incremented once per build command the server serves.
+        /// A value of 1 means the node was just spawned for this build; greater than 1 means an
+        /// already-running node is being reused. Used to log a server lifecycle message into the build log.
+        /// </summary>
+        private static int s_serverBuildCounter;
+
+        /// <summary>
+        /// When MSBuild Server was requested for this invocation but the build is instead running in-process
+        /// (e.g. the server was busy, unreachable, or precluded by command-line switches), this holds the
+        /// localized human-readable reason together with a stable, non-localized reason code. It is surfaced as
+        /// a low-importance <see cref="Microsoft.Build.Framework.MSBuildServerLifecycleEventArgs"/> in the build
+        /// log so a binary log records why the server was not used. Null when the server was not requested or was
+        /// used; reset after it is consumed so it cannot leak into a subsequent in-process build.
+        /// </summary>
+        internal static ServerNotUsedReason? s_serverNotUsed;
+
+        /// <summary>
+        /// Pairs the localized, human-readable reason MSBuild Server was requested but not used with a stable,
+        /// non-localized <see cref="Code"/> (one of the <c>ServerNotUsedReasonCode*</c> constants) so tooling can
+        /// branch on the cause without parsing localized text. Keeping the two together guarantees they never drift.
+        /// </summary>
+        /// <param name="Message">The localized, human-readable reason (a lower-case sentence fragment).</param>
+        /// <param name="Code">The stable, non-localized reason code.</param>
+        internal readonly record struct ServerNotUsedReason(string Message, string Code);
+
+        /// <summary>Stable "reasonCode" values for <see cref="ServerNotUsedReason.Code"/>.</summary>
+        internal const string ServerNotUsedReasonCodeIncompatibleInvocation = "incompatible-invocation";
+        internal const string ServerNotUsedReasonCodeNodeReuseDisabled = "node-reuse-disabled";
+        internal const string ServerNotUsedReasonCodeStdOutRedirected = "stdout-redirected";
+        internal const string ServerNotUsedReasonCodeCommandLineParseError = "command-line-parse-error";
+        internal const string ServerNotUsedReasonCodeServerBusy = "server-busy";
+        internal const string ServerNotUsedReasonCodeServerCrashed = "server-crashed";
+        internal const string ServerNotUsedReasonCodeServerStateUnknown = "server-state-unknown";
+        internal const string ServerNotUsedReasonCodeServerUnreachable = "server-unreachable";
 
         /// <summary>
         /// Indicates that this process was launched as a worker node (via -nodeMode switch).
@@ -2430,7 +2591,11 @@ namespace Microsoft.Build.CommandLine
                                                            commandLine);
                     }
 
-                    projectFile = ProcessProjectSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project], commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions], Directory.GetFiles);
+                    projectFile = ResolveProjectPathAgainstLogicalCurrentDirectory(
+                        ProcessProjectSwitch(
+                            commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Project],
+                            commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.IgnoreProjectExtensions],
+                            Directory.GetFiles));
 
                     // figure out which targets we are building
                     targets = ProcessTargetSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.Target]);
@@ -3228,6 +3393,11 @@ namespace Microsoft.Build.CommandLine
                         // we have to pass down xmake build invocation to avoid circular dependency
                         OutOfProcServerNode.BuildCallback buildFunction = (commandLine) =>
                         {
+                            // Count builds this node serves; TryCreateServerLifecycleEvent uses the count to tell
+                            // a freshly spawned node from a reused one. No synchronization needed: the server
+                            // serializes builds behind its busy mutex, which also publishes the value.
+                            s_serverBuildCounter++;
+
                             int exitCode;
                             ExitType exitType;
 
@@ -3442,6 +3612,52 @@ namespace Microsoft.Build.CommandLine
             }
 
             return projectFile;
+        }
+
+        /// <summary>
+        /// On Unix, rebases a relative project path onto <c>$PWD</c> when <c>$PWD</c> physically resolves
+        /// to the same directory as <see cref="Directory.GetCurrentDirectory"/>, keeping
+        /// <c>$(MSBuildProjectFullPath)</c> stable across symlinked working directories.
+        /// No-op on Windows, for absolute paths or paths containing <c>..</c>, when <c>PWD</c> is
+        /// unset/relative/stale, or when change wave 18.10 is disabled.
+        /// </summary>
+        internal static string ResolveProjectPathAgainstLogicalCurrentDirectory(string projectFile)
+        {
+            if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
+                || NativeMethodsShared.IsWindows
+                || string.IsNullOrEmpty(projectFile)
+                || Path.IsPathRooted(projectFile)
+                // Bail on ".." segments: lexical normalization can escape the shared physical prefix,
+                // so the logical and physical resolutions can end up pointing at different files.
+                || FileUtilities.ContainsParentTraversalSegment(projectFile))
+            {
+                return projectFile;
+            }
+
+            string logicalCurrentDirectory = Environment.GetEnvironmentVariable("PWD");
+            if (string.IsNullOrEmpty(logicalCurrentDirectory) || !Path.IsPathRooted(logicalCurrentDirectory))
+            {
+                return projectFile;
+            }
+
+            // Confirm $PWD physically resolves to the same directory as getcwd(); otherwise PWD is stale.
+            string physicalPwd = NativeMethodsShared.RealPath(logicalCurrentDirectory);
+            string physicalCwd = NativeMethodsShared.RealPath(Directory.GetCurrentDirectory());
+            if (physicalPwd is null || physicalCwd is null
+                || !string.Equals(physicalPwd, physicalCwd, StringComparison.Ordinal))
+            {
+                return projectFile;
+            }
+
+            string rebasedProjectFile = Path.GetFullPath(Path.Combine(logicalCurrentDirectory, projectFile));
+
+            // This runs during command-line parsing before any build logger exists, so we cannot emit a
+            // build message. Trace it via comm tracing (MSBUILDDEBUGCOMM) so the rebase is visible when
+            // diagnosing path discrepancies, including MSBuild Server scenarios where the decision is
+            // made client-side. The interpolated handler is a no-op unless comm tracing is enabled.
+            CommunicationsUtilities.Trace($"ResolveProjectPathAgainstLogicalCurrentDirectory: rebased '{projectFile}' to '{rebasedProjectFile}' via $PWD='{logicalCurrentDirectory}'.");
+
+            return rebasedProjectFile;
         }
 
         private static void ValidateExtensions(string[] projectExtensionsToIgnore)
