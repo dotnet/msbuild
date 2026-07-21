@@ -371,7 +371,7 @@ For each modified line: What was the exact runtime value before? After? Where do
 | `""` | `""` (.NET Fx) / `null` (.NET Core+) | Works / Throws ⚠️ |
 | `"file.resx"` (no dir) | `""` | Works |
 
-Verify behavior on **both** `net472` and `net10.0`.
+Verify behavior on **both** .NET Framework and .NET TFMs.
 
 ### Phase 3: Downstream Impact
 
@@ -423,4 +423,4 @@ Assertions: Execute() return value, [Output] exact string, error message content
 - [ ] Tests for custom tasks set `TaskEnvironment = TaskEnvironmentHelper.CreateForTest()` (built-in tasks have a default)
 - [ ] Migration test follows Pattern A (decoy-CWD) **or** Pattern B (cross-instance independence), or PR explains why no test is meaningful
 - [ ] CWD-mutating tests pinned to a non-parallel xUnit collection
-- [ ] Cross-framework: tested on both net472 and net10.0
+- [ ] Cross-framework: tested on .NET Framework and .NET TFMs.

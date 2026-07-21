@@ -28,7 +28,7 @@ public class PartialEvaluationBenchmark
     /// <summary>
     /// Number of <c>&lt;Target&gt;</c> elements to register during the final evaluation pass. This is
     /// the pass that a properties-only evaluation skips entirely. A restored <c>dotnet new console</c>
-    /// (net10.0) evaluates ~500 targets, so 506 reflects a realistic SDK-style project.
+    /// (.NETCoreApp) evaluates ~500 targets, so 506 reflects a realistic SDK-style project.
     /// </summary>
     [Params(506)]
     public int TargetCount { get; set; }
