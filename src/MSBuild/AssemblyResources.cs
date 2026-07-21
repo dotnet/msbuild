@@ -30,14 +30,14 @@ namespace Microsoft.Build.Shared
                 resource = s_sharedResources.GetString(name, CultureInfo.CurrentUICulture);
             }
 
-            ErrorUtilities.VerifyThrow(resource != null, $"Missing resource '{name}'");
+            Assumed.NotNull(resource, $"Missing resource '{name}'");
 
             return resource;
         }
 
         // assembly resources
-        private static readonly ResourceManager s_resources = new ResourceManager("MSBuild.Strings", typeof(AssemblyResources).GetTypeInfo().Assembly);
+        private static readonly ResourceManager s_resources = new ResourceManager("MSBuild.Strings", typeof(AssemblyResources).Assembly);
         // shared resources
-        private static readonly ResourceManager s_sharedResources = new ResourceManager("MSBuild.Strings.shared", typeof(AssemblyResources).GetTypeInfo().Assembly);
+        private static readonly ResourceManager s_sharedResources = new ResourceManager("MSBuild.Strings.shared", typeof(AssemblyResources).Assembly);
     }
 }

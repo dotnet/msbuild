@@ -421,6 +421,38 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="CoordinatorFailedToConnect">
+        <source>Failed to connect to the build coordinator. The build will proceed without node coordination.</source>
+        <target state="new">Failed to connect to the build coordinator. The build will proceed without node coordination.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CoordinatorFailedToLaunch">
+        <source>Failed to launch the build coordinator. The build will proceed without node coordination.</source>
+        <target state="new">Failed to launch the build coordinator. The build will proceed without node coordination.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CoordinatorFailedToNegotiate">
+        <source>Failed to negotiate with the build coordinator. The build will proceed without node coordination.</source>
+        <target state="new">Failed to negotiate with the build coordinator. The build will proceed without node coordination.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CoordinatorLaunchTimedOut">
+        <source>Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</source>
+        <target state="new">Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="CoordinatorNodeGrantReceived">
+        <source>Coordinator granted {0} node(s) for this build.</source>
+        <target state="new">Coordinator granted {0} node(s) for this build.</target>
+        <note>
+      LOCALIZATION: {0} is the number of nodes granted by the coordinator.
+    </note>
+      </trans-unit>
+      <trans-unit id="CoordinatorWaitingForNodes">
+        <source>Waiting for coordinator to grant build resources...</source>
+        <target state="new">Waiting for coordinator to grant build resources...</target>
+        <note />
+      </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
         <source>Failed to find the specified custom check assembly: '{0}'. Please check if it exists.</source>
         <target state="translated">지정한 사용자 지정 검사 어셈블리를 찾지 못했습니다. '{0}'. 있는지 확인하세요.</target>
@@ -592,7 +624,7 @@
       </trans-unit>
       <trans-unit id="LogEnabledLogs">
         <source>Enabled loggers: {0}</source>
-        <target state="new">Enabled loggers: {0}</target>
+        <target state="translated">사용하도록 설정된 로거: {0}</target>
         <note>{0} is a comma-separated list of logger types (e.g. "Binary logger", "File logger").</note>
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -1040,7 +1072,7 @@ Errors: {3}</source>
       </trans-unit>
       <trans-unit id="TaskHostDetails">
         <source>Task "{0}" ran in TaskHost process {1}, spawned by caller process {2}. New TaskHost spawned for this invocation: {3}. TaskHost is a reusable sidecar: {4}. Node reuse: {5}.</source>
-        <target state="translated">작업 "{0}"은(는) 호출한 MSBuild 프로세스 {1}(이)가 생성한 TaskHost 프로세스 {2}에서 실행되었습니다. 이 호출에 대해 새 TaskHost가 생성되었습니다: {3}. TaskHost는 재사용 가능한 사이드카입니다: {4}. 노드 재사용: {5}.</target>
+        <target state="translated">작업 "{0}"은(는) 호출한 MSBuild 프로세스 {2}(이)가 생성한 TaskHost 프로세스 {1}에서 실행되었습니다. 이 호출에 대해 새 TaskHost가 생성되었습니다: {3}. TaskHost는 재사용 가능한 사이드카입니다: {4}. 노드 재사용: {5}.</target>
         <note>Diagnostic message logged from TaskHostTask. {0} task name. {1} PID of the spawned TaskHost process. {2} PID of the MSBuild process that spawned it. {3}/{4}/{5} are booleans (True/False). LOCALIZATION: Do NOT localize "TaskHost" — it is an MSBuild feature name.</note>
       </trans-unit>
       <trans-unit id="TaskReleasedCores">

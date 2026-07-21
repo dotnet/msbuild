@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd
 {
@@ -55,7 +54,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void StartState(DateTime currentTime)
         {
-            ErrorUtilities.VerifyThrow(_startTimeForCurrentState == DateTime.MinValue, "Cannot start the counter when it is already running.");
+            Assumed.Equal(_startTimeForCurrentState, DateTime.MinValue, "Cannot start the counter when it is already running.");
             _startTimeForCurrentState = currentTime;
         }
 

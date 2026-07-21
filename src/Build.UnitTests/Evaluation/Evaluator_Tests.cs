@@ -4412,7 +4412,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-#if FEATURE_HTTP_LISTENER
+#if FEATURE_THREAD_ABORT
         private Exception _httpListenerThreadException = null;
 
         /// <summary>
@@ -5100,7 +5100,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
-#if FEATURE_HTTP_LISTENER
+#if FEATURE_THREAD_ABORT
         /// <summary>
         /// HTTP server code running on a separate thread that expects a connection request
         /// The test "VerifyDTDProcessingIsDisabled" creates a project with a url reference to this server from a DTD tag

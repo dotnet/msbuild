@@ -11,8 +11,8 @@ internal static class EventsCreatorHelper
 {
     public static BuildMessageEventArgs CreateMessageEventFromText(BuildEventContext buildEventContext, MessageImportance importance, string message, params object?[]? messageArgs)
     {
-        ErrorUtilities.VerifyThrowInternalNull(buildEventContext);
-        ErrorUtilities.VerifyThrowInternalNull(message);
+        Assumed.NotNull(buildEventContext);
+        Assumed.NotNull(message);
 
         BuildMessageEventArgs buildEvent = new BuildMessageEventArgs(
                 message,
@@ -28,9 +28,9 @@ internal static class EventsCreatorHelper
 
     public static BuildErrorEventArgs CreateErrorEventFromText(BuildEventContext buildEventContext, string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
     {
-        ErrorUtilities.VerifyThrowInternalNull(buildEventContext);
-        ErrorUtilities.VerifyThrowInternalNull(file);
-        ErrorUtilities.VerifyThrowInternalNull(message);
+        Assumed.NotNull(buildEventContext);
+        Assumed.NotNull(file);
+        Assumed.NotNull(message);
 
         string? subcategory = null;
 
@@ -59,9 +59,9 @@ internal static class EventsCreatorHelper
 
     public static BuildWarningEventArgs CreateWarningEventFromText(BuildEventContext buildEventContext, string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
     {
-        ErrorUtilities.VerifyThrowInternalNull(buildEventContext);
-        ErrorUtilities.VerifyThrowInternalNull(file);
-        ErrorUtilities.VerifyThrowInternalNull(message);
+        Assumed.NotNull(buildEventContext);
+        Assumed.NotNull(file);
+        Assumed.NotNull(message);
 
         string? subcategory = null;
 

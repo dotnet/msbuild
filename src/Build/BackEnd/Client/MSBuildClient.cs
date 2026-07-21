@@ -108,6 +108,12 @@ namespace Microsoft.Build.Experimental
         private int? _launchedServerPid;
 
         /// <summary>
+        /// Whether this build is multithreaded (/mt). Determines whether the launched server process
+        /// gets Server GC (the server only does in-process project work under /mt).
+        /// </summary>
+        private readonly bool _multiThreaded;
+
+        /// <summary>
         /// Public constructor with parameters.
         /// </summary>
         /// <param name="commandLine">The command line to process. The first argument
@@ -115,6 +121,20 @@ namespace Microsoft.Build.Experimental
         /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
         /// or to version of MSBuild.dll found to be associated with the current process.</param>
         public MSBuildClient(string[] commandLine, string msbuildLocation)
+            : this(commandLine, msbuildLocation, multiThreaded: false)
+        {
+        }
+
+        /// <summary>
+        /// Public constructor with parameters.
+        /// </summary>
+        /// <param name="commandLine">The command line to process. The first argument
+        /// on the command line is assumed to be the name/path of the executable, and is ignored</param>
+        /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
+        /// or to version of MSBuild.dll found to be associated with the current process.</param>
+        /// <param name="multiThreaded">Whether this build is multithreaded (/mt). When true, the launched
+        /// server process is started with Server GC.</param>
+        public MSBuildClient(string[] commandLine, string msbuildLocation, bool multiThreaded)
         {
             _serverEnvironmentVariables = new();
             _exitResult = new();
@@ -122,6 +142,7 @@ namespace Microsoft.Build.Experimental
             // dll & exe locations
             _commandLine = commandLine;
             _msbuildLocation = msbuildLocation;
+            _multiThreaded = multiThreaded;
 
             // Client <-> Server communication stream
             _handshake = GetHandshake();
@@ -469,11 +490,43 @@ namespace Microsoft.Build.Experimental
                 // Set DOTNET_ROOT so the apphost server child can locate the runtime; this
                 // override is replaced by the client's environment on the first build command
                 // (see OutOfProcServerNode.HandleServerNodeBuildCommand → SetEnvironment).
-                // The `!` works around dotnet/msbuild#13761.
+                // This is a shared cached dictionary reused by other node launches, so it must not
+                // be mutated in place.
+                IDictionary<string, string?>? baseOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides();
+                IDictionary<string, string?>? environmentOverrides = baseOverrides;
+
+                // When this build is multithreaded (/mt), launch the long-lived server (build
+                // orchestrator) process with Server GC. Other processes may get higher throughput
+                // with Server GC, but we want to enable it only for the highest-impact one where
+                // most of the work of the actual build will happen in MT mode. GC mode is fixed at
+                // CLR startup, so it must be set in the child's launch environment via DOTNET_gcServer
+                // (which only affects .NET/CoreCLR and, since .NET 9, takes precedence over
+                // runtimeconfig.json). The decision is made from this (launch-time) invocation's command
+                // line; a server is keyed by handshake and reused, so a later differing /mt choice does
+                // not re-launch it.
+                //
+                // This is scoped to the server process only. Sidecar TaskHost (nodemode 2) and worker
+                // (nodemode 1) nodes are launched through other code paths that never set this knob, and
+                // the server resets its own environment to the client's on the first build command (so
+                // DOTNET_gcServer is removed before it ever spawns children). Those nodes therefore keep
+                // the default Workstation GC.
+                //
+                // Copy the shared base overrides (preserving its comparer) before adding the GC override.
+                // Honor an explicit user-set DOTNET_gcServer (e.g. "0" to force Workstation GC in a
+                // memory-constrained container): only inject the default when the user hasn't set it.
+                if (_multiThreaded &&
+                    Environment.GetEnvironmentVariable("DOTNET_gcServer") is null)
+                {
+                    environmentOverrides = baseOverrides is null
+                        ? new Dictionary<string, string?>()
+                        : new Dictionary<string, string?>(baseOverrides);
+                    environmentOverrides["DOTNET_gcServer"] = "1";
+                }
+
                 NodeLaunchData launchData = new(
                     MSBuildLocation: _msbuildLocation,
                     CommandLineArgs: string.Join(" ", msBuildServerOptions),
-                    EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides()!);
+                    EnvironmentOverrides: environmentOverrides);
 
                 using Process msbuildProcess = nodeLauncher.Start(launchData, nodeId: 0);
                 _launchedServerPid = msbuildProcess.Id;
@@ -524,7 +577,8 @@ namespace Microsoft.Build.Experimental
                 : new PartialBuildTelemetry(
                     startedAt: KnownTelemetry.PartialBuildTelemetry.StartAt.GetValueOrDefault(),
                     initialServerState: KnownTelemetry.PartialBuildTelemetry.InitialMSBuildServerState,
-                    serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason);
+                    serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason,
+                    serverEnableReason: KnownTelemetry.PartialBuildTelemetry.ServerEnableReason);
 
             return new ServerNodeBuildCommand(
                         _commandLine,

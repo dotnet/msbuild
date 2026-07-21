@@ -5,7 +5,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Logging;
@@ -15,7 +14,6 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Constants = Microsoft.Build.Framework.Constants;
 #if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.FileAccesses;
@@ -177,8 +175,8 @@ namespace Microsoft.Build.BackEnd
             int scheduledNodeId,
             TaskEnvironment taskEnvironment)
         {
-            ErrorUtilities.VerifyThrowInternalNull(taskType);
-            ErrorUtilities.VerifyThrowInternalNull(taskEnvironment);
+            Assumed.NotNull(taskType);
+            Assumed.NotNull(taskEnvironment);
 
             _scheduledNodeId = scheduledNodeId;
 
@@ -317,10 +315,10 @@ namespace Microsoft.Build.BackEnd
                 lock (_taskHostLock)
                 {
                     _taskHostProvider = (NodeProviderOutOfProcTaskHost)_buildComponentHost.GetComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
-                    ErrorUtilities.VerifyThrowInternalNull(_taskHostProvider, "taskHostProvider");
+                    Assumed.NotNull(_taskHostProvider);
                 }
 
-                string taskLocation = AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly);
+                string taskLocation = _taskType.Type.Assembly.Location;
                 if (string.IsNullOrEmpty(taskLocation))
                 {
                     // fall back to the AssemblyLoadInfo location for inline tasks loaded from bytes
@@ -571,7 +569,7 @@ namespace Microsoft.Build.BackEnd
                     HandleBuildRequest(packet as TaskHostBuildRequest);
                     break;
                 default:
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                     break;
             }
         }
@@ -630,7 +628,7 @@ namespace Microsoft.Build.BackEnd
                 else
                 {
                     exceptionMessageArgs = [_taskType.Type.Name,
-                        AssemblyUtilities.GetAssemblyLocation(_taskType.Type.GetTypeInfo().Assembly),
+                        _taskType.Type.Assembly.Location,
                         string.Empty];
                 }
 
@@ -702,7 +700,7 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        ErrorUtilities.ThrowInternalError("Unknown event args type.");
+                        InternalError.Throw("Unknown event args type.");
                     }
 
                     break;
@@ -761,7 +759,7 @@ namespace Microsoft.Build.BackEnd
             {
                 if (_buildEngine is not IBuildEngine3 engine3)
                 {
-                    ErrorUtilities.ThrowInternalError($"HandleBuildRequest requires IBuildEngine3 but _buildEngine is {_buildEngine?.GetType().Name ?? "null"}");
+                    InternalError.Throw($"HandleBuildRequest requires IBuildEngine3 but _buildEngine is {_buildEngine?.GetType().Name ?? "null"}");
                     return; // unreachable, but satisfies flow analysis
                 }
 
@@ -814,14 +812,15 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void LogErrorUnableToCreateTaskHost(HandshakeOptions requiredContext, string runtime, string architecture, Exception e)
         {
-            string taskHostLocation;
+            string taskHostLocation = null;
 
             if (Handshake.IsHandshakeOptionEnabled(requiredContext, HandshakeOptions.NET))
             {
                 (_, string msbuildPath) = NodeProviderOutOfProcTaskHost.GetMSBuildLocationForNETRuntime(requiredContext, _taskHostParameters);
-                taskHostLocation = msbuildPath != null
-                    ? Path.Combine(msbuildPath, Constants.MSBuildExecutableName)
-                    : null;
+                if (msbuildPath != null)
+                {
+                    (taskHostLocation, _) = NodeProviderOutOfProcTaskHost.ResolveNetTaskHostLaunchPath(msbuildPath);
+                }
             }
             else
             {
