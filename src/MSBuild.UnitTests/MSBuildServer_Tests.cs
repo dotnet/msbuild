@@ -186,17 +186,18 @@ namespace Microsoft.Build.Engine.UnitTests
 
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
-            _env.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", "off");
+            _env.SetEnvironmentVariable("CI", "1");
 
-            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -verbosity:diagnostic", out bool success, false, _output);
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -terminalLogger:auto -verbosity:diagnostic", out bool success, false, _output);
             success.ShouldBeTrue();
             int serverPid = ParseNumber(output, "Server ID is ");
             _env.WithTransientProcess(serverPid);
 
-            const string terminalLoggerMessage = "The environment variable MSBUILDTERMINALLOGGER was set to off.";
+            string terminalLoggerMessage = ResourceUtilities.GetResourceString("TerminalLoggerNotUsedAutomated");
             int initialMessageCount = Regex.Matches(output, Regex.Escape(terminalLoggerMessage)).Count;
+            initialMessageCount.ShouldBeGreaterThan(0);
 
-            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -verbosity:diagnostic", out success, false, _output);
+            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -terminalLogger:auto -verbosity:diagnostic", out success, false, _output);
             success.ShouldBeTrue();
             ParseNumber(output, "Server ID is ").ShouldBe(serverPid);
             Regex.Matches(output, Regex.Escape(terminalLoggerMessage)).Count.ShouldBe(initialMessageCount);
