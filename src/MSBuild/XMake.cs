@@ -1521,6 +1521,7 @@ namespace Microsoft.Build.CommandLine
                     currentProcess.PriorityClass = originalProcessPriority;
                     s_originalProcessPriority = null;
                 }
+                // Restoring priority can fail due to platform permissions; priority changes are best effort.
                 catch (Win32Exception) { }
             }
         }
