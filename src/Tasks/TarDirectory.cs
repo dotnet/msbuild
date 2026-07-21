@@ -123,7 +123,8 @@ namespace Microsoft.Build.Tasks
                         }
 
                         TarEntryFormat format = TarEntryFormat.Pax;
-                        if (!string.IsNullOrEmpty(Format) && !TryParseFormat(Format, out format))
+                        if (!string.IsNullOrEmpty(Format)
+                            && (!Enum.TryParse(Format, ignoreCase: true, out format) || format == TarEntryFormat.Unknown))
                         {
                             Log.LogErrorWithCodeFromResources("TarDirectory.ErrorInvalidFormat", Format);
 
@@ -184,9 +185,6 @@ namespace Microsoft.Build.Tasks
 
                 return true;
             }
-
-            static bool TryParseFormat(string format, out TarEntryFormat tarFormat) =>
-                Enum.TryParse(format, ignoreCase: true, out tarFormat) && tarFormat != TarEntryFormat.Unknown;
         }
 
         /// <summary>
