@@ -6,13 +6,14 @@ param(
     [Parameter(Position = 1)][string]$AllowlistPath = '.github/branch-freeze-allowlist.txt'
 )
 
-function Test-ActorAllowed {
+function Test-BranchFreezeAuthorization {
+    [OutputType([bool])]
     param(
         [Parameter(Mandatory)][string]$Login,
-        [Parameter(Mandatory)][string]$Path
+        [Parameter(Mandatory)][string]$AllowlistPath
     )
 
-    foreach ($line in Get-Content -LiteralPath $Path) {
+    foreach ($line in Get-Content -LiteralPath $AllowlistPath) {
         $allowedLogin = [regex]::Replace(($line -split '#', 2)[0], '\s', '')
         if (
             -not [string]::IsNullOrEmpty($allowedLogin) -and
@@ -26,6 +27,9 @@ function Test-ActorAllowed {
 }
 
 function Invoke-Main {
+    [OutputType([int])]
+    param()
+
     # Step 1: Deny safely when the checked-in allowlist is unavailable.
     if (-not (Test-Path -LiteralPath $AllowlistPath -PathType Leaf)) {
         [Console]::Error.WriteLine("Allowlist file '$AllowlistPath' not found.")
@@ -33,7 +37,9 @@ function Invoke-Main {
     }
 
     # Step 2: Return an exit code that the command workflow can authorize.
-    return [int](-not (Test-ActorAllowed -Login $Actor -Path $AllowlistPath))
+    return [int](-not (
+        Test-BranchFreezeAuthorization -Login $Actor -AllowlistPath $AllowlistPath
+    ))
 }
 
 $ErrorActionPreference = 'Stop'

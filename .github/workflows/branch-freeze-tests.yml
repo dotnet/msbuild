@@ -1,4 +1,4 @@
-name: Branch freeze tests
+name: Validate branch freeze automation
 
 # Runs the branch-freeze PowerShell unit tests and parser validation whenever the
 # branch-freeze scripts, workflows, or allowlist change. This validates the

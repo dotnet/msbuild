@@ -8,12 +8,24 @@
 #                                                         $env:MOCK_ISSUE_COMMENT_FAILURE=1
 #   * `gh api -X POST .../statuses/<sha> -f key=value` -> appends each key=value
 #                                                        line to $env:GH_STATUS_FILE.
+#   * any command                                      -> fails while the counter in
+#                                                        $env:MOCK_TRANSIENT_FAILURE_FILE
+#                                                        is greater than zero.
 [CmdletBinding()]
 param(
   [Parameter(ValueFromRemainingArguments)][string[]]$CliArguments
 )
 
 $ErrorActionPreference = 'Stop'
+
+if (-not [string]::IsNullOrEmpty($env:MOCK_TRANSIENT_FAILURE_FILE)) {
+  $failuresRemaining = [int](Get-Content -LiteralPath $env:MOCK_TRANSIENT_FAILURE_FILE -Raw)
+  if ($failuresRemaining -gt 0) {
+    Set-Content -LiteralPath $env:MOCK_TRANSIENT_FAILURE_FILE `
+      -Value ($failuresRemaining - 1) -Encoding utf8
+    exit 1
+  }
+}
 
 function Get-OptionValue {
   param(

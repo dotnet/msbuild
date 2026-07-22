@@ -54,7 +54,14 @@ tracking issue and blocks merge. `/unfreeze` turns the check green again.
 | [`.github/workflows/branch-freeze-refresh.yml`](../.github/workflows/branch-freeze-refresh.yml) | Refreshes the status on existing open PRs |
 | [`.github/workflows/branch-freeze-tests.yml`](../.github/workflows/branch-freeze-tests.yml) | Validates PowerShell syntax and runs unit tests on branch-freeze changes |
 | [`.github/branch-freeze-allowlist.txt`](../.github/branch-freeze-allowlist.txt) | GitHub logins allowed to run `/freeze` `/unfreeze` |
-| [`.github/branch-freeze/BranchFreeze.psm1`](../.github/branch-freeze/BranchFreeze.psm1) | Shared issue lookup, lifecycle, GitHub CLI, and status functions |
+| [`.github/branch-freeze/BranchFreeze.psm1`](../.github/branch-freeze/BranchFreeze.psm1) | Branch-freeze tracking issue lookup and lifecycle rules |
+| [`.github/branch-freeze/BranchFreezeCommentParser.psm1`](../.github/branch-freeze/BranchFreezeCommentParser.psm1) | Parses slash commands and tracking issue bodies |
+| [`.github/branch-freeze/BranchFreezeCommentComposer.psm1`](../.github/branch-freeze/BranchFreezeCommentComposer.psm1) | Composes issue bodies, replies, audit comments, and status descriptions |
+| [`.github/branch-freeze/GitHubIssuesClient.psm1`](../.github/branch-freeze/GitHubIssuesClient.psm1) | Reads and modifies GitHub labels, issues, comments, and reactions |
+| [`.github/branch-freeze/GitHubPullRequestsClient.psm1`](../.github/branch-freeze/GitHubPullRequestsClient.psm1) | Enumerates open pull requests |
+| [`.github/branch-freeze/GitHubRepositoryClient.psm1`](../.github/branch-freeze/GitHubRepositoryClient.psm1) | Resolves the repository and checks whether branches exist |
+| [`.github/branch-freeze/GitHubStatusChecksClient.psm1`](../.github/branch-freeze/GitHubStatusChecksClient.psm1) | Publishes commit statuses |
+| [`.github/branch-freeze/GitHubCli.psm1`](../.github/branch-freeze/GitHubCli.psm1) | Runs the GitHub CLI and centralizes its error handling |
 | [`.github/branch-freeze/`](../.github/branch-freeze/) | Command, status, refresh, authorization, and test scripts |
 
 ### Tests
@@ -106,8 +113,5 @@ again to clear residual statuses.
 
 ### Notes
 
-* The bulk seed in step 4 (blank `base_ref`) is a one-time/manual operation; run it
-  when no `/freeze` `/unfreeze` is in flight, since the all-branches seed is not
-  serialized with per-branch operations.
-* The fan-out re-stamps up to 1000 open PRs per branch; if a repo ever exceeds that,
-  the workflow logs a warning to raise the limit.
+* Do not run a manual all-branches refresh while a freeze or unfreeze command is running.
+* A refresh handles up to 1,000 open PRs per branch and warns when the limit is reached.

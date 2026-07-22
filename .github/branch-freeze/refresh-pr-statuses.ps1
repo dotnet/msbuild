@@ -6,31 +6,16 @@ param(
     [Parameter(Position = 0)][AllowEmptyString()][string]$BaseRef = ''
 )
 
-function Get-OpenPullRequest {
-    param(
-        [Parameter(Mandatory)][string]$Repository,
-        [AllowEmptyString()][string]$Branch
-    )
-
-    $arguments = @(
-        'pr', 'list',
-        '--repo', $Repository,
-        '--state', 'open',
-        '--limit', '1000',
-        '--json', 'number,headRefOid,baseRefName'
-    )
-    if (-not [string]::IsNullOrEmpty($Branch)) {
-        $arguments += @('--base', $Branch)
-    }
-
-    return @(Invoke-GitHubCli -Arguments $arguments | ConvertFrom-Json)
-}
-
 function Invoke-Main {
+    [OutputType([int])]
+    param()
+
     # Step 1: Load open PRs, optionally limited to one target branch.
-    $repository = Get-RepositoryName
+    $repository = Get-GitHubRepositoryName
     $env:REPO = $repository
-    $pullRequests = @(Get-OpenPullRequest -Repository $repository -Branch $BaseRef)
+    $pullRequests = @(
+        Get-GitHubOpenPullRequest -Repository $repository -BaseRef $BaseRef
+    )
     $suffix = if ([string]::IsNullOrEmpty($BaseRef)) { '' } else { " targeting $BaseRef" }
     Write-Host "Stamping $($pullRequests.Count) open PR(s)$suffix"
     if ($pullRequests.Count -ge 1000) {
@@ -57,6 +42,7 @@ function Invoke-Main {
 }
 
 $ErrorActionPreference = 'Stop'
-Import-Module (Join-Path $PSScriptRoot 'BranchFreeze.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'GitHubPullRequestsClient.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'GitHubRepositoryClient.psm1') -Force
 $exitCode = Invoke-Main
 exit $exitCode

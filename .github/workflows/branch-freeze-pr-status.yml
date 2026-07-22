@@ -1,4 +1,4 @@
-name: Branch freeze PR status
+name: Set branch freeze PR status
 
 # Evaluates the required `branch-freeze` commit status for one pull request when
 # that pull request is opened, updated, reopened, or retargeted.

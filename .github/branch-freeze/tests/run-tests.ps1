@@ -1,8 +1,10 @@
 #!/usr/bin/env pwsh
 # Security-focused unit tests for the branch-freeze authorization and status logic.
 #
-# These pin the three behaviors that matter most if they silently break:
+# These pin the behaviors that matter most if they silently break:
+#   * GitHubCli.psm1     - transient GitHub CLI failures are retried three times.
 #   * is-allowed.ps1     - who may run /freeze /unfreeze (deny-by-default).
+#   * handle-command.ps1 - untrusted branch and reason text cannot execute PowerShell.
 #   * set-pr-status.ps1  - only the open permanent issue for the exact branch title
 #                          freezes that branch.
 #   * handle-command.ps1 - one issue is created per branch, then reopened/closed.
@@ -141,6 +143,52 @@ try {
     }
     $env:PATH = "$mockDirectory$([IO.Path]::PathSeparator)$env:PATH"
 
+    Write-Output '== GitHub CLI transport (transient failures) =='
+    Import-Module (Join-Path $branchFreezeDirectory 'GitHubCli.psm1') -Force
+    $transientFailureFile = Register-TestTemporaryFile
+    Set-Content -LiteralPath $transientFailureFile -Value 2 -Encoding utf8
+    $env:MOCK_TRANSIENT_FAILURE_FILE = $transientFailureFile
+    try {
+        $issuesJson = Invoke-GitHubCli -Arguments @('issue', 'list')
+        Assert-Equal $issuesJson '[]' 'CLI succeeds after two transient failures'
+        Assert-Equal (
+            [int](Get-Content -LiteralPath $transientFailureFile -Raw)
+        ) 0 'CLI makes all three attempts'
+    }
+    finally {
+        $env:MOCK_TRANSIENT_FAILURE_FILE = ''
+    }
+
+    Write-Output '== comment modules (pure parsing and composition) =='
+    $branchFreezeModule = Import-Module `
+        (Join-Path $branchFreezeDirectory 'BranchFreeze.psm1') -Force -PassThru
+    Assert-Equal (
+        @($branchFreezeModule.ExportedFunctions.Keys | Sort-Object) -join ','
+    ) (
+        'Close-BranchFreezeIssue,Get-BranchFreezeState,Open-BranchFreezeIssue'
+    ) 'domain module exports only semantic branch-freeze operations'
+    Import-Module (Join-Path $branchFreezeDirectory 'BranchFreezeCommentParser.psm1') -Force
+    Import-Module (Join-Path $branchFreezeDirectory 'BranchFreezeCommentComposer.psm1') -Force
+
+    $request = ConvertFrom-BranchFreezeCommand -Body '/freeze --branch vs17.14 SDK insertion broke'
+    Assert-Equal $request.Action 'freeze' 'parser recognizes the freeze action'
+    Assert-Equal $request.Branch 'vs17.14' 'parser reads an explicit branch'
+    Assert-Equal $request.Reason 'SDK insertion broke' 'parser preserves the freeze reason'
+
+    $request = ConvertFrom-BranchFreezeCommand -Body '/unfreeze'
+    Assert-Equal $request.Action 'unfreeze' 'parser recognizes the unfreeze action'
+    Assert-Equal $request.Branch 'main' 'parser defaults the branch to main'
+    Assert-Equal $request.Reason '' 'parser returns no unfreeze reason'
+
+    $issueBody = New-BranchFreezeIssueBody -Branch 'main' -Actor 'rainersigwald' `
+        -Reason 'SDK insertion broke'
+    $details = ConvertFrom-BranchFreezeIssueBody -Body $issueBody
+    Assert-Equal $details.Actor 'rainersigwald' 'issue-body parser reads the actor'
+    Assert-Equal $details.Reason 'SDK insertion broke' 'issue-body parser reads the reason'
+    Assert-Equal (
+        New-BranchFreezeAuditComment -Actor 'rainersigwald' -Reason 'SDK insertion broke'
+    ) 'Frozen by @rainersigwald: SDK insertion broke' 'composer creates the audit comment'
+
     Write-Output '== is-allowed.ps1 (authorization boundary) =='
     $allowlist = Join-Path $repositoryRoot '.github/branch-freeze-allowlist.txt'
     $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'is-allowed.ps1') @('rainersigwald', $allowlist)
@@ -160,6 +208,28 @@ try {
     $missingAllowlist = "$emptyAllowlist.missing"
     $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'is-allowed.ps1') @('anyone', $missingAllowlist)
     if ($code -eq 2) { Add-Pass 'missing allowlist file denies (exit 2)' } else { Add-Failure 'missing allowlist file denies (exit 2)' }
+
+    Write-Output '== deny-command.ps1 (unauthorized commenter) =='
+    $issueOperations = Register-TestTemporaryFile
+    $env:GH_ISSUE_FILE = $issueOperations
+    $env:MOCK_ISSUE_COMMENT_FAILURE = '0'
+    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'deny-command.ps1') @(
+        '-Repository', 'o/r',
+        '-CommentId', '99',
+        '-IssueNumber', '42',
+        '-Actor', 'not-allowed'
+    )
+    Assert-Equal $code 0 'authorization denial command succeeds'
+    $denialComment = Get-Content -LiteralPath $issueOperations |
+        ForEach-Object { $_ | ConvertFrom-Json } |
+        Where-Object command -eq 'comment' |
+        Select-Object -First 1
+    Assert-Equal $denialComment.number '42' 'authorization denial replies on the source issue'
+    Assert-Equal (
+        $denialComment.body
+    ) (
+        'Sorry @not-allowed — branch freeze/unfreeze is restricted to accounts listed in `.github/branch-freeze-allowlist.txt`.'
+    ) 'authorization denial explains the allowlist restriction'
 
     Write-Output '== set-pr-status.ps1 (freeze detection) =='
     $env:REPO = 'o/r'
@@ -301,6 +371,52 @@ SDK insertion broke
     } else {
         Add-Failure 'missing branch name does not change tracking issue state'
     }
+
+    Write-Output '== handle-command.ps1 (injection resistance) =='
+    $commandOutput = Register-TestTemporaryFile
+    $issueOperations = Register-TestTemporaryFile
+    $injectionMarker = Register-TestTemporaryFile
+    Remove-Item -LiteralPath $injectionMarker
+    $payload = '$(Set-Content -LiteralPath "{0}" -Value injected)' -f $injectionMarker
+    $env:MOCK_ISSUES = '[]'
+    $env:GH_ISSUE_FILE = $issueOperations
+    $env:BODY = "/freeze $payload"
+    $env:GITHUB_OUTPUT = $commandOutput
+    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
+    Assert-Equal $code 0 'PowerShell-looking freeze reason is accepted as data'
+    if (Test-Path -LiteralPath $injectionMarker) {
+        Add-Failure 'PowerShell-looking freeze reason remains inert'
+    } else {
+        Add-Pass 'PowerShell-looking freeze reason remains inert'
+    }
+    $operations = @(
+        Get-Content -LiteralPath $issueOperations |
+            ForEach-Object { $_ | ConvertFrom-Json }
+    )
+    $injectionBody = ($operations | Where-Object command -eq 'create' | Select-Object -First 1).body
+    if ($injectionBody.Contains($payload, [StringComparison]::Ordinal)) {
+        Add-Pass 'PowerShell-looking freeze reason is preserved literally'
+    } else {
+        Add-Failure 'PowerShell-looking freeze reason is preserved literally'
+    }
+
+    $commandOutput = Register-TestTemporaryFile
+    $issueOperations = Register-TestTemporaryFile
+    $env:MOCK_ISSUES = '[]'
+    $env:GH_ISSUE_FILE = $issueOperations
+    $env:BODY = '/freeze --branch main;Write-Output injected'
+    $env:GITHUB_OUTPUT = $commandOutput
+    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
+    Assert-Equal $code 0 'command-like branch name is handled as invalid input'
+    Assert-Equal (
+        Get-WorkflowOutput $commandOutput 'changed'
+    ) $null 'command-like branch name does not request a refresh'
+    $stateChanges = @(
+        Get-Content -LiteralPath $issueOperations |
+            ForEach-Object { $_ | ConvertFrom-Json } |
+            Where-Object command -In @('create', 'edit', 'reopen', 'close')
+    )
+    Assert-Equal $stateChanges.Count 0 'command-like branch name cannot change tracking issue state'
 
     Write-Output '== handle-command.ps1 (best-effort notification) =='
     $commandOutput = Register-TestTemporaryFile

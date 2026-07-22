@@ -1,4 +1,4 @@
-name: Branch freeze refresh
+name: Refresh branch freeze PR statuses
 
 # Refreshes the required `branch-freeze` commit status on existing pull requests.
 # This workflow has two entry points:

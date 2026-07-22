@@ -19,31 +19,54 @@
 [CmdletBinding()]
 param()
 
+function Get-RequiredEnvironmentValue {
+    [OutputType([string])]
+    param([Parameter(Mandatory)][string]$Name)
+
+    $value = [Environment]::GetEnvironmentVariable($Name)
+    if ([string]::IsNullOrEmpty($value)) {
+        throw "Environment variable '$Name' is required."
+    }
+
+    return $value
+}
+
 function Add-Reaction {
+    [OutputType([void])]
     param(
         [Parameter(Mandatory)][string]$Repository,
         [Parameter(Mandatory)][string]$CommentId,
         [Parameter(Mandatory)][string]$Content
     )
 
-    & gh api -X POST "repos/$Repository/issues/comments/$CommentId/reactions" `
-        -f "content=$Content" *> $null
+    try {
+        Add-GitHubCommentReaction -Repository $Repository -CommentId $CommentId `
+            -Content $Content
+    }
+    catch {
+        return
+    }
 }
 
 function Add-Reply {
+    [OutputType([void])]
     param(
         [Parameter(Mandatory)][string]$Repository,
         [Parameter(Mandatory)][string]$IssueNumber,
         [Parameter(Mandatory)][string]$Message
     )
 
-    & gh issue comment $IssueNumber --repo $Repository --body $Message *> $null
-    if ($LASTEXITCODE -ne 0) {
+    try {
+        Add-GitHubIssueComment -Repository $Repository -IssueNumber $IssueNumber `
+            -Body $Message
+    }
+    catch {
         Write-Host "::warning::Failed to post confirmation comment on issue #$IssueNumber."
     }
 }
 
 function Write-WorkflowOutput {
+    [OutputType([void])]
     param(
         [Parameter(Mandatory)][string]$Name,
         [Parameter(Mandatory)][string]$Value
@@ -54,66 +77,10 @@ function Write-WorkflowOutput {
     }
 }
 
-function Get-CommandRequest {
-    param([AllowEmptyString()][string]$Body)
-
-    $line = ([regex]::Split($Body, '\r?\n', 2)[0]).TrimEnd("`r")
-    if ($line -notmatch '^(\S+)(?:\s+(.*))?$') {
-        return $null
-    }
-
-    $command = $Matches[1]
-    $remaining = if ($Matches.Count -gt 2) { $Matches[2] } else { '' }
-    $action = switch -CaseSensitive ($command) {
-        '/freeze' { 'freeze' }
-        '/unfreeze' { 'unfreeze' }
-        default { return $null }
-    }
-
-    if ($remaining -match '^(--branch|-b)$') {
-        throw "Missing a branch name after ``$remaining``."
-    }
-    if ($remaining -match '^(?:--branch|-b)\s+$') {
-        throw 'No branch name was given after the `--branch` flag.'
-    }
-
-    $branch = 'main'
-    if ($remaining -match '^(?:--branch|-b)\s+(\S+)(?:\s+(.*))?$') {
-        $branch = $Matches[1]
-        $remaining = if ($Matches.Count -gt 2) { $Matches[2] } else { '' }
-    }
-
-    return [pscustomobject]@{
-        Action = $action
-        Branch = $branch
-        Reason = $remaining.TrimEnd()
-    }
-}
-
-function Test-BranchExists {
-    param(
-        [Parameter(Mandatory)][string]$Repository,
-        [Parameter(Mandatory)][string]$Branch
-    )
-
-    if ($Branch -notmatch '^[A-Za-z0-9._/-]+$') {
-        return $false
-    }
-
-    $encodedBranch = [uri]::EscapeDataString($Branch)
-    & gh api "repos/$Repository/branches/$encodedBranch" *> $null
-    return $LASTEXITCODE -eq 0
-}
-
-function Get-Usage {
-    return @'
-**Usage**
-- `/freeze [--branch <name>] <reason>` — freeze a branch (default `main`); a reason is required.
-- `/unfreeze [--branch <name>]` — unfreeze a branch (default `main`).
-'@
-}
-
 function Invoke-Main {
+    [OutputType([int])]
+    param()
+
     # Step 1: Read values supplied by the command workflow.
     $repository = Get-RequiredEnvironmentValue 'REPO'
     $actor = Get-RequiredEnvironmentValue 'ACTOR'
@@ -124,12 +91,12 @@ function Invoke-Main {
 
     # Step 2: Parse the first line into an action, branch, and optional reason.
     try {
-        $request = Get-CommandRequest -Body $body
+        $request = ConvertFrom-BranchFreezeCommand -Body $body
     }
     catch {
         Add-Reaction -Repository $repository -CommentId $commentId -Content 'confused'
-        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber `
-            -Message "$($_.Exception.Message)`n`n$(Get-Usage)"
+        $message = New-BranchFreezeErrorReply -Message $_.Exception.Message
+        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber -Message $message
         return 0
     }
     if ($null -eq $request) {
@@ -138,16 +105,18 @@ function Invoke-Main {
     }
 
     # Step 3: Validate the requested branch and freeze reason.
-    if (-not (Test-BranchExists -Repository $repository -Branch $request.Branch)) {
+    if (-not (Test-GitHubBranchExists -Repository $repository -Branch $request.Branch)) {
         Add-Reaction -Repository $repository -CommentId $commentId -Content 'confused'
-        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber `
-            -Message "Branch ``$($request.Branch)`` was not found in ``$repository``.`n`n$(Get-Usage)"
+        $message = New-BranchFreezeErrorReply `
+            -Message "Branch ``$($request.Branch)`` was not found in ``$repository``."
+        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber -Message $message
         return 0
     }
     if ($request.Action -eq 'freeze' -and [string]::IsNullOrEmpty($request.Reason)) {
         Add-Reaction -Repository $repository -CommentId $commentId -Content 'confused'
-        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber `
-            -Message "A reason is required to freeze ``$($request.Branch)``.`n`n$(Get-Usage)"
+        $message = New-BranchFreezeErrorReply `
+            -Message "A reason is required to freeze ``$($request.Branch)``."
+        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber -Message $message
         return 0
     }
 
@@ -168,13 +137,10 @@ function Invoke-Main {
         else {
             'updated'
         }
-        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber -Message (@'
-❄️ **`{0}` is now frozen** by @{1} — permanent tracking issue #{2} ({3}).
-
-> {4}
-
-Pull requests targeting `{0}` will be blocked by the `branch-freeze` check until someone runs `/unfreeze --branch {0}` (or `/unfreeze` for `main`).
-'@ -f $request.Branch, $actor, $issue.Number, $verb, $request.Reason)
+        $message = New-BranchFreezeConfirmation -Branch $request.Branch -Actor $actor `
+            -IssueNumber ([string]$issue.Number) -ChangeDescription $verb `
+            -Reason $request.Reason
+        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber -Message $message
         return 0
     }
 
@@ -183,22 +149,25 @@ Pull requests targeting `{0}` will be blocked by the `branch-freeze` check until
     if (-not $result.Changed) {
         Write-WorkflowOutput 'changed' 'false'
         Add-Reaction -Repository $repository -CommentId $commentId -Content '+1'
-        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber `
-            -Message "``$($request.Branch)`` is not currently frozen — nothing to do."
+        $message = New-BranchAlreadyOpenReply -Branch $request.Branch
+        Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber -Message $message
         return 0
     }
 
     Write-WorkflowOutput 'branch' $request.Branch
     Write-WorkflowOutput 'changed' 'true'
     Add-Reaction -Repository $repository -CommentId $commentId -Content '+1'
-    Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber -Message (
-        '✅ **`{0}` is now unfrozen** by @{1} — closed permanent tracking issue #{2}. The `branch-freeze` check now passes on open PRs targeting `{0}`.' -f
-            $request.Branch, $actor, $result.Number
-    )
+    $message = New-BranchUnfreezeConfirmation -Branch $request.Branch -Actor $actor `
+        -IssueNumber ([string]$result.Number)
+    Add-Reply -Repository $repository -IssueNumber $sourceIssueNumber -Message $message
     return 0
 }
 
 $ErrorActionPreference = 'Stop'
 Import-Module (Join-Path $PSScriptRoot 'BranchFreeze.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'BranchFreezeCommentComposer.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'BranchFreezeCommentParser.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'GitHubIssuesClient.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'GitHubRepositoryClient.psm1') -Force
 $exitCode = Invoke-Main
 exit $exitCode

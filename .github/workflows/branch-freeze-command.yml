@@ -1,4 +1,4 @@
-name: Branch freeze command
+name: Process branch freeze command
 
 # `/freeze` and `/unfreeze` slash commands that toggle a branch merge-freeze.
 # Restricted to accounts listed in .github/branch-freeze-allowlist.txt. State is
@@ -28,8 +28,9 @@ concurrency:
 jobs:
   command:
     name: Process /freeze and /unfreeze
-    # Cheap pre-filter: a freeze command from someone with at least org-member
-    # association. Authoritative authorization (allowlist) is verified in-job.
+    # Cheap pre-filter: start the job only for repository owners, organization
+    # members, or repository collaborators. These broad roles do not authorize
+    # the command; the checked-in allowlist is verified in-job and is authoritative.
     if: >-
       (startsWith(github.event.comment.body, '/freeze') || startsWith(github.event.comment.body, '/unfreeze')) &&
       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
@@ -75,12 +76,12 @@ jobs:
           ACTOR: ${{ github.event.comment.user.login }}
         shell: pwsh
         run: |
-          & gh api -X POST "repos/$env:REPO/issues/comments/$env:COMMENT_ID/reactions" -f 'content=-1' *> $null
-          & gh issue comment $env:ISSUE_NUMBER --repo $env:REPO `
-            --body "Sorry @$env:ACTOR — branch freeze/unfreeze is restricted to accounts listed in ``.github/branch-freeze-allowlist.txt``."
-          if ($LASTEXITCODE -ne 0) {
-            throw 'Failed to post the authorization denial comment.'
-          }
+          pwsh -NoLogo -NoProfile -File `
+            "$env:GITHUB_WORKSPACE/.github/branch-freeze/deny-command.ps1" `
+            -Repository $env:REPO `
+            -CommentId $env:COMMENT_ID `
+            -IssueNumber $env:ISSUE_NUMBER `
+            -Actor $env:ACTOR
 
       - name: Execute command
         id: cmd
