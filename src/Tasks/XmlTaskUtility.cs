@@ -26,6 +26,18 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="exception">The thrown exception to inspect.</param>
         /// <param name="prohibitDtd">Whether DTDs were prohibited for the operation.</param>
+        /// <param name="containsDtd">Whether the input contains a DTD.</param>
+        /// <returns>True when the failure is consistent with DTD prohibition.</returns>
+        internal static bool IsDtdProhibitedException(Exception exception, bool prohibitDtd, bool containsDtd)
+        {
+            return prohibitDtd && ContainsXmlException(exception) && containsDtd;
+        }
+
+        /// <summary>
+        /// Determines whether an exception is likely caused by prohibited DTD processing.
+        /// </summary>
+        /// <param name="exception">The thrown exception to inspect.</param>
+        /// <param name="prohibitDtd">Whether DTDs were prohibited for the operation.</param>
         /// <param name="containsDtd">Callback that determines whether the input contains a DTD.</param>
         /// <returns>True when the failure is consistent with DTD prohibition.</returns>
         internal static bool IsDtdProhibitedException(Exception exception, bool prohibitDtd, Func<bool> containsDtd)
@@ -59,8 +71,8 @@ namespace Microsoft.Build.Tasks
             }
 
             // Simple text-based detection - no XML parsing required.
-            // DOCTYPE declaration syntax is fixed, so string search is safe and efficient.
-            return xml.Contains(DoctypeMarker, StringComparison.OrdinalIgnoreCase);
+            // XML markup declarations are case-sensitive.
+            return xml.Contains(DoctypeMarker, StringComparison.Ordinal);
         }
 
         /// <summary>
@@ -79,7 +91,7 @@ namespace Microsoft.Build.Tasks
                 var buffer = new char[8192];
                 int charsRead = reader.Read(buffer, 0, buffer.Length);
                 var content = new string(buffer, 0, charsRead);
-                return content.Contains(DoctypeMarker, StringComparison.OrdinalIgnoreCase);
+                return content.Contains(DoctypeMarker, StringComparison.Ordinal);
             }
             catch
             {

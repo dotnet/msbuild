@@ -185,7 +185,6 @@ namespace Microsoft.Build.Tasks
             {
                 if (XmlTaskUtility.IsDtdProhibitedException(e, ProhibitDtd, xsltinput.ContainsDtd))
                 {
-                    // Keep text in neutral resources; localized variants flow through the standard localization pipeline.
                     Log.LogErrorWithCodeFromResources("XslTransform.XsltLoadDtdProhibited", nameof(ProhibitDtd), nameof(XslTransformation));
                 }
                 else
@@ -220,8 +219,34 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
+                bool currentInputContainsDtd = false;
+                if (ProhibitDtd && currentXmlInputIndex >= 0)
+                {
+                    try
+                    {
+                        // Check if input contains DTD.
+                        if (xmlinput.XmlMode == XmlInput.XmlModes.XmlFile)
+                        {
+                            string currentInputPath = XmlInputPaths?[currentXmlInputIndex]?.ItemSpec;
+                            if (!string.IsNullOrEmpty(currentInputPath))
+                            {
+                                currentInputContainsDtd = XmlTaskUtility.ContainsDtd(TaskEnvironment.GetAbsolutePath(currentInputPath));
+                            }
+                        }
+                        else
+                        {
+                            currentInputContainsDtd = XmlTaskUtility.ContainsDtd(XmlContent);
+                        }
+                    }
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    {
+                        // If we cannot inspect input, don't classify as DTD-prohibited.
+                        currentInputContainsDtd = false;
+                    }
+                }
+
                 if (currentXmlInputIndex >= 0
-                    && XmlTaskUtility.IsDtdProhibitedException(e, ProhibitDtd, () => xmlinput.ContainsDtd(currentXmlInputIndex)))
+                    && XmlTaskUtility.IsDtdProhibitedException(e, ProhibitDtd, currentInputContainsDtd))
                 {
                     string offendingPath = XmlInputPaths?[currentXmlInputIndex]?.ItemSpec ?? string.Empty;
                     Log.LogErrorWithCodeFromResources("XslTransform.TransformDtdProhibited", offendingPath, nameof(ProhibitDtd), nameof(XslTransformation));
@@ -389,16 +414,6 @@ namespace Microsoft.Build.Tasks
                 {
                     return XmlReader.Create(new StringReader(_xmlContent), settings);
                 }
-            }
-
-            public bool ContainsDtd(int itemPos)
-            {
-                if (XmlMode == XmlModes.XmlFile)
-                {
-                    return XmlTaskUtility.ContainsDtd(_filePaths[itemPos].Value);
-                }
-
-                return XmlTaskUtility.ContainsDtd(_xmlContent);
             }
         }
 
