@@ -14,6 +14,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
@@ -1846,12 +1847,11 @@ namespace Microsoft.Build.CommandLine
         {
             Assumed.NotNull(EffectiveConfiguration, "We should never have a null configuration when we're trying to log messages!");
 
-            // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
-            BuildMessageEventArgs message = new BuildMessageEventArgs(
-                                                    ResourceUtilities.FormatString(AssemblyResources.GetString(messageResource), messageArgs),
-                                                    null,
-                                                    EffectiveConfiguration.TaskName,
-                                                    importance);
+            BuildMessageEventArgs message = new(
+                message: MessageFormatter.Format(AssemblyResources.GetString(messageResource), messageArgs),
+                helpKeyword: null,
+                senderName: EffectiveConfiguration.TaskName,
+                importance);
 
             LogMessageEvent(message);
         }
@@ -1863,18 +1863,17 @@ namespace Microsoft.Build.CommandLine
         {
             Assumed.NotNull(EffectiveConfiguration, "We should never have a null configuration when we're trying to log warnings!");
 
-            // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
-            BuildWarningEventArgs warning = new BuildWarningEventArgs(
-                                                    null,
-                                                    null,
-                                                    ProjectFileOfTaskNode,
-                                                    LineNumberOfTaskNode,
-                                                    ColumnNumberOfTaskNode,
-                                                    0,
-                                                    0,
-                                                    ResourceUtilities.FormatString(AssemblyResources.GetString(messageResource), messageArgs),
-                                                    null,
-                                                    EffectiveConfiguration.TaskName);
+            BuildWarningEventArgs warning = new(
+                subcategory: null,
+                code: null,
+                file: ProjectFileOfTaskNode,
+                lineNumber: LineNumberOfTaskNode,
+                columnNumber: ColumnNumberOfTaskNode,
+                endLineNumber: 0,
+                endColumnNumber: 0,
+                message: MessageFormatter.Format(AssemblyResources.GetString(messageResource), messageArgs),
+                helpKeyword: null,
+                senderName: EffectiveConfiguration.TaskName);
 
             LogWarningEvent(warning);
         }
@@ -1886,18 +1885,17 @@ namespace Microsoft.Build.CommandLine
         {
             Assumed.NotNull(EffectiveConfiguration, "We should never have a null configuration when we're trying to log errors!");
 
-            // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
-            BuildErrorEventArgs error = new BuildErrorEventArgs(
-                                                    null,
-                                                    null,
-                                                    ProjectFileOfTaskNode,
-                                                    LineNumberOfTaskNode,
-                                                    ColumnNumberOfTaskNode,
-                                                    0,
-                                                    0,
-                                                    AssemblyResources.GetString(messageResource),
-                                                    null,
-                                                    EffectiveConfiguration.TaskName);
+            BuildErrorEventArgs error = new(
+                subcategory: null,
+                code: null,
+                file: ProjectFileOfTaskNode,
+                lineNumber: LineNumberOfTaskNode,
+                columnNumber: ColumnNumberOfTaskNode,
+                endLineNumber: 0,
+                endColumnNumber: 0,
+                message: AssemblyResources.GetString(messageResource),
+                helpKeyword: null,
+                senderName: EffectiveConfiguration.TaskName);
 
             LogErrorEvent(error);
         }

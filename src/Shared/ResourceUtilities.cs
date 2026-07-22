@@ -46,7 +46,7 @@ namespace Microsoft.Build.Shared
         internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, params object?[] args)
         {
             helpKeyword = GetHelpKeyword(resourceName);
-            string message = FormatString(GetResourceString(resourceName), args);
+            string message = MessageFormatter.Format(GetResourceString(resourceName), args);
 
             return MessageParser.TryParseMSBuildCode(message, out code, out string? strippedMessage)
                 ? strippedMessage
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Shared
         internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, object? arg1)
         {
             helpKeyword = GetHelpKeyword(resourceName);
-            string message = FormatString(GetResourceString(resourceName), arg1);
+            string message = MessageFormatter.Format(GetResourceString(resourceName), arg1);
 
             return MessageParser.TryParseMSBuildCode(message, out code, out string? strippedMessage)
                 ? strippedMessage
@@ -104,7 +104,7 @@ namespace Microsoft.Build.Shared
         internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, object? arg1, object? arg2)
         {
             helpKeyword = GetHelpKeyword(resourceName);
-            string message = FormatString(GetResourceString(resourceName), arg1, arg2);
+            string message = MessageFormatter.Format(GetResourceString(resourceName), arg1, arg2);
 
             return MessageParser.TryParseMSBuildCode(message, out code, out string? strippedMessage)
                 ? strippedMessage
@@ -124,7 +124,7 @@ namespace Microsoft.Build.Shared
         internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, object? arg1, object? arg2, object? arg3)
         {
             helpKeyword = GetHelpKeyword(resourceName);
-            string message = FormatString(GetResourceString(resourceName), arg1, arg2, arg3);
+            string message = MessageFormatter.Format(GetResourceString(resourceName), arg1, arg2, arg3);
 
             return MessageParser.TryParseMSBuildCode(message, out code, out string? strippedMessage)
                 ? strippedMessage
@@ -144,7 +144,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted resource string.</returns>
         internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, params object?[] args)
         {
-            string message = FormatString(GetResourceString(resourceName), args);
+            string message = MessageFormatter.Format(GetResourceString(resourceName), args);
 
             return MessageParser.TryStripMSBuildCode(message, out string? strippedMessage)
                 ? strippedMessage
@@ -179,7 +179,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted resource string.</returns>
         internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, object? arg1)
         {
-            string message = FormatString(GetResourceString(resourceName), arg1);
+            string message = MessageFormatter.Format(GetResourceString(resourceName), arg1);
 
             return MessageParser.TryStripMSBuildCode(message, out string? strippedMessage)
                 ? strippedMessage
@@ -197,7 +197,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted resource string.</returns>
         internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, object? arg1, object? arg2)
         {
-            string message = FormatString(GetResourceString(resourceName), arg1, arg2);
+            string message = MessageFormatter.Format(GetResourceString(resourceName), arg1, arg2);
 
             return MessageParser.TryStripMSBuildCode(message, out string? strippedMessage)
                 ? strippedMessage
@@ -216,7 +216,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted resource string.</returns>
         internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, object? arg1, object? arg2, object? arg3)
         {
-            string message = FormatString(GetResourceString(resourceName), arg1, arg2, arg3);
+            string message = MessageFormatter.Format(GetResourceString(resourceName), arg1, arg2, arg3);
 
             return MessageParser.TryStripMSBuildCode(message, out string? strippedMessage)
                 ? strippedMessage
@@ -232,7 +232,7 @@ namespace Microsoft.Build.Shared
         /// <returns>The formatted resource string.</returns>
         /// <remarks>the AssemblyResources.GetString() method is thread-safe.</remarks>
         internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, params object?[] args)
-            => FormatString(GetResourceString(resourceName), args);
+            => MessageFormatter.Format(GetResourceString(resourceName), args);
 
         // Overloads with 0-3 arguments to avoid array allocations.
 
@@ -253,7 +253,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1">Argument for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
         internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, object? arg1)
-            => FormatString(GetResourceString(resourceName), arg1);
+            => MessageFormatter.Format(GetResourceString(resourceName), arg1);
 
         /// <summary>
         /// Formats the resource string with the given arguments.
@@ -264,7 +264,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg2">Second argument for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
         internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, object? arg1, object? arg2)
-            => FormatString(GetResourceString(resourceName), arg1, arg2);
+            => MessageFormatter.Format(GetResourceString(resourceName), arg1, arg2);
 
         /// <summary>
         /// Formats the resource string with the given arguments.
@@ -276,53 +276,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg3">Third argument for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
         internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, object? arg1, object? arg2, object? arg3)
-            => FormatString(GetResourceString(resourceName), arg1, arg2, arg3);
-
-        /// <summary>
-        /// Formats the given string using the variable arguments passed in.
-        ///
-        /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
-        /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
-        ///
-        /// Thread safe.
-        /// </summary>
-        /// <param name="unformatted">The string to format.</param>
-        /// <param name="args">Optional arguments for formatting the given string.</param>
-        /// <returns>The formatted string.</returns>
-        internal static string FormatString(string unformatted, params object?[] args)
-            => MessageFormatter.Format(unformatted, args);
-
-        // Overloads with 1-3 arguments to avoid array allocations.
-
-        /// <summary>
-        /// Formats the given string using the variable arguments passed in.
-        /// </summary>
-        /// <param name="unformatted">The string to format.</param>
-        /// <param name="arg1">Argument for formatting the given string.</param>
-        /// <returns>The formatted string.</returns>
-        internal static string FormatString(string unformatted, object? arg1)
-            => MessageFormatter.Format(unformatted, arg1);
-
-        /// <summary>
-        /// Formats the given string using the variable arguments passed in.
-        /// </summary>
-        /// <param name="unformatted">The string to format.</param>
-        /// <param name="arg1">First argument for formatting the given string.</param>
-        /// <param name="arg2">Second argument for formatting the given string.</param>
-        /// <returns>The formatted string.</returns>
-        internal static string FormatString(string unformatted, object? arg1, object? arg2)
-            => MessageFormatter.Format(unformatted, arg1, arg2);
-
-        /// <summary>
-        /// Formats the given string using the variable arguments passed in.
-        /// </summary>
-        /// <param name="unformatted">The string to format.</param>
-        /// <param name="arg1">First argument for formatting the given string.</param>
-        /// <param name="arg2">Second argument for formatting the given string.</param>
-        /// <param name="arg3">Third argument for formatting the given string.</param>
-        /// <returns>The formatted string.</returns>
-        internal static string FormatString(string unformatted, object? arg1, object? arg2, object? arg3)
-            => MessageFormatter.Format(unformatted, arg1, arg2, arg3);
+            => MessageFormatter.Format(GetResourceString(resourceName), arg1, arg2, arg3);
 
         /// <summary>
         /// Verifies that a particular resource string actually exists in the string table. This will only be called in debug

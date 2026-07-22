@@ -229,7 +229,7 @@ namespace Microsoft.Build.Utilities
         {
             ArgumentNullException.ThrowIfNull(unformatted);
 
-            return ResourceUtilities.FormatString(unformatted, args);
+            return MessageFormatter.Format(unformatted, args);
         }
 
         /// <summary>
@@ -301,7 +301,7 @@ namespace Microsoft.Build.Utilities
             if (messageArgs?.Length > 0)
             {
                 // Verify that message can be formatted using given arguments
-                ResourceUtilities.FormatString(message, messageArgs);
+                MessageFormatter.Format(message, messageArgs);
             }
 #endif
             if (!LogsMessagesOfImportance(importance))
