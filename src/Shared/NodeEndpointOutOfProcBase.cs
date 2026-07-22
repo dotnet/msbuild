@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 #if NET
 using System.Collections.Frozen;
 #endif
@@ -644,6 +645,11 @@ namespace Microsoft.Build.BackEnd
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
             byte[] headerByte = new byte[5];
+
+            // Reusable buffer holding each packet's body. The body is read off the pipe in full
+            // before it is deserialized from memory (see below). Grown on demand and kept for the
+            // life of the connection, mirroring NodePipeBase's _readBuffer.
+            MemoryStream readBodyStream = new MemoryStream();
             ITranslator writeTranslator = null;
 #if NET451_OR_GREATER
             Task<int> readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
@@ -726,15 +732,62 @@ namespace Microsoft.Build.BackEnd
                             bool hasExtendedHeader = NodePacketTypeExtensions.HasExtendedHeader(rawType);
                             NodePacketType packetType = hasExtendedHeader ? NodePacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
 
+                            // The header carries the exact body length (bytes 1-4, little-endian: the sender
+                            // writes packetStreamLength - 5). Read the whole body into a reusable MemoryStream
+                            // in as few pipe reads as the OS delivers, then deserialize from memory. The
+                            // alternative - streaming the body field-by-field straight off the pipe - drains it
+                            // through BufferedReadStream's small refill buffer (one pipe read per refill), so a
+                            // large packet (e.g. a TaskHostConfiguration carrying NuGet restore's
+                            // RestoreGraphItems) costs a very large number of reads and is slow over Windows
+                            // named pipes. Reading into a MemoryStream also lets InterningBinaryReader take its
+                            // backing-buffer fast path. Mirrors NodePipeBase.ReadPacket.
+                            int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(headerByte, 1, 4));
+                            readBodyStream.Position = 0;
+                            readBodyStream.SetLength(packetLength);
+
+                            int bodyBytesRead = 0;
+                            try
+                            {
+                                byte[] bodyBuffer = readBodyStream.GetBuffer();
+                                while (bodyBytesRead < packetLength)
+                                {
+                                    int read = localReadPipe.Read(bodyBuffer, bodyBytesRead, packetLength - bodyBytesRead);
+                                    if (read == 0)
+                                    {
+                                        // Pipe disconnected mid-body.
+                                        break;
+                                    }
+
+                                    bodyBytesRead += read;
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                // Lost communications.  Abort (but allow node reuse)
+                                CommunicationsUtilities.Trace($"Exception reading packet body from server.  {e}");
+                                DebugUtils.DumpExceptionToFile(e);
+                                ChangeLinkStatus(LinkStatus.Inactive);
+                                exitLoop = true;
+                                break;
+                            }
+
+                            if (bodyBytesRead != packetLength)
+                            {
+                                CommunicationsUtilities.Trace($"Incomplete packet body read from server.  {bodyBytesRead} of {packetLength} bytes read");
+                                ChangeLinkStatus(LinkStatus.Failed);
+                                exitLoop = true;
+                                break;
+                            }
+
                             byte parentVersion = 0;
                             if (hasExtendedHeader)
                             {
-                                parentVersion = NodePacketTypeExtensions.ReadVersion(localReadPipe);
+                                parentVersion = NodePacketTypeExtensions.ReadVersion(readBodyStream);
                             }
 
                             try
                             {
-                                ITranslator readTranslator = BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer);
+                                ITranslator readTranslator = BinaryTranslator.GetReadTranslator(readBodyStream, _sharedReadBuffer);
 
                                 // parent sends a packet version that is already negotiated during handshake.
                                 // For Framework task hosts (CLR2/CLR4) without extended headers, defaults to 0.
@@ -828,6 +881,8 @@ namespace Microsoft.Build.BackEnd
                 }
             }
             while (!exitLoop);
+
+            readBodyStream.Dispose();
         }
 
         #endregion
