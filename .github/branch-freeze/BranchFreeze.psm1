@@ -68,18 +68,21 @@ function Get-BranchFreezeState {
     }
 }
 
-function Add-BranchFreezeAuditComment {
+function Add-BranchFreezeHistoryComment {
     [OutputType([void])]
     param(
         [Parameter(Mandatory)][string]$Repository,
         [Parameter(Mandatory)][string]$IssueNumber,
-        [Parameter(Mandatory)][string]$Actor,
-        [Parameter(Mandatory)][string]$Reason
+        [Parameter(Mandatory)][string]$Comment
     )
 
-    $comment = New-BranchFreezeAuditComment -Actor $Actor -Reason $Reason
-    Add-GitHubIssueComment -Repository $Repository -IssueNumber $IssueNumber `
-        -Body $comment
+    try {
+        Add-GitHubIssueComment -Repository $Repository -IssueNumber $IssueNumber `
+            -Body $Comment
+    }
+    catch {
+        Write-Warning "Failed to add history comment to issue #$IssueNumber."
+    }
 }
 
 function Open-BranchFreezeIssue {
@@ -117,8 +120,9 @@ function Open-BranchFreezeIssue {
         }
     }
 
-    Add-BranchFreezeAuditComment -Repository $Repository -IssueNumber ([string]$number) `
-        -Actor $Actor -Reason $Reason
+    $auditComment = New-BranchFreezeAuditComment -Actor $Actor -Reason $Reason
+    Add-BranchFreezeHistoryComment -Repository $Repository `
+        -IssueNumber ([string]$number) -Comment $auditComment
 
     return [pscustomobject]@{
         Number = $number
@@ -141,11 +145,13 @@ function Close-BranchFreezeIssue {
     $number = if ($null -eq $issue) { $null } else { $issue.number }
     if ($changed) {
         $body = New-BranchOpenIssueBody -Branch $Branch -Actor $Actor
-        $comment = New-BranchUnfreezeAuditComment -Actor $Actor
         Set-GitHubIssue -Repository $Repository -IssueNumber ([string]$number) `
             -Body $body
-        Close-GitHubIssue -Repository $Repository -IssueNumber ([string]$number) `
-            -Comment $comment
+        Close-GitHubIssue -Repository $Repository -IssueNumber ([string]$number)
+
+        $auditComment = New-BranchUnfreezeAuditComment -Actor $Actor
+        Add-BranchFreezeHistoryComment -Repository $Repository `
+            -IssueNumber ([string]$number) -Comment $auditComment
     }
 
     return [pscustomobject]@{

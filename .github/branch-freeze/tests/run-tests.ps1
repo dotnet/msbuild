@@ -354,6 +354,27 @@ SDK insertion broke
 
     $commandOutput = Register-TestTemporaryFile
     $issueOperations = Register-TestTemporaryFile
+    $env:MOCK_ISSUES = '[{"number":123,"title":"Branch freeze: main","url":"https://github.com/o/r/issues/123","state":"OPEN","body":"frozen"}]'
+    $env:MOCK_ISSUE_COMMENT_FAILURE = '0'
+    $env:GH_ISSUE_FILE = $issueOperations
+    $env:BODY = '/unfreeze'
+    $env:GITHUB_OUTPUT = $commandOutput
+    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
+    Assert-Equal $code 0 'unfreeze command succeeds'
+    Assert-Equal (Get-WorkflowOutput $commandOutput 'changed') 'true' 'unfreeze requests a PR status refresh'
+    $operations = @(
+        Get-Content -LiteralPath $issueOperations |
+            ForEach-Object { $_ | ConvertFrom-Json }
+    )
+    $unfreezeAuditComment = $operations |
+        Where-Object { $_.command -eq 'comment' -and $_.number -eq '123' } |
+        Select-Object -First 1
+    Assert-Equal (
+        $unfreezeAuditComment.body
+    ) 'Unfrozen by @rainersigwald via /unfreeze.' 'unfreeze records audit history after closing the issue'
+
+    $commandOutput = Register-TestTemporaryFile
+    $issueOperations = Register-TestTemporaryFile
     $env:MOCK_ISSUES = '[]'
     $env:GH_ISSUE_FILE = $issueOperations
     $env:BODY = '/freeze --branch   '
@@ -418,7 +439,35 @@ SDK insertion broke
     )
     Assert-Equal $stateChanges.Count 0 'command-like branch name cannot change tracking issue state'
 
-    Write-Output '== handle-command.ps1 (best-effort notification) =='
+    Write-Output '== handle-command.ps1 (best-effort history and notification) =='
+    $commandOutput = Register-TestTemporaryFile
+    $issueOperations = Register-TestTemporaryFile
+    $env:GH_ISSUE_FILE = $issueOperations
+    $env:MOCK_ISSUES = '[]'
+    $env:MOCK_ISSUE_COMMENT_FAILURE = '1'
+    $env:GH_TOKEN = 'test-token'
+    $env:ACTOR = 'rainersigwald'
+    $env:ISSUE_NUMBER = '42'
+    $env:COMMENT_ID = '99'
+    $env:BODY = '/freeze Audit comment failure test'
+    $env:GITHUB_OUTPUT = $commandOutput
+
+    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
+    Assert-Equal $code 0 'failed audit comment does not abort freeze'
+    Assert-Equal (
+        Get-WorkflowOutput $commandOutput 'changed'
+    ) 'true' 'failed freeze audit comment preserves refresh output'
+    Assert-Equal (
+        Get-WorkflowOutput $commandOutput 'branch'
+    ) 'main' 'failed freeze audit comment preserves refresh branch'
+    $operations = @(
+        Get-Content -LiteralPath $issueOperations |
+            ForEach-Object { $_ | ConvertFrom-Json }
+    )
+    Assert-Equal (
+        @($operations | Where-Object command -eq 'create').Count
+    ) 1 'freeze state changes before its audit comment fails'
+
     $commandOutput = Register-TestTemporaryFile
     $issueOperations = Register-TestTemporaryFile
     $env:GH_ISSUE_FILE = $issueOperations
@@ -432,12 +481,13 @@ SDK insertion broke
     $env:GITHUB_OUTPUT = $commandOutput
 
     $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
-    Assert-Equal $code 0 'failed confirmation reply does not abort unfreeze'
-    Assert-Equal (Get-WorkflowOutput $commandOutput 'changed') 'true' 'failed confirmation reply preserves refresh output'
-    Assert-Equal (Get-WorkflowOutput $commandOutput 'branch') 'main' 'failed confirmation reply preserves refresh branch'
+    Assert-Equal $code 0 'failed audit and confirmation comments do not abort unfreeze'
+    Assert-Equal (Get-WorkflowOutput $commandOutput 'changed') 'true' 'failed unfreeze comments preserve refresh output'
+    Assert-Equal (Get-WorkflowOutput $commandOutput 'branch') 'main' 'failed unfreeze comments preserve refresh branch'
     $operations = @(Get-Content -LiteralPath $issueOperations | ForEach-Object { $_ | ConvertFrom-Json })
     Assert-Equal (@($operations | Where-Object command -eq 'edit').Count) 1 'unfreeze updates the issue body to the open state'
     Assert-Equal (@($operations | Where-Object command -eq 'close').Count) 1 'unfreeze closes the permanent issue'
+    $env:MOCK_ISSUE_COMMENT_FAILURE = '0'
 
     Write-Output '== refresh-pr-statuses.ps1 (bulk refresh) =='
     $statusFile = Initialize-TestStatusFile
