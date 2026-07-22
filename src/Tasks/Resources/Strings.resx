@@ -2426,7 +2426,6 @@
   </data>
   <data name="XmlPeekPoke.InputDtdProhibited" xml:space="preserve">
     <value>MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</value>
-    <comment>{StrBegin="MSB3733: "}{0} is the ProhibitDtd property name and should not be translated. {1} is the XmlPeek or XmlPoke task name and should not be translated.</comment>
   </data>
   <data name="XmlPeekPoke.XPathError" xml:space="preserve">
     <value>MSB3734: XPath Query "{0}" cannot be loaded. {1}</value>
