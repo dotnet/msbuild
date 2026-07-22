@@ -3621,6 +3621,8 @@ namespace Microsoft.Build.CommandLine
         /// No-op on Windows, for absolute paths or paths containing <c>..</c>, when <c>PWD</c> is
         /// unset/relative/stale, or when change wave 18.10 is disabled.
         /// </summary>
+#if NET
+#nullable enable
         internal static string ResolveProjectPathAgainstLogicalCurrentDirectory(string projectFile)
         {
             if (!ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
@@ -3634,15 +3636,15 @@ namespace Microsoft.Build.CommandLine
                 return projectFile;
             }
 
-            string logicalCurrentDirectory = Environment.GetEnvironmentVariable("PWD");
+            string? logicalCurrentDirectory = Environment.GetEnvironmentVariable("PWD");
             if (string.IsNullOrEmpty(logicalCurrentDirectory) || !Path.IsPathRooted(logicalCurrentDirectory))
             {
                 return projectFile;
             }
 
             // Confirm $PWD physically resolves to the same directory as getcwd(); otherwise PWD is stale.
-            string physicalPwd = NativeMethodsShared.RealPath(logicalCurrentDirectory);
-            string physicalCwd = NativeMethodsShared.RealPath(Directory.GetCurrentDirectory());
+            string? physicalPwd = File.ResolveLinkTarget(logicalCurrentDirectory, true)?.FullName;
+            string? physicalCwd = File.ResolveLinkTarget(Directory.GetCurrentDirectory(), true)?.FullName;
             if (physicalPwd is null || physicalCwd is null
                 || !string.Equals(physicalPwd, physicalCwd, StringComparison.Ordinal))
             {
@@ -3659,6 +3661,10 @@ namespace Microsoft.Build.CommandLine
 
             return rebasedProjectFile;
         }
+#nullable disable
+#else
+        internal static string ResolveProjectPathAgainstLogicalCurrentDirectory(string projectFile) => projectFile;
+#endif
 
         private static void ValidateExtensions(string[] projectExtensionsToIgnore)
         {
