@@ -182,6 +182,7 @@ namespace Microsoft.Build.UnitTests
         /// Using the CreateItem task to expand wildcards and verifying that the RecursiveDir metadatum is successfully
         /// serialized/deserialized cross process.
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14429")]
         [Fact]
         public void RecursiveDirOutOfProc()
         {

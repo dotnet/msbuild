@@ -28,11 +28,11 @@ From the repository root, using the repo's pinned SDK (`.dotnet\dotnet.exe`):
 ```powershell
 # Fast JIT pass (build + run the MTP test host)
 .\.dotnet\dotnet.exe build src\aot-validation\Microsoft.Build.AotValidation.csproj
-.\src\aot-validation\bin\Debug\net10.0\win-x64\Microsoft.Build.AotValidation.exe
+.\src\aot-validation\bin\Debug\net11.0\win-x64\Microsoft.Build.AotValidation.exe
 
 # Native AOT pass (the real validation): publish, then run the native exe
 .\.dotnet\dotnet.exe publish src\aot-validation\Microsoft.Build.AotValidation.csproj -r win-x64 -c Release
-.\src\aot-validation\bin\Release\net10.0\win-x64\publish\Microsoft.Build.AotValidation.exe
+.\src\aot-validation\bin\Release\net11.0\win-x64\publish\Microsoft.Build.AotValidation.exe
 ```
 
 Native AOT publishing requires the Visual Studio C++ toolchain (the MSVC linker). A run prints the
@@ -173,7 +173,7 @@ Native AOT. The harness bakes `EnableReflectiveTaskExecution=false`, so the refl
 host instead pre-registers its tasks with the host task registry (see
 [task-class-registration-api.md](../../documentation/specs/task-class-registration-api.md)): the
 common built-in tasks through `Microsoft.Build.Tasks.BuiltInTasks.RegisterAll()`, and its own tasks through
-`Microsoft.Build.Utilities.Task.RegisterTask<T>(name)`. A registered task is constructed and bound with no
+`Microsoft.Build.Utilities.Task.RegisterTask<T>()`. A registered task is constructed and bound with no
 assembly loading or by-name type resolution, so `RegisteredBuiltInAndCustomTasks_Build_UnderAot` runs a real
 in-process build of a hand-authored project - `MakeDir`/`WriteLinesToFile`/`Copy` produce files, and a
 host-registered custom task's `[Output]` is bound back to a property - entirely under AOT.

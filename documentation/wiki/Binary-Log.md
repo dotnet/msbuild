@@ -57,7 +57,7 @@ Instead of passing the project/solution to MSBuild.exe you can now pass a binary
 It is also possible to use the BinaryLogger with older MSBuild versions, such as MSBuild 14.0. For this you'll need the StructuredLogger.dll available here:
 https://github.com/KirillOsenkov/MSBuildStructuredLog/releases/download/v1.0.130/StructuredLogger.dll
 
-Alternatively you can download/install the https://www.nuget.org/packages/Microsoft.Build.Logging.StructuredLogger NuGet package and use the `StructuredLogger.dll` provided by it.
+Alternatively you can download/install the https://www.nuget.org/packages/MSBuild.StructuredLogger NuGet package and use the `StructuredLogger.dll` provided by it.
 
 Once you have the `StructuredLogger.dll` on disk you can pass it to MSBuild like this:
 
