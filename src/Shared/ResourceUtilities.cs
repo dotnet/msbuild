@@ -15,31 +15,6 @@ namespace Microsoft.Build.Shared
     internal static class ResourceUtilities
     {
         /// <summary>
-        /// Extracts the message code (if any) prefixed to the given string.
-        /// <![CDATA[
-        /// MSBuild codes match "^\s*(?<CODE>MSB\d\d\d\d):\s*(?<MESSAGE>.*)$"
-        /// Arbitrary codes match "^\s*(?<CODE>[A-Za-z]+\d+):\s*(?<MESSAGE>.*)$"
-        /// ]]>
-        /// Thread safe.
-        /// </summary>
-        /// <param name="msbuildCodeOnly">Whether to match only MSBuild error codes, or any error code.</param>
-        /// <param name="message">The string to parse.</param>
-        /// <param name="code">[out] The message code, or null if there was no code.</param>
-        /// <returns>The string without its message code prefix, if any.</returns>
-        internal static string ExtractMessageCode(bool msbuildCodeOnly, string message, out string? code)
-        {
-            if (msbuildCodeOnly
-                ? MessageParser.TryParseMSBuildCode(message, out code, out string? result)
-                : MessageParser.TryParseAnyCode(message, out code, out result))
-            {
-                return result;
-            }
-
-            code = null;
-            return message;
-        }
-
-        /// <summary>
         /// Retrieves the MSBuild F1-help keyword for the given resource string. Help keywords are used to index help topics in
         /// host IDEs.
         /// </summary>
@@ -72,9 +47,11 @@ namespace Microsoft.Build.Shared
         internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, params object?[]? args)
         {
             helpKeyword = GetHelpKeyword(resourceName);
+            string message = FormatString(GetResourceString(resourceName), args);
 
-            // NOTE: the AssemblyResources.GetString() method is thread-safe
-            return ExtractMessageCode(true /* msbuildCodeOnly */, FormatString(GetResourceString(resourceName), args), out code);
+            return MessageParser.TryParseMSBuildCode(message, out code, out string? strippedMessage)
+                ? strippedMessage
+                : message;
         }
 
         // Overloads with 0-3 arguments to avoid array allocations.
@@ -91,7 +68,11 @@ namespace Microsoft.Build.Shared
         internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName)
         {
             helpKeyword = GetHelpKeyword(resourceName);
-            return ExtractMessageCode(true, GetResourceString(resourceName), out code);
+            string message = GetResourceString(resourceName);
+
+            return MessageParser.TryParseMSBuildCode(message, out code, out string? strippedMessage)
+                ? strippedMessage
+                : message;
         }
 
         /// <summary>
@@ -105,7 +86,11 @@ namespace Microsoft.Build.Shared
         internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, object? arg1)
         {
             helpKeyword = GetHelpKeyword(resourceName);
-            return ExtractMessageCode(true, FormatString(GetResourceString(resourceName), arg1), out code);
+            string message = FormatString(GetResourceString(resourceName), arg1);
+
+            return MessageParser.TryParseMSBuildCode(message, out code, out string? strippedMessage)
+                ? strippedMessage
+                : message;
         }
 
         /// <summary>
@@ -120,7 +105,11 @@ namespace Microsoft.Build.Shared
         internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, object? arg1, object? arg2)
         {
             helpKeyword = GetHelpKeyword(resourceName);
-            return ExtractMessageCode(true, FormatString(GetResourceString(resourceName), arg1, arg2), out code);
+            string message = FormatString(GetResourceString(resourceName), arg1, arg2);
+
+            return MessageParser.TryParseMSBuildCode(message, out code, out string? strippedMessage)
+                ? strippedMessage
+                : message;
         }
 
         /// <summary>
@@ -136,7 +125,11 @@ namespace Microsoft.Build.Shared
         internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, object? arg1, object? arg2, object? arg3)
         {
             helpKeyword = GetHelpKeyword(resourceName);
-            return ExtractMessageCode(true, FormatString(GetResourceString(resourceName), arg1, arg2, arg3), out code);
+            string message = FormatString(GetResourceString(resourceName), arg1, arg2, arg3);
+
+            return MessageParser.TryParseMSBuildCode(message, out code, out string? strippedMessage)
+                ? strippedMessage
+                : message;
         }
 
         /// <summary>
@@ -151,7 +144,13 @@ namespace Microsoft.Build.Shared
         /// <param name="args">Optional arguments for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
         internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, params object?[]? args)
-            => FormatResourceStringStripCodeAndKeyword(out _, out _, resourceName, args);
+        {
+            string message = FormatString(GetResourceString(resourceName), args);
+
+            return MessageParser.TryStripMSBuildCode(message, out string? strippedMessage)
+                ? strippedMessage
+                : message;
+        }
 
         // Overloads with 0-3 arguments to avoid array allocations.
 
@@ -163,7 +162,13 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">Resource string to load.</param>
         /// <returns>The formatted resource string.</returns>
         internal static string FormatResourceStringStripCodeAndKeyword(string resourceName)
-           => FormatResourceStringStripCodeAndKeyword(out _, out _, resourceName);
+        {
+            string message = GetResourceString(resourceName);
+
+            return MessageParser.TryStripMSBuildCode(message, out string? strippedMessage)
+                ? strippedMessage
+                : message;
+        }
 
         /// <summary>
         /// Looks up a string in the resources, and formats it with the argument passed in. If the string resource has an MSBuild
@@ -174,7 +179,13 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1">Argument for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
         internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, object? arg1)
-           => FormatResourceStringStripCodeAndKeyword(out _, out _, resourceName, arg1);
+        {
+            string message = FormatString(GetResourceString(resourceName), arg1);
+
+            return MessageParser.TryStripMSBuildCode(message, out string? strippedMessage)
+                ? strippedMessage
+                : message;
+        }
 
         /// <summary>
         /// Looks up a string in the resources, and formats it with the arguments passed in. If the string resource has an MSBuild
@@ -186,7 +197,13 @@ namespace Microsoft.Build.Shared
         /// <param name="arg2">Second argument for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
         internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, object? arg1, object? arg2)
-            => FormatResourceStringStripCodeAndKeyword(out _, out _, resourceName, arg1, arg2);
+        {
+            string message = FormatString(GetResourceString(resourceName), arg1, arg2);
+
+            return MessageParser.TryStripMSBuildCode(message, out string? strippedMessage)
+                ? strippedMessage
+                : message;
+        }
 
         /// <summary>
         /// Looks up a string in the resources, and formats it with the arguments passed in. If the string resource has an MSBuild
@@ -199,7 +216,13 @@ namespace Microsoft.Build.Shared
         /// <param name="arg3">Third argument for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
         internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, object? arg1, object? arg2, object? arg3)
-            => FormatResourceStringStripCodeAndKeyword(out _, out _, resourceName, arg1, arg2, arg3);
+        {
+            string message = FormatString(GetResourceString(resourceName), arg1, arg2, arg3);
+
+            return MessageParser.TryStripMSBuildCode(message, out string? strippedMessage)
+                ? strippedMessage
+                : message;
+        }
 
         /// <summary>
         /// Formats the resource string with the given arguments.
