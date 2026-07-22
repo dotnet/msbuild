@@ -38,7 +38,8 @@ namespace MSBuild.Bootstrap.Utils.Tasks
         /// <summary>
         /// Gets or sets the repo-local root path where the .NET Core installation script is downloaded to and run from.
         /// This must be a writable directory; it is intentionally independent of where the SDK itself is installed so the
-        /// script is never written into a machine-global location such as "C:\Program Files\dotnet\". This property is required.        /// </summary>
+        /// script is never written into a machine-global location such as "C:\Program Files\dotnet\". This property is required.
+        /// </summary>
         [Required]
         public string DotNetInstallScriptRootPath { get; set; }
 
