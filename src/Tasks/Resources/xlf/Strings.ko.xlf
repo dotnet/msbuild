@@ -3008,9 +3008,9 @@
         <note>{StrBegin="MSB3723: "}</note>
       </trans-unit>
       <trans-unit id="XmlPeekPoke.InputDtdProhibited">
-        <source>MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
-        <target state="new">MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
-        <note>{StrBegin="MSB3733: "}{0} is the ProhibitDtd property name and should not be translated. {1} is the XmlPeek or XmlPoke task name and should not be translated.</note>
+        <source>MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
+        <target state="new">MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
+        <note />
       </trans-unit>
       <trans-unit id="XslTransform.ArgumentError">
         <source>MSB3701: Unable to load arguments for the XslTransformation task. {0}</source>
