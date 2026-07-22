@@ -3,7 +3,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Globalization;
 using System.Resources;
 using Microsoft.Build.Framework.Utilities;
 
@@ -291,21 +290,7 @@ namespace Microsoft.Build.Shared
         /// <param name="args">Optional arguments for formatting the given string.</param>
         /// <returns>The formatted string.</returns>
         internal static string FormatString(string unformatted, params object?[] args)
-        {
-            string formatted = unformatted;
-
-            // NOTE: String.Format() does not allow a null arguments array
-            if (args?.Length > 0)
-            {
-                ValidateArgsIfDebug(args);
-
-                // Format the string, using the variable arguments passed in.
-                // NOTE: all String methods are thread-safe
-                formatted = string.Format(CultureInfo.CurrentCulture, unformatted, args);
-            }
-
-            return formatted;
-        }
+            => MessageFormatter.Format(unformatted, args);
 
         // Overloads with 1-3 arguments to avoid array allocations.
 
@@ -316,10 +301,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg1">Argument for formatting the given string.</param>
         /// <returns>The formatted string.</returns>
         internal static string FormatString(string unformatted, object? arg1)
-        {
-            ValidateArgsIfDebug([arg1]);
-            return string.Format(CultureInfo.CurrentCulture, unformatted, arg1);
-        }
+            => MessageFormatter.Format(unformatted, arg1);
 
         /// <summary>
         /// Formats the given string using the variable arguments passed in.
@@ -329,10 +311,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg2">Second argument for formatting the given string.</param>
         /// <returns>The formatted string.</returns>
         internal static string FormatString(string unformatted, object? arg1, object? arg2)
-        {
-            ValidateArgsIfDebug([arg1, arg2]);
-            return string.Format(CultureInfo.CurrentCulture, unformatted, arg1, arg2);
-        }
+            => MessageFormatter.Format(unformatted, arg1, arg2);
 
         /// <summary>
         /// Formats the given string using the variable arguments passed in.
@@ -343,29 +322,7 @@ namespace Microsoft.Build.Shared
         /// <param name="arg3">Third argument for formatting the given string.</param>
         /// <returns>The formatted string.</returns>
         internal static string FormatString(string unformatted, object? arg1, object? arg2, object? arg3)
-        {
-            ValidateArgsIfDebug([arg1, arg2, arg3]);
-            return string.Format(CultureInfo.CurrentCulture, unformatted, arg1, arg2, arg3);
-        }
-
-        [Conditional("DEBUG")]
-        private static void ValidateArgsIfDebug(object?[] args)
-        {
-            // If you accidentally pass some random type in that can't be converted to a string,
-            // FormatResourceString calls ToString() which returns the full name of the type!
-            foreach (object? param in args)
-            {
-                // Check it has a real implementation of ToString() and the type is not actually System.String
-                if (param != null)
-                {
-                    if (string.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal) &&
-                        param.GetType() != typeof(string))
-                    {
-                        InternalError.Throw($"Invalid resource parameter type, was {param.GetType().FullName}");
-                    }
-                }
-            }
-        }
+            => MessageFormatter.Format(unformatted, arg1, arg2, arg3);
 
         /// <summary>
         /// Verifies that a particular resource string actually exists in the string table. This will only be called in debug
