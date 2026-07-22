@@ -155,6 +155,33 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        /// Size in bytes of the application-level read buffer that <c>BufferedReadStream</c> uses to drain the
+        /// named pipe feeding an out-of-process .NET node (worker node or .NET TaskHost). A packet body is
+        /// deserialized by streaming through this buffer, so a large packet - e.g. a TaskHostConfiguration
+        /// carrying a big ITaskItem[] such as NuGet restore's RestoreGraphItems - costs roughly
+        /// packetBytes / this-size individual pipe reads. The historical value was 1 KB, which makes a
+        /// multi-hundred-MB restore packet cost hundreds of thousands of pipe reads on Windows. Defaults to
+        /// 256 KB under change wave 18.10; set MSBUILDDISABLEFEATURESFROMVERSION=18.10 to revert to the
+        /// historical 1 KB. Explicitly tunable via MSBUILDNODEREADBUFFERSIZE, which overrides both. This is
+        /// distinct from <see cref="NodeConnectionBufferSize"/>, which sizes the kernel pipe buffer rather
+        /// than this user-space refill buffer.
+        /// </summary>
+        public readonly int NodeReadBufferSize = GetNodeReadBufferSize();
+
+        private static int GetNodeReadBufferSize()
+        {
+            int configured = EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDNODEREADBUFFERSIZE", -1);
+            if (configured > 0)
+            {
+                return configured;
+            }
+
+            const int DefaultBufferSize = 256 * 1024;
+            const int LegacyBufferSize = 1024;
+            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10) ? DefaultBufferSize : LegacyBufferSize;
+        }
+
+        /// <summary>
         /// Launches a persistent RAR process.
         /// </summary>
         /// TODO: Replace with command line flag when feature is completed. The environment variable is intented to avoid exposing the flag early.

@@ -33,6 +33,7 @@ Change wave checks around features will be removed in the release that accompani
 - [Resolve relative project paths against the Unix logical current directory from `PWD`, so builds under symlinked directories produce stable project full paths and related output paths.](https://github.com/dotnet/msbuild/pull/13752)
 - [Restore passes ExcludeRestorePackageImports=true as a global property so NuGet's restore no longer triggers a second evaluation of every project.](https://github.com/dotnet/msbuild/issues/14273)
 - [`-getProperty`/`-getItem` (without a target) stop evaluation after the pass that produces the requested data instead of running a full evaluation, avoiding later passes such as target registration.](https://github.com/dotnet/msbuild/pull/14290)
+- [The out-of-proc node read-pipe buffer (`BufferedReadStream`) defaults to 256 KB (was 1 KB), cutting the number of pipe reads needed to drain a large packet body such as a TaskHostConfiguration carrying NuGet restore's RestoreGraphItems. Tunable via MSBUILDNODEREADBUFFERSIZE; set MSBUILDDISABLEFEATURESFROMVERSION=18.10 to revert to 1 KB.](https://github.com/dotnet/msbuild/pull/14485)
 
 ### 18.9
 - [GenerateResource: typed ResX data/metadata entries in Mark-of-the-Web files are now treated as untrusted and blocked with MSB3821; unblock the file (or set MSBUILDDISABLEFEATURESFROMVERSION=18.9) to restore prior behavior. ResXFileRef entries are always blocked regardless of this wave.](https://github.com/dotnet/msbuild/pull/14015)
