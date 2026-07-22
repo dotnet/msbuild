@@ -252,11 +252,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private AbsolutePath _absolutePathOutput;
 
         /// <summary>
-        /// The value set for the EnumParam.
-        /// </summary>
-        private TestTaskEnum _enumOutput;
-
-        /// <summary>
         /// The value for the AbsolutePathArrayOutput.
         /// </summary>
         private AbsolutePath[] _absolutePathArrayOutput;
@@ -723,7 +718,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             set
             {
-                _enumOutput = value;
                 _testTaskHost?.ParameterSet("EnumParam", value);
             }
         }
