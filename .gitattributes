@@ -7,6 +7,10 @@
 # in Unix via a file share from Windows, the scripts will work.
 *.sh text eol=lf
 
+# Branch-freeze PowerShell scripts execute on Linux GitHub Actions runners.
+.github/branch-freeze/*.ps1 text eol=lf
+.github/branch-freeze/tests/*.ps1 text eol=lf
+
 # Ensure .bin files are stored as binary
 *.bin binary
 
