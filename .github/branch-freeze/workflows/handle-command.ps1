@@ -164,10 +164,11 @@ function Invoke-Main {
 }
 
 $ErrorActionPreference = 'Stop'
-Import-Module (Join-Path $PSScriptRoot 'BranchFreeze.psm1') -Force
-Import-Module (Join-Path $PSScriptRoot 'BranchFreezeCommentComposer.psm1') -Force
-Import-Module (Join-Path $PSScriptRoot 'BranchFreezeCommentParser.psm1') -Force
-Import-Module (Join-Path $PSScriptRoot 'GitHubIssuesClient.psm1') -Force
-Import-Module (Join-Path $PSScriptRoot 'GitHubRepositoryClient.psm1') -Force
+$componentsDirectory = Join-Path (Split-Path -Parent $PSScriptRoot) 'components'
+Import-Module (Join-Path $componentsDirectory 'BranchFreeze.psm1') -Force
+Import-Module (Join-Path $componentsDirectory 'issue-comments/BranchFreezeCommentComposer.psm1') -Force
+Import-Module (Join-Path $componentsDirectory 'issue-comments/BranchFreezeCommentParser.psm1') -Force
+Import-Module (Join-Path $componentsDirectory 'github/GitHubIssuesClient.psm1') -Force
+Import-Module (Join-Path $componentsDirectory 'github/GitHubRepositoryClient.psm1') -Force
 $exitCode = Invoke-Main
 exit $exitCode

@@ -54,7 +54,7 @@ jobs:
           # Authorization logic lives in is-allowed.ps1 (single source of truth,
           # unit-tested); exit 0 = allowed, non-zero = denied (incl. missing file).
           pwsh -NoLogo -NoProfile -File `
-            "$env:GITHUB_WORKSPACE/.github/branch-freeze/is-allowed.ps1" `
+            "$env:GITHUB_WORKSPACE/.github/branch-freeze/workflows/is-allowed.ps1" `
             $env:ACTOR `
             $env:ALLOWLIST
           if ($LASTEXITCODE -eq 0) {
@@ -77,7 +77,7 @@ jobs:
         shell: pwsh
         run: |
           pwsh -NoLogo -NoProfile -File `
-            "$env:GITHUB_WORKSPACE/.github/branch-freeze/deny-command.ps1" `
+            "$env:GITHUB_WORKSPACE/.github/branch-freeze/workflows/deny-command.ps1" `
             -Repository $env:REPO `
             -CommentId $env:COMMENT_ID `
             -IssueNumber $env:ISSUE_NUMBER `
@@ -98,7 +98,7 @@ jobs:
         shell: pwsh
         # The script reopens/closes the branch's permanent tracking issue and
         # exposes the affected branch for the refresh job below.
-        run: pwsh -NoLogo -NoProfile -File "$env:GITHUB_WORKSPACE/.github/branch-freeze/handle-command.ps1"
+        run: pwsh -NoLogo -NoProfile -File "$env:GITHUB_WORKSPACE/.github/branch-freeze/workflows/handle-command.ps1"
 
   # Refresh every open PR on the affected branch. The refresh and single-PR
   # workflows share the same per-branch concurrency group, preventing a stale

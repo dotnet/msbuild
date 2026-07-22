@@ -1,6 +1,6 @@
-Import-Module (Join-Path $PSScriptRoot 'BranchFreezeCommentComposer.psm1') -Force
-Import-Module (Join-Path $PSScriptRoot 'BranchFreezeCommentParser.psm1') -Force
-Import-Module (Join-Path $PSScriptRoot 'GitHubIssuesClient.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'issue-comments/BranchFreezeCommentComposer.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'issue-comments/BranchFreezeCommentParser.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'github/GitHubIssuesClient.psm1') -Force
 
 $script:TrackingLabel = 'branch-freeze'
 

@@ -25,6 +25,8 @@ $ErrorActionPreference = 'Stop'
 
 $testsDirectory = $PSScriptRoot
 $branchFreezeDirectory = Split-Path -Parent $testsDirectory
+$componentsDirectory = Join-Path $branchFreezeDirectory 'components'
+$workflowScriptsDirectory = Join-Path $branchFreezeDirectory 'workflows'
 $repositoryRoot = Split-Path -Parent (Split-Path -Parent $branchFreezeDirectory)
 $powerShell = (Get-Process -Id $PID).Path
 $temporaryPaths = [System.Collections.Generic.List[string]]::new()
@@ -144,7 +146,7 @@ try {
     $env:PATH = "$mockDirectory$([IO.Path]::PathSeparator)$env:PATH"
 
     Write-Output '== GitHub CLI transport (transient failures) =='
-    Import-Module (Join-Path $branchFreezeDirectory 'GitHubCli.psm1') -Force
+    Import-Module (Join-Path $componentsDirectory 'github/GitHubCli.psm1') -Force
     $transientFailureFile = Register-TestTemporaryFile
     Set-Content -LiteralPath $transientFailureFile -Value 2 -Encoding utf8
     $env:MOCK_TRANSIENT_FAILURE_FILE = $transientFailureFile
@@ -161,14 +163,14 @@ try {
 
     Write-Output '== comment modules (pure parsing and composition) =='
     $branchFreezeModule = Import-Module `
-        (Join-Path $branchFreezeDirectory 'BranchFreeze.psm1') -Force -PassThru
+        (Join-Path $componentsDirectory 'BranchFreeze.psm1') -Force -PassThru
     Assert-Equal (
         @($branchFreezeModule.ExportedFunctions.Keys | Sort-Object) -join ','
     ) (
         'Close-BranchFreezeIssue,Get-BranchFreezeState,Open-BranchFreezeIssue'
     ) 'domain module exports only semantic branch-freeze operations'
-    Import-Module (Join-Path $branchFreezeDirectory 'BranchFreezeCommentParser.psm1') -Force
-    Import-Module (Join-Path $branchFreezeDirectory 'BranchFreezeCommentComposer.psm1') -Force
+    Import-Module (Join-Path $componentsDirectory 'issue-comments/BranchFreezeCommentParser.psm1') -Force
+    Import-Module (Join-Path $componentsDirectory 'issue-comments/BranchFreezeCommentComposer.psm1') -Force
 
     $request = ConvertFrom-BranchFreezeCommand -Body '/freeze --branch vs17.14 SDK insertion broke'
     Assert-Equal $request.Action 'freeze' 'parser recognizes the freeze action'
@@ -191,29 +193,29 @@ try {
 
     Write-Output '== is-allowed.ps1 (authorization boundary) =='
     $allowlist = Join-Path $repositoryRoot '.github/branch-freeze-allowlist.txt'
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'is-allowed.ps1') @('rainersigwald', $allowlist)
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'is-allowed.ps1') @('rainersigwald', $allowlist)
     if ($code -eq 0) { Add-Pass 'listed login is allowed' } else { Add-Failure 'listed login is allowed' }
 
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'is-allowed.ps1') @('RAINERSIGWALD', $allowlist)
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'is-allowed.ps1') @('RAINERSIGWALD', $allowlist)
     if ($code -eq 0) { Add-Pass 'match is case-insensitive' } else { Add-Failure 'match is case-insensitive' }
 
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'is-allowed.ps1') @('not-a-real-user', $allowlist)
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'is-allowed.ps1') @('not-a-real-user', $allowlist)
     if ($code -ne 0) { Add-Pass 'unknown login is denied' } else { Add-Failure 'unknown login is denied' }
 
     $emptyAllowlist = Register-TestTemporaryFile
     Set-Content -LiteralPath $emptyAllowlist -Value "# only a comment`n" -Encoding utf8
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'is-allowed.ps1') @('anyone', $emptyAllowlist)
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'is-allowed.ps1') @('anyone', $emptyAllowlist)
     if ($code -ne 0) { Add-Pass 'empty allowlist denies (deny-by-default)' } else { Add-Failure 'empty allowlist denies (deny-by-default)' }
 
     $missingAllowlist = "$emptyAllowlist.missing"
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'is-allowed.ps1') @('anyone', $missingAllowlist)
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'is-allowed.ps1') @('anyone', $missingAllowlist)
     if ($code -eq 2) { Add-Pass 'missing allowlist file denies (exit 2)' } else { Add-Failure 'missing allowlist file denies (exit 2)' }
 
     Write-Output '== deny-command.ps1 (unauthorized commenter) =='
     $issueOperations = Register-TestTemporaryFile
     $env:GH_ISSUE_FILE = $issueOperations
     $env:MOCK_ISSUE_COMMENT_FAILURE = '0'
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'deny-command.ps1') @(
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'deny-command.ps1') @(
         '-Repository', 'o/r',
         '-CommentId', '99',
         '-IssueNumber', '42',
@@ -236,13 +238,13 @@ try {
 
     $statusFile = Initialize-TestStatusFile
     $env:MOCK_ISSUES = '[]'
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'set-pr-status.ps1') @('sha-open', 'main')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @('sha-open', 'main')
     Assert-Equal $code 0 'open branch status command succeeds'
     Assert-Equal (Get-StatusField $statusFile 'state') 'success' 'no tracking issue -> branch open (success)'
 
     $statusFile = Initialize-TestStatusFile
     $env:MOCK_ISSUES = '[{"number":7,"title":"Branch freeze: main","url":"https://github.com/o/r/issues/7","state":"OPEN","body":"## Current state\n\nBranch `main` is **frozen** by @rainersigwald.\n\n### Reason\n\nSDK insertion broke\n\n<!-- branch-freeze-by:rainersigwald -->"}]'
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'set-pr-status.ps1') @('sha-frozen', 'main')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @('sha-frozen', 'main')
     Assert-Equal $code 0 'frozen branch status command succeeds'
     Assert-Equal (Get-StatusField $statusFile 'state') 'failure' 'open permanent issue -> branch frozen (failure)'
     Assert-Equal (Get-StatusField $statusFile 'description') 'Frozen by @rainersigwald: SDK insertion broke' 'status names who froze it'
@@ -250,13 +252,13 @@ try {
 
     $statusFile = Initialize-TestStatusFile
     $env:MOCK_ISSUES = '[{"number":9,"title":"Branch freeze: main","url":"u","state":"CLOSED","body":"old reason"}]'
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'set-pr-status.ps1') @('sha-closed', 'main')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @('sha-closed', 'main')
     Assert-Equal $code 0 'closed permanent issue status command succeeds'
     Assert-Equal (Get-StatusField $statusFile 'state') 'success' 'closed permanent issue -> branch open'
 
     $statusFile = Initialize-TestStatusFile
     $env:MOCK_ISSUES = '[{"number":9,"title":"Branch freeze: release","url":"u","state":"OPEN","body":"release only"}]'
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'set-pr-status.ps1') @('sha-other', 'main')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @('sha-other', 'main')
     Assert-Equal $code 0 'different branch issue status command succeeds'
     Assert-Equal (Get-StatusField $statusFile 'state') 'success' 'different exact title does not freeze the branch'
 
@@ -271,7 +273,7 @@ try {
             body = "## Current state`n`nBranch ``main`` is **frozen**.`n`n### Reason`n`n$longReason`n`n<!-- branch-freeze-by: -->"
         }
     ) | ConvertTo-Json -Compress
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'set-pr-status.ps1') @('sha-long', 'main')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @('sha-long', 'main')
     Assert-Equal $code 0 'long Unicode status command succeeds'
     Assert-Equal (
         Get-StatusField $statusFile 'description'
@@ -291,7 +293,7 @@ try {
     $env:BODY = '/freeze --branch main SDK insertion broke'
     $env:GITHUB_OUTPUT = $commandOutput
 
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'handle-command.ps1')
     Assert-Equal $code 0 'freeze command succeeds'
     Assert-Equal (Get-WorkflowOutput $commandOutput 'changed') 'true' 'freeze requests a PR status refresh'
     Assert-Equal (Get-WorkflowOutput $commandOutput 'branch') 'main' 'freeze returns the affected branch'
@@ -329,7 +331,7 @@ SDK insertion broke
     $env:GH_ISSUE_FILE = $issueOperations
     $env:BODY = '/freeze New failure'
     $env:GITHUB_OUTPUT = $commandOutput
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'handle-command.ps1')
     Assert-Equal $code 0 'freeze reuses a closed permanent issue'
     $operations = @(Get-Content -LiteralPath $issueOperations | ForEach-Object { $_ | ConvertFrom-Json })
     Assert-Equal (@($operations | Where-Object command -eq 'create').Count) 0 'freeze does not create a second issue'
@@ -348,7 +350,7 @@ SDK insertion broke
     $env:MOCK_ISSUES = '[]'
     $env:BODY = '/unfreeze'
     $env:GITHUB_OUTPUT = $commandOutput
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'handle-command.ps1')
     Assert-Equal $code 0 'already-unfrozen command succeeds'
     Assert-Equal (Get-WorkflowOutput $commandOutput 'changed') 'false' 'already-unfrozen command skips PR status refresh'
 
@@ -359,7 +361,7 @@ SDK insertion broke
     $env:GH_ISSUE_FILE = $issueOperations
     $env:BODY = '/unfreeze'
     $env:GITHUB_OUTPUT = $commandOutput
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'handle-command.ps1')
     Assert-Equal $code 0 'unfreeze command succeeds'
     Assert-Equal (Get-WorkflowOutput $commandOutput 'changed') 'true' 'unfreeze requests a PR status refresh'
     $operations = @(
@@ -379,7 +381,7 @@ SDK insertion broke
     $env:GH_ISSUE_FILE = $issueOperations
     $env:BODY = '/freeze --branch   '
     $env:GITHUB_OUTPUT = $commandOutput
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'handle-command.ps1')
     Assert-Equal $code 0 'missing branch name is handled as a usage error'
     Assert-Equal (Get-WorkflowOutput $commandOutput 'changed') $null 'missing branch name does not request a refresh'
     $stateChanges = @(
@@ -403,7 +405,7 @@ SDK insertion broke
     $env:GH_ISSUE_FILE = $issueOperations
     $env:BODY = "/freeze $payload"
     $env:GITHUB_OUTPUT = $commandOutput
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'handle-command.ps1')
     Assert-Equal $code 0 'PowerShell-looking freeze reason is accepted as data'
     if (Test-Path -LiteralPath $injectionMarker) {
         Add-Failure 'PowerShell-looking freeze reason remains inert'
@@ -427,7 +429,7 @@ SDK insertion broke
     $env:GH_ISSUE_FILE = $issueOperations
     $env:BODY = '/freeze --branch main;Write-Output injected'
     $env:GITHUB_OUTPUT = $commandOutput
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'handle-command.ps1')
     Assert-Equal $code 0 'command-like branch name is handled as invalid input'
     Assert-Equal (
         Get-WorkflowOutput $commandOutput 'changed'
@@ -452,7 +454,7 @@ SDK insertion broke
     $env:BODY = '/freeze Audit comment failure test'
     $env:GITHUB_OUTPUT = $commandOutput
 
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'handle-command.ps1')
     Assert-Equal $code 0 'failed audit comment does not abort freeze'
     Assert-Equal (
         Get-WorkflowOutput $commandOutput 'changed'
@@ -480,7 +482,7 @@ SDK insertion broke
     $env:BODY = '/unfreeze'
     $env:GITHUB_OUTPUT = $commandOutput
 
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'handle-command.ps1')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'handle-command.ps1')
     Assert-Equal $code 0 'failed audit and confirmation comments do not abort unfreeze'
     Assert-Equal (Get-WorkflowOutput $commandOutput 'changed') 'true' 'failed unfreeze comments preserve refresh output'
     Assert-Equal (Get-WorkflowOutput $commandOutput 'branch') 'main' 'failed unfreeze comments preserve refresh branch'
@@ -493,14 +495,14 @@ SDK insertion broke
     $statusFile = Initialize-TestStatusFile
     $env:MOCK_ISSUES = '[]'
     $env:MOCK_PRS = '[{"number":1,"headRefOid":"sha-1","baseRefName":"main"},{"number":2,"headRefOid":"sha-2","baseRefName":"main"}]'
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'refresh-pr-statuses.ps1') @('main')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'refresh-pr-statuses.ps1') @('main')
     Assert-Equal $code 0 'bulk refresh succeeds'
     $statusWrites = @(Get-Content -LiteralPath $statusFile | Where-Object { $_ -eq 'state=success' })
     Assert-Equal $statusWrites.Count 2 'bulk refresh stamps every matching PR'
 
     $statusFile = Initialize-TestStatusFile
     $env:MOCK_STATUS_FAILURE_SHA = 'sha-1'
-    $code = Invoke-TestScript (Join-Path $branchFreezeDirectory 'refresh-pr-statuses.ps1') @('main')
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'refresh-pr-statuses.ps1') @('main')
     Assert-Equal $code 1 'bulk refresh fails after a PR status write fails'
     $statusWrites = @(Get-Content -LiteralPath $statusFile | Where-Object { $_ -eq 'state=success' })
     Assert-Equal $statusWrites.Count 1 'bulk refresh attempts later PRs after a status write fails'

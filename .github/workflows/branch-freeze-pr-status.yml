@@ -46,6 +46,6 @@ jobs:
         shell: pwsh
         run: |
           pwsh -NoLogo -NoProfile -File `
-            "$env:GITHUB_WORKSPACE/.github/branch-freeze/set-pr-status.ps1" `
+            "$env:GITHUB_WORKSPACE/.github/branch-freeze/workflows/set-pr-status.ps1" `
             $env:HEAD_SHA `
             $env:BASE_REF

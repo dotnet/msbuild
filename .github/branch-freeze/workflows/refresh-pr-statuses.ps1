@@ -42,7 +42,8 @@ function Invoke-Main {
 }
 
 $ErrorActionPreference = 'Stop'
-Import-Module (Join-Path $PSScriptRoot 'GitHubPullRequestsClient.psm1') -Force
-Import-Module (Join-Path $PSScriptRoot 'GitHubRepositoryClient.psm1') -Force
+$componentsDirectory = Join-Path (Split-Path -Parent $PSScriptRoot) 'components'
+Import-Module (Join-Path $componentsDirectory 'github/GitHubPullRequestsClient.psm1') -Force
+Import-Module (Join-Path $componentsDirectory 'github/GitHubRepositoryClient.psm1') -Force
 $exitCode = Invoke-Main
 exit $exitCode
