@@ -955,10 +955,8 @@ public class NodeBudgetManager_Tests
         BuildGrant root = NewGrant(processId: 1, requestedNodes: 4);
         manager.TryGrant(root).ShouldBe(4);
 
-        BuildGrant nested = new(Guid.NewGuid(), processId: 2, requestedNodes: 4, root.GrantId, isNested: true)
-        {
-            GrantedNodes = 4,
-        };
+        BuildGrant nested = new(Guid.NewGuid(), processId: 2, requestedNodes: 4, grantId: root.GrantId, isNested: true);
+        nested.Activate(4);
 
         manager.TryGrant(nested).ShouldBe(4);
 
