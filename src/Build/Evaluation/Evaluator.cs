@@ -365,7 +365,6 @@ namespace Microsoft.Build.Evaluation
             {
                 EvaluationMetrics.RecordProjectEvaluation(
                     evaluationStartTimestamp,
-                    evaluationStage,
                     submissionId != BuildEventContext.InvalidSubmissionId,
                     evaluationSucceeded);
 
