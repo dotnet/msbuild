@@ -31,6 +31,7 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.10
 - [Restore passes ExcludeRestorePackageImports=true as a global property so NuGet's restore no longer triggers a second evaluation of every project.](https://github.com/dotnet/msbuild/issues/14273)
+- [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs; set MSBUILDDISABLEFEATURESFROMVERSION=18.10 to opt out.](https://github.com/dotnet/msbuild/pull/14285)
 
 ### 18.9
 - [GenerateResource: typed ResX data/metadata entries in Mark-of-the-Web files are now treated as untrusted and blocked with MSB3821; unblock the file (or set MSBUILDDISABLEFEATURESFROMVERSION=18.9) to restore prior behavior. ResXFileRef entries are always blocked regardless of this wave.](https://github.com/dotnet/msbuild/pull/14015)
