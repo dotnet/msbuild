@@ -44,7 +44,7 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">Resource string to load.</param>
         /// <param name="args">Optional arguments for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, params object?[]? args)
+        internal static string FormatResourceStringStripCodeAndKeyword(out string? code, out string? helpKeyword, string resourceName, params object?[] args)
         {
             helpKeyword = GetHelpKeyword(resourceName);
             string message = FormatString(GetResourceString(resourceName), args);
@@ -143,7 +143,7 @@ namespace Microsoft.Build.Shared
         /// <param name="resourceName">Resource string to load.</param>
         /// <param name="args">Optional arguments for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
-        internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, params object?[]? args)
+        internal static string FormatResourceStringStripCodeAndKeyword(string resourceName, params object?[] args)
         {
             string message = FormatString(GetResourceString(resourceName), args);
 
@@ -232,7 +232,7 @@ namespace Microsoft.Build.Shared
         /// <param name="args">Optional arguments for formatting the resource string.</param>
         /// <returns>The formatted resource string.</returns>
         /// <remarks>the AssemblyResources.GetString() method is thread-safe.</remarks>
-        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, params object?[]? args)
+        internal static string FormatResourceStringIgnoreCodeAndKeyword(string resourceName, params object?[] args)
             => FormatString(GetResourceString(resourceName), args);
 
         // Overloads with 0-3 arguments to avoid array allocations.
@@ -290,7 +290,7 @@ namespace Microsoft.Build.Shared
         /// <param name="unformatted">The string to format.</param>
         /// <param name="args">Optional arguments for formatting the given string.</param>
         /// <returns>The formatted string.</returns>
-        internal static string FormatString(string unformatted, params object?[]? args)
+        internal static string FormatString(string unformatted, params object?[] args)
         {
             string formatted = unformatted;
 
