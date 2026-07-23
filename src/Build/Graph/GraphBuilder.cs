@@ -163,9 +163,13 @@ namespace Microsoft.Build.Graph
             }
             else
             {
-                // Use the ProjectInstance constructor that handles solution files via SolutionProjectGenerator
+                // Create a minimal ProjectInstance for edge case of empty solution.
+                // We can't use SolutionProjectGenerator here because it requires logging services
+                // which aren't available during graph construction.
+                ProjectRootElement syntheticRootElement = ProjectRootElement.Create(_projectCollection);
+                syntheticRootElement.FullPath = Solution.FullPath;
                 syntheticSolutionInstance = new ProjectInstance(
-                    Solution.FullPath,
+                    syntheticRootElement,
                     solutionGlobalProperties,
                     toolsVersion: null,
                     _projectCollection);
