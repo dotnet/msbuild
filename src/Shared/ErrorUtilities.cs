@@ -52,7 +52,7 @@ internal static class ErrorUtilities
     /// <param name="resourceName">Resource to use in the exception</param>
     /// <param name="args">Formatting args.</param>
     [DoesNotReturn]
-    internal static void ThrowInvalidOperation(string resourceName, params object?[]? args)
+    internal static void ThrowInvalidOperation(string resourceName, params object?[] args)
     {
         throw new InvalidOperationException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args));
     }
@@ -65,7 +65,7 @@ internal static class ErrorUtilities
         ResourceUtilities.VerifyResourceStringExists(resourceName);
         if (!condition)
         {
-            ThrowInvalidOperation(resourceName, null);
+            ThrowInvalidOperation(resourceName);
         }
     }
 
@@ -138,7 +138,7 @@ internal static class ErrorUtilities
     /// not call this method repeatedly in performance-critical scenarios
     /// </summary>
     [DoesNotReturn]
-    internal static void ThrowArgument(string resourceName, params object?[]? args)
+    internal static void ThrowArgument(string resourceName, params object?[] args)
     {
         ThrowArgument(null, resourceName, args);
     }
@@ -157,7 +157,7 @@ internal static class ErrorUtilities
     /// <param name="resourceName"></param>
     /// <param name="args"></param>
     [DoesNotReturn]
-    internal static void ThrowArgument(Exception? innerException, string resourceName, params object?[]? args)
+    internal static void ThrowArgument(Exception? innerException, string resourceName, params object?[] args)
     {
         throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args), innerException);
     }
@@ -214,7 +214,7 @@ internal static class ErrorUtilities
         ResourceUtilities.VerifyResourceStringExists(resourceName);
         if (!condition)
         {
-            ThrowArgument(innerException, resourceName, null);
+            ThrowArgument(innerException, resourceName);
         }
     }
 
