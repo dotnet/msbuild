@@ -332,6 +332,16 @@ jobs:
       ArtifactName: 'FullOnWindows Release test logs'
     continueOnError: true
     condition: eq(variables.onlyDocChanged, 0)
+  - script: .dotnet\dotnet.exe exec artifacts\bin\MSBuild.Benchmarks\Release\net10.0\MSBuild.Benchmarks.dll --ci
+    displayName: Run benchmarks in dry mode
+    condition: eq(variables.onlyDocChanged, 0)
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: BenchmarkDotNet results'
+    inputs:
+      PathtoPublish: 'BenchmarkDotNet.Artifacts'
+      ArtifactName: 'BenchmarksDryRunWindows'
+    continueOnError: true
+    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
 
 - job: CoreBootstrappedOnLinux
   displayName: "Linux Core"
@@ -427,6 +437,16 @@ jobs:
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)/Verify'
       ArtifactName: 'Linux Verify $(System.JobAttempt)'
+  - bash: .dotnet/dotnet exec artifacts/bin/MSBuild.Benchmarks/Debug/net10.0/MSBuild.Benchmarks.dll --ci
+    displayName: Run benchmarks in dry mode
+    condition: eq(variables.onlyDocChanged, 0)
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: BenchmarkDotNet results'
+    inputs:
+      PathtoPublish: 'BenchmarkDotNet.Artifacts'
+      ArtifactName: 'BenchmarksDryRunLinux'
+    continueOnError: true
+    condition: and(succeededOrFailed(), eq(variables.onlyDocChanged, 0))
 
 - job: CoreOnMac
   displayName: "macOS Core"
