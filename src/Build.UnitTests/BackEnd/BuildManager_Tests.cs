@@ -4500,7 +4500,7 @@ $@"<Project InitialTargets=`Sleep`>
         public void GraphBuildSolutionExecutesSyntheticSolutionNodeWithoutPublishingItInResults()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            using ProjectCollection projectCollection = env.CreateProjectCollection().Collection;
+            ProjectCollection projectCollection = env.CreateProjectCollection().Collection;
 
             TransientTestFolder root = env.CreateFolder(createFolder: true);
             TransientTestFolder projectFolder = env.CreateFolder(Path.Combine(root.Path, "SimpleProject"), createFolder: true);
@@ -4559,6 +4559,8 @@ $@"<Project InitialTargets=`Sleep`>
                 result.ResultsByNode.ContainsKey(graphNode).ShouldBeTrue();
             }
 
+            // Verify that both the project and solution hooks ran (addresses Rainer's review comment)
+            _logger.AssertLogContains("ProjectBuilt");
             _logger.AssertLogContains("AfterSolutionHookRan");
         }
 

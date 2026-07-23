@@ -624,12 +624,6 @@ namespace Microsoft.Build.Logging
             else if (e is ProjectStartedEventArgs projectArgs)
             {
                 projectImportsCollector.AddFile(projectArgs.ProjectFile);
-
-                if (projectArgs.GlobalProperties?.TryGetValue("SolutionPath", out string solutionPath) == true &&
-                    !string.IsNullOrEmpty(solutionPath))
-                {
-                    projectImportsCollector.AddFile(EscapingUtilities.UnescapeAll(solutionPath));
-                }
             }
             else if (e is MetaprojectGeneratedEventArgs { metaprojectXml: { } } metaprojectArgs)
             {

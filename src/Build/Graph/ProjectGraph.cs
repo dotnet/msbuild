@@ -666,6 +666,21 @@ namespace Microsoft.Build.Graph
                     var entryEdge = new ProjectGraphBuildRequest(entryPointNode, GetEntryTargets(entryPointNode));
                     encounteredEdges.Add(entryEdge);
                     edgesToVisit.Enqueue(entryEdge);
+
+                    // For solution graphs, also enqueue the project nodes directly with their default targets.
+                    // The synthetic solution node can't propagate targets (no ProjectReferenceTargets),
+                    // so we need to ensure project nodes get their targets directly.
+                    if (Solution != null && !projectNodeSet.Contains(entryPointNode))
+                    {
+                        foreach (var projectNode in entryPointNode.ProjectReferences)
+                        {
+                            var projectEdge = new ProjectGraphBuildRequest(projectNode, projectNode.ProjectInstance.DefaultTargets.ToArray());
+                            if (encounteredEdges.Add(projectEdge))
+                            {
+                                edgesToVisit.Enqueue(projectEdge);
+                            }
+                        }
+                    }
                 }
             }
             else
@@ -680,6 +695,21 @@ namespace Microsoft.Build.Graph
                             var entryEdge = new ProjectGraphBuildRequest(entryPointNode, GetEntryTargets(entryPointNode));
                             encounteredEdges.Add(entryEdge);
                             edgesToVisit.Enqueue(entryEdge);
+
+                            // For solution graphs, also enqueue the project nodes directly with their default targets.
+                            // The synthetic solution node can't propagate targets (no ProjectReferenceTargets),
+                            // so we need to ensure project nodes get their targets directly.
+                            if (Solution != null && !projectNodeSet.Contains(entryPointNode))
+                            {
+                                foreach (var projectNode in entryPointNode.ProjectReferences)
+                                {
+                                    var projectEdge = new ProjectGraphBuildRequest(projectNode, projectNode.ProjectInstance.DefaultTargets.ToArray());
+                                    if (encounteredEdges.Add(projectEdge))
+                                    {
+                                        edgesToVisit.Enqueue(projectEdge);
+                                    }
+                                }
+                            }
                         }
 
                         continue;
