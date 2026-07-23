@@ -741,6 +741,9 @@ namespace Microsoft.Build.Engine.UnitTests
         [Fact]
         public void BuildManager_EmitsTasksDetailsTelemetryEvent()
         {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDTELEMETRYEXCLUDETASKSDETAILS", null);
+
             var testProject = """
                 <Project>
                     <UsingTask TaskName="Task01" TaskFactory="RoslynCodeTaskFactory"
