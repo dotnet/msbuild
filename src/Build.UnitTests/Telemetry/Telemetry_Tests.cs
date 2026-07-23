@@ -11,6 +11,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
+using Microsoft.Build.Shared;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
@@ -745,6 +746,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             env.SetEnvironmentVariable("MSBUILDTELEMETRYEXCLUDETASKSDETAILS", exclusionValue);
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(runningTests: () => true);
 
             var testProject = """
                 <Project>
