@@ -268,7 +268,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         private Project(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
-            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive, ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
         {
             ArgumentNullException.ThrowIfNull(xml);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -279,7 +279,7 @@ namespace Microsoft.Build.Evaluation
             implementation = defaultImplementation;
 
             _directoryCacheFactory = directoryCacheFactory;
-            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive);
+            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive, evaluationStage);
         }
 
         /// <summary>
@@ -362,7 +362,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         private Project(XmlReader xmlReader, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
-            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive, ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
         {
             ArgumentNullException.ThrowIfNull(xmlReader);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -373,7 +373,7 @@ namespace Microsoft.Build.Evaluation
             implementation = defaultImplementation;
 
             _directoryCacheFactory = directoryCacheFactory;
-            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive);
+            defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive, evaluationStage);
         }
 
         /// <summary>
@@ -458,7 +458,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         private Project(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, ProjectLoadSettings loadSettings,
-            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive)
+            EvaluationContext evaluationContext, IDirectoryCacheFactory directoryCacheFactory, bool interactive, ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
         {
             ArgumentNullException.ThrowIfNull(projectFile);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
@@ -475,7 +475,7 @@ namespace Microsoft.Build.Evaluation
             // seems the XmlReader based one should also clean the same way.
             try
             {
-                defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive);
+                defaultImplementation.Initialize(globalProperties, toolsVersion, subToolsetVersion, loadSettings, evaluationContext, interactive, evaluationStage);
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
             {
@@ -498,7 +498,6 @@ namespace Microsoft.Build.Evaluation
         /// <returns></returns>
         public static Project FromFile(string file, ProjectOptions options)
         {
-            ThrowIfPartialEvaluationRequested(options);
             return new Project(
                 file,
                 options.GlobalProperties,
@@ -508,7 +507,8 @@ namespace Microsoft.Build.Evaluation
                 options.LoadSettings,
                 options.EvaluationContext,
                 options.DirectoryCacheFactory,
-                options.Interactive);
+                options.Interactive,
+                options.EvaluationStage);
         }
 
         /// <summary>
@@ -518,7 +518,6 @@ namespace Microsoft.Build.Evaluation
         /// <param name="options">The <see cref="ProjectOptions"/> to use.</param>
         public static Project FromProjectRootElement(ProjectRootElement rootElement, ProjectOptions options)
         {
-            ThrowIfPartialEvaluationRequested(options);
             return new Project(
                 rootElement,
                 options.GlobalProperties,
@@ -528,7 +527,8 @@ namespace Microsoft.Build.Evaluation
                 options.LoadSettings,
                 options.EvaluationContext,
                 options.DirectoryCacheFactory,
-                options.Interactive);
+                options.Interactive,
+                options.EvaluationStage);
         }
 
         /// <summary>
@@ -538,7 +538,6 @@ namespace Microsoft.Build.Evaluation
         /// <param name="options">The <see cref="ProjectOptions"/> to use.</param>
         public static Project FromXmlReader(XmlReader reader, ProjectOptions options)
         {
-            ThrowIfPartialEvaluationRequested(options);
             return new Project(
                 reader,
                 options.GlobalProperties,
@@ -548,22 +547,8 @@ namespace Microsoft.Build.Evaluation
                 options.LoadSettings,
                 options.EvaluationContext,
                 options.DirectoryCacheFactory,
-                options.Interactive);
-        }
-
-        /// <summary>
-        /// <see cref="Project"/> only supports full evaluation. Throws if a caller requests a partial
-        /// evaluation via <see cref="ProjectOptions.EvaluationStage"/>; use <see cref="ProjectInstance"/>
-        /// for partial (stop-after-pass) evaluation.
-        /// </summary>
-        private static void ThrowIfPartialEvaluationRequested(ProjectOptions options)
-        {
-            ArgumentNullException.ThrowIfNull(options);
-
-            if (options.EvaluationStage != ProjectEvaluationStage.Full)
-            {
-                ErrorUtilities.ThrowArgument("OM_PartialEvaluationNotSupportedForProject", options.EvaluationStage);
-            }
+                options.Interactive,
+                options.EvaluationStage);
         }
 
         /// <summary>
@@ -857,6 +842,16 @@ namespace Microsoft.Build.Evaluation
         /// evaluation logging events back to the Project instance.
         /// </summary>
         public int LastEvaluationId => implementation.LastEvaluationId;
+
+        /// <summary>
+        /// How far evaluation proceeded when this project was last evaluated.
+        /// When this is not <see cref="ProjectEvaluationStage.Full"/>, the project is the result of a
+        /// partial evaluation (requested via <see cref="ProjectOptions.EvaluationStage"/>) and members
+        /// exposing state from later passes (for example items or targets) throw
+        /// <see cref="InvalidOperationException"/> until the project is re-evaluated via
+        /// <see cref="ReevaluateIfNecessary()"/>.
+        /// </summary>
+        public ProjectEvaluationStage EvaluationStage => (implementation as ProjectImpl)?.EvaluationStageInternal ?? ProjectEvaluationStage.Full;
 
         /// <summary>
         /// List of names of the properties that, while global, are still treated as overridable.
@@ -1892,6 +1887,14 @@ namespace Microsoft.Build.Evaluation
             private ProjectLoadSettings _loadSettings;
 
             /// <summary>
+            /// The evaluation stage reached by the most recent evaluation. <see cref="ProjectEvaluationStage.Full"/>
+            /// unless the project was created via a <see cref="ProjectOptions"/> requesting a partial evaluation.
+            /// Retained so that member accessors can fail fast on not-yet-computed state, and so re-evaluation
+            /// can restore the requested stage.
+            /// </summary>
+            private ProjectEvaluationStage _evaluationStage = ProjectEvaluationStage.Full;
+
+            /// <summary>
             /// The delegate registered with the ProjectRootElement to be called if the file name
             /// is changed. Retained so that ultimately it can be unregistered.
             /// If it has been set to null, the project has been unloaded from its collection.
@@ -2248,7 +2251,25 @@ namespace Microsoft.Build.Evaluation
             {
                 get
                 {
+                    VerifyThrowEvaluationStageReached(ProjectEvaluationStage.ItemDefinitions, nameof(ItemDefinitions));
                     return _data.ItemDefinitions;
+                }
+            }
+
+            /// <summary>
+            /// The evaluation stage reached by the most recent evaluation. See <see cref="ProjectEvaluationStage"/>.
+            /// </summary>
+            internal ProjectEvaluationStage EvaluationStageInternal => _evaluationStage;
+
+            /// <summary>
+            /// Throws <see cref="InvalidOperationException"/> if the most recent evaluation stopped before
+            /// <paramref name="requiredStage"/>, meaning the requested member's state was never computed.
+            /// </summary>
+            private void VerifyThrowEvaluationStageReached(ProjectEvaluationStage requiredStage, string memberName)
+            {
+                if (_evaluationStage < requiredStage)
+                {
+                    ErrorUtilities.ThrowInvalidOperation("OM_PartialEvaluationMemberUnavailable", memberName, _evaluationStage, requiredStage);
                 }
             }
 
@@ -2260,6 +2281,7 @@ namespace Microsoft.Build.Evaluation
             {
                 get
                 {
+                    VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Items, nameof(Items));
                     return new ReadOnlyCollection<ProjectItem>(_data.Items);
                 }
             }
@@ -2277,6 +2299,8 @@ namespace Microsoft.Build.Evaluation
                 [DebuggerStepThrough]
                 get
                 {
+                    VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Items, nameof(ItemsIgnoringCondition));
+
                     if (!(_data.ShouldEvaluateForDesignTime && _data.CanEvaluateElementsWithFalseConditions))
                     {
                         ErrorUtilities.ThrowInvalidOperation("OM_NotEvaluatedBecauseShouldEvaluateForDesignTimeIsFalse", nameof(ItemsIgnoringCondition));
@@ -2347,6 +2371,8 @@ namespace Microsoft.Build.Evaluation
                 [DebuggerStepThrough]
                 get
                 {
+                    VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Full, nameof(Targets));
+
                     if (_data.Targets == null)
                     {
                         return ReadOnlyEmptyDictionary<string, ProjectTargetInstance>.Instance;
@@ -2413,6 +2439,8 @@ namespace Microsoft.Build.Evaluation
             {
                 get
                 {
+                    VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Items, nameof(AllEvaluatedItems));
+
                     ICollection<ProjectItem> allEvaluatedItems = _data.AllEvaluatedItems;
 
                     if (allEvaluatedItems == null)
@@ -3155,6 +3183,7 @@ namespace Microsoft.Build.Evaluation
             /// </comments>
             public override ICollection<ProjectItem> GetItems(string itemType)
             {
+                VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Items, nameof(GetItems));
                 ICollection<ProjectItem> items = _data.GetItems(itemType);
                 return items;
             }
@@ -3169,6 +3198,7 @@ namespace Microsoft.Build.Evaluation
             /// </comments>
             public override ICollection<ProjectItem> GetItemsIgnoringCondition(string itemType)
             {
+                VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Items, nameof(GetItemsIgnoringCondition));
                 ICollection<ProjectItem> items = _data.ItemsIgnoringCondition[itemType];
                 return items;
             }
@@ -3186,6 +3216,7 @@ namespace Microsoft.Build.Evaluation
             /// </comments>
             public override ICollection<ProjectItem> GetItemsByEvaluatedInclude(string evaluatedInclude)
             {
+                VerifyThrowEvaluationStageReached(ProjectEvaluationStage.Items, nameof(GetItemsByEvaluatedInclude));
                 ICollection<ProjectItem> items = _data.GetItemsByEvaluatedInclude(evaluatedInclude);
                 return items;
             }
@@ -3351,6 +3382,15 @@ namespace Microsoft.Build.Evaluation
             /// <param name="evaluationContext">The <see cref="EvaluationContext"/> to use. See <see cref="EvaluationContext"/>.</param>
             public override void ReevaluateIfNecessary(EvaluationContext evaluationContext)
             {
+                // A public re-evaluation request implies the caller wants a fully-evaluated project.
+                // A partial evaluation leaves the project non-dirty, so force a re-evaluation to
+                // compute the remaining passes and restore full behavior.
+                if (_evaluationStage != ProjectEvaluationStage.Full)
+                {
+                    _evaluationStage = ProjectEvaluationStage.Full;
+                    _explicitlyMarkedDirty = true;
+                }
+
                 ReevaluateIfNecessary(LoggingService, evaluationContext);
             }
 
@@ -3753,6 +3793,15 @@ namespace Microsoft.Build.Evaluation
                 ProjectInstanceSettings settings,
                 EvaluationContext evaluationContext)
             {
+                // Materializing a ProjectInstance implies a fully-evaluated project (it may be built,
+                // and it is labeled Full). If this project was only partially evaluated, upgrade it to
+                // a full evaluation first so the snapshot is complete rather than silently partial.
+                if (_evaluationStage != ProjectEvaluationStage.Full)
+                {
+                    _evaluationStage = ProjectEvaluationStage.Full;
+                    _explicitlyMarkedDirty = true;
+                }
+
                 ReevaluateIfNecessary(loggingServiceForEvaluation, evaluationContext);
 
                 return new ProjectInstance(_data, DirectoryPath, FullPath, ProjectCollection.HostServices, ProjectCollection.EnvironmentProperties, settings);
@@ -3782,7 +3831,8 @@ namespace Microsoft.Build.Evaluation
                     evaluationContext.SdkResolverService,
                     BuildEventContext.InvalidSubmissionId,
                     evaluationContext,
-                    _interactive);
+                    _interactive,
+                    _evaluationStage);
 
                 Assumed.NotEqual(LastEvaluationId, BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
@@ -3815,7 +3865,7 @@ namespace Microsoft.Build.Evaluation
             /// Global properties may be null.
             /// Tools version may be null.
             /// </summary>
-            internal void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext, bool interactive)
+            internal void Initialize(IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectLoadSettings loadSettings, EvaluationContext evaluationContext, bool interactive, ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
             {
                 Xml.MarkAsExplicitlyLoaded();
 
@@ -3851,9 +3901,13 @@ namespace Microsoft.Build.Evaluation
 
                 _loadSettings = loadSettings;
                 _interactive = interactive;
+                _evaluationStage = evaluationStage;
 
                 Assumed.Equal(LastEvaluationId, BuildEventContext.InvalidEvaluationId, "This is the first evaluation therefore the last evaluation id is invalid");
 
+                // Call the private overload directly so an initial partial evaluation is honored. The
+                // public ReevaluateIfNecessary(EvaluationContext) override intentionally upgrades a
+                // partial project to a full evaluation, which must not happen during initial construction.
                 ReevaluateIfNecessary(LoggingService, evaluationContext);
 
                 Assumed.NotEqual(LastEvaluationId, BuildEventContext.InvalidEvaluationId, "Last evaluation ID must be valid after the first evaluation");

@@ -729,11 +729,6 @@
         <target state="translated">無法使用「{0}」成員，因為專案只經過部分評估 (評估已在「{1}」階段後停止)。請至少以「{2}」評估階段重新評估專案以存取此成員。</target>
         <note>UE: This message is shown when the user reads a member (for example items or targets) that a partial evaluation did not compute. {0} is the member name, {1} is the ProjectEvaluationStage the project was evaluated to, {2} is the minimum ProjectEvaluationStage required to access the member.</note>
       </trans-unit>
-      <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
-        <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
-        <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
-        <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
-      </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">無法使用內含 null 或空白目標名稱的集合呼叫方法 {0}。</target>

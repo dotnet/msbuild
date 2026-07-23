@@ -59,10 +59,6 @@ namespace Microsoft.Build.Definition
         /// <summary>
         /// The <see cref="ProjectEvaluationStage"/> controlling how far evaluation should proceed.
         /// Defaults to <see cref="ProjectEvaluationStage.Full"/> (a complete evaluation).
-        /// A non-<see cref="ProjectEvaluationStage.Full"/> (partial) stage is only honored when creating a
-        /// <see cref="Microsoft.Build.Execution.ProjectInstance"/>; passing a partial stage to a <see cref="Project"/> factory
-        /// (for example <see cref="Project.FromFile(string, ProjectOptions)"/>) throws
-        /// <see cref="System.ArgumentException"/>.
         /// </summary>
         public ProjectEvaluationStage EvaluationStage
         {
