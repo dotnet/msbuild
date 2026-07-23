@@ -4497,7 +4497,7 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
-        public void GraphBuildSolutionExecutesSyntheticSolutionNodeWithoutPublishingItInResults()
+        public void GraphBuildSolutionIncludesSyntheticSolutionNodeInResults()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
             ProjectCollection projectCollection = env.CreateProjectCollection().Collection;
@@ -4548,16 +4548,23 @@ $@"<Project InitialTargets=`Sleep`>
             graph.EntryPointNodes.Count.ShouldBe(1);
             graph.ProjectNodes.Contains(graph.EntryPointNodes.Single()).ShouldBeFalse();
 
+            ProjectGraphNode syntheticSolutionNode = graph.EntryPointNodes.Single();
+
             GraphBuildRequestData request = new(graph, Array.Empty<string>(), projectCollection.HostServices);
 
             GraphBuildResult result = _buildManager.Build(_parameters, request);
             result.OverallResult.ShouldBe(BuildResultCode.Success);
 
-            result.ResultsByNode.Count.ShouldBe(graph.ProjectNodes.Count);
+            // ResultsByNode should include both project nodes AND the synthetic solution node
+            result.ResultsByNode.Count.ShouldBe(graph.ProjectNodes.Count + 1);
             foreach (ProjectGraphNode graphNode in graph.ProjectNodes)
             {
                 result.ResultsByNode.ContainsKey(graphNode).ShouldBeTrue();
             }
+
+            // Verify synthetic solution node is included in results
+            result.ResultsByNode.ContainsKey(syntheticSolutionNode).ShouldBeTrue();
+            result.ResultsByNode[syntheticSolutionNode].OverallResult.ShouldBe(BuildResultCode.Success);
 
             // Verify that both the project and solution hooks ran (addresses Rainer's review comment)
             _logger.AssertLogContains("ProjectBuilt");

@@ -2304,6 +2304,12 @@ namespace Microsoft.Build.Execution
                 }
 
                 (resultsPerNode, syntheticSolutionNodeResult) = BuildGraph(projectGraph, targetsPerNode, submission.BuildRequestData, syntheticSolutionNode);
+
+                // Add synthetic solution node result to resultsPerNode so it's included in GraphBuildResult.ResultsByNode
+                if (syntheticSolutionNode is not null && syntheticSolutionNodeResult is not null)
+                {
+                    resultsPerNode.Add(syntheticSolutionNode, syntheticSolutionNodeResult);
+                }
             }
             else
             {
