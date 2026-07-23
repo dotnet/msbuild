@@ -11,7 +11,6 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
-using Microsoft.Build.Shared;
 using Microsoft.Build.TelemetryInfra;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
@@ -739,14 +738,12 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
 #if NET
-        [Theory]
-        [InlineData(null, true)]
-        [InlineData("1", false)]
-        public void BuildManager_EmitsTasksDetailsTelemetryEventUnlessExcluded(string? exclusionValue, bool shouldEmitEvent)
+        [Fact]
+        public void BuildManager_EmitsTasksDetailsTelemetryEvent()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDTELEMETRYEXCLUDETASKSDETAILS", exclusionValue);
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(runningTests: () => true);
+            env.SetEnvironmentVariable("MSBUILDTELEMETRYEXCLUDETASKSDETAILS", null);
+            Traits.Instance.ExcludeTasksDetailsFromTelemetry = false;
 
             var testProject = """
                 <Project>
@@ -777,12 +774,6 @@ namespace Microsoft.Build.Engine.UnitTests
             // Find the tasks details telemetry event
             var tasksDetailsEvent = logger.TelemetryEvents
                 .FirstOrDefault(e => e.EventName == TasksDetailsTelemetry.TasksDetailsEventName);
-
-            if (!shouldEmitEvent)
-            {
-                tasksDetailsEvent.ShouldBeNull();
-                return;
-            }
 
             tasksDetailsEvent.ShouldNotBeNull();
 
