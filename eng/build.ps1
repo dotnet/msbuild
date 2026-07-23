@@ -7,7 +7,7 @@ Param(
   [switch][Alias('bl')] $binaryLog,
   [switch][Alias('nobl')] $excludeCIBinarylog,
   [switch] $stage2,
-  [string[]] $stage2Arguments = @(),
+  [string[]][Alias('stage2Argument')] $stage2Arguments = @(),
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
