@@ -16,9 +16,10 @@ on:
 
 permissions:
   contents: read        # checkout the shared scripts
-  issues: write         # create/close/label the tracking issue, react, comment
-  # `statuses: write` and `pull-requests: read` are required only by the reusable
-  # refresh workflow and are granted on the `refresh` job below (least privilege).
+  issues: write         # create/close/label the tracking issue; react/reply on issue comments
+  pull-requests: write  # react/reply when the command comes from a pull request comment
+  # `statuses: write` is required only by the reusable refresh workflow and is
+  # granted on the `refresh` job below (least privilege).
 
 concurrency:
   # Do not let two freeze/unfreeze operations modify tracking issues at once.

@@ -44,7 +44,7 @@ function Add-Reaction {
             -Content $Content
     }
     catch {
-        return
+        Write-Host "::warning::Failed to add the '$Content' reaction to comment $CommentId."
     }
 }
 
