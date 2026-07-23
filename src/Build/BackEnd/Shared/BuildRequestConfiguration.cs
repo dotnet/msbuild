@@ -2,12 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Frozen;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
@@ -35,6 +39,40 @@ namespace Microsoft.Build.BackEnd
         public const int InvalidConfigurationId = 0;
 
         #region Static State
+
+        private const string EvaluationCacheEnvironmentVariable = "MSBUILDPROTOTYPEEVALUATIONCACHE";
+        private const string EvaluationCacheDirectoryEnvironmentVariable = "MSBUILDPROTOTYPEEVALUATIONCACHEDIRECTORY";
+        private const string EvaluationCacheKindTagName = "cache.kind";
+
+        private static readonly bool s_evaluationCacheEnabled =
+            Environment.GetEnvironmentVariable(EvaluationCacheEnvironmentVariable) == "1";
+
+        private static readonly string s_evaluationCacheDirectory =
+            Environment.GetEnvironmentVariable(EvaluationCacheDirectoryEnvironmentVariable);
+
+        private static readonly string[] s_evaluationCacheKeyProperties =
+        [
+            "BuildingSolutionFile",
+            "Configuration",
+            "ExcludeRestorePackageImports",
+            "MSBuildIsRestoring",
+            "Platform",
+            "RuntimeIdentifier",
+            "SelfContained",
+            "SolutionPath",
+            "TargetFramework",
+        ];
+
+        // Deliberately unsafe prototype: entries live for the process lifetime and have no input invalidation.
+        private static readonly ConcurrentDictionary<string, ProjectInstance> s_evaluationCache =
+            new(StringComparer.Ordinal);
+
+        private static readonly Meter s_evaluationCacheMeter = new("Microsoft.Build.EvaluationCachePrototype");
+
+        private static readonly Histogram<double> s_evaluationCacheHitDuration =
+            s_evaluationCacheMeter.CreateHistogram<double>(
+                "msbuild.prototype.evaluation_cache.hit.duration",
+                unit: "s");
 
         /// <summary>
         /// This is the ID of the configuration as set by the generator of the configuration.  When
@@ -474,6 +512,19 @@ namespace Microsoft.Build.BackEnd
 
             InitializeProject(componentHost.BuildParameters, () =>
             {
+                string prototypeCacheKey = null;
+                if (s_evaluationCacheEnabled)
+                {
+                    prototypeCacheKey = GetEvaluationCacheKey();
+                    if (TryGetCachedProject(
+                        prototypeCacheKey,
+                        componentHost.BuildParameters,
+                        out ProjectInstance cachedProject))
+                    {
+                        return cachedProject;
+                    }
+                }
+
                 if (componentHost.BuildParameters.SaveOperatingEnvironment)
                 {
                     try
@@ -513,7 +564,7 @@ namespace Microsoft.Build.BackEnd
                     projectLoadSettings |= ProjectLoadSettings.FailOnUnresolvedSdk;
                 }
 
-                return new ProjectInstance(
+                ProjectInstance project = new ProjectInstance(
                     ProjectFullPath,
                     globalProperties,
                     toolsVersionOverride,
@@ -530,7 +581,144 @@ namespace Microsoft.Build.BackEnd
                     sdkResolverService,
                     submissionId,
                     projectLoadSettings);
+
+                if (prototypeCacheKey != null)
+                {
+                    CacheProject(prototypeCacheKey, project);
+                }
+
+                return project;
             });
+        }
+
+        private static bool TryGetCachedProject(
+            string cacheKey,
+            BuildParameters buildParameters,
+            out ProjectInstance project)
+        {
+            if (s_evaluationCache.TryGetValue(cacheKey, out ProjectInstance cachedProject))
+            {
+                long startTimestamp = GetCacheHitStartTimestamp();
+                project = cachedProject.DeepCopy(isImmutable: false);
+                RecordCacheHit(startTimestamp, "memory");
+                return true;
+            }
+
+            if (string.IsNullOrEmpty(s_evaluationCacheDirectory))
+            {
+                project = null;
+                return false;
+            }
+
+            string cacheFile = GetEvaluationCacheFile(cacheKey);
+            if (!FileSystems.Default.FileExists(cacheFile))
+            {
+                project = null;
+                return false;
+            }
+
+            long sharedCacheStartTimestamp = GetCacheHitStartTimestamp();
+            using Stream stream = File.Open(cacheFile, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using ITranslator translator = GetConfigurationTranslator(TranslationDirection.ReadFromStream, stream);
+            project = ProjectInstance.FactoryForDeserialization(translator);
+            project.LateInitialize(buildParameters.ProjectRootElementCache, buildParameters.HostServices);
+            RecordCacheHit(sharedCacheStartTimestamp, "shared");
+            return true;
+        }
+
+        private static long GetCacheHitStartTimestamp() =>
+            s_evaluationCacheHitDuration.Enabled ? Stopwatch.GetTimestamp() : 0;
+
+        private static void RecordCacheHit(long startTimestamp, string cacheKind)
+        {
+            if (startTimestamp == 0)
+            {
+                return;
+            }
+
+            TagList tags = default;
+            tags.Add(EvaluationCacheKindTagName, cacheKind);
+            s_evaluationCacheHitDuration.Record(
+                (Stopwatch.GetTimestamp() - startTimestamp) / (double)Stopwatch.Frequency,
+                in tags);
+        }
+
+        private static void CacheProject(string cacheKey, ProjectInstance project)
+        {
+            s_evaluationCache.TryAdd(cacheKey, project.DeepCopy(isImmutable: true));
+
+            if (string.IsNullOrEmpty(s_evaluationCacheDirectory))
+            {
+                return;
+            }
+
+            Directory.CreateDirectory(s_evaluationCacheDirectory);
+            string cacheFile = GetEvaluationCacheFile(cacheKey);
+            if (FileSystems.Default.FileExists(cacheFile))
+            {
+                return;
+            }
+
+            string temporaryFile = $"{cacheFile}.{EnvironmentUtilities.CurrentProcessId}.{Environment.CurrentManagedThreadId}.tmp";
+            try
+            {
+                ProjectInstance serializableProject = project.DeepCopy(isImmutable: false);
+                serializableProject.TranslateEntireState = true;
+                using (Stream stream = File.Create(temporaryFile))
+                using (ITranslator translator = GetConfigurationTranslator(TranslationDirection.WriteToStream, stream))
+                {
+                    ((ITranslatable)serializableProject).Translate(translator);
+                }
+
+                File.Move(temporaryFile, cacheFile);
+            }
+            catch (IOException) when (FileSystems.Default.FileExists(cacheFile))
+            {
+            }
+            finally
+            {
+                FileUtilities.DeleteNoThrow(temporaryFile);
+            }
+        }
+
+        private string GetEvaluationCacheKey()
+        {
+            StringBuilder keyBuilder = new();
+            AppendCacheKeyPart(keyBuilder, ProjectFullPath);
+            AppendCacheKeyPart(keyBuilder, ToolsVersion);
+
+            foreach (string propertyName in s_evaluationCacheKeyProperties)
+            {
+                AppendCacheKeyPart(keyBuilder, propertyName);
+                ProjectPropertyInstance property = GlobalProperties[propertyName];
+                AppendCacheKeyPart(
+                    keyBuilder,
+                    property is null ? null : ((IProperty)property).EvaluatedValueEscaped);
+            }
+
+            return keyBuilder.ToString();
+        }
+
+        private static string GetEvaluationCacheFile(string cacheKey)
+        {
+            using SHA256 sha256 = SHA256.Create();
+            byte[] hash = sha256.ComputeHash(Encoding.UTF8.GetBytes(
+                typeof(BuildRequestConfiguration).Assembly.FullName + cacheKey));
+            string fileName = BitConverter.ToString(hash).Replace("-", string.Empty) + ".evaluationcache";
+            return Path.Combine(s_evaluationCacheDirectory, fileName);
+        }
+
+        private static void AppendCacheKeyPart(StringBuilder keyBuilder, string value)
+        {
+            if (value is null)
+            {
+                keyBuilder.Append("-1:");
+                return;
+            }
+
+            keyBuilder.Append(value.Length);
+            keyBuilder.Append(':');
+            keyBuilder.Append(value);
         }
 
         private void InitializeProject(BuildParameters buildParameters, Func<ProjectInstance> loadProjectFromFile)
@@ -1102,7 +1290,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Gets the translator for this configuration.
         /// </summary>
-        private ITranslator GetConfigurationTranslator(TranslationDirection direction, Stream stream) =>
+        private static ITranslator GetConfigurationTranslator(TranslationDirection direction, Stream stream) =>
             direction == TranslationDirection.WriteToStream
                     ? BinaryTranslator.GetWriteTranslator(stream)
                     // Not using sharedReadBuffer because this is not a memory stream and so the buffer won't be used anyway.
