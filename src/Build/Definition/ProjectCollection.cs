@@ -1323,16 +1323,6 @@ namespace Microsoft.Build.Evaluation
                 string effectiveToolsVersion = Utilities.GenerateToolsVersionToUse(toolsVersion, toolsVersionFromProject, GetToolset, DefaultToolsVersion, out _);
                 Project project = _loadedProjects.GetMatchingProjectIfAny(fileName, globalProperties, effectiveToolsVersion);
 
-                // A cached project only satisfies a (full) LoadProject if it was fully evaluated. If a matching
-                // project exists but was only partially evaluated, upgrade it in place (re-evaluate) so the same
-                // cache slot is reused rather than returning stale partial state or creating a duplicate entry.
-                // This mutation runs under the per-path load lock taken above, so concurrent loads of the same
-                // path cannot upgrade (and thus re-evaluate) the same project instance simultaneously.
-                if (project is not null && project.EvaluationStage < ProjectEvaluationStage.Full)
-                {
-                    project.ReevaluateIfNecessary();
-                }
-
                 // The Project constructor adds itself to our collection, it is not done by us
                 project ??= new Project(fileName, globalProperties, effectiveToolsVersion, this);
 
@@ -2052,9 +2042,9 @@ namespace Microsoft.Build.Evaluation
                             }
                         }
                     }
-                }
 
-                return null;
+                    return null;
+                }
             }
 
             /// <summary>

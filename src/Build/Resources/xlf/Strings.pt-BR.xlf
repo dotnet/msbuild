@@ -719,16 +719,6 @@
         <target state="translated">MatchOnMetadata não pode ser usado fora de um &lt;Target&gt;.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OM_PartialEvaluationCannotBuild">
-        <source>The project instance cannot be built because it was only partially evaluated (evaluation stopped after the "{0}" stage). A full evaluation is required to build a project.</source>
-        <target state="translated">A instância do projeto não pode ser criada porque foi avaliada apenas parcialmente (a avaliação foi interrompida após a etapa "{0}"). Uma avaliação completa é necessária para criar um projeto.</target>
-        <note>UE: This message is shown when the user tries to build a ProjectInstance produced by a partial evaluation. {0} is the ProjectEvaluationStage the instance was evaluated to.</note>
-      </trans-unit>
-      <trans-unit id="OM_PartialEvaluationMemberUnavailable">
-        <source>The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with at least the "{2}" evaluation stage to access this member.</source>
-        <target state="translated">O membro "{0}" não está disponível porque o projeto foi avaliado apenas parcialmente (a avaliação foi interrompida após a etapa "{1}"). Reavalie o projeto com pelo menos a etapa de avaliação "{2}" para acessar este membro.</target>
-        <note>UE: This message is shown when the user reads a member (for example items or targets) that a partial evaluation did not compute. {0} is the member name, {1} is the ProjectEvaluationStage the project was evaluated to, {2} is the minimum ProjectEvaluationStage required to access the member.</note>
-      </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">O método {0} não pode ser chamado com uma coleção que contém nomes de destino nulos ou vazios.</target>

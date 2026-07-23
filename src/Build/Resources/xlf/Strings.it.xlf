@@ -719,16 +719,6 @@
         <target state="translated">MatchOnMetadata non può essere usato all'esterno di un elemento &lt;Target&gt;.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OM_PartialEvaluationCannotBuild">
-        <source>The project instance cannot be built because it was only partially evaluated (evaluation stopped after the "{0}" stage). A full evaluation is required to build a project.</source>
-        <target state="translated">Non è possibile creare l'istanza del progetto perché è stata valutata solo parzialmente (la valutazione si è interrotta dopo la fase "{0}"). Per creare un progetto è necessaria una valutazione completa.</target>
-        <note>UE: This message is shown when the user tries to build a ProjectInstance produced by a partial evaluation. {0} is the ProjectEvaluationStage the instance was evaluated to.</note>
-      </trans-unit>
-      <trans-unit id="OM_PartialEvaluationMemberUnavailable">
-        <source>The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with at least the "{2}" evaluation stage to access this member.</source>
-        <target state="translated">Il membro "{0}" non è disponibile perché il progetto è stato valutato solo parzialmente (la valutazione si è interrotta dopo la fase "{1}"). Rivalutare il progetto con almeno la fase di valutazione "{2}" per accedere a questo membro.</target>
-        <note>UE: This message is shown when the user reads a member (for example items or targets) that a partial evaluation did not compute. {0} is the member name, {1} is the ProjectEvaluationStage the project was evaluated to, {2} is the minimum ProjectEvaluationStage required to access the member.</note>
-      </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">Non è possibile chiamare il metodo {0} con una raccolta contenente nomi di destinazione Null o vuoti.</target>
