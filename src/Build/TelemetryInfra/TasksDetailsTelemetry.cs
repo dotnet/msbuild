@@ -33,11 +33,6 @@ internal static class TasksDetailsTelemetry
     /// </summary>
     private const int MaxTaskDetailsForTelemetryEvent = 100;
 
-    private static readonly JsonSerializerOptions s_jsonOptions = new()
-    {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-    };
-
     internal static Dictionary<string, string>? GetTasksDetailsProperties(this IWorkerNodeTelemetryData? telemetryData)
     {
         if (telemetryData is null || telemetryData.TasksExecutionData.Count == 0)
@@ -55,7 +50,11 @@ internal static class TasksDetailsTelemetry
         {
             ["TaskCount"] = topTasks.Count.ToString(CultureInfo.InvariantCulture),
             ["TotalTaskCount"] = allTasks.Count.ToString(CultureInfo.InvariantCulture),
-            ["Tasks"] = JsonSerializer.Serialize(topTasks, s_jsonOptions),
+            ["Tasks"] = JsonSerializer.Serialize(topTasks, TasksDetailsJsonContext.Default.ListTaskDetailInfo),
         };
     }
 }
+
+[JsonSourceGenerationOptions(DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull)]
+[JsonSerializable(typeof(List<TaskDetailInfo>))]
+internal partial class TasksDetailsJsonContext : JsonSerializerContext;
