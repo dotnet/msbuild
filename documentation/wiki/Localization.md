@@ -27,7 +27,7 @@
 ### Filing feedback from a OneLoc pull request
 
 When the automated expert review identifies a translation problem in a
-`dotnet-bot` OneLoc pull request, a scheduled workflow detects the finding,
+`dotnet-bot` OneLoc pull request, a daily scheduled workflow detects the finding,
 files or reuses a CEINTL feedback item, and comments its link on the pull
 request.
 

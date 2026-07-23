@@ -2,7 +2,7 @@ name: File CEINTL localization feedback
 
 on:
   schedule:
-    - cron: "7,22,37,52 * * * *"
+    - cron: "17 8 * * *"
   workflow_dispatch:
     inputs:
       pull_request:
