@@ -23,6 +23,7 @@ Import-Module (Join-Path $PSScriptRoot '..\components\clients\KustoClient.psm1')
 Import-Module (Join-Path $PSScriptRoot '..\components\evidence\RegressionDetection.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot '..\components\reporting\RegressionReportWriter.psm1') -Force
 
+# Validate the trusted-job inputs before making a Kusto request.
 $accessToken = $env:KUSTO_ACCESS_TOKEN
 if ([string]::IsNullOrWhiteSpace($accessToken))
 {
@@ -34,13 +35,16 @@ if (-not (Test-Path -LiteralPath $QueryPath))
     throw "Kusto query file not found: $QueryPath"
 }
 
+# Execute the detector and turn its tabular result into the stable candidate contract.
 $client = New-KustoClient -ClusterUri $ClusterUri -Database $Database -AccessToken $accessToken
 $query = Get-Content -LiteralPath $QueryPath -Raw
 $candidates = @(Invoke-KustoQuery -Client $client -Query $query -RequirePrimaryTable $true)
 $report = New-RegressionDetectionReport -Candidates $candidates -GeneratedAtUtc ([DateTimeOffset]::UtcNow)
 
+# Write the machine-readable and human-readable views of the same detection result.
 Write-RegressionDetectionReport -Report $report -OutputDirectory $OutputDirectory
 
+# Gate the later evidence and agent jobs without treating an empty result as an error.
 if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_OUTPUT))
 {
     "has_regressions=$($candidates.Count -gt 0 ? 'true' : 'false')" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
