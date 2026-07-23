@@ -6,7 +6,7 @@ ci=false
 binary_log=false
 exclude_ci_binary_log=false
 stage2=false
-stage2Arguments=
+stage2Arguments=()
 properties=()
 
 source="${BASH_SOURCE[0]}"
@@ -23,7 +23,7 @@ done
 
 scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
 while [[ $# -gt 0 ]]; do
-  lowerI="$(echo "$1" | awk '{print tolower($0)}')"
+  lowerI="$(echo $1 | awk '{print tolower($0)}')"
   case "$lowerI" in
     --configuration)
       configuration=$2
@@ -49,9 +49,9 @@ while [[ $# -gt 0 ]]; do
       stage2=true
       shift 1
       ;;
-    --stage2arguments)
-      stage2Arguments=$2
-      # Supplying stage2Arguments implies a multi-stage build.
+    --stage2argument)
+      stage2Arguments+=( "$2" )
+      # Supplying stage2Argument implies a multi-stage build.
       stage2=true
       shift 2
       ;;
@@ -172,7 +172,7 @@ fi
 # $stage2Arguments are appended to the stage 2 build only.
 # Use this for switches like /mt that should not be passed to the stage1 build
 # until a stable version of MT is available in the images.
-stage2_build_args+=( $stage2Arguments )
+stage2_build_args+=( ${stage2Arguments[@]+"${stage2Arguments[@]}"} )
 
 echo "Stage 2 build: /bin/bash \"$build_script\" ${stage2_build_args[*]}"
 # Needs to run out-of-proc to not inherit the stage 1 build's state variables.
