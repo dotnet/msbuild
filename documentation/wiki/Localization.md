@@ -27,10 +27,9 @@
 ### Filing feedback from a OneLoc pull request
 
 When the automated expert review identifies a translation problem in a
-`dotnet-bot` OneLoc pull request, apply the `file-ceintl-feedback` label. The
-protected `ceintl-ticketing` GitHub environment requires maintainer approval,
-then the workflow files or reuses a CEINTL feedback item and comments its link
-on the pull request.
+`dotnet-bot` OneLoc pull request, a scheduled workflow detects the finding,
+files or reuses a CEINTL feedback item, and comments its link on the pull
+request.
 
 The workflow uses GitHub OIDC and a dedicated Microsoft Entra service principal.
 It does not use a PAT, does not check out the pull request head, and refuses
