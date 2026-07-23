@@ -76,15 +76,16 @@ flowchart TD
 
 1. A deterministic custom job runs daily or through `workflow_dispatch`.
 2. The job uses GitHub OIDC to authenticate as `msbuild-azdo-reader`.
-3. `Get-MtBuildTimeRegressions.kql` queries `perfstar-dev/PerfStarDataRaw`.
-4. `Invoke-MtBuildTimeRegressionScan.ps1` writes bounded JSON and Markdown statistical evidence.
-5. `Add-MtBuildTimeRegressionEvidence.ps1` resolves the exact current and last-healthy MSBuild
+3. `queries/Get-MtBuildTimeRegressions.kql` queries `perfstar-dev/PerfStarDataRaw`.
+4. `workflows/Invoke-MtBuildTimeRegressionScan.ps1` writes bounded JSON and Markdown statistical
+   evidence.
+5. `workflows/Add-MtBuildTimeRegressionEvidence.ps1` resolves the exact current and last-healthy MSBuild
    revisions, downloads only candidate-specific artifacts, extracts allowlisted metrics plus safe
    Hosted timing/completion lines, then deletes the raw files.
-6. The derived evidence is uploaded as a workflow artifact.
-7. `Add-MtBuildTimeDiagnosticEvidence.ps1` finds scheduled diagnostic runs from definition 28394
+6. `workflows/Add-MtBuildTimeDiagnosticEvidence.ps1` finds scheduled diagnostic runs from definition 28394
    that use the exact current or last-healthy MSBuild source SHA, then queries Kusto task, target,
    evaluation-pass, and task-migration data.
+7. The complete derived evidence is uploaded as a workflow artifact.
 8. The Agentic Workflow downloads only the derived evidence into its secret-free sandbox.
 9. The agent investigates every candidate and:
    - creates one aggregate issue when new candidates need tracking;
@@ -93,6 +94,25 @@ flowchart TD
 
 The workflow does not queue PerfStar validation runs. Automated experimental-build and targeted
 PerfStar verification are intentionally deferred.
+
+## Code organization
+
+The implementation follows the same thin-workflow/module structure as the branch-freeze automation:
+
+```text
+.github/mt-build-regression/
+├── components/
+│   ├── clients/       # Azure DevOps and Kusto REST boundaries
+│   ├── evidence/      # Detection, artifact sanitization, and diagnostic selection
+│   └── reporting/     # JSON and Markdown evidence contracts
+├── queries/           # Executable Kusto detector
+├── tests/             # Pure component and evidence-contract tests
+└── workflows/         # Small orchestration entry points called by GitHub Actions
+```
+
+The entry scripts validate credentials and inputs, compose the modules, and publish workflow
+outputs. Network retries, artifact handling, allowlists, exact-SHA matching, and report formatting
+remain encapsulated behind purpose-specific module functions.
 
 ## Detector scope
 

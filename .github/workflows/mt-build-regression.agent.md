@@ -153,17 +153,17 @@ jobs:
         id: scan
         shell: pwsh
         run: |
-          ./.github/workflows/scripts/Invoke-MtBuildTimeRegressionScan.ps1 `
+          ./.github/mt-build-regression/workflows/Invoke-MtBuildTimeRegressionScan.ps1 `
             -ClusterUri 'https://perfstar-experimental.swedencentral.kusto.windows.net' `
             -Database 'perfstar-dev' `
-            -QueryPath './.github/workflows/scripts/Get-MtBuildTimeRegressions.kql' `
+            -QueryPath './.github/mt-build-regression/queries/Get-MtBuildTimeRegressions.kql' `
             -OutputDirectory "$env:RUNNER_TEMP/mt-regression-data"
 
       - name: Collect actual-run evidence
         if: steps.scan.outputs.has_regressions == 'true'
         shell: pwsh
         run: |
-          ./.github/workflows/scripts/Add-MtBuildTimeRegressionEvidence.ps1 `
+          ./.github/mt-build-regression/workflows/Add-MtBuildTimeRegressionEvidence.ps1 `
             -InputReport "$env:RUNNER_TEMP/mt-regression-data/mt-regressions.json" `
             -OutputDirectory "$env:RUNNER_TEMP/mt-regression-data"
 
@@ -171,7 +171,7 @@ jobs:
         if: steps.scan.outputs.has_regressions == 'true'
         shell: pwsh
         run: |
-          ./.github/workflows/scripts/Add-MtBuildTimeDiagnosticEvidence.ps1 `
+          ./.github/mt-build-regression/workflows/Add-MtBuildTimeDiagnosticEvidence.ps1 `
             -InputEvidence "$env:RUNNER_TEMP/mt-regression-data/mt-regression-evidence.json" `
             -OutputDirectory "$env:RUNNER_TEMP/mt-regression-data"
 
