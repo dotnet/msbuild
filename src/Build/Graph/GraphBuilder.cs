@@ -163,10 +163,9 @@ namespace Microsoft.Build.Graph
             }
             else
             {
-                ProjectRootElement syntheticRootElement = ProjectRootElement.Create(_projectCollection);
-                syntheticRootElement.FullPath = Solution.FullPath;
+                // Use the ProjectInstance constructor that handles solution files via SolutionProjectGenerator
                 syntheticSolutionInstance = new ProjectInstance(
-                    syntheticRootElement,
+                    Solution.FullPath,
                     solutionGlobalProperties,
                     toolsVersion: null,
                     _projectCollection);
