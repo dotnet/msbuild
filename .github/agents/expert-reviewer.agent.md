@@ -387,15 +387,21 @@ See `../../documentation/ProjectReference-Protocol.md`.
 
 ---
 
-### 18. Documentation Accuracy
+### 18. Documentation Accuracy & Alignment
 
 **Severity: MODERATE**
 
+Covers both documentation quality in isolation and keeping docs in sync with the code that changed in the same PR. Stale docs are worse than missing docs because users trust and rely on them.
+
 **Rules:**
-1. Code comments should explain _why_, not just _what_.
-2. XML doc comments on public and complex internal code.
+1. Code comments should explain _why_, not just _what_, and must match the post-change algorithm. Stale `// returns null when X` style comments above edited code are a finding.
+2. XML doc comments on public and complex internal code. When semantics shift, update — don't just preserve — the `<summary>`, `<param>`, `<returns>`, and `<remarks>` on touched members.
 3. Use `learn.microsoft.com` URLs, not `docs.microsoft.com`.
-4. Specs need problem statements, non-goals, and concrete examples. See `../../documentation/specs/`.
+4. Specs need problem statements, non-goals, and concrete examples. See `../../documentation/specs/`. If a spec exists for the feature being changed, update it rather than writing a contradicting new one without retiring the old.
+5. Any change to user-observable behavior (properties, items, targets, tasks, CLI switches, error codes, environment variables, ChangeWaves) must update the matching docs in the same PR: `../../documentation/wiki/`, `../../documentation/specs/`, `../../documentation/*.md`, and any README in the affected folder.
+6. When introducing a ChangeWave, update `../../documentation/wiki/ChangeWaves.md` in the same PR (see Dimension 2).
+7. When adding/changing an `MSBxxxx` error or warning code, update any spec or wiki page that enumerates codes or shows example output.
+8. When a property default, target order, or task parameter changes, search the docs tree for references to the old behavior and update every occurrence — don't leave half-updated docs.
 
 **CHECK — Flag if:**
 - [ ] `docs.microsoft.com` URL instead of `learn.microsoft.com`
@@ -403,6 +409,14 @@ See `../../documentation/ProjectReference-Protocol.md`.
 - [ ] Spec lacks problem statement, non-goals, or examples
 - [ ] Documentation inaccurate vs actual behavior
 - [ ] Design decision undocumented
+- [ ] Behavior change with no corresponding docs/spec/wiki update in the same PR
+- [ ] XML doc comment or code comment on a touched member contradicts the new implementation
+- [ ] ChangeWave added but `../../documentation/wiki/ChangeWaves.md` not updated
+- [ ] New/renamed property, item, target, task parameter, or CLI switch not documented
+- [ ] Error/warning code added or message materially changed without doc update
+- [ ] Spec in `../../documentation/specs/` references behavior the PR is removing or altering
+- [ ] Sample code in docs no longer compiles or runs against the new behavior
+- [ ] Only some occurrences of an old name/default updated across docs, leaving inconsistencies
 
 ---
 
