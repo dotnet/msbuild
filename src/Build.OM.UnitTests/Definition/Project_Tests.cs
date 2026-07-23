@@ -2050,16 +2050,26 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         [Fact]
         public void BuildDisabled()
         {
-            Project project = new Project();
+            using ProjectCollection collection = new ProjectCollection();
+            Project project = new Project(collection);
             project.Xml.AddTarget("t");
             project.IsBuildEnabled = false;
             MockLogger mockLogger = new MockLogger();
-            ProjectCollection.GlobalProjectCollection.RegisterLogger(mockLogger);
+            collection.RegisterLogger(mockLogger);
 
-            bool result = project.Build();
+            bool result;
+
+            try
+            {
+                result = project.Build();
+            }
+            finally
+            {
+                collection.UnregisterAllLoggers();
+            }
 
             result.ShouldBeFalse();
-
+            mockLogger.ErrorCount.ShouldBe(1);
             mockLogger.Errors[0].Code.ShouldBe("MSB4112"); // "Security message about disabled targets need to have code MSB4112, because code in the VS Core project system depends on this.  See DesignTimeBuildFeedback.cpp."
         }
 

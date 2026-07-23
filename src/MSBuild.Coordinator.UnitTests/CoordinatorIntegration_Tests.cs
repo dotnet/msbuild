@@ -187,7 +187,9 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
                 TestEnvironment.SetEnvironmentVariable(Constants.NodeBudgetEnvVarName, nodeBudgetValue.ToString());
             }
 
-            TestEnvironment.SetEnvironmentVariable(Constants.ShutdownTimeoutEnvVarName, "100");
+            // Keep this above transient startup/handshake jitter seen in CI, while still
+            // allowing coordinator processes to shut down quickly after each test.
+            TestEnvironment.SetEnvironmentVariable(Constants.ShutdownTimeoutEnvVarName, "1000");
 
             _debugLogPath = Path.Combine(Path.GetTempPath(), $"msbuild-coordinator-test-debug-{Guid.NewGuid():N}");
             TestEnvironment.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");
