@@ -36,36 +36,27 @@ public sealed class EvaluationMetrics_Tests
         _output = output;
     }
 
-    [Theory]
-    [InlineData(ProjectEvaluationStage.Properties, "properties")]
-    [InlineData(ProjectEvaluationStage.ItemDefinitions, "item_definitions")]
-    [InlineData(ProjectEvaluationStage.Items, "items")]
-    [InlineData(ProjectEvaluationStage.UsingTasks, "using_tasks")]
-    [InlineData(ProjectEvaluationStage.Full, "full")]
-    public void EvaluationMetricsCaptureStageAndDuration(ProjectEvaluationStage stage, string expectedStage)
+    [Fact]
+    public void EvaluationMetricsCaptureFullStageAndDuration()
     {
         using MetricCollector collector = new();
         using ProjectCollection collection = new();
 
         _ = ProjectInstance.FromProjectRootElement(
             CreateRootElement("<Project />"),
-            new ProjectOptions
-            {
-                EvaluationStage = stage,
-                ProjectCollection = collection,
-            });
+            new ProjectOptions { ProjectCollection = collection });
 
         collector.Measurements.ShouldContain(measurement =>
             measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationCountName &&
             measurement.Value == 1 &&
-            measurement.HasTag(EvaluationMetrics.StageTagName, expectedStage) &&
+            measurement.HasTag(EvaluationMetrics.StageTagName, EvaluationMetrics.FullStage) &&
             measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.StandaloneOrigin) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, true));
 
         collector.Measurements.ShouldContain(measurement =>
             measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationDurationName &&
             measurement.Value >= 0 &&
-            measurement.HasTag(EvaluationMetrics.StageTagName, expectedStage) &&
+            measurement.HasTag(EvaluationMetrics.StageTagName, EvaluationMetrics.FullStage) &&
             measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.StandaloneOrigin) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, true));
     }
@@ -99,7 +90,7 @@ public sealed class EvaluationMetrics_Tests
 
         collector.Measurements.ShouldContain(measurement =>
             measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationCountName &&
-            measurement.HasTag(EvaluationMetrics.StageTagName, "full") &&
+            measurement.HasTag(EvaluationMetrics.StageTagName, EvaluationMetrics.FullStage) &&
             measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.BuildSubmissionOrigin) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, true));
     }
@@ -124,7 +115,7 @@ public sealed class EvaluationMetrics_Tests
 
         collector.Measurements.ShouldContain(measurement =>
             measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationCountName &&
-            measurement.HasTag(EvaluationMetrics.StageTagName, "full") &&
+            measurement.HasTag(EvaluationMetrics.StageTagName, EvaluationMetrics.FullStage) &&
             measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.StandaloneOrigin) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, false));
     }

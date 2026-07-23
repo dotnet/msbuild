@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Runtime.CompilerServices;
 using System.Threading;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.TelemetryInfra;
@@ -21,6 +20,7 @@ internal static class EvaluationMetrics
     internal const string OriginTagName = "msbuild.project.evaluation.origin";
     internal const string SucceededTagName = "msbuild.project.evaluation.succeeded";
 
+    internal const string FullStage = "full";
     internal const string BuildSubmissionOrigin = "build_submission";
     internal const string StandaloneOrigin = "standalone";
 
@@ -50,7 +50,6 @@ internal static class EvaluationMetrics
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static void RecordProjectEvaluation(
         long startTimestamp,
-        ProjectEvaluationStage stage,
         bool isBuildSubmission,
         bool succeeded)
     {
@@ -69,7 +68,7 @@ internal static class EvaluationMetrics
             }
 
             TagList tags = default;
-            tags.Add(StageTagName, GetStageName(stage));
+            tags.Add(StageTagName, FullStage);
             tags.Add(OriginTagName, isBuildSubmission ? BuildSubmissionOrigin : StandaloneOrigin);
             tags.Add(SucceededTagName, succeeded ? s_boxedTrue : s_boxedFalse);
 
@@ -100,16 +99,6 @@ internal static class EvaluationMetrics
         Volatile.Write(ref s_disabled, 1);
         Debug.WriteLine($"MSBuild evaluation metrics disabled after an instrumentation failure: {ex}");
     }
-
-    private static string GetStageName(ProjectEvaluationStage stage) => stage switch
-    {
-        ProjectEvaluationStage.Properties => "properties",
-        ProjectEvaluationStage.ItemDefinitions => "item_definitions",
-        ProjectEvaluationStage.Items => "items",
-        ProjectEvaluationStage.UsingTasks => "using_tasks",
-        ProjectEvaluationStage.Full => "full",
-        _ => "unknown",
-    };
 
     private static class Instruments
     {

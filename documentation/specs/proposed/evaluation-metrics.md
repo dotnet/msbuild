@@ -21,7 +21,7 @@ Both instruments use the following low-cardinality tags:
 
 | Tag | Values | Description |
 | --- | --- | --- |
-| `msbuild.project.evaluation.stage` | `properties`, `item_definitions`, `items`, `using_tasks`, `full` | Last evaluation stage requested by the caller |
+| `msbuild.project.evaluation.stage` | `full` | Evaluation stage; all evaluations run through every pass |
 | `msbuild.project.evaluation.origin` | `build_submission`, `standalone` | Whether the evaluation belongs to a build submission or was initiated directly through the object model |
 | `msbuild.project.evaluation.succeeded` | `true`, `false` | Whether evaluation completed successfully |
 
