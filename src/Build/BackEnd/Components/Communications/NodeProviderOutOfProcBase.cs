@@ -970,10 +970,32 @@ namespace Microsoft.Build.BackEnd
 
             private readonly ITranslator _writeTranslator;
 
+            /// <summary>
+            /// Size of the read-ahead buffer used to batch pipe reads across packets. A burst of small
+            /// packets (e.g. logging events streamed from a node) can then be served from a few large
+            /// reads instead of one read per header plus one per body.
+            /// </summary>
+            private const int ReadAheadBufferSize = 65536;
+
+            /// <summary>
+            /// Holds bytes read from the pipe ahead of consumption. Unconsumed data occupies
+            /// <see cref="_readAheadBuffer"/>[<see cref="_readAheadStart"/> .. <see cref="_readAheadStart"/> + <see cref="_readAheadCount"/>).
+            /// </summary>
+            private readonly byte[] _readAheadBuffer;
+
+            /// <summary>
+            /// Index of the first unconsumed byte in <see cref="_readAheadBuffer"/>.
+            /// </summary>
+            private int _readAheadStart;
+
+            /// <summary>
+            /// Number of unconsumed bytes currently held in <see cref="_readAheadBuffer"/>.
+            /// </summary>
+            private int _readAheadCount;
+
 #if FEATURE_APM
-            // cached delegates for pipe stream read callbacks
-            private readonly AsyncCallback _headerReadCompleteCallback;
-            private readonly AsyncCallback _bodyReadCompleteCallback;
+            // cached delegate for the pipe stream read callback
+            private readonly AsyncCallback _readCompleteCallback;
 #endif
 
             /// <summary>
@@ -1032,8 +1054,23 @@ namespace Microsoft.Build.BackEnd
 
 
 #if FEATURE_APM
-            // used in BodyReadComplete callback to avoid allocations due to passing state through BeginRead
+            // State for the buffer-aware APM read pump. At most one pipe read is outstanding at a time, and the
+            // pump only runs from BeginAsyncPacketRead or the single read callback, so no synchronization is needed.
             private int _currentPacketLength;
+
+            // The region currently being filled: the header buffer, then the packet body buffer.
+            private byte[] _readTarget;
+            private int _readTargetOffset;
+            private int _readTargetCount;
+            private int _readTargetFilled;
+            private bool _readingHeader;
+
+            // Whether the outstanding BeginRead is filling the read-ahead buffer (true) or reading a large
+            // body directly into _readTarget (false).
+            private bool _readingIntoReadAheadBuffer;
+
+            // Set once the pipe reports end of stream so the pump stops issuing further reads.
+            private bool _readReachedEof;
 #endif
 
             /// <summary>
@@ -1054,6 +1091,7 @@ namespace Microsoft.Build.BackEnd
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
                 _readBufferMemoryStream = new MemoryStream();
+                _readAheadBuffer = new byte[ReadAheadBufferSize];
                 _writeBufferMemoryStream = new MemoryStream();
                 _readTranslator = BinaryTranslator.GetReadTranslator(_readBufferMemoryStream, InterningBinaryReader.CreateSharedBuffer());
                 _writeTranslator = BinaryTranslator.GetWriteTranslator(_writeBufferMemoryStream);
@@ -1061,8 +1099,7 @@ namespace Microsoft.Build.BackEnd
                 _handshakeOptions = handshakeOptions;
                 _negotiatedPacketVersion = negotiatedVersion;
 #if FEATURE_APM
-                _headerReadCompleteCallback = HeaderReadComplete;
-                _bodyReadCompleteCallback = BodyReadComplete;
+                _readCompleteCallback = ReadComplete;
                 _currentPacketLength = 0;
 #endif
 
@@ -1089,7 +1126,9 @@ namespace Microsoft.Build.BackEnd
             public void BeginAsyncPacketRead()
             {
 #if FEATURE_APM
-                _pipeStream.BeginRead(_headerByte, 0, _headerByte.Length, _headerReadCompleteCallback, this);
+                // Set up the header as the region to read, then drive the buffer-aware read pump.
+                SetReadTarget(_headerByte, 0, _headerByte.Length, readingHeader: true);
+                PumpReads();
 #else
                 ThreadPool.QueueUserWorkItem(delegate
                 {
@@ -1105,7 +1144,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        int bytesRead = await _pipeStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
+                        int bytesRead = await ReadExactAsync(_headerByte, 0, _headerByte.Length).ConfigureAwait(false);
                         if (!ProcessHeaderBytesRead(bytesRead))
                         {
                             return;
@@ -1127,18 +1166,7 @@ namespace Microsoft.Build.BackEnd
 
                     try
                     {
-                        int totalBytesRead = 0;
-                        while (totalBytesRead < packetLength)
-                        {
-                            int bytesRead = await _pipeStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
-                            if (bytesRead == 0)
-                            {
-                                break;
-                            }
-
-                            totalBytesRead += bytesRead;
-                        }
-
+                        int totalBytesRead = await ReadExactAsync(packetData, 0, packetLength).ConfigureAwait(false);
                         if (!ProcessBodyBytesRead(totalBytesRead, packetLength, packetType))
                         {
                             return;
@@ -1164,6 +1192,66 @@ namespace Microsoft.Build.BackEnd
                         return;
                     }
                 }
+            }
+
+            /// <summary>
+            /// Reads <paramref name="count"/> bytes into <paramref name="destination"/> starting at
+            /// <paramref name="destinationOffset"/>, drawing from the read-ahead buffer and refilling it from the
+            /// pipe with large reads so a burst of small packets is served from few syscalls. Reads at least as
+            /// large as the read-ahead buffer go straight to the pipe to avoid an extra copy.
+            /// </summary>
+            /// <returns>
+            /// The number of bytes actually read. A value less than <paramref name="count"/> means the pipe
+            /// reached end of stream, which callers treat as a disconnect.
+            /// </returns>
+            private async ValueTask<int> ReadExactAsync(byte[] destination, int destinationOffset, int count)
+            {
+                int totalCopied = 0;
+
+                // Serve whatever is already buffered first.
+                if (_readAheadCount > 0)
+                {
+                    int fromBuffer = Math.Min(count, _readAheadCount);
+                    Array.Copy(_readAheadBuffer, _readAheadStart, destination, destinationOffset, fromBuffer);
+                    _readAheadStart += fromBuffer;
+                    _readAheadCount -= fromBuffer;
+                    totalCopied += fromBuffer;
+                }
+
+                while (totalCopied < count)
+                {
+                    int remaining = count - totalCopied;
+
+                    if (remaining >= _readAheadBuffer.Length)
+                    {
+                        // Large read: bypass the read-ahead buffer and read straight into the destination.
+                        int bytesRead = await _pipeStream.ReadAsync(destination.AsMemory(destinationOffset + totalCopied, remaining), CancellationToken.None).ConfigureAwait(false);
+                        if (bytesRead == 0)
+                        {
+                            break;
+                        }
+
+                        totalCopied += bytesRead;
+                    }
+                    else
+                    {
+                        // Small read: refill the read-ahead buffer with one large pipe read, then copy out.
+                        _readAheadStart = 0;
+                        _readAheadCount = await _pipeStream.ReadAsync(_readAheadBuffer.AsMemory(0, _readAheadBuffer.Length), CancellationToken.None).ConfigureAwait(false);
+                        if (_readAheadCount == 0)
+                        {
+                            break;
+                        }
+
+                        int fromBuffer = Math.Min(remaining, _readAheadCount);
+                        Array.Copy(_readAheadBuffer, _readAheadStart, destination, destinationOffset + totalCopied, fromBuffer);
+                        _readAheadStart += fromBuffer;
+                        _readAheadCount -= fromBuffer;
+                        totalCopied += fromBuffer;
+                    }
+                }
+
+                return totalCopied;
             }
 #endif
 
@@ -1447,13 +1535,74 @@ namespace Microsoft.Build.BackEnd
 
 #if FEATURE_APM
             /// <summary>
-            /// Callback invoked by the completion of a read of a header byte on one of the named pipes.
+            /// Points the read pump at a new region to fill (the header buffer, then the body buffer).
             /// </summary>
-            private void HeaderReadComplete(IAsyncResult result)
+            private void SetReadTarget(byte[] target, int offset, int count, bool readingHeader)
             {
-                int bytesRead;
+                _readTarget = target;
+                _readTargetOffset = offset;
+                _readTargetCount = count;
+                _readTargetFilled = 0;
+                _readingHeader = readingHeader;
+            }
+
+            /// <summary>
+            /// Drives the buffer-aware read state machine. Copies any already-buffered bytes into the current
+            /// target and, when a target is completely filled, advances to the next one. When more bytes are
+            /// needed it issues a single asynchronous pipe read and returns; <see cref="ReadComplete"/> resumes
+            /// the pump when that read completes. This batches many small packets into a few large pipe reads.
+            /// </summary>
+            private void PumpReads()
+            {
+                while (true)
+                {
+                    // Serve the current target from whatever is already buffered.
+                    if (_readAheadCount > 0 && _readTargetFilled < _readTargetCount)
+                    {
+                        int fromBuffer = Math.Min(_readTargetCount - _readTargetFilled, _readAheadCount);
+                        Array.Copy(_readAheadBuffer, _readAheadStart, _readTarget, _readTargetOffset + _readTargetFilled, fromBuffer);
+                        _readAheadStart += fromBuffer;
+                        _readAheadCount -= fromBuffer;
+                        _readTargetFilled += fromBuffer;
+                    }
+
+                    if (_readTargetFilled < _readTargetCount && !_readReachedEof)
+                    {
+                        // Need more from the pipe. Issue one asynchronous read and resume in ReadComplete.
+                        int remaining = _readTargetCount - _readTargetFilled;
+                        if (remaining >= _readAheadBuffer.Length)
+                        {
+                            // Large read: bypass the read-ahead buffer and read straight into the target.
+                            _readingIntoReadAheadBuffer = false;
+                            _pipeStream.BeginRead(_readTarget, _readTargetOffset + _readTargetFilled, remaining, _readCompleteCallback, this);
+                        }
+                        else
+                        {
+                            // Small read: refill the read-ahead buffer with one large pipe read.
+                            _readingIntoReadAheadBuffer = true;
+                            _pipeStream.BeginRead(_readAheadBuffer, 0, _readAheadBuffer.Length, _readCompleteCallback, this);
+                        }
+
+                        return;
+                    }
+
+                    // The target is filled (or the pipe reached end of stream, leaving it short). Advance the
+                    // state machine; a short read is reported to Process*BytesRead, which triggers a disconnect.
+                    if (!AdvanceReadState())
+                    {
+                        return;
+                    }
+                }
+            }
+
+            /// <summary>
+            /// Callback invoked when an asynchronous pipe read issued by <see cref="PumpReads"/> completes.
+            /// </summary>
+            private void ReadComplete(IAsyncResult result)
+            {
                 try
                 {
+                    int bytesRead;
                     try
                     {
                         bytesRead = _pipeStream.EndRead(result);
@@ -1467,28 +1616,81 @@ namespace Microsoft.Build.BackEnd
                         return;
                     }
 
-                    if (!ProcessHeaderBytesRead(bytesRead))
+                    if (bytesRead == 0)
                     {
-                        return;
+                        _readReachedEof = true;
+                    }
+                    else if (_readingIntoReadAheadBuffer)
+                    {
+                        _readAheadStart = 0;
+                        _readAheadCount = bytesRead;
+                    }
+                    else
+                    {
+                        _readTargetFilled += bytesRead;
                     }
                 }
                 catch (IOException e)
                 {
-                    CommunicationsUtilities.Trace(_nodeId, $"EXCEPTION in HeaderReadComplete: {e}");
+                    CommunicationsUtilities.Trace(_nodeId, $"EXCEPTION in ReadComplete: {e}");
                     _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
                     Close();
                     return;
                 }
 
-                _currentPacketLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(_headerByte, 1, 4));
-                MSBuildEventSource.Log.PacketReadSize(_currentPacketLength);
+                PumpReads();
+            }
 
-                // Ensures the buffer is at least this length.
-                // It avoids reallocations if the buffer is already large enough.
-                _readBufferMemoryStream.SetLength(_currentPacketLength);
-                byte[] packetData = _readBufferMemoryStream.GetBuffer();
+            /// <summary>
+            /// Called when the current read target has been filled (or the pipe reached end of stream). Processes
+            /// the completed header or body and sets up the next target. Returns <see langword="false"/> when the
+            /// pump should stop, either because of a disconnect or because a NodeShutdown packet was routed.
+            /// </summary>
+            private bool AdvanceReadState()
+            {
+                if (_readingHeader)
+                {
+                    if (!ProcessHeaderBytesRead(_readTargetFilled))
+                    {
+                        return false;
+                    }
 
-                _pipeStream.BeginRead(packetData, 0, _currentPacketLength, _bodyReadCompleteCallback, this);
+                    _currentPacketLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(_headerByte, 1, 4));
+                    MSBuildEventSource.Log.PacketReadSize(_currentPacketLength);
+
+                    // Ensures the buffer is at least this length.
+                    // It avoids reallocations if the buffer is already large enough.
+                    _readBufferMemoryStream.SetLength(_currentPacketLength);
+                    byte[] packetData = _readBufferMemoryStream.GetBuffer();
+
+                    SetReadTarget(packetData, 0, _currentPacketLength, readingHeader: false);
+                    return true;
+                }
+                else
+                {
+                    NodePacketType packetType = (NodePacketType)_headerByte[0];
+
+                    if (!ProcessBodyBytesRead(_readTargetFilled, _currentPacketLength, packetType))
+                    {
+                        return false;
+                    }
+
+                    // Read and route the packet.
+                    if (!ReadAndRoutePacket(packetType))
+                    {
+                        return false;
+                    }
+
+                    if (packetType == NodePacketType.NodeShutdown)
+                    {
+                        Close();
+                        return false;
+                    }
+
+                    // Set up the next packet header.
+                    SetReadTarget(_headerByte, 0, _headerByte.Length, readingHeader: true);
+                    return true;
+                }
             }
 #endif
 
@@ -1523,61 +1725,6 @@ namespace Microsoft.Build.BackEnd
 
                 return true;
             }
-
-#if FEATURE_APM
-            /// <summary>
-            /// Method called when the body of a packet has been read.
-            /// </summary>
-            private void BodyReadComplete(IAsyncResult result)
-            {
-                NodePacketType packetType = (NodePacketType)_headerByte[0];
-                int bytesRead;
-
-                try
-                {
-                    try
-                    {
-                        bytesRead = _pipeStream.EndRead(result);
-                    }
-
-                    // Workaround for CLR stress bug; it sporadically calls us twice on the same async
-                    // result, and EndRead will throw on the second one. Pretend the second one never happened.
-                    catch (ArgumentException)
-                    {
-                        CommunicationsUtilities.Trace(_nodeId, "Hit CLR bug #825607: called back twice on same async result; ignoring");
-                        return;
-                    }
-
-                    if (!ProcessBodyBytesRead(bytesRead, _currentPacketLength, packetType))
-                    {
-                        return;
-                    }
-                }
-                catch (IOException e)
-                {
-                    CommunicationsUtilities.Trace(_nodeId, $"EXCEPTION in BodyReadComplete (Reading): {e}");
-                    _packetFactory.RoutePacket(_nodeId, new NodeShutdown(NodeShutdownReason.ConnectionFailed));
-                    Close();
-                    return;
-                }
-
-                // Read and route the packet.
-                if (!ReadAndRoutePacket(packetType))
-                {
-                    return;
-                }
-
-                if (packetType != NodePacketType.NodeShutdown)
-                {
-                    // Read the next packet.
-                    BeginAsyncPacketRead();
-                }
-                else
-                {
-                    Close();
-                }
-            }
-#endif
         }
     }
 }
