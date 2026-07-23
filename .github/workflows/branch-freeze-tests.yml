@@ -1,0 +1,56 @@
+name: Validate branch freeze automation
+
+# Runs the branch-freeze PowerShell unit tests and parser validation whenever the
+# branch-freeze scripts, workflows, or allowlist change. This validates the
+# freeze/unfreeze logic without needing a live repo or the real GitHub CLI.
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/branch-freeze-command.yml"
+      - ".github/workflows/branch-freeze-pr-status.yml"
+      - ".github/workflows/branch-freeze-refresh.yml"
+      - ".github/workflows/branch-freeze-tests.yml"
+      - ".github/branch-freeze/**"
+      - ".github/branch-freeze-allowlist.txt"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: PowerShell unit tests
+    runs-on: ubuntu-latest
+    steps:
+      # Keep checkout pinned to the immutable v7.0.0 commit; the @v7 tag can move.
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Validate PowerShell syntax
+        shell: pwsh
+        run: |
+          $failed = $false
+          Get-ChildItem .github/branch-freeze -Recurse -Include *.ps1,*.psm1 | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile(
+              $_.FullName,
+              [ref]$tokens,
+              [ref]$errors
+            )
+
+            foreach ($parseError in $errors) {
+              Write-Output "::error file=$($_.FullName),line=$($parseError.Extent.StartLineNumber)::$($parseError.Message)"
+              $failed = $true
+            }
+          }
+
+          if ($failed) {
+            exit 1
+          }
+
+      - name: Run unit tests
+        shell: pwsh
+        run: pwsh -NoLogo -NoProfile -File .github/branch-freeze/tests/run-tests.ps1

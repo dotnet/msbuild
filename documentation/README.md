@@ -31,6 +31,7 @@ The folder contains collection of docs and references for MSBuild, detailed info
    * [Contributing tasks](wiki/Contributing-Tasks.md)
 * [Error codes](assigning-msb-error-code.md)
 * [Deploying built MSBuild](Deploy-MSBuild.md)
+* [Branch freeze (merge freeze)](branch-freeze.md)
 * [Events emitted by MSBuild](specs/event-source.md)
 * [Change waves (for developers)](wiki/ChangeWaves-Dev.md)
 * [GitHub labels](wiki/Labels.md)
