@@ -20,7 +20,6 @@ using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
 using Microsoft.Build.Collections;
-using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -1051,24 +1050,7 @@ namespace Microsoft.Build.CommandLine
                                 // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
                                 collection.PropertiesFromCommandLine = [.. globalProperties.Keys];
 
-                                // -getProperty/-getItem without a target only read data produced by the early
-                                // evaluation passes, so stop evaluation as soon as the requested data is available
-                                // instead of running a full evaluation. Property values are final after the
-                                // Properties pass; items require the Items pass. This skips the later passes
-                                // (using-tasks and target registration) entirely. Gated behind change wave 18.10
-                                // so the historical full-evaluation behavior can be restored if needed.
-                                ProjectEvaluationStage evaluationStage =
-                                    ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
-                                        ? (getItem.Length == 0 ? ProjectEvaluationStage.Properties : ProjectEvaluationStage.Items)
-                                        : ProjectEvaluationStage.Full;
-
-                                Project project = Project.FromFile(projectFile, new ProjectOptions
-                                {
-                                    ProjectCollection = collection,
-                                    GlobalProperties = globalProperties,
-                                    ToolsVersion = toolsVersion,
-                                    EvaluationStage = evaluationStage,
-                                });
+                                Project project = collection.LoadProject(projectFile, globalProperties, toolsVersion);
 
                                 if (getResultOutputFile.Length == 0)
                                 {
