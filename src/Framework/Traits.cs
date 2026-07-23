@@ -221,7 +221,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public bool SdkTelemetryOptOut = EnvironmentUtilities.IsValueOneOrTrue("DOTNET_CLI_TELEMETRY_OPTOUT");
         public bool FrameworkTelemetryOptOut = EnvironmentUtilities.IsValueOneOrTrue("MSBUILD_TELEMETRY_OPTOUT");
-        public bool ExcludeTasksDetailsFromTelemetry => EnvironmentUtilities.IsValueOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
+        public bool ExcludeTasksDetailsFromTelemetry = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDTELEMETRYEXCLUDETASKSDETAILS");
         public bool FlushNodesTelemetryIntoConsole = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDFLUSHNODESTELEMETRYINTOCONSOLE");
 
         public bool EnableTargetOutputLogging = EnvironmentUtilities.IsValueOneOrTrue("MSBUILDTARGETOUTPUTLOGGING");

@@ -738,13 +738,11 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
 #if NET
-        [Theory]
-        [InlineData(null, true)]
-        [InlineData("1", false)]
-        public void BuildManager_EmitsTasksDetailsTelemetryEventUnlessExcluded(string? exclusionValue, bool shouldEmitEvent)
+        [Fact]
+        public void BuildManager_EmitsTasksDetailsTelemetryEventUnlessExcluded()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDTELEMETRYEXCLUDETASKSDETAILS", exclusionValue);
+            bool shouldEmitEvent = !Traits.Instance.ExcludeTasksDetailsFromTelemetry;
 
             var testProject = """
                 <Project>
