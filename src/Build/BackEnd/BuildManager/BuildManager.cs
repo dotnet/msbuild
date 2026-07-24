@@ -3119,7 +3119,10 @@ namespace Microsoft.Build.Execution
                 _buildParameters,
                 loggingService.LoggerDescriptions.ToArray()
 #if FEATURE_APPDOMAIN
-                , AppDomain.CurrentDomain.SetupInformation
+                // On the .NET runtime the AppDomainSetup has no configuration bytes to propagate to
+                // task AppDomains (and its Get/SetConfigurationBytes do not exist, so translating a
+                // non-null setup would throw when this .NET Framework assembly is hosted on .NET).
+                , NodeProviderOutOfProcBase.IsHostedOnDotNetRuntime ? null : AppDomain.CurrentDomain.SetupInformation
 #endif
                 , new LoggingNodeConfiguration(
                     loggingService.IncludeEvaluationMetaprojects,
