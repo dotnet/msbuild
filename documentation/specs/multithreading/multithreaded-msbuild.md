@@ -307,4 +307,6 @@ When this is a `-mt` (`-multithreaded`) build and `MSBUILDUSESERVER` is unset, M
 
 `-mt` is detected from the full, response-file-aware command-line parse, so it counts wherever it is supplied — command line, auto-response file, a project `Directory.Build.rsp`, an `@response` file, or `MSBUILDFORCEMULTITHREADED`. The same value decides whether an engaged server is launched with [Server GC](../../MSBuild-Server.md#garbage-collection).
 
+The proposed resident/transient server topology and TaskHost lifetime model are
+specified in [Multithreaded MSBuild Server and Sidecar Ownership](mt-server-sidecar-ownership.md).
 
