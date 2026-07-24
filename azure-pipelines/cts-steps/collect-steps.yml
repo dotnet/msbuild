@@ -80,9 +80,12 @@ steps:
     Set-Content -Path $cfgPath -Value $lines -Encoding utf8
     # `tool update` is idempotent: installs if missing, updates if outdated.
     # Avoids the "tool already installed" exit on warm self-hosted agents.
-    $installArgs = @('tool', 'update', 'cts', '--global', '--prerelease', '--configfile', "$cfgPath")
+    $installArgs = @('tool', 'update', 'cts', '--global', '--configfile', "$cfgPath")
     $toolVersion = '${{ parameters.ctsToolVersion }}'
-    if ($toolVersion) { $installArgs += @('--version', $toolVersion) }
+    # `--version` and `--prerelease` are mutually exclusive: an explicit
+    # prerelease version already selects a prerelease, so only fall back to
+    # `--prerelease` (latest) when no version is pinned.
+    if ($toolVersion) { $installArgs += @('--version', $toolVersion) } else { $installArgs += '--prerelease' }
     dotnet @installArgs
     if ($LASTEXITCODE -ne 0) { throw "cts install/update failed" }
     $toolsDir = if ($IsWindows) { Join-Path $env:USERPROFILE '.dotnet\tools' } else { Join-Path $env:HOME '.dotnet/tools' }
