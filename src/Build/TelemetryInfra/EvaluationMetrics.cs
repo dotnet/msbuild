@@ -61,6 +61,7 @@ internal static class EvaluationMetrics
 
         try
         {
+            long endTimestamp = startTimestamp != 0 ? Stopwatch.GetTimestamp() : 0;
             bool countEnabled = Instruments.ProjectEvaluationCount.Enabled;
             bool durationEnabled = startTimestamp != 0 && Instruments.ProjectEvaluationDuration.Enabled;
             if (!countEnabled && !durationEnabled)
@@ -80,7 +81,7 @@ internal static class EvaluationMetrics
 
             if (durationEnabled)
             {
-                double elapsedSeconds = (Stopwatch.GetTimestamp() - startTimestamp) / (double)Stopwatch.Frequency;
+                double elapsedSeconds = (endTimestamp - startTimestamp) / (double)Stopwatch.Frequency;
                 Instruments.ProjectEvaluationDuration.Record(elapsedSeconds, in tags);
             }
         }

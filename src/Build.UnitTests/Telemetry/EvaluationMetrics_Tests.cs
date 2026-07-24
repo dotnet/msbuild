@@ -4,8 +4,10 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.IO;
+using System.Threading;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
@@ -127,6 +129,45 @@ public sealed class EvaluationMetrics_Tests
             measurement.HasTag(EvaluationMetrics.StageTagName, "full") &&
             measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.StandaloneOrigin) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, false));
+    }
+
+    [Fact]
+    public void EvaluationDurationDoesNotIncludeMetricsListenerTime()
+    {
+        using MeterListener listener = new();
+        double? recordedDuration = null;
+        listener.InstrumentPublished = (instrument, meterListener) =>
+        {
+            if (instrument.Meter.Name == EvaluationMetrics.MeterName)
+            {
+                meterListener.EnableMeasurementEvents(instrument);
+            }
+        };
+        listener.SetMeasurementEventCallback<long>((instrument, _, _, _) =>
+        {
+            if (instrument.Name == EvaluationMetrics.ProjectEvaluationCountName)
+            {
+                Thread.Sleep(TimeSpan.FromSeconds(1));
+            }
+        });
+        listener.SetMeasurementEventCallback<double>((instrument, value, _, _) =>
+        {
+            if (instrument.Name == EvaluationMetrics.ProjectEvaluationDurationName)
+            {
+                recordedDuration = value;
+            }
+        });
+        listener.Start();
+
+        long startTimestamp = EvaluationMetrics.GetEvaluationStartTimestamp();
+        EvaluationMetrics.RecordProjectEvaluation(
+            startTimestamp,
+            ProjectEvaluationStage.Full,
+            isBuildSubmission: false,
+            succeeded: true);
+
+        recordedDuration.ShouldNotBeNull();
+        recordedDuration.Value.ShouldBeLessThan(0.5);
     }
 
     [Fact]
