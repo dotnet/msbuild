@@ -64,14 +64,14 @@ public sealed class EvaluationMetrics_Tests
             measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationCountName &&
             measurement.Value == 1 &&
             measurement.HasTag(EvaluationMetrics.StageTagName, expectedStage) &&
-            measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.StandaloneOrigin) &&
+            measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.OutsideBuildSubmissionOrigin) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, true));
 
         collector.Measurements.ShouldContain(measurement =>
             measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationDurationName &&
             measurement.Value >= 0 &&
             measurement.HasTag(EvaluationMetrics.StageTagName, expectedStage) &&
-            measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.StandaloneOrigin) &&
+            measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.OutsideBuildSubmissionOrigin) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, true));
 
         string[] expectedPasses = GetExpectedPasses(stage);
@@ -82,7 +82,7 @@ public sealed class EvaluationMetrics_Tests
             {
                 measurement.Value.ShouldBeGreaterThanOrEqualTo(0);
                 measurement.HasTag(EvaluationMetrics.StageTagName, expectedStage).ShouldBeTrue();
-                measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.StandaloneOrigin).ShouldBeTrue();
+                measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.OutsideBuildSubmissionOrigin).ShouldBeTrue();
                 metricPasses.Add(measurement.Tags[EvaluationMetrics.PassTagName].ShouldBeOfType<string>());
             }
         }
@@ -173,7 +173,7 @@ public sealed class EvaluationMetrics_Tests
         collector.Measurements.ShouldContain(measurement =>
             measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationCountName &&
             measurement.HasTag(EvaluationMetrics.StageTagName, "full") &&
-            measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.StandaloneOrigin) &&
+            measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.OutsideBuildSubmissionOrigin) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, false));
     }
 
