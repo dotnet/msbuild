@@ -632,6 +632,14 @@ Use this to prioritize dimensions based on changed files.
 
 > **Tool availability note**: Steps 5–7 reference gh-aw safe-output tools (`create_pull_request_review_comment`, `submit_pull_request_review`, `add_comment`). When running outside an agentic workflow (e.g. locally in VS Code), these tools are unavailable — use the closest GitHub MCP or CLI equivalents instead (e.g. `gh api` to create PR review comments, `gh pr review` to submit a review, `gh pr comment` to post general comments).
 
+> **AI attribution (required)**: When posting outside an agentic workflow, review comments are published under the invoking user's GitHub account and are indistinguishable from human-authored feedback. As a courtesy to the PR author and other reviewers, clearly mark every comment, general comment, and review body you post as AI-generated. Append this footer as the final line of each inline comment (step 5), general comment (step 6), and review body (step 7):
+>
+> ```markdown
+> _🤖 AI-generated review comment (expert-reviewer agent) — please verify before acting._
+> ```
+>
+> Do not omit or soften this marker even when the reviewer asks for a concise review.
+
 5. Post **inline review comments** on the exact diff lines using the `create_pull_request_review_comment` safe-output tool. Each comment must target a specific `path` and `line` in the PR diff. Format:
 
    ```markdown
