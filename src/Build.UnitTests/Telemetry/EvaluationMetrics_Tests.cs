@@ -6,11 +6,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
+using System.Diagnostics.Tracing;
 using System.IO;
 using System.Threading;
 using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
+using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
@@ -47,6 +49,7 @@ public sealed class EvaluationMetrics_Tests
     public void EvaluationMetricsCaptureStageAndDuration(ProjectEvaluationStage stage, string expectedStage)
     {
         using MetricCollector collector = new();
+        using EventSourceTestHelper eventSourceListener = new();
         using ProjectCollection collection = new();
 
         _ = ProjectInstance.FromProjectRootElement(
@@ -70,6 +73,43 @@ public sealed class EvaluationMetrics_Tests
             measurement.HasTag(EvaluationMetrics.StageTagName, expectedStage) &&
             measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.StandaloneOrigin) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, true));
+
+        string[] expectedPasses = GetExpectedPasses(stage);
+        List<string> metricPasses = [];
+        foreach (MetricMeasurement measurement in collector.Measurements)
+        {
+            if (measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationPassDurationName)
+            {
+                measurement.Value.ShouldBeGreaterThanOrEqualTo(0);
+                measurement.HasTag(EvaluationMetrics.StageTagName, expectedStage).ShouldBeTrue();
+                measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.StandaloneOrigin).ShouldBeTrue();
+                metricPasses.Add(measurement.Tags[EvaluationMetrics.PassTagName].ShouldBeOfType<string>());
+            }
+        }
+
+        List<string> eventSourcePasses = [];
+        foreach (EventWrittenEventArgs eventData in eventSourceListener.GetEvents())
+        {
+            string? pass = eventData.EventId switch
+            {
+                14 => "initial_properties",
+                16 => "properties",
+                18 => "item_definitions",
+                20 => "items",
+                22 => "using_tasks",
+                24 => "targets",
+                _ => null,
+            };
+
+            if (pass is not null)
+            {
+                eventSourcePasses.Add(pass);
+            }
+        }
+
+        metricPasses.ShouldBe(expectedPasses);
+        eventSourcePasses.ShouldBe(expectedPasses);
+        metricPasses.ShouldBe(eventSourcePasses);
     }
 
     [Fact]
@@ -104,6 +144,12 @@ public sealed class EvaluationMetrics_Tests
             measurement.HasTag(EvaluationMetrics.StageTagName, "full") &&
             measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.BuildSubmissionOrigin) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, true));
+
+        collector.Measurements.ShouldContain(measurement =>
+            measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationPassDurationName &&
+            measurement.HasTag(EvaluationMetrics.PassTagName, "targets") &&
+            measurement.HasTag(EvaluationMetrics.StageTagName, "full") &&
+            measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.BuildSubmissionOrigin));
     }
 
     [Fact]
@@ -159,8 +205,8 @@ public sealed class EvaluationMetrics_Tests
         });
         listener.Start();
 
-        long startTimestamp = EvaluationMetrics.GetEvaluationStartTimestamp();
-        EvaluationMetrics.RecordProjectEvaluation(
+        long startTimestamp = EvaluationMetrics.EvaluateStart();
+        EvaluationMetrics.EvaluateStop(
             startTimestamp,
             ProjectEvaluationStage.Full,
             isBuildSubmission: false,
@@ -192,6 +238,39 @@ public sealed class EvaluationMetrics_Tests
                 CreateRootElement("<Project />"),
                 new ProjectOptions { ProjectCollection = collection }));
     }
+
+    [Fact]
+    public void ThrowingPassMetricsListenerDoesNotBreakEvaluation()
+    {
+        using ResetMetricsOnDispose reset = new();
+        using MeterListener listener = new();
+        listener.InstrumentPublished = (instrument, meterListener) =>
+        {
+            if (instrument.Meter.Name == EvaluationMetrics.MeterName &&
+                instrument.Name == EvaluationMetrics.ProjectEvaluationPassDurationName)
+            {
+                meterListener.EnableMeasurementEvents(instrument);
+            }
+        };
+        listener.SetMeasurementEventCallback<double>((_, _, _, _) => throw new InvalidOperationException("Test listener failure"));
+        listener.Start();
+
+        using ProjectCollection collection = new();
+        Should.NotThrow(() =>
+            ProjectInstance.FromProjectRootElement(
+                CreateRootElement("<Project />"),
+                new ProjectOptions { ProjectCollection = collection }));
+    }
+
+    private static string[] GetExpectedPasses(ProjectEvaluationStage stage) => stage switch
+    {
+        ProjectEvaluationStage.Properties => ["initial_properties", "properties"],
+        ProjectEvaluationStage.ItemDefinitions => ["initial_properties", "properties", "item_definitions"],
+        ProjectEvaluationStage.Items => ["initial_properties", "properties", "item_definitions", "items"],
+        ProjectEvaluationStage.UsingTasks => ["initial_properties", "properties", "item_definitions", "items", "using_tasks"],
+        ProjectEvaluationStage.Full => ["initial_properties", "properties", "item_definitions", "items", "using_tasks", "targets"],
+        _ => [],
+    };
 
     private static ProjectRootElement CreateRootElement(string projectXml)
     {
