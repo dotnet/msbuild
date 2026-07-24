@@ -38,7 +38,7 @@ namespace Microsoft.Build.Framework
         /// Must be incremented whenever new members are added. Derived classes should override
         /// the property to return the version actually being implemented.
         /// </remarks>
-        public virtual int Version => Version2;
+        public virtual int Version => Version3;
 
         /// <summary>
         /// Returns <see langword="true"/> if the given message importance is not guaranteed to be ignored by registered loggers.
