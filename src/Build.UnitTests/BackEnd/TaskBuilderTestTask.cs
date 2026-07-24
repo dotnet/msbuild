@@ -67,6 +67,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         internal static readonly CustomStruct[] s_customStructArray = new CustomStruct[] { new CustomStruct(43), new CustomStruct(44) };
 
         /// <summary>
+        /// An enum used to validate engine-level binding of string values to enum task parameters.
+        /// </summary>
+        public enum TestTaskEnum
+        {
+            None,
+            First,
+            Second,
+        }
+
+        /// <summary>
         /// The task host.
         /// </summary>
         private ITestTaskHost _testTaskHost;
@@ -698,6 +708,17 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 _absolutePathOutput = value;
                 _testTaskHost?.ParameterSet("AbsolutePathParam", value);
+            }
+        }
+
+        /// <summary>
+        /// An enum parameter, used to validate engine-level binding of string values to enum task parameters.
+        /// </summary>
+        public TestTaskEnum EnumParam
+        {
+            set
+            {
+                _testTaskHost?.ParameterSet("EnumParam", value);
             }
         }
 

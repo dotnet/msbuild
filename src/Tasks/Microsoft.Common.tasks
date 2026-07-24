@@ -102,6 +102,10 @@
   <UsingTask TaskName="Microsoft.Build.Tasks.XmlPoke"                               AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.XslTransformation"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.ZipDirectory"                          AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <!-- TarDirectory relies on System.Formats.Tar which is only available on .NET (not .NET Framework), so it is registered only when MSBuild runs on the .NET runtime. -->
+  <UsingTask TaskName="Microsoft.Build.Tasks.TarDirectory"                          AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Runtime="NET" Condition="'$(MSBuildRuntimeType)' == 'Core'" />
+  <!-- Untar relies on System.Formats.Tar which is only available on .NET (not .NET Framework), so it is registered only when MSBuild runs on the .NET runtime. -->
+  <UsingTask TaskName="Microsoft.Build.Tasks.Untar"                                 AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Runtime="NET" Condition="'$(MSBuildRuntimeType)' == 'Core'" />
 
   <!--
     Roslyn tasks are now in an assembly owned and shipped by Roslyn, see src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.Sdk.targets.
