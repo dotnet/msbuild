@@ -198,8 +198,8 @@ clients need to build concurrently, one may use the resident and the remaining
 ```mermaid
 flowchart LR
     C1["Client A<br/>-mt, reuse enabled"] --> D1{"Resident admission"}
-    D1 -->|resident absent; wins election| R["Resident server R"]
-    D1 -->|resident idle; admission granted| R
+    D1 -->|resident absent and election won| R["Resident server R"]
+    D1 -->|resident idle and admission granted| R
 
     C2["Client B<br/>-mt, reuse enabled"] --> D2{"Resident admission"}
     D2 -->|busy, contested, or unavailable| T1["Transient server T1"]

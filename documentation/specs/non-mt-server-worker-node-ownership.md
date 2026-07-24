@@ -291,12 +291,12 @@ sequenceDiagram
     R->>W: Reusable build completion
     W->>W: Reset build-lifetime state
     W->>S: Reset or terminate for build boundary
-    W-->>R: Reset acknowledgement; keep connection
+    W-->>R: Reset acknowledgement and keep connection
 
     R->>W: Build 2 configuration and requests
     W-->>R: Build 2 results
 
-    R->>W: Resident shutdown; no reuse
+    R->>W: Resident shutdown with no reuse
     W->>S: Terminate owned TaskHosts
     S-->>W: Exit
     W-->>R: Exit acknowledgement
