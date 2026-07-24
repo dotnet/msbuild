@@ -27,8 +27,6 @@ internal static class EvaluationMetrics
     internal const string BuildSubmissionOrigin = "build_submission";
     internal const string OutsideBuildSubmissionOrigin = "outside_build_submission";
 
-    private static readonly object s_boxedTrue = true;
-    private static readonly object s_boxedFalse = false;
     private static int s_disabled;
 
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -75,7 +73,7 @@ internal static class EvaluationMetrics
             TagList tags = default;
             tags.Add(StageTagName, GetStageName(stage));
             tags.Add(OriginTagName, isBuildSubmission ? BuildSubmissionOrigin : OutsideBuildSubmissionOrigin);
-            tags.Add(SucceededTagName, succeeded ? s_boxedTrue : s_boxedFalse);
+            tags.Add(SucceededTagName, succeeded);
 
             if (countEnabled)
             {
@@ -94,38 +92,26 @@ internal static class EvaluationMetrics
         }
     }
 
-    internal static long EvaluatePass0Start() => EvaluatePassStart();
-
     internal static void EvaluatePass0Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
         EvaluatePassStop(startTimestamp, EvaluationPass.InitialProperties, stage, isBuildSubmission);
-
-    internal static long EvaluatePass1Start() => EvaluatePassStart();
 
     internal static void EvaluatePass1Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
         EvaluatePassStop(startTimestamp, EvaluationPass.Properties, stage, isBuildSubmission);
 
-    internal static long EvaluatePass2Start() => EvaluatePassStart();
-
     internal static void EvaluatePass2Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
         EvaluatePassStop(startTimestamp, EvaluationPass.ItemDefinitionGroups, stage, isBuildSubmission);
-
-    internal static long EvaluatePass3Start() => EvaluatePassStart();
 
     internal static void EvaluatePass3Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
         EvaluatePassStop(startTimestamp, EvaluationPass.Items, stage, isBuildSubmission);
 
-    internal static long EvaluatePass4Start() => EvaluatePassStart();
-
     internal static void EvaluatePass4Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
         EvaluatePassStop(startTimestamp, EvaluationPass.UsingTasks, stage, isBuildSubmission);
-
-    internal static long EvaluatePass5Start() => EvaluatePassStart();
 
     internal static void EvaluatePass5Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
         EvaluatePassStop(startTimestamp, EvaluationPass.Targets, stage, isBuildSubmission);
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    private static long EvaluatePassStart()
+    internal static long EvaluatePassStart()
     {
         if (Volatile.Read(ref s_disabled) != 0)
         {

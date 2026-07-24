@@ -674,7 +674,7 @@ namespace Microsoft.Build.Evaluation
                     // Pass0: load initial properties
                     // Follow the order of precedence so that Global properties overwrite Environment properties
                     MSBuildEventSource.Log.EvaluatePass0Start(_projectRootElement.ProjectFileLocation.File);
-                    evaluationPassStartTimestamp = EvaluationMetrics.EvaluatePass0Start();
+                    evaluationPassStartTimestamp = EvaluationMetrics.EvaluatePassStart();
                     AddBuiltInProperties();
                     AddEnvironmentProperties();
                     AddToolsetProperties();
@@ -693,7 +693,7 @@ namespace Microsoft.Build.Evaluation
 
                 // Pass1: evaluate properties, load imports, and gather everything else
                 MSBuildEventSource.Log.EvaluatePass1Start(projectFile);
-                evaluationPassStartTimestamp = EvaluationMetrics.EvaluatePass1Start();
+                evaluationPassStartTimestamp = EvaluationMetrics.EvaluatePassStart();
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Properties))
                 {
                     PerformDepthFirstPass(_projectRootElement);
@@ -720,7 +720,7 @@ namespace Microsoft.Build.Evaluation
                 // Pass2: evaluate item definitions
                 // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
                 MSBuildEventSource.Log.EvaluatePass2Start(projectFile);
-                evaluationPassStartTimestamp = EvaluationMetrics.EvaluatePass2Start();
+                evaluationPassStartTimestamp = EvaluationMetrics.EvaluatePassStart();
                 using (_evaluationProfiler.TrackPass(EvaluationPass.ItemDefinitionGroups))
                 {
                     foreach (var itemDefinitionGroupElement in _itemDefinitionGroupElements)
@@ -748,7 +748,7 @@ namespace Microsoft.Build.Evaluation
 
                     // Pass3: evaluate project items
                     MSBuildEventSource.Log.EvaluatePass3Start(projectFile);
-                    evaluationPassStartTimestamp = EvaluationMetrics.EvaluatePass3Start();
+                    evaluationPassStartTimestamp = EvaluationMetrics.EvaluatePassStart();
 
                     SynthesizeImportedProjectItems();
 
@@ -797,7 +797,7 @@ namespace Microsoft.Build.Evaluation
 
                 // Pass4: evaluate using-tasks
                 MSBuildEventSource.Log.EvaluatePass4Start(projectFile);
-                evaluationPassStartTimestamp = EvaluationMetrics.EvaluatePass4Start();
+                evaluationPassStartTimestamp = EvaluationMetrics.EvaluatePassStart();
                 using (_evaluationProfiler.TrackPass(EvaluationPass.UsingTasks))
                 {
                     // Evaluate the usingtask and add the result into the data passed in
@@ -842,7 +842,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Pass5: read targets (but don't evaluate them: that happens during build)
                     MSBuildEventSource.Log.EvaluatePass5Start(projectFile);
-                    evaluationPassStartTimestamp = EvaluationMetrics.EvaluatePass5Start();
+                    evaluationPassStartTimestamp = EvaluationMetrics.EvaluatePassStart();
                     for (var i = 0; i < targetElementsCount; i++)
                     {
                         var element = _targetElements[i];
