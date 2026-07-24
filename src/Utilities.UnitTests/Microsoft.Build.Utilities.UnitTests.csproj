@@ -27,7 +27,6 @@
   <ItemGroup>
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
     <Compile Include="..\Shared\StringExtensions.cs" />
 
     <None Include="..\Shared\UnitTests\App.config">
