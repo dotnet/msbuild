@@ -1973,6 +1973,90 @@ $@"
             }
         }
 
+        [Theory]
+        [InlineData(null, null)]
+        [InlineData("OuterTarget", null)]
+        [InlineData(null, "ExplicitTarget")]
+        [InlineData("OuterTarget", "ExplicitTarget")]
+        public void DirectInnerBuildReferenceIsPreservedWhenOuterBuildGeneratesTheSameEdge(
+            string outerTargets,
+            string explicitTargets)
+        {
+            string outerTargetsMetadata = outerTargets is null ? string.Empty : $" Targets=\"{outerTargets}\"";
+            string explicitTargetsMetadata = explicitTargets is null ? string.Empty : $" Targets=\"{explicitTargets}\"";
+            string expectedOuterTarget = outerTargets ?? "ChildDefault";
+            string expectedExplicitTarget = explicitTargets ?? "ChildDefault";
+            string expectedMergedTargets = outerTargets is null && explicitTargets is null
+                ? string.Empty
+                : $"{expectedExplicitTarget};{expectedOuterTarget}";
+
+            TransientTestFile child = _env.CreateFile("child.proj", """
+                <Project DefaultTargets="ChildDefault">
+                  <PropertyGroup>
+                    <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+                    <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+                    <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+                  </PropertyGroup>
+                  <Target Name="ChildDefault" />
+                  <Target Name="OuterTarget" />
+                  <Target Name="ExplicitTarget" />
+                </Project>
+                """);
+
+            TransientTestFile root = _env.CreateFile("root.proj", $"""
+                <Project DefaultTargets="Build">
+                  <ItemGroup>
+                    <ProjectReference Include="{child.Path}"{outerTargetsMetadata} />
+                    <ProjectReference Include="{child.Path}"
+                                      SetTargetFramework="TargetFramework=net8.0"{explicitTargetsMetadata} />
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}"
+                                             OuterBuild="true" />
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}" />
+                  </ItemGroup>
+                  <Target Name="Build" />
+                </Project>
+                """);
+
+            var graph = new ProjectGraph(root.Path);
+
+            ProjectGraphNode rootNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+            ProjectGraphNode outerBuild = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == child.Path &&
+                        !node.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework"));
+            ProjectGraphNode net8Build = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == child.Path &&
+                        node.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out string targetFramework) &&
+                        targetFramework == "net8.0");
+            ProjectGraphNode net9Build = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == child.Path &&
+                        node.ProjectInstance.GlobalProperties.TryGetValue("TargetFramework", out string targetFramework) &&
+                        targetFramework == "net9.0");
+
+            graph.ProjectNodes.Count.ShouldBe(4);
+            rootNode.ProjectReferences.Count.ShouldBe(3);
+            outerBuild.ProjectReferences.ShouldBe([net8Build, net9Build], ignoreOrder: true);
+
+            ProjectItemInstance edgeToOuterBuild = graph.TestOnly_Edges[(rootNode, outerBuild)];
+            ProjectItemInstance edgeToNet8Build = graph.TestOnly_Edges[(rootNode, net8Build)];
+            ProjectItemInstance edgeToNet9Build = graph.TestOnly_Edges[(rootNode, net9Build)];
+
+            edgeToNet8Build.ItemType.ShouldBe(ItemTypeNames.ProjectReference);
+            edgeToNet8Build.GetMetadataValue("SetTargetFramework").ShouldBe("TargetFramework=net8.0");
+            edgeToNet8Build.GetMetadataValue("Targets").ShouldBe(expectedMergedTargets);
+            edgeToNet9Build.ShouldBeSameAs(edgeToOuterBuild);
+
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(["Build"]);
+            targetLists[rootNode].ShouldBe(["Build"]);
+            targetLists[outerBuild].ShouldBe([expectedOuterTarget]);
+            targetLists[net8Build].ShouldBe(
+                outerTargets is null && explicitTargets is null
+                    ? ["ChildDefault"]
+                    : [expectedExplicitTarget, expectedOuterTarget]);
+            targetLists[net9Build].ShouldBe([expectedOuterTarget]);
+        }
+
         [Fact]
         public void DuplicatedInnerBuildMonikersShouldGetDeduplicated()
         {
