@@ -138,9 +138,20 @@ namespace Microsoft.Build.UnitTests
         private sealed class ResizableTerminal(TextWriter output, int width, int height) : ITerminal
         {
             private readonly Terminal _terminal = new(output);
+            private int _width = width;
 
-            public int Width { get; set; } = width;
+            public int Width
+            {
+                get
+                {
+                    WidthQueryCount++;
+                    return _width;
+                }
+                set => _width = value;
+            }
+
             public int Height { get; } = height;
+            public int WidthQueryCount { get; private set; }
             public bool SupportsProgressReporting => false;
 
             public void BeginUpdate() => _terminal.BeginUpdate();
@@ -937,18 +948,32 @@ namespace Microsoft.Build.UnitTests
                 terminalLogger.Refresh();
                 output.GetStringBuilder().Clear();
 
-                foreach (int width in new[] { 100, 80, 60, 40 })
+                terminal.Width = 100;
+                for (int i = 0; i < 29; i++)
+                {
+                    terminalLogger.Refresh();
+                }
+
+                terminal.WidthQueryCount.ShouldBe(1);
+                output.ToString().ShouldBeEmpty();
+                output.GetStringBuilder().Clear();
+
+                terminalLogger.Refresh();
+
+                foreach (int width in new[] { 80, 60, 40 })
                 {
                     terminal.Width = width;
                     terminalLogger.Refresh();
                 }
 
                 output.ToString().ShouldBeEmpty();
+                terminal.WidthQueryCount.ShouldBe(5);
 
                 terminalLogger.Refresh();
                 terminalLogger.Refresh();
                 terminalLogger.Refresh();
 
+                terminal.WidthQueryCount.ShouldBe(8);
                 output.ToString().ShouldStartWith($"{AnsiCodes.CSI}4{AnsiCodes.MoveUpToLineStart}");
                 output.ToString().ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
             }

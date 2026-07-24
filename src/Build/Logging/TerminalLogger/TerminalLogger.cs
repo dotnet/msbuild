@@ -96,10 +96,12 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private readonly CancellationTokenSource _cts = new();
 
+    private const int TerminalSizePollIntervalFrames = 30;
     private const int TerminalSizeSettlingFrames = 3;
 
     private int _lastTerminalWidth;
     private int _lastTerminalHeight;
+    private int _framesSinceLastTerminalSizePoll = TerminalSizePollIntervalFrames;
     private int _terminalSizeStableFrames = TerminalSizeSettlingFrames;
 
     /// <summary>
@@ -1491,6 +1493,14 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     internal void Refresh()
     {
+        // Without polling, rendering with stale dimensions can corrupt output during a resize.
+        if (_terminalSizeStableFrames == TerminalSizeSettlingFrames &&
+            ++_framesSinceLastTerminalSizePoll < TerminalSizePollIntervalFrames)
+        {
+            return;
+        }
+
+        _framesSinceLastTerminalSizePoll = 0;
         int width = Terminal.Width;
         int height = Terminal.Height;
 
