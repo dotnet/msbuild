@@ -24,6 +24,17 @@
 - 3 weeks cadence for main, initiated by loc team
 - on demand for main / release branches, initiated by msbuild team
 
+### Filing feedback from a OneLoc pull request
+
+When the automated expert review identifies a translation problem in a
+`dotnet-bot` OneLoc pull request, a daily scheduled workflow detects the finding,
+files or reuses a CEINTL feedback item, and comments its link on the pull
+request.
+
+The workflow uses GitHub OIDC and a dedicated Microsoft Entra service principal.
+It does not use a PAT, does not check out the pull request head, and refuses
+pull requests that are not OneLoc changes containing only localization files.
+
 ## Contributing a better translation
 
 - send a PR with an updated `<target>` element of the xlf resource (do not include other non-localization changes)

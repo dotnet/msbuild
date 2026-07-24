@@ -1,0 +1,248 @@
+name: File CEINTL localization feedback
+
+on:
+  schedule:
+    - cron: "17 8 * * *"
+  workflow_dispatch:
+    inputs:
+      pull_request:
+        description: OneLoc pull request number
+        required: true
+        type: number
+
+jobs:
+  discover:
+    if: github.repository == 'dotnet/msbuild'
+    runs-on: ubuntu-latest
+    permissions:
+      issues: read
+      pull-requests: read
+    outputs:
+      pull-requests: ${{ steps.discover.outputs.pull-requests }}
+      count: ${{ steps.discover.outputs.count }}
+
+    steps:
+      - name: Find unfiled OneLoc findings
+        id: discover
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PR_NUMBER: ${{ inputs.pull_request || '' }}
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const requestedNumber = Number(process.env.PR_NUMBER);
+            let pulls;
+
+            if (Number.isSafeInteger(requestedNumber) && requestedNumber > 0) {
+              const { data: pull } = await github.rest.pulls.get({
+                owner,
+                repo,
+                pull_number: requestedNumber
+              });
+              pulls = [pull];
+            } else {
+              pulls = await github.paginate(github.rest.pulls.list, {
+                owner,
+                repo,
+                state: 'open',
+                per_page: 100
+              });
+            }
+
+            const pullNumbers = [];
+            for (const pull of pulls) {
+              if (pull.user?.login !== 'dotnet-bot' ||
+                  !pull.title.startsWith('Localized file check-in by OneLocBuild Task:') ||
+                  !pull.head.ref.startsWith('locfiles/')) {
+                continue;
+              }
+
+              const reviews = await github.paginate(github.rest.pulls.listReviews, {
+                owner,
+                repo,
+                pull_number: pull.number,
+                per_page: 100
+              });
+              const hasFinding = reviews.some(review =>
+                review.user?.login === 'github-actions[bot]' &&
+                review.body?.includes('MSBuild Code Review') &&
+                /<!-- gh-aw-workflow-call-id: dotnet\/msbuild\/review(?:-on-open)?\.agent -->/.test(review.body) &&
+                /^### Findings?:\s*[1-9]\d*\b/im.test(review.body));
+              if (!hasFinding) {
+                continue;
+              }
+
+              if (!Number.isSafeInteger(requestedNumber) || requestedNumber <= 0) {
+                const comments = await github.paginate(github.rest.issues.listComments, {
+                  owner,
+                  repo,
+                  issue_number: pull.number,
+                  per_page: 100
+                });
+                if (comments.some(comment =>
+                  comment.user?.login === 'github-actions[bot]' &&
+                  comment.body?.includes('<!-- ceintl-localization-feedback -->'))) {
+                  continue;
+                }
+              }
+
+              pullNumbers.push(pull.number);
+            }
+
+            core.setOutput('pull-requests', JSON.stringify(pullNumbers));
+            core.setOutput('count', pullNumbers.length);
+
+  file-feedback:
+    if: needs.discover.outputs.count != '0'
+    needs: discover
+    runs-on: ubuntu-latest
+    environment: ceintl-ticketing
+    permissions:
+      contents: read
+      id-token: write
+      issues: write
+      pull-requests: write
+    strategy:
+      fail-fast: false
+      matrix:
+        pull_request: ${{ fromJSON(needs.discover.outputs.pull-requests) }}
+    concurrency:
+      group: ceintl-localization-feedback-${{ matrix.pull_request }}
+      cancel-in-progress: false
+
+    steps:
+      # Scheduled workflows execute trusted default-branch code. Explicitly
+      # check out that branch and never execute files from the reviewed PR.
+      - name: Check out trusted workflow code
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Validate OneLoc pull request
+        id: validate
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PR_NUMBER: ${{ matrix.pull_request }}
+          CONTEXT_PATH: ${{ runner.temp }}/ceintl-context.json
+        with:
+          script: |
+            const fs = require('fs');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const pull_number = Number(process.env.PR_NUMBER);
+
+            if (!Number.isSafeInteger(pull_number) || pull_number <= 0) {
+              core.setFailed(`Invalid pull request number: ${process.env.PR_NUMBER}`);
+              return;
+            }
+
+            const { data: pull } = await github.rest.pulls.get({
+              owner,
+              repo,
+              pull_number
+            });
+
+            const failures = [];
+            if (pull.user?.login !== 'dotnet-bot') {
+              failures.push(`author is '${pull.user?.login}', not 'dotnet-bot'`);
+            }
+            if (!pull.title.startsWith('Localized file check-in by OneLocBuild Task:')) {
+              failures.push('title is not a OneLocBuild check-in title');
+            }
+            if (!pull.head.ref.startsWith('locfiles/')) {
+              failures.push(`head branch '${pull.head.ref}' does not start with 'locfiles/'`);
+            }
+            if (pull.head.repo?.full_name !== `${owner}/${repo}`) {
+              failures.push(`head repository is '${pull.head.repo?.full_name}', not '${owner}/${repo}'`);
+            }
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number,
+              per_page: 100
+            });
+
+            const isLocalizationFile = path =>
+              /(^|\/)xlf\/.+\.xlf$/i.test(path) ||
+              /(^|\/)Resources\/.+\.resx$/i.test(path);
+            const unexpectedFiles = files
+              .map(file => file.filename)
+              .filter(path => !isLocalizationFile(path));
+            if (unexpectedFiles.length > 0) {
+              failures.push(`unexpected files: ${unexpectedFiles.join(', ')}`);
+            }
+
+            const reviews = await github.paginate(github.rest.pulls.listReviews, {
+              owner,
+              repo,
+              pull_number,
+              per_page: 100
+            });
+            const matchingReviews = reviews
+              .filter(item =>
+                item.user?.login === 'github-actions[bot]' &&
+                item.body?.includes('MSBuild Code Review') &&
+                /<!-- gh-aw-workflow-call-id: dotnet\/msbuild\/review(?:-on-open)?\.agent -->/.test(item.body) &&
+                /^### Findings?:\s*[1-9]\d*\b/im.test(item.body))
+              .sort((left, right) =>
+                new Date(right.submitted_at) - new Date(left.submitted_at));
+            const review = matchingReviews[0];
+
+            if (!review) {
+              failures.push('no GitHub Actions expert review with one or more findings was found');
+            }
+
+            if (failures.length > 0) {
+              core.setFailed(`Refusing to file CEINTL feedback: ${failures.join('; ')}`);
+              return;
+            }
+
+            fs.writeFileSync(process.env.CONTEXT_PATH, JSON.stringify({
+              prNumber: pull.number,
+              prUrl: pull.html_url,
+              prTitle: pull.title,
+              baseRef: pull.base.ref,
+              headRef: pull.head.ref,
+              files: files.map(file => file.filename),
+              reviewUrl: review.html_url,
+              reviewBody: review.body
+            }, null, 2));
+            core.setOutput('pr-number', pull.number);
+
+      - name: Sign in to Microsoft Entra with OIDC
+        uses: azure/login@532459ea530d8321f2fb9bb10d1e0bcf23869a43 # v3.0.0
+        with:
+          client-id: ${{ vars.CEINTL_CLIENT_ID }}
+          tenant-id: ${{ vars.CEINTL_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      - name: File or find CEINTL feedback
+        id: ceintl
+        shell: pwsh
+        env:
+          CEINTL_TEAM: ${{ vars.CEINTL_TEAM }}
+          CONTEXT_PATH: ${{ runner.temp }}/ceintl-context.json
+        run: >-
+          ./scripts/New-CeintlLocalizationFeedback.ps1
+          -ContextPath $env:CONTEXT_PATH
+          -Team $env:CEINTL_TEAM
+
+      - name: Link CEINTL feedback from pull request
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        env:
+          PR_NUMBER: ${{ steps.validate.outputs.pr-number }}
+          WORK_ITEM_URL: ${{ steps.ceintl.outputs.work-item-url }}
+          WORK_ITEM_ID: ${{ steps.ceintl.outputs.work-item-id }}
+          CREATED: ${{ steps.ceintl.outputs.created }}
+        with:
+          script: |
+            const verb = process.env.CREATED === 'true' ? 'Created' : 'Found existing';
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: Number(process.env.PR_NUMBER),
+              body: `<!-- ceintl-localization-feedback -->\n${verb} CEINTL localization feedback: [${process.env.WORK_ITEM_ID}](${process.env.WORK_ITEM_URL})`
+            });
