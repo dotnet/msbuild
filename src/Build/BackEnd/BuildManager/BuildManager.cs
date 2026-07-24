@@ -907,8 +907,13 @@ namespace Microsoft.Build.Execution
 
         private void CancelAllSubmissions(bool async)
         {
-            ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
-            loggingService.LogBuildCanceled();
+            lock (_syncLock)
+            {
+                if (_buildManagerState == BuildManagerState.Building)
+                {
+                    ((IBuildComponentHost)this).LoggingService.LogBuildCanceled();
+                }
+            }
 
             var parentThreadCulture = _buildParameters != null
                 ? _buildParameters.Culture
