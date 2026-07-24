@@ -1223,6 +1223,36 @@ elementFormDefault="qualified">
             </xs:complexContent>
         </xs:complexType>
     </xs:element>
+    <xs:element name="MSBuildItemGlob" substitutionGroup="msb:Item">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="MSBuildItemGlob" _locComment="" -->Synthesized by the engine for each item type listed in MSBuildProvideItemGlobs. Each item's identity is the item type; its metadata carry the unevaluated include/exclude/remove glob patterns of one item element.</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:complexContent>
+                <xs:extension base="msb:SimpleItemType">
+                    <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                        <xs:choice>
+                            <xs:element name="Include">
+                                <xs:annotation>
+                                    <xs:documentation><!-- _locID_text="MSBuildItemGlob_Include" _locComment="" -->The include glob pattern(s) of the item element (semicolon-separated, wildcards preserved).</xs:documentation>
+                                </xs:annotation>
+                            </xs:element>
+                            <xs:element name="Exclude">
+                                <xs:annotation>
+                                    <xs:documentation><!-- _locID_text="MSBuildItemGlob_Exclude" _locComment="" -->The exclude pattern(s) that apply to the include (semicolon-separated; literals and globs).</xs:documentation>
+                                </xs:annotation>
+                            </xs:element>
+                            <xs:element name="Remove">
+                                <xs:annotation>
+                                    <xs:documentation><!-- _locID_text="MSBuildItemGlob_Remove" _locComment="" -->The remove pattern(s) that apply to the include (semicolon-separated; literals and globs).</xs:documentation>
+                                </xs:annotation>
+                            </xs:element>
+                        </xs:choice>
+                    </xs:sequence>
+                </xs:extension>
+            </xs:complexContent>
+        </xs:complexType>
+    </xs:element>
     <xs:element name="WebReferences" type="msb:SimpleItemType" substitutionGroup="msb:Item">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="WebReferences" _locComment="" -->Name of Web References folder to display in user interface</xs:documentation>
@@ -1945,6 +1975,11 @@ elementFormDefault="qualified">
     <xs:element name="MSBuildProvideImportedProjects" type="msb:StringPropertyType" substitutionGroup="msb:Property">
         <xs:annotation>
             <xs:documentation><!-- _locID_text="MSBuildProvideImportedProjects" _locComment="" -->When set to 'true', the engine synthesizes MSBuildImportedProject items representing the import tree of the project. Each item's identity is the full path of an imported file, with ImportingProjectPath and Sdk metadata.</xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="MSBuildProvideItemGlobs" type="msb:StringPropertyType" substitutionGroup="msb:Property">
+        <xs:annotation>
+            <xs:documentation><!-- _locID_text="MSBuildProvideItemGlobs" _locComment="" -->A semicolon-separated list of item types (e.g. 'Compile;Content'). For each listed item type, the engine synthesizes MSBuildItemGlob items exposing the unevaluated include/exclude/remove glob patterns of that item type. Projects that do not set it pay zero cost.</xs:documentation>
         </xs:annotation>
     </xs:element>
     <xs:element name="MSBuildTreatWarningsAsErrors" type="msb:StringPropertyType" substitutionGroup="msb:Property">
