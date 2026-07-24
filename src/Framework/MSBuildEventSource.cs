@@ -709,13 +709,13 @@ namespace Microsoft.Build.Eventing
         [Event(97, Keywords = Keywords.All)]
         public void FallbackAssemblyLoadStart(string assemblyName)
         {
-            WriteEvent(97);
+            WriteEvent(97, assemblyName);
         }
 
         [Event(98, Keywords = Keywords.All)]
         public void FallbackAssemblyLoadStop(string assemblyName)
         {
-            WriteEvent(98);
+            WriteEvent(98, assemblyName);
         }
 
         [Event(99, Keywords = Keywords.All)]
