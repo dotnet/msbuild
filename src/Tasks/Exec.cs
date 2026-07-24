@@ -135,15 +135,16 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Project visible property specifying the encoding of the captured task standard output stream
         /// </summary>
+        /// <remarks>The special value "ansi" selects the current system ANSI code page (GetACP).</remarks>
         [Output]
-        public string StdOutEncoding
+        public override string StdOutEncoding
         {
             get => StandardOutputEncoding.EncodingName;
             set
             {
                 try
                 {
-                    _standardOutputEncoding = Encoding.GetEncoding(value);
+                    _standardOutputEncoding = EncodingUtilities.GetEncodingFromName(value);
                 }
                 catch (ArgumentException)
                 {
@@ -156,15 +157,16 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Project visible property specifying the encoding of the captured task standard error stream
         /// </summary>
+        /// <remarks>The special value "ansi" selects the current system ANSI code page (GetACP).</remarks>
         [Output]
-        public string StdErrEncoding
+        public override string StdErrEncoding
         {
             get => StandardErrorEncoding.EncodingName;
             set
             {
                 try
                 {
-                    _standardErrorEncoding = Encoding.GetEncoding(value);
+                    _standardErrorEncoding = EncodingUtilities.GetEncodingFromName(value);
                 }
                 catch (ArgumentException)
                 {
@@ -192,6 +194,7 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region Methods
+
         /// <summary>
         /// Write out a temporary batch file with the user-specified command in it.
         /// </summary>

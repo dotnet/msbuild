@@ -1178,6 +1178,54 @@ echo line 3"" />
             exec.ValidateParametersAccessor().ShouldBeTrue();
             exec.GetWorkingDirectoryAccessor().ShouldBe(Path.Combine(projectDir.Path, "builddir"));
         }
+
+        #region stdout/stderr encoding tests
+
+        /// <summary>
+        /// By default Exec reads tool stdout/stderr using the current system OEM code page. This is the
+        /// long-standing behaviour and is preserved so that tools relying on the OEM code page are not broken.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void ExecTask_DefaultStdEncodingIsOem()
+        {
+            Exec exec = PrepareExec("echo test");
+            exec.StdOutEncoding.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
+            exec.StdErrEncoding.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
+        }
+
+        /// <summary>
+        /// Setting StdOutEncoding/StdErrEncoding to the special value "ansi" (case-insensitive) selects the
+        /// current system ANSI code page (GetACP).
+        /// </summary>
+        [WindowsOnlyTheory]
+        [InlineData("ansi")]
+        [InlineData("ANSI")]
+        [InlineData("Ansi")]
+        public void ExecTask_AnsiStdEncodingKnobSelectsAnsiCodePage(string ansiValue)
+        {
+            Exec exec = PrepareExec("echo test");
+            exec.StdOutEncoding = ansiValue;
+            exec.StdErrEncoding = ansiValue;
+
+            exec.StdOutEncoding.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
+            exec.StdErrEncoding.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
+        }
+
+        /// <summary>
+        /// Setting the "ansi" knob keeps the encoding parameters valid and the task runs successfully.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void ExecTask_AnsiStdEncodingKnobExecutesSuccessfully()
+        {
+            Exec exec = PrepareExec("echo [hello]");
+            exec.StdOutEncoding = "ansi";
+            exec.StdErrEncoding = "ansi";
+
+            exec.Execute().ShouldBeTrue();
+            ((MockEngine)exec.BuildEngine).AssertLogContains("[hello]");
+        }
+
+        #endregion
     }
 
     internal sealed class ExecWrapper : Exec
