@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -2846,8 +2846,12 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                _nodeManager!.ShutdownConnectedNodes(_buildParameters!.EnableNodeReuse);
-                _taskHostNodeManager!.ShutdownConnectedNodes(_buildParameters.EnableNodeReuse);
+                // We are aborting the build because a node exited unexpectedly.
+                // Do not reuse nodes, as their state may be compromised by attempts to shut down while the build is in-progress.
+                _nodeManager!.ShutdownConnectedNodes(false /* enableNodeReuse */);
+                
+                // Do not cleanly shut down the task host nodes here because we are aborting;
+                // the task host will hear about it in time through the task building infrastructure.
 
                 foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                 {
