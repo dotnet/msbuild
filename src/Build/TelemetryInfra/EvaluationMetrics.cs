@@ -25,7 +25,7 @@ internal static class EvaluationMetrics
     internal const string SucceededTagName = "msbuild.project.evaluation.succeeded";
 
     internal const string BuildSubmissionOrigin = "build_submission";
-    internal const string StandaloneOrigin = "standalone";
+    internal const string OutsideBuildSubmissionOrigin = "outside_build_submission";
 
     private static readonly object s_boxedTrue = true;
     private static readonly object s_boxedFalse = false;
@@ -74,7 +74,7 @@ internal static class EvaluationMetrics
 
             TagList tags = default;
             tags.Add(StageTagName, GetStageName(stage));
-            tags.Add(OriginTagName, isBuildSubmission ? BuildSubmissionOrigin : StandaloneOrigin);
+            tags.Add(OriginTagName, isBuildSubmission ? BuildSubmissionOrigin : OutsideBuildSubmissionOrigin);
             tags.Add(SucceededTagName, succeeded ? s_boxedTrue : s_boxedFalse);
 
             if (countEnabled)
@@ -198,7 +198,7 @@ internal static class EvaluationMetrics
             TagList tags = default;
             tags.Add(StageTagName, GetStageName(stage));
             tags.Add(PassTagName, GetPassName(pass));
-            tags.Add(OriginTagName, isBuildSubmission ? BuildSubmissionOrigin : StandaloneOrigin);
+            tags.Add(OriginTagName, isBuildSubmission ? BuildSubmissionOrigin : OutsideBuildSubmissionOrigin);
 
             double elapsedSeconds = (endTimestamp - startTimestamp) / (double)Stopwatch.Frequency;
             Instruments.ProjectEvaluationPassDuration.Record(elapsedSeconds, in tags);
