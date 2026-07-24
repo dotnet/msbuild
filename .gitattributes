@@ -6,6 +6,8 @@
 # Force bash scripts to always use lf line endings so that if a repro is accessed
 # in Unix via a file share from Windows, the scripts will work.
 *.sh text eol=lf
+.github/mt-build-regression/**/*.ps1 text eol=lf
+.github/mt-build-regression/**/*.psm1 text eol=lf
 
 # Branch-freeze PowerShell scripts execute on Linux GitHub Actions runners.
 .github/branch-freeze/*.ps1 text eol=lf
