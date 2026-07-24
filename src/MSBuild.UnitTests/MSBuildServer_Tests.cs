@@ -180,6 +180,57 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Fact]
+        public void DeferredLoggerMessagesDoNotAccumulateAcrossServerBuilds()
+        {
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            _env.SetEnvironmentVariable("CI", "1");
+
+            string arguments = $"{project.Path} -terminalLogger:auto -verbosity:diagnostic";
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, arguments, out bool success, false, _output);
+            success.ShouldBeTrue();
+            int serverPid = ParseNumber(output, "Server ID is ");
+            _env.WithTransientProcess(serverPid);
+
+            string terminalLoggerMessage = ResourceUtilities.GetResourceString("TerminalLoggerNotUsedAutomated");
+            int initialMessageCount = Regex.Matches(output, Regex.Escape(terminalLoggerMessage)).Count;
+            initialMessageCount.ShouldBeGreaterThan(0);
+
+            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, arguments, out success, false, _output);
+            success.ShouldBeTrue();
+            ParseNumber(output, "Server ID is ").ShouldBe(serverPid);
+            Regex.Matches(output, Regex.Escape(terminalLoggerMessage)).Count.ShouldBe(initialMessageCount);
+        }
+
+        [WindowsOnlyFact]
+        public void ProcessPriorityDoesNotLeakAcrossServerBuilds()
+        {
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+            ProcessPriorityClass originalPriority = Process.GetCurrentProcess().PriorityClass;
+
+            string projectContents = printPidContents.Replace(
+                "</Target>",
+                "<Message Text=\"Server priority is '$([System.Diagnostics.Process]::GetCurrentProcess().PriorityClass)'\" Importance=\"High\" /></Target>");
+            TransientTestFile project = _env.CreateFile("testProject.proj", projectContents);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "1");
+            // System.Diagnostics.Process is not allowlisted for .NET Framework property functions.
+            _env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+
+            string output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, $"{project.Path} -low", out bool success, false, _output);
+            success.ShouldBeTrue();
+            int serverPid = ParseNumber(output, "Server ID is ");
+            _env.WithTransientProcess(serverPid);
+            output.ShouldContain("Server priority is 'BelowNormal'");
+
+            output = RunnerUtilities.ExecMSBuild(BuildEnvironmentHelper.Instance.CurrentMSBuildExePath, project.Path, out success, false, _output);
+            success.ShouldBeTrue();
+            ParseNumber(output, "Server ID is ").ShouldBe(serverPid);
+            output.ShouldContain($"Server priority is '{originalPriority}'");
+        }
+
+        [Fact]
         public void ServerNotUsedReasonIsLoggedToBuildLog()
         {
             TransientTestFile project = _env.CreateFile("testProject.proj", printPidContents);
