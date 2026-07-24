@@ -452,6 +452,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14417")]
         [Fact]
         public void TransactionalModeHandlesConcurrentWritesSuccessfully()
         {
@@ -513,6 +514,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14428")]
         [Fact]
         public void TransactionalModeSucceedsWithConcurrentOverwrites()
         {
@@ -590,6 +592,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14426")]
         [Fact]
         public void NonTransactionalModeCausesDataLoss()
         {

@@ -88,7 +88,7 @@
     <DefineConstants>$(DefineConstants);FEATURE_SYMLINK_TARGET</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'netcoreapp2.1' or '$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">
+  <PropertyGroup Condition="'$(TargetFramework)' == '$(LatestDotNetCoreForMSBuild)'">
     <DefineConstants>$(DefineConstants);FEATURE_PIPEOPTIONS_CURRENTUSERONLY</DefineConstants>
   </PropertyGroup>
 

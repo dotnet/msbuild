@@ -6,14 +6,14 @@
 // (IsAotCompatible) on its net8.0+ build, but the annotations themselves are written
 // unconditionally so they remain in the public metadata for every target framework.
 //
-// On net10.0 these types come from the runtime. On net472 and netstandard2.0 they are not
+// On .NETCoreApp these types come from the runtime. On net472 and netstandard2.0 they are not
 // available to reference: several dependencies (System.Text.Json, System.Collections.Immutable,
 // Microsoft.IO.Redist, ...) embed their own *internal* copies of these attributes, so the
 // types appear "already declared" - PolySharp therefore skips generating them, yet those
 // copies are inaccessible from this assembly. Defining our own internal copies here makes the
 // annotations resolve. The trim/AOT analyzer never runs on net472 or netstandard2.0, so these
 // definitions only need to exist for the annotations to compile - the trimmer recognizes them
-// by full type name on net10.0 where the real runtime types are used.
+// by full type name on .NETCoreApp where the real runtime types are used.
 #if !NET
 
 namespace System.Diagnostics.CodeAnalysis

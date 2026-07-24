@@ -22,17 +22,15 @@ namespace Microsoft.Build.BackEnd;
 /// </summary>
 internal sealed partial class CoordinatorClient : IDisposable
 {
-    private readonly NamedPipeClientStream _pipeStream;
-    private readonly BinaryReader _reader;
-    private readonly BinaryWriter _writer;
-    private readonly Timer _heartbeatTimer;
+    private readonly Connection _connection;
+    private readonly HeartbeatTimer _heartbeatTimer;
     private readonly ICoordinatorDebugOutput _output;
-    private volatile bool _disposed;
+    private int _disposed;
 
     /// <summary>
     ///  The unique identifier for this connection to the coordinator.
     /// </summary>
-    public Guid ConnectionId { get; }
+    public Guid ConnectionId => _connection.Id;
 
     /// <summary>
     ///  The grant token associated with this coordinator lease.
@@ -62,18 +60,13 @@ internal sealed partial class CoordinatorClient : IDisposable
         int heartbeatIntervalMs,
         ICoordinatorDebugOutput output)
     {
-        ConnectionId = connection.Id;
         GrantId = grantId;
         ServerCapabilities = connection.ServerCapabilities;
-        (_pipeStream, _reader, _writer) = connection.TransferOwnership();
+        _connection = connection;
         _output = output;
         GrantedNodes = grantedNodes;
 
-        _heartbeatTimer = new Timer(
-            SendHeartbeat,
-            state: null,
-            dueTime: heartbeatIntervalMs,
-            period: heartbeatIntervalMs);
+        _heartbeatTimer = new HeartbeatTimer(connection, heartbeatIntervalMs, output);
     }
 
     /// <summary>
@@ -81,43 +74,25 @@ internal sealed partial class CoordinatorClient : IDisposable
     /// </summary>
     public void Dispose()
     {
-        if (_disposed)
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
         {
             return;
         }
 
-        _disposed = true;
-
-        // Stop heartbeat timer and wait for any in-flight callback to complete.
-        // This prevents SendHeartbeat from running after resources are disposed.
-        using (var disposeEvent = new ManualResetEvent(false))
-        {
-            _heartbeatTimer.Dispose(disposeEvent);
-            disposeEvent.WaitOne();
-        }
+        _heartbeatTimer.Dispose();
 
         _output.WriteLine($"CoordinatorClient: Releasing grant ({GrantedNodes} nodes)");
 
         try
         {
-            _writer.Write(ReleaseNodesMessage.Instance);
+            _connection.WriteClientMessage(ReleaseNodesMessage.Instance);
         }
         catch (IOException)
         {
             // Pipe may already be broken.
         }
 
-        try
-        {
-            _writer.Dispose();
-        }
-        catch (IOException)
-        {
-            // Flush in BinaryWriter.Dispose can throw on broken pipe.
-        }
-
-        _reader.Dispose();
-        _pipeStream.Dispose();
+        _connection.Dispose();
     }
 
     private static bool TryGetInheritedGrantId(out Guid grantId)
@@ -138,7 +113,6 @@ internal sealed partial class CoordinatorClient : IDisposable
         ICoordinatorDebugOutput output = DefaultDebugOutput.Instance;
 
         NamedPipeClientStream? pipeStream = null;
-
         try
         {
             pipeStream = new NamedPipeClientStream(".", settings.PipeName, PipeDirection.InOut, PipeOptions.Asynchronous);
@@ -152,9 +126,7 @@ internal sealed partial class CoordinatorClient : IDisposable
                 output.WriteLine("CoordinatorClient: No coordinator running, attempting to launch");
 
                 pipeStream.Dispose();
-#pragma warning disable CA2000 // Ownership transferred to TryNegotiate or disposed in outer finally
                 pipeStream = TryLaunchAndConnect(settings, loggingService, output);
-#pragma warning restore CA2000
 
                 if (pipeStream is null)
                 {
@@ -180,8 +152,11 @@ internal sealed partial class CoordinatorClient : IDisposable
             loggingService.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorFailedToConnect");
 
             // Any failure in coordinator communication should not break the build.
-            pipeStream?.Dispose();
             return null;
+        }
+        finally
+        {
+            pipeStream?.Dispose();
         }
     }
 
@@ -342,60 +317,76 @@ internal sealed partial class CoordinatorClient : IDisposable
         ICoordinatorDebugOutput output,
         ILoggingService? loggingService)
     {
-        using Connection? connection = Connection.TryCreate(pipeStream, settings.ProcessId, output);
-        if (connection is null)
+        Connection? connection = null;
+        try
         {
-            return null;
-        }
-
-        int processId = settings.ProcessId;
-        GrantOwnership grantOwnership;
-
-        // Child MSBuild processes receive this token through their process environment.
-        // Root builds keep it in BuildParameters.BuildProcessEnvironment to avoid races
-        // between concurrent BuildManager instances in the same process.
-        if (TryGetInheritedGrantId(out Guid inheritedGrantId) &&
-            connection.ServerCapabilities.Contains(Capabilities.NestedGrants))
-        {
-            grantOwnership = GrantOwnership.Nested;
-            output.WriteLine($"CoordinatorClient: Joining coordinator grant {inheritedGrantId} for {requestedNodes} nodes (PID {processId}, ConnectionId {connection.Id})");
-            connection.WriteClientMessage(new JoinGrantMessage(inheritedGrantId, requestedNodes));
-        }
-        else
-        {
-            grantOwnership = GrantOwnership.Root;
-            output.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {processId}, ConnectionId {connection.Id})");
-            connection.WriteClientMessage(new RequestNodesMessage(requestedNodes));
-        }
-
-        // Read the response.
-        ServerMessage response = connection.ReadServerMessage();
-
-        switch (response)
-        {
-            case NodeGrantMessage grant:
-                output.WriteLine($"CoordinatorClient: Granted {grant.GrantedNodes} nodes");
-                loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", grant.GrantedNodes);
-
-                return grantOwnership == GrantOwnership.Root
-                    ? CreateRootClient(connection, grant, settings.HeartbeatIntervalMs, output)
-                    : CreateNestedClient(connection, grant, settings.HeartbeatIntervalMs, output);
-
-            case WaitMessage:
-                Assumed.Equal(grantOwnership, GrantOwnership.Root, "Nested coordinator grant joins should not wait for global resources.");
-
-                output.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
-                loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.High, "CoordinatorWaitingForNodes");
-
-                return WaitForDeferredGrant(connection, settings, output, loggingService);
-
-            case ErrorMessage requestError:
-                output.WriteLine($"CoordinatorClient: Server error: {requestError.Message}");
+            connection = Connection.TryCreate(pipeStream, settings.ProcessId, output);
+            if (connection is null)
+            {
                 return null;
+            }
 
-            default:
-                output.WriteLine($"CoordinatorClient: Unexpected response: {response.GetType().Name}");
-                return null;
+            int processId = settings.ProcessId;
+            GrantOwnership grantOwnership;
+
+            // Child MSBuild processes receive this token through their process environment.
+            // Root builds keep it in BuildParameters.BuildProcessEnvironment to avoid races
+            // between concurrent BuildManager instances in the same process.
+            if (TryGetInheritedGrantId(out Guid inheritedGrantId) &&
+                connection.HasServerCapability(Capabilities.NestedGrants))
+            {
+                grantOwnership = GrantOwnership.Nested;
+                output.WriteLine($"CoordinatorClient: Joining coordinator grant {inheritedGrantId} for {requestedNodes} nodes (PID {processId}, ConnectionId {connection.Id})");
+                connection.WriteClientMessage(new JoinGrantMessage(inheritedGrantId, requestedNodes));
+            }
+            else
+            {
+                grantOwnership = GrantOwnership.Root;
+                output.WriteLine($"CoordinatorClient: Requesting {requestedNodes} nodes (PID {processId}, ConnectionId {connection.Id})");
+                connection.WriteClientMessage(new RequestNodesMessage(requestedNodes));
+            }
+
+            // Read the response.
+            ServerMessage response = connection.ReadServerMessage();
+
+            switch (response)
+            {
+                case NodeGrantMessage grant:
+                    output.WriteLine($"CoordinatorClient: Granted {grant.GrantedNodes} nodes");
+                    loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", grant.GrantedNodes);
+
+                    CoordinatorClient client = grantOwnership == GrantOwnership.Root
+                        ? CreateRootClient(connection, grant, settings.HeartbeatIntervalMs, output)
+                        : CreateNestedClient(connection, grant, settings.HeartbeatIntervalMs, output);
+                    connection = null;
+                    return client;
+
+                case WaitMessage:
+                    Assumed.Equal(grantOwnership, GrantOwnership.Root, "Nested coordinator grant joins should not wait for global resources.");
+
+                    output.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
+                    loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.High, "CoordinatorWaitingForNodes");
+
+                    CoordinatorClient? deferredClient = WaitForDeferredGrant(connection, settings, output, loggingService);
+                    if (deferredClient is not null)
+                    {
+                        connection = null;
+                    }
+
+                    return deferredClient;
+
+                case ErrorMessage requestError:
+                    output.WriteLine($"CoordinatorClient: Server error: {requestError.Message}");
+                    return null;
+
+                default:
+                    output.WriteLine($"CoordinatorClient: Unexpected response: {response.GetType().Name}");
+                    return null;
+            }
+        }
+        finally
+        {
+            connection?.Dispose();
         }
     }
 
@@ -407,50 +398,32 @@ internal sealed partial class CoordinatorClient : IDisposable
     {
         var waitTimer = Stopwatch.StartNew();
 
-        // Send heartbeats while waiting so the server doesn't consider us stale.
-        using (Timer heartbeatPump = CreateHeartbeatPump(connection, settings.HeartbeatIntervalMs))
+        ServerMessage responseAfterWait;
+
+        // Send heartbeats only while waiting so the server doesn't consider us stale.
+        using (new HeartbeatTimer(connection, settings.HeartbeatIntervalMs, output))
         {
-            ServerMessage responseAfterWait = connection.ReadServerMessage();
-
-            switch (responseAfterWait)
-            {
-                case NodeGrantMessage grant:
-                    waitTimer.Stop();
-
-                    output.WriteLine($"CoordinatorClient: Deferred grant received: {grant.GrantedNodes} nodes (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
-                    loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", grant.GrantedNodes);
-
-                    return CreateRootClient(connection, grant, settings.HeartbeatIntervalMs, output, waitTimer.Elapsed);
-
-                case ErrorMessage waitError:
-                    output.WriteLine($"CoordinatorClient: Server error while waiting: {waitError.Message} (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
-                    return null;
-
-                default:
-                    output.WriteLine($"CoordinatorClient: Unexpected response after wait: {responseAfterWait.GetType().Name} (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
-                    return null;
-            }
+            responseAfterWait = connection.ReadServerMessage();
         }
 
-        static Timer CreateHeartbeatPump(Connection connection, int intervalMs)
-            => new(
-                static state =>
-                {
-                    try
-                    {
-                        if (state is Connection connection)
-                        {
-                            connection.WriteClientMessage(HeartbeatMessage.Instance);
-                        }
-                    }
-                    catch
-                    {
-                        // Pipe may be broken; swallow and let the next read detect it.
-                    }
-                },
-                state: connection,
-                dueTime: intervalMs,
-                period: intervalMs);
+        waitTimer.Stop();
+
+        switch (responseAfterWait)
+        {
+            case NodeGrantMessage grant:
+                output.WriteLine($"CoordinatorClient: Deferred grant received: {grant.GrantedNodes} nodes (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
+                loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.Normal, "CoordinatorNodeGrantReceived", grant.GrantedNodes);
+
+                return CreateRootClient(connection, grant, settings.HeartbeatIntervalMs, output, waitTimer.Elapsed);
+
+            case ErrorMessage waitError:
+                output.WriteLine($"CoordinatorClient: Server error while waiting: {waitError.Message} (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
+                return null;
+
+            default:
+                output.WriteLine($"CoordinatorClient: Unexpected response after wait: {responseAfterWait.GetType().Name} (waited {waitTimer.Elapsed.TotalSeconds:F2}s)");
+                return null;
+        }
     }
 
     private static CoordinatorClient CreateRootClient(
@@ -540,25 +513,5 @@ internal sealed partial class CoordinatorClient : IDisposable
         }
 
         return null;
-    }
-
-    private void SendHeartbeat(object? state)
-    {
-        if (_disposed)
-        {
-            return;
-        }
-
-        try
-        {
-            _writer.Write(HeartbeatMessage.Instance);
-        }
-        catch (IOException)
-        {
-            _output.WriteLine("CoordinatorClient: Heartbeat failed (pipe broken)");
-
-            // Pipe broken — nothing we can do. The build continues
-            // with whatever nodes were already granted.
-        }
     }
 }

@@ -1,0 +1,117 @@
+name: Process branch freeze command
+
+# `/freeze` and `/unfreeze` slash commands that toggle a branch merge-freeze.
+# Restricted to accounts listed in .github/branch-freeze-allowlist.txt. State is
+# stored as one permanent issue per branch, labeled `branch-freeze`; after toggling,
+# all open PRs on the branch are refreshed so the required
+# `branch-freeze` status updates at once.
+#
+# Authorization is a checked-in allowlist of GitHub logins; all repository
+# mutations use the default GITHUB_TOKEN. No GitHub App or org-scoped
+# permissions are required.
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read        # checkout the shared scripts
+  issues: write         # create/close/label the tracking issue; react/reply on issue comments
+  pull-requests: write  # react/reply when the command comes from a pull request comment
+  # `statuses: write` is required only by the reusable refresh workflow and is
+  # granted on the `refresh` job below (least privilege).
+
+concurrency:
+  # Do not let two freeze/unfreeze operations modify tracking issues at once.
+  group: branch-freeze-command
+  cancel-in-progress: false
+
+jobs:
+  command:
+    name: Process /freeze and /unfreeze
+    # Cheap pre-filter: start the job only for repository owners, organization
+    # members, or repository collaborators. These broad roles do not authorize
+    # the command; the checked-in allowlist is verified in-job and is authoritative.
+    if: >-
+      (startsWith(github.event.comment.body, '/freeze') || startsWith(github.event.comment.body, '/unfreeze')) &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
+    runs-on: ubuntu-latest
+    outputs:
+      branch: ${{ steps.cmd.outputs.branch }}
+      changed: ${{ steps.cmd.outputs.changed }}
+    steps:
+      # Keep checkout pinned to the immutable v7.0.0 commit; the @v7 tag can move.
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Verify commenter is on the branch-freeze allowlist
+        id: auth
+        env:
+          ACTOR: ${{ github.event.comment.user.login }}
+          ALLOWLIST: .github/branch-freeze-allowlist.txt
+        shell: pwsh
+        run: |
+          # Authorization logic lives in is-allowed.ps1 (single source of truth,
+          # unit-tested); exit 0 = allowed, non-zero = denied (incl. missing file).
+          pwsh -NoLogo -NoProfile -File `
+            "$env:GITHUB_WORKSPACE/.github/branch-freeze/workflows/is-allowed.ps1" `
+            $env:ACTOR `
+            $env:ALLOWLIST
+          if ($LASTEXITCODE -eq 0) {
+            Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value 'authorized=true' -Encoding utf8
+            Write-Output "@$env:ACTOR is on the branch-freeze allowlist."
+          } else {
+            Add-Content -LiteralPath $env:GITHUB_OUTPUT -Value 'authorized=false' -Encoding utf8
+            Write-Output "@$env:ACTOR is NOT on the branch-freeze allowlist ($env:ALLOWLIST)."
+          }
+          exit 0
+
+      - name: Deny commenter who is not on the allowlist
+        if: steps.auth.outputs.authorized != 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ACTOR: ${{ github.event.comment.user.login }}
+        shell: pwsh
+        run: |
+          pwsh -NoLogo -NoProfile -File `
+            "$env:GITHUB_WORKSPACE/.github/branch-freeze/workflows/deny-command.ps1" `
+            -Repository $env:REPO `
+            -CommentId $env:COMMENT_ID `
+            -IssueNumber $env:ISSUE_NUMBER `
+            -Actor $env:ACTOR
+
+      - name: Execute command
+        id: cmd
+        if: steps.auth.outputs.authorized == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          ACTOR: ${{ github.event.comment.user.login }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+          # Untrusted comment body is passed as data via env (never interpolated
+          # into the command line) and parsed inside the script.
+          BODY: ${{ github.event.comment.body }}
+        shell: pwsh
+        # The script reopens/closes the branch's permanent tracking issue and
+        # exposes the affected branch for the refresh job below.
+        run: pwsh -NoLogo -NoProfile -File "$env:GITHUB_WORKSPACE/.github/branch-freeze/workflows/handle-command.ps1"
+
+  # Refresh every open PR on the affected branch. The refresh and single-PR
+  # workflows share the same per-branch concurrency group, preventing a stale
+  # status write from winning a race with /freeze or /unfreeze.
+  refresh:
+    needs: command
+    if: needs.command.outputs.changed == 'true'
+    uses: ./.github/workflows/branch-freeze-refresh.yml
+    with:
+      base_ref: ${{ needs.command.outputs.branch }}
+    permissions:
+      contents: read
+      statuses: write
+      issues: read
+      pull-requests: read
