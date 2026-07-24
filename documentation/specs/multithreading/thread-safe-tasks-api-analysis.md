@@ -83,7 +83,9 @@ The following tables list specific .NET APIs and their threading safety classifi
 
 | API | Level | Short Reason | Recommendation |
 |-----|-------|--------------|-------|
-| Constructor `StreamReader` all overloads | WARNING | Uses current working directory | Use absolute paths |
+| Constructors `StreamReader(string path, ...)` | WARNING | Relative paths use current working directory | Use absolute paths |
+
+`StreamReader(Stream, ...)` constructors do not resolve paths and are not restricted by this rule.
 
 ### System.Diagnostics.Process Class
 
