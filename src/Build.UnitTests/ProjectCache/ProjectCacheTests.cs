@@ -1343,6 +1343,41 @@ namespace Microsoft.Build.Engine.UnitTests.ProjectCache
         }
 
         [Fact]
+        public async Task CriticalExceptionFromGraphBuildCompletesSubmission()
+        {
+            const string exceptionMessage = "Critical exception from graph build";
+
+            var project = _env.CreateFile(
+                "1.proj",
+                """
+                <Project>
+                  <Target Name="Build" />
+                </Project>
+                """);
+            var graph = new ProjectGraph(project.Path);
+            var cache = new DelegatingMockCache(
+                (_, _, _) => throw new InternalErrorException(exceptionMessage));
+            var buildParameters = new BuildParameters
+            {
+                ProjectCacheDescriptor = ProjectCacheDescriptor.FromInstance(cache),
+                ShutdownInProcNodeOnBuildFinish = true
+            };
+            var requestData = new GraphBuildRequestData(graph, ["Build"]);
+
+            Task<InternalErrorException> buildTask = Task.Run(
+                () =>
+                {
+                    using var buildManager = new BuildManager();
+                    return Should.Throw<InternalErrorException>(() => buildManager.Build(buildParameters, requestData));
+                });
+
+            Task completedTask = await Task.WhenAny(buildTask, Task.Delay(TimeSpan.FromSeconds(10)));
+
+            completedTask.ShouldBeSameAs(buildTask, "Graph builds should complete after a critical exception.");
+            (await buildTask).Message.ShouldContain(exceptionMessage);
+        }
+
+        [Fact]
         public void EndBuildShouldGetCalledOnceWhenItThrowsExceptionsFromGraphBuilds()
         {
             var project = _env.CreateFile(
