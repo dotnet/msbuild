@@ -8,6 +8,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Profiler;
 
 namespace Microsoft.Build.TelemetryInfra;
 
@@ -16,8 +17,10 @@ internal static class EvaluationMetrics
     internal const string MeterName = "Microsoft.Build";
     internal const string ProjectEvaluationCountName = "msbuild.project.evaluations";
     internal const string ProjectEvaluationDurationName = "msbuild.project.evaluation.duration";
+    internal const string ProjectEvaluationPassDurationName = "msbuild.project.evaluation.pass.duration";
 
     internal const string StageTagName = "msbuild.project.evaluation.stage";
+    internal const string PassTagName = "msbuild.project.evaluation.pass";
     internal const string OriginTagName = "msbuild.project.evaluation.origin";
     internal const string SucceededTagName = "msbuild.project.evaluation.succeeded";
 
@@ -29,7 +32,7 @@ internal static class EvaluationMetrics
     private static int s_disabled;
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    internal static long GetEvaluationStartTimestamp()
+    internal static long EvaluateStart()
     {
         if (Volatile.Read(ref s_disabled) != 0)
         {
@@ -48,7 +51,7 @@ internal static class EvaluationMetrics
     }
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    internal static void RecordProjectEvaluation(
+    internal static void EvaluateStop(
         long startTimestamp,
         ProjectEvaluationStage stage,
         bool isBuildSubmission,
@@ -91,6 +94,25 @@ internal static class EvaluationMetrics
         }
     }
 
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static long EvaluatePassStart()
+    {
+        if (Volatile.Read(ref s_disabled) != 0)
+        {
+            return 0;
+        }
+
+        try
+        {
+            return Instruments.ProjectEvaluationPassDuration.Enabled ? Stopwatch.GetTimestamp() : 0;
+        }
+        catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+        {
+            Disable(ex);
+            return 0;
+        }
+    }
+
     internal static void ResetForTests()
     {
         Volatile.Write(ref s_disabled, 0);
@@ -112,9 +134,73 @@ internal static class EvaluationMetrics
         _ => "unknown",
     };
 
+    private static string GetPassName(EvaluationPass pass) => pass switch
+    {
+        EvaluationPass.InitialProperties => "initial_properties",
+        EvaluationPass.Properties => "properties",
+        EvaluationPass.ItemDefinitionGroups => "item_definitions",
+        EvaluationPass.Items => "items",
+        EvaluationPass.UsingTasks => "using_tasks",
+        EvaluationPass.Targets => "targets",
+        _ => "unknown",
+    };
+
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    internal static void EvaluatePassStop(
+        long startTimestamp,
+        EvaluationPass pass,
+        ProjectEvaluationStage stage,
+        bool isBuildSubmission)
+    {
+        if (startTimestamp == 0 || Volatile.Read(ref s_disabled) != 0)
+        {
+            return;
+        }
+
+        try
+        {
+            long endTimestamp = Stopwatch.GetTimestamp();
+            if (!Instruments.ProjectEvaluationPassDuration.Enabled)
+            {
+                return;
+            }
+
+            TagList tags = default;
+            tags.Add(StageTagName, GetStageName(stage));
+            tags.Add(PassTagName, GetPassName(pass));
+            tags.Add(OriginTagName, isBuildSubmission ? BuildSubmissionOrigin : StandaloneOrigin);
+
+            double elapsedSeconds = (endTimestamp - startTimestamp) / (double)Stopwatch.Frequency;
+            Instruments.ProjectEvaluationPassDuration.Record(elapsedSeconds, in tags);
+        }
+        catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+        {
+            Disable(ex);
+        }
+    }
+
     private static class Instruments
     {
         private static readonly Meter s_meter = new(MeterName);
+        private static readonly InstrumentAdvice<double> s_durationAdvice = new()
+        {
+            HistogramBucketBoundaries =
+            [
+                0.001,
+                0.005,
+                0.01,
+                0.025,
+                0.05,
+                0.1,
+                0.25,
+                0.5,
+                1,
+                2.5,
+                5,
+                10,
+                30,
+            ],
+        };
 
         internal static readonly Counter<long> ProjectEvaluationCount = s_meter.CreateCounter<long>(
             ProjectEvaluationCountName,
@@ -126,24 +212,13 @@ internal static class EvaluationMetrics
             unit: "s",
             description: "Duration of MSBuild project evaluations.",
             tags: null,
-            advice: new InstrumentAdvice<double>
-            {
-                HistogramBucketBoundaries =
-                [
-                    0.001,
-                    0.005,
-                    0.01,
-                    0.025,
-                    0.05,
-                    0.1,
-                    0.25,
-                    0.5,
-                    1,
-                    2.5,
-                    5,
-                    10,
-                    30,
-                ],
-            });
+            advice: s_durationAdvice);
+
+        internal static readonly Histogram<double> ProjectEvaluationPassDuration = s_meter.CreateHistogram<double>(
+            ProjectEvaluationPassDurationName,
+            unit: "s",
+            description: "Duration of MSBuild project evaluation passes.",
+            tags: null,
+            advice: s_durationAdvice);
     }
 }
