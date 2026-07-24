@@ -29,6 +29,15 @@
 # targeting `main` (so a fix PR's effect on the quarantined tests is validated on the PR itself), and
 # manual queue. Consumers that aggregate this data treat rolling and scheduled `main` runs the same
 # (reasons batchedCI/individualCI/schedule), so the mix of triggers is transparent to them.
+parameters:
+# Condition (compile-time constant) reused by every quarantine leg. Runs the leg on any non-PR build
+# (rolling/batched and scheduled re-validation on main), or -- fail-open -- if the gate did not
+# succeed, or when the gate classified the PR as documentation/.github-only. Authored once here and
+# referenced via ${{ parameters.runUnlessDocumentationOnly }} instead of copied onto each job.
+- name: runUnlessDocumentationOnly
+  type: string
+  default: "or(ne(variables['Build.Reason'], 'PullRequest'), not(succeeded('EvaluateDocumentationOnlyChange')), eq(dependencies.EvaluateDocumentationOnlyChange.outputs['CheckDocumentationOnlyChange.onlyDocChanged'], '0'))"
+
 trigger:
   batch: true
   branches:
@@ -57,8 +66,22 @@ variables:
   value: false
 
 jobs:
+# Lightweight gate: determine once whether the PR changed only documentation/.github files.
+# The quarantine legs depend on this and are skipped entirely -- no agent is allocated -- for a
+# docs-only pull request. Non-PR runs (rolling/batched and scheduled re-validation on main) always
+# run, so the quarantined-test signal keeps tracking main regardless of this gate.
+- job: EvaluateDocumentationOnlyChange
+  displayName: "Evaluate documentation-only change"
+  pool:
+    name: NetCore-Public
+    demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+  steps:
+  - template: azure-pipelines/check-documentation-only-change.yml
+
 - job: RunQuarantinedTestsWindows
   displayName: "Run quarantined tests (Windows)"
+  dependsOn: EvaluateDocumentationOnlyChange
+  condition: ${{ parameters.runUnlessDocumentationOnly }}
   pool:
     name: NetCore-Public
     demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
@@ -110,6 +133,8 @@ jobs:
 
 - job: RunQuarantinedTestsLinux
   displayName: "Run quarantined tests (Linux)"
+  dependsOn: EvaluateDocumentationOnlyChange
+  condition: ${{ parameters.runUnlessDocumentationOnly }}
   pool:
     name: NetCore-Public
     demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
@@ -152,6 +177,8 @@ jobs:
 
 - job: RunQuarantinedTestsMac
   displayName: "Run quarantined tests (macOS)"
+  dependsOn: EvaluateDocumentationOnlyChange
+  condition: ${{ parameters.runUnlessDocumentationOnly }}
   pool:
     vmImage: 'macOS-latest'
   timeoutInMinutes: 120
