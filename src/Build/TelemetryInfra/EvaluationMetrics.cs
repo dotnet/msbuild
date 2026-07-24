@@ -212,25 +212,6 @@ internal static class EvaluationMetrics
     private static class Instruments
     {
         private static readonly Meter s_meter = new(MeterName);
-        private static readonly InstrumentAdvice<double> s_durationAdvice = new()
-        {
-            HistogramBucketBoundaries =
-            [
-                0.001,
-                0.005,
-                0.01,
-                0.025,
-                0.05,
-                0.1,
-                0.25,
-                0.5,
-                1,
-                2.5,
-                5,
-                10,
-                30,
-            ],
-        };
 
         internal static readonly Counter<long> ProjectEvaluationCount = s_meter.CreateCounter<long>(
             ProjectEvaluationCountName,
@@ -240,15 +221,11 @@ internal static class EvaluationMetrics
         internal static readonly Histogram<double> ProjectEvaluationDuration = s_meter.CreateHistogram<double>(
             ProjectEvaluationDurationName,
             unit: "s",
-            description: "Duration of MSBuild project evaluations.",
-            tags: null,
-            advice: s_durationAdvice);
+            description: "Duration of MSBuild project evaluations.");
 
         internal static readonly Histogram<double> ProjectEvaluationPassDuration = s_meter.CreateHistogram<double>(
             ProjectEvaluationPassDurationName,
             unit: "s",
-            description: "Duration of MSBuild project evaluation passes.",
-            tags: null,
-            advice: s_durationAdvice);
+            description: "Duration of MSBuild project evaluation passes.");
     }
 }
