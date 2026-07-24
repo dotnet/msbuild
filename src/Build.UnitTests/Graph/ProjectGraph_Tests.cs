@@ -860,10 +860,10 @@ namespace Microsoft.Build.Graph.UnitTests
                 project8Xml.Save(project8Path);
 
                 var projectGraph = new ProjectGraph(slnFile.Path);
-                projectGraph.EntryPointNodes.Count.ShouldBe(5);
-                projectGraph.EntryPointNodes.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project1Path, project2Path, project3Path, project6Path, project8Path }, ignoreOrder: true);
-                projectGraph.GraphRoots.Count.ShouldBe(2);
-                projectGraph.GraphRoots.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project1Path, project6Path }, ignoreOrder: true);
+                projectGraph.EntryPointNodes.Count.ShouldBe(1);
+                projectGraph.EntryPointNodes.Single().ProjectInstance.FullPath.ShouldBe(slnFile.Path);
+                projectGraph.GraphRoots.Count.ShouldBe(1);
+                projectGraph.GraphRoots.Single().ProjectInstance.FullPath.ShouldBe(slnFile.Path);
                 projectGraph.ProjectNodes.Count.ShouldBe(7);
 
                 ProjectGraphNode project1Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project1Path);

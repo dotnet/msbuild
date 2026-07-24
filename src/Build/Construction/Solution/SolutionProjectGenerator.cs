@@ -69,6 +69,7 @@ namespace Microsoft.Build.Construction
         /// The set of properties which identify the configuration and platform to build a project with
         /// </summary>
         private const string SolutionConfigurationAndPlatformProperties = "Configuration=$(Configuration); Platform=$(Platform)";
+        private const string NotGraphBuildCondition = "'$(IsGraphBuild)' != 'true'";
 
         /// <summary>
         /// The Special Target name which when <see cref="_batchProjectTargets"/> is enabled, all P2P references will just execute this target.
@@ -1427,7 +1428,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static void AddProjectBuildTask(ProjectInstance traversalProject, ProjectConfigurationInSolution projectConfiguration, ProjectTargetInstance target, string targetToBuild, string sourceItems, string condition, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", condition, String.Empty);
+            string combinedCondition = string.IsNullOrEmpty(condition) ? NotGraphBuildCondition : $"({condition}) and {NotGraphBuildCondition}";
+            ProjectTaskInstance task = target.AddTask("MSBuild", combinedCondition, String.Empty);
             task.SetParameter("Projects", sourceItems);
             if (targetToBuild != null)
             {
@@ -1458,7 +1460,9 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void AddMetaprojectBuildTask(ProjectInSolution project, ProjectTargetInstance target, string targetToBuild, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", Strings.WeakIntern($"'%(ProjectReference.Identity)' == '{GetMetaprojectName(project)}'"), String.Empty);
+            string projectMatchCondition = Strings.WeakIntern($"'%(ProjectReference.Identity)' == '{GetMetaprojectName(project)}'");
+            string combinedCondition = $"({projectMatchCondition}) and {NotGraphBuildCondition}";
+            ProjectTaskInstance task = target.AddTask("MSBuild", combinedCondition, String.Empty);
             task.SetParameter("Projects", "@(ProjectReference)");
 
             if (targetToBuild != null)
@@ -2061,7 +2065,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static void AddReferencesBuildTask(ProjectTargetInstance target, string targetToBuild, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", String.Empty, String.Empty);
+            ProjectTaskInstance task = target.AddTask("MSBuild", NotGraphBuildCondition, String.Empty);
             if (String.Equals(targetToBuild, "Clean", StringComparison.OrdinalIgnoreCase))
             {
                 task.SetParameter("Projects", "@(ProjectReference->Reverse())");

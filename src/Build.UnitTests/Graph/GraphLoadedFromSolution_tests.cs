@@ -687,15 +687,13 @@ namespace Microsoft.Build.Graph.UnitTests
             // Exactly 1 node per project
             graph.ProjectNodes.Count.ShouldBe(graph.ProjectNodes.Select(GetProjectPath).Distinct().Count());
 
-            // in the solution, all nodes are entry points
-            graphFromSolution.EntryPointNodes.Select(GetProjectPath)
-                .ShouldBeSetEquivalentTo(graph.ProjectNodes.Select(GetProjectPath));
+            graphFromSolution.EntryPointNodes.Count.ShouldBe(1);
+            graphFromSolution.EntryPointNodes.First().ProjectInstance.FullPath.ShouldBe(solutionPath);
+            graphFromSolution.GraphRoots.Count.ShouldBe(1);
+            graphFromSolution.GraphRoots.First().ProjectInstance.FullPath.ShouldBe(solutionPath);
 
             if (projectConfigurations == null || graphFromSolution.ProjectNodes.All(n => n.ProjectReferences.Count == 0))
             {
-                graphFromSolution.GraphRoots.Select(GetProjectPath)
-                    .ShouldBeSameIgnoringOrder(graph.GraphRoots.Select(GetProjectPath));
-
                 graphFromSolution.ProjectNodes.Select(GetProjectPath)
                     .ShouldBeSameIgnoringOrder(graph.ProjectNodes.Select(GetProjectPath));
             }
