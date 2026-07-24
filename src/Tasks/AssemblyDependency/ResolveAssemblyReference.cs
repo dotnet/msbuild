@@ -64,10 +64,12 @@ namespace Microsoft.Build.Tasks
         internal SystemState _cache = null;
 
         /// <summary>
-        /// Construct
+        /// Initializes a new instance of the <see cref="ResolveAssemblyReference"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
-        public ResolveAssemblyReference()
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public ResolveAssemblyReference(TaskEnvironment taskEnvironment)
         {
+            TaskEnvironment = taskEnvironment;
             Strings.Initialize(Log);
         }
 

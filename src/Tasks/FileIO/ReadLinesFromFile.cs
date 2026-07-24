@@ -19,6 +19,12 @@ namespace Microsoft.Build.Tasks
     public class ReadLinesFromFile : TaskExtension, IMultiThreadableTask
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="ReadLinesFromFile"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public ReadLinesFromFile(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
+
+        /// <summary>
         /// File to read lines from.
         /// </summary>
         [Required]

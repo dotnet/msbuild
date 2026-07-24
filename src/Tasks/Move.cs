@@ -28,6 +28,12 @@ namespace Microsoft.Build.Tasks
     public class Move : TaskExtension, ICancelableTask, IIncrementalTask, IMultiThreadableTask
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="Move"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public Move(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
+
+        /// <summary>
         /// Whether we should cancel.
         /// </summary>
         private bool _canceling;

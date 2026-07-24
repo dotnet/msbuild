@@ -134,7 +134,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                     .GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly);
 
                 // Create a throwaway instance to capture the default values for each property.
-                ResolveAssemblyReference rar = new();
+                ResolveAssemblyReference rar = new(TaskEnvironment.Fallback);
 
                 foreach (PropertyInfo property in properties)
                 {

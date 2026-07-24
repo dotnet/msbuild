@@ -25,6 +25,12 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class GetAssemblyIdentity : TaskExtension, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetAssemblyIdentity"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public GetAssemblyIdentity(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
+
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 

@@ -153,7 +153,7 @@ namespace Microsoft.Build.Tasks
             {
                 // delegate generation of the assembly to an instance of the TlbImp ToolTask. MUST
                 // HAVE SET SDKTOOLSPATH TO THE TARGET SDK TO WORK
-                var tlbImp = new ResolveComReference.TlbImp
+                var tlbImp = new ResolveComReference.TlbImp(TaskEnvironment.Fallback)
                 {
                     BuildEngine = BuildEngine,
                     EnvironmentVariables = EnvironmentVariables,

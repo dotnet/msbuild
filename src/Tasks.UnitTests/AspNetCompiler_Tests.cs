@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NoParameters()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             // It's invalid to have zero parameters, so we expect a "false" return value from ValidateParameters.
@@ -44,7 +44,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OnlyMetabasePath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
@@ -58,7 +58,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OnlyVirtualPath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.VirtualPath = @"/MyApp";
@@ -73,7 +73,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OnlyPhysicalPath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.PhysicalPath = @"c:\MyApp";
@@ -85,7 +85,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OnlyTargetPath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.TargetPath = @"c:\MyTarget";
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MetabasePathAndVirtualPath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
@@ -110,7 +110,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MetabasePathAndPhysicalPath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MetabasePathAndTargetPath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
@@ -138,7 +138,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VirtualPathAndPhysicalPath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.VirtualPath = @"/MyApp";
@@ -153,7 +153,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void VirtualPathAndTargetPath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.VirtualPath = @"/MyApp";
@@ -168,7 +168,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void PhysicalPathAndTargetPath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.PhysicalPath = @"c:\MyApp";
@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void AllExceptMetabasePath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.VirtualPath = @"/MyApp";
@@ -197,7 +197,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void AllExceptVirtualPath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
@@ -211,7 +211,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void AllExceptPhysicalPath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
@@ -225,7 +225,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void AllExceptTargetPath()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
@@ -239,7 +239,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void AllParameters()
         {
-            AspNetCompiler t = new AspNetCompiler();
+            AspNetCompiler t = new AspNetCompiler(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
 
             t.MetabasePath = @"/LM/W3SVC/1/Root/MyApp";
@@ -351,6 +351,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private sealed class TestableAspNetCompiler : AspNetCompiler
         {
+            public TestableAspNetCompiler() : base(TaskEnvironment.Fallback) { }
+
             public string CallGenerateFullPathToTool() => GenerateFullPathToTool();
 
             public ProcessStartInfo CallGetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)

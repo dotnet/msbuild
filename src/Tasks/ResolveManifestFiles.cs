@@ -40,6 +40,12 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public sealed class ResolveManifestFiles : TaskExtension, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResolveManifestFiles"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public ResolveManifestFiles(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
+
         #region Fields
 
         private ITaskItem[] _extraFiles;

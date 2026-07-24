@@ -1379,7 +1379,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private ResGen CreateResGenTaskWithDefaultParameters()
         {
-            ResGen resGen = new ResGen();
+            ResGen resGen = new ResGen(TaskEnvironment.Fallback);
 
             resGen.BuildEngine = BuildEngine;
             resGen.SdkToolsPath = _resgenPath;

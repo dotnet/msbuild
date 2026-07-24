@@ -27,7 +27,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InvalidLanguage()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NoLanguage()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -62,7 +62,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NoFileOrDirectory()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void CombineFileDirectory()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -149,7 +149,7 @@ namespace Microsoft.Build.UnitTests
         {
             using TestEnvironment env = TestEnvironment.Create();
             var file = env.ExpectFile(Directory.GetCurrentDirectory(), ".tmp");
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -172,7 +172,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void DirectoryAndRootedFile()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(file);
             }
 
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -236,7 +236,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(file);
             }
 
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -256,7 +256,7 @@ namespace Microsoft.Build.UnitTests
         [WindowsOnlyFact(additionalMessage: "No invalid characters on Unix.")]
         public void InvalidFilePath()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -275,7 +275,7 @@ namespace Microsoft.Build.UnitTests
         [WindowsOnlyFact(additionalMessage: "No invalid characters on Unix.")]
         public void InvalidDirectoryPath()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -298,7 +298,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                WriteCodeFragment task = new WriteCodeFragment();
+                WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
                 task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine engine = new MockEngine(true);
                 task.BuildEngine = engine;
@@ -328,7 +328,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OneAttributeNoParamsVb()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -352,7 +352,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TwoAttributes()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -382,7 +382,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ToDirectory()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -439,7 +439,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(absoluteFolder));
 
-                WriteCodeFragment task = new WriteCodeFragment();
+                WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
                 task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine engine = new MockEngine(true);
                 task.BuildEngine = engine;
@@ -480,7 +480,7 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                WriteCodeFragment task = new WriteCodeFragment();
+                WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
                 task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine engine = new MockEngine(true);
                 task.BuildEngine = engine;
@@ -512,7 +512,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OneAttributeTwoParamsSameName()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -536,7 +536,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OneAttributePositionalParamInvalidSuffix()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -560,7 +560,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OneAttributeTwoPositionalParams()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -585,7 +585,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OneAttributeTwoPositionalParamsWithSameValue()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -618,7 +618,7 @@ namespace Microsoft.Build.UnitTests
             var lines = new[] { "line 1", "line 2", "line 3" };
             var multilineString = String.Join(Environment.NewLine, lines);
 
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -655,7 +655,7 @@ namespace Microsoft.Build.UnitTests
             var lines = new[] { "line 1", "line 2", "line 3" };
             var multilineString = String.Join(Environment.NewLine, lines);
 
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -689,7 +689,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OneAttributeSkippedPositionalParams()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -713,7 +713,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void InvalidNumber()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -737,7 +737,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void NoNumber()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -761,7 +761,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OneAttributePositionalAndNamedParams()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -795,7 +795,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OneAttributePositionalAndNamedParamsVisualBasic()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -1137,7 +1137,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void MessageDisplayPositionalParameterNameWhenAttributeNotFound()
         {
-            WriteCodeFragment task = new WriteCodeFragment();
+            WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
             task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             MockEngine engine = new MockEngine(true);
             task.BuildEngine = engine;
@@ -1176,7 +1176,7 @@ namespace Microsoft.Build.UnitTests
 
         private WriteCodeFragment CreateTask(string language, TaskItem outputDirectory, TaskItem outputFile, params TaskItem[] attributes)
         {
-            return new WriteCodeFragment()
+            return new WriteCodeFragment(TaskEnvironment.Fallback)
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 Language = language,
@@ -1295,7 +1295,7 @@ namespace Microsoft.Build.UnitTests
             {
                 System.Globalization.CultureInfo.CurrentUICulture = new System.Globalization.CultureInfo(cultureName);
                 
-                WriteCodeFragment task = new WriteCodeFragment();
+                WriteCodeFragment task = new WriteCodeFragment(TaskEnvironment.Fallback);
                 task.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 MockEngine engine = new MockEngine(true);
                 task.BuildEngine = engine;

@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TouchExisting()
         {
-            Touch t = new Touch();
+            Touch t = new Touch(TaskEnvironment.Fallback);
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -208,7 +208,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TouchNonExisting()
         {
-            Touch t = new Touch();
+            Touch t = new Touch(TaskEnvironment.Fallback);
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -231,7 +231,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TouchNonExistingAlwaysCreate()
         {
-            Touch t = new Touch();
+            Touch t = new Touch(TaskEnvironment.Fallback);
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -255,7 +255,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TouchNonExistingAlwaysCreateAndBadlyFormedTimestamp()
         {
-            Touch t = new Touch();
+            Touch t = new Touch(TaskEnvironment.Fallback);
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -279,7 +279,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TouchReadonly()
         {
-            Touch t = new Touch();
+            Touch t = new Touch(TaskEnvironment.Fallback);
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -302,7 +302,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TouchReadonlyForce()
         {
-            Touch t = new Touch();
+            Touch t = new Touch(TaskEnvironment.Fallback);
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -320,7 +320,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TouchNonExistingDirectoryDoesntExist()
         {
-            Touch t = new Touch();
+            Touch t = new Touch(TaskEnvironment.Fallback);
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -346,7 +346,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void QuestionTouchNonExisting()
         {
-            Touch t = new Touch();
+            Touch t = new Touch(TaskEnvironment.Fallback);
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -373,7 +373,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void QuestionTouchNonExistingAlwaysCreate()
         {
-            Touch t = new Touch();
+            Touch t = new Touch(TaskEnvironment.Fallback);
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
@@ -399,7 +399,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void QuestionTouchExisting()
         {
-            Touch t = new Touch();
+            Touch t = new Touch(TaskEnvironment.Fallback);
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();

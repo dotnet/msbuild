@@ -20,6 +20,12 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public sealed class AddToWin32Manifest : TaskExtension, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AddToWin32Manifest"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public AddToWin32Manifest(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
+
         private const string supportedArchitectures = "supportedArchitectures";
         private const string windowsSettings = "windowsSettings";
         private const string application = "application";

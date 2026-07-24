@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             ITaskItem x = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.dll"));
             ITaskItem xpdb = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.pdb"));
-            ResolveAssemblyReference t = new()
+            ResolveAssemblyReference t = new(TaskEnvironment.Fallback)
             {
                 BuildEngine = new MockEngine(),
                 AllowedRelatedFileExtensions = new string[] { ".pdb" },
@@ -138,7 +138,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
@@ -176,7 +176,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
@@ -214,7 +214,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
@@ -275,7 +275,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
@@ -324,7 +324,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
@@ -366,7 +366,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
@@ -403,7 +403,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
@@ -463,7 +463,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             assemblyNames[4].SetMetadata("Private", "false");
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.AssemblyFiles = assemblyFiles;
@@ -752,7 +752,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 // Create the engine.
                 MockEngine engine = new MockEngine(_output);
                 // Now, pass feed resolved primary references into ResolveAssemblyReference.
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 t.BuildEngine = engine;
                 t.Assemblies = assemblies;
                 t.AssemblyFiles = assemblyFiles;
@@ -806,7 +806,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             MockEngine engine = new MockEngine(_output);
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.TargetFrameworkDirectories = new string[] { s_myVersion20Path };
@@ -839,7 +839,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblies;
@@ -903,7 +903,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             assemblies[0].SetMetadata("ExternallyResolved", "true");
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblies;
@@ -938,7 +938,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblies;
@@ -984,7 +984,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             MockEngine engine = new MockEngine(_output);
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = new ITaskItem[] {
@@ -1036,7 +1036,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress286699_InvalidCandidateAssemblyFiles()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1056,7 +1056,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress286699_InvalidAssemblyFiles()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1076,7 +1076,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress286699_InvalidAssembliesParameter()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1101,7 +1101,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing Regress286699_InvalidTargetFrameworkDirectory() test");
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1120,7 +1120,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress286699_InvalidSearchPath()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1144,7 +1144,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [InlineData("", true)]
         public void InvalidOrEmptyAppConfig_DoesNotCrash(string appConfigFile, bool expectedSuccess)
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
             t.Assemblies = [new TaskItem("mscorlib")];
@@ -1170,7 +1170,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_8.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
                 MockEngine engine = new MockEngine(_output);
                 t.BuildEngine = engine;
@@ -1193,7 +1193,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void NonExistentReference()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
             t.Assemblies = new ITaskItem[] {
@@ -1223,7 +1223,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void StrongWeakMismatchInDependency()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
             t.Assemblies = new ITaskItem[]
@@ -1247,7 +1247,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void DependenciesOfExternallyResolvedReferencesAreNotSearched()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
             t.Assemblies = new ITaskItem[]
@@ -1274,7 +1274,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing UseSuppliedHintPath() test");
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1302,7 +1302,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress200872()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1325,7 +1325,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExBasic()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1345,7 +1345,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExVerifyComponentFolderSorting()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1366,7 +1366,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExTargetFrameworkVersionDoesNotBeginWithV()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1390,7 +1390,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchDoesNotMatch()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1415,7 +1415,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchMSILX86()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1437,7 +1437,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void VerifyProcessArchitectureMismatchWarning()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1461,7 +1461,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void VerifyProcessArchitectureMismatchWarningDefault()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1484,7 +1484,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void VerifyProcessArchitectureMismatchError()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1511,7 +1511,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchNoneX86()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1531,7 +1531,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchNoneMix()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1559,7 +1559,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchMSILLastFolder()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1584,7 +1584,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchNoneLastFolder()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1608,7 +1608,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchX86FirstFolder()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1631,7 +1631,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchX86MSIL()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1653,7 +1653,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchX86None()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1675,7 +1675,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchNoneNone()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1696,7 +1696,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArcMSILNone()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1717,7 +1717,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchNoneMSIL()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1739,7 +1739,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchMSILMSIL()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine mockEngine = new MockEngine(_output);
             t.BuildEngine = mockEngine;
 
@@ -1761,7 +1761,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExProcessorArchMatches()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1785,7 +1785,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExTargetFrameworkVersionBogusValue()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1806,7 +1806,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void Regress357227_AssemblyFoldersExAgainstRawDrop()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1826,7 +1826,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExHKLM()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1850,7 +1850,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing AssemblyFoldersExHKCUTrumpsHKLM() test");
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1869,7 +1869,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExFutureTargetNDPVersionsDontMatch()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1888,7 +1888,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExMatchBackVersion()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1907,7 +1907,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExCurrentTargetVersionTrumpsPastTargetVersion()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1926,7 +1926,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExServicePackTrumpsBaseVersion()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1951,7 +1951,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing AssemblyFoldersExConditionFilterMaxOS() test");
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -1989,7 +1989,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExConditionFilterMinOS()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -2302,7 +2302,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [WindowsOnlyFact]
         public void AssemblyFoldersExConditionFilterPlatform()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -2377,7 +2377,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void CandidateAssemblyFiles()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -2397,7 +2397,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ThreePartVersionNumberRequiredFrameworkHigherThanTargetFramework()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
             TaskItem item = new TaskItem("System.XML");
@@ -2417,7 +2417,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ThreePartVersionNumberRequiredFrameworkLowerThanTargetFramework()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
             TaskItem item = new TaskItem("System.XML");
@@ -2438,7 +2438,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress242970()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
@@ -2481,7 +2481,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // keeps remoting from timing out the object.
             Console.WriteLine("Performing RawFileName() test");
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -2973,7 +2973,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RawFileNameRelative()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3009,7 +3009,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RelativeDirectoryResolver()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3044,7 +3044,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void HintPathRelative()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3081,7 +3081,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RawFileNameWithSpecificVersionFalse()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3106,7 +3106,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RawFileNameWithSpecificVersionTrue()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3131,7 +3131,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress363340_RawFileNameMissing()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3160,7 +3160,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress444793()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
@@ -3189,7 +3189,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RawFileNameDoesntExist()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
@@ -3209,7 +3209,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void CandidateAssemblyFilesDifferentBaseName()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3228,7 +3228,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ResolveToGAC()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
 
@@ -3246,7 +3246,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ResolveToGACSpecificVersion()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
 
@@ -3307,7 +3307,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ResolveBadImageInPrimary()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
@@ -3348,7 +3348,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ResolveBadImageInSecondary()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine engine = new MockEngine(true);
             t.BuildEngine = engine;
@@ -3387,7 +3387,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ResolveReferenceThatHasWrongPKTInEarlierAssembly()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3410,7 +3410,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void PrimaryFXAssemblyRefIsNotCopyLocal()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3453,7 +3453,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             assemblyNames[0].SetMetadata("Private", "true"); // Fx file, but user chose private=true.
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
@@ -3479,7 +3479,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
@@ -3507,7 +3507,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             assemblyNames[0].SetMetadata("Private", "bogus"); // Fx file, but user chose private=true.
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyNames;
@@ -3540,7 +3540,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictBetweenCopyLocalDependenciesRegress444809()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
@@ -3585,7 +3585,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictBetweenCopyLocalDependenciesRegress444809UnResolvedPrimaryReference()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
@@ -3626,7 +3626,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictGeneratesMessageReferencingAssemblyName()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -3658,7 +3658,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictOutputsExtraInformationOnDemand()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -3701,7 +3701,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictGeneratesMessageReferencingEachConflictingAssemblyName()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -3753,7 +3753,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictWithForeVersionPrimary()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3794,7 +3794,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictBetweenBackAndForeVersionsCopyLocal()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -3833,7 +3833,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictBetweenBackAndForeVersionsNotCopyLocal()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3869,7 +3869,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictingDependenciesWithNonMatchingNames()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3904,7 +3904,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictingDependenciesWithNonMatchingNamesAndHardReferenceInProject()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3933,7 +3933,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SpecificVersionFalse()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3958,7 +3958,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SpecificVersionTrue()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -3981,7 +3981,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SpecificVersionAbsent()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -4001,7 +4001,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress199998()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine m = new MockEngine(_output);
             t.BuildEngine = m;
@@ -4034,7 +4034,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ExecutableExtensionEXE()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4073,7 +4073,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ExecutableExtensionDLL()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4113,7 +4113,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ExecutableExtensionDefaultDLLFirst()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4151,7 +4151,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ExecutableExtensionDefaultEXEFirst()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4192,7 +4192,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SimpleNameWithSpecificVersionTrue()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4230,7 +4230,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SimpleNameWithSpecificVersionFalse()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4267,7 +4267,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void IrrelevantAssemblyNameElement()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4317,7 +4317,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RegressQFE626()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine engine = new MockEngine(_output);
             t.BuildEngine = engine;
@@ -4378,7 +4378,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress265054()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -4441,7 +4441,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress312873_UnresolvedPrimaryWithResolveDependency()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -4483,7 +4483,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress275161_ScatterAssemblies()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -4535,7 +4535,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress317975_LeftoverLowerVersion()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -4587,7 +4587,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress313086_Part1_MscorlibAsRawFilename()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -4628,7 +4628,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress313086_Part2_MscorlibAsRawFilename()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -4665,7 +4665,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.AssemblyFiles = assemblyFiles;
@@ -4703,7 +4703,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     };
 
                 // Now, pass feed resolved primary references into ResolveAssemblyReference.
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
                 t.BuildEngine = engine;
                 t.AssemblyFiles = assemblyFiles;
@@ -4732,7 +4732,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress316906_UnauthorizedAccessViolation_PrimaryReferenceIsInaccessible()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4763,7 +4763,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress316906_UnauthorizedAccessViolation_PrimaryFileIsInaccessible()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4786,7 +4786,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress316906_UnauthorizedAccessViolation_PrimaryAsRawFileIsInaccessible()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4810,7 +4810,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress269704_MissingRegistryElements()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4853,7 +4853,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress276548_AssemblyNameDifferentThanFusionName()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4887,7 +4887,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string veryLongPath = @"C:\" + new string('a', 260);
             string veryLongFile = veryLongPath + @"\A.dll";
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new (_output);
             t.BuildEngine = e;
@@ -4914,7 +4914,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress265003_EscapedCharactersInFusionName()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4950,7 +4950,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress284081_UnescapedCharactersInFusionNameWithHintPath()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -4986,7 +4986,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress366322_ReferencesWithFileExtensions()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -5015,7 +5015,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress366814_MultipleFrameworksFolders()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -5062,7 +5062,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             try
             {
                 // Now, pass feed resolved primary references into ResolveAssemblyReference.
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
                 t.BuildEngine = engine;
                 t.AssemblyFiles = assemblyFiles;
@@ -5085,7 +5085,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress354669_HintPathWithTrailingSlash()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -5125,7 +5125,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress339786_CrossVersionsWithAppConfig()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -5169,7 +5169,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress_DogfoodCLRThrowsFileLoadException()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -5193,7 +5193,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress407623_RedistListDoesNotImplyPresenceInFrameworks()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -5242,7 +5242,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void InvalidCharsInInstalledAssemblyTable()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -5276,7 +5276,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress435487_FxFileResolvedByHintPathShouldByCopyLocal()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -5377,7 +5377,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress46599_BogusInGACValueForAssemblyInRedistList()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -5428,7 +5428,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void VerifyFrameworkFileMetadataFiles()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -5852,7 +5852,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void RedistListNoAssembliesinRedistList()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             string microsoftBuildEnginePath = Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5\\Microsoft.Build.Engine.dll");
             string systemXmlPath = Path.Combine(ObjectModelHelpers.TempProjectDir, "v3.5\\System.Xml.dll");
@@ -6221,7 +6221,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void IgnoreDefaultInstalledAssemblyTables()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -6306,7 +6306,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ReferenceTableNullDenyList()
         {
-            TaskLoggingHelper log = new TaskLoggingHelper(new ResolveAssemblyReference());
+            TaskLoggingHelper log = new TaskLoggingHelper(new ResolveAssemblyReference(TaskEnvironment.Fallback));
             ReferenceTable referenceTable = MakeEmptyReferenceTable(log);
             Dictionary<AssemblyNameExtension, Reference> table = referenceTable.References;
 
@@ -6331,7 +6331,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ReferenceTableEmptyDenyList()
         {
-            TaskLoggingHelper log = new TaskLoggingHelper(new ResolveAssemblyReference());
+            TaskLoggingHelper log = new TaskLoggingHelper(new ResolveAssemblyReference(TaskEnvironment.Fallback));
             ReferenceTable referenceTable = MakeEmptyReferenceTable(log);
             Dictionary<AssemblyNameExtension, Reference> table = referenceTable.References;
 
@@ -6357,7 +6357,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ReferenceTablePrimaryItemInDenyList()
         {
             MockEngine mockEngine = new MockEngine(_output);
-            ResolveAssemblyReference rar = new ResolveAssemblyReference();
+            ResolveAssemblyReference rar = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             rar.BuildEngine = mockEngine;
 
             ReferenceTable referenceTable = MakeEmptyReferenceTable(rar.Log);
@@ -6396,7 +6396,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ReferenceTablePrimaryItemInDenyListSpecificVersionTrue()
         {
             MockEngine mockEngine = new MockEngine(_output);
-            ResolveAssemblyReference rar = new ResolveAssemblyReference();
+            ResolveAssemblyReference rar = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             rar.BuildEngine = mockEngine;
 
             ReferenceTable referenceTable = MakeEmptyReferenceTable(rar.Log);
@@ -6473,7 +6473,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         public void ReferenceTablePrimaryItemInDenyListRemoveOnlyNoWarn()
         {
             MockEngine mockEngine = new MockEngine(_output);
-            ResolveAssemblyReference rar = new ResolveAssemblyReference();
+            ResolveAssemblyReference rar = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             rar.BuildEngine = mockEngine;
 
             ReferenceTable referenceTable = MakeEmptyReferenceTable(rar.Log);
@@ -6946,7 +6946,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                ResolveAssemblyReference rar = new ResolveAssemblyReference();
+                ResolveAssemblyReference rar = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 rar.ProfileName = null;
             });
         }
@@ -6958,7 +6958,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                ResolveAssemblyReference rar = new ResolveAssemblyReference();
+                ResolveAssemblyReference rar = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 rar.FullFrameworkFolders = null;
             });
         }
@@ -6970,7 +6970,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                ResolveAssemblyReference rar = new ResolveAssemblyReference();
+                ResolveAssemblyReference rar = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 rar.FullFrameworkAssemblyTables = null;
             });
         }
@@ -7044,7 +7044,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private static void InitializeRARwithMockEngine(ITestOutputHelper output, out MockEngine mockEngine, out ResolveAssemblyReference rar)
         {
             mockEngine = new MockEngine(output);
-            rar = new ResolveAssemblyReference();
+            rar = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             rar.BuildEngine = mockEngine;
         }
 
@@ -7081,7 +7081,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         private void InitializeMockEngine(out ReferenceTable referenceTable, out MockEngine mockEngine, out ResolveAssemblyReference rar)
         {
             mockEngine = new MockEngine(_output);
-            rar = new ResolveAssemblyReference();
+            rar = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             rar.BuildEngine = mockEngine;
 
             referenceTable = MakeEmptyReferenceTable(rar.Log);
@@ -7134,7 +7134,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 string subsetListClientPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("v3.5\\SubsetList\\Client.xml", _engineOnlySubset);
                 string explicitSubsetListPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("v3.5\\SubsetList\\ExplicitList.xml", _xmlOnlySubset);
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 t.BuildEngine = new MockEngine(_output);
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };
                 t.SearchPaths = new string[] { @"{TargetFrameworkDirectory}" };
@@ -7218,7 +7218,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistListPath = CreateGenericRedistList();
             try
             {
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 t.BuildEngine = new MockEngine(_output);
                 // These are the assemblies we are going to try and resolve
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };
@@ -7262,7 +7262,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                ResolveAssemblyReference reference = new ResolveAssemblyReference();
+                ResolveAssemblyReference reference = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 reference.InstalledAssemblySubsetTables = null;
             });
         }
@@ -7274,7 +7274,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                ResolveAssemblyReference reference = new ResolveAssemblyReference();
+                ResolveAssemblyReference reference = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 reference.TargetFrameworkSubsets = null;
             });
         }
@@ -7286,7 +7286,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                ResolveAssemblyReference reference = new ResolveAssemblyReference();
+                ResolveAssemblyReference reference = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 reference.FullTargetFrameworkSubsetNames = null;
             });
         }
@@ -7299,7 +7299,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistListPath = CreateGenericRedistList();
             try
             {
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 t.BuildEngine = new MockEngine(_output);
                 // These are the assemblies we are going to try and resolve
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };
@@ -7339,7 +7339,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistListPath = CreateGenericRedistList();
             try
             {
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 t.BuildEngine = new MockEngine(_output);
 
                 // These are the assemblies we are going to try and resolve
@@ -7372,7 +7372,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistListPath = CreateGenericRedistList();
             try
             {
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 t.BuildEngine = new MockEngine(_output);
                 // These are the assemblies we are going to try and resolve
                 t.Assemblies = new ITaskItem[] { new TaskItem("System.Xml") };
@@ -7407,7 +7407,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistListPath = CreateGenericRedistList();
             try
             {
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 t.BuildEngine = new MockEngine(_output);
                 // These are the assemblies we are going to try and resolve
                 t.Assemblies = new ITaskItem[] { new TaskItem("System.Xml") };
@@ -7437,7 +7437,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             string redistListPath = CreateGenericRedistList();
             try
             {
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
                 t.BuildEngine = new MockEngine(_output);
 
@@ -7521,7 +7521,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress397129_HandleInvalidDirectoriesAndFiles_Case1()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -7553,7 +7553,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress397129_HandleInvalidDirectoriesAndFiles_Case2()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -7593,7 +7593,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ByDesignRelatedTo454863_PrimaryReferencesDontResolveToParentFolders()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -7619,7 +7619,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress393931_AllowAlternateAssemblyExtensions_Case1()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -7650,7 +7650,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress393931_AllowAlternateAssemblyExtensions()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -7678,7 +7678,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void SGenDependeicies()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -7721,7 +7721,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void Regress315619_TwoWeaklyNamedPrimariesIsInsoluble()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             MockEngine e = new MockEngine(_output);
             t.BuildEngine = e;
@@ -7761,7 +7761,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ForwardRedistRoot()
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine(_output);
 
@@ -7813,7 +7813,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         private int RunTargetFrameworkFilteringTest(string projectTargetFramework)
         {
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.BuildEngine = new MockEngine(_output);
             t.Assemblies = new ITaskItem[]
             {
@@ -8176,7 +8176,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 string fullRedistList;
                 GenerateRedistAndProfileXmlLocations(fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 t.AssemblyFiles = new ITaskItem[] { new TaskItem(Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll")) };
@@ -8224,7 +8224,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 string fullRedistList;
                 GenerateRedistAndProfileXmlLocations(fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 TaskItem item = new TaskItem(Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"));
@@ -8268,7 +8268,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 string fullRedistList;
                 GenerateRedistAndProfileXmlLocations(_fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };
@@ -8315,7 +8315,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 string fullRedistList;
                 GenerateRedistAndProfileXmlLocations(_fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };
@@ -8369,7 +8369,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 string fullRedistList;
                 GenerateRedistAndProfileXmlLocations(fullRedistListContents, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 TaskItem item = new TaskItem(@"DependsOnOnlyv4Assemblies, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
@@ -8423,7 +8423,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 string fullRedistList;
                 GenerateRedistAndProfileXmlLocations(fullRedistListContentsErrors, _engineOnlySubset, out profileRedistList, out fullRedistList, fullFrameworkDirectory, targetFrameworkDirectory);
 
-                ResolveAssemblyReference t = new ResolveAssemblyReference();
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
                 MockEngine e = new MockEngine(_output);
                 t.BuildEngine = e;
                 t.Assemblies = new ITaskItem[] { new TaskItem("Microsoft.Build.Engine"), new TaskItem("System.Xml") };

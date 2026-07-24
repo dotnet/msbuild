@@ -775,7 +775,7 @@ namespace Microsoft.Build.Tasks
                 // a valid code language is already done
                 if (taskInfo.CodeLanguage.Equals("CS"))
                 {
-                    managedCompiler = new RoslynCodeTaskFactoryCSharpCompiler
+                    managedCompiler = new RoslynCodeTaskFactoryCSharpCompiler(TaskEnvironment.Fallback)
                     {
                         NoStandardLib = true,
                     };
@@ -789,7 +789,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else if (taskInfo.CodeLanguage.Equals("VB"))
                 {
-                    managedCompiler = new RoslynCodeTaskFactoryVisualBasicCompiler
+                    managedCompiler = new RoslynCodeTaskFactoryVisualBasicCompiler(TaskEnvironment.Fallback)
                     {
                         NoStandardLib = true,
                         OptionExplicit = true,

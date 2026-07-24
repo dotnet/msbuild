@@ -21,6 +21,12 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public sealed class GetFileHash : TaskExtension, ICancelableTask, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetFileHash"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public GetFileHash(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
+
         internal const string _defaultFileHashAlgorithm = "SHA256";
         internal const string _hashEncodingHex = "hex";
         internal const string _hashEncodingBase64 = "base64";

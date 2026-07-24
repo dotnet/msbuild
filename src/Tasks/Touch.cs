@@ -20,6 +20,12 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class Touch : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="Touch"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public Touch(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
+
         private MessageImportance messageImportance;
 
         /// <summary>

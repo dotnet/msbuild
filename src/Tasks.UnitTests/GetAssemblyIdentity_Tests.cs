@@ -25,7 +25,7 @@ namespace Microsoft.Build.UnitTests
 
         private GetAssemblyIdentity CreateTaskUnderTest(MockEngine engine = null)
         {
-            return new GetAssemblyIdentity
+            return new GetAssemblyIdentity(TaskEnvironment.Fallback)
             {
                 BuildEngine = engine ?? new MockEngine(_output),
             };

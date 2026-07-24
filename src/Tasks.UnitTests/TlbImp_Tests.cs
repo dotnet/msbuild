@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.Build.Framework;
 using System;
 using System.IO;
 using Microsoft.Build.Tasks;
@@ -18,7 +19,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void Machine()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
             Assert.Null(t.Machine); // "Machine should be null by default"
 
             t.Machine = "Agnostic";
@@ -35,7 +36,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void ReferenceFiles()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
             Assert.Null(t.ReferenceFiles); // "ReferenceFiles should be null by default"
 
             t.ReferenceFiles = new string[] { "File1.dll", "File2.dll" };
@@ -54,7 +55,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void TypeLibName()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
             string testParameterValue = "Interop.Foo.dll";
 
             Assert.Null(t.TypeLibName); // "TypeLibName should be null by default"
@@ -70,7 +71,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void TypeLibNameWithSpaces()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
             string testParameterValue = @"c:\Program Files\Interop.Foo.dll";
 
             Assert.Null(t.TypeLibName); // "TypeLibName should be null by default"
@@ -86,7 +87,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void AssemblyNamespace()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
             string testParameterValue = "Microsoft.Build.Foo";
 
             Assert.Null(t.AssemblyNamespace); // "AssemblyNamespace should be null by default"
@@ -109,7 +110,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void AssemblyVersion()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
             Version testParameterValue = new Version(2, 12);
 
             Assert.Null(t.AssemblyVersion); // "AssemblyVersion should be null by default"
@@ -132,7 +133,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void NoLogo()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
 
             Assert.False(t.NoLogo); // "NoLogo should be false by default"
             CommandLine.ValidateNoParameterStartsWith(
@@ -154,7 +155,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void OutputAssembly()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
             string testParameterValue = "AxInterop.Foo.dll";
 
             Assert.Null(t.OutputAssembly); // "OutputAssembly should be null by default"
@@ -177,7 +178,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void OutputAssemblyWithSpaces()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
             string testParameterValue = @"c:\Program Files\AxInterop.Foo.dll";
 
             Assert.Null(t.OutputAssembly); // "OutputAssembly should be null by default"
@@ -200,7 +201,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void PreventClassMembers()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
 
             Assert.False(t.PreventClassMembers); // "PreventClassMembers should be false by default"
             CommandLine.ValidateNoParameterStartsWith(
@@ -222,7 +223,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void SafeArrayAsSystemArray()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
 
             Assert.False(t.SafeArrayAsSystemArray); // "SafeArrayAsSystemArray should be false by default"
             CommandLine.ValidateNoParameterStartsWith(
@@ -244,7 +245,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void Silent()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
 
             Assert.False(t.Silent); // "Silent should be false by default"
             CommandLine.ValidateNoParameterStartsWith(
@@ -266,7 +267,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void Transform()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
 
             var dispRet = ResolveComReference.TlbImpTransformFlags.TransformDispRetVals;
             var serialize = ResolveComReference.TlbImpTransformFlags.SerializableValueClasses;
@@ -306,7 +307,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void Verbose()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
 
             Assert.False(t.Verbose); // "Verbose should be false by default"
             CommandLine.ValidateNoParameterStartsWith(
@@ -329,7 +330,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void TaskFailsWithNoInputs()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
 
             Utilities.ExecuteTaskAndVerifyLogContainsErrorFromResource(t, "TlbImp.NoInputFileSpecified");
         }

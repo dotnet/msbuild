@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void BasicFilter()
         {
-            FindUnderPath t = new FindUnderPath();
+            FindUnderPath t = new FindUnderPath(TaskEnvironment.Fallback);
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
@@ -50,7 +50,7 @@ namespace Microsoft.Build.UnitTests
             ChangeWaves.ResetStateForTests();
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_5.ToString());
 
-            FindUnderPath t = new FindUnderPath();
+            FindUnderPath t = new FindUnderPath(TaskEnvironment.Fallback);
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
@@ -79,7 +79,7 @@ namespace Microsoft.Build.UnitTests
             ChangeWaves.ResetStateForTests();
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_5.ToString());
 
-            FindUnderPath t = new FindUnderPath();
+            FindUnderPath t = new FindUnderPath(TaskEnvironment.Fallback);
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
@@ -123,7 +123,7 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "netcore-linux-failing")]
         public void VerifyFullPath()
         {
-            FindUnderPath t = new FindUnderPath();
+            FindUnderPath t = new FindUnderPath(TaskEnvironment.Fallback);
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 
@@ -146,7 +146,7 @@ namespace Microsoft.Build.UnitTests
         [Trait("Category", "netcore-linux-failing")]
         public void VerifyFullPathNegative()
         {
-            FindUnderPath t = new FindUnderPath();
+            FindUnderPath t = new FindUnderPath(TaskEnvironment.Fallback);
             t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.BuildEngine = new MockEngine();
 

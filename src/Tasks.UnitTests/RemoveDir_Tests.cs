@@ -29,7 +29,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void AttributeForwarding()
         {
-            RemoveDir t = new RemoveDir();
+            RemoveDir t = new RemoveDir(TaskEnvironment.Fallback);
 
             ITaskItem i = new TaskItem("MyNonExistentDirectory");
             i.SetMetadata("Locale", "en-GB");
@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 // Question RemoveDir when files exists.
-                RemoveDir t = new RemoveDir()
+                RemoveDir t = new RemoveDir(TaskEnvironment.Fallback)
                 {
                     Directories = list.ToArray(),
                     BuildEngine = new MockEngine(_output),
@@ -66,7 +66,7 @@ namespace Microsoft.Build.UnitTests
                 };
                 t.Execute().ShouldBeFalse();
 
-                RemoveDir t2 = new RemoveDir()
+                RemoveDir t2 = new RemoveDir(TaskEnvironment.Fallback)
                 {
                     Directories = list.ToArray(),
                     BuildEngine = new MockEngine(_output),
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests
                 }
 
                 // Question again to make sure all files were deleted.
-                RemoveDir t3 = new RemoveDir()
+                RemoveDir t3 = new RemoveDir(TaskEnvironment.Fallback)
                 {
                     Directories = list.ToArray(),
                     BuildEngine = new MockEngine(_output),
@@ -108,7 +108,7 @@ namespace Microsoft.Build.UnitTests
                     list.Add(new TaskItem(""));
                 }
 
-                RemoveDir t = new RemoveDir();
+                RemoveDir t = new RemoveDir(TaskEnvironment.Fallback);
                 t.Directories = list.ToArray();
                 t.BuildEngine = new MockEngine(_output);
                 t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();

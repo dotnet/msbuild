@@ -16,6 +16,12 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class MakeDir : TaskExtension, IIncrementalTask, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MakeDir"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public MakeDir(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
+
         [Required]
         public ITaskItem[] Directories
         {

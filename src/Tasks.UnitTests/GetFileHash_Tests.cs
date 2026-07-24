@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using Microsoft.Build.Framework;
 using System;
 using System.IO;
 using Microsoft.Build.Tasks;
@@ -25,7 +26,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetFileHash_FailsForUnknownAlgorithmName()
         {
-            GetFileHash task = new GetFileHash
+            GetFileHash task = new GetFileHash(TaskEnvironment.Fallback)
             {
                 Files = new[] { new TaskItem(TestBinary.LoremFilePath) },
                 BuildEngine = _mockEngine,
@@ -39,7 +40,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetFileHash_FailsForUnknownHashEncoding()
         {
-            GetFileHash task = new GetFileHash
+            GetFileHash task = new GetFileHash(TaskEnvironment.Fallback)
             {
                 Files = new[] { new TaskItem(TestBinary.LoremFilePath) },
                 BuildEngine = _mockEngine,
@@ -53,7 +54,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetFileHash_FailsForMissingFile()
         {
-            GetFileHash task = new GetFileHash
+            GetFileHash task = new GetFileHash(TaskEnvironment.Fallback)
             {
                 Files = new[] { new TaskItem(Path.Combine(AppContext.BaseDirectory, "this_does_not_exist.txt")) },
                 BuildEngine = _mockEngine,
@@ -67,7 +68,7 @@ namespace Microsoft.Build.UnitTests
         [MemberData(nameof(TestBinary.GetLorem), MemberType = typeof(TestBinary))]
         public void GetFileHash_ComputesCorrectChecksumForOneFile(TestBinary testBinary)
         {
-            GetFileHash task = new GetFileHash
+            GetFileHash task = new GetFileHash(TaskEnvironment.Fallback)
             {
                 Files = new[] { new TaskItem(testBinary.FilePath) },
                 BuildEngine = _mockEngine,
@@ -83,7 +84,7 @@ namespace Microsoft.Build.UnitTests
         [MemberData(nameof(TestBinary.GetLorem), MemberType = typeof(TestBinary))]
         public void GetFileHash_ComputesCorrectChecksumForManyFiles(TestBinary testBinary)
         {
-            GetFileHash task = new GetFileHash
+            GetFileHash task = new GetFileHash(TaskEnvironment.Fallback)
             {
                 Files = new[]
                 {

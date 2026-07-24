@@ -23,7 +23,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void DelaySign()
         {
-            AxTlbBaseTask t = new ResolveComReference.AxImp();
+            AxTlbBaseTask t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
 
             Assert.False(t.DelaySign); // "DelaySign should be false by default"
             CommandLine.ValidateNoParameterStartsWith(
@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [WindowsOnlyFact("Key container is not supported, except under Windows.")]
         public void KeyContainer()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
             t.TypeLibName = "FakeTlb.tlb";
             string badParameterValue = "badKeyContainer";
             string goodParameterValue = "myKeyContainer";
@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void KeyContainerWithSpaces()
         {
-            AxTlbBaseTask t = new ResolveComReference.AxImp();
+            AxTlbBaseTask t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
             string testParameterValue = @"my Key Container";
 
             Assert.Null(t.KeyContainer); // "KeyContainer should be null by default"
@@ -127,7 +127,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void KeyFile()
         {
-            var t = new ResolveComReference.AxImp();
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
             t.ActiveXControlName = "FakeControl.ocx";
             string badParameterValue = "myKeyFile.key";
             string goodParameterValue = null;
@@ -175,7 +175,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void KeyFileWithSpaces()
         {
-            AxTlbBaseTask t = new ResolveComReference.TlbImp();
+            AxTlbBaseTask t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
             string testParameterValue = @"C:\Program Files\myKeyFile.key";
 
             Assert.Null(t.KeyFile); // "KeyFile should be null by default"
@@ -198,7 +198,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void SdkToolsPath()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
             t.TypeLibName = "FakeLibrary.tlb";
             string badParameterValue = @"C:\Program Files\Microsoft Visual Studio 10.0\My Fake SDK Path";
             string goodParameterValue = Path.GetTempPath();
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [Fact]
         public void ToolPath()
         {
-            var t = new ResolveComReference.AxImp();
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback);
             t.ActiveXControlName = "FakeControl.ocx";
             string badParameterValue = @"C:\Program Files\Microsoft Visual Studio 10.0\My Fake SDK Path";
             string goodParameterValue = Path.GetTempPath();
@@ -267,7 +267,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
         [WindowsOnlyFact("Key container is not supported, except under Windows.")]
         public void TaskFailsWhenImproperlySigned()
         {
-            var t = new ResolveComReference.TlbImp();
+            var t = new ResolveComReference.TlbImp(TaskEnvironment.Fallback);
             t.TypeLibName = "Blah.tlb";
             string tempKeyContainer = null;
             string tempKeyFile = null;
@@ -325,7 +325,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             string keyFilePath = Path.Combine(projectDir, keyFileName);
             File.WriteAllBytes(keyFilePath, new byte[] { 0x01, 0x02, 0x03, 0x04 });
 
-            var t = new ResolveComReference.AxImp
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback)
             {
                 ActiveXControlName = "FakeControl.ocx",
                 ToolPath = projectDir,
@@ -358,7 +358,7 @@ namespace Microsoft.Build.UnitTests.AxTlbImp_Tests
             string toolDirName = "tools";
             Directory.CreateDirectory(Path.Combine(projectDir, toolDirName));
 
-            var t = new ResolveComReference.AxImp
+            var t = new ResolveComReference.AxImp(TaskEnvironment.Fallback)
             {
                 ActiveXControlName = "FakeControl.ocx",
                 ToolPath = toolDirName, // relative — must be resolved against projectDir

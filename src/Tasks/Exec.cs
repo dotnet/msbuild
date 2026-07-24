@@ -27,10 +27,13 @@ namespace Microsoft.Build.Tasks
         #region Constructors
 
         /// <summary>
-        /// Default constructor.
+        /// Initializes a new instance of the <see cref="Exec"/> class using the specified <see cref="TaskEnvironment"/>.
         /// </summary>
-        public Exec()
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public Exec(TaskEnvironment taskEnvironment)
         {
+            TaskEnvironment = taskEnvironment;
+
             Command = string.Empty;
 
             // Console-based output uses the current system OEM code page by default. Note that we should not use Console.OutputEncoding

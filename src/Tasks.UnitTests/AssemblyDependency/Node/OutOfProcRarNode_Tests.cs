@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 SetIsOutOfProcRarNodeEnabled = true,
             };
-            ResolveAssemblyReference rar = new()
+            ResolveAssemblyReference rar = new(TaskEnvironment.Fallback)
             {
                 AllowOutOfProcNode = true,
                 BuildEngine = engine,
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 SetIsOutOfProcRarNodeEnabled = buildEngineFlag,
             };
-            ResolveAssemblyReference rar = new()
+            ResolveAssemblyReference rar = new(TaskEnvironment.Fallback)
             {
                 AllowOutOfProcNode = taskInputFlag,
                 BuildEngine = engine,
@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 SetIsOutOfProcRarNodeEnabled = true,
             };
-            ResolveAssemblyReference rar = new()
+            ResolveAssemblyReference rar = new(TaskEnvironment.Fallback)
             {
                 AllowOutOfProcNode = true,
                 BuildEngine = engine,

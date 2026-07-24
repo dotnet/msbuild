@@ -170,7 +170,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                GetInstalledSDKLocations t = new GetInstalledSDKLocations();
+                GetInstalledSDKLocations t = new GetInstalledSDKLocations(TaskEnvironment.Fallback);
                 t.TargetPlatformIdentifier = "Hello";
                 t.TargetPlatformVersion = null;
                 t.Execute();
@@ -184,7 +184,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                GetInstalledSDKLocations t = new GetInstalledSDKLocations();
+                GetInstalledSDKLocations t = new GetInstalledSDKLocations(TaskEnvironment.Fallback);
                 t.TargetPlatformIdentifier = null;
                 t.TargetPlatformVersion = "1.0";
                 t.Execute();
@@ -197,7 +197,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         public void EmptyTargetPlatformIdentifier()
         {
             MockEngine engine = new MockEngine();
-            GetInstalledSDKLocations t = new GetInstalledSDKLocations();
+            GetInstalledSDKLocations t = new GetInstalledSDKLocations(TaskEnvironment.Fallback);
             t.TargetPlatformIdentifier = String.Empty;
             t.TargetPlatformVersion = "1.0";
             t.BuildEngine = engine;
@@ -215,7 +215,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         public void EmptyTargetPlatformVersion()
         {
             MockEngine engine = new MockEngine();
-            GetInstalledSDKLocations t = new GetInstalledSDKLocations();
+            GetInstalledSDKLocations t = new GetInstalledSDKLocations(TaskEnvironment.Fallback);
             t.TargetPlatformIdentifier = "Hello";
             t.TargetPlatformVersion = String.Empty;
             t.BuildEngine = engine;
@@ -234,7 +234,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         public void BadTargetPlatformVersion()
         {
             MockEngine engine = new MockEngine();
-            GetInstalledSDKLocations t = new GetInstalledSDKLocations();
+            GetInstalledSDKLocations t = new GetInstalledSDKLocations(TaskEnvironment.Fallback);
             t.TargetPlatformIdentifier = "Hello";
             t.TargetPlatformVersion = "CAT";
             t.BuildEngine = engine;
@@ -253,7 +253,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
         public void NoSDKsFound()
         {
             MockEngine engine = new MockEngine();
-            GetInstalledSDKLocations t = new GetInstalledSDKLocations();
+            GetInstalledSDKLocations t = new GetInstalledSDKLocations(TaskEnvironment.Fallback);
             t.TargetPlatformIdentifier = "Hello";
             t.TargetPlatformVersion = "1.0";
             t.BuildEngine = engine;
@@ -275,7 +275,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                 Environment.SetEnvironmentVariable("MSBUILDSDKREFERENCEDIRECTORY", _fakeSDKStructureRoot + ";" + _fakeSDKStructureRoot2);
                 Environment.SetEnvironmentVariable("MSBUILDDISABLEREGISTRYFORSDKLOOKUP", "true");
                 MockEngine engine = new MockEngine();
-                GetInstalledSDKLocations t = new GetInstalledSDKLocations();
+                GetInstalledSDKLocations t = new GetInstalledSDKLocations(TaskEnvironment.Fallback);
                 t.TargetPlatformIdentifier = "Windows";
                 t.TargetPlatformVersion = new Version(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue).ToString();
                 t.SDKRegistryRoot = "Somewhere";
@@ -322,7 +322,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                 Environment.SetEnvironmentVariable("MSBUILDSDKREFERENCEDIRECTORY", _fakeSDKStructureRoot + ";" + _fakeSDKStructureRoot2);
                 Environment.SetEnvironmentVariable("MSBUILDDISABLEREGISTRYFORSDKLOOKUP", "true");
                 MockEngine engine = new MockEngine();
-                GetInstalledSDKLocations t = new GetInstalledSDKLocations();
+                GetInstalledSDKLocations t = new GetInstalledSDKLocations(TaskEnvironment.Fallback);
                 t.TargetPlatformIdentifier = "Windows";
                 t.TargetPlatformVersion = new Version(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue).ToString();
                 t.SDKRegistryRoot = "Somewhere";
@@ -396,7 +396,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                 Environment.SetEnvironmentVariable("MSBUILDDISABLEREGISTRYFORSDKLOOKUP", "true");
 
                 MockEngine engine = new MockEngine();
-                GetInstalledSDKLocations t = new GetInstalledSDKLocations();
+                GetInstalledSDKLocations t = new GetInstalledSDKLocations(TaskEnvironment.Fallback);
                 t.TargetPlatformIdentifier = "Windows";
                 t.TargetPlatformVersion = new Version(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue).ToString();
                 t.BuildEngine = engine;
@@ -509,7 +509,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                 });
 
             var engineCorrect = new MockEngine(_output);
-            var taskCorrect = new GetInstalledSDKLocations
+            var taskCorrect = new GetInstalledSDKLocations(TaskEnvironment.Fallback)
             {
                 TargetPlatformIdentifier = "Windows",
                 TargetPlatformVersion = new Version(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue).ToString(),
@@ -541,7 +541,7 @@ namespace Microsoft.Build.UnitTests.GetInstalledSDKLocation_Tests
                 });
 
             var engineWrong = new MockEngine(_output);
-            var taskWrong = new GetInstalledSDKLocations
+            var taskWrong = new GetInstalledSDKLocations(TaskEnvironment.Fallback)
             {
                 TargetPlatformIdentifier = "Windows",
                 TargetPlatformVersion = new Version(int.MaxValue, int.MaxValue, int.MaxValue, int.MaxValue).ToString(),

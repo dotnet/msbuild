@@ -355,7 +355,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void Regress188319()
         {
-            CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
+            CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine();
             ITaskItem i = new TaskItem("SR1.resx");
@@ -389,7 +389,7 @@ namespace Microsoft.Build.UnitTests
                 i.SetMetadata("BuildAction", "EmbeddedResource");
                 // Don't set DependentUpon so it goes by convention
 
-                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
+                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
                 {
                     BuildEngine = new MockEngine(_testOutput),
                     UseDependentUponConvention = true,
@@ -429,7 +429,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 // Don't set DependentUpon so it goes by convention
 
-                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
+                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
                 {
                     BuildEngine = new MockEngine(_testOutput),
                     UseDependentUponConvention = true,
@@ -462,7 +462,7 @@ namespace Microsoft.Build.UnitTests
                 i.SetMetadata("BuildAction", "EmbeddedResource");
                 // Don't set DependentUpon so it goes by convention
 
-                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
+                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
                 {
                     BuildEngine = new MockEngine(_testOutput),
                     UseDependentUponConvention = true,
@@ -496,7 +496,7 @@ namespace Microsoft.Build.UnitTests
                 // See CreateManifestNameImpl
                 env.SetCurrentDirectory(Path.GetDirectoryName(resXFile.Path));
 
-                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
+                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
                 {
                     BuildEngine = new MockEngine(_testOutput),
                     UseDependentUponConvention = true,
@@ -527,7 +527,7 @@ namespace Microsoft.Build.UnitTests
                 i.SetMetadata("BuildAction", "EmbeddedResource");
                 i.SetMetadata("DependentUpon", "SR2.cs");
 
-                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
+                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
                 {
                     BuildEngine = new MockEngine(_testOutput),
                     UseDependentUponConvention = true,
@@ -561,7 +561,7 @@ namespace Microsoft.Build.UnitTests
                 // See CreateManifestNameImpl
                 env.SetCurrentDirectory(Path.GetDirectoryName(resXFile.Path));
 
-                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
+                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
                 {
                     BuildEngine = new MockEngine(_testOutput),
                     UseDependentUponConvention = false,
@@ -597,7 +597,7 @@ namespace Microsoft.Build.UnitTests
 
                 env.SetCurrentDirectory(Path.GetDirectoryName(resXFile.Path));
 
-                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName
+                CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
                 {
                     BuildEngine = new MockEngine(),
                     UseDependentUponConvention = true,
@@ -734,7 +734,7 @@ namespace Microsoft.Build.UnitTests
         public void Regress459265()
         {
             MockEngine m = new MockEngine();
-            CreateCSharpManifestResourceName c = new CreateCSharpManifestResourceName();
+            CreateCSharpManifestResourceName c = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback);
             c.BuildEngine = m;
 
             CreateCSharpManifestResourceName.CreateManifestNameImpl(
@@ -790,7 +790,7 @@ namespace ClassLibrary3
         [Fact]
         public void ResourceFilesWithManifestResourceNamesContainsAdditionalMetadata()
         {
-            CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
+            CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine();
             ITaskItem i = new TaskItem("strings.resx");
@@ -815,7 +815,7 @@ namespace ClassLibrary3
         [Fact]
         public void AddLogicalNameForNonResx()
         {
-            CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
+            CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine();
             ITaskItem i = new TaskItem("pic.bmp");
@@ -840,7 +840,7 @@ namespace ClassLibrary3
         [Fact]
         public void PreserveLogicalNameForNonResx()
         {
-            CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
+            CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine();
             ITaskItem i = new TaskItem("pic.bmp");
@@ -866,7 +866,7 @@ namespace ClassLibrary3
         [Fact]
         public void NoLogicalNameAddedForResx()
         {
-            CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName();
+            CreateCSharpManifestResourceName t = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine();
             ITaskItem i = new TaskItem("strings.resx");

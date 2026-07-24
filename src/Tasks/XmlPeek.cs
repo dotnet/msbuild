@@ -22,6 +22,12 @@ namespace Microsoft.Build.Tasks
     [MSBuildMultiThreadableTask]
     public class XmlPeek : TaskExtension, IMultiThreadableTask
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="XmlPeek"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public XmlPeek(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
+
         #region Properties
 
         /// <inheritdoc />

@@ -19,6 +19,12 @@ namespace Microsoft.Build.Tasks
     public class FindUnderPath : TaskExtension, IMultiThreadableTask
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="FindUnderPath"/> class using the specified <see cref="TaskEnvironment"/>.
+        /// </summary>
+        /// <param name="taskEnvironment">The <see cref="TaskEnvironment"/> the task should use to resolve paths and access environment state.</param>
+        public FindUnderPath(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
+
+        /// <summary>
         /// Gets or sets the task execution environment for thread-safe path resolution.
         /// </summary>
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;

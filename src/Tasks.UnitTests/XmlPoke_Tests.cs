@@ -181,7 +181,7 @@ namespace Microsoft.Build.UnitTests
             MockEngine engine = new(true);
             Prepare(_xmlFileNoNs, out string xmlInputPath);
 
-            XmlPoke task = new()
+            XmlPoke task = new(TaskEnvironment.Fallback)
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = engine,
@@ -231,7 +231,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileWithNs, out xmlInputPath);
 
-            XmlPoke p = new XmlPoke() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            XmlPoke p = new XmlPoke(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//s:variable/@Name";
@@ -250,7 +250,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileNoNs, out xmlInputPath);
 
-            XmlPoke p = new XmlPoke() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            XmlPoke p = new XmlPoke(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
             p.BuildEngine = engine;
 
             p.XmlInputPath = new TaskItem(xmlInputPath);
@@ -278,7 +278,7 @@ namespace Microsoft.Build.UnitTests
                         res += attrs[k] + " ";
                     }
                 }
-                XmlPoke p = new XmlPoke() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XmlPoke p = new XmlPoke(TaskEnvironment.Fallback) { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
                 p.BuildEngine = engine;
                 p.XmlInputPath = new TaskItem(xmlInputPath);
                 p.Query = "//s:variable/@Name";
@@ -357,7 +357,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(useNamespace ? _xmlFileWithNs : _xmlFileNoNs, out xmlInputPath);
 
-            XmlPoke p = new XmlPoke
+            XmlPoke p = new XmlPoke(TaskEnvironment.Fallback)
             {
                 TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 BuildEngine = engine,

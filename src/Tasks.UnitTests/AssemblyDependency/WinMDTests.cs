@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.AssemblyFiles = assemblyFiles;
@@ -204,7 +204,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.AssemblyFiles = assemblyFiles;
@@ -249,7 +249,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.AssemblyFiles = assemblyFiles;
@@ -286,7 +286,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.AssemblyFiles = assemblyFiles;
@@ -317,7 +317,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyFiles;
@@ -348,7 +348,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyFiles;
@@ -379,7 +379,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyFiles;
@@ -420,7 +420,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyFiles;
@@ -452,7 +452,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyFiles;
@@ -483,7 +483,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyFiles;
@@ -525,7 +525,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
             t.TargetProcessorArchitecture = "X86";
             t.BuildEngine = engine;
             t.Assemblies = assemblyFiles;
@@ -561,7 +561,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             TaskItem item = new TaskItem(@"DependsOnInvalidPeHeader");
             ITaskItem[] assemblyFiles = new TaskItem[] { item };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyFiles;
@@ -593,7 +593,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             TaskItem item = new TaskItem("DependsOnX86");
             ITaskItem[] assemblyFiles = new TaskItem[] { item };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyFiles;
@@ -627,7 +627,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             TaskItem item = new TaskItem("DependsOnAnyCPUUnknown");
             ITaskItem[] assemblyFiles = new TaskItem[] { item };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyFiles;
@@ -688,7 +688,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             TaskItem item = new TaskItem(winmdName);
             ITaskItem[] assemblyFiles = new TaskItem[] { item };
 
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyFiles;
@@ -762,7 +762,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
 
             // Now, pass feed resolved primary references into ResolveAssemblyReference.
-            ResolveAssemblyReference t = new ResolveAssemblyReference();
+            ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback);
 
             t.BuildEngine = engine;
             t.Assemblies = assemblyFiles;

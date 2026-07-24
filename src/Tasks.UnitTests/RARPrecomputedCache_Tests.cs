@@ -23,7 +23,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 DateTime now = DateTime.Now;
                 TransientTestFile standardCache = env.CreateFile(".cache");
-                ResolveAssemblyReference t = new ResolveAssemblyReference()
+                ResolveAssemblyReference t = new ResolveAssemblyReference(TaskEnvironment.Fallback)
                 {
                     _cache = new SystemState()
                 };
@@ -58,7 +58,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             {
                 DateTime now = DateTime.Now;
                 TransientTestFile standardCache = env.CreateFile(".cache");
-                ResolveAssemblyReference rarWriterTask = new ResolveAssemblyReference()
+                ResolveAssemblyReference rarWriterTask = new ResolveAssemblyReference(TaskEnvironment.Fallback)
                 {
                     _cache = new SystemState()
                 };
@@ -87,7 +87,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 // Write precomputed cache
                 rarWriterTask.WriteStateFile();
 
-                ResolveAssemblyReference rarReaderTask = new ResolveAssemblyReference()
+                ResolveAssemblyReference rarReaderTask = new ResolveAssemblyReference(TaskEnvironment.Fallback)
                 {
                 };
                 rarReaderTask.StateFile = standardCache.Path;
@@ -111,7 +111,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 TransientTestFile precomputedCache = env.CreateFile(".cache");
-                ResolveAssemblyReference rarWriterTask = new ResolveAssemblyReference()
+                ResolveAssemblyReference rarWriterTask = new ResolveAssemblyReference(TaskEnvironment.Fallback)
                 {
                     _cache = new SystemState()
                 };
@@ -133,7 +133,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 File.Delete(precomputedCache.Path);
                 rarWriterTask.WriteStateFile();
 
-                ResolveAssemblyReference rarReaderTask = new ResolveAssemblyReference()
+                ResolveAssemblyReference rarReaderTask = new ResolveAssemblyReference(TaskEnvironment.Fallback)
                 {
                 };
                 rarReaderTask.StateFile = precomputedCache.Path.Substring(0, precomputedCache.Path.Length - 6); // Not a real path; should not be used.

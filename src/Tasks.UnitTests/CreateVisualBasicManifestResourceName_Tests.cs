@@ -341,7 +341,7 @@ End Namespace
         [Fact]
         public void Regress188319()
         {
-            CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
+            CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine();
 
@@ -387,7 +387,7 @@ End Namespace");
 
                 env.SetCurrentDirectory(Path.GetDirectoryName(resXFile.Path));
 
-                CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName
+                CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName(TaskEnvironment.Fallback)
                 {
                     BuildEngine = new MockEngine(_testOutput),
                     UseDependentUponConvention = true,
@@ -470,7 +470,7 @@ End Namespace
         public void Regress459265()
         {
             MockEngine m = new MockEngine();
-            CreateVisualBasicManifestResourceName c = new CreateVisualBasicManifestResourceName();
+            CreateVisualBasicManifestResourceName c = new CreateVisualBasicManifestResourceName(TaskEnvironment.Fallback);
             c.BuildEngine = m;
 
             string result =
@@ -510,7 +510,7 @@ End Namespace
         [Fact]
         public void ResourceFilesWithManifestResourceNamesContainsAdditionalMetadata()
         {
-            CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
+            CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine();
             ITaskItem i = new TaskItem("strings.resx");
@@ -535,7 +535,7 @@ End Namespace
         [Fact]
         public void AddLogicalNameForNonResx()
         {
-            CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
+            CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine();
             ITaskItem i = new TaskItem("pic.bmp");
@@ -560,7 +560,7 @@ End Namespace
         [Fact]
         public void PreserveLogicalNameForNonResx()
         {
-            CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
+            CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine();
             ITaskItem i = new TaskItem("pic.bmp");
@@ -586,7 +586,7 @@ End Namespace
         [Fact]
         public void NoLogicalNameAddedForResx()
         {
-            CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName();
+            CreateVisualBasicManifestResourceName t = new CreateVisualBasicManifestResourceName(TaskEnvironment.Fallback);
 
             t.BuildEngine = new MockEngine();
             ITaskItem i = new TaskItem("strings.resx");

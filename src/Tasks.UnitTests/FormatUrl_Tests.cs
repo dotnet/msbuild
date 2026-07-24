@@ -19,7 +19,7 @@ namespace Microsoft.Build.UnitTests
             _out = testOutputHelper;
         }
 
-        private FormatUrl GetFormatUrlUnderTest() => new FormatUrl
+        private FormatUrl GetFormatUrlUnderTest() => new FormatUrl(TaskEnvironment.Fallback)
         {
             BuildEngine = new MockEngine(_out),
         };
@@ -116,7 +116,7 @@ namespace Microsoft.Build.UnitTests
             projectFolder.Path.ShouldNotBe(Environment.CurrentDirectory);
 
             var engine = new MockEngine(_out);
-            var t = new FormatUrl
+            var t = new FormatUrl(TaskEnvironment.Fallback)
             {
                 TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectFolder.Path),
                 BuildEngine = engine,
@@ -248,7 +248,7 @@ namespace Microsoft.Build.UnitTests
             // for the assertion below to be meaningful.
             projectFolder.Path.ShouldNotBe(Environment.CurrentDirectory);
 
-            var t = new FormatUrl
+            var t = new FormatUrl(TaskEnvironment.Fallback)
             {
                 TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectFolder.Path),
                 BuildEngine = new MockEngine(_out),
@@ -275,13 +275,13 @@ namespace Microsoft.Build.UnitTests
 
             projectFolderA.Path.ShouldNotBe(projectFolderB.Path);
 
-            var taskA = new FormatUrl
+            var taskA = new FormatUrl(TaskEnvironment.Fallback)
             {
                 TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectFolderA.Path),
                 BuildEngine = new MockEngine(_out),
                 InputUrl = @".",
             };
-            var taskB = new FormatUrl
+            var taskB = new FormatUrl(TaskEnvironment.Fallback)
             {
                 TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectFolderB.Path),
                 BuildEngine = new MockEngine(_out),

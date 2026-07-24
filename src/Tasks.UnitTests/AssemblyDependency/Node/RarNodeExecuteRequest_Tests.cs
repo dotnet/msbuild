@@ -18,7 +18,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void TaskInputsArePropagated()
         {
-            ResolveAssemblyReference clientRar = new()
+            ResolveAssemblyReference clientRar = new(TaskEnvironment.Fallback)
             {
                 BuildEngine = new MockEngine(),
                 Assemblies = [new TaskItem("System"), new TaskItem("System.IO")],
@@ -32,7 +32,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             };
             RarNodeExecuteRequest request = new(clientRar);
 
-            ResolveAssemblyReference nodeRar = new();
+            ResolveAssemblyReference nodeRar = new(TaskEnvironment.Fallback);
             request.SetTaskInputs(nodeRar, CreateBuildEngine());
 
             Assert.Equal(clientRar.Assemblies.Length, nodeRar.Assemblies.Length);
@@ -65,10 +65,10 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 MinimumMessageImportance = MessageImportance.Normal,
                 SetIsTaskInputLoggingEnabled = false,
             };
-            ResolveAssemblyReference clientRar = new() { BuildEngine = mockEngine };
+            ResolveAssemblyReference clientRar = new(TaskEnvironment.Fallback) { BuildEngine = mockEngine };
             RarNodeExecuteRequest request = new(clientRar);
 
-            ResolveAssemblyReference nodeRar = new();
+            ResolveAssemblyReference nodeRar = new(TaskEnvironment.Fallback);
             request.SetTaskInputs(nodeRar, CreateBuildEngine());
 
             Assert.Equal(mockEngine.LineNumberOfTaskNode, nodeRar.BuildEngine.LineNumberOfTaskNode);
@@ -89,14 +89,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 SetIsOutOfProcRarNodeEnabled = true,
             };
-            ResolveAssemblyReference clientRar = new()
+            ResolveAssemblyReference clientRar = new(TaskEnvironment.Fallback)
             {
                 BuildEngine = mockEngine,
                 AllowOutOfProcNode = true,
             };
             RarNodeExecuteRequest request = new(clientRar);
 
-            ResolveAssemblyReference nodeRar = new();
+            ResolveAssemblyReference nodeRar = new(TaskEnvironment.Fallback);
             request.SetTaskInputs(nodeRar, CreateBuildEngine());
 
             IBuildEngine10 buildEngine10 = Assert.IsAssignableFrom<IBuildEngine10>(nodeRar.BuildEngine);

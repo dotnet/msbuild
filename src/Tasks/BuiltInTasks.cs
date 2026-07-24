@@ -25,13 +25,13 @@ namespace Microsoft.Build.Tasks
             Utilities.Task.RegisterTask<Message>();
             Utilities.Task.RegisterTask<Warning>();
             Utilities.Task.RegisterTask<Error>();
-            Utilities.Task.RegisterTask<MakeDir>();
-            Utilities.Task.RegisterTask<RemoveDir>();
-            Utilities.Task.RegisterTask<Copy>();
-            Utilities.Task.RegisterTask<Delete>();
-            Utilities.Task.RegisterTask<Touch>();
-            Utilities.Task.RegisterTask<WriteLinesToFile>();
-            Utilities.Task.RegisterTask<ReadLinesFromFile>();
+            Utilities.Task.RegisterTask(static taskEnvironment => new MakeDir(taskEnvironment));
+            Utilities.Task.RegisterTask(static taskEnvironment => new RemoveDir(taskEnvironment));
+            Utilities.Task.RegisterTask(static taskEnvironment => new Copy(taskEnvironment));
+            Utilities.Task.RegisterTask(static taskEnvironment => new Delete(taskEnvironment));
+            Utilities.Task.RegisterTask(static taskEnvironment => new Touch(taskEnvironment));
+            Utilities.Task.RegisterTask(static taskEnvironment => new WriteLinesToFile(taskEnvironment));
+            Utilities.Task.RegisterTask(static taskEnvironment => new ReadLinesFromFile(taskEnvironment));
         }
     }
 }

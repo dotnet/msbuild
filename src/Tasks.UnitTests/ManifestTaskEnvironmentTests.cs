@@ -27,7 +27,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         public void CreateManifestResourceName_EmptyItemSpec_ShouldFail()
         {
             var engine = new MockEngine(_output);
-            var task = new CreateCSharpManifestResourceName
+            var task = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
             {
                 BuildEngine = engine,
                 ResourceFiles = new ITaskItem[] { new TaskItem("") },
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             // Use path with .. segments - tests canonicalization
             var pathWithDotDot = Path.Combine(folder.Path, "sub", "..", "sub", "Test.resx");
 
-            var task = new CreateCSharpManifestResourceName
+            var task = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
             {
                 BuildEngine = new MockEngine(_output),
                 ResourceFiles = new ITaskItem[] { new TaskItem(pathWithDotDot) },
@@ -90,7 +90,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             // Replace backslashes with forward slashes
             var pathWithForwardSlashes = resxPath.Replace('\\', '/');
 
-            var task = new CreateCSharpManifestResourceName
+            var task = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
             {
                 BuildEngine = new MockEngine(_output),
                 ResourceFiles = new ITaskItem[] { new TaskItem(pathWithForwardSlashes) },
@@ -116,7 +116,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             // Mix forward and back slashes
             var mixedPath = folder.Path + "/Sub\\Folder/Test.resx";
 
-            var task = new CreateCSharpManifestResourceName
+            var task = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
             {
                 BuildEngine = new MockEngine(_output),
                 ResourceFiles = new ITaskItem[] { new TaskItem(mixedPath) },
@@ -134,7 +134,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             using var env = TestEnvironment.Create(_output);
             var folder = env.CreateFolder();
 
-            var task = new AddToWin32Manifest
+            var task = new AddToWin32Manifest(TaskEnvironment.Fallback)
             {
                 BuildEngine = new MockEngine(_output),
                 ApplicationManifest = null,
@@ -168,7 +168,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             var validItem = new TaskItem(valid2Path);
 
-            var task = new CreateCSharpManifestResourceName
+            var task = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
             {
                 BuildEngine = new MockEngine(_output),
                 ResourceFiles = new ITaskItem[] { invalidItem, validItem },
@@ -195,7 +195,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             var resxPath = Path.Combine(deepFolder, "Test.resx");
             File.WriteAllText(resxPath, "<root></root>");
 
-            var task = new CreateCSharpManifestResourceName
+            var task = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
             {
                 BuildEngine = new MockEngine(_output),
                 ResourceFiles = new ITaskItem[] { new TaskItem(resxPath) },
@@ -218,7 +218,7 @@ namespace Microsoft.Build.Tasks.UnitTests
             var resxPath = Path.Combine(spaceFolder, "My Strings.resx");
             File.WriteAllText(resxPath, "<root></root>");
 
-            var task = new CreateCSharpManifestResourceName
+            var task = new CreateCSharpManifestResourceName(TaskEnvironment.Fallback)
             {
                 BuildEngine = new MockEngine(_output),
                 ResourceFiles = new ITaskItem[] { new TaskItem(resxPath) },

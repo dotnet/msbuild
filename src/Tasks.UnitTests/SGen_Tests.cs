@@ -55,6 +55,8 @@ namespace Microsoft.Build.UnitTests
 #else
         internal sealed class SGenExtension : SGen
         {
+            public SGenExtension() : base(TaskEnvironment.Fallback) { }
+
             internal string CommandLine()
             {
                 return base.GenerateCommandLineCommands();
@@ -364,6 +366,8 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private sealed class TestableSGen : SGen
         {
+            public TestableSGen() : base(TaskEnvironment.Fallback) { }
+
             public string CallGenerateFullPathToTool() => GenerateFullPathToTool();
 
             public ProcessStartInfo CallGetProcessStartInfo(string pathToTool, string commandLineCommands, string responseFileSwitch)
