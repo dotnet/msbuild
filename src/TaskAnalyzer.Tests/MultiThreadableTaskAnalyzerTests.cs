@@ -359,6 +359,27 @@ public class MultiThreadableTaskAnalyzerTests
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
+    public async Task NewStreamReader_WithStreamArg_NoDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    using var stream = new MemoryStream();
+                    using var sr = new StreamReader(stream);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
     public async Task FileExists_WithGetAbsolutePath_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
