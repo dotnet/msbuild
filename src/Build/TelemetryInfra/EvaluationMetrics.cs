@@ -94,8 +94,38 @@ internal static class EvaluationMetrics
         }
     }
 
+    internal static long EvaluatePass0Start() => EvaluatePassStart();
+
+    internal static void EvaluatePass0Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
+        EvaluatePassStop(startTimestamp, EvaluationPass.InitialProperties, stage, isBuildSubmission);
+
+    internal static long EvaluatePass1Start() => EvaluatePassStart();
+
+    internal static void EvaluatePass1Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
+        EvaluatePassStop(startTimestamp, EvaluationPass.Properties, stage, isBuildSubmission);
+
+    internal static long EvaluatePass2Start() => EvaluatePassStart();
+
+    internal static void EvaluatePass2Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
+        EvaluatePassStop(startTimestamp, EvaluationPass.ItemDefinitionGroups, stage, isBuildSubmission);
+
+    internal static long EvaluatePass3Start() => EvaluatePassStart();
+
+    internal static void EvaluatePass3Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
+        EvaluatePassStop(startTimestamp, EvaluationPass.Items, stage, isBuildSubmission);
+
+    internal static long EvaluatePass4Start() => EvaluatePassStart();
+
+    internal static void EvaluatePass4Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
+        EvaluatePassStop(startTimestamp, EvaluationPass.UsingTasks, stage, isBuildSubmission);
+
+    internal static long EvaluatePass5Start() => EvaluatePassStart();
+
+    internal static void EvaluatePass5Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
+        EvaluatePassStop(startTimestamp, EvaluationPass.Targets, stage, isBuildSubmission);
+
     [MethodImpl(MethodImplOptions.NoInlining)]
-    internal static long EvaluatePassStart()
+    private static long EvaluatePassStart()
     {
         if (Volatile.Read(ref s_disabled) != 0)
         {
@@ -146,7 +176,7 @@ internal static class EvaluationMetrics
     };
 
     [MethodImpl(MethodImplOptions.NoInlining)]
-    internal static void EvaluatePassStop(
+    private static void EvaluatePassStop(
         long startTimestamp,
         EvaluationPass pass,
         ProjectEvaluationStage stage,
