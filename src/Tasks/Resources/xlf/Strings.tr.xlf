@@ -3007,6 +3007,11 @@
         <target state="translated">MSB3723: "{0}" parametresi "{1}" parametresinin ayarlanmış olmasını gerektiriyor.</target>
         <note>{StrBegin="MSB3723: "}</note>
       </trans-unit>
+      <trans-unit id="XmlPeekPoke.InputDtdProhibited">
+        <source>MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
+        <target state="new">MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="XslTransform.ArgumentError">
         <source>MSB3701: Unable to load arguments for the XslTransformation task. {0}</source>
         <target state="translated">MSB3701: XslTransformation görevi için bağımsız değişkenler yüklenemiyor. {0}</target>
@@ -3021,6 +3026,11 @@
         <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
         <target state="translated">UseTrustedSettings parametresi aracılığıyla esnek XSLT güvenlik ayarlarını etkinleştiriyorsunuz. Bu ayarın güvenlik üzerindeki etkileri hakkında daha fazla bilgi için lütfen https://aka.ms/msbuild/xsltransformation-task adresine bakın.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XslTransform.TransformDtdProhibited">
+        <source>MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</source>
+        <target state="new">MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</target>
+        <note>{StrBegin="MSB3703: "}{0} is the XML input path or inline content indicator. {1} is the ProhibitDtd property name and should not be translated. {2} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
         <source>MSB3702: Unable to process the XsltParameters argument for the XslTransformation task. {0}</source>
@@ -3051,6 +3061,11 @@
         <source>One of XslContent, XslInputPath and XslCompiledDllPath arguments must be set.</source>
         <target state="translated">XslContent, XslInputPath ve XslCompiledDllPath bağımsız değişkenlerinden biri ayarlanmalıdır.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XslTransform.XsltLoadDtdProhibited">
+        <source>MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
+        <target state="new">MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
+        <note>{StrBegin="MSB3704: "}{0} is the ProhibitDtd property name and should not be translated. {1} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadError">
         <source>MSB3704: Unable to load the specified Xslt. {0}</source>

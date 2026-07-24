@@ -48,6 +48,12 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public string Namespaces { get; set; }
 
+        /// <summary>
+        /// Prohibits loading XML with embedded DTD. When true (default), an error is raised if a DTD is present.
+        /// When false, DTDs are ignored. Never set to false for untrusted input.
+        /// </summary>
+        public bool ProhibitDtd { get; set; } = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10);
+
         #endregion
 
         /// <summary>
@@ -65,13 +71,13 @@ namespace Microsoft.Build.Tasks
             // Load the XPath Document
             XmlDocument xmlDoc = new XmlDocument();
 
-            AbsolutePath inputPath;
+            AbsolutePath inputPath = default;
             try
             {
                 inputPath = TaskEnvironment.GetAbsolutePath(XmlInputPath.ItemSpec);
                 using (FileStream fs = new FileStream(inputPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
-                    XmlReaderSettings xrs = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+                    var xrs = new XmlReaderSettings { DtdProcessing = ProhibitDtd ? DtdProcessing.Prohibit : DtdProcessing.Ignore };
                     using (XmlReader sr = XmlReader.Create(fs, xrs))
                     {
                         xmlDoc.Load(sr);
@@ -80,7 +86,15 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                Log.LogErrorWithCodeFromResources("XmlPeekPoke.InputFileError", XmlInputPath.ItemSpec, e.Message);
+                if (XmlTaskUtility.IsDtdProhibitedException(e, ProhibitDtd, () => XmlTaskUtility.ContainsDtd(inputPath)))
+                {
+                    Log.LogErrorWithCodeFromResources("XmlPeekPoke.InputDtdProhibited", nameof(ProhibitDtd), nameof(XmlPoke));
+                }
+                else
+                {
+                    Log.LogErrorWithCodeFromResources("XmlPeekPoke.InputFileError", XmlInputPath.ItemSpec, e.Message);
+                }
+
                 return false;
             }
 

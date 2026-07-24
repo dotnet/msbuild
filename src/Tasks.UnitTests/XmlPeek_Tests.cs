@@ -20,6 +20,10 @@ namespace Microsoft.Build.UnitTests
 {
     public sealed class XmlPeek_Tests
     {
+        private readonly ITestOutputHelper _output;
+
+        public XmlPeek_Tests(ITestOutputHelper output) => _output = output;
+
         private string _xmlFileWithNs = @"<?xml version='1.0' encoding='utf-8'?>
 
 <!DOCTYPE plist PUBLIC ""-//Apple//DTD PLIST 1.0//EN"" ""http://www.apple.com/DTDs/PropertyList-1.0.dtd"">
@@ -51,6 +55,14 @@ namespace Microsoft.Build.UnitTests
   <method AccessModifier='public static' Name='GetVal' />
 </class>
 ";
+        private string _xmlFileNoNsWithDtd = @"<?xml version='1.0' encoding='utf-8'?>
+
+<!DOCTYPE note SYSTEM ""Note.dtd"">
+<class AccessModifier='public' Name='test'>
+  <variable Type='String' Name='a'></variable>
+</class>
+";
+        private const string _malformedXml = "<class>";
         private readonly string _xmlFileRequiresEscaping = @"
 <Root>
   <Key>abcdefg</Key>
@@ -66,7 +78,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileWithNs, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest(), ProhibitDtd = false };
             p.BuildEngine = engine;
 
             p.XmlInputPath = new TaskItem(xmlInputPath);
@@ -89,7 +101,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileWithNs, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest(), ProhibitDtd = false };
             p.BuildEngine = engine;
 
             p.XmlInputPath = new TaskItem(xmlInputPath);
@@ -118,7 +130,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileWithNsWithText, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest(), ProhibitDtd = false };
             p.BuildEngine = engine;
 
             p.XmlInputPath = new TaskItem(xmlInputPath);
@@ -240,21 +252,39 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void PeekDtdWhenDtdProhibitedError()
+        public void PeekDtdShowsTaskSpecificErrorMessageByDefault()
         {
-            MockEngine engine = new MockEngine(true);
-            string xmlInputPath;
-            Prepare(_xmlFileWithNs, out xmlInputPath);
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var xmlInput = env.CreateFile("doc.xml", _xmlFileNoNsWithDtd);
+            MockEngine engine = new(_output);
 
-            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
-            p.BuildEngine = engine;
+            XmlPeek task = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            task.BuildEngine = engine;
+            task.XmlInputPath = new TaskItem(xmlInput.Path);
+            task.Query = "//variable/@Name";
 
-            p.ProhibitDtd = true;
-            p.XmlInputPath = new TaskItem(xmlInputPath);
-            p.Query = "//s:variable/@Name";
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB3733");
+            engine.Log.ShouldContain("DTD");
+            engine.Log.ShouldContain(nameof(XmlPeek));
+            engine.Log.ShouldContain(nameof(XmlPeek.ProhibitDtd));
+        }
 
-            Assert.False(p.Execute()); // "Test should've failed"
-            Assert.Contains("MSB3733", engine.Log); // "Engine log should contain error code MSB3733"
+        [Fact]
+        public void PeekMalformedXmlShowsGenericInputFileError()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            var xmlInput = env.CreateFile("doc.xml", _malformedXml);
+            MockEngine engine = new(_output);
+
+            XmlPeek task = new() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            task.BuildEngine = engine;
+            task.XmlInputPath = new TaskItem(xmlInput.Path);
+            task.Query = "//variable/@Name";
+
+            task.Execute().ShouldBeFalse();
+            engine.Log.ShouldContain("MSB3733");
+            engine.Log.ShouldNotContain("contains a DTD");
         }
 
         [Fact]
@@ -264,7 +294,7 @@ namespace Microsoft.Build.UnitTests
             string xmlInputPath;
             Prepare(_xmlFileWithNs, out xmlInputPath);
 
-            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+            XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest(), ProhibitDtd = false };
             p.BuildEngine = engine;
             p.XmlInputPath = new TaskItem(xmlInputPath);
             p.Query = "//s:variable/@Name";
@@ -293,7 +323,7 @@ namespace Microsoft.Build.UnitTests
                         res += attrs[k] + " ";
                     }
                 }
-                XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest() };
+                XmlPeek p = new XmlPeek() { TaskEnvironment = TaskEnvironmentHelper.CreateForTest(), ProhibitDtd = false };
                 p.BuildEngine = engine;
                 p.XmlInputPath = new TaskItem(xmlInputPath);
                 p.Query = "//s:variable/@Name";
