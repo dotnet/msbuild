@@ -1,0 +1,51 @@
+name: Refresh branch freeze PR statuses
+
+# Refreshes the required `branch-freeze` commit status on existing pull requests.
+# This workflow has two entry points:
+#
+#   * workflow_dispatch - manual refresh or initial rollout seed.
+#   * workflow_call     - refresh invoked after /freeze or /unfreeze changes the
+#                         tracking issue state.
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_ref:
+        description: "Limit stamping to this base branch (blank = all open PRs)."
+        required: false
+        default: ""
+  workflow_call:
+    inputs:
+      base_ref:
+        description: "Refresh open pull requests targeting this base branch."
+        required: true
+        type: string
+
+permissions:
+  contents: read       # checkout the shared scripts
+  statuses: write      # post the branch-freeze commit status
+  issues: read         # read the branch-freeze tracking issues
+  pull-requests: read  # enumerate open PRs for bulk stamping
+
+jobs:
+  refresh:
+    name: Refresh open pull requests
+    runs-on: ubuntu-latest
+    concurrency:
+      group: branch-freeze-write-${{ inputs.base_ref }}
+      cancel-in-progress: false
+    steps:
+      # Keep checkout pinned to the immutable v7.0.0 commit; the @v7 tag can move.
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Refresh pull request statuses
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          BASE_REF: ${{ inputs.base_ref }}
+        shell: pwsh
+        run: |
+          pwsh -NoLogo -NoProfile -File `
+            "$env:GITHUB_WORKSPACE/.github/branch-freeze/workflows/refresh-pr-statuses.ps1" `
+            $env:BASE_REF

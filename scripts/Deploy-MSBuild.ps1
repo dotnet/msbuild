@@ -76,7 +76,7 @@ else {
 if ($runtime -eq "Desktop") {
     $targetFramework = "net472"
 } else {
-    $targetFramework = "net10.0"
+    $targetFramework = "net11.0"
 }
 
 # If bootstrap directory is not defined in parameters, use the default location

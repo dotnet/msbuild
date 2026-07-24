@@ -1112,6 +1112,7 @@ namespace Microsoft.Build.UnitTests
             await Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14394")]
         [Fact]
         public void ReplayBinaryLogWithFewerNodesThanOriginalBuild()
         {
