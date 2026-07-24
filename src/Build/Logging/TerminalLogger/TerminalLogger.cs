@@ -96,6 +96,14 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private readonly CancellationTokenSource _cts = new();
 
+    private const int TerminalSizePollIntervalFrames = 30;
+    private const int TerminalSizeSettlingFrames = 3;
+
+    private int _lastTerminalWidth;
+    private int _lastTerminalHeight;
+    private int _framesSinceLastTerminalSizePoll = TerminalSizePollIntervalFrames;
+    private int _terminalSizeStableFrames = TerminalSizeSettlingFrames;
+
     /// <summary>
     /// Tracks the status of all relevant projects seen so far.
     /// </summary>
@@ -1472,42 +1480,72 @@ public sealed partial class TerminalLogger : INodeLogger
     private void ThreadProc()
     {
         // 1_000 / 30 is a poor approx of 30Hz
-        int count = 0;
         while (!_cts.Token.WaitHandle.WaitOne(1_000 / 30))
         {
-            count++;
-            lock (_lock)
-            {
-                // Querying the terminal for it's dimensions is expensive, so we only do it every 30 frames e.g. once a second.
-                if (count >= 30)
-                {
-                    count = 0;
-                    DisplayNodes();
-                }
-                else
-                {
-                    DisplayNodes(false);
-                }
-            }
+            Refresh();
         }
 
         EraseNodes();
     }
 
     /// <summary>
+    /// Refreshes the node display using the current terminal dimensions.
+    /// </summary>
+    internal void Refresh()
+    {
+        // Without polling, rendering with stale dimensions can corrupt output during a resize.
+        if (_terminalSizeStableFrames == TerminalSizeSettlingFrames &&
+            ++_framesSinceLastTerminalSizePoll < TerminalSizePollIntervalFrames)
+        {
+            return;
+        }
+
+        _framesSinceLastTerminalSizePoll = 0;
+        int width = Terminal.Width;
+        int height = Terminal.Height;
+
+        lock (_lock)
+        {
+            if (_currentFrame.NodesCount > 0)
+            {
+                if (width != _lastTerminalWidth || height != _lastTerminalHeight)
+                {
+                    _lastTerminalWidth = width;
+                    _lastTerminalHeight = height;
+                    _terminalSizeStableFrames = 0;
+                    return;
+                }
+
+                if (_terminalSizeStableFrames < TerminalSizeSettlingFrames)
+                {
+                    _terminalSizeStableFrames++;
+                    if (_terminalSizeStableFrames < TerminalSizeSettlingFrames)
+                    {
+                        return;
+                    }
+                }
+            }
+
+            _lastTerminalWidth = width;
+            _lastTerminalHeight = height;
+            DisplayNodes(width, height);
+        }
+    }
+
+    /// <summary>
     /// Render Nodes section.
     /// It shows what all build nodes do.
     /// </summary>
-    internal void DisplayNodes(bool updateSize = true)
+    internal void DisplayNodes() => DisplayNodes(Terminal.Width, Terminal.Height);
+
+    private void DisplayNodes(int width, int height)
     {
-        int width = updateSize ? Terminal.Width : _currentFrame.Width;
-        int height = updateSize ? Terminal.Height : _currentFrame.Height;
         TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height);
 
         // Do not render delta but clear everything if Terminal width or height have changed.
         if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
         {
-            EraseNodes();
+            EraseNodes(width);
         }
 
         string rendered = newFrame.Render(_currentFrame);
@@ -1529,13 +1567,15 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Erases the previously printed live node output.
     /// </summary>
-    private void EraseNodes()
+    private void EraseNodes() => EraseNodes(Terminal.Width);
+
+    private void EraseNodes(int terminalWidth)
     {
         if (_currentFrame.NodesCount == 0)
         {
             return;
         }
-        Terminal.WriteLine($"{AnsiCodes.CSI}{_currentFrame.NodesCount + 1}{AnsiCodes.MoveUpToLineStart}");
+        Terminal.WriteLine($"{AnsiCodes.CSI}{_currentFrame.GetPhysicalRows(terminalWidth) + 1}{AnsiCodes.MoveUpToLineStart}");
         Terminal.Write($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
         _currentFrame.Clear();
     }

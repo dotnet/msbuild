@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.CommandLine.UnitTests;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Logging;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -134,6 +135,38 @@ namespace Microsoft.Build.UnitTests
     [UseInvariantCulture]
     public class TerminalLogger_Tests
     {
+        private sealed class ResizableTerminal(TextWriter output, int width, int height) : ITerminal
+        {
+            private readonly Terminal _terminal = new(output);
+            private int _width = width;
+
+            public int Width
+            {
+                get
+                {
+                    WidthQueryCount++;
+                    return _width;
+                }
+                set => _width = value;
+            }
+
+            public int Height { get; } = height;
+            public int WidthQueryCount { get; private set; }
+            public bool SupportsProgressReporting => false;
+
+            public void BeginUpdate() => _terminal.BeginUpdate();
+            public void EndUpdate() => _terminal.EndUpdate();
+            public void Write(string text) => _terminal.Write(text);
+            public void Write(ReadOnlySpan<char> text) => _terminal.Write(text);
+            public void WriteLine(string text) => _terminal.WriteLine(text);
+            public void WriteLineFitToWidth(ReadOnlySpan<char> text) => _terminal.WriteLineFitToWidth(text);
+            public void WriteColor(TerminalColor color, string text) => _terminal.WriteColor(color, text);
+            public void WriteColorLine(TerminalColor color, string text) => _terminal.WriteColorLine(color, text);
+            public void Dispose()
+            {
+            }
+        }
+
         private const int _nodeCount = 8;
 
         private const string _immediateMessageString =
@@ -892,6 +925,61 @@ namespace Microsoft.Build.UnitTests
             finally
             {
                 _terminallogger._createStopwatch = createStopwatch;
+            }
+        }
+
+        [Fact]
+        public void RefreshRedrawsAfterTerminalResizeSettles()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 120, height: 40);
+
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
+                eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
+                eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build"));
+                eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "Task"));
+
+                terminalLogger.Refresh();
+                output.GetStringBuilder().Clear();
+
+                terminal.Width = 100;
+                for (int i = 0; i < 29; i++)
+                {
+                    terminalLogger.Refresh();
+                }
+
+                terminal.WidthQueryCount.ShouldBe(1);
+                output.ToString().ShouldBeEmpty();
+                output.GetStringBuilder().Clear();
+
+                terminalLogger.Refresh();
+
+                foreach (int width in new[] { 80, 60, 40 })
+                {
+                    terminal.Width = width;
+                    terminalLogger.Refresh();
+                }
+
+                output.ToString().ShouldBeEmpty();
+                terminal.WidthQueryCount.ShouldBe(5);
+
+                terminalLogger.Refresh();
+                terminalLogger.Refresh();
+                terminalLogger.Refresh();
+
+                terminal.WidthQueryCount.ShouldBe(8);
+                output.ToString().ShouldStartWith($"{AnsiCodes.CSI}4{AnsiCodes.MoveUpToLineStart}");
+                output.ToString().ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
             }
         }
 

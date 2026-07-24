@@ -16,7 +16,7 @@ internal sealed class TerminalNodesFrame
 {
     private const int MaxColumn = 120;
 
-    private readonly (TerminalNodeStatus nodeStatus, int durationLength)[] _nodes;
+    private readonly (TerminalNodeStatus nodeStatus, int durationLength, int renderedWidth)[] _nodes;
 
     private readonly StringBuilder _renderBuilder = new();
 
@@ -29,7 +29,7 @@ internal sealed class TerminalNodesFrame
         Width = Math.Min(width, MaxColumn);
         Height = height;
 
-        _nodes = new (TerminalNodeStatus, int)[nodes.Length];
+        _nodes = new (TerminalNodeStatus, int, int)[nodes.Length];
 
         foreach (TerminalNodeStatus? status in nodes)
         {
@@ -78,11 +78,13 @@ internal sealed class TerminalNodesFrame
 
                 if (renderedWidth > Width)
                 {
+                    _nodes[i].renderedWidth = project.Length;
                     return project.AsSpan();
                 }
             }
         }
 
+        _nodes[i].renderedWidth = Math.Max(Width - 1, 1);
         var renderedTarget = !string.IsNullOrWhiteSpace(targetPrefix) ? $"{AnsiCodes.Colorize(targetPrefix, targetPrefixColor)} {target}" : target;
         var builder = StringBuilderCache.Acquire(renderedWidth);
         builder.Append(TerminalLogger.Indentation).Append(project);
@@ -121,7 +123,7 @@ internal sealed class TerminalNodesFrame
         sb.Clear();
 
         // Move cursor back to 1st line of nodes.
-        sb.AppendLine($"{AnsiCodes.CSI}{previousFrame.NodesCount + 1}{AnsiCodes.MoveUpToLineStart}");
+        sb.AppendLine($"{AnsiCodes.CSI}{previousFrame.GetPhysicalRows(Width) + 1}{AnsiCodes.MoveUpToLineStart}");
 
         int i = 0;
         for (; i < NodesCount; i++)
@@ -161,6 +163,20 @@ internal sealed class TerminalNodesFrame
         }
 
         return sb.ToString();
+    }
+
+    internal int GetPhysicalRows(int terminalWidth)
+    {
+        terminalWidth = Math.Max(terminalWidth, 1);
+
+        int physicalRows = 0;
+        for (int i = 0; i < NodesCount; i++)
+        {
+            int renderedWidth = Math.Max(_nodes[i].renderedWidth, 1);
+            physicalRows += ((renderedWidth - 1) / terminalWidth) + 1;
+        }
+
+        return physicalRows;
     }
 
     public void Clear()
