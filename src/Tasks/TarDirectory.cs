@@ -69,64 +69,63 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            BuildEngine3.Yield();
-
-            try
+            // Evaluate all preconditions before yielding so that failures (which do no real work) don't
+            // pay the cost of yielding and reacquiring the build engine node.
+            if (DestinationFile.Exists)
             {
-                if (DestinationFile.Exists)
+                if (!Overwrite || FailIfNotIncremental)
                 {
-                    if (!Overwrite || FailIfNotIncremental)
-                    {
-                        Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFileExists", DestinationFile.FullName);
+                    Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFileExists", DestinationFile.FullName);
 
-                        return false;
-                    }
-
-                    try
-                    {
-                        File.Delete(DestinationFile.FullName);
-                    }
-                    catch (Exception e)
-                    {
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(DestinationFile.FullName);
-                        Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", SourceDirectory.FullName, DestinationFile.FullName, e.Message, lockedFileMessage);
-
-                        return false;
-                    }
+                    return false;
                 }
 
                 try
                 {
-                    if (FailIfNotIncremental)
-                    {
-                        Log.LogErrorFromResources("TarDirectory.Comment", SourceDirectory.FullName, DestinationFile.FullName);
-                    }
-                    else
-                    {
-                        Log.LogMessageFromResources(MessageImportance.High, "TarDirectory.Comment", SourceDirectory.FullName, DestinationFile.FullName);
-
-                        // Unknown is only reachable if it was explicitly set; fall back to the Pax default.
-                        TarEntryFormat format = Format == TarEntryFormat.Unknown ? TarEntryFormat.Pax : Format;
-
-                        using FileStream destinationStream = new FileStream(DestinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None);
-
-                        // Wrap the destination stream in the requested compression, if any. The tar archive is always
-                        // written to the (optionally compressed) stream using the new .NET 11 overload that honors the
-                        // requested TarEntryFormat.
-                        using Stream? compressionStream = Compression switch
-                        {
-                            TarCompression.GZip => new GZipStream(destinationStream, CompressionLevel.Optimal),
-                            TarCompression.ZStandard => new ZstandardStream(destinationStream, CompressionLevel.Optimal),
-                            _ => null,
-                        };
-
-                        TarFile.CreateFromDirectory(SourceDirectory.FullName, compressionStream ?? destinationStream, includeBaseDirectory: false, format);
-                    }
+                    File.Delete(DestinationFile.FullName);
                 }
                 catch (Exception e)
                 {
-                    Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", SourceDirectory.FullName, DestinationFile.FullName, e.Message, string.Empty);
+                    string lockedFileMessage = LockCheck.GetLockedFileMessage(DestinationFile.FullName);
+                    Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", SourceDirectory.FullName, DestinationFile.FullName, e.Message, lockedFileMessage);
+
+                    return false;
                 }
+            }
+
+            if (FailIfNotIncremental)
+            {
+                Log.LogErrorFromResources("TarDirectory.Comment", SourceDirectory.FullName, DestinationFile.FullName);
+
+                return false;
+            }
+
+            BuildEngine3.Yield();
+
+            try
+            {
+                Log.LogMessageFromResources(MessageImportance.High, "TarDirectory.Comment", SourceDirectory.FullName, DestinationFile.FullName);
+
+                // Unknown is only reachable if it was explicitly set; fall back to the Pax default.
+                TarEntryFormat format = Format == TarEntryFormat.Unknown ? TarEntryFormat.Pax : Format;
+
+                using FileStream destinationStream = new FileStream(DestinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None);
+
+                // Wrap the destination stream in the requested compression, if any. The tar archive is always
+                // written to the (optionally compressed) stream using the new .NET 11 overload that honors the
+                // requested TarEntryFormat.
+                using Stream? compressionStream = Compression switch
+                {
+                    TarCompression.GZip => new GZipStream(destinationStream, CompressionLevel.Optimal),
+                    TarCompression.ZStandard => new ZstandardStream(destinationStream, CompressionLevel.Optimal),
+                    _ => null,
+                };
+
+                TarFile.CreateFromDirectory(SourceDirectory.FullName, compressionStream ?? destinationStream, includeBaseDirectory: false, format);
+            }
+            catch (Exception e)
+            {
+                Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", SourceDirectory.FullName, DestinationFile.FullName, e.Message, string.Empty);
             }
             finally
             {
