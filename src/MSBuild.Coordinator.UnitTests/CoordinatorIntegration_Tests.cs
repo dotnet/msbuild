@@ -62,6 +62,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         buildOutput2.ShouldContain("Hello from project2.proj");
     }
 
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/14516")]
     [Fact]
     public async Task SingleBuild_CoordinatorCapsMaxNodeCount()
     {
