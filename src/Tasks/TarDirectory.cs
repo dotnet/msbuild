@@ -109,7 +109,9 @@ namespace Microsoft.Build.Tasks
                 // Unknown is only reachable if it was explicitly set; fall back to the Pax default.
                 TarEntryFormat format = Format == TarEntryFormat.Unknown ? TarEntryFormat.Pax : Format;
 
-                using FileStream destinationStream = new FileStream(DestinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None);
+                // The destination is guaranteed not to exist at this point: Execute deletes any existing
+                // file (or errors when Overwrite is false) before yielding, so OpenWrite creates a fresh file.
+                using FileStream destinationStream = DestinationFile.OpenWrite();
 
                 // Wrap the destination stream in the requested compression, if any. The tar archive is always
                 // written to the (optionally compressed) stream using the new .NET 11 overload that honors the
