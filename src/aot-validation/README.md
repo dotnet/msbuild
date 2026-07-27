@@ -28,11 +28,11 @@ From the repository root, using the repo's pinned SDK (`.dotnet\dotnet.exe`):
 ```powershell
 # Fast JIT pass (build + run the MTP test host)
 .\.dotnet\dotnet.exe build src\aot-validation\Microsoft.Build.AotValidation.csproj
-.\src\aot-validation\bin\Debug\net10.0\win-x64\Microsoft.Build.AotValidation.exe
+.\src\aot-validation\bin\Debug\net11.0\win-x64\Microsoft.Build.AotValidation.exe
 
 # Native AOT pass (the real validation): publish, then run the native exe
 .\.dotnet\dotnet.exe publish src\aot-validation\Microsoft.Build.AotValidation.csproj -r win-x64 -c Release
-.\src\aot-validation\bin\Release\net10.0\win-x64\publish\Microsoft.Build.AotValidation.exe
+.\src\aot-validation\bin\Release\net11.0\win-x64\publish\Microsoft.Build.AotValidation.exe
 ```
 
 Native AOT publishing requires the Visual Studio C++ toolchain (the MSVC linker). A run prints the

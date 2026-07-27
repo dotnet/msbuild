@@ -129,6 +129,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         buildOutput.ShouldNotContain("Failed to connect to the build coordinator");
     }
 
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/14488")]
     [Fact]
     public async Task NuGetStaticGraphRestore_InheritsCoordinatorGrant_DoesNotDeadlock()
     {
@@ -141,7 +142,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
             """
             <Project Sdk="Microsoft.NET.Sdk">
               <PropertyGroup>
-                <TargetFramework>net10.0</TargetFramework>
+                <TargetFramework>net11.0</TargetFramework>
               </PropertyGroup>
             </Project>
             """);

@@ -470,7 +470,7 @@ namespace Microsoft.Build.Utilities
 
             string targetPlatformVersionString = targetPlatformVersion.ToString();
 
-            ErrorUtilities.DebugTraceMessage("GetPlatformExtensionSDKLocations", $"Calling with TargetPlatformIdentifier:'{targetPlatformIdentifier}' and TargetPlatformVersion: '{targetPlatformVersionString}'");
+            DebugTrace.WriteLine($"Calling with TargetPlatformIdentifier:'{targetPlatformIdentifier}' and TargetPlatformVersion: '{targetPlatformVersionString}'", category: "GetPlatformExtensionSDKLocations");
             IEnumerable<TargetPlatformSDK> targetPlatformSDKs = RetrieveTargetPlatformList(diskRoots, extensionDiskRoots, registryRoot);
 
             return targetPlatformSDKs
@@ -855,17 +855,17 @@ namespace Microsoft.Build.Utilities
                     }
                     else
                     {
-                        ErrorUtilities.DebugTraceMessage("GetPlatformSDKPropsFileLocation", $"Target platform props file location '{propsFileLocation}' did not exist.");
+                        DebugTrace.WriteLine($"Target platform props file location '{propsFileLocation}' did not exist.");
                     }
                 }
                 else
                 {
-                    ErrorUtilities.DebugTraceMessage("GetPlatformSDKPropsFileLocation", $"Could not find root SDK location for SDKI = '{sdkIdentifier}', SDKV = '{sdkVersion}'");
+                    DebugTrace.WriteLine($"Could not find root SDK location for SDKI = '{sdkIdentifier}', SDKV = '{sdkVersion}'");
                 }
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                ErrorUtilities.DebugTraceMessage("GetPlatformSDKPropsFileLocation", $"Encountered exception trying to get the SDK props file Location : {e.Message}");
+                DebugTrace.WriteLine($"Encountered exception trying to get the SDK props file Location : {e.Message}");
             }
 
             return null;
@@ -969,7 +969,7 @@ namespace Microsoft.Build.Utilities
 
                 if (matchingSdk == null)
                 {
-                    ErrorUtilities.DebugTraceMessage("GetExtensionSdkReferences", $"Could not find root SDK for SDKI = '{targetSdkIdentifier}', SDKV = '{targetSdkVersion}'");
+                    DebugTrace.WriteLine($"Could not find root SDK for SDKI = '{targetSdkIdentifier}', SDKV = '{targetSdkVersion}'", category: "GetExtensionSdkReferences");
                 }
                 else
                 {
@@ -990,7 +990,7 @@ namespace Microsoft.Build.Utilities
                     }
                     else
                     {
-                        ErrorUtilities.DebugTraceMessage("GetExtensionSdkReferences", $"Could not find matching extension SDK = '{extensionSdkMoniker}'");
+                        DebugTrace.WriteLine($"Could not find matching extension SDK = '{extensionSdkMoniker}'", category: "GetExtensionSdkReferences");
                     }
                 }
 
@@ -1040,13 +1040,13 @@ namespace Microsoft.Build.Utilities
 
                     if (!FileSystems.Default.DirectoryExists(winmdLocation))
                     {
-                        ErrorUtilities.DebugTraceMessage("GetLegacyTargetPlatformReferences", $"Target platform location '{winmdLocation}' did not exist");
+                        DebugTrace.WriteLine($"Target platform location '{winmdLocation}' did not exist");
                         winmdLocation = null;
                     }
                 }
                 else
                 {
-                    ErrorUtilities.DebugTraceMessage("GetLegacyTargetPlatformReferences", $"Could not find root SDK location for TPI = '{targetPlatformIdentifier}', TPV = '{targetPlatformVersion}'");
+                    DebugTrace.WriteLine($"Could not find root SDK location for TPI = '{targetPlatformIdentifier}', TPV = '{targetPlatformVersion}'");
                 }
 
                 if (!string.IsNullOrEmpty(winmdLocation))
@@ -1055,14 +1055,14 @@ namespace Microsoft.Build.Utilities
 
                     if (winmdPaths.Length > 0)
                     {
-                        ErrorUtilities.DebugTraceMessage("GetLegacyTargetPlatformReferences", $"Found {winmdPaths.Length} contract winmds in '{winmdLocation}'");
+                        DebugTrace.WriteLine($"Found {winmdPaths.Length} contract winmds in '{winmdLocation}'");
                         return winmdPaths;
                     }
                 }
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                ErrorUtilities.DebugTraceMessage("GetLegacyTargetPlatformReferences", $"Encountered exception trying to gather the platform references: {e.Message}");
+                DebugTrace.WriteLine($"Encountered exception trying to gather the platform references: {e.Message}");
             }
 
             return [];
@@ -1133,7 +1133,7 @@ namespace Microsoft.Build.Utilities
 
             foreach (ApiContract contract in apiContracts)
             {
-                ErrorUtilities.DebugTraceMessage("GetApiContractReferences", $"Gathering contract references for contract with name '{contract.Name}' and version '{contract.Version}'");
+                DebugTrace.WriteLine($"Gathering contract references for contract with name '{contract.Name}' and version '{contract.Version}'");
                 string contractPath = Path.Combine(referencesRoot, contract.Name, contract.Version);
 
                 if (FileSystems.Default.DirectoryExists(contractPath))
@@ -1142,7 +1142,7 @@ namespace Microsoft.Build.Utilities
 
                     if (winmdPaths.Length > 0)
                     {
-                        ErrorUtilities.DebugTraceMessage("GetApiContractReferences", $"Found {winmdPaths.Length} contract winmds in '{contractPath}'");
+                        DebugTrace.WriteLine($"Found {winmdPaths.Length} contract winmds in '{contractPath}'");
                         contractWinMDs.AddRange(winmdPaths);
                     }
                 }
@@ -1162,12 +1162,12 @@ namespace Microsoft.Build.Utilities
                 {
                     if (!matchingSdk.Platforms.TryGetValue(platformKey, out platformManifestLocation))
                     {
-                        ErrorUtilities.DebugTraceMessage("GetPlatformManifest", $"Target platform location '{platformManifestLocation}' did not exist or did not contain Platform.xml");
+                        DebugTrace.WriteLine($"Target platform location '{platformManifestLocation}' did not exist or did not contain Platform.xml", category: "GetPlatformManifest");
                     }
                 }
                 else
                 {
-                    ErrorUtilities.DebugTraceMessage("GetPlatformManifest", $"Could not find root SDK for '{platformKey}'");
+                    DebugTrace.WriteLine($"Could not find root SDK for '{platformKey}'", category: "GetPlatformManifest");
                 }
 
                 if (!string.IsNullOrEmpty(platformManifestLocation))
@@ -1182,7 +1182,7 @@ namespace Microsoft.Build.Utilities
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                ErrorUtilities.DebugTraceMessage("GetValueUsingMatchingSDKManifest", $"Encountered exception trying to check if SDK is versioned: {e.Message}");
+                DebugTrace.WriteLine($"Encountered exception trying to check if SDK is versioned: {e.Message}", category: "GetValueUsingMatchingSDKManifest");
             }
 
             return false;
@@ -1539,7 +1539,7 @@ namespace Microsoft.Build.Utilities
             }
             catch (ArgumentException e)
             {
-                ErrorUtilities.DebugTraceMessage("TryParsePlatformVersion", $"Cannot create FrameworkName object, Exception:{e.Message}");
+                DebugTrace.WriteLine($"Cannot create FrameworkName object, Exception:{e.Message}");
             }
 
             if (framework != null)
@@ -2503,7 +2503,7 @@ namespace Microsoft.Build.Utilities
                 DirectoryInfo rootInfo = new DirectoryInfo(diskRoot);
                 if (!rootInfo.Exists)
                 {
-                    ErrorUtilities.DebugTraceMessage("GatherExtensionSDKListFromDirectory", $"DiskRoot '{diskRoot}' does not exist, skipping it");
+                    DebugTrace.WriteLine($"DiskRoot '{diskRoot}' does not exist, skipping it");
                     continue;
                 }
 
@@ -2524,22 +2524,22 @@ namespace Microsoft.Build.Utilities
 
         internal static void GatherExtensionSDKs(DirectoryInfo extensionSdksDirectory, TargetPlatformSDK targetPlatformSDK)
         {
-            ErrorUtilities.DebugTraceMessage("GatherExtensionSDKs", $"Found ExtensionsSDK folder '{extensionSdksDirectory.FullName}'. ");
+            DebugTrace.WriteLine($"Found ExtensionsSDK folder '{extensionSdksDirectory.FullName}'. ");
 
             DirectoryInfo[] sdkNameDirectories = extensionSdksDirectory.GetDirectories();
-            ErrorUtilities.DebugTraceMessage("GatherExtensionSDKs", $"Found '{sdkNameDirectories.Length}' sdkName directories under '{extensionSdksDirectory.FullName}'");
+            DebugTrace.WriteLine($"Found '{sdkNameDirectories.Length}' sdkName directories under '{extensionSdksDirectory.FullName}'");
 
             // For each SDKName under the ExtensionSDKs directory
             foreach (DirectoryInfo sdkNameFolders in sdkNameDirectories)
             {
                 DirectoryInfo[] sdkVersionDirectories = sdkNameFolders.GetDirectories();
-                ErrorUtilities.DebugTraceMessage("GatherExtensionSDKs", $"Found '{sdkVersionDirectories.Length}' sdkVersion directories under '{sdkNameFolders.FullName}'");
+                DebugTrace.WriteLine($"Found '{sdkVersionDirectories.Length}' sdkVersion directories under '{sdkNameFolders.FullName}'");
 
                 // For each Version directory under the SDK Name
                 foreach (DirectoryInfo sdkVersionDirectory in sdkVersionDirectories)
                 {
                     // Make sure the version folder parses to a version, anything that cannot parse directly to a version is to be ignored.
-                    ErrorUtilities.DebugTraceMessage("GatherExtensionSDKs", $"Parsed sdk version folder '{sdkVersionDirectory.Name}' under '{sdkVersionDirectory.FullName}'");
+                    DebugTrace.WriteLine($"Parsed sdk version folder '{sdkVersionDirectory.Name}' under '{sdkVersionDirectory.FullName}'");
                     if (Version.TryParse(sdkVersionDirectory.Name, out Version _))
                     {
                         // Create SDK name based on the folder structure. We could open the manifest here and read the display name, but that would
@@ -2549,7 +2549,7 @@ namespace Microsoft.Build.Utilities
                         // Make sure we have not added the SDK to the list of found SDKs before.
                         if (!targetPlatformSDK.ExtensionSDKs.ContainsKey(SDKKey))
                         {
-                            ErrorUtilities.DebugTraceMessage("GatherExtensionSDKs", $"SDKKey '{SDKKey}' was not already found.");
+                            DebugTrace.WriteLine($"SDKKey '{SDKKey}' was not already found.");
                             string pathToSDKManifest = Path.Combine(sdkVersionDirectory.FullName, "SDKManifest.xml");
                             if (FileUtilities.FileExistsNoThrow(pathToSDKManifest))
                             {
@@ -2557,17 +2557,17 @@ namespace Microsoft.Build.Utilities
                             }
                             else
                             {
-                                ErrorUtilities.DebugTraceMessage("GatherExtensionSDKs", $"No SDKManifest.xml files could be found at '{pathToSDKManifest}'. Not adding sdk");
+                                DebugTrace.WriteLine($"No SDKManifest.xml files could be found at '{pathToSDKManifest}'. Not adding sdk");
                             }
                         }
                         else
                         {
-                            ErrorUtilities.DebugTraceMessage("GatherExtensionSDKs", $"SDKKey '{SDKKey}' was already found, not adding sdk under '{sdkVersionDirectory.FullName}'");
+                            DebugTrace.WriteLine($"SDKKey '{SDKKey}' was already found, not adding sdk under '{sdkVersionDirectory.FullName}'");
                         }
                     }
                     else
                     {
-                        ErrorUtilities.DebugTraceMessage("GatherExtensionSDKs", $"Failed to parse sdk version folder '{sdkVersionDirectory.Name}' under '{sdkVersionDirectory.FullName}'");
+                        DebugTrace.WriteLine($"Failed to parse sdk version folder '{sdkVersionDirectory.Name}' under '{sdkVersionDirectory.FullName}'");
                     }
                 }
             }
@@ -2583,7 +2583,7 @@ namespace Microsoft.Build.Utilities
                 DirectoryInfo rootInfo = new DirectoryInfo(diskRoot);
                 if (!rootInfo.Exists)
                 {
-                    ErrorUtilities.DebugTraceMessage("GatherSDKListFromDirectory", $"DiskRoot '{diskRoot}' does not exist, skipping it");
+                    DebugTrace.WriteLine($"DiskRoot '{diskRoot}' does not exist, skipping it");
                     continue;
                 }
 
@@ -2594,18 +2594,18 @@ namespace Microsoft.Build.Utilities
 
                     if (!rootPathWithIdentifier.Exists)
                     {
-                        ErrorUtilities.DebugTraceMessage("GatherSDKListFromDirectory", $"Disk root with Identifier: '{rootPathWithIdentifier}' does not exist. ");
+                        DebugTrace.WriteLine($"Disk root with Identifier: '{rootPathWithIdentifier}' does not exist. ");
                         continue;
                     }
 
-                    ErrorUtilities.DebugTraceMessage("GatherSDKListFromDirectory", $"Disk root with Identifier: '{rootPathWithIdentifier}' does exist. Enumerating version folders under it. ");
+                    DebugTrace.WriteLine($"Disk root with Identifier: '{rootPathWithIdentifier}' does exist. Enumerating version folders under it. ");
 
                     // Get a list of subdirectories under the root path and identifier, Ie. c:\Program files\Microsoft SDKs\Windows we should see things like, V8.0, 8.0, 9.0 ect.
                     // Only grab the folders that have a version number (they can start with a v or not).
 
                     SortedDictionary<Version, List<string>> versionsInRoot = VersionUtilities.GatherVersionStrings(null, rootPathWithIdentifier.GetDirectories().Select<DirectoryInfo, string>(directory => directory.Name));
 
-                    ErrorUtilities.DebugTraceMessage("GatherSDKListFromDirectory", $"Found '{versionsInRoot.Count}' version folders under the identifier path '{rootPathWithIdentifier}'.");
+                    DebugTrace.WriteLine($"Found '{versionsInRoot.Count}' version folders under the identifier path '{rootPathWithIdentifier}'.");
 
                     // Go through each of the targetplatform versions under the targetplatform identifier.
                     foreach (KeyValuePair<Version, List<string>> directoryUnderRoot in versionsInRoot)
@@ -2658,7 +2658,7 @@ namespace Microsoft.Build.Utilities
                             }
                             else
                             {
-                                ErrorUtilities.DebugTraceMessage("GatherSDKListFromDirectory", $"Could not find ExtensionsSDK folder '{sdkFolderPath}'. ");
+                                DebugTrace.WriteLine($"Could not find ExtensionsSDK folder '{sdkFolderPath}'. ");
                             }
                         }
                     }
@@ -2681,7 +2681,7 @@ namespace Microsoft.Build.Utilities
             // Open the hive for a given view
             using (RegistryKey baseKey = openBaseKey(registryHive, registryView))
             {
-                ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"Gathering SDKS from registryRoot '{registryKeyRoot}', Hive '{registryHive}', View '{registryView}'");
+                DebugTrace.WriteLine($"Gathering SDKS from registryRoot '{registryKeyRoot}', Hive '{registryHive}', View '{registryView}'");
 
                 // Attach the target platform to the registry root. This should give us something like
                 // SOFTWARE\MICROSOFT\Microsoft SDKs\Windows
@@ -2692,7 +2692,7 @@ namespace Microsoft.Build.Utilities
                 // No identifiers found.
                 if (platformIdentifiers == null)
                 {
-                    ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"No sub keys found under registryKeyRoot {registryKeyRoot}");
+                    DebugTrace.WriteLine($"No sub keys found under registryKeyRoot {registryKeyRoot}");
                     return;
                 }
 
@@ -2706,7 +2706,7 @@ namespace Microsoft.Build.Utilities
                     // No versions found.
                     if (versions == null)
                     {
-                        ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"No sub keys found under platformIdentifierKey {platformIdentifierKey}");
+                        DebugTrace.WriteLine($"No sub keys found under platformIdentifierKey {platformIdentifierKey}");
                         return;
                     }
 
@@ -2769,17 +2769,17 @@ namespace Microsoft.Build.Utilities
 
                             // Make something like SOFTWARE\MICROSOFT\Microsoft SDKs\Windows\8.0\ExtensionSdks
                             string extensionSDKsKey = platformSDKsRegistryKey + @"\ExtensionSDKs";
-                            ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"Getting subkeys of '{extensionSDKsKey}'");
+                            DebugTrace.WriteLine($"Getting subkeys of '{extensionSDKsKey}'");
 
                             // Get all of the SDK name folders under the ExtensionSDKs registry key
                             IEnumerable<string> sdkNames = getRegistrySubKeyNames(baseKey, extensionSDKsKey);
                             if (sdkNames == null)
                             {
-                                ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"Could not find subkeys of '{extensionSDKsKey}'");
+                                DebugTrace.WriteLine($"Could not find subkeys of '{extensionSDKsKey}'");
                                 continue;
                             }
 
-                            ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"Found subkeys of '{extensionSDKsKey}'");
+                            DebugTrace.WriteLine($"Found subkeys of '{extensionSDKsKey}'");
 
                             // For each SDK folder under ExtensionSDKs
                             foreach (string sdkName in sdkNames)
@@ -2791,14 +2791,14 @@ namespace Microsoft.Build.Utilities
                                 // Get all of the version registry keys under the SDK Name Key.
                                 IEnumerable<string> sdkVersions = getRegistrySubKeyNames(baseKey, sdkNameKey);
 
-                                ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"Getting subkeys of '{sdkNameKey}'");
+                                DebugTrace.WriteLine($"Getting subkeys of '{sdkNameKey}'");
                                 if (sdkVersions == null)
                                 {
-                                    ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"Could not find subkeys of '{sdkNameKey}'");
+                                    DebugTrace.WriteLine($"Could not find subkeys of '{sdkNameKey}'");
                                     continue;
                                 }
 
-                                ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"Found subkeys of '{sdkNameKey}'");
+                                DebugTrace.WriteLine($"Found subkeys of '{sdkNameKey}'");
 
                                 // For each version registry entry under the SDK Name registry key
                                 foreach (string sdkVersion in sdkVersions)
@@ -2808,14 +2808,14 @@ namespace Microsoft.Build.Utilities
                                     if (Version.TryParse(sdkVersion, out tempVersion))
                                     {
                                         string sdkDirectoryKey = sdkNameKey + @"\" + sdkVersion;
-                                        ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"Getting default key for '{sdkDirectoryKey}'");
+                                        DebugTrace.WriteLine($"Getting default key for '{sdkDirectoryKey}'");
 
                                         // Now that we found the registry key we need to get its default value which points to the directory this SDK is in.
                                         string directoryName = getRegistrySubKeyDefaultValue(baseKey, sdkDirectoryKey);
                                         string sdkKey = TargetPlatformSDK.GetSdkKey(sdkName, sdkVersion);
                                         if (directoryName != null)
                                         {
-                                            ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"SDK installation location = '{directoryName}'");
+                                            DebugTrace.WriteLine($"SDK installation location = '{directoryName}'");
 
                                             // Make sure the directory exists and that it has not been added before.
                                             if (!targetPlatformSDK.ExtensionSDKs.ContainsKey(sdkKey))
@@ -2825,27 +2825,27 @@ namespace Microsoft.Build.Utilities
                                                     string sdkManifestFileLocation = Path.Combine(directoryName, "SDKManifest.xml");
                                                     if (fileExists(sdkManifestFileLocation))
                                                     {
-                                                        ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"Adding SDK '{sdkKey}'  at '{directoryName}' to the list of found sdks.");
+                                                        DebugTrace.WriteLine($"Adding SDK '{sdkKey}'  at '{directoryName}' to the list of found sdks.");
                                                         targetPlatformSDK.ExtensionSDKs.Add(sdkKey, FileUtilities.EnsureTrailingSlash(directoryName));
                                                     }
                                                     else
                                                     {
-                                                        ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"No SDKManifest.xml file found at '{sdkManifestFileLocation}'.");
+                                                        DebugTrace.WriteLine($"No SDKManifest.xml file found at '{sdkManifestFileLocation}'.");
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"SDK directory '{directoryName}' does not exist");
+                                                    DebugTrace.WriteLine($"SDK directory '{directoryName}' does not exist");
                                                 }
                                             }
                                             else
                                             {
-                                                ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"SDK key was previously added. '{sdkKey}'");
+                                                DebugTrace.WriteLine($"SDK key was previously added. '{sdkKey}'");
                                             }
                                         }
                                         else
                                         {
-                                            ErrorUtilities.DebugTraceMessage("GatherSDKsFromRegistryImpl", $"Default key is null for '{sdkDirectoryKey}'");
+                                            DebugTrace.WriteLine($"Default key is null for '{sdkDirectoryKey}'");
                                         }
                                     }
                                 }
@@ -2926,7 +2926,7 @@ namespace Microsoft.Build.Utilities
             if (diskRoots != null && !string.IsNullOrEmpty(directoryRoots))
             {
                 string[] splitRoots = directoryRoots.Split(s_diskRootSplitChars, StringSplitOptions.RemoveEmptyEntries);
-                ErrorUtilities.DebugTraceMessage("ExtractSdkDiskRootsFromEnvironment", $"DiskRoots from Registry '{string.Join(";", splitRoots)}'");
+                DebugTrace.WriteLine($"DiskRoots from Registry '{string.Join(";", splitRoots)}'");
                 diskRoots.AddRange(splitRoots);
             }
 
@@ -2951,17 +2951,17 @@ namespace Microsoft.Build.Utilities
             {
                 if (diskRoots?.Length > 0)
                 {
-                    ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerDiskRoots", $"Passed in DiskRoots '{string.Join(";", diskRoots)}'");
+                    DebugTrace.WriteLine($"Passed in DiskRoots '{string.Join(";", diskRoots)}'");
                     sdkDiskRoots.AddRange(diskRoots);
                 }
                 else
                 {
-                    ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerDiskRoots", "Getting default disk roots");
+                    DebugTrace.WriteLine("Getting default disk roots");
                     GetDefaultSDKDiskRoots(sdkDiskRoots);
                 }
             }
 
-            ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerDiskRoots", $"Diskroots being used '{string.Join(";", sdkDiskRoots.ToArray())}'");
+            DebugTrace.WriteLine($"Diskroots being used '{string.Join(";", sdkDiskRoots)}'");
             return sdkDiskRoots;
         }
 
@@ -2976,11 +2976,11 @@ namespace Microsoft.Build.Utilities
             ExtractSdkDiskRootsFromEnvironment(sdkDiskRoots, sdkDirectoryRootsFromEnvironment);
             if (sdkDiskRoots.Count == 0 && diskRoots?.Length > 0)
             {
-                ErrorUtilities.DebugTraceMessage("GetMultiPlatformSdkDiskRoots", $"Passed in DiskRoots '{string.Join(";", diskRoots)}'");
+                DebugTrace.WriteLine($"Passed in DiskRoots '{string.Join(";", diskRoots)}'", category: "GetMultiPlatformSdkDiskRoots");
                 sdkDiskRoots.AddRange(diskRoots);
             }
 
-            ErrorUtilities.DebugTraceMessage("GetMultiPlatformSdkDiskRoots", $"Diskroots being used '{string.Join(";", sdkDiskRoots.ToArray())}'");
+            DebugTrace.WriteLine($"Diskroots being used '{string.Join(";", sdkDiskRoots)}'", category: "GetMultiPlatformSdkDiskRoots");
             return sdkDiskRoots;
         }
 
@@ -2990,7 +2990,7 @@ namespace Microsoft.Build.Utilities
         /// <returns></returns>
         private static string GetTargetPlatformMonikerRegistryRoots(string registryRootLocation)
         {
-            ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerRegistryRoots", $"RegistryRoot passed in '{registryRootLocation ?? string.Empty}'");
+            DebugTrace.WriteLine($"RegistryRoot passed in '{registryRootLocation ?? string.Empty}'");
 
             string disableRegistryForSDKLookup = Environment.GetEnvironmentVariable("MSBUILDDISABLEREGISTRYFORSDKLOOKUP");
             // If we are not disabling the registry for platform sdk lookups then lets look in the default location.
@@ -3006,11 +3006,11 @@ namespace Microsoft.Build.Utilities
                     registryRoot = @"SOFTWARE\MICROSOFT\Microsoft SDKs\";
                 }
 
-                ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerRegistryRoots", $"RegistryRoot to be looked under '{registryRoot}'");
+                DebugTrace.WriteLine($"RegistryRoot to be looked under '{registryRoot}'");
             }
             else
             {
-                ErrorUtilities.DebugTraceMessage("GetTargetPlatformMonikerRegistryRoots", "MSBUILDDISABLEREGISTRYFORSDKLOOKUP is set registry sdk lookup is disabled");
+                DebugTrace.WriteLine("MSBUILDDISABLEREGISTRYFORSDKLOOKUP is set registry sdk lookup is disabled");
             }
 
             return registryRoot;
@@ -3031,13 +3031,13 @@ namespace Microsoft.Build.Utilities
                 if (platformsRootInfo.Exists)
                 {
                     DirectoryInfo[] platformIdentifiers = platformsRootInfo.GetDirectories();
-                    ErrorUtilities.DebugTraceMessage("GatherPlatformsForSdk", $"Found '{platformIdentifiers.Length}' platform identifier directories under '{platformsRoot}'");
+                    DebugTrace.WriteLine($"Found '{platformIdentifiers.Length}' platform identifier directories under '{platformsRoot}'");
 
                     // Iterate through all identifiers
                     foreach (DirectoryInfo platformIdentifier in platformIdentifiers)
                     {
                         DirectoryInfo[] platformVersions = platformIdentifier.GetDirectories();
-                        ErrorUtilities.DebugTraceMessage("GatherPlatformsForSdk", $"Found '{platformVersions.Length}' platform version directories under '{platformIdentifier.FullName}'");
+                        DebugTrace.WriteLine($"Found '{platformVersions.Length}' platform version directories under '{platformIdentifier.FullName}'");
 
                         // and all versions under each of those identifiers
                         foreach (DirectoryInfo platformVersion in platformVersions)
@@ -3051,7 +3051,7 @@ namespace Microsoft.Build.Utilities
                                 // make sure we haven't already seen this one somehow
                                 if (!sdk.Platforms.ContainsKey(sdkKey))
                                 {
-                                    ErrorUtilities.DebugTraceMessage("GatherPlatformsForSdk", $"SDKKey '{sdkKey}' was not already found.");
+                                    DebugTrace.WriteLine($"SDKKey '{sdkKey}' was not already found.");
 
                                     string pathToPlatformManifest = Path.Combine(platformVersion.FullName, "Platform.xml");
                                     if (FileUtilities.FileExistsNoThrow(pathToPlatformManifest))
@@ -3060,17 +3060,17 @@ namespace Microsoft.Build.Utilities
                                     }
                                     else
                                     {
-                                        ErrorUtilities.DebugTraceMessage("GatherPlatformsForSdk", $"No Platform.xml could be found at '{pathToPlatformManifest}'. Not adding this platform");
+                                        DebugTrace.WriteLine($"No Platform.xml could be found at '{pathToPlatformManifest}'. Not adding this platform");
                                     }
                                 }
                                 else
                                 {
-                                    ErrorUtilities.DebugTraceMessage("GatherPlatformsForSdk", $"SDKKey '{sdkKey}' was already found, not adding platform under '{platformVersion.FullName}'");
+                                    DebugTrace.WriteLine($"SDKKey '{sdkKey}' was already found, not adding platform under '{platformVersion.FullName}'");
                                 }
                             }
                             else
                             {
-                                ErrorUtilities.DebugTraceMessage("GatherPlatformsForSdk", $"Failed to parse platform version folder '{platformVersion.Name}' under '{platformVersion.FullName}'");
+                                DebugTrace.WriteLine($"Failed to parse platform version folder '{platformVersion.Name}' under '{platformVersion.FullName}'");
                             }
                         }
                     }
@@ -3078,7 +3078,7 @@ namespace Microsoft.Build.Utilities
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
             {
-                ErrorUtilities.DebugTraceMessage("GatherPlatformsForSdk", $"Encountered exception trying to gather platform-specific data: {e.Message}");
+                DebugTrace.WriteLine($"Encountered exception trying to gather platform-specific data: {e.Message}");
             }
         }
 

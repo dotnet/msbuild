@@ -24,6 +24,7 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0008** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
 | **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
 | **MSBuildTask0010** | Error | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
+| **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -265,6 +266,27 @@ Use `ITaskItem<string>` and parse `Value` explicitly with the intended culture. 
 
 **Scope:** All `ITask` implementations, including input, output, scalar, and array properties.
 
+### MSBuildTask0011 — Prefer `TaskEnvironment` Constructor Injection
+
+Concrete `IMultiThreadableTask` implementations receive `TaskEnvironment` through their property before execution, but that is too late for constructor logic and property initializers. Add a public constructor whose single parameter is `TaskEnvironment` when construction needs the current task environment:
+
+```csharp
+public class MyTask : Task, IMultiThreadableTask
+{
+    public MyTask(TaskEnvironment taskEnvironment)
+    {
+        TaskEnvironment = taskEnvironment;
+    }
+
+    public TaskEnvironment TaskEnvironment { get; set; }
+    public override bool Execute() => true;
+}
+```
+
+The engine prefers this constructor when it is present. A public parameterless constructor may remain for callers that instantiate the task directly.
+
+**Scope:** Concrete classes implementing `IMultiThreadableTask`. Abstract base classes and tasks that already declare a public single-`TaskEnvironment` constructor do not produce the diagnostic.
+
 ## Analysis Scope
 
 The analyzer determines what to check based on the type declaration:
@@ -273,7 +295,7 @@ The analyzer determines what to check based on the type declaration:
 |---|---|
 | Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009–MSBuildTask0010 |
 | Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
-| Class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0010 only |
+| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
 | Regular class (no task interface or attribute) | Not analyzed |
 
@@ -288,7 +310,7 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
 - **MSBuildTask0010** is always **Error** — task item conversions must not rely on `Convert.ChangeType`.
 - **MSBuildTask0002–MSBuildTask0005 and MSBuildTask0009** report as **Warning** for all task types.
-- **MSBuildTask0006–MSBuildTask0008** report as **Info** — these are modernization suggestions, not correctness issues.
+- **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** report as **Info** — these are modernization suggestions, not correctness issues.
 
 ## Code Fixes
 

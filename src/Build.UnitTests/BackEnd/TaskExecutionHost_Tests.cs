@@ -1752,6 +1752,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ml.AssertLogContains("a=b");
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14459")]
         [Theory]
         [InlineData(typeof(OutOfMemoryException), true)]
         [InlineData(typeof(ArgumentException), false)]
