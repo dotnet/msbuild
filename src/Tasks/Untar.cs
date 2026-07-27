@@ -127,7 +127,7 @@ namespace Microsoft.Build.Tasks
 
                         try
                         {
-                            using FileStream stream = new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false);
+                            using FileStream stream = sourceFile.OpenRead();
 
                             // Detect and unwrap any compression applied to the tar archive. The decompression stream (if any)
                             // and the TarReader are disposed by the enclosing using statements below.
