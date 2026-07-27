@@ -182,7 +182,8 @@ resolver that would have to be **dynamically loaded** in a host that cannot do s
 > `Project`/`ProjectInstance`/`ProjectGraph`/`ProjectCollection` surface, the
 > `SdkResolverService_Tests` switch tests, and the `aot-validation` harness's
 > `Evaluation_InBoxSdkResolvesReflectionFree` test (the harness's `#pragma warning disable IL2026`
-> is gone). `Microsoft.Build` builds warning-free for `net10.0`; the harness is green under Native AOT.
+> is gone). `Microsoft.Build` builds warning-free for the .NETCoreApp TFM; the harness is green
+> under Native AOT.
 
 ### 2.1 Goal and shape
 
@@ -346,7 +347,7 @@ see the
   RUC is gone and in-box resolution is reflection-free), and a test asserting that a
   NuGet-SDK project throws the observable error under AOT. These replace the harness's current
   `#pragma warning disable IL2026`.
-* **Warning check**: rebuild `Microsoft.Build` for `net10.0` and confirm zero new IL warnings
+* **Warning check**: rebuild `Microsoft.Build` for .NETCoreApp and confirm zero new IL warnings
   - the `[FeatureGuard]` satisfies the analyzer and the leaves keep their RUC.
 
 ### 2.7 Payoff and risk

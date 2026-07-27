@@ -377,6 +377,28 @@ internal class ReusableLogger : INodeLogger, IEventSource5
     #endregion
 
     /// <summary>
+    /// Reroutes the wrapped logger's subscriptions without reinitializing it.
+    /// </summary>
+    internal void RerouteActiveEventSource(IEventSource newEventSource)
+    {
+        ArgumentNullException.ThrowIfNull(newEventSource);
+
+        if (_buildTimeEventSource != null)
+        {
+            UnregisterForEvents(_buildTimeEventSource);
+            _buildTimeEventSource = newEventSource;
+            RegisterForEvents(_buildTimeEventSource);
+        }
+        else
+        {
+            Assumed.NotNull(_designTimeEventSource, "ReusableLogger must be initialized before its event source can be rerouted.");
+            UnregisterForEvents(_designTimeEventSource!);
+            _designTimeEventSource = newEventSource;
+            RegisterForEvents(_designTimeEventSource);
+        }
+    }
+
+    /// <summary>
     /// Registers for all of the events on the specified event source.
     /// </summary>
     private void RegisterForEvents(IEventSource eventSource)

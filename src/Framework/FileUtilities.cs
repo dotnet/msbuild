@@ -657,6 +657,27 @@ namespace Microsoft.Build.Framework
         }
 
         /// <summary>
+        /// Returns true if any path segment is exactly "..", without allocating.
+        /// </summary>
+        internal static bool ContainsParentTraversalSegment(ReadOnlySpan<char> path)
+        {
+            // Walk each segment; return true only for a segment that is exactly "..".
+            while (!path.IsEmpty)
+            {
+                int sep = path.IndexOfAny(Slashes);
+                ReadOnlySpan<char> segment = sep < 0 ? path : path.Slice(0, sep);
+                if (segment.SequenceEqual("..".AsSpan()))
+                {
+                    return true;
+                }
+
+                path = sep < 0 ? default : path.Slice(sep + 1);
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Gets the canonicalized full path of the provided path.
         /// Guidance for use: call this on all paths accepted through public entry
         /// points that need normalization. After that point, only verify the path

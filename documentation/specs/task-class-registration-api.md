@@ -59,12 +59,22 @@ the task **parameter type** registry on `TaskItem`:
 +    /// task type's public properties under trimming (parameter binding still reflects over them).
 +    /// </summary>
 +    public static void RegisterTask(string taskName, Func<ITask> factory);
++
++    /// <summary>
++    /// Registers a task under the given name with a factory that receives the TaskEnvironment the engine is
++    /// running the task with, so a task can consume it during construction (for example to compute property
++    /// defaults that depend on the environment). Fully reflection-free.
++    /// </summary>
++    public static void RegisterTask(string taskName, Func<TaskEnvironment, ITask> factory);
  }
 ```
 
 The generic overload is the trim-safe primitive (its `[DynamicallyAccessedMembers]` roots the type, and
 construction is `new T()`); the `Func<ITask>` overload is the convenience for tasks without a public
-parameterless constructor or that need custom construction. Both forward to an internal
+parameterless constructor or that need custom construction; the `Func<TaskEnvironment, ITask>` overload is
+for tasks that need the [`TaskEnvironment`](multithreading/thread-safe-tasks.md) at construction (a task whose
+only constructor takes a `TaskEnvironment` cannot satisfy the generic overload's `new()` constraint). Both
+forward to an internal
 [`TaskClassRegistry`](../../src/Framework/TaskClassRegistry.cs) in Microsoft.Build.Framework - the lowest
 assembly - so the engine, the task library, and the public surface all reach it. Placing the methods on the
 existing public `Task` keeps the surface minimal, the same trade-off the parameter-type registry made by
@@ -172,12 +182,17 @@ Microsoft.Build.Tasks.BuiltInTasks.RegisterAll();
 
 Implemented in this change:
 
-- **API.** `RegisterTask<T>(string)` and `RegisterTask(string, Func<ITask>)` on
+- **API.** `RegisterTask<T>(string)`, `RegisterTask(string, Func<ITask>)`, and
+  `RegisterTask(string, Func<TaskEnvironment, ITask>)` on
   [`Microsoft.Build.Utilities.Task`](../../src/Utilities/Task.cs), forwarding to the internal
   [`TaskClassRegistry`](../../src/Framework/TaskClassRegistry.cs) (a name -> registration map; each
-  [`TaskClassRegistration`](../../src/Framework/TaskClassRegistration.cs) holds a `Func<ITask>` and a
-  `LoadedType` built once, eagerly for the generic overload where the type's `[DynamicallyAccessedMembers]`
-  is in scope).
+  [`TaskClassRegistration`](../../src/Framework/TaskClassRegistration.cs) holds a
+  `Func<TaskEnvironment, ITask>` and a `LoadedType` built once, eagerly for the generic overload where the
+  type's `[DynamicallyAccessedMembers]` is in scope). A registered task type that declares a
+  `TaskEnvironment` constructor gets the environment injected at construction (mirroring the reflective
+  task-load path); the generic overload does this over the trim-rooted type, and the
+  `Func<TaskEnvironment, ITask>` overload lets a host supply the environment for a task whose only
+  constructor takes one.
 - **Engine wiring.** [`TaskExecutionHost`](../../src/Build/BackEnd/TaskExecutionHost/TaskExecutionHost.cs)
   consults the registry first in `FindTask` (building a `TaskFactoryWrapper` from a new
   [`RegisteredTaskFactory`](../../src/Build/Instance/TaskFactories/RegisteredTaskFactory.cs) and the

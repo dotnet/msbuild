@@ -2162,7 +2162,7 @@ namespace Microsoft.Build.Construction
         {
             if (HasUnsavedChanges && throwIfUnsavedChanges)
             {
-                ErrorUtilities.ThrowInvalidOperation("NoReloadOnUnsavedChanges", null);
+                ErrorUtilities.ThrowInvalidOperation("NoReloadOnUnsavedChanges");
             }
         }
     }

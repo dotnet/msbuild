@@ -93,7 +93,7 @@
   <ItemGroup>
     <None Include="buildTransitive\Microsoft.Build.Framework.targets"
           Pack="true"
-          PackagePath="buildTransitive\Microsoft.Build.Framework.targets" />
+          PackagePath="buildTransitive\net10.0\Microsoft.Build.Framework.targets" />
 
     <PackageReference Include="Microsoft.CodeAnalysis.Contracts" PrivateAssets="all" />
 

@@ -390,6 +390,7 @@ namespace Microsoft.Build.BackEnd
                     taskLocation.Column,
                     new TaskLoader.LogError((taskLoc, taskLine, taskColumn, message, messageArgs) =>
                         taskLoggingContext.LogError(new BuildEventFileInfo(taskLoc, taskLine, taskColumn), message, messageArgs)),
+                    taskEnvironment,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
                     appDomain => AssemblyLoadsTracker.StartTracking(taskLoggingContext, AssemblyLoadingContext.TaskRun, _loadedType.Type, appDomain),

@@ -40,6 +40,7 @@ usage()
   echo "  --projects <value>       Project or solution file(s) to build"
   echo "  --ci                     Set when running on CI server"
   echo "  --excludeCIBinarylog     Don't output binary log (short: -nobl)"
+  echo "  --pipelinesLog           Promote msbuild errors/warnings to Azure Pipelines timeline issues; defaults to on in CI (short: -pl)"
   echo "  --prepareMachine         Prepare machine for CI run, clean up processes after build"
   echo "  --nodeReuse <value>      Sets nodereuse msbuild parameter ('true' or 'false')"
   echo "  --warnAsError <value>    Sets warnaserror msbuild parameter ('true' or 'false')"
@@ -88,6 +89,7 @@ build_check=false
 binary_log=false
 binary_log_name=''
 exclude_ci_binary_log=false
+pipelines_log=false
 
 projects=''
 configuration=''
@@ -125,6 +127,9 @@ while [[ $# -gt 0 ]]; do
       ;;
     -excludecibinarylog|-nobl)
       exclude_ci_binary_log=true
+      ;;
+    -pipelineslog|-pl)
+      pipelines_log=true
       ;;
     -restore|-r)
       restore=true
@@ -218,6 +223,7 @@ if [[ -z "$configuration" ]]; then
 fi
 
 if [[ "$ci" == true ]]; then
+  pipelines_log=true
   # Disable node reuse on CI unless explicitly opted in via MSBUILD_NODEREUSE_ENABLED.
   # Internal testing only; this env var will be replaced with a switch (https://github.com/dotnet/arcade/issues/17013) and must not be depended on.
   if [[ "${MSBUILD_NODEREUSE_ENABLED:-}" != "1" ]]; then

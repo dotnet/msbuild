@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -2541,5 +2541,112 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
   <data name="DotnetHostPathIsDirectory" xml:space="preserve">
     <value>MSB4280: The environment variable DOTNET_HOST_PATH is set to a directory ("{0}") instead of a path to the dotnet executable. This can lead to build errors in tasks that use this variable such as the Roslyn compiler. Either unset the variable or update it to point to the dotnet executable directly (e.g. "C:\Program Files\dotnet\dotnet.exe").</value>
     <comment>{StrBegin="MSB4280: "}UE: This warning is shown when the DOTNET_HOST_PATH environment variable is set to a directory path rather than a file path. The variable should point to the dotnet executable, not a directory containing it.</comment>
+  </data>
+  <data name="BuildAborted" xml:space="preserve">
+    <value>MSB4188: Build was canceled.</value>
+    <comment>{StrBegin="MSB4188: "} Error when the build stops suddenly for some reason. For example, because a child node died.</comment>
+  </data>
+  <data name="DeprecatedEventSerialization" xml:space="preserve">
+    <value>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</value>
+  </data>
+  <data name="InvalidProjectFile" xml:space="preserve">
+    <value>MSB4025: The project file could not be loaded. {0}</value>
+    <comment>{StrBegin="MSB4025: "}UE: This message is shown when the project file given to the engine cannot be loaded because the filename/path is
+    invalid, or due to lack of permissions, or incorrect XML. The project filename is not part of the message because it is
+    provided separately to loggers.
+    LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</comment>
+  </data>
+  <data name="InvalidVerbosity" xml:space="preserve">
+    <value>MSB4103: "{0}" is not a valid logger verbosity level.</value>
+    <comment>{StrBegin="MSB4103: "}</comment>
+  </data>
+  <data name="OM_NotSupportedReadOnlyCollection" xml:space="preserve">
+    <value>This collection is read-only.</value>
+  </data>
+  <data name="ProjectFileIsMalformed" xml:space="preserve">
+    <value>MSB5019: The project file is malformed: "{0}". {1}</value>
+    <comment>{StrBegin="MSB5019: "}</comment>
+  </data>
+  <data name="ProjectFileCouldNotBeLoaded" xml:space="preserve">
+    <value>MSB5020: Could not load the project file: "{0}". {1}</value>
+    <comment>{StrBegin="MSB5020: "}</comment>
+  </data>
+  <data name="SolutionFilterFilterContainsProjectNotInSolution" xml:space="preserve">
+    <value>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</value>
+    <comment>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionFilterJsonParsingError" xml:space="preserve">
+    <value>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</value>
+    <comment>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionFilterMissingSolutionError" xml:space="preserve">
+    <value>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</value>
+    <comment>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseDuplicateProject" xml:space="preserve">
+    <value>MSB5004: The solution file has two projects named "{0}".</value>
+    <comment>{StrBegin="MSB5004: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseInvalidProjectFileNameCharacters" xml:space="preserve">
+    <value>MSB5005: Error parsing project section for project "{0}". The project file name "{1}" contains invalid characters.</value>
+    <comment>{StrBegin="MSB5005: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseInvalidProjectFileNameEmpty" xml:space="preserve">
+    <value>MSB5006: Error parsing project section for project "{0}". The project file name is empty.</value>
+    <comment>{StrBegin="MSB5006: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseInvalidProjectSolutionConfigurationEntry" xml:space="preserve">
+    <value>MSB5007: Error parsing the project configuration section in solution file. The entry "{0}" is invalid.</value>
+    <comment>{StrBegin="MSB5007: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseInvalidSolutionConfigurationEntry" xml:space="preserve">
+    <value>MSB5008: Error parsing the solution configuration section in solution file. The entry "{0}" is invalid.</value>
+    <comment>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseNestedProjectError" xml:space="preserve">
+    <value>MSB5009: Error parsing the nested project section in solution file.</value>
+    <comment>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseNestedProjectErrorWithNameAndGuid" xml:space="preserve">
+    <value>MSB5009: Error parsing the project "{0}" section with GUID: "{1}". It is nested under "{2}" but that project is not found in the solution.</value>
+    <comment>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseNestedProjectUndefinedError" xml:space="preserve">
+    <value>MSB5023: Error parsing the nested project section in solution file. A project with the GUID "{0}" is listed as being nested under project "{1}", but does not exist in the solution.</value>
+    <comment>{StrBegin="MSB5023: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseNoHeaderError" xml:space="preserve">
+    <value>MSB5010: No file format header found.</value>
+    <comment>{StrBegin="MSB5010: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseProjectDepGuidError" xml:space="preserve">
+    <value>MSB5011: Parent project GUID not found in "{0}" project dependency section.</value>
+    <comment>{StrBegin="MSB5011: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseProjectEofError" xml:space="preserve">
+    <value>MSB5012: Unexpected end-of-file reached inside "{0}" project section.</value>
+    <comment>{StrBegin="MSB5012: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseProjectError" xml:space="preserve">
+    <value>MSB5013: Error parsing a project section.</value>
+    <comment>{StrBegin="MSB5013: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseVersionMismatchError" xml:space="preserve">
+    <value>MSB5014: File format version is not recognized.  MSBuild can only read solution files between versions {0}.0 and {1}.0, inclusive.</value>
+    <comment>{StrBegin="MSB5014: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SolutionParseWebProjectPropertiesError" xml:space="preserve">
+    <value>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</value>
+    <comment>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</comment>
+  </data>
+  <data name="SubCategoryForSolutionParsingErrors" xml:space="preserve">
+    <value>Solution file</value>
+    <comment>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
+      "MSBUILD : Solution file error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.</comment>
+  </data>
+  <data name="UnrecognizedSolutionComment" xml:space="preserve">
+    <value>Unrecognized solution version "{0}", attempting to continue.</value>
   </data>
 </root>

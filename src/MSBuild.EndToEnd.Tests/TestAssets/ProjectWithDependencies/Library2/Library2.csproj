@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <TargetFramework>net10.0</TargetFramework>
+    <TargetFramework>net11.0</TargetFramework>
     <LangVersion>latest</LangVersion>
   </PropertyGroup>
   
@@ -8,4 +9,5 @@
     <ProjectReference Include="..\Library3\Library3.csproj" />
     <ProjectReference Include="..\Library4\Library4.csproj" />
   </ItemGroup>
+
 </Project>
