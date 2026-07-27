@@ -7,7 +7,6 @@
 using System;
 using System.IO;
 using Microsoft.Build.UnitTests;
-using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
@@ -36,9 +35,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Untar untar = new Untar
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(destination.Path),
+                    DestinationFolder = new DirectoryInfo(destination.Path),
                     SkipUnchangedFiles = false,
-                    SourceFiles = [new TaskItem(tarFilePath)],
+                    SourceFiles = [new FileInfo(tarFilePath)],
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
@@ -65,9 +64,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Untar untar = new Untar
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(destination.Path),
+                    DestinationFolder = new DirectoryInfo(destination.Path),
                     SkipUnchangedFiles = false,
-                    SourceFiles = [new TaskItem(tarFilePath)],
+                    SourceFiles = [new FileInfo(tarFilePath)],
                     Include = "included.txt",
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
@@ -95,9 +94,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Untar untar = new Untar
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(destination.Path),
+                    DestinationFolder = new DirectoryInfo(destination.Path),
                     SkipUnchangedFiles = false,
-                    SourceFiles = [new TaskItem(tarFilePath)],
+                    SourceFiles = [new FileInfo(tarFilePath)],
                     Exclude = "dropped.txt",
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
@@ -124,9 +123,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Untar CreateTask() => new Untar
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(destination.Path),
+                    DestinationFolder = new DirectoryInfo(destination.Path),
                     SkipUnchangedFiles = true,
-                    SourceFiles = [new TaskItem(tarFilePath)],
+                    SourceFiles = [new FileInfo(tarFilePath)],
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
@@ -155,9 +154,9 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Untar untar = new Untar
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(destination.Path),
+                    DestinationFolder = new DirectoryInfo(destination.Path),
                     SkipUnchangedFiles = false,
-                    SourceFiles = [new TaskItem(tarFilePath)],
+                    SourceFiles = [new FileInfo(tarFilePath)],
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
@@ -177,8 +176,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Untar untar = new Untar
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(destination.Path),
-                    SourceFiles = [new TaskItem(Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "missing.tar"))],
+                    DestinationFolder = new DirectoryInfo(destination.Path),
+                    SourceFiles = [new FileInfo(Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "missing.tar"))],
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
@@ -201,8 +200,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Untar untar = new Untar
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(destination.Path),
-                    SourceFiles = [new TaskItem(corrupt.Path)],
+                    DestinationFolder = new DirectoryInfo(destination.Path),
+                    SourceFiles = [new FileInfo(corrupt.Path)],
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 
@@ -227,8 +226,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Untar untar = new Untar
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(destination.Path),
-                    SourceFiles = [new TaskItem(tarFilePath)],
+                    DestinationFolder = new DirectoryInfo(destination.Path),
+                    SourceFiles = [new FileInfo(tarFilePath)],
                     Include = "$(Include)",
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
@@ -254,10 +253,10 @@ namespace Microsoft.Build.Tasks.UnitTests
                 Untar untar = new Untar
                 {
                     BuildEngine = _mockEngine,
-                    DestinationFolder = new TaskItem(destination.Path),
+                    DestinationFolder = new DirectoryInfo(destination.Path),
                     FailIfNotIncremental = true,
                     SkipUnchangedFiles = false,
-                    SourceFiles = [new TaskItem(tarFilePath)],
+                    SourceFiles = [new FileInfo(tarFilePath)],
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
                 };
 

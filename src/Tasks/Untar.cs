@@ -47,10 +47,10 @@ namespace Microsoft.Build.Tasks
         private string[] _excludePatterns = [];
 
         /// <summary>
-        /// Gets or sets a <see cref="ITaskItem"/> with a destination folder path to untar the files to.
+        /// Gets or sets a <see cref="DirectoryInfo"/> with a destination folder path to untar the files to.
         /// </summary>
         [Required]
-        public ITaskItem DestinationFolder { get; set; } = null!;
+        public DirectoryInfo DestinationFolder { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets a value that indicates whether read-only files should be overwritten.
@@ -63,11 +63,11 @@ namespace Microsoft.Build.Tasks
         public bool SkipUnchangedFiles { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets an array of <see cref="ITaskItem"/> objects containing the paths to tar archive files to untar.
+        /// Gets or sets an array of <see cref="FileInfo"/> objects containing the paths to tar archive files to untar.
         /// The compression (none, GZip, or ZStandard) is detected automatically from the archive contents.
         /// </summary>
         [Required]
-        public ITaskItem[] SourceFiles { get; set; } = null!;
+        public FileInfo[] SourceFiles { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets an MSBuild glob expression that specifies which files to include being untarred from the archive.
@@ -100,12 +100,11 @@ namespace Microsoft.Build.Tasks
             DirectoryInfo destinationDirectory;
             try
             {
-                AbsolutePath destinationPath = TaskEnvironment.GetAbsolutePath(DestinationFolder.ItemSpec);
-                destinationDirectory = Directory.CreateDirectory(destinationPath);
+                destinationDirectory = Directory.CreateDirectory(DestinationFolder.FullName);
             }
             catch (Exception e)
             {
-                Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotCreateDestinationDirectory", DestinationFolder.ItemSpec, e.Message);
+                Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotCreateDestinationDirectory", DestinationFolder.FullName, e.Message);
 
                 return false;
             }
@@ -118,28 +117,17 @@ namespace Microsoft.Build.Tasks
 
                 if (!Log.HasLoggedErrors)
                 {
-                    foreach (ITaskItem sourceFile in SourceFiles.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
+                    foreach (FileInfo sourceFile in SourceFiles.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
                     {
-                        AbsolutePath sourceFilePath;
-                        try
+                        if (!FileSystems.Default.FileExists(sourceFile.FullName))
                         {
-                            sourceFilePath = TaskEnvironment.GetAbsolutePath(sourceFile.ItemSpec);
-                        }
-                        catch (Exception)
-                        {
-                            Log.LogErrorWithCodeFromResources("Untar.ErrorFileDoesNotExist", sourceFile.ItemSpec);
-                            continue;
-                        }
-
-                        if (!FileSystems.Default.FileExists(sourceFilePath))
-                        {
-                            Log.LogErrorWithCodeFromResources("Untar.ErrorFileDoesNotExist", sourceFile.ItemSpec);
+                            Log.LogErrorWithCodeFromResources("Untar.ErrorFileDoesNotExist", sourceFile.FullName);
                             continue;
                         }
 
                         try
                         {
-                            using FileStream stream = new FileStream(sourceFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false);
+                            using FileStream stream = new FileStream(sourceFile.FullName, FileMode.Open, FileAccess.Read, FileShare.Read, bufferSize: 0x1000, useAsync: false);
 
                             // Detect and unwrap any compression applied to the tar archive. The decompression stream (if any)
                             // and the TarReader are disposed by the enclosing using statements below.
@@ -159,7 +147,7 @@ namespace Microsoft.Build.Tasks
                             catch (Exception e)
                             {
                                 // Should only be thrown if the archive could not be read (corrupt file, etc).
-                                Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotOpenFile", sourceFile.ItemSpec, e.Message);
+                                Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotOpenFile", sourceFile.FullName, e.Message);
                             }
                         }
                         catch (OperationCanceledException)
@@ -169,7 +157,7 @@ namespace Microsoft.Build.Tasks
                         catch (Exception e)
                         {
                             // Should only be thrown if the archive could not be opened (Access denied, corrupt file, etc).
-                            Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotOpenFile", sourceFile.ItemSpec, e.Message);
+                            Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotOpenFile", sourceFile.FullName, e.Message);
                         }
                     }
                 }
