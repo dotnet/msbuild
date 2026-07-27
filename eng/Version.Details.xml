@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="812e3e28c380da3b0b206506ee2eeb54697d3bd1" BarId="322206" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="dfdd32e8a9349462e71f687679bc7e5837b8ef4a" BarId="324417" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="10.0.8">
@@ -33,7 +33,7 @@
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Formats.Asn1" Version="10.0.8">
+    <Dependency Name="System.Formats.Asn1" Version="10.0.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
@@ -69,13 +69,13 @@
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Pkcs" Version="10.0.8">
+    <Dependency Name="System.Security.Cryptography.Pkcs" Version="10.0.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
     </Dependency>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
-    <Dependency Name="System.Security.Cryptography.Xml" Version="10.0.8">
+    <Dependency Name="System.Security.Cryptography.Xml" Version="10.0.10">
       <Uri>https://github.com/dotnet/runtime</Uri>
       <Sha>
       </Sha>
