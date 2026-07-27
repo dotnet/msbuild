@@ -809,13 +809,16 @@ namespace Microsoft.Build.BackEnd
                             }
 
                             byte parentVersion = 0;
-                            if (hasExtendedHeader)
-                            {
-                                parentVersion = NodePacketTypeExtensions.ReadVersion(deserializationStream);
-                            }
-
                             try
                             {
+                                if (hasExtendedHeader)
+                                {
+                                    // Reads the version byte from the body; can throw EndOfStreamException on a
+                                    // truncated/corrupted extended-header packet (e.g. empty body). Kept inside the
+                                    // try so it fails gracefully as a link failure instead of escaping the loop.
+                                    parentVersion = NodePacketTypeExtensions.ReadVersion(deserializationStream);
+                                }
+
                                 ITranslator readTranslator = BinaryTranslator.GetReadTranslator(deserializationStream, _sharedReadBuffer);
 
                                 // parent sends a packet version that is already negotiated during handshake.
