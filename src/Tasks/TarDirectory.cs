@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
@@ -114,8 +115,8 @@ namespace Microsoft.Build.Tasks
                 using FileStream destinationStream = DestinationFile.OpenWrite();
 
                 // Wrap the destination stream in the requested compression, if any. The tar archive is always
-                // written to the (optionally compressed) stream using the new .NET 11 overload that honors the
-                // requested TarEntryFormat.
+                // written to the (optionally compressed) stream, and the TarWriter is created with the requested
+                // TarEntryFormat so every entry is emitted in that format.
                 using Stream? compressionStream = Compression switch
                 {
                     TarCompression.GZip => new GZipStream(destinationStream, CompressionLevel.Optimal),
@@ -123,7 +124,15 @@ namespace Microsoft.Build.Tasks
                     _ => null,
                 };
 
-                TarFile.CreateFromDirectory(SourceDirectory.FullName, compressionStream ?? destinationStream, includeBaseDirectory: false, format);
+                // Write the archive entry-by-entry (rather than the one-shot TarFile.CreateFromDirectory) so that the
+                // entries are emitted in a deterministic, ordinal-sorted order. Per-entry metadata is written exactly
+                // as TarFile.CreateFromDirectory would via WriteEntry(fullPath, entryName); only the order is affected.
+                using TarWriter writer = new TarWriter(compressionStream ?? destinationStream, format, leaveOpen: true);
+
+                foreach ((string fullPath, string entryName) in EnumerateEntriesInDeterministicOrder())
+                {
+                    writer.WriteEntry(fullPath, entryName);
+                }
             }
             catch (Exception e)
             {
@@ -135,6 +144,50 @@ namespace Microsoft.Build.Tasks
             }
 
             return !Log.HasLoggedErrors;
+        }
+
+        /// <summary>
+        /// Enumerates every filesystem entry under <see cref="SourceDirectory"/> paired with the name it should be
+        /// given inside the archive, sorted by entry name using an ordinal comparison so that the archive is written
+        /// in a deterministic, reproducible order regardless of how the underlying filesystem enumerates directory
+        /// contents. This mirrors the entry naming of <see cref="TarFile.CreateFromDirectory(string, Stream, bool, TarEntryFormat)"/>
+        /// (relative, forward-slash separated, directories suffixed with '/', base directory excluded).
+        /// </summary>
+        private List<(string FullPath, string EntryName)> EnumerateEntriesInDeterministicOrder()
+        {
+            string basePath = FileUtilities.EnsureTrailingSlash(SourceDirectory.FullName);
+
+            List<(string FullPath, string EntryName)> entries = [];
+            CollectEntries(SourceDirectory, basePath, entries);
+
+            // Order determinism: sort by the in-archive entry name using an ordinal comparison. Because a
+            // directory's entry name ends in '/', it is always a prefix of the names of everything it contains,
+            // so directories sort ahead of their own contents, preserving the parent-before-children ordering
+            // that tar expects for restoring directory timestamps.
+            entries.Sort(static (left, right) => string.CompareOrdinal(left.EntryName, right.EntryName));
+
+            return entries;
+        }
+
+        /// <summary>
+        /// Recursively collects the filesystem entries under <paramref name="directory"/> into <paramref name="entries"/>.
+        /// Directory symlinks and junctions are recorded as entries but are not recursed into, matching the behavior of
+        /// <see cref="TarFile.CreateFromDirectory(string, Stream, bool, TarEntryFormat)"/> and avoiding reparse-point cycles.
+        /// </summary>
+        private static void CollectEntries(DirectoryInfo directory, string basePath, List<(string FullPath, string EntryName)> entries)
+        {
+            foreach (FileSystemInfo info in directory.EnumerateFileSystemInfos())
+            {
+                bool isRealDirectory = info is DirectoryInfo && (info.Attributes & FileAttributes.ReparsePoint) == 0;
+
+                string relativePath = info.FullName.Substring(basePath.Length).Replace('\\', '/');
+                entries.Add((info.FullName, isRealDirectory ? relativePath + "/" : relativePath));
+
+                if (isRealDirectory)
+                {
+                    CollectEntries((DirectoryInfo)info, basePath, entries);
+                }
+            }
         }
 
         /// <summary>

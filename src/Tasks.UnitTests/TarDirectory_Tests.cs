@@ -199,6 +199,53 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [Fact]
+        public void WritesEntriesInDeterministicSortedOrder()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                // Create files and a nested directory in a deliberately non-sorted order to prove the task
+                // reorders them rather than relying on the filesystem enumeration order.
+                testEnvironment.CreateFile(sourceFolder, "zebra.txt", "z");
+                testEnvironment.CreateFile(sourceFolder, "apple.txt", "a");
+                TransientTestFolder nestedFolder = testEnvironment.CreateFolder(Path.Combine(sourceFolder.Path, "middle"), createFolder: true);
+                testEnvironment.CreateFile(nestedFolder, "inner.txt", "i");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFile = new FileInfo(tarFilePath),
+                    SourceDirectory = new DirectoryInfo(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                // Entries must be emitted in ordinal-sorted order, and a directory must always precede its
+                // contents (its name ends in '/', which is a prefix of everything inside it).
+                GetAllTarEntryNames(tarFilePath)
+                    .ShouldBe(["apple.txt", "middle/", "middle/inner.txt", "zebra.txt"]);
+            }
+        }
+
+        private static List<string> GetAllTarEntryNames(string tarFilePath)
+        {
+            List<string> names = new List<string>();
+
+            using FileStream stream = new FileStream(tarFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using TarReader reader = new TarReader(stream);
+            for (TarEntry? entry = reader.GetNextEntry(); entry is not null; entry = reader.GetNextEntry())
+            {
+                names.Add(entry.Name);
+            }
+
+            return names;
+        }
+
         private static List<string> GetTarEntryNames(string tarFilePath, TarDirectory.TarCompression compression)
         {
             List<string> names = new List<string>();
