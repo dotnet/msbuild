@@ -20,7 +20,7 @@ namespace Microsoft.Build.UnitTests
         public void RequiredRuntimeAttribute()
         {
             RequiredRuntimeAttribute attribute =
-                typeof(X).GetTypeInfo().GetCustomAttribute<RequiredRuntimeAttribute>();
+                typeof(X).GetCustomAttribute<RequiredRuntimeAttribute>();
 
             attribute.RuntimeVersion.ShouldBe("v5");
         }

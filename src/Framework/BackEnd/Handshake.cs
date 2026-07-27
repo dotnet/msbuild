@@ -22,6 +22,18 @@ internal class Handshake
     protected readonly HandshakeComponents _handshakeComponents;
 
     /// <summary>
+    /// For the .NET task host on Windows, the salt computed from the tools directory with the
+    /// opposite drive-letter casing (e.g. "d:\..." in addition to "D:\..."), or <see langword="null"/>
+    /// when not applicable. The parent and child derive the tools directory from different sources
+    /// (the parent from the <c>$(NetCoreSdkRoot)</c> property, the child from its own process path)
+    /// whose only realistic divergence is drive-letter casing; both spellings denote the same
+    /// directory. The child accepts this variant so it can connect to a parent that spelled the
+    /// drive differently. This only widens what the child accepts, so it never rejects a parent that
+    /// connects successfully today.
+    /// </summary>
+    private readonly int? _netTaskHostSaltDriveCaseVariant;
+
+    /// <summary>
     ///  Initializes a new instance of the <see cref="Handshake"/> class with the specified node type.
     /// </summary>
     /// <param name="nodeType">
@@ -82,6 +94,17 @@ internal class Handshake
 
         int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
 
+        // The .NET task host parent (.NET Framework MSBuild, e.g. Visual Studio) and child
+        // (.NET SDK MSBuild) compute this salt independently from different sources, and on Windows
+        // those can differ only by drive-letter casing ("D:\..." vs "d:\..."). Because the salt is a
+        // case-sensitive hash, that produces a mismatch and the otherwise-valid handshake fails with
+        // MSB4216. Precompute the salt for the alternate drive-letter casing so the child also accepts
+        // the parent's spelling (see IsNetTaskHostSaltMatch). Only the child consults this value.
+        if (IsNetTaskHost && TryGetDriveLetterCaseVariant(toolsDirectory, out string? alternateToolsDirectory))
+        {
+            _netTaskHostSaltDriveCaseVariant = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{alternateToolsDirectory}");
+        }
+
         CommunicationsUtilities.Trace($"Handshake salt is {handshakeSalt}");
         CommunicationsUtilities.Trace($"Tools directory root is {toolsDirectory}");
 
@@ -105,6 +128,47 @@ internal class Handshake
     private bool IsNetTaskHost
         => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.NET | HandshakeOptions.TaskHost);
 
+    /// <summary>
+    /// Determines whether <paramref name="receivedSalt"/> matches this node's salt computed for the
+    /// alternate drive-letter casing of its tools directory. Used only by the .NET task host child to
+    /// tolerate a parent that resolved the same SDK directory with different drive-letter casing
+    /// (e.g. "D:\..." vs "d:\..."), which would otherwise fail the case-sensitive handshake with
+    /// MSB4216. Returns <see langword="false"/> for every other node type and configuration, so the
+    /// exact salt remains required there.
+    /// </summary>
+    public bool IsNetTaskHostSaltMatch(int receivedSalt)
+        => _netTaskHostSaltDriveCaseVariant is int alternateSalt
+            && receivedSalt == CommunicationsUtilities.AvoidEndOfHandshakeSignal(alternateSalt);
+
+    /// <summary>
+    /// Produces <paramref name="path"/> with the drive letter switched to the opposite casing
+    /// (e.g. "D:\dir" -&gt; "d:\dir"). Returns <see langword="false"/> when there is nothing to flip:
+    /// off Windows, for empty paths, for paths without a drive letter (such as UNC paths), or when the
+    /// drive letter is not an ASCII letter.
+    /// </summary>
+    private static bool TryGetDriveLetterCaseVariant(string? path, out string? variant)
+    {
+        variant = null;
+
+        if (!NativeMethods.IsWindows || string.IsNullOrEmpty(path) || path!.Length < 2 || path[1] != ':')
+        {
+            return false;
+        }
+
+        char drive = path[0];
+        char flippedDrive = char.IsUpper(drive)
+            ? char.ToLowerInvariant(drive)
+            : char.IsLower(drive) ? char.ToUpperInvariant(drive) : drive;
+
+        if (flippedDrive == drive)
+        {
+            return false;
+        }
+
+        variant = flippedDrive + path.Substring(1);
+        return true;
+    }
+
 #if NETFRAMEWORK
     private bool IsClr2TaskHost
         => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2 | HandshakeOptions.TaskHost);
@@ -121,7 +185,11 @@ internal class Handshake
 
     private static HandshakeComponents CreateStandardComponents(int options, int salt, int sessionId)
     {
-        var fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion!);
+        // Read the file version from the assembly's AssemblyFileVersionAttribute rather than from the file on
+        // disk: Assembly.Location is empty in a single-file/Native AOT host (and the on-disk read carries an
+        // IL3000), while the attribute carries the same value and is preserved under trimming.
+        var fileVersion = new Version(
+            Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);
 
         return new(
             options,

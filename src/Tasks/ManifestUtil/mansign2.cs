@@ -241,22 +241,33 @@ namespace System.Deployment.Internal.CodeSigning
         private const string Sha256SignatureMethodUri = @"http://www.w3.org/2000/09/xmldsig#rsa-sha256";
         private const string Sha256DigestMethod = @"http://www.w3.org/2000/09/xmldsig#sha256";
 
+        internal const string SignedXmlRequiresUnreferencedCodeMessage = "SignedXml resolves transform and digest algorithm implementations by name; they may be trimmed.";
+        internal const string SignedXmlRequiresDynamicCodeMessage = "SignedXml uses XmlDsigXsltTransform, which relies on XslCompiledTransform and is not supported with Native AOT.";
+
+        [RequiresUnreferencedCode(SignedXmlRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignedXmlRequiresDynamicCodeMessage)]
         internal ManifestSignedXml2()
             : base()
         {
             init();
         }
+        [RequiresUnreferencedCode(SignedXmlRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignedXmlRequiresDynamicCodeMessage)]
         internal ManifestSignedXml2(XmlElement elem)
             : base(elem)
         {
             init();
         }
+        [RequiresUnreferencedCode(SignedXmlRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignedXmlRequiresDynamicCodeMessage)]
         internal ManifestSignedXml2(XmlDocument document)
             : base(document)
         {
             init();
         }
 
+        [RequiresUnreferencedCode(SignedXmlRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(SignedXmlRequiresDynamicCodeMessage)]
         internal ManifestSignedXml2(XmlDocument document, bool verify)
             : base(document)
         {
@@ -321,11 +332,15 @@ namespace System.Deployment.Internal.CodeSigning
             _useSha256 = useSha256;
         }
 
+        [RequiresUnreferencedCode(ManifestSignedXml2.SignedXmlRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(ManifestSignedXml2.SignedXmlRequiresDynamicCodeMessage)]
         internal void Sign(CmiManifestSigner2 signer)
         {
             Sign(signer, null);
         }
 
+        [RequiresUnreferencedCode(ManifestSignedXml2.SignedXmlRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(ManifestSignedXml2.SignedXmlRequiresDynamicCodeMessage)]
         internal void Sign(CmiManifestSigner2 signer, string timeStampUrl, bool disallowMansignTimestampFallback = false)
         {
             // Reset signer infos.
@@ -662,6 +677,8 @@ namespace System.Deployment.Internal.CodeSigning
             return licenseDom;
         }
 
+        [RequiresUnreferencedCode(ManifestSignedXml2.SignedXmlRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(ManifestSignedXml2.SignedXmlRequiresDynamicCodeMessage)]
         private static void AuthenticodeSignLicenseDom(XmlDocument licenseDom, CmiManifestSigner2 signer, string timeStampUrl, bool useSha256, bool disallowMansignTimestampFallback)
         {
             // Make sure it is RSA, as this is the only one Fusion will support.
@@ -816,7 +833,7 @@ namespace System.Deployment.Internal.CodeSigning
                         }
                     }
 
-                    var timestampContext = (Win32.CRYPT_TIMESTAMP_CONTEXT)Marshal.PtrToStructure(ppTsContext, typeof(Win32.CRYPT_TIMESTAMP_CONTEXT));
+                    var timestampContext = Marshal.PtrToStructure<Win32.CRYPT_TIMESTAMP_CONTEXT>(ppTsContext);
                     byte[] encodedBytes = new byte[(int)timestampContext.cbEncoded];
                     Marshal.Copy(timestampContext.pbEncoded, encodedBytes, 0, (int)timestampContext.cbEncoded);
                     timestamp = Convert.ToBase64String(encodedBytes);
@@ -906,6 +923,8 @@ namespace System.Deployment.Internal.CodeSigning
             signatureNode.AppendChild(dsObject);
         }
 
+        [RequiresUnreferencedCode(ManifestSignedXml2.SignedXmlRequiresUnreferencedCodeMessage)]
+        [RequiresDynamicCode(ManifestSignedXml2.SignedXmlRequiresDynamicCodeMessage)]
         private static void StrongNameSignManifestDom(XmlDocument manifestDom, XmlDocument licenseDom, CmiManifestSigner2 signer, bool useSha256)
         {
             RSA snKey = signer.StrongNameKey as RSA;

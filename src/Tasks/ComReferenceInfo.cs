@@ -1,15 +1,17 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if FEATURE_APPDOMAIN
+
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
-// TYPELIBATTR clashes with the one in InteropServices.
-using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
+using Windows.Win32;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Ole;
 
 #nullable disable
 
@@ -23,15 +25,15 @@ namespace Microsoft.Build.Tasks
         #region Properties
 
         /// <summary>
-        /// ITypeLib pointer
+        /// Thread-agile wrapper around the COM ITypeLib pointer for this reference.
         /// </summary>
-        internal ITypeLib typeLibPointer;
+        internal AgileComPointer<ITypeLib> typeLibPointer;
 
         /// <summary>
         /// type library attributes for the reference. Taken from the task item itself or type library if
         /// reference is specified as file on disk.
         /// </summary>
-        internal TYPELIBATTR attr;
+        internal TLIBATTR attr;
 
         /// <summary>
         /// type library name
@@ -112,9 +114,9 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Initialize the object with type library attributes
         /// </summary>
-        internal bool InitializeWithTypeLibAttrs(TaskLoggingHelper log, bool silent, TYPELIBATTR tlbAttr, ITaskItem originalTaskItem, string targetProcessorArchitecture)
+        internal bool InitializeWithTypeLibAttrs(TaskLoggingHelper log, bool silent, TLIBATTR tlbAttr, ITaskItem originalTaskItem, string targetProcessorArchitecture)
         {
-            TYPELIBATTR remappableTlbAttr = tlbAttr;
+            TLIBATTR remappableTlbAttr = tlbAttr;
 
             ComReference.RemapAdoTypeLib(log, silent, ref remappableTlbAttr);
 
@@ -132,7 +134,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Initialize the object with a type library path
         /// </summary>
-        internal bool InitializeWithPath(TaskLoggingHelper log, bool silent, string path, ITaskItem originalTaskItem, string targetProcessorArchitecture)
+        internal unsafe bool InitializeWithPath(TaskLoggingHelper log, bool silent, string path, ITaskItem originalTaskItem, string targetProcessorArchitecture)
         {
             ArgumentNullException.ThrowIfNull(path);
 
@@ -148,35 +150,35 @@ namespace Microsoft.Build.Tasks
             this.fullTypeLibPath = path;
             this.strippedTypeLibPath = ComReference.StripTypeLibNumberFromPath(path, FileSystems.Default.FileExists);
 
-            // use the unstripped path to actually load the library
-            switch (targetProcessorArchitecture)
+            // use the unstripped path to actually load the library.
+            // LOAD_TLB_AS_32BIT (0x20) and LOAD_TLB_AS_64BIT (0x40) are documented LoadTypeLibEx flags that
+            // are not part of the CsWin32 REGKIND enum; OR them onto REGKIND_NONE.
+            REGKIND regKind = targetProcessorArchitecture switch
             {
-                case ProcessorArchitecture.AMD64:
-                case ProcessorArchitecture.IA64:
-                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_NONE | (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_64BIT);
-                    break;
-                case ProcessorArchitecture.X86:
-                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_NONE | (int)NativeMethods.REGKIND.REGKIND_LOAD_TLB_AS_32BIT);
-                    break;
-                case ProcessorArchitecture.ARM:
-                case ProcessorArchitecture.MSIL:
-                default:
-                    // Transmit the flag directly from the .targets files and rely on tlbimp.exe to produce a good error message.
-                    this.typeLibPointer = (ITypeLib)NativeMethods.LoadTypeLibEx(path, (int)NativeMethods.REGKIND.REGKIND_NONE);
-                    break;
-            }
+                ProcessorArchitecture.AMD64 or ProcessorArchitecture.IA64 => (REGKIND)((uint)REGKIND.REGKIND_NONE | PInvoke.LOAD_TLB_AS_64BIT),
+                ProcessorArchitecture.X86 => (REGKIND)((uint)REGKIND.REGKIND_NONE | PInvoke.LOAD_TLB_AS_32BIT),
+                // Transmit the flag directly from the .targets files and rely on tlbimp.exe to produce a good error message.
+                _ => REGKIND.REGKIND_NONE,
+            };
+
+            using ComScope<ITypeLib> typeLib = new(null);
+            PInvoke.LoadTypeLibEx(path, regKind, typeLib).ThrowOnFailure();
+
+            // Register the pointer in the Global Interface Table for thread-agile access. takeOwnership: false
+            // because the ComScope above owns our local reference and releases it when this method returns.
+            this.typeLibPointer = new AgileComPointer<ITypeLib>(typeLib.Pointer, takeOwnership: false);
 
             try
             {
                 // get the type lib attributes from the retrieved interface pointer.
                 // do NOT remap file ADO references, since we'd end up with a totally different reference than specified.
-                ComReference.GetTypeLibAttrForTypeLib(ref this.typeLibPointer, out this.attr);
+                ComReference.GetTypeLibAttrForTypeLib(typeLib.Pointer, out this.attr);
 
                 // get the type lib name from the retrieved interface pointer
                 if (!ComReference.GetTypeLibNameForITypeLib(
                     log,
                     silent,
-                    this.typeLibPointer,
+                    typeLib.Pointer,
                     GetTypeLibId(log),
                     out this.typeLibName))
                 {
@@ -221,10 +223,12 @@ namespace Microsoft.Build.Tasks
         {
             if (typeLibPointer != null)
             {
-                Marshal.ReleaseComObject(typeLibPointer);
+                typeLibPointer.Dispose();
                 typeLibPointer = null;
             }
         }
         #endregion
     }
 }
+
+#endif

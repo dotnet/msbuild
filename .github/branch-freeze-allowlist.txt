@@ -1,0 +1,23 @@
+# branch-freeze allowlist
+#
+# GitHub logins permitted to run the `/freeze` and `/unfreeze` slash commands
+# (see .github/workflows/branch-freeze-command.yml). One login per line.
+#
+# Rules:
+#   * One GitHub login per line (the value after the `@`, e.g. `octocat`).
+#   * Blank lines and `# comments` are ignored.
+#   * Matching is case-insensitive; surrounding whitespace is trimmed.
+#
+# Changes to this file go through normal PR review, which is the audit trail for
+# who may operate the branch freeze. Keep it in sync with the @dotnet/kitten
+# build-duty rotation.
+
+AlesProkop
+AR-May
+baronfel
+jankratochvilcz
+JanProvaznik
+OvesN
+rainersigwald
+ViktorHofer
+VolPlita

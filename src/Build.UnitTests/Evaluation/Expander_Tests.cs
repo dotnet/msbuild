@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
@@ -922,27 +924,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("Item CleanFiles=foo.obj;bar.obj");
         }
 
-#if FEATURE_LEGACY_GETFULLPATH
-        /// <summary>
-        /// Bad path when getting metadata through ->Metadata function
-        /// </summary>
-        [LongPathSupportDisabledFact]
-        public void InvalidPathAndMetadataItemFunctionPathTooLong()
-        {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build'>
-                    <ItemGroup>
-                        <x Include='" + new string('x', 250) + @"'/>
-                    </ItemGroup>
-                    <Target Name='Build'>
-                        <Message Text=""@(x->Metadata('FullPath'))"" />
-                    </Target>
-                </Project>", false);
-
-            logger.AssertLogContains("MSB4023");
-        }
-#endif
-
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->Metadata function
         /// </summary>
@@ -981,27 +962,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4023");
         }
 
-#if FEATURE_LEGACY_GETFULLPATH
-        /// <summary>
-        /// Bad path when getting metadata through ->WithMetadataValue function
-        /// </summary>
-        [LongPathSupportDisabledFact]
-        public void InvalidPathAndMetadataItemFunctionPathTooLong2()
-        {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build'>
-                    <ItemGroup>
-                        <x Include='" + new string('x', 250) + @"'/>
-                    </ItemGroup>
-                    <Target Name='Build'>
-                        <Message Text=""@(x->WithMetadataValue('FullPath', 'x'))"" />
-                    </Target>
-                </Project>", false);
-
-            logger.AssertLogContains("MSB4023");
-        }
-#endif
-
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->WithMetadataValue function
         /// </summary>
@@ -1039,27 +999,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             logger.AssertLogContains("MSB4023");
         }
-
-#if FEATURE_LEGACY_GETFULLPATH
-        /// <summary>
-        /// Bad path when getting metadata through ->AnyHaveMetadataValue function
-        /// </summary>
-        [LongPathSupportDisabledFact]
-        public void InvalidPathAndMetadataItemFunctionPathTooLong3()
-        {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build'>
-                    <ItemGroup>
-                        <x Include='" + new string('x', 250) + @"'/>
-                    </ItemGroup>
-                    <Target Name='Build'>
-                        <Message Text=""@(x->AnyHaveMetadataValue('FullPath', 'x'))"" />
-                    </Target>
-                </Project>", false);
-
-            logger.AssertLogContains("MSB4023");
-        }
-#endif
 
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->AnyHaveMetadataValue function
@@ -1716,6 +1655,132 @@ namespace Microsoft.Build.UnitTests.Evaluation
             Assert.Equal(@"string$(p);dialogs%3b ; splash.bmp ;  ;  ;  ; \jk ; l\mno%3bpqr\stu ; subdir1" + Path.DirectorySeparatorChar + ";subdir2" + Path.DirectorySeparatorChar + " ; english_abc%3bdef;ghi", expander.ExpandIntoStringAndUnescape(value, ExpanderOptions.ExpandAll, MockElementLocation.Instance));
 
             Assert.Equal(@"string$(p);dialogs%3b ; splash.bmp ;  ; $(NonExistent) ; %(NonExistent) ; $(OutputPath) ; $(TargetPath) ; %(Language)_%(Culture)", expander.ExpandIntoStringAndUnescape(value, ExpanderOptions.ExpandItems, MockElementLocation.Instance));
+        }
+
+        /// <summary>
+        ///  Builds an <see cref="Expander{P, I}"/> backed by a fixed metadata table for exercising the
+        ///  hand-written metadata scanner. Metadata values intentionally contain no path separators so
+        ///  that <c>MaybeAdjustFilePath</c> does not perturb the asserted results.
+        /// </summary>
+        private static Expander<ProjectPropertyInstance, ProjectItemInstance> CreateMetadataExpander()
+        {
+            Dictionary<string, string> metadata = new(StringComparer.OrdinalIgnoreCase)
+            {
+                ["Culture"] = "en-US",
+                ["Foo"] = "Bar",
+                ["Compile.Link"] = "Link.cs",
+                ["Filename"] = "App",
+            };
+
+            return new Expander<ProjectPropertyInstance, ProjectItemInstance>(
+                new PropertyDictionary<ProjectPropertyInstance>(),
+                new ItemDictionary<ProjectItemInstance>(),
+                new StringMetadataTable(metadata),
+                FileSystems.Default);
+        }
+
+        /// <summary>
+        ///  Parity tests for the hand-written metadata scanner. These pin the exact expanded result for
+        ///  whitespace handling, malformed references, nested references, qualified vs. unqualified
+        ///  names, and missing metadata so future edits to the scanner cannot silently regress them.
+        /// </summary>
+        [Theory]
+        // Simple expansion, unqualified and qualified.
+        [InlineData("%(Culture)", "en-US")]
+        [InlineData("%(Foo)", "Bar")]
+        [InlineData("%(Compile.Link)", "Link.cs")]
+        // Whitespace around the parentheses and the dot separator is allowed.
+        [InlineData("%( Culture )", "en-US")]
+        [InlineData("%( Compile . Link )", "Link.cs")]
+        // Missing metadata expands to empty; a missing qualifier does not fall back to the unqualified key.
+        [InlineData("%(DoesNotExist)", "")]
+        [InlineData("%(Other.Foo)", "")]
+        // Malformed references are emitted verbatim.
+        [InlineData("%(", "%(")]
+        [InlineData("%()", "%()")]
+        [InlineData("%( )", "%( )")]
+        [InlineData("%(.x)", "%(.x)")]
+        // The outer reference is not closed by ')', so only the inner reference expands.
+        [InlineData("%(Culture%(Foo))", "%(CultureBar)")]
+        // Mixed with surrounding literal text and adjacent references.
+        [InlineData("prefix_%(Culture)_suffix", "prefix_en-US_suffix")]
+        [InlineData("%(Culture)%(Foo)", "en-USBar")]
+        public void ExpandMetadata_ScannerEdgeCases(string input, string expected)
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateMetadataExpander();
+
+            expander.ExpandIntoStringLeaveEscaped(input, ExpanderOptions.ExpandMetadata, MockElementLocation.Instance)
+                .ShouldBe(expected);
+        }
+
+        /// <summary>
+        ///  Parity tests for metadata expansion in the gaps between (and within the separators of) item
+        ///  vector expressions. Items are intentionally left unexpanded (ExpandMetadata only) so the
+        ///  assertions isolate the gap/separator boundary handling in ScanAndExpandMetadataInGaps,
+        ///  including the case where "@(" appears but does not form a well-formed item vector.
+        /// </summary>
+        [Theory]
+        // Metadata after, before, and between item vectors.
+        [InlineData("@(Compile)%(Culture)", "@(Compile)en-US")]
+        [InlineData("%(Culture)@(Compile)", "en-US@(Compile)")]
+        [InlineData("@(A)%(Culture)@(B)", "@(A)en-US@(B)")]
+        // A lone item vector has no gaps and is returned unchanged, even with embedded metadata in a transform.
+        [InlineData("@(Compile)", "@(Compile)")]
+        [InlineData("@(Compile->'%(Filename)')", "@(Compile->'%(Filename)')")]
+        // Metadata embedded in an item vector's separator is expanded in place.
+        [InlineData("@(Compile, '%(Culture)')", "@(Compile, 'en-US')")]
+        // "@(" that does not form a valid item vector still has its surrounding metadata expanded.
+        [InlineData("%(Culture)@(", "en-US@(")]
+        public void ExpandMetadata_ItemVectorGapsAndSeparators(string input, string expected)
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateMetadataExpander();
+
+            expander.ExpandIntoStringLeaveEscaped(input, ExpanderOptions.ExpandMetadata, MockElementLocation.Instance)
+                .ShouldBe(expected);
+        }
+
+        /// <summary>
+        ///  Verifies the built-in vs. custom metadata gating in the scanner: a reference is expanded only
+        ///  when the matching <see cref="ExpanderOptions"/> flag is set; otherwise it is emitted verbatim.
+        /// </summary>
+        /// <remarks>
+        ///  Declared <c>internal</c> because <see cref="ExpanderOptions"/> is internal; this assembly is
+        ///  configured to discover non-public test methods.
+        /// </remarks>
+        [Theory]
+        // Custom metadata (Culture) only expands with ExpandCustomMetadata.
+        [InlineData("%(Culture)", ExpanderOptions.ExpandCustomMetadata, "en-US")]
+        [InlineData("%(Culture)", ExpanderOptions.ExpandBuiltInMetadata, "%(Culture)")]
+        // Built-in metadata (Filename) only expands with ExpandBuiltInMetadata.
+        [InlineData("%(Filename)", ExpanderOptions.ExpandBuiltInMetadata, "App")]
+        [InlineData("%(Filename)", ExpanderOptions.ExpandCustomMetadata, "%(Filename)")]
+        internal void ExpandMetadata_BuiltInVsCustomGating(string input, ExpanderOptions options, string expected)
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateMetadataExpander();
+
+            expander.ExpandIntoStringLeaveEscaped(input, options, MockElementLocation.Instance)
+                .ShouldBe(expected);
+        }
+
+        /// <summary>
+        ///  Parity test for the rewritten transform scanner (<c>GetQuotedExpressionMatches</c>): metadata
+        ///  references inside a transform must not be qualified with an item name. This pins the error path
+        ///  (and its message arguments) so the de-regexed scanner keeps rejecting qualified references,
+        ///  including when surrounded by internal whitespace.
+        /// </summary>
+        [Theory]
+        [InlineData("@(i->'%(i.Meta0)')", "%(i.Meta0)")]
+        [InlineData("@(i->'%( i . Meta0 )')", "%( i . Meta0 )")]
+        public void Transform_QualifiedMetadataThrows(string input, string qualifiedReference)
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateItemFunctionExpander();
+
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() =>
+                expander.ExpandIntoStringLeaveEscaped(input, ExpanderOptions.ExpandItems, MockElementLocation.Instance));
+
+            // The error reports the offending qualified reference and suggests the unqualified form.
+            exception.Message.ShouldContain(qualifiedReference);
+            exception.Message.ShouldContain("%(Meta0)");
         }
 
         /// <summary>
@@ -2633,7 +2698,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             using (var env = TestEnvironment.Create())
             {
-                env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+                env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
 
                 PropertyDictionary<ProjectPropertyInstance> pg = new PropertyDictionary<ProjectPropertyInstance>();
 
@@ -2662,11 +2727,11 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-            string env = Environment.GetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS");
+            AppContext.TryGetSwitch("Microsoft.Build.EnableAllPropertyFunctions", out bool originalSwitch);
 
             try
             {
-                Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+                AppContext.SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", true);
 
                 string result = expander.ExpandIntoStringLeaveEscaped("$([System.Diagnostics.Process]::GetCurrentProcess().Id)", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
 
@@ -2676,7 +2741,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
             finally
             {
-                Environment.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", env);
+                AppContext.SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", originalSwitch);
                 AvailableStaticMethods.Reset_ForUnitTestsOnly();
             }
         }
@@ -3265,6 +3330,22 @@ namespace Microsoft.Build.UnitTests.Evaluation
             expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expectedExpansion);
         }
 
+        [Theory]
+        [InlineData("AString", "linux", "$(AString.Equals($(AString.ToLower()), 'StringComparison.InvariantCulture'))", "True")]
+        [InlineData("AString", "Linux", "$(AString.Equals($(AString.ToLower()), 'StringComparison.InvariantCulture'))", "False")]
+        [InlineData("AString", "hello", "$(AString.Equals('hello', 'StringComparison.OrdinalIgnoreCase'))", "True")]
+        [InlineData("AString", "hello", "$(AString.Equals('HELLO', 'StringComparison.OrdinalIgnoreCase'))", "True")]
+        [InlineData("AString", "hello", "$(AString.Equals('HELLO', 'StringComparison.Ordinal'))", "False")]
+        public void StringEqualsWithStringComparisonTests(string propertyName, string propertyValue, string propertyFunction, string expectedExpansion)
+        {
+            var pg = new PropertyDictionary<ProjectPropertyInstance>
+            { [propertyName] = ProjectPropertyInstance.Create(propertyName, propertyValue) };
+
+            var expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
+
+            expander.ExpandIntoStringLeaveEscaped(propertyFunction, ExpanderOptions.ExpandProperties, MockElementLocation.Instance).ShouldBe(expectedExpansion);
+        }
+
         [Fact]
         public void IsOsPlatformShouldBeCaseInsensitiveToParameter()
         {
@@ -3552,11 +3633,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(pg, FileSystems.Default);
 
-#if FEATURE_CULTUREINFO_GETCULTURES
             string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.Globalization.CultureInfo]::GetCultureInfo(`en-US`).ToString())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-#else
-            string result = expander.ExpandIntoStringLeaveEscaped(@"$([System.Globalization.CultureInfo]::new(`en-US`).ToString())", ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-#endif
 
             Assert.Equal(new CultureInfo("en-US").ToString(), result);
         }
@@ -5209,6 +5286,14 @@ $(
         {
             using (var env = TestEnvironment.Create())
             {
+                // This is the one test that vets the environment-variable opt-in actually flows through
+                // to the feature check. Mimic a prior test having set the AppContext switch (which cannot
+                // be returned to "unset" via the public API), then clear it reflectively so FeatureSwitches
+                // falls back to the variable. Doing both makes the test deterministic regardless of test
+                // ordering and self-validates the reflective unset on every runtime (.NET Core and .NET
+                // Framework store the switch in different internal fields).
+                AppContext.SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", false);
+                UnsetAppContextSwitch("Microsoft.Build.EnableAllPropertyFunctions");
                 env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
                 var root = env.CreateFolder();
 
@@ -5343,6 +5428,49 @@ $(
             public override void Revert()
             {
                 FileUtilities.CurrentThreadWorkingDirectory = _originalValue;
+            }
+        }
+
+        /// <summary>
+        /// TransientTestState that flips the EnableAllPropertyFunctions AppContext switch on and restores
+        /// its original value on revert (deterministic; does not stick across tests).
+        /// </summary>
+        private sealed class TransientEnableAllPropertyFunctions : TransientTestState
+        {
+            private readonly bool _original;
+
+            public TransientEnableAllPropertyFunctions()
+            {
+                AppContext.TryGetSwitch("Microsoft.Build.EnableAllPropertyFunctions", out _original);
+                AppContext.SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", true);
+            }
+
+            public override void Revert() => AppContext.SetSwitch("Microsoft.Build.EnableAllPropertyFunctions", _original);
+        }
+
+        /// <summary>
+        /// Returns an AppContext switch to the "unset" state so that the FeatureSwitches check falls
+        /// back to the environment variable. AppContext can only set a switch true or false (never
+        /// unset), so the entry is removed reflectively from the runtime's private switch table. The
+        /// backing field differs by runtime (.NET Core uses `s_switches`, .NET Framework uses
+        /// `s_switchMap`), so this scans the non-public static dictionaries and clears the key from
+        /// whichever one holds it rather than hard-coding a field name.
+        /// </summary>
+        private static void UnsetAppContextSwitch(string switchName)
+        {
+            foreach (FieldInfo field in typeof(AppContext).GetFields(BindingFlags.NonPublic | BindingFlags.Static))
+            {
+                if (field.GetValue(null) is IDictionary switches)
+                {
+                    lock (switches)
+                    {
+                        if (switches.Contains(switchName))
+                        {
+                            switches.Remove(switchName);
+                            return;
+                        }
+                    }
+                }
             }
         }
 
@@ -5579,7 +5707,7 @@ $(
         public void FileReadAllLines_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5596,7 +5724,6 @@ $(
         public void FileReadAllBytes_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5612,7 +5739,7 @@ $(
         public void FileWriteAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5628,7 +5755,7 @@ $(
         public void FileAppendAllText_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5644,7 +5771,7 @@ $(
         public void FileDelete_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5664,7 +5791,6 @@ $(
         public void FileGetCreationTimeUtc_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5682,7 +5808,6 @@ $(
         public void FileGetLastWriteTimeUtc_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5700,7 +5825,7 @@ $(
         public void FileGetLastAccessTimeUtc_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5722,7 +5847,7 @@ $(
         public void DirectoryCreateDirectory_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5737,7 +5862,7 @@ $(
         public void DirectoryDelete_RelativePath_ResolvesFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5846,7 +5971,7 @@ $(
         public void FileCopy_TwoRelativePaths_BothResolveFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5864,7 +5989,7 @@ $(
         public void FileMove_TwoRelativePaths_BothResolveFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 
@@ -5882,7 +6007,7 @@ $(
         public void DirectoryMove_TwoRelativePaths_BothResolveFromThreadWorkingDirectory()
         {
             using var env = TestEnvironment.Create(_output);
-            env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+            env.WithTransientTestState(new TransientEnableAllPropertyFunctions());
             var correctDir = env.CreateFolder(createFolder: true);
             var wrongDir = env.CreateFolder(createFolder: true);
 

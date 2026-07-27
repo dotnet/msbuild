@@ -148,9 +148,17 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         /// <summary>
+        /// The target names that were requested to execute. Backed by a field so that it can be
+        /// serialized across nodes; without this, a configuration that crosses a node boundary
+        /// would lose its requested targets, which is needed (for example) to generate the correct
+        /// set of targets in a solution metaproject.
+        /// </summary>
+        private List<string> _requestedTargets = [];
+
+        /// <summary>
         /// The target names that were requested to execute.
         /// </summary>
-        internal IReadOnlyCollection<string> RequestedTargets { get; }
+        internal IReadOnlyCollection<string> RequestedTargets => _requestedTargets;
 
         /// <summary>
         /// Initializes a configuration from a BuildRequestData structure.  Used by the BuildManager.
@@ -182,7 +190,7 @@ namespace Microsoft.Build.BackEnd
             _explicitToolsVersionSpecified = data.ExplicitToolsVersionSpecified;
             _toolsVersion = ResolveToolsVersion(data, defaultToolsVersion);
             _globalProperties = data.GlobalPropertiesDictionary;
-            RequestedTargets = new List<string>(data.TargetNames);
+            _requestedTargets = new List<string>(data.TargetNames);
 
             // The following information only exists when the request is populated with an existing project.
             if (data.ProjectInstance != null)
@@ -253,7 +261,7 @@ namespace Microsoft.Build.BackEnd
             _globalProperties = other._globalProperties;
             IsCacheable = other.IsCacheable;
             _configId = configId;
-            RequestedTargets = other.RequestedTargets;
+            _requestedTargets = other._requestedTargets;
             _projectEvaluationId = other._projectEvaluationId;
         }
 
@@ -956,6 +964,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _savedCurrentDirectory);
             translator.TranslateDictionary(ref _savedEnvironmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
             translator.Translate(ref _projectEvaluationId);
+            translator.Translate(ref _requestedTargets);
 
             // if the  entire state is translated, then the transferred state represents the full evaluation data
             if (translator.Mode == TranslationDirection.ReadFromStream && _transferredState?.TranslateEntireState == true)

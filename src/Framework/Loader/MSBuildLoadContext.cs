@@ -49,6 +49,13 @@ namespace Microsoft.Build.Shared
 
         protected override Assembly? Load(AssemblyName assemblyName)
         {
+            if (!Framework.FeatureSwitches.EnableCustomPluginProbing)
+            {
+                // Custom plugin probing is disabled (for example when trimmed); fall back to the
+                // default AssemblyLoadContext rather than resolving dependencies by reflection.
+                return null;
+            }
+
             if (WellKnownAssemblyNames.Contains(assemblyName.Name!))
             {
                 // Force MSBuild assemblies to be loaded in the default ALC

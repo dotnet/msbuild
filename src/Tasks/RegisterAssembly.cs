@@ -8,11 +8,15 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Security;
 
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+using Windows.Win32.System.Ole;
 
 #endif
 
@@ -205,7 +209,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Helper registration method
         /// </summary>
-        private bool Register(string assemblyPath, string typeLibPath)
+        private unsafe bool Register(string assemblyPath, string typeLibPath)
         {
             ArgumentNullException.ThrowIfNull(typeLibPath);
 
@@ -216,8 +220,6 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("RegisterAssembly.RegisterAsmFileDoesNotExist", assemblyPath);
                 return false;
             }
-
-            ITypeLib typeLib = null;
 
             try
             {
@@ -265,10 +267,22 @@ namespace Microsoft.Build.Tasks
                 // Also register the type library
                 try
                 {
-                    typeLib = (ITypeLib)NativeMethods.LoadTypeLibEx(typeLibPath, (int)NativeMethods.REGKIND.REGKIND_NONE);
+                    // ComScope releases the loaded ITypeLib on scope exit, including when
+                    // LoadTypeLibEx / RegisterTypeLib throw out of this block.
+                    using ComScope<ITypeLib> typeLib = new(null);
+                    fixed (char* pTypeLibPath = typeLibPath)
+                    {
+                        PInvoke.LoadTypeLibEx(
+                            typeLibPath,
+                            REGKIND.REGKIND_NONE,
+                            typeLib).ThrowOnFailure();
 
-                    // if we got here, load must have succeeded
-                    NativeMethods.RegisterTypeLib(typeLib, typeLibPath, null);
+                        // if we got here, load must have succeeded
+                        PInvoke.RegisterTypeLib(
+                            typeLib.Pointer,
+                            new PCWSTR(pTypeLibPath),
+                            default).ThrowOnFailure();
+                    }
                 }
                 catch (COMException ex)
                 {
@@ -316,13 +330,6 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("RegisterAssembly.CantRegisterAssembly", assemblyPath, e.Message);
                 return false;
             }
-            finally
-            {
-                if (typeLib != null)
-                {
-                    Marshal.ReleaseComObject(typeLib);
-                }
-            }
 
             return true;
         }
@@ -333,13 +340,13 @@ namespace Microsoft.Build.Tasks
         private unsafe bool ExportTypeLib(Assembly asm, string typeLibFileName)
         {
             _typeLibExportFailed = false;
-            ITypeLib convertedTypeLib = null;
+            System.Runtime.InteropServices.ComTypes.ITypeLib convertedTypeLib = null;
 
             try
             {
                 // Create a converter and run the conversion
                 ITypeLibConverter tlbConverter = new TypeLibConverter();
-                convertedTypeLib = (ITypeLib)tlbConverter.ConvertAssemblyToTypeLib(asm, typeLibFileName, 0, this);
+                convertedTypeLib = (System.Runtime.InteropServices.ComTypes.ITypeLib)tlbConverter.ConvertAssemblyToTypeLib(asm, typeLibFileName, 0, this);
 
                 if (convertedTypeLib == null || _typeLibExportFailed)
                 {

@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!-- https://learn.microsoft.com/dotnet/fundamentals/package-validation/diagnostic-ids -->
 <Suppressions xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <Suppression>
@@ -68,6 +68,62 @@
     <Right>ref/net472/Microsoft.Build.Tasks.Core.dll</Right>
   </Suppression>
   <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.AssemblyDependency.RarNodeShutdownReason</Target>
+    <Left>ref/net10.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.Bootstrapper.BuildMessageSeverity</Target>
+    <Left>ref/net10.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.Bootstrapper.ComponentsLocation</Target>
+    <Left>ref/net10.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.ManifestUtilities.AssemblyIdentity.FullNameFlags</Target>
+    <Left>ref/net10.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.ManifestUtilities.AssemblyReferenceType</Target>
+    <Left>ref/net10.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.ManifestUtilities.OutputMessageType</Target>
+    <Left>ref/net10.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.ManifestUtilities.UpdateMode</Target>
+    <Left>ref/net10.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0008</DiagnosticId>
+    <Target>T:Microsoft.Build.Tasks.Deployment.ManifestUtilities.UpdateUnit</Target>
+    <Left>ref/net10.0/Microsoft.Build.Tasks.Core.dll</Left>
+    <Right>ref/netstandard2.0/Microsoft.Build.Tasks.Core.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
     <DiagnosticId>PKV004</DiagnosticId>
     <Target>.NETCoreApp,Version=v2.0</Target>
   </Suppression>
@@ -114,5 +170,9 @@
   <Suppression>
     <DiagnosticId>PKV004</DiagnosticId>
     <Target>Xamarin.XboxOne,Version=v0.0</Target>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>PKV006</DiagnosticId>
+    <Target>net10.0</Target>
   </Suppression>
 </Suppressions>

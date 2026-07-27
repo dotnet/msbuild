@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Xml.Serialization;
@@ -18,6 +19,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
     [ComVisible(false)]
     public static class ManifestWriter
     {
+        [RequiresUnreferencedCode("Serializes the manifest with XmlSerializer, which reflects over the manifest types; members may be trimmed.")]
+        [RequiresDynamicCode("XmlSerializer generates serialization code at runtime, which is not supported with Native AOT.")]
         private static Stream Serialize(Manifest manifest)
         {
             manifest.OnBeforeSave();
@@ -40,6 +43,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// The name of the output file is inferred from the SourcePath property of the manifest.
         /// </summary>
         /// <param name="manifest">The object representation of the manifest.</param>
+        [RequiresUnreferencedCode("Writes a ClickOnce manifest, which serializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Writes a ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         public static void WriteManifest(Manifest manifest)
         {
             string path = manifest.SourcePath ?? "manifest.xml";
@@ -51,6 +56,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// </summary>
         /// <param name="manifest">The object representation of the manifest.</param>
         /// <param name="path">The name of the output file.</param>
+        [RequiresUnreferencedCode("Writes a ClickOnce manifest, which serializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Writes a ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         public static void WriteManifest(Manifest manifest, string path)
         {
             using (Stream s = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.Write))
@@ -65,6 +72,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="manifest">The object representation of the manifest.</param>
         /// <param name="path">The name of the output file.</param>
         /// <param name="targetframeWorkVersion">The target framework version.</param>
+        [RequiresUnreferencedCode("Writes a ClickOnce manifest, which serializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Writes a ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         public static void WriteManifest(Manifest manifest, string path, string targetframeWorkVersion)
         {
             using (Stream s = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.Write))
@@ -78,6 +87,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// </summary>
         /// <param name="manifest">The object representation of the manifest.</param>
         /// <param name="output">Specifies an output stream.</param>
+        [RequiresUnreferencedCode("Writes a ClickOnce manifest, which serializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Writes a ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         public static void WriteManifest(Manifest manifest, Stream output)
         {
             WriteManifest(manifest, output, null);
@@ -89,6 +100,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// <param name="manifest"></param>
         /// <param name="output"></param>
         /// <param name="targetframeWorkVersion">it will always use sha256 as signature algorithm if TFV is null</param>
+        [RequiresUnreferencedCode("Writes a ClickOnce manifest, which serializes manifest types with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Writes a ClickOnce manifest, which uses XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         private static void WriteManifest(Manifest manifest, Stream output, string targetframeWorkVersion)
         {
             int t1 = Environment.TickCount;

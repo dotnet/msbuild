@@ -145,7 +145,7 @@ namespace Microsoft.Build.BackEnd
                 WaitHandle[] waitHandles = [_shutdownEvent, _packetReceivedEvent];
 
                 // Get the current directory before doing work. We need this so we can restore the directory when the node shuts down.
-                _savedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
+                _savedCurrentDirectory = Environment.CurrentDirectory;
                 while (true)
                 {
                     int index = WaitHandle.WaitAny(waitHandles);
@@ -479,7 +479,7 @@ namespace Microsoft.Build.BackEnd
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
             // Save the current directory.
-            _savedCurrentDirectory = NativeMethodsShared.GetCurrentDirectory();
+            _savedCurrentDirectory = Environment.CurrentDirectory;
 
             // Set the node id.
             _componentHost.BuildParameters.NodeId = configuration.NodeId;

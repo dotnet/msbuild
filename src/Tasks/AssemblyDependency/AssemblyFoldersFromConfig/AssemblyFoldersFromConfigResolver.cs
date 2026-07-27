@@ -3,8 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
+using System.Xml;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -138,8 +138,12 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
                                 _buildEngine?.RegisterTaskObject(key, _assemblyFoldersCache, RegisteredTaskObjectLifetime.Build, true /* dispose early ok*/);
                             }
                         }
-                        catch (SerializationException e)
+                        catch (Exception e) when (e is XmlException || ExceptionHandling.IsIoRelatedException(e))
                         {
+                            // The config file is malformed (XmlException) or could not be read
+                            // (IO error, e.g. the file was locked or a network share dropped after the
+                            // existence check). Either way, report it rather than letting it surface as
+                            // an unhandled exception that fails the whole build.
                             _taskLogger.LogError(ResourceUtilities.GetResourceString("ResolveAssemblyReference.AssemblyFoldersConfigFileMalformed"), _assemblyFolderConfigFile, e.Message);
                             return;
                         }

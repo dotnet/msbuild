@@ -108,6 +108,17 @@ namespace Microsoft.Build.Experimental
         private int? _launchedServerPid;
 
         /// <summary>
+        /// Whether this build is multithreaded (/mt). Determines whether the launched server process
+        /// gets Server GC (the server only does in-process project work under /mt).
+        /// </summary>
+        private readonly bool _multiThreaded;
+
+        /// <summary>
+        /// Whether the server should shut itself down once this build completes instead of staying resident for reuse. 
+        /// </summary>
+        private readonly bool _shutdownServerAfterBuild;
+
+        /// <summary>
         /// Public constructor with parameters.
         /// </summary>
         /// <param name="commandLine">The command line to process. The first argument
@@ -115,6 +126,36 @@ namespace Microsoft.Build.Experimental
         /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
         /// or to version of MSBuild.dll found to be associated with the current process.</param>
         public MSBuildClient(string[] commandLine, string msbuildLocation)
+            : this(commandLine, msbuildLocation, multiThreaded: false)
+        {
+        }
+
+        /// <summary>
+        /// Public constructor with parameters.
+        /// </summary>
+        /// <param name="commandLine">The command line to process. The first argument
+        /// on the command line is assumed to be the name/path of the executable, and is ignored</param>
+        /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
+        /// or to version of MSBuild.dll found to be associated with the current process.</param>
+        /// <param name="multiThreaded">Whether this build is multithreaded (/mt). When true, the launched
+        /// server process is started with Server GC.</param>
+        public MSBuildClient(string[] commandLine, string msbuildLocation, bool multiThreaded)
+            : this(commandLine, msbuildLocation, multiThreaded, shutdownServerAfterBuild: false)
+        {
+        }
+
+        /// <summary>
+        /// Public constructor with parameters.
+        /// </summary>
+        /// <param name="commandLine">The command line to process. The first argument
+        /// on the command line is assumed to be the name/path of the executable, and is ignored</param>
+        /// <param name="msbuildLocation"> Full path to current MSBuild.exe if executable is MSBuild.exe,
+        /// or to version of MSBuild.dll found to be associated with the current process.</param>
+        /// <param name="multiThreaded">Whether this build is multithreaded (/mt). When true, the launched
+        /// server process is started with Server GC.</param>
+        /// <param name="shutdownServerAfterBuild">Whether the server should shut itself down once this build
+        /// completes instead of staying resident for reuse (e.g. a /mt build with -nodeReuse:false).</param>
+        public MSBuildClient(string[] commandLine, string msbuildLocation, bool multiThreaded, bool shutdownServerAfterBuild)
         {
             _serverEnvironmentVariables = new();
             _exitResult = new();
@@ -122,6 +163,8 @@ namespace Microsoft.Build.Experimental
             // dll & exe locations
             _commandLine = commandLine;
             _msbuildLocation = msbuildLocation;
+            _multiThreaded = multiThreaded;
+            _shutdownServerAfterBuild = shutdownServerAfterBuild;
 
             // Client <-> Server communication stream
             _handshake = GetHandshake();
@@ -194,10 +237,9 @@ namespace Microsoft.Build.Experimental
                     return _exitResult;
                 }
             }
-            catch (IOException ex) when (ex is not PathTooLongException)
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && ex is not PathTooLongException)
             {
-                // For unknown root cause, Mutex.TryOpenExisting can sometimes throw 'Connection timed out' exception preventing to obtain the build server state through it (Running or not, Busy or not).
-                // See: https://github.com/dotnet/msbuild/issues/7993
+                // In unexpected state fall back to non-server execution.
                 CommunicationsUtilities.Trace($"Failed to obtain the current build server state: {ex}");
                 CommunicationsUtilities.Trace($"HResult: {ex.HResult}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
@@ -318,48 +360,72 @@ namespace Microsoft.Build.Experimental
                 packetPump.RegisterPacketHandler(NodePacketType.ServerNodeBuildResult, ServerNodeBuildResult.FactoryForDeserialization, packetPump);
                 packetPump.Start();
 
-                WaitHandle[] waitHandles =
-                {
-                    cancellationToken.WaitHandle,
-                    packetPump.PacketPumpCompleted,
-                    packetPump.PacketReceivedEvent
-                };
-
-                while (!_buildFinished)
-                {
-                    int index = WaitHandle.WaitAny(waitHandles);
-                    switch (index)
-                    {
-                        case 0:
-                            HandleCancellation();
-                            // After the cancelation, we want to wait to server gracefuly finish the build.
-                            // We have to replace the cancelation handle, because WaitAny would cause to repeatedly hit this branch of code.
-                            waitHandles[0] = CancellationToken.None.WaitHandle;
-                            break;
-
-                        case 1:
-                            HandlePacketPumpCompleted(packetPump);
-                            break;
-
-                        case 2:
-                            while (packetPump.ReceivedPacketsQueue.TryDequeue(out INodePacket? packet) &&
-                                   !_buildFinished)
-                            {
-                                if (packet != null)
-                                {
-                                    HandlePacket(packet);
-                                }
-                            }
-
-                            break;
-                    }
-                }
+                ProcessPacketsUntilBuildFinished(packetPump, cancellationToken);
             }
             catch (Exception ex)
             {
                 CommunicationsUtilities.Trace($"MSBuild client error: problem during packet handling occurred: {ex}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.Unexpected;
             }
+        }
+
+        /// <summary>
+        /// Consumes packets produced by <paramref name="packetPump"/> until the build finishes (the
+        /// <see cref="ServerNodeBuildResult"/> is processed), the pump completes, or cancellation is requested.
+        /// </summary>
+        private void ProcessPacketsUntilBuildFinished(MSBuildClientPacketPump packetPump, CancellationToken cancellationToken)
+        {
+            WaitHandle[] waitHandles =
+            {
+                cancellationToken.WaitHandle,
+                packetPump.PacketPumpCompleted,
+                packetPump.PacketReceivedEvent
+            };
+
+            while (!_buildFinished)
+            {
+                int index = WaitHandle.WaitAny(waitHandles);
+                switch (index)
+                {
+                    case 0:
+                        HandleCancellation();
+                        // After the cancelation, we want to wait to server gracefuly finish the build.
+                        // We have to replace the cancelation handle, because WaitAny would cause to repeatedly hit this branch of code.
+                        waitHandles[0] = CancellationToken.None.WaitHandle;
+                        break;
+
+                    case 1:
+                        // The packet pump signals PacketPumpCompleted (a sticky ManualResetEvent at a
+                        // lower WaitAny index than PacketReceivedEvent) immediately after enqueuing the
+                        // final ServerNodeBuildResult. Drain any packets it enqueued right before
+                        // completing - that result plus trailing console writes such as the
+                        // "Build succeeded." summary - before treating the pump as finished. Otherwise a
+                        // race where WaitAny observes index 1 before the queue is drained would drop the
+                        // build result and exit 1 on a successful build (#14172).
+                        DrainPacketQueue(packetPump);
+                        if (!_buildFinished)
+                        {
+                            HandlePacketPumpCompleted(packetPump);
+                        }
+
+                        break;
+
+                    case 2:
+                        DrainPacketQueue(packetPump);
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Test hook for the #14172 regression: drives <see cref="ProcessPacketsUntilBuildFinished"/> against a
+        /// pump whose received-packets queue and completion event have already been seeded, without needing a
+        /// live server pipe, and returns the resulting <see cref="MSBuildClientExitResult"/>.
+        /// </summary>
+        internal MSBuildClientExitResult ProcessSeededPacketsForTests(MSBuildClientPacketPump packetPump)
+        {
+            ProcessPacketsUntilBuildFinished(packetPump, CancellationToken.None);
+            return _exitResult;
         }
 
         private void ConfigureAndQueryConsoleProperties()
@@ -437,7 +503,6 @@ namespace Microsoft.Build.Experimental
 
             try
             {
-                // For unknown root cause, opening mutex can sometimes throw 'Connection timed out' exception. See: https://github.com/dotnet/msbuild/issues/7993
                 using var serverLaunchMutex = ServerNamedMutex.OpenOrCreateMutex(serverLaunchMutexName, out bool mutexCreatedNew);
 
                 if (!mutexCreatedNew)
@@ -448,9 +513,10 @@ namespace Microsoft.Build.Experimental
                     return false;
                 }
             }
-            catch (IOException ex) when (ex is not PathTooLongException)
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex) && ex is not PathTooLongException)
             {
-                CommunicationsUtilities.Trace($"Failed to obtain the current build server state: {ex}");
+                // In unexpected state fall back to non-server execution.
+                CommunicationsUtilities.Trace($"Failed to acquire server launch mutex '{serverLaunchMutexName}': {ex}");
                 CommunicationsUtilities.Trace($"HResult: {ex.HResult}.");
                 _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnknownServerState;
                 return false;
@@ -469,10 +535,43 @@ namespace Microsoft.Build.Experimental
                 // Set DOTNET_ROOT so the apphost server child can locate the runtime; this
                 // override is replaced by the client's environment on the first build command
                 // (see OutOfProcServerNode.HandleServerNodeBuildCommand → SetEnvironment).
+                // This is a shared cached dictionary reused by other node launches, so it must not
+                // be mutated in place.
+                IDictionary<string, string?>? baseOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides();
+                IDictionary<string, string?>? environmentOverrides = baseOverrides;
+
+                // When this build is multithreaded (/mt), launch the long-lived server (build
+                // orchestrator) process with Server GC. Other processes may get higher throughput
+                // with Server GC, but we want to enable it only for the highest-impact one where
+                // most of the work of the actual build will happen in MT mode. GC mode is fixed at
+                // CLR startup, so it must be set in the child's launch environment via DOTNET_gcServer
+                // (which only affects .NET/CoreCLR and, since .NET 9, takes precedence over
+                // runtimeconfig.json). The decision is made from this (launch-time) invocation's command
+                // line; a server is keyed by handshake and reused, so a later differing /mt choice does
+                // not re-launch it.
+                //
+                // This is scoped to the server process only. Sidecar TaskHost (nodemode 2) and worker
+                // (nodemode 1) nodes are launched through other code paths that never set this knob, and
+                // the server resets its own environment to the client's on the first build command (so
+                // DOTNET_gcServer is removed before it ever spawns children). Those nodes therefore keep
+                // the default Workstation GC.
+                //
+                // Copy the shared base overrides (preserving its comparer) before adding the GC override.
+                // Honor an explicit user-set DOTNET_gcServer (e.g. "0" to force Workstation GC in a
+                // memory-constrained container): only inject the default when the user hasn't set it.
+                if (_multiThreaded &&
+                    Environment.GetEnvironmentVariable("DOTNET_gcServer") is null)
+                {
+                    environmentOverrides = baseOverrides is null
+                        ? new Dictionary<string, string?>()
+                        : new Dictionary<string, string?>(baseOverrides);
+                    environmentOverrides["DOTNET_gcServer"] = "1";
+                }
+
                 NodeLaunchData launchData = new(
                     MSBuildLocation: _msbuildLocation,
                     CommandLineArgs: string.Join(" ", msBuildServerOptions),
-                    EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides());
+                    EnvironmentOverrides: environmentOverrides);
 
                 using Process msbuildProcess = nodeLauncher.Start(launchData, nodeId: 0);
                 _launchedServerPid = msbuildProcess.Id;
@@ -523,7 +622,8 @@ namespace Microsoft.Build.Experimental
                 : new PartialBuildTelemetry(
                     startedAt: KnownTelemetry.PartialBuildTelemetry.StartAt.GetValueOrDefault(),
                     initialServerState: KnownTelemetry.PartialBuildTelemetry.InitialMSBuildServerState,
-                    serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason);
+                    serverFallbackReason: KnownTelemetry.PartialBuildTelemetry.ServerFallbackReason,
+                    serverEnableReason: KnownTelemetry.PartialBuildTelemetry.ServerEnableReason);
 
             return new ServerNodeBuildCommand(
                         _commandLine,
@@ -532,7 +632,8 @@ namespace Microsoft.Build.Experimental
                         CultureInfo.CurrentCulture,
                         CultureInfo.CurrentUICulture,
                         _consoleConfiguration!,
-                        partialBuildTelemetry);
+                        partialBuildTelemetry,
+                        _shutdownServerAfterBuild);
         }
 
         private ServerNodeHandshake GetHandshake() => new(CommunicationsUtilities.GetHandshakeOptions(
@@ -562,6 +663,25 @@ namespace Microsoft.Build.Experimental
             }
 
             _buildFinished = true;
+        }
+
+        /// <summary>
+        /// Processes every packet currently sitting in the packet pump's received queue, stopping early
+        /// once the build result has been handled. Shared by the PacketReceivedEvent and
+        /// PacketPumpCompleted branches so that packets the pump enqueues immediately before it completes
+        /// (notably the final <see cref="ServerNodeBuildResult"/> and trailing console output) are never
+        /// dropped by an event-ordering race. See https://github.com/dotnet/msbuild/issues/14172.
+        /// </summary>
+        private void DrainPacketQueue(MSBuildClientPacketPump packetPump)
+        {
+            while (packetPump.ReceivedPacketsQueue.TryDequeue(out INodePacket? packet) &&
+                   !_buildFinished)
+            {
+                if (packet != null)
+                {
+                    HandlePacket(packet);
+                }
+            }
         }
 
         /// <summary>

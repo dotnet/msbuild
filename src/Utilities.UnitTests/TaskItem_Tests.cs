@@ -439,4 +439,101 @@ namespace Microsoft.Build.UnitTests
         }
 #endif
     }
+
+    /// <summary>
+    /// Tests for the generic <see cref="TaskItem{T}"/> struct.
+    /// </summary>
+    public class TaskItemOfTTests
+    {
+        [Fact]
+        public void SetMetadata_DoesNotThrow()
+        {
+            var item = new TaskItem<int>(42);
+            // Should not throw - backing is a mutable TaskItem, not TaskItemData
+            item.SetMetadata("key", "value");
+            item.GetMetadata("key").ShouldBe("value");
+        }
+
+        [Fact]
+        public void RemoveMetadata_DoesNotThrow()
+        {
+            var item = new TaskItem<int>(42);
+            item.SetMetadata("key", "value");
+            item.RemoveMetadata("key");
+            item.GetMetadata("key").ShouldBeNullOrEmpty();
+        }
+
+        [Fact]
+        public void CopyMetadataTo_DoesNotThrow()
+        {
+            var source = new TaskItem<int>(42);
+            source.SetMetadata("key", "value");
+            var dest = new TaskItem("dest");
+            source.CopyMetadataTo(dest);
+            dest.GetMetadata("key").ShouldBe("value");
+        }
+
+        [Fact]
+        public void FromITaskItem_PathLikeType_UsesFullPathMetadata()
+        {
+            // FullPath is a reserved metadata computed by the MSBuild item system as the absolute path.
+            // TaskItem<FileInfo> should use FullPath so relative ItemSpecs resolve to absolute paths.
+            var backingItem = new TaskItem("relative\\path.txt");
+            string expectedAbsolutePath = backingItem.GetMetadata("FullPath");
+            expectedAbsolutePath.ShouldNotBeNullOrEmpty();
+
+            var item = new TaskItem<System.IO.FileInfo>(backingItem);
+            item.Value.FullName.ShouldBe(expectedAbsolutePath);
+        }
+
+        [Fact]
+        public void FromITaskItem_NonPathType_UsesItemSpec()
+        {
+            var backingItem = new TaskItem("42");
+            var item = new TaskItem<int>(backingItem);
+            item.Value.ShouldBe(42);
+        }
+
+        [Fact]
+        public void Equals_SameValue_ReturnsTrue()
+        {
+            var a = new TaskItem<int>(42);
+            var b = new TaskItem<int>(42);
+            a.Equals(b).ShouldBeTrue();
+            (a == b).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Equals_DifferentValue_ReturnsFalse()
+        {
+            var a = new TaskItem<int>(1);
+            var b = new TaskItem<int>(2);
+            a.Equals(b).ShouldBeFalse();
+            (a != b).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void Equals_NullStringValue_HandledCorrectly()
+        {
+            // EqualityComparer<string>.Default handles null without boxing or NullReferenceException
+            var a = new TaskItem<string>((string)null!);
+            var b = new TaskItem<string>((string)null!);
+            a.Equals(b).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void GetHashCode_NullValue_ReturnsZero()
+        {
+            var item = new TaskItem<string>((string)null!);
+            item.GetHashCode().ShouldBe(0);
+        }
+
+        [Fact]
+        public void GetHashCode_ConsistentWithEquality()
+        {
+            var a = new TaskItem<int>(42);
+            var b = new TaskItem<int>(42);
+            a.GetHashCode().ShouldBe(b.GetHashCode());
+        }
+    }
 }

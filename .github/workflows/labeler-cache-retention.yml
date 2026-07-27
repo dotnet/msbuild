@@ -33,7 +33,7 @@ jobs:
       matrix:
         type: ["issues"] # Pulls are disabled in this repository, so "pulls" is removed from the matrix
     steps:
-      - uses: dotnet/issue-labeler/restore@46125e85e6a568dc712f358c39f35317366f5eed # v2.0.0
+      - uses: dotnet/issue-labeler/restore@98f1d9b85686147ffdc155547cdd3469546c4e26 # v2.1.0
         with:
           type: ${{ matrix.type }}
           cache_key: ${{ env.CACHE_KEY }}

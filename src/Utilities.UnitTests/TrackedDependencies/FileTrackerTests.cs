@@ -15,10 +15,11 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
-#if ENABLE_TRACKER_TESTS // https://github.com/dotnet/msbuild/issues/12063
-using Microsoft.CodeAnalysis.BuildTasks;
-#endif
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
 
+using Shouldly;
 using Xunit;
 using Windows.Win32;
 using Windows.Win32.Foundation;
@@ -250,6 +251,33 @@ namespace Microsoft.Build.UnitTests.FileTracking
             FileTrackerTestHelper.CleanTlogs();
         }
 
+        [WindowsOnlyFact]
+        public void CompileCSharpExecutable_CompilesSimpleProgram()
+        {
+            string outputFile = Path.Combine(Path.GetTempPath(), $"TestCompile_{Guid.NewGuid()}.exe");
+            try
+            {
+                string codeContent = @"
+using System;
+class Program
+{
+    static void Main()
+    {
+        Console.WriteLine(""Hello from compiled code!"");
+    }
+}";
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
+                File.Exists(outputFile).ShouldBeTrue("Output executable should exist");
+            }
+            finally
+            {
+                if (File.Exists(outputFile))
+                {
+                    File.Delete(outputFile);
+                }
+            }
+        }
+
         [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/dotnet/msbuild/issues/649")]
         public void FileTrackerHelp()
         {
@@ -444,8 +472,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
             Assert.True(foundCreateFileW || foundCreateFileA);
         }
 
-
-#if ENABLE_TRACKER_TESTS // https://github.com/dotnet/msbuild/issues/12063
         [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/dotnet/msbuild/issues/649")]
         public void FileTrackerExtendedDirectoryTracking()
         {
@@ -454,7 +480,6 @@ namespace Microsoft.Build.UnitTests.FileTracking
             File.Delete("directoryattributes.read.1.tlog");
             File.Delete("directoryattributes.write.1.tlog");
 
-            string codeFile = null;
             string outputFile = Path.Combine(Path.GetTempPath(), "directoryattributes.exe");
             string codeContent = @"
 using System.IO;
@@ -479,13 +504,7 @@ namespace ConsoleApplication4
 
             try
             {
-                codeFile = FileUtilities.GetTemporaryFileName();
-                File.WriteAllText(codeFile, codeContent);
-                Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine3();
-                csc.Sources = new ITaskItem[] { new TaskItem(codeFile) };
-                csc.OutputAssembly = new TaskItem(outputFile);
-                csc.Execute();
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
 
                 string trackerPath = FileTracker.GetTrackerPath(ExecutableType.ManagedIL);
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
@@ -496,8 +515,8 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // Should track directories when '/e' is passed
-                FileTrackerTestHelper.AssertFoundStringInTLog("GetFileAttributesExW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
-                FileTrackerTestHelper.AssertFoundStringInTLog("GetFileAttributesW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertFoundStringInTLog("GetFileAttributesExW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertFoundStringInTLog("GetFileAttributesW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -509,8 +528,8 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // With '/a', should *not* track GetFileAttributes on directories, even though we do so on files.
-                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesExW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
-                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesExW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -522,8 +541,8 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // With neither '/a' nor '/e', should not do any directory tracking whatsoever
-                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesExW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
-                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesW:" + FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesExW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog("GetFileAttributesW:" + FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -535,7 +554,7 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // Should track directories when '/e' is passed
-                FileTrackerTestHelper.AssertFoundStringInTLog(FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertFoundStringInTLog(FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -547,7 +566,7 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // With '/a', should *not* track GetFileAttributes on directories, even though we do so on files.
-                FileTrackerTestHelper.AssertDidntFindStringInTLog(FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog(FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
 
                 File.Delete("directoryattributes.read.1.tlog");
                 File.Delete("directoryattributes.write.1.tlog");
@@ -559,11 +578,10 @@ namespace ConsoleApplication4
                 Assert.Equal(0, exit);
 
                 // With neither '/a' nor '/e', should not do any directory tracking whatsoever
-                FileTrackerTestHelper.AssertDidntFindStringInTLog(FrameworkFileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
+                FileTrackerTestHelper.AssertDidntFindStringInTLog(FileUtilities.EnsureTrailingSlash(Directory.GetCurrentDirectory()).ToUpperInvariant(), "directoryattributes.read.1.tlog");
             }
             finally
             {
-                File.Delete(codeFile);
                 File.Delete(outputFile);
             }
         }
@@ -576,21 +594,14 @@ namespace ConsoleApplication4
             File.Delete("findstr.read.1.tlog");
             FileTrackerTestHelper.WriteAll("test.in", "foo");
 
-            string codeFile = null;
             string outputFile = Path.Combine(Path.GetTempPath(), "readtwice.exe");
             File.Delete(outputFile);
 
             try
             {
                 string inputPath = Path.GetFullPath("test.in");
-                codeFile = FileUtilities.GetTemporaryFileName();
                 string codeContent = @"using System.IO; class X { static void Main() { File.ReadAllText(@""" + inputPath + @"""); File.ReadAllText(@""" + inputPath + @"""); }}";
-                File.WriteAllText(codeFile, codeContent);
-                Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine3();
-                csc.Sources = new[] { new TaskItem(codeFile) };
-                csc.OutputAssembly = new TaskItem(outputFile);
-                csc.Execute();
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
 
                 string trackerPath = FileTracker.GetTrackerPath(ExecutableType.ManagedIL);
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
@@ -602,7 +613,6 @@ namespace ConsoleApplication4
             }
             finally
             {
-                File.Delete(codeFile);
                 File.Delete(outputFile);
             }
 
@@ -632,7 +642,6 @@ namespace ConsoleApplication4
             try
             {
                 writeFile = Path.Combine(testDirectory, "test.out");
-                string codeFile = Path.Combine(testDirectory, "code.cs");
                 string codeContent = @"
 using System.IO;
 using System.Runtime.InteropServices;
@@ -646,14 +655,7 @@ class X
     }
 }";
 
-                File.WriteAllText(codeFile, codeContent);
-                Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine3();
-                csc.Sources = new[] { new TaskItem(codeFile) };
-                csc.OutputAssembly = new TaskItem(outputFile);
-                bool success = csc.Execute();
-
-                Assert.True(success);
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile);
 
                 string trackerPath = FileTracker.GetTrackerPath(ExecutableType.ManagedIL);
                 string fileTrackerPath = FileTracker.GetFileTrackerPath(ExecutableType.ManagedIL);
@@ -674,7 +676,6 @@ class X
             FileTrackerTestHelper.AssertDidntFindStringInTLog("CreateFileW, Desired Access=0xc0000000, Creation Disposition=0x1:" + writeFile.ToUpperInvariant(), "writenoread.read.1.tlog");
             FileTrackerTestHelper.AssertFoundStringInTLog("CreateFileW, Desired Access=0xc0000000, Creation Disposition=0x1:" + writeFile.ToUpperInvariant(), "writenoread.write.1.tlog");
         }
-#endif // ENABLE_TRACKER_TESTS
 
         [Fact(Skip = "FileTracker tests require VS2015 Update 3 or a packaged version of Tracker.exe https://github.com/dotnet/msbuild/issues/649")]
         public void FileTrackerFindStrInCommandLine()
@@ -2390,7 +2391,6 @@ class X
             }
         }
 
-#if ENABLE_TRACKER_TESTS // https://github.com/dotnet/msbuild/issues/12063
         [Fact(Skip = "Needs investigation")]
         public void LaunchMultipleOfSameTool_ToolLaunchesOthers()
         {
@@ -2435,16 +2435,7 @@ namespace ConsoleApplication4
 
                 File.Delete(outputFile);
 
-                string codeFile = Path.Combine(testDir, "Program.cs");
-                File.WriteAllText(codeFile, codeContent);
-                Csc csc = new Csc();
-                csc.BuildEngine = new MockEngine3();
-                csc.Sources = new ITaskItem[] { new TaskItem(codeFile) };
-                csc.OutputAssembly = new TaskItem(outputFile);
-                csc.Platform = "x86";
-                bool compileSucceeded = csc.Execute();
-
-                Assert.True(compileSucceeded);
+                FileTrackerTestHelper.CompileCSharpExecutable(codeContent, outputFile, "x86");
 
                 // Item1: appname
                 // Item2: command line
@@ -2476,7 +2467,6 @@ namespace ConsoleApplication4
                 }
             }
         }
-#endif // ENABLE_TRACKER_TESTS
 
         private static void InProcTrackingSpawnsToolWithTracker(bool useTrackerResponseFile)
         {
@@ -2721,6 +2711,73 @@ namespace ConsoleApplication4
         }
 
         public static void AssertFoundStringInTLog(string file, string tlog) => AssertFoundStringInTLog(file, tlog, 1);
+
+        /// <summary>
+        /// Compiles C# source code into an executable using Roslyn.
+        /// </summary>
+        /// <param name="sourceCode">The C# source code to compile.</param>
+        /// <param name="outputPath">The path where the executable will be written.</param>
+        /// <param name="platform">Optional platform target (e.g., "x86", "x64", "AnyCpu"). Defaults to AnyCpu.</param>
+        /// <exception cref="InvalidOperationException">Thrown when compilation fails; the message contains the compiler diagnostics.</exception>
+        public static void CompileCSharpExecutable(string sourceCode, string outputPath, string platform = null)
+        {
+            SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
+
+            string assemblyName = Path.GetFileNameWithoutExtension(outputPath);
+
+            // Add references to required assemblies
+            var references = new List<MetadataReference>
+            {
+                MetadataReference.CreateFromFile(typeof(object).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(Console).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(System.IO.File).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(System.Diagnostics.Process).Assembly.Location),
+                MetadataReference.CreateFromFile(typeof(System.Runtime.InteropServices.DllImportAttribute).Assembly.Location),
+            };
+
+            // Add reference to System.Runtime for core types
+            string runtimePath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+            string systemRuntimePath = Path.Combine(runtimePath, "System.Runtime.dll");
+            if (File.Exists(systemRuntimePath))
+            {
+                references.Add(MetadataReference.CreateFromFile(systemRuntimePath));
+            }
+
+            // Determine platform
+            Platform targetPlatform = string.IsNullOrEmpty(platform)
+                ? Platform.AnyCpu
+                : platform.ToLowerInvariant() switch
+                {
+                    "x86" => Platform.X86,
+                    "x64" => Platform.X64,
+                    _ => Platform.AnyCpu,
+                };
+
+            CSharpCompilationOptions options = new CSharpCompilationOptions(
+                OutputKind.ConsoleApplication,
+                optimizationLevel: OptimizationLevel.Release,
+                platform: targetPlatform);
+
+            CSharpCompilation compilation = CSharpCompilation.Create(
+                assemblyName,
+                syntaxTrees: [syntaxTree],
+                references: references,
+                options: options);
+
+            EmitResult result = compilation.Emit(outputPath);
+
+            if (!result.Success)
+            {
+                string diagnostics = string.Join(
+                    Environment.NewLine,
+                    result.Diagnostics
+                        .Where(d => d.Severity == DiagnosticSeverity.Error)
+                        .Select(d => d.ToString()));
+
+                throw new InvalidOperationException(
+                    $"Compilation failed for '{outputPath}'.{Environment.NewLine}{diagnostics}");
+            }
+        }
     }
 }
 #endif

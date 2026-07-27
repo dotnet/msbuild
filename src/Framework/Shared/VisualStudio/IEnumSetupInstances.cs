@@ -4,9 +4,7 @@
 #if FEATURE_WINDOWSINTEROP && FEATURE_VISUALSTUDIOSETUP
 
 using System;
-#if NET
 using System.Runtime.CompilerServices;
-#endif
 using Windows.Win32;
 using Windows.Win32.Foundation;
 
@@ -29,7 +27,11 @@ internal unsafe struct IEnumSetupInstances : IComIID
         get => ref Unsafe.AsRef(in IID_IEnumSetupInstances);
     }
 #else
-    readonly Guid IComIID.Guid => IID_IEnumSetupInstances;
+    readonly ref readonly Guid IComIID.Guid
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => ref Unsafe.AsRef(in IID_IEnumSetupInstances);
+    }
 #endif
 
     private readonly void** _lpVtbl;

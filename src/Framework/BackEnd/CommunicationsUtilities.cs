@@ -338,6 +338,36 @@ internal static class CommunicationsUtilities
     }
 
     /// <summary>
+    ///  Returns <see langword="true"/> when both dictionaries contain the same set of keys with the same values
+    ///  (keys compared using the dictionaries' own comparer, values compared ordinally). Used to detect unchanged
+    ///  invariant payloads (e.g. the build process environment or the global properties) so they can be
+    ///  deduplicated on the task-host wire.
+    /// </summary>
+    internal static bool AreDictionariesEquivalent(IDictionary<string, string>? left, IDictionary<string, string>? right)
+    {
+        if (ReferenceEquals(left, right))
+        {
+            return true;
+        }
+
+        if (left is null || right is null || left.Count != right.Count)
+        {
+            return false;
+        }
+
+        foreach (KeyValuePair<string, string> entry in left)
+        {
+            if (!right.TryGetValue(entry.Key, out string? otherValue)
+                || !string.Equals(entry.Value, otherValue, StringComparison.Ordinal))
+            {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
     ///  Indicate to the client that all elements of the Handshake have been sent.
     /// </summary>
     internal static void WriteEndOfHandshakeSignal(this PipeStream stream)
@@ -580,7 +610,19 @@ internal static class CommunicationsUtilities
             }
         }
 
-        if (!string.IsNullOrEmpty(architectureFlagToSet))
+        // For a NET task host the launched TaskHost node runs whatever architecture the .NET
+        // SDK shipped, which the worker node cannot know. Suppress the worker node's arch bit
+        // so the handshake stays architecture-agnostic: any architecture of worker node may
+        // connect to any architecture of the resolved SDK TaskHost node (the TaskHost node
+        // tolerates a missing arch bit via IsAllowedBitnessMismatch). Only the worker node
+        // suppresses; the TaskHost node itself (TaskHostParameters.Empty) keeps its arch bit so
+        // already-deployed worker nodes that still emit one continue to connect.
+        bool isNetTaskHostWorkerNode =
+            taskHost &&
+            !taskHostParameters.IsEmpty &&
+            XMakeAttributes.MSBuildRuntimeValues.net.Equals(taskHostParameters.Runtime, StringComparison.OrdinalIgnoreCase);
+
+        if (!isNetTaskHostWorkerNode && !string.IsNullOrEmpty(architectureFlagToSet))
         {
             if (architectureFlagToSet!.Equals(XMakeAttributes.MSBuildArchitectureValues.x64, StringComparison.OrdinalIgnoreCase))
             {
@@ -768,11 +810,17 @@ internal static class CommunicationsUtilities
 
                 using (StreamWriter writer = FileUtilities.OpenWrite(filePath, append: true))
                 {
-                    long now = DateTime.UtcNow.Ticks;
-                    float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;
-                    s_lastLoggedTicks = now;
+                    DateTime now = DateTime.UtcNow;
+                    long nowTicks = now.Ticks;
+                    float millisecondsSinceLastLog = (float)(nowTicks - s_lastLoggedTicks) / TimeSpan.TicksPerMillisecond;
+                    s_lastLoggedTicks = nowTicks;
 
-                    writer.WriteLine($"{Thread.CurrentThread.Name} (TID {Environment.CurrentManagedThreadId}) {now,15} +{millisecondsSinceLastLog,10}ms: {message}");
+                    string? threadName = Thread.CurrentThread.Name;
+                    string threadDisplay = threadName.IsNullOrEmpty()
+                        ? $"TID {Environment.CurrentManagedThreadId}"
+                        : $"{threadName} (TID {Environment.CurrentManagedThreadId})";
+
+                    writer.WriteLine($"{threadDisplay,-24} {now:O} +{millisecondsSinceLastLog,8:F2}ms: {message}");
                 }
             }
             catch (IOException)

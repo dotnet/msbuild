@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
 #if FEATURE_WINDOWSINTEROP
 using Microsoft.Build.Tasks.Fusion;
@@ -46,23 +45,8 @@ namespace Microsoft.Build.Tasks
         internal static Guid GUID_TYPELIB_NAMESPACE = new Guid("{0F21F359-AB84-41E8-9A78-36D110E6D2F9}");
         internal static Guid GUID_ExportedFromComPlus = new Guid("{90883f05-3d28-11d2-8f17-00a0c9a6186d}");
 
-        internal static Guid IID_IUnknown = new Guid("{00000000-0000-0000-C000-000000000046}");
-        internal static Guid IID_IDispatch = new Guid("{00020400-0000-0000-C000-000000000046}");
-        internal static Guid IID_ITypeInfo = new Guid("{00020401-0000-0000-C000-000000000046}");
-        internal static Guid IID_IEnumVariant = new Guid("{00020404-0000-0000-C000-000000000046}");
-        internal static Guid IID_IDispatchEx = new Guid("{A6EF9860-C720-11D0-9337-00A0C90DCAA9}");
-
-        internal static Guid IID_StdOle = new Guid("{00020430-0000-0000-C000-000000000046}");
-
-        // used in LoadTypeLibEx
-        internal enum REGKIND
-        {
-            REGKIND_DEFAULT = 0,
-            REGKIND_REGISTER = 1,
-            REGKIND_NONE = 2,
-            REGKIND_LOAD_TLB_AS_32BIT = 0x20,
-            REGKIND_LOAD_TLB_AS_64BIT = 0x40,
-        }
+        // The stdole2 type library LIBID (not an interface IID, so it has no CsWin32 struct equivalent).
+        internal static Guid LIBID_StdOle = new Guid("{00020430-0000-0000-C000-000000000046}");
 
         // Set of IMAGE_FILE constants which represent the processor architectures for native assemblies.
         internal const UInt16 IMAGE_FILE_MACHINE_UNKNOWN = 0x0; // The contents of this field are assumed to be applicable to any machine type
@@ -76,17 +60,6 @@ namespace Microsoft.Build.Tasks
         internal const UInt16 IMAGE_FILE_MACHINE_R4000 = 0x166; // Used to test a architecture we do not expect to reference
 
         internal const int SE_ERR_ACCESSDENIED = 5;
-
-        [Flags]
-        internal enum MoveFileFlags
-        {
-            MOVEFILE_REPLACE_EXISTING = 0x00000001,
-            MOVEFILE_COPY_ALLOWED = 0x00000002,
-            MOVEFILE_DELAY_UNTIL_REBOOT = 0x00000004,
-            MOVEFILE_WRITE_THROUGH = 0x00000008,
-            MOVEFILE_CREATE_HARDLINK = 0x00000010,
-            MOVEFILE_FAIL_IF_NOT_TRACKABLE = 0x00000020
-        }
 
         #endregion
 
@@ -118,117 +91,6 @@ namespace Microsoft.Build.Tasks
             }
 
             return hardLinkCreated;
-        }
-
-        //------------------------------------------------------------------------------
-        // MoveFileEx
-        //------------------------------------------------------------------------------
-#if FEATURE_WINDOWSINTEROP
-        [SupportedOSPlatform("windows5.1.2600")]
-        internal static bool MoveFileExWindows(string existingFileName, string newFileName, MoveFileFlags flags)
-            => Windows.Win32.PInvoke.MoveFileEx(existingFileName, newFileName, (Windows.Win32.Storage.FileSystem.MOVE_FILE_FLAGS)flags);
-#else
-        internal static bool MoveFileExWindows(string existingFileName, string newFileName, MoveFileFlags flags) => false;
-#endif
-
-        /// <summary>
-        /// Add implementation of this function when not running on windows. The implementation is
-        /// not complete, of course, but should work for most common cases.
-        /// </summary>
-        /// <param name="existingFileName"></param>
-        /// <param name="newFileName"></param>
-        /// <param name="flags"></param>
-        /// <returns></returns>
-        internal static bool MoveFileEx(AbsolutePath existingFileName, AbsolutePath newFileName, MoveFileFlags flags)
-        {
-            if (NativeMethodsShared.IsWindows)
-            {
-                return MoveFileExWindows(existingFileName, newFileName, flags);
-            }
-
-            if (!FileSystems.Default.FileExists(existingFileName))
-            {
-                return false;
-            }
-
-            var targetExists = FileSystems.Default.FileExists(newFileName);
-
-            if (targetExists
-                && ((flags & MoveFileFlags.MOVEFILE_REPLACE_EXISTING) != MoveFileFlags.MOVEFILE_REPLACE_EXISTING))
-            {
-                return false;
-            }
-
-            if (targetExists && (File.GetAttributes(newFileName) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
-            {
-                throw new IOException("Moving target is read-only");
-            }
-
-            if (existingFileName == newFileName)
-            {
-                return true;
-            }
-
-            if (targetExists)
-            {
-                File.Delete(newFileName);
-            }
-
-            File.Move(existingFileName, newFileName);
-            return true;
-        }
-
-        //------------------------------------------------------------------------------
-        // RegisterTypeLib
-        //------------------------------------------------------------------------------
-        [DllImport("oleaut32", PreserveSig = false, EntryPoint = "RegisterTypeLib")]
-        internal static extern void RegisterTypeLib([In, MarshalAs(UnmanagedType.Interface)] object pTypeLib, [In, MarshalAs(UnmanagedType.LPWStr)] string szFullPath, [In, MarshalAs(UnmanagedType.LPWStr)] string szHelpDir);
-
-        //------------------------------------------------------------------------------
-        // UnRegisterTypeLib
-        //------------------------------------------------------------------------------
-        [DllImport("oleaut32", PreserveSig = false, EntryPoint = "UnRegisterTypeLib")]
-        internal static extern void UnregisterTypeLib(
-            [In] ref Guid guid,
-            [In] short wMajorVerNum,
-            [In] short wMinorVerNum,
-            [In] int lcid,
-            [In] System.Runtime.InteropServices.ComTypes.SYSKIND syskind);
-
-        //------------------------------------------------------------------------------
-        // LoadTypeLib
-        //------------------------------------------------------------------------------
-        [DllImport("oleaut32", PreserveSig = false, EntryPoint = "LoadTypeLibEx")]
-        [return: MarshalAs(UnmanagedType.Interface)]
-        internal static extern object LoadTypeLibEx([In, MarshalAs(UnmanagedType.LPWStr)] string szFullPath, [In] int regKind);
-
-        //------------------------------------------------------------------------------
-        // LoadRegTypeLib
-        //------------------------------------------------------------------------------
-        [DllImport("oleaut32", PreserveSig = false)]
-        [return: MarshalAs(UnmanagedType.Interface)]
-        internal static extern object LoadRegTypeLib([In] ref Guid clsid, [In] short majorVersion, [In] short minorVersion, [In] int lcid);
-
-        //------------------------------------------------------------------------------
-        // QueryPathOfRegTypeLib
-        //------------------------------------------------------------------------------
-        [DllImport("oleaut32", PreserveSig = false)]
-        [return: MarshalAs(UnmanagedType.BStr)]
-        internal static extern string QueryPathOfRegTypeLib([In] ref Guid clsid, [In] short majorVersion, [In] short minorVersion, [In] int lcid);
-
-        internal static bool AllDrivesMapped()
-        {
-#if FEATURE_WINDOWSINTEROP
-            const uint AllDriveMask = 0x0cffffff;
-            if (NativeMethodsShared.IsWindows)
-            {
-                var driveMask = Windows.Win32.PInvoke.GetLogicalDrives();
-                // All drives are taken if the value has all 26 bits set
-                return driveMask >= AllDriveMask;
-            }
-#endif
-
-            return false;
         }
 
         #endregion

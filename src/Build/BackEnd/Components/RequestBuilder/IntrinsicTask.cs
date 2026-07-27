@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Execution;
 
@@ -70,7 +69,7 @@ namespace Microsoft.Build.BackEnd
                 ProjectPropertyGroupTaskInstance propertyGroupTaskInstance => new PropertyGroupIntrinsicTask(propertyGroupTaskInstance, loggingContext, projectInstance, logTaskInputs),
                 ProjectItemGroupTaskInstance itemGroupTaskInstance => new ItemGroupIntrinsicTask(itemGroupTaskInstance, loggingContext, projectInstance, logTaskInputs),
 
-                _ => InternalError.Throw<IntrinsicTask>($"Unhandled intrinsic task type {taskInstance.GetType().GetTypeInfo().BaseType}"),
+                _ => InternalError.Throw<IntrinsicTask>($"Unhandled intrinsic task type {taskInstance.GetType().BaseType}"),
             };
 
         /// <summary>

@@ -23,6 +23,7 @@ namespace System.Deployment.Internal.CodeSigning
             DeformatterAlgorithm = typeof(RSAPKCS1SignatureDeformatter).FullName;
         }
 
+        [RequiresUnreferencedCode("CreateDeformatter resolves the deformatter algorithm by name via reflection; matches the base SignatureDescription.CreateDeformatter requirement.")]
         public override AsymmetricSignatureDeformatter CreateDeformatter(AsymmetricAlgorithm key)
         {
             if (key == null)
@@ -35,6 +36,7 @@ namespace System.Deployment.Internal.CodeSigning
             return deformatter;
         }
 
+        [RequiresUnreferencedCode("CreateFormatter resolves the formatter algorithm by name via reflection; matches the base SignatureDescription.CreateFormatter requirement.")]
         public override AsymmetricSignatureFormatter CreateFormatter(AsymmetricAlgorithm key)
         {
             if (key == null)

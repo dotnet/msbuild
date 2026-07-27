@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -133,6 +134,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// A list of ILoggers registered with the LoggingService
         /// </summary>
         private List<ILogger> _loggers;
+
+        /// <summary>
+        /// Central loggers used by distributed registrations, tracked by reference identity.
+        /// </summary>
+        private List<ILogger> _distributedCentralLoggers;
 
         /// <summary>
         /// A list of LoggerDescriptions which describe how to create a forwarding logger on a node. These are
@@ -311,6 +317,7 @@ namespace Microsoft.Build.BackEnd.Logging
             _projectFileMap = new ConcurrentDictionary<int, string>();
             _logMode = loggerMode;
             _loggers = new List<ILogger>();
+            _distributedCentralLoggers = new List<ILogger>();
             _loggerDescriptions = new List<LoggerDescription>();
             _eventSinkDictionary = new Dictionary<int, IBuildEventSink>();
             _nodeId = nodeId;
@@ -980,6 +987,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     CleanLoggingEventProcessing();
 
                     _loggers = new List<ILogger>();
+                    _distributedCentralLoggers = new List<ILogger>();
                     _loggerDescriptions = null;
                     _eventSinkDictionary = null;
                     _filterEventSource = null;
@@ -1040,8 +1048,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (_centralForwardingLoggerSinkId == -1)
                 {
                     // Create a forwarding logger which forwards all events to an eventSourceSink
-                    Assembly engineAssembly = typeof(LoggingService).GetTypeInfo().Assembly;
-                    string loggerClassName = "Microsoft.Build.BackEnd.Logging.CentralForwardingLogger";
+                    Assembly engineAssembly = typeof(CentralForwardingLogger).Assembly;
+                    string loggerClassName = typeof(CentralForwardingLogger).FullName;
                     string loggerAssemblyName = engineAssembly.GetName().FullName;
                     LoggerDescription centralForwardingLoggerDescription = new LoggerDescription(
                                                                                       loggerClassName,
@@ -1050,9 +1058,9 @@ namespace Microsoft.Build.BackEnd.Logging
                                                                                       string.Empty /*No parameters needed as we are forwarding all events*/,
                                                                                       LoggerVerbosity.Diagnostic); /*Not used, but the spirit of the logger is to forward everything so this is the most appropriate verbosity */
 
-                    // Registering a distributed logger will initialize the logger, and create and initialize the forwarding logger.
+                    // Registering a distributed logger will initialize the logger, and initialize the forwarding logger.
                     // In addition it will register the logging description so that it can be instantiated on a node.
-                    RegisterDistributedLogger(logger, centralForwardingLoggerDescription);
+                    RegisterDistributedLoggerCore(logger, centralForwardingLoggerDescription, new CentralForwardingLogger());
 
                     // Get the Id of the eventSourceSink which was created for the first logger.
                     // We keep a reference to this Id so that all other central loggers registered on this logging service (from registerLogger)
@@ -1110,6 +1118,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">If forwardingLogger is null</exception>
         /// <exception cref="LoggerException">If a logger exception is thrown while creating or initializing the distributed or central logger</exception>
         /// <exception cref="InternalLoggerException">If any exception (other than a loggerException)is thrown while creating or initializing the distributed or central logger, we will wrap these exceptions in an InternalLoggerException</exception>
+        [RequiresUnreferencedCode("Creates forwarding loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         public bool RegisterDistributedLogger(ILogger centralLogger, LoggerDescription forwardingLogger)
         {
             lock (_lockObject)
@@ -1121,50 +1130,97 @@ namespace Microsoft.Build.BackEnd.Logging
                     centralLogger = new NullCentralLogger();
                 }
 
-                IForwardingLogger localForwardingLogger = null;
-
-                // create an eventSourceSink which the central logger will register with to receive the events from the forwarding logger
-                EventSourceSink eventSourceSink = new EventSourceSink();
-
-                // If the logger is already in the list it should not be registered again.
-                // Note here that we are checking for direct equivalence (fast)
-                // and if we're dealing with a reusable logger, we need to check its original logger (slower)
-                if (_loggers.Contains(centralLogger) || _loggers.Any(l => l is ReusableLogger rl && rl.OriginalLogger == centralLogger))
+                if (!FeatureSwitches.EnableReflectiveLoggerLoading)
                 {
-                    return false;
+                    throw CreateReflectiveLoggerLoadingDisabledException();
                 }
 
-                // Assign a unique logger Id to this distributed logger
-                int sinkId = _nextSinkId++;
-                forwardingLogger.LoggerId = sinkId;
-                eventSourceSink.Name = $"Sink for forwarding logger \"{sinkId}\".";
-
-                // Initialize and register the central logger
-                InitializeLogger(centralLogger, eventSourceSink);
-
-                localForwardingLogger = forwardingLogger.CreateForwardingLogger();
-                EventRedirectorToSink newRedirector = new EventRedirectorToSink(sinkId, eventSourceSink);
-                localForwardingLogger.BuildEventRedirector = newRedirector;
-                localForwardingLogger.Parameters = forwardingLogger.LoggerSwitchParameters;
-                localForwardingLogger.Verbosity = forwardingLogger.Verbosity;
-
-                // Give the forwarding logger registered on the inproc node the correct ID.
-                localForwardingLogger.NodeId = 1;
-
-                // Convert the path to the logger DLL to full path before passing it to the node provider
-                forwardingLogger.ConvertPathsToFullPaths();
-
-                CreateFilterEventSource();
-
-                // Initialize and register the forwarding logger
-                InitializeLogger(localForwardingLogger, _filterEventSource);
-
-                _loggerDescriptions.Add(forwardingLogger);
-
-                _eventSinkDictionary.Add(sinkId, eventSourceSink);
-
-                return true;
+                return RegisterDistributedLoggerCore(centralLogger, forwardingLogger, forwardingLogger.CreateForwardingLogger());
             }
+        }
+
+        /// <summary>
+        /// Creates the exception thrown when a logger described by its assembly and class name cannot be
+        /// created because reflective logger loading is disabled (a trimmed or Native AOT host). Loggers
+        /// supplied to the engine as already-constructed <see cref="ILogger"/> instances are unaffected and
+        /// are the supported way to log under trimming/AOT.
+        /// </summary>
+        private static InternalLoggerException CreateReflectiveLoggerLoadingDisabledException()
+        {
+            string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(
+                out string errorCode,
+                out string helpKeyword,
+                "ReflectiveLoggerLoadingNotSupported");
+            return new InternalLoggerException(message, innerException: null, e: null, errorCode, helpKeyword, initializationException: true);
+        }
+
+        private bool RegisterDistributedLoggerCore(ILogger centralLogger, LoggerDescription forwardingLogger, IForwardingLogger localForwardingLogger)
+        {
+            Assumed.NotEqual(_serviceState, LoggingServiceState.Shutdown, " The object is shutdown, should not do any operations on a shutdown component");
+            Assumed.NotNull(forwardingLogger, "forwardingLogger was null");
+            Assumed.NotNull(localForwardingLogger, "localForwardingLogger was null");
+            if (centralLogger == null)
+            {
+                centralLogger = new NullCentralLogger();
+            }
+
+            // If the logger is already in the list it should not be registered again.
+            if (_loggers.Contains(centralLogger))
+            {
+                return false;
+            }
+
+            // A central logger can back only one distributed registration.
+            if (_distributedCentralLoggers.Any(existing => ReferenceEquals(existing, centralLogger)))
+            {
+                return false;
+            }
+
+            // Reuse a pre-registered wrapper without reinitializing its logger.
+            ReusableLogger existingReusableCentralLogger = _loggers
+                .OfType<ReusableLogger>()
+                .FirstOrDefault(rl => rl.OriginalLogger == centralLogger);
+
+            // Create the sink for events from this forwarding logger.
+            EventSourceSink eventSourceSink = new EventSourceSink();
+
+            // Assign a unique logger Id to this distributed logger
+            int sinkId = _nextSinkId++;
+            forwardingLogger.LoggerId = sinkId;
+            eventSourceSink.Name = $"Sink for forwarding logger \"{sinkId}\".";
+
+            if (existingReusableCentralLogger is null)
+            {
+                InitializeLogger(centralLogger, eventSourceSink);
+            }
+            else
+            {
+                existingReusableCentralLogger.RerouteActiveEventSource(eventSourceSink);
+            }
+
+            _distributedCentralLoggers.Add(centralLogger);
+
+            EventRedirectorToSink newRedirector = new EventRedirectorToSink(sinkId, eventSourceSink);
+            localForwardingLogger.BuildEventRedirector = newRedirector;
+            localForwardingLogger.Parameters = forwardingLogger.LoggerSwitchParameters;
+            localForwardingLogger.Verbosity = forwardingLogger.Verbosity;
+
+            // Give the forwarding logger registered on the inproc node the correct ID.
+            localForwardingLogger.NodeId = 1;
+
+            // Convert the path to the logger DLL to full path before passing it to the node provider
+            forwardingLogger.ConvertPathsToFullPaths();
+
+            CreateFilterEventSource();
+
+            // Initialize and register the forwarding logger
+            InitializeLogger(localForwardingLogger, _filterEventSource);
+
+            _loggerDescriptions.Add(forwardingLogger);
+
+            _eventSinkDictionary.Add(sinkId, eventSourceSink);
+
+            return true;
         }
 
         /// <summary>
@@ -1177,6 +1233,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <param name="nodeId">The id of the node the logging services is on</param>
         /// <exception cref="InternalErrorException">When forwardingLoggerSink is null</exception>
         /// <exception cref="InternalErrorException">When loggerDescriptions is null</exception>
+        [RequiresUnreferencedCode("Creates forwarding loggers by reflecting over logger assemblies discovered at runtime, which is incompatible with trimming.")]
         public void InitializeNodeLoggers(ICollection<LoggerDescription> descriptions, IBuildEventSink forwardingLoggerSink, int nodeId)
         {
             lock (_lockObject)
@@ -1206,6 +1263,11 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
 
                 CreateFilterEventSource();
+
+                if (!FeatureSwitches.EnableReflectiveLoggerLoading)
+                {
+                    throw CreateReflectiveLoggerLoadingDisabledException();
+                }
 
                 foreach (LoggerDescription description in descriptions)
                 {
@@ -1385,6 +1447,16 @@ namespace Microsoft.Build.BackEnd.Logging
                     {
                         _projectFileMap[projectStartedEventArgs.BuildEventContext.ProjectContextId] = projectStartedEventArgs.ProjectFile;
                     }
+                }
+                else if (loggingPacket.NodeBuildEvent.Value.Value is TaskParameterEventArgs taskParameterEventArgs &&
+                         string.Equals(taskParameterEventArgs.ItemType, ItemTypeNames.EmbedInBinlog, StringComparison.OrdinalIgnoreCase) &&
+                         string.IsNullOrEmpty(taskParameterEventArgs.ProjectFile) &&
+                         taskParameterEventArgs.BuildEventContext != null &&
+                         taskParameterEventArgs.BuildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
+                {
+                    // ProjectFile isn't serialized across nodes (perf), but the binary logger needs it to resolve
+                    // relative EmbedInBinlog paths (#13789). Restore it like LogBuildEvent does for in-proc events.
+                    taskParameterEventArgs.ProjectFile = GetAndVerifyProjectFileFromContext(taskParameterEventArgs, allowCacheMiss: true);
                 }
             }
         }

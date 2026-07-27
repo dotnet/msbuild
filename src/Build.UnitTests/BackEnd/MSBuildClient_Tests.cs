@@ -6,6 +6,8 @@
 using System;
 using System.IO;
 using System.Threading;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Client;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.UnitTests;
 using Shouldly;
@@ -84,6 +86,64 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // signal to pick the generic "server unavailable" message rather than the more
             // specific "crashed with exit code N" one.)
             result.ServerProcessExitCode.ShouldBeNull();
+        }
+
+        /// <summary>
+        /// Regression coverage for https://github.com/dotnet/msbuild/issues/14172. On Linux under full CPU
+        /// saturation, a warm <c>/mt</c> MSBuild Server build that succeeded would intermittently exit 1 with
+        /// the final <c>Build succeeded.</c> summary dropped.
+        /// </summary>
+        /// <remarks>
+        /// Root cause: the client's packet-processing loop waits on
+        /// <c>WaitAny([cancel, PacketPumpCompleted, PacketReceivedEvent])</c>. The pump enqueues the final
+        /// <see cref="ServerNodeBuildResult"/> (and trailing console writes) and then sets
+        /// <c>PacketPumpCompleted</c> - a sticky <see cref="ManualResetEvent"/> that sorts before
+        /// <c>PacketReceivedEvent</c>. If the (descheduled) main loop reaches <c>WaitAny</c> after both are
+        /// signaled, it took the completed branch, which set <c>_buildFinished</c> WITHOUT draining the queue,
+        /// dropping the result. That left <see cref="MSBuildClientExitResult.MSBuildAppExitTypeString"/> null,
+        /// which <c>MSBuildClientApp</c> maps to a non-zero process exit. This test arranges that exact event
+        /// ordering deterministically (both events pre-signaled with the result already queued, so
+        /// <c>WaitAny</c> returns the completed branch) and asserts the result is still processed.
+        /// </remarks>
+        [Fact]
+        public void ProcessPackets_WhenPumpCompletedRacesQueuedResult_DoesNotDropBuildResult()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            MSBuildClient client = new MSBuildClient(["dummy.proj"], "MSBuild.dll");
+
+            using MSBuildClientPacketPump pump = new MSBuildClientPacketPump(new MemoryStream());
+
+            // Seed the queue with the trailing console write and the build result, then signal both the
+            // received event and the (sticky) completion event, mirroring the server's teardown ordering.
+            pump.ReceivedPacketsQueue.Enqueue(new ServerNodeConsoleWrite("Build succeeded." + Environment.NewLine, ConsoleOutput.Standard));
+            pump.ReceivedPacketsQueue.Enqueue(new ServerNodeBuildResult(0, "Success"));
+            pump.PacketReceivedEvent.Set();
+            pump.PacketPumpCompleted.Set();
+
+            // Capture stdout so we can assert the dropped-summary symptom directly (and keep the seeded
+            // console write out of the real test-run output).
+            MSBuildClientExitResult result;
+            using StringWriter capturedConsole = new StringWriter();
+            TextWriter originalConsoleOut = Console.Out;
+            Console.SetOut(capturedConsole);
+            try
+            {
+                result = client.ProcessSeededPacketsForTests(pump);
+            }
+            finally
+            {
+                Console.SetOut(originalConsoleOut);
+            }
+
+            // The build result must be surfaced, not dropped: the client stays Success and forwards the
+            // server's exit type string (which MSBuildClientApp maps to a zero process exit code).
+            result.MSBuildClientExitType.ShouldBe(MSBuildClientExitType.Success);
+            result.MSBuildAppExitTypeString.ShouldBe("Success");
+
+            // The trailing console write queued right before the result - the "Build succeeded." summary
+            // that #14172 dropped - must also be flushed, not stranded behind the drained result.
+            capturedConsole.ToString().ShouldContain("Build succeeded.");
         }
     }
 }

@@ -25,6 +25,8 @@ namespace Microsoft.Build.Shared
 
         // the portion of the expression that matches the item type or metadata name, eg: "foo123"
         // Note that the pattern is more strict than the rules for valid XML element names.
+        // This grammar MUST be kept in sync with ExpressionShredder.SinkValidName, which validates
+        // item type and metadata names when parsing item/metadata expressions.
         internal const string itemTypeOrMetadataNameSpecification = @"[A-Za-z_][A-Za-z_0-9\-]*";
 
         // regular expression used to match item vector transforms

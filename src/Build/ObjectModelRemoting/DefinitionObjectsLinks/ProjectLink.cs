@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -251,6 +252,7 @@ namespace Microsoft.Build.ObjectModelRemoting
         /// <summary>
         /// Facilitate support for remote build.
         /// </summary>
+        [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
         public abstract bool Build(string[] targets, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, EvaluationContext evaluationContext);
 
         /// <summary>

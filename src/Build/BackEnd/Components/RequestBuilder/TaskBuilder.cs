@@ -3,10 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-
-#if FEATURE_APARTMENT_STATE
-using System.Diagnostics.CodeAnalysis;
-#endif
 using System.Linq;
 using System.Reflection;
 #if FEATURE_APARTMENT_STATE
@@ -578,7 +574,7 @@ namespace Microsoft.Build.BackEnd
         /// STA thread launching also being used in XMakeCommandLine\OutOfProcTaskAppDomainWrapperBase.cs, InstantiateAndExecuteTaskInSTAThread method.
         /// Any bug fixes made to this code, please ensure that you also fix that code.
         /// </comment>
-        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is caught and rethrown in the correct thread.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Justification = "Exception is caught and rethrown in the correct thread.")]
         private WorkUnitResult ExecuteTaskInSTAThread(ItemBucket bucket, TaskLoggingContext taskLoggingContext, TaskHostParameters taskIdentityParameters, TaskHost taskHost, TaskExecutionMode howToExecuteTask)
         {
             WorkUnitResult taskResult = new WorkUnitResult(WorkUnitResultCode.Failed, WorkUnitActionCode.Stop, null);
@@ -933,7 +929,7 @@ namespace Microsoft.Build.BackEnd
                             throw new InvalidProjectFileException(ipex.Message, ipex);
                         }
                     }
-                    else if (type == typeof(Exception) || type.GetTypeInfo().IsSubclassOf(typeof(Exception)))
+                    else if (type == typeof(Exception) || type.IsSubclassOf(typeof(Exception)))
                     {
                         // Occasionally, when debugging a very uncommon task exception, it is useful to loop the build with
                         // a debugger attached to break on 2nd chance exceptions.
