@@ -2692,6 +2692,11 @@
         <target state="new">MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
         <note>{StrBegin="MSB4322: "}</note>
       </trans-unit>
+      <trans-unit id="TarDirectory.InvalidDeterministicTimestamp">
+        <source>MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</source>
+        <target state="new">MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</target>
+        <note>{StrBegin="MSB4324: "}</note>
+      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: задача "{0}" не поддерживается в MSBuild версии .NET Core. Используйте MSBuild версии .NET Framework. Дополнительные сведения: https://aka.ms/msbuild/MSB4803.</target>

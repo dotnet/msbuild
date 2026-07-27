@@ -3110,6 +3110,10 @@
     <value>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</value>
     <comment>{StrBegin="MSB4323: "}</comment>
   </data>
+  <data name="TarDirectory.InvalidDeterministicTimestamp">
+    <value>MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</value>
+    <comment>{StrBegin="MSB4324: "}</comment>
+  </data>
   <data name="TarDirectory.Comment">
     <value>Creating tar archive from directory "{0}" to "{1}".</value>
   </data>

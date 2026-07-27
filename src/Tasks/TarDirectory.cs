@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Formats.Tar;
+using System.Globalization;
 using System.IO;
 using System.IO.Compression;
 using Microsoft.Build.Framework;
@@ -59,6 +60,17 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public TarEntryFormat Format { get; set; } = TarEntryFormat.Pax;
 
+        /// <summary>
+        /// Gets or sets an optional timestamp to stamp on every entry in the archive in place of the source files'
+        /// last-write times. Supplying this value makes the produced archive reproducible across machines and runs.
+        /// The value may be an RFC 3339 date-time (for example, <c>2024-01-01T00:00:00Z</c>) or an integer number of
+        /// seconds since the Unix epoch (for example, <c>1704067200</c>, which is also the form of <c>SOURCE_DATE_EPOCH</c>).
+        /// When empty, each entry keeps its source file's last-write time (entries are always written in a
+        /// deterministic order regardless of this value).
+        /// This parameter is optional.
+        /// </summary>
+        public string DeterministicTimestamp { get; set; } = string.Empty;
+
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
@@ -101,6 +113,19 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
+            DateTimeOffset? deterministicTimestamp = null;
+            if (!string.IsNullOrEmpty(DeterministicTimestamp))
+            {
+                if (!TryParseTimestamp(DeterministicTimestamp, out DateTimeOffset parsedTimestamp))
+                {
+                    Log.LogErrorWithCodeFromResources("TarDirectory.InvalidDeterministicTimestamp", DeterministicTimestamp);
+
+                    return false;
+                }
+
+                deterministicTimestamp = parsedTimestamp;
+            }
+
             BuildEngine3.Yield();
 
             try
@@ -125,13 +150,21 @@ namespace Microsoft.Build.Tasks
                 };
 
                 // Write the archive entry-by-entry (rather than the one-shot TarFile.CreateFromDirectory) so that the
-                // entries are emitted in a deterministic, ordinal-sorted order. Per-entry metadata is written exactly
-                // as TarFile.CreateFromDirectory would via WriteEntry(fullPath, entryName); only the order is affected.
+                // entries are emitted in a deterministic, ordinal-sorted order. When a deterministic timestamp is
+                // supplied, each entry is constructed manually so its modification time can be overridden; otherwise
+                // per-entry metadata is written exactly as TarFile.CreateFromDirectory would via WriteEntry.
                 using TarWriter writer = new TarWriter(compressionStream ?? destinationStream, format, leaveOpen: true);
 
-                foreach ((string fullPath, string entryName) in EnumerateEntriesInDeterministicOrder())
+                foreach ((FileSystemInfo info, string entryName) in EnumerateEntriesInDeterministicOrder())
                 {
-                    writer.WriteEntry(fullPath, entryName);
+                    if (deterministicTimestamp is DateTimeOffset timestamp)
+                    {
+                        WriteStampedEntry(writer, format, info, entryName, timestamp);
+                    }
+                    else
+                    {
+                        writer.WriteEntry(info.FullName, entryName);
+                    }
                 }
             }
             catch (Exception e)
@@ -153,11 +186,11 @@ namespace Microsoft.Build.Tasks
         /// contents. This mirrors the entry naming of <see cref="TarFile.CreateFromDirectory(string, Stream, bool, TarEntryFormat)"/>
         /// (relative, forward-slash separated, directories suffixed with '/', base directory excluded).
         /// </summary>
-        private List<(string FullPath, string EntryName)> EnumerateEntriesInDeterministicOrder()
+        private List<(FileSystemInfo Info, string EntryName)> EnumerateEntriesInDeterministicOrder()
         {
             string basePath = FileUtilities.EnsureTrailingSlash(SourceDirectory.FullName);
 
-            List<(string FullPath, string EntryName)> entries = [];
+            List<(FileSystemInfo Info, string EntryName)> entries = [];
             CollectEntries(SourceDirectory, basePath, entries);
 
             // Order determinism: sort by the in-archive entry name using an ordinal comparison. Because a
@@ -174,14 +207,14 @@ namespace Microsoft.Build.Tasks
         /// Directory symlinks and junctions are recorded as entries but are not recursed into, matching the behavior of
         /// <see cref="TarFile.CreateFromDirectory(string, Stream, bool, TarEntryFormat)"/> and avoiding reparse-point cycles.
         /// </summary>
-        private static void CollectEntries(DirectoryInfo directory, string basePath, List<(string FullPath, string EntryName)> entries)
+        private static void CollectEntries(DirectoryInfo directory, string basePath, List<(FileSystemInfo Info, string EntryName)> entries)
         {
             foreach (FileSystemInfo info in directory.EnumerateFileSystemInfos())
             {
                 bool isRealDirectory = info is DirectoryInfo && (info.Attributes & FileAttributes.ReparsePoint) == 0;
 
                 string relativePath = info.FullName.Substring(basePath.Length).Replace('\\', '/');
-                entries.Add((info.FullName, isRealDirectory ? relativePath + "/" : relativePath));
+                entries.Add((info, isRealDirectory ? relativePath + "/" : relativePath));
 
                 if (isRealDirectory)
                 {
@@ -189,6 +222,96 @@ namespace Microsoft.Build.Tasks
                 }
             }
         }
+
+        /// <summary>
+        /// Parses a <see cref="DeterministicTimestamp"/> value. The value may be an integer number of seconds since the
+        /// Unix epoch, or an RFC 3339 date-time. Parsing is culture-invariant and always resolves to a UTC instant.
+        /// </summary>
+        private static bool TryParseTimestamp(string value, out DateTimeOffset timestamp)
+        {
+            // A bare integer is interpreted as the number of seconds since the Unix epoch. This matches the
+            // SOURCE_DATE_EPOCH convention and NuGet's deterministic-timestamp handling.
+            if (long.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out long unixTimeSeconds))
+            {
+                timestamp = DateTimeOffset.FromUnixTimeSeconds(unixTimeSeconds);
+
+                return true;
+            }
+
+            return DateTimeOffset.TryParseExact(value, s_timestampFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out timestamp);
+        }
+
+        /// <summary>
+        /// Writes a single filesystem entry to the archive, stamping it with <paramref name="timestamp"/> in place of the
+        /// source file's last-write time. The entry is constructed manually (rather than via <see cref="TarWriter.WriteEntry(string, string)"/>)
+        /// so its modification time can be overridden. The source file's Unix mode is preserved; Unix owner ids default
+        /// to 0, which both matches Windows behavior and is the conventional choice for a reproducible archive.
+        /// </summary>
+        private static void WriteStampedEntry(TarWriter writer, TarEntryFormat format, FileSystemInfo info, string entryName, DateTimeOffset timestamp)
+        {
+            bool isSymbolicLink = (info.Attributes & FileAttributes.ReparsePoint) != 0;
+            bool isDirectory = info is DirectoryInfo && !isSymbolicLink;
+
+            TarEntryType entryType = (isDirectory, isSymbolicLink, format) switch
+            {
+                (true, _, _) => TarEntryType.Directory,
+                (_, true, _) => TarEntryType.SymbolicLink,
+                (_, _, TarEntryFormat.V7) => TarEntryType.V7RegularFile,
+                _ => TarEntryType.RegularFile,
+            };
+
+            TarEntry entry = CreateEntry(format, entryType, entryName);
+            entry.ModificationTime = timestamp;
+
+            // Preserve the source's Unix permissions (for example, executable bits). This information does not exist on
+            // Windows, where the entry keeps the default mode for its type.
+            if (!isSymbolicLink && !OperatingSystem.IsWindows())
+            {
+                entry.Mode = info.UnixFileMode;
+            }
+
+            FileStream? dataStream = null;
+            try
+            {
+                if (isSymbolicLink)
+                {
+                    entry.LinkName = info.LinkTarget ?? string.Empty;
+                }
+                else if (!isDirectory)
+                {
+                    dataStream = ((FileInfo)info).OpenRead();
+                    entry.DataStream = dataStream;
+                }
+
+                writer.WriteEntry(entry);
+            }
+            finally
+            {
+                dataStream?.Dispose();
+            }
+        }
+
+        /// <summary>
+        /// Creates a <see cref="TarEntry"/> of the concrete type that matches <paramref name="format"/>.
+        /// </summary>
+        private static TarEntry CreateEntry(TarEntryFormat format, TarEntryType entryType, string entryName) => format switch
+        {
+            TarEntryFormat.V7 => new V7TarEntry(entryType, entryName),
+            TarEntryFormat.Ustar => new UstarTarEntry(entryType, entryName),
+            TarEntryFormat.Gnu => new GnuTarEntry(entryType, entryName),
+            _ => new PaxTarEntry(entryType, entryName),
+        };
+
+        /// <summary>
+        /// The RFC 3339 date-time formats accepted for <see cref="DeterministicTimestamp"/>, mirroring NuGet's
+        /// deterministic-timestamp parsing.
+        /// </summary>
+        private static readonly string[] s_timestampFormats =
+        [
+            "yyyy-MM-dd'T'HH:mm:ss'Z'",
+            "yyyy-MM-dd'T'HH:mm:sszzz",
+            "yyyy-MM-dd'T'HH:mm:ss.FFFFFFFK",
+        ];
 
         /// <summary>
         /// Identifies the compression to apply to the tar archive stream.

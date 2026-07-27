@@ -232,6 +232,117 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [Theory]
+        [InlineData("1704067200")]
+        [InlineData("2024-01-01T00:00:00Z")]
+        public void DeterministicTimestampStampsEveryEntry(string deterministicTimestamp)
+        {
+            DateTimeOffset expected = DateTimeOffset.FromUnixTimeSeconds(1704067200);
+
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "a.txt", "a");
+                TransientTestFolder nestedFolder = testEnvironment.CreateFolder(Path.Combine(sourceFolder.Path, "nested"), createFolder: true);
+                testEnvironment.CreateFile(nestedFolder, "b.txt", "b");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DeterministicTimestamp = deterministicTimestamp,
+                    DestinationFile = new FileInfo(tarFilePath),
+                    SourceDirectory = new DirectoryInfo(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                GetTarEntryModificationTimes(tarFilePath)
+                    .ShouldAllBe(modificationTime => modificationTime == expected, _mockEngine.Log);
+            }
+        }
+
+        [Fact]
+        public void DeterministicTimestampProducesByteIdenticalArchives()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "z.txt", "z");
+                testEnvironment.CreateFile(sourceFolder, "a.txt", "a");
+                TransientTestFolder nestedFolder = testEnvironment.CreateFolder(Path.Combine(sourceFolder.Path, "nested"), createFolder: true);
+                testEnvironment.CreateFile(nestedFolder, "b.txt", "b");
+
+                byte[] first = TarWithDeterministicTimestamp(testEnvironment, sourceFolder.Path, "1704067200");
+                byte[] second = TarWithDeterministicTimestamp(testEnvironment, sourceFolder.Path, "1704067200");
+
+                second.ShouldBe(first);
+            }
+        }
+
+        [Fact]
+        public void LogsErrorForInvalidDeterministicTimestamp()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "a.txt", "a");
+
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DeterministicTimestamp = "not-a-timestamp",
+                    DestinationFile = new FileInfo(tarFilePath),
+                    SourceDirectory = new DirectoryInfo(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain("MSB4324", customMessage: _mockEngine.Log);
+                File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);
+            }
+        }
+
+        private byte[] TarWithDeterministicTimestamp(TestEnvironment testEnvironment, string sourceDirectory, string deterministicTimestamp)
+        {
+            string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
+
+            TarDirectory tarDirectory = new TarDirectory
+            {
+                BuildEngine = _mockEngine,
+                DeterministicTimestamp = deterministicTimestamp,
+                DestinationFile = new FileInfo(tarFilePath),
+                SourceDirectory = new DirectoryInfo(sourceDirectory),
+                TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+            };
+
+            tarDirectory.Execute().ShouldBeTrue(_mockEngine.Log);
+
+            return File.ReadAllBytes(tarFilePath);
+        }
+
+        private static List<DateTimeOffset> GetTarEntryModificationTimes(string tarFilePath)
+        {
+            List<DateTimeOffset> modificationTimes = new List<DateTimeOffset>();
+
+            using FileStream stream = new FileStream(tarFilePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            using TarReader reader = new TarReader(stream);
+            for (TarEntry? entry = reader.GetNextEntry(); entry is not null; entry = reader.GetNextEntry())
+            {
+                modificationTimes.Add(entry.ModificationTime);
+            }
+
+            return modificationTimes;
+        }
+
         private static List<string> GetAllTarEntryNames(string tarFilePath)
         {
             List<string> names = new List<string>();
