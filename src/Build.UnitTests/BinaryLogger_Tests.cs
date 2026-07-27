@@ -567,8 +567,10 @@ namespace Microsoft.Build.UnitTests
             using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read);
 
             string solutionFileName = Path.GetFileName(solutionFile.Path);
+            // Use EndsWith because archive paths use backslashes on all platforms,
+            // which means ZipArchiveEntry.Name may return the full path on non-Windows.
             ZipArchiveEntry embeddedSolutionEntry = zipArchive.Entries
-                .FirstOrDefault(entry => entry.Name.Equals(solutionFileName, StringComparison.OrdinalIgnoreCase));
+                .FirstOrDefault(entry => entry.FullName.EndsWith(solutionFileName, StringComparison.OrdinalIgnoreCase));
 
             embeddedSolutionEntry.ShouldNotBeNull(
                 $"Expected solution file '{solutionFileName}' in project imports archive. Embedded files: {string.Join(",", zipArchive.Entries.Select(e => e.FullName))}");
