@@ -69,4 +69,41 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.ConnectionTimeoutMs.ShouldBe(CoordinatorSettings.DefaultConnectionTimeoutMs);
         settings.ProcessId.ShouldBe(EnvironmentUtilities.CurrentProcessId);
     }
+
+    [Fact]
+    public void CoordinatorSettings_MutexNames_DifferByPurpose()
+    {
+        CoordinatorSettings settings = CoordinatorSettings.Default;
+
+        settings.ServerMutexName.ShouldNotBe(settings.LaunchMutexName);
+    }
+
+    [Fact]
+    public void CoordinatorSettings_MutexNames_DifferByPipeName()
+    {
+        // The mutex guards a specific pipe, so two differently-named coordinators must not contend.
+        CoordinatorSettings first = CoordinatorSettings.Default with { PipeName = "coordinator-pipe-one" };
+        CoordinatorSettings second = CoordinatorSettings.Default with { PipeName = "coordinator-pipe-two" };
+
+        first.ServerMutexName.ShouldNotBe(second.ServerMutexName);
+    }
+
+    [WindowsOnlyFact]
+    public void CoordinatorSettings_DefaultMutexNames_AreUserScopedViaPipeName()
+    {
+        // Per-user scoping comes from the default pipe name, which the mutex name is derived from.
+        CoordinatorSettings settings = CoordinatorSettings.FromEnvironment();
+
+        settings.ServerMutexName.ShouldContain(Environment.UserName);
+        settings.LaunchMutexName.ShouldContain(Environment.UserName);
+    }
+
+    [Fact]
+    public void CoordinatorSettings_MutexNames_RespectOverriddenPipeName()
+    {
+        // The mutex guards a specific pipe, so an explicit pipe name is honored as given.
+        CoordinatorSettings settings = CoordinatorSettings.Default with { PipeName = "coordinator-explicit-pipe" };
+
+        settings.ServerMutexName.ShouldContain("coordinator-explicit-pipe");
+    }
 }

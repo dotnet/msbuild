@@ -5,6 +5,7 @@ using System;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Internal;
 
@@ -34,13 +35,25 @@ internal sealed class ServerNodeHandshake : Handshake
         .ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
+    /// The handshake key plus the current user, used as the input to <see cref="ComputeHash"/>.
+    /// </summary>
+    public string GetKeyWithUserName() => $"{GetKey()} {EnvironmentUtilities.CurrentUserName}";
+
+    /// <summary>
     /// Computes Handshake stable hash string representing whole state of handshake.
     /// </summary>
+    /// <remarks>
+    /// The names derived from this hash — the server and RAR node pipes, and the server
+    /// running/busy/launch mutexes — live in machine-wide namespaces, while the pipes are created
+    /// current-user-only. Including the user stops one user's server from locking every other user
+    /// on the machine out of the feature. Naming only; the handshake sent over the wire comes from
+    /// <see cref="RetrieveHandshakeComponents"/> and is unaffected.
+    /// </remarks>
     public string ComputeHash()
     {
         if (_computedHash == null)
         {
-            var input = GetKey();
+            var input = GetKeyWithUserName();
             byte[] utf8 = Encoding.UTF8.GetBytes(input);
 #if NET
             Span<byte> bytes = stackalloc byte[SHA256.HashSizeInBytes];
