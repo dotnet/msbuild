@@ -123,13 +123,13 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Initial capacity of <see cref="_readBufferMemoryStream"/>. 
         /// </summary>
-        private const int InitialReadBufferSize = 256 * 1024; // 256 KB
+        private const int InitialReadBufferSize = 128 * 1024; // 128 KB
 
         /// <summary>
         /// Upper bound on the capacity we keep cached in <see cref="_readBufferMemoryStream"/> between packets.
         /// It prevents a growing the buffer arbitrarily large due to a single oversized packet.
         /// </summary>
-        private const int MaxRetainedReadBufferSize = 1024 * 1024; // 1 MB
+        private const int MaxRetainedReadBufferSize = 2 * 1024 * 1024; // 2 MB
 
         /// <summary>
         /// Reusable buffer for reading packet bodies. The body is read into this stream and handed to
@@ -750,7 +750,7 @@ namespace Microsoft.Build.BackEnd
                             NodePacketType packetType = hasExtendedHeader ? NodePacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
 
                             // The stream the translator deserializes from. With the pre-buffer change wave enabled this
-                            // is the in-memory packet body; otherwise packets are deserialized straight off the pipe.
+                            // is the in-memory packet body; otherwise packets are deserialized from the BufferedReadStream.
                             Stream deserializationStream = localReadPipe;
 
                             if (preBufferPacketBody)
