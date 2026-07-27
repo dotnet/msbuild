@@ -121,9 +121,21 @@ namespace Microsoft.Build.BackEnd
         private BinaryWriter _binaryWriter;
 
         /// <summary>
+        /// Initial capacity of <see cref="_readBufferMemoryStream"/>. 
+        /// </summary>
+        private const int InitialReadBufferSize = 128 * 1024; // 128 KB
+
+        /// <summary>
+        /// Upper bound on the capacity we keep cached in <see cref="_readBufferMemoryStream"/> between packets.
+        /// It prevents a growing the buffer arbitrarily large due to a single oversized packet.
+        /// </summary>
+        private const int MaxRetainedReadBufferSize = 2 * 1024 * 1024; // 2 MB
+
+        /// <summary>
         /// Reusable buffer for reading packet bodies. The body is read into this stream and handed to
         /// the translator so deserialization walks memory instead of issuing a pipe read per primitive.
-        /// Reused across packets (grown to the largest body seen) and disposed in <see cref="InternalDisconnect"/>.
+        /// Reused across packets (grown as needed, shrunk back when it exceeds <see cref="MaxRetainedReadBufferSize"/>)
+        /// and disposed in <see cref="InternalDisconnect"/>.
         /// </summary>
         private MemoryStream _readBufferMemoryStream;
 
@@ -244,7 +256,7 @@ namespace Microsoft.Build.BackEnd
 
             _packetStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetStream);
-            _readBufferMemoryStream = new MemoryStream();
+            _readBufferMemoryStream = new MemoryStream(InitialReadBufferSize);
             _parentPacketVersion = parentPacketVersion;
             _negotiatedWriteVersion = parentPacketVersion < NodePacketTypeExtensions.PacketVersion ? parentPacketVersion : NodePacketTypeExtensions.PacketVersion;
 
@@ -651,14 +663,18 @@ namespace Microsoft.Build.BackEnd
             // terminate event triggered so that we cannot get into a situation where packets are being
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
+
+            bool preBufferPacketBody = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10);
+            Stream localReadPipe = preBufferPacketBody ? localPipe : new BufferedReadStream(localPipe);
+
             byte[] headerByte = new byte[5];
             ITranslator writeTranslator = null;
 #if NET451_OR_GREATER
-            Task<int> readTask = localPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
+            Task<int> readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
 #elif NETCOREAPP
-            Task<int> readTask = localPipe.ReadAsync(headerByte.AsMemory(), CancellationToken.None).AsTask();
+            Task<int> readTask = localReadPipe.ReadAsync(headerByte.AsMemory(), CancellationToken.None).AsTask();
 #else
-            IAsyncResult result = localPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
+            IAsyncResult result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #endif
 
             // Ordering is important.  We want packetAvailable to supercede terminate otherwise we will not properly wait for all
@@ -688,7 +704,7 @@ namespace Microsoft.Build.BackEnd
 #if NET451_OR_GREATER || NETCOREAPP
                                 bytesRead = readTask.ConfigureAwait(false).GetAwaiter().GetResult();
 #else
-                                bytesRead = localPipe.EndRead(result);
+                                bytesRead = localReadPipe.EndRead(result);
 #endif
                             }
                             catch (Exception e)
@@ -733,65 +749,77 @@ namespace Microsoft.Build.BackEnd
                             bool hasExtendedHeader = NodePacketTypeExtensions.HasExtendedHeader(rawType);
                             NodePacketType packetType = hasExtendedHeader ? NodePacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
 
-                            // Bytes 1..4 are the little-endian int32 body length (bytes after the header).
-                            int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(headerByte, 1, 4));
-                            if (packetLength < 0)
-                            {
-                                CommunicationsUtilities.Trace($"Invalid packet length {packetLength} received from server. Aborting.");
-                                ChangeLinkStatus(LinkStatus.Failed);
-                                exitLoop = true;
-                                break;
-                            }
+                            // The stream the translator deserializes from. With the pre-buffer change wave enabled this
+                            // is the in-memory packet body; otherwise packets are deserialized from the BufferedReadStream.
+                            Stream deserializationStream = localReadPipe;
 
-                            bool bodyReadFailed = false;
-                            try
+                            if (preBufferPacketBody)
                             {
-                                // Buffer the whole body before deserializing so InterningBinaryReader takes its
-                                // MemoryStream fast-path and we don't issue a pipe read per primitive.
-                                _readBufferMemoryStream.SetLength(packetLength);
-                                _readBufferMemoryStream.Position = 0;
-                                byte[] packetData = _readBufferMemoryStream.GetBuffer();
-
-                                int totalBytesRead = 0;
-                                while (totalBytesRead < packetLength)
+                                // Bytes 1..4 are the little-endian int32 body length (bytes after the header).
+                                int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(headerByte, 1, 4));
+                                if (packetLength < 0)
                                 {
-                                    // Read returns whatever is available (up to count); the loop handles
-                                    // partial reads, so we request the whole remaining body.
-                                    int bytesReadThisCall = localPipe.Read(packetData, totalBytesRead, packetLength - totalBytesRead);
-                                    if (bytesReadThisCall == 0)
-                                    {
-                                        CommunicationsUtilities.Trace($"Parent disconnected while reading packet body ({totalBytesRead} of {packetLength} bytes read).");
-                                        ChangeLinkStatus(LinkStatus.Failed);
-                                        bodyReadFailed = true;
-                                        break;
-                                    }
-
-                                    totalBytesRead += bytesReadThisCall;
+                                    CommunicationsUtilities.Trace($"Invalid packet length {packetLength} received from server. Aborting.");
+                                    ChangeLinkStatus(LinkStatus.Failed);
+                                    exitLoop = true;
+                                    break;
                                 }
-                            }
-                            catch (Exception e)
-                            {
-                                CommunicationsUtilities.Trace($"Exception reading packet body from server.  {e}");
-                                DebugUtils.DumpExceptionToFile(e);
-                                ChangeLinkStatus(LinkStatus.Failed);
-                                bodyReadFailed = true;
-                            }
 
-                            if (bodyReadFailed)
-                            {
-                                exitLoop = true;
-                                break;
+                                bool bodyReadFailed = false;
+                                try
+                                {
+                                    // Buffer the whole body before deserializing so InterningBinaryReader takes its
+                                    // MemoryStream fast-path and we don't issue a pipe read per primitive.
+                                    _readBufferMemoryStream.SetLength(packetLength);
+                                    _readBufferMemoryStream.Position = 0;
+                                    byte[] packetData = _readBufferMemoryStream.GetBuffer();
+
+                                    int totalBytesRead = 0;
+                                    while (totalBytesRead < packetLength)
+                                    {
+                                        // Read returns whatever is available (up to count); the loop handles
+                                        // partial reads, so we request the whole remaining body.
+                                        int bytesReadThisCall = localPipe.Read(packetData, totalBytesRead, packetLength - totalBytesRead);
+                                        if (bytesReadThisCall == 0)
+                                        {
+                                            CommunicationsUtilities.Trace($"Parent disconnected while reading packet body ({totalBytesRead} of {packetLength} bytes read).");
+                                            ChangeLinkStatus(LinkStatus.Failed);
+                                            bodyReadFailed = true;
+                                            break;
+                                        }
+
+                                        totalBytesRead += bytesReadThisCall;
+                                    }
+                                }
+                                catch (Exception e)
+                                {
+                                    CommunicationsUtilities.Trace($"Exception reading packet body from server.  {e}");
+                                    DebugUtils.DumpExceptionToFile(e);
+                                    ChangeLinkStatus(LinkStatus.Failed);
+                                    bodyReadFailed = true;
+                                }
+
+                                if (bodyReadFailed)
+                                {
+                                    exitLoop = true;
+                                    break;
+                                }
+
+                                deserializationStream = _readBufferMemoryStream;
                             }
 
                             byte parentVersion = 0;
-                            if (hasExtendedHeader)
-                            {
-                                parentVersion = NodePacketTypeExtensions.ReadVersion(_readBufferMemoryStream);
-                            }
-
                             try
                             {
-                                ITranslator readTranslator = BinaryTranslator.GetReadTranslator(_readBufferMemoryStream, _sharedReadBuffer);
+                                if (hasExtendedHeader)
+                                {
+                                    // Reads the version byte from the body; can throw EndOfStreamException on a
+                                    // truncated/corrupted extended-header packet (e.g. empty body). Kept inside the
+                                    // try so it fails gracefully as a link failure instead of escaping the loop.
+                                    parentVersion = NodePacketTypeExtensions.ReadVersion(deserializationStream);
+                                }
+
+                                ITranslator readTranslator = BinaryTranslator.GetReadTranslator(deserializationStream, _sharedReadBuffer);
 
                                 // parent sends a packet version that is already negotiated during handshake.
                                 // For Framework task hosts (CLR2/CLR4) without extended headers, defaults to 0.
@@ -809,12 +837,21 @@ namespace Microsoft.Build.BackEnd
                                 break;
                             }
 
+                            if (preBufferPacketBody && _readBufferMemoryStream.Capacity > MaxRetainedReadBufferSize)
+                            {
+                                // A single oversized packet grew the reusable buffer past the retention threshold.
+                                // Release it and start fresh so one large packet doesn't pin a big allocation for
+                                // the lifetime of the connection.
+                                _readBufferMemoryStream.Dispose();
+                                _readBufferMemoryStream = new MemoryStream(InitialReadBufferSize);
+                            }
+
 #if NET451_OR_GREATER
-                            readTask = localPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
+                            readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
 #elif NETCOREAPP
-                            readTask = localPipe.ReadAsync(headerByte.AsMemory(), CancellationToken.None).AsTask();
+                            readTask = localReadPipe.ReadAsync(headerByte.AsMemory(), CancellationToken.None).AsTask();
 #else
-                            result = localPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
+                            result = localReadPipe.BeginRead(headerByte, 0, headerByte.Length, null, null);
 #endif
 
 #if NET451_OR_GREATER || NETCOREAPP
