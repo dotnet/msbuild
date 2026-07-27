@@ -570,7 +570,7 @@ Use this to prioritize dimensions based on changed files.
 
 1b. **Historical context** (for bug fix and follow-up PRs): Read the linked issue and the original feature PR discussions. Identify design intent, constraints, and reviewer-established principles. Feed this context to every dimension agent so they can evaluate whether the fix aligns with the original design, not just whether the code compiles.
 
-2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`, `model: "claude-opus-4.6"`). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
+2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`, `model: "claude-opus-5"`). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
 
    Each sub-agent receives: the PR diff, PR description, the single dimension's rules and checklist, and the folder context.
 
@@ -626,7 +626,7 @@ Use this to prioritize dimensions based on changed files.
 
    Confirm only with concrete evidence. Dispute if a lock, blocking call, or control flow prevents the scenario. **Never validate against `main`.**
 
-4. For borderline findings, run the same validation on 3 models (`claude-opus-4.6`, `gpt-5.2-codex`, `gemini-3-pro-preview`). Keep findings confirmed by ≥2/3.
+4. For borderline findings, run the same validation on 3 models (`claude-opus-5`, `gpt-5.6-sol`, `gemini-3.6-flash`). Keep findings confirmed by ≥2/3.
 
 ### Wave 3: Post
 
