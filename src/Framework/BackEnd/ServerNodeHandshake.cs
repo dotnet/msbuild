@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -49,24 +49,24 @@ internal sealed class ServerNodeHandshake : Handshake
     /// on the machine out of the feature. Naming only; the handshake sent over the wire comes from
     /// <see cref="RetrieveHandshakeComponents"/> and is unaffected.
     /// </remarks>
-    public string ComputeHash()
-    {
-        if (_computedHash == null)
-        {
-            var input = GetKeyWithUserName();
-            byte[] utf8 = Encoding.UTF8.GetBytes(input);
-#if NET
-            Span<byte> bytes = stackalloc byte[SHA256.HashSizeInBytes];
-            SHA256.HashData(utf8, bytes);
-#else
-            using var sha = SHA256.Create();
-            var bytes = sha.ComputeHash(utf8);
-#endif
-            _computedHash = Convert.ToBase64String(bytes)
-                .Replace("/", "_")
-                .Replace("=", string.Empty);
-        }
+    public string ComputeHash() => _computedHash ??= HashKey(GetKeyWithUserName());
 
-        return _computedHash;
+    /// <summary>
+    /// Hashes a handshake key into a compact string safe to embed in pipe and mutex names.
+    /// </summary>
+    public static string HashKey(string key)
+    {
+        byte[] utf8 = Encoding.UTF8.GetBytes(key);
+#if NET
+        Span<byte> bytes = stackalloc byte[SHA256.HashSizeInBytes];
+        SHA256.HashData(utf8, bytes);
+#else
+        using var sha = SHA256.Create();
+        var bytes = sha.ComputeHash(utf8);
+#endif
+
+        return Convert.ToBase64String(bytes)
+            .Replace("/", "_")
+            .Replace("=", string.Empty);
     }
 }

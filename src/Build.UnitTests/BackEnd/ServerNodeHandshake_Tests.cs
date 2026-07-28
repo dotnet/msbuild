@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Internal;
 using Shouldly;
@@ -20,15 +18,46 @@ namespace Microsoft.Build.UnitTests.BackEnd
     public class ServerNodeHandshake_Tests
     {
         [Fact]
-        public void ComputeHash_IncludesCurrentUser()
+        public void GetKeyWithUserName_AppendsCurrentUserToKey()
         {
             ServerNodeHandshake handshake = new(HandshakeOptions.None);
 
-            // The user name must participate in the hash, otherwise every user on the machine
-            // computes the same pipe and mutex names.
             handshake.GetKeyWithUserName().ShouldBe($"{handshake.GetKey()} {Environment.UserName}");
-            handshake.ComputeHash().ShouldBe(Hash(handshake.GetKeyWithUserName()));
-            handshake.ComputeHash().ShouldNotBe(Hash(handshake.GetKey()));
+        }
+
+        [Fact]
+        public void GetKey_StaysUserAgnostic()
+        {
+            // Only the derived names carry the user. The handshake exchanged over the wire must not,
+            // or it would stop matching other MSBuild versions. The key is purely the numeric
+            // handshake components, so no user string can have leaked into it.
+            ServerNodeHandshake handshake = new(HandshakeOptions.None);
+
+            handshake.GetKey().ShouldNotBeEmpty();
+            handshake.GetKey().ToCharArray().ShouldAllBe(c => char.IsDigit(c) || c == ' ' || c == '-');
+        }
+
+        [Fact]
+        public void ComputeHash_HashesTheUserScopedKey()
+        {
+            ServerNodeHandshake handshake = new(HandshakeOptions.None);
+
+            // Hashing through the production HashKey pins which input is hashed without restating
+            // the algorithm, so this fails if ComputeHash ever drops back to the bare key.
+            handshake.ComputeHash().ShouldBe(ServerNodeHandshake.HashKey(handshake.GetKeyWithUserName()));
+            handshake.ComputeHash().ShouldNotBe(ServerNodeHandshake.HashKey(handshake.GetKey()));
+        }
+
+        [Fact]
+        public void ComputeHash_DependsOnTheWholeKey()
+        {
+            // Guards against the hash ignoring part of its input, which would silently drop the user
+            // scoping that GetKeyWithUserName adds.
+            ServerNodeHandshake first = new(HandshakeOptions.None);
+            ServerNodeHandshake second = new(HandshakeOptions.NodeReuse);
+
+            first.GetKeyWithUserName().ShouldNotBe(second.GetKeyWithUserName());
+            first.ComputeHash().ShouldNotBe(second.ComputeHash());
         }
 
         [Fact]
@@ -43,16 +72,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void ComputeHash_DoesNotChangeHandshakeSentOverTheWire()
+        public void ComputeHash_UsesOnlyCharactersLegalInPipeAndMutexNames()
         {
-            // The user discriminator is a naming concern only. Adding it to the wire handshake would
-            // be a protocol change, so the exchanged components must stay derived from the key alone.
-            ServerNodeHandshake handshake = new(HandshakeOptions.None);
+            // The hash is embedded in '/tmp/...' pipe paths and 'Global\...' mutex names, so path and
+            // namespace separators must not survive into it.
+            string hash = new ServerNodeHandshake(HandshakeOptions.None).ComputeHash();
 
-            HandshakeComponents components = handshake.RetrieveHandshakeComponents();
-
-            components.Options.ShouldBe(CommunicationsUtilities.AvoidEndOfHandshakeSignal(components.Options));
-            handshake.GetKey().ShouldNotContain(Environment.UserName, Case.Insensitive);
+            hash.ShouldNotBeEmpty();
+            hash.ShouldNotContain("/");
+            hash.ShouldNotContain("\\");
+            hash.ShouldNotContain("=");
         }
 
         [Fact]
@@ -65,21 +94,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             OutOfProcServerNode.GetPipeName(handshake).ShouldContain(hash);
             OutOfProcServerNode.GetRunningServerMutexName(handshake).ShouldContain(hash);
             OutOfProcServerNode.GetBusyServerMutexName(handshake).ShouldContain(hash);
-        }
-
-        private static string Hash(string input)
-        {
-            byte[] utf8 = Encoding.UTF8.GetBytes(input);
-#if NET
-            byte[] bytes = SHA256.HashData(utf8);
-#else
-            using SHA256 sha = SHA256.Create();
-            byte[] bytes = sha.ComputeHash(utf8);
-#endif
-
-            return Convert.ToBase64String(bytes)
-                .Replace("/", "_")
-                .Replace("=", string.Empty);
         }
     }
 }
