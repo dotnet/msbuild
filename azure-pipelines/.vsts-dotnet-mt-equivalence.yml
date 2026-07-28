@@ -133,11 +133,11 @@ extends:
         timeoutInMinutes: 240
 
         templateContext:
-          outputParentDirectory: $(MTEquivalenceWorkDir)
+          outputParentDirectory: $(Build.ArtifactStagingDirectory)
           outputs:
           # The reports are the product of this pipeline: JSON for machines, Markdown for humans.
           - output: pipelineArtifact
-            targetPath: $(MTEquivalenceWorkDir)\reports
+            targetPath: $(Build.ArtifactStagingDirectory)\mt-equivalence-reports
             artifactName: mt-equivalence-reports
             condition: always()
 
@@ -156,6 +156,7 @@ extends:
 
         - pwsh: |
             New-Item -ItemType Directory -Force -Path '$(MTEquivalenceWorkDir)\reports' | Out-Null
+            New-Item -ItemType Directory -Force -Path '$(Build.ArtifactStagingDirectory)\mt-equivalence-reports' | Out-Null
             $drive = Get-PSDrive ([System.IO.Path]::GetPathRoot('$(MTEquivalenceWorkDir)').TrimEnd('\', ':'))
             Write-Host "Free space on $($drive.Name): $([math]::Round($drive.Free / 1GB, 1)) GB"
             # Each snapshot of artifacts/ is roughly 4.5 GB, and up to three are kept at once.
@@ -164,7 +165,9 @@ extends:
             }
           displayName: Prepare work directory
 
-        - template: /eng/common/templates-official/steps/enable-internal-sources.yml
+        # @self is required: inside an extends block, a relative template path resolves against the
+        # 1ESPipelineTemplates repository unless the repository alias is given explicitly.
+        - template: /eng/common/templates-official/steps/enable-internal-sources.yml@self
 
         - pwsh: |
             $ErrorActionPreference = 'Stop'
@@ -191,9 +194,17 @@ extends:
             SYSTEM_ACCESSTOKEN: $(System.AccessToken)
 
         - pwsh: |
-            $summary = Join-Path '$(MTEquivalenceWorkDir)' 'reports\summary.md'
+            $source = '$(MTEquivalenceWorkDir)\reports'
+            $target = '$(Build.ArtifactStagingDirectory)\mt-equivalence-reports'
+            if (Test-Path $source) {
+              Copy-Item -Path (Join-Path $source '*') -Destination $target -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            $summary = Join-Path $target 'summary.md'
             if (Test-Path $summary) {
               Write-Host "##vso[task.uploadsummary]$summary"
             }
-          displayName: Publish comparison summary
+            else {
+              Write-Host "##vso[task.logissue type=warning]No comparison summary was produced; the run failed before the comparisons completed."
+            }
+          displayName: Collect and publish comparison reports
           condition: always()
