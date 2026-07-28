@@ -1,0 +1,108 @@
+{
+  "//": "Ordered rules; the first pattern that matches a path (relative to the artifacts root, forward slashes) wins. Disposition: Compare | ComparePayload | Informational | Ignore. Anything not matched defaults to Compare, i.e. it must be byte-identical.",
+  "rules": [
+    {
+      "pattern": "log/**",
+      "disposition": "Ignore",
+      "reason": "Build logs are compared functionally by Compare-Binlogs.ps1. Binlogs and text logs embed wall-clock timestamps, durations, node ids and event ordering, so byte comparison is meaningless."
+    },
+    {
+      "pattern": "**/*.binlog",
+      "disposition": "Ignore",
+      "reason": "Binary logs embed wall-clock timestamps and event ordering by design."
+    },
+    {
+      "pattern": "tmp/**",
+      "disposition": "Ignore",
+      "reason": "Scratch directory that arcade points TEMP/TMP at for the duration of the build; per-process and never shipped."
+    },
+    {
+      "pattern": "**/_manifest/**",
+      "disposition": "Ignore",
+      "reason": "SBOM manifests embed a generation timestamp and a per-run document GUID."
+    },
+    {
+      "pattern": "msbuild-build-env.*",
+      "disposition": "Ignore",
+      "reason": "Developer convenience script generated from the ambient PATH of the build process; environment-dependent, not a build output, never shipped."
+    },
+    {
+      "pattern": "*.lnk",
+      "disposition": "Ignore",
+      "reason": "Windows shortcut generated for local development; embeds link-tracking data and timestamps. Not a build output."
+    },
+    {
+      "pattern": "**/*.AssemblyReference.cache",
+      "disposition": "Informational",
+      "reason": "MSBuild RAR incremental-state cache. Keyed on the last-write timestamps of the referenced assemblies, which are wall-clock and therefore differ between any two builds."
+    },
+    {
+      "pattern": "**/*.GenerateResource.cache",
+      "disposition": "Informational",
+      "reason": "GenerateResource incremental-state cache; records input file timestamps, which are wall-clock."
+    },
+    {
+      "pattern": "**/*.CoreCompileInputs.cache",
+      "disposition": "Informational",
+      "reason": "CoreCompile incremental-state cache; hash of inputs including timestamped paths."
+    },
+    {
+      "pattern": "**/*.FileListAbsolute.txt",
+      "disposition": "Informational",
+      "reason": "Clean-up bookkeeping list written by MSBuild; entry order follows the order in which copies completed, which is scheduling dependent."
+    },
+    {
+      "pattern": "**/*.CopyComplete",
+      "disposition": "Informational",
+      "reason": "Zero-length marker file whose only content is its timestamp."
+    },
+    {
+      "pattern": "**/*.nupkg",
+      "disposition": "ComparePayload",
+      "reason": "NuGet stores each entry's wall-clock last-write time in the zip. The packed payload must still be byte-identical."
+    },
+    {
+      "pattern": "**/*.snupkg",
+      "disposition": "ComparePayload",
+      "reason": "NuGet stores each entry's wall-clock last-write time in the zip. The packed payload must still be byte-identical."
+    },
+    {
+      "pattern": "**/*.vsix",
+      "disposition": "ComparePayload",
+      "reason": "The .vsix payload must be byte-identical. The OPC relationship id in _rels/*.rels is a fresh random value on every build (System.IO.Packaging generates it), so it is normalized away; everything else in those files, and every other entry, is still compared byte for byte.",
+      "normalizeEntries": [
+        {
+          "entryPattern": "_rels/*",
+          "pattern": "Id=\"R[0-9a-fA-F]+\"",
+          "replacement": "Id=\"R<opc-relationship-id>\""
+        }
+      ]
+    },
+    {
+      "//": "The following VS insertion outputs all embed the size and/or SHA256 of the .vsix above. Because the .vsix is not byte-reproducible (random OPC relationship id), neither are they. The .vsix payload itself is verified by the rule above, so these are derived rather than independent differences. Remove these rules if the OPC id is ever made deterministic. Note: these patterns are matched with PowerShell -like, where '*' also crosses directory separators.",
+      "pattern": "*VSSetup*/*.vsman",
+      "disposition": "Informational",
+      "reason": "VS setup manifest; records the size and SHA256 of the .vsix, which is not byte-reproducible because System.IO.Packaging writes a random OPC relationship id. The .vsix payload itself is compared entry by entry."
+    },
+    {
+      "pattern": "*VSSetup*/*.vsmand",
+      "disposition": "Informational",
+      "reason": "Compressed form of the .vsman above; inherits the same non-reproducible .vsix hash."
+    },
+    {
+      "pattern": "*VSSetup*/*.vsman.merge",
+      "disposition": "Informational",
+      "reason": "Intermediate VS setup manifest; inherits the non-reproducible .vsix hash."
+    },
+    {
+      "pattern": "*VSSetup*/*.vsman.overlay",
+      "disposition": "Informational",
+      "reason": "Intermediate VS setup manifest; inherits the non-reproducible .vsix hash."
+    },
+    {
+      "pattern": "*VSSetup*/Microsoft.Build*.json",
+      "disposition": "Informational",
+      "reason": "VS setup component manifest; records the size of the .vsix, which is not byte-reproducible because System.IO.Packaging writes a random OPC relationship id."
+    }
+  ]
+}

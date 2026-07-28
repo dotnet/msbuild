@@ -1,0 +1,199 @@
+# MSBuild -mt build-equivalence pipeline.
+#
+# Mirrors the experimental official build (azure-pipelines/.vsts-dotnet-exp-perf.yml) but, instead of
+# producing a shippable drop, it runs the *same* official-style build two or three times in the same
+# working directory and proves that turning on -mt does not change what the build produces:
+#
+#   baseline   build.cmd -pack -ci ... (official arguments)
+#   mt         the same command with MSBUILD_MT_ENABLED=1, which is how arcade's
+#              eng/common/tools.ps1 appends -mt to the MSBuild command line
+#   control    the same command again with no -mt anywhere
+#
+# The control run is what makes the result interpretable: it measures how much this repo's build output
+# varies between two *identical* builds, so any difference that also appears in the control is
+# pre-existing build non-determinism rather than something -mt caused. Keep it on unless you are
+# deliberately trading rigour for pipeline time.
+#
+# The comparison itself (scripts/mt-equivalence) checks:
+#   * every produced file, byte for byte, with a documented rule set for the handful of outputs that
+#     are non-deterministic by construction;
+#   * the build logs, functionally, after normalizing away scheduling-dependent noise;
+#   * that the mt run really did run with -mt, read back out of the recorded MSBuild command line in
+#     the binary log, so the comparison cannot silently become vacuous.
+#
+# Nothing is signed, published or inserted: -sign and -publish are deliberately not passed, because a
+# real signature would differ between the two runs for reasons that have nothing to do with -mt.
+
+# The pipeline FAILS when a difference is attributable to -mt, and when it cannot prove the -mt build
+# actually ran with -mt. Pre-existing non-determinism found by the control run is surfaced as a
+# warning instead, so a red run always means "-mt changed something".
+
+trigger: none
+pr: none
+
+# Arcade's OfficialBuildId must be <yyyyMMdd>.<revision>, so pin the build number format rather than
+# relying on the collection default.
+name: $(Date:yyyyMMdd).$(Rev:r)
+
+schedules:
+- cron: '0 2 * * *'
+  displayName: Daily -mt build equivalence (02:00 UTC)
+  branches:
+    include:
+    - main
+  # Run even when main has not changed: the point is to catch -mt regressions from the whole
+  # dependency surface (SDK, arcade, Roslyn, NuGet), not only from commits to this repo.
+  always: true
+
+parameters:
+- name: buildConfiguration
+  displayName: Build configuration
+  type: string
+  default: Release
+  values:
+  - Release
+  - Debug
+- name: msbuildEngine
+  displayName: MSBuild engine used for the build
+  type: string
+  default: vs
+  values:
+  - vs      # what the official build uses; also the only engine that produces the VS insertion outputs
+  - dotnet
+- name: runControlBuild
+  displayName: Also run the non-mt control build (recommended - it is what makes a diff interpretable)
+  type: boolean
+  default: true
+- name: deepLogCompare
+  displayName: Also compare task and task-assembly coverage from a diagnostic-verbosity replay
+  type: boolean
+  default: true
+
+variables:
+- name: Codeql.Enabled
+  value: false
+- name: cfsNugetWarnLevel
+  value: warn
+- name: nugetMultiFeedWarnLevel
+  value: none
+- name: NugetSecurityAnalysisWarningLevel
+  value: none
+- name: MTEquivalenceWorkDir
+  value: $(Agent.TempDirectory)\mt-equivalence
+# Mirrors VisualStudio.DropName in .vsts-dotnet-build-jobs.yml. Required by AfterSigning.proj to
+# generate the VS insertion manifests; the value is only embedded into those manifests, nothing is
+# uploaded. It must be identical across the runs being compared, so it deliberately does not include
+# $(Build.BuildNumber)-style values that could change between steps.
+- name: VisualStudio.DropName
+  value: Products/$(System.TeamProject)/$(Build.Repository.Name)/mt-equivalence/$(Build.BuildNumber)
+- group: AzureDevOps-Artifact-Feeds-Pats
+
+resources:
+  repositories:
+  - repository: 1ESPipelineTemplates
+    type: git
+    name: 1ESPipelineTemplates/1ESPipelineTemplates
+
+extends:
+  template: v1/1ES.Official.PipelineTemplate.yml@1ESPipelineTemplates
+  parameters:
+    featureFlags:
+      autoBaseline: false
+    pool:
+      name: VSEng-MicroBuildVSStable
+      os: windows
+    sdl:
+      # This pipeline produces no shippable output; it builds the repo twice and diffs the results.
+      # Keep the SDL surface minimal so a validation run cannot file bugs or block on scans that the
+      # real official build already covers.
+      policheck:
+        enabled: false
+      tsa:
+        enabled: false
+      sbom:
+        enabled: false
+      codeSignValidation:
+        enabled: false
+      credscan:
+        suppressionsFile: $(Build.SourcesDirectory)/eng/CredScanSuppressions.json
+
+    stages:
+    - stage: equivalence
+      displayName: -mt build equivalence
+      jobs:
+      - job: Windows_NT
+        displayName: Build twice and compare
+        pool:
+          name: VSEng-MicroBuildVSStable
+          demands:
+          - agent.os -equals Windows_NT
+
+        # Three full official-style builds of this repo plus the comparisons. Each build is roughly
+        # 20-35 minutes on this pool; the comparisons add about 5 minutes.
+        timeoutInMinutes: 240
+
+        templateContext:
+          outputParentDirectory: $(MTEquivalenceWorkDir)
+          outputs:
+          # The reports are the product of this pipeline: JSON for machines, Markdown for humans.
+          - output: pipelineArtifact
+            targetPath: $(MTEquivalenceWorkDir)\reports
+            artifactName: mt-equivalence-reports
+            condition: always()
+
+        variables:
+        - name: TeamName
+          value: MSBuild
+
+        steps:
+        # No fetchDepth limit: SourceLink and the NuSpec repository-information targets read git
+        # metadata, and the official build does not shallow-clone either.
+        - checkout: self
+          clean: true
+
+        - task: NuGetToolInstaller@1
+          displayName: Install NuGet.exe
+
+        - pwsh: |
+            New-Item -ItemType Directory -Force -Path '$(MTEquivalenceWorkDir)\reports' | Out-Null
+            $drive = Get-PSDrive ([System.IO.Path]::GetPathRoot('$(MTEquivalenceWorkDir)').TrimEnd('\', ':'))
+            Write-Host "Free space on $($drive.Name): $([math]::Round($drive.Free / 1GB, 1)) GB"
+            # Each snapshot of artifacts/ is roughly 4.5 GB, and up to three are kept at once.
+            if ($drive.Free -lt 25GB) {
+              Write-Host "##vso[task.logissue type=warning]Less than 25 GB free; the three artifact snapshots may not fit."
+            }
+          displayName: Prepare work directory
+
+        - template: /eng/common/templates-official/steps/enable-internal-sources.yml
+
+        - pwsh: |
+            $ErrorActionPreference = 'Stop'
+            # Boolean template parameters interpolate as True/False; PowerShell string comparison is
+            # case-insensitive, so compare against 'true'.
+            $scriptArgs = @{
+              WorkDir              = '$(MTEquivalenceWorkDir)'
+              Configuration        = '${{ parameters.buildConfiguration }}'
+              MSBuildEngine        = '${{ parameters.msbuildEngine }}'
+              OfficialBuildId      = '$(Build.BuildNumber)'
+              VisualStudioDropName = '$(VisualStudio.DropName)'
+            }
+            if ('${{ parameters.runControlBuild }}' -ne 'true') { $scriptArgs['SkipControl'] = $true }
+            if ('${{ parameters.deepLogCompare }}' -eq 'true') { $scriptArgs['DeepLogCompare'] = $true }
+
+            Write-Host ($scriptArgs.GetEnumerator() | Sort-Object Key | ForEach-Object { "  -$($_.Key) $($_.Value)" })
+            & '$(Build.SourcesDirectory)\scripts\mt-equivalence\Run-MTEquivalence.ps1' @scriptArgs
+            # Non-zero means a difference was attributed to -mt (or the -mt build could not be proven
+            # to have run with -mt); either way the job must go red.
+            exit $LASTEXITCODE
+          displayName: Build (baseline / -mt / control) and compare
+          failOnStderr: false
+          env:
+            SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+
+        - pwsh: |
+            $summary = Join-Path '$(MTEquivalenceWorkDir)' 'reports\summary.md'
+            if (Test-Path $summary) {
+              Write-Host "##vso[task.uploadsummary]$summary"
+            }
+          displayName: Publish comparison summary
+          condition: always()
