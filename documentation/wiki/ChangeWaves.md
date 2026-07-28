@@ -59,11 +59,6 @@ Change wave checks around features will be removed in the release that accompani
 ### 18.4
 - [Start throwing on null or empty paths in MultiProcess and MultiThreaded Task Environment Drivers.](https://github.com/dotnet/msbuild/pull/12914)
 
-## Change waves that will be removed in the release accompanying .NET 11
-
-### 18.3
-- [Replace Transactional property with ChangeWave control, implement atomic file replacement with retry logic, and update tests.](https://github.com/dotnet/msbuild/pull/12627)
-
 ## Change Waves No Longer In Rotation
 
 ### 16.8
@@ -143,3 +138,7 @@ Change wave checks around features will be removed in the release that accompani
 - ~[.SLNX support - use the new parser for .sln and .slnx](https://github.com/dotnet/msbuild/pull/10836)~ reverted after compat problems discovered
 - ~~[Support custom culture in RAR](https://github.com/dotnet/msbuild/pull/11000)~~ - see [11607](https://github.com/dotnet/msbuild/pull/11607) for details
 - [VS Telemetry](https://github.com/dotnet/msbuild/pull/11255)
+
+### 18.3
+
+- [Replace Transactional property with ChangeWave control, implement atomic file replacement with retry logic, and update tests.](https://github.com/dotnet/msbuild/pull/12627)
