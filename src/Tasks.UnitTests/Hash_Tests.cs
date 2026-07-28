@@ -145,13 +145,38 @@ namespace Microsoft.Build.Tasks.UnitTests
             Assert.Equal(mixedcaseHash, lowercaseHash);
         }
 
-        private string ExecuteHashTask(ITaskItem[] items, bool ignoreCase = false)
+        [Fact]
+        public void HashTaskPathMapMakesHashLocationIndependent()
+        {
+            // Identical inputs built under two different roots hash differently without a path map...
+            ITaskItem[] underRootA = [new TaskItem(@"C:\rootA\src\a.cs"), new TaskItem(@"C:\rootA\obj\ref.dll")];
+            ITaskItem[] underRootB = [new TaskItem(@"C:\rootB\src\a.cs"), new TaskItem(@"C:\rootB\obj\ref.dll")];
+
+            Assert.NotEqual(ExecuteHashTask(underRootA), ExecuteHashTask(underRootB));
+
+            // ...but converge once each root is mapped to the same deterministic prefix.
+            string hashA = ExecuteHashTask(underRootA, pathMap: @"C:\rootA\=/_/");
+            string hashB = ExecuteHashTask(underRootB, pathMap: @"C:\rootB\=/_/");
+            Assert.Equal(hashA, hashB);
+        }
+
+        [Fact]
+        public void HashTaskEmptyPathMapIsUnchanged()
+        {
+            // An empty path map must not alter the legacy hash, so enabling the feature is opt-in.
+            ITaskItem[] items = [new TaskItem("Item1"), new TaskItem("Item2")];
+            Assert.Equal(ExecuteHashTask(items), ExecuteHashTask(items, pathMap: ""));
+            Assert.Equal(ExecuteHashTask(items), ExecuteHashTask(items, pathMap: null));
+        }
+
+        private string ExecuteHashTask(ITaskItem[] items, bool ignoreCase = false, string pathMap = null)
         {
             var hashTask = new Hash
             {
                 BuildEngine = new MockEngine(),
                 ItemsToHash = items,
-                IgnoreCase = ignoreCase
+                IgnoreCase = ignoreCase,
+                PathMap = pathMap
             };
 
             Assert.True(hashTask.Execute());
