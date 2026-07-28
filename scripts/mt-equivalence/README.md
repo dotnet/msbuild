@@ -27,13 +27,26 @@ build runs, minus four things:
 
 | dropped | why |
 |---|---|
-| `-sign` | needs MicroBuild; a real signature would differ between runs for reasons unrelated to `-mt` |
-| `-publish` | needs the Build Asset Registry; this pipeline publishes nothing |
+| `-sign` | needs the MicroBuild signing plugin, and an Authenticode signature embeds a trusted-timestamp countersignature, so signed binaries could never be byte-identical between two runs. What `-mt` could actually affect is the *content* being signed, and that is compared unsigned |
 | `EnableNgenOptimization` | this is exactly the official pipeline's `$(SkipApplyOptimizationDataArg)`, which it passes whenever OptProf is off. Leaving it on requires a `VisualStudioDropAccessToken` and downloads an IBC drop that both runs would consume identically |
 | `GenerateSbom` | SBOM manifests embed a generation timestamp and a per-run GUID, so they can never be byte-compared |
 
-`VisualStudioDropName` **is** passed (mirroring the official job's `VisualStudio.DropName`): without it
-`AfterSigning.proj` fails outright. It is only embedded into the generated VS insertion manifests —
+`-publish` **is** passed. It is the *official-build* publish, not `dotnet publish`, and with
+`DotNetPublishUsingPipelines=true` it pushes nothing to any feed — it emits `##vso[artifact.upload]`
+logging commands and produces three real outputs that would otherwise never be built:
+
+| output | compared as |
+|---|---|
+| `log/<config>/AssetManifest/*.xml` — the Build Asset Registry manifest listing every package, blob and PDB the build declares | byte-identical |
+| `tmp/<config>/SymbolPackages/*.symbols.nupkg` — 10 generated symbol packages | payload byte-identical |
+| `tmp/<config>/PDBsToPublish/**` — 34 PDBs staged for the symbol server | byte-identical |
+
+Feed publishing happens in the separate post-build stage, which this pipeline does not run. Note that
+those three live under `log/` and `tmp/`, which are otherwise ignored, so `ArtifactCompareRules.json`
+carves them out *ahead* of the ignore rules.
+
+`VisualStudioDropName` is also passed (mirroring the official job's `VisualStudio.DropName`): without
+it `AfterSigning.proj` fails outright. It is only embedded into the generated VS insertion manifests —
 nothing is uploaded — and it is identical across the runs being compared.
 
 Everything else — `-pack`, `-ci`, `OfficialBuildId`, `RepositoryName`, `TeamName`,
@@ -180,26 +193,25 @@ Reports land in `<WorkDir>\reports`:
 
 ## Results
 
-Three official-style `Release` builds per trio, all on `main`. Four trios were run: three with
-`-MSBuildEngine dotnet` (23 329 artifact files each) and one with `-MSBuildEngine vs` — the official
-configuration, 28 011 files each including the full VS insertion surface.
+Three official-style `Release` builds per trio, all on `main`, with `-MSBuildEngine vs` — the official
+configuration — producing 28 061 artifact files each, including the full VS insertion surface and the
+`-publish` outputs.
 
-| engine | comparison | byte-identical | unexpected | expected |
-|---|---|---|---|---|
-| `vs` | `mt` vs `baseline` | 27 870 | **0** | 137 |
-| `vs` | `control` vs `baseline` | 27 870 | **0** | 137 |
-| `dotnet` | `mt` vs `baseline` | ~23 216 | **0** | ~109 |
-| `dotnet` | `control` vs `baseline` | ~23 216 | **0** | ~109 |
+| comparison | byte-identical | unexpected | expected |
+|---|---|---|---|
+| `mt` vs `baseline` | 27 909 | **0** | 148 |
+| `control` vs `baseline` | 27 911 | **0** | 146 |
 
-**`-mt` introduced no difference in the produced bits at all**, including every VS insertion output.
-Every file that differs between the `-mt` build and the baseline also differs between two identical
-non-`-mt` builds, in the same way:
+**`-mt` introduced no difference in the produced bits at all**, including every VS insertion output,
+the Build Asset Registry manifest, all 34 staged PDBs and all 10 symbol-package payloads. Every file
+that differs between the `-mt` build and the baseline also differs between two identical non-`-mt`
+builds:
 
-| class | count (`vs`) | why |
+| class | count | why |
 |---|---|---|
 | `*.AssemblyReference.cache`, `*.GenerateResource.cache` | 81 | MSBuild incremental state keyed on wall-clock file timestamps |
-| `*.nupkg` | 28 | zip entry timestamps; payloads byte-identical |
-| `.vsman` / `.vsmand` / `.vsman.merge` / `.vsman.overlay` / component `.json` | 12 | embed the size and SHA256 of a `.vsix` that is not byte-reproducible (see below) |
+| `*.nupkg` (packages + symbol packages) | 38 | zip entry timestamps; payloads byte-identical |
+| `.vsman` / `.vsmand` / `.merge` / `.overlay` / component `.json` | 12 | embed the size and SHA256 of a `.vsix` that is not byte-reproducible (see below) |
 | 6 test assemblies × (bin + obj) | 12 | compiled with `/deterministic-`, so the MVID is a random GUID |
 | `*.vsix` | 4 | random OPC relationship id; payloads verified byte-identical |
 | `VS with MSBuild.slnx.lnk` | 1 | Windows shortcut, embeds link-tracking data |

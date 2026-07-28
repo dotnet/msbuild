@@ -61,9 +61,19 @@ New-Item -ItemType Directory -Force -Path $WorkDir, $ReportsDir | Out-Null
 
 # The official build (azure-pipelines/.vsts-dotnet-build-jobs.yml) runs:
 #   build.cmd -pack -sign -publish -ci -configuration $(BuildConfiguration) $(SkipApplyOptimizationDataArg) ...
+#
+# -publish IS passed. It is the official-build publish, not `dotnet publish`, and with
+# DotNetPublishUsingPipelines=true it pushes nothing to any feed: it emits ##vso[artifact.upload]
+# logging commands and produces three real outputs that would otherwise never be built - the Build
+# Asset Registry manifest (artifacts/log/<config>/AssetManifest), the generated symbol packages
+# (artifacts/tmp/<config>/SymbolPackages) and the staged PDBs (artifacts/tmp/<config>/PDBsToPublish).
+# Feed publishing happens in the separate post-build stage, which this pipeline does not run.
+#
 # Dropped here:
-#   -sign / -publish            need MicroBuild and the Build Asset Registry, and a real signature
-#                               would differ between the two runs for reasons unrelated to -mt.
+#   -sign                       needs the MicroBuild signing plugin, and an Authenticode signature
+#                               embeds a trusted-timestamp countersignature, so signed binaries could
+#                               never be byte-identical between two runs. What -mt could actually
+#                               affect is the content being signed, and that is compared unsigned.
 #   EnableNgenOptimization      this is exactly $(SkipApplyOptimizationDataArg), which the official
 #                               pipeline passes whenever OptProf is disabled. Leaving it on requires a
 #                               VisualStudioDropAccessToken and downloads an IBC drop; it contributes
@@ -77,6 +87,7 @@ New-Item -ItemType Directory -Force -Path $WorkDir, $ReportsDir | Out-Null
 $officialArgs = @(
     '-ci'
     '-pack'
+    '-publish'
     '-configuration', $Configuration
     '-verbosity', 'minimal'
     "/p:OfficialBuildId=$OfficialBuildId"

@@ -17,18 +17,26 @@ build.cmd -ci -pack -configuration Release
           /p:DotNetPublishUsingPipelines=true /p:SuppressFinalPackageVersion=true /p:IsExperimental=true
 ```
 
-`-sign` and `-publish` from the official job are omitted: they need MicroBuild and the Build Asset
-Registry, and a real signature would differ between two runs for reasons unrelated to `-mt`.
-`EnableNgenOptimization` and `GenerateSbom` are turned off (the former is the official pipeline's own
-`$(SkipApplyOptimizationDataArg)`; the latter produces manifests that embed a timestamp and a per-run
-GUID). `VisualStudioDropName` is supplied, exactly as the official job does, because
+`-sign` from the official job is omitted: it needs the MicroBuild signing plugin, and an Authenticode
+signature embeds a trusted-timestamp countersignature, so signed binaries could never be byte-identical
+between two runs. What `-mt` could actually affect is the content being signed, and that is compared
+unsigned. `EnableNgenOptimization` and `GenerateSbom` are turned off (the former is the official
+pipeline's own `$(SkipApplyOptimizationDataArg)`; the latter produces manifests that embed a timestamp
+and a per-run GUID). `VisualStudioDropName` is supplied, exactly as the official job does, because
 `AfterSigning.proj` requires it to generate the VS insertion manifests.
+
+`-publish` **is** passed. It is the official-build publish, not `dotnet publish`: with
+`DotNetPublishUsingPipelines=true` it pushes nothing to any feed (it emits `##vso[artifact.upload]`
+logging commands; feed publishing happens in the separate post-build stage) but it does produce the
+Build Asset Registry manifest, the generated symbol packages and the PDBs staged for the symbol
+server. All three are compared.
 
 The engine is `vs`, which is what the official job uses. This matters: only the `vs` engine builds the
 **VS insertion outputs** — `artifacts/VSSetup` (`.vsix`, `.vsman`, `.vsmand`), the
-`VS.ExternalAPIs.MSBuild` package and the arm64 flavours. That is 28 011 artifact files versus 23 329
-with `-msbuildEngine dotnet`, so validating with `dotnet` would silently skip the entire insertion
-surface.
+`VS.ExternalAPIs.MSBuild` package and the arm64 flavours. With `-publish` the full official-style
+build produces 28 061 artifact files, versus 23 329 for a `-msbuildEngine dotnet` build without
+`-publish`, so validating that way would silently skip both the insertion surface and the publish
+outputs.
 
 The third build (`control`) is a second non-`-mt` build. It establishes how much this repo's output
 varies between two *identical* builds, so a difference in the `-mt` comparison can be attributed.
@@ -36,19 +44,19 @@ varies between two *identical* builds, so a difference in the `-mt` comparison c
 That the `-mt` build really ran multithreaded is verified from the MSBuild command line recorded in
 its binary log, not from the fact that the environment variable was set.
 
-Runs: `main` at `867c136`, `Release`. Three trios with `-msbuildEngine dotnet` and one with the
-official `-msbuildEngine vs`; all four gave the same verdict.
+Runs: `main` at `867c136`, `Release`. Several trios were run while developing the harness; the
+authoritative one is the full official configuration (`-MSBuildEngine vs`, `-publish`), and earlier
+`-msbuildEngine dotnet` trios agreed with it.
 
 ## Headline result
 
-**`-mt` changed nothing in the produced bits**, including every VS insertion output.
+**`-mt` changed nothing in the produced bits**, including every VS insertion output, the Build Asset
+Registry manifest, all 34 staged PDBs and all 10 symbol-package payloads.
 
-| engine | comparison | byte-identical | unexpected differences | expected differences |
-|---|---|---|---|---|
-| `vs` | `mt` vs `baseline` | 27 870 | **0** | 137 |
-| `vs` | `control` vs `baseline` | 27 870 | **0** | 137 |
-| `dotnet` (×3) | `mt` vs `baseline` | 23 215-23 216 | **0** | 109-110 |
-| `dotnet` (×3) | `control` vs `baseline` | 23 215-23 217 | **0** | 108-110 |
+| comparison | byte-identical | unexpected differences | expected differences |
+|---|---|---|---|
+| `mt` vs `baseline` | 27 909 | **0** | 148 |
+| `control` vs `baseline` | 27 911 | **0** | 146 |
 
 The harness was also shown to be capable of failing: removing the known-`-mt` log allowance surfaced
 the 21 real `-mt`-only lines (exit 1); flipping a single byte in `Microsoft.Build.dll` in the `mt`
@@ -263,16 +271,22 @@ Proven for the configuration tested (official-style `Release` build of this repo
 * the VS insertion outputs (`artifacts/VSSetup`: `.vsix`, `.vsman`, `.vsmand`, the component manifests
   and the `VS.ExternalAPIs.MSBuild` package) are included, and every `.vsix` payload is identical
   entry by entry;
+* the `-publish` outputs are included: the Build Asset Registry manifest is byte-identical, all 34
+  PDBs staged for the symbol server are byte-identical, and all 10 generated symbol packages are
+  payload-identical;
 * no errors or warnings appear or disappear;
 * the same tasks run, bound to the same task assemblies.
 
 Not covered:
 
-* Signing and OptProf. Both need MicroBuild, so they are only exercised when the pipeline runs on the
-  MicroBuild pool. Signed outputs would differ between two runs for reasons unrelated to `-mt`, which
-  is why `-sign` is not passed. Any additional file those steps produce is compared automatically,
-  because anything not matched by a rule must be byte-identical, and the control-netting keeps a
-  first-time-seen non-determinism from being misreported as an `-mt` regression.
+* Signing. It needs the MicroBuild plugin, and an Authenticode signature embeds a trusted-timestamp
+  countersignature, so two signed runs could never be byte-identical; `-sign` is therefore not passed
+  and the comparison is of unsigned binaries. Since signing is a post-processing step applied
+  identically to both runs, identical unsigned inputs imply equivalent signed outputs.
+* OptProf / NGEN optimization data, for the same reason the official pipeline skips it when OptProf is
+  off: both runs would consume the same IBC drop, so it adds cost without signal.
+* Feed publishing and the Build Asset Registry push, which happen in the post-build stage rather than
+  in the build. The manifest that drives them *is* compared.
 * Non-Windows builds and the source-build/VMR leg (covered separately by
   `azure-pipelines/vmr-sb-validation.yml`).
 * Test execution — this pipeline deliberately does not run tests; `-mt` test coverage lives in
