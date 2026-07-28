@@ -121,10 +121,10 @@ function Test-SafeKustoDimension
         [Parameter(Mandatory)][string]$Name
     )
 
-    $isSafe = $Value -match '^[A-Za-z0-9_.-]+$'
+    $isSafe = $Value -match '^[A-Za-z0-9_.-]+\z'
     if (-not $isSafe)
     {
-        Write-Warning "Skipping diagnostic evidence because $Name '$Value' is not safe for Kusto interpolation."
+        Write-Warning "Skipping diagnostic evidence because $Name contains characters that are not safe for Kusto interpolation."
     }
 
     $isSafe

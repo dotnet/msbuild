@@ -21,7 +21,7 @@ function Test-SafeMetricName
     [OutputType([bool])]
     param([Parameter(Mandatory)][string]$Name)
 
-    $Name -match '^(build-time|evaluation-time(?:-.+)?|exit-code|recollected-attempts|msbuild-(?:display-)?version|dotnet-version|crank-netSdkVersion|info/(?:test-asset|test-scenario|msbuild-app|test-version|iterations-number))$'
+    $Name -match '^(build-time|evaluation-time(?:-.+)?|exit-code|recollected-attempts|msbuild-(?:display-)?version|dotnet-version|crank-netSdkVersion|info/(?:test-asset|test-scenario|msbuild-app|test-version|iterations-number))\z'
 }
 
 function ConvertTo-AllowlistedMetrics
@@ -103,10 +103,86 @@ function Get-HostedLogExcerpt
     $excerpt
 }
 
+function Expand-BoundedArchive
+{
+    [OutputType([bool])]
+    param(
+        [Parameter(Mandatory)][string]$ArchivePath,
+        [Parameter(Mandatory)][string]$DestinationPath,
+        [long]$MaximumCompressedBytes = 100MB,
+        [long]$MaximumUncompressedBytes = 500MB,
+        [int]$MaximumEntryCount = 10000
+    )
+
+    if ((Get-Item -LiteralPath $ArchivePath).Length -gt $MaximumCompressedBytes)
+    {
+        Write-Warning 'Artifact archive exceeds the compressed-size limit.'
+        return $false
+    }
+
+    $archive = $null
+    try
+    {
+        $archive = [IO.Compression.ZipFile]::OpenRead($ArchivePath)
+        if ($archive.Entries.Count -gt $MaximumEntryCount)
+        {
+            Write-Warning 'Artifact archive exceeds the entry-count limit.'
+            return $false
+        }
+
+        $entryNames = [System.Collections.Generic.HashSet[string]]::new(
+            [StringComparer]::OrdinalIgnoreCase)
+        $totalBytes = 0L
+        foreach ($entry in $archive.Entries)
+        {
+            $entryName = $entry.FullName.Replace('\', '/')
+            if ([string]::IsNullOrWhiteSpace($entryName) -or -not $entryNames.Add($entryName))
+            {
+                Write-Warning 'Artifact archive contains an empty or duplicate entry name.'
+                return $false
+            }
+
+            if ($entry.Length -gt $MaximumUncompressedBytes - $totalBytes)
+            {
+                Write-Warning 'Artifact archive exceeds the uncompressed-size limit.'
+                return $false
+            }
+
+            $totalBytes += $entry.Length
+        }
+    }
+    catch
+    {
+        Write-Warning "Artifact archive could not be inspected safely ($($_.Exception.GetType().Name))."
+        return $false
+    }
+    finally
+    {
+        if ($null -ne $archive)
+        {
+            $archive.Dispose()
+        }
+    }
+
+    try
+    {
+        # The .NET extractor rejects entries that resolve outside DestinationPath.
+        [IO.Compression.ZipFile]::ExtractToDirectory($ArchivePath, $DestinationPath, $true)
+        $true
+    }
+    catch
+    {
+        # Report only the exception type; entry names are untrusted data.
+        Write-Warning "Artifact archive could not be extracted safely ($($_.Exception.GetType().Name))."
+        $false
+    }
+}
+
 Export-ModuleMember -Function @(
     'Get-SafeFileName',
     'Test-SafeMetricName',
     'ConvertTo-AllowlistedMetrics',
     'Read-HostedMetrics',
-    'Get-HostedLogExcerpt'
+    'Get-HostedLogExcerpt',
+    'Expand-BoundedArchive'
 )

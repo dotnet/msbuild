@@ -8,6 +8,7 @@ Import-Module (Join-Path $featureRoot 'components\evidence\EvidenceSanitizer.psm
 Import-Module (Join-Path $featureRoot 'components\evidence\RegressionDetection.psm1') -Force
 Import-Module (Join-Path $featureRoot 'components\evidence\DiagnosticEvidence.psm1') -Force
 Import-Module (Join-Path $featureRoot 'components\reporting\RegressionReportWriter.psm1') -Force
+Import-Module (Join-Path $featureRoot 'components\clients\AzureDevOpsClient.psm1') -Force
 Import-Module (Join-Path $featureRoot 'components\clients\HttpRetry.psm1') -Force
 
 $failures = [System.Collections.Generic.List[string]]::new()
@@ -39,6 +40,50 @@ function Assert-Equal
     }
 }
 
+function Get-KqlLetLiteral
+{
+    param(
+        [Parameter(Mandatory)][string]$Text,
+        [Parameter(Mandatory)][string]$Name
+    )
+
+    if ($Text -match "(?m)^let\s+$([regex]::Escape($Name))\s*=\s*([^;]+);")
+    {
+        return $Matches[1].Trim()
+    }
+
+    ''
+}
+
+function New-TestArchive
+{
+    param(
+        [Parameter(Mandatory)][string]$Path,
+        [Parameter(Mandatory)][hashtable]$Entries
+    )
+
+    $archive = [IO.Compression.ZipFile]::Open($Path, [IO.Compression.ZipArchiveMode]::Create)
+    try
+    {
+        foreach ($entry in $Entries.GetEnumerator())
+        {
+            $writer = [IO.StreamWriter]::new($archive.CreateEntry($entry.Key).Open())
+            try
+            {
+                $writer.Write($entry.Value)
+            }
+            finally
+            {
+                $writer.Dispose()
+            }
+        }
+    }
+    finally
+    {
+        $archive.Dispose()
+    }
+}
+
 $candidateA = [pscustomobject]@{ Backend = 'Hosted'; Os = 'Windows'; ScenarioPair = 'Alpha' }
 $candidateB = [pscustomobject]@{ Backend = 'Gold'; Os = 'Linux'; ScenarioPair = 'Beta' }
 $identity1 = Get-CandidateSetIdentity -Candidates @($candidateA, $candidateB, $candidateA)
@@ -47,9 +92,21 @@ Assert-Equal $identity1.Key $identity2.Key 'Candidate-set key must ignore order 
 Assert-Equal 2 @($identity1.Inputs).Count 'Candidate-set inputs must be unique.'
 Assert-Equal 'Gold/Linux/Beta' $identity1.Inputs[0] 'Candidate-set inputs must be sorted.'
 
+$detectorReport = New-RegressionDetectionReport -Candidates @() -GeneratedAtUtc ([DateTimeOffset]::UtcNow)
+$detector = $detectorReport.detector
+$kql = Get-Content -LiteralPath (Join-Path $featureRoot 'queries\Get-MtBuildTimeRegressions.kql') -Raw
+Assert-Equal "$($detector.lookbackDays)d" (Get-KqlLetLiteral -Text $kql -Name 'lookback') 'Detector lookback metadata must match Kusto.'
+Assert-Equal "$($detector.freshnessDays)d" (Get-KqlLetLiteral -Text $kql -Name 'freshness') 'Detector freshness metadata must match Kusto.'
+Assert-Equal "$($detector.minimumBaselineRuns)" (Get-KqlLetLiteral -Text $kql -Name 'minBaselineRuns') 'Detector baseline-run metadata must match Kusto.'
+Assert-Equal ([double]$detector.minimumMtRegressionPercent).ToString('0.0', [Globalization.CultureInfo]::InvariantCulture) (Get-KqlLetLiteral -Text $kql -Name 'minRegressionPercent') 'Detector percentage metadata must match Kusto.'
+Assert-Equal ([double]$detector.minimumMtRegressionMs).ToString('0.0', [Globalization.CultureInfo]::InvariantCulture) (Get-KqlLetLiteral -Text $kql -Name 'minRegressionMs') 'Detector millisecond metadata must match Kusto.'
+Assert-True ($kql.Contains('| where MtMedianMs > BaselineMtP90Ms')) 'The executable detector must require MT above baseline p90.'
+Assert-True ($kql.Contains('MtVsNonMtDeltaMs > BaselineDeltaP90Ms')) 'The executable detector must require differential above baseline p90.'
+
 Assert-True (Test-SafeMetricName -Name 'build-time') 'build-time must be allowlisted.'
 Assert-True (Test-SafeMetricName -Name 'evaluation-time-pass3') 'Evaluation pass metrics must be allowlisted.'
 Assert-True (-not (Test-SafeMetricName -Name 'secret-environment')) 'Unknown metrics must be rejected.'
+Assert-True (-not (Test-SafeMetricName -Name "build-time`n")) 'Metric names with trailing newlines must be rejected.'
 Assert-Equal 'build_123_Windows' (Get-SafeFileName -Value 'build/123:Windows') 'Unsafe filename characters must be replaced.'
 
 $transportException = [System.Net.Http.HttpRequestException]::new('Transient transport failure.')
@@ -82,6 +139,20 @@ $sourceVersions = Get-RequiredSourceVersions -Evidence $evidence
 Assert-Equal 2 $sourceVersions.Count 'Source versions must be valid, unique SHA-1 values.'
 Assert-True (Test-SafeKustoDimension -Value 'Scenario-1_mt' -Name 'test') 'Expected diagnostic dimensions must be accepted.'
 Assert-True (-not (Test-SafeKustoDimension -Value 'Scenario"; drop' -Name 'test' -WarningAction SilentlyContinue)) 'Unsafe Kusto dimensions must be rejected.'
+Assert-True (-not (Test-SafeKustoDimension -Value "Scenario`n" -Name 'test' -WarningAction SilentlyContinue)) 'Kusto dimensions with trailing newlines must be rejected.'
+$dimensionWarnings = @()
+[void](Test-SafeKustoDimension `
+    -Value "Scenario`n::error::forged" `
+    -Name 'scenario pair' `
+    -WarningAction SilentlyContinue `
+    -WarningVariable dimensionWarnings)
+Assert-True (-not (($dimensionWarnings -join "`n").Contains('forged'))) 'Unsafe Kusto values must not be echoed in warnings.'
+
+Assert-True (Test-AzureDevOpsArtifactUrl -Url 'https://dev.azure.com/devdiv/artifact') 'Azure DevOps artifact URLs must be accepted.'
+Assert-True (Test-AzureDevOpsArtifactUrl -Url 'https://artprodcus3.artifacts.visualstudio.com/content') 'Azure artifact-service URLs must be accepted.'
+Assert-True (-not (Test-AzureDevOpsArtifactUrl -Url 'http://dev.azure.com/devdiv')) 'Non-HTTPS artifact URLs must be rejected.'
+Assert-True (-not (Test-AzureDevOpsArtifactUrl -Url 'https://dev.azure.com.evil.example/artifact')) 'Suffix-confusion artifact hosts must be rejected.'
+Assert-True (-not (Test-AzureDevOpsArtifactUrl -Url 'https://dev.azure.com@evil.example/artifact')) 'Artifact URLs with misleading user-info must be rejected.'
 
 $tempRoot = Join-Path ([IO.Path]::GetTempPath()) "mt-regression-tests-$([Guid]::NewGuid().ToString('N'))"
 try
@@ -108,8 +179,32 @@ try
     Assert-True ($excerpt.Contains('[heartbeat] running')) 'Safe heartbeat lines must be retained.'
     Assert-True (-not $excerpt.Contains('sensitive arbitrary command line')) 'Arbitrary log lines must be excluded.'
 
+    $archivePath = Join-Path $tempRoot 'safe.zip'
+    New-TestArchive -Path $archivePath -Entries @{
+        'a.txt' = 'aa'
+        'sub/b.txt' = 'b'
+    }
+    $safeExtract = Join-Path $tempRoot 'safe-extract'
+    Assert-True (Expand-BoundedArchive -ArchivePath $archivePath -DestinationPath $safeExtract) 'A bounded safe archive must extract.'
+    Assert-True (Test-Path -LiteralPath (Join-Path (Join-Path $safeExtract 'sub') 'b.txt')) 'Safe archive contents must be present.'
+    Assert-True (-not (Expand-BoundedArchive -ArchivePath $archivePath -DestinationPath (Join-Path $tempRoot 'entry-bound') -MaximumEntryCount 1 -WarningAction SilentlyContinue)) 'The entry-count bound must be enforced.'
+    Assert-True (-not (Expand-BoundedArchive -ArchivePath $archivePath -DestinationPath (Join-Path $tempRoot 'expanded-bound') -MaximumUncompressedBytes 1 -WarningAction SilentlyContinue)) 'The uncompressed-size bound must be enforced.'
+    Assert-True (-not (Expand-BoundedArchive -ArchivePath $archivePath -DestinationPath (Join-Path $tempRoot 'compressed-bound') -MaximumCompressedBytes 1 -WarningAction SilentlyContinue)) 'The compressed-size bound must be enforced.'
+
+    $traversalArchive = Join-Path $tempRoot 'traversal.zip'
+    New-TestArchive -Path $traversalArchive -Entries @{ '../escape.txt' = 'escape' }
+    $traversalWarnings = @()
+    Assert-True (-not (Expand-BoundedArchive `
+        -ArchivePath $traversalArchive `
+        -DestinationPath (Join-Path $tempRoot 'traversal') `
+        -WarningAction SilentlyContinue `
+        -WarningVariable traversalWarnings)) 'Traversal entries must be rejected.'
+    Assert-True (-not (Test-Path -LiteralPath (Join-Path $tempRoot 'escape.txt'))) 'Traversal entries must not escape the destination.'
+    Assert-True (-not (($traversalWarnings -join "`n").Contains('escape.txt'))) 'Archive entry names must not be echoed in warnings.'
+
     $reportDirectory = Join-Path $tempRoot 'reports'
     $report = New-RegressionDetectionReport -Candidates @() -GeneratedAtUtc ([DateTimeOffset]::Parse('2026-01-01T00:00:00Z'))
+    $report.detector.lookbackDays = 33
     Write-RegressionDetectionReport -Report $report -OutputDirectory $reportDirectory
     Write-ActualRunEvidenceReport -Candidates @() -OutputDirectory $reportDirectory
     Write-DiagnosticEvidenceReport -Candidates @() -DiagnosticPipelineId 28394 -MaximumRunsToInspect 24 -OutputDirectory $reportDirectory
@@ -126,6 +221,8 @@ try
     {
         Assert-True (Test-Path -LiteralPath (Join-Path $reportDirectory $fileName)) "Expected report '$fileName' was not written."
     }
+    $contextMarkdown = Get-Content -LiteralPath (Join-Path $reportDirectory 'mt-regression-context.md') -Raw
+    Assert-True ($contextMarkdown.Contains('preceding 33 days')) 'Markdown thresholds must render from detector metadata.'
 }
 finally
 {

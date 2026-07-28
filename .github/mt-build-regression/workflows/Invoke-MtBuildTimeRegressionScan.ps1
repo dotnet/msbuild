@@ -38,7 +38,7 @@ if (-not (Test-Path -LiteralPath $QueryPath))
 # Execute the detector and turn its tabular result into the stable candidate contract.
 $client = New-KustoClient -ClusterUri $ClusterUri -Database $Database -AccessToken $accessToken
 $query = Get-Content -LiteralPath $QueryPath -Raw
-$candidates = @(Invoke-KustoQuery -Client $client -Query $query -RequirePrimaryTable $true)
+$candidates = @(Invoke-KustoQuery -Client $client -Query $query -MaximumAttempts 4 -RequirePrimaryTable $true)
 $report = New-RegressionDetectionReport -Candidates $candidates -GeneratedAtUtc ([DateTimeOffset]::UtcNow)
 
 # Write the machine-readable and human-readable views of the same detection result.

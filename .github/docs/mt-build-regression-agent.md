@@ -22,9 +22,10 @@ Azure credential to the AI agent.
 
 ## Data flow at a glance
 
-The diagram below shows the data sources, the credentialed deterministic scan job, and the
-secret-free agent sandbox. Every external data source is reached only by the trusted
-`mt_regression_scan` job. The agent receives nothing but the derived evidence artifact.
+The diagram below shows the data sources, the credentialed deterministic scan job, and the agent
+sandbox. Every external data source is reached only by the trusted `mt_regression_scan` job. The
+agent holds the Copilot PAT and GitHub token required by its toolsets, but no Azure, Kusto, or Azure
+DevOps credentials; the only PerfStar data it receives is the derived evidence artifact.
 
 ```mermaid
 flowchart TD
@@ -60,7 +61,7 @@ flowchart TD
 
     artifact --> agent
 
-    subgraph agent["Job: agent (secret-free sandbox, no Azure/Kusto/AzDO)"]
+    subgraph agent["Job: agent (no Azure/Kusto/AzDO credentials)"]
         direction TB
         investigate["Read evidence, group candidates,<br/>inspect source range, classify each"]
         decide{"Complete high-confidence<br/>fix possible?"}
@@ -86,7 +87,8 @@ flowchart TD
    that use the exact current or last-healthy MSBuild source SHA, then queries Kusto task, target,
    evaluation-pass, and task-migration data.
 7. The complete derived evidence is uploaded as a workflow artifact.
-8. The Agentic Workflow downloads only the derived evidence into its secret-free sandbox.
+8. The Agentic Workflow downloads only the derived evidence into its sandbox, which has no Azure,
+   Kusto, or Azure DevOps credentials.
 9. The agent investigates every candidate and:
    - creates one aggregate issue when new candidates need tracking;
    - opens one draft PR only when it can safely address every actionable regression; or

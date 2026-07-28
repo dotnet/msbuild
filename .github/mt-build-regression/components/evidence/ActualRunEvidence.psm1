@@ -98,23 +98,36 @@ function Get-ArtifactDirectory
     }
 
     $safeName = Get-SafeFileName -Value "$BuildId-$ArtifactName"
+    if (-not (Test-AzureDevOpsArtifactUrl -Url $downloadUrl))
+    {
+        Write-Warning "Artifact '$safeName' has an unapproved download URL."
+        $Context.ArtifactCache[$cacheKey] = $null
+        return $null
+    }
+
     $zipPath = Join-Path $Context.RawDirectory "$safeName.zip"
     $extractPath = Join-Path $Context.RawDirectory $safeName
     New-Item -ItemType Directory -Force -Path $extractPath | Out-Null
 
-    Save-AzureDevOpsArtifact `
-        -Client $Context.AzureDevOpsClient `
-        -DownloadUrl $downloadUrl `
-        -DestinationPath $zipPath
-
-    $zipLength = (Get-Item -LiteralPath $zipPath).Length
-    if ($zipLength -gt 100MB)
+    try
     {
-        throw "Artifact '$ArtifactName' from build $BuildId is $([Math]::Round($zipLength / 1MB, 1)) MB; refusing to extract more than 100 MB."
+        Save-AzureDevOpsArtifact `
+            -Client $Context.AzureDevOpsClient `
+            -DownloadUrl $downloadUrl `
+            -DestinationPath $zipPath
+
+        if (-not (Expand-BoundedArchive -ArchivePath $zipPath -DestinationPath $extractPath))
+        {
+            Remove-Item -LiteralPath $extractPath -Recurse -Force -ErrorAction SilentlyContinue
+            $Context.ArtifactCache[$cacheKey] = $null
+            return $null
+        }
+    }
+    finally
+    {
+        Remove-Item -LiteralPath $zipPath -Force -ErrorAction SilentlyContinue
     }
 
-    Expand-Archive -LiteralPath $zipPath -DestinationPath $extractPath -Force
-    Remove-Item -LiteralPath $zipPath -Force
     $Context.ArtifactCache[$cacheKey] = $extractPath
     $extractPath
 }

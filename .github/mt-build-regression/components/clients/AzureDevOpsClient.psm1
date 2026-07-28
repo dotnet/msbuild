@@ -111,6 +111,23 @@ function Get-AzureDevOpsArtifact
     }
 }
 
+function Test-AzureDevOpsArtifactUrl
+{
+    [OutputType([bool])]
+    param([Parameter(Mandatory)][string]$Url)
+
+    $uri = $null
+    if (-not [Uri]::TryCreate($Url, [UriKind]::Absolute, [ref]$uri))
+    {
+        return $false
+    }
+
+    $uri.Scheme -eq 'https' -and
+        [string]::IsNullOrEmpty($uri.UserInfo) -and
+        ($uri.Host.Equals('dev.azure.com', [StringComparison]::OrdinalIgnoreCase) -or
+            $uri.Host.EndsWith('.artifacts.visualstudio.com', [StringComparison]::OrdinalIgnoreCase))
+}
+
 function Save-AzureDevOpsArtifact
 {
     param(
@@ -119,11 +136,22 @@ function Save-AzureDevOpsArtifact
         [Parameter(Mandatory)][string]$DestinationPath
     )
 
+    if (-not (Test-AzureDevOpsArtifactUrl -Url $DownloadUrl))
+    {
+        throw 'Artifact download URL is not an approved Azure DevOps endpoint.'
+    }
+
     for ($attempt = 1; $attempt -le 4; $attempt++)
     {
         try
         {
-            Invoke-WebRequest -Uri $DownloadUrl -Headers $Client.Headers -OutFile $DestinationPath
+            # PowerShell strips Authorization on redirects unless
+            # -PreserveAuthorizationOnRedirect is explicitly requested.
+            Invoke-WebRequest `
+                -Uri $DownloadUrl `
+                -Headers $Client.Headers `
+                -TimeoutSec 600 `
+                -OutFile $DestinationPath
             return
         }
         catch
@@ -146,5 +174,6 @@ Export-ModuleMember -Function @(
     'Get-AzureDevOpsPipelineRun',
     'Get-AzureDevOpsPipelineRuns',
     'Get-AzureDevOpsArtifact',
+    'Test-AzureDevOpsArtifactUrl',
     'Save-AzureDevOpsArtifact'
 )
