@@ -64,13 +64,6 @@ Change wave checks around features will be removed in the release that accompani
 ### 18.3
 - [Replace Transactional property with ChangeWave control, implement atomic file replacement with retry logic, and update tests.](https://github.com/dotnet/msbuild/pull/12627)
 
-### 17.14
-- ~[.SLNX support - use the new parser for .sln and .slnx](https://github.com/dotnet/msbuild/pull/10836)~ reverted after compat problems discovered
-- ~~[Support custom culture in RAR](https://github.com/dotnet/msbuild/pull/11000)~~ - see [11607](https://github.com/dotnet/msbuild/pull/11607) for details
-- [VS Telemetry](https://github.com/dotnet/msbuild/pull/11255)
-
-
-
 ## Change Waves No Longer In Rotation
 
 ### 16.8
@@ -144,3 +137,9 @@ Change wave checks around features will be removed in the release that accompani
 - [Add ParameterName and PropertyName to TaskParameterEventArgs](https://github.com/dotnet/msbuild/pull/10130)
 - [Emit eval props if requested by any sink](https://github.com/dotnet/msbuild/pull/10243)
 - [Load Microsoft.DotNet.MSBuildSdkResolver into default load context (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/10603)
+
+### 17.14
+
+- ~[.SLNX support - use the new parser for .sln and .slnx](https://github.com/dotnet/msbuild/pull/10836)~ reverted after compat problems discovered
+- ~~[Support custom culture in RAR](https://github.com/dotnet/msbuild/pull/11000)~~ - see [11607](https://github.com/dotnet/msbuild/pull/11607) for details
+- [VS Telemetry](https://github.com/dotnet/msbuild/pull/11255)
