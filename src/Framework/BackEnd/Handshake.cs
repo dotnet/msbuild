@@ -92,7 +92,13 @@ internal class Handshake
         // Calculate salt from environment and tools directory
         string handshakeSalt = Environment.GetEnvironmentVariable("MSBUILDNODEHANDSHAKESALT") ?? "";
 
-        int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}");
+        // A node resolves its change wave once and keeps it for the rest of its lifetime, so a node reused
+        // by a later build would silently keep applying the change wave of the build that started it. Fold
+        // the change wave into the salt so that a node which resolved a different change wave rejects the
+        // connection and the parent starts a fresh node instead.
+        string changeWaveSalt = GetChangeWaveSalt();
+
+        int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}{changeWaveSalt}");
 
         // The .NET task host parent (.NET Framework MSBuild, e.g. Visual Studio) and child
         // (.NET SDK MSBuild) compute this salt independently from different sources, and on Windows
@@ -102,10 +108,11 @@ internal class Handshake
         // the parent's spelling (see IsNetTaskHostSaltMatch). Only the child consults this value.
         if (IsNetTaskHost && TryGetDriveLetterCaseVariant(toolsDirectory, out string? alternateToolsDirectory))
         {
-            _netTaskHostSaltDriveCaseVariant = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{alternateToolsDirectory}");
+            _netTaskHostSaltDriveCaseVariant = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{alternateToolsDirectory}{changeWaveSalt}");
         }
 
         CommunicationsUtilities.Trace($"Handshake salt is {handshakeSalt}");
+        CommunicationsUtilities.Trace($"Change wave salt is {changeWaveSalt}");
         CommunicationsUtilities.Trace($"Tools directory root is {toolsDirectory}");
 
         // Get session ID if needed (expensive call)
@@ -127,6 +134,31 @@ internal class Handshake
 
     private bool IsNetTaskHost
         => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.NET | HandshakeOptions.TaskHost);
+
+    private bool IsClr2TaskHost
+        => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2 | HandshakeOptions.TaskHost);
+
+    /// <summary>
+    /// The part of the handshake salt that represents the change wave this process resolved, so that nodes
+    /// which disagree about <c>MSBUILDDISABLEFEATURESFROMVERSION</c> never talk to each other. The resolved
+    /// wave is used rather than the raw environment variable so that values which mean the same thing (for
+    /// example an unset variable and one that is out of rotation) still allow node reuse.
+    /// Returns an empty string when no change wave is disabled, which is both the default and the case where
+    /// there is nothing to segregate, so the salt stays identical to what previous versions computed.
+    /// Also returns an empty string for the CLR2 task host, whose separate legacy handshake implementation in
+    /// MSBuildTaskHost.exe does not know about change waves; including it here would break that connection.
+    /// </summary>
+    private string GetChangeWaveSalt()
+    {
+        if (IsClr2TaskHost)
+        {
+            return string.Empty;
+        }
+
+        Version disabledWave = ChangeWaves.DisabledWave;
+
+        return disabledWave == ChangeWaves.EnableAllFeatures ? string.Empty : disabledWave.ToString();
+    }
 
     /// <summary>
     /// Determines whether <paramref name="receivedSalt"/> matches this node's salt computed for the
@@ -168,11 +200,6 @@ internal class Handshake
         variant = flippedDrive + path.Substring(1);
         return true;
     }
-
-#if NETFRAMEWORK
-    private bool IsClr2TaskHost
-        => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2 | HandshakeOptions.TaskHost);
-#endif
 
     private static HandshakeComponents CreateNetTaskHostComponents(int options, int salt, int sessionId) => new(
         options,
