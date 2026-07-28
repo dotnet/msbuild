@@ -98,10 +98,13 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.LaunchMutexName.ShouldContain(Environment.UserName);
     }
 
-    [Fact]
-    public void CoordinatorSettings_MutexNames_RespectOverriddenPipeName()
+    [WindowsOnlyFact]
+    public void CoordinatorSettings_MutexNames_EmbedTheGivenPipeName()
     {
-        // The mutex guards a specific pipe, so an explicit pipe name is honored as given.
+        // The mutex guards a specific pipe, so an explicit pipe name is honored as given. Windows
+        // only: the Unix name hashes the pipe name, so it cannot be inspected by substring. The
+        // cross-platform guarantee that the name is derived from the pipe name is covered by
+        // CoordinatorSettings_MutexNames_DifferByPipeName.
         CoordinatorSettings settings = CoordinatorSettings.Default with { PipeName = "coordinator-explicit-pipe" };
 
         settings.ServerMutexName.ShouldContain("coordinator-explicit-pipe");
