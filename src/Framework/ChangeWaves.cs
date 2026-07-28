@@ -27,7 +27,6 @@ namespace Microsoft.Build.Framework
     /// For dev docs: https://github.com/dotnet/msbuild/blob/main/documentation/wiki/ChangeWaves-Dev.md
     internal static class ChangeWaves
     {
-        internal static readonly Version Wave17_10 = new Version(17, 10);
         internal static readonly Version Wave17_12 = new Version(17, 12);
         internal static readonly Version Wave17_14 = new Version(17, 14);
         internal static readonly Version Wave18_3 = new Version(18, 3);
@@ -38,7 +37,7 @@ namespace Microsoft.Build.Framework
         internal static readonly Version Wave18_8 = new Version(18, 8);
         internal static readonly Version Wave18_9 = new Version(18, 9);
         internal static readonly Version Wave18_10 = new Version(18, 10);
-        internal static readonly Version[] AllWaves = [Wave17_10, Wave17_12, Wave17_14, Wave18_3, Wave18_4, Wave18_5, Wave18_6, Wave18_7, Wave18_8, Wave18_9, Wave18_10];
+        internal static readonly Version[] AllWaves = [Wave17_12, Wave17_14, Wave18_3, Wave18_4, Wave18_5, Wave18_6, Wave18_7, Wave18_8, Wave18_9, Wave18_10];
 
         /// <summary>
         /// Special value indicating that all features behind all Change Waves should be enabled.
