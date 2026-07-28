@@ -48,6 +48,8 @@ MSBuildExe
       Evaluate
         LoadDocument / Parse
         EvaluatePass0..5
+        EvaluateImport
+        ReadTargetElements / ComputeTargetMappings
         EvaluateCondition
         ExpandGlob
         ApplyLazyItemOperations
@@ -137,6 +139,9 @@ Only rows marked **PerfLog = Yes** are included in the `DOTNET_PERFLOG_DIR` text
 | `EvaluatePass3Start` (19)<br/>`EvaluatePass3Stop` (20) | No | Pass 3 of evaluation: evaluate project items, then realize deferred/lazy item work. | `projectFile`: evaluated project file path. |
 | `EvaluatePass4Start` (21)<br/>`EvaluatePass4Stop` (22) | No | Pass 4 of evaluation: evaluate `UsingTask` declarations and finalize default-target bookkeeping. | `projectFile`: evaluated project file path. |
 | `EvaluatePass5Start` (23)<br/>`EvaluatePass5Stop` (24) | No | Pass 5 of evaluation: read targets and before/after-target mappings. Target bodies are not executed here. | `projectFile`: evaluated project file path. |
+| `EvaluateImportStart` (113)<br/>`EvaluateImportStop` (114) | No | Around resolving one `Import` element and loading the files it resolves to. Does not cover the recursive evaluation of what was imported, so time here that is not in a nested `LoadDocument`/`Parse` is import probing. | `projectFile`: project or import containing the `Import` element.<br/>`importExpression`: unexpanded `Project` attribute.<br/>`importedFileCount`: number of files the import resolved to. |
+| `ReadTargetElementsStart` (115)<br/>`ReadTargetElementsStop` (116) | No | The target registration part of pass 5, where `ProjectTargetInstance` and `ProjectTaskInstance` objects are constructed. | `projectFile`: evaluated project file path.<br/>`targetElementCount`: number of target elements read. |
+| `ComputeTargetMappingsStart` (117)<br/>`ComputeTargetMappingsStop` (118) | No | The part of pass 5 that builds the `BeforeTargets`/`AfterTargets` maps. | `projectFile`: evaluated project file path. |
 | `EvaluateConditionStart` (9)<br/>`EvaluateConditionStop` (10) | No | Around evaluation of a single MSBuild condition in the lazy item evaluator. This can be high-volume in large evaluations. | `condition`: condition text being evaluated.<br/>`result`: Boolean outcome. |
 | `ApplyLazyItemOperationsStart` (1)<br/>`ApplyLazyItemOperationsStop` (2) | No | Around a lazy item operation applying selection/mutation/save work for one item type. | `itemType`: item type being materialized or updated. |
 | `ExpandGlobStart` (41)<br/>`ExpandGlobStop` (42) | No | Around wildcard expansion for a single glob fragment in item evaluation. | `rootDirectory`: root directory used for the file search.<br/>`glob`: wildcard pattern being expanded.<br/>`excludedPatterns`: comma-separated exclude patterns applied to the glob. |

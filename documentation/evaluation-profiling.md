@@ -2,6 +2,12 @@
 
 MSBuild 15.6 and higher contains an evaluation profiler, which can help analyze which parts of a project (and any .targets/etc that it imports) are taking the most time to evaluate.
 
+> The profiler reports time by evaluation pass and by XML element. For SDK-style projects that means
+> almost everything lands under "Properties (pass 1)", because import loading, XML parsing, SDK
+> resolution and condition evaluation all happen underneath the root `<Import>` elements. For a
+> breakdown by *kind of work* rather than by source line, see
+> [Where full project evaluation spends its time](evaluation-cost-breakdown.md).
+
 The profiler is enabled when passing `/profileevaluation:<filename>` as a command-line argument to MSBuild. After the build, the specified file will contain a profiler report. If the specified filename does not end in `.md`, it will be a tab-separated value (TSV) table suitable for loading into a spreadsheet. If the filename ends in `.md`, it will be a Markdown file that looks like the following:
 
 Pass|File|Line #|Expression|Inc (ms)|Inc (%)|Exc (ms)|Exc (%)|#|Bug

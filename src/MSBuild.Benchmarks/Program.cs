@@ -13,6 +13,16 @@ var argList = new List<string>(args);
 ParseAndRemoveBooleanParameter(argList, "--collect-etw", out bool collectEtw);
 ParseAndRemoveBooleanParameter(argList, "--disable-ngen", out bool disableNGen);
 ParseAndRemoveBooleanParameter(argList, "--disable-inlining", out bool disableJitInlining);
+ParseAndRemoveBooleanParameter(argList, "--analyze", out bool analyze);
+
+#if !NETFRAMEWORK
+// The evaluation cost analysis observes a single evaluation from the inside (event source markers and an injected
+// file system) rather than measuring steady-state throughput, so it does not run under BenchmarkDotNet.
+if (analyze)
+{
+    return MSBuild.Benchmarks.Analysis.EvaluationBreakdownAnalysis.Run([.. argList]);
+}
+#endif
 
 return BenchmarkSwitcher
     .FromAssembly(typeof(Program).Assembly)

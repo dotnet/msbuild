@@ -223,6 +223,70 @@ namespace Microsoft.Build.Eventing
             WriteEvent(24, projectFile);
         }
 
+        /// <summary>
+        /// Call this method to notify listeners that an <c>Import</c> element is being resolved and its target files loaded.
+        /// </summary>
+        /// <remarks>
+        /// The scope covers resolving the import expression (search path fallbacks, wildcard expansion, SDK resolution)
+        /// and loading the resulting project files, but not the recursive evaluation of what was imported. Time spent
+        /// here that is not attributed to a nested LoadDocument or Parse scope is import probing.
+        /// </remarks>
+        /// <param name="projectFile">Filename of the project or import containing the <c>Import</c> element.</param>
+        /// <param name="importExpression">The unexpanded value of the <c>Project</c> attribute.</param>
+        [Event(113, Keywords = Keywords.All)]
+        public void EvaluateImportStart(string projectFile, string importExpression)
+        {
+            WriteEvent(113, projectFile, importExpression);
+        }
+
+        /// <param name="projectFile">Filename of the project or import containing the <c>Import</c> element.</param>
+        /// <param name="importExpression">The unexpanded value of the <c>Project</c> attribute.</param>
+        /// <param name="importedFileCount">Number of project files the import resolved to.</param>
+        [Event(114, Keywords = Keywords.All)]
+        public void EvaluateImportStop(string projectFile, string importExpression, int importedFileCount)
+        {
+            WriteEvent(114, projectFile, importExpression, importedFileCount);
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners that the target registration part of evaluation pass 5 is starting.
+        /// </summary>
+        /// <remarks>
+        /// This is where <c>ProjectTargetInstance</c> and <c>ProjectTaskInstance</c> objects are constructed for every
+        /// target and task in the project and its imports.
+        /// </remarks>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
+        [Event(115, Keywords = Keywords.All)]
+        public void ReadTargetElementsStart(string projectFile)
+        {
+            WriteEvent(115, projectFile);
+        }
+
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
+        /// <param name="targetElementCount">Number of target elements read.</param>
+        [Event(116, Keywords = Keywords.All)]
+        public void ReadTargetElementsStop(string projectFile, int targetElementCount)
+        {
+            WriteEvent(116, projectFile, targetElementCount);
+        }
+
+        /// <summary>
+        /// Call this method to notify listeners that the <c>BeforeTargets</c>/<c>AfterTargets</c> maps are being built.
+        /// </summary>
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
+        [Event(117, Keywords = Keywords.All)]
+        public void ComputeTargetMappingsStart(string projectFile)
+        {
+            WriteEvent(117, projectFile);
+        }
+
+        /// <param name="projectFile">Filename of the project being evaluated.</param>
+        [Event(118, Keywords = Keywords.All)]
+        public void ComputeTargetMappingsStop(string projectFile)
+        {
+            WriteEvent(118, projectFile);
+        }
+
         [Event(25, Keywords = Keywords.All)]
         public void GenerateResourceOverallStart()
         {
