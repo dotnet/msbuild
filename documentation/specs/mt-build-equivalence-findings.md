@@ -260,6 +260,24 @@ are reported in their own "Known `-mt`-only log differences" section of every re
 failing the comparison, and the rule is applied only to the `-mt` comparison, never to the control.
 **Delete that entry once the bug is fixed** so the check becomes strict again.
 
+Measured on the official MicroBuild pool (build 14789743), the baseline build emits 366 of these
+messages and the `-mt` build 1 728 — the baseline is non-zero because a few tasks already need an
+out-of-process task host for runtime or bitness reasons, and `-mt` makes that the common path.
+
+## Non-MSBuild noise from 1ES SDL injection
+
+The 1ES Official template injects Guardian's Roslyn analyzers into the build. That tooling is not part
+of MSBuild and is not deterministic between two runs, so the harness excludes its own outputs:
+
+* `*.gdn.sarif` — Guardian analysis results written into the output tree. Ignored: they are analysis
+  results, not build outputs, and on the pool they were emitted in one build of an identical pair and
+  not the other.
+* `<project>_<guid>_GdnDotnetAnalyzersMerged.ruleset` — a ruleset generated per project whose file
+  name embeds a fresh GUID on every build. The GUID is normalized away in logs and the file ignored.
+
+Both are excluded for the `-mt` comparison and the control alike, so they cannot mask a real
+difference on one side only.
+
 ## What this does and does not prove
 
 Proven for the configuration tested (official-style `Release` build of this repo, Windows,

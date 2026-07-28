@@ -38,6 +38,17 @@
       "reason": "SBOM manifests embed a generation timestamp and a per-run document GUID."
     },
     {
+      "//": "1ES SDL injection runs Guardian's Roslyn analyzers as part of the build and writes its results into the output tree. Those are analysis results about the source, not build products, and they are not even emitted consistently between two identical builds (observed as OnlyInCandidate in the control run on the MicroBuild pool).",
+      "pattern": "**/*.gdn.sarif",
+      "disposition": "Ignore",
+      "reason": "Guardian SARIF output injected by the 1ES SDL template; an analysis result, not a build output."
+    },
+    {
+      "pattern": "**/*_GdnDotnetAnalyzersMerged.ruleset",
+      "disposition": "Ignore",
+      "reason": "Ruleset generated per project by 1ES SDL injection; its file name embeds a fresh GUID on every build."
+    },
+    {
       "pattern": "msbuild-build-env.*",
       "disposition": "Ignore",
       "reason": "Developer convenience script generated from the ambient PATH of the build process; environment-dependent, not a build output, never shipped."

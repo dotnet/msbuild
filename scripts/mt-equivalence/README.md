@@ -131,6 +131,10 @@ are compared functionally:
 
 Every normalization rule carries a `reason` explaining why the raw text cannot be compared verbatim.
 
+> **Editing `drop` patterns:** they are matched against the **raw** log line, before any `replace`
+> rule runs, so the line still has its node prefix, timestamp and trailing `(TaskId:N)`. Anchoring a
+> `drop` pattern with `$` will usually not match.
+
 ### 3. Netting the `-mt` differences against the control
 
 When the control run is present, `Run-MTEquivalence.ps1` computes the verdict that actually matters:

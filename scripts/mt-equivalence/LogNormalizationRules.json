@@ -1,6 +1,8 @@
 {
   "//": "Normalization applied to replayed MSBuild text logs before the two runs are compared as line multisets. Rules are applied in order: 'drop' removes a line entirely, 'replace' rewrites it, 'setOnly' marks a line as compared for presence rather than for count. Every entry documents why the raw text cannot be compared verbatim.",
 
+  "//drop": "NOTE: drop patterns are matched against the RAW log line, before any replace rule runs. A raw line still carries its node prefix, timestamp and trailing '(TaskId:N)', so anchoring a drop pattern with '$' will usually not match.",
+
   "drop": [
     {
       "pattern": "^\\s*(GET|OK|CACHE|NotFound|Retrying) https?://",
@@ -9,6 +11,18 @@
     {
       "pattern": "^\\s*(Restoring packages for |Restored |Installing |Installed |Acquiring lock for the installation of |Acquired lock for the installation of |Committing restore|Writing assets file to disk|Generating MSBuild file|Assets file has not changed|All projects are up-to-date for restore|Determining projects to restore|Persisting no-op dep graph|Reading project file|Restore completed in|Feeds used:|Package source mapping matches found|Total time taken)",
       "reason": "NuGet restore progress varies with package-cache warmth and is not a property of the build engine."
+    },
+    {
+      "pattern": "^\\s*Installed:\\s*(\\(TaskId:\\d+\\))?\\s*$",
+      "reason": "Header of NuGet's cold-restore 'Installed:' summary. Only the first of the three builds performs a real restore; the later two are no-ops, so this block appears in exactly one of any two builds being compared - including two identical non-mt builds."
+    },
+    {
+      "pattern": "^\\s*\\d+ package\\(s\\) to \\S",
+      "reason": "Body of NuGet's cold-restore 'Installed:' summary (see above)."
+    },
+    {
+      "pattern": "\\.gdn\\.sarif",
+      "reason": "Guardian SARIF analysis output injected by the 1ES SDL template. It is an analysis result rather than a build output, and it is not emitted consistently between two identical builds, so the Copy task lines that move it around vary between runs. The files themselves are ignored by ArtifactCompareRules.json for the same reason."
     },
     {
       "pattern": "X\\.509 certificate chain validation will use",
@@ -107,9 +121,9 @@
       "reason": "Durations."
     },
     {
-      "pattern": "\\b[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\\b",
+      "pattern": "(?<![0-9a-fA-F])[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(?![0-9a-fA-F])",
       "replacement": "<guid>",
-      "reason": "Per-run GUIDs (telemetry ids, temp directory names)."
+      "reason": "Per-run GUIDs (telemetry ids, temp directory names, and the ids 1ES SDL injection embeds in generated ruleset file names such as Foo_<guid>_GdnDotnetAnalyzersMerged.ruleset). Anchored on hex-digit lookarounds rather than \\b: '_' is a word character, so \\b does not match between '_' and a hex digit and would miss exactly those embedded ids."
     },
     {
       "pattern": "(?i)\\\\artifacts\\\\tmp\\\\[^\\\\\"]*",
