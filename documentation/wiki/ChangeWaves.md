@@ -10,6 +10,10 @@ The opt-out comes in the form of setting the environment variable `MSBUILDDISABL
 
 The opt-out should be just a *temporary* workaround for a problem - as the feature will anyways become permanent eventually. For this reason - **please make sure to create or upvote a bug describing the issue making you opt-out**.
 
+### Change waves and reused processes
+
+`MSBUILDDISABLEFEATURESFROMVERSION` is read once per process, so a process that outlives a single build - a reused worker node, a task host, or an MSBuild Server node - keeps the change wave it started with. To make sure every process taking part in a build agrees on the change wave, the resolved change wave is part of the node handshake: a node that resolved a different change wave refuses the connection and MSBuild starts a fresh one instead. Changing `MSBUILDDISABLEFEATURESFROMVERSION` between builds therefore starts new nodes rather than reusing the existing ones. Values that resolve to the same change wave (for example an unset variable and a value in an invalid format) still allow node reuse.
+
 ## When do they become permanent?
 
 A wave of features is eligible to "rotate out" (i.e. become standard functionality) six months after its release. For example, wave 16.8 stayed opt-out through wave 16.10, becoming standard functionality when wave 17.0 is introduced.
