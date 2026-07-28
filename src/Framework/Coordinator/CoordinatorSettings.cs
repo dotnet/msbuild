@@ -136,11 +136,6 @@ internal sealed record class CoordinatorSettings()
     /// <summary>
     ///  Generates a platform-appropriate mutex name by combining the pipe name with a purpose suffix.
     /// </summary>
-    /// <remarks>
-    ///  The mutex guards a specific pipe, so it is derived purely from <see cref="PipeName"/>. Per-user
-    ///  scoping comes from the pipe name itself (see <see cref="DefaultPipeName"/>); an explicit
-    ///  <c>MSBUILDCOORDINATORPIPENAME</c> override is respected as given.
-    /// </remarks>
     private string GetMutexName(string purpose)
     {
         if (NativeMethods.IsWindows)
