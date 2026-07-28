@@ -2070,6 +2070,99 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// A cache that reloads changed files from disk - the one the MSBuild Server entry node reuses across builds -
+        /// already notices whatever an implicit restore rewrote, so <see cref="BuildRequestDataFlags.ClearCachesAfterBuild"/>
+        /// must leave it populated. Discarding it would only force the build that follows restore to re-parse the
+        /// entire import closure. Opting out of the change wave restores the unconditional flush.
+        /// </summary>
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(false, false)]
+        public void ClearCachesAfterBuildKeepsCacheThatReloadsFromDisk(bool changeWaveEnabled, bool shouldSurviveFlush)
+        {
+            if (!changeWaveEnabled)
+            {
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString());
+            }
+
+            ChangeWaves.ResetStateForTests();
+
+            string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='test' />
+</Project>
+");
+
+            string projectPath = _env.CreateFile(".proj").Path;
+            File.WriteAllText(projectPath, contents);
+
+            // Matches how the MSBuild Server entry node configures its cache.
+            ProjectRootElementCache cache = new ProjectRootElementCache(autoReloadFromDisk: true);
+            _parameters.ProjectRootElementCache = cache;
+
+            var data = new BuildRequestData(
+                projectPath,
+                ReadOnlyEmptyDictionary<string, string>.Instance,
+                null,
+                new[] { "test" },
+                null,
+                BuildRequestDataFlags.ClearCachesAfterBuild);
+
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result = _buildManager.BuildRequest(data);
+            _buildManager.EndBuild();
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            if (shouldSurviveFlush)
+            {
+                cache.TryGet(projectPath).ShouldNotBeNull();
+            }
+            else
+            {
+                cache.TryGet(projectPath).ShouldBeNull();
+            }
+        }
+
+        /// <summary>
+        /// A cache that cannot notice that a file changed on disk has no way to pick up what restore rewrote, so it
+        /// must still be discarded even when the change wave is enabled.
+        /// </summary>
+        [Fact]
+        public void ClearCachesAfterBuildStillClearsCacheThatDoesNotReloadFromDisk()
+        {
+            ChangeWaves.ResetStateForTests();
+
+            string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='test' />
+</Project>
+");
+
+            string projectPath = _env.CreateFile(".proj").Path;
+            File.WriteAllText(projectPath, contents);
+
+            ProjectRootElementCache cache = new ProjectRootElementCache(autoReloadFromDisk: false);
+            cache.AutoReloadFromDisk.ShouldBeFalse();
+            _parameters.ProjectRootElementCache = cache;
+
+            var data = new BuildRequestData(
+                projectPath,
+                ReadOnlyEmptyDictionary<string, string>.Instance,
+                null,
+                new[] { "test" },
+                null,
+                BuildRequestDataFlags.ClearCachesAfterBuild);
+
+            _buildManager.BeginBuild(_parameters);
+            BuildResult result = _buildManager.BuildRequest(data);
+            _buildManager.EndBuild();
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            cache.TryGet(projectPath).ShouldBeNull();
+        }
+
+        /// <summary>
         /// Verifies that explicitly loaded projects' imports are all marked as also explicitly loaded.
         /// </summary>
         [Fact]

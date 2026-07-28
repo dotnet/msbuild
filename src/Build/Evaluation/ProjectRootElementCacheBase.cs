@@ -13,6 +13,13 @@ namespace Microsoft.Build.Evaluation
         public bool LoadProjectsReadOnly { get; protected set; }
 
         /// <summary>
+        /// Whether this cache notices that a cached file changed on disk after it was read, and reloads it.
+        /// A cache that does so does not need to be discarded when something outside the build (such as restore)
+        /// rewrites part of the import graph.
+        /// </summary>
+        internal virtual bool AutoReloadFromDisk => false;
+
+        /// <summary>
         /// Handler for which project root element just got added to the cache
         /// </summary>
         internal delegate void ProjectRootElementCacheAddEntryHandler(object sender, ProjectRootElementCacheAddEntryEventArgs e);

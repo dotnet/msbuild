@@ -3103,9 +3103,17 @@ namespace Microsoft.Build.Execution
                 {
                     // Reset the project root element cache if specified which ensures that projects will be re-loaded from disk.  We do not need to reset the
                     // cache on child nodes because the OutOfProcNode class sets "autoReloadFromDisk" to "true" which handles the case when a restore modifies
-                    // part of the import graph.
-                    _buildParameters?.ProjectRootElementCache?.Clear();
+                    // part of the import graph. The same reasoning applies to any cache that reloads from disk on the node running this build, such as the
+                    // one the MSBuild Server entry node reuses across builds: it already notices whatever restore rewrote, so discarding it would only force
+                    // the build that follows restore to re-parse the entire import closure.
+                    if (_buildParameters?.ProjectRootElementCache is { } projectRootElementCache &&
+                        !(projectRootElementCache.AutoReloadFromDisk && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)))
+                    {
+                        projectRootElementCache.Clear();
+                    }
 
+                    // Unlike the XML cache, these hold negative results (a file that did not exist, a glob that matched nothing) which no
+                    // timestamp check can invalidate, and which restore invalidates precisely by creating files. They are always cleared.
                     FileMatcher.ClearCaches();
                     FileUtilities.ClearFileExistenceCache();
                 }

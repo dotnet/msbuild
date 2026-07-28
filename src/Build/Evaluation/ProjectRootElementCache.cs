@@ -158,6 +158,8 @@ namespace Microsoft.Build.Evaluation
             LoadProjectsReadOnly = loadProjectsReadOnly;
         }
 
+        /// <inheritdoc />
+        internal override bool AutoReloadFromDisk => _autoReloadFromDisk;
 
         /// <summary>
         /// Returns true if given cache entry exists and is outdated.
