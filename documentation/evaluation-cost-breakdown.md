@@ -344,7 +344,7 @@ makes it visible on single-project builds where the entry node does the evaluati
 
 | Artifact | Survives? | Why |
 | --- | --- | --- |
-| Parsed project XML | **Yes** | `reuseProjectRootElementCache: s_isServerNode` selects a static `ProjectRootElementCache`, and passes `autoReloadFromDisk: reuseProjectRootElementCache` |
+| Parsed project XML | **Only when no restore runs** | `reuseProjectRootElementCache: s_isServerNode` selects a static `ProjectRootElementCache` and passes `autoReloadFromDisk: reuseProjectRootElementCache` — but an implicit `-restore` discards it, see [the restore flush](#the-restore-flush) |
 | JIT-compiled code, loaded assemblies | **Yes** | same process |
 | `FileMatcher` / `FileUtilities` file-existence statics | **Yes**, unless the caller passes `BuildRequestDataFlags.ClearCachesAfterBuild` | process-wide statics |
 | SDK resolution results | **No** | `BuildManager` calls `SdkResolverService.ClearCache(submissionId)` when each submission completes |
@@ -356,6 +356,40 @@ Verified for SDK resolution: three consecutive builds in one server session each
 resolution work — ~20 ms per build that no current cache recovers. Verified for evaluation results:
 warm server builds report ~49 ms of evaluation on *every* build, so nothing about the evaluation
 itself is reused.
+
+### The restore flush
+
+The XML row above carries a caveat that costs more than everything else in the table combined. The
+implicit restore issues its build request with `BuildRequestDataFlags.ClearCachesAfterBuild`, and
+`BuildManager.CheckAllSubmissionsComplete` responds by calling `ProjectRootElementCache.Clear()`,
+which replaces the weak and strong caches wholesale — all 116 files, not just what restore touched.
+Restore then hands over to the build, which finds an empty cache and re-parses the entire closure.
+
+That flush is load-bearing in the classic case: with `autoReloadFromDisk: false` nothing else would
+notice that restore rewrote `nuget.g.props`/`nuget.g.targets`, and the process exits afterwards, so
+there is nothing to preserve. Under the server both facts invert — the timestamp check already covers
+restore's edits, and the cache being discarded is precisely the one meant to survive.
+
+Measured in-process, so that process startup and JIT do not mask the effect, by timing the evaluation
+that follows a restore-like submission:
+
+| Cache | Scenario | Penalty |
+| --- | --- | --- |
+| reloads from disk (server) | 1 project | +250 ms / **+11.88 MB** |
+| reloads from disk (server) | 12 projects | +380 ms / **+12.73 MB** |
+| does not reload (classic) | 1 project | +274 ms / +11.87 MB |
+
+The allocation figures are the reliable signal: 11.9 MB matches parsing the full 1.4 MB closure from
+scratch, and it was identical on every round. The cost is paid **once per build**, by whichever
+project is evaluated first — that evaluation repopulates the cache for everything behind it, so the
+twelve-project case costs about the same as the one-project case. It is a fixed per-build tax rather
+than a per-project one, and it lands only on the entry node; worker nodes were always exempt.
+
+The practical consequence is that the server's cross-build XML cache does nothing for `dotnet build`,
+only for `dotnet build --no-restore` — which is the opposite of where the inner-loop benefit was
+supposed to land. Filed as [#14556](https://github.com/dotnet/msbuild/issues/14556) and fixed in
+[#14558](https://github.com/dotnet/msbuild/pull/14558) by skipping only the `Clear()` when the cache
+reloads from disk, behind change wave 18.10.
 
 ### How the one cross-build cache invalidates
 
@@ -384,11 +418,14 @@ timestamp is not consulted at all.**
 
 That carve-out is a deliberate performance tradeoff — it is what avoids stat-ing the 114 SDK files on
 every lookup — but it does mean that editing a file inside the SDK or the NuGet package cache is not
-guaranteed to be observed by a reused node. In practice an edit to an SDK `.props` file *was* picked
-up in a reused server session in testing, but that cannot be attributed to the timestamp check, since
-a weakly-held entry may simply not have survived. **The carve-out should be treated as "staleness is
-permitted here", not as "staleness cannot happen".** Anyone developing SDK content against a reused
-node should set `MSBUILDDONOTCACHEMODIFICATIONTIME=1` or shut the server down between iterations.
+guaranteed to be observed by a reused node. The ordering above settles what was previously left open:
+step 2 returns before step 4 ever executes, so for a file under an immutable root the timestamp is
+never consulted at all. An edit to an SDK `.props` file *was* observed to take effect in a reused
+server session during testing, but that cannot have come from the timestamp check — it can only have
+been structural eviction of a weakly-held entry, which is luck rather than a guarantee. **The
+carve-out should be treated as "staleness is permitted here", not as "staleness cannot happen".**
+Anyone developing SDK content against a reused node should set `MSBUILDDONOTCACHEMODIFICATIONTIME=1`
+or shut the server down between iterations.
 
 ### Invalidation: the deciding constraint
 
