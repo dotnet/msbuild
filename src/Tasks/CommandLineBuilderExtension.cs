@@ -233,10 +233,8 @@ namespace Microsoft.Build.Tasks
             string[] metadataNames,
             bool[] treatAsFlags)       // May be null. In this case no metadata are treated as flags.
         {
-            ErrorUtilities.VerifyThrow(
-                treatAsFlags == null ||
-                (metadataNames != null && metadataNames.Length == treatAsFlags.Length),
-                "metadataNames and treatAsFlags should have the same length.");
+            Assumed.True(treatAsFlags == null ||
+                (metadataNames != null && metadataNames.Length == treatAsFlags.Length), "metadataNames and treatAsFlags should have the same length.");
 
             if (parameters != null)
             {

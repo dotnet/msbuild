@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
@@ -33,7 +34,7 @@ namespace Microsoft.Build.Construction
         internal ProjectUsingTaskBodyElement(XmlElementWithLocation xmlElement, ProjectUsingTaskElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent);
+            ArgumentNullException.ThrowIfNull(parent);
             VerifyCorrectParent(parent);
         }
 
@@ -71,7 +72,7 @@ namespace Microsoft.Build.Construction
                     return;
                 }
 
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(TaskBody));
+                ArgumentNullException.ThrowIfNull(value, nameof(TaskBody));
                 Internal.Utilities.SetXmlNodeInnerContents(XmlElement, value);
                 MarkDirty("Set usingtask body {0}", value);
             }
@@ -105,13 +106,7 @@ namespace Microsoft.Build.Construction
         /// This does not allow conditions, so it should not be called.
         /// </summary>
         public override ElementLocation ConditionLocation
-        {
-            get
-            {
-                ErrorUtilities.ThrowInternalError("Should not evaluate this");
-                return null;
-            }
-        }
+            => InternalError.Throw<ElementLocation>("Should not evaluate this");
 
         /// <summary>
         /// Location of the "Condition" attribute on this element, if any.
@@ -163,7 +158,7 @@ namespace Microsoft.Build.Construction
             // that it is not empty
             if (parentUsingTask.TaskFactory.Length == 0)
             {
-                ErrorUtilities.VerifyThrow(parentUsingTask.Link == null, "TaskFactory");
+                Assumed.Null(parentUsingTask.Link, "TaskFactory");
                 ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(parent.XmlElement, "TaskFactory");
             }
 

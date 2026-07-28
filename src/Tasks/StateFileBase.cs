@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
@@ -94,7 +95,7 @@ namespace Microsoft.Build.Tasks
         /// <remarks>
         /// Prioritize using the AbsolutePath overload of this method. This method is still used by unenlightened tasks, but new code should use the AbsolutePath overload.
         /// </remarks>
-        internal static T DeserializeCache<T>(string stateFile, TaskLoggingHelper log) where T : StateFileBase
+        internal static T DeserializeCache<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(string stateFile, TaskLoggingHelper log) where T : StateFileBase
         {
             if (string.IsNullOrEmpty(stateFile))
             {
@@ -107,7 +108,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Reads the specified file from disk into a StateFileBase derived object.
         /// </summary>
-        internal static T DeserializeCache<T>(AbsolutePath stateFile, TaskLoggingHelper log) where T : StateFileBase
+        internal static T DeserializeCache<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(AbsolutePath stateFile, TaskLoggingHelper log) where T : StateFileBase
         {
             T retVal = null;
 

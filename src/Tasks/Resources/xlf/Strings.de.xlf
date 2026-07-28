@@ -566,7 +566,7 @@
       </trans-unit>
       <trans-unit id="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
         <source>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</source>
-        <target state="new">MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</target>
+        <target state="translated">MSB4311: Der InputUrl-Wert „{0}“ ist kein gültiger Pfad unter Windows, da er nur aus Leerzeichen besteht.</target>
         <note>{StrBegin="MSB4311: "}</note>
       </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">
@@ -1225,8 +1225,8 @@
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
-        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
-        <target state="translated">MSB3821: Die Datei "{0}" konnte nicht verarbeitet werden, weil sie sich im Internet oder in der Zone eingeschränkter Websites befindet oder die Webmarkierung aufweist. Entfernen Sie die Webmarkierung, wenn Sie diese Dateien verarbeiten möchten.</target>
+        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</source>
+        <target state="new">MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">

@@ -530,6 +530,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
+        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
+            Justification = "ToString is a debugging convenience that serializes the trust info through XslCompiledTransform; the ClickOnce trust-info path is inherently incompatible with Native AOT.")]
         public override string ToString()
         {
             var m = new MemoryStream();
@@ -544,6 +546,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// Writes the application trust to an XML file.
         /// </summary>
         /// <param name="path">The name of the output file.</param>
+        [RequiresDynamicCode("Writes trust info through XslCompiledTransform, which generates IL at runtime and is not supported with Native AOT.")]
         public void Write(string path)
         {
             using (Stream s = File.Open(path, FileMode.Create, FileAccess.Write, FileShare.None))
@@ -557,6 +560,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         /// Writes the application trust to an XML file.
         /// </summary>
         /// <param name="output"></param>
+        [RequiresDynamicCode("Writes trust info through XslCompiledTransform, which generates IL at runtime and is not supported with Native AOT.")]
         public void Write(Stream output)
         {
             var outputDocument = new XmlDocument();

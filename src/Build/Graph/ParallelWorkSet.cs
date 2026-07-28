@@ -24,14 +24,14 @@ namespace Microsoft.Build.Graph
         /// </summary>
         private readonly int _degreeOfParallelism;
 
-        private readonly ConcurrentDictionary<TKey, Lazy<TResult>> _inProgressOrCompletedWork;
+        private readonly ConcurrentDictionary<TKey, WorkItem> _inProgressOrCompletedWork;
 
         private bool _isSchedulingCompleted;
 
         private long _pendingCount;
 
-        private readonly ConcurrentQueue<Lazy<TResult>> _queue =
-            new ConcurrentQueue<Lazy<TResult>>();
+        private readonly ConcurrentQueue<WorkItem> _queue =
+            new ConcurrentQueue<WorkItem>();
 
         private readonly SemaphoreSlim _semaphore;
 
@@ -48,9 +48,9 @@ namespace Microsoft.Build.Graph
             {
                 var completedWork = new Dictionary<TKey, TResult>(_inProgressOrCompletedWork.Count);
 
-                foreach (KeyValuePair<TKey, Lazy<TResult>> kvp in _inProgressOrCompletedWork)
+                foreach (KeyValuePair<TKey, WorkItem> kvp in _inProgressOrCompletedWork)
                 {
-                    Lazy<TResult> workItem = kvp.Value;
+                    WorkItem workItem = kvp.Value;
 
                     if (workItem.IsValueCreated)
                     {
@@ -85,7 +85,7 @@ namespace Microsoft.Build.Graph
 
             _cancellationToken = cancellationToken;
             _degreeOfParallelism = degreeOfParallelism;
-            _inProgressOrCompletedWork = new ConcurrentDictionary<TKey, Lazy<TResult>>(comparer);
+            _inProgressOrCompletedWork = new ConcurrentDictionary<TKey, WorkItem>(comparer);
 
             // Semaphore count is 0 to ensure that all the tasks are blocked unless new data is scheduled.
             _semaphore = new SemaphoreSlim(0, int.MaxValue);
@@ -109,7 +109,7 @@ namespace Microsoft.Build.Graph
                 throw new InvalidOperationException("Cannot add new work after work set is marked as completed.");
             }
 
-            var workItem = new Lazy<TResult>(workFunc);
+            WorkItem workItem = new(workFunc);
 
             if (!_inProgressOrCompletedWork.TryAdd(key, workItem))
             {
@@ -192,7 +192,7 @@ namespace Microsoft.Build.Graph
 
         private void ExecuteWorkItem()
         {
-            if (_queue.TryDequeue(out Lazy<TResult> workItem))
+            if (_queue.TryDequeue(out WorkItem workItem))
             {
                 try
                 {
@@ -208,6 +208,47 @@ namespace Microsoft.Build.Graph
                 finally
                 {
                     Interlocked.Decrement(ref _pendingCount);
+                }
+            }
+        }
+
+        /// <summary>
+        /// A lazily-evaluated work item. Unlike <see cref="Lazy{T}"/>, this does not place a
+        /// <c>DynamicallyAccessedMembers</c> requirement on <typeparamref name="TResult"/> (<see cref="Lazy{T}"/>
+        /// annotates its type argument for the parameterless constructor, which triggers IL2091 here), and it is
+        /// only ever evaluated once by a single worker before the result is read after
+        /// <see cref="WaitForAllWorkAndComplete"/> establishes a happens-before barrier.
+        /// </summary>
+        private sealed class WorkItem
+        {
+            private Func<TResult> _workFunc;
+            private bool _isValueCreated;
+            private TResult _value;
+
+            internal WorkItem(Func<TResult> workFunc)
+            {
+                _workFunc = workFunc;
+            }
+
+            internal bool IsValueCreated => _isValueCreated;
+
+            internal TResult Value
+            {
+                get
+                {
+                    if (!_isValueCreated)
+                    {
+                        _value = _workFunc();
+                        _isValueCreated = true;
+
+                        // Release the factory (and anything its closure captured) once the value is
+                        // computed. Completed work items are retained in the set for reuse, so holding
+                        // the delegate would keep captured graph state alive for the whole build.
+                        // Matches Lazy<T>, which also drops its value factory after evaluation.
+                        _workFunc = null;
+                    }
+
+                    return _value;
                 }
             }
         }

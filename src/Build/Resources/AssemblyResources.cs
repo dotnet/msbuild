@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Globalization;
-using System.Reflection;
 using System.Resources;
 
 #nullable disable
@@ -29,7 +28,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal static void RegisterMSBuildExeResources(ResourceManager manager)
         {
-            ErrorUtilities.VerifyThrow(s_msbuildExeResourceManager == null, "Only one extra resource manager");
+            Assumed.Null(s_msbuildExeResourceManager, "Only one extra resource manager");
 
             s_msbuildExeResourceManager = manager;
         }
@@ -82,7 +81,7 @@ namespace Microsoft.Build.Shared
                 resource = s_sharedResources.GetString(name, CultureInfo.CurrentUICulture);
             }
 
-            ErrorUtilities.VerifyThrow(resource != null, $"Missing resource '{name}'");
+            Assumed.NotNull(resource, $"Missing resource '{name}'");
 
             return resource;
         }
@@ -115,8 +114,8 @@ namespace Microsoft.Build.Shared
         }
 
         // assembly resources
-        private static readonly ResourceManager s_resources = new ResourceManager("Microsoft.Build.Strings", typeof(AssemblyResources).GetTypeInfo().Assembly);
+        private static readonly ResourceManager s_resources = new ResourceManager("Microsoft.Build.Strings", typeof(AssemblyResources).Assembly);
         // shared resources
-        private static readonly ResourceManager s_sharedResources = new ResourceManager("Microsoft.Build.Strings.shared", typeof(AssemblyResources).GetTypeInfo().Assembly);
+        private static readonly ResourceManager s_sharedResources = new ResourceManager("Microsoft.Build.Strings.shared", typeof(AssemblyResources).Assembly);
     }
 }

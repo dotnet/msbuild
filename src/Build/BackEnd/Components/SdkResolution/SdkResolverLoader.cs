@@ -223,9 +223,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         protected virtual IEnumerable<Type> GetResolverTypes(Assembly assembly)
         {
             return assembly.ExportedTypes
-                .Select(type => new { type, info = type.GetTypeInfo() })
-                .Where(t => t.info.IsClass && t.info.IsPublic && !t.info.IsAbstract && typeof(SdkResolver).IsAssignableFrom(t.type))
-                .Select(t => t.type);
+                .Where(t => t.IsClass && t.IsPublic && !t.IsAbstract && typeof(SdkResolver).IsAssignableFrom(t));
         }
 
         protected virtual Assembly LoadResolverAssembly(string resolverPath)

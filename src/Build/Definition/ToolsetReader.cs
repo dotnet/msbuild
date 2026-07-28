@@ -13,7 +13,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Constants = Microsoft.Build.Framework.Constants;
-using ErrorUtils = Microsoft.Build.Shared.ErrorUtilities;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using ReservedPropertyNames = Microsoft.Build.Internal.ReservedPropertyNames;
@@ -300,9 +299,7 @@ namespace Microsoft.Build.Evaluation
             // There's no tools path already for 2.0, so use the path to the v2.0 .NET Framework.
             // If an old-fashioned caller sets BinPath property, or passed a BinPath to the constructor,
             // that will overwrite what we're setting here.
-            ErrorUtilities.VerifyThrow(
-                Constants.defaultToolsVersion == "2.0",
-                "Getting 2.0 FX path so default should be 2.0");
+            Assumed.Equal(Constants.defaultToolsVersion, "2.0", "Getting 2.0 FX path so default should be 2.0");
             var pathToFramework = FrameworkLocationHelper.PathToDotNetFrameworkV20;
 
             // We could not find the default toolsversion because it was not installed on the machine. Fallback to the
@@ -343,7 +340,7 @@ namespace Microsoft.Build.Evaluation
             out string msBuildOverrideTasksPath,
             out string defaultOverrideToolsVersion)
         {
-            ErrorUtils.VerifyThrowArgumentNull(toolsets, "Toolsets");
+            ArgumentNullException.ThrowIfNull(toolsets, paramName: "Toolsets");
 
             ReadEachToolset(toolsets, globalProperties, initialProperties, accumulateProperties);
 

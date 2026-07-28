@@ -4,7 +4,6 @@
 using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -47,10 +46,10 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectPropertyGroupTaskPropertyInstance(string name, string value, string condition, ElementLocation location, ElementLocation conditionLocation)
         {
-            ErrorUtilities.VerifyThrowInternalNull(name);
-            ErrorUtilities.VerifyThrowInternalNull(value);
-            ErrorUtilities.VerifyThrowInternalNull(condition);
-            ErrorUtilities.VerifyThrowInternalNull(location);
+            Assumed.NotNull(name);
+            Assumed.NotNull(value);
+            Assumed.NotNull(condition);
+            Assumed.NotNull(location);
 
             _name = name;
             _value = value;

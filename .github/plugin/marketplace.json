@@ -1,0 +1,18 @@
+{
+  "name": "msbuild-plugins",
+  "owner": {
+    "name": "dotnet/msbuild"
+  },
+  "metadata": {
+    "description": "GitHub Copilot plugins for the MSBuild ecosystem",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "mt-migration",
+      "description": "MSBuild multithreaded task migration toolkit: the migration playbook + an MT-specific code reviewer that traces call chains end-to-end.",
+      "version": "0.1.0",
+      "source": "./plugins/mt-migration"
+    }
+  ]
+}

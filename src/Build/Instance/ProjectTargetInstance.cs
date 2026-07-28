@@ -8,7 +8,6 @@ using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
 using ObjectModel = System.Collections.ObjectModel;
 
 #nullable disable
@@ -162,17 +161,17 @@ namespace Microsoft.Build.Execution
             ObjectModel.ReadOnlyCollection<ProjectOnErrorInstance> onErrorChildren,
             bool parentProjectSupportsReturnsAttribute)
         {
-            ErrorUtilities.VerifyThrowInternalLength(name, nameof(name));
-            ErrorUtilities.VerifyThrowInternalNull(condition);
-            ErrorUtilities.VerifyThrowInternalNull(inputs);
-            ErrorUtilities.VerifyThrowInternalNull(outputs);
-            ErrorUtilities.VerifyThrowInternalNull(keepDuplicateOutputs);
-            ErrorUtilities.VerifyThrowInternalNull(dependsOnTargets);
-            ErrorUtilities.VerifyThrowInternalNull(beforeTargets);
-            ErrorUtilities.VerifyThrowInternalNull(afterTargets);
-            ErrorUtilities.VerifyThrowInternalNull(location);
-            ErrorUtilities.VerifyThrowInternalNull(children);
-            ErrorUtilities.VerifyThrowInternalNull(onErrorChildren);
+            Assumed.NotNullOrEmpty(name);
+            Assumed.NotNull(condition);
+            Assumed.NotNull(inputs);
+            Assumed.NotNull(outputs);
+            Assumed.NotNull(keepDuplicateOutputs);
+            Assumed.NotNull(dependsOnTargets);
+            Assumed.NotNull(beforeTargets);
+            Assumed.NotNull(afterTargets);
+            Assumed.NotNull(location);
+            Assumed.NotNull(children);
+            Assumed.NotNull(onErrorChildren);
 
             _name = name;
             _condition = condition;
@@ -541,7 +540,7 @@ namespace Microsoft.Build.Execution
         /// <returns>The new task instance.</returns>
         internal ProjectTaskInstance AddTask(string taskName, string condition, string continueOnError, string msbuildRuntime, string msbuildArchitecture)
         {
-            ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
+            Assumed.NotNullOrEmpty(taskName);
             ProjectTaskInstance task = new ProjectTaskInstance(taskName, _location, condition ?? String.Empty, continueOnError ?? String.Empty, msbuildRuntime ?? String.Empty, msbuildArchitecture ?? String.Empty);
             this.AddProjectTargetInstanceChild(task);
             return task;

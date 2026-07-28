@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -78,14 +78,13 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public IList<NodeInfo> CreateNodes(int nextNodeId, INodePacketFactory factory, Func<NodeInfo, NodeConfiguration> configurationFactory, int numberOfNodesToCreate)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(factory);
+            ArgumentNullException.ThrowIfNull(factory);
 
             // This can run concurrently. To be properly detect internal bug when we create more nodes than allowed
             //   we add into _nodeContexts premise of future node and verify that it will not cross limits.
             if (_nodeContexts.Count + numberOfNodesToCreate > ComponentHost.BuildParameters.MaxNodeCount)
             {
-                ErrorUtilities.ThrowInternalError($"Exceeded max node count of '{ComponentHost.BuildParameters.MaxNodeCount}', current count is '{_nodeContexts.Count}' ");
-                return new List<NodeInfo>();
+                return InternalError.Throw<IList<NodeInfo>>($"Exceeded max node count of '{ComponentHost.BuildParameters.MaxNodeCount}', current count is '{_nodeContexts.Count}' ");
             }
 
             ConcurrentBag<NodeInfo> nodes = new();
@@ -135,7 +134,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         public void SendData(int nodeId, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrow(_nodeContexts.ContainsKey(nodeId), $"Invalid node id specified: {nodeId}.");
+            Assumed.True(_nodeContexts.ContainsKey(nodeId), $"Invalid node id specified: {nodeId}.");
 
             SendData(_nodeContexts[nodeId], packet);
         }
@@ -198,7 +197,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType componentType)
         {
-            ErrorUtilities.VerifyThrow(componentType == BuildComponentType.OutOfProcNodeProvider, $"Factory cannot create components of type {componentType}");
+            Assumed.Equal(componentType, BuildComponentType.OutOfProcNodeProvider, $"Factory cannot create components of type {componentType}");
             return new NodeProviderOutOfProc();
         }
 

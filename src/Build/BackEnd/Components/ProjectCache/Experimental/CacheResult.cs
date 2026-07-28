@@ -7,7 +7,6 @@ using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Experimental.ProjectCache
 {
@@ -63,9 +62,7 @@ namespace Microsoft.Build.Experimental.ProjectCache
         {
             if (resultType == CacheResultType.CacheHit)
             {
-                ErrorUtilities.VerifyThrow(
-                    buildResult != null ^ proxyTargets != null,
-                    "Either buildResult is specified, or proxyTargets is specified. Not both.");
+                Assumed.True(buildResult != null ^ proxyTargets != null, "Either buildResult is specified, or proxyTargets is specified. Not both.");
             }
 
             ResultType = resultType;
@@ -91,14 +88,14 @@ namespace Microsoft.Build.Experimental.ProjectCache
 
         public static CacheResult IndicateCacheHit(IReadOnlyCollection<PluginTargetResult> targetResults)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(targetResults);
+            ArgumentException.ThrowIfNullOrEmpty(targetResults);
 
             return new CacheResult(CacheResultType.CacheHit, ConstructBuildResult(targetResults));
         }
 
         public static CacheResult IndicateNonCacheHit(CacheResultType resultType)
         {
-            ErrorUtilities.VerifyThrow(resultType != CacheResultType.CacheHit, "CantBeCacheHit");
+            Assumed.NotEqual(resultType, CacheResultType.CacheHit, "CantBeCacheHit");
             return new CacheResult(resultType);
         }
 

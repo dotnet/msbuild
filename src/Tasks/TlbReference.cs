@@ -1,6 +1,8 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+#if FEATURE_APPDOMAIN
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,11 +11,9 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
-// TYPELIBATTR clashes with the one in InteropServices.
-using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
+using Windows.Win32.System.Com;
 using UtilitiesProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
 
 #nullable disable
@@ -89,7 +89,7 @@ namespace Microsoft.Build.Tasks
          */
         protected override string GetWrapperFileNameInternal(string typeLibName)
         {
-            return GetWrapperFileName("Interop.", typeLibName, IncludeTypeLibVersionInName, ReferenceInfo.attr.wMajorVerNum, ReferenceInfo.attr.wMinorVerNum);
+            return GetWrapperFileName("Interop.", typeLibName, IncludeTypeLibVersionInName, (short)ReferenceInfo.attr.wMajorVerNum, (short)ReferenceInfo.attr.wMinorVerNum);
         }
 
         /// <summary>
@@ -230,6 +230,12 @@ namespace Microsoft.Build.Tasks
 
                 GetAndValidateStrongNameKey(out StrongNameKeyPair keyPair, out byte[] publicKey);
 
+                // Marshal the agile ITypeLib pointer back to a runtime-callable wrapper, since the BCL
+                // TypeLibConverter operates on the managed RCW rather than a raw struct-based COM pointer.
+                // Released deterministically in the finally so the RCW does not linger (holding a COM
+                // reference on the type library) until GC in long-lived MSBuild processes (server / node reuse).
+                object typeLibObject = null;
+
                 try
                 {
                     TypeLibImporterFlags flags = TypeLibImporterFlags.SafeArrayAsSystemArray | TypeLibImporterFlags.TransformDispRetVals;
@@ -261,8 +267,14 @@ namespace Microsoft.Build.Tasks
                             break;
                     }
 
+                    unsafe
+                    {
+                        using ComScope<ITypeLib> typeLibScope = ReferenceInfo.typeLibPointer.GetInterface();
+                        typeLibObject = Marshal.GetObjectForIUnknown((IntPtr)typeLibScope.Pointer);
+                    }
+
                     // Start the conversion process. We'll get callbacks on ITypeLibImporterNotifySink to resolve dependent refs.
-                    assemblyBuilder = converter.ConvertTypeLibToAssembly(ReferenceInfo.typeLibPointer, wrapperPath,
+                    assemblyBuilder = converter.ConvertTypeLibToAssembly(typeLibObject, wrapperPath,
                         flags, this, publicKey, keyPair, rootNamespace, null);
                 }
                 catch (COMException ex)
@@ -273,6 +285,13 @@ namespace Microsoft.Build.Tasks
                     }
 
                     throw new ComReferenceResolutionException(ex);
+                }
+                finally
+                {
+                    if (typeLibObject is not null)
+                    {
+                        Marshal.ReleaseComObject(typeLibObject);
+                    }
                 }
 
                 // if we're done, and this is not a temporary wrapper, write it out to disk
@@ -370,11 +389,20 @@ namespace Microsoft.Build.Tasks
          * We should never return null here - it's not documented as the proper way of failing dependency resolution.
          * Instead, we use an exception to abort the conversion process.
          */
-        Assembly ITypeLibImporterNotifySink.ResolveRef(object objTypeLib)
+        unsafe Assembly ITypeLibImporterNotifySink.ResolveRef(object objTypeLib)
         {
-            // get attributes for our dependent typelib
-            ITypeLib typeLib = (ITypeLib)objTypeLib;
-            ComReference.GetTypeLibAttrForTypeLib(ref typeLib, out TYPELIBATTR attr);
+            // get attributes for our dependent typelib. The BCL converter hands us a managed RCW;
+            // QI it for ITypeLib through a CCW to obtain a struct-based COM pointer.
+            TLIBATTR attr;
+            IntPtr typeLibPtr = Marshal.GetComInterfaceForObject(objTypeLib, typeof(ITypeLib.Interface));
+            try
+            {
+                ComReference.GetTypeLibAttrForTypeLib((ITypeLib*)typeLibPtr, out attr);
+            }
+            finally
+            {
+                Marshal.Release(typeLibPtr);
+            }
 
             // call our callback to do the dirty work for us
             if (!ResolverCallback.ResolveComClassicReference(attr, base.OutputDirectory, null, null, out ComReferenceWrapperInfo wrapperInfo))
@@ -443,3 +471,5 @@ namespace Microsoft.Build.Tasks
         #endregion
     }
 }
+
+#endif

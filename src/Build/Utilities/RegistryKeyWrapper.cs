@@ -66,8 +66,8 @@ namespace Microsoft.Build.Internal
         /// </summary>
         internal RegistryKeyWrapper(string registryKeyPath, RegistryKey registryHive)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(registryKeyPath);
-            ErrorUtilities.VerifyThrowArgumentNull(registryHive);
+            ArgumentNullException.ThrowIfNull(registryKeyPath);
+            ArgumentNullException.ThrowIfNull(registryHive);
 
             _registryKeyPath = registryKeyPath;
             _registryHive = registryHive;
@@ -160,7 +160,7 @@ namespace Microsoft.Build.Internal
         /// <returns></returns>
         public virtual RegistryKeyWrapper OpenSubKey(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
 
             RegistryKeyWrapper wrapper = this;
             string[] keyNames = name.Split(MSBuildConstants.BackslashChar, StringSplitOptions.RemoveEmptyEntries);

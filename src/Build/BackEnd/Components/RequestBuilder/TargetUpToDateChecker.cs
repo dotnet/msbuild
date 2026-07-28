@@ -55,8 +55,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal TargetUpToDateChecker(ProjectInstance project, ProjectTargetInstance targetToAnalyze, ILoggingService loggingServices, BuildEventContext buildEventContext)
         {
-            ErrorUtilities.VerifyThrow(project != null, "Need a project.");
-            ErrorUtilities.VerifyThrow(targetToAnalyze != null, "Need a target to analyze.");
+            Assumed.NotNull(project, "Need a project.");
+            Assumed.NotNull(targetToAnalyze, "Need a target to analyze.");
 
             _project = project;
             _targetToAnalyze = targetToAnalyze;
@@ -90,7 +90,7 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_targetInputSpecification != null, "targetInputSpecification is null");
+                Assumed.NotNull(_targetInputSpecification, "targetInputSpecification is null");
                 return _targetInputSpecification;
             }
         }
@@ -103,7 +103,7 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_targetOutputSpecification != null, "targetOutputSpecification is null");
+                Assumed.NotNull(_targetOutputSpecification, "targetOutputSpecification is null");
                 return _targetOutputSpecification;
             }
         }
@@ -202,8 +202,8 @@ namespace Microsoft.Build.BackEnd
                          * We can thus conclude: the target MUST have (non-discrete) inputs
                          *
                          */
-                        ErrorUtilities.VerifyThrow(itemVectorsReferencedInBothTargetInputsAndOutputs.Count > 0, "The target must have inputs.");
-                        ErrorUtilities.VerifyThrow(!IsItemVectorEmpty(itemVectorsInTargetInputs), "The target must have inputs.");
+                        Assumed.Positive(itemVectorsReferencedInBothTargetInputsAndOutputs.Count, "The target must have inputs.");
+                        Assumed.False(IsItemVectorEmpty(itemVectorsInTargetInputs), "The target must have inputs.");
 
                         result = PerformDependencyAnalysisIfDiscreteInputs(itemVectorsInTargetInputs,
                                     itemVectorTransformsInTargetInputs, discreteItemsInTargetInputs, itemVectorsReferencedOnlyInTargetInputs,
@@ -607,8 +607,7 @@ namespace Microsoft.Build.BackEnd
                 ItemVectorPartition outputItemVectors = itemVectorsInTargetOutputs[itemVectorType];
 
                 // NOTE: recall that transforms have been separated out already
-                ErrorUtilities.VerifyThrow(inputItemVectors.Count == 1,
-                    "There should only be one item vector of a particular type in the target inputs that can be filtered.");
+                Assumed.Equal(inputItemVectors.Count, 1, "There should only be one item vector of a particular type in the target inputs that can be filtered.");
 
                 // NOTE: Because the input items which were transformed have already been pulled out, this loop
                 // will only execute a single time.
@@ -711,14 +710,12 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            ErrorUtilities.VerifyThrow(numberOfInputItemVectorsWithAllChangedItems <= itemVectorsReferencedInBothTargetInputsAndOutputs.Count,
-                "The number of vectors containing all changed items cannot exceed the number of correlated vectors.");
+            Assumed.LessThanOrEqual(numberOfInputItemVectorsWithAllChangedItems, itemVectorsReferencedInBothTargetInputsAndOutputs.Count, "The number of vectors containing all changed items cannot exceed the number of correlated vectors.");
 
             // if all correlated input items have changed
             if (numberOfInputItemVectorsWithAllChangedItems == itemVectorsReferencedInBothTargetInputsAndOutputs.Count)
             {
-                ErrorUtilities.VerifyThrow(result == DependencyAnalysisResult.IncrementalBuild,
-                    "If inputs have changed, this must be an incremental build.");
+                Assumed.Equal(result, DependencyAnalysisResult.IncrementalBuild, "If inputs have changed, this must be an incremental build.");
 
                 // then the incremental build is really a full build
                 result = DependencyAnalysisResult.FullBuild;
@@ -846,11 +843,10 @@ namespace Microsoft.Build.BackEnd
                             itemVectorCollection[itemVectorType] = itemVectorPartition;
                         }
 
-                        ErrorUtilities.VerifyThrow(!itemVectorPartition.ContainsKey(item), $"ItemVectorPartition already contains a vector for items with the expression '{item}'");
+                        Assumed.False(itemVectorPartition.ContainsKey(item), $"ItemVectorPartition already contains a vector for items with the expression '{item}'");
                         itemVectorPartition[item] = itemVectorContents;
 
-                        ErrorUtilities.VerifyThrow((itemVectorTransforms == null) || (itemVectorCollection.Equals(itemVectorTransforms)) || (itemVectorPartition.Count == 1),
-                            "If transforms have been separated out, there should only be one item vector per partition.");
+                        Assumed.True((itemVectorTransforms == null) || (itemVectorCollection.Equals(itemVectorTransforms)) || (itemVectorPartition.Count == 1), "If transforms have been separated out, there should only be one item vector per partition.");
                     }
                 }
                 else
@@ -960,15 +956,16 @@ namespace Microsoft.Build.BackEnd
         /// <returns>true, if any "input" is newer than any "output", or if any input or output does not exist.</returns>
         internal static bool IsAnyOutOfDate<T>(out DependencyAnalysisLogDetail dependencyAnalysisDetailEntry, string projectDirectory, IList<T> inputs, IList<T> outputs)
         {
-            ErrorUtilities.VerifyThrow((inputs.Count > 0) && (outputs.Count > 0), "Need to specify inputs and outputs.");
+            Assumed.Positive(inputs.Count, "Need to specify inputs.");
+            Assumed.Positive(outputs.Count, "Need to specify outputs.");
             if (inputs.Count > 0)
             {
-                ErrorUtilities.VerifyThrow(inputs[0] is string || inputs[0] is ProjectItemInstance, "Must be either string or ProjectItemInstance");
+                Assumed.True(inputs[0] is string or ProjectItemInstance, "Must be either string or ProjectItemInstance");
             }
 
             if (outputs.Count > 0)
             {
-                ErrorUtilities.VerifyThrow(outputs[0] is string || outputs[0] is ProjectItemInstance, "Must be either string or ProjectItemInstance");
+                Assumed.True(outputs[0] is string or ProjectItemInstance, "Must be either string or ProjectItemInstance");
             }
 
             // Algorithm: walk through all the outputs to find the oldest output
@@ -1083,12 +1080,12 @@ namespace Microsoft.Build.BackEnd
         {
             if (inputs.Count > 0)
             {
-                ErrorUtilities.VerifyThrow(inputs[0] is string || inputs[0] is ProjectItemInstance, "Must be either string or ProjectItemInstance");
+                Assumed.True(inputs[0] is string or ProjectItemInstance, "Must be either string or ProjectItemInstance");
             }
 
             if (outputs.Count > 0)
             {
-                ErrorUtilities.VerifyThrow(outputs[0] is string || outputs[0] is ProjectItemInstance, "Must be either string or ProjectItemInstance");
+                Assumed.True(outputs[0] is string or ProjectItemInstance, "Must be either string or ProjectItemInstance");
             }
 
             // Only if we are not logging just critical events should we be gathering full details
@@ -1196,8 +1193,8 @@ namespace Microsoft.Build.BackEnd
         /// </returns>
         private int CompareLastWriteTimes(string path1, string path2, out bool path1DoesNotExist, out bool path2DoesNotExist)
         {
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(path1) && !string.IsNullOrEmpty(path2),
-                "Need to specify paths to compare.");
+            Assumed.NotNullOrEmpty(path1);
+            Assumed.NotNullOrEmpty(path2);
 
             path1 = Path.Combine(_project.Directory, path1);
             var path1WriteTime = NativeMethodsShared.GetLastWriteFileUtcTime(path1);

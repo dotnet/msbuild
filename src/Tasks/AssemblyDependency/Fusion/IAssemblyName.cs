@@ -5,9 +5,7 @@
 // Fusion is not in Win32 metadata; declarations from CLR\src\inc\fusion.idl.
 
 using System;
-#if NET
 using System.Runtime.CompilerServices;
-#endif
 using Windows.Win32;
 using Windows.Win32.Foundation;
 
@@ -31,7 +29,11 @@ internal unsafe struct IAssemblyName : IComIID
         get => ref Unsafe.AsRef(in IID_IAssemblyName);
     }
 #else
-    readonly Guid IComIID.Guid => IID_IAssemblyName;
+    readonly ref readonly Guid IComIID.Guid
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => ref Unsafe.AsRef(in IID_IAssemblyName);
+    }
 #endif
 
     private readonly void** _lpVtbl;

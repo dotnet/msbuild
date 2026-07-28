@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -50,6 +50,7 @@ namespace Microsoft.Build.Graph
         private readonly ProjectInterpretation _projectInterpretation;
 
         private readonly ProjectGraph.ProjectInstanceFactoryFunc _projectInstanceFactory;
+        private readonly ProjectGraphMode _graphMode;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
         private ConcurrentDictionary<ConfigurationMetadata, Lazy<ProjectInstance>> _platformNegotiationInstancesCache = new();
 
@@ -67,6 +68,7 @@ namespace Microsoft.Build.Graph
             ProjectGraph.ProjectInstanceFactoryFunc projectInstanceFactory,
             ProjectInterpretation projectInterpretation,
             int degreeOfParallelism,
+            ProjectGraphMode mode,
             CancellationToken cancellationToken)
         {
             var (actualEntryPoints, solutionDependencies) = ExpandSolutionIfPresent(entryPoints.ToImmutableArray());
@@ -85,6 +87,7 @@ namespace Microsoft.Build.Graph
             _projectCollection = projectCollection;
             _projectInstanceFactory = projectInstanceFactory;
             _projectInterpretation = projectInterpretation;
+            _graphMode = mode;
         }
 
         public void BuildGraph()
@@ -228,12 +231,12 @@ namespace Microsoft.Build.Graph
             {
                 var referencingProjectPath = solutionDependency.Key;
 
-                ErrorUtilities.VerifyThrow(projectsByPath.TryGetValue(referencingProjectPath, out var referencingNodes), "nodes should include solution projects");
+                Assumed.True(projectsByPath.TryGetValue(referencingProjectPath, out var referencingNodes), "nodes should include solution projects");
 
                 var referencedNodes = solutionDependency.Value.SelectMany(
                     referencedProjectPath =>
                     {
-                        ErrorUtilities.VerifyThrow(projectsByPath.TryGetValue(referencedProjectPath, out List<ProjectGraphNode> projectToReturn), "nodes should include solution projects");
+                        Assumed.True(projectsByPath.TryGetValue(referencedProjectPath, out List<ProjectGraphNode> projectToReturn), "nodes should include solution projects");
                         return projectToReturn;
                     }).ToArray();
 
@@ -460,9 +463,7 @@ namespace Microsoft.Build.Graph
                 }
                 else
                 {
-                    ErrorUtilities.VerifyThrow(
-                        state == NodeVisitationState.Processed,
-                        "entrypoints should get processed after a call to detect cycles");
+                    Assumed.Equal(state, NodeVisitationState.Processed, "entrypoints should get processed after a call to detect cycles");
                 }
             }
 
@@ -617,7 +618,7 @@ namespace Microsoft.Build.Graph
         {
             var referenceInfos = new List<ProjectInterpretation.ReferenceInfo>();
 
-            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject, _projectCollection, GetInstanceForPlatformNegotiationWithCaching))
+            foreach (var referenceInfo in _projectInterpretation.GetReferences(parsedProject, _projectCollection, GetInstanceForPlatformNegotiationWithCaching, _graphMode))
             {
                 if (FileUtilities.IsSolutionFilename(referenceInfo.ReferenceConfiguration.ProjectFullPath))
                 {
@@ -700,7 +701,7 @@ namespace Microsoft.Build.Graph
             {
                 get
                 {
-                    ErrorUtilities.VerifyThrow(ReferenceItems.TryGetValue(key, out ProjectItemInstance referenceItem), "All requested keys should exist");
+                    Assumed.True(ReferenceItems.TryGetValue(key, out ProjectItemInstance referenceItem), "All requested keys should exist");
                     return referenceItem;
                 }
             }
@@ -745,7 +746,7 @@ namespace Microsoft.Build.Graph
 
             public void RemoveEdge((ProjectGraphNode node, ProjectGraphNode reference) key)
             {
-                ErrorUtilities.VerifyThrow(ReferenceItems.TryRemove(key, out _), "All requested keys should exist");
+                Assumed.True(ReferenceItems.TryRemove(key, out _), "All requested keys should exist");
             }
 
             internal bool HasEdge((ProjectGraphNode node, ProjectGraphNode reference) key) => ReferenceItems.ContainsKey(key);

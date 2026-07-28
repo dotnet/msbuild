@@ -6,7 +6,6 @@ using System.Diagnostics;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -159,15 +158,15 @@ namespace Microsoft.Build.Execution
             ElementLocation conditionLocation,
             List<ProjectItemGroupTaskMetadataInstance> metadata)
         {
-            ErrorUtilities.VerifyThrowInternalNull(itemType);
-            ErrorUtilities.VerifyThrowInternalNull(include);
-            ErrorUtilities.VerifyThrowInternalNull(exclude);
-            ErrorUtilities.VerifyThrowInternalNull(remove);
-            ErrorUtilities.VerifyThrowInternalNull(keepMetadata);
-            ErrorUtilities.VerifyThrowInternalNull(removeMetadata);
-            ErrorUtilities.VerifyThrowInternalNull(keepDuplicates);
-            ErrorUtilities.VerifyThrowInternalNull(condition);
-            ErrorUtilities.VerifyThrowInternalNull(location);
+            Assumed.NotNull(itemType);
+            Assumed.NotNull(include);
+            Assumed.NotNull(exclude);
+            Assumed.NotNull(remove);
+            Assumed.NotNull(keepMetadata);
+            Assumed.NotNull(removeMetadata);
+            Assumed.NotNull(keepDuplicates);
+            Assumed.NotNull(condition);
+            Assumed.NotNull(location);
 
             _itemType = itemType;
             _include = include;

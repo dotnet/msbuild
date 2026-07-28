@@ -54,7 +54,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             StreamingContext context) :
             base(info, context)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(info);
+            ArgumentNullException.ThrowIfNull(info);
 
             commandLineArg = info.GetString("commandLineArg");
         }
@@ -149,7 +149,7 @@ namespace Microsoft.Build.CommandLine.Experimental
         {
             string errorMessage = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(messageResourceName, messageArgs);
 
-            ErrorUtilities.VerifyThrow(errorMessage != null, "The resource string must exist.");
+            Assumed.NotNull(errorMessage, "The resource string must exist.");
 
             throw new CommandLineSwitchException(errorMessage, commandLineArg);
         }

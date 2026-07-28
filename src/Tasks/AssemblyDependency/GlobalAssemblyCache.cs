@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -60,8 +60,8 @@ namespace Microsoft.Build.Tasks
         private static string GetLocationImpl(AssemblyNameExtension assemblyName, string targetProcessorArchitecture, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntime, FileExists fileExists, GetPathFromFusionName getPathFromFusionName, GetGacEnumerator getGacEnumerator, bool specificVersion)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyName);
-            ErrorUtilities.VerifyThrow(assemblyName.FullName != null, "Got a null assembly name fullname.");
+            ArgumentNullException.ThrowIfNull(assemblyName);
+            Assumed.NotNull(assemblyName.FullName, "Got a null assembly name fullname.");
 
             string strongName = assemblyName.FullName;
 
@@ -121,7 +121,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static SortedDictionary<Version, SortedDictionary<AssemblyNameExtension, string>> GenerateListOfAssembliesByRuntime(string strongName, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntime, FileExists fileExists, GetPathFromFusionName getPathFromFusionName, GetGacEnumerator getGacEnumerator, bool specificVersion)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetedRuntime);
+            ArgumentNullException.ThrowIfNull(targetedRuntime);
 
             IEnumerable<AssemblyNameExtension> gacEnum = getGacEnumerator(strongName);
 
@@ -183,12 +183,12 @@ namespace Microsoft.Build.Tasks
         internal static unsafe string RetrievePathFromFusionName(string strongName)
         {
             // Extra checks for PInvoke-destined data.
-            ErrorUtilities.VerifyThrowArgumentNull(strongName);
+            ArgumentNullException.ThrowIfNull(strongName);
 
             // net472-only = inherently Windows. Manual struct-based COM (see Fusion folder).
             using ComScope<IAssemblyCache> assemblyCache = new(null);
             HRESULT hr = Fusion.NativeMethods.CreateAssemblyCache(assemblyCache, 0);
-            ErrorUtilities.VerifyThrow(hr == HRESULT.S_OK, $"CreateAssemblyCache failed, hr {hr}");
+            Assumed.Equal(hr, HRESULT.S_OK, $"CreateAssemblyCache failed, hr {hr}");
 
             ASSEMBLY_INFO assemblyInfo = default;
             assemblyInfo.cbAssemblyInfo = (uint)sizeof(ASSEMBLY_INFO);

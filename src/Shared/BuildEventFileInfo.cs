@@ -84,7 +84,7 @@ namespace Microsoft.Build.Shared
         /// <param name="e"></param>
         internal BuildEventFileInfo(XmlException e)
         {
-            ErrorUtilities.VerifyThrow(e != null, "Need exception context.");
+            Assumed.NotNull(e, "Need exception context.");
             _file = (e.SourceUri.Length == 0) ? String.Empty : new Uri(e.SourceUri).LocalPath;
             _line = e.LineNumber;
             _column = e.LinePosition;
@@ -97,7 +97,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         internal BuildEventFileInfo(string file, XmlException e) : this(e)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(file);
+            ArgumentNullException.ThrowIfNull(file);
 
             _file = file;
         }

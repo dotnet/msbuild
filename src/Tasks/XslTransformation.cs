@@ -1,7 +1,8 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Xml;
 using System.Xml.XPath;
@@ -77,7 +78,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_outputPaths, "OutputPath");
+                ArgumentNullException.ThrowIfNull(_outputPaths, "OutputPath");
                 return _outputPaths;
             }
 
@@ -100,11 +101,13 @@ namespace Microsoft.Build.Tasks
         /// Executes the XslTransform task.
         /// </summary>
         /// <returns>true if transformation succeeds.</returns>
+        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
+            Justification = "The XslTransformation task compiles the user-supplied stylesheet with XslCompiledTransform, which generates IL at runtime and is inherently incompatible with Native AOT.")]
         public override bool Execute()
         {
             XmlInput xmlinput;
             XsltInput xsltinput;
-            ErrorUtilities.VerifyThrowArgumentNull(_outputPaths, "OutputPath");
+            ArgumentNullException.ThrowIfNull(_outputPaths, "OutputPath");
 
             // Load XmlInput, XsltInput parameters
             try
@@ -458,6 +461,7 @@ namespace Microsoft.Build.Tasks
             /// Loads the XSLT to XslCompiledTransform. By default uses Default settings instead of trusted settings.
             /// </summary>
             /// <returns>A XslCompiledTransform object.</returns>
+            [RequiresDynamicCode("XslCompiledTransform generates IL at runtime, which is not supported with Native AOT.")]
             public XslCompiledTransform LoadXslt()
             {
                 return LoadXslt(false);
@@ -468,6 +472,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             /// <param name="useTrustedSettings">Determines whether or not to use trusted settings.</param>
             /// <returns>A XslCompiledTransform object.</returns>
+            [RequiresDynamicCode("XslCompiledTransform generates IL at runtime, which is not supported with Native AOT.")]
             public XslCompiledTransform LoadXslt(bool useTrustedSettings)
             {
                 XslCompiledTransform xslct = new XslCompiledTransform();
@@ -518,8 +523,7 @@ namespace Microsoft.Build.Tasks
                         throw new PlatformNotSupportedException("Precompiled XSLTs are not supported in .NET Core");
 #endif
                     default:
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                        break;
+                        return Assumed.Unreachable<XslCompiledTransform>();
                 }
 
                 return xslct;
