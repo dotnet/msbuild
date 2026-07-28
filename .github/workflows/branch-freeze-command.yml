@@ -101,9 +101,9 @@ jobs:
         # exposes the affected branch for the refresh job below.
         run: pwsh -NoLogo -NoProfile -File "$env:GITHUB_WORKSPACE/.github/branch-freeze/workflows/handle-command.ps1"
 
-  # Refresh every open PR on the affected branch. The refresh and single-PR
-  # workflows share the same per-branch concurrency group, preventing a stale
-  # status write from winning a race with /freeze or /unfreeze.
+  # Refresh every open PR on the affected branch. All branch-freeze status
+  # writers share one queued concurrency group, preventing a stale write from
+  # winning a race with /freeze, /unfreeze, or a PR retarget.
   refresh:
     needs: command
     if: needs.command.outputs.changed == 'true'

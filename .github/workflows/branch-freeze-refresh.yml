@@ -1,11 +1,20 @@
 name: Refresh branch freeze PR statuses
 
 # Refreshes the required `branch-freeze` commit status on existing pull requests.
-# This workflow has two entry points:
+# This workflow has four entry points:
 #
 #   * workflow_dispatch - manual refresh or initial rollout seed.
 #   * workflow_call     - refresh invoked after /freeze or /unfreeze changes the
 #                         tracking issue state.
+#   * workflow_run      - stamps pull requests opened by our own workflows.
+#   * schedule          - safety net for anything the other entry points missed.
+#
+# Why workflow_run and schedule exist: `branch-freeze-pr-status.yml` reacts to
+# `pull_request_target`, but GitHub suppresses workflow runs for pull request
+# events created with the built-in `GITHUB_TOKEN` to avoid recursion. Some of
+# our agentic and automation workflows can fall back to that token, so those
+# pull requests would otherwise wait forever on a `branch-freeze` status that
+# nobody posts, and stay unmergeable.
 
 on:
   workflow_dispatch:
@@ -20,6 +29,21 @@ on:
         description: "Refresh open pull requests targeting this base branch."
         required: true
         type: string
+  # Every workflow here can open a pull request from Actions. Keep this list in
+  # sync when a workflow gains or loses that ability.
+  workflow_run:
+    workflows:
+      - "Backport PR to branch"
+      - "Dreaming (learning atoms curation)"
+      - "Flaky Test Auto-Fixer"
+      - "Flaky Test Triage"
+      - "Inter-branch merge workflow"
+      - "Sync Microsoft.Build version in analyzer template with Version.props"
+    types: [completed]
+  # Off-peak minute: runs scheduled on the hour are the most likely to be
+  # delayed or dropped when GitHub is busy.
+  schedule:
+    - cron: "23 5,17 * * *"
 
 permissions:
   contents: read       # checkout the shared scripts
@@ -30,10 +54,23 @@ permissions:
 jobs:
   refresh:
     name: Refresh open pull requests
+    # `Backport PR to branch` is requested for every issue comment and skips its
+    # job unless the comment is a backport command. Do not turn those skipped
+    # runs into repository-wide status sweeps.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      github.event.workflow_run.conclusion != 'skipped'
     runs-on: ubuntu-latest
+    # Every branch-freeze status writer shares this group, so a sweep can never
+    # interleave with a /freeze refresh or a single-PR update. `queue: max` keeps
+    # up to 100 runs pending instead of discarding the older one. A blank
+    # base_ref means "every open PR", and refresh-pr-statuses.ps1 already stamps
+    # each PR against its own current base branch, so this needs no per-branch
+    # fan-out.
     concurrency:
-      group: branch-freeze-write-${{ inputs.base_ref }}
+      group: branch-freeze-write
       cancel-in-progress: false
+      queue: max
     steps:
       # Keep checkout pinned to the immutable v7.0.0 commit; the @v7 tag can move.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

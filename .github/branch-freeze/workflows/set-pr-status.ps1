@@ -6,8 +6,9 @@
 # required status description.
 [CmdletBinding()]
 param(
-    [Parameter(Mandatory, Position = 0)][string]$HeadSha,
-    [Parameter(Mandatory, Position = 1)][string]$BaseRef
+    [Parameter(Mandatory, Position = 0, ParameterSetName = 'Commit')][string]$HeadSha,
+    [Parameter(Mandatory, Position = 1, ParameterSetName = 'Commit')][string]$BaseRef,
+    [Parameter(Mandatory, ParameterSetName = 'PullRequest')][string]$PullRequestNumber
 )
 
 function Invoke-Main {
@@ -39,7 +40,19 @@ $ErrorActionPreference = 'Stop'
 $componentsDirectory = Join-Path (Split-Path -Parent $PSScriptRoot) 'components'
 Import-Module (Join-Path $componentsDirectory 'BranchFreeze.psm1') -Force
 Import-Module (Join-Path $componentsDirectory 'issue-comments/BranchFreezeCommentComposer.psm1') -Force
+Import-Module (Join-Path $componentsDirectory 'github/GitHubPullRequestsClient.psm1') -Force
 Import-Module (Join-Path $componentsDirectory 'github/GitHubRepositoryClient.psm1') -Force
 Import-Module (Join-Path $componentsDirectory 'github/GitHubStatusChecksClient.psm1') -Force
+
+if ($PSCmdlet.ParameterSetName -eq 'PullRequest') {
+    # Resolve these after the workflow has acquired the global status-writer
+    # lock. Event payloads can be stale when a PR is retargeted repeatedly, and
+    # GitHub does not guarantee that queued workflow jobs start in dispatch order.
+    $pullRequest = Get-GitHubPullRequest -Repository (Get-GitHubRepositoryName) `
+        -Number $PullRequestNumber
+    $HeadSha = [string]$pullRequest.headRefOid
+    $BaseRef = [string]$pullRequest.baseRefName
+}
+
 $exitCode = Invoke-Main
 exit $exitCode

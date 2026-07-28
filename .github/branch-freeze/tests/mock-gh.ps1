@@ -6,6 +6,12 @@
 #                                                         $env:GH_ISSUE_FILE
 #   * `gh issue comment ...`                           -> fails when
 #                                                         $env:MOCK_ISSUE_COMMENT_FAILURE=1
+#   * `gh pr view ... --json ...`                      -> prints $env:MOCK_PR
+#                                                        (default {}).
+#   * `gh api .../commits/<sha>/statuses`             -> prints $env:MOCK_STATUSES
+#                                                        (default []), or fails
+#                                                        while
+#                                                        $env:MOCK_STATUS_READ_FAILURE=1.
 #   * `gh api -X POST .../statuses/<sha> -f key=value` -> appends each key=value
 #                                                        line to $env:GH_STATUS_FILE.
 #   * any command                                      -> fails while the counter in
@@ -104,8 +110,15 @@ switch -CaseSensitive ($command) {
     }
   }
   'pr' {
-    if ($CliArguments.Count -gt 1 -and $CliArguments[1] -eq 'list') {
-      Write-Output $(if ([string]::IsNullOrEmpty($env:MOCK_PRS)) { '[]' } else { $env:MOCK_PRS })
+    if ($CliArguments.Count -gt 1) {
+      switch -CaseSensitive ($CliArguments[1]) {
+        'list' {
+          Write-Output $(if ([string]::IsNullOrEmpty($env:MOCK_PRS)) { '[]' } else { $env:MOCK_PRS })
+        }
+        'view' {
+          Write-Output $(if ([string]::IsNullOrEmpty($env:MOCK_PR)) { '{}' } else { $env:MOCK_PR })
+        }
+      }
     }
   }
   'api' {
@@ -132,7 +145,12 @@ switch -CaseSensitive ($command) {
       }
     }
 
-    if ($endpoint -like '*/statuses/*') {
+    if ($endpoint -like '*/commits/*/statuses*') {
+      if ($env:MOCK_STATUS_READ_FAILURE -eq '1') {
+        exit 1
+      }
+      Write-Output $(if ([string]::IsNullOrEmpty($env:MOCK_STATUSES)) { '[]' } else { $env:MOCK_STATUSES })
+    } elseif ($endpoint -like '*/statuses/*') {
       if (
         -not [string]::IsNullOrEmpty($env:MOCK_STATUS_FAILURE_SHA) -and
         $endpoint.EndsWith("/$($env:MOCK_STATUS_FAILURE_SHA)", [StringComparison]::Ordinal)

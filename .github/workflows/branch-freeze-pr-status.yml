@@ -13,9 +13,10 @@ on:
     types: [opened, synchronize, reopened, edited]
 
 permissions:
-  contents: read   # checkout the shared scripts
-  statuses: write  # post the branch-freeze commit status
-  issues: read     # read the branch-freeze tracking issue
+  contents: read       # checkout the shared scripts
+  statuses: write      # post the branch-freeze commit status
+  issues: read         # read the branch-freeze tracking issue
+  pull-requests: read  # resolve the PR's current head and base inside the lock
 
 jobs:
   status:
@@ -25,9 +26,15 @@ jobs:
       github.event.action != 'edited' ||
       github.event.changes.base != null
     runs-on: ubuntu-latest
+    # Every branch-freeze status writer shares this group. `queue: max`
+    # preserves up to 100 pending jobs instead of replacing an older pending job,
+    # so bursty activity cannot drop a required status. Queued runs do not have a
+    # guaranteed dispatch order, so the step below resolves the PR's current head
+    # and base only after this lock has been acquired.
     concurrency:
-      group: branch-freeze-write-${{ github.event.pull_request.base.ref }}
+      group: branch-freeze-write
       cancel-in-progress: false
+      queue: max
     steps:
       # Pin the action implementation to immutable v7.0.0. Separately, `ref`
       # checks out trusted MSBuild scripts from the default branch rather than
@@ -41,11 +48,9 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
-          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
-          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         shell: pwsh
         run: |
           pwsh -NoLogo -NoProfile -File `
             "$env:GITHUB_WORKSPACE/.github/branch-freeze/workflows/set-pr-status.ps1" `
-            $env:HEAD_SHA `
-            $env:BASE_REF
+            -PullRequestNumber $env:PR_NUMBER

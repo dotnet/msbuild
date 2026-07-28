@@ -6,10 +6,13 @@
 #   * is-allowed.ps1     - who may run /freeze /unfreeze (deny-by-default).
 #   * handle-command.ps1 - untrusted branch and reason text cannot execute PowerShell.
 #   * set-pr-status.ps1  - only the open permanent issue for the exact branch title
-#                          freezes that branch.
+#                          freezes that branch; identical statuses are not reposted;
+#                          current PR state wins over stale event data.
 #   * handle-command.ps1 - one issue is created per branch, then reopened/closed.
 #   * handle-command.ps1 - notification failure cannot suppress refresh after a
 #                          successful state change.
+#   * workflow YAML       - all status writers share one queued lock and
+#                          automation-created PR workflows trigger a refresh.
 #
 # Uses a PowerShell mock of `gh`; no live repository or external JSON tool is needed.
 # Run:  pwsh .github/branch-freeze/tests/run-tests.ps1
@@ -161,6 +164,80 @@ try {
         $env:MOCK_TRANSIENT_FAILURE_FILE = ''
     }
 
+    Write-Output '== workflow contracts (triggers and concurrency) =='
+    $statusWorkflowPath = Join-Path $repositoryRoot '.github/workflows/branch-freeze-pr-status.yml'
+    $refreshWorkflowPath = Join-Path $repositoryRoot '.github/workflows/branch-freeze-refresh.yml'
+    $statusWorkflow = Get-Content -LiteralPath $statusWorkflowPath -Raw
+    $refreshWorkflow = Get-Content -LiteralPath $refreshWorkflowPath -Raw
+
+    Assert-Equal (
+        [regex]::IsMatch($statusWorkflow, '(?m)^\s*group:\s*branch-freeze-write\s*$')
+    ) $true 'single-PR workflow uses the shared writer group'
+    Assert-Equal (
+        $statusWorkflow.IndexOf(
+            'PR_NUMBER: ${{ github.event.pull_request.number }}',
+            [StringComparison]::Ordinal
+        ) -ge 0
+    ) $true 'single-PR workflow passes only the PR identity into the writer lock'
+    Assert-Equal (
+        $statusWorkflow.IndexOf(
+            '${{ github.event.pull_request.base.ref }}',
+            [StringComparison]::Ordinal
+        )
+    ) -1 'single-PR workflow does not trust an event-captured base branch'
+    Assert-Equal (
+        $statusWorkflow.IndexOf('queue: max', [StringComparison]::Ordinal) -ge 0
+    ) $true 'single-PR workflow preserves pending status jobs'
+    Assert-Equal (
+        [regex]::IsMatch($refreshWorkflow, '(?m)^\s*group:\s*branch-freeze-write\s*$')
+    ) $true 'bulk workflow uses the shared writer group'
+    Assert-Equal (
+        $refreshWorkflow.IndexOf('queue: max', [StringComparison]::Ordinal) -ge 0
+    ) $true 'bulk workflow preserves pending status jobs'
+    Assert-Equal (
+        $refreshWorkflow.IndexOf(
+            "github.event.workflow_run.conclusion != 'skipped'",
+            [StringComparison]::Ordinal
+        ) -ge 0
+    ) $true 'bulk workflow ignores skipped source workflows'
+    Assert-Equal (
+        $refreshWorkflow.IndexOf('cron: "23 5,17 * * *"', [StringComparison]::Ordinal) -ge 0
+    ) $true 'bulk workflow keeps the twice-daily safety-net schedule'
+
+    $pullRequestCreatingWorkflows = [ordered]@{
+        'backport.yml' = 'Backport PR to branch'
+        'dreaming.agent.lock.yml' = 'Dreaming (learning atoms curation)'
+        'flaky-test-fixer.agent.lock.yml' = 'Flaky Test Auto-Fixer'
+        'flaky-test-detector.agent.lock.yml' = 'Flaky Test Triage'
+        'inter-branch-merge-flow.yml' = 'Inter-branch merge workflow'
+        'SyncAnalyzerTemplateMSBuildVersion.yml' = 'Sync Microsoft.Build version in analyzer template with Version.props'
+    }
+    $testsWorkflowPath = Join-Path $repositoryRoot '.github/workflows/branch-freeze-tests.yml'
+    $testsWorkflow = Get-Content -LiteralPath $testsWorkflowPath -Raw
+    foreach ($entry in $pullRequestCreatingWorkflows.GetEnumerator()) {
+        $sourceWorkflow = Get-Content -LiteralPath (
+            Join-Path $repositoryRoot ".github/workflows/$($entry.Key)"
+        ) -Raw
+        $escapedName = [regex]::Escape($entry.Value)
+        Assert-Equal (
+            [regex]::IsMatch($sourceWorkflow, "(?m)^name:\s*`"?$escapedName`"?\s*$")
+        ) $true "$($entry.Key) declares the expected workflow name"
+        Assert-Equal (
+            $refreshWorkflow.IndexOf(
+                "- `"$($entry.Value)`"",
+                [StringComparison]::Ordinal
+            ) -ge 0
+        ) $true "bulk workflow listens for $($entry.Value)"
+        # Without this the rename guard above never runs on the pull request that
+        # renames the workflow, which is the only change that can break it.
+        Assert-Equal (
+            $testsWorkflow.IndexOf(
+                "- `".github/workflows/$($entry.Key)`"",
+                [StringComparison]::Ordinal
+            ) -ge 0
+        ) $true "these tests run when $($entry.Key) changes"
+    }
+
     Write-Output '== comment modules (pure parsing and composition) =='
     $branchFreezeModule = Import-Module `
         (Join-Path $componentsDirectory 'BranchFreeze.psm1') -Force -PassThru
@@ -235,6 +312,7 @@ try {
 
     Write-Output '== set-pr-status.ps1 (freeze detection) =='
     $env:REPO = 'o/r'
+    $env:MOCK_STATUSES = '[]'
 
     $statusFile = Initialize-TestStatusFile
     $env:MOCK_ISSUES = '[]'
@@ -243,26 +321,91 @@ try {
     Assert-Equal (Get-StatusField $statusFile 'state') 'success' 'no tracking issue -> branch open (success)'
 
     $statusFile = Initialize-TestStatusFile
+    $env:MOCK_STATUSES = '[{"state":"SUCCESS","context":"Branch-Freeze","description":"Branch open","target_url":null,"creator":{"login":"GitHub-Actions[bot]"}}]'
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @('sha-current-open', 'main')
+    Assert-Equal $code 0 'matching open branch status command succeeds'
+    Assert-Equal (
+        @(Get-Content -LiteralPath $statusFile).Count
+    ) 0 'matching open branch status is not reposted'
+
+    $statusFile = Initialize-TestStatusFile
+    $env:MOCK_STATUSES = '[{"state":"success","context":"branch-freeze","description":"Branch open","target_url":null,"creator":{"login":"github-actions[bot]"}}]'
+    $env:MOCK_STATUS_READ_FAILURE = '1'
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @('sha-read-failure', 'main')
+    $env:MOCK_STATUS_READ_FAILURE = '0'
+    Assert-Equal $code 0 'unreadable current status does not fail the command'
+    Assert-Equal (
+        Get-StatusField $statusFile 'state'
+    ) 'success' 'unreadable current status still posts the required status'
+
+    $statusFile = Initialize-TestStatusFile
+    $env:MOCK_STATUSES = '[{"state":"success","context":"branch-freeze","description":"Branch open","target_url":null}]'
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @('sha-no-creator', 'main')
+    Assert-Equal $code 0 'status without a creator command succeeds'
+    Assert-Equal (
+        Get-StatusField $statusFile 'state'
+    ) 'success' 'status of unknown origin is replaced rather than trusted'
+
+    $statusFile = Initialize-TestStatusFile
+    $env:MOCK_STATUSES = '[{"state":"success","context":"branch-freeze","description":"Branch open","target_url":null,"creator":{"login":"another-app[bot]"}}]'
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @('sha-other-creator', 'main')
+    Assert-Equal $code 0 'matching status from another integration is replaced'
+    Assert-Equal (
+        Get-StatusField $statusFile 'state'
+    ) 'success' 'GitHub Actions reposts a status created by another integration'
+
+    $statusFile = Initialize-TestStatusFile
+    # Simulate an old event that captured an open base, followed by a newer
+    # retarget back to a frozen branch. The workflow now passes only PR #42, so
+    # the script must use this current GitHub state rather than stale event data.
+    $env:MOCK_PR = '{"number":42,"headRefOid":"sha-current","baseRefName":"release"}'
+    $env:MOCK_STATUSES = '[]'
+    $env:MOCK_ISSUES = '[{"number":8,"title":"Branch freeze: release","url":"https://github.com/o/r/issues/8","state":"OPEN","body":"## Current state\n\nBranch `release` is **frozen** by @rainersigwald.\n\n### Reason\n\nServicing validation\n\n<!-- branch-freeze-by:rainersigwald -->"}]'
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @(
+        '-PullRequestNumber', '42'
+    )
+    Assert-Equal $code 0 'current PR status command succeeds'
+    Assert-Equal (
+        Get-StatusField $statusFile 'state'
+    ) 'failure' 'current frozen base wins over stale event data'
+    Assert-Equal (
+        Get-StatusField $statusFile 'target_url'
+    ) 'https://github.com/o/r/issues/8' 'current PR status links the current base freeze'
+
+    $statusFile = Initialize-TestStatusFile
+    $env:MOCK_PR = ''
+    $env:MOCK_STATUSES = '[{"state":"success","context":"branch-freeze","description":"Branch open","target_url":null,"creator":{"login":"github-actions[bot]"}}]'
     $env:MOCK_ISSUES = '[{"number":7,"title":"Branch freeze: main","url":"https://github.com/o/r/issues/7","state":"OPEN","body":"## Current state\n\nBranch `main` is **frozen** by @rainersigwald.\n\n### Reason\n\nSDK insertion broke\n\n<!-- branch-freeze-by:rainersigwald -->"}]'
     $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @('sha-frozen', 'main')
     Assert-Equal $code 0 'frozen branch status command succeeds'
-    Assert-Equal (Get-StatusField $statusFile 'state') 'failure' 'open permanent issue -> branch frozen (failure)'
+    Assert-Equal (Get-StatusField $statusFile 'state') 'failure' 'freeze replaces the previous success status'
     Assert-Equal (Get-StatusField $statusFile 'description') 'Frozen by @rainersigwald: SDK insertion broke' 'status names who froze it'
     Assert-Equal (Get-StatusField $statusFile 'target_url') 'https://github.com/o/r/issues/7' 'status links the tracking issue'
 
     $statusFile = Initialize-TestStatusFile
+    $env:MOCK_STATUSES = '[{"state":"failure","context":"branch-freeze","description":"Frozen by @rainersigwald: SDK insertion broke","target_url":"https://github.com/o/r/issues/7","creator":{"login":"github-actions[bot]"}}]'
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @('sha-current-frozen', 'main')
+    Assert-Equal $code 0 'matching frozen branch status command succeeds'
+    Assert-Equal (
+        @(Get-Content -LiteralPath $statusFile).Count
+    ) 0 'matching frozen branch status is not reposted'
+
+    $statusFile = Initialize-TestStatusFile
+    $env:MOCK_STATUSES = '[{"state":"failure","context":"branch-freeze","description":"Frozen: old reason","target_url":"u","creator":{"login":"github-actions[bot]"}}]'
     $env:MOCK_ISSUES = '[{"number":9,"title":"Branch freeze: main","url":"u","state":"CLOSED","body":"old reason"}]'
     $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @('sha-closed', 'main')
     Assert-Equal $code 0 'closed permanent issue status command succeeds'
-    Assert-Equal (Get-StatusField $statusFile 'state') 'success' 'closed permanent issue -> branch open'
+    Assert-Equal (Get-StatusField $statusFile 'state') 'success' 'unfreeze replaces the previous failure status'
 
     $statusFile = Initialize-TestStatusFile
+    $env:MOCK_STATUSES = '[]'
     $env:MOCK_ISSUES = '[{"number":9,"title":"Branch freeze: release","url":"u","state":"OPEN","body":"release only"}]'
     $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @('sha-other', 'main')
     Assert-Equal $code 0 'different branch issue status command succeeds'
     Assert-Equal (Get-StatusField $statusFile 'state') 'success' 'different exact title does not freeze the branch'
 
     $statusFile = Initialize-TestStatusFile
+    $env:MOCK_STATUSES = '[]'
     $longReason = ('a' * 128) + '😀' + ('b' * 10)
     $env:MOCK_ISSUES = @(
         @{
@@ -494,6 +637,7 @@ SDK insertion broke
     Write-Output '== refresh-pr-statuses.ps1 (bulk refresh) =='
     $statusFile = Initialize-TestStatusFile
     $env:MOCK_ISSUES = '[]'
+    $env:MOCK_STATUSES = '[]'
     $env:MOCK_PRS = '[{"number":1,"headRefOid":"sha-1","baseRefName":"main"},{"number":2,"headRefOid":"sha-2","baseRefName":"main"}]'
     $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'refresh-pr-statuses.ps1') @('main')
     Assert-Equal $code 0 'bulk refresh succeeds'
