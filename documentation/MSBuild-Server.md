@@ -4,8 +4,37 @@ MSBuild Server nodes accept build requests from clients and use worker nodes in 
 
 ## Usage
 
-The primary ways to use MSBuild are via Visual Studio and via the CLI using the `dotnet build`/`dotnet msbuild` commands. MSBuild Server is not supported in Visual Studio because Visual Studio itself works like MSBuild Server. For the CLI, the server functionality is enabled by default and can be disabled by setting the `DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER` environment variable to value `1`.
-To re-enable MSBuild Server, remove the variable or set its value to `0`.
+The primary ways to use MSBuild are via Visual Studio and via the CLI using the `dotnet build`/`dotnet msbuild` commands. MSBuild Server is not supported in Visual Studio because Visual Studio itself works like MSBuild Server.
+
+There are two gates, and they live in different repositories.
+
+**1. MSBuild's own gate.** `MSBuildApp.ShouldUseMSBuildServer` decides whether an invocation uses the server:
+
+| `MSBUILDUSESERVER` | Build kind | Server used? |
+| --- | --- | --- |
+| `1` | any | yes (explicit opt-in) |
+| any other non-empty value (`0`, `false`, ...) | any | no (explicit opt-out, takes precedence over `-mt`) |
+| unset or empty | `-mt` (multithreaded) | yes (implied by `-mt`) |
+| unset or empty | ordinary | no |
+
+**2. Whether the .NET SDK sets `MSBUILDUSESERVER` for you.** This is an SDK-side decision and varies by SDK version. Recent SDKs (verified on `11.0.100-preview.7.26377.110`) opt in on your behalf, so an ordinary `dotnet build` uses the server. Set the variable explicitly to override:
+
+```
+set MSBUILDUSESERVER=0   :: force off
+set MSBUILDUSESERVER=1   :: force on
+```
+
+> Note: an earlier design had the .NET CLI enable the server by default and opt out via `DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER=1`. MSBuild does not read that variable, and a recursive search of the SDKs checked while writing this found no reference to it. Use `MSBUILDUSESERVER`.
+
+### Known limitation: environment-derived state is not fully reset between builds
+
+The server serves many builds from one process, so any static state cached from the environment on first use must be refreshed per build. That is not yet fully true.
+
+`ChangeWaves` caches its parsed wave on first use and never re-reads `MSBUILDDISABLEFEATURESFROMVERSION`: `ShouldApplyChangeWave` returns true only while `ConversionState == NotConvertedYet || _cachedWave == null`. Once a build has applied a wave, later builds in the same server process silently keep the first build's value. The only reset path, `ChangeWaves.ResetStateForTests`, is test-only and is not called by the server.
+
+This also affects the general refresh mechanism, because `Traits.UpdateFromEnvironment()` - which `OutOfProcServerNode` does call per request - is itself gated on `ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)`. If a build disables that wave, the gate reads stale state and `Traits` stops refreshing for every later build in that process.
+
+Until this is fixed, builds that rely on per-invocation differences in this kind of environment state should set `MSBUILDUSESERVER=0`.
 
 The public entry points for hosting the server live in the `Microsoft.Build.Server` namespace (`MSBuildClient`, `MSBuildClientExitResult`, `MSBuildClientExitType`, and `OutOfProcServerNode`). These were previously in `Microsoft.Build.Experimental`.
 

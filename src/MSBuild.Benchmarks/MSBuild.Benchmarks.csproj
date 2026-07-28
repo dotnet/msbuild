@@ -18,6 +18,9 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <!-- Fix transitive dependency from BenchmarkDotNet that conflicts with Microsoft.VisualStudio.OpenTelemetry.ClientExtensions. -->
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" VersionOverride="8.0.0" />
+
+    <!-- The evaluation cost analysis targets .NET (Core) MSBuild only; it uses APIs unavailable on .NET Framework. -->
+    <Compile Remove="Analysis\**\*.cs" />
   </ItemGroup>
 
   <ItemGroup>

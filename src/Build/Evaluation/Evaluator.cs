@@ -837,6 +837,8 @@ namespace Microsoft.Build.Evaluation
                 {
                     // Pass5: read targets (but don't evaluate them: that happens during build)
                     MSBuildEventSource.Log.EvaluatePass5Start(projectFile);
+
+                    MSBuildEventSource.Log.ReadTargetElementsStart(projectFile);
                     for (var i = 0; i < targetElementsCount; i++)
                     {
                         var element = _targetElements[i];
@@ -846,6 +848,9 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
 
+                    MSBuildEventSource.Log.ReadTargetElementsStop(projectFile, targetElementsCount);
+
+                    MSBuildEventSource.Log.ComputeTargetMappingsStart(projectFile);
                     foreach (ProjectTargetElement target in activeTargetsByEvaluationOrder)
                     {
                         using (_evaluationProfiler.TrackElement(target))
@@ -853,6 +858,8 @@ namespace Microsoft.Build.Evaluation
                             AddBeforeAndAfterTargetMappings(target, activeTargets, targetsWhichRunBeforeByTarget, targetsWhichRunAfterByTarget);
                         }
                     }
+
+                    MSBuildEventSource.Log.ComputeTargetMappingsStop(projectFile);
 
                     _data.BeforeTargets = targetsWhichRunBeforeByTarget;
                     _data.AfterTargets = targetsWhichRunAfterByTarget;
@@ -1468,7 +1475,20 @@ namespace Microsoft.Build.Evaluation
         {
             using (_evaluationProfiler.TrackElement(importElement))
             {
+                // ContainingProject walks up the parent chain, so only pay for it when someone is listening.
+                bool trackImport = MSBuildEventSource.Log.IsEnabled();
+
+                if (trackImport)
+                {
+                    MSBuildEventSource.Log.EvaluateImportStart(importElement.ContainingProject.FullPath, importElement.Project);
+                }
+
                 List<ProjectRootElement> importedProjectRootElements = ExpandAndLoadImports(directoryOfImportingFile, importElement, out var sdkResult);
+
+                if (trackImport)
+                {
+                    MSBuildEventSource.Log.EvaluateImportStop(importElement.ContainingProject.FullPath, importElement.Project, importedProjectRootElements?.Count ?? 0);
+                }
 
                 if (importedProjectRootElements != null)
                 {
