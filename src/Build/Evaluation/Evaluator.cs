@@ -376,7 +376,7 @@ namespace Microsoft.Build.Evaluation
                 EvaluationMetrics.EvaluateStop(
                     evaluationStartTimestamp,
                     evaluationStage,
-                    submissionId != BuildEventContext.InvalidSubmissionId,
+                    submissionId,
                     evaluationSucceeded);
 
                 IEnumerable globalProperties = null;
@@ -688,7 +688,7 @@ namespace Microsoft.Build.Evaluation
 
                 Assumed.NotEqual(_data.EvaluationId, BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
-                EvaluationMetrics.EvaluatePass0Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId != BuildEventContext.InvalidSubmissionId);
+                EvaluationMetrics.EvaluatePass0Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
                 MSBuildEventSource.Log.EvaluatePass0Stop(projectFile);
 
                 // Pass1: evaluate properties, load imports, and gather everything else
@@ -708,7 +708,7 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 _data.InitialTargets = initialTargets;
-                EvaluationMetrics.EvaluatePass1Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId != BuildEventContext.InvalidSubmissionId);
+                EvaluationMetrics.EvaluatePass1Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
                 MSBuildEventSource.Log.EvaluatePass1Stop(projectFile);
 
                 if (_evaluationStage <= ProjectEvaluationStage.Properties)
@@ -731,7 +731,7 @@ namespace Microsoft.Build.Evaluation
                         }
                     }
                 }
-                EvaluationMetrics.EvaluatePass2Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId != BuildEventContext.InvalidSubmissionId);
+                EvaluationMetrics.EvaluatePass2Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
                 MSBuildEventSource.Log.EvaluatePass2Stop(projectFile);
 
                 if (_evaluationStage <= ProjectEvaluationStage.ItemDefinitions)
@@ -786,7 +786,7 @@ namespace Microsoft.Build.Evaluation
                     lazyEvaluator = null;
                 }
 
-                EvaluationMetrics.EvaluatePass3Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId != BuildEventContext.InvalidSubmissionId);
+                EvaluationMetrics.EvaluatePass3Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
                 MSBuildEventSource.Log.EvaluatePass3Stop(projectFile);
 
                 if (_evaluationStage <= ProjectEvaluationStage.Items)
@@ -810,7 +810,7 @@ namespace Microsoft.Build.Evaluation
                         _evaluationContext.FileSystem);
                 }
 
-                EvaluationMetrics.EvaluatePass4Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId != BuildEventContext.InvalidSubmissionId);
+                EvaluationMetrics.EvaluatePass4Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
                 MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
 
                 if (_evaluationStage <= ProjectEvaluationStage.UsingTasks)
@@ -896,7 +896,7 @@ namespace Microsoft.Build.Evaluation
                     }
 
                     _data.FinishEvaluation();
-                    EvaluationMetrics.EvaluatePass5Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId != BuildEventContext.InvalidSubmissionId);
+                    EvaluationMetrics.EvaluatePass5Stop(evaluationPassStartTimestamp, _evaluationStage, _submissionId);
                     MSBuildEventSource.Log.EvaluatePass5Stop(projectFile);
                 }
             }
