@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -35,25 +35,17 @@ internal sealed class ServerNodeHandshake : Handshake
         .ToString(CultureInfo.InvariantCulture);
 
     /// <summary>
-    /// The handshake key plus the current user, used as the input to <see cref="ComputeHash"/>.
+    /// The handshake key plus the current user. The pipe and mutex names derived from
+    /// <see cref="ComputeHash"/> are machine-wide while the pipes are current-user-only, so without
+    /// the user one account's server locks every other account on the machine out.
     /// </summary>
     public string GetKeyWithUserName() => $"{GetKey()} {EnvironmentUtilities.CurrentUserName}";
 
     /// <summary>
     /// Computes Handshake stable hash string representing whole state of handshake.
     /// </summary>
-    /// <remarks>
-    /// The names derived from this hash — the server and RAR node pipes, and the server
-    /// running/busy/launch mutexes — live in machine-wide namespaces, while the pipes are created
-    /// current-user-only. Including the user stops one user's server from locking every other user
-    /// on the machine out of the feature. Naming only; the handshake sent over the wire comes from
-    /// <see cref="RetrieveHandshakeComponents"/> and is unaffected.
-    /// </remarks>
     public string ComputeHash() => _computedHash ??= HashKey(GetKeyWithUserName());
 
-    /// <summary>
-    /// Hashes a handshake key into a compact string safe to embed in pipe and mutex names.
-    /// </summary>
     public static string HashKey(string key)
     {
         byte[] utf8 = Encoding.UTF8.GetBytes(key);
