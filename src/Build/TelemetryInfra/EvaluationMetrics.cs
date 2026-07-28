@@ -23,11 +23,17 @@ internal static class EvaluationMetrics
     internal const string PassTagName = "msbuild.project.evaluation.pass";
     internal const string OriginTagName = "msbuild.project.evaluation.origin";
     internal const string SucceededTagName = "msbuild.project.evaluation.succeeded";
+    internal const string SubmissionIdTagName = "msbuild.build.submission.id";
+    internal const string IncludeSubmissionIdEnvironmentVariable = "MSBUILD_EVALUATION_METRICS_INCLUDE_SUBMISSION_ID";
 
     internal const string BuildSubmissionOrigin = "build_submission";
     internal const string OutsideBuildSubmissionOrigin = "outside_build_submission";
 
     private static int s_disabled;
+    private static int s_includeSubmissionId = -1;
+    internal static bool? IncludeSubmissionIdOverrideForTests;
+
+    internal static bool IsSubmissionIdEnabled => IncludeSubmissionId();
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static long EvaluateStart()
@@ -52,7 +58,7 @@ internal static class EvaluationMetrics
     internal static void EvaluateStop(
         long startTimestamp,
         ProjectEvaluationStage stage,
-        bool isBuildSubmission,
+        int submissionId,
         bool succeeded)
     {
         if (Volatile.Read(ref s_disabled) != 0)
@@ -72,7 +78,13 @@ internal static class EvaluationMetrics
 
             TagList tags = default;
             tags.Add(StageTagName, GetStageName(stage));
-            tags.Add(OriginTagName, isBuildSubmission ? BuildSubmissionOrigin : OutsideBuildSubmissionOrigin);
+            tags.Add(
+                OriginTagName,
+                submissionId != BuildEventContext.InvalidSubmissionId ? BuildSubmissionOrigin : OutsideBuildSubmissionOrigin);
+            if (IncludeSubmissionId())
+            {
+                tags.Add(SubmissionIdTagName, submissionId);
+            }
             tags.Add(SucceededTagName, succeeded);
 
             if (countEnabled)
@@ -92,23 +104,23 @@ internal static class EvaluationMetrics
         }
     }
 
-    internal static void EvaluatePass0Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
-        EvaluatePassStop(startTimestamp, EvaluationPass.InitialProperties, stage, isBuildSubmission);
+    internal static void EvaluatePass0Stop(long startTimestamp, ProjectEvaluationStage stage, int submissionId) =>
+        EvaluatePassStop(startTimestamp, EvaluationPass.InitialProperties, stage, submissionId);
 
-    internal static void EvaluatePass1Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
-        EvaluatePassStop(startTimestamp, EvaluationPass.Properties, stage, isBuildSubmission);
+    internal static void EvaluatePass1Stop(long startTimestamp, ProjectEvaluationStage stage, int submissionId) =>
+        EvaluatePassStop(startTimestamp, EvaluationPass.Properties, stage, submissionId);
 
-    internal static void EvaluatePass2Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
-        EvaluatePassStop(startTimestamp, EvaluationPass.ItemDefinitionGroups, stage, isBuildSubmission);
+    internal static void EvaluatePass2Stop(long startTimestamp, ProjectEvaluationStage stage, int submissionId) =>
+        EvaluatePassStop(startTimestamp, EvaluationPass.ItemDefinitionGroups, stage, submissionId);
 
-    internal static void EvaluatePass3Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
-        EvaluatePassStop(startTimestamp, EvaluationPass.Items, stage, isBuildSubmission);
+    internal static void EvaluatePass3Stop(long startTimestamp, ProjectEvaluationStage stage, int submissionId) =>
+        EvaluatePassStop(startTimestamp, EvaluationPass.Items, stage, submissionId);
 
-    internal static void EvaluatePass4Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
-        EvaluatePassStop(startTimestamp, EvaluationPass.UsingTasks, stage, isBuildSubmission);
+    internal static void EvaluatePass4Stop(long startTimestamp, ProjectEvaluationStage stage, int submissionId) =>
+        EvaluatePassStop(startTimestamp, EvaluationPass.UsingTasks, stage, submissionId);
 
-    internal static void EvaluatePass5Stop(long startTimestamp, ProjectEvaluationStage stage, bool isBuildSubmission) =>
-        EvaluatePassStop(startTimestamp, EvaluationPass.Targets, stage, isBuildSubmission);
+    internal static void EvaluatePass5Stop(long startTimestamp, ProjectEvaluationStage stage, int submissionId) =>
+        EvaluatePassStop(startTimestamp, EvaluationPass.Targets, stage, submissionId);
 
     [MethodImpl(MethodImplOptions.NoInlining)]
     internal static long EvaluatePassStart()
@@ -132,6 +144,8 @@ internal static class EvaluationMetrics
     internal static void ResetForTests()
     {
         Volatile.Write(ref s_disabled, 0);
+        Volatile.Write(ref s_includeSubmissionId, -1);
+        IncludeSubmissionIdOverrideForTests = null;
     }
 
     private static void Disable(Exception ex)
@@ -166,7 +180,7 @@ internal static class EvaluationMetrics
         long startTimestamp,
         EvaluationPass pass,
         ProjectEvaluationStage stage,
-        bool isBuildSubmission)
+        int submissionId)
     {
         if (startTimestamp == 0 || Volatile.Read(ref s_disabled) != 0)
         {
@@ -184,7 +198,13 @@ internal static class EvaluationMetrics
             TagList tags = default;
             tags.Add(StageTagName, GetStageName(stage));
             tags.Add(PassTagName, GetPassName(pass));
-            tags.Add(OriginTagName, isBuildSubmission ? BuildSubmissionOrigin : OutsideBuildSubmissionOrigin);
+            tags.Add(
+                OriginTagName,
+                submissionId != BuildEventContext.InvalidSubmissionId ? BuildSubmissionOrigin : OutsideBuildSubmissionOrigin);
+            if (IncludeSubmissionId())
+            {
+                tags.Add(SubmissionIdTagName, submissionId);
+            }
 
             double elapsedSeconds = (endTimestamp - startTimestamp) / (double)Stopwatch.Frequency;
             Instruments.ProjectEvaluationPassDuration.Record(elapsedSeconds, in tags);
@@ -193,6 +213,25 @@ internal static class EvaluationMetrics
         {
             Disable(ex);
         }
+    }
+
+    private static bool IncludeSubmissionId()
+    {
+        if (IncludeSubmissionIdOverrideForTests.HasValue)
+        {
+            return IncludeSubmissionIdOverrideForTests.Value;
+        }
+
+        int includeSubmissionId = Volatile.Read(ref s_includeSubmissionId);
+        if (includeSubmissionId < 0)
+        {
+            includeSubmissionId = string.Equals(
+                Environment.GetEnvironmentVariable(IncludeSubmissionIdEnvironmentVariable),
+                "1",
+                StringComparison.Ordinal) ? 1 : 0;
+            Volatile.Write(ref s_includeSubmissionId, includeSubmissionId);
+        }
+        return includeSubmissionId != 0;
     }
 
     private static class Instruments

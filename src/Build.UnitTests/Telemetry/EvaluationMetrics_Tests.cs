@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Diagnostics.Tracing;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Xml;
 using Microsoft.Build.Construction;
@@ -38,6 +39,8 @@ public sealed class EvaluationMetrics_Tests
     public EvaluationMetrics_Tests(ITestOutputHelper output)
     {
         _output = output;
+        EvaluationMetrics.ResetForTests();
+        EvaluationMetrics.IncludeSubmissionIdOverrideForTests = true;
     }
 
     [Theory]
@@ -65,6 +68,7 @@ public sealed class EvaluationMetrics_Tests
             measurement.Value == 1 &&
             measurement.HasTag(EvaluationMetrics.StageTagName, expectedStage) &&
             measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.OutsideBuildSubmissionOrigin) &&
+            measurement.HasTag(EvaluationMetrics.SubmissionIdTagName, BuildEventContext.InvalidSubmissionId) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, true));
 
         collector.Measurements.ShouldContain(measurement =>
@@ -72,6 +76,7 @@ public sealed class EvaluationMetrics_Tests
             measurement.Value >= 0 &&
             measurement.HasTag(EvaluationMetrics.StageTagName, expectedStage) &&
             measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.OutsideBuildSubmissionOrigin) &&
+            measurement.HasTag(EvaluationMetrics.SubmissionIdTagName, BuildEventContext.InvalidSubmissionId) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, true));
 
         string[] expectedPasses = GetExpectedPasses(stage);
@@ -83,6 +88,7 @@ public sealed class EvaluationMetrics_Tests
                 measurement.Value.ShouldBeGreaterThanOrEqualTo(0);
                 measurement.HasTag(EvaluationMetrics.StageTagName, expectedStage).ShouldBeTrue();
                 measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.OutsideBuildSubmissionOrigin).ShouldBeTrue();
+                measurement.HasTag(EvaluationMetrics.SubmissionIdTagName, BuildEventContext.InvalidSubmissionId).ShouldBeTrue();
                 metricPasses.Add(measurement.Tags[EvaluationMetrics.PassTagName].ShouldBeOfType<string>());
             }
         }
@@ -143,13 +149,72 @@ public sealed class EvaluationMetrics_Tests
             measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationCountName &&
             measurement.HasTag(EvaluationMetrics.StageTagName, "full") &&
             measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.BuildSubmissionOrigin) &&
+            measurement.Tags[EvaluationMetrics.SubmissionIdTagName].ShouldBeOfType<int>() >= 0 &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, true));
 
         collector.Measurements.ShouldContain(measurement =>
             measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationPassDurationName &&
             measurement.HasTag(EvaluationMetrics.PassTagName, "targets") &&
             measurement.HasTag(EvaluationMetrics.StageTagName, "full") &&
-            measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.BuildSubmissionOrigin));
+            measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.BuildSubmissionOrigin) &&
+            measurement.Tags[EvaluationMetrics.SubmissionIdTagName].ShouldBeOfType<int>() >= 0);
+
+        int[] submissionIds = collector.Measurements
+            .Where(measurement =>
+                measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.BuildSubmissionOrigin))
+            .Select(measurement => measurement.Tags[EvaluationMetrics.SubmissionIdTagName].ShouldBeOfType<int>())
+            .Distinct()
+            .ToArray();
+        submissionIds.Length.ShouldBe(1);
+    }
+
+    [Fact]
+    public void EvaluationMetricsDistinguishBuildSubmissions()
+    {
+        using MetricCollector collector = new();
+        using TestEnvironment env = TestEnvironment.Create(_output);
+
+        TransientTestFile firstProject = env.CreateFile(
+            "evaluation-metrics-first.proj",
+            """
+            <Project>
+              <Target Name="Build" />
+            </Project>
+            """);
+        TransientTestFile secondProject = env.CreateFile(
+            "evaluation-metrics-second.proj",
+            """
+            <Project>
+              <Target Name="Build" />
+            </Project>
+            """);
+        MockLogger logger = new(_output);
+
+        foreach (string projectPath in new[] { firstProject.Path, secondProject.Path })
+        {
+            using BuildManager buildManager = new();
+            BuildResult result = buildManager.Build(
+                new BuildParameters { Loggers = [logger] },
+                new BuildRequestData(
+                    projectPath,
+                    new Dictionary<string, string?>(),
+                    null,
+                    ["Build"],
+                    null));
+            result.ShouldHaveSucceeded();
+        }
+
+        int[] submissionIds = collector.Measurements
+            .Where(measurement =>
+                measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationCountName &&
+                measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.BuildSubmissionOrigin))
+            .Select(measurement => measurement.Tags[EvaluationMetrics.SubmissionIdTagName].ShouldBeOfType<int>())
+            .Distinct()
+            .ToArray();
+
+        submissionIds.Length.ShouldBe(2);
+        submissionIds.ShouldAllBe(submissionId => submissionId >= 0);
+        submissionIds[1].ShouldBeGreaterThan(submissionIds[0]);
     }
 
     [Fact]
@@ -174,6 +239,7 @@ public sealed class EvaluationMetrics_Tests
             measurement.InstrumentName == EvaluationMetrics.ProjectEvaluationCountName &&
             measurement.HasTag(EvaluationMetrics.StageTagName, "full") &&
             measurement.HasTag(EvaluationMetrics.OriginTagName, EvaluationMetrics.OutsideBuildSubmissionOrigin) &&
+            measurement.HasTag(EvaluationMetrics.SubmissionIdTagName, BuildEventContext.InvalidSubmissionId) &&
             measurement.HasTag(EvaluationMetrics.SucceededTagName, false));
     }
 
@@ -209,11 +275,73 @@ public sealed class EvaluationMetrics_Tests
         EvaluationMetrics.EvaluateStop(
             startTimestamp,
             ProjectEvaluationStage.Full,
-            isBuildSubmission: false,
+            BuildEventContext.InvalidSubmissionId,
             succeeded: true);
 
         recordedDuration.ShouldNotBeNull();
         recordedDuration.Value.ShouldBeLessThan(0.5);
+    }
+
+    [Fact]
+    public void SubmissionIdTagIsOptIn()
+    {
+        EvaluationMetrics.IncludeSubmissionIdOverrideForTests = false;
+        try
+        {
+            using MetricCollector collector = new();
+            using ProjectCollection collection = new();
+
+            _ = ProjectInstance.FromProjectRootElement(
+                CreateRootElement("<Project />"),
+                new ProjectOptions { ProjectCollection = collection });
+
+            collector.Measurements.ShouldAllBe(measurement =>
+                !measurement.Tags.ContainsKey(EvaluationMetrics.SubmissionIdTagName));
+        }
+        finally
+        {
+            EvaluationMetrics.IncludeSubmissionIdOverrideForTests = true;
+        }
+    }
+
+    [Fact]
+    public void BuildManagerSubmissionIdsRemainPerManagerWithoutMetricsCorrelation()
+    {
+        EvaluationMetrics.IncludeSubmissionIdOverrideForTests = false;
+        try
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            TransientTestFile project = env.CreateFile(
+                "evaluation-metrics-per-manager.proj",
+                """
+                <Project>
+                  <Target Name="Build" />
+                </Project>
+                """);
+            MockLogger logger = new(_output);
+            List<int> submissionIds = [];
+
+            for (int i = 0; i < 2; i++)
+            {
+                using BuildManager buildManager = new();
+                BuildResult result = buildManager.Build(
+                    new BuildParameters { Loggers = [logger] },
+                    new BuildRequestData(
+                        project.Path,
+                        new Dictionary<string, string?>(),
+                        null,
+                        ["Build"],
+                        null));
+                result.ShouldHaveSucceeded();
+                submissionIds.Add(result.SubmissionId);
+            }
+
+            submissionIds.ShouldBe([0, 0]);
+        }
+        finally
+        {
+            EvaluationMetrics.IncludeSubmissionIdOverrideForTests = true;
+        }
     }
 
     [Fact]
