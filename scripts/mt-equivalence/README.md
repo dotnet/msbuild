@@ -147,6 +147,32 @@ MicroBuild agent. Without a control run (`-SkipControl`) the verdict falls back 
 The run always fails if the `-mt` evidence check fails, regardless of everything else: a comparison
 that cannot prove `-mt` was actually on is worthless.
 
+## Investigating a failure
+
+The artifact snapshots are far too large to publish (~4.5 GB each, three of them), and a regression
+that only reproduces intermittently may never reproduce on a developer machine. So every run publishes
+a bounded evidence bundle as the `mt-equivalence-reports` pipeline artifact:
+
+| in the artifact | when | what it is |
+|---|---|---|
+| `binlogs/{baseline,mt,control}.binlog` | always (~28 MB) | the binary log of each build — traces a differing file back to the task and target that wrote it |
+| `binlogs/<run>.FAILED.binlog` | when a build itself fails | the failing build's log, rescued before cleanup destroys it |
+| `evidence/<run>/<path>` | when files differ | **both versions** of every differing file, so the bytes can be diffed offline |
+| `evidence-manifest.json` | always | what was collected, and anything a size cap excluded |
+| `verdict.json` | always | machine-readable verdict and the unexplained-difference lists |
+
+Differences are collected in priority order — attributed to `-mt` first, then the rest of the `mt`
+comparison, then the `control` comparison — so when a cap is hit (`-MaxFiles 200`,
+`-MaxTotalBytes 500MB` by default) the most important evidence is what survives. The manifest always
+records the true totals.
+
+A typical investigation: open `summary.md` for the verdict, find the offending path, diff
+`evidence/baseline/<path>` against `evidence/mt/<path>`, then open `binlogs/mt.binlog` to see which
+task produced it.
+
+The replayed text logs used by the log comparison are *not* published: they run to tens of megabytes
+and are regenerable from the binlogs in seconds.
+
 ### Exit codes
 
 | situation | verdict |
@@ -244,6 +270,7 @@ An always-green check is worthless, so every failure path was exercised:
 | `Run-MTEquivalence.ps1` | orchestrator: runs the builds, snapshots them, runs both comparisons, writes `summary.md` |
 | `Compare-Artifacts.ps1` | byte-level artifact tree comparison |
 | `Compare-Binlogs.ps1` | functional binary-log comparison plus the `-mt` evidence assertion |
+| `Collect-Evidence.ps1` | preserves the binlogs and both versions of every differing file, so a failure can be investigated without rerunning |
 | `ArtifactCompareRules.json` | per-path dispositions, each with a reason |
 | `LogNormalizationRules.json` | log normalization + known `-mt`-only differences, each with a reason |
 | `MtCompareNative.cs` | small C# helper (parallel hashing, byte-run diffing, log scanning) compiled with `Add-Type` |

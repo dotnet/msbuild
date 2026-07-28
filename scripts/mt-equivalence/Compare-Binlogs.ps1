@@ -45,7 +45,11 @@ foreach ($p in @($BaselineBinlog, $CandidateBinlog, $MSBuildPath, $RulesFile)) {
     if (-not (Test-Path -LiteralPath $p)) { throw "Not found: $p" }
 }
 New-Item -ItemType Directory -Force -Path $OutputDir | Out-Null
-$workDir = Join-Path $OutputDir "logwork-$Label"
+# Scratch for the replayed text logs. These run to tens of megabytes each and are fully regenerable
+# from the binlogs (which the pipeline publishes), so they are kept out of the report directory and
+# deleted at the end rather than shipped in the artifact.
+$workDir = Join-Path ([System.IO.Path]::GetTempPath()) "mt-equivalence-logwork-$Label-$PID"
+if (Test-Path -LiteralPath $workDir) { Remove-Item -LiteralPath $workDir -Recurse -Force -ErrorAction SilentlyContinue }
 New-Item -ItemType Directory -Force -Path $workDir | Out-Null
 
 # ---------------------------------------------------------------------------------------------
@@ -402,6 +406,9 @@ $mdPath = Join-Path $OutputDir "log-compare.$Label.md"
 
 Write-Host "[$Label] reports: $jsonPath"
 Write-Host "[$Label]          $mdPath"
+
+# Drop the replayed text logs: they are large and regenerable from the binlogs.
+Remove-Item -LiteralPath $workDir -Recurse -Force -ErrorAction SilentlyContinue
 
 if (-not $passed) {
     Write-Host "[$Label] FAIL"

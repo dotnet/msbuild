@@ -149,6 +149,22 @@ function Invoke-OfficialStyleBuild {
 
     Write-Host ("    exit code $exit in {0:hh\:mm\:ss}" -f $sw.Elapsed)
     if ($exit -ne 0) {
+        # A failed build is never snapshotted, so its binary log would be destroyed by the next run's
+        # cleanup. Rescue it first: "-mt broke the build" is the most likely real failure, and the
+        # binlog is the only way to diagnose it after the fact.
+        try {
+            $failureLogDir = Join-Path $ReportsDir 'binlogs'
+            New-Item -ItemType Directory -Force -Path $failureLogDir | Out-Null
+            $binlog = Get-ChildItem -LiteralPath (Join-Path $ArtifactsDir 'log') -Recurse -Filter '*.binlog' -ErrorAction SilentlyContinue | Select-Object -First 1
+            if ($binlog) {
+                Copy-Item -LiteralPath $binlog.FullName -Destination (Join-Path $failureLogDir "$Name.FAILED.binlog") -Force
+                Write-Host "    preserved the failing build's binary log: $(Join-Path $failureLogDir "$Name.FAILED.binlog")"
+            }
+        }
+        catch {
+            Write-Host "    warning: could not preserve the failing build's binary log: $($_.Exception.Message)"
+        }
+
         if ($MultiThreaded) {
             # The most likely cause of "only the -mt build failed" is that the MSBuild driving the
             # build predates -mt (MSB1001 for an unrecognized switch). Say so, rather than leaving the
@@ -340,6 +356,17 @@ if ($netApplied) {
     if ($unexplainedArtifacts.Count -gt 0 -or $unexplainedLogLines.Count -gt 0) { $md.Add('') }
 }
 
+$md.Add('## Investigating a failure')
+$md.Add('')
+$md.Add('The published report artifact also contains, alongside these reports:')
+$md.Add('')
+$md.Add('- `binlogs/{baseline,mt,control}.binlog` - the binary log of each build, for tracing a differing file back to the task that wrote it.')
+$md.Add('- `evidence/<run>/<path>` - both versions of every differing file, so the bytes can be diffed offline.')
+$md.Add('- `evidence-manifest.json` - what was collected, and anything a size cap excluded.')
+$md.Add('')
+$md.Add('The artifact snapshots themselves are not published (roughly 4.5 GB each).')
+$md.Add('')
+
 foreach ($file in (Get-ChildItem -LiteralPath $ReportsDir -Filter '*.md' | Sort-Object Name)) {
     $md.Add((Get-Content -Raw -LiteralPath $file.FullName))
     $md.Add('')
@@ -347,6 +374,32 @@ foreach ($file in (Get-ChildItem -LiteralPath $ReportsDir -Filter '*.md' | Sort-
 
 $summaryPath = Join-Path $ReportsDir 'summary.md'
 ($md -join [Environment]::NewLine) | Set-Content -LiteralPath $summaryPath -Encoding utf8
+
+# Machine-readable verdict, also consumed by Collect-Evidence.ps1 to decide what to preserve.
+$verdict = [pscustomobject]@{
+    GeneratedUtc          = (Get-Date).ToUniversalTime().ToString('o')
+    Configuration         = $Configuration
+    MSBuildEngine         = $MSBuildEngine
+    OfficialBuildId       = $OfficialBuildId
+    ControlRunIncluded    = (-not $SkipControl)
+    NetOfControlApplied   = $netApplied
+    UnexplainedArtifacts  = @($unexplainedArtifacts)
+    UnexplainedLogLines   = @($unexplainedLogLines)
+    ExplainedByControl    = @($explainedByControl)
+    Outcomes              = $outcomes.ToArray()
+}
+$verdict | ConvertTo-Json -Depth 8 | Set-Content -LiteralPath (Join-Path $ReportsDir 'verdict.json') -Encoding utf8
+
+# Preserve what a post-mortem needs. The snapshots themselves are far too large to publish, so this
+# keeps the binary logs plus both versions of every differing file. Best-effort: failing to collect
+# evidence must never change the verdict.
+try {
+    & (Join-Path $PSScriptRoot 'Collect-Evidence.ps1') -WorkDir $WorkDir
+}
+catch {
+    Write-Host "##vso[task.logissue type=warning]Evidence collection failed: $($_.Exception.Message)"
+    Write-Host "WARNING: evidence collection failed: $($_.Exception.Message)"
+}
 
 Write-Host ''
 Write-Host '================ SUMMARY ================'
