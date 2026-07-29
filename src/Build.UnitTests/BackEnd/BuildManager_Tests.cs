@@ -4715,6 +4715,308 @@ $@"<Project InitialTargets=`Sleep`>
             _logger.AssertLogContains("InnerProjectBuilt");
         }
 
+        [Fact]
+        public void GraphBuildSolutionTargetFailureFailsSubmission()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            ProjectCollection projectCollection = env.CreateProjectCollection().Collection;
+
+            TransientTestFolder root = env.CreateFolder(createFolder: true);
+            TransientTestFolder projectFolder = env.CreateFolder(Path.Combine(root.Path, "Project"), createFolder: true);
+            env.CreateFile(projectFolder, "Project.csproj",
+                """
+                <Project>
+                  <Target Name="Build" />
+                </Project>
+                """);
+
+            TransientTestFile solutionFile = env.CreateFile(root, "FailingSolution.sln",
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 16
+                VisualStudioVersion = 16.0.29326.124
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project", "Project\Project.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                    EndGlobalSection
+                EndGlobal
+                """);
+
+            env.CreateFile(root, $"after.{Path.GetFileName(solutionFile.Path)}.targets",
+                """
+                <Project>
+                  <Target Name="FailSolutionBuild" AfterTargets="Build">
+                    <Error Text="Expected solution hook failure" />
+                  </Target>
+                </Project>
+                """);
+
+            ProjectGraph graph = new(new ProjectGraphEntryPoint(solutionFile.Path), projectCollection);
+            ProjectGraphNode syntheticSolutionNode = graph.EntryPointNodes.Single();
+            GraphBuildRequestData request = new(graph, Array.Empty<string>(), projectCollection.HostServices);
+
+            GraphBuildResult result = _buildManager.Build(_parameters, request);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+            result.Exception.ShouldNotBeNull();
+            result.ResultsByNode[syntheticSolutionNode].OverallResult.ShouldBe(BuildResultCode.Failure);
+            _logger.AssertLogContains("Expected solution hook failure");
+        }
+
+        [Fact]
+        public void GraphBuildSolutionHooksObserveTargetOrdering()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            ProjectCollection projectCollection = env.CreateProjectCollection().Collection;
+
+            TransientTestFolder root = env.CreateFolder(createFolder: true);
+            TransientTestFolder projectFolder = env.CreateFolder(Path.Combine(root.Path, "Project"), createFolder: true);
+            env.CreateFile(projectFolder, "Project.csproj",
+                """
+                <Project>
+                  <Target Name="Build" />
+                </Project>
+                """);
+
+            TransientTestFile solutionFile = env.CreateFile(root, "Ordering.sln",
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 16
+                VisualStudioVersion = 16.0.29326.124
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project", "Project\Project.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                    EndGlobalSection
+                EndGlobal
+                """);
+
+            env.CreateFile(root, $"after.{Path.GetFileName(solutionFile.Path)}.targets",
+                """
+                <Project>
+                  <Target Name="SolutionDependency" />
+                  <Target Name="SolutionBefore" BeforeTargets="Build" DependsOnTargets="SolutionDependency" />
+                  <Target Name="SolutionAfter" AfterTargets="Build" />
+                </Project>
+                """);
+
+            ProjectGraph graph = new(new ProjectGraphEntryPoint(solutionFile.Path), projectCollection);
+            GraphBuildRequestData request = new(graph, Array.Empty<string>(), projectCollection.HostServices);
+
+            GraphBuildResult result = _buildManager.Build(_parameters, request);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            List<string> solutionTargets = _logger.TargetStartedEvents
+                .Where(e => e.ProjectFile.EndsWith("Ordering.sln", StringComparison.OrdinalIgnoreCase))
+                .Select(e => e.TargetName)
+                .ToList();
+
+            int dependencyIndex = solutionTargets.IndexOf("SolutionDependency");
+            int beforeIndex = solutionTargets.IndexOf("SolutionBefore");
+            int buildIndex = solutionTargets.IndexOf("Build");
+            int afterIndex = solutionTargets.IndexOf("SolutionAfter");
+
+            dependencyIndex.ShouldBeGreaterThanOrEqualTo(0);
+            dependencyIndex.ShouldBeLessThan(beforeIndex);
+            beforeIndex.ShouldBeLessThan(buildIndex);
+            buildIndex.ShouldBeLessThan(afterIndex);
+            solutionTargets.Count(target => target == "SolutionDependency").ShouldBe(1);
+            solutionTargets.Count(target => target == "SolutionBefore").ShouldBe(1);
+            solutionTargets.Count(target => target == "SolutionAfter").ShouldBe(1);
+        }
+
+        [Theory]
+        [InlineData("CustomTarget", 1, 1)]
+        [InlineData("Project1:CustomTarget", 1, 0)]
+        public void GraphBuildSolutionCustomTargetsSelectExpectedProjects(
+            string target,
+            int expectedProject1Executions,
+            int expectedProject2Executions)
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            ProjectCollection projectCollection = env.CreateProjectCollection().Collection;
+
+            TransientTestFolder root = env.CreateFolder(createFolder: true);
+            TransientTestFolder project1Folder = env.CreateFolder(Path.Combine(root.Path, "Project1"), createFolder: true);
+            TransientTestFolder project2Folder = env.CreateFolder(Path.Combine(root.Path, "Project2"), createFolder: true);
+            env.CreateFile(project1Folder, "Project1.csproj",
+                """
+                <Project>
+                  <Target Name="CustomTarget">
+                    <Message Text="Project1CustomTarget" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+            env.CreateFile(project2Folder, "Project2.csproj",
+                """
+                <Project>
+                  <Target Name="CustomTarget">
+                    <Message Text="Project2CustomTarget" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+
+            TransientTestFile solutionFile = env.CreateFile(root, "CustomTargets.sln",
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 16
+                VisualStudioVersion = 16.0.29326.124
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project1", "Project1\Project1.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
+                EndProject
+                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project2", "Project2\Project2.csproj", "{2022C11A-1405-4983-BEC2-3A8B0233108F}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                    EndGlobalSection
+                EndGlobal
+                """);
+
+            ProjectGraph graph = new(new ProjectGraphEntryPoint(solutionFile.Path), projectCollection);
+            GraphBuildRequestData request = new(graph, [target], projectCollection.HostServices);
+
+            GraphBuildResult result = _buildManager.Build(_parameters, request);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            _logger.TargetStartedEvents.Count(
+                e => e.TargetName == "CustomTarget"
+                    && e.ProjectFile.EndsWith("Project1.csproj", StringComparison.OrdinalIgnoreCase))
+                .ShouldBe(expectedProject1Executions);
+            _logger.TargetStartedEvents.Count(
+                e => e.TargetName == "CustomTarget"
+                    && e.ProjectFile.EndsWith("Project2.csproj", StringComparison.OrdinalIgnoreCase))
+                .ShouldBe(expectedProject2Executions);
+        }
+
+        [Fact]
+        public void GraphBuildSolutionChangeWaveOptOutPreservesLegacyExecution()
+        {
+            try
+            {
+                ChangeWaves.ResetStateForTests();
+                using TestEnvironment env = TestEnvironment.Create(_output);
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString());
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+
+                ProjectCollection projectCollection = env.CreateProjectCollection().Collection;
+                TransientTestFolder root = env.CreateFolder(createFolder: true);
+                TransientTestFolder projectFolder = env.CreateFolder(Path.Combine(root.Path, "Project"), createFolder: true);
+                env.CreateFile(projectFolder, "Project.csproj",
+                    """
+                    <Project>
+                      <Target Name="Build">
+                        <Message Text="LegacyProjectBuilt" Importance="High" />
+                      </Target>
+                    </Project>
+                    """);
+
+                TransientTestFile solutionFile = env.CreateFile(root, "Legacy.sln",
+                    """
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 16
+                    VisualStudioVersion = 16.0.29326.124
+                    MinimumVisualStudioVersion = 10.0.40219.1
+                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project", "Project\Project.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|Any CPU = Debug|Any CPU
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                        EndGlobalSection
+                    EndGlobal
+                    """);
+
+                env.CreateFile(root, $"after.{Path.GetFileName(solutionFile.Path)}.targets",
+                    """
+                    <Project>
+                      <Target Name="SolutionHook" AfterTargets="Build">
+                        <Message Text="SolutionHookRan" Importance="High" />
+                      </Target>
+                    </Project>
+                    """);
+
+                ProjectGraph graph = new(new ProjectGraphEntryPoint(solutionFile.Path), projectCollection);
+                GraphBuildRequestData request = new(graph, Array.Empty<string>(), projectCollection.HostServices);
+
+                GraphBuildResult result = _buildManager.Build(_parameters, request);
+
+                result.OverallResult.ShouldBe(BuildResultCode.Success);
+                graph.ProjectNodes.ShouldContain(graph.EntryPointNodes.Single());
+                _logger.AssertLogContains("LegacyProjectBuilt");
+                _logger.AssertLogDoesntContain("SolutionHookRan");
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+            }
+        }
+
+        [Fact]
+        public void GraphBuildEmptySolutionExecutesSolutionHooks()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            ProjectCollection projectCollection = env.CreateProjectCollection().Collection;
+
+            TransientTestFolder root = env.CreateFolder(createFolder: true);
+            TransientTestFile solutionFile = env.CreateFile(root, "Empty.sln",
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 16
+                VisualStudioVersion = 16.0.29326.124
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                    EndGlobalSection
+                EndGlobal
+                """);
+
+            env.CreateFile(root, $"after.{Path.GetFileName(solutionFile.Path)}.targets",
+                """
+                <Project>
+                  <Target Name="EmptySolutionHook" AfterTargets="Build">
+                    <Message Text="EmptySolutionHookRan" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+
+            ProjectGraph graph = new(new ProjectGraphEntryPoint(solutionFile.Path), projectCollection);
+            GraphBuildRequestData request = new(graph, Array.Empty<string>(), projectCollection.HostServices);
+
+            GraphBuildResult result = _buildManager.Build(_parameters, request);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            graph.ProjectNodes.ShouldBeEmpty();
+            graph.EntryPointNodes.ShouldHaveSingleItem();
+            result.ResultsByNode.ContainsKey(graph.EntryPointNodes.Single()).ShouldBeTrue();
+            _logger.AssertLogContains("EmptySolutionHookRan");
+        }
+
         /// <summary>
         /// Helper task used by <see cref="TaskInputLoggingIsExposedToTasks"/> to verify <see cref="TaskLoggingHelper.IsTaskInputLoggingEnabled"/>.
         /// </summary>
