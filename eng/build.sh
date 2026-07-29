@@ -6,8 +6,8 @@ ci=false
 binary_log=false
 exclude_ci_binary_log=false
 stage2=false
-stage2Arguments=
-properties=
+stage2Arguments=()
+properties=()
 
 source="${BASH_SOURCE[0]}"
 
@@ -49,14 +49,14 @@ while [[ $# -gt 0 ]]; do
       stage2=true
       shift 1
       ;;
-    --stage2arguments)
-      stage2Arguments=$2
-      # Supplying stage2Arguments implies a multi-stage build.
+    --stage2argument)
+      stage2Arguments+=( "$2" )
+      # Supplying stage2Argument implies a multi-stage build.
       stage2=true
       shift 2
       ;;
     *)
-      properties="$properties $1"
+      properties+=( "$1" )
       shift 1
       ;;
   esac
@@ -65,37 +65,37 @@ done
 build_script="$scriptroot/common/build.sh"
 
 # Arguments common to the stage1 and stage2 builds, including any caller-supplied properties.
-common_build_args="--configuration $configuration $properties"
+common_build_args=( "--configuration" "$configuration" ${properties[@]+"${properties[@]}"} )
 
 # Forward the binary-log-related switches to both the stage 1 and stage 2 builds.
 if [ "$ci" = true ]; then
-  common_build_args="$common_build_args --ci"
+  common_build_args+=("--ci")
 fi
 if [ "$binary_log" = true ]; then
-  common_build_args="$common_build_args --binaryLog"
+  common_build_args+=("--binaryLog")
 fi
 if [ "$exclude_ci_binary_log" = true ]; then
-  common_build_args="$common_build_args --excludeCIBinarylog"
+  common_build_args+=("--excludeCIBinarylog")
 fi
 
-build_args="$common_build_args"
+build_args=("${common_build_args[@]}")
 
 # If the caller requested a multi-stage build, add the --prepareMachine switch to the stage 1 build so that it kills any lingering processes from stage 1 before stage 2 starts.
 # Also disable the pipeline set result masking for stage 1 so that a stage 1 failure surfaces its real exit code to this wrapper (stage 2 is the terminal build that reports the pipeline result).
 if [ "$stage2" = true ]; then
-  build_args="$build_args --prepareMachine --disablePipelineSetResult"
+  build_args+=("--prepareMachine" "--disablePipelineSetResult")
 fi
 
 if [ "$test" = true ] && [ "$stage2" != true ]; then
-  build_args="$build_args --test"
+  build_args+=("--test")
 fi
 
 # Log the stage 1 build command so that it's clear which arguments flow to it.
 if [ "$stage2" = true ]; then
-  echo "Stage 1 build: /bin/bash \"$build_script\" $build_args"
+  echo "Stage 1 build: /bin/bash \"$build_script\" ${build_args[*]}"
 fi
 
-/bin/bash "$build_script" $build_args
+/bin/bash "$build_script" "${build_args[@]}"
 stage1_exit_code=$?
 
 if [ "$stage2" != true ]; then
@@ -153,7 +153,7 @@ export DOTNET_PERFLOG_DIR="$perf_log_dir"
 export DOTNET_HOST_PATH="$bootstrap_root/core/dotnet"
 export DOTNET_INSTALL_DIR="$bootstrap_root/core"
 
-stage2_build_args="$common_build_args"
+stage2_build_args=( "${common_build_args[@]}" )
 
 # Give the stage 2 binary log a distinct name so it doesn't collide with the stage 1 binlog
 # (both otherwise default to Build.binlog) when CI publishes them to the same artifacts location.
@@ -161,20 +161,20 @@ stage2_build_args="$common_build_args"
 # Arcade emits a binlog for CI builds (--ci) or when --binaryLog is passed explicitly, unless it's
 # suppressed with --excludeCIBinarylog.
 if { [ "$ci" = true ] || [ "$binary_log" = true ]; } && [ "$exclude_ci_binary_log" != true ]; then
-  stage2_build_args="$stage2_build_args --binaryLogName Build.stage2.binlog"
+  stage2_build_args+=("--binaryLogName" "Build.stage2.binlog")
 fi
 
 # Only run tests in stage2 when supplying the '--test' switch in a multi-stage build.
 if [ "$test" = true ]; then
-  stage2_build_args="$stage2_build_args --test"
+  stage2_build_args+=("--test")
 fi
 
 # $stage2Arguments are appended to the stage 2 build only.
 # Use this for switches like /mt that should not be passed to the stage1 build
 # until a stable version of MT is available in the images.
-stage2_build_args="$stage2_build_args $stage2Arguments"
+stage2_build_args+=( ${stage2Arguments[@]+"${stage2Arguments[@]}"} )
 
-echo "Stage 2 build: /bin/bash \"$build_script\" $stage2_build_args"
+echo "Stage 2 build: /bin/bash \"$build_script\" ${stage2_build_args[*]}"
 # Needs to run out-of-proc to not inherit the stage 1 build's state variables.
-/bin/bash "$build_script" $stage2_build_args
+/bin/bash "$build_script" "${stage2_build_args[@]}"
 exit $?

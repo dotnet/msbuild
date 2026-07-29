@@ -6,6 +6,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.IO.Pipes;
 using System.Text;
+using System.Threading;
 using Microsoft.Build.Framework.Coordinator;
 
 namespace Microsoft.Build.BackEnd;
@@ -17,9 +18,11 @@ internal sealed partial class CoordinatorClient
     /// </summary>
     private sealed class Connection : IDisposable
     {
-        private NamedPipeClientStream? _pipeStream;
-        private BinaryReader? _reader;
-        private BinaryWriter? _writer;
+        private readonly NamedPipeClientStream _pipeStream;
+        private readonly BinaryReader _reader;
+        private readonly BinaryWriter _writer;
+        private readonly LockType _writeLock = new();
+        private int _disposed;
 
         /// <summary>
         ///  Gets the unique identifier sent during the coordinator handshake.
@@ -62,69 +65,78 @@ internal sealed partial class CoordinatorClient
 
         private bool TryHandshake(int processId, ICoordinatorDebugOutput output)
         {
-            output.WriteLine($"CoordinatorClient: Sending handshake (ConnectionId {Id})");
-            WriteClientMessage(new ClientHandshakeMessage(Id, processId, capabilities: [Capabilities.NestedGrants]));
-
-            ServerMessage response = ReadServerMessage();
-
-            if (response is ServerHandshakeMessage serverHandshake)
+            try
             {
-                ServerCapabilities = serverHandshake.Capabilities;
-                output.WriteLine($"CoordinatorClient: Handshake complete (server capabilities: [{string.Join(", ", serverHandshake.Capabilities)}])");
-                return true;
-            }
+                output.WriteLine($"CoordinatorClient: Sending handshake (ConnectionId {Id})");
+                WriteClientMessage(new ClientHandshakeMessage(Id, processId, capabilities: [Capabilities.NestedGrants]));
 
-            if (response is ErrorMessage error)
-            {
-                output.WriteLine($"CoordinatorClient: Server rejected handshake: {error.Message}");
+                ServerMessage response = ReadServerMessage();
+
+                if (response is ServerHandshakeMessage serverHandshake)
+                {
+                    ServerCapabilities = serverHandshake.Capabilities;
+                    output.WriteLine($"CoordinatorClient: Handshake complete (server capabilities: [{string.Join(", ", serverHandshake.Capabilities)}])");
+                    return true;
+                }
+
+                if (response is ErrorMessage error)
+                {
+                    output.WriteLine($"CoordinatorClient: Server rejected handshake: {error.Message}");
+                    return false;
+                }
+
+                output.WriteLine($"CoordinatorClient: Unexpected handshake response: {response.GetType().Name}");
                 return false;
             }
-
-            output.WriteLine($"CoordinatorClient: Unexpected handshake response: {response.GetType().Name}");
-            return false;
+            catch (Exception ex) when (ex is IOException or EndOfStreamException)
+            {
+                output.WriteLine($"CoordinatorClient: Exception during handshake: {ex.Message}");
+                return false;
+            }
         }
 
         /// <summary>
         ///  Reads the next server message from the coordinator pipe.
         /// </summary>
-        public ServerMessage ReadServerMessage()
-        {
-            Assumed.NotNull(_reader);
-            return _reader.ReadServerMessage();
-        }
+        public ServerMessage ReadServerMessage() => _reader.ReadServerMessage();
 
         /// <summary>
         ///  Writes a client message to the coordinator pipe.
         /// </summary>
         public void WriteClientMessage(ClientMessage message)
         {
-            Assumed.NotNull(_writer);
-            _writer.Write(message);
+            lock (_writeLock)
+            {
+                _writer.Write(message);
+            }
         }
 
         /// <summary>
-        ///  Transfers ownership of the pipe, reader, and writer to the caller.
+        ///  Checks whether the coordinator server advertised a capability during handshake.
         /// </summary>
-        public (NamedPipeClientStream PipeStream, BinaryReader Reader, BinaryWriter Writer) TransferOwnership()
-        {
-            Assumed.NotNull(_pipeStream);
-            Assumed.NotNull(_reader);
-            Assumed.NotNull(_writer);
-
-            var result = (_pipeStream, _reader, _writer);
-
-            _pipeStream = null;
-            _reader = null;
-            _writer = null;
-
-            return result;
-        }
+        public bool HasServerCapability(string capability) => ServerCapabilities.Contains(capability);
 
         public void Dispose()
         {
-            _reader?.Dispose();
-            _writer?.Dispose();
-            _pipeStream?.Dispose();
+            if (Interlocked.Exchange(ref _disposed, 1) != 0)
+            {
+                return;
+            }
+
+            try
+            {
+                lock (_writeLock)
+                {
+                    _writer.Dispose();
+                }
+            }
+            catch (IOException)
+            {
+                // Flush in BinaryWriter.Dispose can throw if the pipe is already broken.
+            }
+
+            _reader.Dispose();
+            _pipeStream.Dispose();
         }
     }
 }
