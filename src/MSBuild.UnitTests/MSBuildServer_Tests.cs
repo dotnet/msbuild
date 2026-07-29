@@ -147,6 +147,7 @@ namespace Microsoft.Build.Engine.UnitTests
             pidOfServerProcess.ShouldNotBe(newServerProcessId, "Node used by both the first and second build should not be the same.");
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14540")]
         [Fact]
         public void ServerSpawnAndReuseAreLoggedToBuildLog()
         {
