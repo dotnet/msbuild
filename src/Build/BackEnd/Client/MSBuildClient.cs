@@ -185,6 +185,8 @@ namespace Microsoft.Build.Experimental
                 PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
                 | PipeOptions.CurrentUserOnly
+#else
+                | (NodeProviderOutOfProcBase.IsHostedOnDotNetRuntime ? NodeProviderOutOfProcBase.PipeOptionsCurrentUserOnly : PipeOptions.None)
 #endif
             );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter

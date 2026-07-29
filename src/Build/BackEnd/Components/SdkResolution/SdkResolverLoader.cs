@@ -270,9 +270,20 @@ namespace Microsoft.Build.BackEnd.SdkResolution
                     }
                     else
                     {
-                        // VS and MSBuild.exe direct usage: use Assembly.Load directly without fallback
+                        // VS and MSBuild.exe direct usage: use Assembly.Load directly
                         // These scenarios should work reliably with Assembly.Load and benefit from NGEN
-                        return Assembly.Load(assemblyName);
+                        try
+                        {
+                            return Assembly.Load(assemblyName);
+                        }
+                        catch (FileNotFoundException)
+                        {
+                            // Assembly.Load honors the CodeBase hint only on .NET Framework (Fusion).
+                            // When this assembly is hosted on .NET (e.g. an IDE running MSBuild.exe's
+                            // assemblies on .NET via MSBuildLocator), the CodeBase is ignored and the
+                            // simple-name load fails — fall back to loading from the resolver path.
+                            return Assembly.LoadFrom(resolverPath);
+                        }
                     }
                 }
             }

@@ -22,6 +22,7 @@ using System.Resources.Extensions;
 using System.Reflection;
 using System.Runtime.InteropServices;
 #if FEATURE_APPDOMAIN
+using System.Runtime.CompilerServices;
 using System.Runtime.Remoting;
 using System.Runtime.Serialization.Formatters.Binary;
 #endif
@@ -806,10 +807,7 @@ namespace Microsoft.Build.Tasks
                                 // create the list that we'll use to disconnect the taskitems once we're done
                                 _remotedTaskItems = new List<ITaskItem>();
 
-                                appDomain = AppDomain.CreateDomain(
-                                    "generateResourceAppDomain",
-                                    null,
-                                    AppDomain.CurrentDomain.SetupInformation);
+                                appDomain = CreateGenerateResourceAppDomain();
 
                                 object obj = appDomain.CreateInstanceFromAndUnwrap(
                                        typeof(ProcessResourceFiles).Module.FullyQualifiedName,
@@ -1807,6 +1805,23 @@ namespace Microsoft.Build.Tasks
         }
 
 #if FEATURE_APPDOMAIN
+        /// <summary>
+        /// Creates the AppDomain resource processing runs in when one is needed. Kept in a separate
+        /// never-inlined method: the AppDomain.CreateDomain overload used here has
+        /// System.Security.Policy.Evidence in its signature, a type that does not exist when a .NET
+        /// host loads this .NET Framework assembly, and an unresolvable signature fails the JIT of
+        /// the entire calling method. Isolating it here keeps <see cref="Execute"/> JITtable on .NET
+        /// so the common no-separate-AppDomain path still works there.
+        /// </summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static AppDomain CreateGenerateResourceAppDomain()
+        {
+            return AppDomain.CreateDomain(
+                "generateResourceAppDomain",
+                null,
+                AppDomain.CurrentDomain.SetupInformation);
+        }
+
         /// <summary>
         /// Make the decision about whether a separate AppDomain is needed.
         /// If this algorithm is unsure about whether a separate AppDomain is

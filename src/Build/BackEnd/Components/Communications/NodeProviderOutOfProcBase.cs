@@ -791,6 +791,17 @@ namespace Microsoft.Build.BackEnd
         }
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+        // When the .NET Framework flavor of MSBuild is hosted on the .NET runtime (e.g. an IDE that
+        // loads MSBuild.exe's assemblies in-proc via MSBuildLocator), PipeSecurity and
+        // PipeStream.GetAccessControl do not exist there, so ValidateRemotePipeSecurityOnWindows
+        // cannot run. That runtime does support PipeOptions.CurrentUserOnly — the mechanism the
+        // .NET flavor of MSBuild uses instead (see FEATURE_PIPEOPTIONS_CURRENTUSERONLY) — which
+        // makes Connect perform the equivalent remote-owner validation.
+        internal static readonly bool IsHostedOnDotNetRuntime = Environment.Version.Major >= 5;
+
+        // The enum value is absent from the .NET Framework reference assemblies, so it is spelled numerically.
+        internal const PipeOptions PipeOptionsCurrentUserOnly = (PipeOptions)0x20000000;
+
         // This code needs to be in a separate method so that we don't try (and fail) to load the Windows-only APIs when JIT-ing the code
         //  on non-Windows operating systems
         private static void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
@@ -822,6 +833,8 @@ namespace Microsoft.Build.BackEnd
                 PipeOptions.Asynchronous
 #if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
                 | PipeOptions.CurrentUserOnly
+#else
+                | (IsHostedOnDotNetRuntime ? PipeOptionsCurrentUserOnly : PipeOptions.None)
 #endif
             );
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
@@ -869,7 +882,9 @@ namespace Microsoft.Build.BackEnd
             nodeStream.Connect(timeout);
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
-            if (NativeMethodsShared.IsWindows)
+            // On the .NET runtime the pipe is opened with PipeOptionsCurrentUserOnly, which made
+            // Connect perform this same remote-owner validation (and PipeSecurity APIs don't exist).
+            if (NativeMethodsShared.IsWindows && !IsHostedOnDotNetRuntime)
             {
                 // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
                 // been faked up with ACLs that would let us attach to it.  It could then issue fake build requests back to
