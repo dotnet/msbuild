@@ -80,6 +80,24 @@ variables:
   value: none
 - name: MTEquivalenceWorkDir
   value: $(Agent.TempDirectory)\mt-equivalence
+# Disable Guardian's Roslyn analyzer injection for this pipeline.
+#
+# The injection rewrites every project's ruleset and makes each compilation emit a
+# <project>.gdn.sarif next to the source, which the build then copies into the output tree. That
+# perturbs the very builds this pipeline exists to compare, and it is not reproducible: the files
+# were observed present in one build of an identical pair and absent from the other. It also
+# produced an incremental SARIF that the Advanced Security publish step rejected
+# ("contains results for files not present in the artifacts list"), which failed both jobs while the
+# equivalence check itself passed.
+#
+# The experimental official build this pipeline mirrors (MSBuild-ExpPerf) also runs with
+# "Guardian: Roslyn" skipped, and this pipeline ships nothing - SDL still covers this source through
+# the real official build and PR validation. The variable name and the accepted value are taken from
+# the task's own condition in the expanded template:
+#   and(eq(variables['ONEES_ROSLYN_RULESET_INJECTED'], true),
+#       ne(variables['ONEES_ENFORCED_ROSLYN_ENABLED'], 'false'), ...)
+- name: ONEES_ENFORCED_ROSLYN_ENABLED
+  value: 'false'
 # Mirrors VisualStudio.DropName in .vsts-dotnet-build-jobs.yml. Required by AfterSigning.proj to
 # generate the VS insertion manifests; the value is only embedded into those manifests, nothing is
 # uploaded. It must be identical across the runs being compared, so it deliberately does not include
