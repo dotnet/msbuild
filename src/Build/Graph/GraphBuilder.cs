@@ -107,7 +107,9 @@ namespace Microsoft.Build.Graph
 
             DetectCycles(originalEntryPointNodes, _projectInterpretation, allParsedProjects);
 
-            if (Solution != null && _solutionGlobalProperties != null)
+            if (Solution != null
+                && _solutionGlobalProperties != null
+                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10))
             {
                 var syntheticSolutionNode = CreateSyntheticSolutionNode(originalEntryPointNodes);
                 EntryPointNodes = [syntheticSolutionNode];
@@ -151,6 +153,7 @@ namespace Microsoft.Build.Graph
             }
 
             solutionGlobalProperties[PropertyNames.IsGraphBuild] = "true";
+            solutionGlobalProperties[SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty] = $"{Solution.FullPath}.metaproj";
 
             ProjectInstance syntheticSolutionInstance;
             ProjectGraphNode projectNodeToInheritFrom = projectNodes.FirstOrDefault();
@@ -378,6 +381,7 @@ namespace Microsoft.Build.Graph
             solutionGlobalPropertiesBuilder["SolutionFileName"] = EscapingUtilities.Escape(Path.GetFileName(Solution.FullPath));
             solutionGlobalPropertiesBuilder["SolutionName"] = EscapingUtilities.Escape(Path.GetFileNameWithoutExtension(Solution.FullPath));
             solutionGlobalPropertiesBuilder[SolutionProjectGenerator.SolutionPathPropertyName] = EscapingUtilities.Escape(Path.Combine(Solution.SolutionFileDirectory, Path.GetFileName(Solution.FullPath)));
+            ImmutableDictionary<string, string> solutionGlobalProperties = solutionGlobalPropertiesBuilder.ToImmutable();
 
             // Project configurations are reused heavily, so cache the global properties for each
             Dictionary<string, ImmutableDictionary<string, string>> globalPropertiesForProjectConfiguration = new(StringComparer.OrdinalIgnoreCase);
@@ -402,10 +406,9 @@ namespace Microsoft.Build.Graph
 
                 if (!globalPropertiesForProjectConfiguration.TryGetValue(projectConfiguration.FullName, out ImmutableDictionary<string, string> projectGlobalProperties))
                 {
-                    solutionGlobalPropertiesBuilder["Configuration"] = projectConfiguration.ConfigurationName;
-                    solutionGlobalPropertiesBuilder["Platform"] = projectConfiguration.PlatformName;
-
-                    projectGlobalProperties = solutionGlobalPropertiesBuilder.ToImmutable();
+                    projectGlobalProperties = solutionGlobalProperties
+                        .SetItem("Configuration", projectConfiguration.ConfigurationName)
+                        .SetItem("Platform", projectConfiguration.PlatformName);
                     globalPropertiesForProjectConfiguration.Add(projectConfiguration.FullName, projectGlobalProperties);
                 }
 
@@ -446,7 +449,7 @@ namespace Microsoft.Build.Graph
 
             newEntryPoints.TrimExcess();
 
-             return (newEntryPoints, solutionDependencies, solutionGlobalPropertiesBuilder.ToImmutable());
+            return (newEntryPoints, solutionDependencies, solutionGlobalProperties);
 
             SolutionConfigurationInSolution SelectSolutionConfiguration(SolutionFile solutionFile, IDictionary<string, string> globalProperties)
             {

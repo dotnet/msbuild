@@ -69,7 +69,9 @@ namespace Microsoft.Build.Construction
         /// The set of properties which identify the configuration and platform to build a project with
         /// </summary>
         private const string SolutionConfigurationAndPlatformProperties = "Configuration=$(Configuration); Platform=$(Platform)";
-        private const string NotGraphBuildCondition = "'$(IsGraphBuild)' != 'true'";
+        internal const string SolutionGraphBuildEntryPointProperty = "_MSBuildSolutionGraphBuildEntryPoint";
+        private const string SuppressSolutionGraphBuildTraversalProperty = "_MSBuildSuppressSolutionGraphBuildTraversal";
+        private const string NotSolutionGraphBuildEntryPointCondition = $"'$({SuppressSolutionGraphBuildTraversalProperty})' != 'true'";
 
         /// <summary>
         /// The Special Target name which when <see cref="_batchProjectTargets"/> is enabled, all P2P references will just execute this target.
@@ -924,6 +926,14 @@ namespace Microsoft.Build.Construction
             // Add solution related macros
             AddGlobalProperties(traversalProject);
 
+            if (_globalProperties.TryGetValue(SolutionGraphBuildEntryPointProperty, out string graphBuildEntryPoint)
+                && FileUtilities.PathComparer.Equals(graphBuildEntryPoint, traversalProject.FullPath))
+            {
+                ProjectPropertyGroupElement graphBuildProperties = traversalProject.CreatePropertyGroupElement();
+                traversalProject.AppendChild(graphBuildProperties);
+                graphBuildProperties.AddProperty(SuppressSolutionGraphBuildTraversalProperty, "true");
+            }
+
             // Add a property group for each solution configuration, each with one XML property containing the
             // project configurations in this solution configuration.
             foreach (SolutionConfigurationInSolution solutionConfiguration in _solutionFile.SolutionConfigurations)
@@ -1428,7 +1438,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static void AddProjectBuildTask(ProjectInstance traversalProject, ProjectConfigurationInSolution projectConfiguration, ProjectTargetInstance target, string targetToBuild, string sourceItems, string condition, string outputItem)
         {
-            string combinedCondition = string.IsNullOrEmpty(condition) ? NotGraphBuildCondition : $"({condition}) and {NotGraphBuildCondition}";
+            string combinedCondition = string.IsNullOrEmpty(condition) ? NotSolutionGraphBuildEntryPointCondition : $"({condition}) and {NotSolutionGraphBuildEntryPointCondition}";
             ProjectTaskInstance task = target.AddTask("MSBuild", combinedCondition, String.Empty);
             task.SetParameter("Projects", sourceItems);
             if (targetToBuild != null)
@@ -1461,7 +1471,7 @@ namespace Microsoft.Build.Construction
         private void AddMetaprojectBuildTask(ProjectInSolution project, ProjectTargetInstance target, string targetToBuild, string outputItem)
         {
             string projectMatchCondition = Strings.WeakIntern($"'%(ProjectReference.Identity)' == '{GetMetaprojectName(project)}'");
-            string combinedCondition = $"({projectMatchCondition}) and {NotGraphBuildCondition}";
+            string combinedCondition = $"({projectMatchCondition}) and {NotSolutionGraphBuildEntryPointCondition}";
             ProjectTaskInstance task = target.AddTask("MSBuild", combinedCondition, String.Empty);
             task.SetParameter("Projects", "@(ProjectReference)");
 
@@ -2065,7 +2075,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private static void AddReferencesBuildTask(ProjectTargetInstance target, string targetToBuild, string outputItem)
         {
-            ProjectTaskInstance task = target.AddTask("MSBuild", NotGraphBuildCondition, String.Empty);
+            ProjectTaskInstance task = target.AddTask("MSBuild", NotSolutionGraphBuildEntryPointCondition, String.Empty);
             if (String.Equals(targetToBuild, "Clean", StringComparison.OrdinalIgnoreCase))
             {
                 task.SetParameter("Projects", "@(ProjectReference->Reverse())");
