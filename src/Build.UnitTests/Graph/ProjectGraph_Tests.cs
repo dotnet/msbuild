@@ -2835,6 +2835,7 @@ $@"
         [InlineData(new[] { "Rebuild" }, new[] { "Rebuild" }, new[] { "Rebuild" })]
         [InlineData(new[] { "Clean" }, new[] { "Clean" }, new[] { "Clean" })]
         [InlineData(new[] { "Publish" }, new[] { "Publish" }, new[] { "Publish" })]
+        [InlineData(new[] { "Pack" }, new[] { "Pack" }, new[] { "Pack" })]
         // Traversal targets
         [InlineData(new[] { "Project1" }, new[] { "Project1Default" }, new string[0])]
         [InlineData(new[] { "Project2" }, new string[0], new[] { "Project2Default" })]
@@ -2893,9 +2894,51 @@ $@"
                 ProjectGraphNode project2Node = GetFirstNodeWithProjectNumber(projectGraph, 2);
 
                 IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(entryTargets);
-                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count + projectGraph.EntryPointNodes.Count);
                 targetLists[project1Node].ShouldBe(expectedProject1Targets);
                 targetLists[project2Node].ShouldBe(expectedProject2Targets);
+            }
+        }
+
+        [Fact]
+        public void SyntheticSolutionNodeCanBeDisabledByChangeWave()
+        {
+            try
+            {
+                ChangeWaves.ResetStateForTests();
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString());
+
+                TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
+                TransientTestFile solutionFile = _env.CreateFile(
+                    "Solution.sln",
+                    $$"""
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 17
+                    VisualStudioVersion = 17.0.31903.59
+                    MinimumVisualStudioVersion = 17.0.31903.59
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "{{projectFile.Path}}", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|x64 = Debug|x64
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                        EndGlobalSection
+                    EndGlobal
+                    """);
+
+                ProjectGraph graph = new(solutionFile.Path);
+
+                graph.EntryPointNodes.ShouldHaveSingleItem();
+                graph.ProjectNodes.ShouldContain(graph.EntryPointNodes.Single());
+                graph.GraphRoots.ShouldHaveSingleItem();
+                graph.ProjectNodes.ShouldContain(graph.GraphRoots.Single());
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
             }
         }
 

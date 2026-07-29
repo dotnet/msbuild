@@ -770,6 +770,20 @@ namespace Microsoft.Build.Graph
                             ProjectGraphBuildRequest entryEdge = new(entryPointNode, [targetName]);
                             encounteredEdges.Add(entryEdge);
                             edgesToVisit.Enqueue(entryEdge);
+
+                            // The synthetic solution node has no ProjectReferenceTargets, so solution-wide
+                            // targets must also be seeded directly on each project in the solution.
+                            if (Solution != null && !projectNodeSet.Contains(entryPointNode))
+                            {
+                                foreach (ProjectGraphNode projectNode in entryPointNode.ProjectReferences)
+                                {
+                                    ProjectGraphBuildRequest projectEdge = new(projectNode, [targetName]);
+                                    if (encounteredEdges.Add(projectEdge))
+                                    {
+                                        edgesToVisit.Enqueue(projectEdge);
+                                    }
+                                }
+                            }
                         }
                     }
                 }
