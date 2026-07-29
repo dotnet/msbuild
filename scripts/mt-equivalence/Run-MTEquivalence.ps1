@@ -146,11 +146,14 @@ function Invoke-OfficialStyleBuild {
         #   * the outer job's TEMP, TMP and PATH would be mutated by an inner build;
         #   * the agent uploads asynchronously, so it races the snapshot move below and fails the job
         #     with FileNotFoundException once the files have been moved aside.
-        # Neutralize the marker: the lines stay readable in the log but are no longer commands.
+        # Neutralize the marker. The agent scans for the "##vso[" token *anywhere* in a line, not just
+        # at the start, so the token itself has to be broken - prefixing the line is not enough (it
+        # leaves the agent half-parsing the command and erroring twice per line). Rewriting "##" to
+        # "~~" keeps the line fully readable while making it inert.
         # Out-Host keeps the build's console output on stdout instead of letting it become part of
         # this function's return value.
         & (Join-Path $RepoRoot 'build.cmd') @officialArgs |
-            ForEach-Object { [string]$_ -replace '^(\s*)##(?=(?:vso)?\[)', '$1(inner build) ##' } |
+            ForEach-Object { [string]$_ -replace '##(?=(?:vso)?\[)', '~~' } |
             Out-Host
         $exit = $LASTEXITCODE
         $sw.Stop()
