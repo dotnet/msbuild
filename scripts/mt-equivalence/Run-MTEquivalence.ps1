@@ -136,9 +136,22 @@ function Invoke-OfficialStyleBuild {
         if ($MultiThreaded) { $env:MSBUILD_MT_ENABLED = '1' } else { Remove-Item Env:\MSBUILD_MT_ENABLED -ErrorAction SilentlyContinue }
 
         $sw = [System.Diagnostics.Stopwatch]::StartNew()
+        # An Azure DevOps agent interprets ##vso[...] logging commands found in this output, and these
+        # are full arcade official-style builds: with -publish they emit ##vso[artifact.upload] for
+        # every package, symbol package, PDB and the asset manifest, and arcade's initialization emits
+        # ##vso[task.setvariable] / ##vso[task.prependpath]. Letting the agent act on them is wrong in
+        # three separate ways:
+        #   * this validation pipeline would publish build assets (PackageArtifacts, BlobArtifacts,
+        #     AssetManifests, PdbArtifacts) that only the real official build may publish;
+        #   * the outer job's TEMP, TMP and PATH would be mutated by an inner build;
+        #   * the agent uploads asynchronously, so it races the snapshot move below and fails the job
+        #     with FileNotFoundException once the files have been moved aside.
+        # Neutralize the marker: the lines stay readable in the log but are no longer commands.
         # Out-Host keeps the build's console output on stdout instead of letting it become part of
         # this function's return value.
-        & (Join-Path $RepoRoot 'build.cmd') @officialArgs | Out-Host
+        & (Join-Path $RepoRoot 'build.cmd') @officialArgs |
+            ForEach-Object { [string]$_ -replace '^(\s*)##(?=(?:vso)?\[)', '$1(inner build) ##' } |
+            Out-Host
         $exit = $LASTEXITCODE
         $sw.Stop()
     }

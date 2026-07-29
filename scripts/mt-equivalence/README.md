@@ -45,6 +45,15 @@ Feed publishing happens in the separate post-build stage, which this pipeline do
 those three live under `log/` and `tmp/`, which are otherwise ignored, so `ArtifactCompareRules.json`
 carves them out *ahead* of the ignore rules.
 
+> **`##vso` logging commands from the inner builds are neutralized.** An ADO agent interprets
+> `##vso[...]` found in step output, and these are real official-style builds: `-publish` emits
+> `##vso[artifact.upload]` for every package, symbol package, PDB and the asset manifest, and arcade's
+> initialization emits `##vso[task.setvariable]` / `##vso[task.prependpath]`. Acting on those would
+> make this validation pipeline publish build assets only the official build may publish, mutate the
+> outer job's `TEMP`/`TMP`/`PATH`, and fail the job when the agent's *asynchronous* upload races the
+> snapshot move. The orchestrator rewrites the marker so the lines stay readable but are inert. The
+> verdict's own `##vso[task.logissue]` messages are unaffected.
+
 `VisualStudioDropName` is also passed (mirroring the official job's `VisualStudio.DropName`): without
 it `AfterSigning.proj` fails outright. It is only embedded into the generated VS insertion manifests —
 nothing is uploaded — and it is identical across the runs being compared.
