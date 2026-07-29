@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Resources;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -290,6 +291,51 @@ namespace Microsoft.Build.UnitTests
             string pattern = $"{commandLine}{Environment.NewLine}\\s*{displayMessage}";
             Regex regex = new Regex(pattern);
             regex.Matches(log).Count.ShouldBe(1, $"{log} doesn't contain the log matching the pattern: {pattern}");
+        }
+
+        /// <summary>
+        /// By default a ToolTask reads the tool's stdout/stderr using the current system OEM code page. This is the
+        /// long-standing behavior and is preserved so that tools relying on the OEM code page are not broken.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void StdEncodingDefaultsToOem()
+        {
+            using MyTool t = new MyTool();
+            t.StdOutEncoding.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
+            t.StdErrEncoding.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
+        }
+
+        /// <summary>
+        /// Setting StdOutEncoding/StdErrEncoding to the special value "ansi" (case-insensitive) selects the
+        /// current system ANSI code page (GetACP), e.g. for native tools like link.exe/cl.exe.
+        /// </summary>
+        [WindowsOnlyTheory]
+        [InlineData("ansi")]
+        [InlineData("ANSI")]
+        [InlineData("Ansi")]
+        public void StdEncodingAnsiKnobSelectsAnsiCodePage(string ansiValue)
+        {
+            using MyTool t = new MyTool();
+            t.StdOutEncoding = ansiValue;
+            t.StdErrEncoding = ansiValue;
+
+            t.StdOutEncoding.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
+            t.StdErrEncoding.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
+        }
+
+        /// <summary>
+        /// An explicitly-set StdOutEncoding/StdErrEncoding value takes precedence over the OEM default and can be
+        /// set to any named encoding, not just the "ansi" special value.
+        /// </summary>
+        [WindowsOnlyFact]
+        public void StdEncodingHonorsExplicitNamedEncoding()
+        {
+            using MyTool t = new MyTool();
+            t.StdOutEncoding = "utf-8";
+            t.StdErrEncoding = "utf-8";
+
+            t.StdOutEncoding.ShouldBe(Encoding.UTF8.EncodingName);
+            t.StdErrEncoding.ShouldBe(Encoding.UTF8.EncodingName);
         }
 
         /// <summary>
