@@ -1974,21 +1974,34 @@ $@"
         }
 
         [Theory]
-        [InlineData(null, null)]
-        [InlineData("OuterTarget", null)]
-        [InlineData(null, "ExplicitTarget")]
-        [InlineData("OuterTarget", "ExplicitTarget")]
+        [InlineData(null, null, false, false)]
+        [InlineData("OuterTarget", null, false, false)]
+        [InlineData(null, "ExplicitTarget", false, false)]
+        [InlineData("OuterTarget", "ExplicitTarget", false, false)]
+        [InlineData("OuterTarget", "ExplicitTarget", true, false)]
+        [InlineData("OuterTarget", "ExplicitTarget", true, true)]
         public void DirectInnerBuildReferenceIsPreservedWhenOuterBuildGeneratesTheSameEdge(
             string outerTargets,
-            string explicitTargets)
+            string explicitTargets,
+            bool addTransitiveProjectReferences,
+            bool explicitReferenceFirst)
         {
             string outerTargetsMetadata = outerTargets is null ? string.Empty : $" Targets=\"{outerTargets}\"";
             string explicitTargetsMetadata = explicitTargets is null ? string.Empty : $" Targets=\"{explicitTargets}\"";
             string expectedOuterTarget = outerTargets ?? "ChildDefault";
             string expectedExplicitTarget = explicitTargets ?? "ChildDefault";
+
+            // With transitive references enabled the root also gets a transitive edge to the inner build. That edge
+            // carries no Targets metadata, so it contributes the child's default targets to the merged edge.
+            string[] expectedNet8Targets = outerTargets is null && explicitTargets is null
+                ? ["ChildDefault"]
+                : addTransitiveProjectReferences
+                    ? [expectedExplicitTarget, "ChildDefault", expectedOuterTarget]
+                    : [expectedExplicitTarget, expectedOuterTarget];
+
             string expectedMergedTargets = outerTargets is null && explicitTargets is null
                 ? string.Empty
-                : $"{expectedExplicitTarget};{expectedOuterTarget}";
+                : string.Join(";", expectedNet8Targets);
 
             TransientTestFile child = _env.CreateFile("child.proj", """
                 <Project DefaultTargets="ChildDefault">
@@ -2003,12 +2016,22 @@ $@"
                 </Project>
                 """);
 
+            string outerReference = $"""<ProjectReference Include="{child.Path}"{outerTargetsMetadata} />""";
+            string explicitReference = $"""
+                <ProjectReference Include="{child.Path}"
+                                  SetTargetFramework="TargetFramework=net8.0"{explicitTargetsMetadata} />
+                """;
+            string projectReferences = explicitReferenceFirst
+                ? $"{explicitReference}{Environment.NewLine}{outerReference}"
+                : $"{outerReference}{Environment.NewLine}{explicitReference}";
+
             TransientTestFile root = _env.CreateFile("root.proj", $"""
                 <Project DefaultTargets="Build">
+                  <PropertyGroup>
+                    <AddTransitiveProjectReferencesInStaticGraph>{addTransitiveProjectReferences}</AddTransitiveProjectReferencesInStaticGraph>
+                  </PropertyGroup>
                   <ItemGroup>
-                    <ProjectReference Include="{child.Path}"{outerTargetsMetadata} />
-                    <ProjectReference Include="{child.Path}"
-                                      SetTargetFramework="TargetFramework=net8.0"{explicitTargetsMetadata} />
+                    {projectReferences}
                     <ProjectReferenceTargets Include="Build"
                                              Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}"
                                              OuterBuild="true" />
@@ -2050,11 +2073,67 @@ $@"
             IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(["Build"]);
             targetLists[rootNode].ShouldBe(["Build"]);
             targetLists[outerBuild].ShouldBe([expectedOuterTarget]);
-            targetLists[net8Build].ShouldBe(
-                outerTargets is null && explicitTargets is null
-                    ? ["ChildDefault"]
-                    : [expectedExplicitTarget, expectedOuterTarget]);
+            targetLists[net8Build].ShouldBe(expectedNet8Targets);
             targetLists[net9Build].ShouldBe([expectedOuterTarget]);
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void DirectReferenceTargetsAreMergedWithTransitiveReferenceToTheSameNode(bool directReferenceFirst)
+        {
+            TransientTestFile leaf = _env.CreateFile("leaf.proj", """
+                <Project DefaultTargets="LeafDefault">
+                  <Target Name="LeafDefault" />
+                  <Target Name="LeafExplicit" />
+                </Project>
+                """);
+
+            TransientTestFile middle = _env.CreateFile("middle.proj", $"""
+                <Project DefaultTargets="MiddleDefault">
+                  <PropertyGroup>
+                    <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <ProjectReference Include="{leaf.Path}" />
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}" />
+                  </ItemGroup>
+                  <Target Name="MiddleDefault" />
+                </Project>
+                """);
+
+            string middleReference = $"""<ProjectReference Include="{middle.Path}" />""";
+            string leafReference = $"""<ProjectReference Include="{leaf.Path}" Targets="LeafExplicit" />""";
+            string projectReferences = directReferenceFirst
+                ? $"{leafReference}{Environment.NewLine}{middleReference}"
+                : $"{middleReference}{Environment.NewLine}{leafReference}";
+
+            TransientTestFile root = _env.CreateFile("root.proj", $"""
+                <Project DefaultTargets="Build">
+                  <PropertyGroup>
+                    <AddTransitiveProjectReferencesInStaticGraph>true</AddTransitiveProjectReferencesInStaticGraph>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    {projectReferences}
+                    <ProjectReferenceTargets Include="Build"
+                                             Targets="{MSBuildConstants.ProjectReferenceTargetsOrDefaultTargetsMarker}" />
+                  </ItemGroup>
+                  <Target Name="Build" />
+                </Project>
+                """);
+
+            var graph = new ProjectGraph(root.Path);
+
+            ProjectGraphNode rootNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+            ProjectGraphNode leafNode = graph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == leaf.Path);
+
+            // The direct reference wins the collision with the synthetic transitive reference, so its item type
+            // and Targets metadata survive, but the transitive edge's default targets must still be merged in.
+            graph.TestOnly_Edges[(rootNode, leafNode)].ItemType.ShouldBe(ItemTypeNames.ProjectReference);
+
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(["Build"]);
+            targetLists[leafNode].ShouldBe(["LeafExplicit", "LeafDefault"], ignoreOrder: true);
         }
 
         [Fact]
