@@ -7,7 +7,9 @@
 #   * `gh issue comment ...`                           -> fails when
 #                                                         $env:MOCK_ISSUE_COMMENT_FAILURE=1
 #   * `gh pr view ... --json ...`                      -> prints $env:MOCK_PR
-#                                                        (default {}).
+#                                                        (default {}), or fails
+#                                                        while
+#                                                        $env:MOCK_PR_VIEW_FAILURE=1.
 #   * `gh api .../commits/<sha>/statuses`             -> prints $env:MOCK_STATUSES
 #                                                        (default []), or fails
 #                                                        while
@@ -116,6 +118,9 @@ switch -CaseSensitive ($command) {
           Write-Output $(if ([string]::IsNullOrEmpty($env:MOCK_PRS)) { '[]' } else { $env:MOCK_PRS })
         }
         'view' {
+          if ($env:MOCK_PR_VIEW_FAILURE -eq '1') {
+            exit 1
+          }
           Write-Output $(if ([string]::IsNullOrEmpty($env:MOCK_PR)) { '{}' } else { $env:MOCK_PR })
         }
       }

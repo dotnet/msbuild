@@ -181,13 +181,28 @@ try {
     ) $true 'single-PR workflow passes only the PR identity into the writer lock'
     Assert-Equal (
         $statusWorkflow.IndexOf(
-            '${{ github.event.pull_request.base.ref }}',
+            'FALLBACK_BASE_REF: ${{ github.event.pull_request.base.ref }}',
             [StringComparison]::Ordinal
-        )
-    ) -1 'single-PR workflow does not trust an event-captured base branch'
+        ) -ge 0
+    ) $true 'single-PR workflow captures the event base only as a fallback'
+    # The event-captured base is allowed to appear exactly once, on the fallback
+    # line above. Anywhere else it would reintroduce the stale-retarget bug.
+    Assert-Equal (
+        [regex]::Matches(
+            $statusWorkflow,
+            [regex]::Escape('${{ github.event.pull_request.base.ref }}')
+        ).Count
+    ) 1 'single-PR workflow does not otherwise trust an event-captured base branch'
     Assert-Equal (
         $statusWorkflow.IndexOf('queue: max', [StringComparison]::Ordinal) -ge 0
     ) $true 'single-PR workflow preserves pending status jobs'
+    # The command workflow holds its own group until its refresh job drains the
+    # shared writer queue, so it needs the same protection against eviction.
+    Assert-Equal (
+        (Get-Content -LiteralPath (
+            Join-Path $repositoryRoot '.github/workflows/branch-freeze-command.yml'
+        ) -Raw).IndexOf('queue: max', [StringComparison]::Ordinal) -ge 0
+    ) $true 'command workflow preserves pending freeze/unfreeze commands'
     Assert-Equal (
         [regex]::IsMatch($refreshWorkflow, '(?m)^\s*group:\s*branch-freeze-write\s*$')
     ) $true 'bulk workflow uses the shared writer group'
@@ -371,6 +386,33 @@ try {
     Assert-Equal (
         Get-StatusField $statusFile 'target_url'
     ) 'https://github.com/o/r/issues/8' 'current PR status links the current base freeze'
+
+    $statusFile = Initialize-TestStatusFile
+    # Reading the pull request is preferred but, like the current-status read, it
+    # must not be able to suppress the write: an unanswered required status is
+    # worse than one stamped from a possibly stale event payload.
+    $env:MOCK_PR_VIEW_FAILURE = '1'
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @(
+        '-PullRequestNumber', '42',
+        '-FallbackHeadSha', 'sha-fallback',
+        '-FallbackBaseRef', 'release'
+    )
+    Assert-Equal $code 0 'unreadable pull request does not fail the command'
+    Assert-Equal (
+        Get-StatusField $statusFile 'state'
+    ) 'failure' 'unreadable pull request falls back to the event-captured base'
+
+    $statusFile = Initialize-TestStatusFile
+    # With nothing to fall back to there is no head commit to stamp, so fail
+    # loudly rather than silently stamping the wrong commit.
+    $code = Invoke-TestScript (Join-Path $workflowScriptsDirectory 'set-pr-status.ps1') @(
+        '-PullRequestNumber', '42'
+    )
+    $env:MOCK_PR_VIEW_FAILURE = '0'
+    Assert-Equal ($code -ne 0) $true 'unreadable pull request without a fallback fails loudly'
+    Assert-Equal (
+        @(Get-Content -LiteralPath $statusFile).Count
+    ) 0 'unresolvable pull request stamps no commit'
 
     $statusFile = Initialize-TestStatusFile
     $env:MOCK_PR = ''

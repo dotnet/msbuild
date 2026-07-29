@@ -49,8 +49,16 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
+          # Last resort only: the script prefers the head and base it reads from
+          # the API after taking the lock, and uses these -- which can be stale
+          # for a retargeted PR -- solely when that read fails. A stale status is
+          # corrected by the next event or sweep; a missing one blocks merging.
+          FALLBACK_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          FALLBACK_BASE_REF: ${{ github.event.pull_request.base.ref }}
         shell: pwsh
         run: |
           pwsh -NoLogo -NoProfile -File `
             "$env:GITHUB_WORKSPACE/.github/branch-freeze/workflows/set-pr-status.ps1" `
-            -PullRequestNumber $env:PR_NUMBER
+            -PullRequestNumber $env:PR_NUMBER `
+            -FallbackHeadSha $env:FALLBACK_HEAD_SHA `
+            -FallbackBaseRef $env:FALLBACK_BASE_REF

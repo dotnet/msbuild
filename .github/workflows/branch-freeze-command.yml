@@ -23,8 +23,14 @@ permissions:
 
 concurrency:
   # Do not let two freeze/unfreeze operations modify tracking issues at once.
+  # This group is held for the whole run, including the `refresh` job below,
+  # which waits on the repository-wide `branch-freeze-write` queue. `queue: max`
+  # keeps up to 100 commands pending for that window instead of letting a newer
+  # command evict an older pending one -- an evicted command never toggles the
+  # freeze at all, and its author is never told.
   group: branch-freeze-command
   cancel-in-progress: false
+  queue: max
 
 jobs:
   command:
