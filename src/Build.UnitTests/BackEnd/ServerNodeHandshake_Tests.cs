@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Build.Experimental;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Server;
 using Shouldly;
 using Xunit;
 
