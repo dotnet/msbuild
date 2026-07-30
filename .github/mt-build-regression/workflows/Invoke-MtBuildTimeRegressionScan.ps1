@@ -152,4 +152,19 @@ if (-not [string]::IsNullOrWhiteSpace($env:GITHUB_OUTPUT))
     "regression_count=$($candidates.Count)" | Add-Content -LiteralPath $env:GITHUB_OUTPUT
 }
 
+# A scheduled run is read after the fact, so record how the detector reached this candidate set.
+Write-Host "Detector returned $($detected.Count) pair(s) from $Database on $ClusterUri."
+Write-Host "Resolved $($runCache.Count) PerfStar run(s) through $OrganizationUri/$Project."
+Write-Host "Excluded $($excluded.Count) unusable run reference(s); $($candidates.Count) candidate(s) remain."
+foreach ($entry in $excluded)
+{
+    Write-Host "  excluded $($entry.run) run $($entry.perfStarBuildNumber) for $($entry.backend)/$($entry.os) '$($entry.scenarioPair)' (state '$($entry.perfStarBuildState)', result '$($entry.perfStarBuildResult)')."
+}
+
+foreach ($candidate in $candidates)
+{
+    Write-Host "  candidate $($candidate.Severity) $($candidate.Backend)/$($candidate.Os) '$($candidate.ScenarioPair)' current build $($candidate.CurrentBuildNumber), $($candidate.CurrentMtSamples) MT sample(s)."
+}
+
+Write-Host "Candidate-set key $($report.candidateSetKey)."
 Write-Host "Wrote $($candidates.Count) candidate(s) to $OutputDirectory."

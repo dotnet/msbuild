@@ -31,6 +31,39 @@ function Write-RegressionDetectionReport
     [void]$markdown.AppendLine("Candidate count: **$($candidates.Count)**")
     [void]$markdown.AppendLine("Candidate-set key: ``$($Report.candidateSetKey)``")
 
+    # Exclusions are part of the detection result: without them the candidate count looks
+    # unexplained, and a dropped last-healthy comparison is invisible to the reader. The report is an
+    # ordered dictionary when written by this job and a plain object when round-tripped through JSON.
+    $excluded = @()
+    if ($Report -is [System.Collections.IDictionary])
+    {
+        if ($Report.Contains('excludedRuns'))
+        {
+            $excluded = @($Report['excludedRuns'])
+        }
+    }
+    elseif ($null -ne $Report.PSObject.Properties['excludedRuns'])
+    {
+        $excluded = @($Report.PSObject.Properties['excludedRuns'].Value)
+    }
+
+    if ($excluded.Count -gt 0)
+    {
+        [void]$markdown.AppendLine()
+        [void]$markdown.AppendLine("## Excluded runs")
+        [void]$markdown.AppendLine()
+        [void]$markdown.AppendLine('A PerfStar run is used only when it reached state `completed` with result `succeeded` or `failed`. `PerfStarDataRaw` is ingested while a run executes, so an unfinished or canceled run reports only part of its scenarios and measures them while the remaining ones still compete for the same machine. Excluding the `current` run drops the candidate; excluding the `healthy` run drops only the last-healthy comparison.')
+        [void]$markdown.AppendLine()
+        [void]$markdown.AppendLine('| Backend | OS | Scenario pair | Run | Build | State | Result |')
+        [void]$markdown.AppendLine('| --- | --- | --- | --- | --- | --- | --- |')
+        foreach ($entry in $excluded)
+        {
+            [void]$markdown.AppendLine(
+                "| $($entry.backend) | $($entry.os) | ``$($entry.scenarioPair)`` | $($entry.run) | " +
+                "$($entry.perfStarBuildNumber) | $($entry.perfStarBuildState) | $($entry.perfStarBuildResult) |")
+        }
+    }
+
     if ($candidates.Count -gt 0)
     {
         [void]$markdown.AppendLine()

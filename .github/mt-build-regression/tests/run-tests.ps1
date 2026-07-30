@@ -14,6 +14,7 @@ Import-Module (Join-Path $featureRoot 'components\clients\AzureDevOpsClient.psm1
 Import-Module (Join-Path $featureRoot 'components\clients\HttpRetry.psm1') -Force
 
 $failures = [System.Collections.Generic.List[string]]::new()
+$assertionCount = 0
 
 function Assert-True
 {
@@ -22,6 +23,7 @@ function Assert-True
         [Parameter(Mandatory)][string]$Message
     )
 
+    $script:assertionCount++
     if (-not $Condition)
     {
         $failures.Add($Message)
@@ -36,6 +38,7 @@ function Assert-Equal
         [Parameter(Mandatory)][string]$Message
     )
 
+    $script:assertionCount++
     if ($Expected -ne $Actual)
     {
         $failures.Add("$Message Expected '$Expected', got '$Actual'.")
@@ -351,6 +354,26 @@ try
     }
     $contextMarkdown = Get-Content -LiteralPath (Join-Path $reportDirectory 'mt-regression-context.md') -Raw
     Assert-True ($contextMarkdown.Contains('preceding 33 days')) 'Markdown thresholds must render from detector metadata.'
+    Assert-True (-not $contextMarkdown.Contains('Excluded runs')) 'The excluded-run section must be omitted when nothing was excluded.'
+
+    # Exclusions must reach the Markdown the agent reads, not only the JSON.
+    $excludedDirectory = Join-Path $tempRoot 'reports-excluded'
+    $excludedReport = New-RegressionDetectionReport -Candidates @() -GeneratedAtUtc ([DateTimeOffset]::Parse('2026-01-01T00:00:00Z'))
+    $excludedReport.excludedRuns = @(
+        [pscustomobject][ordered]@{
+            backend = 'Hosted'
+            os = 'Windows'
+            scenarioPair = 'alpha'
+            run = 'current'
+            perfStarBuildNumber = '20260630.4'
+            perfStarBuildState = 'completed'
+            perfStarBuildResult = 'canceled'
+        })
+    Write-RegressionDetectionReport -Report $excludedReport -OutputDirectory $excludedDirectory
+    $excludedMarkdown = Get-Content -LiteralPath (Join-Path $excludedDirectory 'mt-regression-context.md') -Raw
+    Assert-True ($excludedMarkdown.Contains('Excluded runs')) 'Excluded runs must be rendered in the agent-facing Markdown.'
+    Assert-True ($excludedMarkdown.Contains('20260630.4')) 'The excluded build number must be rendered.'
+    Assert-True ($excludedMarkdown.Contains('canceled')) 'The excluded run result must be rendered.'
 }
 finally
 {
@@ -421,7 +444,7 @@ $($importStatements -join "`n")
 if ($failures.Count -gt 0)
 {
     $failures | ForEach-Object { Write-Error $_ -ErrorAction Continue }
-    throw "$($failures.Count) MT regression test(s) failed."
+    throw "$($failures.Count) of $assertionCount MT regression assertion(s) failed."
 }
 
-Write-Host 'All MT regression component tests passed.'
+Write-Host "All $assertionCount MT regression component assertions passed."

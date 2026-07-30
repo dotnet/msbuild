@@ -72,4 +72,13 @@ Write-DiagnosticEvidenceReport `
     -DiagnosticPipelineId $DiagnosticPipelineId `
     -MaximumRunsToInspect $MaximumRunsToInspect `
     -OutputDirectory $OutputDirectory
+
+foreach ($candidate in $candidates)
+{
+    $current = if ($null -ne $candidate.currentDiagnostic -and $candidate.currentDiagnostic.available) { $candidate.currentDiagnostic.diagnosticBuildNumber } else { 'none' }
+    $healthy = if ($null -ne $candidate.healthyDiagnostic -and $candidate.healthyDiagnostic.available) { $candidate.healthyDiagnostic.diagnosticBuildNumber } else { 'none' }
+    Write-Host "  $($candidate.Backend)/$($candidate.Os) '$($candidate.ScenarioPair)': current-source diagnostic $current, last-healthy-source diagnostic $healthy."
+}
+
+Write-Host "Inspected up to $MaximumRunsToInspect run(s) of diagnostic pipeline $DiagnosticPipelineId."
 Write-Host "Wrote scheduled-binlog evidence for $($candidates.Count) candidate(s) to $OutputDirectory."

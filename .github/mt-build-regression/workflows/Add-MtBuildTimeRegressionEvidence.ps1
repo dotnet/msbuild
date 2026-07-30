@@ -52,4 +52,17 @@ $candidates = @(
 
 # Publish only the bounded JSON and Markdown evidence contract.
 Write-ActualRunEvidenceReport -Candidates $candidates -OutputDirectory $OutputDirectory
+
+foreach ($candidate in $candidates)
+{
+    $available = @(
+        $candidate.currentMtEvidence,
+        $candidate.currentNonMtEvidence,
+        $candidate.healthyMtEvidence,
+        $candidate.healthyNonMtEvidence) | Where-Object { $null -ne $_ -and $_.available }
+    Write-Host ("  $($candidate.Backend)/$($candidate.Os) '$($candidate.ScenarioPair)': current $($candidate.currentRun.perfStarBuildNumber) " +
+        "(MSBuild $($candidate.currentRun.componentBuildNumber)), healthy $(if ($null -ne $candidate.healthyRun) { $candidate.healthyRun.perfStarBuildNumber } else { 'none' }), " +
+        "$(@($available).Count)/4 artifact set(s) available.")
+}
+
 Write-Host "Wrote actual-run evidence for $($candidates.Count) candidate(s) to $OutputDirectory."
