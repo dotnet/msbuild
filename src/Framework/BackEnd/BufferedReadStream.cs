@@ -12,6 +12,7 @@ namespace Microsoft.Build.BackEnd
     internal class BufferedReadStream : Stream
     {
         private const int BUFFER_SIZE = 1024;
+        private readonly int _bufferSize;
         private NamedPipeServerStream _innerStream;
         private byte[] _buffer;
 
@@ -20,9 +21,15 @@ namespace Microsoft.Build.BackEnd
         private int _currentIndexInBuffer;
 
         public BufferedReadStream(NamedPipeServerStream innerStream)
+            : this(innerStream, BUFFER_SIZE)
+        {
+        }
+
+        public BufferedReadStream(NamedPipeServerStream innerStream, int bufferSize)
         {
             _innerStream = innerStream;
-            _buffer = new byte[BUFFER_SIZE];
+            _bufferSize = bufferSize;
+            _buffer = new byte[_bufferSize];
 
             _currentlyBufferedByteCount = 0;
         }
@@ -64,7 +71,7 @@ namespace Microsoft.Build.BackEnd
 
         public override int Read(byte[] buffer, int offset, int count)
         {
-            if (count > BUFFER_SIZE)
+            if (count > _bufferSize)
             {
                 // Trying to read more data than the buffer can hold
                 int alreadyCopied = 0;
@@ -98,7 +105,7 @@ namespace Microsoft.Build.BackEnd
                     _currentlyBufferedByteCount = 0;
                 }
 
-                int innerReadCount = _innerStream.Read(_buffer, 0, BUFFER_SIZE);
+                int innerReadCount = _innerStream.Read(_buffer, 0, _bufferSize);
                 _currentIndexInBuffer = 0;
                 _currentlyBufferedByteCount = innerReadCount;
 
@@ -123,7 +130,7 @@ namespace Microsoft.Build.BackEnd
 
         public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
-            if (count > BUFFER_SIZE)
+            if (count > _bufferSize)
             {
                 // Trying to read more data than the buffer can hold
                 int alreadyCopied = CopyToBuffer(buffer, offset);
@@ -147,7 +154,7 @@ namespace Microsoft.Build.BackEnd
                 int alreadyCopied = CopyToBuffer(buffer, offset);
 
 #pragma warning disable CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
-                int innerReadCount = await _innerStream.ReadAsync(_buffer, 0, BUFFER_SIZE, cancellationToken);
+                int innerReadCount = await _innerStream.ReadAsync(_buffer, 0, _bufferSize, cancellationToken);
 #pragma warning restore CA1835 // Prefer the 'Memory'-based overloads for 'ReadAsync' and 'WriteAsync'
                 _currentIndexInBuffer = 0;
                 _currentlyBufferedByteCount = innerReadCount;
