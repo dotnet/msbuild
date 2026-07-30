@@ -47,8 +47,8 @@ its binary log, not from the fact that the environment variable was set.
 Runs: `main` at `867c136`, `Release`. Several trios were run while developing the harness; the
 authoritative one is the full official configuration (`-MSBuildEngine vs`, `-publish`) executed on the
 official MicroBuild pool by the pipeline itself — DevDiv build
-[14815634](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14815634&view=results), which
-passed end to end. Earlier `-msbuildEngine dotnet` trios and four earlier pool runs agreed with it.
+[14817031](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14817031&view=results), which
+passed end to end. Earlier `-msbuildEngine dotnet` trios and several earlier pool runs agreed with it.
 
 ## Headline result
 
@@ -57,8 +57,17 @@ Registry manifest, all staged PDBs and all symbol-package payloads.
 
 | comparison | paths compared | byte-identical | unexpected differences | expected differences |
 |---|---|---|---|---|
-| `mt` vs `baseline` | 28 149 | 27 999 | **0** | 150 |
-| `control` vs `baseline` | 28 149 | 27 999 | **0** | 150 |
+| `mt` vs `baseline` | 28 149 | 27 997 | **0** | 152 |
+| `control` vs `baseline` | 28 149 | 28 000 | **0** | 149 |
+
+Only 18 paths are excluded from the comparison altogether, and the report names every one of them:
+14 Guardian SARIF files injected by the 1ES SDL template, 2 developer-convenience environment
+scripts, 1 shortcut and 1 build log. Everything else in the tree is compared.
+
+The three builds are also structurally identical, read from the binlog event stream rather than from
+rendered text: 384 distinct targets over 18 993 executions, 9 306 distinct `(project, target)` pairs,
+122 tasks over 16 083 invocations, 53 projects over 1 842 builds, and no warnings or errors — every
+count equal across `baseline`, `mt` and `control`.
 
 That the `-mt` build really ran multithreaded is asserted from the recorded command line, not assumed:
 
@@ -68,19 +77,20 @@ That the `-mt` build really ran multithreaded is asserted from the recorded comm
 ```
 
 The harness was also shown to be capable of failing: removing the known-`-mt` log allowance surfaced
-the 21 real `-mt`-only lines (exit 1); flipping a single byte in `Microsoft.Build.dll` in the `mt`
+the real `-mt`-only lines (exit 1); flipping a single byte in `Microsoft.Build.dll` in the `mt`
 snapshot was reported as `PE: 1 bytes, regions: .text@0x4000+1` (exit 1); appending one byte to
 `manifest.json` inside `Microsoft.Build.vsix` — the one place the comparison is deliberately relaxed —
-was still caught and named (exit 1); and presenting a non-`-mt` binlog as the `-mt` candidate was
-rejected by the evidence guard (exit 1). Corrupting the *control* snapshot instead produced a warning
-and exit 0, so pre-existing non-determinism cannot masquerade as an `-mt` regression.
+was still caught and named (exit 1); a target that executes but logs nothing was invisible to the text
+comparison and caught by the structural one (exit 1); and presenting a non-`-mt` binlog as the `-mt`
+candidate was rejected by the evidence guard (exit 1). Corrupting the *control* snapshot instead
+produced a warning and exit 0, so pre-existing non-determinism cannot masquerade as an `-mt`
+regression.
 
 Every file that differs between the `-mt` build and the baseline also differs between the two
-identical non-`-mt` builds, and in the same way. The `-mt` comparison has *fewer* differences than the
-control, which is the noise floor, not a signal.
+identical non-`-mt` builds, and in the same way.
 
-There were no errors or warnings in any of the three builds, and the sets of executed tasks
-(109) and of task→assembly bindings (105) were identical between `-mt` and baseline.
+There were no errors or warnings in any of the three builds, and the sets of executed tasks and of
+task→assembly bindings were identical between `-mt` and baseline.
 
 ## Pre-existing build non-determinism (not caused by `-mt`)
 
@@ -185,7 +195,7 @@ Visible in the control run, so normalized away for both comparisons:
 
 **This is the only behavioural difference `-mt` introduced, and it is log noise only.**
 
-On the official MicroBuild pool (build 14815634) the `-mt` build emits **1 364** normal-importance
+On the official MicroBuild pool (build 14817031) the `-mt` build emits **1 364** normal-importance
 messages that the baseline does not, over 9 distinct
 (loaded-from, desired-location) pairs:
 
@@ -272,7 +282,7 @@ are reported in their own "Known `-mt`-only log differences" section of every re
 failing the comparison, and the rule is applied only to the `-mt` comparison, never to the control.
 **Delete that entry once the bug is fixed** so the check becomes strict again.
 
-Measured on the official MicroBuild pool (build 14815634), the `-mt` build emits **1 364** more of
+Measured on the official MicroBuild pool (build 14817031), the `-mt` build emits **1 364** more of
 these lines than the baseline, over 9 distinct (loaded-from, desired-location) pairs. The baseline
 count is non-zero because a few tasks already need an out-of-process task host for runtime or bitness
 reasons; `-mt` makes that the common path.
@@ -294,7 +304,7 @@ difference on one side only.
 ## Audit of the exclusion rules
 
 Every exclusion was re-examined adversarially against the artifacts and binlogs of green pool build
-14815634, on the assumption that a rule might be hiding a real `-mt` difference. Three things came
+14817031, on the assumption that a rule might be hiding a real `-mt` difference. Three things came
 out of it.
 
 **Every excused artifact difference is demonstrably pre-existing.** Of the 150 paths excused in the
