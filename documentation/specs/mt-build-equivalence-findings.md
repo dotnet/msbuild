@@ -45,18 +45,27 @@ That the `-mt` build really ran multithreaded is verified from the MSBuild comma
 its binary log, not from the fact that the environment variable was set.
 
 Runs: `main` at `867c136`, `Release`. Several trios were run while developing the harness; the
-authoritative one is the full official configuration (`-MSBuildEngine vs`, `-publish`), and earlier
-`-msbuildEngine dotnet` trios agreed with it.
+authoritative one is the full official configuration (`-MSBuildEngine vs`, `-publish`) executed on the
+official MicroBuild pool by the pipeline itself — DevDiv build
+[14815634](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14815634&view=results), which
+passed end to end. Earlier `-msbuildEngine dotnet` trios and four earlier pool runs agreed with it.
 
 ## Headline result
 
 **`-mt` changed nothing in the produced bits**, including every VS insertion output, the Build Asset
-Registry manifest, all 34 staged PDBs and all 10 symbol-package payloads.
+Registry manifest, all staged PDBs and all symbol-package payloads.
 
-| comparison | byte-identical | unexpected differences | expected differences |
-|---|---|---|---|
-| `mt` vs `baseline` | 27 909 | **0** | 148 |
-| `control` vs `baseline` | 27 911 | **0** | 146 |
+| comparison | paths compared | byte-identical | unexpected differences | expected differences |
+|---|---|---|---|---|
+| `mt` vs `baseline` | 28 149 | 27 999 | **0** | 150 |
+| `control` vs `baseline` | 28 149 | 27 999 | **0** | 150 |
+
+That the `-mt` build really ran multithreaded is asserted from the recorded command line, not assumed:
+
+```
+[mt-vs-baseline] baseline -mt = False / candidate -mt = True
+[control]        baseline -mt = False / candidate -mt = False
+```
 
 The harness was also shown to be capable of failing: removing the known-`-mt` log allowance surfaced
 the 21 real `-mt`-only lines (exit 1); flipping a single byte in `Microsoft.Build.dll` in the `mt`
@@ -260,9 +269,10 @@ are reported in their own "Known `-mt`-only log differences" section of every re
 failing the comparison, and the rule is applied only to the `-mt` comparison, never to the control.
 **Delete that entry once the bug is fixed** so the check becomes strict again.
 
-Measured on the official MicroBuild pool (build 14789743), the baseline build emits 366 of these
-messages and the `-mt` build 1 728 — the baseline is non-zero because a few tasks already need an
-out-of-process task host for runtime or bitness reasons, and `-mt` makes that the common path.
+Measured on the official MicroBuild pool (build 14815634), the `-mt` build emits **1 376** more of
+these lines than the baseline, across 21 distinct "desired location" values. The baseline count is
+non-zero because a few tasks already need an out-of-process task host for runtime or bitness reasons;
+`-mt` makes that the common path.
 
 ## Non-MSBuild noise from 1ES SDL injection
 

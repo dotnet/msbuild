@@ -232,17 +232,18 @@ Reports land in `<WorkDir>\reports`:
 
 ## Results
 
-Three official-style `Release` builds per trio, all on `main`, with `-MSBuildEngine vs` — the official
-configuration — producing 28 061 artifact files each, including the full VS insertion surface and the
-`-publish` outputs.
+Confirmed by the pipeline itself on the official MicroBuild pool, DevDiv build
+[14815634](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14815634&view=results)
+(green end to end): three official-style `Release` builds with `-MSBuildEngine vs` and `-publish`,
+28 149 artifact paths compared each way, including the full VS insertion surface.
 
 | comparison | byte-identical | unexpected | expected |
 |---|---|---|---|
-| `mt` vs `baseline` | 27 909 | **0** | 148 |
-| `control` vs `baseline` | 27 911 | **0** | 146 |
+| `mt` vs `baseline` | 27 999 | **0** | 150 |
+| `control` vs `baseline` | 27 999 | **0** | 150 |
 
 **`-mt` introduced no difference in the produced bits at all**, including every VS insertion output,
-the Build Asset Registry manifest, all 34 staged PDBs and all 10 symbol-package payloads. Every file
+the Build Asset Registry manifest, all staged PDBs and all symbol-package payloads. Every file
 that differs between the `-mt` build and the baseline also differs between two identical non-`-mt`
 builds:
 
