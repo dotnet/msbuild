@@ -698,6 +698,13 @@ namespace Microsoft.Build.Engine.UnitTests
         public void ServerOwnsReusableSidecarsUntilShutdown()
         {
             PrepareIsolatedServerEnv(useServer: false);
+
+            // A sidecar only exists when node reuse is on: TaskHostTask gates it on
+            // EnableNodeReuse. CI disables node reuse by default, which would silently turn this
+            // into a test of short-lived TaskHosts that exit on their own and never exercise
+            // ownership at all.
+            _env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", null);
+
             const string environmentVariableName = "MSBUILD_SERVER_OWNED_SIDECAR_TEST";
             _env.SetEnvironmentVariable(environmentVariableName, "first-build");
             TransientTestFile project = _env.CreateFile(
@@ -721,13 +728,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 </Project>
                 """);
 
-            MSBuildClient.ShutdownServer(CancellationToken.None);
+            ShutdownBootstrapServer();
 
             try
             {
-                string firstOutput = RunnerUtilities.ExecMSBuild(
-                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
-                    $"{project.Path} -mt",
+                string firstOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                    $"{project.Path} -mt -nodeReuse:true",
                     out bool firstSuccess,
                     false,
                     _output);
@@ -740,9 +746,8 @@ namespace Microsoft.Build.Engine.UnitTests
                 firstOutput.ShouldContain("Sidecar environment is first-build");
 
                 _env.SetEnvironmentVariable(environmentVariableName, "second-build");
-                string secondOutput = RunnerUtilities.ExecMSBuild(
-                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
-                    $"{project.Path} -mt",
+                string secondOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                    $"{project.Path} -mt -nodeReuse:true",
                     out bool secondSuccess,
                     false,
                     _output);
@@ -752,10 +757,12 @@ namespace Microsoft.Build.Engine.UnitTests
                 int secondSidecarPid = ParseNumber(secondOutput, "Sidecar ID is ");
                 _env.WithTransientProcess(secondSidecarPid);
 
-                // Each build gets a fresh environment snapshot, whether it reuses the sidecar or gets a new one.
+                // The sidecar is owned and stays connected, so the server reuses the same process
+                // rather than launching a new one, and each build still gets a fresh environment.
+                secondSidecarPid.ShouldBe(firstSidecarPid, "The server should reuse the sidecar it already owns.");
                 secondOutput.ShouldContain("Sidecar environment is second-build");
 
-                MSBuildClient.ShutdownServer(CancellationToken.None).ShouldBeTrue();
+                ShutdownBootstrapServer();
                 WaitForProcessExit(serverPid).ShouldBeTrue($"Server process {serverPid} should exit after build-server shutdown.");
 
                 // The point of the fix: no sidecar the server created may survive it, so shutting the
@@ -765,15 +772,35 @@ namespace Microsoft.Build.Engine.UnitTests
             }
             finally
             {
-                MSBuildClient.ShutdownServer(CancellationToken.None);
+                ShutdownBootstrapServer();
             }
         }
+
+        /// <summary>
+        /// Runs <c>build-server shutdown</c> against the bootstrap installation. The in-process
+        /// <see cref="MSBuildClient.ShutdownServer"/> cannot be used here: it derives its handshake
+        /// from the currently running MSBuild, which is a different installation than the bootstrap
+        /// that served these builds, so it would not find that server.
+        /// </summary>
+        private void ShutdownBootstrapServer()
+            => RunnerUtilities.RunProcessAndGetOutput(
+                RunnerUtilities.BootstrapDotnetHostPath,
+                "build-server shutdown",
+                out _,
+                outputHelper: _output,
+                environmentVariables: RunnerUtilities.GetBootstrapMSBuildEnvironmentVariables());
 
         [Fact]
         public void SidecarDoesNotOutliveANonServerBuild()
         {
             PrepareIsolatedServerEnv(useServer: false);
             _env.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "0");
+
+            // A sidecar only exists when node reuse is on, and CI disables it by default. Without
+            // this the build would use a short-lived TaskHost that exits on its own, so the test
+            // would pass without ever exercising ownership.
+            _env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", null);
+
             TransientTestFile project = _env.CreateFile(
                 "unownedSidecar.proj",
                 $"""
@@ -789,7 +816,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 """);
 
             string output = RunnerUtilities.ExecBootstrapedMSBuild(
-                $"{project.Path} -mt",
+                $"{project.Path} -mt -nodeReuse:true",
                 out bool success,
                 false,
                 _output);
