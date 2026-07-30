@@ -734,9 +734,9 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 firstSuccess.ShouldBeTrue();
                 int serverPid = ParseNumber(firstOutput, "Server ID is ");
-                int sidecarPid = ParseNumber(firstOutput, "Sidecar ID is ");
+                int firstSidecarPid = ParseNumber(firstOutput, "Sidecar ID is ");
                 _env.WithTransientProcess(serverPid);
-                _env.WithTransientProcess(sidecarPid);
+                _env.WithTransientProcess(firstSidecarPid);
                 firstOutput.ShouldContain("Sidecar environment is first-build");
 
                 _env.SetEnvironmentVariable(environmentVariableName, "second-build");
@@ -749,12 +749,19 @@ namespace Microsoft.Build.Engine.UnitTests
 
                 secondSuccess.ShouldBeTrue();
                 ParseNumber(secondOutput, "Server ID is ").ShouldBe(serverPid);
-                ParseNumber(secondOutput, "Sidecar ID is ").ShouldBe(sidecarPid);
+                int secondSidecarPid = ParseNumber(secondOutput, "Sidecar ID is ");
+                _env.WithTransientProcess(secondSidecarPid);
+
+                // Each build gets a fresh environment snapshot, whether it reuses the sidecar or gets a new one.
                 secondOutput.ShouldContain("Sidecar environment is second-build");
 
                 MSBuildClient.ShutdownServer(CancellationToken.None).ShouldBeTrue();
                 WaitForProcessExit(serverPid).ShouldBeTrue($"Server process {serverPid} should exit after build-server shutdown.");
-                WaitForProcessExit(sidecarPid).ShouldBeTrue($"Sidecar process {sidecarPid} owned by the server should exit with it.");
+
+                // The point of the fix: no sidecar the server created may survive it, so shutting the
+                // server down must reap every sidecar it owned, not just the most recent one.
+                WaitForProcessExit(firstSidecarPid).ShouldBeTrue($"Sidecar process {firstSidecarPid} owned by the server should exit with it.");
+                WaitForProcessExit(secondSidecarPid).ShouldBeTrue($"Sidecar process {secondSidecarPid} owned by the server should exit with it.");
             }
             finally
             {
@@ -781,8 +788,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 </Project>
                 """);
 
-            string output = RunnerUtilities.ExecMSBuild(
-                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+            string output = RunnerUtilities.ExecBootstrapedMSBuild(
                 $"{project.Path} -mt",
                 out bool success,
                 false,

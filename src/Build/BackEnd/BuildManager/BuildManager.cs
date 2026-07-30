@@ -1510,11 +1510,11 @@ namespace Microsoft.Build.Execution
             _nodeManager ??= (INodeManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager);
             _nodeManager.ShutdownAllNodes();
 
-            // Sidecar TaskHosts are owned by whichever process launched them, so shutting down "all
-            // nodes" has to reach them too. Without this they are left running with no owner and no
-            // way to be discovered by a later shutdown request.
-            _taskHostNodeManager ??= (INodeManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.TaskHostNodeManager);
-            _taskHostNodeManager.ShutdownAllNodes();
+            // Sidecars are owned by whichever process launched them, so shutting down "all nodes" has
+            // to reach this process's own sidecars too. Only meaningful once a build has created the
+            // manager; without one this process owns no sidecars. Mirrors how the two managers are
+            // shut down in pairs elsewhere in this class.
+            _taskHostNodeManager?.ShutdownAllNodes();
         }
 
         /// <summary>

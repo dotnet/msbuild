@@ -259,7 +259,12 @@ namespace Microsoft.Build.BackEnd
             }
 
             // TaskHosts that are not connected to this process (legacy pooled hosts) still need the scan.
-            ShutdownAllNodes(ComponentHost.BuildParameters.EnableNodeReuse, NodeContextTerminated);
+            // If no BuildParameters were specified, this call is shutting down idle nodes left over from
+            // some other, completed build, which must have been started with node reuse. Mirrors the
+            // guard in NodeProviderOutOfProc.ShutdownAllNodes, and is required because this method is
+            // now reachable from BuildManager.ShutdownAllNodes before any build has run.
+            bool nodeReuse = ComponentHost.BuildParameters?.EnableNodeReuse ?? true;
+            ShutdownAllNodes(nodeReuse, NodeContextTerminated);
         }
         #endregion
 
