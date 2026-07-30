@@ -156,6 +156,7 @@ jobs:
         shell: pwsh
         env:
           KUSTO_ACCESS_TOKEN: ${{ steps.kusto_token.outputs.token }}
+          AZDO_ACCESS_TOKEN: ${{ steps.azdo_token.outputs.token }}
         run: |
           ./.github/mt-build-regression/workflows/Invoke-MtBuildTimeRegressionScan.ps1 `
             -ClusterUri 'https://perfstar-experimental.swedencentral.kusto.windows.net' `

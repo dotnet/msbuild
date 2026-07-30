@@ -14,12 +14,16 @@ param(
     [Parameter(Mandatory)][string]$ClusterUri,
     [Parameter(Mandatory)][string]$Database,
     [Parameter(Mandatory)][string]$QueryPath,
-    [Parameter(Mandatory)][string]$OutputDirectory
+    [Parameter(Mandatory)][string]$OutputDirectory,
+    [string]$OrganizationUri = 'https://dev.azure.com/devdiv',
+    [string]$Project = 'DevDiv'
 )
 
 $ErrorActionPreference = 'Stop'
 
+Import-Module (Join-Path $PSScriptRoot '..\components\clients\AzureDevOpsClient.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot '..\components\clients\KustoClient.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot '..\components\evidence\RunSelection.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot '..\components\evidence\RegressionDetection.psm1') -Force
 Import-Module (Join-Path $PSScriptRoot '..\components\reporting\RegressionReportWriter.psm1') -Force
 
@@ -30,6 +34,12 @@ if ([string]::IsNullOrWhiteSpace($accessToken))
     throw 'KUSTO_ACCESS_TOKEN is required.'
 }
 
+$azdoAccessToken = $env:AZDO_ACCESS_TOKEN
+if ([string]::IsNullOrWhiteSpace($azdoAccessToken))
+{
+    throw 'AZDO_ACCESS_TOKEN is required.'
+}
+
 if (-not (Test-Path -LiteralPath $QueryPath))
 {
     throw "Kusto query file not found: $QueryPath"
@@ -38,8 +48,99 @@ if (-not (Test-Path -LiteralPath $QueryPath))
 # Execute the detector and turn its tabular result into the stable candidate contract.
 $client = New-KustoClient -ClusterUri $ClusterUri -Database $Database -AccessToken $accessToken
 $query = Get-Content -LiteralPath $QueryPath -Raw
-$candidates = @(Invoke-KustoQuery -Client $client -Query $query -MaximumAttempts 4 -RequirePrimaryTable $true)
+$detected = @(Invoke-KustoQuery -Client $client -Query $query -MaximumAttempts 4 -RequirePrimaryTable $true)
+
+# PerfStarDataRaw is ingested while a run executes, so the detector can select a build that has not
+# finished and therefore reported only part of its scenarios. Resolve each run's real state here, so
+# that the candidate set, its identity key, and this job's outputs all describe usable runs only.
+# Azure DevOps lookup failures propagate: a transient error must fail the scan rather than silently
+# suppress candidates.
+$azureDevOpsClient = New-AzureDevOpsClient `
+    -OrganizationUri $OrganizationUri `
+    -Project $Project `
+    -AccessToken $azdoAccessToken
+$runCache = New-PerfStarRunCache
+$excluded = [System.Collections.Generic.List[object]]::new()
+
+$candidates = @(
+    foreach ($candidate in $detected)
+    {
+        $currentRun = Get-PerfStarRunMetadata `
+            -AzureDevOpsClient $azureDevOpsClient `
+            -RunCache $runCache `
+            -BuildId ([string]$candidate.CurrentBuildId) `
+            -Backend ([string]$candidate.Backend)
+
+        if (-not (Test-PerfStarRunUsable -Run $currentRun))
+        {
+            Write-Warning ("Excluding {0}/{1} '{2}': current PerfStar run {3} is not usable (state '{4}', result '{5}')." -f `
+                $candidate.Backend,
+                $candidate.Os,
+                $candidate.ScenarioPair,
+                $currentRun.perfStarBuildNumber,
+                $currentRun.perfStarBuildState,
+                $currentRun.perfStarBuildResult)
+            $excluded.Add([pscustomobject][ordered]@{
+                backend = [string]$candidate.Backend
+                os = [string]$candidate.Os
+                scenarioPair = [string]$candidate.ScenarioPair
+                run = 'current'
+                perfStarBuildNumber = $currentRun.perfStarBuildNumber
+                perfStarBuildState = $currentRun.perfStarBuildState
+                perfStarBuildResult = $currentRun.perfStarBuildResult
+            })
+            continue
+        }
+
+        # An unusable last-healthy run only invalidates the comparison, not the candidate. Drop the
+        # reference so the evidence step reports the candidate without a healthy baseline.
+        if (-not [string]::IsNullOrWhiteSpace([string]$candidate.HealthyBuildId))
+        {
+            $healthyRun = Get-PerfStarRunMetadata `
+                -AzureDevOpsClient $azureDevOpsClient `
+                -RunCache $runCache `
+                -BuildId ([string]$candidate.HealthyBuildId) `
+                -Backend ([string]$candidate.Backend)
+
+            if (-not (Test-PerfStarRunUsable -Run $healthyRun))
+            {
+                Write-Warning ("Dropping the last-healthy comparison for {0}/{1} '{2}': run {3} is not usable (state '{4}', result '{5}')." -f `
+                    $candidate.Backend,
+                    $candidate.Os,
+                    $candidate.ScenarioPair,
+                    $healthyRun.perfStarBuildNumber,
+                    $healthyRun.perfStarBuildState,
+                    $healthyRun.perfStarBuildResult)
+                $excluded.Add([pscustomobject][ordered]@{
+                    backend = [string]$candidate.Backend
+                    os = [string]$candidate.Os
+                    scenarioPair = [string]$candidate.ScenarioPair
+                    run = 'healthy'
+                    perfStarBuildNumber = $healthyRun.perfStarBuildNumber
+                    perfStarBuildState = $healthyRun.perfStarBuildState
+                    perfStarBuildResult = $healthyRun.perfStarBuildResult
+                })
+                $candidate.HealthyBuildId = ''
+                foreach ($healthyField in @(
+                    'HealthyBuildNumber',
+                    'HealthyTimestamp',
+                    'HealthyMtMedianMs',
+                    'HealthyNonMtMedianMs',
+                    'HealthyMtVsNonMtDeltaMs'))
+                {
+                    if ($null -ne $candidate.PSObject.Properties[$healthyField])
+                    {
+                        $candidate.$healthyField = $null
+                    }
+                }
+            }
+        }
+
+        $candidate
+    })
+
 $report = New-RegressionDetectionReport -Candidates $candidates -GeneratedAtUtc ([DateTimeOffset]::UtcNow)
+$report.excludedRuns = $excluded.ToArray()
 
 # Write the machine-readable and human-readable views of the same detection result.
 Write-RegressionDetectionReport -Report $report -OutputDirectory $OutputDirectory

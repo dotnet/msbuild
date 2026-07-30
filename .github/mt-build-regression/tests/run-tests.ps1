@@ -6,6 +6,8 @@ $ErrorActionPreference = 'Stop'
 $featureRoot = Split-Path $PSScriptRoot -Parent
 Import-Module (Join-Path $featureRoot 'components\evidence\EvidenceSanitizer.psm1') -Force
 Import-Module (Join-Path $featureRoot 'components\evidence\RegressionDetection.psm1') -Force
+Import-Module (Join-Path $featureRoot 'components\evidence\RunSelection.psm1') -Force
+Import-Module (Join-Path $featureRoot 'components\evidence\ActualRunEvidence.psm1') -Force
 Import-Module (Join-Path $featureRoot 'components\evidence\DiagnosticEvidence.psm1') -Force
 Import-Module (Join-Path $featureRoot 'components\reporting\RegressionReportWriter.psm1') -Force
 Import-Module (Join-Path $featureRoot 'components\clients\AzureDevOpsClient.psm1') -Force
@@ -137,6 +139,72 @@ $evidence = [pscustomobject]@{
 }
 $sourceVersions = Get-RequiredSourceVersions -Evidence $evidence
 Assert-Equal 2 $sourceVersions.Count 'Source versions must be valid, unique SHA-1 values.'
+
+function New-TestRun
+{
+    param([string]$State, [string]$Result)
+
+    [pscustomobject]@{ perfStarBuildState = $State; perfStarBuildResult = $Result }
+}
+
+Assert-True (Test-PerfStarRunUsable -Run (New-TestRun 'completed' 'succeeded')) 'Completed successful runs must be usable.'
+Assert-True (Test-PerfStarRunUsable -Run (New-TestRun 'completed' 'failed')) 'A completed run that failed overall must remain usable.'
+Assert-True (-not (Test-PerfStarRunUsable -Run (New-TestRun 'inProgress' ''))) 'In-progress runs must be rejected.'
+Assert-True (-not (Test-PerfStarRunUsable -Run (New-TestRun 'canceling' ''))) 'Canceling runs must be rejected.'
+Assert-True (-not (Test-PerfStarRunUsable -Run (New-TestRun 'completed' 'canceled'))) 'Canceled runs report state completed and must still be rejected.'
+Assert-True (-not (Test-PerfStarRunUsable -Run (New-TestRun 'completed' 'unknown'))) 'Runs with an unknown result must be rejected.'
+Assert-True (-not (Test-PerfStarRunUsable -Run (New-TestRun 'completed' ''))) 'Runs with a missing result must be rejected.'
+Assert-True (-not (Test-PerfStarRunUsable -Run ([pscustomobject]@{}))) 'Runs missing the state and result properties must be rejected.'
+Assert-Equal 25429 (Get-PerfStarPipelineDefinitionId -Backend 'Gold') 'The Gold backend must map to definition 25429.'
+Assert-Equal 28338 (Get-PerfStarPipelineDefinitionId -Backend 'Hosted') 'The Hosted backend must map to definition 28338.'
+
+# Azure DevOps omits properties instead of nulling them: an in-progress run carries no 'result', and
+# a run without a component resource carries no 'resources.pipelines'. The resolver runs under
+# StrictMode, so it must read those through the property collection rather than dotted access.
+$runSelectionModule = Get-Module RunSelection
+if ($null -eq $runSelectionModule)
+{
+    $failures.Add('RunSelection module must be loaded for the payload-shape test.')
+}
+else
+{
+    $sparseMetadata = & $runSelectionModule {
+        function Get-AzureDevOpsPipelineRun
+        {
+            param($Client, $DefinitionId, $BuildId)
+
+            # An in-progress run as Azure DevOps actually returns it.
+            [pscustomobject]@{ id = 14815927; name = '20260730.3'; state = 'inProgress' }
+        }
+
+        function Get-AzureDevOpsBuild
+        {
+            throw 'The component build must not be requested when no component resource exists.'
+        }
+
+        try
+        {
+            Get-PerfStarRunMetadata `
+                -AzureDevOpsClient ([pscustomobject]@{}) `
+                -RunCache (New-PerfStarRunCache) `
+                -BuildId '14815927' `
+                -Backend 'Hosted'
+        }
+        catch
+        {
+            $_.Exception.Message
+        }
+    }
+
+    Assert-True ($sparseMetadata -is [pscustomobject]) "Resolving a run with omitted properties must not throw. Got '$sparseMetadata'."
+    if ($sparseMetadata -is [pscustomobject])
+    {
+        Assert-Equal 'inProgress' $sparseMetadata.perfStarBuildState 'The run state must survive a sparse payload.'
+        Assert-Equal '' $sparseMetadata.perfStarBuildResult 'An omitted result must become an empty string.'
+        Assert-Equal '' $sparseMetadata.componentSourceVersion 'An omitted component resource must become an empty string.'
+        Assert-True (-not (Test-PerfStarRunUsable -Run $sparseMetadata)) 'A sparse in-progress run must be rejected rather than throw.'
+    }
+}
 Assert-True (Test-SafeKustoDimension -Value 'Scenario-1_mt' -Name 'test') 'Expected diagnostic dimensions must be accepted.'
 Assert-True (-not (Test-SafeKustoDimension -Value 'Scenario"; drop' -Name 'test' -WarningAction SilentlyContinue)) 'Unsafe Kusto dimensions must be rejected.'
 Assert-True (-not (Test-SafeKustoDimension -Value "Scenario`n" -Name 'test' -WarningAction SilentlyContinue)) 'Kusto dimensions with trailing newlines must be rejected.'
@@ -201,6 +269,66 @@ try
         -WarningVariable traversalWarnings)) 'Traversal entries must be rejected.'
     Assert-True (-not (Test-Path -LiteralPath (Join-Path $tempRoot 'escape.txt'))) 'Traversal entries must not escape the destination.'
     Assert-True (-not (($traversalWarnings -join "`n").Contains('escape.txt'))) 'Archive entry names must not be echoed in warnings.'
+
+    # The evidence step must fail loudly rather than silently drop a candidate the detector accepted,
+    # and it must not touch artifacts for a run it rejects. Shadow the module's private resolution and
+    # artifact functions inside its own scope so this stays offline.
+    $actualRunEvidenceModule = Get-Module ActualRunEvidence
+    if ($null -eq $actualRunEvidenceModule)
+    {
+        $failures.Add('ActualRunEvidence module must be loaded for the invariant test.')
+    }
+    else
+    {
+        $unusableReport = [pscustomobject]@{
+            candidates = @([pscustomobject]@{
+                Backend = 'Hosted'
+                Os = 'Windows'
+                ScenarioPair = 'Alpha'
+                CurrentBuildId = '1'
+                HealthyBuildId = ''
+                MtScenario = 'alpha-mt'
+                NonMtScenario = 'alpha'
+            })
+        }
+
+        $invariantResult = & $actualRunEvidenceModule {
+            param($Report, $RawDirectory)
+
+            function Get-PerfStarRunMetadata
+            {
+                param($AzureDevOpsClient, $RunCache, $BuildId, $Backend)
+
+                [pscustomobject]@{
+                    perfStarBuildId = $BuildId
+                    perfStarBuildNumber = '20260730.3'
+                    perfStarBuildState = 'inProgress'
+                    perfStarBuildResult = ''
+                }
+            }
+
+            function Get-ScenarioEvidence
+            {
+                throw 'Artifact evidence must not be requested for an unusable run.'
+            }
+
+            try
+            {
+                [void](Get-ActualRunEvidenceCandidates `
+                    -Report $Report `
+                    -AzureDevOpsClient ([pscustomobject]@{}) `
+                    -RawDirectory $RawDirectory)
+                'no-throw'
+            }
+            catch
+            {
+                $_.Exception.Message
+            }
+        } $unusableReport (Join-Path $tempRoot 'unusable-run')
+
+        Assert-True ($invariantResult -like '*is not usable*') "The evidence step must reject a candidate whose current run is unusable. Got '$invariantResult'."
+        Assert-True ($invariantResult -notlike '*must not be requested*') 'The evidence step must reject an unusable run before requesting artifacts.'
+    }
 
     $reportDirectory = Join-Path $tempRoot 'reports'
     $report = New-RegressionDetectionReport -Candidates @() -GeneratedAtUtc ([DateTimeOffset]::Parse('2026-01-01T00:00:00Z'))

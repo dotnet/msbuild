@@ -1,20 +1,8 @@
 # Copyright (c) Microsoft. All rights reserved.
 
 Import-Module (Join-Path $PSScriptRoot '..\clients\AzureDevOpsClient.psm1')
+Import-Module (Join-Path $PSScriptRoot 'RunSelection.psm1')
 Import-Module (Join-Path $PSScriptRoot 'EvidenceSanitizer.psm1')
-
-function Get-PerfStarPipelineDefinitionId
-{
-    [OutputType([int])]
-    param([Parameter(Mandatory)][string]$Backend)
-
-    switch ($Backend)
-    {
-        'Gold' { return 25429 }
-        'Hosted' { return 28338 }
-        default { throw "Unsupported PerfStar backend '$Backend'." }
-    }
-}
 
 function New-ActualRunEvidenceContext
 {
@@ -27,51 +15,9 @@ function New-ActualRunEvidenceContext
     [pscustomobject][ordered]@{
         AzureDevOpsClient = $AzureDevOpsClient
         RawDirectory = $RawDirectory
-        RunCache = @{}
+        RunCache = New-PerfStarRunCache
         ArtifactCache = @{}
     }
-}
-
-function Get-PerfStarRunMetadata
-{
-    [OutputType([pscustomobject])]
-    param(
-        [Parameter(Mandatory)]$Context,
-        [Parameter(Mandatory)][string]$BuildId,
-        [Parameter(Mandatory)][string]$Backend
-    )
-
-    $cacheKey = "$Backend/$BuildId"
-    if ($Context.RunCache.ContainsKey($cacheKey))
-    {
-        return $Context.RunCache[$cacheKey]
-    }
-
-    $definitionId = Get-PerfStarPipelineDefinitionId -Backend $Backend
-    $run = Get-AzureDevOpsPipelineRun -Client $Context.AzureDevOpsClient -DefinitionId $definitionId -BuildId $BuildId
-    $component = $run.resources.pipelines.ComponentBuildUnderTest
-
-    $componentBuild = $null
-    if ($null -ne $component -and $null -ne $component.pipeline.id)
-    {
-        $componentBuild = Get-AzureDevOpsBuild -Client $Context.AzureDevOpsClient -BuildId ([string]$component.pipeline.id)
-    }
-
-    $metadata = [pscustomobject][ordered]@{
-        perfStarBuildId = [string]$run.id
-        perfStarBuildNumber = [string]$run.name
-        perfStarBuildResult = [string]$run.result
-        perfStarBuildUrl = [string]$run._links.web.href
-        componentBuildId = if ($null -ne $componentBuild) { [string]$componentBuild.id } else { '' }
-        componentBuildNumber = if ($null -ne $componentBuild) { [string]$componentBuild.buildNumber } else { [string]$component.version }
-        componentSourceBranch = if ($null -ne $componentBuild) { [string]$componentBuild.sourceBranch } else { '' }
-        componentSourceVersion = if ($null -ne $componentBuild) { [string]$componentBuild.sourceVersion } else { '' }
-        componentBuildResult = if ($null -ne $componentBuild) { [string]$componentBuild.result } else { '' }
-        componentBuildUrl = if ($null -ne $componentBuild) { [string]$componentBuild._links.web.href } else { '' }
-    }
-
-    $Context.RunCache[$cacheKey] = $metadata
-    $metadata
 }
 
 function Get-ArtifactDirectory
@@ -283,13 +229,29 @@ function Get-ActualRunEvidenceCandidates
             foreach ($candidate in @($Report.candidates))
             {
                 $currentRun = Get-PerfStarRunMetadata `
-                    -Context $context `
+                    -AzureDevOpsClient $context.AzureDevOpsClient `
+                    -RunCache $context.RunCache `
                     -BuildId ([string]$candidate.CurrentBuildId) `
                     -Backend ([string]$candidate.Backend)
+
+                # Step 1 already excluded unusable runs; a violation here means the evidence input
+                # and the detector report disagree, which must fail rather than silently diverge.
+                if (-not (Test-PerfStarRunUsable -Run $currentRun))
+                {
+                    throw ("Current PerfStar run {0} for {1}/{2} '{3}' is not usable (state '{4}', result '{5}'). The detector report and this step disagree." -f `
+                        $currentRun.perfStarBuildNumber,
+                        $candidate.Backend,
+                        $candidate.Os,
+                        $candidate.ScenarioPair,
+                        $currentRun.perfStarBuildState,
+                        $currentRun.perfStarBuildResult)
+                }
+
                 $healthyRun = if (-not [string]::IsNullOrWhiteSpace([string]$candidate.HealthyBuildId))
                 {
                     Get-PerfStarRunMetadata `
-                        -Context $context `
+                        -AzureDevOpsClient $context.AzureDevOpsClient `
+                        -RunCache $context.RunCache `
                         -BuildId ([string]$candidate.HealthyBuildId) `
                         -Backend ([string]$candidate.Backend)
                 }
