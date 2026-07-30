@@ -96,14 +96,6 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private readonly CancellationTokenSource _cts = new();
 
-    private const int TerminalSizePollIntervalFrames = 30;
-    private const int TerminalSizeSettlingFrames = 3;
-
-    private int _lastTerminalWidth;
-    private int _lastTerminalHeight;
-    private int _framesSinceLastTerminalSizePoll = TerminalSizePollIntervalFrames;
-    private int _terminalSizeStableFrames = TerminalSizeSettlingFrames;
-
     /// <summary>
     /// Tracks the status of all relevant projects seen so far.
     /// </summary>
@@ -1491,43 +1483,17 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Refreshes the node display using the current terminal dimensions.
     /// </summary>
+    /// <remarks>
+    /// The terminal is queried on every frame. The number of physical rows the live block occupies
+    /// changes as soon as the terminal is resized, so rendering a delta against dimensions captured
+    /// on an earlier frame moves the cursor to the wrong place and corrupts the output.
+    /// <see cref="ITerminal.GetSize"/> keeps that to a single console query per frame.
+    /// </remarks>
     internal void Refresh()
     {
-        // Without polling, rendering with stale dimensions can corrupt output during a resize.
-        if (_terminalSizeStableFrames == TerminalSizeSettlingFrames &&
-            ++_framesSinceLastTerminalSizePoll < TerminalSizePollIntervalFrames)
-        {
-            return;
-        }
-
-        _framesSinceLastTerminalSizePoll = 0;
-        int width = Terminal.Width;
-        int height = Terminal.Height;
-
         lock (_lock)
         {
-            if (_currentFrame.NodesCount > 0)
-            {
-                if (width != _lastTerminalWidth || height != _lastTerminalHeight)
-                {
-                    _lastTerminalWidth = width;
-                    _lastTerminalHeight = height;
-                    _terminalSizeStableFrames = 0;
-                    return;
-                }
-
-                if (_terminalSizeStableFrames < TerminalSizeSettlingFrames)
-                {
-                    _terminalSizeStableFrames++;
-                    if (_terminalSizeStableFrames < TerminalSizeSettlingFrames)
-                    {
-                        return;
-                    }
-                }
-            }
-
-            _lastTerminalWidth = width;
-            _lastTerminalHeight = height;
+            (int width, int height) = Terminal.GetSize();
             DisplayNodes(width, height);
         }
     }
@@ -1536,14 +1502,18 @@ public sealed partial class TerminalLogger : INodeLogger
     /// Render Nodes section.
     /// It shows what all build nodes do.
     /// </summary>
-    internal void DisplayNodes() => DisplayNodes(Terminal.Width, Terminal.Height);
+    internal void DisplayNodes()
+    {
+        (int width, int height) = Terminal.GetSize();
+        DisplayNodes(width, height);
+    }
 
     private void DisplayNodes(int width, int height)
     {
         TerminalNodesFrame newFrame = new TerminalNodesFrame(_nodes, width: width, height: height);
 
         // Do not render delta but clear everything if Terminal width or height have changed.
-        if (newFrame.Width != _currentFrame.Width || newFrame.Height != _currentFrame.Height)
+        if (newFrame.TerminalWidth != _currentFrame.TerminalWidth || newFrame.Height != _currentFrame.Height)
         {
             EraseNodes(width);
         }
@@ -1567,7 +1537,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Erases the previously printed live node output.
     /// </summary>
-    private void EraseNodes() => EraseNodes(Terminal.Width);
+    private void EraseNodes() => EraseNodes(Terminal.GetSize().Width);
 
     private void EraseNodes(int terminalWidth)
     {

@@ -138,20 +138,22 @@ namespace Microsoft.Build.UnitTests
         private sealed class ResizableTerminal(TextWriter output, int width, int height) : ITerminal
         {
             private readonly Terminal _terminal = new(output);
-            private int _width = width;
 
-            public int Width
+            public int Width { get; set; } = width;
+
+            public int Height { get; set; } = height;
+
+            /// <summary>
+            /// Number of times the logger asked for the terminal dimensions.
+            /// </summary>
+            public int SizeQueryCount { get; private set; }
+
+            public (int Width, int Height) GetSize()
             {
-                get
-                {
-                    WidthQueryCount++;
-                    return _width;
-                }
-                set => _width = value;
+                SizeQueryCount++;
+                return (Width, Height);
             }
 
-            public int Height { get; } = height;
-            public int WidthQueryCount { get; private set; }
             public bool SupportsProgressReporting => false;
 
             public void BeginUpdate() => _terminal.BeginUpdate();
@@ -929,7 +931,44 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void RefreshRedrawsAfterTerminalResizeSettles()
+        public void RefreshRendersEveryFrameWithASingleSizeQuery()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 120, height: 40);
+
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
+                eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
+                eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build"));
+                eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "Task"));
+
+                terminalLogger.Refresh();
+                int queriesAfterFirstFrame = terminal.SizeQueryCount;
+                output.GetStringBuilder().Clear();
+
+                for (int i = 0; i < 10; i++)
+                {
+                    terminalLogger.Refresh();
+                    output.ToString().ShouldNotBeEmpty($"Frame {i} was not rendered.");
+                    output.GetStringBuilder().Clear();
+                }
+
+                // Both dimensions have to come from a single console round-trip per frame.
+                (terminal.SizeQueryCount - queriesAfterFirstFrame).ShouldBe(10);
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void RefreshRedrawsImmediatelyAfterTerminalResize()
         {
             using StringWriter output = new();
             using ResizableTerminal terminal = new(output, width: 120, height: 40);
@@ -948,32 +987,16 @@ namespace Microsoft.Build.UnitTests
                 terminalLogger.Refresh();
                 output.GetStringBuilder().Clear();
 
-                terminal.Width = 100;
-                for (int i = 0; i < 29; i++)
-                {
-                    terminalLogger.Refresh();
-                }
-
-                terminal.WidthQueryCount.ShouldBe(1);
-                output.ToString().ShouldBeEmpty();
+                // Unchanged dimensions keep the cheap delta render.
+                terminalLogger.Refresh();
+                output.ToString().ShouldNotContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
                 output.GetStringBuilder().Clear();
 
+                // The node line was laid out 119 columns wide, so at 40 columns the terminal reflows it
+                // into 3 physical rows and the cursor has to move up by 4 before erasing.
+                terminal.Width = 40;
                 terminalLogger.Refresh();
 
-                foreach (int width in new[] { 80, 60, 40 })
-                {
-                    terminal.Width = width;
-                    terminalLogger.Refresh();
-                }
-
-                output.ToString().ShouldBeEmpty();
-                terminal.WidthQueryCount.ShouldBe(5);
-
-                terminalLogger.Refresh();
-                terminalLogger.Refresh();
-                terminalLogger.Refresh();
-
-                terminal.WidthQueryCount.ShouldBe(8);
                 output.ToString().ShouldStartWith($"{AnsiCodes.CSI}4{AnsiCodes.MoveUpToLineStart}");
                 output.ToString().ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
             }
@@ -983,6 +1006,38 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Fact]
+        public void RefreshUsesUncappedWidthForReflow()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 140, height: 40);
+            string projectFile = $"{new string('a', 130)}.proj";
+
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(projectFile));
+                eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(projectFile));
+                eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(projectFile, "Build"));
+                eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(projectFile, "Task"));
+
+                terminalLogger.Refresh();
+                output.GetStringBuilder().Clear();
+
+                terminal.Width = 130;
+                terminalLogger.Refresh();
+
+                output.ToString().ShouldStartWith($"{AnsiCodes.CSI}2{AnsiCodes.MoveUpToLineStart}");
+                output.ToString().ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
 
         [Fact]
         public async Task DisplayNodesOverwritesWithNewTargetFramework()

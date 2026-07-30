@@ -6,6 +6,11 @@ using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.Build.Framework.Logging;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Console;
+#endif
 #if NETFRAMEWORK
 using Microsoft.Build.Shared;
 #endif
@@ -79,6 +84,34 @@ internal sealed class Terminal : ITerminal
             return Console.BufferWidth == 0 ? BigUnknownDimension : Console.BufferWidth;
         }
     }
+
+    /// <inheritdoc/>
+    public (int Width, int Height) GetSize()
+    {
+        if (Console.IsOutputRedirected)
+        {
+            return (BigUnknownDimension, BigUnknownDimension);
+        }
+
+#if FEATURE_WINDOWSINTEROP
+        if (NativeMethodsShared.IsWindows)
+        {
+            // Console.BufferWidth and Console.BufferHeight each take the console lock and call
+            // GetConsoleScreenBufferInfo. Since the render thread polls the size 30 times a second,
+            // we make the call ourselves and read both dimensions out of one result.
+            HANDLE stdOut = PInvoke.GetStdHandle(STD_HANDLE.STD_OUTPUT_HANDLE);
+            if (stdOut != HANDLE.INVALID_HANDLE_VALUE
+                && PInvoke.GetConsoleScreenBufferInfo(stdOut, out CONSOLE_SCREEN_BUFFER_INFO bufferInfo))
+            {
+                return (NormalizeDimension(bufferInfo.dwSize.X), NormalizeDimension(bufferInfo.dwSize.Y));
+            }
+        }
+#endif
+
+        return (Width, Height);
+    }
+
+    private static int NormalizeDimension(int dimension) => dimension <= 0 ? BigUnknownDimension : dimension;
 
     /// <inheritdoc/>
     /// <remarks>
