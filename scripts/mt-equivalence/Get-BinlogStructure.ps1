@@ -3,62 +3,94 @@
   Writes the target/task/project execution counts of a binary log to a JSON file.
 
 .DESCRIPTION
-  Reads the binlog's event stream with Microsoft.Build from a given SDK directory.
+  Compiles BinlogStructure.cs with the SDK's own Roslyn and runs it on the SDK's own runtime, so the
+  program, the compiler and Microsoft.Build all agree on the target framework.
 
-  This deliberately runs as its own process, one candidate SDK directory per launch. Loading MSBuild
-  commits the process's default AssemblyLoadContext to one Microsoft.Build identity, so a second
-  candidate can only ever fail with "Assembly with same name is already loaded" - which masks the
-  real reason the first candidate failed. One process per attempt keeps every attempt hermetic and
-  every error report truthful. It also keeps MSBuild's assemblies out of the calling session.
+  This deliberately avoids loading Microsoft.Build into the calling PowerShell. The build agents run
+  an older pwsh than a typical dev box (7.4, on .NET 8) while the SDK's Microsoft.Build targets a
+  newer framework, so Add-Type there fails with CS1705 - it compiles locally and not on the agent.
+  It also avoids reading the counts out of a diagnostic-verbosity text replay: engine-assigned
+  TargetIds are not unique across projects, and a measurable share of TaskStarted events never reach
+  the text at all, so the text cannot give exact counts.
+
+  The compile is done once per work directory and reused.
 #>
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $true)][string] $Binlog,
     [Parameter(Mandatory = $true)][string] $OutFile,
-    [Parameter(Mandatory = $true)][string] $ReaderDirectory
+    [Parameter(Mandatory = $true)][string] $WorkDir
 )
 
 Set-StrictMode -Version 3.0
 $ErrorActionPreference = 'Stop'
 
-$framework = Join-Path $ReaderDirectory 'Microsoft.Build.Framework.dll'
-$engine = Join-Path $ReaderDirectory 'Microsoft.Build.dll'
+function Find-DotnetRoot {
+    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+    $onPath = Get-Command dotnet -ErrorAction SilentlyContinue
+    foreach ($root in @(
+            (Join-Path $repoRoot '.dotnet'),
+            $env:DOTNET_INSTALL_DIR,
+            $env:DOTNET_ROOT,
+            $(if ($onPath) { Split-Path -Parent $onPath.Source }))) {
 
-# Each step is reported separately: a failure here disables a check that the text comparison relies
-# on, and the caller can only act on it if it says which step broke and why.
-try {
-    # LoadFrom also registers the assembly's directory as a probing path, so Microsoft.Build's own
-    # dependencies resolve without any custom AssemblyLoadContext plumbing.
-    [void][System.Reflection.Assembly]::LoadFrom($framework)
-    [void][System.Reflection.Assembly]::LoadFrom($engine)
-}
-catch {
-    throw "loading MSBuild from '$ReaderDirectory' failed: $($_.Exception.Message)"
-}
-
-try {
-    # -ReferencedAssemblies replaces Add-Type's default reference set, so the framework assemblies
-    # the source actually uses have to be named explicitly - without System.Collections the
-    # Dictionary<,> in BinlogStructure.cs does not resolve.
-    Add-Type -TypeDefinition (Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'BinlogStructure.cs')) `
-        -ReferencedAssemblies @($engine, $framework, 'System.Collections', 'System.Runtime') -ErrorAction Stop
-}
-catch {
-    throw "compiling BinlogStructure.cs against '$ReaderDirectory' failed (PowerShell $($PSVersionTable.PSVersion)): $($_.Exception.Message)"
+        if (-not $root) { continue }
+        foreach ($name in 'dotnet.exe', 'dotnet') {
+            $exe = Join-Path $root $name
+            if (Test-Path -LiteralPath $exe) { return [pscustomobject]@{ Root = $root; Exe = $exe } }
+        }
+    }
+    throw 'No dotnet installation found (looked in <repo>\.dotnet, DOTNET_INSTALL_DIR, DOTNET_ROOT and PATH).'
 }
 
-try {
-    $counts = [BinlogStructure]::Collect((Resolve-Path -LiteralPath $Binlog).Path)
-}
-catch {
-    throw "reading '$Binlog' with MSBuild from '$ReaderDirectory' failed: $($_.Exception.Message)"
+$dotnet = Find-DotnetRoot
+
+# Newest SDK that actually carries Microsoft.Build; that is the assembly set the program binds to.
+$sdk = Get-ChildItem -LiteralPath (Join-Path $dotnet.Root 'sdk') -Directory -ErrorAction SilentlyContinue |
+    Sort-Object Name -Descending |
+    Where-Object { (Test-Path -LiteralPath (Join-Path $_.FullName 'Microsoft.Build.dll')) -and (Test-Path -LiteralPath (Join-Path $_.FullName 'Roslyn\bincore\csc.dll')) } |
+    Select-Object -First 1
+if (-not $sdk) { throw "No SDK under $(Join-Path $dotnet.Root 'sdk') contains both Microsoft.Build.dll and Roslyn." }
+
+# Run on the newest shared framework available: it has to be at least what Microsoft.Build targets.
+$framework = Get-ChildItem -LiteralPath (Join-Path $dotnet.Root 'shared\Microsoft.NETCore.App') -Directory -ErrorAction SilentlyContinue |
+    Sort-Object Name -Descending | Select-Object -First 1
+if (-not $framework) { throw "No Microsoft.NETCore.App under $(Join-Path $dotnet.Root 'shared')." }
+
+$toolDir = Join-Path $WorkDir 'binlogstructure'
+$toolDll = Join-Path $toolDir 'BinlogStructure.dll'
+$source = Join-Path $PSScriptRoot 'BinlogStructure.cs'
+
+if ((-not (Test-Path -LiteralPath $toolDll)) -or ((Get-Item $toolDll).LastWriteTimeUtc -lt (Get-Item $source).LastWriteTimeUtc)) {
+    New-Item -ItemType Directory -Force -Path $toolDir | Out-Null
+
+    # Reference the runtime's own assemblies rather than a targeting pack, which need not be
+    # installed. Only the managed ones can be referenced, hence the name filter.
+    $refs = New-Object System.Collections.Generic.List[string]
+    $refs.Add((Join-Path $sdk.FullName 'Microsoft.Build.dll'))
+    $refs.Add((Join-Path $sdk.FullName 'Microsoft.Build.Framework.dll'))
+    foreach ($dll in (Get-ChildItem -LiteralPath $framework.FullName -Filter '*.dll')) {
+        if ($dll.Name -like '*Native*') { continue }
+        if ($dll.Name -like 'System*.dll' -or $dll.Name -eq 'netstandard.dll') { $refs.Add($dll.FullName) }
+    }
+
+    $cscArgs = @(
+        (Join-Path $sdk.FullName 'Roslyn\bincore\csc.dll'),
+        '/nologo', '/noconfig', '/nostdlib', '/target:exe', '/optimize+', '/nullable:enable',
+        "/out:$toolDll", $source) + ($refs | ForEach-Object { "/r:$_" })
+
+    $cscOutput = & $dotnet.Exe @cscArgs 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "compiling BinlogStructure.cs failed: $(($cscOutput | Out-String).Trim())" }
+
+    # csc alone does not emit one, and 'dotnet exec' will not start a framework-dependent app without it.
+    @{
+        runtimeOptions = @{
+            tfm         = 'net10.0'
+            framework   = @{ name = 'Microsoft.NETCore.App'; version = $framework.Name }
+            rollForward = 'latestMajor'
+        }
+    } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath (Join-Path $toolDir 'BinlogStructure.runtimeconfig.json') -Encoding utf8
 }
 
-[pscustomobject]@{
-    ReaderDirectory  = $ReaderDirectory
-    Targets          = $counts.Targets
-    TargetsByProject = $counts.TargetsByProject
-    Tasks            = $counts.Tasks
-    Projects         = $counts.Projects
-    Diagnostics      = $counts.Diagnostics
-} | ConvertTo-Json -Depth 4 -Compress | Set-Content -LiteralPath $OutFile -Encoding utf8
+$runOutput = & $dotnet.Exe exec $toolDll $Binlog $OutFile $sdk.FullName 2>&1
+if ($LASTEXITCODE -ne 0) { throw "reading '$Binlog' failed: $(($runOutput | Out-String).Trim())" }

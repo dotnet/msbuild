@@ -1,79 +1,109 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Runtime.Loader;
+using System.Text.Json;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 
 /// <summary>
-///  Pulls execution counts straight out of a binary log's event stream.
+///  Writes the target/task/project execution counts of a binary log to a JSON file.
 /// </summary>
 /// <remarks>
-///  Comparing replayed *text* is unavoidably noisy: node ids interleave, and MSBuild's console and
-///  file loggers only emit a target header when that target happens to log something at the current
-///  verbosity, so a target that is silent in one run and chatty in another looks like it only ran in
-///  one of them. The events themselves have none of that ambiguity - every target that executes
-///  raises exactly one TargetStarted - so these counts are the authoritative answer to "did the two
-///  builds do the same work".
+///  Comparing replayed *text* is unavoidably noisy: node ids interleave, and MSBuild's loggers only
+///  emit a target header when that target happens to log something at the current verbosity, so a
+///  target that is silent in one run and chatty in another looks like it only ran in one of them.
+///  Diagnostic verbosity does not fix it either - engine-assigned TargetIds are not unique across
+///  projects, and a measurable share of TaskStarted events never reach the text at all. The event
+///  stream has none of that ambiguity: every target that executes raises exactly one TargetStarted.
 ///  <para>
-///   Deliberately written in a conservative C# dialect. This is compiled by Add-Type, whose language
-///   version follows the PowerShell host, and the build agents run an older pwsh than a typical dev
-///   box: target-typed 'new()' and lambda discards compile locally and fail there.
+///   This is a standalone program rather than something loaded into the calling PowerShell because
+///   Microsoft.Build targets a newer framework than the pwsh on the build agents runs on, so
+///   Add-Type cannot even compile against it there (CS1705). Running on the SDK's own runtime side-
+///   steps the whole question, and keeps MSBuild's assemblies out of the caller.
 ///  </para>
 /// </remarks>
-public static class BinlogStructure
+internal static class BinlogStructure
 {
-    public sealed class Counts
+    private static int Main(string[] args)
     {
-        public Dictionary<string, int> Targets = new Dictionary<string, int>(StringComparer.Ordinal);
+        if (args.Length != 3)
+        {
+            Console.Error.WriteLine("usage: binlogstructure <binlog> <output.json> <msbuildAssemblyDirectory>");
+            return 2;
+        }
 
-        public Dictionary<string, int> TargetsByProject = new Dictionary<string, int>(StringComparer.Ordinal);
+        string binlog = args[0];
+        string outputPath = args[1];
+        string assemblyDirectory = args[2];
 
-        public Dictionary<string, int> Tasks = new Dictionary<string, int>(StringComparer.Ordinal);
+        // Microsoft.Build drags in a good number of its neighbours; resolve them all out of the
+        // directory it came from rather than listing them.
+        AssemblyLoadContext.Default.Resolving += (context, name) =>
+        {
+            string candidate = Path.Combine(assemblyDirectory, name.Name + ".dll");
+            return File.Exists(candidate) ? context.LoadFromAssemblyPath(candidate) : null;
+        };
 
-        public Dictionary<string, int> Projects = new Dictionary<string, int>(StringComparer.Ordinal);
+        Counts counts = Collect(binlog);
 
-        public Dictionary<string, int> Diagnostics = new Dictionary<string, int>(StringComparer.Ordinal);
+        using (FileStream stream = File.Create(outputPath))
+        {
+            JsonSerializer.Serialize(stream, counts);
+        }
+
+        Console.WriteLine($"targets={Total(counts.Targets)} tasks={Total(counts.Tasks)} projects={Total(counts.Projects)}");
+        return 0;
+    }
+
+    private static int Total(Dictionary<string, int> counts)
+    {
+        int total = 0;
+        foreach (int n in counts.Values)
+        {
+            total += n;
+        }
+
+        return total;
+    }
+
+    private sealed class Counts
+    {
+        public Dictionary<string, int> Targets { get; } = new(StringComparer.Ordinal);
+
+        public Dictionary<string, int> TargetsByProject { get; } = new(StringComparer.Ordinal);
+
+        public Dictionary<string, int> Tasks { get; } = new(StringComparer.Ordinal);
+
+        public Dictionary<string, int> Projects { get; } = new(StringComparer.Ordinal);
+
+        public Dictionary<string, int> Diagnostics { get; } = new(StringComparer.Ordinal);
     }
 
     private static void Bump(Dictionary<string, int> counts, string key)
     {
-        int n;
-        counts.TryGetValue(key, out n);
+        counts.TryGetValue(key, out int n);
         counts[key] = n + 1;
     }
 
-    // The three builds run in the same working tree, so project paths already agree verbatim; only
-    // the directory separator is normalized, for the case where a log is compared across platforms.
-    private static string Project(string path)
-    {
-        return string.IsNullOrEmpty(path) ? "<none>" : path.Replace('/', '\\');
-    }
+    // The runs being compared share a working tree, so project paths already agree verbatim; only
+    // the directory separator is normalized, for the case where logs are compared across platforms.
+    private static string Project(string? path) => string.IsNullOrEmpty(path) ? "<none>" : path.Replace('/', '\\');
 
-    public static Counts Collect(string binlogPath)
+    private static Counts Collect(string binlogPath)
     {
-        Counts counts = new Counts();
-        BinaryLogReplayEventSource reader = new BinaryLogReplayEventSource();
+        Counts counts = new();
+        BinaryLogReplayEventSource reader = new();
 
-        reader.TargetStarted += delegate (object sender, TargetStartedEventArgs e)
+        reader.TargetStarted += (_, e) =>
         {
             Bump(counts.Targets, "target " + e.TargetName);
             Bump(counts.TargetsByProject, "target " + e.TargetName + " in " + Project(e.ProjectFile));
         };
-        reader.TaskStarted += delegate (object sender, TaskStartedEventArgs e)
-        {
-            Bump(counts.Tasks, "task " + e.TaskName);
-        };
-        reader.ProjectStarted += delegate (object sender, ProjectStartedEventArgs e)
-        {
-            Bump(counts.Projects, "project " + Project(e.ProjectFile));
-        };
-        reader.WarningRaised += delegate (object sender, BuildWarningEventArgs e)
-        {
-            Bump(counts.Diagnostics, "warning " + e.Code);
-        };
-        reader.ErrorRaised += delegate (object sender, BuildErrorEventArgs e)
-        {
-            Bump(counts.Diagnostics, "error " + e.Code);
-        };
+        reader.TaskStarted += (_, e) => Bump(counts.Tasks, "task " + e.TaskName);
+        reader.ProjectStarted += (_, e) => Bump(counts.Projects, "project " + Project(e.ProjectFile));
+        reader.WarningRaised += (_, e) => Bump(counts.Diagnostics, "warning " + e.Code);
+        reader.ErrorRaised += (_, e) => Bump(counts.Diagnostics, "error " + e.Code);
 
         reader.Replay(binlogPath);
         return counts;

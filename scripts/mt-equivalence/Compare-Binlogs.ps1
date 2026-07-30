@@ -191,60 +191,29 @@ $knownMtDifferences = New-Object System.Collections.Generic.List[object]
 # (project, target) pair, every task and every project, straight from the events.
 # ---------------------------------------------------------------------------------------------
 
-function Get-BinlogReaderDirectory {
-    # Any recent Microsoft.Build can read the binlog; it just has to be the .NET (not .NET Framework)
-    # build, because the helper runs under pwsh. Arcade installs one into <repo>\.dotnet whenever
-    # global.json has a 'tools.dotnet' entry, which is independent of -msbuildEngine.
-    $candidates = New-Object System.Collections.Generic.List[string]
-    $seenDir = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
-    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
-    $dotnetOnPath = Get-Command dotnet -ErrorAction SilentlyContinue
-    foreach ($root in @(
-            (Join-Path $repoRoot '.dotnet'),
-            $env:DOTNET_INSTALL_DIR,
-            $env:DOTNET_ROOT,
-            $(if ($dotnetOnPath) { Split-Path -Parent $dotnetOnPath.Source }))) {
-
-        if (-not $root) { continue }
-        $sdkDir = Join-Path $root 'sdk'
-        if (-not (Test-Path -LiteralPath $sdkDir)) { continue }
-        foreach ($d in (Get-ChildItem -LiteralPath $sdkDir -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending)) {
-            if ((Test-Path -LiteralPath (Join-Path $d.FullName 'Microsoft.Build.dll')) -and
-                (Test-Path -LiteralPath (Join-Path $d.FullName 'Microsoft.Build.Framework.dll')) -and
-                $seenDir.Add($d.FullName)) {
-                $candidates.Add($d.FullName)
-            }
-        }
-    }
-    return $candidates
-}
-
-# The extraction runs out of process, one candidate SDK per launch: see Get-BinlogStructure.ps1 for
-# why. The first directory that works is remembered so only the first binlog pays for probing.
+# The extraction runs out of process, compiled and executed by the SDK itself: see
+# Get-BinlogStructure.ps1 for why it cannot run inside this PowerShell session.
 $structureScript = Join-Path $PSScriptRoot 'Get-BinlogStructure.ps1'
 $structureHost = (Get-Process -Id $PID).Path
-$structureDirs = @(Get-BinlogReaderDirectory)
-$structureDir = $null
 $structureErrors = New-Object System.Collections.Generic.List[string]
+$structureAnnounced = $false
 
 function Get-BinlogStructuredCounts {
     param([string] $Binlog)
 
     $outFile = Join-Path $workDir ("structure-" + [System.IO.Path]::GetRandomFileName() + '.json')
-    foreach ($dir in $(if ($structureDir) { @($structureDir) } else { $structureDirs })) {
-        $stderr = & $structureHost -NoProfile -NonInteractive -File $structureScript `
-            -Binlog $Binlog -OutFile $outFile -ReaderDirectory $dir 2>&1
-        if ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $outFile)) {
-            if (-not $script:structureDir) {
-                $script:structureDir = $dir
-                Write-Host "[$Label] structural comparison using the MSBuild assemblies in $dir"
-            }
-            $json = Get-Content -Raw -LiteralPath $outFile | ConvertFrom-Json
-            Remove-Item -LiteralPath $outFile -Force -ErrorAction SilentlyContinue
-            return $json
+    $stderr = & $structureHost -NoProfile -NonInteractive -File $structureScript `
+        -Binlog $Binlog -OutFile $outFile -WorkDir $workDir 2>&1
+    if ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $outFile)) {
+        if (-not $script:structureAnnounced) {
+            $script:structureAnnounced = $true
+            Write-Host "[$Label] structural comparison reading the binlog event stream directly"
         }
-        $structureErrors.Add("$dir : $(($stderr | Out-String).Trim())")
+        $json = Get-Content -Raw -LiteralPath $outFile | ConvertFrom-Json
+        Remove-Item -LiteralPath $outFile -Force -ErrorAction SilentlyContinue
+        return $json
     }
+    $structureErrors.Add("$([System.IO.Path]::GetFileName($Binlog)): $(($stderr | Out-String).Trim())")
     return $null
 }
 

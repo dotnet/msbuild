@@ -303,5 +303,5 @@ An always-green check is worthless, so every failure path was exercised:
 | `ArtifactCompareRules.json` | per-path dispositions, each with a reason |
 | `LogNormalizationRules.json` | log normalization + known `-mt`-only differences, each with a reason |
 | `MtCompareNative.cs` | small C# helper (parallel hashing, byte-run diffing, log scanning) compiled with `Add-Type` |
-| `Get-BinlogStructure.ps1` | reads one binlog's execution counts; runs as its own process so each reader-assembly attempt is hermetic |
+| `Get-BinlogStructure.ps1` | compiles and runs `BinlogStructure.cs` with the SDK's own Roslyn and runtime, so it works regardless of the PowerShell version on the agent |
 | `BinlogStructure.cs` | reads target/task/project execution counts out of a binlog's event stream |
