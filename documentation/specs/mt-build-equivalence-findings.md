@@ -185,32 +185,35 @@ Visible in the control run, so normalized away for both comparisons:
 
 **This is the only behavioural difference `-mt` introduced, and it is log noise only.**
 
-The `-mt` build emits **1 202** normal-importance messages that the baseline does not (1 213 extra log
-lines in total once the 11 target headers below are counted):
+On the official MicroBuild pool (build 14815634) the `-mt` build emits **1 364** normal-importance
+messages that the baseline does not, over 9 distinct
+(loaded-from, desired-location) pairs:
 
 ```
-Task assembly was loaded from 'C:\...\sdk\<version>\Microsoft.Build.dll'
-  while the desired location was 'C:\...\sdk\<version>\Roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll'.
+Task assembly was loaded from 'C:\...\MSBuild\Current\Bin\Microsoft.Build.dll'
+  while the desired location was '...\Roslyn\binfx\Microsoft.Build.Tasks.CodeAnalysis.Sdk.dll'.
 ```
 
-Distribution over the "desired" assembly in the initial run:
+Distribution over the "desired" assembly:
 
 | count | desired assembly |
 |---|---|
-| 485 | `Roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll` |
-| 299 | `microsoft.dotnet.xlifftasks\...\Microsoft.DotNet.XliffTasks.dll` |
-| 169 | `Sdks\Microsoft.Build.Tasks.Git\...` |
-| 103 | `Microsoft.Build.Tasks.Core.dll` |
-| 78 | `Sdks\Microsoft.SourceLink.Common\...` |
-| 21 | `microsoft.testing.platform.msbuild\...` |
-| 21 | `xunit.v3.core.mtp-v2\...` |
-| 18 + 5 | `Sdks\Microsoft.NET.Sdk\tools\net11.0\...` |
-| 3 | `microsoft.dotnet.nugetrepack.tasks\...` |
+| 556 | `.dotnet\sdk\<version>\Roslyn\binfx\Microsoft.Build.Tasks.CodeAnalysis.Sdk.dll` |
+| 274 | `MSBuild\Current\Bin\Microsoft.Build.Tasks.Core.dll` |
+| 190 | `MSBuild\Current\Bin\amd64\Microsoft.Build.Tasks.Core.dll` |
+| 185 | `Sdks\Microsoft.Build.Tasks.Git\tools\netframework\Microsoft.Build.Tasks.Git.dll` |
+| 86 | `Sdks\Microsoft.SourceLink.Common\tools\netframework\Microsoft.SourceLink.Common.dll` |
+| 23 | `Sdks\Microsoft.NET.Sdk\tools\net472\Microsoft.NET.Build.Tasks.dll` |
+| 22 | `microsoft.testing.platform.msbuild\...\Microsoft.Testing.Platform.MSBuild.dll` |
+| 22 | `xunit.v3.core.mtp-v2\...\xunit.v3.msbuildtasks.dll` |
+| 6 | `microsoft.visualstudioeng.microbuild.plugins.swixbuild\...\SwixBuild.dll` |
 
-As a side effect, 11 targets that are otherwise silent at normal verbosity acquire a target header in
-the `-mt` log only (`AcquireSdk`, `GatherXlf`, `ResolveKeySource`,
-`InitializeSourceRootMappedPaths`, `TranslateSourceFromXlf`, …). That is purely the text logger
-reacting to the extra messages.
+As a side effect, **12** targets that are otherwise silent at normal verbosity acquire a target header
+in the `-mt` log only (`AcquireSdk`, `ResolveKeySource`, `InitializeSourceRootMappedPaths`,
+`NormalizeNetCoreSdkRootCasing`, `GenerateMSBuildEditorConfigFileCore`, …). That is purely the text
+logger reacting to the extra messages: every one of those header blocks contains nothing but this
+message. It is not evidence of extra work — the structural comparison shows every target executing
+exactly as many times in both runs.
 
 ### Root cause
 
@@ -269,10 +272,10 @@ are reported in their own "Known `-mt`-only log differences" section of every re
 failing the comparison, and the rule is applied only to the `-mt` comparison, never to the control.
 **Delete that entry once the bug is fixed** so the check becomes strict again.
 
-Measured on the official MicroBuild pool (build 14815634), the `-mt` build emits **1 376** more of
-these lines than the baseline, across 21 distinct "desired location" values. The baseline count is
-non-zero because a few tasks already need an out-of-process task host for runtime or bitness reasons;
-`-mt` makes that the common path.
+Measured on the official MicroBuild pool (build 14815634), the `-mt` build emits **1 364** more of
+these lines than the baseline, over 9 distinct (loaded-from, desired-location) pairs. The baseline
+count is non-zero because a few tasks already need an out-of-process task host for runtime or bitness
+reasons; `-mt` makes that the common path.
 
 ## Non-MSBuild noise from 1ES SDL injection
 
@@ -311,8 +314,15 @@ distinct `(project, target)` pairs, 122 tasks over 16 083 invocations, 53 projec
 and zero warnings and errors — every count equal across baseline, `-mt` and control. The extra target
 headers in the `-mt` text log are a logging side-effect of the `TaskAssemblyLocationMismatch` bug
 above: the file logger only emits a target header when the target logs something, so targets that are
-silent at normal verbosity acquire a header once the bug starts logging inside them. Of the 15 target
-names whose header count rose, every added header block contained nothing but the bug's message.
+silent at normal verbosity acquire a header once the bug starts logging inside them.
+
+Fifteen target names have a higher header count under `-mt`. Twelve of them appear in the `-mt` log
+only, and every one of those header blocks contains nothing but the bug's message. The other three
+(`PrepareForBuild`, `_GenerateSourceLinkFile`, `Build`) already appear in the baseline; their extra
+headers are the file logger re-emitting a header when output from another node interleaves, which is
+what the `setOnly` rule exists for. That re-emission is not `-mt` specific and swings in both
+directions between two identical builds — `_CopyFilesMarkedCopyLocal`, for instance, produces 299
+headers in the baseline and 440 in the control.
 
 Being right by luck is not the same as being checked, so the structural comparison is now a
 first-class tier of `Compare-Binlogs.ps1`: always on, enforced, netted against the control, and

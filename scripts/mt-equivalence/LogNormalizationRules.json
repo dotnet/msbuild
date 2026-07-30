@@ -154,7 +154,7 @@
     },
     {
       "pattern": "^[A-Za-z_][A-Za-z0-9_.]*:$",
-      "reason": "Collateral of the TaskAssemblyLocationMismatch bug above: MSBuild's file logger only emits a target header when the target logs something at the current verbosity, so targets that are silent at normal verbosity acquire a header in the -mt log only. Verified on the pool build: of the 15 target names whose header count rose under -mt, every added header block contained nothing but the bug's message. What this rule stops comparing is fully covered by the structure/targets and structure/targetsByProject sections, which take exact execution counts for every target - and every (project, target) pair - from the binlog event stream, are unaffected by verbosity or interleaving, always run, and are enforced."
+      "reason": "Collateral of the TaskAssemblyLocationMismatch bug above: MSBuild's file logger only emits a target header when the target logs something at the current verbosity, so targets that are silent at normal verbosity acquire a header in the -mt log only. Verified on the pool build: all 12 target names this suppresses appear in the -mt log only, and every one of their header blocks contains nothing but the bug's message. What this rule stops comparing is fully covered by the structure/targets and structure/targetsByProject sections, which take exact execution counts for every target - and every (project, target) pair - from the binlog event stream, are unaffected by verbosity or interleaving, always run, and are enforced."
     }
   ]
 }
