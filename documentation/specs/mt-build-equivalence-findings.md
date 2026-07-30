@@ -208,18 +208,19 @@ Visible in the control run, so normalized away for both comparisons:
   `VBCSCompiler` has to be started depends on whether a server from an earlier build is still alive.
 * NuGet restore chatter — depends on package-cache warmth.
 
-## The one `-mt`-only log difference
+## `-mt`-only log differences
 
-`-mt` routes tasks that are not marked `[MSBuildMultiThreadableTask]` to an out-of-process task host,
-which makes MSBuild log a spurious `TaskAssemblyLocationMismatch` message for most task invocations —
-1 364 extra lines in an official build of this repo. It is log noise: no build output changes, which
-the byte-level artifact comparison confirms. Fixed by
+None. `-mt` used to make MSBuild log a spurious `TaskAssemblyLocationMismatch` for most task
+invocations — 1 364 extra lines in an official build — because a task routed to an out-of-process task
+host is represented in-proc by a `TaskHostTask` proxy whose own assembly location is always
+`Microsoft.Build.dll`. That was log noise only, and it is fixed by
 [#14550](https://github.com/dotnet/msbuild/pull/14550).
 
-Until that merges the messages are allowed by a `knownMtOnly` entry in
-[`LogNormalizationRules.json`](../../scripts/mt-equivalence/LogNormalizationRules.json), which reports
-them separately instead of failing the comparison and applies only to the `-mt` comparison, never to
-the control. **Delete that entry once #14550 is in** so the check becomes strict again.
+With that in, the `knownMtOnly` list in
+[`LogNormalizationRules.json`](../../scripts/mt-equivalence/LogNormalizationRules.json) is empty and
+the log comparison is strict: any line that appears on the `-mt` side and not on the baseline side,
+and is not also produced by the control run, fails the pipeline. It should stay empty — an entry
+there is an unfixed bug, not a normalization.
 
 ## Non-MSBuild noise from 1ES SDL injection
 
@@ -244,24 +245,26 @@ on the assumption that a rule might be hiding a real `-mt` difference. Three thi
 `-mt` comparison, all 150 also differ between the two identical non-`-mt` builds. Not one difference
 is excused on the strength of a written rule alone; each has an experimental control.
 
-**The two target-header suppressions were justified by a control that cannot fail.** The `setOnly`
-rule for target headers and its `knownMtOnly` counterpart stop comparing how many times a target
-header appears — and a target header is exactly what would reveal a target running only under `-mt`.
-Their stated justification was the `-DeepCompare` coverage comparison. That comparison does run, but
-target coverage was deliberately excluded from the set of extractors allowed to fail it, precisely
-because the header-based extraction it uses is itself unstable. So the suppression was justified by a
-check that reports and never fails.
+**The target-header suppressions were justified by a control that cannot fail.** The `setOnly` rule
+for target headers, and the `knownMtOnly` entry that used to accompany it, stop comparing how many
+times a target header appears — and a target header is exactly what would reveal a target running only
+under `-mt`. Their stated justification was the `-DeepCompare` coverage comparison. That comparison
+does run, but target coverage was deliberately excluded from the set of extractors allowed to fail it,
+precisely because the header-based extraction it uses is itself unstable. So the suppression was
+justified by a check that reports and never fails.
 
 The suppression turned out to be *correct* — reading the raw event stream out of all three binlogs
 shows the builds are structurally identical: 384 distinct targets over 18 993 executions, 9 306
 distinct `(project, target)` pairs, 122 tasks over 16 083 invocations, 53 projects over 1 842 builds,
 and zero warnings and errors — every count equal across baseline, `-mt` and control. The extra target
-headers in the `-mt` text log are a side-effect of the extra messages described above: the file logger
-only emits a target header when the target logs something, so targets that are silent at normal
-verbosity acquire a header once something starts logging inside them.
+headers seen in the `-mt` text log at the time were a side-effect of the spurious
+`TaskAssemblyLocationMismatch` messages: the file logger only emits a target header when the target
+logs something, so targets that are silent at normal verbosity acquired a header once something
+started logging inside them. With [#14550](https://github.com/dotnet/msbuild/pull/14550) in, those
+messages are gone and so are the extra headers, and the `knownMtOnly` list is empty.
 
-Fifteen target names have a higher header count under `-mt`. Twelve of them appear in the `-mt` log
-only, and every one of those header blocks contains nothing but those messages. The other three
+Fifteen target names had a higher header count under `-mt`. Twelve of them appeared in the `-mt` log
+only, and every one of those header blocks contained nothing but those messages. The other three
 (`PrepareForBuild`, `_GenerateSourceLinkFile`, `Build`) already appear in the baseline; their extra
 headers are the file logger re-emitting a header when output from another node interleaves, which is
 what the `setOnly` rule exists for. That re-emission is not `-mt` specific and swings in both

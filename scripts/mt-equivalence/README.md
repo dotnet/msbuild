@@ -219,6 +219,9 @@ on the run summary.
 bugs. They are reported in their own section of the report instead of failing the comparison, and are
 applied **only** to the `mt` comparison, never to the control. Delete an entry when its bug is fixed.
 
+It is currently **empty**, and should stay that way: `-mt` produces no log difference that has to be
+excused, so an entry here means an unfixed bug rather than a normalization.
+
 ## Running it locally
 
 ```powershell
@@ -278,8 +281,8 @@ which also documents the two pre-existing reproducibility gaps found along the w
 
 An always-green check is worthless, so every failure path was exercised:
 
-* Removing the `knownMtOnly` allowance surfaced the 21 real `-mt`-only log lines: `logs=FAIL`,
-  21 unexplained, exit code 1.
+* Adding a `knownMtOnly` allowance back and then removing it surfaced the real `-mt`-only log lines it
+  had been hiding: `logs=FAIL`, exit code 1. (The list is empty today.)
 * Flipping a single byte at `0x4000` in `Microsoft.Build.dll` in the `mt` snapshot was reported as
   `PE: 1 bytes, regions: .text@0x4000+1`: `artifacts=FAIL`, exit code 1.
 * Appending one byte to `manifest.json` *inside* `Microsoft.Build.vsix` — the one place the
