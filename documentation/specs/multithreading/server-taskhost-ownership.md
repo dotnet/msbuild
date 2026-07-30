@@ -1,24 +1,47 @@
-# Multithreaded MSBuild Server and TaskHost Ownership
+# MT Request Routing and TaskHost Ownership
 
 **Status:** Proposed
 
-Companion proposal:
-[Non-Multithreaded Worker-Node Ownership](../non-mt-server-worker-node-ownership.md).
+## Terminology
+
+- **Resident server:** the single stable MSBuild Server process for a compatible
+  identity. It can serve both MT and non-MT requests; MT/non-MT are not server
+  types.
+- **MT request:** a build request with multithreaded mode enabled.
+- **Non-MT request:** a build request without multithreaded mode enabled. It
+  targets the same resident server as an MT request.
+- **Transient server:** a private server process that serves one MT request and
+  exits.
+- **Worker:** an out-of-process node that evaluates and executes project work on
+  behalf of the resident server or an in-process fallback.
+- **Thin client:** the short-lived command-line process that submits work to the
+  resident server.
+- **In-process fallback:** execution in the thin client after a request cannot
+  use the resident server.
+- **Owned node:** a child whose lifetime is bounded by one server or worker and
+  which cannot be adopted by another owner.
+- **Sidecar TaskHost:** an engine-created TaskHost associated with an MT
+  in-process/thread node for running a task that cannot execute safely in that
+  node.
+- **Compatibility TaskHost:** an engine-created TaskHost required by runtime,
+  architecture, or task-loading constraints.
 
 ## Decision
 
-The MSBuild Server defines the lifetime of every node it creates.
+The resident server defines the lifetime of every node it creates.
 
-This applies whether the server performs project work in its own process or
-delegates that work to worker processes, and therefore applies to both MT and
-non-MT builds.
+This applies whether the resident performs project work in its own process or
+delegates that work to workers.
 
-For MT builds:
+When serving an MT request:
 
-- the shared resident server owns its directly-created sidecar TaskHosts;
+- the resident server owns its directly-created sidecar TaskHosts;
 - a transient server owns its directly-created sidecar TaskHosts;
 - a worker owns any TaskHosts it creates; and
 - an owned TaskHost cannot be adopted by another server or worker.
+
+When the resident serves a non-MT request, it similarly owns the
+out-of-process workers it uses. Those workers own any TaskHosts they create.
 
 Owned nodes may be reused while their owner remains alive, but they cannot
 outlive their owner.
@@ -35,23 +58,22 @@ V1 has one resident server for each compatible server identity.
 - A transient server exits after its build.
 - Multiple resident servers are out of scope for V1.
 
-MT and non-MT requests share the same resident identity. Request mode controls
+MT and non-MT requests target the same resident identity. Request mode controls
 the response to rejected admission:
 
-- an MT client launches a transient server;
-- a non-MT client follows the in-process fallback described by the companion
-  proposal.
+- a rejected MT request launches a transient server;
+- a rejected non-MT request executes through the existing in-process fallback.
 
 ```mermaid
 flowchart TB
-    MT["MT client"] --> A{"Resident admission"}
+    MT["MT request client"] --> A{"Resident admission"}
     A -->|granted| R["Shared resident server"]
     A -->|busy or contested| T["One-build transient server"]
-    NR["MT client with node reuse disabled"] --> T
+    NR["MT request client with node reuse disabled"] --> T
 
     R --> RS["Resident-owned sidecars"]
     T --> TS["Transient-owned sidecars"]
-    R --> RW["Resident-owned non-MT workers"]
+    R --> RW["Resident-owned workers"]
     RW --> RWT["Worker-owned TaskHosts"]
 ```
 

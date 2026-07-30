@@ -1,13 +1,28 @@
-# Non-Multithreaded Worker-Node Ownership
+# Resident Server Worker-Node Ownership
 
 **Status:** Proposed
 
-Companion proposal:
-[Multithreaded MSBuild Server and TaskHost Ownership](multithreading/mt-server-sidecar-ownership.md).
+## Terminology
+
+- **Resident server:** the single stable MSBuild Server process for a compatible
+  identity. It can serve both MT and non-MT requests; MT/non-MT are not server
+  types.
+- **MT request:** a build request with multithreaded mode enabled.
+- **Non-MT request:** a build request without multithreaded mode enabled. It
+  targets the same resident server as an MT request.
+- **Resident-owned worker:** an out-of-process project worker whose lifetime is
+  bounded by the resident server.
+- **In-process fallback:** execution in the short-lived thin client after a
+  non-MT request cannot acquire the resident.
+- **Fallback worker:** a worker used by in-process fallback. Reusable fallback
+  workers retain the existing global reconnectable-node contract.
+- **TaskHost:** a process used by a server or worker to execute an isolated task.
+- **Explicitly transient TaskHost:** a TaskHost requested by a caller that needs
+  process isolation to end at the project-build boundary.
 
 ## Decision
 
-When the shared resident server executes a non-MT build, it owns every
+When the resident server executes a non-MT request, it owns every
 out-of-process worker it creates or reuses.
 
 Resident-owned workers:
@@ -17,12 +32,13 @@ Resident-owned workers:
 - cannot be adopted by another MSBuild process; and
 - cannot outlive the resident.
 
-This applies whether the resident itself is otherwise empty or also retains MT
-sidecars from earlier builds.
+This applies whether the resident currently delegates all project work or also
+retains TaskHosts from an earlier MT request.
 
 ## In-process fallback
 
-Non-MT busy or unavailable-server fallback remains unchanged:
+A non-MT request rejected because the resident is busy or unavailable retains
+the existing fallback:
 
 - the thin client executes the build in-process;
 - fallback workers use the legacy globally reconnectable worker handshake; and
@@ -32,12 +48,13 @@ Non-MT busy or unavailable-server fallback remains unchanged:
 The resident-owned and fallback worker pools use incompatible handshakes and
 cannot adopt from one another.
 
-`-nodeReuse:false` continues to disqualify a non-MT build from using the server.
+`-nodeReuse:false` continues to disqualify a non-MT request from using the
+resident.
 That build runs in-process and leaves no reusable worker behind.
 
 ```mermaid
 flowchart TB
-    C["Non-MT client"] --> A{"Resident admission"}
+    C["Non-MT request client"] --> A{"Resident admission"}
     A -->|granted| R["Shared resident server"]
     A -->|busy or unavailable| F["In-process fallback"]
 
@@ -83,8 +100,18 @@ fallback workers and cannot match resident-owned workers.
 
 ## Compatibility
 
-Task execution guarantees are unchanged and are defined by the companion
-proposal.
+This proposal changes process lifetime, not task isolation guarantees.
+
+- A non-multithreaded, non-yielding task runs exclusively in its process while
+  it is executing a project.
+- Node reuse may later execute an unrelated project in the same process.
+- Tasks must not treat process-static state as project-specific state.
+- Any static state must be independent of project/build identity or validate
+  that it is safe for the current invocation.
+- MT-capable tasks may execute concurrently according to their declared
+  contract.
+- Full per-project process isolation still requires an explicitly transient
+  TaskHost.
 
 An independent concurrent build cannot reuse workers active in another build
 today, so ownership does not change that case.
@@ -111,7 +138,7 @@ dynamic downsizing is outside this specification.
 
 ## Required tests
 
-1. Sequential non-MT builds on the resident reuse the same worker PID.
+1. Sequential non-MT requests on the resident reuse the same worker PID.
 2. Resident-owned and fallback handshakes cannot adopt from one another.
 3. Busy non-MT admission falls back in-process.
 4. Fallback workers retain legacy cross-fallback reuse.
