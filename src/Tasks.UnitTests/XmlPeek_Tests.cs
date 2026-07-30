@@ -271,6 +271,16 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void PeekAllowsDtdByDefaultWhenWave18_11IsDisabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            new XmlPeek().ProhibitDtd.ShouldBeFalse();
+        }
+
+        [Fact]
         public void PeekMalformedXmlShowsGenericInputFileError()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);

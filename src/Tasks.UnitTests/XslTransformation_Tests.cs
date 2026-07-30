@@ -1129,6 +1129,16 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void XslTransformationAllowsDtdByDefaultWhenWave18_11IsDisabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            new XslTransformation().ProhibitDtd.ShouldBeFalse();
+        }
+
+        [Fact]
         public void XsltWithDtdShowsTaskSpecificLoadErrorByDefault()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);

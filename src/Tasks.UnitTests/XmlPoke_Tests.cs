@@ -227,6 +227,16 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void PokeAllowsDtdByDefaultWhenWave18_11IsDisabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            new XmlPoke().ProhibitDtd.ShouldBeFalse();
+        }
+
+        [Fact]
         public void PokeMalformedXmlShowsGenericInputFileError()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
