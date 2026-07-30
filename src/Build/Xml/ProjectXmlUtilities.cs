@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework.BuildException;
 using Microsoft.Build.Shared;
 
@@ -55,11 +56,11 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Throw an invalid project exception if there are any child elements at all
         /// </summary>
-        internal static void VerifyThrowProjectNoChildElements(XmlElementWithLocation element)
+        internal static void VerifyThrowProjectNoChildElements(XmlElementWithLocation element, UnknownElementsConfiguration config = null)
         {
             foreach (var child in GetVerifyThrowProjectChildElements(element))
             {
-                ThrowProjectInvalidChildElement(child.Name, element.Name, element.Location);
+                ThrowIfProjectInvalidChildElement(child.Name, element.Name, element.Location, config);
             }
         }
 
@@ -70,14 +71,6 @@ namespace Microsoft.Build.Internal
         internal static void ThrowProjectInvalidChildElementDueToDuplicate(XmlElementWithLocation child)
         {
             ProjectErrorUtilities.ThrowInvalidProject(child.Location, "InvalidChildElementDueToDuplication", child.Name, child.ParentNode.Name);
-        }
-
-        /// <summary>
-        /// Throw an invalid project exception indicating that the child is not valid beneath the element
-        /// </summary>
-        internal static void ThrowProjectInvalidChildElement(string name, string parentName, ElementLocation location)
-        {
-            ProjectErrorUtilities.ThrowInvalidProject(location, "UnrecognizedChildElement", name, parentName);
         }
 
         /// <summary>
@@ -145,12 +138,17 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// If there are any attributes on the element, throws an InvalidProjectFileException complaining that the attribute is not valid on this element.
         /// </summary>
-        internal static void VerifyThrowProjectNoAttributes(XmlElementWithLocation element)
+        internal static void VerifyThrowProjectNoAttributes(XmlElementWithLocation element, UnknownElementsConfiguration config = null)
         {
             if (element.HasAttributes)
             {
                 foreach (XmlAttributeWithLocation attribute in element.Attributes)
                 {
+                    if (config?.CheckSkipAttribute(element.Name, attribute.Name) == true)
+                    {
+                        continue;
+                    }
+
                     ThrowProjectInvalidAttribute(attribute);
                 }
             }
@@ -177,14 +175,40 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Verify  that all attributes on the element are on the list of legal attributes
+        /// Verify that all attributes on the element are on the list of legal attributes.
+        /// When genericElementName is provided, only that name is checked in the config (not the actual element name).
         /// </summary>
-        internal static void VerifyThrowProjectAttributes(XmlElementWithLocation element, HashSet<string> validAttributes)
+        internal static void VerifyThrowProjectAttributes(XmlElementWithLocation element, HashSet<string> validAttributes, UnknownElementsConfiguration config = null, string genericElementName = null)
         {
             foreach (XmlAttributeWithLocation attribute in element.Attributes)
             {
-                ProjectXmlUtilities.VerifyThrowProjectInvalidAttribute(validAttributes.Contains(attribute.Name), attribute);
+                if (!validAttributes.Contains(attribute.Name))
+                {
+                    string configElementName = genericElementName ?? element.Name;
+                    if (config?.CheckSkipAttribute(configElementName, attribute.Name) == true)
+                    {
+                        continue;
+                    }
+
+                    ThrowProjectInvalidAttribute(attribute);
+                }
             }
+        }
+
+        /// <summary>
+        /// Throws an InvalidProjectFileException if the child element is not allowed by configuration.
+        /// If the element is allowed, it is silently skipped.
+        /// </summary>
+        /// <returns>True if the element was skipped (caller should continue), false if the element was not in config and an exception was thrown.</returns>
+        internal static bool ThrowIfProjectInvalidChildElement(string name, string parentName, ElementLocation location, UnknownElementsConfiguration config = null)
+        {
+            if (config?.CheckSkipElement(parentName, name) == true)
+            {
+                return true;
+            }
+
+            ProjectErrorUtilities.ThrowInvalidProject(location, "UnrecognizedChildElement", name, parentName);
+            return false; // Unreachable, but needed for compiler
         }
 
         /// <summary>
