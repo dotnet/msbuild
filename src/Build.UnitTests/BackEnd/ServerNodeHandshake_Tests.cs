@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using Microsoft.Build.Experimental;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Server;
 using Shouldly;
