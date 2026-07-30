@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft. All rights reserved.
 
-Import-Module (Join-Path $PSScriptRoot '..\clients\AzureDevOpsClient.psm1') -Force
-Import-Module (Join-Path $PSScriptRoot 'EvidenceSanitizer.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot '..\clients\AzureDevOpsClient.psm1')
+Import-Module (Join-Path $PSScriptRoot 'EvidenceSanitizer.psm1')
 
 function Get-PerfStarPipelineDefinitionId
 {

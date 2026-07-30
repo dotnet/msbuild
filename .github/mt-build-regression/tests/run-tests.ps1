@@ -229,6 +229,67 @@ finally
     Remove-Item -LiteralPath $tempRoot -Recurse -Force -ErrorAction SilentlyContinue
 }
 
+# Each workflows/*.ps1 entry point must be able to resolve every component command it calls after
+# running only its own Import-Module statements. A nested `Import-Module -Force` in a component
+# module silently unbinds a client module from the entry script's scope, so this is verified in a
+# fresh runspace per entry point rather than in this script's already-populated session.
+$workflowRoot = Join-Path $featureRoot 'workflows'
+$componentCommands = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+foreach ($moduleFile in Get-ChildItem -LiteralPath (Join-Path $featureRoot 'components') -Recurse -Filter '*.psm1')
+{
+    $moduleTokens = $null
+    $moduleErrors = $null
+    $moduleAst = [System.Management.Automation.Language.Parser]::ParseFile($moduleFile.FullName, [ref]$moduleTokens, [ref]$moduleErrors)
+    foreach ($definition in $moduleAst.FindAll({ param($node) $node -is [System.Management.Automation.Language.FunctionDefinitionAst] }, $true))
+    {
+        [void]$componentCommands.Add($definition.Name)
+    }
+}
+
+foreach ($entryPoint in Get-ChildItem -LiteralPath $workflowRoot -Filter '*.ps1')
+{
+    $entryTokens = $null
+    $entryErrors = $null
+    $entryAst = [System.Management.Automation.Language.Parser]::ParseFile($entryPoint.FullName, [ref]$entryTokens, [ref]$entryErrors)
+
+    $importStatements = @(
+        $entryAst.FindAll({
+            param($node)
+            $node -is [System.Management.Automation.Language.CommandAst] -and
+            $node.GetCommandName() -eq 'Import-Module'
+        }, $true) | ForEach-Object { $_.Extent.Text })
+
+    $invokedCommands = @(
+        $entryAst.FindAll({ param($node) $node -is [System.Management.Automation.Language.CommandAst] }, $true) |
+            ForEach-Object { $_.GetCommandName() } |
+            Where-Object { $_ -and $componentCommands.Contains($_) } |
+            Sort-Object -Unique)
+
+    Assert-True ($invokedCommands.Count -gt 0) "$($entryPoint.Name) must call at least one component command."
+
+    $probe = [powershell]::Create()
+    try
+    {
+        [void]$probe.AddScript(@"
+`$PSScriptRoot = '$($workflowRoot -replace "'", "''")'
+$($importStatements -join "`n")
+@($($(($invokedCommands | ForEach-Object { "'$_'" }) -join ',')))|
+    Where-Object { -not (Get-Command `$_ -ErrorAction SilentlyContinue) }
+"@)
+        $unresolved = @($probe.Invoke())
+        foreach ($probeError in $probe.Streams.Error)
+        {
+            $failures.Add("$($entryPoint.Name) failed to import its modules: $probeError")
+        }
+
+        Assert-Equal 0 $unresolved.Count "$($entryPoint.Name) cannot resolve component command(s): $($unresolved -join ', ')."
+    }
+    finally
+    {
+        $probe.Dispose()
+    }
+}
+
 if ($failures.Count -gt 0)
 {
     $failures | ForEach-Object { Write-Error $_ -ErrorAction Continue }

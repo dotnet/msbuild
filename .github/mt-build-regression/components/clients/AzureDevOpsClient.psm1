@@ -2,7 +2,7 @@
 
 Set-StrictMode -Version Latest
 
-Import-Module (Join-Path $PSScriptRoot 'HttpRetry.psm1') -Force
+Import-Module (Join-Path $PSScriptRoot 'HttpRetry.psm1')
 
 function New-AzureDevOpsClient
 {
