@@ -55,8 +55,9 @@ the official MicroBuild pool by the pipeline itself, in
 
 | run | commit | result |
 |---|---|---|
+| [14817800](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14817800&view=results) | `512bc3b` | **succeeded** — the numbers below, with the allowances restored |
 | [14817555](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14817555&view=results) | `180809a` | failed on purpose — the `knownMtOnly` allowance was removed after #14550 merged, and the messages were still there because they come from the *driving* MSBuild |
-| [14817031](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14817031&view=results) | `5aa9f18` | **succeeded** — the numbers below, with the structural comparison active |
+| [14817031](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14817031&view=results) | `5aa9f18` | succeeded — same verdict before `main` was merged in |
 | [14815634](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14815634&view=results) | `d87e327` | succeeded — same verdict before the structural comparison was added |
 | [14816699](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14816699&view=results) | `13d285b` | failed — the structural reader could not load MSBuild under the agent's PowerShell (`CS1705`) |
 | [14816238](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14816238&view=results) | `d5c62f8` | failed — same cause, reported as a misleading "assembly already loaded" |
@@ -75,8 +76,11 @@ Registry manifest, all staged PDBs and all symbol-package payloads.
 
 | comparison | paths compared | byte-identical | unexpected differences | expected differences |
 |---|---|---|---|---|
-| `mt` vs `baseline` | 28 149 | 27 997 | **0** | 152 |
-| `control` vs `baseline` | 28 149 | 28 000 | **0** | 149 |
+| `mt` vs `baseline` | 28 149 | 27 998 | **0** | 151 |
+| `control` vs `baseline` | 28 149 | 27 999 | **0** | 150 |
+
+The count of expected differences moves by one or two between runs — those files are non-deterministic
+by nature, so that number *is* the noise floor. What has to stay at zero is the unexpected column.
 
 Only 18 paths are excluded from the comparison altogether, and the report names every one of them:
 14 Guardian SARIF files injected by the 1ES SDL template, 2 developer-convenience environment
@@ -84,7 +88,7 @@ scripts, 1 shortcut and 1 build log. Everything else in the tree is compared.
 
 The three builds are also structurally identical, read from the binlog event stream rather than from
 rendered text: 384 distinct targets over 18 993 executions, 9 306 distinct `(project, target)` pairs,
-122 tasks over 16 083 invocations, 53 projects over 1 842 builds, and no warnings or errors — every
+122 tasks over 16 084 invocations, 53 projects over 1 842 builds, and no warnings or errors — every
 count equal across `baseline`, `mt` and `control`.
 
 That the `-mt` build really ran multithreaded is asserted from the recorded command line, not assumed:
@@ -227,7 +231,8 @@ reported all 1 364, attributed to
 which is 18.11. The `knownMtOnly` entries in
 [`LogNormalizationRules.json`](../../scripts/mt-equivalence/LogNormalizationRules.json) therefore stay
 until that pool moves to a VS carrying the fix; delete them then and the log comparison becomes
-strict again.
+strict again. They excuse exactly 21 distinct lines — the 9 message variants (1 364 occurrences) and
+the 12 target headers those messages cause — and nothing else.
 
 This generalises: a `knownMtOnly` entry is cleared by the fix *shipping to the agents*, not by it
 merging.
