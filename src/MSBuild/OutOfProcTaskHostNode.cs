@@ -1329,17 +1329,64 @@ namespace Microsoft.Build.CommandLine
             // the next build performs a fresh apply rather than trusting state left over from this build.
             _lastAppliedConfigEnvironment = null;
 
-            // Sidecar TaskHost will persist after the build is done.
-            if (_nodeReuse)
+            // A sidecar TaskHost is owned by the process that launched it: it stays connected and
+            // resets in place between builds rather than disconnecting into the global
+            // reconnectable pool, so it can never outlive its owner.
+            if (_nodeReuse && buildComplete.PrepareForReuse)
             {
-                _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
+                PrepareForNextBuild();
+                if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
+                {
+                    _nodeEndpoint.SendData(new NodeShutdown(NodeShutdownReason.Requested));
+                }
+
+                return;
             }
-            else
-            {
-                // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
-                _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
-            }
+
+            // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
+            _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
             _shutdownEvent.Set();
+        }
+
+        /// <summary>
+        /// Disposes build-scoped state so this sidecar can serve the next build of its owner
+        /// without being torn down and relaunched.
+        /// </summary>
+        private void PrepareForNextBuild()
+        {
+            Assumed.Zero(_activeTaskCount, "A sidecar TaskHost cannot reset while a task is executing.");
+            Assumed.Zero(_blockedTaskCount, "A sidecar TaskHost cannot reset while a task is blocked.");
+            Assumed.Zero(_taskContexts.Count, "A sidecar TaskHost cannot reset with live task contexts.");
+
+            FailAllPendingCallbackRequests("TaskHost resetting for the next build.");
+
+            _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
+            _registeredTaskObjectCache = new RegisteredTaskObjectCacheBase();
+
+            _currentConfiguration = null;
+            _currentTaskContext.Value = null;
+            _taskCompletePacket = null;
+            _taskWrapper = null;
+            _taskCancelledEvent.Reset();
+            _warningsAsErrors = null;
+            _warningsNotAsErrors = null;
+            _warningsAsMessages = null;
+            _lastAppliedConfigEnvironment = null;
+            _debugCommunications = Traits.Instance.DebugNodeCommunication;
+            _updateEnvironment = false;
+            _updateEnvironmentAndLog = false;
+            AllowFailureWithoutError = false;
+
+            NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+
+            try
+            {
+                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                CommunicationsUtilities.Trace($"Failed to restore the sidecar TaskHost environment: {ex}");
+            }
         }
 
         /// <summary>
@@ -1419,6 +1466,16 @@ namespace Microsoft.Build.CommandLine
                     break;
 
                 case LinkStatus.Inactive:
+                    if (_nodeReuse)
+                    {
+                        // A sidecar has no owner other than the process it is connected to, so a
+                        // lost connection means it can never be reached again. Exit instead of
+                        // lingering as an orphan that nothing can shut down.
+                        _shutdownReason = NodeEngineShutdownReason.ConnectionFailed;
+                        FailAllPendingCallbackRequests("Sidecar TaskHost lost its connection to its owner.");
+                        _shutdownEvent.Set();
+                    }
+
                     break;
 
                 default:

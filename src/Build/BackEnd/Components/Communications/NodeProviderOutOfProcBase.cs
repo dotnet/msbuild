@@ -1004,7 +1004,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Tracks the state of the packet sent to terminate the node.
             /// </summary>
-            private ExitPacketState _exitPacketState;
+            private volatile ExitPacketState _exitPacketState;
 
             /// <summary>
             /// The minimum packet version supported by both the host and the node.
@@ -1083,6 +1083,16 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public int NodeId => _nodeId;
 
+            private bool IsOwnedSidecarTaskHost =>
+                Handshake.IsHandshakeOptionEnabled(_handshakeOptions, HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse);
+
+            /// <summary>
+            /// A sidecar TaskHost is owned by this process and stays connected across reusable
+            /// builds, so its reset acknowledgement must not tear the connection down.
+            /// </summary>
+            private bool ShouldKeepConnectionAfterNodeShutdown =>
+                IsOwnedSidecarTaskHost && _exitPacketState == ExitPacketState.None;
+
             /// <summary>
             /// Starts a new asynchronous read operation for this node.
             /// </summary>
@@ -1158,7 +1168,7 @@ namespace Microsoft.Build.BackEnd
                         return;
                     }
 
-                    if (packetType == NodePacketType.NodeShutdown)
+                    if (packetType == NodePacketType.NodeShutdown && !ShouldKeepConnectionAfterNodeShutdown)
                     {
                         Close();
                         return;
@@ -1312,13 +1322,11 @@ namespace Microsoft.Build.BackEnd
                             // Do nothing here because any exception will be caught by the async read handler
                         }
 
-                        // Once the NodeBuildComplete packet has been dequeued, the node is shutting down and no
-                        // further packets will be enqueued, so the drain thread must terminate. This has to run even
-                        // when writing the packet above threw (e.g. the child already exited and the pipe was
-                        // disposed); otherwise the thread loops back to WaitOne() and blocks forever, leaking the
-                        // thread and the NodeContext it captures. In a long-lived host like Visual Studio these
-                        // leaked threads accumulate across builds.
-                        if (packet is NodeBuildComplete)
+                        // A sidecar TaskHost keeps this connection across reusable builds. Every other
+                        // NodeBuildComplete ends the connection, so the drain thread must terminate even when
+                        // writing the packet threw; otherwise it would block forever and leak the NodeContext.
+                        if (packet is NodeBuildComplete buildComplete &&
+                            (!IsOwnedSidecarTaskHost || !buildComplete.PrepareForReuse))
                         {
                             if (IsExitPacket(packet))
                             {
@@ -1567,7 +1575,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                if (packetType != NodePacketType.NodeShutdown)
+                if (packetType != NodePacketType.NodeShutdown || ShouldKeepConnectionAfterNodeShutdown)
                 {
                     // Read the next packet.
                     BeginAsyncPacketRead();

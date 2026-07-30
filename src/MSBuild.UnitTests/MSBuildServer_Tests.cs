@@ -66,6 +66,24 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
+    public class SidecarProcessIdTask : Microsoft.Build.Utilities.Task
+    {
+        public string? EnvironmentVariableName { get; set; }
+
+        [Output]
+        public int Pid { get; set; }
+
+        [Output]
+        public string? EnvironmentVariableValue { get; set; }
+
+        public override bool Execute()
+        {
+            Pid = Process.GetCurrentProcess().Id;
+            EnvironmentVariableValue = Environment.GetEnvironmentVariable(EnvironmentVariableName!);
+            return true;
+        }
+    }
+
     public class MSBuildServer_Tests : IDisposable
     {
         private readonly ITestOutputHelper _output;
@@ -676,6 +694,110 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
 #if NET
+        [Fact]
+        public void ServerOwnsReusableSidecarsUntilShutdown()
+        {
+            PrepareIsolatedServerEnv(useServer: false);
+            const string environmentVariableName = "MSBUILD_SERVER_OWNED_SIDECAR_TEST";
+            _env.SetEnvironmentVariable(environmentVariableName, "first-build");
+            TransientTestFile project = _env.CreateFile(
+                "serverOwnedSidecar.proj",
+                $"""
+                <Project>
+                    <UsingTask TaskName="ProcessIdTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
+                    <UsingTask TaskName="SidecarProcessIdTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
+                    <Target Name="Probe">
+                        <ProcessIdTask>
+                            <Output PropertyName="SERVER_PID" TaskParameter="Pid" />
+                        </ProcessIdTask>
+                        <SidecarProcessIdTask EnvironmentVariableName="{environmentVariableName}">
+                            <Output PropertyName="SIDECAR_PID" TaskParameter="Pid" />
+                            <Output PropertyName="SIDECAR_ENVIRONMENT" TaskParameter="EnvironmentVariableValue" />
+                        </SidecarProcessIdTask>
+                        <Message Text="Server ID is $(SERVER_PID)" Importance="High" />
+                        <Message Text="Sidecar ID is $(SIDECAR_PID)" Importance="High" />
+                        <Message Text="Sidecar environment is $(SIDECAR_ENVIRONMENT)" Importance="High" />
+                    </Target>
+                </Project>
+                """);
+
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            try
+            {
+                string firstOutput = RunnerUtilities.ExecMSBuild(
+                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                    $"{project.Path} -mt",
+                    out bool firstSuccess,
+                    false,
+                    _output);
+
+                firstSuccess.ShouldBeTrue();
+                int serverPid = ParseNumber(firstOutput, "Server ID is ");
+                int sidecarPid = ParseNumber(firstOutput, "Sidecar ID is ");
+                _env.WithTransientProcess(serverPid);
+                _env.WithTransientProcess(sidecarPid);
+                firstOutput.ShouldContain("Sidecar environment is first-build");
+
+                _env.SetEnvironmentVariable(environmentVariableName, "second-build");
+                string secondOutput = RunnerUtilities.ExecMSBuild(
+                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                    $"{project.Path} -mt",
+                    out bool secondSuccess,
+                    false,
+                    _output);
+
+                secondSuccess.ShouldBeTrue();
+                ParseNumber(secondOutput, "Server ID is ").ShouldBe(serverPid);
+                ParseNumber(secondOutput, "Sidecar ID is ").ShouldBe(sidecarPid);
+                secondOutput.ShouldContain("Sidecar environment is second-build");
+
+                MSBuildClient.ShutdownServer(CancellationToken.None).ShouldBeTrue();
+                WaitForProcessExit(serverPid).ShouldBeTrue($"Server process {serverPid} should exit after build-server shutdown.");
+                WaitForProcessExit(sidecarPid).ShouldBeTrue($"Sidecar process {sidecarPid} owned by the server should exit with it.");
+            }
+            finally
+            {
+                MSBuildClient.ShutdownServer(CancellationToken.None);
+            }
+        }
+
+        [Fact]
+        public void SidecarDoesNotOutliveANonServerBuild()
+        {
+            PrepareIsolatedServerEnv(useServer: false);
+            _env.SetEnvironmentVariable(Traits.UseMSBuildServerEnvVarName, "0");
+            TransientTestFile project = _env.CreateFile(
+                "unownedSidecar.proj",
+                $"""
+                <Project>
+                    <UsingTask TaskName="SidecarProcessIdTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
+                    <Target Name="Probe">
+                        <SidecarProcessIdTask EnvironmentVariableName="PATH">
+                            <Output PropertyName="SIDECAR_PID" TaskParameter="Pid" />
+                        </SidecarProcessIdTask>
+                        <Message Text="Sidecar ID is $(SIDECAR_PID)" Importance="High" />
+                    </Target>
+                </Project>
+                """);
+
+            string output = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                $"{project.Path} -mt",
+                out bool success,
+                false,
+                _output);
+
+            success.ShouldBeTrue();
+            int sidecarPid = ParseNumber(output, "Sidecar ID is ");
+            _env.WithTransientProcess(sidecarPid);
+
+            // Without a server the sidecar's owner is the command-line MSBuild process itself, which
+            // has now exited. The sidecar must go with it rather than lingering in a reuse pool where
+            // nothing can shut it down.
+            WaitForProcessExit(sidecarPid).ShouldBeTrue($"Sidecar process {sidecarPid} should exit with the build that created it.");
+        }
+
         /// <summary>
         /// Builds a project that reports, for the process that executes <see cref="ProcessIdTask"/>,
         /// its PID and whether it runs with Server GC. When <paramref name="useTaskHostFactory"/> is

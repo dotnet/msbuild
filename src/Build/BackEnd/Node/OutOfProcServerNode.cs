@@ -272,6 +272,11 @@ namespace Microsoft.Build.Server
         {
             CommunicationsUtilities.Trace($"Shutting down with reason: {_shutdownReason}, and exception: {_shutdownException}.");
 
+            if (_shutdownReason == NodeEngineShutdownReason.BuildComplete)
+            {
+                BuildManager.DefaultBuildManager.ShutdownOwnedTaskHostNodes();
+            }
+
             // On Windows, a process holds a handle to the current directory,
             // so reset it away from a user-requested folder that may get deleted.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);

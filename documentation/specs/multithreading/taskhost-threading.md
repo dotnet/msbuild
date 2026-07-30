@@ -188,7 +188,7 @@ Each new `TaskHostConfiguration` carries a full environment snapshot, task param
 
 When the owning worker node sends `NodeBuildComplete`, `HandleNodeBuildComplete()` decides whether to exit or stay alive:
 
-- **Sidecar TaskHost** (`_nodeReuse = true`): Always sets `BuildCompleteReuse`. The sidecar process persists across builds, re-entering the `Run()` outer loop to accept new connections.
+- **Sidecar TaskHost** (`_nodeReuse = true`): Owned by the process that launched it. It keeps its named-pipe connection to that owner across builds: a reusable `NodeBuildComplete` disposes build-lifetime state, resets in place, and acknowledges completion without disconnecting. A non-reusable completion exits the sidecar, and an unexpected loss of the owner connection also terminates it, so a sidecar can never outlive its owner or return to a machine-wide reuse pool.
 - **Regular TaskHost** (`_nodeReuse = false`): Sets `BuildCompleteReuse` only if `buildComplete.PrepareForReuse` is true **and** `Traits.Instance.EscapeHatches.ReuseTaskHostNodes` is enabled. Otherwise sets `BuildComplete` and the process exits. This avoids holding assembly locks on custom task DLLs between builds.
 
-There is **no idle timeout**. The `WaitAny()` call has no timeout parameter -- the TaskHost waits indefinitely until it receives a shutdown signal or the connection drops.
+Sidecars are shut down directly through their existing connections when their owner exits, so no machine-wide process enumeration is required. Reusable TaskHosts kept alive by the escape hatch above are not owned, have **no idle timeout**, and wait indefinitely until they receive a shutdown signal or a connection attempt reuses them.

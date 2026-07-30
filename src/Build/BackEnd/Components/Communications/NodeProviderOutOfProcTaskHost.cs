@@ -217,9 +217,18 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>
         public void ShutdownConnectedNodes(bool enableReuse)
         {
-            // Send the build completion message to the nodes, causing them to shutdown or reset.
-            List<NodeContext> contextsToShutDown = [.. _nodeContexts.Values];
+            List<NodeContext> contextsToShutDown;
+            lock (_activeNodes)
+            {
+                contextsToShutDown = _nodeContexts.Values.Where(context => _activeNodes.Contains(context.NodeId)).ToList();
+            }
 
+            if (contextsToShutDown.Count == 0)
+            {
+                return;
+            }
+
+            // Send the build completion message to the nodes, causing them to shutdown or reset.
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
 
             _noNodesActiveEvent.WaitOne();
@@ -230,6 +239,26 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
+            // Sidecar TaskHosts are owned by this process and remain connected to it, so they can be
+            // shut down directly over those connections. This is what makes shutdown deterministic:
+            // no process-name scan is involved, and a sidecar hosted by a runtime whose process name
+            // the scan does not recognize is still reached.
+            List<NodeContext> contextsToShutDown = [];
+            foreach (NodeContext context in _nodeContexts.Values)
+            {
+                if (MarkNodeActive(context))
+                {
+                    contextsToShutDown.Add(context);
+                }
+            }
+
+            if (contextsToShutDown.Count > 0)
+            {
+                ShutdownConnectedNodes(contextsToShutDown, enableReuse: false);
+                _noNodesActiveEvent.WaitOne();
+            }
+
+            // TaskHosts that are not connected to this process (legacy pooled hosts) still need the scan.
             ShutdownAllNodes(ComponentHost.BuildParameters.EnableNodeReuse, NodeContextTerminated);
         }
         #endregion
@@ -636,44 +665,40 @@ namespace Microsoft.Build.BackEnd
             hostProcessId = -1;
             wasNewlyCreated = false;
 
-            bool nodeCreationSucceeded;
-            if (!_nodeContexts.ContainsKey(nodeKey))
+            if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
             {
                 wasNewlyCreated = true;
-                nodeCreationSucceeded = CreateNode(nodeKey, factory, handler, configuration, taskHostParameters);
+                if (!CreateNode(nodeKey, factory, handler, configuration, taskHostParameters) ||
+                    !_nodeContexts.TryGetValue(nodeKey, out context))
+                {
+                    return false;
+                }
             }
-            else
+
+            if (!MarkNodeActive(context))
             {
-                // node already exists, so "creation" automatically succeeded
-                nodeCreationSucceeded = true;
+                return false;
             }
 
-            if (nodeCreationSucceeded)
+            Stack<INodePacketHandler> handlerStack = _nodeIdToPacketHandlerStack.GetOrAdd(context.NodeId, _ => new Stack<INodePacketHandler>());
+            lock (handlerStack)
             {
-                NodeContext context = _nodeContexts[nodeKey];
-
-                Stack<INodePacketHandler> handlerStack = _nodeIdToPacketHandlerStack.GetOrAdd(context.NodeId, _ => new Stack<INodePacketHandler>());
-                lock (handlerStack)
-                {
-                    handlerStack.Push(handler);
-                }
-
-                try
-                {
-                    hostProcessId = context.Process?.Id ?? -1;
-                }
-                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-                {
-                    // Process has already exited or is otherwise inaccessible; PID is unavailable.
-                    hostProcessId = -1;
-                }
-
-                // Configure the node.
-                context.SendData(configuration);
-                return true;
+                handlerStack.Push(handler);
             }
 
-            return false;
+            try
+            {
+                hostProcessId = context.Process?.Id ?? -1;
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                // Process has already exited or is otherwise inaccessible; PID is unavailable.
+                hostProcessId = -1;
+            }
+
+            // Configure the node.
+            context.SendData(configuration);
+            return true;
         }
 
         /// <summary>
@@ -868,14 +893,28 @@ namespace Microsoft.Build.BackEnd
             _nodeContexts[nodeKey] = context;
             _nodeIdToNodeKey[context.NodeId] = nodeKey;
 
-            lock (_activeNodes)
-            {
-                _activeNodes.Add(context.NodeId);
-                _noNodesActiveEvent.Reset();
-            }
+            MarkNodeActive(context);
 
             // Start the asynchronous read.
             context.BeginAsyncPacketRead();
+        }
+
+        private bool MarkNodeActive(NodeContext context)
+        {
+            lock (_activeNodes)
+            {
+                if (!_nodeIdToNodeKey.ContainsKey(context.NodeId))
+                {
+                    return false;
+                }
+
+                if (_activeNodes.Add(context.NodeId))
+                {
+                    _noNodesActiveEvent.Reset();
+                }
+
+                return true;
+            }
         }
 
         /// <summary>
