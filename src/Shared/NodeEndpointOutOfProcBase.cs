@@ -132,6 +132,25 @@ namespace Microsoft.Build.BackEnd
         private const int MaxRetainedReadBufferSize = 2 * 1024 * 1024; // 2 MB
 
         /// <summary>
+        /// Buffer size for the read-side pipe wrapper when the pre-buffer change wave is enabled.
+        /// A larger cache lets the header refill amortize an entire batch of small packets in a
+        /// single pipe read, so small packets (see <see cref="PreBufferBodyThreshold"/>) stay on
+        /// the buffered-stream fast path with no per-packet pipe syscalls.
+        /// </summary>
+        private const int LargeReadBufferSize = 64 * 1024; // 64 KB
+
+        /// <summary>
+        /// Body-size threshold below which the read loop stays on the buffered-stream path
+        /// even with the pre-buffer change wave enabled. Small bodies are almost always
+        /// already inside the 64 KB cache the header refill triggered, so pre-buffering them
+        /// into <see cref="_readBufferMemoryStream"/> would just add a redundant copy. At or
+        /// above this size the body is pre-buffered so <see cref="InterningBinaryReader"/>'s
+        /// MemoryStream fast path fires (avoiding a per-primitive pipe read via the buffered
+        /// wrapper).
+        /// </summary>
+        private const int PreBufferBodyThreshold = 512;
+
+        /// <summary>
         /// Reusable buffer for reading packet bodies. The body is read into this stream and handed to
         /// the translator so deserialization walks memory instead of issuing a pipe read per primitive.
         /// Reused across packets (grown as needed, shrunk back when it exceeds <see cref="MaxRetainedReadBufferSize"/>)
@@ -665,7 +684,9 @@ namespace Microsoft.Build.BackEnd
             CommunicationsUtilities.Trace("Entering read loop.");
 
             bool preBufferPacketBody = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10);
-            Stream localReadPipe = preBufferPacketBody ? localPipe : new BufferedReadStream(localPipe);
+            Stream localReadPipe = preBufferPacketBody
+                ? new BufferedReadStream(localPipe, LargeReadBufferSize)
+                : new BufferedReadStream(localPipe);
 
             byte[] headerByte = new byte[5];
             ITranslator writeTranslator = null;
@@ -750,7 +771,8 @@ namespace Microsoft.Build.BackEnd
                             NodePacketType packetType = hasExtendedHeader ? NodePacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
 
                             // The stream the translator deserializes from. With the pre-buffer change wave enabled this
-                            // is the in-memory packet body; otherwise packets are deserialized from the BufferedReadStream.
+                            // is the in-memory packet body for large packets, or the BufferedReadStream for small
+                            // packets; with the wave disabled it is always the (small) BufferedReadStream.
                             Stream deserializationStream = localReadPipe;
 
                             if (preBufferPacketBody)
@@ -765,47 +787,54 @@ namespace Microsoft.Build.BackEnd
                                     break;
                                 }
 
-                                bool bodyReadFailed = false;
-                                try
+                                // Small packets stay on the BufferedReadStream path: the whole body is almost always
+                                // already inside localReadPipe's 64 KB cache (the header refill pulled in up to 64 KB),
+                                // so pre-buffering would just add a redundant copy. Only large bodies pay the
+                                // per-packet copy to get InterningBinaryReader's MemoryStream fast path.
+                                if (packetLength >= PreBufferBodyThreshold)
                                 {
-                                    // Buffer the whole body before deserializing so InterningBinaryReader takes its
-                                    // MemoryStream fast-path and we don't issue a pipe read per primitive.
-                                    _readBufferMemoryStream.SetLength(packetLength);
-                                    _readBufferMemoryStream.Position = 0;
-                                    byte[] packetData = _readBufferMemoryStream.GetBuffer();
-
-                                    int totalBytesRead = 0;
-                                    while (totalBytesRead < packetLength)
+                                    bool bodyReadFailed = false;
+                                    try
                                     {
-                                        // Read returns whatever is available (up to count); the loop handles
-                                        // partial reads, so we request the whole remaining body.
-                                        int bytesReadThisCall = localPipe.Read(packetData, totalBytesRead, packetLength - totalBytesRead);
-                                        if (bytesReadThisCall == 0)
+                                        // Buffer the whole body before deserializing so InterningBinaryReader takes its
+                                        // MemoryStream fast-path and we don't issue a pipe read per primitive.
+                                        _readBufferMemoryStream.SetLength(packetLength);
+                                        _readBufferMemoryStream.Position = 0;
+                                        byte[] packetData = _readBufferMemoryStream.GetBuffer();
+
+                                        int totalBytesRead = 0;
+                                        while (totalBytesRead < packetLength)
                                         {
-                                            CommunicationsUtilities.Trace($"Parent disconnected while reading packet body ({totalBytesRead} of {packetLength} bytes read).");
-                                            ChangeLinkStatus(LinkStatus.Failed);
-                                            bodyReadFailed = true;
-                                            break;
+                                            // Read via localReadPipe (BufferedReadStream) so any body bytes the header
+                                            // refill pulled in ahead are consumed from the cache before touching the pipe.
+                                            int bytesReadThisCall = localReadPipe.Read(packetData, totalBytesRead, packetLength - totalBytesRead);
+                                            if (bytesReadThisCall == 0)
+                                            {
+                                                CommunicationsUtilities.Trace($"Parent disconnected while reading packet body ({totalBytesRead} of {packetLength} bytes read).");
+                                                ChangeLinkStatus(LinkStatus.Failed);
+                                                bodyReadFailed = true;
+                                                break;
+                                            }
+
+                                            totalBytesRead += bytesReadThisCall;
                                         }
-
-                                        totalBytesRead += bytesReadThisCall;
                                     }
-                                }
-                                catch (Exception e)
-                                {
-                                    CommunicationsUtilities.Trace($"Exception reading packet body from server.  {e}");
-                                    DebugUtils.DumpExceptionToFile(e);
-                                    ChangeLinkStatus(LinkStatus.Failed);
-                                    bodyReadFailed = true;
-                                }
+                                    catch (Exception e)
+                                    {
+                                        CommunicationsUtilities.Trace($"Exception reading packet body from server.  {e}");
+                                        DebugUtils.DumpExceptionToFile(e);
+                                        ChangeLinkStatus(LinkStatus.Failed);
+                                        bodyReadFailed = true;
+                                    }
 
-                                if (bodyReadFailed)
-                                {
-                                    exitLoop = true;
-                                    break;
-                                }
+                                    if (bodyReadFailed)
+                                    {
+                                        exitLoop = true;
+                                        break;
+                                    }
 
-                                deserializationStream = _readBufferMemoryStream;
+                                    deserializationStream = _readBufferMemoryStream;
+                                }
                             }
 
                             byte parentVersion = 0;
