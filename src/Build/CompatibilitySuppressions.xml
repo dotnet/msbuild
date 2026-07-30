@@ -7,6 +7,34 @@
   <Suppression>
     <DiagnosticId>CP0001</DiagnosticId>
     <Target>T:Microsoft.Build.Experimental.MSBuildClient</Target>
+    <Left>lib/net11.0/Microsoft.Build.dll</Left>
+    <Right>lib/net11.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Experimental.MSBuildClientExitResult</Target>
+    <Left>lib/net11.0/Microsoft.Build.dll</Left>
+    <Right>lib/net11.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Experimental.MSBuildClientExitType</Target>
+    <Left>lib/net11.0/Microsoft.Build.dll</Left>
+    <Right>lib/net11.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Experimental.OutOfProcServerNode</Target>
+    <Left>lib/net11.0/Microsoft.Build.dll</Left>
+    <Right>lib/net11.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Experimental.MSBuildClient</Target>
     <Left>lib/net472/Microsoft.Build.dll</Left>
     <Right>lib/net472/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
@@ -30,6 +58,34 @@
     <Target>T:Microsoft.Build.Experimental.OutOfProcServerNode</Target>
     <Left>lib/net472/Microsoft.Build.dll</Left>
     <Right>lib/net472/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Experimental.MSBuildClient</Target>
+    <Left>ref/net11.0/Microsoft.Build.dll</Left>
+    <Right>ref/net11.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Experimental.MSBuildClientExitResult</Target>
+    <Left>ref/net11.0/Microsoft.Build.dll</Left>
+    <Right>ref/net11.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Experimental.MSBuildClientExitType</Target>
+    <Left>ref/net11.0/Microsoft.Build.dll</Left>
+    <Right>ref/net11.0/Microsoft.Build.dll</Right>
+    <IsBaselineSuppression>true</IsBaselineSuppression>
+  </Suppression>
+  <Suppression>
+    <DiagnosticId>CP0001</DiagnosticId>
+    <Target>T:Microsoft.Build.Experimental.OutOfProcServerNode</Target>
+    <Left>ref/net11.0/Microsoft.Build.dll</Left>
+    <Right>ref/net11.0/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
   </Suppression>
   <Suppression>
@@ -59,9 +115,5 @@
     <Left>ref/net472/Microsoft.Build.dll</Left>
     <Right>ref/net472/Microsoft.Build.dll</Right>
     <IsBaselineSuppression>true</IsBaselineSuppression>
-  </Suppression>
-  <Suppression>
-    <DiagnosticId>PKV006</DiagnosticId>
-    <Target>net10.0</Target>
   </Suppression>
 </Suppressions>
