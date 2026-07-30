@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks
         /// Prohibits loading XML with embedded DTD. When true (default), an error is raised if a DTD is present.
         /// When false, DTDs are ignored.
         /// </summary>
-        public bool ProhibitDtd { get; set; } = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10);
+        public bool ProhibitDtd { get; set; } = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11);
 
         #endregion
 
