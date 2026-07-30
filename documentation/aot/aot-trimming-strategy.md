@@ -134,7 +134,7 @@ Apply the catalog with this loop:
    localize unavoidable DAM suppressions to the smallest member, and update the tracker when a row
    moves or disappears.
 5. **Verify the touched slice.** A change that affects the analyzed engine must keep
-   `Microsoft.Build` at 0 warnings / 0 errors on both `net10.0` and `net472`, publish and run the
+   `Microsoft.Build` at 0 warnings / 0 errors on all TFMs, publish and run the
    AOT harness when the closure changes, and run the targeted tests for the switch/path being moved.
 
 ---

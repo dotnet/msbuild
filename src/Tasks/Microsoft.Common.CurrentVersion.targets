@@ -1387,11 +1387,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- RESOURCE ITEMS -->
     <AssignLinkMetadata Items="@(Resource)"
-                        Condition="'@(Resource)' != '' and '%(Resource.DefiningProjectFullPath)' != '$(MSBuildProjectFullPath)' and $([MSBuild]::AreFeaturesEnabled('17.10'))">
+                        Condition="'@(Resource)' != '' and '%(Resource.DefiningProjectFullPath)' != '$(MSBuildProjectFullPath)'">
       <Output TaskParameter="OutputItems" ItemName="_Temp" />
     </AssignLinkMetadata>
 
-    <ItemGroup Condition="$([MSBuild]::AreFeaturesEnabled('17.10'))">
+    <ItemGroup>
       <Resource Remove="@(_Temp)" />
       <Resource Include="@(_Temp)" />
       <_Temp Remove="@(_Temp)" />

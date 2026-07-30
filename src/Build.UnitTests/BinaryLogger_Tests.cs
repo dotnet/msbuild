@@ -869,17 +869,9 @@ namespace Microsoft.Build.UnitTests
         [InlineData("LogFile={}.binlog")]  // Wildcard with LogFile= prefix
         public void ParseParameters_WildcardPath_ReturnsNullPath(string parametersString)
         {
-            using (TestEnvironment env = TestEnvironment.Create())
-            {
-                // Enable Wave17_12 to support wildcard parameters
-                ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
-                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+            var result = BinaryLogger.ParseParameters(parametersString);
 
-                var result = BinaryLogger.ParseParameters(parametersString);
-
-                result.LogFilePath.ShouldBeNull();
-            }
+            result.LogFilePath.ShouldBeNull();
 
             // Create the expected log file to satisfy test environment expectations
             File.Create(_logFile).Dispose();

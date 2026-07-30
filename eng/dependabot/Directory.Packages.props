@@ -25,7 +25,7 @@
     <PackageVersion Include="Microsoft.CodeCoverage" Version="18.0.1" />
     <PackageVersion Update="Microsoft.CodeCoverage" Condition="'$(MicrosoftCodeCoverageVersion)' != ''" Version="$(MicrosoftCodeCoverageVersion)" />
 
-    <PackageVersion Include="Microsoft.BuildXL.Processes" Version="0.1.0-20241105.3" />
+    <PackageVersion Include="Microsoft.BuildXL.Processes" Version="0.1.0-20260612.4" />
     <PackageVersion Update="Microsoft.BuildXL.Processes" Condition="'$(BuildXLProcessesVersion)' != ''" Version="$(BuildXLProcessesVersion)" />
 
     <PackageVersion Include="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="3.8.2112" />

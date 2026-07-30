@@ -20,8 +20,11 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Determine the strong name key source
     /// </summary>
-    public class ResolveKeySource : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class ResolveKeySource : TaskExtension, IMultiThreadableTask
     {
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
         private const string pfxFileExtension = ".pfx";
 #if !RUNTIME_TYPE_NETCORE
         private const string pfxFileContainerPrefix = "VS_KEY_";
@@ -118,6 +121,7 @@ namespace Microsoft.Build.Tasks
                         FileStream fs = null;
                         try
                         {
+                            AbsolutePath keyFilePath = TaskEnvironment.GetAbsolutePath(KeyFile);
                             string currentUserName = Environment.UserDomainName + "\\" + Environment.UserName;
                             // we use the curent user name to randomize the associated container name, i.e different user on the same machine will export to different keys
                             // this is because SNAPI by default will create keys in "per-machine" crypto store (visible for all the user) but will set the permission such only
@@ -125,7 +129,7 @@ namespace Microsoft.Build.Tasks
                             // Now different users will use different container name. We use ToLower(invariant) because this is what the native equivalent of this function (Create new key, or VC++ import-er).
                             // use as well and we want to keep the hash (and key container name the same) otherwise user could be prompt for a password twice.
                             byte[] userNameBytes = System.Text.Encoding.Unicode.GetBytes(currentUserName.ToLower(CultureInfo.InvariantCulture));
-                            fs = File.OpenRead(KeyFile);
+                            fs = File.OpenRead(keyFilePath);
                             int fileLength = (int)fs.Length;
                             var keyBytes = new byte[fileLength];
                             fs.ReadFromStream(keyBytes, 0, fileLength);
@@ -205,15 +209,16 @@ namespace Microsoft.Build.Tasks
             if (!string.IsNullOrEmpty(CertificateFile) && !certInStore)
             {
 #if FEATURE_PFX_SIGNING
+                AbsolutePath certificateFilePath = TaskEnvironment.GetAbsolutePath(CertificateFile);
                 // if the cert isn't on disk, we can't import it
-                if (!FileSystems.Default.FileExists(CertificateFile))
+                if (!FileSystems.Default.FileExists(certificateFilePath))
                 {
                     Log.LogErrorWithCodeFromResources("ResolveKeySource.CertificateNotInStore");
                 }
                 else
                 {
                     // add the cert to the store optionally prompting for the password
-                    if (X509Certificate2.GetCertContentType(CertificateFile) == X509ContentType.Pfx)
+                    if (X509Certificate2.GetCertContentType(certificateFilePath) == X509ContentType.Pfx)
                     {
                         bool imported = false;
                         // first try it with no password
@@ -222,7 +227,7 @@ namespace Microsoft.Build.Tasks
                         try
                         {
                             personalStore.Open(OpenFlags.ReadWrite);
-                            cert.Import(CertificateFile, (string)null, X509KeyStorageFlags.PersistKeySet);
+                            cert.Import(certificateFilePath, (string)null, X509KeyStorageFlags.PersistKeySet);
                             personalStore.Add(cert);
                             ResolvedThumbprint = cert.Thumbprint;
                             imported = true;
@@ -250,7 +255,7 @@ namespace Microsoft.Build.Tasks
                         var personalStore = new X509Store(StoreName.My, StoreLocation.CurrentUser);
                         try
                         {
-                            var cert = new X509Certificate2(CertificateFile);
+                            var cert = new X509Certificate2(certificateFilePath);
                             personalStore.Open(OpenFlags.ReadWrite);
                             personalStore.Add(cert);
                             ResolvedThumbprint = cert.Thumbprint;

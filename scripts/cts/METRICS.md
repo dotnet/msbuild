@@ -50,7 +50,7 @@ consumers; new fields will be added at the end of this list.
 
 ## Coverage note
 
-Tests are net10.0 only — the wrappers cannot host the net472 leg (xunit.v3
+Tests are latest .NETCoreApp only — the wrappers cannot host the net472 leg (xunit.v3
 requires `OutputType=Exe`, CTS requires `OutputType=Library`). The regular
 PR pipeline continues to provide net472 signal. See `scripts/cts/README.md`
 → "Coverage gap" for the details.

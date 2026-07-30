@@ -54,7 +54,7 @@ Omit `-Project` to operate on every project registered in `projects.json`.
 
 ## Coverage gap vs the regular PR pipeline
 
-The wrappers are pinned to `TargetFrameworks=net10.0`. xunit.v3 rejects
+The wrappers are pinned to latest .NETCoreApp. xunit.v3 rejects
 `net472` when `OutputType=Library` (which CTS needs so it can host the
 test DLL), so we cannot run the .NET Framework leg through CTS today.
 
@@ -62,15 +62,15 @@ What this means in practice:
 
 | TFM            | Regular PR pipeline | CTS pipeline |
 | -------------- | ------------------- | ------------ |
-| `net10.0`      | ✅                  | ✅           |
-| `net472` (Win) | ✅                  | ❌           |
+| `NETCoreApp`   | ✅                  | ✅           |
+| `.NETFramework` (Win) | ✅           | ❌           |
 
 The CTS pipeline is parallel and **non-blocking**; the regular PR
 pipeline continues to provide net472 signal and remains the merge gate.
-CTS adds incrementality for the net10.0 subset only. Closing the gap
+CTS adds incrementality for the .NETCoreApp subset only. Closing the gap
 requires either an `OutputType=Exe` net472 wrapper variant (needs
 validation that `cts vstest` works against a .NET Framework Exe host) or
-a legacy-xunit wrapper for net472.
+a legacy-xunit wrapper for .NETFramework.
 
 ## Local vs CI
 
@@ -108,7 +108,7 @@ a **non-blocking** PR-time step, and can also be run locally:
 
 * Baseline + logs live at `<repo>/.cts/` (gitignored).
 * The `.VSTest.csproj` wrappers output to
-  `artifacts/bin/<MSBuildProjectName>/Debug/net10.0/` — distinct from the
+  `artifacts/bin/<MSBuildProjectName>/Debug/net11.0/` — distinct from the
   default MTP variant.
 * Demos hardcode per-project demo files via `projects.json` →
   `DemoFiles.{Broad,Narrow,Unrelated}`. Projects without `DemoFiles` skip

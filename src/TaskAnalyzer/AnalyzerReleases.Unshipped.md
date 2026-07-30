@@ -12,3 +12,4 @@ MSBuildTask0007 | MSBuild.TaskAuthoring | Info | Prefer ITaskItem<T> over manual
 MSBuildTask0008 | MSBuild.TaskAuthoring | Info | Initialize a relative default path in Execute() so TaskEnvironment can root it when the property is retyped (code fix available)
 MSBuildTask0009 | MSBuild.TaskAuthoring | Warning | ITaskItem<T> used with a type argument T that MSBuild cannot bind as a task parameter
 MSBuildTask0010 | MSBuild.TaskAuthoring | Error | ITaskItem<T> used with a type argument T that MSBuild parses through Convert.ChangeType
+MSBuildTask0011 | MSBuild.TaskAuthoring | Info | Prefer constructor injection for TaskEnvironment
