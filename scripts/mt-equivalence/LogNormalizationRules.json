@@ -150,7 +150,7 @@
   "knownMtOnly": [
     {
       "pattern": "^Task assembly was loaded from '.*' while the desired location was '.*'\\.$",
-      "reason": "Under -mt, a task routed to an out-of-process task host is represented in-proc by a TaskHostTask proxy whose own assembly location is always Microsoft.Build.dll, so MSBuild reported a mismatch for most task invocations (1364 extra lines in an official build of this repo). Log noise only: no build output changes, which the byte-level artifact comparison confirms. Fixed by https://github.com/dotnet/msbuild/pull/14550, but the messages are emitted by the installed Visual Studio MSBuild that drives the build, so this entry has to stay until an 18.11 VS carrying that fix reaches the agents. Delete it then."
+      "reason": "Under -mt, a task routed to an out-of-process task host is represented in-proc by a TaskHostTask proxy whose own assembly location is always Microsoft.Build.dll, so MSBuild reported a mismatch for most task invocations (1364 extra lines in an official build of this repo). Log noise only: no build output changes, which the byte-level artifact comparison confirms. Fixed by https://github.com/dotnet/msbuild/pull/14550, but the messages are emitted by the installed Visual Studio MSBuild that drives the build - VSEng-MicroBuildVSStable is on MSBuild 18.8.2 while the fix is in main (18.11) - so this entry has to stay until that pool picks up a VS carrying it. Delete it then."
     },
     {
       "pattern": "^[A-Za-z_][A-Za-z0-9_.]*:$",

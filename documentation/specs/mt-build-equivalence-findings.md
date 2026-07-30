@@ -222,10 +222,11 @@ that *drives* the build — the pool's installed Visual Studio MSBuild — not t
 produces, and the messages are logged by the former. Verified: after merging #14550, run
 [14817555](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14817555&view=results) still
 reported all 1 364, attributed to
-`C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\Microsoft.Build.dll`. The
-`knownMtOnly` entries in
+`C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\Microsoft.Build.dll` —
+`MSBuildVersion = 18.8.2`, the MSBuild on the `VSEng-MicroBuildVSStable` pool. #14550 is in `main`,
+which is 18.11. The `knownMtOnly` entries in
 [`LogNormalizationRules.json`](../../scripts/mt-equivalence/LogNormalizationRules.json) therefore stay
-until an 18.11 VS carrying the fix reaches the agents; delete them then and the log comparison becomes
+until that pool moves to a VS carrying the fix; delete them then and the log comparison becomes
 strict again.
 
 This generalises: a `knownMtOnly` entry is cleared by the fix *shipping to the agents*, not by it

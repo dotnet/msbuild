@@ -224,8 +224,8 @@ applied **only** to the `mt` comparison, never to the control.
 An entry is cleared when its fix **reaches the agents**, not when it merges. Because `-mt` is applied
 to the MSBuild that drives the build, a fix in this repo only changes what this pipeline observes once
 it ships in the Visual Studio installed on the pool. Merging
-[#14550](https://github.com/dotnet/msbuild/pull/14550) left its entry firing unchanged, attributed to
-`…\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\Microsoft.Build.dll`.
+[#14550](https://github.com/dotnet/msbuild/pull/14550) into `main` (18.11) left its entry firing
+unchanged, because `VSEng-MicroBuildVSStable` drives the build with MSBuild 18.8.2.
 
 ## Running it locally
 
