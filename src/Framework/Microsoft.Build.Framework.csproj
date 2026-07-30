@@ -217,11 +217,12 @@
     EngineServices.Version must be bumped, otherwise engine and task hosts of different versions negotiate
     incorrectly. Runs only in CI pull-request builds (the AzDO variable SYSTEM_PULLREQUEST_TARGETBRANCH is
     set) and diffs the file against the PR target branch. This replaces the former Check-RequiredVersionBumps
-    function in eng/build.ps1 by colocating the check with the file it protects.
+    function in eng/build.ps1 by colocating the check with the file it protects. Disable inside VMR as git
+    versions are vastly different therer and might be lacking support.
   -->
   <Target Name="CheckEngineServicesVersionBump"
           BeforeTargets="Build"
-          Condition="'$(ContinuousIntegrationBuild)' == 'true' and '$(SYSTEM_PULLREQUEST_TARGETBRANCH)' != ''">
+          Condition="'$(ContinuousIntegrationBuild)' == 'true' and '$(SYSTEM_PULLREQUEST_TARGETBRANCH)' != '' and '$(DotNetBuildFromVMR)' != 'true'">
     <PropertyGroup>
       <!-- Some PRs specify the bare target branch (e.g. "main"), some prefix it with "refs/heads/". Normalize both. -->
       <_EngineServicesTargetBranch>refs/remotes/origin/$(SYSTEM_PULLREQUEST_TARGETBRANCH.Replace('refs/heads/', ''))</_EngineServicesTargetBranch>

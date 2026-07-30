@@ -15,6 +15,7 @@ public class CommunicationUtilitiesTests
     /// <summary>
     /// Verify our custom way of getting env vars gives the same results as the BCL.
     /// </summary>
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/14541")]
     [Fact]
     public void GetEnvVars()
     {
