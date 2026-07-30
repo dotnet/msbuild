@@ -18,8 +18,8 @@
   resident server.
 - **In-process fallback:** execution in the thin client after a request cannot
   use the resident server.
-- **Owned node:** a child whose lifetime is bounded by one server or worker and
-  which cannot be adopted by another owner.
+- **Owned node:** a child whose lifetime is bounded by the process that created
+  it and which cannot be adopted by another owner.
 - **Sidecar TaskHost:** an engine-created TaskHost associated with an MT
   in-process/thread node for running a task that cannot execute safely in that
   node.
@@ -28,23 +28,34 @@
 
 ## Decision
 
-The resident server defines the lifetime of every node it creates.
+Every node is owned by the process that created it, and cannot outlive it.
 
-This applies whether the resident performs project work in its own process or
-delegates that work to workers.
+Ownership is not specific to the server. A sidecar TaskHost is always owned,
+including when the server is explicitly disabled: in that case it is owned by
+the ordinary MSBuild process that created it and dies with it. There is no
+unowned, pool-resident sidecar and no machine-wide reuse pool for sidecars.
+
+The resident server therefore defines the lifetime of every node it creates,
+whether it performs project work in its own process or delegates that work to
+workers.
 
 When serving an MT request:
 
 - the resident server owns its directly-created sidecar TaskHosts;
 - a transient server owns its directly-created sidecar TaskHosts;
 - a worker owns any TaskHosts it creates; and
-- an owned TaskHost cannot be adopted by another server or worker.
+- an owned TaskHost cannot be adopted by another owner.
 
 When the resident serves a non-MT request, it similarly owns the
 out-of-process workers it uses. Those workers own any TaskHosts they create.
 
 Owned nodes may be reused while their owner remains alive, but they cannot
-outlive their owner.
+outlive their owner. Sidecar reuse is therefore reuse within one owner's
+lifetime, not reuse across independent MSBuild invocations.
+
+Because a sidecar is always owned, no additional ownership marker is required
+on the wire: the existing signal that distinguishes a sidecar from a short-lived
+TaskHost is also the ownership signal.
 
 ## V1 server topology
 
@@ -81,9 +92,19 @@ flowchart TB
 
 An owned node has:
 
-1. an ownership-specific handshake that prevents cross-owner adoption;
+1. a handshake that prevents adoption by a process that is not its owner;
 2. a live connection retained for the owner's lifetime; and
 3. an owner-specific shutdown path.
+
+The handshake requirement is satisfied by the existing distinction between a
+sidecar and a short-lived TaskHost. It does require that handshake comparison
+not tolerate divergence in that distinction: leniency intended for architecture
+differences must be scoped to architecture, or a non-owning process can be
+admitted to an owned node.
+
+Per-owner identity is not required in the handshake, because an owner connects
+only to children it launched itself and retains those connections. No
+discovery by process enumeration is involved.
 
 At reusable build completion:
 
@@ -143,6 +164,9 @@ expires or receives `dotnet build-server shutdown`, it directly shuts down:
 After the resident and any one-build transient servers have been idle past
 their lifetime, no owned MSBuild child process remains.
 
+When the server is disabled, the same cascade runs in the ordinary MSBuild
+process at the end of its build, so no sidecar survives that process either.
+
 ## Compatibility
 
 Strict ownership does not reduce sharing between simultaneously active,
@@ -151,6 +175,8 @@ independent builds: an active node cannot be adopted by another build today.
 The intentional behavior changes are:
 
 - reusable TaskHosts no longer migrate between owners;
+- a sidecar no longer outlives the process that created it, so consecutive
+  MSBuild invocations without a server each start their own sidecars;
 - busy MT requests use transient servers instead of thin-client execution;
 - `-mt -nodeReuse:false` no longer consumes and shuts down the resident; and
 - server shutdown deterministically reaps its TaskHosts.
@@ -180,3 +206,8 @@ Build results and task isolation guarantees remain unchanged.
 9. Abrupt owner termination reaps owned TaskHosts.
 10. Independent concurrent builds retain their existing task-execution
     guarantees.
+11. With the server disabled, a build that used sidecars leaves no TaskHost
+    process behind.
+12. A process that is not the owner cannot be admitted to an owned sidecar,
+    including when it differs from the owner only in bits that architecture
+    leniency would otherwise tolerate.
