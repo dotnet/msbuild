@@ -179,6 +179,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly ProjectRootElementCacheBase _projectRootElementCache;
 
+        private UnknownElementsConfiguration _unknownElementsConfiguration;
+
         /// <summary>
         /// The logging context to be used and piped down throughout evaluation.
         /// </summary>
@@ -294,6 +296,37 @@ namespace Microsoft.Build.Evaluation
             _streamImports.Add(string.Empty);
         }
 
+        private void InitializeUnknownElementsConfiguration()
+        {
+            _unknownElementsConfiguration = _projectRootElementCache.UnknownElementsConfiguration;
+
+            if (Traits.Instance.EscapeHatches.DisableParseConfig || string.IsNullOrEmpty(_projectRootElement.FullPath))
+            {
+                return;
+            }
+
+            string projectConfigPath = FileUtilities.GetPathOfFileAbove(UnknownElementsConfiguration.ConfigFileName, _projectRootElement.DirectoryPath);
+            if (string.IsNullOrEmpty(projectConfigPath))
+            {
+                return;
+            }
+
+            if (_unknownElementsConfiguration is null)
+            {
+                _unknownElementsConfiguration = UnknownElementsConfiguration.LoadFromFile(projectConfigPath);
+            }
+            else if (!_unknownElementsConfiguration.ContainsLoadedFile(projectConfigPath))
+            {
+                _unknownElementsConfiguration = _unknownElementsConfiguration.Merge(UnknownElementsConfiguration.LoadFromFile(projectConfigPath));
+            }
+            else
+            {
+                return;
+            }
+
+            _projectRootElementCache.UnknownElementsConfiguration = _unknownElementsConfiguration;
+        }
+
         /// <summary>
         /// Delegate passed to methods to provide basic expression evaluation
         /// ability, without having a language service.
@@ -377,6 +410,12 @@ namespace Microsoft.Build.Evaluation
                     globalProperties = evaluator._data.GlobalPropertiesDictionary;
                     properties = Traits.LogAllEnvironmentVariables ? evaluator._data.Properties : evaluator.FilterOutEnvironmentDerivedProperties(evaluator._data.Properties);
                     items = evaluator._data.Items;
+                }
+
+                string skippedMessage = evaluator._unknownElementsConfiguration?.GetSkippedSummaryMessage();
+                if (skippedMessage is not null)
+                {
+                    evaluator._evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, skippedMessage);
                 }
 
                 evaluator._evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, evaluator._evaluationProfiler.ProfiledResult);
@@ -648,6 +687,14 @@ namespace Microsoft.Build.Evaluation
                 Assumed.Equal(_data.EvaluationId, BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
                 _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
                 _evaluationLoggingContext.LogProjectEvaluationStarted();
+
+                InitializeUnknownElementsConfiguration();
+
+                string configMessage = _unknownElementsConfiguration?.GetLoadedConfigsMessage();
+                if (configMessage is not null)
+                {
+                    _evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, configMessage);
+                }
 
                 // Track loads only after start of evaluation was actually logged
                 using var assemblyLoadsTracker =

@@ -12,6 +12,8 @@ namespace Microsoft.Build.Evaluation
     {
         public bool LoadProjectsReadOnly { get; protected set; }
 
+        internal UnknownElementsConfiguration UnknownElementsConfiguration { get; set; }
+
         /// <summary>
         /// Handler for which project root element just got added to the cache
         /// </summary>

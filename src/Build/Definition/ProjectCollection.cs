@@ -205,6 +205,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private int _maxNodeCount;
 
+        private UnknownElementsConfiguration _unknownElementsConfiguration;
+
         /// <summary>
         /// LoggingService Logger mode.
         /// If Asynchronous mode is used
@@ -387,6 +389,13 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
+            // Load the global Directory.Parse.config unless explicitly provided or disabled.
+            if (_unknownElementsConfiguration is null && !Traits.Instance.EscapeHatches.DisableParseConfig)
+            {
+                _unknownElementsConfiguration = UnknownElementsConfiguration.LoadGlobalConfig();
+                ProjectRootElementCache.UnknownElementsConfiguration = _unknownElementsConfiguration;
+            }
+
             OnlyLogCriticalEvents = onlyLogCriticalEvents;
             EnableTargetOutputLogging = enableTargetOutputLogging;
 
@@ -562,6 +571,20 @@ namespace Microsoft.Build.Evaluation
         /// Properties passed from the command line (e.g. by using /p:).
         /// </summary>
         public ICollection<string> PropertiesFromCommandLine { get; set; }
+
+        /// <summary>
+        /// Gets or sets the configuration for allowed unknown attributes/elements during parsing.
+        /// When set, this configuration will be used by builds started from this collection.
+        /// </summary>
+        internal UnknownElementsConfiguration UnknownElementsConfiguration
+        {
+            get => _unknownElementsConfiguration;
+            set
+            {
+                _unknownElementsConfiguration = value;
+                ProjectRootElementCache.UnknownElementsConfiguration = value;
+            }
+        }
 
         /// <summary>
         /// The default tools version of this project collection. Projects use this tools version if they

@@ -237,6 +237,12 @@ namespace Microsoft.Build.Execution
         private bool _reportFileAccesses;
 
         /// <summary>
+        /// The configuration for allowed unknown attributes/elements during parsing.
+        /// Loaded on the main node and serialized to worker nodes.
+        /// </summary>
+        private UnknownElementsConfiguration _unknownElementsConfiguration;
+
+        /// <summary>
         /// Constructor for those who intend to set all properties themselves.
         /// </summary>
         public BuildParameters()
@@ -262,6 +268,7 @@ namespace Microsoft.Build.Execution
 
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(projectCollection.GlobalPropertiesCollection);
             _propertiesFromCommandLine = projectCollection.PropertiesFromCommandLine;
+            _unknownElementsConfiguration = projectCollection.UnknownElementsConfiguration;
         }
 
         /// <summary>
@@ -330,6 +337,7 @@ namespace Microsoft.Build.Execution
             IsTelemetryEnabled = other.IsTelemetryEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
             _enableTargetOutputLogging = other.EnableTargetOutputLogging;
+            _unknownElementsConfiguration = other._unknownElementsConfiguration;
         }
 
         /// <summary>
@@ -823,6 +831,16 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Gets or sets the configuration for allowed unknown attributes/elements during parsing.
+        /// When set, this configuration is used for parsing and evaluation.
+        /// </summary>
+        internal UnknownElementsConfiguration UnknownElementsConfiguration
+        {
+            get => _unknownElementsConfiguration;
+            set => _unknownElementsConfiguration = value;
+        }
+
+        /// <summary>
         /// Gets or sets a value indicating if the build is allowed to interact with the user.
         /// </summary>
         public bool Interactive
@@ -994,6 +1012,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
             translator.Translate(ref _multiThreaded);
+            translator.Translate(ref _unknownElementsConfiguration, UnknownElementsConfiguration.FactoryForDeserialization);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.
