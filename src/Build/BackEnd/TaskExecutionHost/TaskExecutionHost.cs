@@ -517,8 +517,13 @@ namespace Microsoft.Build.BackEnd
             // meaningless) in a single-file/Native AOT host - and a registered task is already the loaded
             // type. On .NET, guard the read on dynamic-code support so ILC dead-strips it (and its IL3000)
             // under Native AOT while the JIT keeps the diagnostic; .NET Framework (no AOT) always runs it.
+            // A TaskHostTask is only an in-proc proxy - the task assembly it stands for is loaded in the task
+            // host process, so the proxy's own location (always Microsoft.Build.dll) says nothing about where
+            // the task came from and comparing it would report a mismatch for every out-of-proc task.
 #if NET
-            if (RuntimeFeature.IsDynamicCodeSupported)
+            if (RuntimeFeature.IsDynamicCodeSupported && TaskInstance is not TaskHostTask)
+#else
+            if (TaskInstance is not TaskHostTask)
 #endif
             {
                 // When MSBuild loads a task assembly, it uses Assembly.LoadFrom() with a specific path, but
@@ -530,10 +535,7 @@ namespace Microsoft.Build.BackEnd
                 string realTaskAssemblyLocation = TaskInstance.GetType().Assembly.Location;
                 if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) && realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
                 {
-                    if (!IsTaskAssemblyMatchFactoryType())
-                    {
-                        _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
-                    }
+                    _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch", realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
                 }
             }
 
@@ -546,10 +548,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             return true;
-
-            // Function to validate that if this is a TaskHostTask, the assembly it loaded is the same one we found in the registry.
-            bool IsTaskAssemblyMatchFactoryType() => TaskInstance is not TaskHostTask tht
-                || tht.LoadedTaskAssemblyInfo.AssemblyLocation == _taskFactoryWrapper.TaskFactoryLoadedType.Path;
         }
 
         /// <summary>
