@@ -4,6 +4,18 @@
     <MSBuildAllProjects>$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
   </PropertyGroup>
 
+  <!-- The Verify package (pulled in by Verify.XunitV3) unconditionally sets both Deterministic=false and
+       DeterministicSourcePaths=false in its build props, which NuGet imports per-TargetFramework - so the
+       outer build still evaluates Deterministic as true while every inner build compiles with
+       /deterministic-. Only DeterministicSourcePaths matters to Verify: it locates *.verified.* snapshots
+       through [CallerFilePath], which /pathmap would rewrite. Turning off /deterministic just makes Roslyn
+       stamp a random MVID and a PE TimeDateStamp derived from it, so those test assemblies differ between
+       two builds of the same commit. Restore it here, after the package props have been imported;
+       DeterministicSourcePaths is left alone (it is already false for test projects). -->
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
   <PropertyGroup Condition="'$(IsUnitTestProject)' != 'true'">
     <StrongNameKeyId>Microsoft</StrongNameKeyId>
   </PropertyGroup>
