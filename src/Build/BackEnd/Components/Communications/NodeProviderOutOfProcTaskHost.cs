@@ -231,8 +231,18 @@ namespace Microsoft.Build.BackEnd
             // Send the build completion message to the nodes, causing them to shutdown or reset.
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
 
-            _noNodesActiveEvent.WaitOne();
+            // Bounded so a sidecar that dies or wedges while acknowledging cannot hang the build it
+            // just finished. An owned sidecar now replies in place rather than disconnecting, so the
+            // acknowledgement is the only signal that ends this wait.
+            _noNodesActiveEvent.WaitOne(TimeoutForNodeShutdown);
         }
+
+        /// <summary>
+        /// How long to wait for owned nodes to acknowledge shutdown before giving up on them. A
+        /// sidecar that has already died, or is wedged, will never acknowledge, and shutdown must
+        /// not block on it. Matches <c>NodeProviderOutOfProcBase.TimeoutForWaitForExit</c>.
+        /// </summary>
+        private const int TimeoutForNodeShutdown = 30000;
 
         /// <summary>
         /// Shuts down all of the managed nodes permanently.
@@ -255,7 +265,10 @@ namespace Microsoft.Build.BackEnd
             if (contextsToShutDown.Count > 0)
             {
                 ShutdownConnectedNodes(contextsToShutDown, enableReuse: false);
-                _noNodesActiveEvent.WaitOne();
+
+                // Bounded: this set can include nodes that were idle rather than serving a build, and
+                // an idle node whose process is already gone never acknowledges.
+                _noNodesActiveEvent.WaitOne(TimeoutForNodeShutdown);
             }
 
             // TaskHosts that are not connected to this process (legacy pooled hosts) still need the scan.
