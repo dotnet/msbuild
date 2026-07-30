@@ -55,6 +55,7 @@ the official MicroBuild pool by the pipeline itself, in
 
 | run | commit | result |
 |---|---|---|
+| [14817555](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14817555&view=results) | `180809a` | failed on purpose — the `knownMtOnly` allowance was removed after #14550 merged, and the messages were still there because they come from the *driving* MSBuild |
 | [14817031](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14817031&view=results) | `5aa9f18` | **succeeded** — the numbers below, with the structural comparison active |
 | [14815634](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14815634&view=results) | `d87e327` | succeeded — same verdict before the structural comparison was added |
 | [14816699](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14816699&view=results) | `13d285b` | failed — the structural reader could not load MSBuild under the agent's PowerShell (`CS1705`) |
@@ -210,17 +211,25 @@ Visible in the control run, so normalized away for both comparisons:
 
 ## `-mt`-only log differences
 
-None. `-mt` used to make MSBuild log a spurious `TaskAssemblyLocationMismatch` for most task
-invocations — 1 364 extra lines in an official build — because a task routed to an out-of-process task
-host is represented in-proc by a `TaskHostTask` proxy whose own assembly location is always
-`Microsoft.Build.dll`. That was log noise only, and it is fixed by
-[#14550](https://github.com/dotnet/msbuild/pull/14550).
+One, and it is log noise. Under `-mt` a task routed to an out-of-process task host is represented
+in-proc by a `TaskHostTask` proxy whose own assembly location is always `Microsoft.Build.dll`, so
+MSBuild reported a `TaskAssemblyLocationMismatch` for most task invocations — 1 364 extra lines in an
+official build. No produced byte changes, which the artifact comparison confirms, and the builds stay
+structurally identical. Fixed by [#14550](https://github.com/dotnet/msbuild/pull/14550).
 
-With that in, the `knownMtOnly` list in
-[`LogNormalizationRules.json`](../../scripts/mt-equivalence/LogNormalizationRules.json) is empty and
-the log comparison is strict: any line that appears on the `-mt` side and not on the baseline side,
-and is not also produced by the control run, fails the pipeline. It should stay empty — an entry
-there is an unfixed bug, not a normalization.
+**That fix landing in `main` does not clear this from the pipeline.** `-mt` is applied to the MSBuild
+that *drives* the build — the pool's installed Visual Studio MSBuild — not to the MSBuild the build
+produces, and the messages are logged by the former. Verified: after merging #14550, run
+[14817555](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14817555&view=results) still
+reported all 1 364, attributed to
+`C:\Program Files\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\Microsoft.Build.dll`. The
+`knownMtOnly` entries in
+[`LogNormalizationRules.json`](../../scripts/mt-equivalence/LogNormalizationRules.json) therefore stay
+until an 18.11 VS carrying the fix reaches the agents; delete them then and the log comparison becomes
+strict again.
+
+This generalises: a `knownMtOnly` entry is cleared by the fix *shipping to the agents*, not by it
+merging.
 
 ## Non-MSBuild noise from 1ES SDL injection
 
@@ -246,22 +255,22 @@ on the assumption that a rule might be hiding a real `-mt` difference. Three thi
 is excused on the strength of a written rule alone; each has an experimental control.
 
 **The target-header suppressions were justified by a control that cannot fail.** The `setOnly` rule
-for target headers, and the `knownMtOnly` entry that used to accompany it, stop comparing how many
-times a target header appears — and a target header is exactly what would reveal a target running only
-under `-mt`. Their stated justification was the `-DeepCompare` coverage comparison. That comparison
-does run, but target coverage was deliberately excluded from the set of extractors allowed to fail it,
-precisely because the header-based extraction it uses is itself unstable. So the suppression was
-justified by a check that reports and never fails.
+for target headers and its `knownMtOnly` counterpart stop comparing how many times a target header
+appears — and a target header is exactly what would reveal a target running only under `-mt`. Their
+stated justification was the `-DeepCompare` coverage comparison. That comparison does run, but target
+coverage was deliberately excluded from the set of extractors allowed to fail it, precisely because
+the header-based extraction it uses is itself unstable. So the suppression was justified by a check
+that reports and never fails.
 
 The suppression turned out to be *correct* — reading the raw event stream out of all three binlogs
 shows the builds are structurally identical: 384 distinct targets over 18 993 executions, 9 306
 distinct `(project, target)` pairs, 122 tasks over 16 083 invocations, 53 projects over 1 842 builds,
 and zero warnings and errors — every count equal across baseline, `-mt` and control. The extra target
-headers seen in the `-mt` text log at the time were a side-effect of the spurious
-`TaskAssemblyLocationMismatch` messages: the file logger only emits a target header when the target
-logs something, so targets that are silent at normal verbosity acquired a header once something
-started logging inside them. With [#14550](https://github.com/dotnet/msbuild/pull/14550) in, those
-messages are gone and so are the extra headers, and the `knownMtOnly` list is empty.
+headers in the `-mt` text log are a side-effect of the spurious `TaskAssemblyLocationMismatch`
+messages: the file logger only emits a target header when the target logs something, so targets that
+are silent at normal verbosity acquire a header once something starts logging inside them. They will
+disappear along with the messages once the agents pick up
+[#14550](https://github.com/dotnet/msbuild/pull/14550).
 
 Fifteen target names had a higher header count under `-mt`. Twelve of them appeared in the `-mt` log
 only, and every one of those header blocks contained nothing but those messages. The other three

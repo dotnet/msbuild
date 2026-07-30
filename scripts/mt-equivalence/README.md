@@ -88,6 +88,8 @@ read a green run here as coverage for in-development `-mt` changes.
 
 A practical consequence: the MSBuild on the agent must itself support `-mt`, or only the `mt` build
 fails (with MSB1001 for an unrecognized switch). The orchestrator prints an explicit hint in that case.
+A second one: a fix merged into this repo does not change what this pipeline sees until it ships in
+the Visual Studio installed on the pool.
 
 ## What it compares
 
@@ -215,12 +217,15 @@ on the run summary.
 
 ### Known `-mt`-only log differences
 
-`LogNormalizationRules.json` has a `knownMtOnly` section for differences that are already filed as
-bugs. They are reported in their own section of the report instead of failing the comparison, and are
-applied **only** to the `mt` comparison, never to the control. Delete an entry when its bug is fixed.
+`LogNormalizationRules.json` has a `knownMtOnly` section for differences that are already fixed or
+filed. They are reported in their own section of the report instead of failing the comparison, and are
+applied **only** to the `mt` comparison, never to the control.
 
-It is currently **empty**, and should stay that way: `-mt` produces no log difference that has to be
-excused, so an entry here means an unfixed bug rather than a normalization.
+An entry is cleared when its fix **reaches the agents**, not when it merges. Because `-mt` is applied
+to the MSBuild that drives the build, a fix in this repo only changes what this pipeline observes once
+it ships in the Visual Studio installed on the pool. Merging
+[#14550](https://github.com/dotnet/msbuild/pull/14550) left its entry firing unchanged, attributed to
+`…\Microsoft Visual Studio\18\Enterprise\MSBuild\Current\Bin\Microsoft.Build.dll`.
 
 ## Running it locally
 
@@ -281,8 +286,9 @@ which also documents the two pre-existing reproducibility gaps found along the w
 
 An always-green check is worthless, so every failure path was exercised:
 
-* Adding a `knownMtOnly` allowance back and then removing it surfaced the real `-mt`-only log lines it
-  had been hiding: `logs=FAIL`, exit code 1. (The list is empty today.)
+* Removing the `knownMtOnly` allowance surfaced the 21 real `-mt`-only log lines: `logs=FAIL`,
+  21 unexplained, exit code 1. (Done for real in run 14817555, after the fix for those lines had
+  merged — which is how it was confirmed the fix has to reach the agents, not just `main`.)
 * Flipping a single byte at `0x4000` in `Microsoft.Build.dll` in the `mt` snapshot was reported as
   `PE: 1 bytes, regions: .text@0x4000+1`: `artifacts=FAIL`, exit code 1.
 * Appending one byte to `manifest.json` *inside* `Microsoft.Build.vsix` — the one place the
