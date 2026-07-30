@@ -1,7 +1,20 @@
 {
-  "//": "Normalization applied to replayed MSBuild text logs before the two runs are compared as line multisets. Rules are applied in order: 'drop' removes a line entirely, 'replace' rewrites it, 'setOnly' marks a line as compared for presence rather than for count. Every entry documents why the raw text cannot be compared verbatim.",
+  "//": "Normalization applied to replayed MSBuild text logs before the two runs are compared as line multisets. Rules are applied in order: 'prefix' strips the node/timestamp prefix, 'drop' removes a line entirely, 'replace' rewrites it, 'setOnly' marks a line as compared for presence rather than for count. Every entry documents why the raw text cannot be compared verbatim.",
 
-  "//drop": "NOTE: drop patterns are matched against the RAW log line, before any replace rule runs. A raw line still carries its node prefix, timestamp and trailing '(TaskId:N)', so anchoring a drop pattern with '$' will usually not match.",
+  "//prefix": "Stripped from every line before any other rule runs. Whether the file logger emits a node id and timestamp depends on the engine used to replay the binlog (MSBuild.exe does not, 'dotnet msbuild' does), not on the build being tested, so this has to come off first: otherwise every '^'-anchored drop rule below silently stops matching and dropped noise reappears as reported differences.",
+
+  "prefix": [
+    {
+      "pattern": "^\\d{1,2}:\\d{2}:\\d{2}\\.\\d{3}\\s+\\d+(?::\\d+)?>",
+      "reason": "Leading wall-clock timestamp plus node/submission id."
+    },
+    {
+      "pattern": "^\\s*\\d+(?::\\d+)?>",
+      "reason": "Node id prefix; -mt changes node assignment."
+    }
+  ],
+
+  "//drop": "NOTE: drop patterns are matched after the 'prefix' rules above have run, but before any 'replace' rule. A line therefore still carries its indentation and its trailing '(TaskId:N)', so anchoring a drop pattern with '$' will usually not match.",
 
   "drop": [
     {
@@ -76,16 +89,6 @@
 
   "replace": [
     {
-      "pattern": "^\\d{1,2}:\\d{2}:\\d{2}\\.\\d{3}\\s+\\d+(?::\\d+)?>",
-      "replacement": "",
-      "reason": "Leading wall-clock timestamp plus node/submission id."
-    },
-    {
-      "pattern": "^\\s*\\d+(?::\\d+)?>",
-      "replacement": "",
-      "reason": "Node id prefix; -mt changes node assignment."
-    },
-    {
       "pattern": "\\s*\\((TaskId|TargetId|ProjectId):\\d+\\)",
       "replacement": "",
       "reason": "Engine-assigned ids depend on scheduling order."
@@ -135,11 +138,11 @@
   "setOnly": [
     {
       "pattern": "^[A-Za-z_][A-Za-z0-9_.]*:$",
-      "reason": "MSBuild's file logger re-emits a target header every time output from a different node interleaves, so the number of header lines is a pure scheduling artifact. Compared for presence instead."
+      "reason": "MSBuild's file logger re-emits a target header every time output from a different node interleaves, so the number of header lines is a pure scheduling artifact. Compared for presence instead. How many times each target actually executed is compared exactly, and enforced, by the structure/targets and structure/targetsByProject sections, which read TargetStarted events directly from the binlog."
     },
     {
       "pattern": "^PROJECT (BUILT|DONE): ",
-      "reason": "See the project-started/finished normalization above: the number of build requests that actually execute (versus being satisfied from the results cache) is scheduling dependent, so these are compared for presence."
+      "reason": "See the project-started/finished normalization above: the number of build requests that actually execute (versus being satisfied from the results cache) is scheduling dependent, so these are compared for presence. How many times each project was actually built is compared exactly, and enforced, by the structure/projects section, which reads ProjectStarted events directly from the binlog."
     }
   ],
 
@@ -151,7 +154,7 @@
     },
     {
       "pattern": "^[A-Za-z_][A-Za-z0-9_.]*:$",
-      "reason": "Collateral of the TaskAssemblyLocationMismatch bug above: MSBuild's file logger only emits a target header when the target logs something at the current verbosity, so targets that are silent at normal verbosity acquire a header in the -mt log only. Target coverage is compared independently, and exactly, by the diagnostic-verbosity coverage comparison (-DeepCompare)."
+      "reason": "Collateral of the TaskAssemblyLocationMismatch bug above: MSBuild's file logger only emits a target header when the target logs something at the current verbosity, so targets that are silent at normal verbosity acquire a header in the -mt log only. Verified on the pool build: of the 15 target names whose header count rose under -mt, every added header block contained nothing but the bug's message. What this rule stops comparing is fully covered by the structure/targets and structure/targetsByProject sections, which take exact execution counts for every target - and every (project, target) pair - from the binlog event stream, are unaffected by verbosity or interleaving, always run, and are enforced."
     }
   ]
 }

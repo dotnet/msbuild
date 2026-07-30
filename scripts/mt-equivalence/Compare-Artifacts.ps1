@@ -314,9 +314,39 @@ $allPaths.UnionWith([string[]]@($candIndex.Keys))
 $results = New-Object System.Collections.Generic.List[object]
 $comparedCount = 0
 
+# Ignored paths are the one class of exclusion that leaves no trace in the diff lists, so they are
+# tallied per rule and reported. Without this, an Ignore pattern that quietly grew to cover a real
+# build output would be invisible in every run.
+$ignoredByRule = [ordered]@{}
+foreach ($rule in $rules) {
+    if ($rule.disposition -eq 'Ignore') {
+        $ignoredByRule[$rule.pattern] = [pscustomobject]@{
+            Pattern         = $rule.pattern
+            Reason          = $rule.reason
+            Count           = 0
+            OnlyInBaseline  = 0
+            OnlyInCandidate = 0
+            Differing       = 0
+            Samples         = (New-Object System.Collections.Generic.List[string])
+        }
+    }
+}
+
 foreach ($rel in ($allPaths | Sort-Object)) {
     $disp = Get-Disposition -RelativePath $rel
-    if ($disp.Disposition -eq 'Ignore') { continue }
+    if ($disp.Disposition -eq 'Ignore') {
+        $bucket = $ignoredByRule[$disp.Pattern]
+        if ($bucket) {
+            $bucket.Count++
+            $inB = $baseIndex.ContainsKey($rel)
+            $inC = $candIndex.ContainsKey($rel)
+            if ($inB -and -not $inC) { $bucket.OnlyInBaseline++ }
+            elseif ($inC -and -not $inB) { $bucket.OnlyInCandidate++ }
+            elseif ($baseIndex[$rel].Hash -ne $candIndex[$rel].Hash) { $bucket.Differing++ }
+            if ($bucket.Samples.Count -lt 25) { $bucket.Samples.Add($rel) }
+        }
+        continue
+    }
     $comparedCount++
 
     $inBase = $baseIndex.ContainsKey($rel)
@@ -342,6 +372,8 @@ foreach ($rel in ($allPaths | Sort-Object)) {
         })
 }
 
+Write-Host ("[{0}] {1} paths excluded by Ignore rules: {2}" -f $Label, (($ignoredByRule.Values | Measure-Object -Property Count -Sum).Sum), `
+    (($ignoredByRule.Values | ForEach-Object { "$($_.Pattern)=$($_.Count)" }) -join ', '))
 Write-Host "[$Label] triaging $($results.Count) differing paths ..."
 $sw = [System.Diagnostics.Stopwatch]::StartNew()
 
@@ -370,6 +402,10 @@ Write-Host ("[{0}] triage completed in {1:n1}s" -f $Label, $sw.Elapsed.TotalSeco
 $failures = @($results | Where-Object { $_.Disposition -ne 'Informational' })
 $informational = @($results | Where-Object { $_.Disposition -eq 'Informational' })
 
+$ignoredRules = @($ignoredByRule.Values)
+$ignoredCount = 0
+foreach ($b in $ignoredRules) { $ignoredCount += $b.Count }
+
 $summary = [pscustomobject]@{
     Label                  = $Label
     BaselineDir            = $BaselineDir
@@ -377,6 +413,7 @@ $summary = [pscustomobject]@{
     BaselineFileCount      = $baseIndex.Count
     CandidateFileCount     = $candIndex.Count
     ComparedPathCount      = $comparedCount
+    IgnoredPathCount       = $ignoredCount
     IdenticalPathCount     = $comparedCount - $results.Count
     FailingDiffCount       = $failures.Count
     InformationalDiffCount = $informational.Count
@@ -384,7 +421,7 @@ $summary = [pscustomobject]@{
     GeneratedUtc           = (Get-Date).ToUniversalTime().ToString('o')
 }
 
-$report = [pscustomobject]@{ Summary = $summary; Failures = $failures; Informational = $informational }
+$report = [pscustomobject]@{ Summary = $summary; Failures = $failures; Informational = $informational; Ignored = $ignoredRules }
 $jsonPath = Join-Path $OutputDir "artifact-compare.$Label.json"
 $report | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $jsonPath -Encoding utf8
 
@@ -400,6 +437,7 @@ $md.Add('|---|---|')
 $md.Add("| Baseline | ``$BaselineDir`` ($($baseIndex.Count) files) |")
 $md.Add("| Candidate | ``$CandidateDir`` ($($candIndex.Count) files) |")
 $md.Add("| Paths compared | $comparedCount |")
+$md.Add("| Paths excluded by an Ignore rule | $ignoredCount |")
 $md.Add("| Byte-identical | $($summary.IdenticalPathCount) |")
 $md.Add("| **Unexpected differences** | **$($failures.Count)** |")
 $md.Add("| Expected differences (documented) | $($informational.Count) |")
@@ -438,6 +476,29 @@ function Add-DiffSection {
 
 Add-DiffSection -Items $failures -Title 'Unexpected differences'
 Add-DiffSection -Items $informational -Title 'Expected differences'
+
+# Everything the Ignore rules removed from the comparison, so the exclusions can be reviewed without
+# having to re-run the build. 'differing' is how many of them would have been reported had the rule
+# not existed - a rule with a large 'differing' count is doing real work and deserves scrutiny; a
+# rule matching nothing is dead and should be deleted.
+$md.Add('### Paths excluded from the comparison')
+$md.Add('')
+$md.Add('| Ignore rule | matched | differing | only in baseline | only in candidate |')
+$md.Add('|---|---|---|---|---|')
+foreach ($b in $ignoredRules) {
+    $md.Add("| ``$($b.Pattern)`` | $($b.Count) | $($b.Differing) | $($b.OnlyInBaseline) | $($b.OnlyInCandidate) |")
+}
+$md.Add('')
+foreach ($b in $ignoredRules) {
+    if ($b.Count -eq 0) {
+        $md.Add("- ``$($b.Pattern)`` matched nothing in this build.")
+        continue
+    }
+    $md.Add("- ``$($b.Pattern)`` - $($b.Reason)")
+    foreach ($s in $b.Samples) { $md.Add("  - ``$s``") }
+    if ($b.Count -gt $b.Samples.Count) { $md.Add("  - _(... $($b.Count - $b.Samples.Count) more; see the JSON report)_") }
+}
+$md.Add('')
 
 $mdPath = Join-Path $OutputDir "artifact-compare.$Label.md"
 ($md -join [Environment]::NewLine) | Set-Content -LiteralPath $mdPath -Encoding utf8

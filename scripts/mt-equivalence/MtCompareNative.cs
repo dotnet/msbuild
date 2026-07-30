@@ -96,10 +96,17 @@ public static class MtCompareNative
     }
 
     /// <summary>
-    /// Streams a text file, applies drop/replace normalization and returns a line -> count map.
+    /// Streams a text file, applies prefix/drop/replace normalization and returns a line -> count map.
     /// </summary>
+    /// <remarks>
+    /// The node-id and timestamp prefix is stripped before anything else, because whether the file
+    /// logger emits one depends on the replay engine rather than on the build. Leaving it in place
+    /// makes every '^'-anchored drop rule silently stop matching, which turns dropped noise back into
+    /// reported differences.
+    /// </remarks>
     public static Dictionary<string, int> NormalizedLineCounts(
         string path,
+        System.Text.RegularExpressions.Regex[] prefix,
         System.Text.RegularExpressions.Regex[] drop,
         System.Text.RegularExpressions.Regex[] replaceFrom,
         string[] replaceTo,
@@ -108,8 +115,14 @@ public static class MtCompareNative
     {
         var counts = new Dictionary<string, int>(StringComparer.Ordinal);
 
-        foreach (string raw in File.ReadLines(path))
+        foreach (string rawLine in File.ReadLines(path))
         {
+            string raw = rawLine;
+            for (int i = 0; i < prefix.Length; i++)
+            {
+                raw = prefix[i].Replace(raw, string.Empty);
+            }
+
             bool skip = false;
             for (int i = 0; i < drop.Length; i++)
             {

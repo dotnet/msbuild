@@ -103,6 +103,12 @@ Hashes every file under `artifacts` on both sides and classifies each path with 
 | `Informational` | non-deterministic by construction; reported with a written reason, does not fail |
 | `Ignore` | excluded (logs, temp, SBOM manifests, dev-environment helper files) |
 
+`Ignore` is the only disposition that removes a path from the diff lists entirely, so the report
+accounts for it explicitly: every run lists each `Ignore` rule with how many paths it matched, how
+many of those actually differed, and a sample of the paths. A rule matching nothing is called out as
+dead, and a rule with a large `differing` count is visibly doing real work. Review that table when
+changing the rules.
+
 Note that patterns are matched with PowerShell `-like`, where `*` also crosses directory separators —
 so a pattern must not be prefixed with `**/` if it needs to match a root-relative path such as
 `VSSetup/Release/...`.
@@ -129,20 +135,26 @@ are compared functionally:
    the first few KB, so this costs one gzip read) and the script asserts that the `mt` run really did
    run with `-mt` and the baseline did not. Without this the whole comparison could silently become
    vacuous.
-2. **Diagnostics.** Both logs are replayed at quiet verbosity; the multiset of errors and warnings
+2. **Structure.** The binlog event stream is read directly and the two runs must agree, exactly, on
+   how many times every target ran, every `(project, target)` pair ran, every task ran and every
+   project was built, plus the multiset of warning and error codes. This costs about 2.5 seconds per
+   binlog and needs no replay. It is the check that makes the noise tolerance of the text tiers below
+   safe: those deliberately stop counting target headers, and this is what still pins down what
+   actually executed. A target that runs but logs nothing is invisible to a text comparison at any
+   verbosity, and is caught here.
+3. **Diagnostics.** Both logs are replayed at quiet verbosity; the multiset of errors and warnings
    must be identical.
-3. **Functional.** Both are replayed at normal verbosity, normalized with
+4. **Functional.** Both are replayed at normal verbosity, normalized with
    [`LogNormalizationRules.json`](LogNormalizationRules.json), and compared as line multisets.
-4. **Coverage** (`-DeepCompare`). Both are replayed at diagnostic verbosity and the sets of executed
-   tasks and of task→assembly bindings must match. The set of *target* names is reported but not
-   enforced: the text logger only emits a target header when a target produces output in a contiguous
-   block, so the set is partly an interleaving artifact — the control run shows the same instability.
+5. **Coverage** (`-DeepCompare`, off by default). Both are replayed at diagnostic verbosity and the
+   sets of executed tasks and of task→assembly bindings must match. Target and task coverage is now
+   covered more precisely, and always, by tier 2; what this adds is the task→assembly binding.
 
 Every normalization rule carries a `reason` explaining why the raw text cannot be compared verbatim.
 
-> **Editing `drop` patterns:** they are matched against the **raw** log line, before any `replace`
-> rule runs, so the line still has its node prefix, timestamp and trailing `(TaskId:N)`. Anchoring a
-> `drop` pattern with `$` will usually not match.
+> **Editing `drop` patterns:** the `prefix` rules (node id and timestamp) are stripped first, but
+> `drop` still runs before any `replace` rule, so the line keeps its indentation and its trailing
+> `(TaskId:N)`. Anchoring a `drop` pattern with `$` will usually not match.
 
 ### 3. Netting the `-mt` differences against the control
 
@@ -276,6 +288,8 @@ An always-green check is worthless, so every failure path was exercised:
   (`Candidate build did not run with -mt`), exit code 1.
 * Corrupting a byte in the **control** snapshot only produced a warning and exit code 0 — a
   pre-existing non-determinism must not masquerade as an `-mt` regression.
+* Adding a target that executes but logs nothing at normal verbosity was invisible to the text
+  comparison (`functional: 0 missing, 0 extra`) and was caught by `structure/targets`, exit code 1.
 
 ## Files
 
@@ -288,3 +302,4 @@ An always-green check is worthless, so every failure path was exercised:
 | `ArtifactCompareRules.json` | per-path dispositions, each with a reason |
 | `LogNormalizationRules.json` | log normalization + known `-mt`-only differences, each with a reason |
 | `MtCompareNative.cs` | small C# helper (parallel hashing, byte-run diffing, log scanning) compiled with `Add-Type` |
+| `BinlogStructure.cs` | reads target/task/project execution counts out of a binlog's event stream |

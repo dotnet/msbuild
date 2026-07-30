@@ -288,6 +288,48 @@ of MSBuild and is not deterministic between two runs, so the harness excludes it
 Both are excluded for the `-mt` comparison and the control alike, so they cannot mask a real
 difference on one side only.
 
+## Audit of the exclusion rules
+
+Every exclusion was re-examined adversarially against the artifacts and binlogs of green pool build
+14815634, on the assumption that a rule might be hiding a real `-mt` difference. Three things came
+out of it.
+
+**Every excused artifact difference is demonstrably pre-existing.** Of the 150 paths excused in the
+`-mt` comparison, all 150 also differ between the two identical non-`-mt` builds. Not one difference
+is excused on the strength of a written rule alone; each has an experimental control.
+
+**The two target-header suppressions were justified by a control that does not run.** The `setOnly`
+rule for target headers and its `knownMtOnly` counterpart stop comparing how many times a target
+header appears — and a target header is exactly what would reveal a target running only under `-mt`.
+Their stated justification was the `-DeepCompare` coverage comparison, but that switch is off by
+default in the pipeline, and target coverage was explicitly excluded from failing even when it does
+run. In the shipping configuration the suppression had no compensating control at all.
+
+The suppression turned out to be *correct* — reading the raw event stream out of all three binlogs
+shows the builds are structurally identical: 384 distinct targets over 18 993 executions, 9 306
+distinct `(project, target)` pairs, 122 tasks over 16 083 invocations, 53 projects over 1 842 builds,
+and zero warnings and errors — every count equal across baseline, `-mt` and control. The extra target
+headers in the `-mt` text log are a logging side-effect of the `TaskAssemblyLocationMismatch` bug
+above: the file logger only emits a target header when the target logs something, so targets that are
+silent at normal verbosity acquire a header once the bug starts logging inside them. Of the 15 target
+names whose header count rose, every added header block contained nothing but the bug's message.
+
+Being right by luck is not the same as being checked, so the structural comparison is now a
+first-class tier of `Compare-Binlogs.ps1`: always on, enforced, netted against the control, and
+costing about 2.5 seconds per binlog. It is strictly stronger than what it replaces, because it is
+taken from the events rather than from rendered text — a target that executes but logs nothing is
+invisible to a text comparison at any verbosity, and is caught here. That case is covered by a test.
+
+**Ignored paths left no trace in the report.** `Ignore` rules removed paths from the comparison
+without recording anything, so nobody could review what was being hidden without re-running the
+build. The artifact report now lists every `Ignore` rule with the number of paths it matched, how
+many of those actually differed, and a sample, and flags rules that matched nothing.
+
+One latent defect was found and fixed along the way: `drop` patterns were matched against the raw log
+line including the node-id/timestamp prefix, so every `^`-anchored rule silently stopped matching
+whenever the replay engine emitted one. The pool's replay does not, which is why this never surfaced,
+but `-msbuildEngine dotnet` does. The prefix is now stripped in its own stage ahead of `drop`.
+
 ## What this does and does not prove
 
 Proven for the configuration tested (official-style `Release` build of this repo, Windows,

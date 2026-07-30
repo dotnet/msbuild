@@ -9,12 +9,19 @@
     1. MT evidence  - reads the "Command line arguments" recorded in each binlog and asserts that
                       the candidate build really did run with -mt / --multithreaded and that the
                       baseline did not. Without this the whole comparison would be vacuous.
-    2. Diagnostics  - replays both logs at quiet verbosity (errors and warnings only) and requires
+    2. Structure    - reads the raw event stream out of both binlogs and requires that every target,
+                      every (project, target) pair, every task and every project executed exactly
+                      the same number of times. This is the strongest of the log checks: it is taken
+                      from the events themselves, so unlike the text tiers below it is unaffected by
+                      verbosity, by node interleaving, or by the console logger only emitting a
+                      target header when the target happens to produce output.
+    3. Diagnostics  - replays both logs at quiet verbosity (errors and warnings only) and requires
                       an identical multiset of diagnostics.
-    3. Functional   - replays both at normal verbosity, normalizes away scheduling-dependent noise
+    4. Functional   - replays both at normal verbosity, normalizes away scheduling-dependent noise
                       using LogNormalizationRules.json, and requires an identical multiset of lines.
-    4. Deep (opt-in)- replays both at diagnostic verbosity and compares the multiset of executed
-                      targets and tasks.
+    5. Deep (opt-in)- replays both at diagnostic verbosity and compares the multiset of executed
+                      targets and tasks. Superseded by tier 2 for target/task coverage; retained
+                      because it also compares which assembly each task was bound to.
 
 .PARAMETER MSBuildPath
   Path to the executable used to replay the binlogs. Must be new enough to read the binlog format
@@ -142,6 +149,7 @@ $rules = Get-Content -Raw -LiteralPath $RulesFile | ConvertFrom-Json
 Add-Type -TypeDefinition (Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'MtCompareNative.cs')) -ErrorAction Stop
 
 $opts = [System.Text.RegularExpressions.RegexOptions]::Compiled
+$prefixRegexes = [System.Text.RegularExpressions.Regex[]]@($rules.prefix | ForEach-Object { [regex]::new($_.pattern, $opts) })
 $dropRegexes = [System.Text.RegularExpressions.Regex[]]@($rules.drop | ForEach-Object { [regex]::new($_.pattern, $opts) })
 $replaceFrom = [System.Text.RegularExpressions.Regex[]]@($rules.replace | ForEach-Object { [regex]::new($_.pattern, $opts) })
 $replaceTo = [string[]]@($rules.replace | ForEach-Object { $_.replacement })
@@ -167,7 +175,70 @@ function Get-NormalizedLineCounts {
     param([string] $Path)
 
     $seen = [System.Collections.Generic.HashSet[string]]::new()
-    return [MtCompareNative]::NormalizedLineCounts($Path, $dropRegexes, $replaceFrom, $replaceTo, $setOnlyRegexes, $seen)
+    return [MtCompareNative]::NormalizedLineCounts($Path, $prefixRegexes, $dropRegexes, $replaceFrom, $replaceTo, $setOnlyRegexes, $seen)
+}
+
+$sections = [ordered]@{}
+$knownMtDifferences = New-Object System.Collections.Generic.List[object]
+
+# ---------------------------------------------------------------------------------------------
+# Structural comparison, taken from the binlog event stream rather than from replayed text.
+#
+# The text tiers below have to tolerate a lot of noise, and two of the normalization rules
+# (the target-header setOnly rule and its knownMtOnly counterpart) deliberately stop comparing
+# how many times a target header appears. That is only safe if something else pins down what
+# actually ran, which is what this does: exact execution counts for every target, every
+# (project, target) pair, every task and every project, straight from the events.
+# ---------------------------------------------------------------------------------------------
+
+function Get-BinlogReaderDirectory {
+    # Any recent Microsoft.Build can read the binlog; it just has to be the .NET (not .NET Framework)
+    # build, because this script runs under pwsh. Arcade installs one into <repo>\.dotnet whenever
+    # global.json has a 'tools.dotnet' entry, which is independent of -msbuildEngine.
+    $candidates = New-Object System.Collections.Generic.List[string]
+    $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+    foreach ($root in @(
+            (Join-Path $repoRoot '.dotnet'),
+            $env:DOTNET_INSTALL_DIR,
+            $env:DOTNET_ROOT,
+            (Split-Path -Parent ((Get-Command dotnet -ErrorAction SilentlyContinue)).Source))) {
+
+        if (-not $root) { continue }
+        $sdkDir = Join-Path $root 'sdk'
+        if (-not (Test-Path -LiteralPath $sdkDir)) { continue }
+        foreach ($d in (Get-ChildItem -LiteralPath $sdkDir -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending)) {
+            if (Test-Path -LiteralPath (Join-Path $d.FullName 'Microsoft.Build.dll')) { $candidates.Add($d.FullName) }
+        }
+    }
+    return $candidates
+}
+
+$structureReaderError = $null
+$structureReady = $false
+foreach ($dir in (Get-BinlogReaderDirectory)) {
+    try {
+        # LoadFrom also registers the assembly's directory as a probing path, so Microsoft.Build's
+        # own dependencies resolve without any custom AssemblyLoadContext plumbing.
+        [void][System.Reflection.Assembly]::LoadFrom((Join-Path $dir 'Microsoft.Build.Framework.dll'))
+        [void][System.Reflection.Assembly]::LoadFrom((Join-Path $dir 'Microsoft.Build.dll'))
+        Add-Type -TypeDefinition (Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'BinlogStructure.cs')) -ReferencedAssemblies @(
+            (Join-Path $dir 'Microsoft.Build.dll'),
+            (Join-Path $dir 'Microsoft.Build.Framework.dll'),
+            'System.Collections',
+            'System.Runtime') -ErrorAction Stop
+        Write-Host "[$Label] structural comparison using the MSBuild assemblies in $dir"
+        $structureReady = $true
+        break
+    }
+    catch {
+        $structureReaderError = $_.Exception.Message
+    }
+}
+
+if (-not $structureReady) {
+    # This is the control that lets the text tiers ignore target-header counts, so not being able to
+    # run it has to be loud rather than silent.
+    $evidenceProblems.Add("Could not load an MSBuild assembly able to read the binlog event stream, so the structural comparison did not run. Last error: $structureReaderError")
 }
 
 function Compare-LineCounts {
@@ -201,9 +272,6 @@ function Compare-LineCounts {
     }
 }
 
-$sections = [ordered]@{}
-$knownMtDifferences = New-Object System.Collections.Generic.List[object]
-
 function Split-KnownMtDifferences {
     param($Comparison)
 
@@ -231,6 +299,25 @@ function Split-KnownMtDifferences {
         MissingInCandidate = @($Comparison.MissingInCandidate)
         ExtraInCandidate   = $remaining.ToArray()
     }
+}
+
+if ($structureReady) {
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $baseStruct = [BinlogStructure]::Collect((Resolve-Path -LiteralPath $BaselineBinlog).Path)
+    $candStruct = [BinlogStructure]::Collect((Resolve-Path -LiteralPath $CandidateBinlog).Path)
+    $sw.Stop()
+
+    foreach ($dim in @('Targets', 'TargetsByProject', 'Tasks', 'Projects', 'Diagnostics')) {
+        $name = 'structure/' + $dim.Substring(0, 1).ToLowerInvariant() + $dim.Substring(1)
+        # Deliberately not passed through Split-KnownMtDifferences: this tier exists precisely to be
+        # the check that nothing is excused, so a known bug must not be able to suppress it either.
+        $cmp = Compare-LineCounts -Baseline $baseStruct.$dim -Candidate $candStruct.$dim
+        $sections[$name] = $cmp
+        Write-Host ("[{0}] {1}: {2} distinct / {3} executions baseline, {4} / {5} candidate; {6} missing, {7} extra" -f `
+                $Label, $name, $cmp.BaselineDistinct, $cmp.BaselineTotal, $cmp.CandidateDistinct, $cmp.CandidateTotal, `
+                $cmp.MissingInCandidate.Count, $cmp.ExtraInCandidate.Count)
+    }
+    Write-Host ("[{0}] structural extraction took {1:n1}s" -f $Label, $sw.Elapsed.TotalSeconds)
 }
 
 foreach ($tier in @(
@@ -300,13 +387,18 @@ if ($DeepCompare) {
 
 $diagnosticsMismatch = $sections['diagnostics'].MissingInCandidate.Count + $sections['diagnostics'].ExtraInCandidate.Count
 $functionalMismatch = $sections['functional'].MissingInCandidate.Count + $sections['functional'].ExtraInCandidate.Count
+$structureMismatch = 0
+$structureSections = @($sections.Keys | Where-Object { $_ -like 'structure/*' })
+foreach ($name in $structureSections) {
+    $structureMismatch += $sections[$name].MissingInCandidate.Count + $sections[$name].ExtraInCandidate.Count
+}
 $coverageMismatch = 0
 foreach ($name in $coverageNames) {
     if ($name -notin $deepFailingExtractors) { continue }
     $coverageMismatch += $coverage[$name].MissingInCandidate.Count + $coverage[$name].ExtraInCandidate.Count
 }
 
-$passed = ($evidenceProblems.Count -eq 0) -and ($diagnosticsMismatch -eq 0) -and ($functionalMismatch -eq 0) -and ($coverageMismatch -eq 0)
+$passed = ($evidenceProblems.Count -eq 0) -and ($diagnosticsMismatch -eq 0) -and ($functionalMismatch -eq 0) -and ($structureMismatch -eq 0) -and ($coverageMismatch -eq 0)
 
 $report = [pscustomobject]@{
     Label                  = $Label
@@ -341,6 +433,9 @@ $md.Add("| Baseline ran with -mt | $baselineMt |")
 $md.Add("| Candidate ran with -mt | $candidateMt |")
 $md.Add("| Diagnostics (errors/warnings) differences | $diagnosticsMismatch |")
 $md.Add("| Functional (normal verbosity) differences | $functionalMismatch |")
+if ($structureSections.Count -gt 0) {
+    $md.Add("| Structural differences (target/task/project execution counts) | $structureMismatch |")
+}
 if ($coverageNames.Count -gt 0) { $md.Add("| Target/task coverage differences | $coverageMismatch |") }
 $md.Add("| Known, already-filed -mt differences | $($knownMtDifferences.Count) distinct / $knownMtLineTotal lines |")
 $md.Add("| Result | $(if ($passed) { 'PASS' } else { 'FAIL' }) |")

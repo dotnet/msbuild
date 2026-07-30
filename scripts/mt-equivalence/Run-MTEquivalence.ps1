@@ -328,12 +328,17 @@ if (-not $SkipControl) {
         }
 
         $controlLines = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::Ordinal)
-        foreach ($section in @('diagnostics', 'functional')) {
+        # Structural counts are netted alongside the text tiers so that a genuinely unstable
+        # target/task/project count shows up in the control too and is reported as noise rather than
+        # blamed on -mt. Section names are discovered rather than hard-coded so that adding a
+        # structural dimension to Compare-Binlogs.ps1 cannot silently escape the netting.
+        $netSections = @('diagnostics', 'functional') + @($mtLogs.Sections.PSObject.Properties.Name | Where-Object { $_ -like 'structure/*' })
+        foreach ($section in $netSections) {
             foreach ($d in @($controlLogs.Sections.$section.MissingInCandidate) + @($controlLogs.Sections.$section.ExtraInCandidate)) {
                 if ($d) { [void]$controlLines.Add($d.Line) }
             }
         }
-        foreach ($section in @('diagnostics', 'functional')) {
+        foreach ($section in $netSections) {
             foreach ($d in @($mtLogs.Sections.$section.MissingInCandidate) + @($mtLogs.Sections.$section.ExtraInCandidate)) {
                 if (-not $d) { continue }
                 if (-not $controlLines.Contains($d.Line)) { $unexplainedLogLines += $d.Line }
