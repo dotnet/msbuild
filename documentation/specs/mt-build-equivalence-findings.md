@@ -5,6 +5,10 @@ byte for byte. The harness that produces these results is
 [`scripts/mt-equivalence`](../../scripts/mt-equivalence/README.md); the pipeline is
 [`azure-pipelines/.vsts-dotnet-mt-equivalence.yml`](../../azure-pipelines/.vsts-dotnet-mt-equivalence.yml).
 
+Answers [#13603](https://github.com/dotnet/msbuild/issues/13603), which asks for a validation leg
+proving that an `-mt` build produces the same artifacts as a standard one before the production
+pipeline is switched to `-mt`.
+
 ## Method
 
 Three official-style builds of the same commit, in the same working tree, differing only in whether
@@ -44,11 +48,24 @@ varies between two *identical* builds, so a difference in the `-mt` comparison c
 That the `-mt` build really ran multithreaded is verified from the MSBuild command line recorded in
 its binary log, not from the fact that the environment variable was set.
 
-Runs: `main` at `867c136`, `Release`. Several trios were run while developing the harness; the
-authoritative one is the full official configuration (`-MSBuildEngine vs`, `-publish`) executed on the
-official MicroBuild pool by the pipeline itself — DevDiv build
-[14817031](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14817031&view=results), which
-passed end to end. Earlier `-msbuildEngine dotnet` trios and several earlier pool runs agreed with it.
+Runs: `main` at `867c136`, `Release`. Several trios were run locally while developing the harness; the
+authoritative ones are the full official configuration (`-MSBuildEngine vs`, `-publish`) executed on
+the official MicroBuild pool by the pipeline itself, in
+[DevDiv definition 28545](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=28545):
+
+| run | commit | result |
+|---|---|---|
+| [14817031](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14817031&view=results) | `5aa9f18` | **succeeded** — the numbers below, with the structural comparison active |
+| [14815634](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14815634&view=results) | `d87e327` | succeeded — same verdict before the structural comparison was added |
+| [14816699](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14816699&view=results) | `13d285b` | failed — the structural reader could not load MSBuild under the agent's PowerShell (`CS1705`) |
+| [14816238](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14816238&view=results) | `d5c62f8` | failed — same cause, reported as a misleading "assembly already loaded" |
+| [14802518](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14802518&view=results) | `5b2e99f` | failed — DevDiv/1ES pool incident, unrelated to the comparison |
+| [14802348](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14802348&view=results) | `756a173` | failed — same incident |
+| [14802168](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14802168&view=results) | `9219205` | failed — inner builds' `##vso` commands were reaching the agent |
+| [14801836](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14801836&view=results) | `c9ccccd` | failed — same cause; the comparison itself passed |
+| [14789743](https://devdiv.visualstudio.com/DevDiv/_build/results?buildId=14789743&view=results) | `ff1d43c` | failed — 1ES SDL injection noise, since filtered |
+
+Earlier `-msbuildEngine dotnet` trios run locally agreed with the pool runs.
 
 ## Headline result
 
@@ -191,101 +208,18 @@ Visible in the control run, so normalized away for both comparisons:
   `VBCSCompiler` has to be started depends on whether a server from an earlier build is still alive.
 * NuGet restore chatter — depends on package-cache warmth.
 
-## `-mt`-specific finding: spurious `TaskAssemblyLocationMismatch` messages
+## The one `-mt`-only log difference
 
-**This is the only behavioural difference `-mt` introduced, and it is log noise only.**
+`-mt` routes tasks that are not marked `[MSBuildMultiThreadableTask]` to an out-of-process task host,
+which makes MSBuild log a spurious `TaskAssemblyLocationMismatch` message for most task invocations —
+1 364 extra lines in an official build of this repo. It is log noise: no build output changes, which
+the byte-level artifact comparison confirms. Fixed by
+[#14550](https://github.com/dotnet/msbuild/pull/14550).
 
-On the official MicroBuild pool (build 14817031) the `-mt` build emits **1 364** normal-importance
-messages that the baseline does not, over 9 distinct
-(loaded-from, desired-location) pairs:
-
-```
-Task assembly was loaded from 'C:\...\MSBuild\Current\Bin\Microsoft.Build.dll'
-  while the desired location was '...\Roslyn\binfx\Microsoft.Build.Tasks.CodeAnalysis.Sdk.dll'.
-```
-
-Distribution over the "desired" assembly:
-
-| count | desired assembly |
-|---|---|
-| 556 | `.dotnet\sdk\<version>\Roslyn\binfx\Microsoft.Build.Tasks.CodeAnalysis.Sdk.dll` |
-| 274 | `MSBuild\Current\Bin\Microsoft.Build.Tasks.Core.dll` |
-| 190 | `MSBuild\Current\Bin\amd64\Microsoft.Build.Tasks.Core.dll` |
-| 185 | `Sdks\Microsoft.Build.Tasks.Git\tools\netframework\Microsoft.Build.Tasks.Git.dll` |
-| 86 | `Sdks\Microsoft.SourceLink.Common\tools\netframework\Microsoft.SourceLink.Common.dll` |
-| 23 | `Sdks\Microsoft.NET.Sdk\tools\net472\Microsoft.NET.Build.Tasks.dll` |
-| 22 | `microsoft.testing.platform.msbuild\...\Microsoft.Testing.Platform.MSBuild.dll` |
-| 22 | `xunit.v3.core.mtp-v2\...\xunit.v3.msbuildtasks.dll` |
-| 6 | `microsoft.visualstudioeng.microbuild.plugins.swixbuild\...\SwixBuild.dll` |
-
-As a side effect, **12** targets that are otherwise silent at normal verbosity acquire a target header
-in the `-mt` log only (`AcquireSdk`, `ResolveKeySource`, `InitializeSourceRootMappedPaths`,
-`NormalizeNetCoreSdkRootCasing`, `GenerateMSBuildEditorConfigFileCore`, …). That is purely the text
-logger reacting to the extra messages: every one of those header blocks contains nothing but this
-message. It is not evidence of extra work — the structural comparison shows every target executing
-exactly as many times in both runs.
-
-### Root cause
-
-Under `-mt`, tasks that are not marked `[MSBuildMultiThreadableTask]` are routed to an external
-TaskHost — confirmed by `Launching task "{0}" from assembly "{1}" in an external task host …` in the
-`-mt` binary log. `TaskExecutionHost.InitializeTask` then does:
-
-```csharp
-// src/Build/BackEnd/TaskExecutionHost/TaskExecutionHost.cs
-string realTaskAssemblyLocation = TaskInstance.GetType().Assembly.Location;
-if (!string.IsNullOrWhiteSpace(realTaskAssemblyLocation) &&
-    realTaskAssemblyLocation != _taskFactoryWrapper.TaskFactoryLoadedType.Path)
-{
-    if (!IsTaskAssemblyMatchFactoryType())
-    {
-        _taskLoggingContext.LogComment(MessageImportance.Normal, "TaskAssemblyLocationMismatch",
-            realTaskAssemblyLocation, _taskFactoryWrapper.TaskFactoryLoadedType.Path);
-    }
-}
-
-bool IsTaskAssemblyMatchFactoryType() => TaskInstance is not TaskHostTask tht
-    || tht.LoadedTaskAssemblyInfo.AssemblyLocation == _taskFactoryWrapper.TaskFactoryLoadedType.Path;
-```
-
-For a TaskHost-routed task, `TaskInstance` is a `TaskHostTask`, which lives in `Microsoft.Build.dll` —
-hence the "loaded from Microsoft.Build.dll" text for every affected task. `IsTaskAssemblyMatchFactoryType`
-exists precisely to suppress the diagnostic in that case, but it compares
-`TaskHostTask.LoadedTaskAssemblyInfo.AssemblyLocation` (which comes from the task's
-`AssemblyLoadInfo`, and is not populated for tasks registered by assembly *name* rather than by path,
-as almost all tasks in `Microsoft.Common.tasks` are) with the resolved
-`TaskFactoryLoadedType.Path`. The comparison fails and the message is logged.
-
-Because virtually nothing runs in a TaskHost in a normal build, the guard has effectively never been
-exercised; `-mt` makes it the common path.
-
-### Impact
-
-* No build output changes — proven byte for byte by the artifact comparison in this same run.
-* Noise: ~1 200 extra messages at `MessageImportance.Normal`, i.e. visible at `-v:n` and above and in
-  every binary log, in a build that otherwise logs zero warnings. It makes real
-  assembly-identity problems undiscoverable, and inflates binlog size.
-
-### Suggested fix
-
-Either populate `AssemblyLoadInfo.AssemblyLocation` for TaskHost-routed tasks, or make the guard
-skip the diagnostic whenever `TaskInstance is TaskHostTask` and the resolved task type came from the
-same registration (comparing the task *type*, not the wrapper's assembly). A regression test should
-assert that a `-mt` build of a project using tasks registered by assembly name logs no
-`TaskAssemblyLocationMismatch`.
-
-### Status in the harness
-
-Tracked as a `knownMtOnly` entry in
-[`LogNormalizationRules.json`](../../scripts/mt-equivalence/LogNormalizationRules.json): the messages
-are reported in their own "Known `-mt`-only log differences" section of every report instead of
-failing the comparison, and the rule is applied only to the `-mt` comparison, never to the control.
-**Delete that entry once the bug is fixed** so the check becomes strict again.
-
-Measured on the official MicroBuild pool (build 14817031), the `-mt` build emits **1 364** more of
-these lines than the baseline, over 9 distinct (loaded-from, desired-location) pairs. The baseline
-count is non-zero because a few tasks already need an out-of-process task host for runtime or bitness
-reasons; `-mt` makes that the common path.
+Until that merges the messages are allowed by a `knownMtOnly` entry in
+[`LogNormalizationRules.json`](../../scripts/mt-equivalence/LogNormalizationRules.json), which reports
+them separately instead of failing the comparison and applies only to the `-mt` comparison, never to
+the control. **Delete that entry once #14550 is in** so the check becomes strict again.
 
 ## Non-MSBuild noise from 1ES SDL injection
 
@@ -303,9 +237,8 @@ difference on one side only.
 
 ## Audit of the exclusion rules
 
-Every exclusion was re-examined adversarially against the artifacts and binlogs of green pool build
-14817031, on the assumption that a rule might be hiding a real `-mt` difference. Three things came
-out of it.
+Every exclusion was re-examined adversarially against the artifacts and binlogs of a green pool run,
+on the assumption that a rule might be hiding a real `-mt` difference. Three things came out of it.
 
 **Every excused artifact difference is demonstrably pre-existing.** Of the 150 paths excused in the
 `-mt` comparison, all 150 also differ between the two identical non-`-mt` builds. Not one difference
@@ -323,12 +256,12 @@ The suppression turned out to be *correct* — reading the raw event stream out 
 shows the builds are structurally identical: 384 distinct targets over 18 993 executions, 9 306
 distinct `(project, target)` pairs, 122 tasks over 16 083 invocations, 53 projects over 1 842 builds,
 and zero warnings and errors — every count equal across baseline, `-mt` and control. The extra target
-headers in the `-mt` text log are a logging side-effect of the `TaskAssemblyLocationMismatch` bug
-above: the file logger only emits a target header when the target logs something, so targets that are
-silent at normal verbosity acquire a header once the bug starts logging inside them.
+headers in the `-mt` text log are a side-effect of the extra messages described above: the file logger
+only emits a target header when the target logs something, so targets that are silent at normal
+verbosity acquire a header once something starts logging inside them.
 
 Fifteen target names have a higher header count under `-mt`. Twelve of them appear in the `-mt` log
-only, and every one of those header blocks contains nothing but the bug's message. The other three
+only, and every one of those header blocks contains nothing but those messages. The other three
 (`PrepareForBuild`, `_GenerateSourceLinkFile`, `Build`) already appear in the baseline; their extra
 headers are the file logger re-emitting a header when output from another node interleaves, which is
 what the `setOnly` rule exists for. That re-emission is not `-mt` specific and swings in both
