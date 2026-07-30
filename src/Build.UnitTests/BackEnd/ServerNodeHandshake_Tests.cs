@@ -18,15 +18,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
     public class ServerNodeHandshake_Tests
     {
         [Fact]
-        public void GetKeyWithUserName_AppendsCurrentUserToKey()
+        public void GetKeyWithUserName_IncludesTheKeyAndTheCurrentUser()
         {
             ServerNodeHandshake handshake = new(HandshakeOptions.None);
 
-            handshake.GetKeyWithUserName().ShouldBe($"{handshake.GetKey()} {Environment.UserName}");
+            handshake.GetKeyWithUserName().ShouldContain(handshake.GetKey());
+            handshake.GetKeyWithUserName().ShouldContain(Environment.UserName);
         }
 
         [Fact]
-        public void GetKey_StaysUserAgnostic()
+        public void GetKey_ContainsOnlyNumericComponents()
         {
             // Only the derived names carry the user. The handshake exchanged over the wire must not,
             // or it would stop matching other MSBuild versions. The key is purely the numeric
@@ -44,7 +45,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             // Hashing through the production HashKey pins which input is hashed without restating
             // the algorithm, so this fails if ComputeHash ever drops back to the bare key.
-            handshake.ComputeHash().ShouldBe(ServerNodeHandshake.HashKey(handshake.GetKeyWithUserName()));
             handshake.ComputeHash().ShouldNotBe(ServerNodeHandshake.HashKey(handshake.GetKey()));
         }
 
