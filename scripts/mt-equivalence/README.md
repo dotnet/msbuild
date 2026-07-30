@@ -146,9 +146,10 @@ are compared functionally:
    must be identical.
 4. **Functional.** Both are replayed at normal verbosity, normalized with
    [`LogNormalizationRules.json`](LogNormalizationRules.json), and compared as line multisets.
-5. **Coverage** (`-DeepCompare`, off by default). Both are replayed at diagnostic verbosity and the
-   sets of executed tasks and of task→assembly bindings must match. Target and task coverage is now
-   covered more precisely, and always, by tier 2; what this adds is the task→assembly binding.
+5. **Coverage** (`-DeepCompare`). Both are replayed at diagnostic verbosity and the sets of executed
+   tasks and of task→assembly bindings must match. Target coverage is reported but never fails,
+   because it is extracted from text headers and is unstable for the same reason; tier 2 covers that
+   ground precisely and always. What this tier still adds is the task→assembly binding.
 
 Every normalization rule carries a `reason` explaining why the raw text cannot be compared verbatim.
 
@@ -302,4 +303,5 @@ An always-green check is worthless, so every failure path was exercised:
 | `ArtifactCompareRules.json` | per-path dispositions, each with a reason |
 | `LogNormalizationRules.json` | log normalization + known `-mt`-only differences, each with a reason |
 | `MtCompareNative.cs` | small C# helper (parallel hashing, byte-run diffing, log scanning) compiled with `Add-Type` |
+| `Get-BinlogStructure.ps1` | reads one binlog's execution counts; runs as its own process so each reader-assembly attempt is hermetic |
 | `BinlogStructure.cs` | reads target/task/project execution counts out of a binlog's event stream |

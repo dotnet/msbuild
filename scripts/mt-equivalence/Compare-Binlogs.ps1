@@ -193,52 +193,69 @@ $knownMtDifferences = New-Object System.Collections.Generic.List[object]
 
 function Get-BinlogReaderDirectory {
     # Any recent Microsoft.Build can read the binlog; it just has to be the .NET (not .NET Framework)
-    # build, because this script runs under pwsh. Arcade installs one into <repo>\.dotnet whenever
+    # build, because the helper runs under pwsh. Arcade installs one into <repo>\.dotnet whenever
     # global.json has a 'tools.dotnet' entry, which is independent of -msbuildEngine.
     $candidates = New-Object System.Collections.Generic.List[string]
+    $seenDir = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
     $repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+    $dotnetOnPath = Get-Command dotnet -ErrorAction SilentlyContinue
     foreach ($root in @(
             (Join-Path $repoRoot '.dotnet'),
             $env:DOTNET_INSTALL_DIR,
             $env:DOTNET_ROOT,
-            (Split-Path -Parent ((Get-Command dotnet -ErrorAction SilentlyContinue)).Source))) {
+            $(if ($dotnetOnPath) { Split-Path -Parent $dotnetOnPath.Source }))) {
 
         if (-not $root) { continue }
         $sdkDir = Join-Path $root 'sdk'
         if (-not (Test-Path -LiteralPath $sdkDir)) { continue }
         foreach ($d in (Get-ChildItem -LiteralPath $sdkDir -Directory -ErrorAction SilentlyContinue | Sort-Object Name -Descending)) {
-            if (Test-Path -LiteralPath (Join-Path $d.FullName 'Microsoft.Build.dll')) { $candidates.Add($d.FullName) }
+            if ((Test-Path -LiteralPath (Join-Path $d.FullName 'Microsoft.Build.dll')) -and
+                (Test-Path -LiteralPath (Join-Path $d.FullName 'Microsoft.Build.Framework.dll')) -and
+                $seenDir.Add($d.FullName)) {
+                $candidates.Add($d.FullName)
+            }
         }
     }
     return $candidates
 }
 
-$structureReaderError = $null
-$structureReady = $false
-foreach ($dir in (Get-BinlogReaderDirectory)) {
-    try {
-        # LoadFrom also registers the assembly's directory as a probing path, so Microsoft.Build's
-        # own dependencies resolve without any custom AssemblyLoadContext plumbing.
-        [void][System.Reflection.Assembly]::LoadFrom((Join-Path $dir 'Microsoft.Build.Framework.dll'))
-        [void][System.Reflection.Assembly]::LoadFrom((Join-Path $dir 'Microsoft.Build.dll'))
-        Add-Type -TypeDefinition (Get-Content -Raw -LiteralPath (Join-Path $PSScriptRoot 'BinlogStructure.cs')) -ReferencedAssemblies @(
-            (Join-Path $dir 'Microsoft.Build.dll'),
-            (Join-Path $dir 'Microsoft.Build.Framework.dll'),
-            'System.Collections',
-            'System.Runtime') -ErrorAction Stop
-        Write-Host "[$Label] structural comparison using the MSBuild assemblies in $dir"
-        $structureReady = $true
-        break
+# The extraction runs out of process, one candidate SDK per launch: see Get-BinlogStructure.ps1 for
+# why. The first directory that works is remembered so only the first binlog pays for probing.
+$structureScript = Join-Path $PSScriptRoot 'Get-BinlogStructure.ps1'
+$structureHost = (Get-Process -Id $PID).Path
+$structureDirs = @(Get-BinlogReaderDirectory)
+$structureDir = $null
+$structureErrors = New-Object System.Collections.Generic.List[string]
+
+function Get-BinlogStructuredCounts {
+    param([string] $Binlog)
+
+    $outFile = Join-Path $workDir ("structure-" + [System.IO.Path]::GetRandomFileName() + '.json')
+    foreach ($dir in $(if ($structureDir) { @($structureDir) } else { $structureDirs })) {
+        $stderr = & $structureHost -NoProfile -NonInteractive -File $structureScript `
+            -Binlog $Binlog -OutFile $outFile -ReaderDirectory $dir 2>&1
+        if ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $outFile)) {
+            if (-not $script:structureDir) {
+                $script:structureDir = $dir
+                Write-Host "[$Label] structural comparison using the MSBuild assemblies in $dir"
+            }
+            $json = Get-Content -Raw -LiteralPath $outFile | ConvertFrom-Json
+            Remove-Item -LiteralPath $outFile -Force -ErrorAction SilentlyContinue
+            return $json
+        }
+        $structureErrors.Add("$dir : $(($stderr | Out-String).Trim())")
     }
-    catch {
-        $structureReaderError = $_.Exception.Message
-    }
+    return $null
 }
 
-if (-not $structureReady) {
-    # This is the control that lets the text tiers ignore target-header counts, so not being able to
-    # run it has to be loud rather than silent.
-    $evidenceProblems.Add("Could not load an MSBuild assembly able to read the binlog event stream, so the structural comparison did not run. Last error: $structureReaderError")
+function ConvertTo-CountMap {
+    param($Object)
+
+    $map = [System.Collections.Generic.Dictionary[string, int]]::new([System.StringComparer]::Ordinal)
+    if ($Object) {
+        foreach ($p in $Object.PSObject.Properties) { $map[$p.Name] = [int]$p.Value }
+    }
+    return $map
 }
 
 function Compare-LineCounts {
@@ -301,17 +318,22 @@ function Split-KnownMtDifferences {
     }
 }
 
-if ($structureReady) {
-    $sw = [System.Diagnostics.Stopwatch]::StartNew()
-    $baseStruct = [BinlogStructure]::Collect((Resolve-Path -LiteralPath $BaselineBinlog).Path)
-    $candStruct = [BinlogStructure]::Collect((Resolve-Path -LiteralPath $CandidateBinlog).Path)
-    $sw.Stop()
+$sw = [System.Diagnostics.Stopwatch]::StartNew()
+$baseStruct = Get-BinlogStructuredCounts -Binlog $BaselineBinlog
+$candStruct = Get-BinlogStructuredCounts -Binlog $CandidateBinlog
+$sw.Stop()
 
+if ($null -eq $baseStruct -or $null -eq $candStruct) {
+    # This is the control that lets the text tiers stop counting target headers, so failing to run it
+    # has to be loud rather than silent.
+    $evidenceProblems.Add("Could not read the binlog event stream, so the structural comparison did not run. Attempts: $($structureErrors -join ' | ')")
+}
+else {
     foreach ($dim in @('Targets', 'TargetsByProject', 'Tasks', 'Projects', 'Diagnostics')) {
         $name = 'structure/' + $dim.Substring(0, 1).ToLowerInvariant() + $dim.Substring(1)
         # Deliberately not passed through Split-KnownMtDifferences: this tier exists precisely to be
         # the check that nothing is excused, so a known bug must not be able to suppress it either.
-        $cmp = Compare-LineCounts -Baseline $baseStruct.$dim -Candidate $candStruct.$dim
+        $cmp = Compare-LineCounts -Baseline (ConvertTo-CountMap $baseStruct.$dim) -Candidate (ConvertTo-CountMap $candStruct.$dim)
         $sections[$name] = $cmp
         Write-Host ("[{0}] {1}: {2} distinct / {3} executions baseline, {4} / {5} candidate; {6} missing, {7} extra" -f `
                 $Label, $name, $cmp.BaselineDistinct, $cmp.BaselineTotal, $cmp.CandidateDistinct, $cmp.CandidateTotal, `

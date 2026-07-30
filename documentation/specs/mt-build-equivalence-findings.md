@@ -301,12 +301,13 @@ out of it.
 `-mt` comparison, all 150 also differ between the two identical non-`-mt` builds. Not one difference
 is excused on the strength of a written rule alone; each has an experimental control.
 
-**The two target-header suppressions were justified by a control that does not run.** The `setOnly`
+**The two target-header suppressions were justified by a control that cannot fail.** The `setOnly`
 rule for target headers and its `knownMtOnly` counterpart stop comparing how many times a target
 header appears — and a target header is exactly what would reveal a target running only under `-mt`.
-Their stated justification was the `-DeepCompare` coverage comparison, but that switch is off by
-default in the pipeline, and target coverage was explicitly excluded from failing even when it does
-run. In the shipping configuration the suppression had no compensating control at all.
+Their stated justification was the `-DeepCompare` coverage comparison. That comparison does run, but
+target coverage was deliberately excluded from the set of extractors allowed to fail it, precisely
+because the header-based extraction it uses is itself unstable. So the suppression was justified by a
+check that reports and never fails.
 
 The suppression turned out to be *correct* — reading the raw event stream out of all three binlogs
 shows the builds are structurally identical: 384 distinct targets over 18 993 executions, 9 306
