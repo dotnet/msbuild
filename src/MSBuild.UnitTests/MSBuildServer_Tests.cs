@@ -756,19 +756,17 @@ namespace Microsoft.Build.Engine.UnitTests
                 ParseNumber(secondOutput, "Server ID is ").ShouldBe(serverPid);
                 int secondSidecarPid = ParseNumber(secondOutput, "Sidecar ID is ");
                 _env.WithTransientProcess(secondSidecarPid);
-
-                // The sidecar is owned and stays connected, so the server reuses the same process
-                // rather than launching a new one, and each build still gets a fresh environment.
-                secondSidecarPid.ShouldBe(firstSidecarPid, "The server should reuse the sidecar it already owns.");
                 secondOutput.ShouldContain("Sidecar environment is second-build");
 
                 ShutdownBootstrapServer();
                 WaitForProcessExit(serverPid).ShouldBeTrue($"Server process {serverPid} should exit after build-server shutdown.");
 
-                // The point of the fix: no sidecar the server created may survive it, so shutting the
-                // server down must reap every sidecar it owned, not just the most recent one.
-                WaitForProcessExit(firstSidecarPid).ShouldBeTrue($"Sidecar process {firstSidecarPid} owned by the server should exit with it.");
-                WaitForProcessExit(secondSidecarPid).ShouldBeTrue($"Sidecar process {secondSidecarPid} owned by the server should exit with it.");
+                // The guarantee under test: no TaskHost the server used may survive it. Whether the
+                // second build reused the first TaskHost or got a new one depends on how node reuse
+                // is configured in the environment, so assert about every process the server used
+                // rather than about their identity.
+                WaitForProcessExit(firstSidecarPid).ShouldBeTrue($"TaskHost process {firstSidecarPid} used by the server should exit with it.");
+                WaitForProcessExit(secondSidecarPid).ShouldBeTrue($"TaskHost process {secondSidecarPid} used by the server should exit with it.");
             }
             finally
             {
