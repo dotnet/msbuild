@@ -19,8 +19,8 @@
 
   <!-- Arcade features -->
   <PropertyGroup>
-    <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
-    <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
+    <UsingToolIbcOptimization Condition="'$(DotNetBuild)' != 'true'">true</UsingToolIbcOptimization>
+    <UsingToolVisualStudioIbcTraining Condition="'$(DotNetBuild)' != 'true'">true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
     <UsingToolNuGetRepack>true</UsingToolNuGetRepack>
