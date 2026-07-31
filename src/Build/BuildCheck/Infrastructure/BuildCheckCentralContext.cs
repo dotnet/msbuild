@@ -76,17 +76,27 @@ internal sealed class BuildCheckCentralContext
 
     // This we can potentially use to subscribe for receiving evaluated props in the
     //  build event args. However - this needs to be done early on, when checks might not be known yet
-    internal bool HasEvaluatedPropertiesActions => _globalCallbacks.EvaluatedPropertiesActions.Count > 0;
+    internal bool HasEvaluatedPropertiesActions => HasRegisteredActions(_globalCallbacks.EvaluatedPropertiesActions);
 
-    internal bool HasParsedItemsActions => _globalCallbacks.ParsedItemsActions.Count > 0;
+    internal bool HasParsedItemsActions => HasRegisteredActions(_globalCallbacks.ParsedItemsActions);
 
-    internal bool HasTaskInvocationActions => _globalCallbacks.TaskInvocationActions.Count > 0;
+    internal bool HasTaskInvocationActions => HasRegisteredActions(_globalCallbacks.TaskInvocationActions);
 
-    internal bool HasPropertyReadActions => _globalCallbacks.PropertyReadActions.Count > 0;
+    internal bool HasPropertyReadActions => HasRegisteredActions(_globalCallbacks.PropertyReadActions);
 
-    internal bool HasPropertyWriteActions => _globalCallbacks.PropertyWriteActions.Count > 0;
+    internal bool HasPropertyWriteActions => HasRegisteredActions(_globalCallbacks.PropertyWriteActions);
 
-    internal bool HasBuildFinishedActions => _globalCallbacks.BuildFinishedActions.Count > 0;
+    internal bool HasBuildFinishedActions => HasRegisteredActions(_globalCallbacks.BuildFinishedActions);
+
+    private static bool HasRegisteredActions<T>(
+        List<(CheckWrapper, Action<BuildCheckDataContext<T>>)> registeredCallbacks)
+        where T : CheckData
+    {
+        lock (registeredCallbacks)
+        {
+            return registeredCallbacks.Count > 0;
+        }
+    }
 
     internal void RegisterEnvironmentVariableReadAction(CheckWrapper check, Action<BuildCheckDataContext<EnvironmentVariableCheckData>> environmentVariableAction)
        => RegisterAction(check, environmentVariableAction, _globalCallbacks.EnvironmentVariableCheckDataActions);
@@ -246,7 +256,7 @@ internal sealed class BuildCheckCentralContext
             {
                 if (!commonConfig.IsEnabled)
                 {
-                    return;
+                    continue;
                 }
 
                 configPerRule = [commonConfig];
@@ -256,7 +266,7 @@ internal sealed class BuildCheckCentralContext
                 configPerRule = _configurationProvider.GetMergedConfigurations(projectFullPath, checkCallback.Item1.Check);
                 if (configPerRule.All(c => !c.IsEnabled))
                 {
-                    return;
+                    continue;
                 }
             }
 
