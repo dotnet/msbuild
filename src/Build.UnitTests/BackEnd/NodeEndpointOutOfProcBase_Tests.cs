@@ -67,10 +67,31 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public void NoArchBitWorkerNode_NoArchBitTaskHost_NotTolerated()
         {
             // The tolerance is scoped to x64/arm64 TaskHost nodes; an x86-equivalent (no arch bit)
-            // TaskHost node must not silently accept any handshake.
+            // TaskHost node must not silently accept any handshake. Such a parent and TaskHost node
+            // agree exactly anyway, so IsHandshakePartValid accepts them before reaching here.
             NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
                 expectedOptions: (int)BaseNet,
                 receivedOptions: (int)BaseNet).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void X64WorkerNode_X86TaskHost_NotTolerated()
+        {
+            // x86 is encoded as the absence of X64/Arm64 rather than a flag of its own, so an
+            // x86 TaskHost node expects no architecture bit. A parent that positively declared x64
+            // is a genuine bitness mismatch and must be rejected: the tolerance only ever widens
+            // what an x64/arm64 TaskHost node accepts, never what an x86 one does.
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)BaseNet,
+                receivedOptions: (int)(BaseNet | HandshakeOptions.X64)).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Arm64WorkerNode_X86TaskHost_NotTolerated()
+        {
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)BaseNet,
+                receivedOptions: (int)(BaseNet | HandshakeOptions.Arm64)).ShouldBeFalse();
         }
 
         [Fact]
