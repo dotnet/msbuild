@@ -2,6 +2,7 @@
 Param(
   [string] $msbuildEngine,
   [string][Alias('c')] $configuration = "Debug",
+  [string][Alias('v')] $verbosity,
   [switch][Alias('t')] $test,
   [switch] $ci,
   [switch][Alias('bl')] $binaryLog,
@@ -18,6 +19,11 @@ $buildScript = Join-Path $PSScriptRoot 'common\build.ps1'
 $commonBuildArgs = @('-configuration', $configuration) + $properties
 
 # Forward the argument if supplied. Needs to be done for all above explicit parameters that should be passed to the build.
+if ($verbosity) {
+  $commonBuildArgs += '-verbosity'
+  $commonBuildArgs += $verbosity
+}
+
 if ($msbuildEngine) {
   $commonBuildArgs += '-msbuildEngine'
   $commonBuildArgs += $msbuildEngine
