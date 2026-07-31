@@ -8,26 +8,29 @@ This enables compatibility scenarios where project files may include attributes/
 
 ## Configuration File Format
 
-`Directory.Parse.config` is a plain text file with one entry per line:
+`Directory.Parse.config` is an XML file:
 
+```xml
+<ParseConfig>
+  <IgnoreAttributes>
+    <Ignore Element="Target" Name="CustomAttr" />
+    <Ignore Element="Property" Name="NewFeatureFlag" />
+  </IgnoreAttributes>
+  <IgnoreChildren>
+    <Ignore Element="Project" Name="CustomElement" />
+    <Ignore Element="Task" Name="CustomChild" />
+  </IgnoreChildren>
+</ParseConfig>
 ```
-# Lines starting with # are comments
-# Empty lines are ignored
 
-# Format: Type:Name:AllowedName
-Attribute:Target:CustomAttr
-Element:Project:CustomElement
-Attribute:PropertyGroup:NewFeatureFlag
-```
+- **Root element**: `<ParseConfig>`
+- **`<IgnoreAttributes>`**: Contains `<Ignore>` entries for attributes to skip. Appears 0 or 1 times.
+- **`<IgnoreChildren>`**: Contains `<Ignore>` entries for child elements to skip. Appears 0 or 1 times.
+- **`<Ignore>`**: Each entry has `Element` (the parent/owner element name) and `Name` (the attribute or child to allow).
 
-- **Type**: Either `Attribute` or `Element` (case-insensitive)
-- **Name**:  `Attribute`: the name/type of the element; `Element`: the name/type of the parent element
-- **AllowedName**: The name of the attribute or child element to allow
+Matching is case-insensitive. Entries with missing or empty `Element`/`Name` attributes are silently ignored. Unrecognized sections or elements are ignored.
 
-Matching is case-insensitive.
-Invalid lines (wrong format, unknown type, wrong number of colons) are silently ignored.
-
-For more details on `Name`:
+For more details on `Element`:
 
 ### Valid Attribute Names
 
