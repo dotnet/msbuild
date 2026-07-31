@@ -543,6 +543,91 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _customLogger.NumberOfWarning.ShouldBe(0);
         }
 
+        private static AssemblyConflictReferenceDetails CreateConflictVictorDetails()
+            => new(
+                "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v1/D.dll",
+                useUnifiedHeader: false,
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                [new AssemblyConflictDependee("/libs/v1/D.dll", ["D"])]);
+
+        private static AssemblyConflictReferenceDetails CreateConflictVictimDetails()
+            => new(
+                "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v2/D.dll",
+                useUnifiedHeader: true,
+                isPrimary: false,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
+
+        private static AssemblyConflictMessageFormats CreateConflictMessageFormats()
+            => new(
+                "There was a conflict between \"{0}\" and \"{1}\".",
+                "\"{0}\" was chosen because it had a higher version.",
+                "\"{0}\" was chosen because it was primary and \"{1}\" was not.",
+                "MSB3243: No way to resolve conflict between \"{0}\" and \"{1}\". Choosing \"{0}\" arbitrarily.",
+                "References which depend on \"{0}\" [{1}].",
+                "References which depend on or have been unified to \"{0}\" [{1}].",
+                "Unresolved primary reference with an item include of \"{0}\".",
+                "Project file item includes which caused reference \"{0}\".",
+                "Found conflicts between different versions of \"{0}\" that could not be resolved.\n{1}");
+
+        [Fact]
+        public void TestLogAssemblyConflictDependencyDetailsMessageEventMP()
+        {
+            var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs(
+                CreateConflictVictorDetails(),
+                CreateConflictVictimDetails(),
+                CreateConflictMessageFormats(),
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow);
+
+            _mockHost.BuildParameters.MaxNodeCount = 4;
+            _taskHost.LogMessageEvent(detailsEvent);
+
+            _taskHost.IsRunningMultipleNodes.ShouldBeTrue();
+            _customLogger.LastMessage.ShouldBeOfType<AssemblyConflictDependencyDetailsMessageEventArgs>();
+            _customLogger.NumberOfWarning.ShouldBe(0);
+        }
+
+        [Fact]
+        public void TestLogAssemblyConflictWarningEventMP()
+        {
+            AssemblyConflictReferenceDetails victor = CreateConflictVictorDetails();
+            AssemblyConflictReferenceDetails victim = CreateConflictVictimDetails();
+            var warningEvent = new AssemblyConflictWarningEventArgs(
+                "D",
+                victor.FusionName,
+                victim.FusionName,
+                AssemblyConflictLossReason.WasNotPrimary,
+                victor,
+                victim,
+                CreateConflictMessageFormats(),
+                "MSB3277",
+                @"C:\foo\bar.proj",
+                42,
+                7,
+                "MSBuild.ResolveAssemblyReference.FoundConflicts",
+                "ResolveAssemblyReference",
+                DateTime.UtcNow);
+
+            _mockHost.BuildParameters.MaxNodeCount = 4;
+            _taskHost.LogWarningEvent(warningEvent);
+
+            _taskHost.IsRunningMultipleNodes.ShouldBeTrue();
+            _customLogger.LastWarning.ShouldBeOfType<AssemblyConflictWarningEventArgs>();
+            _customLogger.NumberOfWarning.ShouldBe(1);
+
+            var deserializedWarning = (AssemblyConflictWarningEventArgs)_customLogger.LastWarning;
+            deserializedWarning.Code.ShouldBe("MSB3277");
+            deserializedWarning.SimpleAssemblyName.ShouldBe("D");
+            deserializedWarning.Message.ShouldBe(warningEvent.Message);
+        }
+
         /// <summary>
         /// Test that custom events are logged properly
         /// </summary>

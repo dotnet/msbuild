@@ -73,23 +73,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                     RarNodeBufferedLogEvents logEvents = (RarNodeBufferedLogEvents)packet;
                     foreach (LogMessagePacketBase logMessagePacket in logEvents.EventQueue)
                     {
-                        BuildEventArgs buildEvent = logMessagePacket.NodeBuildEvent?.Value!;
-                        switch (logMessagePacket.EventType)
-                        {
-                            case LoggingEventType.BuildErrorEvent:
-                                rarTask.BuildEngine.LogErrorEvent((BuildErrorEventArgs)buildEvent);
-                                break;
-                            case LoggingEventType.BuildWarningEvent:
-                                rarTask.BuildEngine.LogWarningEvent((BuildWarningEventArgs)buildEvent);
-                                break;
-                            case LoggingEventType.BuildMessageEvent:
-                            case LoggingEventType.AssemblyResolutionSearchTraceEvent:
-                                rarTask.BuildEngine.LogMessageEvent((BuildMessageEventArgs)buildEvent);
-                                break;
-                            default:
-                                Assumed.Unreachable($"Received unexpected log event type {logMessagePacket.Type}");
-                                break;
-                        }
+                        DispatchBuildEvent(rarTask, logMessagePacket.EventType, logMessagePacket.NodeBuildEvent?.Value!);
                     }
                 }
                 else
@@ -104,6 +88,31 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
             response.SetTaskOutputs(rarTask);
 
             return response.Success;
+        }
+
+        internal static void DispatchBuildEvent(
+            ResolveAssemblyReference rarTask,
+            LoggingEventType eventType,
+            BuildEventArgs buildEvent)
+        {
+            switch (eventType)
+            {
+                case LoggingEventType.BuildErrorEvent:
+                    rarTask.BuildEngine.LogErrorEvent((BuildErrorEventArgs)buildEvent);
+                    break;
+                case LoggingEventType.BuildWarningEvent:
+                case LoggingEventType.AssemblyConflictWarningEvent:
+                    rarTask.BuildEngine.LogWarningEvent((BuildWarningEventArgs)buildEvent);
+                    break;
+                case LoggingEventType.BuildMessageEvent:
+                case LoggingEventType.AssemblyResolutionSearchTraceEvent:
+                case LoggingEventType.AssemblyConflictDependencyDetailsEvent:
+                    rarTask.BuildEngine.LogMessageEvent((BuildMessageEventArgs)buildEvent);
+                    break;
+                default:
+                    Assumed.Unreachable($"Received unexpected log event type {eventType}");
+                    break;
+            }
         }
     }
 }
