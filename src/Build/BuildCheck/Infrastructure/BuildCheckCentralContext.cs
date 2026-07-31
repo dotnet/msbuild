@@ -45,13 +45,27 @@ internal sealed class BuildCheckCentralContext
 
         internal void DeregisterCheck(CheckWrapper check)
         {
-            EvaluatedPropertiesActions.RemoveAll(a => a.Item1 == check);
-            ParsedItemsActions.RemoveAll(a => a.Item1 == check);
-            EvaluatedItemsActions.RemoveAll(a => a.Item1 == check);
-            PropertyReadActions.RemoveAll(a => a.Item1 == check);
-            PropertyWriteActions.RemoveAll(a => a.Item1 == check);
-            ProjectRequestProcessingDoneActions.RemoveAll(a => a.Item1 == check);
-            BuildFinishedActions.RemoveAll(a => a.Item1 == check);
+            DeregisterCheck(EvaluatedPropertiesActions, check);
+            DeregisterCheck(ParsedItemsActions, check);
+            DeregisterCheck(EvaluatedItemsActions, check);
+            DeregisterCheck(TaskInvocationActions, check);
+            DeregisterCheck(PropertyReadActions, check);
+            DeregisterCheck(PropertyWriteActions, check);
+            DeregisterCheck(ProjectRequestProcessingDoneActions, check);
+            DeregisterCheck(BuildFinishedActions, check);
+            DeregisterCheck(EnvironmentVariableCheckDataActions, check);
+            DeregisterCheck(ProjectImportedCheckDataActions, check);
+        }
+
+        private static void DeregisterCheck<T>(
+            List<(CheckWrapper, Action<BuildCheckDataContext<T>>)> registeredCallbacks,
+            CheckWrapper check)
+            where T : CheckData
+        {
+            lock (registeredCallbacks)
+            {
+                registeredCallbacks.RemoveAll(a => a.Item1 == check);
+            }
         }
     }
 
@@ -213,8 +227,14 @@ internal sealed class BuildCheckCentralContext
     {
         string projectFullPath = checkData.ProjectFilePath;
         List<CheckWrapper>? checksToRemove = null;
+        (CheckWrapper, Action<BuildCheckDataContext<T>>)[] callbacksSnapshot;
 
-        foreach (var checkCallback in registeredCallbacks)
+        lock (registeredCallbacks)
+        {
+            callbacksSnapshot = registeredCallbacks.ToArray();
+        }
+
+        foreach (var checkCallback in callbacksSnapshot)
         {
             // Tracing - https://github.com/dotnet/msbuild/issues/9629 - we might want to account this entire block
             //  to the relevant check (with BuildCheckConfigurationEffective only the currently accounted part as being the 'core-execution' subspan)
