@@ -927,6 +927,19 @@ namespace Microsoft.Build.BackEnd
             // The pipe(s) used to communicate with the node.
             private readonly Stream _pipeStream;
 
+#if !FEATURE_APM
+            /// <summary>
+            /// When the change wave is enabled, this wraps <see cref="_pipeStream"/> with a
+            /// 64 KB read-ahead buffer. It amortizes many small-packet reads from workers
+            /// (LogMessage flood dominates non-mt worker-&gt;server traffic) into a single
+            /// pipe syscall. Null when the wave is disabled, in which case the read loop
+            /// reads directly from <see cref="_pipeStream"/>. Only used by the async
+            /// (netcoreapp) read path; the FEATURE_APM (.NET Framework) path uses
+            /// BeginRead/EndRead directly on <see cref="_pipeStream"/>.
+            /// </summary>
+            private readonly BufferedReadStream _bufferedReadStream;
+#endif
+
             /// <summary>
             /// The factory used to create packets from data read off the pipe.
             /// </summary>
@@ -1051,6 +1064,11 @@ namespace Microsoft.Build.BackEnd
                 _nodeId = nodeId;
                 _process = process;
                 _pipeStream = nodePipe;
+#if !FEATURE_APM
+                _bufferedReadStream = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
+                    ? new BufferedReadStream(nodePipe, 64 * 1024)
+                    : null;
+#endif
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
                 _readBufferMemoryStream = new MemoryStream();
@@ -1101,11 +1119,16 @@ namespace Microsoft.Build.BackEnd
 #if !FEATURE_APM
             public async Task RunPacketReadLoopAsync()
             {
+                // Under the change wave, reads go through a 64 KB read-ahead BufferedReadStream
+                // so many small worker->server packets (LogMessage flood) amortize into a
+                // single pipe syscall. Legacy path reads directly from the pipe (baseline).
+                Stream readStream = _bufferedReadStream ?? _pipeStream;
+
                 while (true)
                 {
                     try
                     {
-                        int bytesRead = await _pipeStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
+                        int bytesRead = await readStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
                         if (!ProcessHeaderBytesRead(bytesRead))
                         {
                             return;
@@ -1130,7 +1153,7 @@ namespace Microsoft.Build.BackEnd
                         int totalBytesRead = 0;
                         while (totalBytesRead < packetLength)
                         {
-                            int bytesRead = await _pipeStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
+                            int bytesRead = await readStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
                             if (bytesRead == 0)
                             {
                                 break;

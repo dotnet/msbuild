@@ -665,7 +665,14 @@ namespace Microsoft.Build.BackEnd
             CommunicationsUtilities.Trace("Entering read loop.");
 
             bool preBufferPacketBody = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10);
-            Stream localReadPipe = preBufferPacketBody ? localPipe : new BufferedReadStream(localPipe);
+
+            // Under the change wave, use a 64 KB read-ahead buffer. It amortizes the many
+            // small-packet reads that dominate non-mt worker->server traffic (LogMessage flood)
+            // and lets the pre-buffer body read below serve small bodies straight from cache
+            // with zero extra pipe syscalls. Legacy path keeps the historical 1 KB size.
+            BufferedReadStream localReadPipe = preBufferPacketBody
+                ? new BufferedReadStream(localPipe, 64 * 1024)
+                : new BufferedReadStream(localPipe);
 
             byte[] headerByte = new byte[5];
             ITranslator writeTranslator = null;
@@ -778,8 +785,11 @@ namespace Microsoft.Build.BackEnd
                                     while (totalBytesRead < packetLength)
                                     {
                                         // Read returns whatever is available (up to count); the loop handles
-                                        // partial reads, so we request the whole remaining body.
-                                        int bytesReadThisCall = localPipe.Read(packetData, totalBytesRead, packetLength - totalBytesRead);
+                                        // partial reads, so we request the whole remaining body. Reading via
+                                        // localReadPipe drains any bytes still in the read-ahead cache first
+                                        // (avoiding a syscall when the header refill grabbed body bytes too)
+                                        // before falling through to a direct pipe.Read for the remainder.
+                                        int bytesReadThisCall = localReadPipe.Read(packetData, totalBytesRead, packetLength - totalBytesRead);
                                         if (bytesReadThisCall == 0)
                                         {
                                             CommunicationsUtilities.Trace($"Parent disconnected while reading packet body ({totalBytesRead} of {packetLength} bytes read).");
