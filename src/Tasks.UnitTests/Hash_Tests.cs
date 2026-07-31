@@ -1,6 +1,7 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -148,15 +149,22 @@ namespace Microsoft.Build.Tasks.UnitTests
         [Fact]
         public void HashTaskPathMapMakesHashLocationIndependent()
         {
-            // Identical inputs built under two different roots hash differently without a path map...
-            ITaskItem[] underRootA = [new TaskItem(@"C:\rootA\src\a.cs"), new TaskItem(@"C:\rootA\obj\ref.dll")];
-            ITaskItem[] underRootB = [new TaskItem(@"C:\rootB\src\a.cs"), new TaskItem(@"C:\rootB\obj\ref.dll")];
+            // Paths use the host's native separator: TaskItem normalizes item specs to native
+            // separators (backslashes become forward slashes on Unix), and a real build derives both
+            // $(PathMap) and @(Compile) on the same OS, so the path map prefixes match the items.
+            string sep = Path.DirectorySeparatorChar.ToString();
+            string rootA = Path.DirectorySeparatorChar == '\\' ? @"C:\rootA" : "/rootA";
+            string rootB = Path.DirectorySeparatorChar == '\\' ? @"C:\rootB" : "/rootB";
 
+            ITaskItem[] underRootA = [new TaskItem($"{rootA}{sep}src{sep}a.cs"), new TaskItem($"{rootA}{sep}obj{sep}ref.dll")];
+            ITaskItem[] underRootB = [new TaskItem($"{rootB}{sep}src{sep}a.cs"), new TaskItem($"{rootB}{sep}obj{sep}ref.dll")];
+
+            // Identical inputs built under two different roots hash differently without a path map...
             Assert.NotEqual(ExecuteHashTask(underRootA), ExecuteHashTask(underRootB));
 
             // ...but converge once each root is mapped to the same deterministic prefix.
-            string hashA = ExecuteHashTask(underRootA, pathMap: @"C:\rootA\=/_/");
-            string hashB = ExecuteHashTask(underRootB, pathMap: @"C:\rootB\=/_/");
+            string hashA = ExecuteHashTask(underRootA, pathMap: $"{rootA}{sep}=/_/");
+            string hashB = ExecuteHashTask(underRootB, pathMap: $"{rootB}{sep}=/_/");
             Assert.Equal(hashA, hashB);
         }
 
