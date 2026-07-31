@@ -41,9 +41,10 @@ namespace Microsoft.Build.Tasks
             var assembliesMetadata = new List<ITaskItem>();
             foreach (string assemblyPath in AssemblyPaths)
             {
-                // Preserve original behavior: silently skip null/empty entries instead of throwing
-                // ArgumentException from GetAbsolutePath (Sin 6).
-                if (string.IsNullOrEmpty(assemblyPath))
+                // Preserve original behavior: entries that are null, empty, or whitespace-only previously
+                // fell through FileExists and were skipped silently. Skip them here so GetAbsolutePath is
+                // never handed a value it could reject with an ArgumentException.
+                if (string.IsNullOrWhiteSpace(assemblyPath))
                 {
                     continue;
                 }
@@ -59,9 +60,9 @@ namespace Microsoft.Build.Tasks
 
                         if (attributes != null)
                         {
-                            // Preserve original [Output] behavior (Sin 1): emit the user-supplied path,
-                            // not the absolutized form, as the resulting item's ItemSpec.
-                            attributes.AssemblyFullPath = absoluteAssemblyPath.OriginalValue;
+                            // Preserve the original [Output] behavior: the resulting item's ItemSpec must be
+                            // the exact path the caller supplied, not the absolutized form used to read metadata.
+                            attributes.AssemblyFullPath = assemblyPath;
                             assembliesMetadata.Add(CreateItemWithMetadata(attributes));
                         }
                     }
