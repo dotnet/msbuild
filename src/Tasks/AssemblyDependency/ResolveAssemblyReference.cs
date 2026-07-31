@@ -14,6 +14,7 @@ using System.Xml.Linq;
 
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -191,6 +192,34 @@ namespace Microsoft.Build.Tasks
 
             private static string GetResourceEightSpaces(string name)
                 => Strings.EightSpaces + AssemblyResources.PrimaryResources.GetString(name, CultureInfo.InvariantCulture);
+        }
+
+        private static class InvariantAssemblyConflictMessageFormats
+        {
+            /// <summary>
+            /// The warning code embedded in the "ResolveAssemblyReference.FoundConflicts" resource string.
+            /// </summary>
+            internal const string FoundConflictsWarningCode = "MSB3277";
+
+            internal static readonly AssemblyConflictMessageFormats Instance = new(
+                GetResource("ResolveAssemblyReference.ConflictFound"),
+                GetResource("ResolveAssemblyReference.ConflictHigherVersionChosen"),
+                GetResource("ResolveAssemblyReference.ConflictPrimaryChosen"),
+                GetResource("ResolveAssemblyReference.ConflictUnsolvable"),
+                GetResource("ResolveAssemblyReference.ReferenceDependsOn"),
+                GetResource("ResolveAssemblyReference.UnifiedReferenceDependsOn"),
+                GetResource("ResolveAssemblyReference.UnResolvedPrimaryItemSpec"),
+                GetResource("ResolveAssemblyReference.PrimarySourceItemsForReference"),
+                GetStrippedFoundConflicts());
+
+            private static string GetResource(string name)
+                => AssemblyResources.PrimaryResources.GetString(name, CultureInfo.InvariantCulture);
+
+            private static string GetStrippedFoundConflicts()
+            {
+                string raw = GetResource("ResolveAssemblyReference.FoundConflicts");
+                return MessageParser.TryStripAnyCode(raw, out string strippedMessage) ? strippedMessage : raw;
+            }
         }
 
         #region Properties
@@ -1295,46 +1324,54 @@ namespace Microsoft.Build.Tasks
                         if (conflictCandidate.IsConflictVictim)
                         {
                             bool logWarning = idealAssemblyRemappingsIdentities.Any(i => i.assemblyName.FullName.Equals(fusionName) && i.reference.GetConflictVictims().Count == 0);
-                            StringBuilder logConflict = StringBuilderCache.Acquire();
-                            LogConflict(conflictCandidate, fusionName, logConflict);
-
-                            // If we are logging warnings append it into existing StringBuilder, otherwise build details by new StringBuilder.
-                            // Remark: There is no point to use StringBuilderCache.Acquire() here as at this point StringBuilderCache already rent StringBuilder for this thread
-                            StringBuilder logDependencies = logWarning ? logConflict.AppendLine() : new StringBuilder();
 
                             // Log the assemblies and primary source items which are related to the conflict which was just logged.
                             Reference victor = dependencyTable.GetReference(conflictCandidate.ConflictVictorName);
 
-                            // Log the winner of the conflict resolution, the source items and dependencies which caused it
-                            LogReferenceDependenciesAndSourceItemsToStringBuilder(conflictCandidate.ConflictVictorName.FullName, victor, logDependencies);
-
-                            // Log the reference which lost the conflict and the dependencies and source items which caused it.
-                            LogReferenceDependenciesAndSourceItemsToStringBuilder(fusionName, conflictCandidate, logDependencies.AppendLine(), referenceIsUnified: true);
-
-                            string output = StringBuilderCache.GetStringAndRelease(logConflict);
-                            string details = string.Empty;
-                            if (logWarning)
+                            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
                             {
-                                // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
-                                // chosen was not the conflict victor in a version comparison. In other words, the victor was older.
-                                Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", assemblyName.Name, output);
+                                LogConflictStructured(assemblyName, fusionName, conflictCandidate, victor, logWarning);
                             }
                             else
                             {
-                                details = logDependencies.ToString();
-                                Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), output);
-                                Log.LogMessage(MessageImportance.Low, details);
-                            }
+                                StringBuilder logConflict = StringBuilderCache.Acquire();
+                                LogConflict(conflictCandidate, fusionName, logConflict);
 
-                            if (OutputUnresolvedAssemblyConflicts)
-                            {
-                                _unresolvedConflicts.Add(new TaskItem(assemblyName.Name, new Dictionary<string, string>()
+                                // If we are logging warnings append it into existing StringBuilder, otherwise build details by new StringBuilder.
+                                // Remark: There is no point to use StringBuilderCache.Acquire() here as at this point StringBuilderCache already rent StringBuilder for this thread
+                                StringBuilder logDependencies = logWarning ? logConflict.AppendLine() : new StringBuilder();
+
+                                // Log the winner of the conflict resolution, the source items and dependencies which caused it
+                                LogReferenceDependenciesAndSourceItemsToStringBuilder(conflictCandidate.ConflictVictorName.FullName, victor, logDependencies);
+
+                                // Log the reference which lost the conflict and the dependencies and source items which caused it.
+                                LogReferenceDependenciesAndSourceItemsToStringBuilder(fusionName, conflictCandidate, logDependencies.AppendLine(), referenceIsUnified: true);
+
+                                string output = StringBuilderCache.GetStringAndRelease(logConflict);
+                                string details = string.Empty;
+                                if (logWarning)
                                 {
-                                    { "logMessage", output },
-                                    { "logMessageDetails", details },
-                                    { "victorVersionNumber", victor.ReferenceVersion?.ToString() },
-                                    { "victimVersionNumber", conflictCandidate.ReferenceVersion?.ToString() }
-                                }));
+                                    // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
+                                    // chosen was not the conflict victor in a version comparison. In other words, the victor was older.
+                                    Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.FoundConflicts", assemblyName.Name, output);
+                                }
+                                else
+                                {
+                                    details = logDependencies.ToString();
+                                    Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), output);
+                                    Log.LogMessage(MessageImportance.Low, details);
+                                }
+
+                                if (OutputUnresolvedAssemblyConflicts)
+                                {
+                                    _unresolvedConflicts.Add(new TaskItem(assemblyName.Name, new Dictionary<string, string>()
+                                    {
+                                        { "logMessage", output },
+                                        { "logMessageDetails", details },
+                                        { "victorVersionNumber", victor.ReferenceVersion?.ToString() },
+                                        { "victimVersionNumber", conflictCandidate.ReferenceVersion?.ToString() }
+                                    }));
+                                }
                             }
                         }
                     }
@@ -2301,6 +2338,197 @@ namespace Microsoft.Build.Tasks
                     break;
             }
         }
+
+        /// <summary>
+        /// Structured equivalent of <see cref="LogConflict(Reference, string, StringBuilder)"/> combined with
+        /// <see cref="LogReferenceDependenciesAndSourceItemsToStringBuilder(string, Reference, StringBuilder, bool)"/>.
+        /// Used behind <see cref="ChangeWaves.Wave18_11"/> to avoid building the (potentially enormous) dependency-list
+        /// strings unless something actually consumes the resulting event's <c>Message</c>.
+        /// </summary>
+        private void LogConflictStructured(AssemblyNameExtension assemblyName, string fusionName, Reference conflictCandidate, Reference victor, bool logWarning)
+        {
+            string victorFusionName = conflictCandidate.ConflictVictorName.FullName;
+            AssemblyConflictLossReason lossReason = ToPublicLossReason(conflictCandidate.ConflictLossExplanation);
+
+            // For primary references with an insoluble conflict, there's no way an app.config binding redirect could
+            // help, so log an immediate warning. This is independent of the aggregated FoundConflicts warning/message
+            // below and matches legacy LogConflict behavior exactly.
+            if (conflictCandidate.ConflictLossExplanation == ConflictLossReason.InsolubleConflict && conflictCandidate.IsPrimary)
+            {
+                Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.ConflictUnsolvable", conflictCandidate.ConflictVictorName, fusionName);
+            }
+
+            AssemblyConflictReferenceDetails victorDetails = BuildConflictReferenceDetails(victorFusionName, victor, useUnifiedHeader: false);
+            AssemblyConflictReferenceDetails victimDetails = BuildConflictReferenceDetails(fusionName, conflictCandidate, useUnifiedHeader: true);
+
+            string output;
+            string details = string.Empty;
+            if (logWarning)
+            {
+                // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
+                // chosen was not the conflict victor in a version comparison. In other words, the victor was older.
+                output = LogFoundConflictsWarning(assemblyName.Name, victorFusionName, fusionName, lossReason, victorDetails, victimDetails, materializeMessage: OutputUnresolvedAssemblyConflicts) ?? string.Empty;
+            }
+            else
+            {
+                output = AssemblyConflictMessageFormatter.FormatHeaderOnly(victorFusionName, fusionName, lossReason, conflictCandidate.IsPrimary, InvariantAssemblyConflictMessageFormats.Instance);
+                Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), output);
+
+                var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs(
+                    victorDetails,
+                    victimDetails,
+                    InvariantAssemblyConflictMessageFormats.Instance,
+                    GetType().Name,
+                    MessageImportance.Low,
+                    DateTime.UtcNow);
+                BuildEngine.LogMessageEvent(detailsEvent);
+
+                if (OutputUnresolvedAssemblyConflicts)
+                {
+                    details = detailsEvent.Message ?? string.Empty;
+                }
+            }
+
+            if (OutputUnresolvedAssemblyConflicts)
+            {
+                _unresolvedConflicts.Add(new TaskItem(assemblyName.Name, new Dictionary<string, string>()
+                {
+                    { "logMessage", output },
+                    { "logMessageDetails", details },
+                    { "victorVersionNumber", victor.ReferenceVersion?.ToString() },
+                    { "victimVersionNumber", conflictCandidate.ReferenceVersion?.ToString() }
+                }));
+            }
+        }
+
+        /// <summary>
+        /// Logs the aggregated MSB3277 warning (or, if warnings-as-errors applies to it, the equivalent error) for a
+        /// resolved-but-unsatisfying conflict.
+        /// </summary>
+        /// <returns>
+        /// The conflict body (header and dependency details, matching the legacy "logMessage" metadata contents), if
+        /// <paramref name="materializeMessage"/> was <see langword="true"/> or the warning was escalated to an
+        /// error; otherwise <see langword="null"/>.
+        /// </returns>
+        private string LogFoundConflictsWarning(
+            string simpleAssemblyName,
+            string victorFusionName,
+            string victimFusionName,
+            AssemblyConflictLossReason lossReason,
+            AssemblyConflictReferenceDetails victorDetails,
+            AssemblyConflictReferenceDetails victimDetails,
+            bool materializeMessage)
+        {
+            const string warningCode = InvariantAssemblyConflictMessageFormats.FoundConflictsWarningCode;
+            string helpKeyword = Log.HelpKeywordPrefix is null ? null : Log.HelpKeywordPrefix + "ResolveAssemblyReference.FoundConflicts";
+            string body = materializeMessage
+                ? AssemblyConflictMessageFormatter.FormatWarningBody(victorFusionName, victimFusionName, lossReason, victimDetails.IsPrimary, victorDetails, victimDetails, InvariantAssemblyConflictMessageFormats.Instance)
+                : null;
+
+            if (BuildEngine is IBuildEngine8 buildEngine8 && buildEngine8.ShouldTreatWarningAsError(warningCode))
+            {
+                // Preserve legacy behavior: TaskLoggingHelper.LogWarning escalates warnings-as-errors synchronously
+                // (updating HasLoggedErrors immediately), whereas the engine's own warning-to-error promotion for a
+                // directly-logged warning event happens asynchronously on the logging thread. Replicate the
+                // synchronous escalation here; this is the rare path so eager formatting is not a perf concern.
+                body ??= AssemblyConflictMessageFormatter.FormatWarningBody(victorFusionName, victimFusionName, lossReason, victimDetails.IsPrimary, victorDetails, victimDetails, InvariantAssemblyConflictMessageFormats.Instance);
+                string message = AssemblyConflictMessageFormatter.FormatWarningMessage(
+                    simpleAssemblyName,
+                    victorFusionName,
+                    victimFusionName,
+                    lossReason,
+                    victimDetails.IsPrimary,
+                    victorDetails,
+                    victimDetails,
+                    InvariantAssemblyConflictMessageFormats.Instance);
+                Log.LogError(subcategory: null, errorCode: warningCode, helpKeyword: helpKeyword, helpLink: null, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: message);
+                return body;
+            }
+
+            var warningEvent = new AssemblyConflictWarningEventArgs(
+                simpleAssemblyName,
+                victorFusionName,
+                victimFusionName,
+                lossReason,
+                victorDetails,
+                victimDetails,
+                InvariantAssemblyConflictMessageFormats.Instance,
+                warningCode,
+                BuildEngine.ProjectFileOfTaskNode,
+                BuildEngine.LineNumberOfTaskNode,
+                BuildEngine.ColumnNumberOfTaskNode,
+                helpKeyword,
+                GetType().Name,
+                DateTime.UtcNow);
+            BuildEngine.LogWarningEvent(warningEvent);
+
+            // Match legacy semantics: the "logMessage" metadata on UnresolvedAssemblyConflicts historically held the
+            // conflict body (header + dependency details) without the outer MSB3277 "Found conflicts..." wrapper,
+            // even though the warning's own rendered Message includes that wrapper.
+            return body;
+        }
+
+        /// <summary>
+        /// Builds the structured dependency details (dependees and the project items which pulled them in) for one
+        /// side of a conflict, mirroring the data produced by
+        /// <see cref="LogReferenceDependenciesAndSourceItemsToStringBuilder(string, Reference, StringBuilder, bool)"/>.
+        /// </summary>
+        private static AssemblyConflictReferenceDetails BuildConflictReferenceDetails(string fusionName, Reference reference, bool useUnifiedHeader)
+        {
+            Assumed.NotNull(reference);
+
+            string unresolvedPrimaryItemSpec = null;
+            var dependees = new List<AssemblyConflictDependee>();
+
+            if (reference.IsPrimary)
+            {
+                if (reference.IsResolved)
+                {
+                    // Matches legacy behavior: a resolved primary reference's own project items are logged as if the
+                    // reference were one of its own dependees.
+                    dependees.Add(BuildConflictDependee(reference));
+                }
+                else
+                {
+                    unresolvedPrimaryItemSpec = reference.PrimarySourceItem?.ItemSpec;
+                }
+            }
+
+            foreach (Reference dependeeReference in reference.GetDependees())
+            {
+                dependees.Add(BuildConflictDependee(dependeeReference));
+            }
+
+            return new AssemblyConflictReferenceDetails(
+                fusionName,
+                reference.FullPath,
+                useUnifiedHeader,
+                reference.IsPrimary,
+                reference.IsResolved,
+                unresolvedPrimaryItemSpec,
+                dependees);
+        }
+
+        private static AssemblyConflictDependee BuildConflictDependee(Reference dependeeReference)
+        {
+            var sourceItemSpecs = new List<string>();
+            foreach (ITaskItem sourceItem in dependeeReference.GetSourceItems())
+            {
+                sourceItemSpecs.Add(sourceItem.ItemSpec);
+            }
+
+            return new AssemblyConflictDependee(dependeeReference.FullPath, sourceItemSpecs);
+        }
+
+        private static AssemblyConflictLossReason ToPublicLossReason(ConflictLossReason reason)
+            => reason switch
+            {
+                ConflictLossReason.HadLowerVersion => AssemblyConflictLossReason.HadLowerVersion,
+                ConflictLossReason.InsolubleConflict => AssemblyConflictLossReason.InsolubleConflict,
+                ConflictLossReason.WasNotPrimary => AssemblyConflictLossReason.WasNotPrimary,
+                ConflictLossReason.FusionEquivalentWithSameVersion => AssemblyConflictLossReason.FusionEquivalentWithSameVersion,
+                _ => AssemblyConflictLossReason.DidNotLose,
+            };
         #endregion
 
         #region StateFile

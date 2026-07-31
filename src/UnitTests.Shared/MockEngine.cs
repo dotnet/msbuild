@@ -55,6 +55,8 @@ namespace Microsoft.Build.UnitTests
 
         public int Errors { get; set; }
 
+        public ISet<string> WarningsAsErrors { get; } = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
         public bool AllowFailureWithoutError { get; set; } = false;
 
         public BuildErrorEventArgs[] ErrorEvents => _errorEvents.ToArray();
@@ -507,7 +509,7 @@ namespace Microsoft.Build.UnitTests
         {
         }
 
-        public bool ShouldTreatWarningAsError(string warningCode) => false;
+        public bool ShouldTreatWarningAsError(string warningCode) => WarningsAsErrors.Contains(warningCode);
 
         public override bool LogsMessagesOfImportance(MessageImportance importance)
             => importance <= MinimumMessageImportance;

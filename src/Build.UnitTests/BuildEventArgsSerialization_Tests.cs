@@ -935,6 +935,194 @@ namespace Microsoft.Build.UnitTests
                 DateTime.UtcNow);
 
         [Fact]
+        public void RoundtripAssemblyConflictDependencyDetailsMessageEventArgs()
+        {
+            var args = CreateAssemblyConflictDependencyDetailsEvent();
+
+            Roundtrip(
+                args,
+                e => e.Importance.ToString(),
+                e => e.Message,
+                e => DescribeConflictReferenceDetails(e.Victor),
+                e => DescribeConflictReferenceDetails(e.Victim));
+        }
+
+        [Fact]
+        public void RoundtripAssemblyConflictWarningEventArgs()
+        {
+            var args = CreateAssemblyConflictWarningEvent();
+
+            Roundtrip(
+                args,
+                e => e.Code,
+                e => e.File,
+                e => e.LineNumber.ToString(),
+                e => e.ColumnNumber.ToString(),
+                e => e.HelpKeyword,
+                e => e.SimpleAssemblyName,
+                e => e.VictorFusionName,
+                e => e.VictimFusionName,
+                e => e.LossReason.ToString(),
+                e => e.Message,
+                e => DescribeConflictReferenceDetails(e.Victor),
+                e => DescribeConflictReferenceDetails(e.Victim));
+        }
+
+        /// <summary>
+        /// Verifies that the structured conflict events round-trip correctly through the binary log serializer even
+        /// with a large number of dependees and source items each - the scenario the structured representation
+        /// exists to avoid materializing as one enormous eagerly-formatted string.
+        /// </summary>
+        [Fact]
+        public void RoundtripAssemblyConflictWarningEventArgsWithManyDependees()
+        {
+            const int dependeeCount = 250;
+            const int sourceItemsPerDependee = 4;
+
+            var dependees = new AssemblyConflictDependee[dependeeCount];
+            for (int i = 0; i < dependeeCount; i++)
+            {
+                var sourceItemSpecs = new string[sourceItemsPerDependee];
+                for (int j = 0; j < sourceItemsPerDependee; j++)
+                {
+                    sourceItemSpecs[j] = $"Item{i}_{j}.proj";
+                }
+
+                dependees[i] = new AssemblyConflictDependee($"/deps/Dependee{i}.dll", sourceItemSpecs);
+            }
+
+            var victim = new AssemblyConflictReferenceDetails(
+                "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/deps/D.dll",
+                useUnifiedHeader: true,
+                isPrimary: false,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                dependees);
+
+            var victor = new AssemblyConflictReferenceDetails(
+                "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/deps/v1/D.dll",
+                useUnifiedHeader: false,
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                [new AssemblyConflictDependee("/deps/v1/D.dll", ["D"])]);
+
+            var args = new AssemblyConflictWarningEventArgs(
+                "D",
+                victor.FusionName,
+                victim.FusionName,
+                AssemblyConflictLossReason.WasNotPrimary,
+                victor,
+                victim,
+                CreateConflictMessageFormats(),
+                "MSB3277",
+                file: null,
+                lineNumber: 0,
+                columnNumber: 0,
+                helpKeyword: null,
+                "ResolveAssemblyReference",
+                DateTime.UtcNow);
+
+            Roundtrip(
+                args,
+                e => e.Message,
+                e => e.Victor.Dependees.Count.ToString(),
+                e => e.Victim.Dependees.Count.ToString(),
+                e => DescribeConflictReferenceDetails(e.Victim));
+
+            // The reconstructed message must contain every dependee's identity and source items, in order.
+            args.Message.ShouldNotBeNull();
+            for (int i = 0; i < dependeeCount; i++)
+            {
+                args.Message.ShouldContain($"Dependee{i}.dll");
+            }
+        }
+
+        private static string DescribeConflictReferenceDetails(AssemblyConflictReferenceDetails details)
+            => $"{details.FusionName};{details.FullPath};{details.UseUnifiedHeader};{details.IsPrimary};{details.IsResolved};{details.UnresolvedPrimaryItemSpec};"
+                + string.Join("|", details.Dependees.Select(d => $"{d.DependeeFullPath}=[{string.Join(",", d.SourceItemSpecs)}]"));
+
+        private static AssemblyConflictMessageFormats CreateConflictMessageFormats()
+            => new(
+                "There was a conflict between \"{0}\" and \"{1}\".",
+                "\"{0}\" was chosen because it had a higher version.",
+                "\"{0}\" was chosen because it was primary and \"{1}\" was not.",
+                "MSB3243: No way to resolve conflict between \"{0}\" and \"{1}\". Choosing \"{0}\" arbitrarily.",
+                "References which depend on \"{0}\" [{1}].",
+                "References which depend on or have been unified to \"{0}\" [{1}].",
+                "Unresolved primary reference with an item include of \"{0}\".",
+                "Project file item includes which caused reference \"{0}\".",
+                "Found conflicts between different versions of \"{0}\" that could not be resolved.\n{1}");
+
+        private static AssemblyConflictDependencyDetailsMessageEventArgs CreateAssemblyConflictDependencyDetailsEvent()
+        {
+            var victor = new AssemblyConflictReferenceDetails(
+                "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v1/D.dll",
+                useUnifiedHeader: false,
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                [new AssemblyConflictDependee("/libs/v1/D.dll", ["D"])]);
+
+            var victim = new AssemblyConflictReferenceDetails(
+                "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v2/D.dll",
+                useUnifiedHeader: true,
+                isPrimary: false,
+                isResolved: false,
+                unresolvedPrimaryItemSpec: "D, Version=2.0.0.0",
+                [new AssemblyConflictDependee("/libs/B.dll", ["B", "B2"])]);
+
+            return new AssemblyConflictDependencyDetailsMessageEventArgs(
+                victor,
+                victim,
+                CreateConflictMessageFormats(),
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow);
+        }
+
+        private static AssemblyConflictWarningEventArgs CreateAssemblyConflictWarningEvent()
+        {
+            var victor = new AssemblyConflictReferenceDetails(
+                "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v1/D.dll",
+                useUnifiedHeader: false,
+                isPrimary: true,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                [new AssemblyConflictDependee("/libs/v1/D.dll", ["D"])]);
+
+            var victim = new AssemblyConflictReferenceDetails(
+                "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
+                "/libs/v2/D.dll",
+                useUnifiedHeader: true,
+                isPrimary: false,
+                isResolved: true,
+                unresolvedPrimaryItemSpec: null,
+                [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
+
+            return new AssemblyConflictWarningEventArgs(
+                "D",
+                victor.FusionName,
+                victim.FusionName,
+                AssemblyConflictLossReason.WasNotPrimary,
+                victor,
+                victim,
+                CreateConflictMessageFormats(),
+                "MSB3277",
+                @"C:\foo\bar.proj",
+                42,
+                7,
+                "MSBuild.ResolveAssemblyReference.FoundConflicts",
+                "ResolveAssemblyReference",
+                DateTime.UtcNow);
+        }
+
+        [Fact]
         public void RoundtripProjectEvaluationStartedEventArgs()
         {
             var projectFile = @"C:\foo\bar.proj";
