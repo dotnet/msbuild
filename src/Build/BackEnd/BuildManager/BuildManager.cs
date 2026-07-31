@@ -20,6 +20,7 @@ using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
@@ -2322,12 +2323,6 @@ namespace Microsoft.Build.Execution
                 submission.SubmissionId,
                 new ReadOnlyDictionary<ProjectGraphNode, BuildResult>(resultsPerNode ?? new Dictionary<ProjectGraphNode, BuildResult>()));
 
-            if (syntheticSolutionNodeResult?.OverallResult == BuildResultCode.Failure)
-            {
-                graphBuildResult.Exception = syntheticSolutionNodeResult.Exception
-                    ?? new InvalidOperationException("Synthetic solution graph node execution failed.");
-            }
-
             // The overall submission is complete, so report it as complete
             ReportResultsToSubmission<GraphBuildRequestData, GraphBuildResult>(graphBuildResult);
 
@@ -2352,9 +2347,9 @@ namespace Microsoft.Build.Execution
             }
 
             ProjectGraphNode entryPointNode = projectGraph.EntryPointNodes.First();
-            return projectGraph.ProjectNodes.Contains(entryPointNode)
-                ? null
-                : entryPointNode;
+            return entryPointNode.ProjectInstance.GlobalProperties.ContainsKey(SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty)
+                ? entryPointNode
+                : null;
         }
 
         [RequiresUnreferencedCode("Initializes loggers and project cache plugins by reflecting over assemblies discovered at runtime, which is incompatible with trimming.")]
@@ -2384,7 +2379,7 @@ namespace Microsoft.Build.Execution
             BuildResult? syntheticSolutionNodeResult = null;
             ExceptionDispatchInfo? submissionException = null;
             int finishedProjectNodesCount = 0;
-            int projectNodesCount = projectGraph.ProjectNodes.Count;
+            int projectNodesCount = projectGraph.ProjectNodes.Count - (syntheticSolutionNode is null ? 0 : 1);
 
             while (blockedNodes.Count > 0 || buildingNodes.Count > 0)
             {

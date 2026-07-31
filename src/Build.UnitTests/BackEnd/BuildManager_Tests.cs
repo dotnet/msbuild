@@ -4546,7 +4546,7 @@ $@"<Project InitialTargets=`Sleep`>
 
             ProjectGraph graph = new(new ProjectGraphEntryPoint(solutionFile.Path), projectCollection);
             graph.EntryPointNodes.Count.ShouldBe(1);
-            graph.ProjectNodes.Contains(graph.EntryPointNodes.Single()).ShouldBeFalse();
+            graph.ProjectNodes.ShouldContain(graph.EntryPointNodes.Single());
 
             ProjectGraphNode syntheticSolutionNode = graph.EntryPointNodes.Single();
 
@@ -4556,7 +4556,7 @@ $@"<Project InitialTargets=`Sleep`>
             result.OverallResult.ShouldBe(BuildResultCode.Success);
 
             // ResultsByNode should include both project nodes AND the synthetic solution node
-            result.ResultsByNode.Count.ShouldBe(graph.ProjectNodes.Count + 1);
+            result.ResultsByNode.Count.ShouldBe(graph.ProjectNodes.Count);
             foreach (ProjectGraphNode graphNode in graph.ProjectNodes)
             {
                 result.ResultsByNode.ContainsKey(graphNode).ShouldBeTrue();
@@ -4765,7 +4765,7 @@ $@"<Project InitialTargets=`Sleep`>
             GraphBuildResult result = _buildManager.Build(_parameters, request);
 
             result.OverallResult.ShouldBe(BuildResultCode.Failure);
-            result.Exception.ShouldNotBeNull();
+            result.Exception.ShouldBeNull();
             result.ResultsByNode[syntheticSolutionNode].OverallResult.ShouldBe(BuildResultCode.Failure);
             _logger.AssertLogContains("Expected solution hook failure");
         }
@@ -4916,7 +4916,7 @@ $@"<Project InitialTargets=`Sleep`>
             {
                 ChangeWaves.ResetStateForTests();
                 using TestEnvironment env = TestEnvironment.Create(_output);
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
                 BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
 
                 ProjectCollection projectCollection = env.CreateProjectCollection().Collection;
@@ -5011,9 +5011,9 @@ $@"<Project InitialTargets=`Sleep`>
             GraphBuildResult result = _buildManager.Build(_parameters, request);
 
             result.OverallResult.ShouldBe(BuildResultCode.Success);
-            graph.ProjectNodes.ShouldBeEmpty();
-            graph.EntryPointNodes.ShouldHaveSingleItem();
-            result.ResultsByNode.ContainsKey(graph.EntryPointNodes.Single()).ShouldBeTrue();
+            ProjectGraphNode syntheticSolutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+            graph.ProjectNodes.ShouldHaveSingleItem().ShouldBe(syntheticSolutionNode);
+            result.ResultsByNode.ContainsKey(syntheticSolutionNode).ShouldBeTrue();
             _logger.AssertLogContains("EmptySolutionHookRan");
         }
 

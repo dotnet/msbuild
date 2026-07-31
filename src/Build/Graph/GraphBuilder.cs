@@ -37,6 +37,8 @@ namespace Microsoft.Build.Graph
 
         public IReadOnlyCollection<ProjectGraphNode> EntryPointNodes { get; private set; }
 
+        public IReadOnlyCollection<ProjectGraphNode> OriginalEntryPointNodes { get; private set; }
+
         public GraphEdges Edges { get; private set; }
 
         public SolutionFile Solution { get; private set; }
@@ -103,25 +105,28 @@ namespace Microsoft.Build.Graph
 
             AddEdges(allParsedProjects);
 
-            var originalEntryPointNodes = _entryPointConfigurationMetadata.Select(e => allParsedProjects[e].GraphNode).ToList();
+            OriginalEntryPointNodes = _entryPointConfigurationMetadata.Select(e => allParsedProjects[e].GraphNode).ToList();
 
-            DetectCycles(originalEntryPointNodes, _projectInterpretation, allParsedProjects);
+            DetectCycles(OriginalEntryPointNodes, _projectInterpretation, allParsedProjects);
+
+            var projectNodes = allParsedProjects.Values.Select(p => p.GraphNode).ToList();
 
             if (Solution != null
                 && _solutionGlobalProperties != null
-                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10))
+                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
             {
-                var syntheticSolutionNode = CreateSyntheticSolutionNode(originalEntryPointNodes);
+                var syntheticSolutionNode = CreateSyntheticSolutionNode(OriginalEntryPointNodes);
+                projectNodes.Add(syntheticSolutionNode);
                 EntryPointNodes = [syntheticSolutionNode];
                 RootNodes = [syntheticSolutionNode];
             }
             else
             {
-                EntryPointNodes = originalEntryPointNodes;
-                RootNodes = GetGraphRoots(originalEntryPointNodes);
+                EntryPointNodes = OriginalEntryPointNodes;
+                RootNodes = GetGraphRoots(OriginalEntryPointNodes);
             }
 
-            ProjectNodes = allParsedProjects.Values.Select(p => p.GraphNode).ToList();
+            ProjectNodes = projectNodes;
 
             // Clean and release some temporary used large memory objects.
             _platformNegotiationInstancesCache.Clear();
@@ -185,11 +190,9 @@ namespace Microsoft.Build.Graph
                 SolutionItemReference,
                 Solution.FullPath,
                 Solution.FullPath);
-            var syntheticEdges = new GraphEdges();
-
             foreach (var projectNode in projectNodes)
             {
-                syntheticSolutionNode.AddProjectReference(projectNode, stubItem, syntheticEdges);
+                syntheticSolutionNode.AddProjectReference(projectNode, stubItem, Edges);
             }
 
             return syntheticSolutionNode;

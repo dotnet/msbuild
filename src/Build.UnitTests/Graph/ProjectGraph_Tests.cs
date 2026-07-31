@@ -864,7 +864,7 @@ namespace Microsoft.Build.Graph.UnitTests
                 projectGraph.EntryPointNodes.Single().ProjectInstance.FullPath.ShouldBe(slnFile.Path);
                 projectGraph.GraphRoots.Count.ShouldBe(1);
                 projectGraph.GraphRoots.Single().ProjectInstance.FullPath.ShouldBe(slnFile.Path);
-                projectGraph.ProjectNodes.Count.ShouldBe(7);
+                projectGraph.ProjectNodes.Count.ShouldBe(8);
 
                 ProjectGraphNode project1Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project1Path);
                 project1Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
@@ -2894,9 +2894,98 @@ $@"
                 ProjectGraphNode project2Node = GetFirstNodeWithProjectNumber(projectGraph, 2);
 
                 IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = projectGraph.GetTargetLists(entryTargets);
-                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count + projectGraph.EntryPointNodes.Count);
+                targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
                 targetLists[project1Node].ShouldBe(expectedProject1Targets);
                 targetLists[project2Node].ShouldBe(expectedProject2Targets);
+            }
+        }
+
+        [Fact]
+        public void SyntheticSolutionNodeIsIncludedInTopologicalSort()
+        {
+            TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
+            TransientTestFile solutionFile = _env.CreateFile(
+                "Solution.sln",
+                $$"""
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 17
+                VisualStudioVersion = 17.0.31903.59
+                MinimumVisualStudioVersion = 17.0.31903.59
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "{{projectFile.Path}}", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|x64 = Debug|x64
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                        {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                    EndGlobalSection
+                EndGlobal
+                """);
+
+            ProjectGraph graph = new(solutionFile.Path);
+            ProjectGraphNode syntheticSolutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+            ProjectGraphNode[] sortedNodes = graph.ProjectNodesTopologicallySorted.ToArray();
+
+            graph.ProjectNodes.ShouldContain(syntheticSolutionNode);
+            graph.TestOnly_Edges.Count.ShouldBe(1);
+            sortedNodes.Length.ShouldBe(graph.ProjectNodes.Count);
+            sortedNodes.Distinct().Count().ShouldBe(sortedNodes.Length);
+            sortedNodes.Last().ShouldBe(syntheticSolutionNode);
+        }
+
+        [Fact]
+        public void SolutionTraversalTargetSelectsMultitargetingOuterBuild()
+        {
+            TransientTestFile projectFile = _env.CreateFile(
+                "Project1.csproj",
+                """
+                <Project>
+                  <PropertyGroup>
+                    <TargetFrameworks>net472;net10.0</TargetFrameworks>
+                    <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+                    <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+                  </PropertyGroup>
+                  <Target Name="CustomTarget" />
+                </Project>
+                """);
+            TransientTestFile solutionFile = _env.CreateFile(
+                "Solution.sln",
+                $$"""
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 17
+                VisualStudioVersion = 17.0.31903.59
+                MinimumVisualStudioVersion = 17.0.31903.59
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "{{projectFile.Path}}", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|x64 = Debug|x64
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                        {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                    EndGlobalSection
+                EndGlobal
+                """);
+
+            ProjectGraph graph = new(solutionFile.Path);
+            ProjectGraphNode outerBuild = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == projectFile.Path
+                    && !node.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework"));
+            ProjectGraphNode[] innerBuilds = graph.ProjectNodes.Where(
+                node => node.ProjectInstance.FullPath == projectFile.Path
+                    && node.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework")).ToArray();
+
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(["Project1:CustomTarget"]);
+
+            outerBuild.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.OuterBuild);
+            innerBuilds.Length.ShouldBe(2);
+            targetLists[outerBuild].ShouldBe(["CustomTarget"]);
+            foreach (ProjectGraphNode innerBuild in innerBuilds)
+            {
+                targetLists[innerBuild].ShouldBeEmpty();
             }
         }
 
@@ -2906,7 +2995,7 @@ $@"
             try
             {
                 ChangeWaves.ResetStateForTests();
-                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString());
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
 
                 TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
                 TransientTestFile solutionFile = _env.CreateFile(
