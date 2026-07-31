@@ -13,9 +13,15 @@ namespace Microsoft.Build.Tasks
     /// Determines which file, if any, to be used as the code analysis rule set based
     /// on the supplied code analysis properties.
     /// </summary>
-    public sealed class ResolveCodeAnalysisRuleSet : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public sealed class ResolveCodeAnalysisRuleSet : TaskExtension, IMultiThreadableTask
     {
         #region Properties
+
+        /// <summary>
+        /// Gets or sets the task execution environment for thread-safe path resolution.
+        /// </summary>
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
         /// The desired code analysis rule set file. May be a simple name, relative
@@ -84,7 +90,8 @@ namespace Microsoft.Build.Tasks
                 if (!string.IsNullOrEmpty(MSBuildProjectDirectory))
                 {
                     string fullName = Path.Combine(MSBuildProjectDirectory, CodeAnalysisRuleSet);
-                    if (FileSystems.Default.FileExists(fullName))
+                    AbsolutePath absolute = TaskEnvironment.GetAbsolutePath(fullName);
+                    if (FileSystems.Default.FileExists(absolute))
                     {
                         return CodeAnalysisRuleSet;
                     }
@@ -96,7 +103,8 @@ namespace Microsoft.Build.Tasks
                     foreach (string directory in CodeAnalysisRuleSetDirectories)
                     {
                         string fullName = Path.Combine(directory, CodeAnalysisRuleSet);
-                        if (FileSystems.Default.FileExists(fullName))
+                        AbsolutePath absolute = TaskEnvironment.GetAbsolutePath(fullName);
+                        if (FileSystems.Default.FileExists(absolute))
                         {
                             return fullName;
                         }
@@ -109,16 +117,21 @@ namespace Microsoft.Build.Tasks
                 if (!string.IsNullOrEmpty(MSBuildProjectDirectory))
                 {
                     string fullName = Path.Combine(MSBuildProjectDirectory, CodeAnalysisRuleSet);
-                    if (FileSystems.Default.FileExists(fullName))
+                    AbsolutePath absolute = TaskEnvironment.GetAbsolutePath(fullName);
+                    if (FileSystems.Default.FileExists(absolute))
                     {
                         return CodeAnalysisRuleSet;
                     }
                 }
             }
-            else if (FileSystems.Default.FileExists(CodeAnalysisRuleSet))
+            else
             {
                 // This is a full path.
-                return CodeAnalysisRuleSet;
+                AbsolutePath absolute = TaskEnvironment.GetAbsolutePath(CodeAnalysisRuleSet);
+                if (FileSystems.Default.FileExists(absolute))
+                {
+                    return CodeAnalysisRuleSet;
+                }
             }
 
             // We can't resolve the rule set to any existing file.
