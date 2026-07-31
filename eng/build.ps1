@@ -1,8 +1,8 @@
 [CmdletBinding(PositionalBinding=$false)]
 Param(
   [string] $msbuildEngine,
-  [string] $configuration = "Debug",
-  [switch] $test,
+  [string][Alias('c')] $configuration = "Debug",
+  [switch][Alias('t')] $test,
   [switch] $ci,
   [switch][Alias('bl')] $binaryLog,
   [switch][Alias('nobl')] $excludeCIBinarylog,

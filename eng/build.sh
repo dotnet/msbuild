@@ -25,11 +25,11 @@ scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
 while [[ $# -gt 0 ]]; do
   lowerI="$(echo $1 | awk '{print tolower($0)}')"
   case "$lowerI" in
-    --configuration)
+    --configuration|-c)
       configuration=$2
       shift 2
       ;;
-    --test)
+    --test|-t)
       test=true
       shift 1
       ;;
