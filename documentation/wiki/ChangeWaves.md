@@ -31,6 +31,7 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.11
 - [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs](https://github.com/dotnet/msbuild/pull/14285)
+- RAR aggregates rejected assembly candidates into one structured search event per reference, reducing binary-log size while preserving diagnostic detail. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.11` to retain individual candidate messages.
 
 ### 18.10
 - [Resolve relative project paths against the Unix logical current directory from `PWD`, so builds under symlinked directories produce stable project full paths and related output paths.](https://github.com/dotnet/msbuild/pull/13752)
