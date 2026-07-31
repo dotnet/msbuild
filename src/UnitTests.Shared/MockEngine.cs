@@ -43,6 +43,7 @@ namespace Microsoft.Build.UnitTests
         private readonly ConcurrentDictionary<object, object> _objectCache = new ConcurrentDictionary<object, object>();
         private readonly ConcurrentQueue<BuildErrorEventArgs> _errorEvents = new ConcurrentQueue<BuildErrorEventArgs>();
         private readonly ConcurrentQueue<BuildWarningEventArgs> _warningEvents = new ConcurrentQueue<BuildWarningEventArgs>();
+        private readonly ConcurrentQueue<BuildMessageEventArgs> _messageEvents = new ConcurrentQueue<BuildMessageEventArgs>();
 
         public MockEngine() : this(false)
         {
@@ -58,6 +59,7 @@ namespace Microsoft.Build.UnitTests
 
         public BuildErrorEventArgs[] ErrorEvents => _errorEvents.ToArray();
         public BuildWarningEventArgs[] WarningEvents => _warningEvents.ToArray();
+        public BuildMessageEventArgs[] MessageEvents => _messageEvents.ToArray();
 
         public Dictionary<string, string> GlobalProperties { get; set; } = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -161,6 +163,7 @@ namespace Microsoft.Build.UnitTests
         {
             lock (_lockObj)
             {
+                _messageEvents.Enqueue(eventArgs);
                 if (_logToConsole)
                 {
                     Console.WriteLine(eventArgs.Message);

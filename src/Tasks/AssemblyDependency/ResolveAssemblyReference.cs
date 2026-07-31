@@ -5,9 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-#if !NET
 using System.Globalization;
-#endif
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -176,6 +174,23 @@ namespace Microsoft.Build.Tasks
                     initialized = true;
                 }
             }
+        }
+
+        private static class InvariantAssemblyResolutionSearchMessageFormats
+        {
+            internal static readonly AssemblyResolutionSearchTraceMessageFormats Instance = new(
+                GetResourceEightSpaces("ResolveAssemblyReference.SearchPath"),
+                GetResourceEightSpaces("ResolveAssemblyReference.SearchPathAddedByParentAssembly"),
+                GetResourceEightSpaces("ResolveAssemblyReference.SearchedAssemblyFoldersEx"),
+                GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile"),
+                GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch"),
+                GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName"),
+                GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac"),
+                GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk"),
+                GetResourceEightSpaces("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch"));
+
+            private static string GetResourceEightSpaces(string name)
+                => Strings.EightSpaces + AssemblyResources.PrimaryResources.GetString(name, CultureInfo.InvariantCulture);
         }
 
         #region Properties
@@ -1943,10 +1958,42 @@ namespace Microsoft.Build.Tasks
         /// <param name="reference">The reference.</param>
         /// <param name="fusionName">The fusion name.</param>
         /// <param name="importance">The importance of the message.</param>
-        private void LogAssembliesConsideredAndRejected(Reference reference, string fusionName, MessageImportance importance)
+        internal void LogAssembliesConsideredAndRejected(Reference reference, string fusionName, MessageImportance importance)
         {
-            if (reference.AssembliesConsideredAndRejected != null)
+            if (reference.AssembliesConsideredAndRejected is { Count: > 0 })
             {
+                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+                {
+                    var attempts = new AssemblyResolutionSearchAttempt[reference.AssembliesConsideredAndRejected.Count];
+                    for (int i = 0; i < attempts.Length; i++)
+                    {
+                        ResolutionSearchLocation location = reference.AssembliesConsideredAndRejected[i];
+                        bool logAssemblyFoldersMinimal = TrackAssemblyFoldersExSearch(location.SearchPath, importance);
+                        string processorArchitecture = location.Reason == NoMatchReason.ProcessorArchitectureDoesNotMatch
+                            ? location.AssemblyName.AssemblyName.ProcessorArchitecture.ToString()
+                            : null;
+
+                        attempts[i] = new AssemblyResolutionSearchAttempt(
+                            location.FileNameAttempted,
+                            location.SearchPath,
+                            location.ParentAssembly,
+                            location.AssemblyName?.FullName,
+                            GetAssemblyResolutionSearchResult(location.Reason),
+                            processorArchitecture,
+                            logAssemblyFoldersMinimal);
+                    }
+
+                    BuildEngine.LogMessageEvent(new AssemblyResolutionSearchTraceEventArgs(
+                        fusionName,
+                        _targetProcessorArchitecture,
+                        attempts,
+                        InvariantAssemblyResolutionSearchMessageFormats.Instance,
+                        GetType().Name,
+                        importance,
+                        DateTime.UtcNow));
+                    return;
+                }
+
                 string lastSearchPath = null;
 
                 foreach (ResolutionSearchLocation location in reference.AssembliesConsideredAndRejected)
@@ -2036,6 +2083,38 @@ namespace Microsoft.Build.Tasks
                 }
             }
         }
+
+        private bool TrackAssemblyFoldersExSearch(string searchPath, MessageImportance importance)
+        {
+            bool containsAssemblyFoldersExSentinel = String.Compare(searchPath, 0, AssemblyResolutionConstants.assemblyFoldersExSentinel, 0, AssemblyResolutionConstants.assemblyFoldersExSentinel.Length, StringComparison.OrdinalIgnoreCase) == 0;
+            bool logAssemblyFoldersMinimal = containsAssemblyFoldersExSentinel && !_logVerboseSearchResults;
+            if (logAssemblyFoldersMinimal)
+            {
+                if (!_showAssemblyFoldersExLocations.TryGetValue(searchPath, out MessageImportance messageImportance))
+                {
+                    _showAssemblyFoldersExLocations.Add(searchPath, importance);
+                }
+                else if ((messageImportance == MessageImportance.Low && (importance == MessageImportance.Normal || importance == MessageImportance.High)) ||
+                    (messageImportance == MessageImportance.Normal && importance == MessageImportance.High))
+                {
+                    _showAssemblyFoldersExLocations[searchPath] = importance;
+                }
+            }
+
+            return logAssemblyFoldersMinimal;
+        }
+
+        private static AssemblyResolutionSearchResult GetAssemblyResolutionSearchResult(NoMatchReason reason)
+            => reason switch
+            {
+                NoMatchReason.FileNotFound => AssemblyResolutionSearchResult.FileNotFound,
+                NoMatchReason.FusionNamesDidNotMatch => AssemblyResolutionSearchResult.FusionNamesDidNotMatch,
+                NoMatchReason.TargetHadNoFusionName => AssemblyResolutionSearchResult.TargetHadNoFusionName,
+                NoMatchReason.NotInGac => AssemblyResolutionSearchResult.NotInGac,
+                NoMatchReason.NotAFileNameOnDisk => AssemblyResolutionSearchResult.NotAFileNameOnDisk,
+                NoMatchReason.ProcessorArchitectureDoesNotMatch => AssemblyResolutionSearchResult.ProcessorArchitectureDoesNotMatch,
+                _ => AssemblyResolutionSearchResult.Unknown,
+            };
 
         /// <summary>
         /// Show the files that made this dependency necessary.
