@@ -30,15 +30,22 @@ safe-outputs:
 
 # Expert Code Review
 
-Review pull request #${{ github.event.pull_request.number || github.event.issue.number }} using the `expert-reviewer` agent defined at `.github/agents/expert-reviewer.agent.md`.
+Review pull request #${{ github.event.pull_request.number || github.event.issue.number }}.
+
+The expert MSBuild reviewer instructions — the 24 review dimensions, the 13
+overarching principles, and the folder hotspot mapping — are imported into this
+prompt from `.github/agents/expert-reviewer.agent.md`. Apply them directly.
 
 ## Instructions
 
 1. Fetch the full diff for the pull request.
-2. Call the `expert-reviewer` agent. Make sure to call it as subagent (`task` tool, `agent_type: "general-purpose"`, `model: "claude-opus-5"`). And make sure to follow the guidance on subagent calls from within the `expert-reviewer` agent. We expect 2+ levels of agents to be called.
-3. Do **not** post comments or reviews yourself, except for the fallback in step 4 if the subagent posts nothing. The subagent will post its own comments using the available safe-output tools:
+2. Review the diff yourself, applying every dimension from the reviewer
+   instructions above. Do not delegate the review to a sub-agent.
+3. Post your findings using the safe-output tools:
    - **Inline review comments** on specific diff lines via `create_pull_request_review_comment`
    - **Design-level concerns** (not tied to a line) via `add_comment`
    - **Final review verdict** (COMMENT or REQUEST_CHANGES) via `submit_pull_request_review`
-   - **Never use APPROVE** — the agent must not count as a PR approval. Use COMMENT for clean reviews.
-4. If the subagent does not post anything (e.g. no issues found), this is the only exception to step 3: post a brief fallback review using `submit_pull_request_review` with event `COMMENT` (not `APPROVE`). Do not use `add_comment` for this fallback.
+   - **Never use APPROVE** — this review must not count as a PR approval. Use COMMENT for clean reviews.
+4. Always finish with `submit_pull_request_review`, including when the diff is
+   clean. A clean verdict must name the dimensions you actually checked — never
+   report a pass you did not verify.

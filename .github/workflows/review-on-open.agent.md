@@ -53,6 +53,7 @@ imports:
     with:
       environment: copilot-pat-pool
   - shared/review-shared.md
+  - .github/agents/expert-reviewer.agent.md
 
 environment: copilot-pat-pool
 
