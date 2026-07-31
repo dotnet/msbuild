@@ -75,6 +75,17 @@ namespace Microsoft.Build.BackEnd
         {
             _outOfProcTaskHostNodeProvider?.ShutdownAllNodes();
         }
+
+        /// <summary>
+        /// Shuts down only the TaskHosts this process owns, over the connections it already holds.
+        /// Unlike <see cref="ShutdownAllNodes"/> this does not scan the machine for unrelated nodes,
+        /// which matters when an owner is exiting: the scan connects to every candidate process it
+        /// finds and can take far longer than the owner has to shut down.
+        /// </summary>
+        public void ShutdownOwnedNodes()
+        {
+            (_outOfProcTaskHostNodeProvider as NodeProviderOutOfProcTaskHost)?.ShutdownOwnedNodes();
+        }
         #endregion
 
         #region IBuildComponent Members

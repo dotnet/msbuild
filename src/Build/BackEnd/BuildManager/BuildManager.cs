@@ -1524,7 +1524,9 @@ namespace Microsoft.Build.Execution
         internal void ShutdownOwnedTaskHostNodes()
         {
             // The caller only invokes this after its final build callback has returned, so no new build can start.
-            _taskHostNodeManager?.ShutdownAllNodes();
+            // Deliberately not ShutdownAllNodes: that also scans the machine for unrelated TaskHosts,
+            // which an exiting owner has no reason to do and not enough time to finish.
+            (_taskHostNodeManager as TaskHostNodeManager)?.ShutdownOwnedNodes();
         }
 
         /// <summary>

@@ -212,6 +212,13 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// How long to wait for owned nodes to acknowledge shutdown before giving up on them. A
+        /// sidecar that has already died, or is wedged, will never acknowledge, and shutdown must
+        /// not block on it. Matches <c>NodeProviderOutOfProcBase.TimeoutForWaitForExit</c>.
+        /// </summary>
+        private const int TimeoutForNodeShutdown = 30000;
+
+        /// <summary>
         /// Shuts down all of the connected managed nodes.
         /// </summary>
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>
@@ -238,21 +245,31 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// How long to wait for owned nodes to acknowledge shutdown before giving up on them. A
-        /// sidecar that has already died, or is wedged, will never acknowledge, and shutdown must
-        /// not block on it. Matches <c>NodeProviderOutOfProcBase.TimeoutForWaitForExit</c>.
-        /// </summary>
-        private const int TimeoutForNodeShutdown = 30000;
-
-        /// <summary>
         /// Shuts down all of the managed nodes permanently.
         /// </summary>
         public void ShutdownAllNodes()
         {
-            // Sidecar TaskHosts are owned by this process and remain connected to it, so they can be
-            // shut down directly over those connections. This is what makes shutdown deterministic:
-            // no process-name scan is involved, and a sidecar hosted by a runtime whose process name
-            // the scan does not recognize is still reached.
+            ShutdownOwnedNodes();
+
+            // TaskHosts that are not connected to this process (legacy pooled hosts) still need the scan.
+            // If no BuildParameters were specified, this call is shutting down idle nodes left over from
+            // some other, completed build, which must have been started with node reuse. Mirrors the
+            // guard in NodeProviderOutOfProc.ShutdownAllNodes, and is required because this method is
+            // now reachable from BuildManager.ShutdownAllNodes before any build has run.
+            bool nodeReuse = ComponentHost.BuildParameters?.EnableNodeReuse ?? true;
+            ShutdownAllNodes(nodeReuse, NodeContextTerminated);
+        }
+
+        /// <summary>
+        /// Shuts down the TaskHosts this process owns, using the connections it already holds.
+        /// </summary>
+        /// <remarks>
+        /// Deliberately does not scan the machine for other nodes. Owned sidecars are reachable over
+        /// their retained connections, which is what makes shutdown deterministic and keeps it fast
+        /// enough to run while an owner is exiting.
+        /// </remarks>
+        internal void ShutdownOwnedNodes()
+        {
             List<NodeContext> contextsToShutDown = [];
             foreach (NodeContext context in _nodeContexts.Values)
             {
@@ -262,22 +279,16 @@ namespace Microsoft.Build.BackEnd
                 }
             }
 
-            if (contextsToShutDown.Count > 0)
+            if (contextsToShutDown.Count == 0)
             {
-                ShutdownConnectedNodes(contextsToShutDown, enableReuse: false);
-
-                // Bounded: this set can include nodes that were idle rather than serving a build, and
-                // an idle node whose process is already gone never acknowledges.
-                _noNodesActiveEvent.WaitOne(TimeoutForNodeShutdown);
+                return;
             }
 
-            // TaskHosts that are not connected to this process (legacy pooled hosts) still need the scan.
-            // If no BuildParameters were specified, this call is shutting down idle nodes left over from
-            // some other, completed build, which must have been started with node reuse. Mirrors the
-            // guard in NodeProviderOutOfProc.ShutdownAllNodes, and is required because this method is
-            // now reachable from BuildManager.ShutdownAllNodes before any build has run.
-            bool nodeReuse = ComponentHost.BuildParameters?.EnableNodeReuse ?? true;
-            ShutdownAllNodes(nodeReuse, NodeContextTerminated);
+            ShutdownConnectedNodes(contextsToShutDown, enableReuse: false);
+
+            // Bounded: this set can include nodes that were idle rather than serving a build, and
+            // an idle node whose process is already gone never acknowledges.
+            _noNodesActiveEvent.WaitOne(TimeoutForNodeShutdown);
         }
         #endregion
 
