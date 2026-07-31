@@ -18,9 +18,7 @@ namespace Microsoft.Build.Tasks
     {
         #region Properties
 
-        /// <summary>
-        /// Gets or sets the task execution environment for thread-safe path resolution.
-        /// </summary>
+        /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
         /// <summary>
