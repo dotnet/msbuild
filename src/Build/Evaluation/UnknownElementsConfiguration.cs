@@ -51,6 +51,15 @@ namespace Microsoft.Build.Evaluation
         internal static UnknownElementsConfiguration Empty { get; } = new UnknownElementsConfiguration();
 
         /// <summary>
+        /// Returns true if this config has the same set of loaded files as the other config.
+        /// Used by worker nodes to detect if the config changed between builds.
+        /// </summary>
+        internal bool HasSameLoadedFiles(UnknownElementsConfiguration other)
+        {
+            return _loadedConfigFiles.SetEquals(other._loadedConfigFiles);
+        }
+
+        /// <summary>
         /// Checks whether the given file path has already been loaded into this configuration.
         /// </summary>
         internal bool ContainsLoadedFile(string filePath)
@@ -270,46 +279,67 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            foreach (string rawLine in File.ReadLines(filePath))
+            try
             {
-                string entry = rawLine.Trim();
-                if (string.IsNullOrEmpty(entry) || entry[0] == '#')
+                var settings = new System.Xml.XmlReaderSettings { DtdProcessing = System.Xml.DtdProcessing.Prohibit };
+                var doc = new System.Xml.XmlDocument();
+                using (var stream = File.OpenRead(fullPath))
+                using (var reader = System.Xml.XmlReader.Create(stream, settings))
                 {
-                    continue;
+                    doc.Load(reader);
                 }
 
-                int firstColon = entry.IndexOf(':');
-                if (firstColon < 0)
+                System.Xml.XmlElement? root = doc.DocumentElement;
+                if (root is null || !root.Name.Equals("ParseConfig", StringComparison.OrdinalIgnoreCase))
                 {
-                    continue;
+                    return;
                 }
 
-                int secondColon = entry.IndexOf(':', firstColon + 1);
-                if (secondColon < 0 || entry.IndexOf(':', secondColon + 1) >= 0)
+                foreach (System.Xml.XmlNode child in root.ChildNodes)
                 {
-                    continue;
-                }
+                    if (child.NodeType != System.Xml.XmlNodeType.Element)
+                    {
+                        continue;
+                    }
 
-                string type = entry.Substring(0, firstColon).Trim();
-                string elementName = entry.Substring(firstColon + 1, secondColon - firstColon - 1).Trim();
-                string unknownName = entry.Substring(secondColon + 1).Trim();
+                    Dictionary<string, HashSet<string>>? target = null;
+                    if (child.Name.Equals("IgnoreAttributes", StringComparison.OrdinalIgnoreCase))
+                    {
+                        target = _allowedAttributes;
+                    }
+                    else if (child.Name.Equals("IgnoreChildren", StringComparison.OrdinalIgnoreCase))
+                    {
+                        target = _allowedChildren;
+                    }
 
-                if (type.Length == 0 || elementName.Length == 0 || unknownName.Length == 0)
-                {
-                    continue;
-                }
+                    if (target is null)
+                    {
+                        continue;
+                    }
 
-                if (type.Equals("ATTRIBUTE", StringComparison.OrdinalIgnoreCase))
-                {
-                    AddAllowedName(_allowedAttributes, elementName, unknownName);
-                }
-                else if (type.Equals("ELEMENT", StringComparison.OrdinalIgnoreCase))
-                {
-                    AddAllowedName(_allowedChildren, elementName, unknownName);
+                    foreach (System.Xml.XmlNode ignoreNode in child.ChildNodes)
+                    {
+                        if (ignoreNode.NodeType != System.Xml.XmlNodeType.Element
+                            || !ignoreNode.Name.Equals("Ignore", StringComparison.OrdinalIgnoreCase))
+                        {
+                            continue;
+                        }
+
+                        System.Xml.XmlElement ignoreElement = (System.Xml.XmlElement)ignoreNode;
+                        string elementName = ignoreElement.GetAttribute("Element");
+                        string name = ignoreElement.GetAttribute("Name");
+
+                        if (!string.IsNullOrEmpty(elementName) && !string.IsNullOrEmpty(name))
+                        {
+                            AddAllowedName(target, elementName, name);
+                        }
+                    }
                 }
             }
-
-            _loadedConfigFiles.Add(fullPath);
+            catch
+            {
+                // If the file can't be parsed as XML, silently skip it
+            }
         }
 
         private static void AddAllowedName(Dictionary<string, HashSet<string>> destination, string elementName, string unknownName)

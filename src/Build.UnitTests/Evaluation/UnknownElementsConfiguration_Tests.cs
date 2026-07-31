@@ -34,13 +34,15 @@ namespace Microsoft.Build.UnitTests.Evaluation
         public void ParsesValidConfigFile()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, @"
-# This is a comment
-Attribute:Target:Foo
-Element:Project:CustomThing
-
-Attribute:PropertyGroup:Bar
-");
+            File.WriteAllText(configPath, @"<ParseConfig>
+  <IgnoreAttributes>
+    <Ignore Element=""Target"" Name=""Foo"" />
+    <Ignore Element=""PropertyGroup"" Name=""Bar"" />
+  </IgnoreAttributes>
+  <IgnoreChildren>
+    <Ignore Element=""Project"" Name=""CustomThing"" />
+  </IgnoreChildren>
+</ParseConfig>");
 
             var config = UnknownElementsConfiguration.LoadFromFile(configPath);
 
@@ -54,7 +56,7 @@ Attribute:PropertyGroup:Bar
         public void IsCaseInsensitive()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Attribute:Target:Foo\n");
+            File.WriteAllText(configPath, @"<ParseConfig><IgnoreAttributes><Ignore Element=""Target"" Name=""Foo"" /></IgnoreAttributes></ParseConfig>");
 
             var config = UnknownElementsConfiguration.LoadFromFile(configPath);
 
@@ -67,7 +69,7 @@ Attribute:PropertyGroup:Bar
         public void RejectsNonAllowedItems()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Attribute:Target:Foo\n");
+            File.WriteAllText(configPath, @"<ParseConfig><IgnoreAttributes><Ignore Element=""Target"" Name=""Foo"" /></IgnoreAttributes></ParseConfig>");
 
             var config = UnknownElementsConfiguration.LoadFromFile(configPath);
 
@@ -77,23 +79,30 @@ Attribute:PropertyGroup:Bar
         }
 
         [Fact]
-        public void IgnoresInvalidLines()
+        public void IgnoresInvalidEntries()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, @"
-# Comment
-InvalidType:Target:Foo
-Attribute:Target
-Attribute
-:Target:Foo
-Attribute:Target:Foo:ExtraColon
-Attribute:Target:ValidOne
-");
+            File.WriteAllText(configPath, @"<ParseConfig>
+  <IgnoreAttributes>
+    <Ignore Element="""" Name=""Foo"" />
+    <Ignore Element=""Target"" Name="""" />
+    <Ignore Name=""Bar"" />
+    <Ignore Element=""Target"" />
+    <NotIgnore Element=""Target"" Name=""Nope"" />
+    <Ignore Element=""Target"" Name=""ValidOne"" />
+  </IgnoreAttributes>
+  <BogusSection>
+    <Ignore Element=""Target"" Name=""Nope2"" />
+  </BogusSection>
+</ParseConfig>");
 
             var config = UnknownElementsConfiguration.LoadFromFile(configPath);
 
             config.CheckSkipAttribute("Target", "ValidOne").ShouldBeTrue();
             config.CheckSkipAttribute("Target", "Foo").ShouldBeFalse();
+            config.CheckSkipAttribute("Target", "Bar").ShouldBeFalse();
+            config.CheckSkipAttribute("Target", "Nope").ShouldBeFalse();
+            config.CheckSkipAttribute("Target", "Nope2").ShouldBeFalse();
         }
 
         [Fact]
@@ -109,10 +118,10 @@ Attribute:Target:ValidOne
         public void MergeCombinesEntriesAndDeduplicatesFiles()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Attribute:Target:Foo\n");
+            File.WriteAllText(configPath, @"<ParseConfig><IgnoreAttributes><Ignore Element=""Target"" Name=""Foo"" /></IgnoreAttributes></ParseConfig>");
 
             string extraConfigPath = Path.Combine(_testDir, "extra.config");
-            File.WriteAllText(extraConfigPath, "Element:Project:CustomThing\n");
+            File.WriteAllText(extraConfigPath, @"<ParseConfig><IgnoreChildren><Ignore Element=""Project"" Name=""CustomThing"" /></IgnoreChildren></ParseConfig>");
 
             var merged = UnknownElementsConfiguration.LoadFromFile(configPath)
                 .Merge(UnknownElementsConfiguration.LoadFromFile(extraConfigPath))
@@ -127,7 +136,7 @@ Attribute:Target:ValidOne
         public void LoadGlobalConfigLoadsEnvironmentVariablePaths()
         {
             string envConfigPath = Path.Combine(_testDir, "env.config");
-            File.WriteAllText(envConfigPath, "Element:Project:CustomThing\n");
+            File.WriteAllText(envConfigPath, @"<ParseConfig><IgnoreChildren><Ignore Element=""Project"" Name=""CustomThing"" /></IgnoreChildren></ParseConfig>");
 
             string oldEnv = Environment.GetEnvironmentVariable(UnknownElementsConfiguration.EnvironmentVariableName);
             try
@@ -147,7 +156,7 @@ Attribute:Target:ValidOne
         public void RecordsSkippedItems()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Attribute:Target:Foo\n");
+            File.WriteAllText(configPath, @"<ParseConfig><IgnoreAttributes><Ignore Element=""Target"" Name=""Foo"" /></IgnoreAttributes></ParseConfig>");
 
             var config = UnknownElementsConfiguration.LoadFromFile(configPath);
 
@@ -173,7 +182,7 @@ Attribute:Target:ValidOne
         public void GetLoadedConfigsMessageListsFiles()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Attribute:Target:Foo\n");
+            File.WriteAllText(configPath, @"<ParseConfig><IgnoreAttributes><Ignore Element=""Target"" Name=""Foo"" /></IgnoreAttributes></ParseConfig>");
 
             var config = UnknownElementsConfiguration.LoadFromFile(configPath);
 
@@ -186,7 +195,7 @@ Attribute:Target:ValidOne
         public void AllowedAttributeDoesNotThrowDuringParsing()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Attribute:Target:CustomAttr\n");
+            File.WriteAllText(configPath, @"<ParseConfig><IgnoreAttributes><Ignore Element=""Target"" Name=""CustomAttr"" /></IgnoreAttributes></ParseConfig>");
 
             string projectContent = @"
 <Project>
@@ -226,7 +235,7 @@ Attribute:Target:ValidOne
         public void AllowedChildElementDoesNotThrowDuringParsing()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Element:Project:CustomElement\n");
+            File.WriteAllText(configPath, @"<ParseConfig><IgnoreChildren><Ignore Element=""Project"" Name=""CustomElement"" /></IgnoreChildren></ParseConfig>");
 
             string projectContent = @"
 <Project>
