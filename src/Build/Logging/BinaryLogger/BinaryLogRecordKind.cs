@@ -47,5 +47,6 @@ namespace Microsoft.Build.Logging
         BuildCanceled,
         LoggersRegistered,
         MSBuildServerLifecycle,
+        AssemblyResolutionSearchTrace,
     }
 }

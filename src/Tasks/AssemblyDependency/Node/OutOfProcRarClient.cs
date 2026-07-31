@@ -83,6 +83,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                                 rarTask.BuildEngine.LogWarningEvent((BuildWarningEventArgs)buildEvent);
                                 break;
                             case LoggingEventType.BuildMessageEvent:
+                            case LoggingEventType.AssemblyResolutionSearchTraceEvent:
                                 rarTask.BuildEngine.LogMessageEvent((BuildMessageEventArgs)buildEvent);
                                 break;
                             default:
