@@ -12,7 +12,7 @@ namespace Microsoft.Build.Framework;
 /// Generic custom error events including extended data for event enriching.
 /// Extended data are implemented by <see cref="IExtendedBuildEventArgs"/>
 /// </summary>
-public sealed class ExtendedBuildErrorEventArgs : BuildErrorEventArgs, IExtendedBuildEventArgs
+public sealed class ExtendedBuildErrorEventArgs : BuildErrorEventArgs, IExtendedBuildEventArgs, IStructuredBuildEventArgs
 {
     /// <inheritdoc />
     public string ExtendedType { get; set; }
@@ -22,6 +22,12 @@ public sealed class ExtendedBuildErrorEventArgs : BuildErrorEventArgs, IExtended
 
     /// <inheritdoc />
     public string? ExtendedData { get; set; }
+
+    /// <inheritdoc />
+    public string? OriginalFormat { get; internal set; }
+
+    /// <inheritdoc />
+    public IReadOnlyList<KeyValuePair<string, string?>>? StructuredValues { get; internal set; }
 
     /// <summary>
     /// Default constructor. Used for deserialization.
@@ -122,5 +128,6 @@ public sealed class ExtendedBuildErrorEventArgs : BuildErrorEventArgs, IExtended
     {
         base.CreateFromStream(reader, version);
         reader.ReadExtendedBuildEventData(this);
+        StructuredBuildEventArgsData.Apply(this);
     }
 }

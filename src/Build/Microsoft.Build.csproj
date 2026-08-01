@@ -139,6 +139,9 @@
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelper.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\TaskLoggingHelper.Structured.cs">
+      <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelper.Structured.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\TaskLoggingHelperExtension.cs">
       <Link>BackEnd\Components\RequestBuilder\IntrinsicTasks\TaskLoggingHelperExtension.cs</Link>
     </Compile>

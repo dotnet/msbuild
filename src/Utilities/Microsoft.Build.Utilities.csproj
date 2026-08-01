@@ -72,6 +72,9 @@
     <Compile Include="..\Shared\TaskLoggingHelper.cs">
       <Link>Shared\TaskLoggingHelper.cs</Link>
     </Compile>
+    <Compile Include="..\Shared\TaskLoggingHelper.Structured.cs">
+      <Link>Shared\TaskLoggingHelper.Structured.cs</Link>
+    </Compile>
     <Compile Include="..\Shared\Tracing.cs">
       <Link>Shared\Tracing.cs</Link>
     </Compile>

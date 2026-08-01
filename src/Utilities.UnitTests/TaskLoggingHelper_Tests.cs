@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -15,6 +16,10 @@ namespace Microsoft.Build.UnitTests
 {
     public class TaskLoggingHelperTests
     {
+        private readonly ITestOutputHelper _output;
+
+        public TaskLoggingHelperTests(ITestOutputHelper output) => _output = output;
+
         [Fact]
         public void CheckMessageCode()
         {
@@ -140,6 +145,233 @@ namespace Microsoft.Build.UnitTests
             mockEngine.AssertLogContains("{2");
             mockEngine.AssertLogContains("{3");
             mockEngine.AssertLogContains("{4");
+        }
+
+        [Fact]
+        public void InterpolatedMessageUsesStructuredOverload()
+        {
+            MockEngine3 mockEngine = new();
+            Task task = new MockTask { BuildEngine = mockEngine };
+            string candidate = "a.dll";
+            string expected = "b.dll";
+
+            task.Log.LogMessage(MessageImportance.Low, $"Considered {candidate} but expected {expected}");
+
+            mockEngine.LastMessageEvent.Message.ShouldBe("Considered a.dll but expected b.dll");
+            IStructuredBuildEventArgs structured = mockEngine.LastMessageEvent.ShouldBeAssignableTo<IStructuredBuildEventArgs>();
+            structured.OriginalFormat.ShouldBe("Considered {candidate} but expected {expected}");
+            structured.StructuredValues.ShouldBe(
+            [
+                new KeyValuePair<string, string>("candidate", "a.dll"),
+                new KeyValuePair<string, string>("expected", "b.dll"),
+            ]);
+        }
+
+        [Fact]
+        public void StructuredMessageRemainsLazyAndNamedStateSurvivesMaterialization()
+        {
+            MockEngine3 mockEngine = new() { MinimumMessageImportance = MessageImportance.High };
+            Task task = new MockTask { BuildEngine = mockEngine };
+            string value = "captured";
+
+            task.Log.LogMessage($"Value {value}");
+
+            ExtendedBuildMessageEventArgs buildEvent =
+                mockEngine.LastMessageEvent.ShouldBeOfType<ExtendedBuildMessageEventArgs>();
+            buildEvent.RawMessage.ShouldBe("Value {0}");
+            buildEvent.RawArguments.ShouldNotBeNull();
+            buildEvent.OriginalFormat.ShouldBe("Value {value}");
+            buildEvent.StructuredValues[0].Value.ShouldBe("captured");
+
+            buildEvent.Message.ShouldBe("Value captured");
+            buildEvent.OriginalFormat.ShouldBe("Value {value}");
+            buildEvent.StructuredValues[0].Value.ShouldBe("captured");
+        }
+
+        [Fact]
+        public void StringAndCompositeMessageOverloadsRemainUnstructured()
+        {
+            MockEngine3 mockEngine = new();
+            Task task = new MockTask { BuildEngine = mockEngine };
+
+            task.Log.LogMessage("literal");
+            mockEngine.LastMessageEvent.ShouldNotBeAssignableTo<IStructuredBuildEventArgs>();
+
+            task.Log.LogMessage("composite {0}", 42);
+            mockEngine.LastMessageEvent.Message.ShouldBe("composite 42");
+            mockEngine.LastMessageEvent.ShouldNotBeAssignableTo<IStructuredBuildEventArgs>();
+
+            string preformatted = $"preformatted {42}";
+            task.Log.LogMessage(preformatted);
+            mockEngine.LastMessageEvent.ShouldNotBeAssignableTo<IStructuredBuildEventArgs>();
+        }
+
+        [Fact]
+        public void StructuredInterpolationSupportsNamesFormattingNullsAndBraces()
+        {
+            MockEngine3 mockEngine = new();
+            Task task = new MockTask { BuildEngine = mockEngine };
+            int amount = 12;
+            string missing = null;
+            string projectPath = "project.proj";
+
+            task.Log.LogMessage(
+                $"{{value}} {amount,8:D4} {amount:D2} {missing} {task.Log.Named("ProjectPath", projectPath)}");
+
+            mockEngine.LastMessageEvent.Message.ShouldBe("{value}     0012 12  project.proj");
+            IStructuredBuildEventArgs structured = mockEngine.LastMessageEvent.ShouldBeAssignableTo<IStructuredBuildEventArgs>();
+            structured.OriginalFormat.ShouldBe(
+                "{{value}} {amount,8:D4} {amount_2:D2} {missing} {ProjectPath}");
+            structured.StructuredValues.ShouldBe(
+            [
+                new KeyValuePair<string, string>("amount", "0012"),
+                new KeyValuePair<string, string>("amount_2", "12"),
+                new KeyValuePair<string, string>("missing", null),
+                new KeyValuePair<string, string>("ProjectPath", "project.proj"),
+            ]);
+        }
+
+        [Fact]
+        public void DisabledImportanceDoesNotEvaluateInterpolationHoles()
+        {
+            MockEngine mockEngine = new() { MinimumMessageImportance = MessageImportance.High };
+            Task task = new MockTask { BuildEngine = mockEngine };
+            int evaluations = 0;
+
+            task.Log.LogMessage(MessageImportance.Low, $"Not evaluated {Evaluate()}");
+
+            evaluations.ShouldBe(0);
+            mockEngine.Messages.ShouldBe(0);
+
+            int Evaluate()
+            {
+                evaluations++;
+                return evaluations;
+            }
+        }
+
+#if NET
+        [Fact]
+        public void DisabledStructuredInterpolationAllocatesLessThanEagerFormatting()
+        {
+            MockEngine mockEngine = new() { MinimumMessageImportance = MessageImportance.High };
+            Task task = new MockTask { BuildEngine = mockEngine };
+
+            for (int i = 0; i < 10; i++)
+            {
+                task.Log.LogMessage(MessageImportance.Low, $"Value {i}");
+                string eager = $"Value {i}";
+                task.Log.LogMessage(MessageImportance.Low, eager);
+            }
+
+            long start = GC.GetAllocatedBytesForCurrentThread();
+            for (int i = 0; i < 1_000; i++)
+            {
+                task.Log.LogMessage(MessageImportance.Low, $"Value {i}");
+            }
+
+            long structuredAllocations = GC.GetAllocatedBytesForCurrentThread() - start;
+
+            start = GC.GetAllocatedBytesForCurrentThread();
+            for (int i = 0; i < 1_000; i++)
+            {
+                string eager = $"Value {i}";
+                task.Log.LogMessage(MessageImportance.Low, eager);
+            }
+
+            long eagerAllocations = GC.GetAllocatedBytesForCurrentThread() - start;
+
+            _output.WriteLine(
+                $"Disabled structured interpolation: {structuredAllocations:N0} bytes; eager interpolation: {eagerAllocations:N0} bytes.");
+            structuredAllocations.ShouldBeLessThan(eagerAllocations);
+        }
+#endif
+
+        [Fact]
+        public void ExplicitStructuredApisSupportOrderedValuesAndLocalizedDisplay()
+        {
+            MockEngine3 mockEngine = new();
+            Task task = new MockTask { BuildEngine = mockEngine };
+
+            task.Log.LogStructuredMessage("Copied {Source} to {Destination}", "a", "b");
+            mockEngine.LastMessageEvent.Message.ShouldBe("Copied a to b");
+            IStructuredBuildEventArgs structured = mockEngine.LastMessageEvent.ShouldBeAssignableTo<IStructuredBuildEventArgs>();
+            structured.OriginalFormat.ShouldBe("Copied {Source} to {Destination}");
+
+            task.Log.LogStructuredMessage(
+                MessageImportance.Normal,
+                "Copied {Source} to {Destination}",
+                "b <- a",
+                new List<KeyValuePair<string, object>>
+                {
+                    new("Source", "a"),
+                    new("Destination", "b"),
+                });
+
+            mockEngine.LastMessageEvent.Message.ShouldBe("b <- a");
+            structured = mockEngine.LastMessageEvent.ShouldBeAssignableTo<IStructuredBuildEventArgs>();
+            structured.StructuredValues[0].Key.ShouldBe("Source");
+            structured.StructuredValues[1].Key.ShouldBe("Destination");
+        }
+
+        [Fact]
+        public void DynamicStructuredTemplatesValidateAndDisambiguateNames()
+        {
+            MockEngine3 mockEngine = new();
+            Task task = new MockTask { BuildEngine = mockEngine };
+
+            task.Log.LogStructuredMessage("{Value} then {Value}", 1, 2);
+            IStructuredBuildEventArgs structured = mockEngine.LastMessageEvent.ShouldBeAssignableTo<IStructuredBuildEventArgs>();
+            structured.OriginalFormat.ShouldBe("{Value} then {Value_2}");
+            structured.StructuredValues[0].Key.ShouldBe("Value");
+            structured.StructuredValues[1].Key.ShouldBe("Value_2");
+
+            Should.Throw<FormatException>(() => task.Log.LogStructuredMessage("{Missing", 1));
+            Should.Throw<FormatException>(() => task.Log.LogStructuredMessage("{One} {Two}", 1));
+            Should.Throw<ArgumentException>(() => task.Log.LogStructuredMessage(
+                MessageImportance.Normal,
+                "{Expected}",
+                "localized",
+                new List<KeyValuePair<string, object>> { new("Actual", 1) }));
+        }
+
+        [Fact]
+        public void StructuredWarningsAndErrorsPreserveDiagnosticMetadata()
+        {
+            MockEngine3 mockEngine = new();
+            Task task = new MockTask { BuildEngine = mockEngine };
+            string detail = "detail";
+
+            task.Log.LogWarning("sub", "W1", "help", "helpLink", "file", 1, 2, 3, 4, $"warning {detail}");
+            mockEngine.LastWarningEvent.Code.ShouldBe("W1");
+            mockEngine.LastWarningEvent.File.ShouldBe("file");
+            mockEngine.LastWarningEvent.LineNumber.ShouldBe(1);
+            mockEngine.LastWarningEvent.ShouldBeAssignableTo<IStructuredBuildEventArgs>()
+                .OriginalFormat.ShouldBe("warning {detail}");
+
+            task.Log.LogError("sub", "E1", "help", "helpLink", "file", 5, 6, 7, 8, $"error {detail}");
+            mockEngine.LastErrorEvent.Code.ShouldBe("E1");
+            mockEngine.LastErrorEvent.File.ShouldBe("file");
+            mockEngine.LastErrorEvent.LineNumber.ShouldBe(5);
+            mockEngine.LastErrorEvent.ShouldBeAssignableTo<IStructuredBuildEventArgs>()
+                .OriginalFormat.ShouldBe("error {detail}");
+            task.Log.HasLoggedErrors.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void StructuredWarningPreservesWarnAsErrorRouting()
+        {
+            MockEngine mockEngine = new() { TreatWarningsAsErrors = true };
+            Task task = new MockTask { BuildEngine = mockEngine };
+            string detail = "detail";
+
+            task.Log.LogWarning("sub", "W1", "help", "file", 1, 2, 3, 4, $"warning {detail}");
+
+            mockEngine.Warnings.ShouldBe(0);
+            mockEngine.Errors.ShouldBe(1);
+            BuildErrorEventArgs error = mockEngine.ErrorEvents.ShouldHaveSingleItem();
+            error.Code.ShouldBe("W1");
+            error.ShouldBeAssignableTo<IStructuredBuildEventArgs>().OriginalFormat.ShouldBe("warning {detail}");
         }
 
         [Fact]

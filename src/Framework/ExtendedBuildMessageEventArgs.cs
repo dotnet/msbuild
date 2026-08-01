@@ -11,7 +11,7 @@ namespace Microsoft.Build.Framework;
 /// Generic custom build events including extended data for event enriching.
 /// Extended data are implemented by <see cref="IExtendedBuildEventArgs"/>
 /// </summary>
-public sealed class ExtendedBuildMessageEventArgs : BuildMessageEventArgs, IExtendedBuildEventArgs
+public sealed class ExtendedBuildMessageEventArgs : BuildMessageEventArgs, IExtendedBuildEventArgs, IStructuredBuildEventArgs
 {
     /// <inheritdoc />
     public string ExtendedType { get; set; }
@@ -21,6 +21,12 @@ public sealed class ExtendedBuildMessageEventArgs : BuildMessageEventArgs, IExte
 
     /// <inheritdoc />
     public string? ExtendedData { get; set; }
+
+    /// <inheritdoc />
+    public string? OriginalFormat { get; internal set; }
+
+    /// <inheritdoc />
+    public IReadOnlyList<KeyValuePair<string, string?>>? StructuredValues { get; internal set; }
 
     /// <summary>
     /// Default constructor. Used for deserialization.
@@ -139,5 +145,6 @@ public sealed class ExtendedBuildMessageEventArgs : BuildMessageEventArgs, IExte
     {
         base.CreateFromStream(reader, version);
         reader.ReadExtendedBuildEventData(this);
+        StructuredBuildEventArgsData.Apply(this);
     }
 }

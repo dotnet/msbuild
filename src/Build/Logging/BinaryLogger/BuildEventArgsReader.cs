@@ -925,6 +925,7 @@ namespace Microsoft.Build.Logging
                     ExtendedMetadata = fields.Extended.ExtendedMetadataAsDictionary,
                     ExtendedData = fields.Extended.ExtendedData,
                 };
+                StructuredBuildEventArgsData.Apply((IExtendedBuildEventArgs)e);
             }
             e.BuildEventContext = fields.BuildEventContext;
 
@@ -977,6 +978,7 @@ namespace Microsoft.Build.Logging
                     ExtendedMetadata = fields.Extended.ExtendedMetadataAsDictionary,
                     ExtendedData = fields.Extended.ExtendedData,
                 };
+                StructuredBuildEventArgsData.Apply((IExtendedBuildEventArgs)e);
             }
             e.BuildEventContext = fields.BuildEventContext;
 
@@ -1030,6 +1032,7 @@ namespace Microsoft.Build.Logging
                     ExtendedMetadata = fields.Extended?.ExtendedMetadataAsDictionary,
                     ExtendedData = fields.Extended?.ExtendedData,
                 };
+                StructuredBuildEventArgsData.Apply((IExtendedBuildEventArgs)e);
             }
 
             e.BuildEventContext = fields.BuildEventContext;

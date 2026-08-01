@@ -56,6 +56,8 @@ namespace Microsoft.Build.UnitTests
 
         public bool AllowFailureWithoutError { get; set; } = false;
 
+        public bool TreatWarningsAsErrors { get; set; }
+
         public BuildErrorEventArgs[] ErrorEvents => _errorEvents.ToArray();
         public BuildWarningEventArgs[] WarningEvents => _warningEvents.ToArray();
 
@@ -504,7 +506,7 @@ namespace Microsoft.Build.UnitTests
         {
         }
 
-        public bool ShouldTreatWarningAsError(string warningCode) => false;
+        public bool ShouldTreatWarningAsError(string warningCode) => TreatWarningsAsErrors;
 
         public override bool LogsMessagesOfImportance(MessageImportance importance)
             => importance <= MinimumMessageImportance;

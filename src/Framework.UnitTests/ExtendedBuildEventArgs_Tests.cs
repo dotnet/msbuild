@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace Microsoft.Build.Framework.UnitTests;
@@ -154,6 +155,43 @@ public class ExtendedBuildEventArgs_Tests
         argDeserialized.CreateFromStream(br, 80);
 
         argDeserialized.Should().BeEquivalentTo(arg);
+    }
+
+    [Fact]
+    public void StructuredMessagePreservesOrderAndNullsAcrossEventSerialization()
+    {
+        var arg = new ExtendedBuildMessageEventArgs(
+            StructuredBuildEventArgsData.EventType,
+            "{0}|{1}",
+            null,
+            "sender",
+            MessageImportance.Normal,
+            DateTime.UtcNow,
+            messageArgs: [null!, string.Empty]);
+        StructuredBuildEventArgsData.Set(
+            arg,
+            "{NullValue}|{EmptyValue}",
+            [
+                new("NullValue", null),
+                new("EmptyValue", string.Empty),
+            ]);
+
+        using var stream = new MemoryStream();
+        using var writer = new BinaryWriter(stream);
+        arg.WriteToStream(writer);
+
+        stream.Position = 0;
+        using var reader = new BinaryReader(stream);
+        var deserialized = new ExtendedBuildMessageEventArgs();
+        deserialized.CreateFromStream(reader, 80);
+
+        deserialized.Message.ShouldBe("|");
+        deserialized.OriginalFormat.ShouldBe("{NullValue}|{EmptyValue}");
+        deserialized.StructuredValues.ShouldBe(
+        [
+            new("NullValue", null),
+            new("EmptyValue", string.Empty),
+        ]);
     }
 
     [InlineData(true)]

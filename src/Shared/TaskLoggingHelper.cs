@@ -37,7 +37,7 @@ namespace Microsoft.Build.Utilities
 #else
     public
 #endif
- class TaskLoggingHelper
+ partial class TaskLoggingHelper
 #if FEATURE_APPDOMAIN
         : MarshalByRefObject
 #endif

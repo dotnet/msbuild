@@ -322,6 +322,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
+                    CreateStructuredMessageEvent(),
                     new GeneratedFileUsedEventArgs("path", "some content"),
                     new LoggersRegisteredEventArgs(new List<RegisteredLoggerInfo>
                     {
@@ -365,6 +366,23 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
             }
+        }
+
+        private static ExtendedBuildMessageEventArgs CreateStructuredMessageEvent()
+        {
+            var buildEvent = new ExtendedBuildMessageEventArgs(
+                StructuredBuildEventArgsData.EventType,
+                "visible {0}",
+                null,
+                "sender",
+                MessageImportance.Normal,
+                DateTime.UtcNow,
+                "message");
+            StructuredBuildEventArgsData.Set(
+                buildEvent,
+                "visible {Value}",
+                [new("Value", "message")]);
+            return buildEvent;
         }
 
         /// <summary>

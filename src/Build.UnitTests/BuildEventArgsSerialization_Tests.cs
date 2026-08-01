@@ -25,8 +25,11 @@ namespace Microsoft.Build.UnitTests
 {
     public class BuildEventArgsSerializationTests
     {
-        public BuildEventArgsSerializationTests()
+        private readonly ITestOutputHelper _output;
+
+        public BuildEventArgsSerializationTests(ITestOutputHelper output)
         {
+            _output = output;
             // touch the type so that static constructor runs
             _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
         }
@@ -538,6 +541,95 @@ namespace Microsoft.Build.UnitTests
                 e => e.ExtendedData,
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
+
+        [Fact]
+        public void StructuredMessagesDeduplicateTemplateComponents()
+        {
+            const int Count = 500;
+            const string MessageFormat =
+                "Considered candidate '{0}' while resolving a reference, but expected '{1}' according to the configured search path.";
+            const string OriginalFormat =
+                "Considered candidate '{Candidate}' while resolving a reference, but expected '{Expected}' according to the configured search path.";
+
+            long eagerLength = WriteEvents(structured: false);
+            long structuredLength = WriteEvents(structured: true);
+
+            _output.WriteLine($"Eager: {eagerLength:N0} bytes; structured: {structuredLength:N0} bytes.");
+            structuredLength.ShouldBeLessThan(eagerLength);
+
+            long WriteEvents(bool structured)
+            {
+                using var stream = new MemoryStream();
+                using var writer = new BinaryWriter(stream);
+                var eventWriter = new BuildEventArgsWriter(writer);
+                for (int i = 0; i < Count; i++)
+                {
+                    string candidate = $"candidate-{i:D4}.dll";
+                    const string Expected = "expected.dll";
+                    BuildMessageEventArgs buildEvent;
+                    if (structured)
+                    {
+                        var structuredEvent = new ExtendedBuildMessageEventArgs(
+                            "MSBuild.StructuredLogging",
+                            MessageFormat,
+                            null,
+                            "Task",
+                            MessageImportance.Low,
+                            DateTime.UtcNow,
+                            candidate,
+                            Expected);
+                        StructuredBuildEventArgsData.Set(
+                            structuredEvent,
+                            OriginalFormat,
+                            [
+                                new("Candidate", candidate),
+                                new("Expected", Expected),
+                            ]);
+                        buildEvent = structuredEvent;
+                    }
+                    else
+                    {
+                        buildEvent = new BuildMessageEventArgs(
+                            string.Format(CultureInfo.CurrentCulture, MessageFormat, candidate, Expected),
+                            null,
+                            "Task",
+                            MessageImportance.Low);
+                    }
+
+                    eventWriter.Write(buildEvent);
+                }
+
+                return stream.Length;
+            }
+        }
+
+        [Fact]
+        public void StructuredMessagePreservesNullAndEmptyValuesThroughBinaryLog()
+        {
+            var args = new ExtendedBuildMessageEventArgs(
+                StructuredBuildEventArgsData.EventType,
+                "{0}|{1}",
+                null,
+                "Task",
+                MessageImportance.Low,
+                DateTime.UtcNow,
+                null!,
+                string.Empty);
+            StructuredBuildEventArgsData.Set(
+                args,
+                "{NullValue}|{EmptyValue}",
+                [
+                    new("NullValue", null),
+                    new("EmptyValue", string.Empty),
+                ]);
+
+            Roundtrip(
+                args,
+                e => e.Message,
+                e => e.OriginalFormat,
+                e => string.Join("|", e.StructuredValues!.Select(value => $"{value.Key}={value.Value ?? "<null>"}")));
+        }
+
 
         /// <summary>
         /// The MSBuild Server lifecycle events are logged as a dedicated <see cref="MSBuildServerLifecycleEventArgs"/>
