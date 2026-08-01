@@ -11,6 +11,7 @@ namespace Microsoft.Build.Framework;
 /// Generic custom build events including extended data for event enriching.
 /// Extended data are implemented by <see cref="IExtendedBuildEventArgs"/>
 /// </summary>
+[Serializable]
 public sealed class ExtendedBuildMessageEventArgs : BuildMessageEventArgs, IExtendedBuildEventArgs, IStructuredBuildEventArgs
 {
     /// <inheritdoc />

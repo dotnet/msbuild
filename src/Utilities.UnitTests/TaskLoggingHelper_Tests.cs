@@ -16,9 +16,11 @@ namespace Microsoft.Build.UnitTests
 {
     public class TaskLoggingHelperTests
     {
+#if NET
         private readonly ITestOutputHelper _output;
 
         public TaskLoggingHelperTests(ITestOutputHelper output) => _output = output;
+#endif
 
         [Fact]
         public void CheckMessageCode()
