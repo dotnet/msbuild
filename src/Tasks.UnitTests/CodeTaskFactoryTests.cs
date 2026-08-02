@@ -26,6 +26,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the simple case where we have a string parameter and we want to log that.
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14571")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -152,6 +153,7 @@ namespace Microsoft.Build.UnitTests
         /// being in MSBuildToolsPath anymore, that this does NOT affect full fusion AssemblyNames --
         /// it's picked up from the GAC, where it is anyway, so there's no need to redirect.
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14575")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -530,6 +532,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the case where we have adding a using statement
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14577")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -571,6 +574,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Verify setting the output tag on the parameter causes it to be an output from the perspective of the targets
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14576")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -1229,6 +1233,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Test the simple case where we have a string parameter and we want to log that.
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14568")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -1271,6 +1276,7 @@ namespace Microsoft.Build.UnitTests
         /// Verify that the generated code from source is embedded in the binlog
         /// </summary>
         /// <param name="forceOutOfProc"></param>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14574")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -1347,6 +1353,7 @@ namespace Microsoft.Build.UnitTests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14569")]
         public void EmbedsGeneratedFileInBinlog(bool forceOutOfProc)
         {
             int num = forceOutOfProc ? 5 : 4;
