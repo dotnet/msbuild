@@ -41,7 +41,7 @@ Apply **all** dimensions on every review, weighted by file location (see [Folder
 
 **Rules:**
 1. Breaking changes are basically forbidden. Customers expect any project that built before to keep building.
-2. In cases where we expect no breaking behavior but there is a slight chance, gate behind a ChangeWave. This especially applies to changes in risky areas such as IPC or the engine. See `../../documentation/wiki/ChangeWaves.md`.
+2. In cases where we expect no breaking behavior but there is a slight chance it should be gated behind a ChangeWave. See `../../documentation/wiki/ChangeWaves.md`.
 3. New warnings are breaking changes because customers set `-WarnAsError` in their builds. Gate them behind a ChangeWave or emit them as `Message`.
 4. Make behavioral changes opt-in by default.
 5. SDK target changes must preserve backward compatibility with existing project files.
