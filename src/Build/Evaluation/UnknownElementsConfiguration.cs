@@ -52,6 +52,20 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly ConcurrentDictionary<string, int> _skippedItems = new(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>
+        /// Config files resolved during this process, so that <c>BinaryLogger</c> can embed their contents.
+        /// A binary log that records which rules applied, but not what those rules were, cannot explain why a
+        /// project parsed the way it did. Mirrors how BuildCheck surfaces resolved <c>.editorconfig</c> files.
+        /// </summary>
+        private static ConcurrentBag<string> s_resolvedConfigFilePaths = new();
+
+        internal static IEnumerable<string> ResolvedConfigFilePaths => s_resolvedConfigFilePaths;
+
+        /// <summary>
+        /// Clears the collected paths after they have been embedded in the binary log.
+        /// </summary>
+        internal static void ClearResolvedConfigFilePaths() => s_resolvedConfigFilePaths = new ConcurrentBag<string>();
+
         private UnknownElementsConfiguration()
         {
             _allowedAttributes = FrozenDictionary<string, FrozenSet<string>>.Empty;
@@ -126,6 +140,7 @@ namespace Microsoft.Build.Evaluation
             if (file.Exists)
             {
                 loadedFiles.Add(file.FullPath);
+                s_resolvedConfigFilePaths.Add(file.FullPath);
 
                 foreach (string problem in file.Problems)
                 {

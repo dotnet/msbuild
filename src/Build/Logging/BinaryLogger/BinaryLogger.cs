@@ -1,10 +1,11 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
@@ -511,6 +512,15 @@ namespace Microsoft.Build.Logging
                     projectImportsCollector.AddFile(filePath);
                 }
                 EditorConfigParser.ClearEditorConfigFilePaths();
+
+                // Directory.Parse.config decides whether projects parse at all, so its contents belong in the
+                // log alongside the message naming which file applied.
+                foreach (var filePath in UnknownElementsConfiguration.ResolvedConfigFilePaths)
+                {
+                    projectImportsCollector.AddFile(filePath);
+                }
+                UnknownElementsConfiguration.ClearResolvedConfigFilePaths();
+
                 projectImportsCollector.Close();
 
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
