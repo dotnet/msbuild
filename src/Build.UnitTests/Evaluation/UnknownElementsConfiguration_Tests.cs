@@ -123,9 +123,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string extraConfigPath = Path.Combine(_testDir, "extra.config");
             File.WriteAllText(extraConfigPath, @"<ParseConfig><IgnoreChildren><Ignore Element=""Project"" Name=""CustomThing"" /></IgnoreChildren></ParseConfig>");
 
-            var merged = UnknownElementsConfiguration.LoadFromFile(configPath)
-                .Merge(UnknownElementsConfiguration.LoadFromFile(extraConfigPath))
-                .Merge(UnknownElementsConfiguration.LoadFromFile(configPath));
+            var merged = UnknownElementsConfiguration.Merge(
+                UnknownElementsConfiguration.LoadFromFile(configPath),
+                UnknownElementsConfiguration.LoadFromFile(extraConfigPath));
+            merged = UnknownElementsConfiguration.Merge(merged, UnknownElementsConfiguration.LoadFromFile(configPath));
 
             merged.CheckSkipAttribute("Target", "Foo").ShouldBeTrue();
             merged.CheckSkipElement("Project", "CustomThing").ShouldBeTrue();

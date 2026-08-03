@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -330,14 +330,14 @@ namespace Microsoft.Build.Evaluation
             }
             else if (!_unknownElementsConfiguration.ContainsLoadedFile(projectConfigPath))
             {
-                _unknownElementsConfiguration = _unknownElementsConfiguration.Merge(UnknownElementsConfiguration.LoadFromFile(projectConfigPath));
+                _unknownElementsConfiguration = UnknownElementsConfiguration.Merge(_unknownElementsConfiguration, UnknownElementsConfiguration.LoadFromFile(projectConfigPath));
             }
             else
             {
                 return;
             }
 
-            _projectRootElementCache.UnknownElementsConfiguration = _unknownElementsConfiguration;
+            _projectRootElementCache.SetUnknownElementsConfiguration(_unknownElementsConfiguration);
         }
 
         /// <summary>

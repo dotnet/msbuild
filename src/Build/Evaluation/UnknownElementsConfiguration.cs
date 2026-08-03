@@ -50,13 +50,21 @@ namespace Microsoft.Build.Evaluation
 
         internal static UnknownElementsConfiguration Empty { get; } = new UnknownElementsConfiguration();
 
-        /// <summary>
-        /// Returns true if this config has the same set of loaded files as the other config.
-        /// Used by worker nodes to detect if the config changed between builds.
-        /// </summary>
-        internal bool HasSameLoadedFiles(UnknownElementsConfiguration other)
+        public static bool Equals(UnknownElementsConfiguration? left, UnknownElementsConfiguration? right)
         {
-            return _loadedConfigFiles.SetEquals(other._loadedConfigFiles);
+            if (ReferenceEquals(left, right))
+            {
+                return true;
+            }
+            
+            if (left is null || right is null)
+            {
+                return false;
+            }
+
+            return left._loadedConfigFiles.SetEquals(right._loadedConfigFiles)
+                && CollectionHelpers.DictionaryEquals(left._allowedAttributes, right._allowedAttributes, HashSet<string>.CreateSetComparer())
+                && CollectionHelpers.DictionaryEquals(left._allowedChildren, right._allowedChildren, HashSet<string>.CreateSetComparer());
         }
 
         /// <summary>
@@ -138,20 +146,21 @@ namespace Microsoft.Build.Evaluation
             return $"Loaded Directory.Parse.config from: {string.Join(", ", _loadedConfigFiles)}";
         }
 
-        internal UnknownElementsConfiguration Merge(UnknownElementsConfiguration other)
+        internal static UnknownElementsConfiguration Merge(UnknownElementsConfiguration left, UnknownElementsConfiguration right)
         {
-            ArgumentNullException.ThrowIfNull(other);
+            ArgumentNullException.ThrowIfNull(left);
+            ArgumentNullException.ThrowIfNull(right);
 
             var merged = new UnknownElementsConfiguration();
 
-            UnionEntries(merged._allowedAttributes, _allowedAttributes);
-            UnionEntries(merged._allowedAttributes, other._allowedAttributes);
-            UnionEntries(merged._allowedChildren, _allowedChildren);
-            UnionEntries(merged._allowedChildren, other._allowedChildren);
-            merged._loadedConfigFiles.UnionWith(_loadedConfigFiles);
-            merged._loadedConfigFiles.UnionWith(other._loadedConfigFiles);
-            MergeSkippedItems(merged._skippedItems, _skippedItems);
-            MergeSkippedItems(merged._skippedItems, other._skippedItems);
+            UnionEntries(merged._allowedAttributes, left._allowedAttributes);
+            UnionEntries(merged._allowedAttributes, right._allowedAttributes);
+            UnionEntries(merged._allowedChildren, left._allowedChildren);
+            UnionEntries(merged._allowedChildren, right._allowedChildren);
+            merged._loadedConfigFiles.UnionWith(left._loadedConfigFiles);
+            merged._loadedConfigFiles.UnionWith(right._loadedConfigFiles);
+            MergeSkippedItems(merged._skippedItems, left._skippedItems);
+            MergeSkippedItems(merged._skippedItems, right._skippedItems);
 
             return merged;
         }
