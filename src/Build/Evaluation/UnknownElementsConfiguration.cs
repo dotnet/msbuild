@@ -26,8 +26,6 @@ namespace Microsoft.Build.Evaluation
         internal const string ConfigFileName = "Directory.Parse.config";
         internal const string EnvironmentVariableName = "MSBUILD_PARSE_CONFIG";
 
-        private const string UserProfileSubfolder = ".msbuild";
-
         private Dictionary<string, HashSet<string>> _allowedAttributes;
         private Dictionary<string, HashSet<string>> _allowedChildren;
         private HashSet<string> _loadedConfigFiles;
@@ -172,21 +170,9 @@ namespace Microsoft.Build.Evaluation
             return config;
         }
 
-        internal static UnknownElementsConfiguration LoadGlobalConfig(string? startingDirectory = null)
+        internal static UnknownElementsConfiguration LoadGlobalConfig()
         {
             var config = new UnknownElementsConfiguration();
-
-            string? msbuildExeDir = BuildEnvironmentHelper.Instance?.CurrentMSBuildToolsDirectory;
-            if (!string.IsNullOrEmpty(msbuildExeDir))
-            {
-                config.LoadFile(Path.Combine(msbuildExeDir, ConfigFileName));
-            }
-
-            string userProfile = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
-            if (!string.IsNullOrEmpty(userProfile))
-            {
-                config.LoadFile(Path.Combine(userProfile, UserProfileSubfolder, ConfigFileName));
-            }
 
             string? envValue = Environment.GetEnvironmentVariable(EnvironmentVariableName);
             if (!string.IsNullOrEmpty(envValue))
@@ -199,16 +185,6 @@ namespace Microsoft.Build.Evaluation
                     {
                         config.LoadFile(trimmedPath);
                     }
-                }
-            }
-
-            // Walk up from the starting directory looking for a Directory.Parse.config
-            if (!string.IsNullOrEmpty(startingDirectory))
-            {
-                string directoryConfigPath = FileUtilities.GetPathOfFileAbove(ConfigFileName, startingDirectory!);
-                if (!string.IsNullOrEmpty(directoryConfigPath) && !config.ContainsLoadedFile(directoryConfigPath))
-                {
-                    config.LoadFile(directoryConfigPath);
                 }
             }
 
