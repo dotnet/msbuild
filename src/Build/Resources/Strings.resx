@@ -698,8 +698,8 @@
     is assigned the value "x", this error would be displayed: &lt;MyTask Count="x" /&gt;</comment>
   </data>
   <data name="InvalidTaskPathParameterValueError" xml:space="preserve">
-    <value>MSB4030: The "{0}" parameter of the "{2}" task is a path of type "{1}", but its value consists only of whitespace. Specify a path containing at least one non-whitespace character, or remove the parameter if it is optional.</value>
-    <comment>{StrBegin="MSB4030: "}{0} is the task parameter name, {1} is the parameter's .NET type, and {2} is the task name. Do not localize type names or task parameter names.</comment>
+    <value>MSB4286: The "{0}" parameter of the "{2}" task is a path of type "{1}", but its value consists only of whitespace. Specify a path containing at least one non-whitespace character.</value>
+    <comment>{StrBegin="MSB4286: "}{0} is the task parameter name, {1} is the parameter's .NET type, and {2} is the task name. Do not localize type names or task parameter names.</comment>
   </data>
   <data name="InvalidToolsetValueInConfigFileValue" xml:space="preserve">
     <value>MSB4137: Invalid value specified in the configuration file at "{0}". Property name or tools version name is an empty string.</value>

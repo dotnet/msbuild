@@ -519,7 +519,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
 
-            exception.ErrorCode.ShouldBe("MSB4030");
+            exception.ErrorCode.ShouldBe("MSB4286");
             exception.Message.ShouldContain("AbsolutePathParam");
             exception.Message.ShouldContain(typeof(AbsolutePath).FullName);
             exception.Message.ShouldContain("TaskBuilderTestTask");
@@ -586,7 +586,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
 
-            exception.ErrorCode.ShouldBe("MSB4030");
+            exception.ErrorCode.ShouldBe("MSB4286");
             exception.Message.ShouldContain("AbsolutePathArrayParam");
             exception.Message.ShouldContain(typeof(AbsolutePath[]).FullName);
             exception.Message.ShouldContain("TaskBuilderTestTask");
@@ -671,7 +671,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
 
-            exception.ErrorCode.ShouldBe("MSB4030");
+            exception.ErrorCode.ShouldBe("MSB4286");
             exception.Message.ShouldContain("TaskItemFileInfoParam");
             exception.Message.ShouldContain("TaskBuilderTestTask");
             exception.Message.ShouldContain("non-whitespace character");
