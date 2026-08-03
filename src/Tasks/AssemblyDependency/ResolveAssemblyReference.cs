@@ -2358,13 +2358,13 @@ namespace Microsoft.Build.Tasks
                 Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.ConflictUnsolvable", conflictCandidate.ConflictVictorName, fusionName);
             }
 
-            AssemblyConflictReferenceDetails victorDetails = BuildConflictReferenceDetails(victorFusionName, victor, useUnifiedHeader: false);
-            AssemblyConflictReferenceDetails victimDetails = BuildConflictReferenceDetails(fusionName, conflictCandidate, useUnifiedHeader: true);
-
             string output;
             string details = string.Empty;
             if (logWarning)
             {
+                AssemblyConflictReferenceDetails victorDetails = BuildConflictReferenceDetails(victorFusionName, victor, useUnifiedHeader: false);
+                AssemblyConflictReferenceDetails victimDetails = BuildConflictReferenceDetails(fusionName, conflictCandidate, useUnifiedHeader: true);
+
                 // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
                 // chosen was not the conflict victor in a version comparison. In other words, the victor was older.
                 output = LogFoundConflictsWarning(assemblyName.Name, victorFusionName, fusionName, lossReason, victorDetails, victimDetails, materializeMessage: OutputUnresolvedAssemblyConflicts) ?? string.Empty;
@@ -2374,18 +2374,35 @@ namespace Microsoft.Build.Tasks
                 output = AssemblyConflictMessageFormatter.FormatHeaderOnly(victorFusionName, fusionName, lossReason, conflictCandidate.IsPrimary, InvariantAssemblyConflictMessageFormats.Instance);
                 Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), output);
 
-                var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs(
-                    victorDetails,
-                    victimDetails,
-                    InvariantAssemblyConflictMessageFormats.Instance,
-                    GetType().Name,
-                    MessageImportance.Low,
-                    DateTime.UtcNow);
-                BuildEngine.LogMessageEvent(detailsEvent);
-
-                if (OutputUnresolvedAssemblyConflicts)
+                bool logDependencyDetails = Log.LogsMessagesOfImportance(MessageImportance.Low);
+                if (logDependencyDetails || OutputUnresolvedAssemblyConflicts)
                 {
-                    details = detailsEvent.Message ?? string.Empty;
+                    AssemblyConflictReferenceDetails victorDetails = BuildConflictReferenceDetails(victorFusionName, victor, useUnifiedHeader: false);
+                    AssemblyConflictReferenceDetails victimDetails = BuildConflictReferenceDetails(fusionName, conflictCandidate, useUnifiedHeader: true);
+
+                    if (logDependencyDetails)
+                    {
+                        var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs(
+                            victorDetails,
+                            victimDetails,
+                            InvariantAssemblyConflictMessageFormats.Instance,
+                            GetType().Name,
+                            MessageImportance.Low,
+                            DateTime.UtcNow);
+                        BuildEngine.LogMessageEvent(detailsEvent);
+
+                        if (OutputUnresolvedAssemblyConflicts)
+                        {
+                            details = detailsEvent.Message ?? string.Empty;
+                        }
+                    }
+                    else
+                    {
+                        details = AssemblyConflictMessageFormatter.FormatDependencyDetails(
+                            victorDetails,
+                            victimDetails,
+                            InvariantAssemblyConflictMessageFormats.Instance);
+                    }
                 }
             }
 
@@ -2478,7 +2495,9 @@ namespace Microsoft.Build.Tasks
             Assumed.NotNull(reference);
 
             string unresolvedPrimaryItemSpec = null;
-            var dependees = new List<AssemblyConflictDependee>();
+            HashSet<Reference> dependeeReferences = reference.GetDependees();
+            int dependeeCount = dependeeReferences.Count + (reference.IsPrimary && reference.IsResolved ? 1 : 0);
+            var dependees = new List<AssemblyConflictDependee>(dependeeCount);
 
             if (reference.IsPrimary)
             {
@@ -2490,11 +2509,12 @@ namespace Microsoft.Build.Tasks
                 }
                 else
                 {
-                    unresolvedPrimaryItemSpec = reference.PrimarySourceItem?.ItemSpec;
+                    // Legacy formatting passed the item itself to string.Format, which preserves its escaped include.
+                    unresolvedPrimaryItemSpec = reference.PrimarySourceItem?.ToString();
                 }
             }
 
-            foreach (Reference dependeeReference in reference.GetDependees())
+            foreach (Reference dependeeReference in dependeeReferences)
             {
                 dependees.Add(BuildConflictDependee(dependeeReference));
             }
@@ -2511,8 +2531,9 @@ namespace Microsoft.Build.Tasks
 
         private static AssemblyConflictDependee BuildConflictDependee(Reference dependeeReference)
         {
-            var sourceItemSpecs = new List<string>();
-            foreach (ITaskItem sourceItem in dependeeReference.GetSourceItems())
+            Dictionary<string, ITaskItem>.ValueCollection sourceItems = dependeeReference.GetSourceItems();
+            var sourceItemSpecs = new List<string>(sourceItems.Count);
+            foreach (ITaskItem sourceItem in sourceItems)
             {
                 sourceItemSpecs.Add(sourceItem.ItemSpec);
             }
