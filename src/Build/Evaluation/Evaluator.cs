@@ -707,6 +707,23 @@ namespace Microsoft.Build.Evaluation
                 if (configMessage is not null)
                 {
                     _evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, configMessage);
+
+                    // Embed the config files in the binlog by logging them as imports
+                    foreach (string configFile in _unknownElementsConfiguration.LoadedConfigFiles)
+                    {
+                        var importArgs = new ProjectImportedEventArgs(
+                            -1,
+                            -1,
+                            "Loaded Directory.Parse.config: {0}",
+                            configFile)
+                        {
+                            BuildEventContext = _evaluationLoggingContext.BuildEventContext,
+                            ImportedProjectFile = configFile,
+                            ProjectFile = _projectRootElement.FullPath,
+                        };
+
+                        _evaluationLoggingContext.LogBuildEvent(importArgs);
+                    }
                 }
 
                 // Track loads only after start of evaluation was actually logged
