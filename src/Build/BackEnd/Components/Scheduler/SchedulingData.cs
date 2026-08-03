@@ -503,13 +503,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public bool IsNodeWorking(int nodeId)
         {
-            SchedulableRequest request;
-            if (!_executingRequestByNode.TryGetValue(nodeId, out request))
-            {
-                return false;
-            }
-
-            return request != null;
+            return GetExecutingRequestByNode(nodeId) is not null;
         }
 
         /// <summary>
