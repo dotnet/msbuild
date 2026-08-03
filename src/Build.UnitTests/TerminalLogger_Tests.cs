@@ -605,8 +605,7 @@ namespace Microsoft.Build.UnitTests
         {
             // The build coordinator logs its "waiting for nodes" diagnostic with BuildEventContext.Invalid
             // because it runs outside the context of any particular project. It is identified as a coordinator
-            // diagnostic by its ExtendedType (not by comparing its rendered message text), and should still be
-            // rendered.
+            // diagnostic by its ExtendedType, and should still be rendered.
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 _centralNodeEventSource.InvokeMessageRaised(MakeExtendedMessageEventArgs(
