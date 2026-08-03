@@ -10,15 +10,10 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// Raised by the build coordinator while it is waiting for the coordination server to grant it worker nodes.
 /// </summary>
 /// <remarks>
-/// Consumers (e.g. <c>TerminalLogger</c>) should recognize this diagnostic by its concrete type
-/// (<c>is CoordinatorWaitingForNodesEventArgs</c>) rather than by comparing its rendered, localizable message
-/// text. The concrete type is preserved for in-process consumers, i.e. loggers registered directly with the
-/// <c>LoggingService</c> in the process that raised the event -- which is the only place this event is
-/// currently raised or consumed. If the event ever crossed a node boundary (out-of-proc IPC) or were
-/// round-tripped through a binary log, it would be reconstructed generically as
-/// <see cref="ExtendedBuildMessageEventArgs"/> (still carrying the same <see cref="IExtendedBuildEventArgs.ExtendedType"/>), since
-/// neither the node-IPC packet format nor the binary log format preserve concrete
-/// <see cref="BuildMessageEventArgs"/> subtypes that aren't explicitly registered with them.
+/// Recognize this diagnostic by its concrete type (<c>is CoordinatorWaitingForNodesEventArgs</c>), not by
+/// comparing message text. Note: the concrete type is only preserved for in-process consumers; if this event
+/// ever crossed a node boundary or was replayed from a binary log, it would come back as a generic
+/// <see cref="ExtendedBuildMessageEventArgs"/> with the same <see cref="IExtendedBuildEventArgs.ExtendedType"/>.
 /// </remarks>
 public sealed class CoordinatorWaitingForNodesEventArgs : BuildMessageEventArgs, IExtendedBuildEventArgs
 {
@@ -26,7 +21,7 @@ public sealed class CoordinatorWaitingForNodesEventArgs : BuildMessageEventArgs,
     string IExtendedBuildEventArgs.ExtendedType
     {
         get => Constants.WaitingForNodesEventType;
-        set { /* Type is fixed for this event; ignore deserialized value which is always expected to match. */ }
+        set { /* Type is fixed for this event. */ }
     }
 
     /// <inheritdoc />

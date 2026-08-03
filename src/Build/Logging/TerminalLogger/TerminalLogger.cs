@@ -1440,11 +1440,8 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <param name="e">Raised message event.</param>
     /// <returns>true if the event is a recognized coordinator diagnostic.</returns>
     /// <remarks>
-    /// The primary check is the event's concrete type, which is the strongest signal and requires no string
-    /// comparison at all. The <see cref="IExtendedBuildEventArgs.ExtendedType"/> fallback covers the (currently
-    /// unused) case where the event was reconstructed generically as <see cref="ExtendedBuildMessageEventArgs"/>
-    /// after crossing a node boundary or a binary log round-trip, since neither preserves concrete
-    /// <see cref="BuildMessageEventArgs"/> subtypes that aren't explicitly registered with them.
+    /// The ExtendedType fallback handles the case where the event was reconstructed generically (e.g. after a
+    /// binary log round-trip), which loses the concrete type but keeps the ExtendedType.
     /// </remarks>
     private static bool IsCoordinatorMessage(BuildMessageEventArgs e) =>
         e is Microsoft.Build.Framework.Coordinator.CoordinatorWaitingForNodesEventArgs ||
