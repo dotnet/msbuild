@@ -48,7 +48,7 @@ Apply **all** dimensions on every review, weighted by file location (see [Folder
 6. Never remove CLI switches or aliases — deprecate with warnings first.
 
 **CHECK — Flag if:**
-- [ ] A change can be percieved by customers as breaking
+- [ ] A change can be perceived by customers as breaking (name the specific scenario)
 - [ ] Risky behavioral change has no ChangeWave gate
 - [ ] New warnings emitted
 - [ ] A property default value has changed
@@ -89,7 +89,7 @@ Hot paths: `Evaluator.cs`, `Expander.cs`, file I/O operations.
 4. Profile before optimizing — claims require evidence.
 
 **CHECK — Flag if:**
-- [ ] LINQ
+- [ ] LINQ on a hot path (cold-path LINQ is idiomatic here — don't flag it)
 - [ ] Strings allocated that could be reused or avoided
 - [ ] A value recomputed on every call when cacheable
 - [ ] `Dictionary` for <10 items, or `List` for frequent lookups of >100 items
@@ -148,7 +148,7 @@ See `../../documentation/wiki/Binary-Log.md` and `../../documentation/wiki/Loggi
 
 **Rules:**
 1. Changes must be captured in the binary log.
-2. Use appropriate `MessageImportance`: `High` = always shown, `Normal` = default, `Low` = detailed, `Diagnostic` = debug.
+2. Use appropriate `MessageImportance`: `High` = always shown, `Normal` = default, `Low` = detailed.
 3. Add diagnostic logging for complex code paths.
 4. Use structured logging events with sufficient context (project path, target name, item identity).
 5. Binary log format changes must be backward-compatible.
@@ -413,13 +413,11 @@ See `../../documentation/ProjectReference-Protocol.md`.
 See `../../documentation/wiki/Bootstrap.md`.
 
 **Rules:**
-1. Dependency versions must be pinned via Darc/Maestro. Manual edits to `eng/Versions.props` require justification.
-2. Verify compatibility with all build entry points: Arcade CLI, VS, `dotnet build`, bootstrap.
-3. CI/CD pipeline changes require validation before merge.
-4. Follow VS servicing and branching conventions.
+1. Verify compatibility with all build entry points: Arcade CLI, VS, `dotnet build`, bootstrap.
+2. CI/CD pipeline changes require validation before merge.
+3. Follow VS servicing and branching conventions.
 
 **CHECK — Flag if:**
-- [ ] `eng/Versions.props` manually edited without Darc justification
 - [ ] CI YAML change not validated
 - [ ] Bootstrap build compatibility not verified
 - [ ] Change works in one build entry point but may fail in others
@@ -570,7 +568,7 @@ Use this to prioritize dimensions based on changed files.
 
 1b. **Historical context** (for bug fix and follow-up PRs): Read the linked issue and the original feature PR discussions. Identify design intent, constraints, and reviewer-established principles. Feed this context to every dimension agent so they can evaluate whether the fix aligns with the original design, not just whether the code compiles.
 
-2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`, `model: "claude-opus-4.6"`). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
+2. Launch **one sub-agent per dimension** (`task` tool, `agent_type: "general-purpose"`, `model: "claude-opus-5"`). Each agent evaluates exactly one dimension against the full PR diff. Run in **parallel batches of 6** (4 batches for 24 dimensions).
 
    Each sub-agent receives: the PR diff, PR description, the single dimension's rules and checklist, and the folder context.
 
@@ -606,7 +604,7 @@ Use this to prioritize dimensions based on changed files.
 3. For each non-LGTM finding, launch a validation agent that **proves or disproves it** using:
 
    - **Code flow tracing**: Read full source from the PR branch (`github-mcp-server-get_file_contents` with `ref: "refs/pull/{pr}/head"`). Trace callers, callees, locks, thread boundaries.
-   - **Build and test**: Build the PR branch locally. Run existing tests. Check coverage of the claimed scenario.
+   - **Build and test**: if the PR head is checked out, build it and run the tests covering the claimed scenario. Otherwise validate by reading the diff and source via GitHub MCP.
    - **Proof-of-concept test**: Write a minimal test that demonstrates the issue — include in PR feedback as evidence.
    - **Thread timeline**: For concurrency issues, write the interleaving step-by-step:
      ```
@@ -626,13 +624,15 @@ Use this to prioritize dimensions based on changed files.
 
    Confirm only with concrete evidence. Dispute if a lock, blocking call, or control flow prevents the scenario. **Never validate against `main`.**
 
-4. For borderline findings, run the same validation on 3 models (`claude-opus-4.6`, `gpt-5.2-codex`, `gemini-3-pro-preview`). Keep findings confirmed by ≥2/3.
+4. For borderline findings, run the same validation on 3 models (`claude-opus-5`, `gpt-5.6-sol`, `gemini-3.6-flash`). Keep findings confirmed by ≥2/3.
 
 ### Wave 3: Post
 
 > **Tool availability note**: Steps 5–7 reference gh-aw safe-output tools (`create_pull_request_review_comment`, `submit_pull_request_review`, `add_comment`). When running outside an agentic workflow (e.g. locally in VS Code), these tools are unavailable — use the closest GitHub MCP or CLI equivalents instead (e.g. `gh api` to create PR review comments, `gh pr review` to submit a review, `gh pr comment` to post general comments).
 
-5. Post **inline review comments** on the exact diff lines using the `create_pull_request_review_comment` safe-output tool. Each comment must target a specific `path` and `line` in the PR diff. Format:
+5. **Deduplicate first.** Dimensions overlap, so the same defect can be reported by several of them. Group findings by `FILE` + `LINES` and post one comment per root cause, under the highest-severity dimension.
+
+   Post **inline review comments** on the exact diff lines using the `create_pull_request_review_comment` safe-output tool. Each comment must target a specific `path` and `line` in the PR diff. Format:
 
    ```markdown
    **[$SEVERITY] $DimensionName**
