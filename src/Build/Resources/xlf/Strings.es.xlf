@@ -602,6 +602,11 @@
         <target state="translated">MSB4255: Los siguientes archivos de caché de resultados de entrada no existen: "{0}"</target>
         <note />
       </trans-unit>
+      <trans-unit id="InvalidTaskPathParameterValueError">
+        <source>MSB4030: The "{0}" parameter of the "{2}" task is a path of type "{1}", but its value consists only of whitespace. Specify a path containing at least one non-whitespace character, or remove the parameter if it is optional.</source>
+        <target state="new">MSB4030: The "{0}" parameter of the "{2}" task is a path of type "{1}", but its value consists only of whitespace. Specify a path containing at least one non-whitespace character, or remove the parameter if it is optional.</target>
+        <note>{StrBegin="MSB4030: "}{0} is the task parameter name, {1} is the parameter's .NET type, and {2} is the task name. Do not localize type names or task parameter names.</note>
+      </trans-unit>
       <trans-unit id="InvalidVersionFormat">
         <source>Version string was not in a correct format.</source>
         <target state="translated">La cadena de versión no tenía el formato correcto.</target>

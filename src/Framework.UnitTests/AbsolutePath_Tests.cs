@@ -83,6 +83,53 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData(" ")]
+        [InlineData("\t")]
+        [InlineData("\r\n")]
+        [InlineData(" \t\r\n")]
+        [UseInvariantCulture]
+        public void AbsolutePath_WhitespaceOnlyWithBasePath_ShouldExplainHowToFixTheValue(string path)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path, GetTestBasePath()));
+
+            exception.Message.ShouldStartWith("The path consists only of whitespace.");
+            exception.Message.ShouldContain("non-whitespace character");
+        }
+
+        [Theory]
+        [InlineData(" ")]
+        [InlineData("\t")]
+        [UseInvariantCulture]
+        public void AbsolutePath_WhitespaceOnlyWithoutBasePath_ShouldExplainHowToFixTheValue(string path)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+
+            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path));
+
+            exception.Message.ShouldStartWith("The path consists only of whitespace.");
+            exception.Message.ShouldContain("non-whitespace character");
+        }
+
+        [Fact]
+        public void AbsolutePath_WhitespaceOnlyWithBasePath_ShouldBeAcceptedWhenWaveIsDisabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            const string path = "   ";
+            AbsolutePath absolutePath = new(path, GetTestBasePath());
+
+            absolutePath.OriginalValue.ShouldBe(path);
+        }
+
+        [Theory]
         [InlineData("subfolder")]
         [InlineData("deep/nested/path")]
         [InlineData(".")]

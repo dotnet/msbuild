@@ -511,6 +511,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ValidateTaskParameterNotSet("AbsolutePathParam", "@(NonExistentItem)");
         }
 
+        [Fact]
+        public void TestSetAbsolutePathParamWhitespaceOnlyReportsActionableError()
+        {
+            var parameters = GetStandardParametersDictionary(true);
+            parameters["AbsolutePathParam"] = ("   ", ElementLocation.Create("foo.proj"));
+
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
+
+            exception.ErrorCode.ShouldBe("MSB4030");
+            exception.Message.ShouldContain("AbsolutePathParam");
+            exception.Message.ShouldContain(typeof(AbsolutePath).FullName);
+            exception.Message.ShouldContain("TaskBuilderTestTask");
+            exception.Message.ShouldContain("non-whitespace character");
+        }
+
         #endregion
 
         #region AbsolutePath Array Params
@@ -561,6 +576,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSetAbsolutePathArrayParamEmptyItem()
         {
             ValidateTaskParameterNotSet("AbsolutePathArrayParam", "@(NonExistentItem)");
+        }
+
+        [Fact]
+        public void TestSetAbsolutePathArrayParamWhitespaceOnlyReportsActionableError()
+        {
+            var parameters = GetStandardParametersDictionary(true);
+            parameters["AbsolutePathArrayParam"] = ("%20%20%20", ElementLocation.Create("foo.proj"));
+
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
+
+            exception.ErrorCode.ShouldBe("MSB4030");
+            exception.Message.ShouldContain("AbsolutePathArrayParam");
+            exception.Message.ShouldContain(typeof(AbsolutePath[]).FullName);
+            exception.Message.ShouldContain("TaskBuilderTestTask");
+            exception.Message.ShouldContain("non-whitespace character");
         }
 
         #endregion
@@ -631,6 +661,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestSetTaskItemIntParamEmptyItem()
         {
             ValidateTaskParameterNotSet("TaskItemIntParam", "@(NonExistentItem)");
+        }
+
+        [Fact]
+        public void TestSetTaskItemFileInfoParamWhitespaceOnlyReportsActionableError()
+        {
+            var parameters = GetStandardParametersDictionary(true);
+            parameters["TaskItemFileInfoParam"] = ("%20%20%20", ElementLocation.Create("foo.proj"));
+
+            InvalidProjectFileException exception = Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
+
+            exception.ErrorCode.ShouldBe("MSB4030");
+            exception.Message.ShouldContain("TaskItemFileInfoParam");
+            exception.Message.ShouldContain("TaskBuilderTestTask");
+            exception.Message.ShouldContain("non-whitespace character");
         }
 
         #endregion

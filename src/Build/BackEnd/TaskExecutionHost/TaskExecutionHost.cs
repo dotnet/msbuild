@@ -923,8 +923,15 @@ namespace Microsoft.Build.BackEnd
         /// Wraps the given <paramref name="item"/> into a <c>TaskItem&lt;T&gt;</c> where T is
         /// <paramref name="genericArgument"/>, using a cached compiled constructor delegate.
         /// </summary>
-        private static ITaskItem CreateTaskItemOfT(Type genericArgument, ITaskItem item)
+        private ITaskItem CreateTaskItemOfT(Type genericArgument, ITaskItem item)
         {
+            if (TaskItemTypeDetector.IsSupportedPathType(genericArgument))
+            {
+                // Validate the original identity before TaskItem<T> reads FullPath metadata, which can
+                // resolve a whitespace-only identity to the project directory and hide the invalid input.
+                TaskEnvironment.GetAbsolutePath(item.ItemSpec);
+            }
+
             Func<ITaskItem, ITaskItem> factory = s_taskItemOfTFactories.GetOrAdd(genericArgument, static t =>
             {
 #if NET
@@ -992,6 +999,14 @@ namespace Microsoft.Build.BackEnd
             }
 
             return ValueTypeParser.Parse(value, targetType);
+        }
+
+        private static bool IsPathParameterType(Type parameterType)
+        {
+            Type valueType = parameterType.IsArray ? parameterType.GetElementType() : parameterType;
+            return TaskItemTypeDetector.IsSupportedPathType(valueType)
+                || (TaskParameterTypeVerifier.TryGetSupportedTaskItemValueType(valueType, out Type taskItemValueType)
+                    && TaskItemTypeDetector.IsSupportedPathType(taskItemValueType));
         }
 
         /// <summary>
@@ -1089,6 +1104,18 @@ namespace Microsoft.Build.BackEnd
                     ex is FormatException || // bad string representation of a type
                     ex is OverflowException) // overflow when converting string representation of a numerical type
                 {
+                    if (ex is ArgumentException
+                        && IsPathParameterType(parameterType)
+                        && string.IsNullOrWhiteSpace(currentItem.ItemSpec))
+                    {
+                        ProjectErrorUtilities.ThrowInvalidProject(
+                            parameterLocation,
+                            "InvalidTaskPathParameterValueError",
+                            parameter.Name,
+                            parameterType.FullName,
+                            _taskName);
+                    }
+
                     ProjectErrorUtilities.ThrowInvalidProject(
                         parameterLocation,
                         "InvalidTaskParameterValueError",
@@ -1615,10 +1642,23 @@ namespace Microsoft.Build.BackEnd
                     ex is FormatException || // bad string representation of a type
                     ex is OverflowException) // overflow when converting string representation of a numerical type
                 {
+                    string expandedParameterValue = _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation);
+                    if (ex is ArgumentException
+                        && IsPathParameterType(parameterType)
+                        && string.IsNullOrWhiteSpace(expandedParameterValue))
+                    {
+                        ProjectErrorUtilities.ThrowInvalidProject(
+                            parameterLocation,
+                            "InvalidTaskPathParameterValueError",
+                            parameter.Name,
+                            parameterType.FullName,
+                            _taskName);
+                    }
+
                     ProjectErrorUtilities.ThrowInvalidProject(
                         parameterLocation,
                         "InvalidTaskParameterValueError",
-                        _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation),
+                        expandedParameterValue,
                         parameter.Name,
                         parameterType.FullName,
                         _taskName);
