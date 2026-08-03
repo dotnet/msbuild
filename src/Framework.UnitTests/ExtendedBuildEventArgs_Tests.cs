@@ -160,21 +160,24 @@ public class ExtendedBuildEventArgs_Tests
     [Fact]
     public void StructuredMessagePreservesOrderAndNullsAcrossEventSerialization()
     {
-        var arg = new ExtendedBuildMessageEventArgs(
-            StructuredBuildEventArgsData.EventType,
-            "{0}|{1}",
+        var arg = new StructuredBuildMessageEventArgs(
             null,
-            "sender",
-            MessageImportance.Normal,
-            DateTime.UtcNow,
-            messageArgs: [null!, string.Empty]);
-        StructuredBuildEventArgsData.Set(
-            arg,
+            null,
+            null,
+            0,
+            0,
+            0,
+            0,
+            "{NullValue}|{EmptyValue}",
             "{NullValue}|{EmptyValue}",
             [
                 new("NullValue", null),
                 new("EmptyValue", string.Empty),
-            ]);
+            ],
+            null,
+            "sender",
+            MessageImportance.Normal,
+            DateTime.UtcNow);
 
         using var stream = new MemoryStream();
         using var writer = new BinaryWriter(stream);
@@ -182,7 +185,7 @@ public class ExtendedBuildEventArgs_Tests
 
         stream.Position = 0;
         using var reader = new BinaryReader(stream);
-        var deserialized = new ExtendedBuildMessageEventArgs();
+        var deserialized = new StructuredBuildMessageEventArgs();
         deserialized.CreateFromStream(reader, 80);
 
         deserialized.Message.ShouldBe("|");

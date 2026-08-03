@@ -323,6 +323,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
                     CreateStructuredMessageEvent(),
+                    CreateStructuredWarningEvent(),
+                    CreateStructuredErrorEvent(),
                     new GeneratedFileUsedEventArgs("path", "some content"),
                     new LoggersRegisteredEventArgs(new List<RegisteredLoggerInfo>
                     {
@@ -368,22 +370,56 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
-        private static ExtendedBuildMessageEventArgs CreateStructuredMessageEvent()
-        {
-            var buildEvent = new ExtendedBuildMessageEventArgs(
-                StructuredBuildEventArgsData.EventType,
-                "visible {0}",
+        private static StructuredBuildMessageEventArgs CreateStructuredMessageEvent() =>
+            new(
+                null,
+                null,
+                null,
+                0,
+                0,
+                0,
+                0,
+                "localized visible message",
+                "visible {Value}",
+                [new("Value", "message")],
                 null,
                 "sender",
                 MessageImportance.Normal,
-                DateTime.UtcNow,
-                "message");
-            StructuredBuildEventArgsData.Set(
-                buildEvent,
-                "visible {Value}",
-                [new("Value", "message")]);
-            return buildEvent;
-        }
+                DateTime.UtcNow);
+
+        private static StructuredBuildWarningEventArgs CreateStructuredWarningEvent() =>
+            new(
+                "subcategory",
+                "W1",
+                "warning.cs",
+                1,
+                2,
+                3,
+                4,
+                "localized warning",
+                "warning {Value}",
+                [new("Value", "message")],
+                "help",
+                "sender",
+                "https://warning",
+                DateTime.UtcNow);
+
+        private static StructuredBuildErrorEventArgs CreateStructuredErrorEvent() =>
+            new(
+                "subcategory",
+                "E1",
+                "error.cs",
+                5,
+                6,
+                7,
+                8,
+                "localized error",
+                "error {Value}",
+                [new("Value", "message")],
+                "help",
+                "sender",
+                "https://error",
+                DateTime.UtcNow);
 
         /// <summary>
         /// Verify the LoggingMessagePacket is properly created from a build event.

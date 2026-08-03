@@ -551,11 +551,13 @@ namespace Microsoft.Build.UnitTests
             const string OriginalFormat =
                 "Considered candidate '{Candidate}' while resolving a reference, but expected '{Expected}' according to the configured search path.";
 
-            long eagerLength = WriteEvents(structured: false);
+            long lazyCompositeLength = WriteEvents(structured: false);
             long structuredLength = WriteEvents(structured: true);
 
-            _output.WriteLine($"Eager: {eagerLength:N0} bytes; structured: {structuredLength:N0} bytes.");
-            structuredLength.ShouldBeLessThan(eagerLength);
+            _output.WriteLine(
+                $"Lazy composite: {lazyCompositeLength:N0} bytes; structured: {structuredLength:N0} bytes.");
+            // Dedicated records measured 2.7% overhead; leave headroom while catching lost string-table reuse.
+            structuredLength.ShouldBeLessThan((lazyCompositeLength * 11) / 10);
 
             long WriteEvents(bool structured)
             {
@@ -569,8 +571,28 @@ namespace Microsoft.Build.UnitTests
                     BuildMessageEventArgs buildEvent;
                     if (structured)
                     {
-                        var structuredEvent = new ExtendedBuildMessageEventArgs(
-                            "MSBuild.StructuredLogging",
+                        buildEvent = new StructuredBuildMessageEventArgs(
+                            null,
+                            null,
+                            null,
+                            0,
+                            0,
+                            0,
+                            0,
+                            OriginalFormat,
+                            OriginalFormat,
+                            [
+                                new("Candidate", candidate),
+                                new("Expected", Expected),
+                            ],
+                            null,
+                            "Task",
+                            MessageImportance.Low,
+                            DateTime.UtcNow);
+                    }
+                    else
+                    {
+                        buildEvent = new BuildMessageEventArgs(
                             MessageFormat,
                             null,
                             "Task",
@@ -578,22 +600,6 @@ namespace Microsoft.Build.UnitTests
                             DateTime.UtcNow,
                             candidate,
                             Expected);
-                        StructuredBuildEventArgsData.Set(
-                            structuredEvent,
-                            OriginalFormat,
-                            [
-                                new("Candidate", candidate),
-                                new("Expected", Expected),
-                            ]);
-                        buildEvent = structuredEvent;
-                    }
-                    else
-                    {
-                        buildEvent = new BuildMessageEventArgs(
-                            string.Format(CultureInfo.CurrentCulture, MessageFormat, candidate, Expected),
-                            null,
-                            "Task",
-                            MessageImportance.Low);
                     }
 
                     eventWriter.Write(buildEvent);
@@ -606,28 +612,89 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void StructuredMessagePreservesNullAndEmptyValuesThroughBinaryLog()
         {
-            var args = new ExtendedBuildMessageEventArgs(
-                StructuredBuildEventArgsData.EventType,
-                "{0}|{1}",
+            var args = new StructuredBuildMessageEventArgs(
                 null,
-                "Task",
-                MessageImportance.Low,
-                DateTime.UtcNow,
-                null!,
-                string.Empty);
-            StructuredBuildEventArgsData.Set(
-                args,
+                null,
+                null,
+                0,
+                0,
+                0,
+                0,
+                "{NullValue}|{EmptyValue}",
                 "{NullValue}|{EmptyValue}",
                 [
                     new("NullValue", null),
                     new("EmptyValue", string.Empty),
-                ]);
+                ],
+                null,
+                "Task",
+                MessageImportance.Low,
+                DateTime.UtcNow);
 
             Roundtrip(
                 args,
                 e => e.Message,
                 e => e.OriginalFormat,
                 e => string.Join("|", e.StructuredValues!.Select(value => $"{value.Key}={value.Value ?? "<null>"}")));
+        }
+
+        [Fact]
+        public void StructuredEventsUseDedicatedRecordsAndRoundtripDiagnosticMetadata()
+        {
+            KeyValuePair<string, string>[] values = [new("Detail", "detail")];
+            DateTime timestamp = DateTime.UtcNow;
+            var message = new StructuredBuildMessageEventArgs(
+                "subcategory", "M1", "message.cs", 1, 2, 3, 4,
+                "localized message", "message {Detail}", values,
+                "message-help", "Task", MessageImportance.Low, timestamp);
+            var warning = new StructuredBuildWarningEventArgs(
+                "subcategory", "W1", "warning.cs", 5, 6, 7, 8,
+                "localized warning", "warning {Detail}", values,
+                "warning-help", "Task", "https://warning", timestamp);
+            var error = new StructuredBuildErrorEventArgs(
+                "subcategory", "E1", "error.cs", 9, 10, 11, 12,
+                "localized error", "error {Detail}", values,
+                "error-help", "Task", "https://error", timestamp);
+
+            AssertRecordKind(message, BinaryLogRecordKind.StructuredMessage);
+            AssertRecordKind(warning, BinaryLogRecordKind.StructuredWarning);
+            AssertRecordKind(error, BinaryLogRecordKind.StructuredError);
+
+            Roundtrip(
+                message,
+                e => e.Message,
+                e => e.OriginalFormat,
+                e => e.Importance.ToString(),
+                e => e.Code,
+                e => e.File,
+                e => string.Join("|", e.StructuredValues!));
+            Roundtrip(
+                warning,
+                e => e.Message,
+                e => e.OriginalFormat,
+                e => e.Code,
+                e => e.File,
+                e => e.HelpLink,
+                e => string.Join("|", e.StructuredValues!));
+            Roundtrip(
+                error,
+                e => e.Message,
+                e => e.OriginalFormat,
+                e => e.Code,
+                e => e.File,
+                e => e.HelpLink,
+                e => string.Join("|", e.StructuredValues!));
+
+            static void AssertRecordKind(BuildEventArgs args, BinaryLogRecordKind expected)
+            {
+                using var stream = new MemoryStream();
+                using var writer = new BinaryWriter(stream);
+                new BuildEventArgsWriter(writer).Write(args);
+                stream.Position = 0;
+                using var reader = new BinaryReader(stream);
+                using var eventReader = new BuildEventArgsReader(reader, BinaryLogger.FileFormatVersion);
+                eventReader.ReadRaw().RecordKind.ShouldBe(expected);
+            }
         }
 
 

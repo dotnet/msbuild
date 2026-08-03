@@ -178,10 +178,10 @@ namespace Microsoft.Build.UnitTests
 
             task.Log.LogMessage($"Value {value}");
 
-            ExtendedBuildMessageEventArgs buildEvent =
-                mockEngine.LastMessageEvent.ShouldBeOfType<ExtendedBuildMessageEventArgs>();
-            buildEvent.RawMessage.ShouldBe("Value {0}");
-            buildEvent.RawArguments.ShouldNotBeNull();
+            StructuredBuildMessageEventArgs buildEvent =
+                mockEngine.LastMessageEvent.ShouldBeOfType<StructuredBuildMessageEventArgs>();
+            buildEvent.RawMessage.ShouldBe("Value {value}");
+            buildEvent.RawArguments.ShouldBeNull();
             buildEvent.OriginalFormat.ShouldBe("Value {value}");
             buildEvent.StructuredValues[0].Value.ShouldBe("captured");
 
@@ -189,6 +189,45 @@ namespace Microsoft.Build.UnitTests
             buildEvent.OriginalFormat.ShouldBe("Value {value}");
             buildEvent.StructuredValues[0].Value.ShouldBe("captured");
         }
+
+#if NET
+        [Fact]
+        public void StructuredMessageUsesOriginalEventShapeWhenChangeWaveIsDisabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable(
+                "MSBUILDDISABLEFEATURESFROMVERSION",
+                ChangeWaves.Wave18_11.ToString());
+
+            try
+            {
+                MockEngine3 mockEngine = new();
+                Task task = new MockTask { BuildEngine = mockEngine };
+                string value = "captured";
+
+                task.Log.LogMessage($"Value {value}");
+
+                mockEngine.LastMessageEvent.ShouldBeOfType<BuildMessageEventArgs>();
+                mockEngine.LastMessageEvent.ShouldNotBeAssignableTo<IStructuredBuildEventArgs>();
+                mockEngine.LastMessageEvent.Message.ShouldBe("Value captured");
+
+                task.Log.LogWarning($"Warning {value}");
+                mockEngine.LastWarningEvent.ShouldBeOfType<BuildWarningEventArgs>();
+                mockEngine.LastWarningEvent.ShouldNotBeAssignableTo<IStructuredBuildEventArgs>();
+                mockEngine.LastWarningEvent.Message.ShouldBe("Warning captured");
+
+                task.Log.LogError($"Error {value}");
+                mockEngine.LastErrorEvent.ShouldBeOfType<BuildErrorEventArgs>();
+                mockEngine.LastErrorEvent.ShouldNotBeAssignableTo<IStructuredBuildEventArgs>();
+                mockEngine.LastErrorEvent.Message.ShouldBe("Error captured");
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+#endif
 
         [Fact]
         public void StringAndCompositeMessageOverloadsRemainUnstructured()
@@ -250,6 +289,26 @@ namespace Microsoft.Build.UnitTests
                 evaluations++;
                 return evaluations;
             }
+        }
+
+        [Fact]
+        public void ManuallyDisabledHandlerIsIgnoredByWarningAndErrorOverloads()
+        {
+            MockEngine mockEngine = new() { MinimumMessageImportance = MessageImportance.High };
+            Task task = new MockTask { BuildEngine = mockEngine };
+            var handler = new TaskLoggingHelper.StructuredLogInterpolatedStringHandler(
+                literalLength: 0,
+                formattedCount: 0,
+                task.Log,
+                MessageImportance.Low,
+                out bool shouldAppend);
+
+            shouldAppend.ShouldBeFalse();
+            task.Log.LogWarning(ref handler);
+            task.Log.LogError(ref handler);
+
+            mockEngine.Warnings.ShouldBe(0);
+            mockEngine.Errors.ShouldBe(0);
         }
 
 #if NET
@@ -335,6 +394,14 @@ namespace Microsoft.Build.UnitTests
                 "{Expected}",
                 "localized",
                 new List<KeyValuePair<string, object>> { new("Actual", 1) }));
+            Should.Throw<ArgumentNullException>(() => task.Log.LogStructuredWarning(
+                "{Expected}",
+                null!,
+                new List<KeyValuePair<string, object>> { new("Expected", 1) }));
+            Should.Throw<ArgumentNullException>(() => task.Log.LogStructuredError(
+                "{Expected}",
+                null!,
+                new List<KeyValuePair<string, object>> { new("Expected", 1) }));
         }
 
         [Fact]
@@ -348,6 +415,7 @@ namespace Microsoft.Build.UnitTests
             mockEngine.LastWarningEvent.Code.ShouldBe("W1");
             mockEngine.LastWarningEvent.File.ShouldBe("file");
             mockEngine.LastWarningEvent.LineNumber.ShouldBe(1);
+            mockEngine.LastWarningEvent.Message.ShouldBe("warning detail");
             mockEngine.LastWarningEvent.ShouldBeAssignableTo<IStructuredBuildEventArgs>()
                 .OriginalFormat.ShouldBe("warning {detail}");
 
@@ -355,6 +423,7 @@ namespace Microsoft.Build.UnitTests
             mockEngine.LastErrorEvent.Code.ShouldBe("E1");
             mockEngine.LastErrorEvent.File.ShouldBe("file");
             mockEngine.LastErrorEvent.LineNumber.ShouldBe(5);
+            mockEngine.LastErrorEvent.Message.ShouldBe("error detail");
             mockEngine.LastErrorEvent.ShouldBeAssignableTo<IStructuredBuildEventArgs>()
                 .OriginalFormat.ShouldBe("error {detail}");
             task.Log.HasLoggedErrors.ShouldBeTrue();

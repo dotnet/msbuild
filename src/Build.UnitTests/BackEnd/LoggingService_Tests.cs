@@ -885,6 +885,47 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(BuildWarningEventForTreatAsErrorOrMessageTests.Timestamp, actualBuildEvent.Timestamp);
         }
 
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void StructuredWarningConversionPreservesStructuredState(bool treatAsError)
+        {
+            const string Code = "STRUCTURED1";
+            var warning = new StructuredBuildWarningEventArgs(
+                "subcategory",
+                Code,
+                "warning.cs",
+                1,
+                2,
+                3,
+                4,
+                "localized warning",
+                "warning {Detail}",
+                [new("Detail", "detail")],
+                "help",
+                "sender",
+                "https://warning",
+                DateTime.UtcNow);
+
+            MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(
+                warning,
+                warningsAsErrors: treatAsError ? new HashSet<string> { Code } : null,
+                warningsAsMessages: treatAsError ? null : new HashSet<string> { Code });
+
+            BuildEventArgs converted = treatAsError
+                ? logger.Errors.ShouldHaveSingleItem()
+                : logger.BuildMessageEvents.ShouldHaveSingleItem();
+            IStructuredBuildEventArgs structured =
+                converted.ShouldBeAssignableTo<IStructuredBuildEventArgs>();
+            converted.Message.ShouldBe("localized warning");
+            structured.OriginalFormat.ShouldBe("warning {Detail}");
+            structured.StructuredValues.ShouldBe([new("Detail", "detail")]);
+            if (treatAsError)
+            {
+                ((BuildErrorEventArgs)converted).HelpLink.ShouldBe("https://warning");
+            }
+        }
+
         /// <summary>
         /// Verifies that a warning is not treated as a low importance message when other warning codes are specified.
         /// </summary>

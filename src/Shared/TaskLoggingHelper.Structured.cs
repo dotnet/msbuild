@@ -10,6 +10,10 @@ using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
+#if BUILD_ENGINE
+using Microsoft.Build.Utilities;
+#endif
+
 #nullable enable
 
 #if BUILD_ENGINE
@@ -34,7 +38,7 @@ namespace Microsoft.Build.Utilities
         /// reserving any part of the standard interpolation format string.
         /// </remarks>
         /// <typeparam name="T">The value type.</typeparam>
-        public readonly struct NamedStructuredLogValue<T> : INamedStructuredLogValue
+        public readonly struct NamedStructuredLogValue<T>
         {
             internal NamedStructuredLogValue(string name, T value)
             {
@@ -45,15 +49,6 @@ namespace Microsoft.Build.Utilities
 
             internal string Name { get; }
             internal T Value { get; }
-
-            string INamedStructuredLogValue.Name => Name;
-            object? INamedStructuredLogValue.Value => Value;
-        }
-
-        private interface INamedStructuredLogValue
-        {
-            string Name { get; }
-            object? Value { get; }
         }
 
         /// <summary>
@@ -83,11 +78,11 @@ namespace Microsoft.Build.Utilities
         public ref struct StructuredLogInterpolatedStringHandler
         {
             private readonly bool _enabled;
+            private readonly bool _emitStructured;
             private readonly StringBuilder? _messageFormat;
-            private readonly StringBuilder? _template;
+            private ValueStringBuilder _template;
             private readonly object[]? _messageArguments;
             private readonly KeyValuePair<string, string?>[]? _values;
-            private readonly HashSet<string>? _names;
             private int _fallbackName;
             private int _formattedIndex;
 
@@ -152,27 +147,28 @@ namespace Microsoft.Build.Utilities
                 out bool shouldAppend)
             {
                 _enabled = enabled;
+                _emitStructured = enabled && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11);
                 shouldAppend = enabled;
                 _fallbackName = 0;
                 _formattedIndex = 0;
                 if (enabled)
                 {
                     int capacity = literalLength + (formattedCount * 11);
-                    _messageFormat = new StringBuilder(capacity);
-                    _template = new StringBuilder(capacity);
-                    _messageArguments = formattedCount == 0 ? Array.Empty<object>() : new object[formattedCount];
+                    _messageFormat = _emitStructured ? null : new StringBuilder(capacity);
+                    _template = new ValueStringBuilder(capacity);
+                    _messageArguments = _emitStructured
+                        ? null
+                        : formattedCount == 0 ? Array.Empty<object>() : new object[formattedCount];
                     _values = formattedCount == 0
                         ? Array.Empty<KeyValuePair<string, string?>>()
                         : new KeyValuePair<string, string?>[formattedCount];
-                    _names = new HashSet<string>(StringComparer.Ordinal);
                 }
                 else
                 {
                     _messageFormat = null;
-                    _template = null;
+                    _template = default;
                     _messageArguments = null;
                     _values = null;
-                    _names = null;
                 }
             }
 
@@ -191,8 +187,12 @@ namespace Microsoft.Build.Utilities
                     return;
                 }
 
-                AppendEscapedLiteral(_messageFormat!, value);
-                AppendEscapedLiteral(_template!, value);
+                if (_messageFormat is not null)
+                {
+                    AppendEscapedLiteral(_messageFormat, value);
+                }
+
+                AppendEscapedLiteral(ref _template, value);
             }
 
             /// <summary>
@@ -250,6 +250,30 @@ namespace Microsoft.Build.Utilities
                 [CallerArgumentExpression(nameof(value))] string? expression = null)
                 => AppendFormattedCore(value, alignment, format, expression);
 
+            /// <summary>
+            /// Appends a value carrying an explicit stable structured name.
+            /// </summary>
+            public void AppendFormatted<T>(NamedStructuredLogValue<T> value)
+                => AppendFormattedCore(value.Value, alignment: 0, format: null, value.Name);
+
+            /// <summary>
+            /// Appends a formatted value carrying an explicit stable structured name.
+            /// </summary>
+            public void AppendFormatted<T>(NamedStructuredLogValue<T> value, string? format)
+                => AppendFormattedCore(value.Value, alignment: 0, format, value.Name);
+
+            /// <summary>
+            /// Appends an aligned value carrying an explicit stable structured name.
+            /// </summary>
+            public void AppendFormatted<T>(NamedStructuredLogValue<T> value, int alignment)
+                => AppendFormattedCore(value.Value, alignment, format: null, value.Name);
+
+            /// <summary>
+            /// Appends an aligned, formatted value carrying an explicit stable structured name.
+            /// </summary>
+            public void AppendFormatted<T>(NamedStructuredLogValue<T> value, int alignment, string? format)
+                => AppendFormattedCore(value.Value, alignment, format, value.Name);
+
             private void AppendFormattedCore<T>(T value, int alignment, string? format, string? expression)
             {
                 if (!_enabled)
@@ -257,68 +281,74 @@ namespace Microsoft.Build.Utilities
                     return;
                 }
 
-                string? name = expression;
                 object? actualValue = value;
-                if (actualValue is INamedStructuredLogValue namedValue)
-                {
-                    name = namedValue.Name;
-                    actualValue = namedValue.Value;
-                }
-
-                name = GetUniqueName(SanitizeName(name));
-                string displayValue = FormatValue(actualValue, format, CultureInfo.CurrentCulture);
+                string name = GetUniqueName(SanitizeName(expression));
                 int index = _formattedIndex++;
-                _messageFormat!.Append('{').Append(index);
-                if (alignment != 0)
+                if (_messageFormat is not null)
                 {
-                    _messageFormat.Append(',').Append(alignment.ToString(CultureInfo.InvariantCulture));
+                    _messageFormat.Append('{').Append(index);
+                    if (alignment != 0)
+                    {
+                        _messageFormat.Append(',').Append(alignment.ToString(CultureInfo.InvariantCulture));
+                    }
+
+                    _messageFormat.Append('}');
+                    _messageArguments![index] = FormatValue(actualValue, format, CultureInfo.CurrentCulture);
                 }
 
-                _messageFormat.Append('}');
-                _messageArguments![index] = displayValue;
-
-                _template!.Append('{').Append(name);
+                _template.Append('{');
+                _template.Append(name);
                 if (alignment != 0)
                 {
-                    _template.Append(',').Append(alignment.ToString(CultureInfo.InvariantCulture));
+                    _template.Append(',');
+                    _template.Append(alignment.ToString(CultureInfo.InvariantCulture));
                 }
 
                 if (!string.IsNullOrEmpty(format))
                 {
-                    _template.Append(':').Append(format);
+                    _template.Append(':');
+                    _template.Append(format);
                 }
 
                 _template.Append('}');
                 _values![index] = new KeyValuePair<string, string?>(
                     name,
-                    actualValue == null ? null : FormatValue(actualValue, format, CultureInfo.InvariantCulture));
+                    actualValue == null ? null : FormatValue(actualValue, format, CultureInfo.CurrentCulture));
             }
 
             private string SanitizeName(string? name)
             {
                 name = name?.Trim();
-                if (name is null || name.Length == 0)
+                if (name is null || !IsUsableInferredName(name))
                 {
                     return $"Value{_fallbackName++}";
                 }
 
-                StringBuilder? sanitized = null;
-                for (int i = 0; i < name.Length; i++)
+                return name;
+            }
+
+            private static bool IsUsableInferredName(string name)
+            {
+                if (name.Length == 0 || !(char.IsLetter(name[0]) || name[0] == '_'))
+                {
+                    return false;
+                }
+
+                for (int i = 1; i < name.Length; i++)
                 {
                     char c = name[i];
-                    if (c is '{' or '}' or ',' or ':')
+                    if (!(char.IsLetterOrDigit(c) || c is '_' or '.'))
                     {
-                        sanitized ??= new StringBuilder(name);
-                        sanitized[i] = '_';
+                        return false;
                     }
                 }
 
-                return sanitized?.ToString() ?? name;
+                return true;
             }
 
             private string GetUniqueName(string name)
             {
-                if (_names!.Add(name))
+                if (!ContainsName(name))
                 {
                     return name;
                 }
@@ -330,29 +360,46 @@ namespace Microsoft.Build.Utilities
                     candidate = name + "_" + suffix.ToString(CultureInfo.InvariantCulture);
                     suffix++;
                 }
-                while (!_names.Add(candidate));
+                while (ContainsName(candidate));
 
                 return candidate;
             }
 
-            /// <summary>
-            /// Returns the positional composite format used by <see cref="LazyFormattedBuildEventArgs"/>.
-            /// It is intentionally distinct from <see cref="GetOriginalFormat"/> so the visible message can remain
-            /// lazy while structured consumers receive stable source-level names.
-            /// </summary>
-            internal string GetDisplayFormat() => _messageFormat!.ToString();
+            private bool ContainsName(string name)
+            {
+                for (int i = 0; i < _formattedIndex; i++)
+                {
+                    if (string.Equals(_values![i].Key, name, StringComparison.Ordinal))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
 
             /// <summary>
-            /// Returns display arguments captured separately from the format so binary-log string tables can
-            /// deduplicate components without first creating the complete visible message.
+            /// Returns a positional composite format only when the Change Wave compatibility fallback is active.
             /// </summary>
-            internal object[] GetMessageArguments() => _messageArguments!;
+            /// <remarks>
+            /// The normal structured path renders the named template directly. Keeping positional state out of that
+            /// path avoids storing a second template solely for older event types.
+            /// </remarks>
+            internal string? GetDisplayFormat() => _messageFormat?.ToString();
 
             /// <summary>
-            /// Returns the invariant named template intended for structured consumers. Unlike the positional
-            /// display format, this template preserves meaningful names for querying and aggregation.
+            /// Returns positional arguments only when needed to restore the pre-Change-Wave event shape.
             /// </summary>
-            internal string GetOriginalFormat() => _template!.ToString();
+            internal object[]? GetMessageArguments() => _messageArguments;
+
+            /// <summary>
+            /// Returns the invariant named template used both as the event display format and by structured consumers.
+            /// </summary>
+            /// <remarks>
+            /// The owned builder is disposed here because compiler-generated handler calls consume the handler once.
+            /// This keeps capture safe for nested logging while returning pooled storage promptly.
+            /// </remarks>
+            internal string GetOriginalFormat() => _template.ToStringAndDispose();
 
             /// <summary>
             /// Returns invariant string values independently from lazy display state so reading
@@ -472,10 +519,17 @@ namespace Microsoft.Build.Utilities
         /// must apply suppression and warning-as-error policy.
         /// </param>
         public void LogWarning(ref StructuredLogInterpolatedStringHandler message)
-            => LogStructuredWarningCore(
+        {
+            if (!message.IsEnabled)
+            {
+                return;
+            }
+
+            LogStructuredWarningCore(
                 null, null, null, null, null, 0, 0, 0, 0,
                 null, message.GetOriginalFormat(), message.GetValues(),
                 message.GetDisplayFormat(), message.GetMessageArguments());
+        }
 
         /// <summary>
         /// Logs a structured interpolated warning with source-location metadata.
@@ -499,7 +553,13 @@ namespace Microsoft.Build.Utilities
             int endLineNumber,
             int endColumnNumber,
             ref StructuredLogInterpolatedStringHandler message)
-            => LogStructuredWarningCore(
+        {
+            if (!message.IsEnabled)
+            {
+                return;
+            }
+
+            LogStructuredWarningCore(
                 subcategory,
                 warningCode,
                 helpKeyword,
@@ -514,6 +574,7 @@ namespace Microsoft.Build.Utilities
                 message.GetValues(),
                 message.GetDisplayFormat(),
                 message.GetMessageArguments());
+        }
 
         /// <summary>
         /// Logs a structured interpolated warning with source-location metadata and a help link.
@@ -539,7 +600,13 @@ namespace Microsoft.Build.Utilities
             int endLineNumber,
             int endColumnNumber,
             ref StructuredLogInterpolatedStringHandler message)
-            => LogStructuredWarningCore(
+        {
+            if (!message.IsEnabled)
+            {
+                return;
+            }
+
+            LogStructuredWarningCore(
                 subcategory,
                 warningCode,
                 helpKeyword,
@@ -554,6 +621,7 @@ namespace Microsoft.Build.Utilities
                 message.GetValues(),
                 message.GetDisplayFormat(),
                 message.GetMessageArguments());
+        }
 
         /// <summary>
         /// Logs a structured interpolated error.
@@ -562,10 +630,17 @@ namespace Microsoft.Build.Utilities
         /// The compiler-built handler. Errors are always captured because they determine build success.
         /// </param>
         public void LogError(ref StructuredLogInterpolatedStringHandler message)
-            => LogStructuredErrorCore(
+        {
+            if (!message.IsEnabled)
+            {
+                return;
+            }
+
+            LogStructuredErrorCore(
                 null, null, null, null, null, 0, 0, 0, 0,
                 null, message.GetOriginalFormat(), message.GetValues(),
                 message.GetDisplayFormat(), message.GetMessageArguments());
+        }
 
         /// <summary>
         /// Logs a structured interpolated error with source-location metadata.
@@ -589,7 +664,13 @@ namespace Microsoft.Build.Utilities
             int endLineNumber,
             int endColumnNumber,
             ref StructuredLogInterpolatedStringHandler message)
-            => LogStructuredErrorCore(
+        {
+            if (!message.IsEnabled)
+            {
+                return;
+            }
+
+            LogStructuredErrorCore(
                 subcategory,
                 errorCode,
                 helpKeyword,
@@ -604,6 +685,7 @@ namespace Microsoft.Build.Utilities
                 message.GetValues(),
                 message.GetDisplayFormat(),
                 message.GetMessageArguments());
+        }
 
         /// <summary>
         /// Logs a structured interpolated error with source-location metadata and a help link.
@@ -629,7 +711,13 @@ namespace Microsoft.Build.Utilities
             int endLineNumber,
             int endColumnNumber,
             ref StructuredLogInterpolatedStringHandler message)
-            => LogStructuredErrorCore(
+        {
+            if (!message.IsEnabled)
+            {
+                return;
+            }
+
+            LogStructuredErrorCore(
                 subcategory,
                 errorCode,
                 helpKeyword,
@@ -644,6 +732,7 @@ namespace Microsoft.Build.Utilities
                 message.GetValues(),
                 message.GetDisplayFormat(),
                 message.GetMessageArguments());
+        }
 
         /// <summary>
         /// Logs a structured normal-importance message from an invariant named template and ordered values.
@@ -664,7 +753,15 @@ namespace Microsoft.Build.Utilities
         /// <param name="values">Values in template occurrence order; null elements remain structured nulls.</param>
         public void LogStructuredMessage(MessageImportance importance, string messageTemplate, params object?[]? values)
         {
-            StructuredMessageData data = ParseStructuredMessage(messageTemplate, values);
+            if (!LogsMessagesOfImportance(importance))
+            {
+                return;
+            }
+
+            StructuredMessageData data = ParseStructuredMessage(
+                messageTemplate,
+                values,
+                buildDisplayFormat: !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11));
             LogStructuredMessageCore(
                 importance,
                 data.Message,
@@ -681,7 +778,10 @@ namespace Microsoft.Build.Utilities
         /// <param name="values">Values in template occurrence order; null elements remain structured nulls.</param>
         public void LogStructuredWarning(string messageTemplate, params object?[]? values)
         {
-            StructuredMessageData data = ParseStructuredMessage(messageTemplate, values);
+            StructuredMessageData data = ParseStructuredMessage(
+                messageTemplate,
+                values,
+                buildDisplayFormat: !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11));
             LogStructuredWarningCore(
                 null, null, null, null, null, 0, 0, 0, 0,
                 data.Message, data.OriginalFormat, data.Values, data.MessageFormat, data.MessageArguments);
@@ -694,7 +794,10 @@ namespace Microsoft.Build.Utilities
         /// <param name="values">Values in template occurrence order; null elements remain structured nulls.</param>
         public void LogStructuredError(string messageTemplate, params object?[]? values)
         {
-            StructuredMessageData data = ParseStructuredMessage(messageTemplate, values);
+            StructuredMessageData data = ParseStructuredMessage(
+                messageTemplate,
+                values,
+                buildDisplayFormat: !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11));
             LogStructuredErrorCore(
                 null, null, null, null, null, 0, 0, 0, 0,
                 data.Message, data.OriginalFormat, data.Values, data.MessageFormat, data.MessageArguments);
@@ -721,6 +824,12 @@ namespace Microsoft.Build.Utilities
             string localizedMessage,
             IReadOnlyList<KeyValuePair<string, object?>> values)
         {
+            ArgumentNullException.ThrowIfNull(localizedMessage);
+            if (!LogsMessagesOfImportance(importance))
+            {
+                return;
+            }
+
             StructuredMessageData data = ValidateNamedStructuredMessage(originalFormat, localizedMessage, values);
             LogStructuredMessageCore(importance, data.Message, data.OriginalFormat, data.Values, null, null);
         }
@@ -796,22 +905,42 @@ namespace Microsoft.Build.Utilities
                 "LoggingBeforeTaskInitialization",
                 message ?? messageFormat ?? string.Empty);
             bool fillInLocation = string.IsNullOrEmpty(file) && lineNumber == 0 && columnNumber == 0;
-            var e = new ExtendedBuildMessageEventArgs(
-                StructuredBuildEventArgsData.EventType,
-                subcategory,
-                code,
-                fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
-                fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
-                fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
-                endLineNumber,
-                endColumnNumber,
-                messageFormat ?? message,
-                helpKeyword,
-                TaskName,
-                importance,
-                DateTime.UtcNow,
-                messageArguments);
-            StructuredBuildEventArgsData.Set(e, originalFormat, values!);
+            BuildMessageEventArgs e;
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+            {
+                e = new StructuredBuildMessageEventArgs(
+                    subcategory,
+                    code,
+                    fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                    fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                    fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                    endLineNumber,
+                    endColumnNumber,
+                    message ?? originalFormat,
+                    originalFormat,
+                    values!,
+                    helpKeyword,
+                    TaskName,
+                    importance,
+                    DateTime.UtcNow);
+            }
+            else
+            {
+                e = new BuildMessageEventArgs(
+                    subcategory,
+                    code,
+                    fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                    fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                    fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                    endLineNumber,
+                    endColumnNumber,
+                    messageFormat ?? message,
+                    helpKeyword,
+                    TaskName,
+                    importance,
+                    DateTime.UtcNow,
+                    messageArguments);
+            }
 
             BuildEngine.LogMessageEvent(e);
         }
@@ -837,22 +966,42 @@ namespace Microsoft.Build.Utilities
                 "LoggingBeforeTaskInitialization",
                 message ?? messageFormat ?? string.Empty);
             bool fillInLocation = string.IsNullOrEmpty(file) && lineNumber == 0 && columnNumber == 0;
-            var e = new ExtendedBuildErrorEventArgs(
-                StructuredBuildEventArgsData.EventType,
-                subcategory,
-                errorCode,
-                fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
-                fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
-                fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
-                endLineNumber,
-                endColumnNumber,
-                messageFormat ?? message,
-                helpKeyword,
-                TaskName,
-                helpLink,
-                DateTime.UtcNow,
-                messageArguments);
-            StructuredBuildEventArgsData.Set(e, originalFormat, values!);
+            BuildErrorEventArgs e;
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+            {
+                e = new StructuredBuildErrorEventArgs(
+                    subcategory,
+                    errorCode,
+                    fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                    fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                    fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                    endLineNumber,
+                    endColumnNumber,
+                    message ?? originalFormat,
+                    originalFormat,
+                    values!,
+                    helpKeyword,
+                    TaskName,
+                    helpLink,
+                    DateTime.UtcNow);
+            }
+            else
+            {
+                e = new BuildErrorEventArgs(
+                    subcategory,
+                    errorCode,
+                    fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                    fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                    fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                    endLineNumber,
+                    endColumnNumber,
+                    messageFormat ?? message,
+                    helpKeyword,
+                    TaskName,
+                    helpLink,
+                    DateTime.UtcNow,
+                    messageArguments);
+            }
 
             BuildEngine.LogErrorEvent(e);
             HasLoggedErrors = true;
@@ -899,35 +1048,58 @@ namespace Microsoft.Build.Utilities
                 return;
             }
 
-            var e = new ExtendedBuildWarningEventArgs(
-                StructuredBuildEventArgsData.EventType,
-                subcategory,
-                warningCode,
-                fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
-                fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
-                fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
-                endLineNumber,
-                endColumnNumber,
-                messageFormat ?? message,
-                helpKeyword,
-                TaskName,
-                helpLink,
-                DateTime.UtcNow,
-                messageArguments);
-            StructuredBuildEventArgsData.Set(e, originalFormat, values!);
+            BuildWarningEventArgs e;
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+            {
+                e = new StructuredBuildWarningEventArgs(
+                    subcategory,
+                    warningCode,
+                    fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                    fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                    fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                    endLineNumber,
+                    endColumnNumber,
+                    message ?? originalFormat,
+                    originalFormat,
+                    values!,
+                    helpKeyword,
+                    TaskName,
+                    helpLink,
+                    DateTime.UtcNow);
+            }
+            else
+            {
+                e = new BuildWarningEventArgs(
+                    subcategory,
+                    warningCode,
+                    fillInLocation ? BuildEngine.ProjectFileOfTaskNode : file,
+                    fillInLocation ? BuildEngine.LineNumberOfTaskNode : lineNumber,
+                    fillInLocation ? BuildEngine.ColumnNumberOfTaskNode : columnNumber,
+                    endLineNumber,
+                    endColumnNumber,
+                    messageFormat ?? message,
+                    helpKeyword,
+                    TaskName,
+                    helpLink,
+                    DateTime.UtcNow,
+                    messageArguments);
+            }
 
             BuildEngine.LogWarningEvent(e);
         }
 
-        private static StructuredMessageData ParseStructuredMessage(string messageTemplate, object?[]? values)
+        private static StructuredMessageData ParseStructuredMessage(
+            string messageTemplate,
+            object?[]? values,
+            bool buildDisplayFormat = true)
         {
             ArgumentNullException.ThrowIfNull(messageTemplate);
             values ??= Array.Empty<object?>();
 
             var normalized = new StringBuilder(messageTemplate.Length);
-            var composite = new StringBuilder(messageTemplate.Length);
-            var names = new HashSet<string>(StringComparer.Ordinal);
-            var holes = new List<(string Name, string? Format)>();
+            StringBuilder? composite = buildDisplayFormat ? new StringBuilder(messageTemplate.Length) : null;
+            var holes = new (string Name, string? Format)[values.Length];
+            int holeCount = 0;
 
             for (int i = 0; i < messageTemplate.Length;)
             {
@@ -937,7 +1109,7 @@ namespace Microsoft.Build.Utilities
                     if (i + 1 < messageTemplate.Length && messageTemplate[i + 1] == '{')
                     {
                         normalized.Append("{{");
-                        composite.Append("{{");
+                        composite?.Append("{{");
                         i += 2;
                         continue;
                     }
@@ -956,7 +1128,7 @@ namespace Microsoft.Build.Utilities
                         throw new FormatException("Structured message holes must have names.");
                     }
 
-                    name = GetUniqueName(names, SanitizeName(name));
+                    name = GetUniqueName(holes, holeCount, SanitizeName(name));
                     string suffix = separator < 0 ? string.Empty : hole.Substring(separator);
                     string? format = null;
                     int colon = suffix.IndexOf(':');
@@ -966,8 +1138,17 @@ namespace Microsoft.Build.Utilities
                     }
 
                     normalized.Append('{').Append(name).Append(suffix).Append('}');
-                    composite.Append('{').Append(holes.Count).Append(suffix).Append('}');
-                    holes.Add((name, format));
+                    if (composite is not null)
+                    {
+                        composite.Append('{').Append(holeCount).Append(suffix).Append('}');
+                    }
+
+                    if (holeCount < holes.Length)
+                    {
+                        holes[holeCount] = (name, format);
+                    }
+
+                    holeCount++;
                     i = close + 1;
                     continue;
                 }
@@ -977,7 +1158,7 @@ namespace Microsoft.Build.Utilities
                     if (i + 1 < messageTemplate.Length && messageTemplate[i + 1] == '}')
                     {
                         normalized.Append("}}");
-                        composite.Append("}}");
+                        composite?.Append("}}");
                         i += 2;
                         continue;
                     }
@@ -986,31 +1167,31 @@ namespace Microsoft.Build.Utilities
                 }
 
                 normalized.Append(c);
-                composite.Append(c);
+                composite?.Append(c);
                 i++;
             }
 
-            if (holes.Count != values.Length)
+            if (holeCount != values.Length)
             {
                 throw new FormatException(
-                    $"The structured message template contains {holes.Count} holes but {values.Length} values were supplied.");
+                    $"The structured message template contains {holeCount} holes but {values.Length} values were supplied.");
             }
 
-            var structuredValues = new List<KeyValuePair<string, string?>>(values.Length);
+            var structuredValues = new KeyValuePair<string, string?>[values.Length];
             for (int i = 0; i < values.Length; i++)
             {
                 object? value = values[i];
-                structuredValues.Add(new KeyValuePair<string, string?>(
+                structuredValues[i] = new KeyValuePair<string, string?>(
                     holes[i].Name,
-                    value == null ? null : FormatValue(value, holes[i].Format, CultureInfo.InvariantCulture)));
+                    value == null ? null : FormatValue(value, holes[i].Format, CultureInfo.CurrentCulture));
             }
 
             return new StructuredMessageData(
                 null,
                 normalized.ToString(),
                 structuredValues,
-                composite.ToString(),
-                ToDisplayArguments(values));
+                composite?.ToString(),
+                buildDisplayFormat ? (object[])(object)values : null);
         }
 
         private static StructuredMessageData ValidateNamedStructuredMessage(
@@ -1018,6 +1199,7 @@ namespace Microsoft.Build.Utilities
             string localizedMessage,
             IReadOnlyList<KeyValuePair<string, object?>> values)
         {
+            ArgumentNullException.ThrowIfNull(localizedMessage);
             ArgumentNullException.ThrowIfNull(values);
             object?[] rawValues = new object?[values.Count];
             for (int i = 0; i < values.Count; i++)
@@ -1025,7 +1207,7 @@ namespace Microsoft.Build.Utilities
                 rawValues[i] = values[i].Value;
             }
 
-            StructuredMessageData parsed = ParseStructuredMessage(originalFormat, rawValues);
+            StructuredMessageData parsed = ParseStructuredMessage(originalFormat, rawValues, buildDisplayFormat: false);
             for (int i = 0; i < values.Count; i++)
             {
                 if (!string.Equals(parsed.Values[i].Key, values[i].Key, StringComparison.Ordinal))
@@ -1036,19 +1218,7 @@ namespace Microsoft.Build.Utilities
                 }
             }
 
-            ArgumentNullException.ThrowIfNull(localizedMessage);
             return new StructuredMessageData(localizedMessage, parsed.OriginalFormat, parsed.Values, null, null);
-        }
-
-        private static object[] ToDisplayArguments(object?[] values)
-        {
-            var result = new object[values.Length];
-            for (int i = 0; i < values.Length; i++)
-            {
-                result[i] = values[i]!;
-            }
-
-            return result;
         }
 
         private static int IndexOfSeparator(string hole)
@@ -1066,9 +1236,12 @@ namespace Microsoft.Build.Utilities
         private static string SanitizeName(string name)
             => name.Replace('{', '_').Replace('}', '_').Replace(',', '_').Replace(':', '_');
 
-        private static string GetUniqueName(HashSet<string> names, string name)
+        private static string GetUniqueName(
+            (string Name, string? Format)[] holes,
+            int holeCount,
+            string name)
         {
-            if (names.Add(name))
+            if (!ContainsName(holes, holeCount, name))
             {
                 return name;
             }
@@ -1080,9 +1253,25 @@ namespace Microsoft.Build.Utilities
                 candidate = name + "_" + suffix.ToString(CultureInfo.InvariantCulture);
                 suffix++;
             }
-            while (!names.Add(candidate));
+            while (ContainsName(holes, holeCount, candidate));
 
             return candidate;
+        }
+
+        private static bool ContainsName(
+            (string Name, string? Format)[] holes,
+            int holeCount,
+            string name)
+        {
+            for (int i = 0; i < Math.Min(holeCount, holes.Length); i++)
+            {
+                if (string.Equals(holes[i].Name, name, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static string FormatValue(object? value, string? format, IFormatProvider provider)
@@ -1092,6 +1281,32 @@ namespace Microsoft.Build.Utilities
 
         private static void AppendEscapedLiteral(StringBuilder builder, string value)
         {
+            if (value.IndexOf('{') < 0 && value.IndexOf('}') < 0)
+            {
+                builder.Append(value);
+                return;
+            }
+
+            foreach (char c in value)
+            {
+                if (c is '{' or '}')
+                {
+                    // Composite formats escape literal braces by doubling them.
+                    builder.Append(c);
+                }
+
+                builder.Append(c);
+            }
+        }
+
+        private static void AppendEscapedLiteral(ref ValueStringBuilder builder, string value)
+        {
+            if (value.IndexOf('{') < 0 && value.IndexOf('}') < 0)
+            {
+                builder.Append(value);
+                return;
+            }
+
             foreach (char c in value)
             {
                 if (c is '{' or '}')
@@ -1103,7 +1318,7 @@ namespace Microsoft.Build.Utilities
             }
         }
 
-        private sealed class StructuredMessageData(
+        private readonly record struct StructuredMessageData(
             string? message,
             string originalFormat,
             IReadOnlyList<KeyValuePair<string, string?>> values,
