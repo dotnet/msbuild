@@ -108,7 +108,7 @@ extends:
 
               # Reviewers come from the queue-time parameter when specified. Otherwise fall back to the
               # owner of the experimental branch, which by convention is exp/{alias}/{branchname}.
-              $reviewers = "$env:INSERTION_REVIEWERS_PARAMETER".Trim()
+              $reviewers = ("$env:INSERTION_REVIEWERS_PARAMETER".Trim()) -replace '[\r\n]', ''
               if ($reviewers) {
                 Write-Host "Using insertion reviewers from pipeline parameter: '$reviewers'"
               }
