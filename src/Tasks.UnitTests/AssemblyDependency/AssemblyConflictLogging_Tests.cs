@@ -56,12 +56,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <c>ConflictBetweenCopyLocalDependenciesRegress444809UnResolvedPrimaryReference</c> test. This conflict
         /// produces the standalone (non-warning) dependency-details message path (<c>logWarning == false</c>).
         /// </summary>
-        private ResolveAssemblyReference CreateMessageConflictTask(MockEngine engine) => new()
+        private ResolveAssemblyReference CreateMessageConflictTask(MockEngine engine, bool useEscapedPrimaryItem = false) => new()
         {
             BuildEngine = engine,
             Assemblies = new ITaskItem[]
             {
-                new TaskItem("A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null"),
+                new TaskItem(useEscapedPrimaryItem
+                    ? "A%2C Version=20.0.0.0%2C Culture=Neutral%2C PublicKeyToken=null"
+                    : "A, Version=20.0.0.0, Culture=Neutral, PublicKeyToken=null"),
                 new TaskItem("B, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null"),
                 new TaskItem("D, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null"),
             },
@@ -136,8 +138,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         [Fact]
         public void ConflictDependencyDetailsMessageIsStructuredAndTextMatchesLegacy()
         {
-            MockEngine structuredEngine = RunWithWaveState(waveEnabled: true, CreateMessageConflictTask);
-            MockEngine legacyEngine = RunWithWaveState(waveEnabled: false, CreateMessageConflictTask);
+            MockEngine structuredEngine = RunWithWaveState(waveEnabled: true, engine => CreateMessageConflictTask(engine));
+            MockEngine legacyEngine = RunWithWaveState(waveEnabled: false, engine => CreateMessageConflictTask(engine));
 
             // This scenario's conflict is resolved without an MSB3277 warning (no reference is left unresolvable);
             // an unrelated MSB3245 warning about the unresolved primary reference to "A" may still be present in
@@ -206,11 +208,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Fact]
-        public void OutputUnresolvedAssemblyConflictsNotMaterializedWhenDisabled()
+        public void ConflictDependencyDetailsMessageAvailableWhenOutputDisabled()
         {
-            // When OutputUnresolvedAssemblyConflicts is false (the default), the structured message event's
-            // Message must never be forced - i.e. no eager formatting of the (potentially enormous) dependency
-            // list occurs unless something reads it.
             MockEngine engine = new(_output);
             ResolveAssemblyReference task = CreateMessageConflictTask(engine);
 
@@ -224,8 +223,69 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 .OfType<AssemblyConflictDependencyDetailsMessageEventArgs>()
                 .ShouldHaveSingleItem();
 
-            // Reading Message on demand must still work (laziness is transparent to consumers).
             detailsEvent.Message.ShouldNotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public void ConflictDependencyDetailsMessageRespectsImportanceFilter()
+        {
+            MockEngine engine = new(_output)
+            {
+                MinimumMessageImportance = MessageImportance.Normal,
+            };
+            ResolveAssemblyReference task = CreateMessageConflictTask(engine);
+
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+            Execute(task).ShouldBeTrue();
+            ChangeWaves.ResetStateForTests();
+
+            engine.MessageEvents.ShouldNotContain(message => message is AssemblyConflictDependencyDetailsMessageEventArgs);
+        }
+
+        [Fact]
+        public void FilteredConflictDependencyDetailsStillPopulateOutputMetadata()
+        {
+            MockEngine engine = new(_output)
+            {
+                MinimumMessageImportance = MessageImportance.Normal,
+            };
+            ResolveAssemblyReference task = CreateMessageConflictTask(engine);
+            task.OutputUnresolvedAssemblyConflicts = true;
+
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+            Execute(task).ShouldBeTrue();
+            ChangeWaves.ResetStateForTests();
+
+            engine.MessageEvents.ShouldNotContain(message => message is AssemblyConflictDependencyDetailsMessageEventArgs);
+            task.UnresolvedAssemblyConflicts.ShouldHaveSingleItem()
+                .GetMetadata("logMessageDetails").ShouldNotBeNullOrEmpty();
+        }
+
+        [Fact]
+        public void EscapedUnresolvedPrimaryItemTextMatchesLegacy()
+        {
+            MockEngine structuredEngine = RunWithWaveState(
+                waveEnabled: true,
+                engine => CreateMessageConflictTask(engine, useEscapedPrimaryItem: true));
+            MockEngine legacyEngine = RunWithWaveState(
+                waveEnabled: false,
+                engine => CreateMessageConflictTask(engine, useEscapedPrimaryItem: true));
+
+            AssemblyConflictDependencyDetailsMessageEventArgs structuredDetails = structuredEngine.MessageEvents
+                .OfType<AssemblyConflictDependencyDetailsMessageEventArgs>()
+                .ShouldHaveSingleItem();
+            BuildMessageEventArgs legacyDetails = legacyEngine.MessageEvents
+                .Where(message => message.Importance == MessageImportance.Low
+                    && message.Message != null
+                    && message.Message.Contains("Project file item includes which caused reference"))
+                .ShouldHaveSingleItem();
+
+            structuredDetails.Message.ShouldBe(legacyDetails.Message);
+            structuredDetails.Message.ShouldContain("A%2C Version=20.0.0.0");
         }
     }
 }

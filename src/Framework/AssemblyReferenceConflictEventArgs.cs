@@ -3,9 +3,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Text;
+using Microsoft.Build.Framework.Utilities;
 
 namespace Microsoft.Build.Framework;
 
@@ -140,8 +140,9 @@ public sealed class AssemblyConflictReferenceDetails
     public bool IsResolved { get; }
 
     /// <summary>
-    /// Gets the item spec of the unresolved primary source item, when <see cref="IsPrimary"/> is <see langword="true"/>
-    /// and <see cref="IsResolved"/> is <see langword="false"/>. Otherwise <see langword="null"/>.
+    /// Gets the escaped include of the unresolved primary source item, matching the value rendered by the item's
+    /// <c>ToString()</c> method, when <see cref="IsPrimary"/> is <see langword="true"/> and
+    /// <see cref="IsResolved"/> is <see langword="false"/>. Otherwise <see langword="null"/>.
     /// </summary>
     public string? UnresolvedPrimaryItemSpec { get; }
 
@@ -399,8 +400,11 @@ internal static class AssemblyConflictMessageFormatter
         }
     }
 
-    private static string Format(string format, params object?[] arguments)
-        => string.Format(CultureInfo.CurrentCulture, format, arguments);
+    private static string Format(string format, object? arg0)
+        => MessageFormatter.Format(format, arg0);
+
+    private static string Format(string format, object? arg0, object? arg1)
+        => MessageFormatter.Format(format, arg0, arg1);
 }
 
 /// <summary>
@@ -457,6 +461,8 @@ public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMes
     }
 
     internal AssemblyConflictMessageFormats? MessageFormats => _messageFormats;
+
+    internal bool IsMessageMaterialized => _formattedMessage is not null;
 
     internal override void WriteToStream(BinaryWriter writer)
     {
@@ -580,6 +586,8 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
     }
 
     internal AssemblyConflictMessageFormats? MessageFormats => _messageFormats;
+
+    internal bool IsMessageMaterialized => _formattedMessage is not null;
 
     internal override void WriteToStream(BinaryWriter writer)
     {
