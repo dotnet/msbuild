@@ -257,6 +257,16 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="AssemblyResolutionSearchTraceEventArgs"/>.
         /// </summary>
         AssemblyResolutionSearchTraceEvent = 45,
+
+        /// <summary>
+        /// Event is <see cref="AssemblyConflictDependencyDetailsMessageEventArgs"/>.
+        /// </summary>
+        AssemblyConflictDependencyDetailsEvent = 46,
+
+        /// <summary>
+        /// Event is <see cref="AssemblyConflictWarningEventArgs"/>.
+        /// </summary>
+        AssemblyConflictWarningEvent = 47,
     }
     #endregion
 
@@ -513,6 +523,8 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.LoggersRegisteredEvent => new LoggersRegisteredEventArgs(),
                 LoggingEventType.MSBuildServerLifecycleEvent => new MSBuildServerLifecycleEventArgs(),
                 LoggingEventType.AssemblyResolutionSearchTraceEvent => new AssemblyResolutionSearchTraceEventArgs(),
+                LoggingEventType.AssemblyConflictDependencyDetailsEvent => new AssemblyConflictDependencyDetailsMessageEventArgs(),
+                LoggingEventType.AssemblyConflictWarningEvent => new AssemblyConflictWarningEventArgs(),
 
                 _ => Assumed.Unreachable<BuildEventArgs>($"Should not get to the default of GetBuildEventArgFromId ID: {_eventType}")
             };
@@ -670,6 +682,14 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(AssemblyResolutionSearchTraceEventArgs))
             {
                 return LoggingEventType.AssemblyResolutionSearchTraceEvent;
+            }
+            else if (eventType == typeof(AssemblyConflictDependencyDetailsMessageEventArgs))
+            {
+                return LoggingEventType.AssemblyConflictDependencyDetailsEvent;
+            }
+            else if (eventType == typeof(AssemblyConflictWarningEventArgs))
+            {
+                return LoggingEventType.AssemblyConflictWarningEvent;
             }
             else if (eventType == typeof(TargetStartedEventArgs))
             {

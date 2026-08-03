@@ -48,5 +48,7 @@ namespace Microsoft.Build.Logging
         LoggersRegistered,
         MSBuildServerLifecycle,
         AssemblyResolutionSearchTrace,
+        AssemblyConflictDependencyDetails,
+        AssemblyConflictWarning,
     }
 }
