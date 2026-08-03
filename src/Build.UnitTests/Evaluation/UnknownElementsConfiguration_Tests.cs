@@ -30,16 +30,21 @@ namespace Microsoft.Build.UnitTests.Evaluation
             }
         }
 
+        private string WriteConfig(string directory, string body)
+        {
+            string configPath = Path.Combine(directory, UnknownElementsConfiguration.ConfigFileName);
+            File.WriteAllText(configPath, $"<ParseConfig>{body}</ParseConfig>");
+            return configPath;
+        }
+
         [Fact]
         public void ParsesValidConfigFile()
         {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, @"
-# This is a comment
-Attribute:Target:Foo
-Element:Project:CustomThing
-
-Attribute:PropertyGroup:Bar
+            string configPath = WriteConfig(_testDir, @"
+  <!-- a comment -->
+  <AllowAttribute Element=""Target"" Name=""Foo"" />
+  <AllowElement Parent=""Project"" Name=""CustomThing"" />
+  <AllowAttribute Element=""PropertyGroup"" Name=""Bar"" />
 ");
 
             var config = UnknownElementsConfiguration.LoadFromFile(configPath);
@@ -53,8 +58,7 @@ Attribute:PropertyGroup:Bar
         [Fact]
         public void IsCaseInsensitive()
         {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Attribute:Target:Foo\n");
+            string configPath = WriteConfig(_testDir, @"<AllowAttribute Element=""Target"" Name=""Foo"" />");
 
             var config = UnknownElementsConfiguration.LoadFromFile(configPath);
 
@@ -66,8 +70,7 @@ Attribute:PropertyGroup:Bar
         [Fact]
         public void RejectsNonAllowedItems()
         {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Attribute:Target:Foo\n");
+            string configPath = WriteConfig(_testDir, @"<AllowAttribute Element=""Target"" Name=""Foo"" />");
 
             var config = UnknownElementsConfiguration.LoadFromFile(configPath);
 
@@ -77,23 +80,46 @@ Attribute:PropertyGroup:Bar
         }
 
         [Fact]
-        public void IgnoresInvalidLines()
+        public void UnrecognizedDirectivesAreIgnoredButReported()
         {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, @"
-# Comment
-InvalidType:Target:Foo
-Attribute:Target
-Attribute
-:Target:Foo
-Attribute:Target:Foo:ExtraColon
-Attribute:Target:ValidOne
+            // Forward compatibility: a directive a newer MSBuild defines must not fail this engine,
+            // but it is reported so that a typo remains diagnosable.
+            string configPath = WriteConfig(_testDir, @"
+  <AllowMetadata Item=""Compile"" Name=""Future"" />
+  <AllowAttribute Element=""Target"" Name=""ValidOne"" />
 ");
 
             var config = UnknownElementsConfiguration.LoadFromFile(configPath);
 
             config.CheckSkipAttribute("Target", "ValidOne").ShouldBeTrue();
-            config.CheckSkipAttribute("Target", "Foo").ShouldBeFalse();
+            config.GetMalformedEntriesMessage().ShouldContain("AllowMetadata");
+        }
+
+        [Fact]
+        public void DirectivesMissingRequiredAttributesAreReported()
+        {
+            string configPath = WriteConfig(_testDir, @"
+  <AllowAttribute Element=""Target"" />
+  <AllowElement Name=""Orphan"" />
+  <AllowAttribute Element=""Target"" Name=""ValidOne"" />
+");
+
+            var config = UnknownElementsConfiguration.LoadFromFile(configPath);
+
+            config.CheckSkipAttribute("Target", "ValidOne").ShouldBeTrue();
+            config.GetMalformedEntriesMessage().ShouldNotBeNull();
+        }
+
+        [Fact]
+        public void MalformedXmlIsReportedRatherThanThrowing()
+        {
+            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
+            File.WriteAllText(configPath, "<ParseConfig><AllowAttribute Element=\"Target\" Name=\"Foo\" ></ParseConfig>");
+
+            var config = UnknownElementsConfiguration.LoadFromFile(configPath);
+
+            config.IsEmpty.ShouldBeTrue();
+            config.GetMalformedEntriesMessage().ShouldNotBeNull();
         }
 
         [Fact]
@@ -106,30 +132,15 @@ Attribute:Target:ValidOne
         }
 
         [Fact]
-        public void NearestConfigWinsAndChainIsMerged()
+        public void NearestConfigWinsEntirelyWithNoLayering()
         {
-            // repo root permits Foo, subdirectory permits Bar; a project in the subdirectory gets both.
+            // Discovery is first-found-wins, matching Directory.Build.props / .rsp. A nearer file replaces a
+            // farther one outright; it does not add to it.
             string subDir = Path.Combine(_testDir, "sub");
             Directory.CreateDirectory(subDir);
 
-            File.WriteAllText(Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName), "Attribute:Target:Foo\n");
-            File.WriteAllText(Path.Combine(subDir, UnknownElementsConfiguration.ConfigFileName), "Attribute:Target:Bar\n");
-
-            var config = UnknownElementsConfiguration.Resolve(subDir);
-
-            config.CheckSkipAttribute("Target", "Foo").ShouldBeTrue();
-            config.CheckSkipAttribute("Target", "Bar").ShouldBeTrue();
-            config.LoadedConfigFiles.Count.ShouldBe(2);
-        }
-
-        [Fact]
-        public void RootTrueStopsTheUpwardWalk()
-        {
-            string subDir = Path.Combine(_testDir, "sub");
-            Directory.CreateDirectory(subDir);
-
-            File.WriteAllText(Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName), "Attribute:Target:Foo\n");
-            File.WriteAllText(Path.Combine(subDir, UnknownElementsConfiguration.ConfigFileName), "root = true\nAttribute:Target:Bar\n");
+            WriteConfig(_testDir, @"<AllowAttribute Element=""Target"" Name=""Foo"" />");
+            WriteConfig(subDir, @"<AllowAttribute Element=""Target"" Name=""Bar"" />");
 
             var config = UnknownElementsConfiguration.Resolve(subDir);
 
@@ -138,6 +149,18 @@ Attribute:Target:ValidOne
             config.LoadedConfigFiles.Count.ShouldBe(1);
         }
 
+        [Fact]
+        public void ResolveFindsConfigInAnAncestorDirectory()
+        {
+            string subDir = Path.Combine(_testDir, "a", "b", "c");
+            Directory.CreateDirectory(subDir);
+
+            WriteConfig(_testDir, @"<AllowAttribute Element=""Target"" Name=""Foo"" />");
+
+            var config = UnknownElementsConfiguration.Resolve(subDir);
+
+            config.CheckSkipAttribute("Target", "Foo").ShouldBeTrue();
+        }
         [Fact]
         public void IdentityIsContentBasedNotPathBased()
         {
@@ -148,9 +171,9 @@ Attribute:Target:ValidOne
             Directory.CreateDirectory(dirB);
             Directory.CreateDirectory(dirC);
 
-            File.WriteAllText(Path.Combine(dirA, UnknownElementsConfiguration.ConfigFileName), "root=true\nAttribute:Target:Foo\n");
-            File.WriteAllText(Path.Combine(dirB, UnknownElementsConfiguration.ConfigFileName), "root=true\nAttribute:Target:Foo\n");
-            File.WriteAllText(Path.Combine(dirC, UnknownElementsConfiguration.ConfigFileName), "root=true\nAttribute:Target:Other\n");
+            WriteConfig(dirA, @"<AllowAttribute Element=""Target"" Name=""Foo"" />");
+            WriteConfig(dirB, @"<AllowAttribute Element=""Target"" Name=""Foo"" />");
+            WriteConfig(dirC, @"<AllowAttribute Element=""Target"" Name=""Other"" />");
 
             var a = UnknownElementsConfiguration.Resolve(dirA);
             var b = UnknownElementsConfiguration.Resolve(dirB);
@@ -175,20 +198,20 @@ Attribute:Target:ValidOne
         public void MalformedEntriesAreReportedRatherThanSilentlyDropped()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Attribute:Target:Foo\nAttribuet:Target:Typo\n");
+            File.WriteAllText(configPath, @"<ParseConfig><AllowAttribute Element=""Target"" Name=""Foo"" /><Attribuet Element=""Target"" Name=""Typo"" /></ParseConfig>");
 
             var config = UnknownElementsConfiguration.LoadFromFile(configPath);
 
             config.CheckSkipAttribute("Target", "Foo").ShouldBeTrue();
             config.GetMalformedEntriesMessage().ShouldNotBeNull();
-            config.GetMalformedEntriesMessage().ShouldContain("Attribuet:Target:Typo");
+            config.GetMalformedEntriesMessage().ShouldContain("Attribuet");
         }
 
         [Fact]
         public void RecordsSkippedItems()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Attribute:Target:Foo\n");
+            WriteConfig(_testDir, @"<AllowAttribute Element=""Target"" Name=""Foo"" />");
 
             var config = UnknownElementsConfiguration.LoadFromFile(configPath);
 
@@ -214,7 +237,7 @@ Attribute:Target:ValidOne
         public void GetLoadedConfigsMessageListsFiles()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Attribute:Target:Foo\n");
+            WriteConfig(_testDir, @"<AllowAttribute Element=""Target"" Name=""Foo"" />");
 
             var config = UnknownElementsConfiguration.LoadFromFile(configPath);
 
@@ -227,7 +250,7 @@ Attribute:Target:ValidOne
         public void AllowedAttributeDoesNotThrowDuringParsing()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Attribute:Target:CustomAttr\n");
+            WriteConfig(_testDir, @"<AllowAttribute Element=""Target"" Name=""CustomAttr"" />");
 
             string projectContent = @"
 <Project>
@@ -267,7 +290,7 @@ Attribute:Target:ValidOne
         public void AllowedChildElementDoesNotThrowDuringParsing()
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Element:Project:CustomElement\n");
+            WriteConfig(_testDir, @"<AllowElement Parent=""Project"" Name=""CustomElement"" />");
 
             string projectContent = @"
 <Project>
