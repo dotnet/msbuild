@@ -1059,7 +1059,7 @@ namespace Microsoft.Build.BackEnd
                 _process = process;
                 _pipeStream = nodePipe;
 #if !FEATURE_APM
-                _readStream = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10)
+                _readStream = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
                     ? new BufferedReadStream(nodePipe, 64 * 1024)
                     : nodePipe;
 #endif

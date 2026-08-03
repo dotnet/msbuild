@@ -653,7 +653,7 @@ namespace Microsoft.Build.BackEnd
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
 
-            bool preBufferPacketBody = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10);
+            bool preBufferPacketBody = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11);
             MemoryStream readBufferMemoryStream = null;
 
             // Use 64 KB read-ahead under the change wave; retain the legacy 1 KB size otherwise.

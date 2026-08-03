@@ -68,7 +68,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             try
             {
                 ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
 
                 string projectContents = $"""
                     <Project>
