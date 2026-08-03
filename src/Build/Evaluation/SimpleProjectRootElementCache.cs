@@ -27,7 +27,8 @@ namespace Microsoft.Build.Evaluation
     {
         private readonly ConcurrentDictionary<string, ProjectRootElement> _cache;
 
-        internal SimpleProjectRootElementCache()
+        internal SimpleProjectRootElementCache(UnknownElementsConfiguration unknownElementsConfiguration = null)
+            : base(unknownElementsConfiguration)
         {
             _cache = new ConcurrentDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
             LoadProjectsReadOnly = true;

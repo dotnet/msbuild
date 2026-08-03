@@ -320,7 +320,9 @@ namespace Microsoft.Build.Execution
 
             if (String.IsNullOrEmpty(taskFactory) || taskFactory.Equals(RegisteredTaskRecord.AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase) || taskFactory.Equals(RegisteredTaskRecord.TaskHostFactory, StringComparison.OrdinalIgnoreCase))
             {
-                ProjectXmlUtilities.VerifyThrowProjectNoChildElements(projectUsingTaskXml.XmlElement);
+                ProjectXmlUtilities.VerifyThrowProjectNoChildElements(
+                    projectUsingTaskXml.XmlElement,
+                    projectUsingTaskXml.ContainingProject.ProjectRootElementCache?.UnknownElementsConfiguration);
             }
 
             if (projectUsingTaskXml.AssemblyFile.Length > 0)

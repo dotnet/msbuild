@@ -147,7 +147,8 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Creates an empty cache.
         /// </summary>
-        internal ProjectRootElementCache(bool autoReloadFromDisk, bool loadProjectsReadOnly = false)
+        internal ProjectRootElementCache(bool autoReloadFromDisk, bool loadProjectsReadOnly = false, UnknownElementsConfiguration unknownElementsConfiguration = null)
+            : base(unknownElementsConfiguration)
         {
             DebugTraceCache("Constructing with autoreload from disk: ", autoReloadFromDisk);
 

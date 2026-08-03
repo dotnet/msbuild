@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -207,6 +208,8 @@ namespace Microsoft.Build.Evaluation
 
         private UnknownElementsConfiguration _unknownElementsConfiguration;
 
+        private bool _parseConfigurationExplicitlySet;
+
         /// <summary>
         /// LoggingService Logger mode.
         /// If Asynchronous mode is used
@@ -368,12 +371,20 @@ namespace Microsoft.Build.Evaluation
             ToolsetLocations = toolsetDefinitionLocations;
             MaxNodeCount = maxNodeCount;
 
+            // When no configuration was supplied by the caller (the CLI resolves one from the entry project's
+            // directory and passes it in), the collection resolves lazily on first project load so that hosts
+            // which know nothing about this feature still honour a repo's Directory.Parse.config.
+            UnknownElementsConfiguration parseConfig = _unknownElementsConfiguration ?? UnknownElementsConfiguration.Empty;
+
             if (Traits.Instance.UseSimpleProjectRootElementCacheConcurrency)
             {
-                ProjectRootElementCache = new SimpleProjectRootElementCache();
+                ProjectRootElementCache = new SimpleProjectRootElementCache(parseConfig);
             }
-            else if (reuseProjectRootElementCache && s_projectRootElementCache != null)
+            else if (reuseProjectRootElementCache && s_projectRootElementCache != null
+                     && parseConfig.Equals(s_projectRootElementCache.UnknownElementsConfiguration))
             {
+                // Only adopt the cache carried over from a previous MSBuild Server build when it was populated
+                // under the same parse rules; otherwise its elements were parsed under a different grammar.
                 ProjectRootElementCache = s_projectRootElementCache;
             }
             else
@@ -382,19 +393,14 @@ namespace Microsoft.Build.Evaluation
                 // If we are not reusing, cache will be released at end of build and as we do not support project files will changes during build
                 // we do not need to auto reload.
                 bool autoReloadFromDisk = reuseProjectRootElementCache;
-                ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk, loadProjectsReadOnly);
+                ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk, loadProjectsReadOnly, parseConfig);
                 if (reuseProjectRootElementCache)
                 {
                     s_projectRootElementCache = ProjectRootElementCache;
                 }
             }
 
-            // Load the global Directory.Parse.config unless explicitly provided or disabled.
-            if (_unknownElementsConfiguration is null && !Traits.Instance.EscapeHatches.DisableParseConfig)
-            {
-                _unknownElementsConfiguration = UnknownElementsConfiguration.LoadGlobalConfig();
-                ProjectRootElementCache.UnknownElementsConfiguration = _unknownElementsConfiguration;
-            }
+            _unknownElementsConfiguration = ProjectRootElementCache.UnknownElementsConfiguration;
 
             OnlyLogCriticalEvents = onlyLogCriticalEvents;
             EnableTargetOutputLogging = enableTargetOutputLogging;
@@ -573,17 +579,76 @@ namespace Microsoft.Build.Evaluation
         public ICollection<string> PropertiesFromCommandLine { get; set; }
 
         /// <summary>
-        /// Gets or sets the configuration for allowed unknown attributes/elements during parsing.
-        /// When set, this configuration will be used by builds started from this collection.
+        /// Gets or sets the parse configuration used by projects loaded into this collection.
         /// </summary>
+        /// <remarks>
+        /// Setting this replaces <see cref="ProjectRootElementCache"/>, because a cache is bound to one
+        /// configuration for its lifetime. That is only safe while no projects are loaded, since loaded
+        /// <see cref="Project"/> objects hold <see cref="Construction.ProjectRootElement"/> references the
+        /// cache tracks.
+        /// </remarks>
         internal UnknownElementsConfiguration UnknownElementsConfiguration
         {
             get => _unknownElementsConfiguration;
             set
             {
-                _unknownElementsConfiguration = value;
-                ProjectRootElementCache.UnknownElementsConfiguration = value;
+                _parseConfigurationExplicitlySet = true;
+                ApplyParseConfiguration(value ?? UnknownElementsConfiguration.Empty);
             }
+        }
+
+        /// <summary>
+        /// Rebinds this collection, and therefore its cache, to a parse configuration.
+        /// </summary>
+        private void ApplyParseConfiguration(UnknownElementsConfiguration value)
+        {
+            if (value.Equals(_unknownElementsConfiguration))
+            {
+                return;
+            }
+
+            // Loaded projects reference elements parsed under the current configuration; swapping the cache
+            // underneath them would orphan those references. Callers are expected to use a separate
+            // ProjectCollection for a different set of rules.
+            if (_loadedProjects.Count > 0)
+            {
+                return;
+            }
+
+            _unknownElementsConfiguration = value;
+            ProjectRootElementCache = Traits.Instance.UseSimpleProjectRootElementCacheConcurrency
+                ? new SimpleProjectRootElementCache(value)
+                : new ProjectRootElementCache(autoReloadFromDisk: false, loadProjectsReadOnly: ProjectRootElementCache.LoadProjectsReadOnly, unknownElementsConfiguration: value);
+        }
+
+        /// <summary>
+        /// Resolves the parse configuration from the directory of the first project loaded, unless a caller
+        /// supplied one explicitly. This is what lets hosts that know nothing about Directory.Parse.config
+        /// (notably Visual Studio) still honour a repository's rules without any host-side change. Once a
+        /// project is loaded the configuration is frozen; it is re-resolved only when the collection is empty
+        /// again, which is the state a long-lived host is in between solutions.
+        /// </summary>
+        private void EnsureParseConfigurationResolved(string projectFilePath)
+        {
+            if (_parseConfigurationExplicitlySet
+                || Traits.Instance.EscapeHatches.DisableParseConfig
+                || string.IsNullOrEmpty(projectFilePath)
+                || _loadedProjects.Count > 0)
+            {
+                return;
+            }
+
+            string projectDirectory;
+            try
+            {
+                projectDirectory = Path.GetDirectoryName(projectFilePath);
+            }
+            catch
+            {
+                return;
+            }
+
+            ApplyParseConfiguration(UnknownElementsConfiguration.Resolve(projectDirectory));
         }
 
         /// <summary>
@@ -1092,7 +1157,7 @@ namespace Microsoft.Build.Evaluation
         /// - So that the owner of this project collection can force the XML to be loaded again
         /// from disk, by doing <see cref="UnloadAllProjects"/>.
         /// </summary>
-        internal ProjectRootElementCacheBase ProjectRootElementCache { get; }
+        internal ProjectRootElementCacheBase ProjectRootElementCache { get; private set; }
 
         /// <summary>
         /// Escape a string using MSBuild escaping format. For example, "%3b" for ";".
@@ -1277,6 +1342,8 @@ namespace Microsoft.Build.Evaluation
         {
             ArgumentException.ThrowIfNullOrEmpty(fileName);
             fileName = FileUtilities.NormalizePath(fileName);
+
+            EnsureParseConfigurationResolved(fileName);
 
             // Serialize loads for the same project path to avoid races where multiple threads create equivalent
             // projects concurrently. Loads for different paths can proceed in parallel.

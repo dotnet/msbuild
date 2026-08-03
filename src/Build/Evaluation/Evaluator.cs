@@ -179,8 +179,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly ProjectRootElementCacheBase _projectRootElementCache;
 
-        private UnknownElementsConfiguration _unknownElementsConfiguration;
-
         /// <summary>
         /// The logging context to be used and piped down throughout evaluation.
         /// </summary>
@@ -296,35 +294,30 @@ namespace Microsoft.Build.Evaluation
             _streamImports.Add(string.Empty);
         }
 
-        private void InitializeUnknownElementsConfiguration()
+        /// <summary>
+        /// Logs which Directory.Parse.config files contributed to this build, and any entries in them that
+        /// could not be understood. The configuration itself is resolved once at the start of the build and
+        /// carried on the cache; nothing is resolved or merged here.
+        /// </summary>
+        private void LogParseConfigDiagnostics()
         {
-            _unknownElementsConfiguration = _projectRootElementCache.UnknownElementsConfiguration;
-
-            if (Traits.Instance.EscapeHatches.DisableParseConfig || string.IsNullOrEmpty(_projectRootElement.FullPath))
+            UnknownElementsConfiguration parseConfig = _projectRootElementCache.UnknownElementsConfiguration;
+            if (parseConfig is null)
             {
                 return;
             }
 
-            string projectConfigPath = FileUtilities.GetPathOfFileAbove(UnknownElementsConfiguration.ConfigFileName, _projectRootElement.DirectoryPath);
-            if (string.IsNullOrEmpty(projectConfigPath))
+            string configMessage = parseConfig.GetLoadedConfigsMessage();
+            if (configMessage is not null)
             {
-                return;
+                _evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, configMessage);
             }
 
-            if (_unknownElementsConfiguration is null)
+            string malformedMessage = parseConfig.GetMalformedEntriesMessage();
+            if (malformedMessage is not null)
             {
-                _unknownElementsConfiguration = UnknownElementsConfiguration.LoadFromFile(projectConfigPath);
+                _evaluationLoggingContext.LogCommentFromText(MessageImportance.Normal, malformedMessage);
             }
-            else if (!_unknownElementsConfiguration.ContainsLoadedFile(projectConfigPath))
-            {
-                _unknownElementsConfiguration = _unknownElementsConfiguration.Merge(UnknownElementsConfiguration.LoadFromFile(projectConfigPath));
-            }
-            else
-            {
-                return;
-            }
-
-            _projectRootElementCache.UnknownElementsConfiguration = _unknownElementsConfiguration;
         }
 
         /// <summary>
@@ -412,7 +405,7 @@ namespace Microsoft.Build.Evaluation
                     items = evaluator._data.Items;
                 }
 
-                string skippedMessage = evaluator._unknownElementsConfiguration?.GetSkippedSummaryMessage();
+                string skippedMessage = evaluator._projectRootElementCache.UnknownElementsConfiguration?.GetSkippedSummaryMessage();
                 if (skippedMessage is not null)
                 {
                     evaluator._evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, skippedMessage);
@@ -688,13 +681,7 @@ namespace Microsoft.Build.Evaluation
                 _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
                 _evaluationLoggingContext.LogProjectEvaluationStarted();
 
-                InitializeUnknownElementsConfiguration();
-
-                string configMessage = _unknownElementsConfiguration?.GetLoadedConfigsMessage();
-                if (configMessage is not null)
-                {
-                    _evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, configMessage);
-                }
+                LogParseConfigDiagnostics();
 
                 // Track loads only after start of evaluation was actually logged
                 using var assemblyLoadsTracker =

@@ -12,7 +12,22 @@ namespace Microsoft.Build.Evaluation
     {
         public bool LoadProjectsReadOnly { get; protected set; }
 
-        internal UnknownElementsConfiguration UnknownElementsConfiguration { get; set; }
+        /// <summary>
+        /// The parse configuration every element in this cache was parsed under.
+        /// </summary>
+        /// <remarks>
+        /// Deliberately settable only at construction. A cache instance is bound to one configuration for
+        /// its lifetime, which makes it impossible to hold elements parsed under differing rules. Reuse
+        /// points that outlive a build (worker nodes, the MSBuild server) compare
+        /// <see cref="Evaluation.UnknownElementsConfiguration.Identity"/> and construct a new cache when it
+        /// differs, rather than mutating this one.
+        /// </remarks>
+        internal UnknownElementsConfiguration UnknownElementsConfiguration { get; }
+
+        protected ProjectRootElementCacheBase(UnknownElementsConfiguration unknownElementsConfiguration)
+        {
+            UnknownElementsConfiguration = unknownElementsConfiguration ?? UnknownElementsConfiguration.Empty;
+        }
 
         /// <summary>
         /// Handler for which project root element just got added to the cache

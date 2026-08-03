@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -212,6 +212,12 @@ namespace Microsoft.Build.Execution
         /// Once that has happened, we use the provided one, rather than our default.
         /// </summary>
         private bool _acquiredProjectRootElementCacheFromProjectInstance;
+
+        /// <summary>
+        /// Set once the parse configuration has been resolved for the current build, so that the upward
+        /// directory walk happens exactly once no matter how many submissions are executed.
+        /// </summary>
+        private bool _parseConfigurationResolved;
 
         /// <summary>
         /// The project started event handler
@@ -618,11 +624,11 @@ namespace Microsoft.Build.Execution
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
 
-                if (_buildParameters.UnknownElementsConfiguration is null && !Traits.Instance.EscapeHatches.DisableParseConfig)
-                {
-                    _buildParameters.UnknownElementsConfiguration = UnknownElementsConfiguration.LoadGlobalConfig(BuildParameters.StartupDirectory);
-                    _buildParameters.ProjectRootElementCache.UnknownElementsConfiguration = _buildParameters.UnknownElementsConfiguration;
-                }
+                // The parse configuration is owned by the ProjectRootElementCache: it is fixed when the cache
+                // is constructed, so a cache can never hold elements parsed under differing rules. It is
+                // carried on BuildParameters purely so that it reaches worker nodes via NodeConfiguration.
+                _buildParameters.UnknownElementsConfiguration =
+                    _buildParameters.ProjectRootElementCache?.UnknownElementsConfiguration ?? UnknownElementsConfiguration.Empty;
 
                 if (_buildParameters.UsesCachedResults() && _buildParameters.ProjectIsolationMode == ProjectIsolationMode.False)
                 {
@@ -845,7 +851,7 @@ namespace Microsoft.Build.Execution
                         config.ResultsNodeId = Scheduler.InvalidNodeId;
                     }
 
-                    _buildParameters.ProjectRootElementCache.DiscardImplicitReferences();
+                    _buildParameters!.ProjectRootElementCache!.DiscardImplicitReferences();
                 }
             }
         }
@@ -1607,6 +1613,8 @@ namespace Microsoft.Build.Execution
                         _buildParameters!.ProjectRootElementCache =
                             new ProjectRootElementCache(false /* do not automatically reload from disk */);
                     }
+
+                    ResolveParseConfigurationForBuild(submission);
 
                     VerifyStateInternal(BuildManagerState.Building);
 
@@ -2497,6 +2505,7 @@ namespace Microsoft.Build.Execution
             _executionCancellationTokenSource?.Dispose();
             _executionCancellationTokenSource = null;
             _nodeConfiguration = null;
+            _parseConfigurationResolved = false;
             _buildSubmissions.Clear();
 
             _scheduler?.Reset();
@@ -3106,6 +3115,78 @@ namespace Microsoft.Build.Execution
 
                 _noActiveSubmissionsEvent?.Set();
             }
+        }
+
+        /// <summary>
+        /// Retrieves the configuration structure for a node.
+        /// </summary>
+        /// <summary>
+        /// Resolves <c>Directory.Parse.config</c> once per build, anchored on the directory of the entry
+        /// project, and binds the build to a cache carrying that configuration.
+        /// </summary>
+        /// <remarks>
+        /// This runs before any project is parsed, so the resulting rules apply to the entry project itself
+        /// and to everything it imports. Anchoring on the project rather than the current directory matches
+        /// how <c>Directory.Build.rsp</c> is discovered by the command line.
+        ///
+        /// A <see cref="ProjectRootElementCache"/> is bound to one configuration for its lifetime, so applying
+        /// a different configuration means replacing the cache. That is only done when the current cache was
+        /// not supplied by a caller who may already have parsed projects into it: a cache adopted from a
+        /// <see cref="ProjectInstance"/>, or one belonging to a <see cref="ProjectCollection"/> that already
+        /// resolved its own configuration, is left alone.
+        /// </remarks>
+        private void ResolveParseConfigurationForBuild(BuildSubmission submission)
+        {
+            if (_parseConfigurationResolved || Traits.Instance.EscapeHatches.DisableParseConfig)
+            {
+                return;
+            }
+
+            _parseConfigurationResolved = true;
+
+            if (_acquiredProjectRootElementCacheFromProjectInstance)
+            {
+                // The cache belongs to the caller's ProjectInstance and may already hold parsed elements.
+                return;
+            }
+
+            ProjectRootElementCacheBase? currentCache = _buildParameters!.ProjectRootElementCache;
+            if (currentCache?.UnknownElementsConfiguration?.IsEmpty == false)
+            {
+                // A configuration was already established (for example by a ProjectCollection resolving from
+                // the first project loaded into it). Respect it rather than resolving a second time.
+                return;
+            }
+
+            string? projectFullPath = submission.BuildRequestData?.ProjectFullPath;
+            if (string.IsNullOrEmpty(projectFullPath))
+            {
+                return;
+            }
+
+            string? anchorDirectory;
+            try
+            {
+                anchorDirectory = Path.GetDirectoryName(projectFullPath);
+            }
+            catch
+            {
+                return;
+            }
+
+            UnknownElementsConfiguration parseConfig = UnknownElementsConfiguration.Resolve(anchorDirectory);
+            if (parseConfig.IsEmpty)
+            {
+                return;
+            }
+
+            _buildParameters.ProjectRootElementCache = new ProjectRootElementCache(
+                autoReloadFromDisk: false,
+                loadProjectsReadOnly: currentCache?.LoadProjectsReadOnly ?? false,
+                unknownElementsConfiguration: parseConfig);
+
+            // Carried on BuildParameters purely so that worker nodes receive it via NodeConfiguration.
+            _buildParameters.UnknownElementsConfiguration = parseConfig;
         }
 
         /// <summary>

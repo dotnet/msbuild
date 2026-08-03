@@ -106,41 +106,82 @@ Attribute:Target:ValidOne
         }
 
         [Fact]
-        public void MergeCombinesEntriesAndDeduplicatesFiles()
+        public void NearestConfigWinsAndChainIsMerged()
         {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, "Attribute:Target:Foo\n");
+            // repo root permits Foo, subdirectory permits Bar; a project in the subdirectory gets both.
+            string subDir = Path.Combine(_testDir, "sub");
+            Directory.CreateDirectory(subDir);
 
-            string extraConfigPath = Path.Combine(_testDir, "extra.config");
-            File.WriteAllText(extraConfigPath, "Element:Project:CustomThing\n");
+            File.WriteAllText(Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName), "Attribute:Target:Foo\n");
+            File.WriteAllText(Path.Combine(subDir, UnknownElementsConfiguration.ConfigFileName), "Attribute:Target:Bar\n");
 
-            var merged = UnknownElementsConfiguration.LoadFromFile(configPath)
-                .Merge(UnknownElementsConfiguration.LoadFromFile(extraConfigPath))
-                .Merge(UnknownElementsConfiguration.LoadFromFile(configPath));
+            var config = UnknownElementsConfiguration.Resolve(subDir);
 
-            merged.CheckSkipAttribute("Target", "Foo").ShouldBeTrue();
-            merged.CheckSkipElement("Project", "CustomThing").ShouldBeTrue();
-            merged.LoadedConfigFiles.Count.ShouldBe(2);
+            config.CheckSkipAttribute("Target", "Foo").ShouldBeTrue();
+            config.CheckSkipAttribute("Target", "Bar").ShouldBeTrue();
+            config.LoadedConfigFiles.Count.ShouldBe(2);
         }
 
         [Fact]
-        public void LoadGlobalConfigLoadsEnvironmentVariablePaths()
+        public void RootTrueStopsTheUpwardWalk()
         {
-            string envConfigPath = Path.Combine(_testDir, "env.config");
-            File.WriteAllText(envConfigPath, "Element:Project:CustomThing\n");
+            string subDir = Path.Combine(_testDir, "sub");
+            Directory.CreateDirectory(subDir);
 
-            string oldEnv = Environment.GetEnvironmentVariable(UnknownElementsConfiguration.EnvironmentVariableName);
-            try
-            {
-                Environment.SetEnvironmentVariable(UnknownElementsConfiguration.EnvironmentVariableName, envConfigPath);
-                var config = UnknownElementsConfiguration.LoadGlobalConfig();
+            File.WriteAllText(Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName), "Attribute:Target:Foo\n");
+            File.WriteAllText(Path.Combine(subDir, UnknownElementsConfiguration.ConfigFileName), "root = true\nAttribute:Target:Bar\n");
 
-                config.CheckSkipElement("Project", "CustomThing").ShouldBeTrue();
-            }
-            finally
-            {
-                Environment.SetEnvironmentVariable(UnknownElementsConfiguration.EnvironmentVariableName, oldEnv);
-            }
+            var config = UnknownElementsConfiguration.Resolve(subDir);
+
+            config.CheckSkipAttribute("Target", "Bar").ShouldBeTrue();
+            config.CheckSkipAttribute("Target", "Foo").ShouldBeFalse();
+            config.LoadedConfigFiles.Count.ShouldBe(1);
+        }
+
+        [Fact]
+        public void IdentityIsContentBasedNotPathBased()
+        {
+            string dirA = Path.Combine(_testDir, "a");
+            string dirB = Path.Combine(_testDir, "b");
+            string dirC = Path.Combine(_testDir, "c");
+            Directory.CreateDirectory(dirA);
+            Directory.CreateDirectory(dirB);
+            Directory.CreateDirectory(dirC);
+
+            File.WriteAllText(Path.Combine(dirA, UnknownElementsConfiguration.ConfigFileName), "root=true\nAttribute:Target:Foo\n");
+            File.WriteAllText(Path.Combine(dirB, UnknownElementsConfiguration.ConfigFileName), "root=true\nAttribute:Target:Foo\n");
+            File.WriteAllText(Path.Combine(dirC, UnknownElementsConfiguration.ConfigFileName), "root=true\nAttribute:Target:Other\n");
+
+            var a = UnknownElementsConfiguration.Resolve(dirA);
+            var b = UnknownElementsConfiguration.Resolve(dirB);
+            var c = UnknownElementsConfiguration.Resolve(dirC);
+
+            // Same rules from different files are interchangeable, so a cache can be shared between them.
+            a.Equals(b).ShouldBeTrue();
+            a.Identity.ShouldBe(b.Identity);
+
+            // Different rules must never share a cache.
+            a.Equals(c).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void EmptyConfigurationsShareTheCanonicalIdentity()
+        {
+            UnknownElementsConfiguration.Resolve(_testDir).Equals(UnknownElementsConfiguration.Empty).ShouldBeTrue();
+            UnknownElementsConfiguration.Empty.IsEmpty.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void MalformedEntriesAreReportedRatherThanSilentlyDropped()
+        {
+            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
+            File.WriteAllText(configPath, "Attribute:Target:Foo\nAttribuet:Target:Typo\n");
+
+            var config = UnknownElementsConfiguration.LoadFromFile(configPath);
+
+            config.CheckSkipAttribute("Target", "Foo").ShouldBeTrue();
+            config.GetMalformedEntriesMessage().ShouldNotBeNull();
+            config.GetMalformedEntriesMessage().ShouldContain("Attribuet:Target:Typo");
         }
 
         [Fact]

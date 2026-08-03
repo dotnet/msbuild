@@ -715,6 +715,19 @@ namespace Microsoft.Build.Execution
             // Grab the system parameters.
             _buildParameters = configuration.BuildParameters;
 
+            // The parse configuration is resolved once by the entry point and travels in BuildParameters.
+            // A ProjectRootElementCache is bound to one configuration for its lifetime, so when this reused
+            // node is handed a build with different parse rules we replace the cache rather than mutate it --
+            // otherwise elements parsed under the previous build's rules would be served to this one.
+            UnknownElementsConfiguration parseConfig = _buildParameters.UnknownElementsConfiguration ?? UnknownElementsConfiguration.Empty;
+            if (s_projectRootElementCacheBase == null || !parseConfig.Equals(s_projectRootElementCacheBase.UnknownElementsConfiguration))
+            {
+                s_projectRootElementCacheBase = new ProjectRootElementCache(
+                    autoReloadFromDisk: true,
+                    loadProjectsReadOnly: false,
+                    unknownElementsConfiguration: parseConfig);
+            }
+
             _buildParameters.ProjectRootElementCache = s_projectRootElementCacheBase;
 
             // Snapshot the current environment
