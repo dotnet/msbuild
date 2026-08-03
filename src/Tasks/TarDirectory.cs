@@ -211,7 +211,7 @@ namespace Microsoft.Build.Tasks
         {
             foreach (FileSystemInfo info in directory.EnumerateFileSystemInfos())
             {
-                bool isRealDirectory = info is DirectoryInfo && (info.Attributes & FileAttributes.ReparsePoint) == 0;
+                bool isRealDirectory = info is DirectoryInfo && info.LinkTarget is null;
 
                 string relativePath = info.FullName.Substring(basePath.Length).Replace('\\', '/');
                 entries.Add((info, isRealDirectory ? relativePath + "/" : relativePath));
@@ -249,7 +249,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void WriteStampedEntry(TarWriter writer, TarEntryFormat format, FileSystemInfo info, string entryName, DateTimeOffset timestamp)
         {
-            bool isSymbolicLink = (info.Attributes & FileAttributes.ReparsePoint) != 0;
+            bool isSymbolicLink = info.LinkTarget is not null;
             bool isDirectory = info is DirectoryInfo && !isSymbolicLink;
 
             TarEntryType entryType = (isDirectory, isSymbolicLink, format) switch
