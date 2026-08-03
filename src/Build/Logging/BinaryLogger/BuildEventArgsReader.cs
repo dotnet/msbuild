@@ -554,7 +554,10 @@ namespace Microsoft.Build.Logging
                 attempts,
                 fields.SenderName ?? string.Empty,
                 fields.Importance,
-                fields.Timestamp);
+                fields.Timestamp)
+            {
+                ProjectFile = fields.ProjectFile,
+            };
             SetCommonFields(e, fields);
             e.ProjectFile = fields.ProjectFile;
             return e;
@@ -624,7 +627,10 @@ namespace Microsoft.Build.Logging
                 formats,
                 fields.SenderName ?? string.Empty,
                 fields.Importance,
-                fields.Timestamp);
+                fields.Timestamp)
+            {
+                ProjectFile = fields.ProjectFile,
+            };
             SetCommonFields(e, fields);
             return e;
         }
