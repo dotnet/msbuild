@@ -1,13 +1,14 @@
 [CmdletBinding(PositionalBinding=$false)]
 Param(
   [string] $msbuildEngine,
-  [string] $configuration = "Debug",
-  [switch] $test,
+  [string][Alias('c')] $configuration = "Debug",
+  [string][Alias('v')] $verbosity,
+  [switch][Alias('t')] $test,
   [switch] $ci,
   [switch][Alias('bl')] $binaryLog,
   [switch][Alias('nobl')] $excludeCIBinarylog,
   [switch] $stage2,
-  [string] $stage2Arguments = "",
+  [string[]] $stage2Argument = @(),
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
@@ -18,6 +19,11 @@ $buildScript = Join-Path $PSScriptRoot 'common\build.ps1'
 $commonBuildArgs = @('-configuration', $configuration) + $properties
 
 # Forward the argument if supplied. Needs to be done for all above explicit parameters that should be passed to the build.
+if ($verbosity) {
+  $commonBuildArgs += '-verbosity'
+  $commonBuildArgs += $verbosity
+}
+
 if ($msbuildEngine) {
   $commonBuildArgs += '-msbuildEngine'
   $commonBuildArgs += $msbuildEngine
@@ -35,7 +41,7 @@ if ($excludeCIBinarylog) {
 }
 
 # Supplying stage2Arguments implies a multi-stage build
-if ($stage2Arguments) {
+if ($stage2Argument.Count -gt 0) {
   $stage2 = $true
 }
 
@@ -136,13 +142,10 @@ $env:DOTNET_PERFLOG_DIR=$PerfLogDir
 $env:DOTNET_HOST_PATH = Join-Path $BootstrapRoot 'core\dotnet.exe'
 $env:DOTNET_INSTALL_DIR = Join-Path $BootstrapRoot 'core'
 
-# $stage2Arguments are appended to the stage 2 build only.
+# $stage2Argument are appended to the stage 2 build only.
 # Use this for switches like /mt that should not be passed to the stage1 build
 # until a stable version of MT is available in the images.
-# The @(...) wrapper is important: when -split returns exactly one element PowerShell gives back a
-# string, which would later splat one character per argument (so "/mt" becomes "/", "m", "t").
-# Wrapping with @() forces an array even for a single token.
-$stage2Args = @(if ($stage2Arguments) { $stage2Arguments -split '\s+' | Where-Object { $_ } } else { @() })
+$stage2Args = $stage2Argument
 
 $stage2BuildArgs = $commonBuildArgs
 

@@ -381,6 +381,72 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             logger.FullLog.ShouldContain("TaskWithAttribute executed");
         }
 
+        /// <summary>
+        /// Regression test: a task routed to a TaskHost must not log <c>TaskAssemblyLocationMismatch</c>.
+        /// <c>TaskHostTask</c> is only an in-proc proxy for a task that is loaded in a separate process, so
+        /// its own assembly location (Microsoft.Build.dll) can never match the resolved task assembly path
+        /// and the diagnostic carries no information. In multi-threaded mode this is the common path, so a
+        /// stale check produced one spurious message per task execution.
+        /// The registered path deliberately contains a redundant "." segment so that it is not byte-identical
+        /// to <c>Assembly.Location</c> - the same normalization difference real builds hit.
+        /// </summary>
+        [Theory]
+        [InlineData(true, "")] // Routed to the sidecar TaskHost because multi-threaded mode is on.
+        [InlineData(false, @" TaskFactory=""TaskHostFactory""")] // Routed to a TaskHost by explicit request.
+        public void TaskHostRoutedTask_DoesNotLogAssemblyLocationMismatch(bool multiThreaded, string taskFactoryAttribute)
+        {
+            // Arrange
+            string assemblyPath = Assembly.GetExecutingAssembly().Location;
+            string nonNormalizedAssemblyPath = Path.Combine(Path.GetDirectoryName(assemblyPath), ".", Path.GetFileName(assemblyPath));
+
+            string projectContent = $@"
+<Project>
+    <UsingTask TaskName=""NonEnlightenedTestTask"" AssemblyFile=""{nonNormalizedAssemblyPath}""{taskFactoryAttribute} />
+
+    <Target Name=""TestTarget"">
+        <NonEnlightenedTestTask />
+    </Target>
+</Project>";
+
+            string projectFile = Path.Combine(_testProjectsDir, $"NoAssemblyLocationMismatch_{multiThreaded}.proj");
+            File.WriteAllText(projectFile, projectContent);
+
+            var logger = new MockLogger(_output);
+            var buildParameters = new BuildParameters
+            {
+                MultiThreaded = multiThreaded,
+                Loggers = new[] { logger },
+                DisableInProcNode = false,
+                EnableNodeReuse = false
+            };
+
+            var buildRequestData = new BuildRequestData(
+                projectFile,
+                new Dictionary<string, string>(),
+                null,
+                new[] { "TestTarget" },
+                null);
+
+            // Act
+            var result = BuildManager.DefaultBuildManager.Build(buildParameters, buildRequestData);
+
+            // Assert
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "NonEnlightenedTestTask");
+            logger.FullLog.ShouldContain("NonEnlightenedTask executed");
+
+            // Assert on the localized text preceding the first format argument so the test is locale-safe
+            // and does not depend on the exact paths that would have been reported.
+            const string ArgumentSentinel = "<<arg>>";
+            string mismatchMessage = ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                "TaskAssemblyLocationMismatch",
+                ArgumentSentinel,
+                ArgumentSentinel);
+            string mismatchMessagePrefix = mismatchMessage.Substring(0, mismatchMessage.IndexOf(ArgumentSentinel, StringComparison.Ordinal));
+
+            logger.FullLog.ShouldNotContain(mismatchMessagePrefix);
+        }
+
         private string CreateTestProject(string taskName, string taskClass)
         {
             return $@"

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -15,16 +16,23 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental
+namespace Microsoft.Build.Server
 {
     /// <summary>
     /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server
     /// </summary>
+    /// <remarks>
+    /// This type is public only so that the MSBuild command-line application can host the MSBuild server;
+    /// third-party use is not expected or supported. It exists to wrap the MSBuild CLI and offers nothing
+    /// beyond it, so invoke the CLI instead.
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
     {
         /// <summary>
         /// A callback used to execute command line build.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public delegate (int exitCode, string exitType) BuildCallback(string[] commandLine);
 
         private readonly BuildCallback _buildFunction;
