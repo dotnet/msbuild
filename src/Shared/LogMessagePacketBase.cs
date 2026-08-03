@@ -591,9 +591,6 @@ namespace Microsoft.Build.Shared
             }
             else if (eventType == typeof(Microsoft.Build.Framework.Coordinator.CoordinatorWaitingForNodesEventArgs))
             {
-                // No dedicated LoggingEventType is registered for this type: if it ever crossed a node boundary,
-                // it would be reconstructed generically as ExtendedBuildMessageEventArgs on the receiving side
-                // (still carrying the same ExtendedType), same as happens today for a binary log round-trip.
                 return LoggingEventType.ExtendedBuildMessageEvent;
             }
             else if (eventType == typeof(CriticalBuildMessageEventArgs))

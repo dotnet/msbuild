@@ -1198,14 +1198,9 @@ public sealed partial class TerminalLogger : INodeLogger
         var buildEventContext = e.BuildEventContext;
         string? message = e.Message;
 
-        // Messages with no meaningful project context are logged either with a null BuildEventContext
-        // (e.g. forwarded from an out-of-process helper, such as NuGet's restore task console host) or with
-        // BuildEventContext.Invalid (e.g. the in-process build coordinator, which runs outside of any project).
-        // For the null-context case we trust null-context + High importance alone, since the sender has already
-        // opted out of any project association. For the Invalid-context case we additionally require the event
-        // to be a recognized coordinator diagnostic (identified by its ExtendedType, not its rendered message
-        // text), since Invalid is also a plausible (mis-)use by in-process code that IS associated with the
-        // current build and shouldn't be echoed unconditionally.
+        // Null context (e.g. an out-of-process helper) is trusted alone; BuildEventContext.Invalid additionally
+        // requires a recognized coordinator diagnostic, since Invalid can also be (mis-)used by in-process code
+        // that IS associated with the current build.
         if (buildEventContext is null || buildEventContext == BuildEventContext.Invalid)
         {
             bool isRecognizedGlobalMessage = buildEventContext is null || IsCoordinatorMessage(e);
@@ -1439,10 +1434,6 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     /// <param name="e">Raised message event.</param>
     /// <returns>true if the event is a recognized coordinator diagnostic.</returns>
-    /// <remarks>
-    /// The ExtendedType fallback handles the case where the event was reconstructed generically (e.g. after a
-    /// binary log round-trip), which loses the concrete type but keeps the ExtendedType.
-    /// </remarks>
     private static bool IsCoordinatorMessage(BuildMessageEventArgs e) =>
         e is Microsoft.Build.Framework.Coordinator.CoordinatorWaitingForNodesEventArgs ||
         e is IExtendedBuildEventArgs { ExtendedType: Microsoft.Build.Framework.Coordinator.Constants.WaitingForNodesEventType };

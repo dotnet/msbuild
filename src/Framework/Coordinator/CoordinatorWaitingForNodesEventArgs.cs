@@ -11,9 +11,7 @@ namespace Microsoft.Build.Framework.Coordinator;
 /// </summary>
 /// <remarks>
 /// Recognize this diagnostic by its concrete type (<c>is CoordinatorWaitingForNodesEventArgs</c>), not by
-/// comparing message text. Note: the concrete type is only preserved for in-process consumers; if this event
-/// ever crossed a node boundary or was replayed from a binary log, it would come back as a generic
-/// <see cref="ExtendedBuildMessageEventArgs"/> with the same <see cref="IExtendedBuildEventArgs.ExtendedType"/>.
+/// comparing message text.
 /// </remarks>
 public sealed class CoordinatorWaitingForNodesEventArgs : BuildMessageEventArgs, IExtendedBuildEventArgs
 {
