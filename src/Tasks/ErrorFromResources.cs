@@ -3,7 +3,7 @@
 
 using System;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework.Utilities;
 
 #nullable disable
 
@@ -51,12 +51,26 @@ namespace Microsoft.Build.Tasks
         {
             try
             {
-                string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, Log.FormatResourceString(Resource, Arguments), out string errorCode);
+                string message = Log.FormatResourceString(Resource, Arguments);
 
-                // If the user specifies a code, that should override.
+                if (MessageParser.TryParseAnyCode(message, out string errorCode, out string strippedMessage))
+                {
+                    message = strippedMessage;
+                }
+
+                // If the user specified a code, that should override.
                 Code ??= errorCode;
 
-                Log.LogError(null, Code, HelpKeyword, File, 0, 0, 0, 0, message);
+                Log.LogError(
+                    subcategory: null,
+                    Code,
+                    HelpKeyword,
+                    File,
+                    lineNumber: 0,
+                    columnNumber: 0,
+                    endLineNumber: 0,
+                    endColumnNumber: 0,
+                    message);
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
