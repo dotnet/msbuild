@@ -927,6 +927,13 @@ namespace Microsoft.Build.BackEnd
             // The pipe(s) used to communicate with the node.
             private readonly Stream _pipeStream;
 
+#if !FEATURE_APM
+            /// <summary>
+            /// Stream used for async packet reads.
+            /// </summary>
+            private readonly Stream _readStream;
+#endif
+
             /// <summary>
             /// The factory used to create packets from data read off the pipe.
             /// </summary>
@@ -1051,6 +1058,11 @@ namespace Microsoft.Build.BackEnd
                 _nodeId = nodeId;
                 _process = process;
                 _pipeStream = nodePipe;
+#if !FEATURE_APM
+                _readStream = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
+                    ? new BufferedReadStream(nodePipe, 64 * 1024)
+                    : nodePipe;
+#endif
                 _packetFactory = factory;
                 _headerByte = new byte[5]; // 1 for the packet type, 4 for the body length
                 _readBufferMemoryStream = new MemoryStream();
@@ -1105,7 +1117,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     try
                     {
-                        int bytesRead = await _pipeStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
+                        int bytesRead = await _readStream.ReadAsync(_headerByte.AsMemory(), CancellationToken.None).ConfigureAwait(false);
                         if (!ProcessHeaderBytesRead(bytesRead))
                         {
                             return;
@@ -1130,7 +1142,7 @@ namespace Microsoft.Build.BackEnd
                         int totalBytesRead = 0;
                         while (totalBytesRead < packetLength)
                         {
-                            int bytesRead = await _pipeStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
+                            int bytesRead = await _readStream.ReadAsync(packetData.AsMemory(totalBytesRead, packetLength - totalBytesRead), CancellationToken.None).ConfigureAwait(false);
                             if (bytesRead == 0)
                             {
                                 break;
