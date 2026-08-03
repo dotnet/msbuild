@@ -605,7 +605,29 @@ namespace Microsoft.Build.UnitTests
         {
             // The build coordinator logs its "waiting for nodes" diagnostic with BuildEventContext.Invalid
             // because it runs outside the context of any particular project. It is identified as a coordinator
-            // diagnostic by its ExtendedType, and should still be rendered.
+            // diagnostic by its concrete type (CoordinatorWaitingForNodesEventArgs), and should still be rendered.
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(new Microsoft.Build.Framework.Coordinator.CoordinatorWaitingForNodesEventArgs(
+                    AssemblyResources.GetString("CoordinatorWaitingForNodes"),
+                    senderName: null,
+                    MessageImportance.High)
+                {
+                    BuildEventContext = BuildEventContext.Invalid,
+                });
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintCoordinatorMessage_InvalidContext_ReconstructedAsExtendedBuildMessage_Rendered()
+        {
+            // If the coordinator's diagnostic ever crossed a node boundary or were round-tripped through a binary
+            // log, it would be reconstructed generically as ExtendedBuildMessageEventArgs (since neither the
+            // node-IPC packet format nor the binary log format preserve concrete BuildMessageEventArgs subtypes
+            // that aren't explicitly registered with them) -- but it would still carry the same ExtendedType, and
+            // must still be recognized and rendered via that fallback.
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 _centralNodeEventSource.InvokeMessageRaised(MakeExtendedMessageEventArgs(
@@ -623,8 +645,9 @@ namespace Microsoft.Build.UnitTests
         public Task PrintMessage_InvalidContext_HighImportance_UnrecognizedMessage_Skipped()
         {
             // A High-importance message with BuildEventContext.Invalid that is not a recognized coordinator
-            // diagnostic (not an ExtendedBuildMessageEventArgs with the coordinator's ExtendedType) should not
-            // be echoed directly to the terminal (it is not a recognized global message).
+            // diagnostic (neither a CoordinatorWaitingForNodesEventArgs nor an ExtendedBuildMessageEventArgs with
+            // the coordinator's ExtendedType) should not be echoed directly to the terminal (it is not a
+            // recognized global message).
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("Some unrelated Invalid-context message.", MessageImportance.High, buildEventContext: BuildEventContext.Invalid));
@@ -636,9 +659,10 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintMessage_InvalidContext_HighImportance_MatchingTextButNotExtendedType_Skipped()
         {
-            // A plain BuildMessageEventArgs (not an ExtendedBuildMessageEventArgs) that happens to carry the exact
-            // same text as the coordinator's "waiting for nodes" diagnostic must NOT be recognized as a coordinator
-            // diagnostic. Recognition is based on the event's ExtendedType, not on comparing rendered message text.
+            // A plain BuildMessageEventArgs (neither a CoordinatorWaitingForNodesEventArgs nor an
+            // ExtendedBuildMessageEventArgs) that happens to carry the exact same text as the coordinator's
+            // "waiting for nodes" diagnostic must NOT be recognized as a coordinator diagnostic. Recognition is
+            // based on the event's type/ExtendedType, not on comparing rendered message text.
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs(AssemblyResources.GetString("CoordinatorWaitingForNodes"), MessageImportance.High, buildEventContext: BuildEventContext.Invalid));
