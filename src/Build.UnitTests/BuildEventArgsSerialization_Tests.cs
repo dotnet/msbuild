@@ -1017,7 +1017,10 @@ namespace Microsoft.Build.UnitTests
                 ],
                 "ResolveAssemblyReference",
                 MessageImportance.Low,
-                DateTime.UtcNow);
+                DateTime.UtcNow)
+            {
+                ProjectFile = @"C:\foo\search.proj",
+            };
 
         [Fact]
         public void RoundtripAssemblyConflictDependencyDetailsMessageEventArgs()
@@ -1027,6 +1030,7 @@ namespace Microsoft.Build.UnitTests
             Roundtrip(
                 args,
                 e => e.Importance.ToString(),
+                e => e.ProjectFile,
                 e => e.Message,
                 e => DescribeConflictReferenceDetails(e.Victor),
                 e => DescribeConflictReferenceDetails(e.Victim));
@@ -1044,6 +1048,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.LineNumber.ToString(),
                 e => e.ColumnNumber.ToString(),
                 e => e.HelpKeyword,
+                e => e.ProjectFile,
                 e => e.SimpleAssemblyName,
                 e => e.VictorFusionName,
                 e => e.VictimFusionName,
@@ -1051,6 +1056,22 @@ namespace Microsoft.Build.UnitTests
                 e => e.Message,
                 e => DescribeConflictReferenceDetails(e.Victor),
                 e => DescribeConflictReferenceDetails(e.Victim));
+        }
+
+        [Fact]
+        public void AssemblyConflictMessagesAreFormattedLazily()
+        {
+            AssemblyConflictDependencyDetailsMessageEventArgs details = CreateAssemblyConflictDependencyDetailsEvent();
+            AssemblyConflictWarningEventArgs warning = CreateAssemblyConflictWarningEvent();
+
+            details.IsMessageMaterialized.ShouldBeFalse();
+            warning.IsMessageMaterialized.ShouldBeFalse();
+
+            details.Message.ShouldNotBeNullOrEmpty();
+            warning.Message.ShouldNotBeNullOrEmpty();
+
+            details.IsMessageMaterialized.ShouldBeTrue();
+            warning.IsMessageMaterialized.ShouldBeTrue();
         }
 
         /// <summary>
@@ -1167,7 +1188,10 @@ namespace Microsoft.Build.UnitTests
                 CreateConflictMessageFormats(),
                 "ResolveAssemblyReference",
                 MessageImportance.Low,
-                DateTime.UtcNow);
+                DateTime.UtcNow)
+            {
+                ProjectFile = @"C:\foo\details.proj",
+            };
         }
 
         private static AssemblyConflictWarningEventArgs CreateAssemblyConflictWarningEvent()
@@ -1204,7 +1228,10 @@ namespace Microsoft.Build.UnitTests
                 7,
                 "MSBuild.ResolveAssemblyReference.FoundConflicts",
                 "ResolveAssemblyReference",
-                DateTime.UtcNow);
+                DateTime.UtcNow)
+            {
+                ProjectFile = @"C:\foo\warning.proj",
+            };
         }
 
         [Fact]
