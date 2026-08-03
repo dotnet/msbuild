@@ -30,6 +30,13 @@
 
     <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.ClientExtensions" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
     <PackageReference Include="Microsoft.VisualStudio.OpenTelemetry.Collector" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
+    <!--
+        OpenTelemetry.Api GHSA-g94r-2vxg-569j comes in transitively through the net472
+        Visual Studio telemetry packages referenced above. NuGetAuditSuppress is scoped to
+        the project that declares it, so it has to be repeated here as well as in
+        src/Framework/Microsoft.Build.Framework.csproj.
+    -->
+    <NuGetAuditSuppress Include="https://github.com/advisories/GHSA-g94r-2vxg-569j" />
 
     <ProjectReference Include="..\Build\Microsoft.Build.csproj" />
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
