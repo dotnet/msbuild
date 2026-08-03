@@ -28,4 +28,11 @@ internal static class Constants
     ///  Name of environment variable that overrides coordinator pipe name.
     /// </summary>
     public const string PipeNameEnvVarName = "MSBUILDCOORDINATORPIPENAME";
+
+    /// <summary>
+    ///  <see cref="Microsoft.Build.Framework.IExtendedBuildEventArgs.ExtendedType"/> used to mark the coordinator's
+    ///  "waiting for nodes" diagnostic, so that loggers (e.g. Terminal Logger) can recognize it by type instead of
+    ///  by comparing against its (localizable) rendered message text.
+    /// </summary>
+    public const string WaitingForNodesEventType = "CoordinatorWaitingForNodes";
 }

@@ -604,10 +604,17 @@ namespace Microsoft.Build.UnitTests
         public Task PrintCoordinatorMessage_InvalidContext_Rendered()
         {
             // The build coordinator logs its "waiting for nodes" diagnostic with BuildEventContext.Invalid
-            // because it runs outside the context of any particular project. It should still be rendered.
+            // because it runs outside the context of any particular project. It is identified as a coordinator
+            // diagnostic by its ExtendedType (not by comparing its rendered message text), and should still be
+            // rendered.
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
-                _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs(AssemblyResources.GetString("CoordinatorWaitingForNodes"), MessageImportance.High, buildEventContext: BuildEventContext.Invalid));
+                _centralNodeEventSource.InvokeMessageRaised(MakeExtendedMessageEventArgs(
+                    AssemblyResources.GetString("CoordinatorWaitingForNodes"),
+                    MessageImportance.High,
+                    Microsoft.Build.Framework.Coordinator.Constants.WaitingForNodesEventType,
+                    extendedMetadata: null,
+                    buildEventContext: BuildEventContext.Invalid));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
@@ -616,11 +623,26 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintMessage_InvalidContext_HighImportance_UnrecognizedMessage_Skipped()
         {
-            // A High-importance message with BuildEventContext.Invalid that does not match a known coordinator
-            // diagnostic should not be echoed directly to the terminal (it is not a recognized global message).
+            // A High-importance message with BuildEventContext.Invalid that is not a recognized coordinator
+            // diagnostic (not an ExtendedBuildMessageEventArgs with the coordinator's ExtendedType) should not
+            // be echoed directly to the terminal (it is not a recognized global message).
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("Some unrelated Invalid-context message.", MessageImportance.High, buildEventContext: BuildEventContext.Invalid));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintMessage_InvalidContext_HighImportance_MatchingTextButNotExtendedType_Skipped()
+        {
+            // A plain BuildMessageEventArgs (not an ExtendedBuildMessageEventArgs) that happens to carry the exact
+            // same text as the coordinator's "waiting for nodes" diagnostic must NOT be recognized as a coordinator
+            // diagnostic. Recognition is based on the event's ExtendedType, not on comparing rendered message text.
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs(AssemblyResources.GetString("CoordinatorWaitingForNodes"), MessageImportance.High, buildEventContext: BuildEventContext.Invalid));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();

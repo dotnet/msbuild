@@ -41,12 +41,6 @@ public sealed partial class TerminalLogger : INodeLogger
     private static readonly string[] _authProviderMessageKeywords = ["[CredentialProvider]", "--interactive"];
 #endif
 
-    // The build coordinator logs its "waiting for nodes" message with BuildEventContext.Invalid because it runs
-    // outside the context of any particular project. We match against the resource string itself (rather than
-    // trusting null/Invalid context + High importance alone) so that we don't accidentally treat arbitrary
-    // Invalid-context, High-importance messages from unrelated code paths as coordinator diagnostics.
-    private static readonly string s_coordinatorWaitingForNodesMessage = AssemblyResources.GetString("CoordinatorWaitingForNodes");
-
     private static readonly string[] newLineStrings = { "\r\n", "\n" };
 
     /// <summary>
@@ -1208,12 +1202,13 @@ public sealed partial class TerminalLogger : INodeLogger
         // (e.g. forwarded from an out-of-process helper, such as NuGet's restore task console host) or with
         // BuildEventContext.Invalid (e.g. the in-process build coordinator, which runs outside of any project).
         // For the null-context case we trust null-context + High importance alone, since the sender has already
-        // opted out of any project association. For the Invalid-context case we additionally require the message
-        // to match a known coordinator diagnostic, since Invalid is also a plausible (mis-)use by in-process code
-        // that IS associated with the current build and shouldn't be echoed unconditionally.
+        // opted out of any project association. For the Invalid-context case we additionally require the event
+        // to be a recognized coordinator diagnostic (identified by its ExtendedType, not its rendered message
+        // text), since Invalid is also a plausible (mis-)use by in-process code that IS associated with the
+        // current build and shouldn't be echoed unconditionally.
         if (buildEventContext is null || buildEventContext == BuildEventContext.Invalid)
         {
-            bool isRecognizedGlobalMessage = buildEventContext is null || IsCoordinatorMessage(message);
+            bool isRecognizedGlobalMessage = buildEventContext is null || IsCoordinatorMessage(e);
 
             if (Verbosity > LoggerVerbosity.Quiet && message is not null && e.Importance == MessageImportance.High && isRecognizedGlobalMessage)
             {
@@ -1442,10 +1437,10 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// Detects build coordinator diagnostics logged with <see cref="BuildEventContext.Invalid"/>.
     /// </summary>
-    /// <param name="message">Raised event message.</param>
-    /// <returns>true if the message matches a known coordinator diagnostic.</returns>
-    private static bool IsCoordinatorMessage(string? message) =>
-        message is not null && string.Equals(message, s_coordinatorWaitingForNodesMessage, StringComparison.Ordinal);
+    /// <param name="e">Raised message event.</param>
+    /// <returns>true if the event is a recognized coordinator diagnostic.</returns>
+    private static bool IsCoordinatorMessage(BuildMessageEventArgs e) =>
+        e is IExtendedBuildEventArgs { ExtendedType: Microsoft.Build.Framework.Coordinator.Constants.WaitingForNodesEventType };
 
 
     private static bool IsImmediateWarning(string code) => code == "MSB3026";

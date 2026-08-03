@@ -374,7 +374,19 @@ internal sealed partial class CoordinatorClient : IDisposable
 
                 case WaitMessage:
                     output.WriteLine("CoordinatorClient: Received WaitMessage, waiting for deferred grant");
-                    loggingService?.LogComment(BuildEventContext.Invalid, MessageImportance.High, "CoordinatorWaitingForNodes");
+
+                    // Logged as an ExtendedBuildMessageEventArgs (rather than a plain LogComment) so that loggers
+                    // (e.g. Terminal Logger) can recognize this as a coordinator diagnostic by its ExtendedType,
+                    // instead of by comparing against its (localizable) rendered message text.
+                    loggingService?.LogBuildEvent(new ExtendedBuildMessageEventArgs(
+                        Microsoft.Build.Framework.Coordinator.Constants.WaitingForNodesEventType,
+                        AssemblyResources.GetString("CoordinatorWaitingForNodes"),
+                        helpKeyword: null,
+                        senderName: "MSBuild",
+                        MessageImportance.High)
+                    {
+                        BuildEventContext = BuildEventContext.Invalid,
+                    });
 
                     var waitTimer = Stopwatch.StartNew();
 
