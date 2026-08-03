@@ -74,10 +74,8 @@ This matches how `Directory.Build.rsp` is discovered (`CommandLineParser.GetProj
 `Directory.Build.props` and `Directory.Solution.props` are located.
 
 **First found wins.** There is no layering: a `Directory.Parse.config` in a subdirectory replaces one
-higher up rather than adding to it. Layering would borrow a per-file notion from `.editorconfig`, but a
-build resolves exactly one configuration, so there is nothing to compose across. A nearer file that
-omits a permission granted by a farther one fails loudly, with MSB4066/MSB4067 naming the attribute or
-element.
+higher up rather than adding to it. A nearer file that omits a permission granted by a farther one fails
+loudly, with MSB4066/MSB4067 naming the attribute or element.
 
 There are no machine-wide or environment-variable sources. Whether a project loads should not depend on
 state that is not in source control.

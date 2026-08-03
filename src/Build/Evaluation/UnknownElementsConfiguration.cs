@@ -20,8 +20,8 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     /// <remarks>
     /// The configuration is resolved exactly once per build, anchored on the entry project's directory,
-    /// by walking up for <c>Directory.Parse.config</c> files. The walk stops at a file declaring
-    /// <c>root = true</c>; entries from nearer files win over farther ones.
+    /// by walking up to the nearest <c>Directory.Parse.config</c>. First found wins: there is no layering,
+    /// matching how <c>Directory.Build.props</c> and <c>Directory.Build.rsp</c> are discovered.
     ///
     /// Instances are immutable and carry a content-based <see cref="Identity"/>. A
     /// <see cref="ProjectRootElementCache"/> is constructed with one configuration and keeps it for its
@@ -86,10 +86,10 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         /// <remarks>
         /// First found wins, with no layering, matching how <c>Directory.Build.props</c>,
-        /// <c>Directory.Build.rsp</c> and <c>Directory.Solution.props</c> are discovered. Layering would be
-        /// borrowing a per-file notion from <c>.editorconfig</c>, but a build resolves exactly one
-        /// configuration, so there is nothing for it to compose across. A nearer file that omits a permission
-        /// granted by a farther one fails loudly, with MSB4066/MSB4067 naming the attribute or element.
+        /// <c>Directory.Build.rsp</c> and <c>Directory.Solution.props</c> are discovered. Layering was
+        /// considered and rejected: a build resolves exactly one configuration, so there is nothing for it
+        /// to compose across. A nearer file that omits a permission granted by a farther one fails loudly,
+        /// with MSB4066/MSB4067 naming the attribute or element.
         /// </remarks>
         internal static UnknownElementsConfiguration Resolve(string? startingDirectory)
         {
