@@ -232,10 +232,7 @@ namespace Microsoft.Build.Framework
         public static void UpdateFromEnvironment()
         {
             // Re-create Traits instance to update values in Traits according to current environment.
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-            {
-                _instance = new Traits();
-            }
+            _instance = new Traits();
         }
     }
 
@@ -484,14 +481,6 @@ namespace Microsoft.Build.Framework
                 }
 
                 return _sdkReferencePropertyExpansionValue;
-            }
-        }
-
-        public bool UnquoteTargetSwitchParameters
-        {
-            get
-            {
-                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
             }
         }
 

@@ -8,7 +8,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 {
     /// <summary>
     /// Diagnostic descriptors for the thread-safe task analyzer.
-    /// All rules default to Warning severity. MSBuildTask0001 defaults to Error.
+    /// Rules default to the severity appropriate for the behavior they diagnose.
     /// </summary>
     internal static class DiagnosticDescriptors
     {
@@ -85,6 +85,33 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             isEnabledByDefault: true,
             description: "A relative default path cannot be rooted in a property initializer because the MSBuild engine only assigns TaskEnvironment after the task is constructed. Move the default into Execute(), where TaskEnvironment.GetAbsolutePath can resolve it, guarding the assignment so a value bound from the project is not overwritten.");
 
+        public static readonly DiagnosticDescriptor UnsupportedTaskItemType = new(
+            id: DiagnosticIds.UnsupportedTaskItemType,
+            title: "ITaskItem<T> used with unsupported type argument",
+            messageFormat: "Task property '{0}' uses ITaskItem<{1}> but MSBuild cannot automatically parse '{1}' from item metadata. Use one of the directly parsed types: {2}.",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "MSBuild can only bind ITaskItem<T> properties when T is a supported type. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.");
+
+        public static readonly DiagnosticDescriptor CultureSensitiveTaskItemType = new(
+            id: DiagnosticIds.CultureSensitiveTaskItemType,
+            title: "ITaskItem<T> type argument relies on culture-sensitive conversion",
+            messageFormat: "Task property '{0}' uses ITaskItem<{1}>, which MSBuild parses through Convert.ChangeType using CultureInfo.InvariantCulture. Use ITaskItem<string> and parse explicitly with a chosen culture.",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Error,
+            isEnabledByDefault: true,
+            description: "ITaskItem<T> type arguments parsed through Convert.ChangeType use CultureInfo.InvariantCulture. Bind the item as a string and parse it explicitly with the intended culture.");
+
+        public static readonly DiagnosticDescriptor PreferTaskEnvironmentConstructorInjection = new(
+            id: DiagnosticIds.PreferTaskEnvironmentConstructorInjection,
+            title: "Prefer constructor injection for TaskEnvironment",
+            messageFormat: "Task '{0}' receives TaskEnvironment only after construction; add a public constructor with a single TaskEnvironment parameter to make it available during construction",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Info,
+            isEnabledByDefault: true,
+            description: "Constructor injection makes TaskEnvironment available to constructor logic and environment-dependent default initialization. The MSBuild engine prefers a public constructor with a single TaskEnvironment parameter when one is available.");
+
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
             TaskEnvironmentRequired,
@@ -93,6 +120,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             TransitiveUnsafeCall,
             PreferTypedPathParameter,
             PreferTypedTaskItem,
-            InitializeRelativeDefaultInExecute);
+            InitializeRelativeDefaultInExecute,
+            UnsupportedTaskItemType,
+            CultureSensitiveTaskItemType,
+            PreferTaskEnvironmentConstructorInjection);
     }
 }

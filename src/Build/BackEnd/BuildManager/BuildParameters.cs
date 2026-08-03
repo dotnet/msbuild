@@ -362,6 +362,22 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public IDictionary<string, string> BuildProcessEnvironment => BuildProcessEnvironmentInternal;
 
+        internal void SetBuildProcessEnvironmentVariable(string name, string value)
+        {
+            Dictionary<string, string> environment = new(BuildProcessEnvironmentInternal, CommunicationsUtilities.EnvironmentVariableComparer);
+
+            if (value is null)
+            {
+                environment.Remove(name);
+            }
+            else
+            {
+                environment[name] = value;
+            }
+
+            _buildProcessEnvironment = environment.ToFrozenDictionary(CommunicationsUtilities.EnvironmentVariableComparer);
+        }
+
         /// <summary>
         /// The name of the culture to use during the build.
         /// </summary>

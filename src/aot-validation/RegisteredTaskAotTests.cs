@@ -16,7 +16,7 @@ namespace Microsoft.Build.AotValidation;
 /// (assembly probing, by-name type resolution) is trimmed away and an <em>un</em>registered task fails
 /// observably. A host instead pre-registers its tasks with the host task registry: the common built-in
 /// tasks through <see cref="BuiltInTasks.RegisterAll"/>, and its own tasks through
-/// <see cref="Utilities.Task.RegisterTask{T}(string)"/>. A registered task is constructed and bound with
+/// <see cref="Utilities.Task.RegisterTask{T}()"/>. A registered task is constructed and bound with
 /// no assembly loading or by-name type resolution, so it runs under AOT. These tests drive a real
 /// in-process build (<see cref="Project.Build(string, System.Collections.Generic.IEnumerable{ILogger})"/>)
 /// of a hand-authored project and assert the tasks' real side effects.
@@ -30,7 +30,7 @@ public sealed class RegisteredTaskAotTests
         // Pre-register the common built-in tasks and a host custom task before the build. (Idempotent, so
         // calling RegisterAll across tests is safe.)
         BuiltInTasks.RegisterAll();
-        Utilities.Task.RegisterTask<HarnessEchoTask>(nameof(HarnessEchoTask));
+        Utilities.Task.RegisterTask<HarnessEchoTask>();
 
         using TempDirectory dir = new();
         string outDir = Path.Combine(dir.Path, "out");

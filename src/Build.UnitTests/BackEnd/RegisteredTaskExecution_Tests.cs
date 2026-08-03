@@ -12,15 +12,18 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     /// <summary>
     /// Integration coverage for the host task-class registration API
-    /// (<see cref="Task.RegisterTask{T}(string)"/> and the
+    /// (<see cref="Task.RegisterTask{T}()"/> and the
     /// <see cref="System.Func{ITask}"/> overload) exercised through a real in-process build on the default
     /// (JIT) engine, where reflective task execution is enabled. The Native AOT (reflective-off) counterparts
     /// live in the aot-validation harness, which is not part of the CI test run; these run in CI.
     /// </summary>
     /// <remarks>
-    /// The task registry is process-global and has no unregister API, so each test uses a unique, distinctive
-    /// task name that no real task or other test uses; the leftover registrations are harmless (a registered
-    /// name only affects a build that invokes a task of exactly that name).
+    /// The task registry is process-global and has no unregister API. Generic <see cref="Task.RegisterTask{T}()"/>
+    /// registrations are keyed by the task type's name, so each such test invokes the task through a project
+    /// element of that same type name (for example <c>&lt;RegisteredEchoTestTask&gt;</c>); the custom test task
+    /// types here are used by no real task or other test. The <see cref="System.Func{ITask}"/> factory overload
+    /// takes an explicit name, so those tests use a unique, distinctive one. Leftover registrations are harmless
+    /// (a registered name only affects a build that invokes a task of exactly that name).
     /// </remarks>
     public sealed class RegisteredTaskExecution_Tests
     {
@@ -36,14 +39,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void RegisterTaskGeneric_ResolvesAndExecutesAndBindsOutput()
         {
-            Task.RegisterTask<RegisteredEchoTestTask>("RegTaskTest_GenericEcho");
+            Task.RegisterTask<RegisteredEchoTestTask>();
 
             string project = """
                 <Project DefaultTargets="Build">
                   <Target Name="Build">
-                    <RegTaskTest_GenericEcho Input="hello">
+                    <RegisteredEchoTestTask Input="hello">
                       <Output TaskParameter="Result" PropertyName="EchoResult" />
-                    </RegTaskTest_GenericEcho>
+                    </RegisteredEchoTestTask>
                     <Message Text="Bound: $(EchoResult)" Importance="high" />
                   </Target>
                 </Project>
@@ -84,15 +87,16 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
         /// <summary>
         /// Registering a name a second time replaces the previous registration; the most recently registered
-        /// task is the one the engine constructs.
+        /// task is the one the engine constructs. Uses the <see cref="System.Func{ITask}"/> overload (which
+        /// takes an explicit name) so two different task types can share one registration name.
         /// </summary>
         [Fact]
         public void RegisterTask_RegisteringSameNameAgain_ReplacesPreviousRegistration()
         {
-            Task.RegisterTask<RegisteredEchoTestTask>("RegTaskTest_Replace");
+            Task.RegisterTask("RegTaskTest_Replace", static () => new RegisteredEchoTestTask());
 
             // Re-register the same name with a different task type; the latest registration must win.
-            Task.RegisterTask<RegisteredMarkerTestTask>("RegTaskTest_Replace");
+            Task.RegisterTask("RegTaskTest_Replace", static () => new RegisteredMarkerTestTask());
 
             string project = """
                 <Project DefaultTargets="Build">
@@ -116,12 +120,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         [Fact]
         public void RegisteredTaskFollowedByIntrinsicTask_BothExecute_NoStateLeak()
         {
-            Task.RegisterTask<RegisteredEchoTestTask>("RegTaskTest_ResetEcho");
+            Task.RegisterTask<RegisteredEchoTestTask>();
 
             string project = """
                 <Project DefaultTargets="Build">
                   <Target Name="Build">
-                    <RegTaskTest_ResetEcho Input="x" />
+                    <RegisteredEchoTestTask Input="x" />
                     <CallTarget Targets="Side" />
                   </Target>
                   <Target Name="Side">
@@ -134,6 +138,54 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             logger.AssertLogContains("RegisteredEchoTestTask ran: x!");
             logger.AssertLogContains("SideTargetRan");
+        }
+
+        /// <summary>
+        /// A task registered through the generic overload whose type declares both a parameterless and a
+        /// <see cref="TaskEnvironment"/> constructor is constructed through the <see cref="TaskEnvironment"/>
+        /// constructor (injecting the current environment), mirroring the reflective task-load path.
+        /// </summary>
+        [Fact]
+        public void RegisterTaskGeneric_TaskWithTaskEnvironmentConstructor_InjectsEnvironment()
+        {
+            Task.RegisterTask<RegisteredEnvCtorTestTask>();
+
+            string project = """
+                <Project DefaultTargets="Build">
+                  <Target Name="Build">
+                    <RegisteredEnvCtorTestTask />
+                  </Target>
+                </Project>
+                """;
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(project, _output);
+
+            logger.AssertLogContains("RegisteredEnvCtorTestTask used env ctor: True");
+            logger.AssertLogContains("RegisteredEnvCtorTestTask ctor env was null: False");
+        }
+
+        /// <summary>
+        /// A task registered through the <see cref="System.Func{TaskEnvironment, ITask}"/> overload receives
+        /// the current <see cref="TaskEnvironment"/> at construction, so a task whose only constructor takes a
+        /// <see cref="TaskEnvironment"/> (and thus cannot use the generic <c>new()</c> overload) can still be
+        /// registered and run reflection-free.
+        /// </summary>
+        [Fact]
+        public void RegisterTaskEnvironmentFactory_InjectsEnvironment()
+        {
+            Task.RegisterTask(static (TaskEnvironment env) => new RegisteredEnvOnlyCtorTestTask(env));
+
+            string project = """
+                <Project DefaultTargets="Build">
+                  <Target Name="Build">
+                    <RegisteredEnvOnlyCtorTestTask />
+                  </Target>
+                </Project>
+                """;
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(project, _output);
+
+            logger.AssertLogContains("RegisteredEnvOnlyCtorTestTask ctor env was null: False");
         }
     }
 
@@ -165,6 +217,62 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public override bool Execute()
         {
             Log.LogMessage(MessageImportance.High, "RegisteredMarkerTestTask ran");
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// A host-registered task that declares both a parameterless and a <see cref="TaskEnvironment"/>
+    /// constructor, used to prove the registered-task path prefers the environment-injecting constructor.
+    /// </summary>
+    public sealed class RegisteredEnvCtorTestTask : Task, IMultiThreadableTask
+    {
+        private readonly bool _usedEnvironmentConstructor;
+        private readonly bool _ctorEnvironmentWasNull;
+
+        public RegisteredEnvCtorTestTask()
+        {
+            _usedEnvironmentConstructor = false;
+            _ctorEnvironmentWasNull = true;
+        }
+
+        public RegisteredEnvCtorTestTask(TaskEnvironment taskEnvironment)
+        {
+            _usedEnvironmentConstructor = true;
+            _ctorEnvironmentWasNull = taskEnvironment is null;
+            TaskEnvironment = taskEnvironment!;
+        }
+
+        public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+        public override bool Execute()
+        {
+            Log.LogMessage(MessageImportance.High, "RegisteredEnvCtorTestTask used env ctor: " + _usedEnvironmentConstructor);
+            Log.LogMessage(MessageImportance.High, "RegisteredEnvCtorTestTask ctor env was null: " + _ctorEnvironmentWasNull);
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// A host-registered task whose only constructor takes a <see cref="TaskEnvironment"/>. It cannot be
+    /// registered through the generic <c>new()</c> overload, so it is registered via the
+    /// <see cref="System.Func{TaskEnvironment, ITask}"/> factory overload that supplies the environment.
+    /// </summary>
+    public sealed class RegisteredEnvOnlyCtorTestTask : Task, IMultiThreadableTask
+    {
+        private readonly bool _ctorEnvironmentWasNull;
+
+        public RegisteredEnvOnlyCtorTestTask(TaskEnvironment taskEnvironment)
+        {
+            _ctorEnvironmentWasNull = taskEnvironment is null;
+            TaskEnvironment = taskEnvironment!;
+        }
+
+        public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+        public override bool Execute()
+        {
+            Log.LogMessage(MessageImportance.High, "RegisteredEnvOnlyCtorTestTask ctor env was null: " + _ctorEnvironmentWasNull);
             return true;
         }
     }

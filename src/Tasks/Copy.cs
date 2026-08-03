@@ -29,8 +29,6 @@ namespace Microsoft.Build.Tasks
     {
 
         // Default parallelism determined empirically - times below are in seconds spent in the Copy task building this repo
-        // with "build -skiptests -rebuild -configuration Release /ds" (with hack to build.ps1 to disable creating selfhost
-        // build for non-selfhost first build; implies first running build in repo to pull packages and create selfhost)
         // and comparing the task timings from the default and selfhost binlogs with different settings for this parallelism
         // number (via env var override). >=3 samples averaged for each number.
         //

@@ -22,6 +22,9 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0006** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer typed path parameter over string |
 | **MSBuildTask0007** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
 | **MSBuildTask0008** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
+| **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
+| **MSBuildTask0010** | Error | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
+| **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -225,15 +228,74 @@ For a reference-typed target (`FileInfo`/`DirectoryInfo`) the guard is a null-co
 
 **Fix skipped (diagnostic still reported):** when there is no editable `Execute()` in the current document, when `Execute()` is expression-bodied (no statement block to prepend to), or when the task has no accessible `TaskEnvironment` member to root the path through.
 
+### MSBuildTask0009 — Unsupported `ITaskItem<T>` Type Argument
+
+When a task property is typed as `ITaskItem<T>` or `ITaskItem<T>[]` but `T` is not supported by MSBuild's task parameter binder, a **Warning** is emitted. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.
+
+**Directly parsed type arguments:** `string`, `bool`, `AbsolutePath`, `FileInfo`, `DirectoryInfo`.
+
+The binder also accepts `char`, numeric primitives, `decimal`, and `DateTime`, but MSBuildTask0010 rejects those types because they rely on `Convert.ChangeType`.
+
+```csharp
+// ⚠️ MSBuildTask0009: Task property 'Id' uses ITaskItem<Guid> but 'Guid' is not supported
+public class MyTask : Task
+{
+    public ITaskItem<System.Guid> Id { get; set; }       // warning
+    public ITaskItem<System.TimeSpan>[] Durations { get; set; }  // warning
+    public ITaskItem<int> Count { get; set; }             // MSBuildTask0010 error
+}
+```
+
+No code fix is offered for MSBuildTask0009 — the resolution depends on the intended semantics (e.g., switching to `string` and parsing manually, or choosing a different supported type).
+
+**Scope:** All `ITask` implementations (not just multithreaded tasks), since using an unsupported T is always a runtime correctness problem.
+
+### MSBuildTask0010 — Culture-Sensitive `ITaskItem<T>` Conversion
+
+MSBuild binds `ITaskItem<T>` for `char`, numeric primitives, `decimal`, and `DateTime` through `Convert.ChangeType` using `CultureInfo.InvariantCulture`. Because this implicit conversion may not match the task's intended culture, the analyzer reports an **Error** whenever one of these types is used.
+
+```csharp
+public class MyTask : Task
+{
+    public ITaskItem<int> Count { get; set; }       // error
+    public ITaskItem<DateTime>[] Dates { get; set; } // error
+}
+```
+
+Use `ITaskItem<string>` and parse `Value` explicitly with the intended culture. `ITaskItem<bool>`, `ITaskItem<AbsolutePath>`, `ITaskItem<FileInfo>`, and `ITaskItem<DirectoryInfo>` use dedicated parser paths and do not produce MSBuildTask0010.
+
+**Scope:** All `ITask` implementations, including input, output, scalar, and array properties.
+
+### MSBuildTask0011 — Prefer `TaskEnvironment` Constructor Injection
+
+Concrete `IMultiThreadableTask` implementations receive `TaskEnvironment` through their property before execution, but that is too late for constructor logic and property initializers. Add a public constructor whose single parameter is `TaskEnvironment` when construction needs the current task environment:
+
+```csharp
+public class MyTask : Task, IMultiThreadableTask
+{
+    public MyTask(TaskEnvironment taskEnvironment)
+    {
+        TaskEnvironment = taskEnvironment;
+    }
+
+    public TaskEnvironment TaskEnvironment { get; set; }
+    public override bool Execute() => true;
+}
+```
+
+The engine prefers this constructor when it is present. A public parameterless constructor may remain for callers that instantiate the task directly.
+
+**Scope:** Concrete classes implementing `IMultiThreadableTask`. Abstract base classes and tasks that already declare a public single-`TaskEnvironment` constructor do not produce the diagnostic.
+
 ## Analysis Scope
 
 The analyzer determines what to check based on the type declaration:
 
 | Type | Rules Applied |
 |---|---|
-| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005 |
+| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009–MSBuildTask0010 |
 | Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
-| Class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 only |
+| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
 | Regular class (no task interface or attribute) | Not analyzed |
 
@@ -246,8 +308,9 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 ### Severity Levels
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
-- **MSBuildTask0002–MSBuildTask0005** report as **Warning** for all task types.
-- **MSBuildTask0006–MSBuildTask0008** report as **Info** — these are modernization suggestions, not correctness issues.
+- **MSBuildTask0010** is always **Error** — task item conversions must not rely on `Convert.ChangeType`.
+- **MSBuildTask0002–MSBuildTask0005 and MSBuildTask0009** report as **Warning** for all task types.
+- **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** report as **Info** — these are modernization suggestions, not correctness issues.
 
 ## Code Fixes
 

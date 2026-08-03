@@ -859,8 +859,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 method.ContainingType is not null &&
                 method.ContainingType.IsValueType)
             {
-                string typeName = method.ContainingType.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat);
-                return s_supportedValueTypeNames.Contains(typeName) ? typeName : null;
+                return SupportedTaskItemTypes.TryGetSpecialTypeDisplayName(
+                    method.ContainingType.SpecialType,
+                    out string? typeName)
+                    ? typeName
+                    : null;
             }
 
             // Convert.ToXxx methods
@@ -888,28 +891,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             return null;
         }
-
-        /// <summary>
-        /// Value type names (as minimal C# names) that ValueTypeParser supports.
-        /// Only these types should be suggested by the analyzer.
-        /// </summary>
-        private static readonly System.Collections.Generic.HashSet<string> s_supportedValueTypeNames =
-            new(System.StringComparer.Ordinal)
-            {
-                "bool",
-                "char",
-                "byte",
-                "sbyte",
-                "short",
-                "ushort",
-                "int",
-                "uint",
-                "long",
-                "ulong",
-                "float",
-                "double",
-                "decimal",
-            };
 
         /// <summary>
         /// Checks if the given operation traces back (with at most one level of local indirection)

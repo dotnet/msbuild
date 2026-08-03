@@ -924,27 +924,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("Item CleanFiles=foo.obj;bar.obj");
         }
 
-#if FEATURE_LEGACY_GETFULLPATH
-        /// <summary>
-        /// Bad path when getting metadata through ->Metadata function
-        /// </summary>
-        [LongPathSupportDisabledFact]
-        public void InvalidPathAndMetadataItemFunctionPathTooLong()
-        {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build'>
-                    <ItemGroup>
-                        <x Include='" + new string('x', 250) + @"'/>
-                    </ItemGroup>
-                    <Target Name='Build'>
-                        <Message Text=""@(x->Metadata('FullPath'))"" />
-                    </Target>
-                </Project>", false);
-
-            logger.AssertLogContains("MSB4023");
-        }
-#endif
-
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->Metadata function
         /// </summary>
@@ -983,27 +962,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             logger.AssertLogContains("MSB4023");
         }
 
-#if FEATURE_LEGACY_GETFULLPATH
-        /// <summary>
-        /// Bad path when getting metadata through ->WithMetadataValue function
-        /// </summary>
-        [LongPathSupportDisabledFact]
-        public void InvalidPathAndMetadataItemFunctionPathTooLong2()
-        {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build'>
-                    <ItemGroup>
-                        <x Include='" + new string('x', 250) + @"'/>
-                    </ItemGroup>
-                    <Target Name='Build'>
-                        <Message Text=""@(x->WithMetadataValue('FullPath', 'x'))"" />
-                    </Target>
-                </Project>", false);
-
-            logger.AssertLogContains("MSB4023");
-        }
-#endif
-
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->WithMetadataValue function
         /// </summary>
@@ -1041,27 +999,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             logger.AssertLogContains("MSB4023");
         }
-
-#if FEATURE_LEGACY_GETFULLPATH
-        /// <summary>
-        /// Bad path when getting metadata through ->AnyHaveMetadataValue function
-        /// </summary>
-        [LongPathSupportDisabledFact]
-        public void InvalidPathAndMetadataItemFunctionPathTooLong3()
-        {
-            MockLogger logger = Helpers.BuildProjectWithNewOMExpectFailure(@"
-                <Project DefaultTargets='Build'>
-                    <ItemGroup>
-                        <x Include='" + new string('x', 250) + @"'/>
-                    </ItemGroup>
-                    <Target Name='Build'>
-                        <Message Text=""@(x->AnyHaveMetadataValue('FullPath', 'x'))"" />
-                    </Target>
-                </Project>", false);
-
-            logger.AssertLogContains("MSB4023");
-        }
-#endif
 
         /// <summary>
         /// Bad path with illegal windows chars when getting metadata through ->AnyHaveMetadataValue function
@@ -5253,53 +5190,6 @@ $(
             }
         }
 
-        [Fact]
-        public void ExpandItem_ConvertToStringUsingInvariantCultureForNumberData_RespectingChangeWave()
-        {
-            // Note: Skipping the test since it is not a valid scenario when ICU mode is not used.
-            if (!ICUModeAvailable())
-            {
-                return;
-            }
-
-            var currentThread = Thread.CurrentThread;
-            var originalCulture = currentThread.CurrentCulture;
-            var originalUICulture = currentThread.CurrentUICulture;
-
-            try
-            {
-                var svSECultureInfo = new CultureInfo("sv-SE");
-                using (var env = TestEnvironment.Create())
-                {
-                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_12.ToString());
-                    ChangeWaves.ResetStateForTests();
-                    currentThread.CurrentCulture = svSECultureInfo;
-                    currentThread.CurrentUICulture = svSECultureInfo;
-                    var root = env.CreateFolder();
-
-                    var projectFile = env.CreateFile(root, ".proj",
-                        @"<Project>
-
-  <PropertyGroup>
-    <_value>$([MSBuild]::Subtract(0, 1))</_value>
-    <_otherValue Condition=""'$(_value)' &gt;= -1"">test-value</_otherValue>
-  </PropertyGroup>
-  <Target Name=""Build"" />
-</Project>");
-                    var exception = Should.Throw<InvalidProjectFileException>(() =>
-                    {
-                        new ProjectInstance(projectFile.Path);
-                    });
-                    exception.BaseMessage.ShouldContain("A numeric comparison was attempted on \"$(_value)\"");
-                }
-            }
-            finally
-            {
-                currentThread.CurrentCulture = originalCulture;
-                currentThread.CurrentUICulture = originalUICulture;
-            }
-        }
-
         [Theory]
         [InlineData("getType")]
         [InlineData("GetType")]
@@ -5407,18 +5297,6 @@ $(
                 // the fast path was successfully resolved without reflection.
                 File.Exists(reflectionInfoPath).ShouldBeFalse();
             }
-        }
-
-        /// <summary>
-        /// Determines if ICU mode is enabled.
-        /// Copied from: https://learn.microsoft.com/en-us/dotnet/core/extensions/globalization-icu#determine-if-your-app-is-using-icu
-        /// </summary>
-        private static bool ICUModeAvailable()
-        {
-            SortVersion sortVersion = CultureInfo.InvariantCulture.CompareInfo.Version;
-            byte[] bytes = sortVersion.SortId.ToByteArray();
-            int version = bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0];
-            return version != 0 && version == sortVersion.FullVersion;
         }
 
         [Fact]

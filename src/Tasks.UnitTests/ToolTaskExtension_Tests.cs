@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -38,8 +38,8 @@ namespace Microsoft.Build.UnitTests
             // Now shared messages. Should be accessible with the private LogShared property
             PropertyInfo logShared = typeof(ToolTask).GetProperty("LogShared", BindingFlags.Instance | BindingFlags.NonPublic);
             TaskLoggingHelper log = (TaskLoggingHelper)logShared.GetValue(t, null);
-            log.LogWarningWithCodeFromResources("Shared.FailedCreatingTempFile", "Gothic II");
-            log.LogMessageFromResources("Shared.CannotConvertStringToBool", "foo");
+            log.LogWarningWithCodeFromResources("CannotChangeItemSpecModifiers", "Gothic II");
+            log.LogMessageFromResources("TaskResourcesNotRegistered", "foo");
 
             // Now private Utilities messages. Should be accessible with the private LogPrivate property
             PropertyInfo logPrivate = typeof(ToolTask).GetProperty("LogPrivate", BindingFlags.Instance | BindingFlags.NonPublic);

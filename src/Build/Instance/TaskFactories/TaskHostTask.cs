@@ -241,11 +241,6 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Gets information about the assembly from which the task type was loaded.
-        /// </summary>
-        public AssemblyLoadInfo LoadedTaskAssemblyInfo => _taskType.Assembly;
-
-        /// <summary>
         /// Sets the requested task parameter to the requested value.
         /// </summary>
         public void SetPropertyValue(TaskPropertyInfo property, object value)

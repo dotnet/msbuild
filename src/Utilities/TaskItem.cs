@@ -329,7 +329,7 @@ namespace Microsoft.Build.Utilities
         {
             ArgumentNullException.ThrowIfNull(metadataName);
             ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsItemSpecModifier(metadataName),
-                "Shared.CannotChangeItemSpecModifiers", metadataName);
+                "CannotChangeItemSpecModifiers", metadataName);
 
             _metadata = _metadata?.Remove(metadataName);
         }
@@ -365,7 +365,7 @@ namespace Microsoft.Build.Utilities
             // Non-derivable metadata can only be set at construction time.
             // That's why this is IsItemSpecModifier and not IsDerivableItemSpecModifier.
             ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsDerivableItemSpecModifier(metadataName),
-                "Shared.CannotChangeItemSpecModifiers", metadataName);
+                "CannotChangeItemSpecModifiers", metadataName);
 
             _metadata ??= ImmutableDictionaryExtensions.EmptyMetadata;
 

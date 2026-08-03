@@ -1,9 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using Microsoft.Build.Framework;
 #if FEATURE_APPDOMAIN
+using System;
 using System.Reflection;
 using Microsoft.Build.Shared.Debugging;
 #endif
@@ -39,6 +39,7 @@ namespace Microsoft.Build.Shared
             int taskLine,
             int taskColumn,
             LogError logError,
+            TaskEnvironment? taskEnvironment,
 #if FEATURE_APPDOMAIN
             AppDomainSetup appDomainSetup,
             Action<AppDomain> appDomainCreated,
@@ -116,7 +117,11 @@ namespace Microsoft.Build.Shared
                 {
                     // perf improvement for the same appdomain case - we already have the type object
                     // and don't want to go through reflection to recreate it from the name.
-                    return (ITask?)Activator.CreateInstance(loadedType.Type);
+                    // LoadedType owns instantiation: it invokes the TaskEnvironment-accepting constructor when
+                    // the task declares one (so the task can compute environment-dependent defaults during
+                    // construction) or the parameterless one otherwise, through a cached, Native AOT friendly
+                    // mechanism. The engine still assigns the TaskEnvironment property separately afterward.
+                    return loadedType.CreateInstance(taskEnvironment);
                 }
 
 #if FEATURE_APPDOMAIN

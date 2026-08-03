@@ -71,10 +71,6 @@ Knobs:
 * `MSBUILDADDITIONALSDKRESOLVERSFOLDER` (and `_NET` / `_NETFRAMEWORK` variants) - test hook
   that adds an override resolver folder.
 * `MSBUILDINCLUDEDEFAULTSDKRESOLVER=false` - drop the built-in default resolver.
-* Legacy path: when ChangeWave 17.10 is **disabled**, `SdkResolverService` uses a
-  non-caching `SdkResolverLoader` and the eager `LoadAllResolvers`, which scans
-  `MSBuildToolsDirectory32\SdkResolvers` and loads **every** resolver up front. The default
-  (17.10 enabled) path is manifest-based and lazy via `CachingSdkResolverLoader`.
 
 ### 1.3 The built-in fallback resolver
 
@@ -182,7 +178,8 @@ resolver that would have to be **dynamically loaded** in a host that cannot do s
 > `Project`/`ProjectInstance`/`ProjectGraph`/`ProjectCollection` surface, the
 > `SdkResolverService_Tests` switch tests, and the `aot-validation` harness's
 > `Evaluation_InBoxSdkResolvesReflectionFree` test (the harness's `#pragma warning disable IL2026`
-> is gone). `Microsoft.Build` builds warning-free for `net10.0`; the harness is green under Native AOT.
+> is gone). `Microsoft.Build` builds warning-free for the .NETCoreApp TFM; the harness is green
+> under Native AOT.
 
 ### 2.1 Goal and shape
 
@@ -318,10 +315,6 @@ through the guard: `SdkResolverLoader.LoadResolverAssembly`, `GetResolverTypes`,
 `LoadResolvers`, `LoadResolversFromManifest`, `LoadAllResolvers`, and
 `CachingSdkResolverLoader.LoadResolversFromManifest`.
 
-Legacy note: the `LoadAllResolvers` path (only used when ChangeWave 17.10 is disabled) is also
-reflective. Either apply the same guard there, or document that disabling Wave17.10 is not part
-of the trim-safe contract (the default, caching, manifest-based path is what trims).
-
 ### 2.5 Step 4 - the error resource
 
 Add to [src/Build/Resources/Strings.resx](../../src/Build/Resources/Strings.resx) (assigned `MSB4282`;
@@ -346,7 +339,7 @@ see the
   RUC is gone and in-box resolution is reflection-free), and a test asserting that a
   NuGet-SDK project throws the observable error under AOT. These replace the harness's current
   `#pragma warning disable IL2026`.
-* **Warning check**: rebuild `Microsoft.Build` for `net10.0` and confirm zero new IL warnings
+* **Warning check**: rebuild `Microsoft.Build` for .NETCoreApp and confirm zero new IL warnings
   - the `[FeatureGuard]` satisfies the analyzer and the leaves keep their RUC.
 
 ### 2.7 Payoff and risk
