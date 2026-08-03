@@ -12,7 +12,7 @@ namespace Microsoft.Build.Evaluation
     {
         public bool LoadProjectsReadOnly { get; protected set; }
 
-        internal UnknownElementsConfiguration UnknownElementsConfiguration { get; set; }
+        public UnknownElementsConfiguration UnknownElementsConfiguration { get; protected set; }
 
         /// <summary>
         /// Handler for which project root element just got added to the cache
@@ -63,6 +63,17 @@ namespace Microsoft.Build.Evaluation
         internal abstract void DiscardImplicitReferences();
 
         internal abstract void DiscardAnyWeakReference(ProjectRootElement projectRootElement);
+
+        internal void SetUnknownElementsConfiguration(UnknownElementsConfiguration configuration)
+        {
+            if (UnknownElementsConfiguration.Equals(UnknownElementsConfiguration, configuration))
+            {
+                return;
+            }
+
+            DiscardImplicitReferences();
+            UnknownElementsConfiguration = configuration;
+        }
 
         /// <summary>
         /// Raises the <see cref="ProjectRootElementDirtied"/> event.
