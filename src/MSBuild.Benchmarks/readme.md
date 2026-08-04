@@ -47,11 +47,11 @@ dotnet run -c Release -f net11.0 -- --filter "*OrchardCoreEvaluationBenchmark*" 
 dotnet run -c Release -f net11.0 -- --filter "*OrchardCoreEvaluationBenchmark*" --orchard-core-project "$HOME/src/OrchardCore/src/OrchardCore/OrchardCore/OrchardCore.csproj"
 ```
 
-Each measured method creates a fresh `ProjectCollection`, evaluates the project, and reads
-`PackageReference` items or the `TargetFrameworks` property 100 times. The full-evaluation methods
-model behavior before partial evaluation; the partial-evaluation methods model the optimized
-`-getProperty` and `-getItem` paths. BenchmarkDotNet reports the normalized cost of one evaluation
-and the ratio against full evaluation.
+Each measured method invokes the MSBuild command-line implementation 100 times with either
+`-getProperty:TargetFrameworks` or `-getItem:PackageReference`. Run this same benchmark source on
+the commits being compared: commits before the optimization use their full-evaluation CLI path,
+while commits after the optimization use their partial-evaluation CLI path. BenchmarkDotNet
+reports the normalized cost of one query.
 
 The project path can alternatively be provided through the
 `MSBUILD_BENCHMARK_ORCHARDCORE_PROJECT` environment variable.

@@ -2,21 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Configs;
-using Microsoft.Build.Definition;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
+using Microsoft.Build.CommandLine;
 
 namespace MSBuild.Benchmarks;
 
 /// <summary>
-/// Measures repeated <c>-getItem</c>/<c>-getProperty</c>-style evaluations of an Orchard Core
-/// project. Full evaluation models the behavior before partial evaluation, while the Properties
-/// and Items stages model the optimized paths.
+/// Measures repeated <c>-getItem</c> and <c>-getProperty</c> command-line queries on an Orchard
+/// Core project. The benchmark deliberately invokes the command-line implementation so the same
+/// source measures full evaluation before the partial-evaluation optimization and partial
+/// evaluation after it.
 /// </summary>
 [MemoryDiagnoser]
-[CategoriesColumn]
-[GroupBenchmarksBy(BenchmarkLogicalGroupRule.ByCategory)]
 public class OrchardCoreEvaluationBenchmark
 {
     internal const string ProjectPathEnvironmentVariable = "MSBUILD_BENCHMARK_ORCHARDCORE_PROJECT";
@@ -25,9 +21,10 @@ public class OrchardCoreEvaluationBenchmark
     private const string ItemType = "PackageReference";
     private const string PropertyName = "TargetFrameworks";
 
-    private string _projectPath = null!;
-    private string _sdkPath = null!;
-    private Dictionary<string, string> _toolsetProperties = null!;
+    private string[] _getItemsArguments = null!;
+    private string[] _getPropertyArguments = null!;
+    private TextWriter _originalOut = null!;
+    private TextWriter _originalError = null!;
     private string? _originalMSBuildSDKsPath;
     private string? _originalMSBuildExtensionsPath;
     private string? _originalMSBuildEnableWorkloadResolver;
@@ -42,39 +39,50 @@ public class OrchardCoreEvaluationBenchmark
                 $"Specify an Orchard Core project with --orchard-core-project or the {ProjectPathEnvironmentVariable} environment variable.");
         }
 
-        _projectPath = Path.GetFullPath(projectPath);
-        if (!File.Exists(_projectPath))
+        projectPath = Path.GetFullPath(projectPath);
+        if (!File.Exists(projectPath))
         {
-            throw new FileNotFoundException("The Orchard Core benchmark project does not exist.", _projectPath);
+            throw new FileNotFoundException("The Orchard Core benchmark project does not exist.", projectPath);
         }
 
-        _sdkPath = FindDotNetSdkPath();
-        string sdksPath = Path.Combine(_sdkPath, "Sdks");
+        string sdkPath = FindDotNetSdkPath();
+        string sdksPath = Path.Combine(sdkPath, "Sdks");
+        string nuGetTargetsPath = Path.Combine(sdkPath, "NuGet.targets");
 
         _originalMSBuildSDKsPath = Environment.GetEnvironmentVariable("MSBuildSDKsPath");
         _originalMSBuildExtensionsPath = Environment.GetEnvironmentVariable("MSBuildExtensionsPath");
         _originalMSBuildEnableWorkloadResolver = Environment.GetEnvironmentVariable("MSBuildEnableWorkloadResolver");
+        _originalOut = Console.Out;
+        _originalError = Console.Error;
 
         try
         {
             Environment.SetEnvironmentVariable("MSBuildSDKsPath", sdksPath);
-            Environment.SetEnvironmentVariable("MSBuildExtensionsPath", _sdkPath);
+            Environment.SetEnvironmentVariable("MSBuildExtensionsPath", sdkPath);
             Environment.SetEnvironmentVariable("MSBuildEnableWorkloadResolver", "false");
 
-            _toolsetProperties = new Dictionary<string, string>
-            {
-                ["MSBuildExtensionsPath"] = _sdkPath,
-                ["MSBuildExtensionsPath32"] = _sdkPath,
-                ["MSBuildExtensionsPath64"] = _sdkPath,
-                ["MSBuildSDKsPath"] = sdksPath,
-            };
+            _getPropertyArguments = CreateArguments(
+                projectPath,
+                $"-getProperty:{PropertyName}",
+                nuGetTargetsPath);
+            _getItemsArguments = CreateArguments(
+                projectPath,
+                $"-getItem:{ItemType}",
+                nuGetTargetsPath);
 
-            Console.WriteLine($"Using .NET SDK: {_sdkPath}");
-            ValidateEvaluationStages();
+            ValidateQuery(_getPropertyArguments, output => !string.IsNullOrWhiteSpace(output));
+            ValidateQuery(
+                _getItemsArguments,
+                output =>
+                    output.Contains(ItemType, StringComparison.OrdinalIgnoreCase) &&
+                    !output.Contains($"\"{ItemType}\": []", StringComparison.OrdinalIgnoreCase));
+
+            Console.SetOut(TextWriter.Null);
+            Console.SetError(TextWriter.Null);
         }
         catch
         {
-            RestoreEnvironment();
+            RestoreProcessState();
             throw;
         }
     }
@@ -82,144 +90,95 @@ public class OrchardCoreEvaluationBenchmark
     [GlobalCleanup]
     public void GlobalCleanup()
     {
-        RestoreEnvironment();
+        RestoreProcessState();
     }
 
-    private void RestoreEnvironment()
+    [Benchmark(OperationsPerInvoke = EvaluationCount)]
+    public int GetProperty()
+        => ExecuteRepeatedly(_getPropertyArguments);
+
+    [Benchmark(OperationsPerInvoke = EvaluationCount)]
+    public int GetItems()
+        => ExecuteRepeatedly(_getItemsArguments);
+
+    private static string[] CreateArguments(
+        string projectPath,
+        string query,
+        string nuGetTargetsPath)
+        =>
+        [
+            "MSBuild.exe",
+            projectPath,
+            query,
+            "-nologo",
+            "-noAutoResponse",
+            "-p:MSBuildEnableWorkloadResolver=false",
+            $"-p:NuGetRestoreTargets={nuGetTargetsPath}",
+        ];
+
+    private static int ExecuteRepeatedly(string[] arguments)
     {
+        int checksum = 0;
+        for (int i = 0; i < EvaluationCount; i++)
+        {
+            MSBuildApp.ExitType result = MSBuildApp.Execute(arguments);
+            if (result != MSBuildApp.ExitType.Success)
+            {
+                throw new InvalidOperationException($"MSBuild query failed with exit type {result}.");
+            }
+
+            checksum++;
+        }
+
+        return checksum;
+    }
+
+    private static void ValidateQuery(string[] arguments, Func<string, bool> isExpectedOutput)
+    {
+        using StringWriter output = new();
+        TextWriter originalOut = Console.Out;
+        TextWriter originalError = Console.Error;
+        Console.SetOut(output);
+        Console.SetError(output);
+        MSBuildApp.ExitType result;
+        try
+        {
+            result = MSBuildApp.Execute(arguments);
+        }
+        finally
+        {
+            Console.SetOut(originalOut);
+            Console.SetError(originalError);
+        }
+
+        if (result != MSBuildApp.ExitType.Success)
+        {
+            throw new InvalidOperationException(
+                $"The Orchard Core query failed:{Environment.NewLine}{output}");
+        }
+
+        if (!isExpectedOutput(output.ToString()))
+        {
+            throw new InvalidOperationException(
+                "The Orchard Core query did not produce the expected output.");
+        }
+    }
+
+    private void RestoreProcessState()
+    {
+        if (_originalOut is not null)
+        {
+            Console.SetOut(_originalOut);
+        }
+
+        if (_originalError is not null)
+        {
+            Console.SetError(_originalError);
+        }
+
         Environment.SetEnvironmentVariable("MSBuildSDKsPath", _originalMSBuildSDKsPath);
         Environment.SetEnvironmentVariable("MSBuildExtensionsPath", _originalMSBuildExtensionsPath);
         Environment.SetEnvironmentVariable("MSBuildEnableWorkloadResolver", _originalMSBuildEnableWorkloadResolver);
-    }
-
-    [Benchmark(Baseline = true, OperationsPerInvoke = EvaluationCount)]
-    [BenchmarkCategory("GetProperty")]
-    public int FullEvaluation_GetProperty()
-        => EvaluateAndGetProperty(ProjectEvaluationStage.Full);
-
-    [Benchmark(OperationsPerInvoke = EvaluationCount)]
-    [BenchmarkCategory("GetProperty")]
-    public int PartialEvaluation_GetProperty()
-        => EvaluateAndGetProperty(ProjectEvaluationStage.Properties);
-
-    [Benchmark(Baseline = true, OperationsPerInvoke = EvaluationCount)]
-    [BenchmarkCategory("GetItems")]
-    public int FullEvaluation_GetItems()
-        => EvaluateAndGetItems(ProjectEvaluationStage.Full);
-
-    [Benchmark(OperationsPerInvoke = EvaluationCount)]
-    [BenchmarkCategory("GetItems")]
-    public int PartialEvaluation_GetItems()
-        => EvaluateAndGetItems(ProjectEvaluationStage.Items);
-
-    private int EvaluateAndGetItems(ProjectEvaluationStage stage)
-    {
-        int checksum = 0;
-        for (int i = 0; i < EvaluationCount; i++)
-        {
-            using ProjectCollection collection = CreateProjectCollection();
-            ProjectInstance project = Evaluate(stage, collection);
-            checksum += project.GetItems(ItemType).Count;
-        }
-
-        return checksum;
-    }
-
-    private int EvaluateAndGetProperty(ProjectEvaluationStage stage)
-    {
-        int checksum = 0;
-        for (int i = 0; i < EvaluationCount; i++)
-        {
-            using ProjectCollection collection = CreateProjectCollection();
-            ProjectInstance project = Evaluate(stage, collection);
-            checksum += project.GetPropertyValue(PropertyName).Length;
-        }
-
-        return checksum;
-    }
-
-    private ProjectCollection CreateProjectCollection()
-    {
-        ProjectCollection collection = new();
-        collection.RemoveAllToolsets();
-        collection.AddToolset(new Toolset("Current", _sdkPath, _toolsetProperties, collection, null));
-        collection.DefaultToolsVersion = "Current";
-        return collection;
-    }
-
-    private ProjectInstance Evaluate(ProjectEvaluationStage stage, ProjectCollection collection)
-        => ProjectInstance.FromFile(_projectPath, new ProjectOptions
-        {
-            EvaluationStage = stage,
-            ProjectCollection = collection,
-            ToolsVersion = "Current",
-        });
-
-    private void ValidateEvaluationStages()
-    {
-        string fullProperty;
-        string[] fullItems;
-        using (ProjectCollection collection = CreateProjectCollection())
-        {
-            ProjectInstance project = Evaluate(ProjectEvaluationStage.Full, collection);
-            fullProperty = project.GetPropertyValue(PropertyName);
-            fullItems = GetItemSignatures(project);
-        }
-
-        if (string.IsNullOrWhiteSpace(fullProperty))
-        {
-            throw new InvalidOperationException(
-                $"The Orchard Core project must define a non-empty {PropertyName} property.");
-        }
-
-        if (fullItems.Length == 0)
-        {
-            throw new InvalidOperationException(
-                $"The Orchard Core project must define at least one {ItemType} item.");
-        }
-
-        using (ProjectCollection collection = CreateProjectCollection())
-        {
-            string partialProperty = Evaluate(ProjectEvaluationStage.Properties, collection)
-                .GetPropertyValue(PropertyName);
-            if (!string.Equals(fullProperty, partialProperty, StringComparison.Ordinal))
-            {
-                throw new InvalidOperationException(
-                    $"Partial property evaluation produced a different {PropertyName} value.");
-            }
-        }
-
-        using (ProjectCollection collection = CreateProjectCollection())
-        {
-            string[] partialItems = GetItemSignatures(Evaluate(ProjectEvaluationStage.Items, collection));
-            if (!fullItems.SequenceEqual(partialItems, StringComparer.Ordinal))
-            {
-                throw new InvalidOperationException(
-                    $"Partial item evaluation produced different {ItemType} items or metadata.");
-            }
-        }
-    }
-
-    private static string[] GetItemSignatures(ProjectInstance project)
-    {
-        ICollection<ProjectItemInstance> items = project.GetItems(ItemType);
-        var signatures = new string[items.Count];
-        int index = 0;
-        foreach (ProjectItemInstance item in items)
-        {
-            var signature = new System.Text.StringBuilder(item.EvaluatedInclude);
-            foreach (string metadataName in item.MetadataNames.OrderBy(name => name, StringComparer.OrdinalIgnoreCase))
-            {
-                signature.Append('\0')
-                    .Append(metadataName)
-                    .Append('=')
-                    .Append(item.GetMetadataValue(metadataName));
-            }
-
-            signatures[index++] = signature.ToString();
-        }
-
-        return signatures;
     }
 
     private static string FindDotNetSdkPath()
