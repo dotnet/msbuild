@@ -115,20 +115,49 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// The CLR2 task host computes its handshake with its own copy of this code in MSBuildTaskHost.exe,
-        /// which knows nothing about change waves, so it must be left out.
+        /// A task host connection is the one place where the two ends can be different MSBuild versions, and
+        /// the resolved wave is version-relative: <see cref="ChangeWaves.DisabledWave"/> clamps and rounds the
+        /// environment variable into that binary's own wave list. The CLR2 task host additionally computes its
+        /// handshake from a separate legacy copy of this code that knows nothing about change waves. Unlike a
+        /// worker node, a task host mismatch cannot be recovered from by starting a different host, so no task
+        /// host may take the change wave into account.
         /// </summary>
-        [Fact]
-        public void Clr2TaskHostHandshakeIgnoresChangeWave()
+        [Theory]
+        [InlineData((int)(HandshakeOptions.TaskHost | HandshakeOptions.CLR2))]
+        [InlineData((int)(HandshakeOptions.TaskHost | HandshakeOptions.NET))]
+        [InlineData((int)(HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.X64))]
+        [InlineData((int)(HandshakeOptions.TaskHost | HandshakeOptions.NET | HandshakeOptions.SidecarTaskHost))]
+        [InlineData((int)HandshakeOptions.TaskHost)]
+        public void TaskHostHandshakeIgnoresChangeWave(int taskHostOptions)
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
-            HandshakeOptions options = HandshakeOptions.CLR2 | HandshakeOptions.TaskHost;
+            var options = (HandshakeOptions)taskHostOptions;
 
             string firstKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env, options);
             string secondKey = GetKeyForChangeWave(ChangeWaves.HighestWave.ToString(), env, options);
 
             secondKey.ShouldBe(firstKey);
+        }
+
+        /// <summary>
+        /// The .NET task host is the connection at risk: a .NET Framework parent (e.g. Visual Studio) talks to
+        /// a child taken from the installed .NET SDK, which resolves the same environment variable against a
+        /// different wave list. Its handshake has to stay identical to what a version without change wave
+        /// salting computes, otherwise the build fails with MSB4216 and the parent can only relaunch the same
+        /// SDK binary rather than start a compatible host.
+        /// </summary>
+        [Fact]
+        public void NetTaskHostHandshakeIsUnaffectedByChangeWave()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            HandshakeOptions options = HandshakeOptions.TaskHost | HandshakeOptions.NET;
+
+            string unsetKey = GetKeyForChangeWave(null, env, options);
+            string waveSetKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env, options);
+
+            waveSetKey.ShouldBe(unsetKey);
         }
     }
 }

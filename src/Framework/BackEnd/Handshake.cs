@@ -95,7 +95,7 @@ internal class Handshake
         // A node resolves its change wave once and keeps it for the rest of its lifetime, so a node reused
         // by a later build would silently keep applying the change wave of the build that started it. Fold
         // the change wave into the salt so that a node which resolved a different change wave rejects the
-        // connection and the parent starts a fresh node instead.
+        // connection and the parent starts a fresh node instead. Task hosts are excluded, see GetChangeWaveSalt.
         string changeWaveSalt = GetChangeWaveSalt();
 
         int salt = CommunicationsUtilities.GetHashCode($"{handshakeSalt}{toolsDirectory}{changeWaveSalt}");
@@ -135,20 +135,29 @@ internal class Handshake
     private bool IsNetTaskHost
         => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.NET | HandshakeOptions.TaskHost);
 
-    private bool IsClr2TaskHost
-        => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2 | HandshakeOptions.TaskHost);
+    private bool IsTaskHost
+        => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.TaskHost);
 
     /// <summary>
     /// The part of the handshake salt that represents the change wave this process resolved, so that nodes
     /// which disagree about <c>MSBUILDDISABLEFEATURESFROMVERSION</c> never talk to each other. The resolved
     /// wave is used rather than the raw environment variable so that values which resolve to the same wave
     /// (for example an unset variable and one in an invalid format) still allow node reuse.
-    /// Also returns an empty string for the CLR2 task host, whose separate legacy handshake implementation in
-    /// MSBuildTaskHost.exe does not know about change waves; including it here would break that connection.
+    /// <para>
+    /// Returns an empty string for every task host, because a task host connection is the one place where the
+    /// two sides can be different MSBuild versions and the resolved wave is a version-relative value:
+    /// <see cref="ChangeWaves.DisabledWave"/> clamps and rounds the environment variable into the binary's own
+    /// <c>AllWaves</c> list, which differs between versions. The CLR2 task host computes its handshake from a
+    /// separate legacy copy of this code in MSBuildTaskHost.exe that knows nothing about change waves, and the
+    /// .NET task host pairs a .NET Framework parent (e.g. Visual Studio) with a child from the installed .NET
+    /// SDK, so the same variable can legitimately resolve to different waves on either side. Unlike a worker
+    /// node or an MSBuild Server node, a task host mismatch is not self-healing: the parent can only relaunch
+    /// the very same SDK binary, so the build fails with MSB4216 instead of starting a compatible host.
+    /// </para>
     /// </summary>
     private string GetChangeWaveSalt()
     {
-        if (IsClr2TaskHost)
+        if (IsTaskHost)
         {
             return string.Empty;
         }
@@ -198,6 +207,11 @@ internal class Handshake
         variant = flippedDrive + path.Substring(1);
         return true;
     }
+
+#if NETFRAMEWORK
+    private bool IsClr2TaskHost
+        => IsHandshakeOptionEnabled(HandshakeOptions, HandshakeOptions.CLR2 | HandshakeOptions.TaskHost);
+#endif
 
     private static HandshakeComponents CreateNetTaskHostComponents(int options, int salt, int sessionId) => new(
         options,
