@@ -112,6 +112,7 @@ public class OrchardCoreEvaluationBenchmark
             query,
             "-nologo",
             "-noAutoResponse",
+            "-tl:off",
             "-p:MSBuildEnableWorkloadResolver=false",
             $"-p:NuGetRestoreTargets={nuGetTargetsPath}",
         ];
