@@ -1369,7 +1369,6 @@ namespace Microsoft.Build.CommandLine
             FailAllPendingCallbackRequests("TaskHost resetting for the next build.");
 
             _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
-            _registeredTaskObjectCache = new RegisteredTaskObjectCacheBase();
 
             _currentConfiguration = null;
             _currentTaskContext.Value = null;
