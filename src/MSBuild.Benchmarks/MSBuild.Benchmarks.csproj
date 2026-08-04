@@ -18,6 +18,7 @@
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <!-- Fix transitive dependency from BenchmarkDotNet that conflicts with Microsoft.VisualStudio.OpenTelemetry.ClientExtensions. -->
     <PackageReference Include="Microsoft.Extensions.Logging.Configuration" VersionOverride="8.0.0" />
+    <Compile Remove="OrchardCoreEvaluationBenchmark.cs" />
   </ItemGroup>
 
   <ItemGroup>
