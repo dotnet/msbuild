@@ -143,7 +143,6 @@ internal class Handshake
     /// which disagree about <c>MSBUILDDISABLEFEATURESFROMVERSION</c> never talk to each other. The resolved
     /// wave is used rather than the raw environment variable so that values which resolve to the same wave
     /// (for example an unset variable and one in an invalid format) still allow node reuse.
-    /// there is nothing to segregate, so the salt stays identical to what previous versions computed.
     /// Also returns an empty string for the CLR2 task host, whose separate legacy handshake implementation in
     /// MSBuildTaskHost.exe does not know about change waves; including it here would break that connection.
     /// </summary>

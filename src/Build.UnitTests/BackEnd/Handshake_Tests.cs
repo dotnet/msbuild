@@ -67,8 +67,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
-            string firstKey = GetKeyForChangeWave(ChangeWaves.Wave17_12.ToString(), env, s_workerNodeOptions);
-            string secondKey = GetKeyForChangeWave(ChangeWaves.Wave17_12.ToString(), env, s_workerNodeOptions);
+            string firstKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env, s_workerNodeOptions);
+            string secondKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env, s_workerNodeOptions);
 
             secondKey.ShouldBe(firstKey);
         }
@@ -105,7 +105,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 taskHostParameters: TaskHostParameters.Empty,
                 architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture());
 
-            SetChangeWave(ChangeWaves.Wave17_12.ToString(), env);
+            SetChangeWave(ChangeWaves.LowestWave.ToString(), env);
             string firstHash = new ServerNodeHandshake(options).ComputeHash();
 
             SetChangeWave(ChangeWaves.HighestWave.ToString(), env);
@@ -125,7 +125,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             HandshakeOptions options = HandshakeOptions.CLR2 | HandshakeOptions.TaskHost;
 
-            string firstKey = GetKeyForChangeWave(ChangeWaves.Wave17_12.ToString(), env, options);
+            string firstKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env, options);
             string secondKey = GetKeyForChangeWave(ChangeWaves.HighestWave.ToString(), env, options);
 
             secondKey.ShouldBe(firstKey);
