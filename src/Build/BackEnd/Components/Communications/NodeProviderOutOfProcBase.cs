@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -96,7 +96,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to send.</param>
         protected void SendData(NodeContext context, INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet);
+            ArgumentNullException.ThrowIfNull(packet);
             context.SendData(packet);
         }
 
@@ -308,7 +308,7 @@ namespace Microsoft.Build.BackEnd
             });
             if (!exceptions.IsEmpty)
             {
-                ErrorUtilities.ThrowInternalError(
+                InternalError.Throw(
                     $"Cannot acquire required number of nodes. MSBuildLocation: '{msbuildLocation}', CommandLineArgs: '{commandLineArgs}', NumberOfNodesToCreate: {numberOfNodesToCreate}, NextNodeId: {nextNodeId}.",
                     new AggregateException(exceptions.ToArray()));
             }
@@ -463,7 +463,7 @@ namespace Microsoft.Build.BackEnd
                 msbuildLocation,
                 _componentHost?.BuildParameters?.NodeExeLocation);
 
-            ErrorUtilities.VerifyThrow(processNamesToSearch.Length > 0, "Expected at least one process name to search for.");
+            Assumed.Positive(processNamesToSearch.Length, "Expected at least one process name to search for.");
             string expectedProcessName = processNamesToSearch.Length == 1
                 ? processNamesToSearch[0]
                 : string.Join(", ", processNamesToSearch);
@@ -796,12 +796,7 @@ namespace Microsoft.Build.BackEnd
         private static void ValidateRemotePipeSecurityOnWindows(NamedPipeClientStream nodeStream)
         {
             SecurityIdentifier identifier = s_currentWindowsIdentity.Owner;
-#if FEATURE_PIPE_SECURITY
             PipeSecurity remoteSecurity = nodeStream.GetAccessControl();
-#else
-            var remoteSecurity = new PipeSecurity(nodeStream.SafePipeHandle, System.Security.AccessControl.AccessControlSections.Access |
-                System.Security.AccessControl.AccessControlSections.Owner | System.Security.AccessControl.AccessControlSections.Group);
-#endif
             IdentityReference remoteOwner = remoteSecurity.GetOwner(typeof(SecurityIdentifier));
             if (remoteOwner != identifier)
             {
@@ -1232,17 +1227,6 @@ namespace Microsoft.Build.BackEnd
 
                                 serverToClientStream.Write(writeStreamBuffer, i, lengthToWrite);
                             }
-
-                            if (packet is NodeBuildComplete)
-                            {
-                                if (IsExitPacket(packet))
-                                {
-                                    context._exitPacketState = ExitPacketState.ExitPacketSent;
-                                    context._packetQueueDrainDelayCancellation.Cancel();
-                                }
-
-                                return;
-                            }
                         }
                         catch (IOException e)
                         {
@@ -1252,6 +1236,29 @@ namespace Microsoft.Build.BackEnd
                         catch (ObjectDisposedException) // This happens if a child dies unexpectedly
                         {
                             // Do nothing here because any exception will be caught by the async read handler
+                        }
+
+                        // Once the NodeBuildComplete packet has been dequeued, the node is shutting down and no
+                        // further packets will be enqueued, so the drain thread must terminate. This has to run even
+                        // when writing the packet above threw (e.g. the child already exited and the pipe was
+                        // disposed); otherwise the thread loops back to WaitOne() and blocks forever, leaking the
+                        // thread and the NodeContext it captures. In a long-lived host like Visual Studio these
+                        // leaked threads accumulate across builds.
+                        if (packet is NodeBuildComplete)
+                        {
+                            if (IsExitPacket(packet))
+                            {
+                                context._exitPacketState = ExitPacketState.ExitPacketSent;
+                                try
+                                {
+                                    context._packetQueueDrainDelayCancellation.Cancel();
+                                }
+                                catch (ObjectDisposedException)
+                                {
+                                }
+                            }
+
+                            return;
                         }
                     }
                 }

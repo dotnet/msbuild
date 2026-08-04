@@ -254,6 +254,35 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestConfiguration deserializedConfig = packet as BuildRequestConfiguration;
 
             Assert.Equal(config, deserializedConfig);
+
+            // RequestedTargets is excluded from InternalEquals, so assert the empty-list round-trip explicitly.
+            deserializedConfig.RequestedTargets.ShouldBeEmpty();
+        }
+
+        /// <summary>
+        /// Regression test for the solution metaproject bug where building a solution with a
+        /// non-standard target (e.g. "Pack") in a multi-node/parallel build fails with MSB4057.
+        /// The requested targets must round-trip through translation; otherwise a configuration
+        /// that crosses a node boundary loses them and the generated solution metaproject omits
+        /// the user-requested targets.
+        /// </summary>
+        [Fact]
+        public void TestTranslationPreservesRequestedTargets()
+        {
+            PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
+            properties.Set(ProjectPropertyInstance.Create("this", "that"));
+
+            BuildRequestData data = new BuildRequestData("file", properties.ToDictionary(), "4.0", ["Build", "Pack"], null);
+            BuildRequestConfiguration config = new BuildRequestConfiguration(data, "2.0");
+
+            config.RequestedTargets.ShouldBe(["Build", "Pack"]);
+
+            ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = BuildRequestConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            BuildRequestConfiguration deserializedConfig = packet as BuildRequestConfiguration;
+
+            deserializedConfig.RequestedTargets.ShouldBe(["Build", "Pack"]);
         }
 
         [Fact]

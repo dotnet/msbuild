@@ -72,6 +72,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         [SuppressMessage("Microsoft.Security.Xml", "CA3073: ReviewTrustedXsltUse.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
         [SuppressMessage("Microsoft.Security.Xml", "CA3053: UseSecureXmlResolver.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
+        [RequiresDynamicCode("XslCompiledTransform generates IL at runtime, which is not supported with Native AOT.")]
         [SuppressMessage("Microsoft.Security.Xml", "CA3059: UseXmlReaderForXPathDocument.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
         public static Stream XslTransform(string resource, Stream input, params DictionaryEntry[] entries)
         {

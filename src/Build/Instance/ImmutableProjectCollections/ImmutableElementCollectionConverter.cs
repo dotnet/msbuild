@@ -148,7 +148,7 @@ namespace Microsoft.Build.Instance
                     throw new ArgumentOutOfRangeException(nameof(count));
                 }
 
-                ErrorUtilities.VerifyCollectionCopyToArguments(array, nameof(array), arrayIndex, nameof(arrayIndex), count);
+                ErrorUtilities.VerifyCollectionCopyToArguments(array, arrayIndex, count);
 
                 int index = arrayIndex;
                 int endIndex = arrayIndex + count;
@@ -165,7 +165,7 @@ namespace Microsoft.Build.Instance
 
             public void CopyTo(KeyValuePair<string, T>[] array, int arrayIndex)
             {
-                ErrorUtilities.VerifyCollectionCopyToArguments(array, nameof(array), arrayIndex, nameof(arrayIndex), _projectElements.Count);
+                ErrorUtilities.VerifyCollectionCopyToArguments(array, arrayIndex, _projectElements.Count);
 
                 int index = arrayIndex;
                 foreach (var item in _projectElements.Values)

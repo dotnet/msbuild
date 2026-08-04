@@ -99,7 +99,7 @@ namespace Microsoft.Build.Internal
             // Clear architecture-specific overrides that would take precedence over DOTNET_ROOT
             foreach (string varName in _archSpecificRootVars)
             {
-                overrides[varName] = null!;
+                overrides[varName] = null;
             }
 
             _cachedOverrides = overrides;
@@ -114,14 +114,14 @@ namespace Microsoft.Build.Internal
         /// </summary>
         /// <param name="environment">The environment dictionary to modify.</param>
         /// <param name="overrides">The overrides to apply. If null, no changes are made.</param>
-        internal static void ApplyEnvironmentOverrides(IDictionary<string, string> environment, IDictionary<string, string>? overrides)
+        internal static void ApplyEnvironmentOverrides(IDictionary<string, string> environment, IDictionary<string, string?>? overrides)
         {
             if (overrides is null)
             {
                 return;
             }
 
-            foreach (KeyValuePair<string, string> kvp in overrides)
+            foreach (KeyValuePair<string, string?> kvp in overrides)
             {
                 if (kvp.Value is null)
                 {

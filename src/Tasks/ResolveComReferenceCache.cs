@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -41,8 +40,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal ResolveComReferenceCache(string tlbImpPath, string axImpPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(tlbImpPath);
-            ErrorUtilities.VerifyThrowArgumentNull(axImpPath);
+            ArgumentNullException.ThrowIfNull(tlbImpPath);
+            ArgumentNullException.ThrowIfNull(axImpPath);
 
             tlbImpLocation = tlbImpPath;
             axImpLocation = axImpPath;

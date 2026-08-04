@@ -17,8 +17,8 @@ namespace Microsoft.Build.UnitTests;
 /// <summary>
 /// Tests for <see cref="GlobalInterfaceTable"/> and <see cref="AgileComPointer{TInterface}"/>.
 /// Uses <see cref="IRunningObjectTable"/> obtained via <c>PInvoke.GetRunningObjectTable</c>
-/// as a real COM object to register, since it is always available on Windows and is
-/// already wired up with <see cref="IComIID"/> via the existing polyfill list.
+/// as a real COM object to register, since it is always available on Windows and
+/// CsWin32 attaches <see cref="IComIID"/> to it on every target framework.
 /// </summary>
 [SupportedOSPlatform("windows5.0")]
 public unsafe class AgileComPointerTests

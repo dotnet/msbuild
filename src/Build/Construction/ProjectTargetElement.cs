@@ -41,7 +41,7 @@ namespace Microsoft.Build.Construction
         internal ProjectTargetElement(XmlElementWithLocation xmlElement, ProjectRootElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent);
+            ArgumentNullException.ThrowIfNull(parent);
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentLength(value);
+                ArgumentException.ThrowIfNullOrEmpty(value);
                 if (Link != null)
                 {
                     TargetLink.Name = value;
@@ -132,7 +132,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, XMakeAttributes.inputs);
+                ArgumentNullException.ThrowIfNull(value, XMakeAttributes.inputs);
                 SetOrRemoveAttribute(XMakeAttributes.inputs, value, "Set target Inputs {0}", value);
             }
         }
@@ -152,7 +152,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, XMakeAttributes.outputs);
+                ArgumentNullException.ThrowIfNull(value, XMakeAttributes.outputs);
                 SetOrRemoveAttribute(XMakeAttributes.outputs, value, "Set target Outputs {0}", value);
             }
         }
@@ -180,7 +180,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, XMakeAttributes.keepDuplicateOutputs);
+                ArgumentNullException.ThrowIfNull(value, XMakeAttributes.keepDuplicateOutputs);
                 SetOrRemoveAttribute(XMakeAttributes.keepDuplicateOutputs, value, "Set target KeepDuplicateOutputs {0}", value);
             }
         }
@@ -200,7 +200,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, XMakeAttributes.dependsOnTargets);
+                ArgumentNullException.ThrowIfNull(value, XMakeAttributes.dependsOnTargets);
                 SetOrRemoveAttribute(XMakeAttributes.dependsOnTargets, value, "Set target DependsOnTargets {0}", value);
             }
         }
@@ -220,7 +220,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, XMakeAttributes.beforeTargets);
+                ArgumentNullException.ThrowIfNull(value, XMakeAttributes.beforeTargets);
                 SetOrRemoveAttribute(XMakeAttributes.beforeTargets, value, "Set target BeforeTargets {0}", value);
             }
         }
@@ -240,7 +240,7 @@ namespace Microsoft.Build.Construction
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, XMakeAttributes.afterTargets);
+                ArgumentNullException.ThrowIfNull(value, XMakeAttributes.afterTargets);
                 SetOrRemoveAttribute(XMakeAttributes.afterTargets, value, "Set target AfterTargets {0}", value);
             }
         }
@@ -378,7 +378,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectTaskElement AddTask(string taskName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskName);
+            ArgumentException.ThrowIfNullOrEmpty(taskName);
 
             ProjectTaskElement task = ContainingProject.CreateTaskElement(taskName);
 

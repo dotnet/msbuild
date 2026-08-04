@@ -12,7 +12,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.ExceptionServices;
 using System.Threading;
@@ -28,6 +27,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Coordinator;
 using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
@@ -265,6 +265,8 @@ namespace Microsoft.Build.Execution
 
         private ProjectCacheService? _projectCacheService;
 
+        private CoordinatorClient? _coordinatorClient;
+
         private bool _hasProjectCacheServiceInitializedVsScenario;
 
 #if DEBUG
@@ -294,7 +296,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public BuildManager(string hostName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(hostName);
+            ArgumentNullException.ThrowIfNull(hostName);
 
             _hostName = hostName;
             _buildManagerState = BuildManagerState.Idle;
@@ -629,6 +631,27 @@ namespace Microsoft.Build.Execution
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 
+                // If the coordinator is enabled, request a node grant and cap MaxNodeCount.
+                // This is done after logging initialization so that waiting/grant messages
+                // are visible in the terminal logger.
+                if (Traits.Instance.EnableCoordinator)
+                {
+                    _coordinatorClient = CoordinatorClient.TryConnect(
+                        requestedNodes: _buildParameters.MaxNodeCount,
+                        settings: CoordinatorSettings.FromEnvironment(),
+                        loggingService);
+
+                    if (_coordinatorClient != null)
+                    {
+                        _buildParameters.MaxNodeCount = _coordinatorClient.GrantedNodes;
+
+                        if (_coordinatorClient.WaitDuration is TimeSpan waitDuration)
+                        {
+                            _buildTelemetry.CoordinatorWaitDurationMs = waitDuration.TotalMilliseconds;
+                        }
+                    }
+                }
+
                 // Validate environment variables (e.g., DOTNET_HOST_PATH)
                 EnvironmentVariableValidator.ValidateEnvironmentVariables(loggingService);
 
@@ -932,7 +955,7 @@ namespace Microsoft.Build.Execution
                     new ConfigurationMetadata(project),
                     (config, loadProject) => CreateConfiguration(project, config),
                     loadProject: true);
-                ErrorUtilities.VerifyThrow(configuration.Project != null, "Configuration should have been loaded.");
+                Assumed.NotNull(configuration.Project, "Configuration should have been loaded.");
                 return configuration.Project!;
             }
         }
@@ -965,7 +988,7 @@ namespace Microsoft.Build.Execution
         {
             lock (_syncLock)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(requestData);
+                ArgumentNullException.ThrowIfNull(requestData);
                 ErrorIfState(BuildManagerState.WaitingForBuildToComplete, "WaitingForEndOfBuild");
                 ErrorIfState(BuildManagerState.Idle, "NoBuildInProgress");
                 VerifyStateInternal(BuildManagerState.Building);
@@ -1064,8 +1087,8 @@ namespace Microsoft.Build.Execution
 
                 Task projectCacheDispose = _projectCacheService!.DisposeAsync().AsTask();
 
-                ErrorUtilities.VerifyThrow(_buildSubmissions.Count == 0, "All submissions not yet complete.");
-                ErrorUtilities.VerifyThrow(_activeNodes.Count == 0, "All nodes not yet shut down.");
+                Assumed.Zero(_buildSubmissions.Count, "All submissions not yet complete.");
+                Assumed.Zero(_activeNodes.Count, "All nodes not yet shut down.");
 
                 if (_buildParameters!.UsesOutputCache())
                 {
@@ -1173,6 +1196,9 @@ namespace Microsoft.Build.Execution
                 }
                 finally
                 {
+                    _coordinatorClient?.Dispose();
+                    _coordinatorClient = null;
+
                     if (_buildParameters!.LegacyThreadingSemantics)
                     {
                         _legacyThreadingData.MainThreadSubmissionId = -1;
@@ -1218,13 +1244,12 @@ namespace Microsoft.Build.Execution
         {
             TelemetryManager.Instance.Initialize(isStandalone: false);
 
-            using IActivity? activity = TelemetryManager.Instance
-                ?.DefaultActivitySource
+            using IActivity? activity = TelemetryManager.Instance.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Build)
                 ?.SetTags(_buildTelemetry)
-                ?.SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
-                        includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
-                        includeTargetDetails: false));
+                .SetTags(_telemetryConsumingLogger?.WorkerNodeTelemetryData.AsActivityDataHolder(
+                    includeTasksDetails: !Traits.Instance.ExcludeTasksDetailsFromTelemetry,
+                    includeTargetDetails: false));
         }
 
         /// <summary>
@@ -1492,8 +1517,8 @@ namespace Microsoft.Build.Execution
         [SuppressMessage("Microsoft.Maintainability", "CA1506:AvoidExcessiveClassCoupling", Justification = "Complex class might need refactoring to separate scheduling elements from submission elements.")]
         private void ExecuteSubmission(BuildSubmission submission, bool allowMainThreadBuild)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(submission);
-            ErrorUtilities.VerifyThrow(!submission.IsCompleted, "Submission already complete.");
+            ArgumentNullException.ThrowIfNull(submission);
+            Assumed.False(submission.IsCompleted, "Submission already complete.");
 
             BuildRequestConfiguration? resolvedConfiguration = null;
             bool shuttingDown = false;
@@ -1532,9 +1557,7 @@ namespace Microsoft.Build.Execution
                     // If we have an unnamed project, assign it a temporary name.
                     if (string.IsNullOrEmpty(submission.BuildRequestData.ProjectFullPath))
                     {
-                        ErrorUtilities.VerifyThrow(
-                            submission.BuildRequestData.ProjectInstance != null,
-                            "Unexpected null path for a submission with no ProjectInstance.");
+                        Assumed.NotNull(submission.BuildRequestData.ProjectInstance, "Unexpected null path for a submission with no ProjectInstance.");
 
                         // If we have already named this instance when it was submitted previously during this build, use the same
                         // name so that we get the same configuration (and thus don't cause it to rebuild.)
@@ -1606,7 +1629,7 @@ namespace Microsoft.Build.Execution
             Debug.Assert(!Monitor.IsEntered(_syncLock));
             if (shuttingDown)
             {
-                ErrorUtilities.VerifyThrow(resolvedConfiguration is not null, "Cannot call project cache without having BuildRequestConfiguration");
+                Assumed.NotNull(resolvedConfiguration, "Cannot call project cache without having BuildRequestConfiguration");
                 // We were already canceled!
                 CompleteSubmissionWithException(submission, resolvedConfiguration!, new BuildAbortedException());
             }
@@ -1727,7 +1750,7 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            ErrorUtilities.VerifyThrow(FileUtilities.IsSolutionFilename(config.ProjectFullPath), $"{config.ProjectFullPath} is not a solution");
+            Assumed.True(FileUtilities.IsSolutionFilename(config.ProjectFullPath), $"{config.ProjectFullPath} is not a solution");
 
             var buildEventContext = request.BuildEventContext;
             if (buildEventContext == BuildEventContext.Invalid)
@@ -1899,7 +1922,7 @@ namespace Microsoft.Build.Execution
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError($"Unexpected packet received by BuildManager: {packet.Type}");
+                        Assumed.Unreachable($"Unexpected packet received by BuildManager: {packet.Type}");
                         break;
                 }
             }
@@ -2223,9 +2246,7 @@ namespace Microsoft.Build.Execution
                 DumpGraph(projectGraph);
             }
 
-            ErrorUtilities.VerifyThrow(
-                submission.BuildResult?.Exception == null,
-                "Exceptions only get set when the graph submission gets completed with an exception in OnThreadException. That should not happen during graph builds.");
+            Assumed.Null(submission.BuildResult?.Exception, "Exceptions only get set when the graph submission gets completed with an exception in OnThreadException. That should not happen during graph builds.");
 
             // The overall submission is complete, so report it as complete
             ReportResultsToSubmission<GraphBuildRequestData, GraphBuildResult>(
@@ -2391,10 +2412,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void VerifyStateInternal(BuildManagerState requiredState)
         {
-            if (_buildManagerState != requiredState)
-            {
-                ErrorUtilities.ThrowInternalError($"Expected state {requiredState}, actual state {_buildManagerState}");
-            }
+            Assumed.Equal(_buildManagerState, requiredState, $"Expected state {requiredState}, actual state {_buildManagerState}");
         }
 
         /// <summary>
@@ -2742,7 +2760,7 @@ namespace Microsoft.Build.Execution
 
             _shuttingDown = true;
             _executionCancellationTokenSource?.Cancel();
-            ErrorUtilities.VerifyThrow(_activeNodes.Contains(node), $"Unexpected shutdown from node {node} which shouldn't exist.");
+            Assumed.True(_activeNodes.Contains(node), $"Unexpected shutdown from node {node} which shouldn't exist.");
             _activeNodes.Remove(node);
 
             if (shutdownPacket.Reason != NodeShutdownReason.Requested)
@@ -2945,7 +2963,7 @@ namespace Microsoft.Build.Execution
                         break;
 
                     default:
-                        ErrorUtilities.ThrowInternalError($"Scheduling action {response.Action} not handled.");
+                        Assumed.Unreachable($"Scheduling action {response.Action} not handled.");
                         break;
                 }
             }
@@ -3205,7 +3223,7 @@ namespace Microsoft.Build.Execution
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
                 LoggerDescription forwardingLoggerDescription = new LoggerDescription(
                     loggerClassName: typeof(BuildCheckForwardingLogger).FullName,
-                    loggerAssemblyName: typeof(BuildCheckForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
+                    loggerAssemblyName: typeof(BuildCheckForwardingLogger).Assembly.GetName().FullName,
                     loggerAssemblyFile: null,
                     loggerSwitchParameters: null,
                     verbosity: LoggerVerbosity.Quiet);
@@ -3225,7 +3243,7 @@ namespace Microsoft.Build.Execution
                 // In the future we might optimize for single, in-node build scenario - where forwarding logger is not needed (but it's just quick pass-through)
                 LoggerDescription forwardingLoggerDescription = new LoggerDescription(
                     loggerClassName: typeof(InternalTelemetryForwardingLogger).FullName,
-                    loggerAssemblyName: typeof(InternalTelemetryForwardingLogger).GetTypeInfo().Assembly.GetName().FullName,
+                    loggerAssemblyName: typeof(InternalTelemetryForwardingLogger).Assembly.GetName().FullName,
                     loggerAssemblyFile: null,
                     loggerSwitchParameters: null,
                     verbosity: LoggerVerbosity.Quiet);
@@ -3280,7 +3298,7 @@ namespace Microsoft.Build.Execution
             static List<ForwardingLoggerRecord> ProcessForwardingLoggers(IEnumerable<ForwardingLoggerRecord>? forwarders)
             {
                 Type configurableLoggerType = typeof(ConfigurableForwardingLogger);
-                string engineAssemblyName = configurableLoggerType.GetTypeInfo().Assembly.GetName().FullName;
+                string engineAssemblyName = configurableLoggerType.Assembly.GetName().FullName;
                 string configurableLoggerName = configurableLoggerType.FullName!;
 
                 if (forwarders == null)
@@ -3386,7 +3404,7 @@ namespace Microsoft.Build.Execution
         {
             I? castPacket = packet as I;
 
-            ErrorUtilities.VerifyThrow(castPacket != null, $"Incorrect packet type: {packet.Type} should have been {expectedType}");
+            Assumed.NotNull(castPacket, $"Incorrect packet type: {packet.Type} should have been {expectedType}");
 
             return castPacket;
         }
@@ -3463,7 +3481,7 @@ namespace Microsoft.Build.Execution
                         s_singletonInstance = null;
                     }
 
-                    TelemetryManager.Instance?.Dispose();
+                    TelemetryManager.Instance.Dispose();
 
                     _disposed = true;
                 }
@@ -3474,9 +3492,9 @@ namespace Microsoft.Build.Execution
         {
             Debug.Assert(Monitor.IsEntered(_syncLock));
 
-            ErrorUtilities.VerifyThrowInternalNull(inputCacheFiles);
-            ErrorUtilities.VerifyThrow(_configCache == null, "caches must not be set at this point");
-            ErrorUtilities.VerifyThrow(_resultsCache == null, "caches must not be set at this point");
+            Assumed.NotNull(inputCacheFiles);
+            Assumed.Null(_configCache, "caches must not be set at this point");
+            Assumed.Null(_resultsCache, "caches must not be set at this point");
 
             try
             {

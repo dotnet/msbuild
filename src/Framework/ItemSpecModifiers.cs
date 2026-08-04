@@ -342,7 +342,7 @@ internal static class ItemSpecModifiers
     {
         if (!TryGetModifierKind(modifier, out ItemSpecModifierKind kind))
         {
-            throw new InternalErrorException($"\"{modifier}\" is not a valid item-spec modifier.");
+            return Assumed.Unreachable<string>($"\"{modifier}\" is not a valid item-spec modifier.");
         }
 
         Cache cache = default;
@@ -391,7 +391,7 @@ internal static class ItemSpecModifiers
         string? definingProjectEscaped,
         ref Cache cache)
     {
-        FrameworkErrorUtilities.VerifyThrow(itemSpec != null, "Need item-spec to modify.");
+        Assumed.NotNull(itemSpec, "Need item-spec to modify.");
 
         try
         {
@@ -442,7 +442,7 @@ internal static class ItemSpecModifiers
                 return string.Empty;
             }
 
-            FrameworkErrorUtilities.VerifyThrow(definingProjectEscaped != null, "How could definingProjectEscaped by null?");
+            Assumed.NotNull(definingProjectEscaped, "How could definingProjectEscaped by null?");
 
             // Fast path: check if we already have cached results for this defining project.
             // This avoids any closure allocation on the hot path. The miss path only runs once per distinct defining project.
@@ -474,7 +474,7 @@ internal static class ItemSpecModifiers
             throw new InvalidOperationException(SR.FormatInvalidFilespecForTransform(modifier, itemSpec, e.Message));
         }
 
-        throw new InternalErrorException($"\"{modifier}\" is not a valid item-spec modifier.");
+        return Assumed.Unreachable<string>($"\"{modifier}\" is not a valid item-spec modifier.");
     }
 
     private static string ComputeFullPath(string? currentDirectory, string itemSpec)
@@ -494,7 +494,7 @@ internal static class ItemSpecModifiers
 
         if (!FileUtilities.EndsWithSlash(root))
         {
-            FrameworkErrorUtilities.VerifyThrow(
+            Assumed.True(
                 FileUtilitiesRegex.StartsWithUncPattern(root),
                 "Only UNC shares should be missing trailing slashes.");
 
@@ -559,7 +559,7 @@ internal static class ItemSpecModifiers
 
             if (length != -1)
             {
-                FrameworkErrorUtilities.VerifyThrow(
+                Assumed.True(
                     (directory.Length > length) && FileUtilities.IsSlash(directory[length]),
                     "Root directory must have a trailing slash.");
 
@@ -569,7 +569,7 @@ internal static class ItemSpecModifiers
             return directory;
         }
 
-        FrameworkErrorUtilities.VerifyThrow(
+        Assumed.True(
             !string.IsNullOrEmpty(directory) && FileUtilities.IsSlash(directory[0]),
             "Expected a full non-windows path rooted at '/'.");
 

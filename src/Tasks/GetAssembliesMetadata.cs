@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
@@ -68,7 +67,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(AssemblyPaths));
+                ArgumentNullException.ThrowIfNull(value, nameof(AssemblyPaths));
                 _assemblyPaths = value;
             }
         }

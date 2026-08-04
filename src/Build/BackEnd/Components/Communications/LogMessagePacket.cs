@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
@@ -54,7 +53,7 @@ namespace Microsoft.Build.BackEnd
             return new LogMessagePacket(translator);
         }
 
-        protected override bool EventCanSerializeItself(LoggingEventType eventType, MethodInfo methodInfo) => eventType switch
+        protected override bool EventCanSerializeItself(LoggingEventType eventType) => eventType switch
         {
             // Switch to serialization methods that we provide and don't use the WriteToStream inherited from
             // LazyFormattedBuildEventArgs.
@@ -63,7 +62,7 @@ namespace Microsoft.Build.BackEnd
             LoggingEventType.ResponseFileUsedEvent => false,
 
             // Otherwise, defer to the base implementation.
-            _ => base.EventCanSerializeItself(eventType, methodInfo),
+            _ => base.EventCanSerializeItself(eventType),
         };
 
         protected override void WriteEventToStream(BuildEventArgs buildEvent, LoggingEventType eventType, ITranslator translator)

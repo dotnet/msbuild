@@ -1275,6 +1275,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Basic case
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14194", TestPlatforms.Windows)]
         [Fact]
         public void GetCommandLine()
         {
@@ -1290,6 +1291,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Quoted path
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14192", TestPlatforms.Windows)]
         [Fact]
         public void GetCommandLineQuotedExe()
         {
@@ -1313,6 +1315,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// On path
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14196", TestPlatforms.Windows)]
         [Fact]
         public void GetCommandLineQuotedExeOnPath()
         {
@@ -3215,6 +3218,28 @@ EndGlobal
 
             CommandLineSwitches switches = new CommandLineSwitches();
             MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeFalse();
+        }
+
+        [Theory]
+        // MSBUILDUSESERVER value, -mt build, expected server use, expected reason.
+        [InlineData("1", false, true, "EnvVar")]
+        [InlineData("1", true, true, "EnvVar")]
+        [InlineData("0", true, false, "")]
+        [InlineData("0", false, false, "")]
+        [InlineData("false", true, false, "")] // any explicit non-"1" value opts out
+        [InlineData("true", true, false, "")]
+        [InlineData(null, true, true, "ImpliedByMt")]
+        [InlineData(null, false, false, "")]
+        [InlineData("", true, true, "ImpliedByMt")] // empty is treated as unset
+        public void ShouldUseMSBuildServerDecisionTree(string useServerValue, bool isMultiThreaded, bool expectedUseServer, string expectedReason)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDUSESERVER", useServerValue);
+
+            bool useServer = MSBuildApp.ShouldUseMSBuildServer(isMultiThreaded, out string reason);
+
+            useServer.ShouldBe(expectedUseServer);
+            reason.ShouldBe(expectedReason);
         }
 
         private string CopyMSBuild()

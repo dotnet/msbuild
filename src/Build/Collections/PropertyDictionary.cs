@@ -112,15 +112,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         ICollection<string> IDictionary<string, T>.Keys
-        {
-            get
-            {
-                ErrorUtilities.ThrowInternalError("Keys is not supported on PropertyDictionary.");
-
-                // Show the compiler that this always throws:
-                throw new NotImplementedException();
-            }
-        }
+            => InternalError.Throw<ICollection<string>>("Keys is not supported on PropertyDictionary.");
 
         /// <summary>
         /// Accessor for the list of properties
@@ -206,8 +198,8 @@ namespace Microsoft.Build.Collections
 
             set
             {
-                ErrorUtilities.VerifyThrowInternalNull(value, "Properties can't have null value");
-                ErrorUtilities.VerifyThrow(String.Equals(name, value.Key, StringComparison.OrdinalIgnoreCase), "Key must match value's key");
+                Assumed.NotNull(value, "Properties can't have null value");
+                Assumed.Equal(name, value.Key, StringComparison.OrdinalIgnoreCase, "Key must match value's key");
                 Set(value);
             }
         }
@@ -368,7 +360,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         void IDictionary<string, T>.Add(string key, T value)
         {
-            ErrorUtilities.VerifyThrow(key == value.Key, "Key must match value's key");
+            Assumed.Equal(key, value.Key, "Key must match value's key");
 
             // The properties lock is locked in the set method
             Set(value);
@@ -443,16 +435,14 @@ namespace Microsoft.Build.Collections
         /// Not implemented
         /// </summary>
         void ICollection<KeyValuePair<string, T>>.CopyTo(KeyValuePair<string, T>[] array, int arrayIndex)
-        {
-            ErrorUtilities.ThrowInternalError("CopyTo is not supported on PropertyDictionary.");
-        }
+            => InternalError.Throw("CopyTo is not supported on PropertyDictionary.");
 
         /// <summary>
         /// Removes a property from the collection
         /// </summary>
         bool ICollection<KeyValuePair<string, T>>.Remove(KeyValuePair<string, T> item)
         {
-            ErrorUtilities.VerifyThrow(item.Key == item.Value.Key, "Key must match value's key");
+            Assumed.Equal(item.Key, item.Value.Key, "Key must match value's key");
 
             // The properties lock is locked in the remove method
             return ((IDictionary<string, T>)this).Remove(item.Key);
@@ -507,7 +497,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal bool Remove(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
 
             using (_lock.EnterDisposableWriteLock())
             {
@@ -523,7 +513,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal void Set(T projectProperty)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectProperty);
+            ArgumentNullException.ThrowIfNull(projectProperty);
 
             using (_lock.EnterDisposableWriteLock())
             {
