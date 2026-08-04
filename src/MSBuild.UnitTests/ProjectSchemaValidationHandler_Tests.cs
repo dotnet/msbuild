@@ -11,6 +11,7 @@ using System.Xml;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -272,6 +273,64 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(importedProjectFilename);
                 Environment.SetEnvironmentVariable("MSBuildOldOM", oldValueForMSBuildOldOM);
                 Environment.SetEnvironmentVariable("MSBuildLoadMicrosoftTargetsReadOnly", oldValueForMSBuildLoadMicrosoftTargetsReadOnly);
+            }
+        }
+
+        /// <summary>
+        /// The Sdk element is a valid child of Project (it is translated into implicit imports),
+        /// so a project consisting of nothing but an Sdk element must validate against the schema.
+        /// </summary>
+        [Fact]
+        public void VerifyValidSdkElementSchema()
+        {
+            string[] msbuildTempXsdFilenames = Array.Empty<string>();
+            string projectFilename = CreateTempFileOnDisk(@"
+                    <Project xmlns=`msbuildnamespace`>
+                        <Sdk Name=`Microsoft.NET.Sdk` Version=`1.0.0` MinimumVersion=`1.0.0` />
+                        <Target Name=`Build` />
+                        <Sdk Name=`Some.Other.Sdk` />
+                    </Project>
+                    ");
+
+            try
+            {
+                // Create schema files in the temp folder
+                msbuildTempXsdFilenames = PrepareSchemaFiles();
+
+                Should.NotThrow(() => ProjectSchemaValidationHandler.VerifyProjectSchema(projectFilename, msbuildTempXsdFilenames[0], Path.GetTempPath()));
+            }
+            finally
+            {
+                File.Delete(projectFilename);
+                CleanupSchemaFiles(msbuildTempXsdFilenames);
+            }
+        }
+
+        /// <summary>
+        /// The Name attribute is required on the Sdk element, so omitting it must be
+        /// caught by the schema.
+        /// </summary>
+        [Fact]
+        public void VerifyInvalidSdkElementSchema()
+        {
+            string[] msbuildTempXsdFilenames = Array.Empty<string>();
+            string projectFilename = CreateTempFileOnDisk(@"
+                    <Project xmlns=`msbuildnamespace`>
+                        <Sdk Version=`1.0.0` />
+                    </Project>
+                    ");
+
+            try
+            {
+                // Create schema files in the temp folder
+                msbuildTempXsdFilenames = PrepareSchemaFiles();
+
+                Should.Throw<InitializationException>(() => ProjectSchemaValidationHandler.VerifyProjectSchema(projectFilename, msbuildTempXsdFilenames[0], Path.GetTempPath()));
+            }
+            finally
+            {
+                File.Delete(projectFilename);
+                CleanupSchemaFiles(msbuildTempXsdFilenames);
             }
         }
 
