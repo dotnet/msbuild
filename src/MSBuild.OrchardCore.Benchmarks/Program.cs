@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Diagnostics;
@@ -6,6 +6,7 @@ using BenchmarkDotNet.Configs;
 using BenchmarkDotNet.Diagnostics.Windows;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
+using MSBuild.OrchardCore.Benchmarks;
 using static MSBuild.Benchmarks.Extensions;
 
 var argList = new List<string>(args);
@@ -13,11 +14,41 @@ var argList = new List<string>(args);
 ParseAndRemoveBooleanParameter(argList, "--collect-etw", out bool collectEtw);
 ParseAndRemoveBooleanParameter(argList, "--disable-ngen", out bool disableNGen);
 ParseAndRemoveBooleanParameter(argList, "--disable-inlining", out bool disableJitInlining);
+if (!TryParseAndRemoveStringParameter(
+        argList,
+        "--orchard-core-project",
+        out string? projectPath,
+        out string? error))
+{
+    Console.Error.WriteLine(error);
+    return 1;
+}
 
-return BenchmarkSwitcher
-    .FromAssembly(typeof(Program).Assembly)
-    .Run([.. argList], GetConfig(collectEtw, disableNGen, disableJitInlining))
-    .ToExitCode();
+if (projectPath is null)
+{
+    Console.Error.WriteLine("Specify the Orchard Core project with --orchard-core-project <path>.");
+    return 1;
+}
+
+projectPath = Path.GetFullPath(projectPath);
+if (!File.Exists(projectPath))
+{
+    Console.Error.WriteLine($"The Orchard Core project does not exist: {projectPath}");
+    return 1;
+}
+
+Environment.SetEnvironmentVariable(
+    OrchardCoreEvaluationBenchmark.ProjectPathEnvironmentVariable,
+    projectPath);
+Environment.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", "off");
+
+return BenchmarkRunner
+    .Run<OrchardCoreEvaluationBenchmark>(
+        GetConfig(collectEtw, disableNGen, disableJitInlining),
+        [.. argList])
+    .HasAnyErrors()
+        ? 1
+        : 0;
 
 static IConfig GetConfig(bool collectEtw, bool disableNGen, bool disableJitInlining)
 {
@@ -72,4 +103,34 @@ static void ParseAndRemoveBooleanParameter(List<string> argsList, string paramet
     {
         parameterValue = false;
     }
+}
+
+static bool TryParseAndRemoveStringParameter(
+    List<string> argsList,
+    string parameter,
+    out string? parameterValue,
+    out string? error)
+{
+    int parameterIndex = argsList.IndexOf(parameter);
+
+    if (parameterIndex == -1)
+    {
+        parameterValue = null;
+        error = null;
+        return true;
+    }
+
+    if (parameterIndex == argsList.Count - 1 ||
+        string.IsNullOrWhiteSpace(argsList[parameterIndex + 1]) ||
+        argsList[parameterIndex + 1].StartsWith("--", StringComparison.Ordinal))
+    {
+        parameterValue = null;
+        error = $"Missing value for {parameter}.";
+        return false;
+    }
+
+    parameterValue = argsList[parameterIndex + 1];
+    argsList.RemoveRange(parameterIndex, 2);
+    error = null;
+    return true;
 }

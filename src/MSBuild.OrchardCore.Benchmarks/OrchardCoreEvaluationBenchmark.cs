@@ -4,7 +4,7 @@
 using BenchmarkDotNet.Attributes;
 using Microsoft.Build.CommandLine;
 
-namespace MSBuild.Benchmarks;
+namespace MSBuild.OrchardCore.Benchmarks;
 
 /// <summary>
 /// Measures repeated <c>-getItem</c> and <c>-getProperty</c> command-line queries on an Orchard
@@ -36,7 +36,7 @@ public class OrchardCoreEvaluationBenchmark
         if (string.IsNullOrWhiteSpace(projectPath))
         {
             throw new InvalidOperationException(
-                $"Specify an Orchard Core project with --orchard-core-project or the {ProjectPathEnvironmentVariable} environment variable.");
+                "The Orchard Core project path was not passed to the benchmark process.");
         }
 
         projectPath = Path.GetFullPath(projectPath);
