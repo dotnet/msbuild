@@ -111,7 +111,7 @@ namespace Microsoft.Build.UnitTests
                 string utilities = Path.Combine(portableTaskPath, utilitiesName);
                 File.Copy(utilities, Path.Combine(folder.Path, utilitiesName));
                 File.Copy(currentAssembly, newAssemblyLocation);
-                TypeLoader typeLoader = new(TaskLoader.IsTaskClass);
+                TypeLoader typeLoader = TypeLoader.Create<ITask>();
 
                 // If we cannot accept MSBuild next to the task assembly we're loading, this will throw.
                 typeLoader.Load("TypeLoader_Tests", AssemblyLoadInfo.Create(null, newAssemblyLocation), logWarning: (format, args) => { }, useTaskHost: true);
@@ -234,13 +234,13 @@ namespace Microsoft.Build.UnitTests
         public void Regress640476PartialName()
         {
             string forwardingLoggerLocation = typeof(Microsoft.Build.Logging.ConfigurableForwardingLogger).Assembly.Location;
-            TypeLoader loader = new TypeLoader(IsForwardingLoggerClass);
+            TypeLoader loader = TypeLoader.Create<IForwardingLogger>();
             LoadedType loadedType = loader.Load("ConfigurableForwardingLogger", AssemblyLoadInfo.Create(null, forwardingLoggerLocation), logWarning: (format, args) => { });
             Assert.NotNull(loadedType);
             Assert.Equal(forwardingLoggerLocation, loadedType.Assembly.AssemblyLocation);
 
             string fileLoggerLocation = typeof(Microsoft.Build.Logging.FileLogger).Assembly.Location;
-            loader = new TypeLoader(IsLoggerClass);
+            loader = TypeLoader.Create<ILogger>();
             loadedType = loader.Load("FileLogger", AssemblyLoadInfo.Create(null, fileLoggerLocation), logWarning: (format, args) => { });
             Assert.NotNull(loadedType);
             Assert.Equal(fileLoggerLocation, loadedType.Assembly.AssemblyLocation);
@@ -255,14 +255,14 @@ namespace Microsoft.Build.UnitTests
         {
             Type forwardingLoggerType = typeof(Microsoft.Build.Logging.ConfigurableForwardingLogger);
             string forwardingLoggerLocation = forwardingLoggerType.Assembly.Location;
-            TypeLoader loader = new TypeLoader(IsForwardingLoggerClass);
+            TypeLoader loader = TypeLoader.Create<IForwardingLogger>();
             LoadedType loadedType = loader.Load(forwardingLoggerType.FullName, AssemblyLoadInfo.Create(null, forwardingLoggerLocation), logWarning: (format, args) => { });
             Assert.NotNull(loadedType);
             Assert.Equal(forwardingLoggerLocation, loadedType.Assembly.AssemblyLocation);
 
             Type fileLoggerType = typeof(Microsoft.Build.Logging.FileLogger);
             string fileLoggerLocation = fileLoggerType.Assembly.Location;
-            loader = new TypeLoader(IsLoggerClass);
+            loader = TypeLoader.Create<ILogger>();
             loadedType = loader.Load(fileLoggerType.FullName, AssemblyLoadInfo.Create(null, fileLoggerLocation), logWarning: (format, args) => { });
             Assert.NotNull(loadedType);
             Assert.Equal(fileLoggerLocation, loadedType.Assembly.AssemblyLocation);
@@ -282,7 +282,7 @@ namespace Microsoft.Build.UnitTests
             Func<Type, object, bool> forwardingLoggerfilter = IsForwardingLoggerClass;
             Type firstPublicType = FirstPublicDesiredType(forwardingLoggerfilter, forwardingLoggerAssemblyLocation);
 
-            TypeLoader loader = new TypeLoader(forwardingLoggerfilter);
+            TypeLoader loader = TypeLoader.Create<IForwardingLogger>();
             LoadedType loadedType = loader.Load(String.Empty, AssemblyLoadInfo.Create(null, forwardingLoggerAssemblyLocation), logWarning: (format, args) => { });
             Assert.NotNull(loadedType);
             Assert.Equal(forwardingLoggerAssemblyLocation, loadedType.Assembly.AssemblyLocation);
@@ -297,7 +297,7 @@ namespace Microsoft.Build.UnitTests
             Func<Type, object, bool> fileLoggerfilter = IsLoggerClass;
             firstPublicType = FirstPublicDesiredType(fileLoggerfilter, fileLoggerAssemblyLocation);
 
-            loader = new TypeLoader(fileLoggerfilter);
+            loader = TypeLoader.Create<ILogger>();
             loadedType = loader.Load(String.Empty, AssemblyLoadInfo.Create(null, fileLoggerAssemblyLocation), logWarning: (format, args) => { });
             Assert.NotNull(loadedType);
             Assert.Equal(fileLoggerAssemblyLocation, loadedType.Assembly.AssemblyLocation);

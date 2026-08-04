@@ -1,0 +1,21 @@
+<Project>
+
+  <!--
+    This folder is an isolated Native AOT validation harness. It is intentionally NOT part of
+    the repository's Arcade build: this empty Directory.Build.props stops the SDK from importing
+    any Directory.Build.props above it (src/ and the repository root) - the SDK imports only the
+    nearest one walking up - so the harness uses plain Microsoft.NET.Sdk defaults instead of
+    Arcade test machinery.
+
+    It references Microsoft.Build via a ProjectReference that crosses this boundary - the
+    referenced engine project still builds with the repo's own props (its nearest
+    Directory.Build.props is the repository root).
+  -->
+
+  <PropertyGroup>
+    <!-- Opt out of the repo's central package management so this harness can pin its own
+         MSTest / MTP versions inline (the repo only uses xUnit v3). -->
+    <ManagePackageVersionsCentrally>false</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+</Project>

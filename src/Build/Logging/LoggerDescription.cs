@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using Microsoft.Build.BackEnd;
@@ -153,6 +154,7 @@ namespace Microsoft.Build.Logging
         /// exceptions if desired.
         /// </summary>
         /// <returns></returns>
+        [RequiresUnreferencedCode("Loads and instantiates a forwarding logger type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         internal IForwardingLogger CreateForwardingLogger()
         {
             IForwardingLogger forwardingLogger = null;
@@ -181,6 +183,7 @@ namespace Microsoft.Build.Logging
         /// exceptions if desired.
         /// </summary>
         /// <returns></returns>
+        [RequiresUnreferencedCode("Loads and instantiates a logger type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         public ILogger CreateLogger()
         {
             return CreateLogger(false);
@@ -190,6 +193,7 @@ namespace Microsoft.Build.Logging
         /// Loads a logger from its assembly, instantiates it, and handles errors.
         /// </summary>
         /// <returns>Instantiated logger.</returns>
+        [RequiresUnreferencedCode("Loads and instantiates a logger type by reflecting over an assembly discovered at runtime, which is incompatible with trimming.")]
         private ILogger CreateLogger(bool forwardingLogger)
         {
             ILogger logger = null;
@@ -199,7 +203,7 @@ namespace Microsoft.Build.Logging
                 if (forwardingLogger)
                 {
                     // load the logger from its assembly
-                    LoadedType loggerClass = (new TypeLoader(s_forwardingLoggerClassFilter)).Load(_loggerClassName, _loggerAssembly, logWarning: (format, args) => { });
+                    LoadedType loggerClass = TypeLoader.Create<IForwardingLogger>().Load(_loggerClassName, _loggerAssembly, logWarning: (format, args) => { });
 
                     if (loggerClass != null)
                     {
@@ -210,7 +214,7 @@ namespace Microsoft.Build.Logging
                 else
                 {
                     // load the logger from its assembly
-                    LoadedType loggerClass = (new TypeLoader(s_loggerClassFilter)).Load(_loggerClassName, _loggerAssembly, logWarning: (format, args) => { });
+                    LoadedType loggerClass = TypeLoader.Create<ILogger>().Load(_loggerClassName, _loggerAssembly, logWarning: (format, args) => { });
 
                     if (loggerClass != null)
                     {
@@ -237,40 +241,6 @@ namespace Microsoft.Build.Logging
             }
 
             return logger;
-        }
-
-        /// <summary>
-        /// Used for finding loggers when reflecting through assemblies.
-        /// </summary>
-        private static readonly Func<Type, object, bool> s_forwardingLoggerClassFilter = IsForwardingLoggerClass;
-
-        /// <summary>
-        /// Used for finding loggers when reflecting through assemblies.
-        /// </summary>
-        private static readonly Func<Type, object, bool> s_loggerClassFilter = IsLoggerClass;
-
-        /// <summary>
-        /// Checks if the given type is a logger class.
-        /// </summary>
-        /// <remarks>This method is used as a Type Filter delegate.</remarks>
-        /// <returns>true, if specified type is a logger</returns>
-        private static bool IsForwardingLoggerClass(Type type, object unused)
-        {
-            return type.IsClass &&
-                !type.IsAbstract &&
-                (type.GetInterface("IForwardingLogger") != null);
-        }
-
-        /// <summary>
-        /// Checks if the given type is a logger class.
-        /// </summary>
-        /// <remarks>This method is used as a TypeFilter delegate.</remarks>
-        /// <returns>true, if specified type is a logger</returns>
-        private static bool IsLoggerClass(Type type, object unused)
-        {
-            return type.IsClass &&
-                !type.IsAbstract &&
-                (type.GetInterface("ILogger") != null);
         }
 
         /// <summary>

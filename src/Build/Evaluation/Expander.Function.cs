@@ -17,7 +17,7 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
 using AvailableStaticMethods = Microsoft.Build.Internal.AvailableStaticMethods;
-using FeatureSwitches = Microsoft.Build.Internal.FeatureSwitches;
+using FeatureSwitches = Microsoft.Build.Framework.FeatureSwitches;
 using ParseArgs = Microsoft.Build.Evaluation.Expander.ArgumentParser;
 
 #if FEATURE_MSIOREDIST
@@ -181,6 +181,28 @@ internal partial class Expander<P, I>
         /// <summary>
         /// Extract the function details from the given property function expression.
         /// </summary>
+        /// <param name="expressionFunction">The property-function body, e.g. <c>SomeProp.ToLower()</c> or <c>[System.Math]::Max(1, 2)</c>.</param>
+        /// <param name="elementLocation">Location used for error reporting.</param>
+        /// <param name="propertyValue">
+        /// The receiver instance the function binds against. It is used here only to derive the receiver
+        /// <see cref="Type"/> (via <c>GetType()</c>); the instance itself is passed to <c>Execute</c> later.
+        /// Legitimate values are:
+        /// <list type="bullet">
+        /// <item><description><see langword="null"/> for a static call (<c>[Type]::Method()</c>) or the first
+        /// instance call in a chain, where the receiver type defaults to <see cref="string"/>.</description></item>
+        /// <item><description>A <see cref="string"/>, the evaluated value of an MSBuild property (the common case;
+        /// property values are always strings).</description></item>
+        /// <item><description>The return value of a preceding function in a chain such as <c>$(Prop.A().B())</c>,
+        /// which can be any type that function produced.</description></item>
+        /// </list>
+        /// Only the receiver type's public member surface (constructors, methods, properties, fields) is reflected
+        /// over. Because that runtime type is open-ended it cannot be statically preserved nor expressed as a
+        /// <c>DynamicallyAccessedMembers</c> constraint on an <see cref="object"/> parameter, so the unavoidable
+        /// trim suppression lives, minimized, in <c>FunctionBuilder.SetReceiverType</c>.
+        /// </param>
+        /// <param name="propertiesUseTracker">Tracks property reads performed while evaluating the function.</param>
+        /// <param name="fileSystem">File system abstraction used by file and directory property functions.</param>
+        /// <param name="loggingContext">Logging context for the operation; may be <see langword="null"/>.</param>
         internal static Function ExtractPropertyFunction(
             string expressionFunction,
             IElementLocation elementLocation,
@@ -248,7 +270,7 @@ internal partial class Expander<P, I>
                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionTypeUnavailable", expressionFunction, typeName);
                 }
 
-                functionBuilder.ReceiverType = receiverType;
+                functionBuilder.SetReceiverType(receiverType);
             }
             else if (expressionFunction[0] == '[') // We have an indexer
             {
@@ -261,7 +283,7 @@ internal partial class Expander<P, I>
 
                 var methodStartIndex = indexerEndIndex + 1;
 
-                functionBuilder.ReceiverType = propertyValue.GetType();
+                functionBuilder.SetReceiverType(propertyValue.GetType());
 
                 ConstructIndexerFunction(expressionFunction, elementLocation, propertyValue, methodStartIndex, indexerEndIndex, ref functionBuilder);
             }
@@ -295,7 +317,7 @@ internal partial class Expander<P, I>
                 var receiverType = propertyValue?.GetType() ?? typeof(string);
 
                 functionBuilder.Receiver = functionReceiver;
-                functionBuilder.ReceiverType = receiverType;
+                functionBuilder.SetReceiverType(receiverType);
 
                 ConstructFunction(elementLocation, expressionFunction, argumentStartIndex, methodStartIndex, ref functionBuilder);
             }
@@ -340,6 +362,8 @@ internal partial class Expander<P, I>
         /// </summary>
         [UnconditionalSuppressMessage("Trimming", "IL2074:UnrecognizedReflectionPattern",
             Justification = "_receiverType is reassigned from a runtime property value whose type is restricted to the property-function allowlist, whose members are preserved for trimming.")]
+        [UnconditionalSuppressMessage("Trimming", "IL2080:UnrecognizedReflectionPattern",
+            Justification = "_bindingFlags is masked to AllowedBindingFlags at construction, so it never carries BindingFlags.NonPublic; GetMethods(_bindingFlags) therefore binds only public methods of the property-function allowlist receiver, whose public members are preserved for trimming.")]
         internal object Execute(object objectInstance, IPropertyProvider<P> properties, ExpanderOptions options, IElementLocation elementLocation)
         {
             object functionResult = String.Empty;
@@ -644,8 +668,6 @@ internal partial class Expander<P, I>
         /// <returns></returns>
         [UnconditionalSuppressMessage("Trimming", "IL2096:UnrecognizedReflectionPattern",
             Justification = "The type name is resolved against the curated AvailableStaticMethods allowlist; the case-insensitive lookup only resolves to allowlist types, whose members are preserved for trimming.")]
-        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
-            Justification = "The GetTypeFromAssembly / GetTypeFromAssemblyUsingNamespace calls below are reached only when the EnableAllPropertyFunctions feature switch is enabled (MSBUILDENABLEALLPROPERTYFUNCTIONS=1). That switch is a FeatureSwitchDefinition defaulting to false under trimming (see the RuntimeHostConfigurationOption in Microsoft.Build.csproj), so the trimmer removes this branch from a trimmed application; the trim analyzer does not evaluate the feature-switch default and therefore still reports the call as reachable.")]
         private static Type GetTypeForStaticMethod(string typeName, string simpleMethodName)
         {
             Type receiverType;
@@ -677,7 +699,7 @@ internal partial class Expander<P, I>
                     var assemblyQualifiedTypeName = cachedTypeInformation.Item1;
 
                     // Get the type from the assembly qualified type name from AvailableStaticMethods
-                    receiverType = Type.GetType(assemblyQualifiedTypeName, false /* do not throw TypeLoadException if not found */, true /* ignore case */);
+                    receiverType = Type.GetType(assemblyQualifiedTypeName, throwOnError: false, ignoreCase: true);
 
                     // If the type information from the cache is not loadable, it means the cache information got corrupted somehow
                     // Throw here to prevent adding null types in the cache
@@ -692,7 +714,7 @@ internal partial class Expander<P, I>
             }
 
             // Get the type from mscorlib (or the currently running assembly)
-            receiverType = Type.GetType(typeName, false /* do not throw TypeLoadException if not found */, true /* ignore case */);
+            receiverType = Type.GetType(typeName, throwOnError: false, ignoreCase: true);
 
             if (receiverType != null)
             {
@@ -703,11 +725,12 @@ internal partial class Expander<P, I>
                 return receiverType;
             }
 
-            // Note the following code path is only entered when MSBUILDENABLEALLPROPERTYFUNCTIONS == 1.
-            // It is modeled as a trimmer feature switch (see FeatureSwitches) so this reflective
-            // probing is removed from trimmed applications, where only the curated allowlist of
-            // receiver types is supported. The environment variable is still honored at runtime when
-            // not trimmed, and must not be cached so it stays dynamically settable.
+            // The following reflective probing runs only when the EnableAllPropertyFunctions feature
+            // switch is enabled (or, in untrimmed builds, the legacy MSBUILDENABLEALLPROPERTYFUNCTIONS
+            // environment variable is set). That switch is a [FeatureGuard] for RequiresUnreferencedCode,
+            // so the analyzer treats this branch as the trim-unsafe region (no suppression needed). In
+            // trimmed / AOT applications the trimmer substitutes the switch false and removes this branch,
+            // so only the curated allowlist of receiver types is supported.
             if (FeatureSwitches.EnableAllPropertyFunctions)
             {
                 // We didn't find the type, so go probing. First in System
@@ -1116,6 +1139,9 @@ internal partial class Expander<P, I>
                 return true;
             }
 
+            // The escape hatch opens everything. The feature switch also preserves the legacy
+            // MSBUILDENABLEALLPROPERTYFUNCTIONS environment-variable behavior in untrimmed builds; under
+            // trimming it is substituted false, so this wide gate is removed.
             if (FeatureSwitches.EnableAllPropertyFunctions)
             {
                 // anything goes
@@ -1128,8 +1154,9 @@ internal partial class Expander<P, I>
         private static bool IsInstanceMethodAvailable(Type receiverType, string methodName)
         {
             // The escape hatch opens everything (this preserves the historical behavior, including
-            // allowing GetType). Under trimming EnableAllPropertyFunctions is substituted false and
-            // this branch is removed.
+            // allowing GetType). The feature switch also preserves the legacy
+            // MSBUILDENABLEALLPROPERTYFUNCTIONS environment-variable behavior in untrimmed builds; under
+            // trimming it is substituted false, so this wide gate is removed.
             if (FeatureSwitches.EnableAllPropertyFunctions)
             {
                 return true;
@@ -1159,6 +1186,8 @@ internal partial class Expander<P, I>
         /// Finds a public method on the receiver type by name (case-insensitive) and exact
         /// parameter-type signature, filtering by the current binding flags (instance/static).
         /// </summary>
+        [UnconditionalSuppressMessage("Trimming", "IL2080:UnrecognizedReflectionPattern",
+            Justification = "_bindingFlags is masked to AllowedBindingFlags at construction, so it never carries BindingFlags.NonPublic; GetMethods(_bindingFlags) therefore binds only public methods of the property-function allowlist receiver, whose public members are preserved for trimming.")]
         private MethodInfo FindPublicMethodBySignature(string methodName, Type[] parameterTypes)
         {
             foreach (MethodInfo method in _receiverType.GetMethods(_bindingFlags))
@@ -1197,6 +1226,21 @@ internal partial class Expander<P, I>
         /// Construct and instance of objectType based on the constructor or method arguments provided.
         /// Arguments must never be null.
         /// </summary>
+        // This reflective invoke can in principle reach any public method of an allowlisted receiver type.
+        // The only such method carrying [RequiresDynamicCode] is Enum.GetValues(Type) (on System.Enum) -
+        // this is the IL3050 suppressed below.
+        //
+        // Reaching it would require an author to pass a System.Type argument, and a property function has no
+        // way to produce one: string does not coerce to Type (evaluation reports MSB4186, "method not
+        // found"), and [System.Type]::GetType(...) is not an available property function (MSB4185, even with
+        // MSBUILDENABLEALLPROPERTYFUNCTIONS=1). The receiver is a runtime Type, so the static
+        // Enum.GetValues<TEnum>() overload cannot be substituted either. The case is therefore blocked before
+        // this invoke (identically on JIT and AOT) and would still fail observably (InvalidProjectFileException)
+        // if reached - never silently. Verified under Native AOT by src/aot-validation/PropertyFunctionAotTests.cs.
+        [UnconditionalSuppressMessage("AOT", "IL3050:RequiresDynamicCode",
+            Justification = "The only RDC method reachable here is Enum.GetValues(Type), which is unreachable via property functions; see comment above.")]
+        [UnconditionalSuppressMessage("Trimming", "IL2080:UnrecognizedReflectionPattern",
+            Justification = "_bindingFlags is masked to AllowedBindingFlags at construction, so it never carries BindingFlags.NonPublic; GetMethods(_bindingFlags) therefore binds only public methods of the property-function allowlist receiver, whose public members are preserved for trimming.")]
         private object LateBindExecute(Exception ex, BindingFlags bindingFlags, object objectInstance /* null unless instance method */, object[] args, bool isConstructor)
         {
             // First let's try for a method where all arguments are strings..

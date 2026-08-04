@@ -4,7 +4,6 @@
 using System;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -61,47 +60,6 @@ namespace Microsoft.Build.CommandLine
                     JsonObject jsonItem = new();
                     jsonItem["Identity"] = item.GetMetadataValue("Identity");
                     foreach (string metadatumName in item.MetadataNames)
-                    {
-                        if (metadatumName.Equals("Identity"))
-                        {
-                            continue;
-                        }
-
-                        jsonItem[metadatumName] = TryGetMetadataValue(item, metadatumName);
-                    }
-
-                    itemArray.Add(jsonItem);
-                }
-
-                itemsNode[itemName] = itemArray;
-            }
-
-            _topLevelNode["Items"] = itemsNode;
-        }
-
-        internal void AddItemsInJsonFormat(string[] itemNames, Project project)
-        {
-            if (itemNames.Length == 0)
-            {
-                return;
-            }
-
-            Assumed.Null(_topLevelNode["Items"], "Should not add multiple lists of items to the json format.");
-
-            JsonObject itemsNode = new();
-            foreach (string itemName in itemNames)
-            {
-                JsonArray itemArray = new();
-                foreach (ProjectItem item in project.GetItems(itemName))
-                {
-                    JsonObject jsonItem = new();
-                    jsonItem["Identity"] = item.GetMetadataValue("Identity");
-                    foreach (ProjectMetadata metadatum in item.Metadata)
-                    {
-                        jsonItem[metadatum.Name] = metadatum.EvaluatedValue;
-                    }
-
-                    foreach (string metadatumName in ItemSpecModifiers.All)
                     {
                         if (metadatumName.Equals("Identity"))
                         {
@@ -185,25 +143,6 @@ namespace Microsoft.Build.CommandLine
         /// this will catch the InvalidOperationException and return an empty string.
         /// </summary>
         private static string TryGetMetadataValue(ProjectItemInstance item, string metadataName)
-        {
-            try
-            {
-                return item.GetMetadataValue(metadataName);
-            }
-            catch (InvalidOperationException)
-            {
-                // Built-in metadata like FullPath, Directory, etc. require path computation.
-                // If the item spec contains illegal path characters, return empty string.
-                return string.Empty;
-            }
-        }
-
-        /// <summary>
-        /// Attempts to get metadata value from a ProjectItem. If the metadata is a built-in metadata
-        /// (like FullPath, Directory, etc.) and the item spec contains illegal path characters,
-        /// this will catch the InvalidOperationException and return an empty string.
-        /// </summary>
-        private static string TryGetMetadataValue(ProjectItem item, string metadataName)
         {
             try
             {

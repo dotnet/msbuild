@@ -12,8 +12,10 @@ namespace Microsoft.Build.Shared.FileSystem
     internal sealed class CachingFileSystemWrapper : IFileSystem
     {
         private readonly IFileSystem _fileSystem;
-        private readonly ConcurrentDictionary<string, bool> _existenceCache = new ConcurrentDictionary<string, bool>();
-        private readonly ConcurrentDictionary<string, DateTime> _lastWriteTimeCache = new ConcurrentDictionary<string, DateTime>();
+        private readonly ConcurrentDictionary<string, bool> _directoryExistenceCache = new();
+        private readonly ConcurrentDictionary<string, bool> _fileExistenceCache = new();
+        private readonly ConcurrentDictionary<string, bool> _fileOrDirectoryExistenceCache = new();
+        private readonly ConcurrentDictionary<string, DateTime> _lastWriteTimeCache = new();
 
         public CachingFileSystemWrapper(IFileSystem fileSystem)
         {
@@ -22,7 +24,14 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public bool FileOrDirectoryExists(string path)
         {
-            return CachedExistenceCheck(path, p => _fileSystem.FileOrDirectoryExists(p));
+            // A positive result from either specific cache implies existence, so we can avoid a redundant filesystem stat.
+            if ((_fileExistenceCache.TryGetValue(path, out bool fileExists) && fileExists) ||
+                (_directoryExistenceCache.TryGetValue(path, out bool directoryExists) && directoryExists))
+            {
+                return true;
+            }
+
+            return _fileOrDirectoryExistenceCache.GetOrAdd(path, p => _fileSystem.FileOrDirectoryExists(p));
         }
 
         public FileAttributes GetAttributes(string path)
@@ -37,12 +46,12 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public bool DirectoryExists(string path)
         {
-            return CachedExistenceCheck(path, p => _fileSystem.DirectoryExists(p));
+            return _directoryExistenceCache.GetOrAdd(path, p => _fileSystem.DirectoryExists(p));
         }
 
         public bool FileExists(string path)
         {
-            return CachedExistenceCheck(path, p => _fileSystem.FileExists(p));
+            return _fileExistenceCache.GetOrAdd(path, p => _fileSystem.FileExists(p));
         }
 
         public IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
@@ -78,11 +87,6 @@ namespace Microsoft.Build.Shared.FileSystem
         public IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly)
         {
             return _fileSystem.EnumerateFileSystemEntries(path, searchPattern, searchOption);
-        }
-
-        private bool CachedExistenceCheck(string path, Func<string, bool> existenceCheck)
-        {
-            return _existenceCache.GetOrAdd(path, existenceCheck);
         }
     }
 }

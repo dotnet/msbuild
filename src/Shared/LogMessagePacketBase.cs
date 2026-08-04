@@ -247,6 +247,11 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="LoggersRegisteredEventArgs"/>
         /// </summary>
         LoggersRegisteredEvent = 43,
+
+        /// <summary>
+        /// Event is <see cref="MSBuildServerLifecycleEventArgs"/>
+        /// </summary>
+        MSBuildServerLifecycleEvent = 44,
     }
     #endregion
 
@@ -501,6 +506,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildCanceledEvent => new BuildCanceledEventArgs("Build canceled."),
                 LoggingEventType.WorkerNodeTelemetryEvent => new WorkerNodeTelemetryEventArgs(),
                 LoggingEventType.LoggersRegisteredEvent => new LoggersRegisteredEventArgs(),
+                LoggingEventType.MSBuildServerLifecycleEvent => new MSBuildServerLifecycleEventArgs(),
 
                 _ => Assumed.Unreachable<BuildEventArgs>($"Should not get to the default of GetBuildEventArgFromId ID: {_eventType}")
             };
@@ -650,6 +656,10 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(LoggersRegisteredEventArgs))
             {
                 return LoggingEventType.LoggersRegisteredEvent;
+            }
+            else if (eventType == typeof(MSBuildServerLifecycleEventArgs))
+            {
+                return LoggingEventType.MSBuildServerLifecycleEvent;
             }
             else if (eventType == typeof(TargetStartedEventArgs))
             {

@@ -18,9 +18,43 @@ internal partial class Expander<P, I>
     private struct FunctionBuilder
     {
         /// <summary>
-        /// The type of this function's receiver.
+        /// Backing field for <see cref="ReceiverType"/>. Carries the same annotation as the property so the
+        /// getter's return value is satisfied by a field with a matching requirement: a compiler-generated
+        /// auto-property backing field does not inherit the property's annotation, which is what produces IL2078.
         /// </summary>
-        public Type ReceiverType { get; set; }
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicConstructors |
+            DynamicallyAccessedMemberTypes.PublicMethods |
+            DynamicallyAccessedMemberTypes.PublicProperties |
+            DynamicallyAccessedMemberTypes.PublicFields)]
+        private Type _receiverType;
+
+        /// <summary>
+        /// The type of this function's receiver. Only the public member surface is preserved for trimming:
+        /// property functions never bind non-public members (<see cref="BindingFlags.NonPublic"/> is rejected
+        /// by <c>TypeExtensions.InvokePublicMember</c>). Keep in sync with <c>Function._receiverType</c> and
+        /// <c>Constants.PropertyFunctionMembers</c>.
+        /// </summary>
+        [DynamicallyAccessedMembers(
+            DynamicallyAccessedMemberTypes.PublicConstructors |
+            DynamicallyAccessedMemberTypes.PublicMethods |
+            DynamicallyAccessedMemberTypes.PublicProperties |
+            DynamicallyAccessedMemberTypes.PublicFields)]
+        public readonly Type ReceiverType => _receiverType;
+
+        /// <summary>
+        /// Sets <see cref="ReceiverType"/> from a property-function receiver type. That type is always either
+        /// a type from MSBuild's curated static-method allowlist (resolved by name, its public members
+        /// preserved for trimming by <c>Constants.PropertyFunctionMembers</c>) or a runtime value's
+        /// <c>GetType()</c>; property functions bind only the public surface. This one-line setter writes the
+        /// annotated <see cref="_receiverType"/> field directly, so it is the single place an un-annotated
+        /// <see cref="Type"/> enters the <c>DynamicallyAccessedMembers</c>-tracked flow and the localized,
+        /// minimized home of the IL2069 suppression - every downstream hop (<c>Build</c> -> <c>Function</c>
+        /// -> <c>InvokePublicMember</c>) is then machine-checked.
+        /// </summary>
+        [UnconditionalSuppressMessage("Trimming", "IL2069",
+            Justification = "Receiver type comes from the static-method allowlist (public members preserved by Constants.PropertyFunctionMembers) or a runtime GetType(); only public members are bound. See the summary for the DAM-flow rationale.")]
+        internal void SetReceiverType(Type receiverType) => _receiverType = receiverType;
 
         /// <summary>
         /// The name of the function.
@@ -61,8 +95,6 @@ internal partial class Expander<P, I>
         /// </summary>
         public PropertiesUseTracker PropertiesUseTracker { get; set; }
 
-        [UnconditionalSuppressMessage("Trimming", "IL2072:UnrecognizedReflectionPattern",
-            Justification = "The receiver type stored in ReceiverType is a property-function receiver, restricted to the curated AvailableStaticMethods allowlist (whose members are preserved for trimming) or to a property value of an allowlist type; the DynamicallyAccessedMembers requirement of the Function constructor is satisfied for those preserved types.")]
         internal readonly Function Build()
         {
             return new Function(

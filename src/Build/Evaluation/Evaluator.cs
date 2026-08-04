@@ -140,6 +140,11 @@ namespace Microsoft.Build.Evaluation
         private readonly ProjectLoadSettings _loadSettings;
 
         /// <summary>
+        /// How far evaluation should proceed. <see cref="ProjectEvaluationStage.Full"/> runs every pass.
+        /// </summary>
+        private readonly ProjectEvaluationStage _evaluationStage;
+
+        /// <summary>
         /// The maximum number of nodes to report for evaluation.
         /// </summary>
         private readonly int _maxNodeCount;
@@ -223,7 +228,8 @@ namespace Microsoft.Build.Evaluation
             bool profileEvaluation,
             bool interactive,
             ILoggingService loggingService,
-            BuildEventContext buildEventContext)
+            BuildEventContext buildEventContext,
+            ProjectEvaluationStage evaluationStage)
         {
             Assumed.NotNull(data);
             Assumed.NotNull(projectRootElementCache);
@@ -263,6 +269,7 @@ namespace Microsoft.Build.Evaluation
             _projectSupportsReturnsAttribute = new Dictionary<ProjectRootElement, bool>();
             _projectRootElement = projectRootElement;
             _loadSettings = loadSettings;
+            _evaluationStage = evaluationStage;
             _maxNodeCount = maxNodeCount;
             _environmentProperties = environmentProperties;
             _propertiesFromCommandLine = propertiesFromCommandLine ?? [];
@@ -324,7 +331,8 @@ namespace Microsoft.Build.Evaluation
             ISdkResolverService sdkResolverService,
             int submissionId,
             EvaluationContext evaluationContext,
-            bool interactive = false)
+            bool interactive = false,
+            ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
         {
             MSBuildEventSource.Log.EvaluateStart(root.ProjectFileLocation.File);
             var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
@@ -346,7 +354,8 @@ namespace Microsoft.Build.Evaluation
                 profileEvaluation,
                 interactive,
                 loggingService,
-                buildEventContext);
+                buildEventContext,
+                evaluationStage);
 
             try
             {
@@ -685,6 +694,13 @@ namespace Microsoft.Build.Evaluation
 
                 _data.InitialTargets = initialTargets;
                 MSBuildEventSource.Log.EvaluatePass1Stop(projectFile);
+
+                if (_evaluationStage <= ProjectEvaluationStage.Properties)
+                {
+                    _data.FinishEvaluation();
+                    return;
+                }
+
                 // Pass2: evaluate item definitions
                 // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
                 MSBuildEventSource.Log.EvaluatePass2Start(projectFile);
@@ -699,6 +715,13 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
                 MSBuildEventSource.Log.EvaluatePass2Stop(projectFile);
+
+                if (_evaluationStage <= ProjectEvaluationStage.ItemDefinitions)
+                {
+                    _data.FinishEvaluation();
+                    return;
+                }
+
                 LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
@@ -746,6 +769,12 @@ namespace Microsoft.Build.Evaluation
 
                 MSBuildEventSource.Log.EvaluatePass3Stop(projectFile);
 
+                if (_evaluationStage <= ProjectEvaluationStage.Items)
+                {
+                    _data.FinishEvaluation();
+                    return;
+                }
+
                 // Pass4: evaluate using-tasks
                 MSBuildEventSource.Log.EvaluatePass4Start(projectFile);
                 using (_evaluationProfiler.TrackPass(EvaluationPass.UsingTasks))
@@ -758,6 +787,14 @@ namespace Microsoft.Build.Evaluation
                         _expander,
                         ExpanderOptions.ExpandPropertiesAndItems,
                         _evaluationContext.FileSystem);
+                }
+
+                MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
+
+                if (_evaluationStage <= ProjectEvaluationStage.UsingTasks)
+                {
+                    _data.FinishEvaluation();
+                    return;
                 }
 
                 // If there was no DefaultTargets attribute found in the depth first pass,
@@ -778,7 +815,6 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget = new Dictionary<string, List<TargetSpecification>>(StringComparer.OrdinalIgnoreCase);
                 LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder = new LinkedList<ProjectTargetElement>();
                 Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets = new Dictionary<string, LinkedListNode<ProjectTargetElement>>(StringComparer.OrdinalIgnoreCase);
-                MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Targets))
                 {

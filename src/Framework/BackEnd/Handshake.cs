@@ -185,7 +185,11 @@ internal class Handshake
 
     private static HandshakeComponents CreateStandardComponents(int options, int salt, int sessionId)
     {
-        var fileVersion = new Version(FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion!);
+        // Read the file version from the assembly's AssemblyFileVersionAttribute rather than from the file on
+        // disk: Assembly.Location is empty in a single-file/Native AOT host (and the on-disk read carries an
+        // IL3000), while the attribute carries the same value and is preserved under trimming.
+        var fileVersion = new Version(
+            Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>()!.Version);
 
         return new(
             options,

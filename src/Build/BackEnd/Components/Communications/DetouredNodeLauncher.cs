@@ -186,7 +186,9 @@ namespace Microsoft.Build.BackEnd
                     (Experimental.FileAccess.FlagsAndAttributes)fileAccessData.FlagsAndAttributes,
                     fileAccessData.Path,
                     fileAccessData.ProcessArgs,
-                    fileAccessData.IsAnAugmentedFileAccess),
+                    fileAccessData.IsAnAugmentedFileAccess,
+                    fileAccessData.EnumeratePattern,
+                    (Experimental.FileAccess.FlagsAndAttributes)fileAccessData.OpenedFileOrDirectoryAttributes),
                 _nodeId);
 
             public override void HandleProcessData(ProcessData processData) => _fileAccessManager.ReportProcess(
