@@ -647,9 +647,8 @@ namespace Microsoft.Build.Logging
 
         private BinaryLogRecordKind Write(AssemblyConflictWarningEventArgs e)
         {
-            // AssemblyConflictWarningEventArgs writes the same 8 diagnostic fields as the generic
-            // BuildWarningEventArgs writer above (Subcategory/Code/File/ProjectFile/Line/Column/EndLine/EndColumn),
-            // but omits Message/Arguments since the message is reconstructed lazily from the structured fields below.
+            // Write the eight diagnostic fields that the generic BuildWarningEventArgs writer uses.
+            // Do not write Message or Arguments because the reader reconstructs the message from the structured fields.
             WriteBuildEventArgsFields(e, writeMessage: false);
             WriteDeduplicatedString(e.Subcategory);
             WriteDeduplicatedString(e.Code);

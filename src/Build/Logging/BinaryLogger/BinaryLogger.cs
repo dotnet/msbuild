@@ -118,8 +118,8 @@ namespace Microsoft.Build.Logging
         // version 29:
         //    - new record kinds: AssemblyConflictDependencyDetailsMessageEventArgs, AssemblyConflictWarningEventArgs
         //    (RAR conflict dependency-list details and MSB3277 warning, structured behind ChangeWave 18.11)
-        //    Forward-compatible readers older than version 29 skip these unknown record kinds; strict readers reject
-        //    the newer file format.
+        //    Forward-compatible readers older than version 29 skip these unknown record kinds.
+        //    Strict readers reject the newer file format.
 
         // MAKE SURE YOU KEEP BuildEventArgsWriter AND StructuredLogViewer.BuildEventArgsWriter IN SYNC WITH THE CHANGES ABOVE.
         // Both components must stay in sync to avoid issues with logging or event handling in the products.

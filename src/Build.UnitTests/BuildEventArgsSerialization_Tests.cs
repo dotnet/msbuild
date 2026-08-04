@@ -991,9 +991,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verifies that the structured conflict events round-trip correctly through the binary log serializer even
-        /// with a large number of dependees and source items each - the scenario the structured representation
-        /// exists to avoid materializing as one enormous eagerly-formatted string.
+        /// Verifies a binary-log round trip for a large structured conflict event.
+        /// The event contains many dependees and source items without one large preformatted string.
         /// </summary>
         [Fact]
         public void RoundtripAssemblyConflictWarningEventArgsWithManyDependees()
@@ -1054,7 +1053,7 @@ namespace Microsoft.Build.UnitTests
                 e => e.Victim.Dependees.Count.ToString(),
                 e => DescribeConflictReferenceDetails(e.Victim));
 
-            // The reconstructed message must contain every dependee's identity and source items, in order.
+            // Verify that the reconstructed message contains each dependee in the original order.
             args.Message.ShouldNotBeNull();
             for (int i = 0; i < dependeeCount; i++)
             {

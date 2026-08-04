@@ -32,7 +32,11 @@ Change wave checks around features will be removed in the release that accompani
 ### 18.11
 - [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs](https://github.com/dotnet/msbuild/pull/14285)
 - RAR aggregates rejected assembly candidates into one structured search event per reference, reducing binary-log size while preserving diagnostic detail. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.11` to retain individual candidate messages.
-- RAR replaces the potentially enormous conflict dependency-list strings logged for each version conflict (both the MSB3277 warning and the low-importance diagnostic message) with structured events carrying victor/victim identities, dependency chains, and source items. The invariant-English rendered text is unchanged, but localized builds now use invariant-English templates so binary-log replay is culture-stable. Strict binary-log readers older than format 29 reject the newer format; readers that opt into forward-compatible reading skip these structured conflict records. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.11` to retain the legacy localized plain-text events.
+- RAR now logs structured events for version-conflict dependency details. These events replace large text messages for MSB3277 warnings and low-importance diagnostics.
+  - The events contain victor and victim identities, dependency chains, and source items.
+  - Invariant-English builds produce the same text. Localized builds now use invariant-English templates to make binary-log replay culture-stable.
+  - Strict readers older than binary-log format 29 reject the newer format. Forward-compatible readers skip the structured conflict records.
+  - Set `MSBUILDDISABLEFEATURESFROMVERSION=18.11` to restore the legacy localized plain-text events.
 
 ### 18.10
 - [Resolve relative project paths against the Unix logical current directory from `PWD`, so builds under symlinked directories produce stable project full paths and related output paths.](https://github.com/dotnet/msbuild/pull/13752)
