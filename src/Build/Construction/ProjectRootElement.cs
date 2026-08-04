@@ -273,7 +273,9 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         private ProjectRootElement(XmlDocumentWithLocation document)
         {
-            ProjectParser.Parse(document, this, ProjectRootElementCache.UnknownElementsConfiguration);
+            // This constructor is only used by ThrowIfDocumentHasParsingErrors to check whether a document
+            // parses; it deliberately has no cache, so there is no configuration to apply.
+            ProjectParser.Parse(document, this, ProjectRootElementCache?.UnknownElementsConfiguration);
         }
 
         /// <summary>
