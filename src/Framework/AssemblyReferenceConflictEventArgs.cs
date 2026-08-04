@@ -15,8 +15,8 @@ namespace Microsoft.Build.Framework;
 public enum AssemblyConflictLossReason
 {
     /// <summary>
-    /// The reference did not lose a conflict. This value is never expected to appear on a
-    /// logged conflict event; it exists only to mirror the internal "no conflict" state.
+    /// The reference did not lose a conflict.
+    /// This value represents the internal "no conflict" state and does not occur in logged conflict events.
     /// </summary>
     DidNotLose,
 
@@ -31,7 +31,7 @@ public enum AssemblyConflictLossReason
     InsolubleConflict,
 
     /// <summary>
-    /// This reference was a dependency and the other reference was primary (specified directly in the project file).
+    /// This reference was a dependency. The other reference was a primary reference that the project specified directly.
     /// </summary>
     WasNotPrimary,
 
@@ -42,8 +42,8 @@ public enum AssemblyConflictLossReason
 }
 
 /// <summary>
-/// Describes one reference (a project item, or a file on disk) that required a dependee reference, along with the
-/// project items that pulled the dependee in.
+/// Describes a reference that required the conflicting assembly.
+/// It also identifies the project items that caused MSBuild to resolve the reference.
 /// </summary>
 [Serializable]
 public sealed class AssemblyConflictDependee
@@ -89,8 +89,8 @@ public sealed class AssemblyConflictDependee
 }
 
 /// <summary>
-/// Describes one side (the victor or the victim) of an assembly conflict, including the references and project
-/// items that led to it being resolved.
+/// Describes the victor or victim of an assembly conflict.
+/// It includes the references and project items that caused assembly resolution.
 /// </summary>
 [Serializable]
 public sealed class AssemblyConflictReferenceDetails
@@ -124,32 +124,34 @@ public sealed class AssemblyConflictReferenceDetails
     public string? FullPath { get; }
 
     /// <summary>
-    /// Gets whether the "unified" wording should be used when rendering the header for this reference
-    /// (used for the reference that lost the conflict, which may have been unified to the victor).
+    /// Gets a value that indicates whether the rendered header uses the "unified" text.
+    /// The victim uses this text when MSBuild unifies it to the victor.
     /// </summary>
     public bool UseUnifiedHeader { get; }
 
     /// <summary>
-    /// Gets whether this reference is a primary reference (directly specified in the project file).
+    /// Gets a value that indicates whether the project directly specified this primary reference.
     /// </summary>
     public bool IsPrimary { get; }
 
     /// <summary>
-    /// Gets whether this reference was resolved to a file on disk.
+    /// Gets a value that indicates whether MSBuild resolved this reference to a file.
     /// </summary>
     public bool IsResolved { get; }
 
     /// <summary>
-    /// Gets the escaped include of the unresolved primary source item, matching the value rendered by the item's
-    /// <c>ToString()</c> method, when <see cref="IsPrimary"/> is <see langword="true"/> and
-    /// <see cref="IsResolved"/> is <see langword="false"/>. Otherwise <see langword="null"/>.
+    /// Gets the escaped include of the unresolved primary source item.
+    /// This value matches the text from the item's <c>ToString()</c> method.
+    /// The value is available when <see cref="IsPrimary"/> is <see langword="true"/> and <see cref="IsResolved"/> is <see langword="false"/>.
+    /// Otherwise, the value is <see langword="null"/>.
     /// </summary>
     public string? UnresolvedPrimaryItemSpec { get; }
 
     /// <summary>
-    /// Gets the dependee references (and the project items that pulled each one in) that required this reference.
-    /// When <see cref="IsPrimary"/> and <see cref="IsResolved"/> are both <see langword="true"/>, the first entry
-    /// describes this reference's own project items, matching legacy rendering.
+    /// Gets the dependee references that required this reference.
+    /// Each entry also contains the project items that caused MSBuild to resolve the dependee.
+    /// If this reference is primary and resolved, the first entry contains this reference's project items.
+    /// This first entry preserves the legacy text.
     /// </summary>
     public IReadOnlyList<AssemblyConflictDependee> Dependees { get; }
 
@@ -196,8 +198,8 @@ public sealed class AssemblyConflictReferenceDetails
 }
 
 /// <summary>
-/// Invariant message templates used to reconstruct assembly conflict messages lazily, regardless of the
-/// culture active when the event is later read back (for example, from a binary log).
+/// Contains invariant templates that reconstruct assembly conflict messages only when a reader requests the messages.
+/// The templates produce stable text when a reader replays a binary log with a different culture.
 /// </summary>
 [Serializable]
 internal sealed class AssemblyConflictMessageFormats
@@ -261,9 +263,8 @@ internal sealed class AssemblyConflictMessageFormats
 }
 
 /// <summary>
-/// Shared formatting logic for rendering <see cref="AssemblyConflictReferenceDetails"/> and the overall conflict
-/// message, used by both <see cref="AssemblyConflictDependencyDetailsMessageEventArgs"/> and
-/// <see cref="AssemblyConflictWarningEventArgs"/> so that their rendered text matches exactly.
+/// Formats conflict reference details and complete conflict messages.
+/// Both structured conflict event types use this class to produce identical text.
 /// </summary>
 internal static class AssemblyConflictMessageFormatter
 {
@@ -299,10 +300,10 @@ internal static class AssemblyConflictMessageFormatter
             FormatWarningBody(victorFusionName, victimFusionName, lossReason, victimIsPrimary, victor, victim, formats));
 
     /// <summary>
-    /// Formats the conflict header and dependency details combined (matching the legacy "output" StringBuilder
-    /// contents for the warning path), without the outer "Found conflicts..." (MSB3277) wrapper. This is the value
-    /// historically exposed via the <c>logMessage</c> metadata on <c>UnresolvedAssemblyConflicts</c> items; the
-    /// wrapper text is only added when rendering the actual warning <see cref="BuildEventArgs.Message"/>.
+    /// Formats the conflict header and dependency details without the outer MSB3277 wrapper.
+    /// This text matches the legacy warning body.
+    /// <c>UnresolvedAssemblyConflicts</c> items use this text for the <c>logMessage</c> metadata.
+    /// The warning <see cref="BuildEventArgs.Message"/> adds the outer wrapper.
     /// </summary>
     internal static string FormatWarningBody(
         string victorFusionName,
@@ -323,8 +324,8 @@ internal static class AssemblyConflictMessageFormatter
     }
 
     /// <summary>
-    /// Formats just the conflict header (no dependency details), matching the text logged as a standalone
-    /// message when the conflict does not also produce a warning.
+    /// Formats the conflict header without dependency details.
+    /// The result matches the standalone message for a conflict that does not produce a warning.
     /// </summary>
     internal static string FormatHeaderOnly(
         string victorFusionName,
@@ -358,8 +359,7 @@ internal static class AssemblyConflictMessageFormatter
                 break;
 
             case AssemblyConflictLossReason.InsolubleConflict:
-                // When the victim is primary, a separate immediate warning is logged instead; nothing is appended here,
-                // matching legacy behavior.
+                // A primary victim produces a separate warning, so this header must not contain more text.
                 if (!victimIsPrimary)
                 {
                     log.AppendLine().Append(Format(formats.ConflictUnsolvable, victorFusionName, victimFusionName));
@@ -368,7 +368,7 @@ internal static class AssemblyConflictMessageFormatter
                 break;
 
             case AssemblyConflictLossReason.FusionEquivalentWithSameVersion:
-                // No additional text, matching legacy behavior.
+                // Legacy messages do not contain more text for this reason.
                 break;
 
             default:
@@ -408,9 +408,8 @@ internal static class AssemblyConflictMessageFormatter
 }
 
 /// <summary>
-/// Reports the dependency chain (the references and project items) that led to an assembly conflict, without any
-/// warning-level severity. This corresponds to the "extra information" that RAR logs at low importance whenever a
-/// conflict was resolved without producing a warning.
+/// Reports the references and project items that caused an assembly conflict.
+/// RAR logs this low-importance event when conflict resolution does not produce a warning.
 /// </summary>
 [Serializable]
 public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMessageEventArgs
@@ -466,7 +465,7 @@ public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMes
 
     internal override void WriteToStream(BinaryWriter writer)
     {
-        // Message is reconstructed from the structured fields on the receiving node.
+        // The receiving node reconstructs the message from the structured fields.
         base.WriteToStream(writer);
         Victor.WriteToStream(writer);
         Victim.WriteToStream(writer);
@@ -483,8 +482,8 @@ public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMes
 }
 
 /// <summary>
-/// Reports an unresolved assembly version conflict (MSB3277) with structured details describing the victor, the
-/// victim, and the dependency chains that led to each.
+/// Reports an unresolved assembly version conflict (MSB3277).
+/// The structured details identify the victor, the victim, and their dependency chains.
 /// </summary>
 [Serializable]
 public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
@@ -591,7 +590,7 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
 
     internal override void WriteToStream(BinaryWriter writer)
     {
-        // Message is reconstructed from the structured fields on the receiving node.
+        // The receiving node reconstructs the message from the structured fields.
         base.WriteToStream(writer);
         writer.Write(SimpleAssemblyName);
         writer.Write(VictorFusionName);

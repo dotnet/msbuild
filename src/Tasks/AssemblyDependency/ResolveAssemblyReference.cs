@@ -194,7 +194,7 @@ namespace Microsoft.Build.Tasks
         private static class InvariantAssemblyConflictMessageFormats
         {
             /// <summary>
-            /// The warning code embedded in the "ResolveAssemblyReference.FoundConflicts" resource string.
+            /// The warning code in the "ResolveAssemblyReference.FoundConflicts" resource string.
             /// </summary>
             internal const string FoundConflictsWarningCode = "MSB3277";
 
@@ -2340,19 +2340,18 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Structured equivalent of <see cref="LogConflict(Reference, string, StringBuilder)"/> combined with
+        /// Logs the structured equivalent of <see cref="LogConflict(Reference, string, StringBuilder)"/> and
         /// <see cref="LogReferenceDependenciesAndSourceItemsToStringBuilder(string, Reference, StringBuilder, bool)"/>.
-        /// Used behind <see cref="ChangeWaves.Wave18_11"/> to avoid building the (potentially enormous) dependency-list
-        /// strings unless something actually consumes the resulting event's <c>Message</c>.
+        /// <see cref="ChangeWaves.Wave18_11"/> controls this behavior.
+        /// The method does not build large dependency-list strings until a consumer requests the event message.
         /// </summary>
         private void LogConflictStructured(AssemblyNameExtension assemblyName, string fusionName, Reference conflictCandidate, Reference victor, bool logWarning)
         {
             string victorFusionName = conflictCandidate.ConflictVictorName.FullName;
             AssemblyConflictLossReason lossReason = ToPublicLossReason(conflictCandidate.ConflictLossExplanation);
 
-            // For primary references with an insoluble conflict, there's no way an app.config binding redirect could
-            // help, so log an immediate warning. This is independent of the aggregated FoundConflicts warning/message
-            // below and matches legacy LogConflict behavior exactly.
+            // An app.config binding redirect cannot resolve an insoluble conflict for a primary reference.
+            // Log a separate warning to preserve the legacy behavior.
             if (conflictCandidate.ConflictLossExplanation == ConflictLossReason.InsolubleConflict && conflictCandidate.IsPrimary)
             {
                 Log.LogWarningWithCodeFromResources("ResolveAssemblyReference.ConflictUnsolvable", conflictCandidate.ConflictVictorName, fusionName);
@@ -2365,8 +2364,7 @@ namespace Microsoft.Build.Tasks
                 AssemblyConflictReferenceDetails victorDetails = BuildConflictReferenceDetails(victorFusionName, victor, useUnifiedHeader: false);
                 AssemblyConflictReferenceDetails victimDetails = BuildConflictReferenceDetails(fusionName, conflictCandidate, useUnifiedHeader: true);
 
-                // This warning is logged regardless of AutoUnify since it means a conflict existed where the reference
-                // chosen was not the conflict victor in a version comparison. In other words, the victor was older.
+                // Log this warning for all AutoUnify values because RAR selected an older reference.
                 output = LogFoundConflictsWarning(assemblyName.Name, victorFusionName, fusionName, lossReason, victorDetails, victimDetails, materializeMessage: OutputUnresolvedAssemblyConflicts) ?? string.Empty;
             }
             else
@@ -2419,13 +2417,12 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Logs the aggregated MSB3277 warning (or, if warnings-as-errors applies to it, the equivalent error) for a
-        /// resolved-but-unsatisfying conflict.
+        /// Logs the aggregated MSB3277 warning for a conflict that RAR resolved with an older reference.
+        /// Logs an error when the build treats MSB3277 as an error.
         /// </summary>
         /// <returns>
-        /// The conflict body (header and dependency details, matching the legacy "logMessage" metadata contents), if
-        /// <paramref name="materializeMessage"/> was <see langword="true"/> or the warning was escalated to an
-        /// error; otherwise <see langword="null"/>.
+        /// The conflict body when <paramref name="materializeMessage"/> is <see langword="true"/> or MSB3277 becomes an error.
+        /// Otherwise, returns <see langword="null"/>.
         /// </returns>
         private string LogFoundConflictsWarning(
             string simpleAssemblyName,
@@ -2444,10 +2441,10 @@ namespace Microsoft.Build.Tasks
 
             if (BuildEngine is IBuildEngine8 buildEngine8 && buildEngine8.ShouldTreatWarningAsError(warningCode))
             {
-                // Preserve legacy behavior: TaskLoggingHelper.LogWarning escalates warnings-as-errors synchronously
-                // (updating HasLoggedErrors immediately), whereas the engine's own warning-to-error promotion for a
-                // directly-logged warning event happens asynchronously on the logging thread. Replicate the
-                // synchronous escalation here; this is the rare path so eager formatting is not a perf concern.
+                // TaskLoggingHelper promotes warnings to errors synchronously and immediately updates HasLoggedErrors.
+                // The logging thread promotes a directly logged warning asynchronously.
+                // Promote MSB3277 here to preserve the synchronous legacy behavior.
+                // This path is uncommon, so immediate formatting has a small performance effect.
                 body ??= AssemblyConflictMessageFormatter.FormatWarningBody(victorFusionName, victimFusionName, lossReason, victimDetails.IsPrimary, victorDetails, victimDetails, InvariantAssemblyConflictMessageFormats.Instance);
                 string message = AssemblyConflictMessageFormatter.FormatWarningMessage(
                     simpleAssemblyName,
@@ -2479,15 +2476,14 @@ namespace Microsoft.Build.Tasks
                 DateTime.UtcNow);
             BuildEngine.LogWarningEvent(warningEvent);
 
-            // Match legacy semantics: the "logMessage" metadata on UnresolvedAssemblyConflicts historically held the
-            // conflict body (header + dependency details) without the outer MSB3277 "Found conflicts..." wrapper,
-            // even though the warning's own rendered Message includes that wrapper.
+            // Preserve the legacy logMessage metadata, which contains the conflict body without the outer MSB3277 wrapper.
             return body;
         }
 
         /// <summary>
-        /// Builds the structured dependency details (dependees and the project items which pulled them in) for one
-        /// side of a conflict, mirroring the data produced by
+        /// Builds structured dependency details for one side of a conflict.
+        /// The details contain dependees and the project items that caused their resolution.
+        /// The result matches the data from
         /// <see cref="LogReferenceDependenciesAndSourceItemsToStringBuilder(string, Reference, StringBuilder, bool)"/>.
         /// </summary>
         private static AssemblyConflictReferenceDetails BuildConflictReferenceDetails(string fusionName, Reference reference, bool useUnifiedHeader)
@@ -2503,13 +2499,12 @@ namespace Microsoft.Build.Tasks
             {
                 if (reference.IsResolved)
                 {
-                    // Matches legacy behavior: a resolved primary reference's own project items are logged as if the
-                    // reference were one of its own dependees.
+                    // Include the primary reference as its own dependee to preserve the legacy text.
                     dependees.Add(BuildConflictDependee(reference));
                 }
                 else
                 {
-                    // Legacy formatting passed the item itself to string.Format, which preserves its escaped include.
+                    // Use ToString() because the legacy text contains the escaped include.
                     unresolvedPrimaryItemSpec = reference.PrimarySourceItem?.ToString();
                 }
             }
