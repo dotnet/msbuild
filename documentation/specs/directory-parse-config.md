@@ -30,11 +30,9 @@ This enables compatibility scenarios where project files may include attributes/
 
 Matching is case-insensitive. Entries with missing or empty `Element`/`Name` attributes are silently ignored. Unrecognized sections or elements are ignored.
 
-For more details on `Element`:
+### Valid `IgnoreAttributes` Elements
 
-### Valid Attribute Names
-
-For attributes the `Name` can be the name of the following MSBuild elements:
+The `Element` attribute in `<IgnoreAttributes>` entries can be:
 - `Target`
 - `PropertyGroup`
 - `ItemGroup`
@@ -47,19 +45,24 @@ For attributes the `Name` can be the name of the following MSBuild elements:
 - `Otherwise`
 - `ProjectExtensions`
 
-Although the following are not elements, they can be specified to target attributes on these types of elements:
-- `Property`: attributes on elements inside a `PropertyGroup`
-- `Item`: attributes on elements inside a `ItemGroup`
-- `Metadata`: attributes on elements inside an `Item` or `ItemDefinitionGroup`
-- `Parameter`: attributes on elements in a ParameterGroup inside a UsingTask
-- `UsingTaskBody`: attributes on Task elements inside a UsingTask
+Generic names for dynamically-named elements:
 
-### Valid Element Names
+| Generic Name | Applies To |
+|---|---|
+| `Property` | Any property element (child of `PropertyGroup`) |
+| `Item` | Any item element (child of `ItemGroup`) |
+| `ItemDefinition` | Any item definition element (child of `ItemDefinitionGroup`) |
+| `Metadata` | Any metadata element (child of an `Item` or `ItemDefinition`) |
+| `Parameter` | Any parameter element in a `ParameterGroup` inside `UsingTask` |
+| `UsingTaskBody` | The `Task` element inside `UsingTask` |
 
-The following names can be specified:
+### Valid `IgnoreChildren` Elements
+
+The `Element` attribute in `<IgnoreChildren>` entries can be:
 - `Project`
 - `Import`
 - `ImportGroup`
+- `Task`
 - `UsingTask`
 - `OnError`
 - `Output`
@@ -67,66 +70,67 @@ The following names can be specified:
 - `When`
 - `Otherwise`
 
-The following cannot be specified since their children are by definition always valid:
+Not applicable (children are free-form by design):
+
 - `Target`
 - `PropertyGroup`
 - `ItemGroup`
+- `ItemDefinitionGroup`
 - `ProjectExtensions`
 
 ## Discovery and Loading
 
-Configuration files are discovered and merged additively:
+Configuration is discovered from two sources:
 
-1. **Global config at build start**
-   - Next to the MSBuild executable
-   - User profile: `%USERPROFILE%\.msbuild\Directory.Parse.config` (Windows) or `$HOME/.msbuild/Directory.Parse.config` (Unix)
-   - Paths listed in `MSBUILD_PARSE_CONFIG`, split using the platform path separator
-   - The startup directory of MSBuild
+1. **`MSBUILD_PARSE_CONFIG` environment variable** — Semicolon-separated (Windows) or colon-separated (Unix) list of config file paths. Always loaded when a `ProjectCollection` is created.
 
-2. **Directory-specific config at evaluation start**
-   - MSBuild walks up from the project file's directory looking for `Directory.Parse.config`
-   - If found and that file was not already loaded globally, it is loaded and merged for that evaluation
+2. **Project directory walk** — The CLI walks up from the target project file's directory looking for `Directory.Parse.config` (same pattern as `Directory.Build.rsp`). Called via `ProjectCollection.LoadParseConfigForStartup(directory)` before any project is loaded.
 
-## Centralized Loading (BuildManager)
+These are merged additively — entries from either source are combined.
 
-In a normal build flow, the main node loads global config once during `BuildManager.BeginBuild()`. The config is:
-- Stored on `BuildParameters.UnknownElementsConfiguration`
-- Serialized to worker nodes via the standard `ITranslatable` mechanism
-- Set on the shared `ProjectRootElementCache`, so parsing uses the same configuration
+## Public API
 
-At evaluation start, MSBuild may merge in one additional `Directory.Parse.config` discovered from the project file's directory walk.
+### `ProjectCollection.LoadParseConfigForStartup(string startingDirectory)`
 
-Users of the `ProjectCollection` API can also set `ProjectCollection.UnknownElementsConfiguration` directly, which flows into `BuildParameters` when builds are started.
+Walks up from `startingDirectory` to find a `Directory.Parse.config`, merges it with the current config, and sets it on the cache. Must be called before loading projects. Call `UnloadParseConfigForStartup()` after the build to restore the previous state.
+
+### `ProjectCollection.UnloadParseConfigForStartup()`
+
+Restores the parse configuration to the state before `LoadParseConfigForStartup` was called.
+
 
 ## Logging
 
-During evaluation, two low-importance messages can be logged to the binary log:
+- **Config files loaded**: Logged at evaluation start (`MessageImportance.Low`). Lists all loaded config file paths.
+- **Config files embedded**: Each loaded config file is logged as a `ProjectImportedEventArgs`, causing the binary logger to embed the file content in the binlog.
+- **Skipped items summary**: Logged after evaluation completes (`MessageImportance.Low`). Lists all skipped attributes/elements with occurrence counts.
 
-- **Config files loaded**: Lists all discovered and loaded config file paths.
-- **Skipped items summary**: Lists all unrecognized attributes/elements that were skipped, with occurrence counts. This is logged after evaluation work has completed so it reflects actual skips from that evaluation.
+## Feature Flag
 
-Example log messages:
-```
-Loaded Directory.Parse.config from: C:\repo\Directory.Parse.config, C:\Users\me\.msbuild\Directory.Parse.config
-Skipped unrecognized items allowed by Directory.Parse.config: Attribute:Target:CustomAttr (2 occurrences); Element:Project:Widget (1 occurrence)
-```
+Set `MSBUILD_DISABLE_PARSE_CONFIG=1` to disable all automatic config loading.
 
 ## Examples
 
-### Allow a custom attribute on Target elements
+### Allow a custom attribute on all Target elements
 
-Directory.Parse.config:
-```
-Attribute:Target:CustomAttr
+```xml
+<ParseConfig>
+  <IgnoreAttributes>
+    <Ignore Element="Target" Name="CustomAttr" />
+  </IgnoreAttributes>
+</ParseConfig>
 ```
 
-This allows `<Target Name="Build" CustomAttr="value">` without error.
+Allows `<Target Name="Build" CustomAttr="value">` without error.
 
 ### Allow a custom child element under Project
 
-Directory.Parse.config:
-```
-Element:Project:ToolConfiguration
+```xml
+<ParseConfig>
+  <IgnoreChildren>
+    <Ignore Element="Project" Name="ToolConfiguration" />
+  </IgnoreChildren>
+</ParseConfig>
 ```
 
-This allows `<ToolConfiguration ... />` as a direct child of `<Project>` without error.
+Allows `<ToolConfiguration ... />` as a direct child of `<Project>` without error.
