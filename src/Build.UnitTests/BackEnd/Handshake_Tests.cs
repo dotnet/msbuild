@@ -56,7 +56,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
 
-            string firstKey = GetKeyForChangeWave(ChangeWaves.Wave17_12.ToString(), env, s_workerNodeOptions);
+            string firstKey = GetKeyForChangeWave(ChangeWaves.LowestWave.ToString(), env, s_workerNodeOptions);
             string secondKey = GetKeyForChangeWave(ChangeWaves.HighestWave.ToString(), env, s_workerNodeOptions);
 
             secondKey.ShouldNotBe(firstKey);
