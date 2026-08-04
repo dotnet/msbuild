@@ -26,6 +26,21 @@ namespace Microsoft.Build.Evaluation
         internal const string ConfigFileName = "Directory.Parse.config";
         internal const string EnvironmentVariableName = "MSBUILD_PARSE_CONFIG";
 
+        /// <summary>
+        /// Static collection of config file paths to embed in the binlog.
+        /// Populated during config loading, consumed by BinaryLogger.Shutdown.
+        /// </summary>
+        private static ConcurrentBag<string> s_binlogEmbedPaths = new();
+
+        /// <summary>Paths collected for binlog embedding.</summary>
+        internal static IEnumerable<string> BinlogEmbedPaths => s_binlogEmbedPaths;
+
+        /// <summary>Clears the embed paths after they've been written to the binlog.</summary>
+        internal static void ClearBinlogEmbedPaths()
+        {
+            s_binlogEmbedPaths = new ConcurrentBag<string>();
+        }
+
         private Dictionary<string, HashSet<string>> _allowedAttributes;
         private Dictionary<string, HashSet<string>> _allowedChildren;
         private HashSet<string> _loadedConfigFiles;
@@ -263,6 +278,8 @@ namespace Microsoft.Build.Evaluation
             {
                 return;
             }
+
+            s_binlogEmbedPaths.Add(fullPath);
 
             try
             {
