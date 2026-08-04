@@ -440,11 +440,22 @@ namespace Microsoft.Build.BackEnd
 
             void CreateNodeContext(int nodeId, Process nodeToReuse, Stream nodeStream, byte negotiatedVersion)
             {
-                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, nodeLaunchData.Handshake.HandshakeOptions);
+                HandshakeOptions handshakeOptions = nodeLaunchData.Handshake.HandshakeOptions;
+                NodeContext nodeContext = new(nodeId, nodeToReuse, nodeStream, factory, terminateNode, negotiatedVersion, handshakeOptions, DoesConnectionPersistAcrossBuilds(handshakeOptions));
                 nodeContexts.Enqueue(nodeContext);
                 createNode(nodeContext);
             }
         }
+
+        /// <summary>
+        /// Whether a node launched with these handshake options stays connected to this process after
+        /// one of its builds completes, so that this process can use it again for the next one. Such
+        /// a node reports build completion with <see cref="NodeReadyForNextBuild"/> rather than
+        /// <see cref="NodeShutdown"/>, and more packets follow on its connection afterwards.
+        /// False by default: a node disconnects at the end of a build and, if reusable, waits on its
+        /// pipe for some other process to claim it.
+        /// </summary>
+        protected virtual bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions) => false;
 
         /// <summary>
         /// Finds processes that could be reusable MSBuild nodes.
@@ -1046,9 +1057,11 @@ namespace Microsoft.Build.BackEnd
                 INodePacketFactory factory,
                 NodeContextTerminateDelegate terminateDelegate,
                 byte negotiatedVersion,
-                HandshakeOptions handshakeOptions = HandshakeOptions.None)
+                HandshakeOptions handshakeOptions = HandshakeOptions.None,
+                bool connectionPersistsAcrossBuilds = false)
             {
                 _nodeId = nodeId;
+                _connectionPersistsAcrossBuilds = connectionPersistsAcrossBuilds;
                 _process = process;
                 _pipeStream = nodePipe;
                 _packetFactory = factory;
@@ -1059,10 +1072,6 @@ namespace Microsoft.Build.BackEnd
                 _writeTranslator = BinaryTranslator.GetWriteTranslator(_writeBufferMemoryStream);
                 _terminateDelegate = terminateDelegate;
                 _handshakeOptions = handshakeOptions;
-
-                // A sidecar is a TaskHost launched with node reuse: that pairing is what makes it
-                // long-lived and connected to this process across builds.
-                _isSidecar = Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse);
                 _negotiatedPacketVersion = negotiatedVersion;
 #if FEATURE_APM
                 _headerReadCompleteCallback = HeaderReadComplete;
@@ -1088,19 +1097,11 @@ namespace Microsoft.Build.BackEnd
             public int NodeId => _nodeId;
 
             /// <summary>
-            /// Whether this connection is to a sidecar TaskHost: a long-lived TaskHost that stays
-            /// connected across its owner's builds instead of exiting when a build finishes.
-            /// Decided once when the context is created rather than re-derived from wire state.
+            /// Whether this node stays connected after a build completes, so that its owner can use
+            /// it again for the next one. Such a node reports build completion with
+            /// <see cref="NodeReadyForNextBuild"/> instead of <see cref="NodeShutdown"/>.
             /// </summary>
-            private readonly bool _isSidecar;
-
-            /// <summary>
-            /// A sidecar answers a reusable build completion in place and stays connected, so that
-            /// acknowledgement must not be mistaken for it shutting down and tear the connection
-            /// down. Once a terminal exit packet has been sent it really is shutting down.
-            /// </summary>
-            private bool IsSidecarResetAcknowledgement =>
-                _isSidecar && _exitPacketState == ExitPacketState.None;
+            private readonly bool _connectionPersistsAcrossBuilds;
 
             /// <summary>
             /// Starts a new asynchronous read operation for this node.
@@ -1177,7 +1178,7 @@ namespace Microsoft.Build.BackEnd
                         return;
                     }
 
-                    if (packetType == NodePacketType.NodeShutdown && !IsSidecarResetAcknowledgement)
+                    if (packetType == NodePacketType.NodeShutdown)
                     {
                         Close();
                         return;
@@ -1331,11 +1332,17 @@ namespace Microsoft.Build.BackEnd
                             // Do nothing here because any exception will be caught by the async read handler
                         }
 
-                        // A sidecar keeps this connection across reusable builds. Every other
-                        // NodeBuildComplete ends the connection, so the drain thread must terminate even when
-                        // writing the packet threw; otherwise it would block forever and leak the NodeContext.
+                        // Once the NodeBuildComplete packet has been dequeued, the node is shutting down and no
+                        // further packets will be enqueued, so the drain thread must terminate. This has to run even
+                        // when writing the packet above threw (e.g. the child already exited and the pipe was
+                        // disposed); otherwise the thread loops back to WaitOne() and blocks forever, leaking the
+                        // thread and the NodeContext it captures. In a long-lived host like Visual Studio these
+                        // leaked threads accumulate across builds.
+                        //
+                        // A node that stays connected is the exception: its owner sends it more packets after this
+                        // one, so the drain thread has to keep running.
                         if (packet is NodeBuildComplete buildComplete &&
-                            (!_isSidecar || !buildComplete.PrepareForReuse))
+                            !(_connectionPersistsAcrossBuilds && buildComplete.PrepareForReuse))
                         {
                             if (IsExitPacket(packet))
                             {
@@ -1584,7 +1591,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                if (packetType != NodePacketType.NodeShutdown || IsSidecarResetAcknowledgement)
+                if (packetType != NodePacketType.NodeShutdown)
                 {
                     // Read the next packet.
                     BeginAsyncPacketRead();

@@ -212,6 +212,15 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// A sidecar TaskHost is one launched with node reuse. It stays connected to this process
+        /// between builds instead of disconnecting into the pool of TaskHosts any process may claim,
+        /// which is what lets this process shut it down later and what stops it outliving this
+        /// process.
+        /// </summary>
+        protected override bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions)
+            => Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NodeReuse);
+
+        /// <summary>
         /// How long to wait for sidecars to acknowledge build completion before giving up on them.
         /// A sidecar that has already died, or is wedged, will never acknowledge, and its owner must
         /// not block on it. Matches <c>NodeProviderOutOfProcBase.TimeoutForWaitForExit</c>.
@@ -269,6 +278,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeReadyForNextBuild, NodeReadyForNextBuild.FactoryForDeserialization, this);
 
             // Register callback request packet types so we can deserialize them when
             // they arrive from TaskHost processes. These are forwarded to the current
@@ -373,6 +383,9 @@ namespace Microsoft.Build.BackEnd
             switch (packet.Type)
             {
                 case NodePacketType.NodeShutdown:
+                case NodePacketType.NodeReadyForNextBuild:
+                    // Either the node has exited, or it has finished a build and stayed connected.
+                    // Both mean it is no longer working on this build, which is what shutdown waits for.
                     lock (_activeNodes)
                     {
                         if (_activeNodes.Contains(node))

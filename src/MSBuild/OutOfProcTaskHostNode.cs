@@ -1337,7 +1337,7 @@ namespace Microsoft.Build.CommandLine
                 PrepareForNextBuild();
                 if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
                 {
-                    _nodeEndpoint.SendData(new NodeShutdown(NodeShutdownReason.Requested));
+                    _nodeEndpoint.SendData(new NodeReadyForNextBuild());
                 }
 
                 return;
