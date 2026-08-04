@@ -32,6 +32,8 @@ namespace Microsoft.Build.Logging;
 /// </remarks>
 public sealed partial class TerminalLogger : INodeLogger
 {
+    private readonly BuildEventTracker _eventTracker = new();
+
     private const string FilePathPattern = " -> ";
     private const string MSBuildTaskName = "MSBuild";
 
@@ -114,11 +116,6 @@ public sealed partial class TerminalLogger : INodeLogger
     /// However, reads and writes to locations in an array is atomic, so locking is not required.
     /// </remarks>
     private TerminalNodeStatus?[] _nodes = Array.Empty<TerminalNodeStatus>();
-
-    /// <summary>
-    /// The timestamp of the <see cref="IEventSource.BuildStarted"/> event.
-    /// </summary>
-    private DateTime _buildStartTime;
 
     /// <summary>
     /// The working directory when the build starts, to trim relative output paths.
@@ -446,18 +443,19 @@ public sealed partial class TerminalLogger : INodeLogger
         // Detect if we're in replay mode
         _isReplayMode = eventSource is IBinaryLogReplaySource;
 
-        eventSource.BuildStarted += BuildStarted;
-        eventSource.BuildFinished += BuildFinished;
-        eventSource.ProjectStarted += ProjectStarted;
-        eventSource.ProjectFinished += ProjectFinished;
-        eventSource.TargetStarted += TargetStarted;
-        eventSource.TargetFinished += TargetFinished;
-        eventSource.TaskStarted += TaskStarted;
-        eventSource.TaskFinished += TaskFinished;
-        eventSource.StatusEventRaised += StatusEventRaised;
-        eventSource.MessageRaised += MessageRaised;
-        eventSource.WarningRaised += WarningRaised;
-        eventSource.ErrorRaised += ErrorRaised;
+        _eventTracker.BuildStartedTracked += OnBuildStarted;
+        _eventTracker.BuildFinishedTracked += OnBuildFinished;
+        _eventTracker.ProjectStartedTracked += OnProjectStarted;
+        _eventTracker.ProjectFinishedTracked += ProjectFinished;
+        _eventTracker.TargetStartedTracked += TargetStarted;
+        _eventTracker.TargetFinishedTracked += TargetFinished;
+        _eventTracker.TaskStartedTracked += TaskStarted;
+        _eventTracker.TaskFinishedTracked += TaskFinished;
+        _eventTracker.StatusEventTracked += StatusEventRaised;
+        _eventTracker.MessageTracked += MessageRaised;
+        _eventTracker.WarningTracked += WarningRaised;
+        _eventTracker.ErrorTracked += ErrorRaised;
+        _eventTracker.Attach(eventSource);
 
         if (eventSource is IEventSource4 eventSource4)
         {
@@ -545,6 +543,20 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <inheritdoc/>
     public void Shutdown()
     {
+        _eventTracker.Detach();
+        _eventTracker.BuildStartedTracked -= OnBuildStarted;
+        _eventTracker.BuildFinishedTracked -= OnBuildFinished;
+        _eventTracker.ProjectStartedTracked -= OnProjectStarted;
+        _eventTracker.ProjectFinishedTracked -= ProjectFinished;
+        _eventTracker.TargetStartedTracked -= TargetStarted;
+        _eventTracker.TargetFinishedTracked -= TargetFinished;
+        _eventTracker.TaskStartedTracked -= TaskStarted;
+        _eventTracker.TaskFinishedTracked -= TaskFinished;
+        _eventTracker.StatusEventTracked -= StatusEventRaised;
+        _eventTracker.MessageTracked -= MessageRaised;
+        _eventTracker.WarningTracked -= WarningRaised;
+        _eventTracker.ErrorTracked -= ErrorRaised;
+
         NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode);
 
         _cts.Cancel();
@@ -568,9 +580,9 @@ public sealed partial class TerminalLogger : INodeLogger
     #region Logger callbacks
 
     /// <summary>
-    /// The <see cref="IEventSource.BuildStarted"/> callback.
+    /// The tracked build-start callback.
     /// </summary>
-    private void BuildStarted(object sender, BuildStartedEventArgs e)
+    private void OnBuildStarted(BuildEventTracker.BuildStartedSnapshot _)
     {
         if (!_manualRefresh && _showNodesDisplay)
         {
@@ -579,8 +591,6 @@ public sealed partial class TerminalLogger : INodeLogger
             _refresher.Start();
         }
 
-        _buildStartTime = e.Timestamp;
-
         if (Terminal.SupportsProgressReporting && Verbosity != LoggerVerbosity.Quiet)
         {
             Terminal.Write(AnsiCodes.SetProgressIndeterminate);
@@ -588,9 +598,9 @@ public sealed partial class TerminalLogger : INodeLogger
     }
 
     /// <summary>
-    /// The <see cref="IEventSource.BuildFinished"/> callback.
+    /// The tracked build-finished callback.
     /// </summary>
-    private void BuildFinished(object sender, BuildFinishedEventArgs e)
+    private void OnBuildFinished(BuildEventTracker.BuildFinishedSnapshot build)
     {
         _cts.Cancel();
         _refresher?.Join();
@@ -600,8 +610,8 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             if (Verbosity > LoggerVerbosity.Quiet)
             {
-                string duration = (e.Timestamp - _buildStartTime).TotalSeconds.ToString("F1");
-                string buildResult = GetBuildResultString(e.Succeeded, _buildErrorsCount, _buildWarningsCount);
+                string duration = build.Duration.TotalSeconds.ToString("F1");
+                string buildResult = GetBuildResultString(build.Succeeded, _buildErrorsCount, _buildWarningsCount);
 
                 Terminal.WriteLine("");
                 if (_testRunSummaries.Any())
@@ -710,7 +720,7 @@ public sealed partial class TerminalLogger : INodeLogger
         Terminal.WriteLine(string.Empty);
     }
 
-    private void StatusEventRaised(object sender, BuildStatusEventArgs e)
+    private void StatusEventRaised(BuildStatusEventArgs e)
     {
         switch (e)
         {
@@ -720,7 +730,6 @@ public sealed partial class TerminalLogger : INodeLogger
             case ProjectEvaluationStartedEventArgs _evalStart:
                 break;
             case ProjectEvaluationFinishedEventArgs evalFinish:
-                CaptureEvalContext(evalFinish);
                 break;
             case LoggersRegisteredEventArgs loggerEvent:
                 _registeredLoggers.AddRange(loggerEvent.Loggers);
@@ -729,45 +738,36 @@ public sealed partial class TerminalLogger : INodeLogger
     }
 
     /// <summary>
-    /// The <see cref="IEventSource.ProjectStarted"/> callback.
+    /// The tracked project-start callback.
     /// </summary>
-    private void ProjectStarted(object sender, ProjectStartedEventArgs e)
+    private void OnProjectStarted(BuildEventTracker.ProjectStartedSnapshot project)
     {
-        if (e.BuildEventContext is null)
-        {
-            return;
-        }
-
-        ProjectContext c = new(e.BuildEventContext);
+        ProjectContext c = new(project.ProjectContextId);
 
         if (_restoreContext is null)
         {
-            EvalContext evalContext = new(e.BuildEventContext);
-            string? targetFramework = null;
-            string? runtimeIdentifier = null;
-            
-            if (_projectEvaluations.TryGetValue(evalContext, out EvalProjectInfo evalInfo))
-            {
-                targetFramework = evalInfo.TargetFramework;
-                runtimeIdentifier = evalInfo.RuntimeIdentifier;
-            }
+            EvalProjectInfo evalInfo = new(
+                new EvalContext(project.EvaluationId),
+                project.EvaluationProjectFile,
+                project.TargetFramework,
+                project.RuntimeIdentifier);
 
             // Per-project metaproj files (e.g. MyProject.csproj.metaproj) are constructed
             // directly without evaluation, so they won't have a matching ProjectEvaluationFinished event.
             System.Diagnostics.Debug.Assert(
-                evalInfo != default || FileUtilities.IsMetaprojectFilename(e.ProjectFile),
+                evalInfo != default || FileUtilities.IsMetaprojectFilename(project.ProjectFile),
                 "EvalProjectInfo should have been captured before ProjectStarted");
 
             TerminalProjectInfo projectInfo = new(c, evalInfo, _createStopwatch?.Invoke());
             _projects[c] = projectInfo;
 
             // First ever restore in the build is starting.
-            if (e.TargetNames == "Restore" && !_restoreFinished)
+            if (project.TargetNames == "Restore" && !_restoreFinished)
             {
                 _restoreContext = c;
-                int nodeIndex = NodeIndexForContext(e.BuildEventContext);
+                int nodeIndex = project.NodeId - 1;
                 EnsureNodeCapacity(nodeIndex);
-                _nodes[nodeIndex] = new TerminalNodeStatus(e.ProjectFile!, targetFramework, runtimeIdentifier, "Restore", _projects[c].Stopwatch);
+                _nodes[nodeIndex] = new TerminalNodeStatus(project.ProjectFile!, project.TargetFramework, project.RuntimeIdentifier, "Restore", _projects[c].Stopwatch);
             }
         }
     }
@@ -775,7 +775,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// The <see cref="IEventSource.ProjectFinished"/> callback.
     /// </summary>
-    private void ProjectFinished(object sender, ProjectFinishedEventArgs e)
+    private void ProjectFinished(ProjectFinishedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
         if (buildEventContext is null)
@@ -1052,7 +1052,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// The <see cref="IEventSource.TargetStarted"/> callback.
     /// </summary>
-    private void TargetStarted(object sender, TargetStartedEventArgs e)
+    private void TargetStarted(TargetStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
         if (_restoreContext is null && buildEventContext is not null && _projects.TryGetValue(new ProjectContext(buildEventContext), out TerminalProjectInfo? project))
@@ -1116,7 +1116,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// The <see cref="IEventSource.TargetFinished"/> callback. Unused.
     /// </summary>
-    private void TargetFinished(object sender, TargetFinishedEventArgs e)
+    private void TargetFinished(TargetFinishedEventArgs e)
     {
         // For cache plugin projects which result in a cache hit, ensure the output path is set
         // to the item spec corresponding to the GetTargetPath target upon completion.
@@ -1156,7 +1156,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// The <see cref="IEventSource.TaskStarted"/> callback.
     /// </summary>
-    private void TaskStarted(object sender, TaskStartedEventArgs e)
+    private void TaskStarted(TaskStartedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
         if (_restoreContext is null && buildEventContext is not null && e.TaskName == MSBuildTaskName)
@@ -1174,7 +1174,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// The <see cref="IEventSource.TaskFinished"/> callback.
     /// </summary>
-    private void TaskFinished(object sender, TaskFinishedEventArgs e)
+    private void TaskFinished(TaskFinishedEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
         if (_restoreContext is null && buildEventContext is not null && e.TaskName == MSBuildTaskName
@@ -1193,7 +1193,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// The <see cref="IEventSource.MessageRaised"/> callback.
     /// </summary>
-    private void MessageRaised(object sender, BuildMessageEventArgs e)
+    private void MessageRaised(BuildMessageEventArgs e)
     {
         var buildEventContext = e.BuildEventContext;
         if (buildEventContext is null)
@@ -1352,7 +1352,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// The <see cref="IEventSource.WarningRaised"/> callback.
     /// </summary>
-    private void WarningRaised(object sender, BuildWarningEventArgs e)
+    private void WarningRaised(BuildWarningEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
 
@@ -1441,7 +1441,7 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <summary>
     /// The <see cref="IEventSource.ErrorRaised"/> callback.
     /// </summary>
-    private void ErrorRaised(object sender, BuildErrorEventArgs e)
+    private void ErrorRaised(BuildErrorEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
 
