@@ -1059,6 +1059,10 @@ namespace Microsoft.Build.BackEnd
                 _writeTranslator = BinaryTranslator.GetWriteTranslator(_writeBufferMemoryStream);
                 _terminateDelegate = terminateDelegate;
                 _handshakeOptions = handshakeOptions;
+
+                // A sidecar is a TaskHost launched with node reuse: that pairing is what makes it
+                // long-lived and connected to this process across builds.
+                _isSidecar = Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse);
                 _negotiatedPacketVersion = negotiatedVersion;
 #if FEATURE_APM
                 _headerReadCompleteCallback = HeaderReadComplete;
@@ -1083,15 +1087,20 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             public int NodeId => _nodeId;
 
-            private bool IsOwnedSidecarTaskHost =>
-                Handshake.IsHandshakeOptionEnabled(_handshakeOptions, HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse);
+            /// <summary>
+            /// Whether this connection is to a sidecar TaskHost: a long-lived TaskHost that stays
+            /// connected across its owner's builds instead of exiting when a build finishes.
+            /// Decided once when the context is created rather than re-derived from wire state.
+            /// </summary>
+            private readonly bool _isSidecar;
 
             /// <summary>
-            /// A sidecar TaskHost is owned by this process and stays connected across reusable
-            /// builds, so its reset acknowledgement must not tear the connection down.
+            /// A sidecar answers a reusable build completion in place and stays connected, so that
+            /// acknowledgement must not be mistaken for it shutting down and tear the connection
+            /// down. Once a terminal exit packet has been sent it really is shutting down.
             /// </summary>
-            private bool ShouldKeepConnectionAfterNodeShutdown =>
-                IsOwnedSidecarTaskHost && _exitPacketState == ExitPacketState.None;
+            private bool IsSidecarResetAcknowledgement =>
+                _isSidecar && _exitPacketState == ExitPacketState.None;
 
             /// <summary>
             /// Starts a new asynchronous read operation for this node.
@@ -1168,7 +1177,7 @@ namespace Microsoft.Build.BackEnd
                         return;
                     }
 
-                    if (packetType == NodePacketType.NodeShutdown && !ShouldKeepConnectionAfterNodeShutdown)
+                    if (packetType == NodePacketType.NodeShutdown && !IsSidecarResetAcknowledgement)
                     {
                         Close();
                         return;
@@ -1322,11 +1331,11 @@ namespace Microsoft.Build.BackEnd
                             // Do nothing here because any exception will be caught by the async read handler
                         }
 
-                        // A sidecar TaskHost keeps this connection across reusable builds. Every other
+                        // A sidecar keeps this connection across reusable builds. Every other
                         // NodeBuildComplete ends the connection, so the drain thread must terminate even when
                         // writing the packet threw; otherwise it would block forever and leak the NodeContext.
                         if (packet is NodeBuildComplete buildComplete &&
-                            (!IsOwnedSidecarTaskHost || !buildComplete.PrepareForReuse))
+                            (!_isSidecar || !buildComplete.PrepareForReuse))
                         {
                             if (IsExitPacket(packet))
                             {
@@ -1575,7 +1584,7 @@ namespace Microsoft.Build.BackEnd
                     return;
                 }
 
-                if (packetType != NodePacketType.NodeShutdown || ShouldKeepConnectionAfterNodeShutdown)
+                if (packetType != NodePacketType.NodeShutdown || IsSidecarResetAcknowledgement)
                 {
                     // Read the next packet.
                     BeginAsyncPacketRead();

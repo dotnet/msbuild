@@ -1352,6 +1352,14 @@ namespace Microsoft.Build.CommandLine
         /// Disposes build-scoped state so this sidecar can serve the next build of its owner
         /// without being torn down and relaunched.
         /// </summary>
+        /// <remarks>
+        /// A TaskHost used to serve exactly one build: <see cref="XMake"/> constructed a fresh node
+        /// per build, so build state was reset by construction and no field could be missed. A
+        /// sidecar keeps its connection across builds and tearing the node down would tear that
+        /// connection down with it, so it resets in place instead. Every field added to this class
+        /// therefore has to be classified: build-scoped fields must be reset here, or their values
+        /// leak into the next, unrelated build served by this same process.
+        /// </remarks>
         private void PrepareForNextBuild()
         {
             Assumed.Zero(_activeTaskCount, "A sidecar TaskHost cannot reset while a task is executing.");

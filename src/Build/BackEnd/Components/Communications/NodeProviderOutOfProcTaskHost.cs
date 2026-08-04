@@ -212,8 +212,8 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// How long to wait for owned nodes to acknowledge shutdown before giving up on them. A
-        /// sidecar that has already died, or is wedged, will never acknowledge, and shutdown must
+        /// How long to wait for sidecars to acknowledge build completion before giving up on them.
+        /// A sidecar that has already died, or is wedged, will never acknowledge, and its owner must
         /// not block on it. Matches <c>NodeProviderOutOfProcBase.TimeoutForWaitForExit</c>.
         /// </summary>
         private const int TimeoutForNodeShutdown = 30000;
@@ -224,23 +224,14 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>
         public void ShutdownConnectedNodes(bool enableReuse)
         {
-            List<NodeContext> contextsToShutDown;
-            lock (_activeNodes)
-            {
-                contextsToShutDown = _nodeContexts.Values.Where(context => _activeNodes.Contains(context.NodeId)).ToList();
-            }
-
-            if (contextsToShutDown.Count == 0)
-            {
-                return;
-            }
-
             // Send the build completion message to the nodes, causing them to shutdown or reset.
+            List<NodeContext> contextsToShutDown = [.. _nodeContexts.Values];
+
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
 
-            // Bounded so a sidecar that dies or wedges while acknowledging cannot hang the build it
-            // just finished. An owned sidecar now replies in place rather than disconnecting, so the
-            // acknowledgement is the only signal that ends this wait.
+            // Bounded: a sidecar acknowledges in place instead of disconnecting, so that
+            // acknowledgement is the only thing that ends this wait, and one that died or wedged
+            // while acknowledging would otherwise hang its owner.
             _noNodesActiveEvent.WaitOne(TimeoutForNodeShutdown);
         }
 
@@ -249,46 +240,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
-            ShutdownOwnedNodes();
+            // Sidecars stay connected between builds, so they are reachable here and are not found
+            // by the scan below, which looks for nodes this process is not connected to.
+            ShutdownConnectedNodes(enableReuse: false);
 
-            // TaskHosts that are not connected to this process (legacy pooled hosts) still need the scan.
-            // If no BuildParameters were specified, this call is shutting down idle nodes left over from
-            // some other, completed build, which must have been started with node reuse. Mirrors the
-            // guard in NodeProviderOutOfProc.ShutdownAllNodes, and is required because this method is
-            // now reachable from BuildManager.ShutdownAllNodes before any build has run.
-            bool nodeReuse = ComponentHost.BuildParameters?.EnableNodeReuse ?? true;
-            ShutdownAllNodes(nodeReuse, NodeContextTerminated);
-        }
-
-        /// <summary>
-        /// Shuts down the TaskHosts this process owns, using the connections it already holds.
-        /// </summary>
-        /// <remarks>
-        /// Deliberately does not scan the machine for other nodes. Owned sidecars are reachable over
-        /// their retained connections, which is what makes shutdown deterministic and keeps it fast
-        /// enough to run while an owner is exiting.
-        /// </remarks>
-        internal void ShutdownOwnedNodes()
-        {
-            List<NodeContext> contextsToShutDown = [];
-            foreach (NodeContext context in _nodeContexts.Values)
-            {
-                if (MarkNodeActive(context))
-                {
-                    contextsToShutDown.Add(context);
-                }
-            }
-
-            if (contextsToShutDown.Count == 0)
-            {
-                return;
-            }
-
-            ShutdownConnectedNodes(contextsToShutDown, enableReuse: false);
-
-            // Bounded: this set can include nodes that were idle rather than serving a build, and
-            // an idle node whose process is already gone never acknowledges.
-            _noNodesActiveEvent.WaitOne(TimeoutForNodeShutdown);
+            ShutdownAllNodes(ComponentHost.BuildParameters.EnableNodeReuse, NodeContextTerminated);
         }
         #endregion
 
@@ -694,40 +650,54 @@ namespace Microsoft.Build.BackEnd
             hostProcessId = -1;
             wasNewlyCreated = false;
 
-            if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
+            bool nodeCreationSucceeded;
+            if (!_nodeContexts.ContainsKey(nodeKey))
             {
                 wasNewlyCreated = true;
-                if (!CreateNode(nodeKey, factory, handler, configuration, taskHostParameters) ||
-                    !_nodeContexts.TryGetValue(nodeKey, out context))
+                nodeCreationSucceeded = CreateNode(nodeKey, factory, handler, configuration, taskHostParameters);
+            }
+            else
+            {
+                // node already exists, so "creation" automatically succeeded
+                nodeCreationSucceeded = true;
+            }
+
+            if (nodeCreationSucceeded)
+            {
+                if (!_nodeContexts.TryGetValue(nodeKey, out NodeContext context))
                 {
                     return false;
                 }
+
+                // A sidecar retained from an earlier build is idle, so re-activate it: shutdown
+                // waits only for nodes marked active, and would otherwise not wait for this one.
+                if (!TryActivateNode(context))
+                {
+                    return false;
+                }
+
+                Stack<INodePacketHandler> handlerStack = _nodeIdToPacketHandlerStack.GetOrAdd(context.NodeId, _ => new Stack<INodePacketHandler>());
+                lock (handlerStack)
+                {
+                    handlerStack.Push(handler);
+                }
+
+                try
+                {
+                    hostProcessId = context.Process?.Id ?? -1;
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    // Process has already exited or is otherwise inaccessible; PID is unavailable.
+                    hostProcessId = -1;
+                }
+
+                // Configure the node.
+                context.SendData(configuration);
+                return true;
             }
 
-            if (!MarkNodeActive(context))
-            {
-                return false;
-            }
-
-            Stack<INodePacketHandler> handlerStack = _nodeIdToPacketHandlerStack.GetOrAdd(context.NodeId, _ => new Stack<INodePacketHandler>());
-            lock (handlerStack)
-            {
-                handlerStack.Push(handler);
-            }
-
-            try
-            {
-                hostProcessId = context.Process?.Id ?? -1;
-            }
-            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
-            {
-                // Process has already exited or is otherwise inaccessible; PID is unavailable.
-                hostProcessId = -1;
-            }
-
-            // Configure the node.
-            context.SendData(configuration);
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -922,13 +892,20 @@ namespace Microsoft.Build.BackEnd
             _nodeContexts[nodeKey] = context;
             _nodeIdToNodeKey[context.NodeId] = nodeKey;
 
-            MarkNodeActive(context);
+            TryActivateNode(context);
 
             // Start the asynchronous read.
             context.BeginAsyncPacketRead();
         }
 
-        private bool MarkNodeActive(NodeContext context)
+        /// <summary>
+        /// Marks a node as participating in the current build, so that shutdown waits for it.
+        /// </summary>
+        /// <returns>
+        /// <see langword="false"/> if the node is no longer tracked, meaning its process went away
+        /// between being looked up and being used, in which case the caller must not use it.
+        /// </returns>
+        private bool TryActivateNode(NodeContext context)
         {
             lock (_activeNodes)
             {

@@ -1509,25 +1509,6 @@ namespace Microsoft.Build.Execution
 
             _nodeManager ??= (INodeManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager);
             _nodeManager.ShutdownAllNodes();
-
-            // Sidecars are owned by whichever process launched them, so shutting down "all nodes"
-            // has to reach this process's own sidecars, which no scan would find. Only the owned
-            // ones: the machine-wide scan above is shared by both providers and already covers
-            // legacy pooled TaskHosts, and an owned sidecar cannot outlive its owner, so there is
-            // never a stale one left on the machine for a later shutdown to hunt for.
-            ShutdownOwnedTaskHostNodes();
-        }
-
-        /// <summary>
-        /// Shuts down the sidecar TaskHost nodes owned by this process, without scanning for
-        /// unrelated nodes. Used when the owner is exiting and must take its children with it.
-        /// </summary>
-        internal void ShutdownOwnedTaskHostNodes()
-        {
-            // The caller only invokes this after its final build callback has returned, so no new build can start.
-            // Deliberately not ShutdownAllNodes: that also scans the machine for unrelated TaskHosts,
-            // which an exiting owner has no reason to do and not enough time to finish.
-            (_taskHostNodeManager as TaskHostNodeManager)?.ShutdownOwnedNodes();
         }
 
         /// <summary>
