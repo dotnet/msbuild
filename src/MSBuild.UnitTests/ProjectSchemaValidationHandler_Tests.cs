@@ -287,7 +287,6 @@ namespace Microsoft.Build.UnitTests
             string projectFilename = CreateTempFileOnDisk(@"
                     <Project xmlns=`msbuildnamespace`>
                         <Sdk Name=`Microsoft.NET.Sdk` Version=`1.0.0` MinimumVersion=`1.0.0` />
-                        <Target Name=`Build` />
                         <Sdk Name=`Some.Other.Sdk` />
                     </Project>
                     ");
