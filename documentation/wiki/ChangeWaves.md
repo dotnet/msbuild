@@ -41,7 +41,7 @@ Change wave checks around features will be removed in the release that accompani
 - [Restore no longer discards a ProjectRootElementCache that reloads changed files from disk, so the build that follows an implicit restore does not re-parse the import closure.](https://github.com/dotnet/msbuild/pull/14558)
 - [Use optimized MSBuild file specification matching and enumeration](https://github.com/dotnet/msbuild/pull/14663). Regex-backed file globs use culture-invariant case folding; set `MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS=1` to preserve legacy current-culture folding without disabling other Wave 18.11 features.
 - [Isolated (`-graph -isolate`) builds fail deterministically with MSB4252 on a cross-project reference to a target that is not declared via `ProjectReferenceTargets`, instead of passing if the referenced project happened to build on that node previously.](https://github.com/dotnet/msbuild/pull/14280)
-- RAR aggregates rejected assembly candidates into one structured search event per reference, reducing binary-log size while preserving diagnostic detail. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.11` to retain individual candidate messages.
+- RAR writes one structured search event for each reference instead of one message for each rejected assembly candidate. This change reduces binary-log size and preserves the diagnostic text. Loggers receive one multiline message for each reference. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.11` to retain individual candidate messages.
 
 ### 18.10
 - [Resolve relative project paths against the Unix logical current directory from `PWD`, so builds under symlinked directories produce stable project full paths and related output paths.](https://github.com/dotnet/msbuild/pull/13752)
