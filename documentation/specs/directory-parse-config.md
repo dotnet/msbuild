@@ -56,6 +56,8 @@ Generic names for dynamically-named elements:
 | `Parameter` | Any parameter element in a `ParameterGroup` inside `UsingTask` |
 | `UsingTaskBody` | The `Task` element inside `UsingTask` |
 
+Note: `Item` only applies to attributes with leading underscores as any other attributes are interpreted as metadata names.
+
 ### Valid `IgnoreChildren` Elements
 
 The `Element` attribute in `<IgnoreChildren>` entries can be:
