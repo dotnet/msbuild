@@ -30,7 +30,6 @@ dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark*"
 ```
 dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark.IncludeOnly"
 ```
-
 ## Command-Line Options
 
 ### Custom Options
