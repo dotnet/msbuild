@@ -18,11 +18,9 @@ using Xunit;
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     /// <summary>
-    /// Tests for the structured (behind <see cref="ChangeWaves.Wave18_11"/>) representation of RAR's assembly
-    /// version conflict diagnostics: the MSB3277 warning (<see cref="AssemblyConflictWarningEventArgs"/>) and the
-    /// low-importance dependency-details message (<see cref="AssemblyConflictDependencyDetailsMessageEventArgs"/>).
-    /// Both replace what used to be enormous, eagerly-formatted dependency-list strings built directly into
-    /// <c>LogResults</c>/<c>LogConflict</c>.
+    /// Tests RAR's structured assembly-conflict events behind <see cref="ChangeWaves.Wave18_11"/>.
+    /// The events replace large preformatted dependency-list strings.
+    /// The events include the MSB3277 warning and the low-importance dependency details.
     /// </summary>
     public sealed class AssemblyConflictLogging_Tests : ResolveAssemblyReferenceTestFixture
     {
@@ -32,9 +30,9 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Reproduces the "D1 (primary) vs D2 (dependency of B)" conflict scenario used by the legacy
-        /// <c>ConflictGeneratesMessageReferencingAssemblyName</c> test. This conflict produces the aggregated
-        /// MSB3277 warning path (<c>logWarning == true</c>).
+        /// Reproduces the D1 primary-reference conflict with the D2 dependency of B.
+        /// The legacy <c>ConflictGeneratesMessageReferencingAssemblyName</c> test uses this scenario.
+        /// This conflict produces the aggregated MSB3277 warning.
         /// </summary>
         private ResolveAssemblyReference CreateWarningConflictTask(MockEngine engine) => new()
         {
@@ -52,9 +50,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         };
 
         /// <summary>
-        /// Reproduces the primary-unresolved-reference conflict scenario used by the legacy
-        /// <c>ConflictBetweenCopyLocalDependenciesRegress444809UnResolvedPrimaryReference</c> test. This conflict
-        /// produces the standalone (non-warning) dependency-details message path (<c>logWarning == false</c>).
+        /// Reproduces the unresolved primary-reference conflict from the legacy regression test.
+        /// This conflict produces a standalone dependency-details message without an MSB3277 warning.
         /// </summary>
         private ResolveAssemblyReference CreateMessageConflictTask(MockEngine engine, bool useEscapedPrimaryItem = false) => new()
         {
@@ -96,8 +93,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             structuredEngine.Warnings.ShouldBe(1);
             legacyEngine.Warnings.ShouldBe(1);
 
-            // The rendered warning text must be byte-for-byte identical regardless of whether the structured
-            // representation is used, since only the underlying event shape changed.
+            // Verify that the structured event does not change the warning text.
             structuredEngine.WarningEvents[0].Message.ShouldBe(legacyEngine.WarningEvents[0].Message);
             structuredEngine.WarningEvents[0].Code.ShouldBe(legacyEngine.WarningEvents[0].Code);
 
@@ -109,7 +105,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             structuredWarning.Victor.Dependees.ShouldNotBeEmpty();
             structuredWarning.Victim.Dependees.ShouldNotBeEmpty();
 
-            // The legacy path never raises the structured type.
+            // Verify that the legacy path does not log the structured event type.
             legacyEngine.WarningEvents[0].ShouldNotBeOfType<AssemblyConflictWarningEventArgs>();
         }
 
@@ -141,9 +137,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             MockEngine structuredEngine = RunWithWaveState(waveEnabled: true, engine => CreateMessageConflictTask(engine));
             MockEngine legacyEngine = RunWithWaveState(waveEnabled: false, engine => CreateMessageConflictTask(engine));
 
-            // This scenario's conflict is resolved without an MSB3277 warning (no reference is left unresolvable);
-            // an unrelated MSB3245 warning about the unresolved primary reference to "A" may still be present in
-            // both runs, but neither run should produce the aggregated conflict warning.
+            // This conflict does not produce MSB3277 because RAR resolves the conflict.
+            // Both runs can contain an unrelated MSB3245 warning for the unresolved primary reference to A.
             structuredEngine.WarningEvents.ShouldNotContain(w => w.Code == "MSB3277");
             legacyEngine.WarningEvents.ShouldNotContain(w => w.Code == "MSB3277");
 
@@ -154,9 +149,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             detailsEvent.Victor.Dependees.ShouldNotBeEmpty();
             detailsEvent.Victim.Dependees.ShouldNotBeEmpty();
 
-            // The rendered dependency-details text must match the legacy plain-message rendering exactly. The
-            // legacy low-importance message carrying this content is identified by its distinctive "source items"
-            // text (produced by LogDependeeReferenceToStringBuilder), since RAR also logs other Low messages.
+            // Identify the legacy message by the source-item text because RAR logs other low-importance messages.
+            // Verify that the structured event produces the same dependency-details text.
             BuildMessageEventArgs legacyDetails = legacyEngine.MessageEvents
                 .Where(m => m.Importance == MessageImportance.Low
                     && m.Message != null
