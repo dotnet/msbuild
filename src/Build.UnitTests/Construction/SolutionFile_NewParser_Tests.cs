@@ -3,6 +3,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
@@ -120,6 +121,93 @@ namespace Microsoft.Build.UnitTests.Construction
             aspNetProjectReferences.Count.ShouldBe(2);
             aspNetProjectReferences[0].ShouldBe("{FD705688-88D1-4C22-9BFF-86235D89C2FC}");
             aspNetProjectReferences[1].ShouldBe("{F0726D09-042B-4A7A-8A01-6BED2422BD5D}");
+        }
+
+        /// <summary>
+        /// The solution configurations must be returned in the order in which the solution file declares them, even
+        /// when the first project doesn't map every solution configuration. Otherwise the default configuration and
+        /// platform - which are used when none is specified on the command line - would depend on the order in which
+        /// the projects happen to declare their own configurations.
+        /// </summary>
+        [Fact]
+        public void SolutionConfigurationsAreOrderedByTheSolutionAndNotByTheProjects()
+        {
+            string solutionFileContents =
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{11111111-1111-1111-1111-111111111111}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary2', 'ClassLibrary2\ClassLibrary2.csproj', '{22222222-2222-2222-2222-222222222222}'
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|x86 = Debug|x86
+                        Debug|x64 = Debug|x64
+                        Release|x86 = Release|x86
+                        Release|x64 = Release|x64
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {11111111-1111-1111-1111-111111111111}.Debug|x64.ActiveCfg = Debug|x64
+                        {11111111-1111-1111-1111-111111111111}.Release|x86.ActiveCfg = Release|x86
+                        {11111111-1111-1111-1111-111111111111}.Release|x64.ActiveCfg = Release|x64
+                        {22222222-2222-2222-2222-222222222222}.Debug|x86.ActiveCfg = Debug|x86
+                        {22222222-2222-2222-2222-222222222222}.Debug|x64.ActiveCfg = Debug|x64
+                        {22222222-2222-2222-2222-222222222222}.Release|x86.ActiveCfg = Release|x86
+                        {22222222-2222-2222-2222-222222222222}.Release|x64.ActiveCfg = Release|x64
+                    EndGlobalSection
+                EndGlobal
+                """;
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents);
+
+            solution.SolutionConfigurations.Select(configuration => configuration.FullName)
+                .ShouldBe(["Debug|x86", "Debug|x64", "Release|x86", "Release|x64"]);
+
+            solution.GetDefaultConfigurationName().ShouldBe("Debug");
+            solution.GetDefaultPlatformName().ShouldBe("x86");
+        }
+
+        /// <summary>
+        /// Solution configurations parsed from a .slnx file must be deterministic too. The solution model normalizes
+        /// the order of the build types and platforms declared in a .slnx file, so the solution configurations follow
+        /// that normalized order rather than the order in which the projects declare their own configurations.
+        /// </summary>
+        [Fact]
+        public void SolutionConfigurationsFromSlnxAreOrderedByTheSolutionAndNotByTheProjects()
+        {
+            string solutionFileContents =
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary1', 'ClassLibrary1\ClassLibrary1.csproj', '{11111111-1111-1111-1111-111111111111}'
+                EndProject
+                Project('{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}') = 'ClassLibrary2', 'ClassLibrary2\ClassLibrary2.csproj', '{22222222-2222-2222-2222-222222222222}'
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|x86 = Debug|x86
+                        Debug|x64 = Debug|x64
+                        Release|x86 = Release|x86
+                        Release|x64 = Release|x64
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {11111111-1111-1111-1111-111111111111}.Debug|x64.ActiveCfg = Debug|x64
+                        {11111111-1111-1111-1111-111111111111}.Release|x86.ActiveCfg = Release|x86
+                        {11111111-1111-1111-1111-111111111111}.Release|x64.ActiveCfg = Release|x64
+                        {22222222-2222-2222-2222-222222222222}.Debug|x86.ActiveCfg = Debug|x86
+                        {22222222-2222-2222-2222-222222222222}.Debug|x64.ActiveCfg = Debug|x64
+                        {22222222-2222-2222-2222-222222222222}.Release|x86.ActiveCfg = Release|x86
+                        {22222222-2222-2222-2222-222222222222}.Release|x64.ActiveCfg = Release|x64
+                    EndGlobalSection
+                EndGlobal
+                """;
+
+            SolutionFile solution = ParseSolutionHelper(solutionFileContents, convertToSlnx: true);
+
+            solution.SolutionConfigurations.Select(configuration => configuration.FullName)
+                .ShouldBe(["Debug|x64", "Debug|x86", "Release|x64", "Release|x86"]);
+
+            solution.GetDefaultConfigurationName().ShouldBe("Debug");
+            solution.GetDefaultPlatformName().ShouldBe("x64");
         }
 
         /// <summary>

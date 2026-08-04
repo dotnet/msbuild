@@ -113,8 +113,8 @@ namespace Microsoft.Build.Construction
         // The list of projects in the SLN, in order of their appearance in the SLN.
         private List<ProjectInSolution> _projectsInOrder;
 
-        // The list of solution configurations in the solution
-        private Dictionary<string, SolutionConfigurationInSolution> _solutionConfigurationsByFullName;
+        // The list of solution configurations in the solution, in the order they were added.
+        private List<SolutionConfigurationInSolution> _solutionConfigurations;
 
         // cached default configuration name for GetDefaultConfigurationName
         private string _defaultConfigurationName;
@@ -269,7 +269,8 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// The list of all full solution configurations (configuration + platform) in this solution
         /// </summary>
-        public IReadOnlyList<SolutionConfigurationInSolution> SolutionConfigurations => _solutionConfigurationsByFullName.Values.ToList().AsReadOnly();
+        /// <remarks>The configurations are returned in a stable order determined by the solution file.</remarks>
+        public IReadOnlyList<SolutionConfigurationInSolution> SolutionConfigurations => _solutionConfigurations.AsReadOnly();
 
         #endregion
 
@@ -357,13 +358,20 @@ namespace Microsoft.Build.Construction
             ContainsWebProjects = false;
             Version = 0;
             _currentLineNumber = 0;
-            _solutionConfigurationsByFullName = new Dictionary<string, SolutionConfigurationInSolution>();
+            _solutionConfigurations = new List<SolutionConfigurationInSolution>();
             _defaultConfigurationName = null;
             _defaultPlatformName = null;
 
             _currentVisualStudioVersion = solutionModel.VisualStudioProperties.Version;
 
-            ReadProjects(solutionModel);
+            // Tracks the solution configurations that at least one project maps to. The solution configurations
+            // themselves are added afterwards so that their order doesn't depend on the order in which the projects
+            // happen to declare them.
+            HashSet<string> projectMappedConfigurations = new HashSet<string>(StringComparer.Ordinal);
+
+            ReadProjects(solutionModel, projectMappedConfigurations);
+
+            ReadSolutionConfigurations(solutionModel, projectMappedConfigurations);
 
             // We need to save the solution folders in order to cache the unique project names and check for duplicates.
             ReadSolutionFolders(solutionModel);
@@ -376,7 +384,27 @@ namespace Microsoft.Build.Construction
             CacheUniqueProjectNamesAndCheckForDuplicates();
         }
 
-        private void ReadProjects(SolutionModel solutionModel)
+        /// <summary>
+        /// There are no solution configurations in the new parser. Instead we collect them from each project's
+        /// configurations. The solution model reports the build types and platforms in a stable order, so we
+        /// enumerate those instead of the projects to make the resulting order deterministic, and thus to make
+        /// <see cref="GetDefaultConfigurationName" /> and <see cref="GetDefaultPlatformName" /> deterministic too.
+        /// </summary>
+        private void ReadSolutionConfigurations(SolutionModel solutionModel, HashSet<string> projectMappedConfigurations)
+        {
+            foreach (string buildType in solutionModel.BuildTypes)
+            {
+                foreach (string platform in solutionModel.Platforms)
+                {
+                    if (projectMappedConfigurations.Contains(SolutionConfigurationInSolution.ComputeFullName(buildType, platform)))
+                    {
+                        AddSolutionConfiguration(buildType, platform);
+                    }
+                }
+            }
+        }
+
+        private void ReadProjects(SolutionModel solutionModel, HashSet<string> projectMappedConfigurations)
         {
             foreach (SolutionProjectModel projectModel in solutionModel.SolutionProjects)
             {
@@ -404,7 +432,7 @@ namespace Microsoft.Build.Construction
                     proj.ParentProjectGuid = ToProjectGuidFormat(projectModel.Parent.Id);
                 }
 
-                SetProjectConfigurations(proj, projectModel, solutionModel.BuildTypes, solutionModel.Platforms);
+                SetProjectConfigurations(proj, projectModel, solutionModel.BuildTypes, solutionModel.Platforms, projectMappedConfigurations);
 
                 // Add the project to the collection
                 AddProjectToSolution(proj);
@@ -458,7 +486,8 @@ namespace Microsoft.Build.Construction
             ProjectInSolution proj,
             SolutionProjectModel projectModel,
             IReadOnlyList<string> buildTypes,
-            IReadOnlyList<string> platforms)
+            IReadOnlyList<string> platforms,
+            HashSet<string> projectMappedConfigurations)
         {
             foreach (string solutionBuildType in buildTypes)
             {
@@ -482,8 +511,7 @@ namespace Microsoft.Build.Construction
 
                     proj.SetProjectConfiguration(configurationName, projectConfiguration);
 
-                    // There are no solution configurations in the new parser. Instead we collect them from each project's configurations.
-                    AddSolutionConfiguration(solutionBuildType, solutionPlatform);
+                    projectMappedConfigurations.Add(configurationName);
                 }
             }
         }
@@ -688,16 +716,23 @@ namespace Microsoft.Build.Construction
         }
 
         /// <summary>
-        /// Adds a configuration to this solution
+        /// Adds a configuration to this solution, preserving the order in which configurations are added.
         /// </summary>
         internal void AddSolutionConfiguration(string configurationName, string platformName)
         {
             var solutionConfiguration = new SolutionConfigurationInSolution(configurationName, platformName);
 
-            if (!_solutionConfigurationsByFullName.ContainsKey(solutionConfiguration.FullName))
+            // The number of solution configurations is small, so a linear search is cheaper than maintaining a
+            // separate lookup, and it keeps the configurations in the order in which they were added.
+            foreach (SolutionConfigurationInSolution existingConfiguration in _solutionConfigurations)
             {
-                _solutionConfigurationsByFullName[solutionConfiguration.FullName] = solutionConfiguration;
+                if (string.Equals(existingConfiguration.FullName, solutionConfiguration.FullName, StringComparison.Ordinal))
+                {
+                    return;
+                }
             }
+
+            _solutionConfigurations.Add(solutionConfiguration);
         }
 
         /// <summary>
@@ -768,7 +803,7 @@ namespace Microsoft.Build.Construction
             ContainsWebProjects = false;
             Version = 0;
             _currentLineNumber = 0;
-            _solutionConfigurationsByFullName = new Dictionary<string, SolutionConfigurationInSolution>();
+            _solutionConfigurations = new List<SolutionConfigurationInSolution>();
             _defaultConfigurationName = null;
             _defaultPlatformName = null;
 
@@ -1754,7 +1789,7 @@ namespace Microsoft.Build.Construction
                 // Solution folders don't have configurations
                 if (project.ProjectType != SolutionProjectType.SolutionFolder)
                 {
-                    foreach (SolutionConfigurationInSolution solutionConfiguration in _solutionConfigurationsByFullName.Values)
+                    foreach (SolutionConfigurationInSolution solutionConfiguration in _solutionConfigurations)
                     {
                         // The "ActiveCfg" entry defines the active project configuration in the given solution configuration
                         // This entry must be present for every possible solution configuration/project combination.
