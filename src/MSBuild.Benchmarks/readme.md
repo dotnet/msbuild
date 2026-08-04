@@ -31,31 +31,6 @@ dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark*"
 dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark.IncludeOnly"
 ```
 
-### Run the Orchard Core Evaluation Benchmarks
-
-Restore an Orchard Core checkout, then pass the path to
-`src/OrchardCore/OrchardCore/OrchardCore.csproj`. The benchmark intentionally does not set
-`TargetFramework`, so it measures the outer cross-targeting evaluation used by the equivalent
-CLI query. It runs only on the .NET Core target and is excluded from ordinary all-benchmark runs
-unless the project path is set.
-
-```powershell
-dotnet run -c Release -f net11.0 -- --filter "*OrchardCoreEvaluationBenchmark*" --orchard-core-project "C:\src\OrchardCore\src\OrchardCore\OrchardCore\OrchardCore.csproj"
-```
-
-```bash
-dotnet run -c Release -f net11.0 -- --filter "*OrchardCoreEvaluationBenchmark*" --orchard-core-project "$HOME/src/OrchardCore/src/OrchardCore/OrchardCore/OrchardCore.csproj"
-```
-
-Each measured method invokes the MSBuild command-line implementation 100 times with either
-`-getProperty:TargetFrameworks` or `-getItem:PackageReference`. Run this same benchmark source on
-the commits being compared: commits before the optimization use their full-evaluation CLI path,
-while commits after the optimization use their partial-evaluation CLI path. BenchmarkDotNet
-reports the normalized cost of one query.
-
-The project path can alternatively be provided through the
-`MSBUILD_BENCHMARK_ORCHARDCORE_PROJECT` environment variable.
-
 ## Command-Line Options
 
 ### Custom Options
@@ -63,7 +38,6 @@ The project path can alternatively be provided through the
 - `--collect-etw` - Enable ETW (Event Tracing for Windows) profiling diagnostics
 - `--disable-ngen` - Disable NGEN/ReadyToRun to measure pure JIT performance
 - `--disable-inlining` - Disable JIT inlining for more accurate method-level profiling
-- `--orchard-core-project <path>` - Project used by `OrchardCoreEvaluationBenchmark`
 
 These custom options can be combined with any BenchmarkDotNet options:
 
