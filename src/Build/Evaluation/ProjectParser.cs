@@ -437,12 +437,19 @@ namespace Microsoft.Build.Construction
 
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
-                ProjectErrorUtilities.VerifyThrowInvalidProject(
-                    childElement.Name == XMakeElements.import,
-                    childElement.Location,
-                    "UnrecognizedChildElement",
-                    childElement.Name,
-                    element.Name);
+                if (childElement.Name != XMakeElements.import)
+                {
+                    if (_unknownElementsConfiguration?.CheckSkipElement(element.Name, childElement.Name) == true)
+                    {
+                        continue;
+                    }
+
+                    ProjectErrorUtilities.ThrowInvalidProject(
+                        childElement.Location,
+                        "UnrecognizedChildElement",
+                        childElement.Name,
+                        element.Name);
+                }
 
                 ProjectImportElement item = ParseProjectImportElement(childElement, importGroup);
 
@@ -567,7 +574,7 @@ namespace Microsoft.Build.Construction
                         foundTaskElement = true;
                         break;
                     default:
-                        if (ProjectXmlUtilities.ThrowIfProjectInvalidChildElement(childElement.Name, "Task", element.Location, _unknownElementsConfiguration))
+                        if (ProjectXmlUtilities.ThrowIfProjectInvalidChildElement(childElement.Name, element.Name, element.Location, _unknownElementsConfiguration))
                         {
                             continue;
                         }
