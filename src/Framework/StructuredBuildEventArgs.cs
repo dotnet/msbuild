@@ -11,19 +11,25 @@ namespace Microsoft.Build.Framework;
 /// Keeps structured message state separate from the general-purpose extended-event contract.
 /// </summary>
 /// <remarks>
-/// These types are internal because loggers consume the stable <see cref="IStructuredBuildEventArgs"/>
-/// contract. Dedicated types let node and binary-log transports serialize ordered values directly
-/// without forcing every extended event to carry structured state or dictionary framing.
+/// Loggers use the stable <see cref="IStructuredBuildEventArgs"/> contract instead of these internal types.
+/// Dedicated types let node and binary-log transports serialize the ordered values directly.
+/// Other extended events do not carry structured state or dictionary framing.
 /// </remarks>
 [Serializable]
 internal sealed class StructuredBuildMessageEventArgs : BuildMessageEventArgs, IStructuredBuildEventArgs
 {
     private StructuredBuildEventState _structuredState;
 
+    /// <summary>
+    /// Creates an empty event for deserialization.
+    /// </summary>
     internal StructuredBuildMessageEventArgs()
     {
     }
 
+    /// <summary>
+    /// Creates a structured message event without creating its display text.
+    /// </summary>
     internal StructuredBuildMessageEventArgs(
         string? subcategory,
         string? code,
@@ -56,19 +62,24 @@ internal sealed class StructuredBuildMessageEventArgs : BuildMessageEventArgs, I
         _structuredState.Set(message, originalFormat, values);
     }
 
+    /// <inheritdoc />
     public string? OriginalFormat => _structuredState.GetOriginalFormat(RawMessage);
 
+    /// <inheritdoc />
     public IReadOnlyList<KeyValuePair<string, string?>>? StructuredValues =>
         _structuredState.StructuredValues;
 
+    /// <inheritdoc />
     public override string? Message => _structuredState.GetFormattedMessage(base.Message);
 
+    /// <inheritdoc />
     internal override void WriteToStream(BinaryWriter writer)
     {
         base.WriteToStream(writer);
         _structuredState.WriteToStream(writer);
     }
 
+    /// <inheritdoc />
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
         base.CreateFromStream(reader, version);
@@ -81,10 +92,16 @@ internal sealed class StructuredBuildWarningEventArgs : BuildWarningEventArgs, I
 {
     private StructuredBuildEventState _structuredState;
 
+    /// <summary>
+    /// Creates an empty event for deserialization.
+    /// </summary>
     internal StructuredBuildWarningEventArgs()
     {
     }
 
+    /// <summary>
+    /// Creates a structured warning event without creating its display text.
+    /// </summary>
     internal StructuredBuildWarningEventArgs(
         string? subcategory,
         string? code,
@@ -117,19 +134,24 @@ internal sealed class StructuredBuildWarningEventArgs : BuildWarningEventArgs, I
         _structuredState.Set(message, originalFormat, values);
     }
 
+    /// <inheritdoc />
     public string? OriginalFormat => _structuredState.GetOriginalFormat(RawMessage);
 
+    /// <inheritdoc />
     public IReadOnlyList<KeyValuePair<string, string?>>? StructuredValues =>
         _structuredState.StructuredValues;
 
+    /// <inheritdoc />
     public override string? Message => _structuredState.GetFormattedMessage(base.Message);
 
+    /// <inheritdoc />
     internal override void WriteToStream(BinaryWriter writer)
     {
         base.WriteToStream(writer);
         _structuredState.WriteToStream(writer);
     }
 
+    /// <inheritdoc />
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
         base.CreateFromStream(reader, version);
@@ -142,10 +164,16 @@ internal sealed class StructuredBuildErrorEventArgs : BuildErrorEventArgs, IStru
 {
     private StructuredBuildEventState _structuredState;
 
+    /// <summary>
+    /// Creates an empty event for deserialization.
+    /// </summary>
     internal StructuredBuildErrorEventArgs()
     {
     }
 
+    /// <summary>
+    /// Creates a structured error event without creating its display text.
+    /// </summary>
     internal StructuredBuildErrorEventArgs(
         string? subcategory,
         string? code,
@@ -178,19 +206,24 @@ internal sealed class StructuredBuildErrorEventArgs : BuildErrorEventArgs, IStru
         _structuredState.Set(message, originalFormat, values);
     }
 
+    /// <inheritdoc />
     public string? OriginalFormat => _structuredState.GetOriginalFormat(RawMessage);
 
+    /// <inheritdoc />
     public IReadOnlyList<KeyValuePair<string, string?>>? StructuredValues =>
         _structuredState.StructuredValues;
 
+    /// <inheritdoc />
     public override string? Message => _structuredState.GetFormattedMessage(base.Message);
 
+    /// <inheritdoc />
     internal override void WriteToStream(BinaryWriter writer)
     {
         base.WriteToStream(writer);
         _structuredState.WriteToStream(writer);
     }
 
+    /// <inheritdoc />
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
         base.CreateFromStream(reader, version);

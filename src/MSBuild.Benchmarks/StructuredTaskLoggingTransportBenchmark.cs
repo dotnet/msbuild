@@ -7,7 +7,7 @@ using Microsoft.Build.Framework;
 namespace MSBuild.Benchmarks;
 
 /// <summary>
-/// Measures dedicated structured event construction and node-packet serialization.
+/// Measures dedicated structured event creation and node-packet serialization.
 /// </summary>
 [MemoryDiagnoser]
 public class StructuredTaskLoggingTransportBenchmark

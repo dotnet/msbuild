@@ -13,34 +13,31 @@ namespace Microsoft.Build.Framework;
 /// Exposes the invariant template and ordered values associated with a structured build event.
 /// </summary>
 /// <remarks>
-/// The structured state is intentionally independent from <see cref="BuildEventArgs.Message"/>.
-/// Loggers often aggregate or filter by template without needing the complete display string, and
-/// <see cref="BuildEventArgs.Message"/> may be materialized lazily. Keeping this contract separate
-/// also prevents lazy message materialization from discarding machine-readable names and values.
+/// The structured state is independent of <see cref="BuildEventArgs.Message"/>.
+/// A logger can group or filter events by template without creating the display text.
+/// This contract also keeps the names and values after a logger reads <see cref="BuildEventArgs.Message"/>.
 /// </remarks>
 public interface IStructuredBuildEventArgs
 {
     /// <summary>
-    /// Gets the invariant message template whose named holes correspond positionally to
-    /// <see cref="StructuredValues"/>.
+    /// Gets the invariant message template.
+    /// Each named hole corresponds to a value at the same position in <see cref="StructuredValues"/>.
     /// </summary>
     /// <remarks>
-    /// This is the structured-logging equivalent of Microsoft.Extensions.Logging's
-    /// <c>{OriginalFormat}</c> convention. It is nullable so consumers can safely probe event types
-    /// that expose the contract before deserialization has populated their structured state.
+    /// This property follows the Microsoft.Extensions.Logging <c>{OriginalFormat}</c> convention.
+    /// The value is null until deserialization supplies the structured state.
     /// </remarks>
     string? OriginalFormat { get; }
 
     /// <summary>
-    /// Gets the ordered, uniquely named values captured for the message template.
-    /// Values are formatted once using the task's current culture before they cross a process boundary.
+    /// Gets the ordered values and their unique names.
+    /// The task formats each value one time with its current culture before transport.
     /// </summary>
     /// <remarks>
-    /// An ordered list preserves the relationship between template occurrences and values without
-    /// depending on dictionary enumeration behavior. Names are unique so consumers may safely build
-    /// a lookup when order is not relevant. Capturing the culture-sensitive text once ensures in-process
-    /// logging and replay render identically. Null values remain null rather than being conflated with an
-    /// empty string.
+    /// The list order preserves the relation between each template hole and its value.
+    /// Unique names let a consumer create a lookup when order is not necessary.
+    /// The formatted value makes in-process output and replay output identical.
+    /// A null value remains different from an empty string.
     /// </remarks>
     IReadOnlyList<KeyValuePair<string, string?>>? StructuredValues { get; }
 }

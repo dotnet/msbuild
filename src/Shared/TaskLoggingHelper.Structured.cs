@@ -33,9 +33,9 @@ namespace Microsoft.Build.Utilities
         /// Wraps a value with an explicit stable name for structured interpolation.
         /// </summary>
         /// <remarks>
-        /// Caller expressions such as <c>project.FullPath</c> are useful defaults but may change
-        /// during refactoring. This wrapper lets callers preserve a stable logging schema without
-        /// reserving any part of the standard interpolation format string.
+        /// Caller expressions such as <c>project.FullPath</c> are useful default names.
+        /// These expressions can change during refactoring.
+        /// This wrapper preserves a stable logging schema without changing the standard interpolation format.
         /// </remarks>
         /// <typeparam name="T">The value type.</typeparam>
         public readonly struct NamedStructuredLogValue<T>
@@ -59,8 +59,8 @@ namespace Microsoft.Build.Utilities
         /// <param name="value">The value.</param>
         /// <returns>The named value.</returns>
         /// <remarks>
-        /// Use this only when the caller expression is not an appropriate long-lived schema name.
-        /// Ordinary expressions should rely on automatic caller-expression capture.
+        /// Use this method when the caller expression is not a stable schema name.
+        /// For other expressions, use automatic caller-expression capture.
         /// </remarks>
         public NamedStructuredLogValue<T> Named<T>(string name, T value) => new(name, value);
 
@@ -68,11 +68,10 @@ namespace Microsoft.Build.Utilities
         /// Builds structured task log messages from C# interpolated strings.
         /// </summary>
         /// <remarks>
-        /// The handler creates two templates for different consumers: a named invariant template
-        /// for structured analysis, and a positional composite template for lazy visible-message
-        /// rendering. Keeping them separate avoids creating the full message unless requested while
-        /// retaining meaningful names in binary logs. The <c>out bool</c> constructor pattern also
-        /// prevents interpolation expressions from being evaluated for disabled messages.
+        /// The handler creates an invariant named template for structured analysis.
+        /// It creates a positional template only when the Change Wave fallback emits an ordinary event.
+        /// Both paths create the complete display text only when a consumer requests it.
+        /// The <c>out bool</c> constructor also prevents evaluation of expressions for disabled messages.
         /// </remarks>
         [InterpolatedStringHandler]
         public ref struct StructuredLogInterpolatedStringHandler
@@ -92,8 +91,8 @@ namespace Microsoft.Build.Utilities
             /// <param name="literalLength">Compiler-provided literal length used only to size buffers.</param>
             /// <param name="formattedCount">Compiler-provided hole count used only to size collections.</param>
             /// <param name="shouldAppend">
-            /// Receives <see langword="true"/> because warnings and errors must reach the engine,
-            /// where suppression and warning-as-error policy are applied.
+            /// Receives <see langword="true"/> because warnings and errors must reach the engine.
+            /// The engine applies suppression and warning-as-error policy.
             /// </param>
             public StructuredLogInterpolatedStringHandler(int literalLength, int formattedCount, out bool shouldAppend)
                 : this(literalLength, formattedCount, enabled: true, out shouldAppend)
@@ -105,10 +104,10 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="literalLength">Compiler-provided literal length used only to size buffers.</param>
             /// <param name="formattedCount">Compiler-provided hole count used only to size collections.</param>
-            /// <param name="logger">The helper whose engine services determine whether the message can be observed.</param>
+            /// <param name="logger">The helper that checks whether a logger can receive the message.</param>
             /// <param name="shouldAppend">
-            /// Receives <see langword="false"/> when no logger can observe a normal-importance
-            /// message, allowing the compiler to skip every interpolation expression.
+            /// Receives <see langword="false"/> when no logger can receive a normal-importance message.
+            /// The compiler then skips all interpolation expressions.
             /// </param>
             public StructuredLogInterpolatedStringHandler(
                 int literalLength,
@@ -124,11 +123,11 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="literalLength">Compiler-provided literal length used only to size buffers.</param>
             /// <param name="formattedCount">Compiler-provided hole count used only to size collections.</param>
-            /// <param name="logger">The helper whose engine services determine whether the message can be observed.</param>
+            /// <param name="logger">The helper that checks whether a logger can receive the message.</param>
             /// <param name="importance">The importance used for the engine visibility check.</param>
             /// <param name="shouldAppend">
-            /// Receives <see langword="false"/> when no logger can observe this importance,
-            /// allowing the compiler to skip every interpolation expression.
+            /// Receives <see langword="false"/> when no logger can receive this importance.
+            /// The compiler then skips all interpolation expressions.
             /// </param>
             public StructuredLogInterpolatedStringHandler(
                 int literalLength,
@@ -177,8 +176,8 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <param name="value">Literal source text supplied by the compiler.</param>
             /// <remarks>
-            /// Braces are escaped in both templates so literal braces cannot later become
-            /// positional or named holes.
+            /// The handler escapes braces in each active template.
+            /// Thus, a literal brace cannot become a positional or named hole.
             /// </remarks>
             public void AppendLiteral(string value)
             {
@@ -201,8 +200,8 @@ namespace Microsoft.Build.Utilities
             /// <typeparam name="T">The value type.</typeparam>
             /// <param name="value">The value to capture.</param>
             /// <param name="expression">
-            /// The compiler-provided source expression. It supplies a useful default name without
-            /// requiring callers to duplicate names in string literals.
+            /// The compiler-provided source expression.
+            /// It supplies a default name without requiring a duplicate string literal.
             /// </param>
             public void AppendFormatted<T>(
                 T value,
@@ -214,7 +213,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <typeparam name="T">The value type.</typeparam>
             /// <param name="value">The value to capture.</param>
-            /// <param name="format">The standard interpolation format; it is never repurposed as a name.</param>
+            /// <param name="format">The standard interpolation format. The handler does not use it as a name.</param>
             /// <param name="expression">The compiler-provided source expression used as the default name.</param>
             public void AppendFormatted<T>(
                 T value,
@@ -227,7 +226,7 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <typeparam name="T">The value type.</typeparam>
             /// <param name="value">The value to capture.</param>
-            /// <param name="alignment">The standard interpolation alignment used only for visible rendering.</param>
+            /// <param name="alignment">The standard interpolation alignment for the display text.</param>
             /// <param name="expression">The compiler-provided source expression used as the default name.</param>
             public void AppendFormatted<T>(
                 T value,
@@ -240,8 +239,8 @@ namespace Microsoft.Build.Utilities
             /// </summary>
             /// <typeparam name="T">The value type.</typeparam>
             /// <param name="value">The value to capture.</param>
-            /// <param name="alignment">The standard interpolation alignment used only for visible rendering.</param>
-            /// <param name="format">The standard interpolation format; it is never repurposed as a name.</param>
+            /// <param name="alignment">The standard interpolation alignment for the display text.</param>
+            /// <param name="format">The standard interpolation format. The handler does not use it as a name.</param>
             /// <param name="expression">The compiler-provided source expression used as the default name.</param>
             public void AppendFormatted<T>(
                 T value,
@@ -382,8 +381,8 @@ namespace Microsoft.Build.Utilities
             /// Returns a positional composite format only when the Change Wave compatibility fallback is active.
             /// </summary>
             /// <remarks>
-            /// The normal structured path renders the named template directly. Keeping positional state out of that
-            /// path avoids storing a second template solely for older event types.
+            /// The structured path renders the named template directly.
+            /// It does not store a second template for older event types.
             /// </remarks>
             internal string? GetDisplayFormat() => _messageFormat?.ToString();
 
@@ -396,20 +395,22 @@ namespace Microsoft.Build.Utilities
             /// Returns the invariant named template used both as the event display format and by structured consumers.
             /// </summary>
             /// <remarks>
-            /// The owned builder is disposed here because compiler-generated handler calls consume the handler once.
-            /// This keeps capture safe for nested logging while returning pooled storage promptly.
+            /// A compiler-generated call consumes the handler one time.
+            /// Thus, this method can dispose the builder and return its pooled storage.
+            /// The owned builder also makes nested logging safe.
             /// </remarks>
             internal string GetOriginalFormat() => _template.ToStringAndDispose();
 
             /// <summary>
-            /// Returns invariant string values independently from lazy display state so reading
-            /// <see cref="BuildEventArgs.Message"/> cannot discard the structured payload.
+            /// Returns the captured string values separately from the lazy display state.
+            /// Reading <see cref="BuildEventArgs.Message"/> does not remove these values.
             /// </summary>
             internal IReadOnlyList<KeyValuePair<string, string?>> GetValues() => _values!;
 
             /// <summary>
-            /// Indicates whether the compiler populated this handler. Disabled message overloads check this before
-            /// reading state so the non-null getter contract remains true without allocating placeholder objects.
+            /// Indicates whether the compiler populated this handler.
+            /// Disabled overloads check this value before they read the handler state.
+            /// This check avoids placeholder allocations for non-null return values.
             /// </summary>
             internal readonly bool IsEnabled => _enabled;
         }
@@ -418,8 +419,9 @@ namespace Microsoft.Build.Utilities
         /// Logs a structured normal-importance interpolated message.
         /// </summary>
         /// <param name="message">
-        /// The compiler-built handler. A plain string cannot convert to this parameter, which keeps
-        /// literal and preformatted-string calls on their existing overloads.
+        /// The compiler-built handler.
+        /// A plain string cannot convert to this parameter.
+        /// Thus, literal and preformatted strings use their existing overloads.
         /// </param>
         public void LogMessage(
             [InterpolatedStringHandlerArgument("")] ref StructuredLogInterpolatedStringHandler message)
@@ -443,8 +445,9 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="importance">The importance used both for filtering and the emitted event.</param>
         /// <param name="message">
-        /// The compiler-built handler. Its constructor receives <paramref name="importance"/> so
-        /// disabled interpolation expressions are never evaluated.
+        /// The compiler-built handler.
+        /// Its constructor receives <paramref name="importance"/>.
+        /// The compiler does not evaluate interpolation expressions for a disabled message.
         /// </param>
         public void LogMessage(
             MessageImportance importance,
@@ -470,7 +473,9 @@ namespace Microsoft.Build.Utilities
         /// <param name="subcategory">Optional diagnostic category.</param>
         /// <param name="code">Optional diagnostic code.</param>
         /// <param name="helpKeyword">Optional IDE help keyword.</param>
-        /// <param name="file">Optional source file; the task location is used when omitted with zero line and column.</param>
+        /// <param name="file">
+        /// Optional source file. The task location is used when the file, line, and column are not specified.
+        /// </param>
         /// <param name="lineNumber">Starting line, or zero when unavailable.</param>
         /// <param name="columnNumber">Starting column, or zero when unavailable.</param>
         /// <param name="endLineNumber">Ending line, or zero when unavailable.</param>
@@ -515,8 +520,9 @@ namespace Microsoft.Build.Utilities
         /// Logs a structured interpolated warning.
         /// </summary>
         /// <param name="message">
-        /// The compiler-built handler. Warning capture is not importance-filtered because the engine
-        /// must apply suppression and warning-as-error policy.
+        /// The compiler-built handler.
+        /// Warning capture does not use importance filtering.
+        /// The engine must apply suppression and warning-as-error policy.
         /// </param>
         public void LogWarning(ref StructuredLogInterpolatedStringHandler message)
         {
@@ -535,9 +541,11 @@ namespace Microsoft.Build.Utilities
         /// Logs a structured interpolated warning with source-location metadata.
         /// </summary>
         /// <param name="subcategory">Optional warning category.</param>
-        /// <param name="warningCode">Optional warning code used by suppression and warning-as-error policy.</param>
+        /// <param name="warningCode">Optional warning code for suppression and warning-as-error policy.</param>
         /// <param name="helpKeyword">Optional IDE help keyword.</param>
-        /// <param name="file">Optional source file; the task location is used when omitted with zero line and column.</param>
+        /// <param name="file">
+        /// Optional source file. The task location is used when the file, line, and column are not specified.
+        /// </param>
         /// <param name="lineNumber">Starting line, or zero when unavailable.</param>
         /// <param name="columnNumber">Starting column, or zero when unavailable.</param>
         /// <param name="endLineNumber">Ending line, or zero when unavailable.</param>
@@ -580,10 +588,12 @@ namespace Microsoft.Build.Utilities
         /// Logs a structured interpolated warning with source-location metadata and a help link.
         /// </summary>
         /// <param name="subcategory">Optional warning category.</param>
-        /// <param name="warningCode">Optional warning code used by suppression and warning-as-error policy.</param>
+        /// <param name="warningCode">Optional warning code for suppression and warning-as-error policy.</param>
         /// <param name="helpKeyword">Optional IDE help keyword.</param>
         /// <param name="helpLink">Optional link to additional diagnostic information.</param>
-        /// <param name="file">Optional source file; the task location is used when omitted with zero line and column.</param>
+        /// <param name="file">
+        /// Optional source file. The task location is used when the file, line, and column are not specified.
+        /// </param>
         /// <param name="lineNumber">Starting line, or zero when unavailable.</param>
         /// <param name="columnNumber">Starting column, or zero when unavailable.</param>
         /// <param name="endLineNumber">Ending line, or zero when unavailable.</param>
@@ -648,7 +658,9 @@ namespace Microsoft.Build.Utilities
         /// <param name="subcategory">Optional error category.</param>
         /// <param name="errorCode">Optional error code.</param>
         /// <param name="helpKeyword">Optional IDE help keyword.</param>
-        /// <param name="file">Optional source file; the task location is used when omitted with zero line and column.</param>
+        /// <param name="file">
+        /// Optional source file. The task location is used when the file, line, and column are not specified.
+        /// </param>
         /// <param name="lineNumber">Starting line, or zero when unavailable.</param>
         /// <param name="columnNumber">Starting column, or zero when unavailable.</param>
         /// <param name="endLineNumber">Ending line, or zero when unavailable.</param>
@@ -694,7 +706,9 @@ namespace Microsoft.Build.Utilities
         /// <param name="errorCode">Optional error code.</param>
         /// <param name="helpKeyword">Optional IDE help keyword.</param>
         /// <param name="helpLink">Optional link to additional diagnostic information.</param>
-        /// <param name="file">Optional source file; the task location is used when omitted with zero line and column.</param>
+        /// <param name="file">
+        /// Optional source file. The task location is used when the file, line, and column are not specified.
+        /// </param>
         /// <param name="lineNumber">Starting line, or zero when unavailable.</param>
         /// <param name="columnNumber">Starting column, or zero when unavailable.</param>
         /// <param name="endLineNumber">Ending line, or zero when unavailable.</param>
@@ -738,10 +752,12 @@ namespace Microsoft.Build.Utilities
         /// Logs a structured normal-importance message from an invariant named template and ordered values.
         /// </summary>
         /// <param name="messageTemplate">
-        /// The invariant named template. It is separate from the values so non-C# callers receive
-        /// the same binary-log deduplication as handler callers.
+        /// The invariant named template.
+        /// Its separate values let non-C# callers use the same binary-log string deduplication as handler callers.
         /// </param>
-        /// <param name="values">Values in template occurrence order; null elements remain structured nulls.</param>
+        /// <param name="values">
+        /// Values in template occurrence order. A null element remains a structured null value.
+        /// </param>
         public void LogStructuredMessage(string messageTemplate, params object?[]? values)
             => LogStructuredMessage(MessageImportance.Normal, messageTemplate, values);
 
@@ -750,7 +766,9 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         /// <param name="importance">The importance used for filtering and the emitted event.</param>
         /// <param name="messageTemplate">The invariant named template.</param>
-        /// <param name="values">Values in template occurrence order; null elements remain structured nulls.</param>
+        /// <param name="values">
+        /// Values in template occurrence order. A null element remains a structured null value.
+        /// </param>
         public void LogStructuredMessage(MessageImportance importance, string messageTemplate, params object?[]? values)
         {
             if (!LogsMessagesOfImportance(importance))
@@ -775,7 +793,9 @@ namespace Microsoft.Build.Utilities
         /// Logs a structured warning from an invariant named template and ordered values.
         /// </summary>
         /// <param name="messageTemplate">The invariant named template.</param>
-        /// <param name="values">Values in template occurrence order; null elements remain structured nulls.</param>
+        /// <param name="values">
+        /// Values in template occurrence order. A null element remains a structured null value.
+        /// </param>
         public void LogStructuredWarning(string messageTemplate, params object?[]? values)
         {
             StructuredMessageData data = ParseStructuredMessage(
@@ -791,7 +811,9 @@ namespace Microsoft.Build.Utilities
         /// Logs a structured error from an invariant named template and ordered values.
         /// </summary>
         /// <param name="messageTemplate">The invariant named template.</param>
-        /// <param name="values">Values in template occurrence order; null elements remain structured nulls.</param>
+        /// <param name="values">
+        /// Values in template occurrence order. A null element remains a structured null value.
+        /// </param>
         public void LogStructuredError(string messageTemplate, params object?[]? values)
         {
             StructuredMessageData data = ParseStructuredMessage(
@@ -807,16 +829,16 @@ namespace Microsoft.Build.Utilities
         /// Logs an already-localized display message with a separate invariant template and named values.
         /// </summary>
         /// <remarks>
-        /// Resource-based messages need two representations: localized text for people and an
-        /// invariant schema for machines. Accepting both prevents localization from fragmenting
-        /// template-based aggregation.
+        /// A resource-based message needs localized text for users and an invariant template for tools.
+        /// Separate inputs keep localized text from dividing events into different template groups.
         /// </remarks>
         /// <param name="importance">The importance used for filtering and the emitted event.</param>
         /// <param name="originalFormat">The invariant named template persisted for structured consumers.</param>
         /// <param name="localizedMessage">The already-localized visible message.</param>
         /// <param name="values">
-        /// Ordered named values. Names must match the template so the localized text cannot silently
-        /// change the structured schema.
+        /// Ordered named values.
+        /// Each name must match its template hole.
+        /// This rule prevents localized text from changing the structured schema.
         /// </param>
         public void LogStructuredMessage(
             MessageImportance importance,

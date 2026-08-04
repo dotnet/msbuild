@@ -9,8 +9,8 @@ using Microsoft.Build.Utilities;
 namespace MSBuild.Benchmarks;
 
 /// <summary>
-/// Measures the cost of creating task logging events without materializing their visible messages.
-/// This isolates handler capture and structured-state construction from logger rendering.
+/// Measures task log event creation without creating the display text.
+/// The results separate handler capture and structured state creation from logger rendering.
 /// </summary>
 [MemoryDiagnoser]
 public class StructuredTaskLoggingBenchmark
