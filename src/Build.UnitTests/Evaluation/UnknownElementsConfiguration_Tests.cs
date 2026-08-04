@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Evaluation;
@@ -63,19 +64,6 @@ namespace Microsoft.Build.UnitTests.Evaluation
             config.CheckSkipAttribute("target", "foo").ShouldBeTrue();
             config.CheckSkipAttribute("TARGET", "FOO").ShouldBeTrue();
             config.CheckSkipAttribute("Target", "Foo").ShouldBeTrue();
-        }
-
-        [Fact]
-        public void RejectsNonAllowedItems()
-        {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, @"<ParseConfig><IgnoreAttributes><Ignore Element=""Target"" Name=""Foo"" /></IgnoreAttributes></ParseConfig>");
-
-            var config = UnknownElementsConfiguration.LoadFromFile(configPath);
-
-            config.CheckSkipAttribute("Target", "Bar").ShouldBeFalse();
-            config.CheckSkipElement("Target", "Foo").ShouldBeFalse();
-            config.CheckSkipAttribute("ItemGroup", "Foo").ShouldBeFalse();
         }
 
         [Fact]
@@ -172,107 +160,99 @@ namespace Microsoft.Build.UnitTests.Evaluation
             summary.ShouldContain("2 occurrences");
         }
 
-        [Fact]
-        public void GetLoadedConfigsMessageReturnsNullWhenEmpty()
-        {
-            var config = UnknownElementsConfiguration.LoadFromFile(Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName));
-            config.GetLoadedConfigsMessage().ShouldBeNull();
-        }
-
-        [Fact]
-        public void GetLoadedConfigsMessageListsFiles()
+        [Theory]
+        [MemberData(nameof(AttributeSkipCases))]
+        public void AllowedAttributeIsSkipped(string configElement, string configName, string projectXml)
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, @"<ParseConfig><IgnoreAttributes><Ignore Element=""Target"" Name=""Foo"" /></IgnoreAttributes></ParseConfig>");
-
-            var config = UnknownElementsConfiguration.LoadFromFile(configPath);
-
-            string message = config.GetLoadedConfigsMessage();
-            message.ShouldNotBeNull();
-            message.ShouldContain(_testDir);
-        }
-
-        [Fact]
-        public void AllowedAttributeDoesNotThrowDuringParsing()
-        {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, @"<ParseConfig><IgnoreAttributes><Ignore Element=""Target"" Name=""CustomAttr"" /></IgnoreAttributes></ParseConfig>");
-
-            string projectContent = @"
-<Project>
-  <Target Name=""Build"" CustomAttr=""hello"">
-  </Target>
-</Project>";
-
+            File.WriteAllText(configPath, $@"<ParseConfig><IgnoreAttributes><Ignore Element=""{configElement}"" Name=""{configName}"" /></IgnoreAttributes></ParseConfig>");
             string projectFile = Path.Combine(_testDir, "test.proj");
-            File.WriteAllText(projectFile, projectContent);
+            File.WriteAllText(projectFile, projectXml);
 
-            using (var projectCollection = CreateProjectCollection(UnknownElementsConfiguration.LoadFromFile(configPath)))
+            using (var pc = CreateProjectCollection(UnknownElementsConfiguration.LoadFromFile(configPath)))
             {
-                var project = new Project(projectFile, null, null, projectCollection);
+                var project = new Project(projectFile, null, null, pc, ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreEmptyImports | ProjectLoadSettings.IgnoreInvalidImports);
                 project.ShouldNotBeNull();
             }
         }
 
-        [Fact]
-        public void NonAllowedAttributeStillThrows()
+        [Theory]
+        [MemberData(nameof(AttributeSkipCases))]
+        public void NonAllowedAttributeThrows(string configElement, string configName, string projectXml)
         {
-            string projectContent = @"
-<Project>
-  <Target Name=""Build"" BogusAttr=""hello"">
-  </Target>
-</Project>";
-
+            _ = configElement;
+            _ = configName;
             string projectFile = Path.Combine(_testDir, "test.proj");
-            File.WriteAllText(projectFile, projectContent);
+            File.WriteAllText(projectFile, projectXml);
 
-            using (var projectCollection = CreateProjectCollection(UnknownElementsConfiguration.LoadFromFile(Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName))))
+            using (var pc = CreateProjectCollection(UnknownElementsConfiguration.Empty))
             {
-                Should.Throw<InvalidProjectFileException>(() => new Project(projectFile, null, null, projectCollection));
+                Should.Throw<InvalidProjectFileException>(() => new Project(projectFile, null, null, pc, ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreEmptyImports | ProjectLoadSettings.IgnoreInvalidImports));
             }
         }
 
-        [Fact]
-        public void AllowedChildElementDoesNotThrowDuringParsing()
+        [Theory]
+        [MemberData(nameof(ChildSkipCases))]
+        public void AllowedChildIsSkipped(string configElement, string configName, string projectXml)
         {
             string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
-            File.WriteAllText(configPath, @"<ParseConfig><IgnoreChildren><Ignore Element=""Project"" Name=""CustomElement"" /></IgnoreChildren></ParseConfig>");
-
-            string projectContent = @"
-<Project>
-  <CustomElement />
-  <Target Name=""Build"">
-  </Target>
-</Project>";
-
+            File.WriteAllText(configPath, $@"<ParseConfig><IgnoreChildren><Ignore Element=""{configElement}"" Name=""{configName}"" /></IgnoreChildren></ParseConfig>");
             string projectFile = Path.Combine(_testDir, "test.proj");
-            File.WriteAllText(projectFile, projectContent);
+            File.WriteAllText(projectFile, projectXml);
 
-            using (var projectCollection = CreateProjectCollection(UnknownElementsConfiguration.LoadFromFile(configPath)))
+            using (var pc = CreateProjectCollection(UnknownElementsConfiguration.LoadFromFile(configPath)))
             {
-                var project = new Project(projectFile, null, null, projectCollection);
+                var project = new Project(projectFile, null, null, pc, ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreEmptyImports | ProjectLoadSettings.IgnoreInvalidImports);
                 project.ShouldNotBeNull();
             }
         }
 
-        [Fact]
-        public void NonAllowedChildElementStillThrows()
+        [Theory]
+        [MemberData(nameof(ChildSkipCases))]
+        public void NonAllowedChildThrows(string configElement, string configName, string projectXml)
         {
-            string projectContent = @"
-<Project>
-  <BogusElement />
-  <Target Name=""Build"">
-  </Target>
-</Project>";
-
+            _ = configElement;
+            _ = configName;
             string projectFile = Path.Combine(_testDir, "test.proj");
-            File.WriteAllText(projectFile, projectContent);
+            File.WriteAllText(projectFile, projectXml);
 
-            using (var projectCollection = CreateProjectCollection(UnknownElementsConfiguration.LoadFromFile(Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName))))
+            using (var pc = CreateProjectCollection(UnknownElementsConfiguration.Empty))
             {
-                Should.Throw<InvalidProjectFileException>(() => new Project(projectFile, null, null, projectCollection));
+                Should.Throw<InvalidProjectFileException>(() => new Project(projectFile, null, null, pc, ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreEmptyImports | ProjectLoadSettings.IgnoreInvalidImports));
             }
         }
+
+        public static IEnumerable<object[]> AttributeSkipCases => new[]
+        {
+            new object[] { "Target", "X", @"<Project><Target Name=""T"" X=""1"" /></Project>" },
+            new object[] { "PropertyGroup", "X", @"<Project><PropertyGroup X=""1""><A>1</A></PropertyGroup><Target Name=""T"" /></Project>" },
+            new object[] { "Property", "X", @"<Project><PropertyGroup><A X=""1"">1</A></PropertyGroup><Target Name=""T"" /></Project>" },
+            new object[] { "ItemGroup", "X", @"<Project><ItemGroup X=""1""><Compile Include=""a.cs"" /></ItemGroup><Target Name=""T"" /></Project>" },
+            new object[] { "Item", "_X", @"<Project><ItemGroup><Compile Include=""a.cs"" _X=""1"" /></ItemGroup><Target Name=""T"" /></Project>" },
+            new object[] { "Import", "X", @"<Project><Import Project=""nonexistent.props"" X=""1"" /><Target Name=""T"" /></Project>" },
+            new object[] { "ImportGroup", "X", @"<Project><ImportGroup X=""1""><Import Project=""nonexistent.props"" /></ImportGroup><Target Name=""T"" /></Project>" },
+            new object[] { "UsingTask", "X", @"<Project><UsingTask TaskName=""Foo"" AssemblyName=""Bar"" X=""1"" /><Target Name=""T"" /></Project>" },
+            new object[] { "OnError", "X", @"<Project><Target Name=""T""><OnError ExecuteTargets=""T"" X=""1"" /></Target></Project>" },
+            new object[] { "Output", "X", @"<Project><Target Name=""T""><Message Text=""hi""><Output TaskParameter=""Text"" PropertyName=""P"" X=""1"" /></Message></Target></Project>" },
+            new object[] { "Choose", "X", @"<Project><Choose X=""1""><When Condition=""true""><PropertyGroup><A>1</A></PropertyGroup></When></Choose><Target Name=""T"" /></Project>" },
+            new object[] { "Otherwise", "X", @"<Project><Choose><When Condition=""true""><PropertyGroup><A>1</A></PropertyGroup></When><Otherwise X=""1""><PropertyGroup><B>2</B></PropertyGroup></Otherwise></Choose><Target Name=""T"" /></Project>" },
+            new object[] { "ItemDefinition", "_X", @"<Project><ItemDefinitionGroup><Compile _X=""1"" /></ItemDefinitionGroup><Target Name=""T"" /></Project>" },
+            new object[] { "Metadata", "X", @"<Project><ItemGroup><Compile Include=""a.cs""><MyMeta X=""1"">val</MyMeta></Compile></ItemGroup><Target Name=""T"" /></Project>" },
+            new object[] { "UsingTaskBody", "X", @"<Project><UsingTask TaskName=""Foo"" AssemblyName=""Bar"" TaskFactory=""CodeTaskFactory""><Task X=""1"" /></UsingTask><Target Name=""T"" /></Project>" },
+            new object[] { "Parameter", "X", @"<Project><UsingTask TaskName=""Foo"" AssemblyName=""Bar"" TaskFactory=""CodeTaskFactory""><ParameterGroup><MyParam X=""1"" /></ParameterGroup></UsingTask><Target Name=""T"" /></Project>" },
+            new object[] { "ProjectExtensions", "X", @"<Project><ProjectExtensions X=""1""><Foo>bar</Foo></ProjectExtensions><Target Name=""T"" /></Project>" },
+        };
+
+        public static IEnumerable<object[]> ChildSkipCases => new[]
+        {
+            new object[] { "Project", "Custom", @"<Project><Custom /><Target Name=""T"" /></Project>" },
+            new object[] { "UsingTask", "Custom", @"<Project><UsingTask TaskName=""Foo"" AssemblyName=""Bar"" TaskFactory=""CodeTaskFactory""><Custom /></UsingTask><Target Name=""T"" /></Project>" },
+            new object[] { "ImportGroup", "Custom", @"<Project><ImportGroup><Custom /></ImportGroup><Target Name=""T"" /></Project>" },
+            new object[] { "Choose", "Custom", @"<Project><Choose><When Condition=""true""><PropertyGroup><A>1</A></PropertyGroup></When><Custom /></Choose><Target Name=""T"" /></Project>" },
+            new object[] { "When", "Custom", @"<Project><Choose><When Condition=""true""><PropertyGroup><A>1</A></PropertyGroup><Custom /></When></Choose><Target Name=""T"" /></Project>" },
+            new object[] { "Otherwise", "Custom", @"<Project><Choose><When Condition=""true""><PropertyGroup><A>1</A></PropertyGroup></When><Otherwise><PropertyGroup><B>2</B></PropertyGroup><Custom /></Otherwise></Choose><Target Name=""T"" /></Project>" },
+            new object[] { "Task", "Custom", @"<Project><Target Name=""T""><Message Text=""hi""><Custom /></Message></Target></Project>" },
+        };
 
         private static ProjectCollection CreateProjectCollection(UnknownElementsConfiguration config)
         {
