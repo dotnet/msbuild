@@ -43,7 +43,6 @@ When serving an MT request:
 
 - the resident server owns its directly-created sidecar TaskHosts;
 - a transient server owns its directly-created sidecar TaskHosts;
-- a worker owns any TaskHosts it creates; and
 - an owned TaskHost cannot be adopted by another owner.
 
 When the resident serves a non-MT request, it similarly owns the
@@ -80,7 +79,7 @@ flowchart TB
     MT["MT request client"] --> A{"Resident admission"}
     A -->|granted| R["Shared resident server"]
     A -->|busy or contested| T["One-build transient server"]
-    NR["MT request client with node reuse disabled"] --> T
+    NR["MT request client\n with nr:false"] --> T
 
     R --> RS["Resident-owned sidecars"]
     T --> TS["Transient-owned sidecars"]
