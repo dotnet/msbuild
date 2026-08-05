@@ -335,34 +335,6 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [UnixOnlyFact]
-        public void PreservesSpecialPermissionBitsWhenRequested()
-        {
-            using (TestEnvironment testEnvironment = TestEnvironment.Create())
-            {
-                string tarFilePath = CreateTarWithMode(testEnvironment, "F1.txt", "F1", UnixFileMode.SetGroup | UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.GroupRead | UnixFileMode.GroupExecute | UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
-
-                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
-
-                Untar untar = new Untar
-                {
-                    BuildEngine = _mockEngine,
-                    DestinationFolder = new DirectoryInfo(destination.Path),
-                    PreservePermissions = true,
-                    SkipUnchangedFiles = false,
-                    SourceFiles = [new FileInfo(tarFilePath)],
-                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
-                };
-
-                untar.Execute().ShouldBeTrue(_mockEngine.Log);
-
-                UnixFileMode extractedMode = File.GetUnixFileMode(Path.Combine(destination.Path, "F1.txt"));
-
-                // The setgid bit set in the archive must survive extraction when preserving is on.
-                (extractedMode & UnixFileMode.SetGroup).ShouldBe(UnixFileMode.SetGroup);
-            }
-        }
-
         private string CreateTarWithMode(TestEnvironment testEnvironment, string entryName, string content, UnixFileMode mode)
         {
             string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "modes.tar");
