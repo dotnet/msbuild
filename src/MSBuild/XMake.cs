@@ -2769,8 +2769,13 @@ namespace Microsoft.Build.CommandLine
                 return true;
             }
 
-            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded)
-                && ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MultiThreaded], defaultValue: true, resourceName: null);
+            if (!commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded))
+            {
+                return false;
+            }
+
+            string[] parameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MultiThreaded];
+            return parameters.Length == 0 || !parameters[parameters.Length - 1].Equals(bool.FalseString, StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
