@@ -2418,7 +2418,7 @@ namespace Microsoft.Build.Execution
                             continue;
                         }
 
-                        BuildRequestData request = IsSyntheticSolutionNode(node)
+                        BuildRequestData request = IsLegacySyntheticSolutionNode(node)
                             ? new BuildRequestData(
                                 node.ProjectInstance.FullPath,
                                 node.ProjectInstance.GlobalProperties.ToDictionary(kvp => kvp.Key, kvp => (string?)kvp.Value),
@@ -2475,6 +2475,21 @@ namespace Microsoft.Build.Execution
 
             bool IsSyntheticSolutionNode(ProjectGraphNode node) =>
                 syntheticSolutionNode is not null && ReferenceEquals(node, syntheticSolutionNode);
+
+            bool IsLegacySyntheticSolutionNode(ProjectGraphNode node)
+            {
+                if (!IsSyntheticSolutionNode(node))
+                {
+                    return false;
+                }
+
+                return !node.ProjectInstance.GlobalProperties.TryGetValue(
+                    SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty,
+                    out string? generatedSolutionProjectPath)
+                    || !FileUtilities.PathComparer.Equals(
+                        node.ProjectInstance.FullPath,
+                        generatedSolutionProjectPath);
+            }
         }
 
         /// <summary>

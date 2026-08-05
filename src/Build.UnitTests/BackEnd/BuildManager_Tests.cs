@@ -4572,6 +4572,72 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
+        public void GraphBuildGeneratedSolutionProjectUsesInMemoryInstance()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            ProjectCollection projectCollection = env.CreateProjectCollection().Collection;
+
+            TransientTestFolder root = env.CreateFolder(createFolder: true);
+            TransientTestFolder projectFolder = env.CreateFolder(Path.Combine(root.Path, "SimpleProject"), createFolder: true);
+            env.CreateFile(projectFolder, "SimpleProject.csproj",
+                """
+                <Project>
+                  <Target Name="Build">
+                    <Message Text="GeneratedGraphProjectBuilt" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+
+            TransientTestFile solutionFile = env.CreateFile(root, "GeneratedGraph.sln",
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 16
+                VisualStudioVersion = 16.0.29326.124
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleProject", "SimpleProject\SimpleProject.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                    EndGlobalSection
+                EndGlobal
+                """);
+
+            env.CreateFile(root, $"after.{Path.GetFileName(solutionFile.Path)}.targets",
+                """
+                <Project>
+                  <Target Name="AfterGeneratedSolutionHook" AfterTargets="Build">
+                    <Message Text="GeneratedGraphSolutionHookRan" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+
+            ProjectGraph graph = ProjectGraph.CreateForBuild(
+                new ProjectGraphBuildOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
+                    ProjectCollection = projectCollection,
+                    Targets = ["Build"]
+                });
+
+            ProjectGraphNode solutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+            File.Exists(solutionNode.ProjectInstance.FullPath).ShouldBeFalse();
+
+            GraphBuildRequestData request = new(graph, ["Build"], projectCollection.HostServices);
+
+            GraphBuildResult result = _buildManager.Build(_parameters, request);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            result.ResultsByNode[solutionNode].OverallResult.ShouldBe(BuildResultCode.Success);
+            _logger.AssertLogContains("GeneratedGraphProjectBuilt");
+            _logger.AssertLogContains("GeneratedGraphSolutionHookRan");
+        }
+
+        [Fact]
         public void GraphBuildSolutionCleanUsesProjectConfiguration()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
