@@ -6,6 +6,9 @@ using Microsoft.Build.Construction;
 
 #nullable disable
 
-namespace Microsoft.Build.Graph{
-    internal delegate SolutionProjectGenerationResult SolutionProjectFactory(SolutionFile solution, IDictionary<string, string> globalProperties);
+namespace Microsoft.Build.Graph
+{
+    internal delegate SolutionProjectGenerationResult SolutionProjectFactory(
+        SolutionFile solution,
+        IDictionary<string, string> globalProperties);
 }

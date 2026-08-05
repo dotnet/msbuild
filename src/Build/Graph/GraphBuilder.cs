@@ -204,8 +204,7 @@ namespace Microsoft.Build.Graph
                 return new ProjectInstance(
                     Solution.FullPath,
                     projectNodeToInheritFrom.ProjectInstance,
-                    solutionGlobalProperties
-                );
+                    solutionGlobalProperties);
             }
 
             ProjectRootElement syntheticRootElement = ProjectRootElement.Create(_projectCollection);
