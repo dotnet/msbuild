@@ -252,6 +252,21 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="MSBuildServerLifecycleEventArgs"/>
         /// </summary>
         MSBuildServerLifecycleEvent = 44,
+
+        /// <summary>
+        /// Event is <see cref="StructuredBuildMessageEventArgs"/>.
+        /// </summary>
+        StructuredBuildMessageEvent = 45,
+
+        /// <summary>
+        /// Event is <see cref="StructuredBuildWarningEventArgs"/>.
+        /// </summary>
+        StructuredBuildWarningEvent = 46,
+
+        /// <summary>
+        /// Event is <see cref="StructuredBuildErrorEventArgs"/>.
+        /// </summary>
+        StructuredBuildErrorEvent = 47,
     }
     #endregion
 
@@ -507,6 +522,9 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.WorkerNodeTelemetryEvent => new WorkerNodeTelemetryEventArgs(),
                 LoggingEventType.LoggersRegisteredEvent => new LoggersRegisteredEventArgs(),
                 LoggingEventType.MSBuildServerLifecycleEvent => new MSBuildServerLifecycleEventArgs(),
+                LoggingEventType.StructuredBuildMessageEvent => new StructuredBuildMessageEventArgs(),
+                LoggingEventType.StructuredBuildWarningEvent => new StructuredBuildWarningEventArgs(),
+                LoggingEventType.StructuredBuildErrorEvent => new StructuredBuildErrorEventArgs(),
 
                 _ => Assumed.Unreachable<BuildEventArgs>($"Should not get to the default of GetBuildEventArgFromId ID: {_eventType}")
             };
@@ -660,6 +678,18 @@ namespace Microsoft.Build.Shared
             else if (eventType == typeof(MSBuildServerLifecycleEventArgs))
             {
                 return LoggingEventType.MSBuildServerLifecycleEvent;
+            }
+            else if (eventType == typeof(StructuredBuildMessageEventArgs))
+            {
+                return LoggingEventType.StructuredBuildMessageEvent;
+            }
+            else if (eventType == typeof(StructuredBuildWarningEventArgs))
+            {
+                return LoggingEventType.StructuredBuildWarningEvent;
+            }
+            else if (eventType == typeof(StructuredBuildErrorEventArgs))
+            {
+                return LoggingEventType.StructuredBuildErrorEvent;
             }
             else if (eventType == typeof(TargetStartedEventArgs))
             {

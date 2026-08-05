@@ -204,6 +204,9 @@ namespace Microsoft.Build.Logging
         {
             switch (e)
             {
+                case StructuredBuildMessageEventArgs structuredMessage: return Write(structuredMessage);
+                case StructuredBuildWarningEventArgs structuredWarning: return Write(structuredWarning);
+                case StructuredBuildErrorEventArgs structuredError: return Write(structuredError);
                 case BuildMessageEventArgs buildMessage: return Write(buildMessage);
                 case TaskStartedEventArgs taskStarted: return Write(taskStarted);
                 case TaskFinishedEventArgs taskFinished: return Write(taskFinished);
@@ -496,21 +499,40 @@ namespace Microsoft.Build.Logging
 
         private BinaryLogRecordKind Write(BuildErrorEventArgs e)
         {
-            WriteBuildEventArgsFields(e);
-            WriteArguments(e.RawArguments);
-            WriteDeduplicatedString(e.Subcategory);
-            WriteDeduplicatedString(e.Code);
-            WriteDeduplicatedString(e.File);
-            WriteDeduplicatedString(e.ProjectFile);
-            Write(e.LineNumber);
-            Write(e.ColumnNumber);
-            Write(e.EndLineNumber);
-            Write(e.EndColumnNumber);
-
+            WriteErrorFields(e);
             return BinaryLogRecordKind.Error;
         }
 
         private BinaryLogRecordKind Write(BuildWarningEventArgs e)
+        {
+            WriteWarningFields(e);
+            return BinaryLogRecordKind.Warning;
+        }
+
+        private BinaryLogRecordKind Write(StructuredBuildErrorEventArgs e)
+        {
+            WriteErrorFields(e);
+            WriteDeduplicatedString(e.HelpLink);
+            WriteStructuredFields(e);
+            return BinaryLogRecordKind.StructuredError;
+        }
+
+        private BinaryLogRecordKind Write(StructuredBuildWarningEventArgs e)
+        {
+            WriteWarningFields(e);
+            WriteDeduplicatedString(e.HelpLink);
+            WriteStructuredFields(e);
+            return BinaryLogRecordKind.StructuredWarning;
+        }
+
+        private BinaryLogRecordKind Write(StructuredBuildMessageEventArgs e)
+        {
+            WriteMessageFields(e, writeImportance: true);
+            WriteStructuredFields(e);
+            return BinaryLogRecordKind.StructuredMessage;
+        }
+
+        private void WriteErrorFields(BuildErrorEventArgs e)
         {
             WriteBuildEventArgsFields(e);
             WriteArguments(e.RawArguments);
@@ -522,8 +544,40 @@ namespace Microsoft.Build.Logging
             Write(e.ColumnNumber);
             Write(e.EndLineNumber);
             Write(e.EndColumnNumber);
+        }
 
-            return BinaryLogRecordKind.Warning;
+        private void WriteWarningFields(BuildWarningEventArgs e)
+        {
+            WriteBuildEventArgsFields(e);
+            WriteArguments(e.RawArguments);
+            WriteDeduplicatedString(e.Subcategory);
+            WriteDeduplicatedString(e.Code);
+            WriteDeduplicatedString(e.File);
+            WriteDeduplicatedString(e.ProjectFile);
+            Write(e.LineNumber);
+            Write(e.ColumnNumber);
+            Write(e.EndLineNumber);
+            Write(e.EndColumnNumber);
+        }
+
+        private void WriteStructuredFields(IStructuredBuildEventArgs e)
+        {
+            var buildEvent = (BuildEventArgs)e;
+            string originalFormat = e.OriginalFormat;
+            WriteDeduplicatedString(string.Equals(buildEvent.RawMessage, originalFormat, StringComparison.Ordinal)
+                ? null
+                : originalFormat);
+
+            IReadOnlyList<KeyValuePair<string, string>> values =
+                e.StructuredValues ?? Array.Empty<KeyValuePair<string, string>>();
+            int count = values.Count;
+            Write(count);
+            for (int i = 0; i < count; i++)
+            {
+                KeyValuePair<string, string> value = values[i];
+                WriteDeduplicatedString(value.Key);
+                WriteDeduplicatedString(value.Value);
+            }
         }
 
         private BinaryLogRecordKind Write(BuildMessageEventArgs e)

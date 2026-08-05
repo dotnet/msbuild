@@ -1661,7 +1661,29 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 if (ShouldTreatWarningAsMessage(warningEvent))
                 {
-                    if (buildEventArgs is ExtendedBuildWarningEventArgs extWarningEvent)
+                    if (warningEvent is StructuredBuildWarningEventArgs structuredWarning)
+                    {
+                        buildEventArgs = new StructuredBuildMessageEventArgs(
+                            structuredWarning.Subcategory,
+                            structuredWarning.Code,
+                            structuredWarning.File,
+                            structuredWarning.LineNumber,
+                            structuredWarning.ColumnNumber,
+                            structuredWarning.EndLineNumber,
+                            structuredWarning.EndColumnNumber,
+                            structuredWarning.RawMessage ?? structuredWarning.OriginalFormat ?? string.Empty,
+                            structuredWarning.OriginalFormat ?? string.Empty,
+                            structuredWarning.StructuredValues ?? [],
+                            structuredWarning.HelpKeyword,
+                            structuredWarning.SenderName,
+                            MessageImportance.Low,
+                            structuredWarning.Timestamp)
+                        {
+                            BuildEventContext = warningEvent.BuildEventContext,
+                            ProjectFile = warningEvent.ProjectFile,
+                        };
+                    }
+                    else if (buildEventArgs is ExtendedBuildWarningEventArgs extWarningEvent)
                     {
                         buildEventArgs = new ExtendedBuildMessageEventArgs(
                                 extWarningEvent.ExtendedType,
@@ -1707,7 +1729,29 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
                 else if (ShouldTreatWarningAsError(warningEvent))
                 {
-                    if (warningEvent is ExtendedBuildWarningEventArgs extWarningEvent)
+                    if (warningEvent is StructuredBuildWarningEventArgs structuredWarning)
+                    {
+                        buildEventArgs = new StructuredBuildErrorEventArgs(
+                            structuredWarning.Subcategory,
+                            structuredWarning.Code,
+                            structuredWarning.File,
+                            structuredWarning.LineNumber,
+                            structuredWarning.ColumnNumber,
+                            structuredWarning.EndLineNumber,
+                            structuredWarning.EndColumnNumber,
+                            structuredWarning.RawMessage ?? structuredWarning.OriginalFormat ?? string.Empty,
+                            structuredWarning.OriginalFormat ?? string.Empty,
+                            structuredWarning.StructuredValues ?? [],
+                            structuredWarning.HelpKeyword,
+                            structuredWarning.SenderName,
+                            structuredWarning.HelpLink,
+                            structuredWarning.Timestamp)
+                        {
+                            BuildEventContext = warningEvent.BuildEventContext,
+                            ProjectFile = warningEvent.ProjectFile,
+                        };
+                    }
+                    else if (warningEvent is ExtendedBuildWarningEventArgs extWarningEvent)
                     {
                         buildEventArgs = new ExtendedBuildErrorEventArgs(
                             extWarningEvent.ExtendedType,

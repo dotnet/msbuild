@@ -39,10 +39,17 @@ namespace Microsoft.Build.UnitTests
 
         internal int Errors { set; get; }
 
+        internal BuildMessageEventArgs LastMessageEvent { get; private set; }
+
+        internal BuildWarningEventArgs LastWarningEvent { get; private set; }
+
+        internal BuildErrorEventArgs LastErrorEvent { get; private set; }
+
         public bool IsRunningMultipleNodes { get; set; }
 
         public void LogErrorEvent(BuildErrorEventArgs eventArgs)
         {
+            LastErrorEvent = eventArgs;
             Console.WriteLine(EventArgsFormatting.FormatEventMessage(eventArgs));
             _log.AppendLine(EventArgsFormatting.FormatEventMessage(eventArgs));
             ++Errors;
@@ -50,6 +57,7 @@ namespace Microsoft.Build.UnitTests
 
         public void LogWarningEvent(BuildWarningEventArgs eventArgs)
         {
+            LastWarningEvent = eventArgs;
             Console.WriteLine(EventArgsFormatting.FormatEventMessage(eventArgs));
             _log.AppendLine(EventArgsFormatting.FormatEventMessage(eventArgs));
             ++Warnings;
@@ -63,6 +71,7 @@ namespace Microsoft.Build.UnitTests
 
         public void LogMessageEvent(BuildMessageEventArgs eventArgs)
         {
+            LastMessageEvent = eventArgs;
             // Only if the message is above the minimum importance should we record the log message
             if (eventArgs.Importance <= MinimumMessageImportance)
             {

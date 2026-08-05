@@ -322,6 +322,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                         ExtendedMetadata = new Dictionary<string, string> { { "m1", "v1" }, { "m2", "v2" } },
                         BuildEventContext = new BuildEventContext(1, 2, 3, 4, 5, 6, 7)
                     },
+                    CreateStructuredMessageEvent(),
+                    CreateStructuredWarningEvent(),
+                    CreateStructuredErrorEvent(),
                     new GeneratedFileUsedEventArgs("path", "some content"),
                     new LoggersRegisteredEventArgs(new List<RegisteredLoggerInfo>
                     {
@@ -366,6 +369,57 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 Environment.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", _initialTargetOutputLogging);
             }
         }
+
+        private static StructuredBuildMessageEventArgs CreateStructuredMessageEvent() =>
+            new(
+                null,
+                null,
+                null,
+                0,
+                0,
+                0,
+                0,
+                "localized visible message",
+                "visible {Value}",
+                [new("Value", "message")],
+                null,
+                "sender",
+                MessageImportance.Normal,
+                DateTime.UtcNow);
+
+        private static StructuredBuildWarningEventArgs CreateStructuredWarningEvent() =>
+            new(
+                "subcategory",
+                "W1",
+                "warning.cs",
+                1,
+                2,
+                3,
+                4,
+                "localized warning",
+                "warning {Value}",
+                [new("Value", "message")],
+                "help",
+                "sender",
+                "https://warning",
+                DateTime.UtcNow);
+
+        private static StructuredBuildErrorEventArgs CreateStructuredErrorEvent() =>
+            new(
+                "subcategory",
+                "E1",
+                "error.cs",
+                5,
+                6,
+                7,
+                8,
+                "localized error",
+                "error {Value}",
+                [new("Value", "message")],
+                "help",
+                "sender",
+                "https://error",
+                DateTime.UtcNow);
 
         /// <summary>
         /// Verify the LoggingMessagePacket is properly created from a build event.

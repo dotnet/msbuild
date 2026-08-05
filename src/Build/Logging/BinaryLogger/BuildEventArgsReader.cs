@@ -332,6 +332,9 @@ namespace Microsoft.Build.Logging
                 BinaryLogRecordKind.BuildCanceled => ReadBuildCanceledEventArgs(),
                 BinaryLogRecordKind.LoggersRegistered => ReadLoggersRegisteredEventArgs(),
                 BinaryLogRecordKind.MSBuildServerLifecycle => ReadMSBuildServerLifecycleEventArgs(),
+                BinaryLogRecordKind.StructuredMessage => ReadStructuredBuildMessageEventArgs(),
+                BinaryLogRecordKind.StructuredWarning => ReadStructuredBuildWarningEventArgs(),
+                BinaryLogRecordKind.StructuredError => ReadStructuredBuildErrorEventArgs(),
                 _ => null
             };
 
@@ -495,8 +498,8 @@ namespace Microsoft.Build.Logging
                 for (int i = 0; i < list.Length; i++)
                 {
                     string? key = GetStringFromRecord(list[i].keyIndex);
-                    // passing null forward would require changes to API surface of existing events
-                    // (BuildStartedEventArgs.BuildEnvironment and ProjectStartedEventArgs.GlobalProperties)
+                    // Passing null forward would require changes to API surface of existing events
+                    // (BuildStartedEventArgs.BuildEnvironment and ProjectStartedEventArgs.GlobalProperties).
                     string value = GetStringFromRecord(list[i].valueIndex) ?? string.Empty;
                     if (key != null)
                     {
@@ -1035,6 +1038,116 @@ namespace Microsoft.Build.Logging
             e.BuildEventContext = fields.BuildEventContext;
 
             return e;
+        }
+
+        private BuildEventArgs ReadStructuredBuildMessageEventArgs()
+        {
+            BuildEventArgsFields fields = ReadBuildEventArgsFields(readImportance: true);
+            (string originalFormat, IReadOnlyList<KeyValuePair<string, string?>> values) =
+                ReadStructuredFields(fields.Message);
+            var e = new StructuredBuildMessageEventArgs(
+                fields.Subcategory,
+                fields.Code,
+                fields.File,
+                fields.LineNumber,
+                fields.ColumnNumber,
+                fields.EndLineNumber,
+                fields.EndColumnNumber,
+                fields.Message!,
+                originalFormat,
+                values,
+                fields.HelpKeyword,
+                fields.SenderName,
+                fields.Importance,
+                fields.Timestamp)
+            {
+                ProjectFile = fields.ProjectFile,
+                BuildEventContext = fields.BuildEventContext,
+            };
+            SetCommonFields(e, fields);
+            return e;
+        }
+
+        private BuildEventArgs ReadStructuredBuildWarningEventArgs()
+        {
+            BuildEventArgsFields fields = ReadBuildEventArgsFields();
+            ReadDiagnosticFields(fields);
+            string? helpLink = ReadOptionalString();
+            (string originalFormat, IReadOnlyList<KeyValuePair<string, string?>> values) =
+                ReadStructuredFields(fields.Message);
+            var e = new StructuredBuildWarningEventArgs(
+                fields.Subcategory,
+                fields.Code,
+                fields.File,
+                fields.LineNumber,
+                fields.ColumnNumber,
+                fields.EndLineNumber,
+                fields.EndColumnNumber,
+                fields.Message!,
+                originalFormat,
+                values,
+                fields.HelpKeyword,
+                fields.SenderName,
+                helpLink,
+                fields.Timestamp)
+            {
+                ProjectFile = fields.ProjectFile,
+                BuildEventContext = fields.BuildEventContext,
+            };
+            SetCommonFields(e, fields);
+            return e;
+        }
+
+        private BuildEventArgs ReadStructuredBuildErrorEventArgs()
+        {
+            BuildEventArgsFields fields = ReadBuildEventArgsFields();
+            ReadDiagnosticFields(fields);
+            string? helpLink = ReadOptionalString();
+            (string originalFormat, IReadOnlyList<KeyValuePair<string, string?>> values) =
+                ReadStructuredFields(fields.Message);
+            var e = new StructuredBuildErrorEventArgs(
+                fields.Subcategory,
+                fields.Code,
+                fields.File,
+                fields.LineNumber,
+                fields.ColumnNumber,
+                fields.EndLineNumber,
+                fields.EndColumnNumber,
+                fields.Message!,
+                originalFormat,
+                values,
+                fields.HelpKeyword,
+                fields.SenderName,
+                helpLink,
+                fields.Timestamp)
+            {
+                ProjectFile = fields.ProjectFile,
+                BuildEventContext = fields.BuildEventContext,
+            };
+            SetCommonFields(e, fields);
+            return e;
+        }
+
+        private (string OriginalFormat, IReadOnlyList<KeyValuePair<string, string?>> Values)
+            ReadStructuredFields(string? rawMessage)
+        {
+            string originalFormat = ReadOptionalString() ?? rawMessage ?? string.Empty;
+            int count = ReadInt32();
+            if ((uint)count > StructuredBuildEventState.MaximumValueCount)
+            {
+                throw new InvalidDataException(
+                    $"Structured event value count {count} exceeds {StructuredBuildEventState.MaximumValueCount}.");
+            }
+
+            var values = new KeyValuePair<string, string?>[count];
+            for (int i = 0; i < count; i++)
+            {
+                values[i] = new KeyValuePair<string, string?>(
+                    ReadDeduplicatedString() ?? string.Empty,
+                    ReadDeduplicatedString());
+            }
+
+            return (originalFormat, values);
         }
 
         private BuildEventArgs ReadTaskCommandLineEventArgs()

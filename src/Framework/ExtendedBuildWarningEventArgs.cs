@@ -12,6 +12,7 @@ namespace Microsoft.Build.Framework;
 /// Generic custom warning events including extended data for event enriching.
 /// Extended data are implemented by <see cref="IExtendedBuildEventArgs"/>
 /// </summary>
+[Serializable]
 public sealed class ExtendedBuildWarningEventArgs : BuildWarningEventArgs, IExtendedBuildEventArgs
 {
     /// <inheritdoc />

@@ -25,8 +25,11 @@ namespace Microsoft.Build.UnitTests
 {
     public class BuildEventArgsSerializationTests
     {
-        public BuildEventArgsSerializationTests()
+        private readonly ITestOutputHelper _output;
+
+        public BuildEventArgsSerializationTests(ITestOutputHelper output)
         {
+            _output = output;
             // touch the type so that static constructor runs
             _ = ItemGroupLoggingHelper.ItemGroupIncludeLogMessagePrefix;
         }
@@ -538,6 +541,162 @@ namespace Microsoft.Build.UnitTests
                 e => e.ExtendedData,
                 e => string.Join(", ", e.RawArguments ?? Array.Empty<object>()));
         }
+
+        [Fact]
+        public void StructuredMessagesDeduplicateTemplateComponents()
+        {
+            const int Count = 500;
+            const string MessageFormat =
+                "Considered candidate '{0}' while resolving a reference, but expected '{1}' according to the configured search path.";
+            const string OriginalFormat =
+                "Considered candidate '{Candidate}' while resolving a reference, but expected '{Expected}' according to the configured search path.";
+
+            long lazyCompositeLength = WriteEvents(structured: false);
+            long structuredLength = WriteEvents(structured: true);
+
+            _output.WriteLine(
+                $"Lazy composite: {lazyCompositeLength:N0} bytes; structured: {structuredLength:N0} bytes.");
+            // Dedicated records measured 2.7% overhead; leave headroom while catching lost string-table reuse.
+            structuredLength.ShouldBeLessThan((lazyCompositeLength * 11) / 10);
+
+            long WriteEvents(bool structured)
+            {
+                using var stream = new MemoryStream();
+                using var writer = new BinaryWriter(stream);
+                var eventWriter = new BuildEventArgsWriter(writer);
+                for (int i = 0; i < Count; i++)
+                {
+                    string candidate = $"candidate-{i:D4}.dll";
+                    const string Expected = "expected.dll";
+                    BuildMessageEventArgs buildEvent;
+                    if (structured)
+                    {
+                        buildEvent = new StructuredBuildMessageEventArgs(
+                            null,
+                            null,
+                            null,
+                            0,
+                            0,
+                            0,
+                            0,
+                            OriginalFormat,
+                            OriginalFormat,
+                            [
+                                new("Candidate", candidate),
+                                new("Expected", Expected),
+                            ],
+                            null,
+                            "Task",
+                            MessageImportance.Low,
+                            DateTime.UtcNow);
+                    }
+                    else
+                    {
+                        buildEvent = new BuildMessageEventArgs(
+                            MessageFormat,
+                            null,
+                            "Task",
+                            MessageImportance.Low,
+                            DateTime.UtcNow,
+                            candidate,
+                            Expected);
+                    }
+
+                    eventWriter.Write(buildEvent);
+                }
+
+                return stream.Length;
+            }
+        }
+
+        [Fact]
+        public void StructuredMessagePreservesNullAndEmptyValuesThroughBinaryLog()
+        {
+            var args = new StructuredBuildMessageEventArgs(
+                null,
+                null,
+                null,
+                0,
+                0,
+                0,
+                0,
+                "{NullValue}|{EmptyValue}",
+                "{NullValue}|{EmptyValue}",
+                [
+                    new("NullValue", null),
+                    new("EmptyValue", string.Empty),
+                ],
+                null,
+                "Task",
+                MessageImportance.Low,
+                DateTime.UtcNow);
+
+            Roundtrip(
+                args,
+                e => e.Message,
+                e => e.OriginalFormat,
+                e => string.Join("|", e.StructuredValues!.Select(value => $"{value.Key}={value.Value ?? "<null>"}")));
+        }
+
+        [Fact]
+        public void StructuredEventsUseDedicatedRecordsAndRoundtripDiagnosticMetadata()
+        {
+            KeyValuePair<string, string>[] values = [new("Detail", "detail")];
+            DateTime timestamp = DateTime.UtcNow;
+            var message = new StructuredBuildMessageEventArgs(
+                "subcategory", "M1", "message.cs", 1, 2, 3, 4,
+                "localized message", "message {Detail}", values,
+                "message-help", "Task", MessageImportance.Low, timestamp);
+            var warning = new StructuredBuildWarningEventArgs(
+                "subcategory", "W1", "warning.cs", 5, 6, 7, 8,
+                "localized warning", "warning {Detail}", values,
+                "warning-help", "Task", "https://warning", timestamp);
+            var error = new StructuredBuildErrorEventArgs(
+                "subcategory", "E1", "error.cs", 9, 10, 11, 12,
+                "localized error", "error {Detail}", values,
+                "error-help", "Task", "https://error", timestamp);
+
+            AssertRecordKind(message, BinaryLogRecordKind.StructuredMessage);
+            AssertRecordKind(warning, BinaryLogRecordKind.StructuredWarning);
+            AssertRecordKind(error, BinaryLogRecordKind.StructuredError);
+
+            Roundtrip(
+                message,
+                e => e.Message,
+                e => e.OriginalFormat,
+                e => e.Importance.ToString(),
+                e => e.Code,
+                e => e.File,
+                e => string.Join("|", e.StructuredValues!));
+            Roundtrip(
+                warning,
+                e => e.Message,
+                e => e.OriginalFormat,
+                e => e.Code,
+                e => e.File,
+                e => e.HelpLink,
+                e => string.Join("|", e.StructuredValues!));
+            Roundtrip(
+                error,
+                e => e.Message,
+                e => e.OriginalFormat,
+                e => e.Code,
+                e => e.File,
+                e => e.HelpLink,
+                e => string.Join("|", e.StructuredValues!));
+
+            static void AssertRecordKind(BuildEventArgs args, BinaryLogRecordKind expected)
+            {
+                using var stream = new MemoryStream();
+                using var writer = new BinaryWriter(stream);
+                new BuildEventArgsWriter(writer).Write(args);
+                stream.Position = 0;
+                using var reader = new BinaryReader(stream);
+                using var eventReader = new BuildEventArgsReader(reader, BinaryLogger.FileFormatVersion);
+                eventReader.ReadRaw().RecordKind.ShouldBe(expected);
+            }
+        }
+
 
         /// <summary>
         /// The MSBuild Server lifecycle events are logged as a dedicated <see cref="MSBuildServerLifecycleEventArgs"/>

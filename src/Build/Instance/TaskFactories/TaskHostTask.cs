@@ -669,14 +669,21 @@ namespace Microsoft.Build.BackEnd
             switch (logMessagePacket.EventType)
             {
                 case LoggingEventType.BuildErrorEvent:
+                case LoggingEventType.ExtendedBuildErrorEvent:
                     this.BuildEngine.LogErrorEvent((BuildErrorEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.BuildWarningEvent:
+                case LoggingEventType.ExtendedBuildWarningEvent:
                     this.BuildEngine.LogWarningEvent((BuildWarningEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.TaskCommandLineEvent:
                 case LoggingEventType.BuildMessageEvent:
+                case LoggingEventType.ExtendedBuildMessageEvent:
+                case LoggingEventType.ExtendedCriticalBuildMessageEvent:
                     this.BuildEngine.LogMessageEvent((BuildMessageEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
+                    break;
+                case LoggingEventType.ExtendedCustomEvent:
+                    this.BuildEngine.LogCustomEvent((CustomBuildEventArgs)logMessagePacket.NodeBuildEvent.Value.Value);
                     break;
                 case LoggingEventType.CustomEvent:
                     BuildEventArgs buildEvent = logMessagePacket.NodeBuildEvent.Value.Value;
