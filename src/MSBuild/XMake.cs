@@ -2775,7 +2775,7 @@ namespace Microsoft.Build.CommandLine
             }
 
             string[] parameters = commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MultiThreaded];
-            return parameters.Length == 0 || !parameters[parameters.Length - 1].Equals(bool.FalseString, StringComparison.OrdinalIgnoreCase);
+            return parameters.Length == 0 || !parameters[^1].Equals(bool.FalseString, StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
