@@ -2862,11 +2862,6 @@
         <target state="new">Untarring file "{0}" to "{1}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="Untar.TarSlipExploit">
-        <source>Entry is outside the target directory: "{0}"</source>
-        <target state="new">Entry is outside the target directory: "{0}"</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
         <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
         <target state="translated">"{2}" 매개 변수가 프로젝트에 "{3}"(으)로 설정되었고 파일 크기와 타임스탬프가 일치하기 때문에 "{0}" 파일에서 "{1}" 파일로 압축을 풀 수 없습니다.</target>

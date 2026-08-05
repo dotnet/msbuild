@@ -264,6 +264,48 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [Fact]
+        public void RejectsTarSlipEntryOutsideDestination()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                // Craft a malicious archive whose entry name traverses out of the destination directory.
+                string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "malicious.tar");
+                string maliciousEntryName = $"..{Path.DirectorySeparatorChar}escaped.txt";
+
+                using (FileStream tarStream = new FileStream(tarFilePath, FileMode.Create, FileAccess.Write))
+                using (System.Formats.Tar.TarWriter writer = new System.Formats.Tar.TarWriter(tarStream, System.Formats.Tar.TarEntryFormat.Pax))
+                {
+                    System.Formats.Tar.PaxTarEntry entry = new System.Formats.Tar.PaxTarEntry(System.Formats.Tar.TarEntryType.RegularFile, maliciousEntryName)
+                    {
+                        DataStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes("pwned")),
+                    };
+                    writer.WriteEntry(entry);
+                }
+
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+
+                Untar untar = new Untar
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new DirectoryInfo(destination.Path),
+                    SkipUnchangedFiles = false,
+                    SourceFiles = [new FileInfo(tarFilePath)],
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                untar.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                // The traversal target must not have been written outside the destination directory.
+                string escapedPath = Path.GetFullPath(Path.Combine(destination.Path, maliciousEntryName));
+                File.Exists(escapedPath).ShouldBeFalse();
+
+                // The failure must surface the dedicated "outside destination directory" error (MSB4334),
+                // not a generic "could not open file" (MSB4333).
+                _mockEngine.Log.ShouldContain("MSB4334");
+            }
+        }
+
         private string CreateTar(TestEnvironment testEnvironment, TransientTestFolder sourceFolder, TarDirectory.TarCompression compression = TarDirectory.TarCompression.None)
         {
             string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");

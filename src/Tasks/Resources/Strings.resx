@@ -3162,9 +3162,6 @@
   <data name="Untar.DidNotUntarBecauseOfEntryType">
     <value>Did not untar entry "{0}" because its entry type "{1}" is not supported.</value>
   </data>
-  <data name="Untar.TarSlipExploit">
-    <value>Entry is outside the target directory: "{0}"</value>
-  </data>
   <data name="Untar.FileComment">
     <value>Untarring file "{0}" to "{1}".</value>
   </data>

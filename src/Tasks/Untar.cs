@@ -219,7 +219,15 @@ namespace Microsoft.Build.Tasks
                 }
 
                 AbsolutePath fullDestinationPath = TaskEnvironment.GetAbsolutePath(Path.Combine(destinationDirectory.FullName, entryName)).GetCanonicalForm();
-                ErrorUtilities.VerifyThrowInvalidOperation(fullDestinationPath.Value.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison), "Untar.TarSlipExploit", fullDestinationPath);
+
+                // Guard against tar-slip: an entry whose name contains ".." traversal segments (or an absolute path)
+                // can resolve to a location outside the destination directory. Reject such entries and continue so
+                // one malicious entry doesn't abort extraction of the rest of the (benign) archive.
+                if (!fullDestinationPath.Value.StartsWith(fullDestinationDirectoryPath, FileUtilities.PathComparison))
+                {
+                    Log.LogErrorWithCodeFromResources("Untar.ErrorExtractingResultsInFilesOutsideDestination", fullDestinationPath.Value, fullDestinationDirectoryPath.Value);
+                    continue;
+                }
 
                 FileInfo destinationPath = new(fullDestinationPath);
 
@@ -234,14 +242,6 @@ namespace Microsoft.Build.Tasks
                 if (tarEntry.EntryType is not (TarEntryType.RegularFile or TarEntryType.V7RegularFile))
                 {
                     Log.LogMessageFromResources(MessageImportance.Low, "Untar.DidNotUntarBecauseOfEntryType", entryName, tarEntry.EntryType.ToString());
-                    continue;
-                }
-
-                if (!destinationPath.FullName.StartsWith(destinationDirectory.FullName, StringComparison.OrdinalIgnoreCase))
-                {
-                    // TarFile.ExtractToDirectory() throws an IOException for this but since we're extracting one file at a time
-                    // for logging and cancellation, we need to check for it ourselves.
-                    Log.LogErrorFromResources("Untar.ErrorExtractingResultsInFilesOutsideDestination", destinationPath.FullName, destinationDirectory.FullName);
                     continue;
                 }
 

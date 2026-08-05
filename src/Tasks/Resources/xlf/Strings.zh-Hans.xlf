@@ -2862,11 +2862,6 @@
         <target state="new">Untarring file "{0}" to "{1}".</target>
         <note />
       </trans-unit>
-      <trans-unit id="Untar.TarSlipExploit">
-        <source>Entry is outside the target directory: "{0}"</source>
-        <target state="new">Entry is outside the target directory: "{0}"</target>
-        <note />
-      </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
         <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
         <target state="translated">未从文件“{0}”解压缩到文件“{1}”，因为“{2}”参数在项目中设置为“{3}”，而两个文件的大小及时间戳一致。</target>
