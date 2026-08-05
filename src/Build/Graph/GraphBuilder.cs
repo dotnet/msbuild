@@ -43,6 +43,8 @@ namespace Microsoft.Build.Graph
 
         public SolutionFile Solution { get; private set; }
 
+        internal IReadOnlyList<ProjectInstance> GenerateSolutionMetaprojects { get; private set; }
+
         private readonly List<ConfigurationMetadata> _entryPointConfigurationMetadata;
 
         private readonly ParallelWorkSet<ConfigurationMetadata, ParsedProject> _graphWorkSet;
@@ -65,6 +67,8 @@ namespace Microsoft.Build.Graph
         /// </summary>
         private readonly ConcurrentDictionary<ConfigurationMetadata, ConcurrentBag<string>> _projectReferrers = new();
 
+        private readonly SolutionProjectFactory _solutionProjectFactory;
+
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
             ProjectCollection projectCollection,
@@ -72,8 +76,10 @@ namespace Microsoft.Build.Graph
             ProjectInterpretation projectInterpretation,
             int degreeOfParallelism,
             ProjectGraphMode mode,
+            SolutionProjectFactory solutionProjectFactory,
             CancellationToken cancellationToken)
         {
+            _solutionProjectFactory = solutionProjectFactory;
             var (actualEntryPoints, solutionDependencies, solutionGlobalProperties) = ExpandSolutionIfPresent(entryPoints.ToImmutableArray());
 
             _solutionDependencies = solutionDependencies;
@@ -161,26 +167,17 @@ namespace Microsoft.Build.Graph
             solutionGlobalProperties[SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty] = $"{Solution.FullPath}.metaproj";
 
             ProjectInstance syntheticSolutionInstance;
-            ProjectGraphNode projectNodeToInheritFrom = projectNodes.FirstOrDefault();
-            if (projectNodeToInheritFrom is not null)
+            
+            if (_solutionProjectFactory is not null)
             {
-                syntheticSolutionInstance = new ProjectInstance(
-                    Solution.FullPath,
-                    projectNodeToInheritFrom.ProjectInstance,
-                    solutionGlobalProperties);
+                SolutionProjectGenerationResult generationResult = _solutionProjectFactory(Solution, solutionGlobalProperties);
+
+                syntheticSolutionInstance = generationResult.TraversalProject;
+                GenerateSolutionMetaprojects = generationResult.Metaprojects;
             }
             else
             {
-                // Create a minimal ProjectInstance for edge case of empty solution.
-                // We can't use SolutionProjectGenerator here because it requires logging services
-                // which aren't available during graph construction.
-                ProjectRootElement syntheticRootElement = ProjectRootElement.Create(_projectCollection);
-                syntheticRootElement.FullPath = Solution.FullPath;
-                syntheticSolutionInstance = new ProjectInstance(
-                    syntheticRootElement,
-                    solutionGlobalProperties,
-                    toolsVersion: null,
-                    _projectCollection);
+                syntheticSolutionInstance = CreateLegacySyntheticSolutionInstance(projectNodes, solutionGlobalProperties);
             }
 
             var syntheticSolutionNode = new ProjectGraphNode(syntheticSolutionInstance);
@@ -196,6 +193,29 @@ namespace Microsoft.Build.Graph
             }
 
             return syntheticSolutionNode;
+        }
+
+        private ProjectInstance CreateLegacySyntheticSolutionInstance(IReadOnlyCollection<ProjectGraphNode> projectNodes, Dictionary<string, string> solutionGlobalProperties)
+        {
+            ProjectGraphNode projectNodeToInheritFrom = projectNodes.FirstOrDefault();
+
+            if (projectNodeToInheritFrom is not null)
+            {
+                return new ProjectInstance(
+                    Solution.FullPath,
+                    projectNodeToInheritFrom.ProjectInstance,
+                    solutionGlobalProperties
+                );
+            }
+
+            ProjectRootElement syntheticRootElement = ProjectRootElement.Create(_projectCollection);
+            syntheticRootElement.FullPath = Solution.FullPath;
+
+            return new ProjectInstance(
+                syntheticRootElement,
+                solutionGlobalProperties,
+                toolsVersion: null,
+                _projectCollection);
         }
 
         private void AddEdges(Dictionary<ConfigurationMetadata, ParsedProject> allParsedProjects)

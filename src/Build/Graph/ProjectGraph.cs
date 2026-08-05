@@ -468,6 +468,7 @@ namespace Microsoft.Build.Graph
                 ProjectInterpretation.Instance,
                 options.DegreeOfParallelism,
                 options.Mode,
+                solutionProjectFactory: null,
                 cancellationToken);
             graphBuilder.BuildGraph();
 
