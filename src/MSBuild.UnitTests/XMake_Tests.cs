@@ -3309,6 +3309,22 @@ EndGlobal
             MSBuildApp.Execute([@"c:\bin\msbuild.exe", project, "/m:257 /mt"]).ShouldBe(MSBuildApp.ExitType.SwitchError);
         }
 
+        [Theory]
+        [InlineData("-mt", true)]
+        [InlineData("-mt:true", true)]
+        [InlineData("-mt:false", false)]
+        [InlineData("-multithreaded:false", false)]
+        public void MultiThreadedSwitchAcceptsBooleanValue(string argument, bool expected)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create();
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+            CommandLineSwitches switches = new();
+            CommandLineParser parser = new();
+            parser.GatherCommandLineSwitches([argument], switches);
+
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBe(expected);
+        }
+
         [Fact]
         public void MSBuildForceMultiThreadedEnvironmentVariableEnablesMultiThreadedMode()
         {

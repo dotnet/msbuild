@@ -2769,7 +2769,8 @@ namespace Microsoft.Build.CommandLine
                 return true;
             }
 
-            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded);
+            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded)
+                && ProcessBooleanSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MultiThreaded], defaultValue: true, resourceName: null);
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
