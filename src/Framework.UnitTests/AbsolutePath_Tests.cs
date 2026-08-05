@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 using Xunit.NetCore.Extensions;
@@ -94,7 +95,7 @@ namespace Microsoft.Build.UnitTests
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
             ChangeWaves.ResetStateForTests();
 
-            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path, GetTestBasePath()));
+            var exception = Should.Throw<WhitespaceOnlyPathException>(() => new AbsolutePath(path, GetTestBasePath()));
 
             exception.Message.ShouldStartWith("The path consists only of whitespace.");
             exception.Message.ShouldContain("non-whitespace character");
@@ -110,10 +111,20 @@ namespace Microsoft.Build.UnitTests
             env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
             ChangeWaves.ResetStateForTests();
 
-            var exception = Should.Throw<ArgumentException>(() => new AbsolutePath(path));
+            var exception = Should.Throw<WhitespaceOnlyPathException>(() => new AbsolutePath(path));
 
             exception.Message.ShouldStartWith("The path consists only of whitespace.");
             exception.Message.ShouldContain("non-whitespace character");
+        }
+
+        [Fact]
+        public void ValueTypeParser_ShouldPreserveWhitespaceOnlyPathException()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+
+            Should.Throw<WhitespaceOnlyPathException>(() => ValueTypeParser.Parse(" ", typeof(AbsolutePath)));
         }
 
         [Fact]

@@ -128,7 +128,7 @@ namespace Microsoft.Build.Framework
         {
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_10) && string.IsNullOrWhiteSpace(path))
             {
-                throw new ArgumentException(SR.PathCannotBeWhitespace, nameof(path));
+                throw new WhitespaceOnlyPathException(nameof(path));
             }
         }
 

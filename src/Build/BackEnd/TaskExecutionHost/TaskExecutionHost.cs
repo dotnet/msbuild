@@ -1001,14 +1001,6 @@ namespace Microsoft.Build.BackEnd
             return ValueTypeParser.Parse(value, targetType);
         }
 
-        private static bool IsPathParameterType(Type parameterType)
-        {
-            Type valueType = parameterType.IsArray ? parameterType.GetElementType() : parameterType;
-            return TaskItemTypeDetector.IsSupportedPathType(valueType)
-                || (TaskParameterTypeVerifier.TryGetSupportedTaskItemValueType(valueType, out Type taskItemValueType)
-                    && TaskItemTypeDetector.IsSupportedPathType(taskItemValueType));
-        }
-
         /// <summary>
         /// Called on the local side.
         /// </summary>
@@ -1097,6 +1089,17 @@ namespace Microsoft.Build.BackEnd
                     return InternalSetTaskParameter(parameter, finalTaskInputs);
                 }
             }
+            catch (WhitespaceOnlyPathException)
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(
+                    parameterLocation,
+                    "InvalidTaskPathParameterValueError",
+                    parameter.Name,
+                    parameterType.FullName,
+                    _taskName);
+
+                throw;
+            }
             catch (Exception ex)
             {
                 if (ex is InvalidCastException || // invalid type
@@ -1104,18 +1107,6 @@ namespace Microsoft.Build.BackEnd
                     ex is FormatException || // bad string representation of a type
                     ex is OverflowException) // overflow when converting string representation of a numerical type
                 {
-                    if (ex is ArgumentException
-                        && IsPathParameterType(parameterType)
-                        && string.IsNullOrWhiteSpace(currentItem.ItemSpec))
-                    {
-                        ProjectErrorUtilities.ThrowInvalidProject(
-                            parameterLocation,
-                            "InvalidTaskPathParameterValueError",
-                            parameter.Name,
-                            parameterType.FullName,
-                            _taskName);
-                    }
-
                     ProjectErrorUtilities.ThrowInvalidProject(
                         parameterLocation,
                         "InvalidTaskParameterValueError",
@@ -1635,6 +1626,17 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
             }
+            catch (WhitespaceOnlyPathException)
+            {
+                ProjectErrorUtilities.ThrowInvalidProject(
+                    parameterLocation,
+                    "InvalidTaskPathParameterValueError",
+                    parameter.Name,
+                    parameterType.FullName,
+                    _taskName);
+
+                throw;
+            }
             catch (Exception ex)
             {
                 if (ex is InvalidCastException || // invalid type
@@ -1643,18 +1645,6 @@ namespace Microsoft.Build.BackEnd
                     ex is OverflowException) // overflow when converting string representation of a numerical type
                 {
                     string expandedParameterValue = _batchBucket.Expander.ExpandIntoStringAndUnescape(parameterValue, ExpanderOptions.ExpandAll, parameterLocation);
-                    if (ex is ArgumentException
-                        && IsPathParameterType(parameterType)
-                        && string.IsNullOrWhiteSpace(expandedParameterValue))
-                    {
-                        ProjectErrorUtilities.ThrowInvalidProject(
-                            parameterLocation,
-                            "InvalidTaskPathParameterValueError",
-                            parameter.Name,
-                            parameterType.FullName,
-                            _taskName);
-                    }
-
                     ProjectErrorUtilities.ThrowInvalidProject(
                         parameterLocation,
                         "InvalidTaskParameterValueError",
