@@ -1091,14 +1091,12 @@ namespace Microsoft.Build.BackEnd
             }
             catch (WhitespaceOnlyPathException)
             {
-                ProjectErrorUtilities.ThrowInvalidProject(
+                throw ProjectErrorUtilities.CreateInvalidProjectException(
                     parameterLocation,
                     "InvalidTaskPathParameterValueError",
                     parameter.Name,
                     parameterType.FullName,
                     _taskName);
-
-                throw;
             }
             catch (Exception ex)
             {
@@ -1628,14 +1626,12 @@ namespace Microsoft.Build.BackEnd
             }
             catch (WhitespaceOnlyPathException)
             {
-                ProjectErrorUtilities.ThrowInvalidProject(
+                throw ProjectErrorUtilities.CreateInvalidProjectException(
                     parameterLocation,
                     "InvalidTaskPathParameterValueError",
                     parameter.Name,
                     parameterType.FullName,
                     _taskName);
-
-                throw;
             }
             catch (Exception ex)
             {

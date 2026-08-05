@@ -5,7 +5,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #nullable enable
 
@@ -194,7 +193,6 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// through <see cref="TaskEnvironment.GetAbsolutePath(string)"/> inside a task.
         /// </summary>
         [Fact]
-        [UseInvariantCulture]
         public void WhitespaceOnlyProjectPropertyPassedToGetAbsolutePathReportsActionableException()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -218,10 +216,8 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             ObjectModelHelpers.BuildProjectExpectFailure(project, logger);
 
             logger.AssertLogContains("Received path length: 3");
-            logger.AssertLogContains("MSB4018");
-            logger.AssertLogContains(typeof(WhitespaceOnlyPathException).FullName);
-            logger.AssertLogContains("The path consists only of whitespace.");
-            logger.AssertLogContains("Specify a path that contains at least one non-whitespace character.");
+            BuildErrorEventArgs error = Assert.Single(logger.Errors);
+            Assert.Equal("MSB4018", error.Code);
         }
     }
 

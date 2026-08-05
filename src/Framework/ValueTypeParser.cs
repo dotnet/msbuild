@@ -100,11 +100,8 @@ namespace Microsoft.Build.Shared
                 // general-purpose conversion for parameter types we don't really intend to support.
                 return Convert.ChangeType(value, targetType, CultureInfo.InvariantCulture);
             }
-            catch (WhitespaceOnlyPathException)
-            {
-                throw;
-            }
-            catch (Exception ex) when (ex is FormatException || ex is InvalidCastException || ex is OverflowException || ex is ArgumentException || ex is NotSupportedException)
+            catch (Exception ex) when (ex is not WhitespaceOnlyPathException
+                && (ex is FormatException || ex is InvalidCastException || ex is OverflowException || ex is ArgumentException || ex is NotSupportedException))
             {
                 throw new ArgumentException($"Cannot parse '{value}' as type {targetType.Name}.", nameof(value), ex);
             }

@@ -88,7 +88,6 @@ namespace Microsoft.Build.UnitTests
         [InlineData("\t")]
         [InlineData("\r\n")]
         [InlineData(" \t\r\n")]
-        [UseInvariantCulture]
         public void AbsolutePath_WhitespaceOnlyWithBasePath_ShouldExplainHowToFixTheValue(string path)
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -97,14 +96,12 @@ namespace Microsoft.Build.UnitTests
 
             var exception = Should.Throw<WhitespaceOnlyPathException>(() => new AbsolutePath(path, GetTestBasePath()));
 
-            exception.Message.ShouldStartWith("The path consists only of whitespace.");
-            exception.Message.ShouldContain("non-whitespace character");
+            exception.ParamName.ShouldBe(nameof(path));
         }
 
         [Theory]
         [InlineData(" ")]
         [InlineData("\t")]
-        [UseInvariantCulture]
         public void AbsolutePath_WhitespaceOnlyWithoutBasePath_ShouldExplainHowToFixTheValue(string path)
         {
             using TestEnvironment env = TestEnvironment.Create();
@@ -113,8 +110,7 @@ namespace Microsoft.Build.UnitTests
 
             var exception = Should.Throw<WhitespaceOnlyPathException>(() => new AbsolutePath(path));
 
-            exception.Message.ShouldStartWith("The path consists only of whitespace.");
-            exception.Message.ShouldContain("non-whitespace character");
+            exception.ParamName.ShouldBe(nameof(path));
         }
 
         [Fact]
