@@ -85,6 +85,20 @@ namespace Microsoft.Build.Tasks
         /// <remarks>This task does not support incremental build and will error out instead.</remarks>
         public bool FailIfNotIncremental { get; set; }
 
+        /// <summary>
+        /// Gets or sets a value that indicates whether the Unix file permissions stored in the archive should be
+        /// preserved exactly, including the setuid, setgid, and sticky bits.
+        /// </summary>
+        /// <remarks>
+        /// When <see langword="false"/> (the default), extraction masks the archived mode to the standard
+        /// read/write/execute ownership bits, dropping the setuid/setgid/sticky bits. This matches the safer,
+        /// non-root default of GNU tar, bsdtar, and Python's <c>data</c> extraction filter, and avoids restoring
+        /// privileged permission bits from an untrusted archive. When <see langword="true"/>, the archived
+        /// permissions are restored verbatim (still subject to the process umask) by delegating to the runtime's
+        /// built-in extraction. This has no effect on Windows.
+        /// </remarks>
+        public bool PreservePermissions { get; set; }
+
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
@@ -284,37 +298,49 @@ namespace Microsoft.Build.Tasks
                 {
                     Log.LogMessageFromResources(MessageImportance.Normal, "Untar.FileComment", entryName, destinationPath.FullName);
 
-                    FileStreamOptions fileStreamOptions = new()
+                    if (PreservePermissions)
                     {
-                        Access = FileAccess.Write,
-                        Mode = FileMode.Create,
-                        Share = FileShare.None,
-                        BufferSize = 0x1000
-                    };
-
-                    const UnixFileMode OwnershipPermissions =
-                        UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
-                        UnixFileMode.GroupRead | UnixFileMode.GroupWrite | UnixFileMode.GroupExecute |
-                        UnixFileMode.OtherRead | UnixFileMode.OtherWrite | UnixFileMode.OtherExecute;
-
-                    // Restore Unix permissions.
-                    // For security, limit to ownership permissions, and respect umask (through UnixCreateMode).
-                    UnixFileMode mode = tarEntry.Mode & OwnershipPermissions;
-                    if (mode != UnixFileMode.None && NativeMethodsShared.IsUnixLike)
-                    {
-                        fileStreamOptions.UnixCreateMode = mode;
+                        // Delegate to the runtime, which restores the archived Unix permissions verbatim
+                        // (including setuid/setgid/sticky bits, subject to umask) and flows the cancellation token.
+                        tarEntry.ExtractToFileAsync(destinationPath.FullName, overwrite: true, _cancellationTokenSource.Token)
+                            .ConfigureAwait(continueOnCapturedContext: false)
+                            .GetAwaiter()
+                            .GetResult();
                     }
-
-                    using (FileStream destination = new FileStream(destinationPath.FullName, fileStreamOptions))
+                    else
                     {
-                        if (tarEntry.DataStream is Stream dataStream)
+                        FileStreamOptions fileStreamOptions = new()
                         {
+                            Access = FileAccess.Write,
+                            Mode = FileMode.Create,
+                            Share = FileShare.None,
+                            BufferSize = 0x1000
+                        };
+
+                        const UnixFileMode OwnershipPermissions =
+                            UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute |
+                            UnixFileMode.GroupRead | UnixFileMode.GroupWrite | UnixFileMode.GroupExecute |
+                            UnixFileMode.OtherRead | UnixFileMode.OtherWrite | UnixFileMode.OtherExecute;
+
+                        // Restore Unix permissions.
+                        // For security, limit to ownership permissions, and respect umask (through UnixCreateMode).
+                        UnixFileMode mode = tarEntry.Mode & OwnershipPermissions;
+                        if (mode != UnixFileMode.None && NativeMethodsShared.IsUnixLike)
+                        {
+                            fileStreamOptions.UnixCreateMode = mode;
+                        }
+
+                        using (FileStream destination = new FileStream(destinationPath.FullName, fileStreamOptions))
+                        {
+                            if (tarEntry.DataStream is Stream dataStream)
+                            {
 #pragma warning disable CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
-                            dataStream.CopyToAsync(destination, _DefaultCopyBufferSize, _cancellationTokenSource.Token)
-                                .ConfigureAwait(continueOnCapturedContext: false)
-                                .GetAwaiter()
-                                .GetResult();
+                                dataStream.CopyToAsync(destination, _DefaultCopyBufferSize, _cancellationTokenSource.Token)
+                                    .ConfigureAwait(continueOnCapturedContext: false)
+                                    .GetAwaiter()
+                                    .GetResult();
 #pragma warning restore CA2025
+                            }
                         }
                     }
 

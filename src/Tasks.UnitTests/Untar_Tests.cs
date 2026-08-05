@@ -306,6 +306,82 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
+        [UnixOnlyFact]
+        public void MasksSpecialPermissionBitsByDefault()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                string tarFilePath = CreateTarWithMode(testEnvironment, "F1.txt", "F1", UnixFileMode.SetGroup | UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.GroupRead | UnixFileMode.GroupExecute | UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
+
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+
+                Untar untar = new Untar
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new DirectoryInfo(destination.Path),
+                    SkipUnchangedFiles = false,
+                    SourceFiles = [new FileInfo(tarFilePath)],
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                untar.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                UnixFileMode extractedMode = File.GetUnixFileMode(Path.Combine(destination.Path, "F1.txt"));
+
+                // The setgid bit and any other special bits must be dropped when preserving is off.
+                (extractedMode & UnixFileMode.SetGroup).ShouldBe(UnixFileMode.None);
+                (extractedMode & UnixFileMode.SetUser).ShouldBe(UnixFileMode.None);
+                (extractedMode & UnixFileMode.StickyBit).ShouldBe(UnixFileMode.None);
+            }
+        }
+
+        [UnixOnlyFact]
+        public void PreservesSpecialPermissionBitsWhenRequested()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                string tarFilePath = CreateTarWithMode(testEnvironment, "F1.txt", "F1", UnixFileMode.SetGroup | UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute | UnixFileMode.GroupRead | UnixFileMode.GroupExecute | UnixFileMode.OtherRead | UnixFileMode.OtherExecute);
+
+                TransientTestFolder destination = testEnvironment.CreateFolder(createFolder: false);
+
+                Untar untar = new Untar
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFolder = new DirectoryInfo(destination.Path),
+                    PreservePermissions = true,
+                    SkipUnchangedFiles = false,
+                    SourceFiles = [new FileInfo(tarFilePath)],
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                untar.Execute().ShouldBeTrue(_mockEngine.Log);
+
+                UnixFileMode extractedMode = File.GetUnixFileMode(Path.Combine(destination.Path, "F1.txt"));
+
+                // The setgid bit set in the archive must survive extraction when preserving is on.
+                (extractedMode & UnixFileMode.SetGroup).ShouldBe(UnixFileMode.SetGroup);
+            }
+        }
+
+        private string CreateTarWithMode(TestEnvironment testEnvironment, string entryName, string content, UnixFileMode mode)
+        {
+            string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "modes.tar");
+
+            using (FileStream tarStream = new FileStream(tarFilePath, FileMode.Create, FileAccess.Write))
+            using (System.Formats.Tar.TarWriter writer = new System.Formats.Tar.TarWriter(tarStream))
+            {
+                System.Formats.Tar.UstarTarEntry entry = new System.Formats.Tar.UstarTarEntry(System.Formats.Tar.TarEntryType.RegularFile, entryName)
+                {
+                    Mode = mode,
+                    DataStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content)),
+                };
+
+                writer.WriteEntry(entry);
+            }
+
+            return tarFilePath;
+        }
+
         private string CreateTar(TestEnvironment testEnvironment, TransientTestFolder sourceFolder, TarDirectory.TarCompression compression = TarDirectory.TarCompression.None)
         {
             string tarFilePath = Path.Combine(testEnvironment.CreateFolder(createFolder: true).Path, "test.tar");
@@ -327,3 +403,5 @@ namespace Microsoft.Build.Tasks.UnitTests
 }
 
 #endif
+
+
