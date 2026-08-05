@@ -505,6 +505,44 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Contains(message, _customLogger.LastWarning.Message); // "Expected line to contain NotSerializable message but it did not"
         }
 
+        [Fact]
+        public void TestLogAssemblyResolutionSearchTraceEventMP()
+        {
+            var searchEvent = new AssemblyResolutionSearchTraceEventArgs(
+                "Requested, Version=1.0.0.0",
+                "MSIL",
+                [
+                    new AssemblyResolutionSearchAttempt(
+                        "candidate.dll",
+                        "search-path",
+                        parentAssembly: null,
+                        assemblyName: null,
+                        AssemblyResolutionSearchResult.FileNotFound,
+                        processorArchitecture: null,
+                        logAssemblyFoldersEx: false),
+                ],
+                new AssemblyResolutionSearchTraceMessageFormats(
+                    "Search {0}",
+                    "Search {0} from {1}",
+                    "Searched AssemblyFoldersEx",
+                    "Missing {0}",
+                    "Found {1} at {0}, expected {2}",
+                    "No identity {0}",
+                    "Not in GAC {0}",
+                    "Not a file {0}",
+                    "Architecture {1} at {0}, expected {2}"),
+                "ResolveAssemblyReference",
+                MessageImportance.Low,
+                DateTime.UtcNow);
+
+            _mockHost.BuildParameters.MaxNodeCount = 4;
+            _taskHost.LogMessageEvent(searchEvent);
+
+            _taskHost.IsRunningMultipleNodes.ShouldBeTrue();
+            _customLogger.LastMessage.ShouldBeOfType<AssemblyResolutionSearchTraceEventArgs>();
+            _customLogger.NumberOfWarning.ShouldBe(0);
+        }
+
         /// <summary>
         /// Test that custom events are logged properly
         /// </summary>
