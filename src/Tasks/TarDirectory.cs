@@ -108,7 +108,7 @@ namespace Microsoft.Build.Tasks
 
             if (FailIfNotIncremental)
             {
-                Log.LogErrorFromResources("TarDirectory.Comment", SourceDirectory.FullName, DestinationFile.FullName);
+                Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailIfNotIncremental", SourceDirectory.FullName, DestinationFile.FullName);
 
                 return false;
             }
@@ -135,41 +135,58 @@ namespace Microsoft.Build.Tasks
                 // Unknown is only reachable if it was explicitly set; fall back to the Pax default.
                 TarEntryFormat format = Format == TarEntryFormat.Unknown ? TarEntryFormat.Pax : Format;
 
-                // The destination is guaranteed not to exist at this point: Execute deletes any existing
-                // file (or errors when Overwrite is false) before yielding, so OpenWrite creates a fresh file.
-                using FileStream destinationStream = DestinationFile.OpenWrite();
-
-                // Wrap the destination stream in the requested compression, if any. The tar archive is always
-                // written to the (optionally compressed) stream, and the TarWriter is created with the requested
-                // TarEntryFormat so every entry is emitted in that format.
-                using Stream? compressionStream = Compression switch
+                // Scope the write streams to this block so they are flushed and closed before Execute returns,
+                // and — importantly — before the catch below attempts to delete a partially-written archive.
+                using (FileStream destinationStream = DestinationFile.OpenWrite())
                 {
-                    TarCompression.GZip => new GZipStream(destinationStream, CompressionLevel.Optimal),
-                    TarCompression.ZStandard => new ZstandardStream(destinationStream, CompressionLevel.Optimal),
-                    _ => null,
-                };
-
-                // Write the archive entry-by-entry (rather than the one-shot TarFile.CreateFromDirectory) so that the
-                // entries are emitted in a deterministic, ordinal-sorted order. When a deterministic timestamp is
-                // supplied, each entry is constructed manually so its modification time can be overridden; otherwise
-                // per-entry metadata is written exactly as TarFile.CreateFromDirectory would via WriteEntry.
-                using TarWriter writer = new TarWriter(compressionStream ?? destinationStream, format, leaveOpen: true);
-
-                foreach ((FileSystemInfo info, string entryName) in EnumerateEntriesInDeterministicOrder())
-                {
-                    if (deterministicTimestamp is DateTimeOffset timestamp)
+                    // Wrap the destination stream in the requested compression, if any. The tar archive is always
+                    // written to the (optionally compressed) stream, and the TarWriter is created with the requested
+                    // TarEntryFormat so every entry is emitted in that format.
+                    using Stream? compressionStream = Compression switch
                     {
-                        WriteStampedEntry(writer, format, info, entryName, timestamp);
-                    }
-                    else
+                        TarCompression.GZip => new GZipStream(destinationStream, CompressionLevel.Optimal),
+                        TarCompression.ZStandard => new ZstandardStream(destinationStream, CompressionLevel.Optimal),
+                        _ => null,
+                    };
+
+                    // Write the archive entry-by-entry (rather than the one-shot TarFile.CreateFromDirectory) so that the
+                    // entries are emitted in a deterministic, ordinal-sorted order. When a deterministic timestamp is
+                    // supplied, each entry is constructed manually so its modification time can be overridden; otherwise
+                    // per-entry metadata is written exactly as TarFile.CreateFromDirectory would via WriteEntry.
+                    using TarWriter writer = new TarWriter(compressionStream ?? destinationStream, format, leaveOpen: true);
+
+                    foreach ((FileSystemInfo info, string entryName) in EnumerateEntriesInDeterministicOrder())
                     {
-                        writer.WriteEntry(info.FullName, entryName);
+                        if (deterministicTimestamp is DateTimeOffset timestamp)
+                        {
+                            WriteStampedEntry(writer, format, info, entryName, timestamp);
+                        }
+                        else
+                        {
+                            writer.WriteEntry(info.FullName, entryName);
+                        }
                     }
                 }
             }
             catch (Exception e)
             {
                 Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", SourceDirectory.FullName, DestinationFile.FullName, e.Message, string.Empty);
+
+                // Best-effort cleanup of the partially-written archive so a subsequent non-Overwrite build does
+                // not fail with "already exists" on a corrupt, incomplete file. Swallow any failure here — the
+                // original ErrorFailed above is the diagnostic that matters.
+                try
+                {
+                    DestinationFile.Refresh();
+                    if (DestinationFile.Exists)
+                    {
+                        DestinationFile.Delete();
+                    }
+                }
+                catch
+                {
+                    // Ignore: cleanup is best-effort and must not mask the real failure.
+                }
             }
             finally
             {

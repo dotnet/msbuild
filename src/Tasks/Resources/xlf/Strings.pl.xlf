@@ -2682,6 +2682,11 @@
         <target state="new">MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</target>
         <note>{StrBegin="MSB4321: "}</note>
       </trans-unit>
+      <trans-unit id="TarDirectory.ErrorFailIfNotIncremental">
+        <source>MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</source>
+        <target state="new">MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</target>
+        <note>{StrBegin="MSB4325: "}</note>
+      </trans-unit>
       <trans-unit id="TarDirectory.ErrorFailed">
         <source>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</source>
         <target state="new">MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</target>
