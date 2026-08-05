@@ -73,6 +73,19 @@ namespace Microsoft.Build.Server
         private readonly ServerNodeHandshake _handshake;
 
         /// <summary>
+        /// Identifies the transient server this client launches for its own exclusive use, or
+        /// <see langword="null"/> when this client talks to the resident server.
+        /// </summary>
+        /// <remarks>
+        /// A transient server is torn down after the single build it serves, so it must not be
+        /// reachable by any other client: without this, every transient build resolves to the same
+        /// endpoint as the resident server and orders that to shut down instead. Giving each one its
+        /// own id also lets concurrent transient builds run their own servers rather than contending
+        /// on one set of pipe and mutex names.
+        /// </remarks>
+        private readonly string? _serverInstanceId;
+
+        /// <summary>
         /// The named pipe name for client-server communication.
         /// </summary>
         private readonly string _pipeName;
@@ -172,6 +185,7 @@ namespace Microsoft.Build.Server
             _msbuildLocation = msbuildLocation;
             _multiThreaded = multiThreaded;
             _shutdownServerAfterBuild = shutdownServerAfterBuild;
+            _serverInstanceId = shutdownServerAfterBuild ? Guid.NewGuid().ToString("N") : null;
 
             // Client <-> Server communication stream
             _handshake = GetHandshake();
@@ -531,11 +545,21 @@ namespace Microsoft.Build.Server
 
             try
             {
-                string[] msBuildServerOptions =
-                [
-                    "/nologo",
-                    NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcServerNode)
-                ];
+                string[] msBuildServerOptions = _serverInstanceId is null
+                    ?
+                    [
+                        "/nologo",
+                        NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcServerNode)
+                    ]
+                    :
+                    [
+                        "/nologo",
+                        NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcServerNode),
+
+                        // The server derives its pipe and mutex names from this too, so a transient
+                        // server is addressable only by the client that launched it.
+                        $"{OutOfProcServerNode.ServerInstanceIdCommandLineSwitch}{_serverInstanceId}"
+                    ];
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
 
@@ -643,10 +667,12 @@ namespace Microsoft.Build.Server
                         _shutdownServerAfterBuild);
         }
 
-        private ServerNodeHandshake GetHandshake() => new(CommunicationsUtilities.GetHandshakeOptions(
-            taskHost: false,
-            taskHostParameters: TaskHostParameters.Empty,
-            architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
+        private ServerNodeHandshake GetHandshake() => new(
+            CommunicationsUtilities.GetHandshakeOptions(
+                taskHost: false,
+                taskHostParameters: TaskHostParameters.Empty,
+                architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()),
+            _serverInstanceId);
 
         /// <summary>
         /// Handle cancellation.

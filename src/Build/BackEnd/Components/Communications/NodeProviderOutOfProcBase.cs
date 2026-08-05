@@ -717,17 +717,33 @@ namespace Microsoft.Build.BackEnd
         /// Used by out-of-proc nodes (e.g., server node) to detect over-provisioning at build completion.
         /// </summary>
         /// <param name="nodeMode">The node mode to filter for.</param>
+        /// <param name="excludedCommandLineSubstring">When non-null, processes whose command line contains
+        /// this text are not counted. The server uses it to exclude transient servers, which are private to
+        /// a single build and so do not compete with the resident server for its role.</param>
         /// <returns>The number of matching processes, or 0 if enumeration fails or the feature wave is disabled.</returns>
-        internal static int CountActiveNodesWithMode(NodeMode nodeMode)
+        internal static int CountActiveNodesWithMode(NodeMode nodeMode, string excludedCommandLineSubstring = null)
         {
             try
             {
                 (_, IList<Process> nodeProcesses) = GetPossibleRunningNodes(nodeMode);
-                int count = nodeProcesses.Count;
+                int count = 0;
                 foreach (var process in nodeProcesses)
                 {
+                    // Anything we cannot read the command line for is counted, so that a failure to
+                    // identify a process errs towards detecting over-provisioning rather than missing it.
+                    bool excluded = excludedCommandLineSubstring is not null
+                        && process.TryGetCommandLine(out string commandLine)
+                        && commandLine is not null
+                        && commandLine.IndexOf(excludedCommandLineSubstring, StringComparison.OrdinalIgnoreCase) >= 0;
+
+                    if (!excluded)
+                    {
+                        count++;
+                    }
+
                     process?.Dispose();
                 }
+
                 return count;
             }
             catch (Exception ex)

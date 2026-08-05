@@ -92,9 +92,17 @@ namespace Microsoft.Build.Server
         private bool _cancelRequested = false;
         private string _serverBusyMutexName = default!;
 
-        public OutOfProcServerNode(BuildCallback buildFunction)
+        /// <summary>
+        /// Identifies this transient server, or <see langword="null"/> when this is the resident
+        /// server. Supplied by the client that launched this process, which derives the same pipe and
+        /// mutex names from it.
+        /// </summary>
+        private readonly string? _instanceId;
+
+        public OutOfProcServerNode(BuildCallback buildFunction, string? instanceId = null)
         {
             _buildFunction = buildFunction;
+            _instanceId = instanceId;
 
             _receivedPackets = new ConcurrentQueue<INodePacket>();
             _packetReceivedEvent = new AutoResetEvent(false);
@@ -116,7 +124,8 @@ namespace Microsoft.Build.Server
         public NodeEngineShutdownReason Run(out Exception? shutdownException)
         {
             ServerNodeHandshake handshake = new(
-                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
+                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()),
+                _instanceId);
 
             _serverBusyMutexName = GetBusyServerMutexName(handshake);
 
@@ -184,6 +193,13 @@ namespace Microsoft.Build.Server
         }
 
         #endregion
+
+        /// <summary>
+        /// The command line switch a client uses to tell the transient server it launches which
+        /// instance it is. Both sides fold the value into <see cref="ServerNodeHandshake.ComputeHash"/>,
+        /// so a transient server is addressable only by that client.
+        /// </summary>
+        internal const string ServerInstanceIdCommandLineSwitch = "/serverinstanceid:";
 
         internal static string GetPipeName(ServerNodeHandshake handshake)
             => NamedPipeUtil.GetPlatformSpecificPipeName($"MSBuildServer-{handshake.ComputeHash()}");
@@ -343,12 +359,16 @@ namespace Microsoft.Build.Server
         {
             bool shouldReuse = buildComplete.PrepareForReuse;
 
-            if (shouldReuse)
+            // A transient server serves one build and exits, so it neither competes for the resident
+            // server's role nor counts against it.
+            if (shouldReuse && _instanceId is null)
             {
-                // Self-terminate if another server node is already running system-wide.
-                // Threshold is 1: only one server node should be active per handshake.
+                // Self-terminate if another resident server node is already running system-wide.
+                // Threshold is 1: only one resident server node should be active per handshake.
                 // If another is running (count > 1, since we count ourselves), exit to avoid over-provisioning.
-                int serverNodeCount = NodeProviderOutOfProcBase.CountActiveNodesWithMode(NodeMode.OutOfProcServerNode);
+                int serverNodeCount = NodeProviderOutOfProcBase.CountActiveNodesWithMode(
+                    NodeMode.OutOfProcServerNode,
+                    excludedCommandLineSubstring: ServerInstanceIdCommandLineSwitch);
                 if (serverNodeCount > 1)
                 {
                     CommunicationsUtilities.Trace($"Terminating server node due to over-provisioning: {serverNodeCount} server nodes found system-wide.");
