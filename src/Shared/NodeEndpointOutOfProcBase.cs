@@ -697,6 +697,15 @@ namespace Microsoft.Build.BackEnd
 #else
                                 bytesRead = localReadPipe.EndRead(result);
 #endif
+                                while (bytesRead > 0 && bytesRead < headerByte.Length)
+                                {
+                                    int additionalBytesRead = localReadPipe.Read(headerByte, bytesRead, headerByte.Length - bytesRead);
+                                    if (additionalBytesRead == 0)
+                                    {
+                                        break;
+                                    }
+                                    bytesRead += additionalBytesRead;
+                                }
                             }
                             catch (Exception e)
                             {
