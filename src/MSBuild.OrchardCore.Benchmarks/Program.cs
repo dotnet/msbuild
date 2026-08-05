@@ -122,7 +122,7 @@ static bool TryParseAndRemoveStringParameter(
 
     if (parameterIndex == argsList.Count - 1 ||
         string.IsNullOrWhiteSpace(argsList[parameterIndex + 1]) ||
-        argsList[parameterIndex + 1].StartsWith("--", StringComparison.Ordinal))
+        argsList[parameterIndex + 1].StartsWith('-'))
     {
         parameterValue = null;
         error = $"Missing value for {parameter}.";
