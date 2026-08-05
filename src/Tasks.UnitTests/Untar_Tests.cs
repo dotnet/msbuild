@@ -326,7 +326,9 @@ namespace Microsoft.Build.Tasks.UnitTests
 
                 untar.Execute().ShouldBeTrue(_mockEngine.Log);
 
+#pragma warning disable CA1416 // Validate platform compatibility — guarded by [UnixOnlyFact]
                 UnixFileMode extractedMode = File.GetUnixFileMode(Path.Combine(destination.Path, "F1.txt"));
+#pragma warning restore CA1416
 
                 // The setgid bit and any other special bits must be dropped when preserving is off.
                 (extractedMode & UnixFileMode.SetGroup).ShouldBe(UnixFileMode.None);
