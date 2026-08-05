@@ -2933,6 +2933,51 @@ $@"
             sortedNodes.Length.ShouldBe(graph.ProjectNodes.Count);
             sortedNodes.Distinct().Count().ShouldBe(sortedNodes.Length);
             sortedNodes.Last().ShouldBe(syntheticSolutionNode);
+            syntheticSolutionNode.ProjectInstance.FullPath.ShouldBe(solutionFile.Path);
+        }
+
+        [Fact]
+        public void BuildApiUsesGeneratedSolutionTraversalInstance()
+        {
+            TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
+            TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "GeneratedSolution.sln");
+            ProjectCollection projectCollection = _env.CreateProjectCollection().Collection;
+
+            ProjectGraph graph = ProjectGraph.CreateForBuild(
+                new ProjectGraphBuildOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
+                    ProjectCollection = projectCollection,
+                    Targets = ["CustomTarget"]
+                });
+
+            ProjectGraphNode solutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+
+            solutionNode.ProjectInstance.FullPath.ShouldBe($"{solutionFile.Path}.metaproj");
+            solutionNode.ProjectInstance.Targets.ContainsKey("CustomTarget").ShouldBeTrue();
+        }
+
+        [Fact]
+        public void BuildApiRejectsTargetNotSpecifiedDuringConstruction()
+        {
+            TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
+            TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "TargetBoundSolution.sln");
+
+            ProjectGraph graph = ProjectGraph.CreateForBuild(
+                new ProjectGraphBuildOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
+                    ProjectCollection = _env.CreateProjectCollection().Collection,
+                    Targets = ["CustomTarget"]
+                });
+
+            graph.GetTargetLists(["CustomTarget"]);
+
+            ArgumentException exception = Should.Throw<ArgumentException>(
+                () => graph.GetTargetLists(["AnotherTarget"]));
+
+            exception.ParamName.ShouldBe("entryProjectTargets");
+            exception.Message.ShouldContain("AnotherTarget");
         }
 
         [Fact]
@@ -3287,6 +3332,31 @@ $@"
                 }));
 
             exception.ParamName.ShouldBe("DegreeOfParallelism");
+        }
+
+        private TransientTestFile CreateSingleProjectSolution(
+            TransientTestFile projectFile,
+            string solutionFileName)
+        {
+            return _env.CreateFile(
+                solutionFileName,
+                $$"""
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 17
+                VisualStudioVersion = 17.0.31903.59
+                MinimumVisualStudioVersion = 17.0.31903.59
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "{{projectFile.Path}}", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|x64 = Debug|x64
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                        {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                    EndGlobalSection
+                EndGlobal
+                """);
         }
 
         public void Dispose()

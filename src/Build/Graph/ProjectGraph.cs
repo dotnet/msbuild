@@ -6,10 +6,12 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
@@ -17,6 +19,7 @@ using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -62,6 +65,8 @@ namespace Microsoft.Build.Graph
         private readonly EvaluationContext _evaluationContext = null;
 
         private readonly IReadOnlyCollection<ProjectGraphNode> _originalEntryPointNodes;
+
+        private readonly ImmutableHashSet<string> _generatedSolutionTargets;
 
         private GraphBuilder.GraphEdges Edges { get; }
 
@@ -443,6 +448,69 @@ namespace Microsoft.Build.Graph
         public ProjectGraph(
             ProjectGraphOptions options,
             CancellationToken cancellationToken = default)
+            : this(
+                options,
+                solutionProjectFactory: null,
+                generatedSolutionTargets: null,
+                cancellationToken)
+        {
+        }
+
+        /// <summary>
+        /// Constructs a target-bound project graph using the generated solution traversal project.
+        /// </summary>
+        /// <param name="options">The options used to construct the target-bound graph.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to observe.</param>
+        /// <returns>The constructed project graph.</returns>
+        [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
+        public static ProjectGraph CreateForBuild(
+            ProjectGraphBuildOptions options,
+            CancellationToken cancellationToken = default)
+        {
+            ArgumentNullException.ThrowIfNull(options);
+            ArgumentNullException.ThrowIfNull(options.EntryPoints);
+            ArgumentNullException.ThrowIfNull(options.ProjectCollection);
+            ArgumentNullException.ThrowIfNull(options.Targets);
+
+            ImmutableArray<string> targets = options.Targets.ToImmutableArray();
+
+            var graphOptions = new ProjectGraphOptions
+            {
+                EntryPoints = options.EntryPoints,
+                ProjectCollection = options.ProjectCollection,
+                ProjectInstanceFactoryFunc = options.ProjectInstanceFactoryFunc,
+                DegreeOfParallelism = options.DegreeOfParallelism,
+                Mode = options.Mode
+            };
+
+            var generationContext = new SolutionProjectGenerationContext(
+                options.ProjectCollection.LoggingService,
+                BuildEventContext.Invalid,
+                SdkResolverService.Instance,
+                targets,
+                options.ToolsVersionOverride,
+                BuildEventContext.InvalidSubmissionId);
+
+            SolutionProjectFactory solutionProjectFactory =
+                (solution, globalProperties) =>
+                    SolutionProjectGenerator.GenerateForGraph(
+                        solution,
+                        globalProperties,
+                        options.ProjectCollection,
+                        generationContext);
+
+            return new ProjectGraph(
+                graphOptions,
+                solutionProjectFactory,
+                targets,
+                cancellationToken);
+        }
+
+        private ProjectGraph(
+            ProjectGraphOptions options,
+            SolutionProjectFactory solutionProjectFactory,
+            IReadOnlyCollection<string> generatedSolutionTargets,
+            CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(options.ProjectCollection, nameof(options.ProjectCollection));
             ArgumentNullException.ThrowIfNull(options.EntryPoints, nameof(options.EntryPoints));
@@ -450,6 +518,8 @@ namespace Microsoft.Build.Graph
             {
                 throw new ArgumentOutOfRangeException(nameof(options.DegreeOfParallelism), "DegreeOfParallelism must be greater than zero.");
             }
+
+            _generatedSolutionTargets = generatedSolutionTargets?.ToImmutableHashSet(StringComparer.OrdinalIgnoreCase);
 
             var measurementInfo = BeginMeasurement();
 
@@ -468,7 +538,7 @@ namespace Microsoft.Build.Graph
                 ProjectInterpretation.Instance,
                 options.DegreeOfParallelism,
                 options.Mode,
-                solutionProjectFactory: null,
+                solutionProjectFactory,
                 cancellationToken);
             graphBuilder.BuildGraph();
 
@@ -642,6 +712,24 @@ namespace Microsoft.Build.Graph
         public IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> GetTargetLists(ICollection<string> entryProjectTargets)
         {
             ThrowOnEmptyTargetNames(entryProjectTargets);
+
+            if (_generatedSolutionTargets is not null
+                && Solution is not null
+                && entryProjectTargets is not null)
+            {
+                foreach (string targetName in entryProjectTargets)
+                {
+                    if (!_generatedSolutionTargets.Contains(targetName)
+                        && !SolutionProjectGenerator._defaultTargetNames.Contains(targetName))
+                    {
+                        throw new ArgumentException(
+                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                                "OM_ProjectGraphTargetNotGenerated",
+                                targetName),
+                            nameof(entryProjectTargets));
+                    }
+                }
+            }
 
             // Seed the dictionary with empty lists for every buildable node. In this particular case though an empty list means "build nothing" rather than "default targets".
             var targetLists = new Dictionary<ProjectGraphNode, ImmutableList<string>>(ProjectNodes.Count);

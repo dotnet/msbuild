@@ -43,7 +43,8 @@ namespace Microsoft.Build.Graph
 
         public SolutionFile Solution { get; private set; }
 
-        internal IReadOnlyList<ProjectInstance> GenerateSolutionMetaprojects { get; private set; }
+        internal IReadOnlyList<ProjectInstance> GeneratedSolutionMetaprojects { get; private set; }
+            = Array.Empty<ProjectInstance>();
 
         private readonly List<ConfigurationMetadata> _entryPointConfigurationMetadata;
 
@@ -57,6 +58,7 @@ namespace Microsoft.Build.Graph
         private readonly ProjectGraphMode _graphMode;
         private IReadOnlyDictionary<string, IReadOnlyCollection<string>> _solutionDependencies;
         private ImmutableDictionary<string, string> _solutionGlobalProperties;
+        private IReadOnlyDictionary<string, string> _solutionEntryPointGlobalProperties;
         private ConcurrentDictionary<ConfigurationMetadata, Lazy<ProjectInstance>> _platformNegotiationInstancesCache = new();
 
         /// <summary>
@@ -170,10 +172,26 @@ namespace Microsoft.Build.Graph
             
             if (_solutionProjectFactory is not null)
             {
-                SolutionProjectGenerationResult generationResult = _solutionProjectFactory(Solution, solutionGlobalProperties);
+                var generationGlobalProperties = new Dictionary<string, string>(
+                    (_solutionEntryPointGlobalProperties?.Count ?? 0) + 2,
+                    StringComparer.OrdinalIgnoreCase);
+
+                if (_solutionEntryPointGlobalProperties is not null)
+                {
+                    foreach (KeyValuePair<string, string> property in _solutionEntryPointGlobalProperties)
+                    {
+                        generationGlobalProperties[property.Key] = property.Value;
+                    }
+                }
+
+                generationGlobalProperties[PropertyNames.IsGraphBuild] = "true";
+                generationGlobalProperties[SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty] = $"{Solution.FullPath}.metaproj";
+
+                SolutionProjectGenerationResult generationResult =
+                    _solutionProjectFactory(Solution, generationGlobalProperties);
 
                 syntheticSolutionInstance = generationResult.TraversalProject;
-                GenerateSolutionMetaprojects = generationResult.Metaprojects;
+                GeneratedSolutionMetaprojects = generationResult.Metaprojects;
             }
             else
             {
@@ -362,6 +380,17 @@ namespace Microsoft.Build.Graph
             ErrorUtilities.VerifyThrowArgument(entryPoints.Count == 1, "StaticGraphAcceptsSingleSolutionEntryPoint");
 
             ProjectGraphEntryPoint solutionEntryPoint = entryPoints.Single();
+            var solutionEntryPointGlobalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (solutionEntryPoint.GlobalProperties is not null)
+            {
+                foreach (KeyValuePair<string, string> property in solutionEntryPoint.GlobalProperties)
+                {
+                    solutionEntryPointGlobalProperties[property.Key] = property.Value;
+                }
+            }
+
+            _solutionEntryPointGlobalProperties = solutionEntryPointGlobalProperties;
+
             ImmutableDictionary<string, string>.Builder solutionGlobalPropertiesBuilder = ImmutableDictionary.CreateBuilder(
                 keyComparer: StringComparer.OrdinalIgnoreCase,
                 valueComparer: StringComparer.Ordinal);
