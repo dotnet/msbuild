@@ -2980,6 +2980,24 @@ $@"
             exception.Message.ShouldContain("AnotherTarget");
         }
 
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void BuildApiRejectsInvalidTargetNames(string targetName)
+        {
+            ArgumentException exception = Should.Throw<ArgumentException>(
+                () => ProjectGraph.CreateForBuild(
+                    new ProjectGraphBuildOptions
+                    {
+                        EntryPoints = [],
+                        ProjectCollection = _env.CreateProjectCollection().Collection,
+                        Targets = [targetName]
+                    }));
+
+            exception.ParamName.ShouldBe("Targets");
+        }
+
         [Fact]
         public void SolutionTraversalTargetSelectsMultitargetingOuterBuild()
         {

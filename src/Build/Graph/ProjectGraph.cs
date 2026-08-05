@@ -473,6 +473,14 @@ namespace Microsoft.Build.Graph
             ArgumentNullException.ThrowIfNull(options.Targets);
 
             ImmutableArray<string> targets = options.Targets.ToImmutableArray();
+            if (targets.Any(targetName => string.IsNullOrWhiteSpace(targetName)))
+            {
+                throw new ArgumentException(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
+                        "OM_TargetNameNullOrEmpty",
+                        nameof(CreateForBuild)),
+                    nameof(options.Targets));
+            }
 
             var graphOptions = new ProjectGraphOptions
             {
