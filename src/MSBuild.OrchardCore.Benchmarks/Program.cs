@@ -37,9 +37,23 @@ if (!File.Exists(projectPath))
     return 1;
 }
 
+string sdkPath;
+try
+{
+    sdkPath = DotNetSdkLocator.FindSdkPath();
+}
+catch (InvalidOperationException exception)
+{
+    Console.Error.WriteLine(exception.Message);
+    return 1;
+}
+
 Environment.SetEnvironmentVariable(
     OrchardCoreEvaluationBenchmark.ProjectPathEnvironmentVariable,
     projectPath);
+Environment.SetEnvironmentVariable(
+    OrchardCoreEvaluationBenchmark.DotNetSdkPathEnvironmentVariable,
+    sdkPath);
 Environment.SetEnvironmentVariable("MSBUILDTERMINALLOGGER", "off");
 
 return BenchmarkRunner

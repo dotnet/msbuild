@@ -15,6 +15,7 @@ namespace MSBuild.OrchardCore.Benchmarks;
 [MemoryDiagnoser]
 public class OrchardCoreEvaluationBenchmark
 {
+    internal const string DotNetSdkPathEnvironmentVariable = "MSBUILD_BENCHMARK_DOTNET_SDK_PATH";
     internal const string ProjectPathEnvironmentVariable = "MSBUILD_BENCHMARK_ORCHARDCORE_PROJECT";
 
     private const int EvaluationCount = 100;
@@ -45,7 +46,13 @@ public class OrchardCoreEvaluationBenchmark
             throw new FileNotFoundException("The Orchard Core benchmark project does not exist.", projectPath);
         }
 
-        string sdkPath = DotNetSdkLocator.FindSdkPath();
+        string? sdkPath = Environment.GetEnvironmentVariable(DotNetSdkPathEnvironmentVariable);
+        if (string.IsNullOrWhiteSpace(sdkPath))
+        {
+            throw new InvalidOperationException(
+                "The .NET SDK path was not passed to the benchmark process.");
+        }
+
         string sdksPath = Path.Combine(sdkPath, "Sdks");
         string nuGetTargetsPath = Path.Combine(sdkPath, "NuGet.targets");
 
@@ -181,5 +188,4 @@ public class OrchardCoreEvaluationBenchmark
         Environment.SetEnvironmentVariable("MSBuildExtensionsPath", _originalMSBuildExtensionsPath);
         Environment.SetEnvironmentVariable("MSBuildEnableWorkloadResolver", _originalMSBuildEnableWorkloadResolver);
     }
-
 }
