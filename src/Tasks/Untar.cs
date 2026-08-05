@@ -34,7 +34,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Stores a <see cref="CancellationTokenSource"/> used for cancellation.
         /// </summary>
-        private readonly CancellationTokenSource _cancellationToken = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         /// <summary>
         /// Stores the include patterns after parsing.
@@ -91,7 +91,7 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc cref="ICancelableTask.Cancel"/>
         public void Cancel()
         {
-            _cancellationToken.Cancel();
+            _cancellationTokenSource.Cancel();
         }
 
         /// <inheritdoc cref="Task.Execute"/>
@@ -117,7 +117,7 @@ namespace Microsoft.Build.Tasks
 
                 if (!Log.HasLoggedErrors)
                 {
-                    foreach (FileInfo sourceFile in SourceFiles.TakeWhile(i => !_cancellationToken.IsCancellationRequested))
+                    foreach (FileInfo sourceFile in SourceFiles.TakeWhile(i => !_cancellationTokenSource.IsCancellationRequested))
                     {
                         if (!FileSystems.Default.FileExists(sourceFile.FullName))
                         {
@@ -167,7 +167,7 @@ namespace Microsoft.Build.Tasks
                 BuildEngine3.Reacquire();
             }
 
-            return !_cancellationToken.IsCancellationRequested && !Log.HasLoggedErrors;
+            return !_cancellationTokenSource.IsCancellationRequested && !Log.HasLoggedErrors;
         }
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace Microsoft.Build.Tasks
         {
             AbsolutePath fullDestinationDirectoryPath = TaskEnvironment.GetAbsolutePath(FileUtilities.EnsureTrailingSlash(destinationDirectory.FullName)).GetCanonicalForm();
 
-            for (TarEntry? tarEntry = reader.GetNextEntry(); tarEntry is not null && !_cancellationToken.IsCancellationRequested; tarEntry = reader.GetNextEntry())
+            for (TarEntry? tarEntry = reader.GetNextEntry(); tarEntry is not null && !_cancellationTokenSource.IsCancellationRequested; tarEntry = reader.GetNextEntry())
             {
                 string entryName = tarEntry.Name;
 
@@ -310,7 +310,7 @@ namespace Microsoft.Build.Tasks
                         if (tarEntry.DataStream is Stream dataStream)
                         {
 #pragma warning disable CA2025 // Do not pass 'IDisposable' instances into unawaited tasks
-                            dataStream.CopyToAsync(destination, _DefaultCopyBufferSize, _cancellationToken.Token)
+                            dataStream.CopyToAsync(destination, _DefaultCopyBufferSize, _cancellationTokenSource.Token)
                                 .ConfigureAwait(continueOnCapturedContext: false)
                                 .GetAwaiter()
                                 .GetResult();
