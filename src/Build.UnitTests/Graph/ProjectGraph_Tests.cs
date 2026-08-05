@@ -3094,6 +3094,37 @@ $@"
             }
         }
 
+        [Fact]
+        public void BuildApiGeneratedSolutionNodeIsNotDisabledByLegacyChangeWave()
+        {
+            try
+            {
+                ChangeWaves.ResetStateForTests();
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+
+                TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
+                TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "GeneratedSolution.sln");
+
+                ProjectGraph graph = ProjectGraph.CreateForBuild(
+                    new ProjectGraphBuildOptions
+                    {
+                        EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
+                        ProjectCollection = _env.CreateProjectCollection().Collection,
+                        Targets = ["Build"]
+                    });
+
+                ProjectGraphNode solutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+
+                solutionNode.ProjectInstance.FullPath.ShouldBe($"{solutionFile.Path}.metaproj");
+                graph.ProjectNodes.ShouldContain(solutionNode);
+                graph.GraphRoots.ShouldBe([solutionNode]);
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
         [Theory]
         [InlineData("Project1:Build")]
         [InlineData("Project1:")]

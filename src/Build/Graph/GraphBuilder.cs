@@ -121,7 +121,8 @@ namespace Microsoft.Build.Graph
 
             if (Solution != null
                 && _solutionGlobalProperties != null
-                && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+                && (_solutionProjectFactory is not null
+                    || ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)))
             {
                 var syntheticSolutionNode = CreateSyntheticSolutionNode(OriginalEntryPointNodes);
                 projectNodes.Add(syntheticSolutionNode);
