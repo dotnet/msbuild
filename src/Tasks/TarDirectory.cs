@@ -69,7 +69,7 @@ namespace Microsoft.Build.Tasks
         /// deterministic order regardless of this value).
         /// This parameter is optional.
         /// </summary>
-        public string DeterministicTimestamp { get; set; } = string.Empty;
+        public string? DeterministicTimestamp { get; set; }
 
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
