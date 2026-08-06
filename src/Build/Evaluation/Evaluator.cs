@@ -2761,7 +2761,7 @@ namespace Microsoft.Build.Evaluation
 
             _itemGlobRequestedTypes = new HashSet<string>(
                 ExpressionShredder.SplitSemiColonSeparatedList(provideProperty.EvaluatedValue),
-                StringComparer.OrdinalIgnoreCase);
+                MSBuildNameIgnoreCaseComparer.Default);
             _itemGlobElements = new List<ProjectItemElement>();
         }
 
