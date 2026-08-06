@@ -222,8 +222,14 @@ namespace Microsoft.Build.BackEnd
         /// which is what lets this process shut it down later and what stops it outliving this
         /// process.
         /// </summary>
+        /// <remarks>
+        /// Behind <see cref="ChangeWaves.Wave18_11"/>: opting out returns a task host launched with
+        /// node reuse to the machine-wide pool it used to join. The node itself reads the same wave,
+        /// so both ends of the connection agree.
+        /// </remarks>
         protected override bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions)
-            => Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NodeReuse);
+            => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
+                && Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NodeReuse);
 
         /// <summary>
         /// Shuts down all of the connected managed nodes.
@@ -285,6 +291,24 @@ namespace Microsoft.Build.BackEnd
         #endregion
 
         #region IBuildComponent Members
+
+        /// <summary>
+        /// The connections this provider owns, or <see langword="null"/> before initialization.
+        /// FOR UNIT TESTING ONLY: a worker node process must keep the same set across every build it
+        /// serves, or task hosts that are still connected are lost.
+        /// </summary>
+        internal ConcurrentDictionary<TaskHostNodeKey, NodeContext> ConnectedNodes => _nodeContexts;
+
+        /// <summary>
+        /// The host of the build currently being served. FOR UNIT TESTING ONLY.
+        /// </summary>
+        internal IBuildComponentHost CurrentComponentHost => ComponentHost;
+
+        /// <summary>
+        /// Whether a node launched with these options keeps its connection between builds.
+        /// FOR UNIT TESTING ONLY.
+        /// </summary>
+        internal bool ConnectionPersists(HandshakeOptions handshakeOptions) => DoesConnectionPersistAcrossBuilds(handshakeOptions);
 
         /// <summary>
         /// Initializes the component.

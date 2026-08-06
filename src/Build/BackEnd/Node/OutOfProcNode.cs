@@ -156,7 +156,13 @@ namespace Microsoft.Build.Execution
             // builds. Their connections are process-lifetime resources, so scope the provider that
             // owns them to the process: a later build then reuses the task hosts this one started,
             // instead of stranding them alive, unreachable and unclaimable.
-            _componentFactories.ReplaceFactory(BuildComponentType.OutOfProcTaskHostNodeProvider, NodeProviderOutOfProcTaskHost.CreateProcessWideComponent);
+            //
+            // Behind the same wave as the connections themselves: when they do not persist, the
+            // provider has nothing to carry across builds and the original per-build one is used.
+            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+            {
+                _componentFactories.ReplaceFactory(BuildComponentType.OutOfProcTaskHostNodeProvider, NodeProviderOutOfProcTaskHost.CreateProcessWideComponent);
+            }
             SerializationContractInitializer.Initialize();
             _packetFactory = new NodePacketFactory();
 

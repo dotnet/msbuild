@@ -1,9 +1,9 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Concurrent;
-using System.Reflection;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Shouldly;
 using Xunit;
 
@@ -19,8 +19,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// connection outlives the build. A worker node builds a fresh component collection for every
     /// build it serves, so the object holding those connections has to be scoped to the process
     /// rather than the build; otherwise each build forgets the task hosts the previous one started,
-    /// and those task hosts are left running, unreachable by their launcher and unclaimable by
-    /// anyone else because a task host pipe accepts a single connection.
+    /// and those task hosts are left running -- unreachable by their launcher and unclaimable by
+    /// anyone else, because a task host pipe accepts a single connection.
     /// </remarks>
     public class NodeProviderOutOfProcTaskHost_Tests
     {
@@ -49,33 +49,52 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void InitializeComponent_WhenAlreadyInitialized_KeepsConnectedNodesAndRefreshesTheHost()
         {
-            var provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+            NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
 
             MockHost firstBuildHost = new();
             provider.InitializeComponent(firstBuildHost);
 
-            object? nodeContextsAfterFirstBuild = GetNodeContexts(provider);
-            nodeContextsAfterFirstBuild.ShouldNotBeNull();
+            object connectedNodesAfterFirstBuild = provider.ConnectedNodes;
+            connectedNodesAfterFirstBuild.ShouldNotBeNull();
 
-            // The next build the worker node serves brings a new component host with it.
+            // The next build this worker node serves brings a new component host with it.
             MockHost secondBuildHost = new();
             provider.InitializeComponent(secondBuildHost);
 
-            GetNodeContexts(provider).ShouldBeSameAs(
-                nodeContextsAfterFirstBuild,
-                "re-initializing would drop the connections to task hosts that are still running, leaving them unreachable and unable to exit");
+            provider.ConnectedNodes.ShouldBeSameAs(
+                connectedNodesAfterFirstBuild,
+                "re-initializing drops the connections to task hosts that are still running, leaving them unreachable and unable to exit");
 
-            GetComponentHost(provider).ShouldBeSameAs(secondBuildHost, "the provider must still act on behalf of the build currently running");
+            provider.CurrentComponentHost.ShouldBeSameAs(secondBuildHost, "the provider must act on behalf of the build currently running");
         }
 
-        private static object? GetNodeContexts(NodeProviderOutOfProcTaskHost provider)
-            => typeof(NodeProviderOutOfProcTaskHost)
-                .GetField("_nodeContexts", BindingFlags.Instance | BindingFlags.NonPublic)!
-                .GetValue(provider);
+        [Fact]
+        public void ConnectionPersistsAcrossBuilds_OnlyForNodeReuse()
+        {
+            NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
 
-        private static object? GetComponentHost(NodeProviderOutOfProcTaskHost provider)
-            => typeof(NodeProviderOutOfProcBase)
-                .GetProperty("ComponentHost", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)!
-                .GetValue(provider);
+            provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse).ShouldBeTrue();
+            provider.ConnectionPersists(HandshakeOptions.TaskHost).ShouldBeFalse("a task host not launched with node reuse exits at the end of the build");
+        }
+
+        [Fact]
+        public void ConnectionDoesNotPersistWhenTheChangeWaveIsDisabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            try
+            {
+                NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+
+                provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse).ShouldBeFalse(
+                    "opting out of the wave must return the task host to the machine-wide pool it used to join");
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
     }
 }

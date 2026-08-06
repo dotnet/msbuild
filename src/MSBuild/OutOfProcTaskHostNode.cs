@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -154,6 +154,12 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private ManualResetEvent _taskCancelledEvent;
 
+        /// <summary>
+        /// Signalled when the current build cancelled a task. FOR UNIT TESTING ONLY: a cancellation
+        /// from one build must not still be signalled when the node is reset for the next.
+        /// </summary>
+        internal ManualResetEvent TaskCancelledEvent => _taskCancelledEvent;
+
         /// This is the wrapper for the user task to be executed.
         /// We are providing a wrapper to create a possibility of executing the task in a separate AppDomain
         /// </summary>
@@ -185,7 +191,7 @@ namespace Microsoft.Build.CommandLine
         /// <summary>
         /// The task object cache.
         /// </summary>
-        private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
+        private RegisteredTaskObjectCacheBase _registeredTaskObjectCache = new();
 
 #if FEATURE_REPORTFILEACCESSES
         /// <summary>
@@ -1339,9 +1345,19 @@ namespace Microsoft.Build.CommandLine
             // because the reset is ordered behind NodeBuildComplete on the same pipe and runs on
             // the packet-processing thread, so the next build's TaskHostConfiguration cannot
             // overtake it.
-            if (_nodeReuse && buildComplete.PrepareForReuse)
+            if (_nodeReuse && buildComplete.PrepareForReuse && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
             {
                 PrepareForNextBuild();
+                return;
+            }
+
+            if (_nodeReuse)
+            {
+                // Opted out of ChangeWaves.Wave18_11: disconnect and go back to listening, rejoining
+                // the machine-wide pool that any process may claim from. The owner reads the same
+                // wave when it decides whether this connection persists, so both ends agree.
+                _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
+                _shutdownEvent.Set();
                 return;
             }
 
@@ -1362,7 +1378,7 @@ namespace Microsoft.Build.CommandLine
         /// therefore has to be classified: build-scoped fields must be reset here, or their values
         /// leak into the next, unrelated build served by this same process.
         /// </remarks>
-        private void PrepareForNextBuild()
+        internal void PrepareForNextBuild()
         {
             // Only state that the next build will not re-establish for itself belongs here.
             // Per-task state -- the configuration, the warning sets, the environment flags, the task
