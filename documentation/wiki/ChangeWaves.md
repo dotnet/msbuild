@@ -31,7 +31,7 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.11
 - [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs](https://github.com/dotnet/msbuild/pull/14285)
-- [A TaskHost launched with node reuse is owned by the process that launched it, staying connected to it across builds and exiting with it, instead of disconnecting into a machine-wide pool any process may claim.](https://github.com/dotnet/msbuild/pull/14584)
+- [A TaskHost that exists only to keep a task out of the process that launched it — `-mt` routing of a non-multithreadable task, or `MSBUILDFORCEALLTASKSOUTOFPROC` — is owned by that process, staying connected across its builds and exiting with it, instead of disconnecting into a machine-wide pool any process may claim. TaskHosts of a different runtime or architecture are unaffected and stay pooled.](https://github.com/dotnet/msbuild/pull/14584)
 
 ### 18.10
 - [Resolve relative project paths against the Unix logical current directory from `PWD`, so builds under symlinked directories produce stable project full paths and related output paths.](https://github.com/dotnet/msbuild/pull/13752)
