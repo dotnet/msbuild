@@ -198,16 +198,21 @@ Because the sidecar stays connected, the owner exiting -- normally, via `dotnet 
 
 #### Lifetime change
 
-A TaskHost launched with node reuse previously set `BuildCompleteReuse` unconditionally: it disconnected at the end of every build and went back to listening on its pipe, joining a machine-wide pool that any process could claim. It is now scoped to its launcher instead. This applies to every TaskHost launched with node reuse, not only to those routed by `-mt`:
+A task host launched with node reuse previously set `BuildCompleteReuse` unconditionally: it disconnected at the end of every build and went back to listening on its pipe, joining a machine-wide pool that any process could claim. It is now scoped to its launcher **when it exists only to keep a task out of the launcher's process**. A task host that exists because the launcher *cannot run the task itself* stays pooled:
 
 | configuration | before | after |
 |---|---|---|
 | `-mt` routing of a non-multithreadable task | pool-scoped | **owner-scoped** |
-| `Runtime="NET"` under .NET Framework MSBuild | pool-scoped | **owner-scoped** |
-| `Architecture="x86"` under an x64 parent | pool-scoped | **owner-scoped** |
+| `MSBUILDFORCEALLTASKSOUTOFPROC` | pool-scoped | **owner-scoped** |
+| `Runtime="NET"` under .NET Framework MSBuild | pool-scoped | unchanged -- different runtime |
+| `Architecture="x86"` under an x64 parent | pool-scoped | unchanged -- different architecture |
 | `TaskFactory="TaskHostFactory"` explicitly requested | exits at end of build | unchanged |
 | `Runtime="CLR2"` | never node-reused -- excluded in `GetHandshakeOptions` | unchanged |
 
-Consecutive command-line invocations therefore no longer share a TaskHost. Reuse within one owner's lifetime -- a resident MSBuild server, Visual Studio, or any long-lived `BuildManager` -- is unchanged, which is where it pays off. Two things bound the cost: cross-process pooling of these hosts dates from the introduction of the sidecar in 18.0 rather than being long-standing behaviour, and `Runtime="CLR2"`, the case where a single shared host matters most, was already excluded from node reuse.
+The split matters because a connected task host cannot be claimed by anyone else. Owning a cross-architecture or cross-runtime host would cost one idle process per worker node for a task that only ever runs in one of them at a time: with ten projects of which one needs an `Architecture="x86"` task host, under `-m:4` and reordered so the scheduler places it on a different worker each build, owning it left three idle hosts (~153 MB) where pooling leaves one (~51 MB). Sharing is the point of those hosts, so they keep it.
+
+An owned task host is one that runs the same runtime and architecture as its launcher, so no other process has any use for it. Its launcher tells it which it is with `NodeBuildComplete.PrepareForReuse`; nothing new goes on the wire, and an older launcher never sets that flag for a task host it launched with node reuse, so it keeps pooling exactly as it always has.
+
+Consecutive command-line invocations therefore no longer share an owned task host. Reuse within one owner's lifetime -- a resident MSBuild server, Visual Studio, or any long-lived `BuildManager` -- is unchanged, which is where it pays off.
 
 When the TaskHost binary comes from an older SDK it keeps the old behaviour, because the decision is made in the child: it disconnects at the end of each build and relists, so the launching process reuses it across builds but it also outlives that process. Mixed old-SDK and new-SDK TaskHosts behave independently.

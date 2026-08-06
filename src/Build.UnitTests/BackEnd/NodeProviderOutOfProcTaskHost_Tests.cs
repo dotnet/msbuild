@@ -4,6 +4,7 @@
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
 
@@ -69,12 +70,57 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void ConnectionPersistsAcrossBuilds_OnlyForNodeReuse()
+        public void ConnectionPersistsAcrossBuilds_OnlyForATaskHostThisProcessCouldHaveRunItself()
         {
             NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
 
-            provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse).ShouldBeTrue();
-            provider.ConnectionPersists(HandshakeOptions.TaskHost).ShouldBeFalse("a task host not launched with node reuse exits at the end of the build");
+            HandshakeOptions sameArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture() switch
+            {
+                XMakeAttributes.MSBuildArchitectureValues.arm64 => HandshakeOptions.Arm64,
+                XMakeAttributes.MSBuildArchitectureValues.x64 => HandshakeOptions.X64,
+                _ => HandshakeOptions.None,
+            };
+
+            provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse | sameArchitecture).ShouldBeTrue(
+                "a task host that only exists to keep a task out of this process is owned by it");
+
+            provider.ConnectionPersists(HandshakeOptions.TaskHost | sameArchitecture).ShouldBeFalse(
+                "a task host not launched with node reuse exits at the end of the build");
+        }
+
+        [Fact]
+        public void Clr2TaskHostsStayPooled()
+        {
+            // A task host this process cannot run the task without is useful to every other process
+            // that needs the same runtime, so owning it would cost one idle task host per worker
+            // node for a task that only ever runs in one of them at a time.
+            NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+
+            provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse | HandshakeOptions.CLR2).ShouldBeFalse();
+        }
+
+        [WindowsFullFrameworkOnlyFact]
+        public void NetTaskHostsStayPooledOnFramework()
+        {
+            // .NET Framework MSBuild cannot run a Runtime="NET" task itself, so the task host it
+            // launches for one is shared, not owned.
+            NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+
+            provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse | HandshakeOptions.NET).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void CrossArchitectureTaskHostsStayPooled()
+        {
+            NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
+
+            // No architecture bit means x86, which differs from this process unless it is itself x86.
+            HandshakeOptions differentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture() == XMakeAttributes.MSBuildArchitectureValues.x64
+                ? HandshakeOptions.None
+                : HandshakeOptions.X64;
+
+            provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse | differentArchitecture).ShouldBeFalse(
+                "a task host of another architecture is useful to every process that needs that architecture");
         }
 
         [Fact]
@@ -88,7 +134,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 NodeProviderOutOfProcTaskHost provider = (NodeProviderOutOfProcTaskHost)NodeProviderOutOfProcTaskHost.CreateComponent(BuildComponentType.OutOfProcTaskHostNodeProvider);
 
-                provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse).ShouldBeFalse(
+                provider.ConnectionPersists(HandshakeOptions.TaskHost | HandshakeOptions.NodeReuse | (XMakeAttributes.GetCurrentMSBuildArchitecture() == XMakeAttributes.MSBuildArchitectureValues.x64 ? HandshakeOptions.X64 : HandshakeOptions.None)).ShouldBeFalse(
                     "opting out of the wave must return the task host to the machine-wide pool it used to join");
             }
             finally

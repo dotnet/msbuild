@@ -1335,9 +1335,12 @@ namespace Microsoft.Build.CommandLine
             // the next build performs a fresh apply rather than trusting state left over from this build.
             _lastAppliedConfigEnvironment = null;
 
-            // A sidecar TaskHost is owned by the process that launched it: it stays connected and
-            // resets in place between builds rather than disconnecting into the global
-            // reconnectable pool, so it can never outlive its owner.
+            // A task host launched with node reuse is either owned by the process that launched it,
+            // staying connected and resetting in place between builds so it can never outlive its
+            // owner, or pooled, disconnecting into the machine-wide set any process may claim.
+            // PrepareForReuse is how the owner says which: it exists to keep a task out of the
+            // owner's process (owned), or because the owner cannot run the task itself, being a
+            // different runtime or architecture (pooled, and useful to every process that needs it).
             //
             // Nothing is sent back. The owner already knows this node is idle: it cannot have
             // completed the build while a task was still outstanding, which is the invariant
@@ -1353,9 +1356,10 @@ namespace Microsoft.Build.CommandLine
 
             if (_nodeReuse)
             {
-                // Opted out of ChangeWaves.Wave18_11: disconnect and go back to listening, rejoining
-                // the machine-wide pool that any process may claim from. The owner reads the same
-                // wave when it decides whether this connection persists, so both ends agree.
+                // Either a pooled task host, or opted out of ChangeWaves.Wave18_11: disconnect and
+                // go back to listening, rejoining the machine-wide pool. An older owner never sets
+                // PrepareForReuse for a task host it launched with node reuse, so it lands here too
+                // and behaves exactly as it always has.
                 _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
                 _shutdownEvent.Set();
                 return;

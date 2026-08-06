@@ -217,19 +217,65 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// A sidecar TaskHost is one launched with node reuse. It stays connected to this process
-        /// between builds instead of disconnecting into the pool of TaskHosts any process may claim,
-        /// which is what lets this process shut it down later and what stops it outliving this
-        /// process.
+        /// Whether a task host launched with these options is owned by this process, staying
+        /// connected to it between builds instead of disconnecting into the pool of task hosts any
+        /// process may claim.
         /// </summary>
         /// <remarks>
-        /// Behind <see cref="ChangeWaves.Wave18_11"/>: opting out returns a task host launched with
-        /// node reuse to the machine-wide pool it used to join. The node itself reads the same wave,
-        /// so both ends of the connection agree.
+        /// Only a task host that exists to keep a task out of *this* process is owned. One that
+        /// exists because this process cannot run the task itself -- a different runtime
+        /// (Runtime="NET" under .NET Framework MSBuild, Runtime="CLR2") or a different architecture
+        /// -- stays pooled, because it is useful to every process that needs that runtime or
+        /// architecture. Owning those would cost one idle task host per worker node for a task that
+        /// only ever runs in one of them at a time, since a connected task host cannot be claimed by
+        /// anyone else.
+        ///
+        /// Behind <see cref="ChangeWaves.Wave18_11"/>: opting out pools every task host, which is
+        /// what they all did before. The node reads the same wave, and learns which of the two it is
+        /// from the <see cref="NodeBuildComplete.PrepareForReuse"/> flag its owner sends.
         /// </remarks>
         protected override bool DoesConnectionPersistAcrossBuilds(HandshakeOptions handshakeOptions)
             => ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
-                && Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NodeReuse);
+                && Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NodeReuse)
+                && !ExistsOnlyForCompatibility(handshakeOptions);
+
+        /// <summary>
+        /// Whether a task host with these options exists only because this process cannot run the
+        /// task itself, rather than to keep a task out of this process.
+        /// </summary>
+        internal static bool ExistsOnlyForCompatibility(HandshakeOptions handshakeOptions)
+        {
+            // A different runtime. CLR2 always is. .NET only when this process is not itself .NET.
+            if (Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.CLR2))
+            {
+                return true;
+            }
+
+            if (Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NET))
+            {
+#if NETFRAMEWORK
+                return true;
+#else
+                // Same runtime as this process. A .NET task host runs whatever architecture the SDK
+                // shipped and suppresses its architecture bits for that reason, so they carry no
+                // information here and there is nothing further to compare.
+                return false;
+#endif
+            }
+
+            // A different architecture. The handshake encodes only x64 and arm64, so no bit means
+            // x86 -- which differs from this process unless this process is itself x86.
+            bool wantsX64 = Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.X64);
+            bool wantsArm64 = Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.Arm64);
+
+            string requestedArchitecture = wantsX64
+                ? XMakeAttributes.MSBuildArchitectureValues.x64
+                : wantsArm64
+                    ? XMakeAttributes.MSBuildArchitectureValues.arm64
+                    : XMakeAttributes.MSBuildArchitectureValues.x86;
+
+            return !string.Equals(requestedArchitecture, XMakeAttributes.GetCurrentMSBuildArchitecture(), StringComparison.OrdinalIgnoreCase);
+        }
 
         /// <summary>
         /// Shuts down all of the connected managed nodes.
@@ -237,20 +283,41 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>
         public void ShutdownConnectedNodes(bool enableReuse)
         {
-            // Send the build completion message to the nodes, causing them to shutdown or reset.
             List<NodeContext> contextsToShutDown = [.. _nodeContexts.Values];
 
-            ShutdownConnectedNodes(contextsToShutDown, enableReuse);
+            // Processes that could not be connected to are skipped for the rest of a build; clear
+            // that for the next one, or a pooled task host this process failed to claim once is
+            // never retried and a new one is started instead. The worker node provider is shared
+            // across every build the process serves, so this would otherwise accumulate.
+            ClearProcessesToIgnore();
 
-            // A node that stays connected never disconnects, so waiting on it would wait forever. It
-            // is already idle: the build cannot have completed while one of its tasks was
-            // outstanding, which is the invariant OutOfProcTaskHostNode.HandleNodeBuildComplete
-            // asserts on receipt. Its in-place reset needs no acknowledgement either, being ordered
-            // behind NodeBuildComplete on the same pipe. So retire those here, and wait only when a
-            // node is actually going to disconnect -- a stale entry from an earlier build must never
-            // be able to block this process forever.
+            // Task hosts do not share the worker node send loop. A worker node treats "not reused"
+            // as "about to exit" and waits for the process to go away; a pooled task host does not
+            // exit, it disconnects and goes back to listening, so waiting for it would burn the full
+            // exit timeout on every build.
             bool anyNodeWillDisconnect = false;
 
+            foreach (NodeContext context in contextsToShutDown)
+            {
+                // An owned task host resets in place and stays connected; a pooled one disconnects
+                // and rejoins the machine-wide pool. This flag is how the node tells them apart.
+                bool ownedByThisProcess = enableReuse && context.ConnectionPersistsAcrossBuilds;
+
+                context.SendData(new NodeBuildComplete(ownedByThisProcess));
+
+                if (!ownedByThisProcess)
+                {
+                    anyNodeWillDisconnect = true;
+                }
+            }
+
+            // An owned task host never disconnects, so waiting on it would wait forever. It is
+            // already idle: the build cannot have completed while one of its tasks was outstanding,
+            // which is the invariant OutOfProcTaskHostNode.HandleNodeBuildComplete asserts on
+            // receipt. Its in-place reset needs no acknowledgement either, being ordered behind
+            // NodeBuildComplete on the same pipe. So retire those here, and wait only for the nodes
+            // that really do disconnect -- a stale entry from an earlier build must never be able to
+            // block this process forever.
             lock (_activeNodes)
             {
                 foreach (NodeContext context in contextsToShutDown)
@@ -258,10 +325,6 @@ namespace Microsoft.Build.BackEnd
                     if (enableReuse && context.ConnectionPersistsAcrossBuilds)
                     {
                         _activeNodes.Remove(context.NodeId);
-                    }
-                    else
-                    {
-                        anyNodeWillDisconnect = true;
                     }
                 }
 
