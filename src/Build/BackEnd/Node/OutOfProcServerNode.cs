@@ -357,24 +357,8 @@ namespace Microsoft.Build.Server
         /// <param name="buildComplete"></param>
         private void HandleServerShutdownCommand(NodeBuildComplete buildComplete)
         {
-            bool shouldReuse = buildComplete.PrepareForReuse;
-
-            // A transient server serves one build and exits, so it neither competes for the resident
-            // server's role nor counts against it.
-            if (shouldReuse && _instanceId is null)
-            {
-                // Self-terminate if another resident server node is already running system-wide.
-                // Threshold is 1: only one resident server node should be active per handshake.
-                // If another is running (count > 1, since we count ourselves), exit to avoid over-provisioning.
-                int serverNodeCount = NodeProviderOutOfProcBase.CountActiveNodesWithMode(
-                    NodeMode.OutOfProcServerNode,
-                    excludedCommandLineSubstring: ServerInstanceIdCommandLineSwitch);
-                if (serverNodeCount > 1)
-                {
-                    CommunicationsUtilities.Trace($"Terminating server node due to over-provisioning: {serverNodeCount} server nodes found system-wide.");
-                    shouldReuse = false;
-                }
-            }
+            // A transient server is private to one build and must never enter the resident reuse loop.
+            bool shouldReuse = buildComplete.PrepareForReuse && _instanceId is null;
 
             _shutdownReason = shouldReuse ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
             _shutdownEvent.Set();
