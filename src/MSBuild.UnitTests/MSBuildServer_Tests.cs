@@ -66,6 +66,18 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
+    public class SidecarProcessIdTask : Microsoft.Build.Utilities.Task
+    {
+        [Output]
+        public int Pid { get; set; }
+
+        public override bool Execute()
+        {
+            Pid = Process.GetCurrentProcess().Id;
+            return true;
+        }
+    }
+
     public class MSBuildServer_Tests : IDisposable
     {
         private readonly ITestOutputHelper _output;
@@ -790,15 +802,13 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// A transient build must not adopt the resident server's sidecar TaskHost. Sidecars are owned
-        /// by the process that launched them (#14584), so a build that tears its own server down at the
-        /// end must bring its own TaskHost rather than borrowing one whose owner outlives it.
+        /// A transient build with node reuse disabled must not adopt the resident server's reusable
+        /// TaskHost. It must instead launch a non-reusable TaskHost for its own build.
         /// </summary>
         /// <remarks>
-        /// This deliberately does not assert that the resident sidecar is still alive afterwards. A
-        /// sidecar lives exactly as long as its owner, which <see cref="TransientBuildDoesNotShutDownResidentServer"/>
-        /// already covers, and asserting its survival here proved sensitive to unrelated MSBuild
-        /// activity elsewhere on the machine when the suite runs in parallel.
+        /// This deliberately does not assert that the resident TaskHost is still alive afterwards.
+        /// Its lifetime is independent of the server identity behavior under test, and asserting its
+        /// survival is sensitive to unrelated MSBuild activity elsewhere on the machine.
         /// </remarks>
         [Fact]
         public void TransientBuildDoesNotAdoptResidentSidecars()
@@ -819,7 +829,7 @@ namespace Microsoft.Build.Engine.UnitTests
                         <ProcessIdTask>
                             <Output PropertyName="SERVER_PID" TaskParameter="Pid" />
                         </ProcessIdTask>
-                        <SidecarProcessIdTask EnvironmentVariableName="PATH">
+                        <SidecarProcessIdTask>
                             <Output PropertyName="SIDECAR_PID" TaskParameter="Pid" />
                         </SidecarProcessIdTask>
                         <Message Text="Server ID is $(SERVER_PID)" Importance="High" />
@@ -919,6 +929,14 @@ namespace Microsoft.Build.Engine.UnitTests
             _env.SetEnvironmentVariable("COMPlus_gcServer", null);
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", useServer ? "1" : null);
         }
+
+        private void ShutdownBootstrapServer()
+            => RunnerUtilities.RunProcessAndGetOutput(
+                RunnerUtilities.BootstrapDotnetHostPath,
+                "build-server shutdown",
+                out _,
+                outputHelper: _output,
+                environmentVariables: RunnerUtilities.GetBootstrapMSBuildEnvironmentVariables());
 
         /// <summary>
         /// The MSBuild server (build orchestrator) process must be launched with Server GC when the

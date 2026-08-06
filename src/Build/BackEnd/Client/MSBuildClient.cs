@@ -34,6 +34,9 @@ namespace Microsoft.Build.Server
     [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class MSBuildClient
     {
+        private const int NewServerConnectionTimeoutMilliseconds = 20_000;
+        private const int TransientServerConnectionTimeoutMilliseconds = 30_000;
+
         /// <summary>
         /// The build inherits all the environment variables from the client process.
         /// This property allows to add extra environment variables or reset some of the existing ones.
@@ -253,7 +256,7 @@ namespace Microsoft.Build.Server
                 }
 
                 // Connect to server.
-                if (!TryConnectToServer(serverIsAlreadyRunning ? 1_000 : 20_000))
+                if (!TryConnectToServer(serverIsAlreadyRunning ? 1_000 : NewServerConnectionTimeoutMilliseconds))
                 {
                     return _exitResult;
                 }
@@ -597,6 +600,25 @@ namespace Microsoft.Build.Server
                         ? new Dictionary<string, string?>()
                         : new Dictionary<string, string?>(baseOverrides);
                     environmentOverrides["DOTNET_gcServer"] = "1";
+                }
+
+                if (_serverInstanceId is not null)
+                {
+                    // No other client knows this server's identity, so it cannot be reused if its
+                    // launching client exits before connecting. Bound that orphan window rather than
+                    // inheriting the generic node connection timeout (15 minutes by default).
+                    if (environmentOverrides is null)
+                    {
+                        environmentOverrides = new Dictionary<string, string?>();
+                    }
+                    else if (ReferenceEquals(environmentOverrides, baseOverrides))
+                    {
+                        environmentOverrides = new Dictionary<string, string?>(baseOverrides);
+                    }
+
+                    environmentOverrides["MSBUILDNODECONNECTIONTIMEOUT"] =
+                        Math.Min(CommunicationsUtilities.NodeConnectionTimeout, TransientServerConnectionTimeoutMilliseconds)
+                            .ToString(CultureInfo.InvariantCulture);
                 }
 
                 NodeLaunchData launchData = new(
