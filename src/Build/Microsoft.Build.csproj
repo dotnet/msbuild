@@ -132,7 +132,6 @@
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
-    <Compile Include="..\Shared\NodeReadyForNextBuild.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\PlatformNegotiation.cs">
       <Link>PlatformNegotiation.cs</Link>

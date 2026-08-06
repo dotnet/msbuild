@@ -450,8 +450,8 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Whether a node launched with these handshake options stays connected to this process after
         /// one of its builds completes, so that this process can use it again for the next one. Such
-        /// a node reports build completion with <see cref="NodeReadyForNextBuild"/> rather than
-        /// <see cref="NodeShutdown"/>, and more packets follow on its connection afterwards.
+        /// a node resets in place rather than disconnecting, and more packets follow on its
+        /// connection afterwards.
         /// False by default: a node disconnects at the end of a build and, if reusable, waits on its
         /// pipe for some other process to claim it.
         /// </summary>
@@ -1098,10 +1098,16 @@ namespace Microsoft.Build.BackEnd
 
             /// <summary>
             /// Whether this node stays connected after a build completes, so that its owner can use
-            /// it again for the next one. Such a node reports build completion with
-            /// <see cref="NodeReadyForNextBuild"/> instead of <see cref="NodeShutdown"/>.
+            /// it again for the next one, instead of disconnecting into the pool of nodes that any
+            /// process may claim.
             /// </summary>
             private readonly bool _connectionPersistsAcrossBuilds;
+
+            /// <summary>
+            /// Whether this node stays connected after a build completes. Its owner uses this to
+            /// tell the nodes that will disconnect from the ones it must retire itself.
+            /// </summary>
+            public bool ConnectionPersistsAcrossBuilds => _connectionPersistsAcrossBuilds;
 
             /// <summary>
             /// Starts a new asynchronous read operation for this node.

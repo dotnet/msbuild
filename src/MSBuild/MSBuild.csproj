@@ -83,7 +83,6 @@
     <Compile Include="..\Shared\TaskLoader.cs" />
     <Compile Include="..\Shared\TypeLoader.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
-    <Compile Include="..\Shared\NodeReadyForNextBuild.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />

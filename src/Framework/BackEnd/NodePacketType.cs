@@ -226,21 +226,7 @@ internal enum NodePacketType : byte
     /// </summary>
     RarNodeBufferedLogEvents, // 0x16
 
-    /// <summary>
-    /// Sent by a node that stays connected to its owner across builds, to report that it has
-    /// disposed the state of the build that just completed and is ready for the next one.
-    ///
-    /// A node that exits at the end of a build reports that with <see cref="NodeShutdown"/>, which
-    /// its owner treats as the end of the connection. A node that stays connected needs to say
-    /// "this build is done" without saying "this connection is done", so it says it with this
-    /// packet instead.
-    ///
-    /// Contents:
-    /// (nothing)
-    /// </summary>
-    NodeReadyForNextBuild, // 0x17
-
-    // Packet types 0x18-0x1F reserved for future core functionality
+    // Packet types 0x17-0x1F reserved for future core functionality
 
     #region TaskHost callback packets (0x20-0x27)
     // These support bidirectional callbacks from TaskHost to parent for IBuildEngine implementations

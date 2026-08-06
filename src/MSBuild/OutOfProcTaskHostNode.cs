@@ -1332,14 +1332,16 @@ namespace Microsoft.Build.CommandLine
             // A sidecar TaskHost is owned by the process that launched it: it stays connected and
             // resets in place between builds rather than disconnecting into the global
             // reconnectable pool, so it can never outlive its owner.
+            //
+            // Nothing is sent back. The owner already knows this node is idle: it cannot have
+            // completed the build while a task was still outstanding, which is the invariant
+            // asserted above. It also does not need to be told when the reset below has finished,
+            // because the reset is ordered behind NodeBuildComplete on the same pipe and runs on
+            // the packet-processing thread, so the next build's TaskHostConfiguration cannot
+            // overtake it.
             if (_nodeReuse && buildComplete.PrepareForReuse)
             {
                 PrepareForNextBuild();
-                if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
-                {
-                    _nodeEndpoint.SendData(new NodeReadyForNextBuild());
-                }
-
                 return;
             }
 
@@ -1362,28 +1364,29 @@ namespace Microsoft.Build.CommandLine
         /// </remarks>
         private void PrepareForNextBuild()
         {
-            Assumed.Zero(_activeTaskCount, "A sidecar TaskHost cannot reset while a task is executing.");
-            Assumed.Zero(_blockedTaskCount, "A sidecar TaskHost cannot reset while a task is blocked.");
-            Assumed.Zero(_taskContexts.Count, "A sidecar TaskHost cannot reset with live task contexts.");
+            // Only state that the next build will not re-establish for itself belongs here.
+            // Per-task state -- the configuration, the warning sets, the environment flags, the task
+            // wrapper and its completion packet -- is assigned unconditionally from each incoming
+            // TaskHostConfiguration before it is ever read, so clearing it here would be dead code
+            // and clearing _taskCompletePacket could discard a result that has not been sent yet.
 
+            // Defensive, and matches HandleShutdown: a task blocked on a callback would never
+            // unblock once the parent stops answering for this build. No-op when nothing is pending.
             FailAllPendingCallbackRequests("TaskHost resetting for the next build.");
 
+            // Build-lifetime objects registered by tasks. Nothing else disposes these while the node
+            // stays alive; a node that exited at the end of a build did it in HandleShutdown.
             _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
 
-            _currentConfiguration = null;
-            _currentTaskContext.Value = null;
-            _taskCompletePacket = null;
-            _taskWrapper = null;
+            // A cancellation that arrived as the build was ending would otherwise still be signalled
+            // and would spin the next build's wait loop.
             _taskCancelledEvent.Reset();
-            _warningsAsErrors = null;
-            _warningsNotAsErrors = null;
-            _warningsAsMessages = null;
-            _lastAppliedConfigEnvironment = null;
-            _debugCommunications = Traits.Instance.DebugNodeCommunication;
-            _updateEnvironment = false;
-            _updateEnvironmentAndLog = false;
+
+            // Set by tasks through IBuildEngine and never re-established per task, so it would leak
+            // into the next build.
             AllowFailureWithoutError = false;
 
+            // A task may have changed either of these, and the next build must not inherit them.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
             try

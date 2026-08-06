@@ -221,13 +221,6 @@ namespace Microsoft.Build.BackEnd
             => Handshake.IsHandshakeOptionEnabled(handshakeOptions, HandshakeOptions.NodeReuse);
 
         /// <summary>
-        /// How long to wait for sidecars to acknowledge build completion before giving up on them.
-        /// A sidecar that has already died, or is wedged, will never acknowledge, and its owner must
-        /// not block on it. Matches <c>NodeProviderOutOfProcBase.TimeoutForWaitForExit</c>.
-        /// </summary>
-        private const int TimeoutForNodeShutdown = 30000;
-
-        /// <summary>
         /// Shuts down all of the connected managed nodes.
         /// </summary>
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>
@@ -238,10 +231,32 @@ namespace Microsoft.Build.BackEnd
 
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
 
-            // Bounded: a sidecar acknowledges in place instead of disconnecting, so that
-            // acknowledgement is the only thing that ends this wait, and one that died or wedged
-            // while acknowledging would otherwise hang its owner.
-            _noNodesActiveEvent.WaitOne(TimeoutForNodeShutdown);
+            // A node that stays connected never disconnects, so the wait below would never see it
+            // go away. It is already idle: the build cannot have completed while one of its tasks
+            // was outstanding, which is the invariant OutOfProcTaskHostNode.HandleNodeBuildComplete
+            // asserts on receipt. Its in-place reset needs no acknowledgement either, being ordered
+            // behind NodeBuildComplete on the same pipe. So retire it here and keep the wait for the
+            // nodes that really do disconnect.
+            if (enableReuse)
+            {
+                lock (_activeNodes)
+                {
+                    foreach (NodeContext context in contextsToShutDown)
+                    {
+                        if (context.ConnectionPersistsAcrossBuilds)
+                        {
+                            _activeNodes.Remove(context.NodeId);
+                        }
+                    }
+
+                    if (_activeNodes.Count == 0)
+                    {
+                        _noNodesActiveEvent.Set();
+                    }
+                }
+            }
+
+            _noNodesActiveEvent.WaitOne();
         }
 
         /// <summary>
@@ -278,7 +293,6 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
-            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeReadyForNextBuild, NodeReadyForNextBuild.FactoryForDeserialization, this);
 
             // Register callback request packet types so we can deserialize them when
             // they arrive from TaskHost processes. These are forwarded to the current
@@ -383,9 +397,8 @@ namespace Microsoft.Build.BackEnd
             switch (packet.Type)
             {
                 case NodePacketType.NodeShutdown:
-                case NodePacketType.NodeReadyForNextBuild:
-                    // Either the node has exited, or it has finished a build and stayed connected.
-                    // Both mean it is no longer working on this build, which is what shutdown waits for.
+                    // The node has exited, so it is no longer working on this build, which is what
+                    // shutdown waits for.
                     lock (_activeNodes)
                     {
                         if (_activeNodes.Contains(node))
