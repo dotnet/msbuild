@@ -10,14 +10,10 @@ namespace Microsoft.Build.Logging;
 /// <summary>
 /// A struct containing relevant evaluation-time data that may not be knowable just from ProjectStart events.
 /// </summary>
-/// <param name="context"></param>
 /// <param name="ProjectFile"></param>
 /// <param name="TargetFramework"></param>
 /// <param name="RuntimeIdentifier"></param>
-internal record struct EvalProjectInfo(TerminalLogger.EvalContext context, string? ProjectFile, string? TargetFramework, string? RuntimeIdentifier)
-{
-    public readonly int Id => context.Id;
-}
+internal readonly record struct EvalProjectInfo(string? ProjectFile, string? TargetFramework, string? RuntimeIdentifier);
 
 /// <summary>
 /// Represents a project being built.
@@ -29,13 +25,13 @@ internal sealed class TerminalProjectInfo
     /// <summary>
     /// Initialized a new <see cref="TerminalProjectInfo"/> with the given <paramref name="evalInfo"/> .
     /// </summary>
-    /// <param name="context">The ProjectContext of this project execution.</param>
+    /// <param name="contextKey">The project context key of this project execution.</param>
     /// <param name="evalInfo">A subset of the interesting eval-time data for this running project</param>
     /// <param name="stopwatch">A stopwatch to time the build of the project.</param>
-    public TerminalProjectInfo(TerminalLogger.ProjectContext context, EvalProjectInfo evalInfo, StopwatchAbstraction? stopwatch)
+    public TerminalProjectInfo(BuildEventTracker.ProjectContextKey contextKey, EvalProjectInfo evalInfo, StopwatchAbstraction? stopwatch)
     {
         _evalInfo = evalInfo;
-        _context = context;
+        _contextKey = contextKey;
 
         if (stopwatch is not null)
         {
@@ -51,7 +47,7 @@ internal sealed class TerminalProjectInfo
     /// <summary>
     /// The int value of the ProjectContext id of this project execution.
     /// </summary>
-    public int Id => _context.Id;
+    public int Id => _contextKey.ProjectContextId;
 
     /// <summary>
     /// The full path to the project file.
@@ -82,7 +78,7 @@ internal sealed class TerminalProjectInfo
     /// The runtime identifier of the project or null if platform-agnostic.
     /// </summary>
     public string? RuntimeIdentifier => _evalInfo.RuntimeIdentifier;
-    private readonly TerminalLogger.ProjectContext _context;
+    private readonly BuildEventTracker.ProjectContextKey _contextKey;
     private readonly EvalProjectInfo _evalInfo;
 
     /// <summary>

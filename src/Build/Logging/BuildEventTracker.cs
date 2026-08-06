@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging;
@@ -12,7 +13,7 @@ internal sealed class BuildEventTracker
 
     internal readonly record struct BuildFinishedSnapshot(DateTime Timestamp, TimeSpan Duration, bool Succeeded);
 
-    internal readonly record struct ProjectStartedSnapshot(
+    internal sealed record ProjectSnapshot(
         int ProjectContextId,
         int NodeId,
         int EvaluationId,
@@ -20,7 +21,10 @@ internal sealed class BuildEventTracker
         string? TargetNames,
         string? EvaluationProjectFile,
         string? TargetFramework,
-        string? RuntimeIdentifier);
+        string? RuntimeIdentifier)
+    {
+        internal ProjectContextKey ContextKey => new(NodeId, ProjectContextId);
+    }
 
     private IEventSource? _eventSource;
 
@@ -28,37 +32,35 @@ internal sealed class BuildEventTracker
 
     internal event Action<BuildFinishedSnapshot>? BuildFinishedTracked;
 
-    internal event Action<ProjectStartedSnapshot>? ProjectStartedTracked;
+    internal event Action<ProjectSnapshot>? ProjectStartedTracked;
 
-    internal event Action<ProjectFinishedEventArgs>? ProjectFinishedTracked;
+    internal event Action<ProjectSnapshot?, ProjectFinishedEventArgs>? ProjectFinishedTracked;
 
-    internal event Action<TargetStartedEventArgs>? TargetStartedTracked;
+    internal event Action<ProjectSnapshot?, TargetStartedEventArgs>? TargetStartedTracked;
 
-    internal event Action<TargetFinishedEventArgs>? TargetFinishedTracked;
+    internal event Action<ProjectSnapshot?, TargetFinishedEventArgs>? TargetFinishedTracked;
 
-    internal event Action<TaskStartedEventArgs>? TaskStartedTracked;
+    internal event Action<ProjectSnapshot?, TaskStartedEventArgs>? TaskStartedTracked;
 
-    internal event Action<TaskFinishedEventArgs>? TaskFinishedTracked;
+    internal event Action<ProjectSnapshot?, TaskFinishedEventArgs>? TaskFinishedTracked;
 
     internal event Action<BuildStatusEventArgs>? StatusEventTracked;
 
-    internal event Action<BuildMessageEventArgs>? MessageTracked;
+    internal event Action<ProjectSnapshot?, BuildMessageEventArgs>? MessageTracked;
 
-    internal event Action<BuildWarningEventArgs>? WarningTracked;
+    internal event Action<ProjectSnapshot?, BuildWarningEventArgs>? WarningTracked;
 
-    internal event Action<BuildErrorEventArgs>? ErrorTracked;
-
-    private DateTime _buildStartTime;
+    internal event Action<ProjectSnapshot?, BuildErrorEventArgs>? ErrorTracked;
 
     internal DateTime BuildStartTime { get; private set; }
 
     /// <summary>
-    /// A wrapper over the project context ID passed to us in <see cref="IEventSource"/> logger events.
+    /// Identifies a project request context across all build nodes.
     /// </summary>
-    internal record struct ProjectContext(int Id)
+    internal readonly record struct ProjectContextKey(int NodeId, int ProjectContextId)
     {
-        public ProjectContext(BuildEventContext context)
-            : this(context.ProjectContextId)
+        public ProjectContextKey(BuildEventContext context)
+            : this(context.NodeId, context.ProjectContextId)
         {
         }
     }
@@ -66,7 +68,7 @@ internal sealed class BuildEventTracker
     /// <summary>
     /// A wrapper over the evaluation context ID passed to us in <see cref="IEventSource"/> logger events.
     /// </summary>
-    internal record struct EvalContext(int Id)
+    internal readonly record struct EvalContext(int Id)
     {
         public EvalContext(BuildEventContext context)
             : this(context.EvaluationId)
@@ -78,22 +80,13 @@ internal sealed class BuildEventTracker
     /// Tracks the status of all relevant projects seen so far.
     /// </summary>
     /// <remarks>
-    /// Keyed by an ID that gets passed to logger callbacks, this allows us to quickly look up the corresponding project.
+    /// Keyed by the node and node-unique project context ID passed to logger callbacks.
     /// </remarks>
-    private readonly Dictionary<ProjectContext, TerminalProjectInfo> _projects = [];
+    private readonly Dictionary<ProjectContextKey, ProjectSnapshot> _projects = [];
 
     private readonly Dictionary<EvalContext, EvalProjectInfo> _projectEvaluations = [];
 
-    /// <summary>
-    /// Tracks the work currently being done by build nodes. Null means the node is not doing any work worth reporting.
-    /// </summary>
-    /// <remarks>
-    /// There is no locking around access to this data structure despite it being accessed concurrently by multiple threads.
-    /// However, reads and writes to locations in an array is atomic, so locking is not required.
-    /// </remarks>
-    private TerminalNodeStatus?[] _nodes = Array.Empty<TerminalNodeStatus>();
-
-    public void Attach(IEventSource eventSource)
+    internal void Attach(IEventSource eventSource)
     {
         ArgumentNullException.ThrowIfNull(eventSource);
 
@@ -135,6 +128,9 @@ internal sealed class BuildEventTracker
 
     private void OnBuildStarted(object sender, BuildStartedEventArgs e)
     {
+        _projects.Clear();
+        _projectEvaluations.Clear();
+
         BuildStartTime = e.Timestamp;
         BuildStartedTracked?.Invoke(new BuildStartedSnapshot(e.Timestamp));
     }
@@ -143,13 +139,13 @@ internal sealed class BuildEventTracker
     {
         BuildFinishedTracked?.Invoke(new BuildFinishedSnapshot(
             e.Timestamp,
-            e.Timestamp - _buildStartTime,
+            e.Timestamp - BuildStartTime,
             e.Succeeded));
     }
 
     private void OnProjectStarted(object sender, ProjectStartedEventArgs e)
     {
-        var buildEventContext = e.BuildEventContext;
+        BuildEventContext? buildEventContext = e.BuildEventContext;
         if (buildEventContext is null)
         {
             return;
@@ -157,7 +153,7 @@ internal sealed class BuildEventTracker
 
         _projectEvaluations.TryGetValue(new EvalContext(buildEventContext), out EvalProjectInfo evalInfo);
 
-        ProjectStartedTracked?.Invoke(new ProjectStartedSnapshot(
+        ProjectSnapshot project = new(
             buildEventContext.ProjectContextId,
             buildEventContext.NodeId,
             buildEventContext.EvaluationId,
@@ -165,32 +161,35 @@ internal sealed class BuildEventTracker
             e.TargetNames,
             evalInfo.ProjectFile,
             evalInfo.TargetFramework,
-            evalInfo.RuntimeIdentifier));
+            evalInfo.RuntimeIdentifier);
+
+        _projects[project.ContextKey] = project;
+        ProjectStartedTracked?.Invoke(project);
     }
 
     private void OnProjectFinished(object sender, ProjectFinishedEventArgs e)
     {
-        ProjectFinishedTracked?.Invoke(e);
+        ProjectFinishedTracked?.Invoke(CorrelateProject(e), e);
     }
 
     private void OnTargetStarted(object sender, TargetStartedEventArgs e)
     {
-        TargetStartedTracked?.Invoke(e);
+        TargetStartedTracked?.Invoke(CorrelateProject(e), e);
     }
 
     private void OnTargetFinished(object sender, TargetFinishedEventArgs e)
     {
-        TargetFinishedTracked?.Invoke(e);
+        TargetFinishedTracked?.Invoke(CorrelateProject(e), e);
     }
 
     private void OnTaskStarted(object sender, TaskStartedEventArgs e)
     {
-        TaskStartedTracked?.Invoke(e);
+        TaskStartedTracked?.Invoke(CorrelateProject(e), e);
     }
 
     private void OnTaskFinished(object sender, TaskFinishedEventArgs e)
     {
-        TaskFinishedTracked?.Invoke(e);
+        TaskFinishedTracked?.Invoke(CorrelateProject(e), e);
     }
 
     private void OnStatusEventRaised(object sender, BuildStatusEventArgs e)
@@ -205,20 +204,20 @@ internal sealed class BuildEventTracker
 
     private void OnMessageRaised(object sender, BuildMessageEventArgs e)
     {
-        MessageTracked?.Invoke(e);
+        MessageTracked?.Invoke(CorrelateProject(e), e);
     }
 
     private void OnWarningRaised(object sender, BuildWarningEventArgs e)
     {
-        WarningTracked?.Invoke(e);
+        WarningTracked?.Invoke(CorrelateProject(e), e);
     }
 
     private void OnErrorRaised(object sender, BuildErrorEventArgs e)
     {
-        ErrorTracked?.Invoke(e);
+        ErrorTracked?.Invoke(CorrelateProject(e), e);
     }
 
-    public void CaptureEvalContext(ProjectEvaluationFinishedEventArgs evalFinish)
+    private void CaptureEvalContext(ProjectEvaluationFinishedEventArgs evalFinish)
     {
         var buildEventContext = evalFinish.BuildEventContext;
         if (buildEventContext is null)
@@ -249,147 +248,19 @@ internal sealed class BuildEventTracker
                         break;
                 }
             }
-            var evalInfo = new EvalProjectInfo(new TerminalLogger.EvalContext(buildEventContext), evalFinish.ProjectFile, tfm, rid);
+            var evalInfo = new EvalProjectInfo(evalFinish.ProjectFile, tfm, rid);
             _projectEvaluations[c] = evalInfo;
         }
     }
+
+    private ProjectSnapshot? CorrelateProject(BuildEventArgs e)
+    {
+        BuildEventContext? buildEventContext = e.BuildEventContext;
+        return buildEventContext is not null
+            && _projects.TryGetValue(
+                new ProjectContextKey(buildEventContext),
+                out ProjectSnapshot? project)
+                    ? project
+                    : null;
+    }
 }
-
-//  BuildEventTracker 
-// Subscribe to events; correlate evaluation/project/target/task contexts; maintain lifecycle state; 
-// expose normalized callbacks/snapshots
-
-// TerminalLogger
-// Render live node progress, ANSI output, hyperlinks, restore/test summaries, terminal-width behavior     
-
-
-// Subscribe to events
-
-//  TerminalLogger.Initialize  directly registers its handlers:
-
-//  TerminalLogger.cs:457-468 
-
-// eventSource.BuildStarted += BuildStarted;
-// eventSource.BuildFinished += BuildFinished;
-// eventSource.ProjectStarted += ProjectStarted;
-// eventSource.ProjectFinished += ProjectFinished;
-// eventSource.TargetStarted += TargetStarted;
-// eventSource.TargetFinished += TargetFinished;
-// eventSource.TaskStarted += TaskStarted;
-// eventSource.TaskFinished += TaskFinished;
-// eventSource.StatusEventRaised += StatusEventRaised;
-// eventSource.MessageRaised += MessageRaised;
-// eventSource.WarningRaised += WarningRaised;
-// eventSource.ErrorRaised += ErrorRaised;
-
-// This subscription logic could move into  BuildEventTracker.Attach(IEventSource) .
-
-
-
-
-
-// Correlate contexts
-
-// Context keys are defined at:
-
-//  TerminalLogger.cs:57-73 
-
-// internal record struct ProjectContext(int Id);
-// internal record struct EvalContext(int Id);
-
-// Tracked state is stored at:
-
-//  TerminalLogger.cs:113-124 
-
-// private readonly Dictionary<ProjectContext, TerminalProjectInfo> _projects = [];
-// private readonly Dictionary<EvalContext, EvalProjectInfo> _projectEvaluations = [];
-// private TerminalNodeStatus?[] _nodes = [];
-
-// Evaluation-to-project correlation happens through:
-
-// •  CaptureEvalContext : lines  904-937 
-// •  ProjectStarted : lines  742-780 
-
-// The evaluation is first stored by  EvaluationId , then retrieved when a project with the corresponding evaluation starts.
-
-// Project-scoped events repeatedly resolve their project through:
-
-// _projects.TryGetValue(
-//     new ProjectContext(buildEventContext),
-//     out TerminalProjectInfo? project);
-
-// This occurs in target, task, message, warning, and error handlers.
-
-// The current target correlation is limited:  TargetStarted  stores the target name in  project.CurrentTarget . There is not yet a general target/task model keyed by  TargetId  and  TaskId .
-
-
-
-
-
-
-
-
-// Maintain lifecycle state
-
-// Project creation and timing:
-
-//  TerminalLogger.cs:742-780 
-
-// TerminalProjectInfo projectInfo = new(c, evalInfo, ...);
-// _projects[c] = projectInfo;
-
-// Project completion:
-
-//  TerminalLogger.cs:786-805 
-
-// project.Succeeded = e.Succeeded;
-// project.Stopwatch.Stop();
-
-// Target state:
-
-//  TerminalLogger.cs:1063-1092 
-
-// project.Stopwatch.Start();
-// project.CurrentTarget = targetName;
-// UpdateNodeStatus(buildEventContext, nodeStatus);
-
-// Task yielding/resuming is handled at lines  1167-1197 . In particular, the  MSBuild  task temporarily stops project timing and marks the node idle.
-
-// Diagnostic state is maintained by  TerminalProjectInfo :
-
-//  TerminalProjectInfo.cs:91-150 
-
-// public string? CurrentTarget { get; set; }
-// public bool Succeeded { get; set; }
-// public int ErrorCount { get; private set; }
-// public int WarningCount { get; private set; }
-// public IReadOnlyList<TerminalBuildMessage>? BuildMessages => _buildMessages;
-
-// public void AddBuildMessage(...)
-
-// Warnings and errors are associated with projects in:
-
-// •  WarningRaised :  TerminalLogger.cs:1363-1394 
-// •  ErrorRaised :  TerminalLogger.cs:1452-1468 
-
-// Expose normalized callbacks or snapshots
-
-// This functionality does not currently exist.
-
-//  TerminalLogger  updates its private state and immediately renders from the same handlers. For example,  ProjectFinished  both completes project state and writes terminal output.
-
-// The extraction would need to introduce something like:
-
-// tracker.ProjectStarted += OnProjectStarted;
-// tracker.ProjectUpdated += OnProjectUpdated;
-// tracker.DiagnosticRaised += OnDiagnosticRaised;
-// tracker.ProjectFinished += OnProjectFinished;
-
-// with presentation-neutral models such as:
-
-// ProjectSnapshot
-// DiagnosticSnapshot
-// TargetSnapshot
-// TaskSnapshot
-
-// That is the main new abstraction: converting TerminalLogger’s private mutable state into read-only information consumable by both  TerminalLogger  and  CiLoggerBase .
