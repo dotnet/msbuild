@@ -70,6 +70,21 @@ public sealed class ItemGlobs_Tests(ITestOutputHelper output)
     }
 
     [Fact]
+    public void RequestedItemTypesAreMatchedCaseInsensitively()
+    {
+        var project = CreateProject("""
+                <PropertyGroup>
+                    <MSBuildProvideItemGlobs>compile</MSBuildProvideItemGlobs>
+                </PropertyGroup>
+                <ItemGroup>
+                    <Compile Include="*.cs" />
+                </ItemGroup>
+            """);
+
+        GlobItemsFor(project, "Compile").Single().GetMetadataValue("Include").ShouldBe("*.cs");
+    }
+
+    [Fact]
     public void IncludeExcludeAndRemoveCaptured()
     {
         var project = CreateProject("""
