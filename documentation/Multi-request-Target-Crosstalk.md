@@ -51,7 +51,7 @@ Suppose a project contains an auxiliary target that modifies an item consumed by
 </Target>
 ```
 
-Two callers request different target sets:
+Two callers (usually other projects building concurrently) request different target sets:
 
 - `Build`.
 - `Auxiliary;Build`
