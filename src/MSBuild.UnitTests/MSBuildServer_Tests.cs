@@ -710,8 +710,10 @@ namespace Microsoft.Build.Engine.UnitTests
                     false,
                     _output);
                 residentSuccess.ShouldBeTrue();
+                int residentClientPid = ParseNumber(residentOutput, "Process ID is ");
                 int residentPid = ParseNumber(residentOutput, "TaskRanInPID=");
                 _env.WithTransientProcess(residentPid);
+                residentPid.ShouldNotBe(residentClientPid, "The resident build must run in a server, not in-process.");
 
                 string transientOutput = RunnerUtilities.ExecBootstrapedMSBuild(
                     $"{project.Path} -mt -nodeReuse:false",
@@ -719,9 +721,11 @@ namespace Microsoft.Build.Engine.UnitTests
                     false,
                     _output);
                 transientSuccess.ShouldBeTrue();
+                int transientClientPid = ParseNumber(transientOutput, "Process ID is ");
                 int transientPid = ParseNumber(transientOutput, "TaskRanInPID=");
                 _env.WithTransientProcess(transientPid);
 
+                transientPid.ShouldNotBe(transientClientPid, "The transient build must run in a server, not in-process.");
                 transientPid.ShouldNotBe(residentPid, "A transient build must run in its own server rather than borrowing the resident one.");
                 WaitForProcessExit(transientPid).ShouldBeTrue($"Transient server {transientPid} should tear itself down after its build.");
 
