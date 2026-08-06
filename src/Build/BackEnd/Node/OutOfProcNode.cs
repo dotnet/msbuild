@@ -150,6 +150,13 @@ namespace Microsoft.Build.Execution
 
             _componentFactories = new BuildComponentFactoryCollection(this);
             _componentFactories.RegisterDefaultFactories();
+
+            // This process serves many builds and constructs a fresh OutOfProcNode for each one, but
+            // the task hosts it launches with node reuse stay connected to the process across those
+            // builds. Their connections are process-lifetime resources, so scope the provider that
+            // owns them to the process: a later build then reuses the task hosts this one started,
+            // instead of stranding them alive, unreachable and unclaimable.
+            _componentFactories.ReplaceFactory(BuildComponentType.OutOfProcTaskHostNodeProvider, NodeProviderOutOfProcTaskHost.CreateProcessWideComponent);
             SerializationContractInitializer.Initialize();
             _packetFactory = new NodePacketFactory();
 

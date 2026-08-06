@@ -39,6 +39,11 @@ namespace Microsoft.Build.BackEnd
     internal class NodeProviderOutOfProcTaskHost : NodeProviderOutOfProcBase, INodeProvider, INodePacketFactory, INodePacketHandler
     {
         /// <summary>
+        /// The provider used by a worker node, whose lifetime is the process rather than the build.
+        /// </summary>
+        private static NodeProviderOutOfProcTaskHost s_processWideInstance;
+
+        /// <summary>
         /// Store the path for MSBuild / MSBuildTaskHost so that we don't have to keep recalculating it.
         /// </summary>
         private static string s_baseTaskHostPath;
@@ -231,32 +236,39 @@ namespace Microsoft.Build.BackEnd
 
             ShutdownConnectedNodes(contextsToShutDown, enableReuse);
 
-            // A node that stays connected never disconnects, so the wait below would never see it
-            // go away. It is already idle: the build cannot have completed while one of its tasks
-            // was outstanding, which is the invariant OutOfProcTaskHostNode.HandleNodeBuildComplete
+            // A node that stays connected never disconnects, so waiting on it would wait forever. It
+            // is already idle: the build cannot have completed while one of its tasks was
+            // outstanding, which is the invariant OutOfProcTaskHostNode.HandleNodeBuildComplete
             // asserts on receipt. Its in-place reset needs no acknowledgement either, being ordered
-            // behind NodeBuildComplete on the same pipe. So retire it here and keep the wait for the
-            // nodes that really do disconnect.
-            if (enableReuse)
-            {
-                lock (_activeNodes)
-                {
-                    foreach (NodeContext context in contextsToShutDown)
-                    {
-                        if (context.ConnectionPersistsAcrossBuilds)
-                        {
-                            _activeNodes.Remove(context.NodeId);
-                        }
-                    }
+            // behind NodeBuildComplete on the same pipe. So retire those here, and wait only when a
+            // node is actually going to disconnect -- a stale entry from an earlier build must never
+            // be able to block this process forever.
+            bool anyNodeWillDisconnect = false;
 
-                    if (_activeNodes.Count == 0)
+            lock (_activeNodes)
+            {
+                foreach (NodeContext context in contextsToShutDown)
+                {
+                    if (enableReuse && context.ConnectionPersistsAcrossBuilds)
                     {
-                        _noNodesActiveEvent.Set();
+                        _activeNodes.Remove(context.NodeId);
                     }
+                    else
+                    {
+                        anyNodeWillDisconnect = true;
+                    }
+                }
+
+                if (_activeNodes.Count == 0)
+                {
+                    _noNodesActiveEvent.Set();
                 }
             }
 
-            _noNodesActiveEvent.WaitOne();
+            if (anyNodeWillDisconnect)
+            {
+                _noNodesActiveEvent.WaitOne();
+            }
         }
 
         /// <summary>
@@ -281,6 +293,19 @@ namespace Microsoft.Build.BackEnd
         public void InitializeComponent(IBuildComponentHost host)
         {
             ComponentHost = host;
+
+            // This provider outlives the component collection that resolved it. A worker node
+            // process serves many builds and constructs a fresh OutOfProcNode for each one (see
+            // MSBuildApp.StartLocalNode), while the task hosts it launched stay connected to this
+            // process across those builds. Re-initializing here would strand those connections:
+            // unreachable from this process because nothing references them, and unclaimable by any
+            // other because a task host pipe accepts only one connection at a time. So once the
+            // node state exists, only refresh the host.
+            if (_nodeContexts is not null)
+            {
+                return;
+            }
+
             _nodeContexts = new ConcurrentDictionary<TaskHostNodeKey, NodeContext>();
             _nodeIdToNodeKey = new ConcurrentDictionary<int, TaskHostNodeKey>();
             _nodeIdToPacketHandlerStack = new ConcurrentDictionary<int, Stack<INodePacketHandler>>();
@@ -429,6 +454,24 @@ namespace Microsoft.Build.BackEnd
         {
             Assumed.Equal(componentType, BuildComponentType.OutOfProcTaskHostNodeProvider, $"Factory cannot create components of type {componentType}");
             return new NodeProviderOutOfProcTaskHost();
+        }
+
+        /// <summary>
+        /// Factory for the provider shared by every build a worker node process serves.
+        /// </summary>
+        /// <remarks>
+        /// A task host launched with node reuse stays connected to the process that launched it, so
+        /// its connection is a process-lifetime resource. A worker node builds a fresh component
+        /// collection per build, so resolving a new provider each time would forget task hosts that
+        /// are still running and still connected: this process could no longer reach them, and no
+        /// other process could claim them either, because a task host pipe accepts only one
+        /// connection at a time. That strands one task host per worker per build and loses reuse
+        /// entirely, so the object owning those connections is scoped to the process.
+        /// </remarks>
+        internal static IBuildComponent CreateProcessWideComponent(BuildComponentType componentType)
+        {
+            Assumed.Equal(componentType, BuildComponentType.OutOfProcTaskHostNodeProvider, $"Factory cannot create components of type {componentType}");
+            return s_processWideInstance ??= new NodeProviderOutOfProcTaskHost();
         }
 
         /// <summary>
