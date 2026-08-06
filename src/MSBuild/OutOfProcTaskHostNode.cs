@@ -1329,18 +1329,20 @@ namespace Microsoft.Build.CommandLine
             // the next build performs a fresh apply rather than trusting state left over from this build.
             _lastAppliedConfigEnvironment = null;
 
-            // Sidecar TaskHost will persist after the build is done.
-            if (_nodeReuse)
-            {
-                _shutdownReason = NodeEngineShutdownReason.BuildCompleteReuse;
-            }
-            else
-            {
-                // TaskHostNodes lock assemblies with custom tasks produced by build scripts if NodeReuse is on. This causes failures if the user builds twice.
-                _shutdownReason = buildComplete.PrepareForReuse && Traits.Instance.EscapeHatches.ReuseTaskHostNodes ? NodeEngineShutdownReason.BuildCompleteReuse : NodeEngineShutdownReason.BuildComplete;
-            }
+            _shutdownReason = DetermineShutdownReason(
+                _nodeReuse,
+                buildComplete.PrepareForReuse,
+                Traits.Instance.EscapeHatches.ReuseTaskHostNodes);
             _shutdownEvent.Set();
         }
+
+        internal static NodeEngineShutdownReason DetermineShutdownReason(
+            bool nodeReuse,
+            bool prepareForReuse,
+            bool reuseTaskHostNodes) =>
+            prepareForReuse && (nodeReuse || reuseTaskHostNodes)
+                ? NodeEngineShutdownReason.BuildCompleteReuse
+                : NodeEngineShutdownReason.BuildComplete;
 
         /// <summary>
         /// Perform necessary actions to shut down the node.

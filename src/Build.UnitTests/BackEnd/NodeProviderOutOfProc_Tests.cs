@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Linq;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -145,6 +147,23 @@ namespace Microsoft.Build.UnitTests.BackEnd
             
             result.Length.ShouldBe(1);
             result[0].ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void ShutdownHandshakes_IncludeWorkerAndTaskHost(bool nodeReuse)
+        {
+            HandshakeOptions[] options = NodeProviderOutOfProcBase.GetShutdownHandshakes(nodeReuse)
+                .Select(handshake => handshake.HandshakeOptions)
+                .ToArray();
+
+            options.Length.ShouldBe(3);
+            options.Count(option => !Handshake.IsHandshakeOptionEnabled(option, HandshakeOptions.TaskHost)).ShouldBe(2);
+            options.Count(option => Handshake.IsHandshakeOptionEnabled(option, HandshakeOptions.TaskHost)).ShouldBe(1);
+
+            HandshakeOptions taskHostOptions = options.Single(option => Handshake.IsHandshakeOptionEnabled(option, HandshakeOptions.TaskHost));
+            Handshake.IsHandshakeOptionEnabled(taskHostOptions, HandshakeOptions.NodeReuse).ShouldBe(nodeReuse);
         }
     }
 }

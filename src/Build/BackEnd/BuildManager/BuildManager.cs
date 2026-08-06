@@ -1507,6 +1507,8 @@ namespace Microsoft.Build.Execution
         {
             Microsoft.Build.Server.MSBuildClient.ShutdownServer(CancellationToken.None);
 
+            _taskHostNodeManager?.ShutdownConnectedNodes(enableReuse: false);
+
             _nodeManager ??= (INodeManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager);
             _nodeManager.ShutdownAllNodes();
         }

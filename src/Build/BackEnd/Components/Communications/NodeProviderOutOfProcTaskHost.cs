@@ -162,6 +162,12 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
+        internal static Handshake GetHandshake(bool enableNodeReuse) =>
+            new(CommunicationsUtilities.GetHandshakeOptions(
+                taskHost: true,
+                taskHostParameters: TaskHostParameters.Empty,
+                nodeReuse: enableNodeReuse));
+
         /// <summary>
         /// Returns the name of the CLR2 Task Host executable
         /// </summary>

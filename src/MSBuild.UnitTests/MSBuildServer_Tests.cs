@@ -66,6 +66,18 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
+    public class SidecarProcessIdTask : Microsoft.Build.Utilities.Task
+    {
+        [Output]
+        public int Pid { get; set; }
+
+        public override bool Execute()
+        {
+            Pid = Process.GetCurrentProcess().Id;
+            return true;
+        }
+    }
+
     public class MSBuildServer_Tests : IDisposable
     {
         private readonly ITestOutputHelper _output;
@@ -610,6 +622,63 @@ namespace Microsoft.Build.Engine.UnitTests
             finally
             {
                 // Ensure any server we spun up is torn down even if an assertion above fails.
+                MSBuildClient.ShutdownServer(CancellationToken.None);
+            }
+        }
+
+        [Fact]
+        public void MultiThreadedNoReuseBuildDoesNotAdoptOrOrphanSidecarTaskHost()
+        {
+            PrepareIsolatedServerEnv(useServer: false);
+            TransientTestFile project = _env.CreateFile(
+                "mtNoReuseSidecarProbe.proj",
+                $"""
+                <Project>
+                  <UsingTask TaskName="SidecarProcessIdTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
+                  <Target Name="Probe">
+                    <SidecarProcessIdTask>
+                      <Output PropertyName="PID" TaskParameter="Pid" />
+                    </SidecarProcessIdTask>
+                    <Message Text="[Work around GitHub issue #9667 with --interactive]TaskRanInPID=$(PID)" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+
+            MSBuildClient.ShutdownServer(CancellationToken.None);
+
+            try
+            {
+                string reusableOutput = RunnerUtilities.ExecMSBuild(
+                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                    $"{project.Path} -mt",
+                    out bool reusableSuccess,
+                    false,
+                    _output);
+                reusableSuccess.ShouldBeTrue();
+                int reusableSidecarPid = ParseNumber(reusableOutput, "TaskRanInPID=");
+                _env.WithTransientProcess(reusableSidecarPid);
+
+                string noReuseOutput = RunnerUtilities.ExecMSBuild(
+                    BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                    $"{project.Path} -mt -nr:false",
+                    out bool noReuseSuccess,
+                    false,
+                    _output);
+                noReuseSuccess.ShouldBeTrue();
+                int noReuseTaskHostPid = ParseNumber(noReuseOutput, "TaskRanInPID=");
+                _env.WithTransientProcess(noReuseTaskHostPid);
+
+                noReuseTaskHostPid.ShouldNotBe(
+                    reusableSidecarPid,
+                    "A no-reuse build must not reconnect to a reusable sidecar that was already idle.");
+                WaitForProcessExit(noReuseTaskHostPid).ShouldBeTrue(
+                    $"TaskHost process {noReuseTaskHostPid} should exit after a no-reuse build.");
+                using Process reusableSidecar = Process.GetProcessById(reusableSidecarPid);
+                reusableSidecar.HasExited.ShouldBeFalse(
+                    "The pre-existing reusable sidecar should remain untouched by the no-reuse build.");
+            }
+            finally
+            {
                 MSBuildClient.ShutdownServer(CancellationToken.None);
             }
         }

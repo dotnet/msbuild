@@ -171,19 +171,34 @@ namespace Microsoft.Build.BackEnd
             // Search for all instances of msbuildtaskhost process and add them to the process list
             nodeProcesses.AddRange(Process.GetProcessesByName(Path.GetFileNameWithoutExtension(msbuildtaskhostExeName)));
 
+            Handshake[] shutdownHandshakes = GetShutdownHandshakes(nodeReuse);
+
             // For all processes in the list, send signal to terminate if able to connect
             foreach (Process nodeProcess in nodeProcesses)
             {
                 // A 2013 comment suggested some nodes take this long to respond, so a smaller timeout would miss nodes.
                 int timeout = 30;
 
-                // Attempt to connect to the process with the handshake without low priority.
-                Stream nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, false), out HandshakeResult result);
+                Stream nodeStream = null;
+                HandshakeResult result = default;
 
-                if (nodeStream == null)
+                foreach (Handshake handshake in shutdownHandshakes)
                 {
-                    // If we couldn't connect attempt to connect to the process with the handshake including low priority.
-                    nodeStream = TryConnectToProcess(nodeProcess.Id, timeout, NodeProviderOutOfProc.GetHandshake(nodeReuse, true), out result);
+                    Stream candidateStream = null;
+                    try
+                    {
+                        candidateStream = TryConnectToProcess(nodeProcess.Id, timeout, handshake, out result);
+                        if (candidateStream != null)
+                        {
+                            nodeStream = candidateStream;
+                            candidateStream = null;
+                            break;
+                        }
+                    }
+                    finally
+                    {
+                        candidateStream?.Dispose();
+                    }
                 }
 
                 if (nodeStream != null)
@@ -196,6 +211,13 @@ namespace Microsoft.Build.BackEnd
                 }
             }
         }
+
+        internal static Handshake[] GetShutdownHandshakes(bool nodeReuse) =>
+        [
+            NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: false),
+            NodeProviderOutOfProc.GetHandshake(nodeReuse, enableLowPriority: true),
+            NodeProviderOutOfProcTaskHost.GetHandshake(nodeReuse),
+        ];
 
         /// <summary>
         /// Finds or creates child processes which can act as nodes using the provided launch data.
