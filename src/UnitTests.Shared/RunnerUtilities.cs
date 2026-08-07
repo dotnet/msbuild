@@ -75,6 +75,15 @@ namespace Microsoft.Build.UnitTests.Shared
             // Built msbuild.dll executed by dotnet.exe needs this environment variable for msbuild tasks such as RoslynCodeTaskFactory.
             testEnvironment.SetEnvironmentVariable(Constants.DotnetHostPathEnvVarName, s_dotnetExePath);
         }
+
+        /// <summary>
+        /// The dotnet host inside the bootstrap layout, for tests that must drive the bootstrap
+        /// installation directly rather than through MSBuild (for example <c>dotnet build-server
+        /// shutdown</c>). Pair it with <see cref="GetBootstrapMSBuildEnvironmentVariables"/> so the
+        /// command targets the same installation, and therefore the same server, that
+        /// <see cref="ExecBootstrapedMSBuild(string, out bool, bool, ITestOutputHelper, bool, int)"/> built with.
+        /// </summary>
+        public static string BootstrapDotnetHostPath => s_bootstrapDotnetHostPath;
 #endif
 
         /// <summary>
