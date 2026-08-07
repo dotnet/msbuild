@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using BenchmarkDotNet.Attributes;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
@@ -9,7 +10,15 @@ using Microsoft.Build.Utilities;
 
 namespace MSBuild.Benchmarks;
 
+/// <summary>
+///  Measures cold population and repeated access for defining-project item-spec modifiers.
+/// </summary>
+/// <remarks>
+///  Iteration setup creates fresh items and clears the process-wide defining-project cache. Each
+///  benchmark batches enough items for a single measured invocation before normalization per item.
+/// </remarks>
 [MemoryDiagnoser]
+[RunOncePerIteration]
 public class DefiningProjectModifiersBenchmark
 {
     /// <summary>
@@ -24,8 +33,11 @@ public class DefiningProjectModifiersBenchmark
     private const int RepeatedReads = 10;
 
     private string _tempDir = null!;
-    private ProjectInstance _singleProjectInstance = null!;
-    private ProjectInstance _multiProjectInstance = null!;
+    private ProjectCollection _projectCollection = null!;
+    private ProjectRootElement _singleProjectRoot = null!;
+    private ProjectRootElement _multiProjectRoot = null!;
+    private ProjectItemInstance[] _singleProjectItems = null!;
+    private ProjectItemInstance[] _multiProjectItems = null!;
     private TaskItem[] _taskItemsWithDefiningProject = null!;
 
     [GlobalSetup]
@@ -41,67 +53,89 @@ public class DefiningProjectModifiersBenchmark
             File.WriteAllText(Path.Combine(srcDir, $"File{i}.cs"), string.Empty);
         }
 
+        _projectCollection = new ProjectCollection();
+
         // --- Single-project scenario ---
         // All items defined in one project file. DefiningProjectFullPath is the same for all items,
         // so a cache keyed by defining project path would hit on every item after the first.
-        using (var pc = new ProjectCollection())
+        _singleProjectRoot = ProjectRootElement.Create(_projectCollection);
+        _singleProjectRoot.FullPath = Path.Combine(_tempDir, "SingleProject.csproj");
+
+        ProjectItemGroupElement singleProjectItemGroup = _singleProjectRoot.AddItemGroup();
+        for (int i = 0; i < ItemsPerProject; i++)
         {
-            var root = Microsoft.Build.Construction.ProjectRootElement.Create(pc);
-            root.FullPath = Path.Combine(_tempDir, "SingleProject.csproj");
-
-            var itemGroup = root.AddItemGroup();
-            for (int i = 0; i < ItemsPerProject; i++)
-            {
-                itemGroup.AddItem("Compile", Path.Combine(srcDir, $"File{i}.cs"));
-            }
-
-            var project = new Project(root, null, null, pc);
-            _singleProjectInstance = project.CreateProjectInstance();
+            singleProjectItemGroup.AddItem("Compile", Path.Combine(srcDir, $"File{i}.cs"));
         }
 
         // --- Multi-project scenario ---
         // Items imported from a second project file. The main project and the imported project
         // each define items, so there are two distinct DefiningProjectFullPath values.
-        using (var pc = new ProjectCollection())
+        // Imported project defines half the items.
+        ProjectRootElement importRoot = ProjectRootElement.Create(_projectCollection);
+        importRoot.FullPath = Path.Combine(_tempDir, "Imported.props");
+        ProjectItemGroupElement importItemGroup = importRoot.AddItemGroup();
+        for (int i = 0; i < ItemsPerProject / 2; i++)
         {
-            // Imported project defines half the items.
-            var importRoot = Microsoft.Build.Construction.ProjectRootElement.Create(pc);
-            importRoot.FullPath = Path.Combine(_tempDir, "Imported.props");
-            var importItemGroup = importRoot.AddItemGroup();
-            for (int i = 0; i < ItemsPerProject / 2; i++)
-            {
-                importItemGroup.AddItem("Compile", Path.Combine(srcDir, $"File{i}.cs"));
-            }
-
-            importRoot.Save();
-
-            // Main project imports the props file and defines the other half.
-            var mainRoot = Microsoft.Build.Construction.ProjectRootElement.Create(pc);
-            mainRoot.FullPath = Path.Combine(_tempDir, "MainProject.csproj");
-            mainRoot.AddImport("Imported.props");
-            var mainItemGroup = mainRoot.AddItemGroup();
-            for (int i = ItemsPerProject / 2; i < ItemsPerProject; i++)
-            {
-                mainItemGroup.AddItem("Compile", Path.Combine(srcDir, $"File{i}.cs"));
-            }
-
-            var project = new Project(mainRoot, null, null, pc);
-            _multiProjectInstance = project.CreateProjectInstance();
+            importItemGroup.AddItem("Compile", Path.Combine(srcDir, $"File{i}.cs"));
         }
 
-        // --- TaskItem instances with defining project set ---
-        // Copy from ProjectItemInstance so that _definingProject is populated.
-        var sourceItems = _singleProjectInstance.GetItems("Compile").ToArray();
+        importRoot.Save();
+
+        // Main project imports the props file and defines the other half.
+        _multiProjectRoot = ProjectRootElement.Create(_projectCollection);
+        _multiProjectRoot.FullPath = Path.Combine(_tempDir, "MainProject.csproj");
+        _multiProjectRoot.AddImport("Imported.props");
+        ProjectItemGroupElement mainItemGroup = _multiProjectRoot.AddItemGroup();
+        for (int i = ItemsPerProject / 2; i < ItemsPerProject; i++)
+        {
+            mainItemGroup.AddItem("Compile", Path.Combine(srcDir, $"File{i}.cs"));
+        }
+    }
+
+    [IterationSetup]
+    public void IterationSetup()
+    {
+        // Copy from a throwaway ProjectInstance so TaskItem._definingProject is populated without
+        // warming the ProjectItemInstance objects used by the measured workload.
+        ProjectInstance taskItemSource = new(
+            _singleProjectRoot,
+            globalProperties: null,
+            toolsVersion: null,
+            _projectCollection);
+
+        ProjectItemInstance[] sourceItems = [.. taskItemSource.GetItems("Compile")];
         _taskItemsWithDefiningProject = new TaskItem[sourceItems.Length];
         for (int i = 0; i < sourceItems.Length; i++)
         {
             _taskItemsWithDefiningProject[i] = new TaskItem(sourceItems[i]);
         }
+
+        ProjectInstance singleProjectInstance = new(
+            _singleProjectRoot,
+            globalProperties: null,
+            toolsVersion: null,
+            _projectCollection);
+
+        ProjectInstance multiProjectInstance = new(
+            _multiProjectRoot,
+            globalProperties: null,
+            toolsVersion: null,
+            _projectCollection);
+
+        _singleProjectItems = [.. singleProjectInstance.GetItems("Compile")];
+        _multiProjectItems = [.. multiProjectInstance.GetItems("Compile")];
+
+        // TaskItem construction reads DefiningProjectFullPath from the source items. Reset the
+        // process-wide cache after setup so every measured iteration starts from the same state.
+        ItemSpecModifiers.ClearDefiningProjectCache();
     }
 
     [GlobalCleanup]
     public void GlobalCleanup()
     {
+        ItemSpecModifiers.ClearDefiningProjectCache();
+        _projectCollection.Dispose();
+
         if (Directory.Exists(_tempDir))
         {
             Directory.Delete(_tempDir, recursive: true);
@@ -109,40 +143,44 @@ public class DefiningProjectModifiersBenchmark
     }
 
     // -----------------------------------------------------------------------
-    // ProjectItemInstance: Read all DefiningProject* modifiers on one item.
-    // Cold-cache baseline for all four DefiningProject modifiers.
+    // ProjectItemInstance: Read all DefiningProject* modifiers once on each fresh item.
+    // The process-wide cache starts empty and is shared across items from the same project.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemsPerProject)]
     public string ProjectItemInstance_AllDefiningProjectModifiers_Once()
     {
-        ProjectItemInstance item = _singleProjectInstance.GetItems("Compile").First();
         string last = null!;
 
-        last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath);
-        last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectDirectory);
-        last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectName);
-        last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectExtension);
+        foreach (ProjectItemInstance item in _singleProjectItems)
+        {
+            last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath);
+            last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectDirectory);
+            last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectName);
+            last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectExtension);
+        }
 
         return last;
     }
 
     // -----------------------------------------------------------------------
-    // ProjectItemInstance: Read DefiningProjectDirectory repeatedly.
+    // ProjectItemInstance: Read DefiningProjectDirectory repeatedly on each item.
     // This is the most expensive DefiningProject modifier — it resolves
     // FullPath, RootDir, and Directory internally. Repeated reads on the
     // same item should benefit heavily from caching.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemsPerProject)]
     public string ProjectItemInstance_DefiningProjectDirectory_Repeated()
     {
-        ProjectItemInstance item = _singleProjectInstance.GetItems("Compile").First();
         string last = null!;
 
-        for (int i = 0; i < RepeatedReads; i++)
+        foreach (ProjectItemInstance item in _singleProjectItems)
         {
-            last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectDirectory);
+            for (int i = 0; i < RepeatedReads; i++)
+            {
+                last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectDirectory);
+            }
         }
 
         return last;
@@ -155,12 +193,12 @@ public class DefiningProjectModifiersBenchmark
     // cache should compute once and return cached results for the rest.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemsPerProject)]
     public string ProjectItemInstance_DefiningProjectNameExtension_AllItems_SingleProject()
     {
         string last = null!;
 
-        foreach (ProjectItemInstance item in _singleProjectInstance.GetItems("Compile"))
+        foreach (ProjectItemInstance item in _singleProjectItems)
         {
             last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectName);
             last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectExtension);
@@ -176,12 +214,12 @@ public class DefiningProjectModifiersBenchmark
     // defining project path has two entries.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemsPerProject)]
     public string ProjectItemInstance_DefiningProjectFullPath_AllItems_MultiProject()
     {
         string last = null!;
 
-        foreach (ProjectItemInstance item in _multiProjectInstance.GetItems("Compile"))
+        foreach (ProjectItemInstance item in _multiProjectItems)
         {
             last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectFullPath);
         }
@@ -192,18 +230,18 @@ public class DefiningProjectModifiersBenchmark
     // -----------------------------------------------------------------------
     // ProjectItemInstance: Read DefiningProjectDirectory on all items from a
     // multi-project scenario, repeated.
-    // The most expensive modifier across multiple passes — represents the
-    // worst case for uncached DefiningProject resolution.
+    // The first pass populates the two defining-project cache entries; later
+    // passes measure repeated access through both process-wide and per-item caches.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemsPerProject)]
     public string ProjectItemInstance_DefiningProjectDirectory_AllItems_MultiProject_Repeated()
     {
         string last = null!;
 
         for (int pass = 0; pass < RepeatedReads; pass++)
         {
-            foreach (ProjectItemInstance item in _multiProjectInstance.GetItems("Compile"))
+            foreach (ProjectItemInstance item in _multiProjectItems)
             {
                 last = item.GetMetadataValue(ItemSpecModifiers.DefiningProjectDirectory);
             }
@@ -213,21 +251,23 @@ public class DefiningProjectModifiersBenchmark
     }
 
     // -----------------------------------------------------------------------
-    // TaskItem: Read all DefiningProject* modifiers on one item.
+    // TaskItem: Read all DefiningProject* modifiers once on each item.
     // Exercises the Utilities.TaskItem → ItemSpecModifiers path with a
     // defining project obtained by copying from a ProjectItemInstance.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemsPerProject)]
     public string TaskItem_AllDefiningProjectModifiers_Once()
     {
-        TaskItem item = _taskItemsWithDefiningProject[0];
         string last = null!;
 
-        last = item.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath);
-        last = item.GetMetadata(ItemSpecModifiers.DefiningProjectDirectory);
-        last = item.GetMetadata(ItemSpecModifiers.DefiningProjectName);
-        last = item.GetMetadata(ItemSpecModifiers.DefiningProjectExtension);
+        foreach (TaskItem item in _taskItemsWithDefiningProject)
+        {
+            last = item.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath);
+            last = item.GetMetadata(ItemSpecModifiers.DefiningProjectDirectory);
+            last = item.GetMetadata(ItemSpecModifiers.DefiningProjectName);
+            last = item.GetMetadata(ItemSpecModifiers.DefiningProjectExtension);
+        }
 
         return last;
     }
@@ -237,7 +277,7 @@ public class DefiningProjectModifiersBenchmark
     // all items. All share the same defining project path.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemsPerProject)]
     public string TaskItem_DefiningProjectNameExtension_AllItems()
     {
         string last = null!;
@@ -252,18 +292,20 @@ public class DefiningProjectModifiersBenchmark
     }
 
     // -----------------------------------------------------------------------
-    // TaskItem: Read DefiningProjectDirectory repeatedly on one item.
+    // TaskItem: Read DefiningProjectDirectory repeatedly on each item.
     // -----------------------------------------------------------------------
 
-    [Benchmark]
+    [Benchmark(OperationsPerInvoke = ItemsPerProject)]
     public string TaskItem_DefiningProjectDirectory_Repeated()
     {
-        TaskItem item = _taskItemsWithDefiningProject[0];
         string last = null!;
 
-        for (int i = 0; i < RepeatedReads; i++)
+        foreach (TaskItem item in _taskItemsWithDefiningProject)
         {
-            last = item.GetMetadata(ItemSpecModifiers.DefiningProjectDirectory);
+            for (int i = 0; i < RepeatedReads; i++)
+            {
+                last = item.GetMetadata(ItemSpecModifiers.DefiningProjectDirectory);
+            }
         }
 
         return last;
