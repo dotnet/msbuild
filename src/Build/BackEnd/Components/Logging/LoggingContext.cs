@@ -71,6 +71,20 @@ namespace Microsoft.Build.BackEnd.Logging
         internal IBuildEngineDataConsumer BuildEngineDataConsumer => this;
 
         /// <summary>
+        /// The full path of the project this context is associated with, if any. Returns
+        /// <see langword="null"/> for contexts that are not project-scoped (e.g.
+        /// <see cref="NodeLoggingContext"/>).
+        /// </summary>
+        /// <remarks>
+        /// Used for resolving relative paths to absolute on the engine side before they
+        /// flow out to loggers, where neither the process current directory nor the
+        /// background thread CWD is a reliable base directory (especially in
+        /// multithreaded MSBuild execution; see
+        /// <c>documentation/specs/multithreading/multithreaded-msbuild.md</c>).
+        /// </remarks>
+        internal virtual string? ProjectFullPath => null;
+
+        /// <summary>
         /// Retrieves the logging service
         /// </summary>
         public ILoggingService LoggingService

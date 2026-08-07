@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 #endif
@@ -263,6 +264,20 @@ namespace Microsoft.Build.BackEnd
             bool logItemMetadata,
             IElementLocation location = null)
         {
+            // For items destined for the binary logger via the EmbedInBinlog hint, resolve
+            // any relative item specs against the project's directory before the event
+            // leaves the engine. The logger consumes events on background threads where
+            // the process current directory is not a reliable base directory; this is
+            // especially true under multithreaded MSBuild execution where multiple
+            // projects may be running concurrently in the same process and the
+            // process-level CWD is not a per-project concept at all (see
+            // documentation/specs/multithreading/multithreaded-msbuild.md).
+            if (items != null
+                && string.Equals(itemType, ItemTypeNames.EmbedInBinlog, StringComparison.OrdinalIgnoreCase))
+            {
+                items = MakeEmbedInBinlogItemSpecsAbsolute(items, loggingContext.ProjectFullPath);
+            }
+
             var args = CreateTaskParameterEventArgs(
                 loggingContext.BuildEventContext,
                 messageKind,
@@ -276,6 +291,81 @@ namespace Microsoft.Build.BackEnd
                 location?.Column ?? 0);
 
             loggingContext.LogBuildEvent(args);
+        }
+
+        /// <summary>
+        /// Returns an item list equivalent to <paramref name="items"/> in which every relative
+        /// <see cref="ITaskItem.ItemSpec"/> (or relative bare-string spec) has been resolved to
+        /// an absolute path against <paramref name="projectFullPath"/>'s directory. The original
+        /// items are not mutated; a snapshot is allocated only when at least one rewrite is
+        /// required.
+        /// </summary>
+        private static IList MakeEmbedInBinlogItemSpecsAbsolute(IList items, string projectFullPath)
+        {
+            if (string.IsNullOrEmpty(projectFullPath))
+            {
+                return items;
+            }
+
+            string projectDirectory = Path.GetDirectoryName(projectFullPath);
+            if (string.IsNullOrEmpty(projectDirectory))
+            {
+                return items;
+            }
+
+            int count = items.Count;
+            object[] cloned = null;
+
+            for (int i = 0; i < count; i++)
+            {
+                object item = items[i];
+                string originalSpec = item switch
+                {
+                    ITaskItem taskItem => taskItem.ItemSpec,
+                    string s => s,
+                    _ => null,
+                };
+
+                if (string.IsNullOrEmpty(originalSpec) || Path.IsPathRooted(originalSpec))
+                {
+                    if (cloned != null)
+                    {
+                        cloned[i] = item;
+                    }
+
+                    continue;
+                }
+
+                // Path.GetFullPath of an already-rooted path does not consult the process
+                // current directory, so this is safe in any execution mode.
+                string absoluteSpec = Path.GetFullPath(Path.Combine(projectDirectory, originalSpec));
+
+                if (cloned == null)
+                {
+                    cloned = new object[count];
+                    for (int j = 0; j < i; j++)
+                    {
+                        cloned[j] = items[j];
+                    }
+                }
+
+                cloned[i] = item is ITaskItem origTaskItem
+                    ? new TaskItemData(absoluteSpec, CopyMetadata(origTaskItem))
+                    : (object)absoluteSpec;
+            }
+
+            return cloned ?? items;
+        }
+
+        private static IDictionary<string, string> CopyMetadata(ITaskItem item)
+        {
+            var dictionary = new Dictionary<string, string>();
+            foreach (KeyValuePair<string, string> kvp in item.EnumerateMetadata())
+            {
+                dictionary[kvp.Key] = kvp.Value;
+            }
+
+            return dictionary;
         }
 
         internal static TaskParameterEventArgs CreateTaskParameterEventArgs(
