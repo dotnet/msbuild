@@ -618,6 +618,11 @@ namespace Microsoft.Build.Execution
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
 
+                if (!Traits.Instance.EscapeHatches.DisableParseConfig)
+                {
+                    _buildParameters.UnknownElementsConfiguration = _buildParameters.ProjectRootElementCache.UnknownElementsConfiguration;
+                }
+
                 if (_buildParameters.UsesCachedResults() && _buildParameters.ProjectIsolationMode == ProjectIsolationMode.False)
                 {
                     // If input or output caches are used and the project isolation mode is set to

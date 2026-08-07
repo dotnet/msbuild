@@ -715,6 +715,8 @@ namespace Microsoft.Build.Execution
             // Grab the system parameters.
             _buildParameters = configuration.BuildParameters;
 
+            s_projectRootElementCacheBase.SetUnknownElementsConfiguration(configuration.BuildParameters.UnknownElementsConfiguration);
+
             _buildParameters.ProjectRootElementCache = s_projectRootElementCacheBase;
 
             // Snapshot the current environment

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -381,6 +381,12 @@ namespace Microsoft.Build.Evaluation
                 // we do not need to auto reload.
                 bool autoReloadFromDisk = reuseProjectRootElementCache;
                 ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk, loadProjectsReadOnly);
+                
+                if (!Traits.Instance.EscapeHatches.DisableParseConfig)
+                {
+                    ProjectRootElementCache.SetUnknownElementsConfiguration(UnknownElementsConfiguration.LoadGlobalConfig());
+                }
+
                 if (reuseProjectRootElementCache)
                 {
                     s_projectRootElementCache = ProjectRootElementCache;
@@ -562,6 +568,66 @@ namespace Microsoft.Build.Evaluation
         /// Properties passed from the command line (e.g. by using /p:).
         /// </summary>
         public ICollection<string> PropertiesFromCommandLine { get; set; }
+
+        /// <summary>
+        /// Gets or sets the configuration for allowed unknown attributes/elements during parsing.
+        /// When set, this configuration will be used by builds started from this collection.
+        /// </summary>
+        internal UnknownElementsConfiguration UnknownElementsConfiguration
+        {
+            get => ProjectRootElementCache.UnknownElementsConfiguration;
+            set => ProjectRootElementCache.SetUnknownElementsConfiguration(value);
+        }
+
+        /// <summary>
+        /// The config state before LoadParseConfigForStartup was called, used to restore on unload.
+        /// </summary>
+        private UnknownElementsConfiguration _preStartupUnknownElementsConfiguration;
+
+        /// <summary>
+        /// Loads a Directory.Parse.config by walking up from the specified directory
+        /// and adds it to the current parse configuration. Call <see cref="UnloadParseConfigForStartup"/>
+        /// to restore the previous state after the build completes.
+        /// </summary>
+        /// <param name="startingDirectory">The directory to start searching from (typically the build's working directory).</param>
+        /// <exception cref="InvalidOperationException">Thrown if startup config is already loaded.</exception>
+        public void LoadParseConfigForStartup(string startingDirectory)
+        {
+            if (_preStartupUnknownElementsConfiguration is not null)
+            {
+                throw new InvalidOperationException("LoadParseConfigForStartup called while startup config is already loaded. Call UnloadParseConfigForStartup first.");
+            }
+
+            if (Traits.Instance.EscapeHatches.DisableParseConfig || string.IsNullOrEmpty(startingDirectory))
+            {
+                return;
+            }
+
+            var config = ProjectRootElementCache.UnknownElementsConfiguration;
+            if (config is null)
+            {
+                return;
+            }
+
+            string configPath = FileUtilities.GetPathOfFileAbove(UnknownElementsConfiguration.ConfigFileName, startingDirectory);
+            if (!string.IsNullOrEmpty(configPath) && !config.ContainsLoadedFile(configPath))
+            {
+                _preStartupUnknownElementsConfiguration = config;
+                ProjectRootElementCache.SetUnknownElementsConfiguration(UnknownElementsConfiguration.Merge(config, UnknownElementsConfiguration.LoadFromFile(configPath)));
+            }
+        }
+
+        /// <summary>
+        /// Restores the parse configuration to the state before <see cref="LoadParseConfigForStartup"/> was called.
+        /// </summary>
+        public void UnloadParseConfigForStartup()
+        {
+            if (_preStartupUnknownElementsConfiguration is not null)
+            {
+                ProjectRootElementCache.SetUnknownElementsConfiguration(_preStartupUnknownElementsConfiguration);
+                _preStartupUnknownElementsConfiguration = null;
+            }
+        }
 
         /// <summary>
         /// The default tools version of this project collection. Projects use this tools version if they

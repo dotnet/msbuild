@@ -1708,6 +1708,9 @@ namespace Microsoft.Build.CommandLine
                 // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
                 projectCollection.PropertiesFromCommandLine = [.. globalProperties.Keys];
 
+                // Load parse config from the project file's directory before any project is loaded.
+                projectCollection.LoadParseConfigForStartup(Path.GetDirectoryName(Path.GetFullPath(projectFile)));
+
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
                 {
                     ThrowInvalidToolsVersionInitializationException(projectCollection.Toolsets, toolsVersion);
@@ -2006,6 +2009,7 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
+                projectCollection?.UnloadParseConfigForStartup();
                 projectCollection?.Dispose();
                 FileUtilities.ClearCacheDirectory();
 

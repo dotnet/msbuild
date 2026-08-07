@@ -181,7 +181,7 @@ namespace Microsoft.Build.Construction
 
             XmlDocumentWithLocation document = LoadDocument(xmlReader, preserveFormatting);
 
-            ProjectParser.Parse(document, this);
+            ProjectParser.Parse(document, this, ProjectRootElementCache.UnknownElementsConfiguration);
         }
 
         private readonly bool _isEphemeral = false;
@@ -217,7 +217,7 @@ namespace Microsoft.Build.Construction
                 document.Load(xr);
             }
 
-            ProjectParser.Parse(document, this);
+            ProjectParser.Parse(document, this, ProjectRootElementCache.UnknownElementsConfiguration);
         }
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace Microsoft.Build.Construction
 
             XmlDocumentWithLocation document = LoadDocument(path, preserveFormatting, projectRootElementCache.LoadProjectsReadOnly);
 
-            ProjectParser.Parse(document, this);
+            ProjectParser.Parse(document, this, ProjectRootElementCache.UnknownElementsConfiguration);
         }
 
         /// <summary>
@@ -261,7 +261,7 @@ namespace Microsoft.Build.Construction
             _directory = Environment.CurrentDirectory;
             IncrementVersion();
 
-            ProjectParser.Parse(document, this);
+            ProjectParser.Parse(document, this, ProjectRootElementCache.UnknownElementsConfiguration);
         }
 
         /// <summary>
@@ -273,7 +273,9 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         private ProjectRootElement(XmlDocumentWithLocation document)
         {
-            ProjectParser.Parse(document, this);
+            // This constructor is only used by ThrowIfDocumentHasParsingErrors to check whether a document
+            // parses; it deliberately has no cache, so there is no configuration to apply.
+            ProjectParser.Parse(document, this, ProjectRootElementCache?.UnknownElementsConfiguration);
         }
 
         /// <summary>
@@ -1721,7 +1723,7 @@ namespace Microsoft.Build.Construction
 
             RemoveAllChildren();
 
-            ProjectParser.Parse(newDocument, this);
+            ProjectParser.Parse(newDocument, this, ProjectRootElementCache.UnknownElementsConfiguration);
 
             MarkDirty("Project reloaded", null);
         }
