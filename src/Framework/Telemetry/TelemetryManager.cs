@@ -5,8 +5,6 @@
 using Microsoft.VisualStudio.Telemetry;
 #endif
 
-using System;
-using System.IO;
 using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Framework.Telemetry
@@ -29,6 +27,12 @@ namespace Microsoft.Build.Framework.Telemetry
 
         private static bool s_initialized;
         private static bool s_disposed;
+
+        /// <summary>
+        /// Indicates whether the telemetry infrastructure has already been torn down.
+        /// Exposed for TESTING purposes.
+        /// </summary>
+        internal static bool IsDisposed => s_disposed;
 
         private TelemetryManager()
         {
@@ -100,10 +104,13 @@ namespace Microsoft.Build.Framework.Telemetry
                 DefaultActivitySource = new MSBuildActivitySource(TelemetryConstants.DefaultActivitySourceNamespace);
 #endif
             }
-            catch (Exception ex) when (ex is FileNotFoundException or FileLoadException or TypeLoadException)
+            catch
             {
-                // Microsoft.VisualStudio.Telemetry or System.Diagnostics.DiagnosticSource might not be available outside of VS or dotnet.
-                // This is expected in standalone application scenarios (when MSBuild.exe is invoked directly).
+                // Telemetry is best effort and must never fail a build.
+                // Microsoft.VisualStudio.Telemetry or System.Diagnostics.DiagnosticSource might not be available outside of VS or dotnet
+                // (FileNotFoundException, FileLoadException, TypeLoadException) - this is expected in standalone application scenarios
+                // (when MSBuild.exe is invoked directly). The telemetry stack itself can also throw, for example when the machine is
+                // configured to opt out of Visual Studio telemetry, so any failure simply disables telemetry for this process.
                 DefaultActivitySource = null;
             }
         }
@@ -117,20 +124,24 @@ namespace Microsoft.Build.Framework.Telemetry
                     return;
                 }
 
+                s_disposed = true;
+
+                // Nothing may use the activity source once the underlying session is gone.
+                DefaultActivitySource = null;
+
 #if NETFRAMEWORK
                 try
                 {
                     DisposeVsTelemetry();
                 }
-                catch (Exception ex) when (
-                    ex is FileNotFoundException or
-                    FileLoadException or
-                    TypeLoadException)
+                catch
                 {
-                    // Assembly was never loaded, nothing to dispose.
+                    // Telemetry is best effort and must never fail a build.
+                    // The Visual Studio telemetry assembly may never have been loaded (FileNotFoundException,
+                    // FileLoadException, TypeLoadException), and disposing the session can itself throw when the
+                    // telemetry stack was not fully started - for example when telemetry is opted out machine wide.
                 }
 #endif
-                s_disposed = true;
             }
         }
 
@@ -163,13 +174,19 @@ namespace Microsoft.Build.Framework.Telemetry
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static MSBuildActivitySource Initialize(bool isStandalone)
         {
-            TelemetrySession session;
+            TelemetrySession? session;
             if (isStandalone)
             {
                 session = TelemetryService.CreateAndGetDefaultSession(CollectorApiKey);
-                TelemetryService.DefaultSession.UseVsIsOptedIn();
-                TelemetryService.DefaultSession.Start();
-                s_ownsSession = true;
+
+                // The telemetry stack can decline to create a session, for example when telemetry is disabled
+                // machine wide. Only take ownership of a session we actually created and started.
+                if (session is not null)
+                {
+                    session.UseVsIsOptedIn();
+                    session.Start();
+                    s_ownsSession = true;
+                }
             }
             else
             {
@@ -183,12 +200,18 @@ namespace Microsoft.Build.Framework.Telemetry
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void Dispose()
         {
-            if (s_ownsSession && s_telemetrySession is TelemetrySession session)
+            object? telemetrySession = s_telemetrySession;
+            bool ownsSession = s_ownsSession;
+
+            // Clear the state first so that a failure while disposing the session cannot leave a stale
+            // session behind, and so that a subsequent disposal attempt is a no-op.
+            s_telemetrySession = null;
+            s_ownsSession = false;
+
+            if (ownsSession && telemetrySession is TelemetrySession session)
             {
                 session.Dispose();
             }
-
-            s_telemetrySession = null;
         }
     }
 #endif
