@@ -288,8 +288,12 @@ namespace Microsoft.Build.Tasks
                         .GetAwaiter()
                         .GetResult();
                 }
-                catch (IOException e)
+                catch (Exception e) when (e is IOException or UnauthorizedAccessException)
                 {
+                    // Both IOException (e.g. a destination file locked by another process) and
+                    // UnauthorizedAccessException (e.g. denied permissions on the destination) are per-entry
+                    // failures. Log against the entry being extracted and continue so one problematic
+                    // destination doesn't abort extraction of the rest of the archive.
                     Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotExtractFile", entryName, destinationPath.FullName, e.Message);
                 }
             }
