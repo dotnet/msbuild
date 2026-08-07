@@ -238,7 +238,14 @@ namespace Microsoft.Build.Tasks
             {
                 bool isRealDirectory = info is DirectoryInfo && info.LinkTarget is null;
 
-                string relativePath = info.FullName.Substring(basePath.Length).Replace('\\', '/');
+                // On Windows the directory separator is '\\', which tar entry names never use, so translate it
+                // to '/'. On Unix the separator is already '/' and '\\' is a legal filename character, so leave
+                // it untouched — replacing it there would corrupt entry names that legitimately contain a backslash.
+                string relativePath = info.FullName.Substring(basePath.Length);
+                if (Path.DirectorySeparatorChar != '/')
+                {
+                    relativePath = relativePath.Replace(Path.DirectorySeparatorChar, '/');
+                }
                 entries.Add((info, isRealDirectory ? relativePath + "/" : relativePath));
 
                 if (isRealDirectory)
