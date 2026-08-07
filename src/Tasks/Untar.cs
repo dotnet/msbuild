@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Formats.Tar;
 using System.IO;
 using System.IO.Compression;
@@ -108,15 +109,8 @@ namespace Microsoft.Build.Tasks
         /// <returns>A <see cref="System.Threading.Tasks.Task{Boolean}"/> that resolves to <see langword="true"/> when extraction completed without errors or cancellation.</returns>
         private async System.Threading.Tasks.Task<bool> ExecuteAsync()
         {
-            DirectoryInfo destinationDirectory;
-            try
+            if (!TryCreateDestinationDirectory(out DirectoryInfo? destinationDirectory))
             {
-                destinationDirectory = Directory.CreateDirectory(DestinationFolder.FullName);
-            }
-            catch (Exception e)
-            {
-                Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotCreateDestinationDirectory", DestinationFolder.FullName, e.Message);
-
                 return false;
             }
 
@@ -179,6 +173,31 @@ namespace Microsoft.Build.Tasks
             }
 
             return !_cancellationTokenSource.IsCancellationRequested && !Log.HasLoggedErrors;
+        }
+
+        /// <summary>
+        /// Creates the destination directory, logging an error and returning <see langword="false"/> if it cannot be created.
+        /// </summary>
+        /// <param name="destinationDirectory">
+        /// When this method returns <see langword="true"/>, contains the created destination <see cref="DirectoryInfo"/>; otherwise <see langword="null"/>.
+        /// </param>
+        /// <returns><see langword="true"/> if the destination directory was created; otherwise <see langword="false"/>.</returns>
+        private bool TryCreateDestinationDirectory([NotNullWhen(true)] out DirectoryInfo? destinationDirectory)
+        {
+            try
+            {
+                destinationDirectory = Directory.CreateDirectory(DestinationFolder.FullName);
+
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotCreateDestinationDirectory", DestinationFolder.FullName, e.Message);
+
+                destinationDirectory = null;
+
+                return false;
+            }
         }
 
         /// <summary>
