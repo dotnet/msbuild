@@ -229,7 +229,18 @@ namespace Microsoft.Build.Tasks
                 // Directory entries and entries whose name refers to a directory should be created and skipped.
                 if (tarEntry.EntryType is TarEntryType.Directory || Path.GetFileName(destinationPath.FullName).Length == 0)
                 {
-                    Directory.CreateDirectory(destinationPath.FullName);
+                    try
+                    {
+                        Directory.CreateDirectory(destinationPath.FullName);
+                    }
+                    catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+                    {
+                        // Creating the directory can fail (e.g. a file already exists at that path, or permissions
+                        // are denied). Report it against the entry and continue so one bad entry doesn't abort
+                        // extraction of the rest of the archive.
+                        Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotCreateDestinationDirectory", destinationPath.FullName, e.Message);
+                    }
+
                     continue;
                 }
 
