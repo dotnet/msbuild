@@ -284,8 +284,13 @@ namespace Microsoft.Build.Tasks.UnitTests
             }
         }
 
-        [Fact]
-        public void LogsErrorForInvalidDeterministicTimestamp()
+        [Theory]
+        [InlineData("not-a-timestamp")]
+        [InlineData("-62135596801")] // one second below DateTimeOffset.MinValue
+        [InlineData("253402300800")] // one second above DateTimeOffset.MaxValue
+        [InlineData("99999999999999")] // grossly out of range
+        [InlineData("1704067200000")] // Unix milliseconds mistaken for seconds
+        public void LogsErrorForInvalidDeterministicTimestamp(string deterministicTimestamp)
         {
             using (TestEnvironment testEnvironment = TestEnvironment.Create())
             {
@@ -298,7 +303,7 @@ namespace Microsoft.Build.Tasks.UnitTests
                 TarDirectory tarDirectory = new TarDirectory
                 {
                     BuildEngine = _mockEngine,
-                    DeterministicTimestamp = "not-a-timestamp",
+                    DeterministicTimestamp = deterministicTimestamp,
                     DestinationFile = new FileInfo(tarFilePath),
                     SourceDirectory = new DirectoryInfo(sourceFolder.Path),
                     TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),

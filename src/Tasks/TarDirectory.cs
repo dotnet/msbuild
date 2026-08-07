@@ -250,6 +250,17 @@ namespace Microsoft.Build.Tasks
             // SOURCE_DATE_EPOCH convention and NuGet's deterministic-timestamp handling.
             if (long.TryParse(value, NumberStyles.None, CultureInfo.InvariantCulture, out long unixTimeSeconds))
             {
+                // Range-check before calling FromUnixTimeSeconds, which throws ArgumentOutOfRangeException for values
+                // outside [DateTimeOffset.MinValue, DateTimeOffset.MaxValue]. A common mistake is to supply Unix
+                // milliseconds (e.g. 1704067200000) here; treat that — and any other out-of-range value — as a parse
+                // failure so the caller surfaces the intended InvalidDeterministicTimestamp error rather than crashing.
+                if (unixTimeSeconds is < MinUnixTimeSeconds or > MaxUnixTimeSeconds)
+                {
+                    timestamp = default;
+
+                    return false;
+                }
+
                 timestamp = DateTimeOffset.FromUnixTimeSeconds(unixTimeSeconds);
 
                 return true;
@@ -318,6 +329,18 @@ namespace Microsoft.Build.Tasks
             TarEntryFormat.Gnu => new GnuTarEntry(entryType, entryName),
             _ => new PaxTarEntry(entryType, entryName),
         };
+
+        /// <summary>
+        /// The inclusive lower bound, in seconds since the Unix epoch, of the range accepted by
+        /// <see cref="DateTimeOffset.FromUnixTimeSeconds(long)"/> — corresponding to <see cref="DateTimeOffset.MinValue"/>.
+        /// </summary>
+        private const long MinUnixTimeSeconds = -62135596800L;
+
+        /// <summary>
+        /// The inclusive upper bound, in seconds since the Unix epoch, of the range accepted by
+        /// <see cref="DateTimeOffset.FromUnixTimeSeconds(long)"/> — corresponding to <see cref="DateTimeOffset.MaxValue"/>.
+        /// </summary>
+        private const long MaxUnixTimeSeconds = 253402300799L;
 
         /// <summary>
         /// The RFC 3339 date-time formats accepted for <see cref="DeterministicTimestamp"/>, mirroring NuGet's
