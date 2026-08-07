@@ -281,6 +281,22 @@
       RuntimeSourceFeedKey="$(DotNetRuntimeSourceFeedKey)"/>
   </Target>
 
+  <!-- Fail if the bootstrap SDK's runtime is older than $(BundledNETCoreAppPackageVersion): outputs embed that
+       version and would fail host resolution under the bootstrap at run time. -->
+  <Target Name="VerifyBootstrapRuntimeVersion"
+          DependsOnTargets="AcquireSdk"
+          BeforeTargets="PrepareForBuild"
+          Condition="!$(TargetFramework.StartsWith('net4')) and '$(BundledNETCoreAppPackageVersion)' != ''">
+
+    <PropertyGroup>
+      <_BootstrapRuntimeVersion>$([System.IO.Path]::GetFileName('$([System.IO.Directory]::GetDirectories($([MSBuild]::NormalizeDirectory('$(ArtifactsBinDir)', 'bootstrap', 'core', 'shared', 'Microsoft.NETCore.App')))[0])'))</_BootstrapRuntimeVersion>
+    </PropertyGroup>
+
+    <Error Condition="$([MSBuild]::VersionLessThan('$(_BootstrapRuntimeVersion)', '$(BundledNETCoreAppPackageVersion)'))"
+           File="$(MSBuildThisFileDirectory)Versions.props"
+           Text="The bootstrap base SDK '$(BootstrapSdkVersion)' delivers .NET runtime '$(_BootstrapRuntimeVersion)', which is older than the runtime '$(BundledNETCoreAppPackageVersion)' delivered by SDK '$(NETCoreSdkVersion)' used to build this repository. Update BootstrapSdkVersion in eng/Versions.props to a version whose bundled runtime is at least '$(BundledNETCoreAppPackageVersion)'." />
+  </Target>
+
   <Target Name="BootstrapNetCore" DependsOnTargets="AcquireSdk">
     <ItemGroup>
       <!-- *.deps.json are excluded because the SDK rewrites these files for consistency with the rest of the SDK, so take their version. -->
