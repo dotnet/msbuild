@@ -130,39 +130,9 @@ namespace Microsoft.Build.Tasks
                             continue;
                         }
 
-                        try
-                        {
-                            using FileStream stream = sourceFile.OpenRead();
-
-                            // Detect and unwrap any compression applied to the tar archive. The decompression stream (if any)
-                            // and the TarReader are disposed by the enclosing using statements below.
-                            using Stream? decompressionStream = CreateDecompressionStream(stream);
-#pragma warning disable CA2000 // Dispose objects before losing scope because the using declaration disposes the TarReader.
-                            using TarReader reader = new TarReader(decompressionStream ?? stream, leaveOpen: true);
-#pragma warning restore CA2000 // Dispose objects before losing scope
-
-                            try
-                            {
-                                await ExtractAsync(reader, destinationDirectory).ConfigureAwait(continueOnCapturedContext: false);
-                            }
-                            catch (OperationCanceledException)
-                            {
-                                break;
-                            }
-                            catch (Exception e)
-                            {
-                                // Should only be thrown if the archive could not be read (corrupt file, etc).
-                                Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotOpenFile", sourceFile.FullName, e.Message);
-                            }
-                        }
-                        catch (OperationCanceledException)
+                        if (!await TryExtractTarballAsync(sourceFile, destinationDirectory).ConfigureAwait(continueOnCapturedContext: false))
                         {
                             break;
-                        }
-                        catch (Exception e)
-                        {
-                            // Should only be thrown if the archive could not be opened (Access denied, corrupt file, etc).
-                            Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotOpenFile", sourceFile.FullName, e.Message);
                         }
                     }
                 }
@@ -173,6 +143,56 @@ namespace Microsoft.Build.Tasks
             }
 
             return !_cancellationTokenSource.IsCancellationRequested && !Log.HasLoggedErrors;
+        }
+
+        /// <summary>
+        /// Opens a single source archive and extracts its entries to the destination directory, logging an error for any
+        /// failure to open or read the archive.
+        /// </summary>
+        /// <param name="sourceFile">The tar archive to extract.</param>
+        /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract entries to.</param>
+        /// <returns>
+        /// A <see cref="System.Threading.Tasks.Task{Boolean}"/> that resolves to <see langword="false"/> when extraction was
+        /// canceled and the enclosing loop should stop; otherwise <see langword="true"/> to continue with the next archive.
+        /// </returns>
+        private async System.Threading.Tasks.Task<bool> TryExtractTarballAsync(FileInfo sourceFile, DirectoryInfo destinationDirectory)
+        {
+            try
+            {
+                using FileStream stream = sourceFile.OpenRead();
+
+                // Detect and unwrap any compression applied to the tar archive. The decompression stream (if any)
+                // and the TarReader are disposed by the enclosing using statements below.
+                using Stream? decompressionStream = CreateDecompressionStream(stream);
+#pragma warning disable CA2000 // Dispose objects before losing scope because the using declaration disposes the TarReader.
+                using TarReader reader = new TarReader(decompressionStream ?? stream, leaveOpen: true);
+#pragma warning restore CA2000 // Dispose objects before losing scope
+
+                try
+                {
+                    await ExtractAsync(reader, destinationDirectory).ConfigureAwait(continueOnCapturedContext: false);
+                }
+                catch (OperationCanceledException)
+                {
+                    return false;
+                }
+                catch (Exception e)
+                {
+                    // Should only be thrown if the archive could not be read (corrupt file, etc).
+                    Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotOpenFile", sourceFile.FullName, e.Message);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                return false;
+            }
+            catch (Exception e)
+            {
+                // Should only be thrown if the archive could not be opened (Access denied, corrupt file, etc).
+                Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotOpenFile", sourceFile.FullName, e.Message);
+            }
+
+            return true;
         }
 
         /// <summary>
