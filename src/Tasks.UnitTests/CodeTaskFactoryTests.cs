@@ -67,6 +67,7 @@ namespace Microsoft.Build.UnitTests
         /// Microsoft.Build.Tasks.v4.0.dll is expected to NOT be in MSBuildToolsPath, that
         /// we will redirect under the covers to use the current tasks instead.
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14593")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -109,6 +110,7 @@ namespace Microsoft.Build.UnitTests
         /// Microsoft.Build.Tasks.v12.0.dll is expected to NOT be in MSBuildToolsPath, that
         /// we will redirect under the covers to use the current tasks instead.
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14578")]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
