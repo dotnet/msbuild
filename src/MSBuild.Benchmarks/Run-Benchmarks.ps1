@@ -26,6 +26,13 @@
 .PARAMETER Job
     The BenchmarkDotNet job to run, such as short or dry.
 
+.PARAMETER LaunchCount
+    Number of independent benchmark process launches. If omitted, BenchmarkDotNet uses its default.
+
+.PARAMETER EnforcePowerPlan
+    Allows BenchmarkDotNet to temporarily select the High Performance power plan on Windows.
+    By default, the current host power plan is left unchanged.
+
 .PARAMETER CollectEtw
     Enables ETW profiling diagnostics.
 
@@ -51,6 +58,10 @@
 .EXAMPLE
     .\Run-Benchmarks.ps1 -Filter '*PropertyExpansionBenchmark*' `
         -Job short -DisableNGen
+
+.EXAMPLE
+    .\Run-Benchmarks.ps1 -Filter '*PropertyExpansionBenchmark*' `
+        -Framework net11.0 -LaunchCount 3
 
 .EXAMPLE
     .\Run-Benchmarks.ps1 -All
@@ -94,6 +105,11 @@ param(
 
     [ValidateNotNullOrEmpty()]
     [string]$Job,
+
+    [ValidateRange(1, 2147483647)]
+    [int]$LaunchCount,
+
+    [switch]$EnforcePowerPlan,
 
     [switch]$CollectEtw,
 
@@ -147,8 +163,10 @@ $scriptArguments = @{
     '--collect-etw' = '-CollectEtw'
     '--disable-inlining' = '-DisableInlining'
     '--disable-ngen' = '-DisableNGen'
+    '--enforce-power-plan' = '-EnforcePowerPlan'
     '--filter' = '-Filter'
     '--job' = '-Job'
+    '--launchCount' = '-LaunchCount'
 }
 
 foreach ($scriptArgument in $scriptArguments.GetEnumerator())
@@ -182,6 +200,16 @@ foreach ($framework in $TargetFramework)
     if ($Job)
     {
         $dotnetArguments += @('--job', $Job)
+    }
+
+    if ($PSBoundParameters.ContainsKey('LaunchCount'))
+    {
+        $dotnetArguments += @('--launchCount', $LaunchCount)
+    }
+
+    if ($EnforcePowerPlan)
+    {
+        $dotnetArguments += '--enforce-power-plan'
     }
 
     if ($CollectEtw)

@@ -44,10 +44,11 @@ Common BenchmarkDotNet options are exposed directly:
 
 ```powershell
 .\Run-Benchmarks.ps1 -Filter "*MetadataExpansionBenchmark*" -Job short -DisableNGen
+.\Run-Benchmarks.ps1 -Filter "*MetadataExpansionBenchmark*" -LaunchCount 3
 ```
 
-Use `-CollectEtw` or `-DisableInlining` for the other custom options. Less common
-BenchmarkDotNet arguments can still be passed with `-BenchmarkDotNetArguments`.
+Use `-CollectEtw`, `-DisableInlining`, or `-EnforcePowerPlan` for the other custom options.
+Less common BenchmarkDotNet arguments can still be passed with `-BenchmarkDotNetArguments`.
 
 Use `-All` to explicitly run every benchmark, or `-Framework` to override the target frameworks:
 
@@ -55,6 +56,31 @@ Use `-All` to explicitly run every benchmark, or `-Framework` to override the ta
 .\Run-Benchmarks.ps1 -All
 .\Run-Benchmarks.ps1 -Filter "*MetadataExpansionBenchmark*" -Framework net11.0
 ```
+
+### Choose a Run Mode
+
+Use `-Job dry` or `-Job short` only to confirm that benchmarks build and execute. These jobs do
+not collect enough data for performance conclusions.
+
+For exploratory measurements, omit `-Job` and `-LaunchCount`. BenchmarkDotNet will adapt its
+warmup and measurement iterations within one process launch. For a final comparison, use three
+independent launches on the target framework:
+
+```powershell
+.\Run-Benchmarks.ps1 -Filter "*MetadataExpansionBenchmark*" `
+    -Framework net11.0 -LaunchCount 3
+```
+
+Each launch performs a complete benchmark run, so this approximately triples execution time.
+
+The runner leaves the current OS power plan unchanged by default. Configure dedicated benchmark
+machines with a stable performance-oriented power plan. Alternatively, use `-EnforcePowerPlan` to
+allow BenchmarkDotNet to temporarily select the High Performance plan on Windows and restore the
+previous plan when the run completes. If the process terminates abruptly, the plan may need to be
+restored manually.
+
+Compare results only when the target framework, architecture, runtime, and machine environment
+match. In particular, absolute `net472` and `net11.0` results are not directly comparable.
 
 ### Run Benchmarks on a Specific TFM
 
@@ -82,6 +108,7 @@ dotnet run -c Release -f net11.0 -- --filter "*ItemSpecModifiersBenchmark.Includ
 - `--collect-etw` - Enable ETW (Event Tracing for Windows) profiling diagnostics
 - `--disable-ngen` - Disable NGEN/ReadyToRun to measure pure JIT performance
 - `--disable-inlining` - Disable JIT inlining for more accurate method-level profiling
+- `--enforce-power-plan` - Allow BenchmarkDotNet to select High Performance on Windows
 
 These custom options can be combined with any BenchmarkDotNet options:
 
