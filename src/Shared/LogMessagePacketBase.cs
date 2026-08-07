@@ -589,6 +589,10 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.ExtendedBuildMessageEvent;
             }
+            else if (eventType == typeof(Microsoft.Build.Framework.Coordinator.CoordinatorWaitingForNodesEventArgs))
+            {
+                return LoggingEventType.ExtendedBuildMessageEvent;
+            }
             else if (eventType == typeof(CriticalBuildMessageEventArgs))
             {
                 return LoggingEventType.CriticalBuildMessage;

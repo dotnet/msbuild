@@ -108,18 +108,28 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
 
     public void MessageRaised(object sender, BuildMessageEventArgs e)
     {
-        if (e.BuildEventContext is null)
+        // Never forward messages if verbosity is quiet
+        if (Verbosity == LoggerVerbosity.Quiet)
         {
             return;
         }
 
-        if (e.Message is not null &&
-            // Never forward messages if the verbosity is quiet
-            Verbosity != LoggerVerbosity.Quiet &&
-            // High-priority messages are always collected by the central node
-            (e.Importance == MessageImportance.High
-            // Normmal-priority messages are only collected if the verbosity is more verbose than normal
-            || (e.Importance == MessageImportance.Normal && Verbosity > LoggerVerbosity.Normal)))
+        // Never forward messages without content
+        if (e.Message is null)
+        {
+            return;
+        }
+
+        // Never forward messages without context unless they have high importance
+        // (high importance messages from coordinator/global context are still forwarded)
+        if (e.BuildEventContext is null && e.Importance != MessageImportance.High)
+        {
+            return;
+        }
+
+        // Forward high-priority messages or normal-priority messages when verbosity is high enough
+        if (e.Importance == MessageImportance.High ||
+           (e.Importance == MessageImportance.Normal && Verbosity > LoggerVerbosity.Normal))
         {
             BuildEventRedirector?.ForwardEvent(e);
         }
