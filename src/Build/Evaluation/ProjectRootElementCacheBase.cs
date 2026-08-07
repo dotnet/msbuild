@@ -58,6 +58,14 @@ namespace Microsoft.Build.Evaluation
 
         internal abstract void Clear();
 
+        /// <summary>
+        /// Called when the host has determined that something outside the build - typically restore - may have
+        /// rewritten part of the import graph, and the cache must not go on serving what it read before that.
+        /// Discarding everything always satisfies that; a cache that can tell on its own which of its entries a
+        /// rewrite invalidated may override this to discard only those.
+        /// </summary>
+        internal virtual void ClearCachesAfterBuildIfNeeded() => Clear();
+
         internal abstract void DiscardImplicitReferences();
 
         internal abstract void DiscardAnyWeakReference(ProjectRootElement projectRootElement);
