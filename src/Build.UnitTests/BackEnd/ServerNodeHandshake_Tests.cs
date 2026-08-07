@@ -18,12 +18,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
     public class ServerNodeHandshake_Tests
     {
         [Fact]
-        public void GetKeyWithUserName_IncludesTheKeyAndTheCurrentUser()
+        public void GetKeyWithEndpointIdentity_IncludesTheKeyAndTheCurrentUser()
         {
             ServerNodeHandshake handshake = new(HandshakeOptions.None);
 
-            handshake.GetKeyWithUserName().ShouldContain(handshake.GetKey());
-            handshake.GetKeyWithUserName().ShouldContain(Environment.UserName);
+            handshake.GetKeyWithEndpointIdentity().ShouldContain(handshake.GetKey());
+            handshake.GetKeyWithEndpointIdentity().ShouldContain(Environment.UserName);
         }
 
         [Fact]
@@ -52,11 +52,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void ComputeHash_DependsOnTheWholeKey()
         {
             // Guards against the hash ignoring part of its input, which would silently drop the user
-            // scoping that GetKeyWithUserName adds.
+            // scoping that GetKeyWithEndpointIdentity adds.
             ServerNodeHandshake first = new(HandshakeOptions.None);
             ServerNodeHandshake second = new(HandshakeOptions.NodeReuse);
 
-            first.GetKeyWithUserName().ShouldNotBe(second.GetKeyWithUserName());
+            first.GetKeyWithEndpointIdentity().ShouldNotBe(second.GetKeyWithEndpointIdentity());
             first.ComputeHash().ShouldNotBe(second.ComputeHash());
         }
 

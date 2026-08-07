@@ -55,14 +55,14 @@ internal sealed class ServerNodeHandshake : Handshake
     /// pipes are current-user-only, so without the user one account's server locks every other
     /// account on the machine out.
     /// </summary>
-    public string GetKeyWithUserName() => _instanceId is null
+    public string GetKeyWithEndpointIdentity() => _instanceId is null
         ? $"{GetKey()} {EnvironmentUtilities.CurrentUserName}"
         : $"{GetKey()} {EnvironmentUtilities.CurrentUserName} {_instanceId}";
 
     /// <summary>
     /// Computes Handshake stable hash string representing whole state of handshake.
     /// </summary>
-    public string ComputeHash() => _computedHash ??= HashKey(GetKeyWithUserName());
+    public string ComputeHash() => _computedHash ??= HashKey(GetKeyWithEndpointIdentity());
 
     public static string HashKey(string key)
     {

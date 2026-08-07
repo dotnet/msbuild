@@ -937,7 +937,7 @@ namespace Microsoft.Build.Engine.UnitTests
         private void ShutdownBootstrapServer()
             => RunnerUtilities.RunProcessAndGetOutput(
                 RunnerUtilities.BootstrapDotnetHostPath,
-                "build-server shutdown",
+                "build-server shutdown --msbuild",
                 out _,
                 outputHelper: _output,
                 environmentVariables: RunnerUtilities.GetBootstrapMSBuildEnvironmentVariables());
