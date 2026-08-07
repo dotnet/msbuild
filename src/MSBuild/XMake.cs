@@ -3145,6 +3145,18 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Processes the server instance id switch, which a client passes to the transient server it
+        /// launches for its own exclusive use. Both sides fold it into the pipe and mutex names, so a
+        /// transient server is unreachable by anyone else.
+        /// </summary>
+        /// <param name="parameters">The command line parameters for the switch.</param>
+        /// <returns>The instance id, or null for the resident server.</returns>
+        internal static string ProcessServerInstanceIdSwitch(string[] parameters)
+            => parameters.Length > 0 && !string.IsNullOrEmpty(parameters[parameters.Length - 1])
+                ? parameters[parameters.Length - 1]
+                : null;
+
+        /// <summary>
         /// Processes the node reuse switch, the user can set node reuse to true, false or not set the switch. If the switch is
         /// not set the system will check to see if the process is being run as an administrator. This check in localnode provider
         /// will determine the node reuse setting for that case.
@@ -3434,7 +3446,7 @@ namespace Microsoft.Build.CommandLine
                             return (exitCode, exitType.ToString());
                         };
 
-                        OutOfProcServerNode serverNode = new(buildFunction);
+                        OutOfProcServerNode serverNode = new(buildFunction, ProcessServerInstanceIdSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ServerInstanceId]));
 
                         s_isServerNode = true;
                         shutdownReason = serverNode.Run(out nodeException);

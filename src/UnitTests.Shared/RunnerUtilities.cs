@@ -61,6 +61,8 @@ namespace Microsoft.Build.UnitTests.Shared
         // fail to find its runtime. See eng/BootStrapMsBuild.targets.
         private static readonly string s_bootstrapDotnetHostPath = EnvironmentProvider.GetDotnetExePathFromFolder(BootstrapMsBuildBinaryLocation);
 
+        public static string BootstrapDotnetHostPath => s_bootstrapDotnetHostPath;
+
         // Architecture-specific DOTNET_ROOT_<ARCH> variables take precedence over DOTNET_ROOT for the .NET app host.
         // X86/X64/ARM64 cover every CI agent architecture; these are cleared when launching the bootstrapped MSBuild.
         private static readonly string[] s_archSpecificDotnetRootVars =
