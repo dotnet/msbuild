@@ -59,6 +59,7 @@ The folder contains collection of docs and references for MSBuild, detailed info
 * [Support for remote host objects](specs/remote-host-object.md)
 * [Static graph](specs/static-graph.md)
 * [Single project isolated builds: implementation details](specs/single-project-isolated-builds.md)
+* [Multi-request target crosstalk](Multi-request-Target-Crosstalk.md)
 * [Task isolation](specs/task-isolation-and-dependencies.md)
 * [Target maps](wiki/Target-Maps.md)
 * [Managing parallelism in MSBuild](specs/resource-management.md)
