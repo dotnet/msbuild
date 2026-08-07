@@ -1,25 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageId>Microsoft.Build.Templates</PackageId>
+    <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
     <Authors>Microsoft</Authors>
     <Description>Common Microsoft Build Templates</Description>
-    <PackageProjectUrl>https://github.com/dotnet/msbuild</PackageProjectUrl>
     <PackageType>Template</PackageType>
-    <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <NoWarn>$(NoWarn);NU5128</NoWarn>
     <IsPackable>true</IsPackable>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-  </PropertyGroup>
-
-  <PropertyGroup>
     <LocalizeTemplates>false</LocalizeTemplates>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.TemplateEngine.Tasks" Version="*" PrivateAssets="all" IsImplicitlyDefined="true"/>
-  </ItemGroup>
 
   <ItemGroup>
     <Content Include="content\**" Exclude="content\**\bin\**;content\**\obj\**" PackagePath="content"/>

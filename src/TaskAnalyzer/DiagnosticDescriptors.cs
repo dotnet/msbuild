@@ -103,6 +103,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             isEnabledByDefault: true,
             description: "ITaskItem<T> type arguments parsed through Convert.ChangeType use CultureInfo.InvariantCulture. Bind the item as a string and parse it explicitly with the intended culture.");
 
+        public static readonly DiagnosticDescriptor PreferTaskEnvironmentConstructorInjection = new(
+            id: DiagnosticIds.PreferTaskEnvironmentConstructorInjection,
+            title: "Prefer constructor injection for TaskEnvironment",
+            messageFormat: "Task '{0}' receives TaskEnvironment only after construction; add a public constructor with a single TaskEnvironment parameter to make it available during construction",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Info,
+            isEnabledByDefault: true,
+            description: "Constructor injection makes TaskEnvironment available to constructor logic and environment-dependent default initialization. The MSBuild engine prefers a public constructor with a single TaskEnvironment parameter when one is available.");
+
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
             TaskEnvironmentRequired,
@@ -113,6 +122,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             PreferTypedTaskItem,
             InitializeRelativeDefaultInExecute,
             UnsupportedTaskItemType,
-            CultureSensitiveTaskItemType);
+            CultureSensitiveTaskItemType,
+            PreferTaskEnvironmentConstructorInjection);
     }
 }

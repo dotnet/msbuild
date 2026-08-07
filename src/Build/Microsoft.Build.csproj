@@ -157,6 +157,7 @@
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.cs" />
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.DefaultDebugOutput.cs" />
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.GrantOwnership.cs" />
+    <Compile Include="BackEnd\BuildManager\CoordinatorClient.HeartbeatTimer.cs" />
     <Compile Include="BackEnd\BuildManager\CoordinatorClient.TestAccessor.cs" />
     <Compile Include="BackEnd\BuildManager\EnvironmentVariableValidator.cs" />
     <Compile Include="BackEnd\BuildManager\GlobalPropertiesLookup.cs" />
@@ -220,6 +221,7 @@
     <Compile Include="Logging\ReusableLogger.cs" />
     <Compile Include="TelemetryInfra\InternalTelemetryConsumingLogger.cs" />
     <Compile Include="TelemetryInfra\ITelemetryCollector.cs" />
+    <Compile Include="TelemetryInfra\TasksDetailsTelemetry.cs" />
     <Compile Include="TelemetryInfra\TelemetryCollectorProvider.cs" />
     <Compile Include="Utilities\AwaitExtensions.cs" />
     <Compile Include="Utilities\EncodingStringWriter.cs" />
@@ -545,6 +547,7 @@
     <Compile Include="Evaluation\StringMetadataTable.cs" />
     <Compile Include="Evaluation\ExpressionShredder.cs" />
     <Compile Include="Evaluation\Evaluator.cs" />
+    <Compile Include="Evaluation\GlobResultBuilder.cs" />
     <Compile Include="Evaluation\Expander.cs" />
     <Compile Include="Evaluation\ToolsetProvider.cs" />
     <Compile Include="Evaluation\Expander\ArgumentParser.cs" />

@@ -95,7 +95,7 @@ authors toward the built-in factories — relevant below.
 
 ## 3. Built-in factories (what actually runs on .NET)
 
-| Factory | Implements | net10.0 behavior | Reflection used |
+| Factory | Implements | .NETCoreApp behavior | Reflection used |
 |---|---|---|---|
 | `AssemblyTaskFactory` (`src/Build/Instance/TaskFactories/`) | `ITaskFactory3` | **Active — the main path** | `TypeLoader.Load` (assembly load + type resolution), then `Activator.CreateInstance` via `TaskLoader.CreateTask`, or a `TaskHostTask` for out-of-proc |
 | `IntrinsicTaskFactory` (`.../IntrinsicTasks/`) | `ITaskFactory` | Active | None — `new MSBuild()` / `new CallTarget()` directly |
@@ -235,11 +235,11 @@ The contract is annotated honestly on both sides:
    the factory contract stays honest end to end.
 
 With both sides annotated, a host that calls `ITaskFactory.CreateTask`/`Initialize`
-through the interface gets an honest IL2026, and the build is clean on both `net10.0`
-and `net472` under warnings-as-errors (0 IL warnings, 0 warnings, 0 errors). The
+through the interface gets an honest IL2026, and the build is clean on both TFMs under
+warnings-as-errors (0 IL warnings, 0 warnings, 0 errors). The
 attributes compile on `net472`/`netstandard2.0` via the internal polyfill in
 `src/Framework/Polyfills/AotTrimmingPolyfills.cs` (the trim analyzer only runs on
-`net10.0`).
+the .NETCoreApp TFM).
 
 ### Consequences accepted
 

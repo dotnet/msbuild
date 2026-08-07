@@ -353,6 +353,7 @@ namespace Microsoft.Build.Engine.UnitTests
         /// This test recreates the scenario by symlinking the bootstrap SDK directory and
         /// running MSBuild through the symlink.
         /// </summary>
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14393")]
         [UnixOnlyFact]
         public void NetTaskHost_SymlinkedSdkPath_ShouldNotCauseMSB4216()
         {

@@ -643,10 +643,7 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0))
                 {
-                    // Prevent loading methods refs from StringTools if ChangeWave opted out.
-                    returnVal = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
-                        ? IntrinsicFunctions.StableStringHash(arg0)
-                        : IntrinsicFunctions.StableStringHashLegacy(arg0);
+                    returnVal = IntrinsicFunctions.StableStringHash(arg0);
                     return true;
                 }
                 else if (ParseArgs.TryGetArgs(args, out string? arg1, out string? arg2) && Enum.TryParse<IntrinsicFunctions.StringHashingAlgorithm>(arg2, true, out var hashAlgorithm) && arg1 != null && arg2 != null)

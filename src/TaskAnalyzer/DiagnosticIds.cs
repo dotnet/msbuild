@@ -38,5 +38,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>Task property uses ITaskItem&lt;T&gt; with a type argument parsed through Convert.ChangeType.</summary>
         public const string CultureSensitiveTaskItemType = "MSBuildTask0010";
+
+        /// <summary>Task should receive TaskEnvironment through constructor injection.</summary>
+        public const string PreferTaskEnvironmentConstructorInjection = "MSBuildTask0011";
     }
 }

@@ -21,7 +21,7 @@ Use a **fast, scoped** `dotnet test` loop while iterating, and the **full `build
 
 These are configured in `Directory.Build.props` (repo root), `src/Directory.Build.targets`, and `src/Shared/UnitTests/xunit.runner.json`. They apply to both `dotnet test` and `build.cmd -test` unless noted otherwise:
 
-- **Multi-targeting**: test projects target `net472` *and* `net10.0` on Windows (`net10.0` only on Linux/macOS). `dotnet test` runs the suite **once per TFM**.
+- **Multi-targeting**: test projects target .NETFramework and .NETCoreApp on Windows (.NETCoreApp only on Linux/macOS). `dotnet test` runs the suite **once per TFM**.
 - **Single-threaded by default**: `xunit.runner.json` sets `maxParallelThreads: 1` and `parallelizeTestCollections: false`. Many tests mutate process-global state (env vars, cwd, SDK resolvers), so this is intentional.
 - **Auto trait filters**: platform/TFM-inappropriate tests are filtered out via `--filter-not-trait Category=...` (e.g., `nonwindowstests`, `failing`, `nonnetcoreapptests`). Don't try to "fix" tests that appear skipped because of these.
 - **Coverage on non-Windows**: `--coverage --coverage-settings Coverage.config` is appended unconditionally to `XunitOptions` in `src/Directory.Build.targets`. There is no MSBuild property switch to disable it from `dotnet test` — to skip coverage, run the test exe directly without `--coverage`.
@@ -42,26 +42,26 @@ For comprehensive MTP vs VSTest flag reference, see the `run-tests` skill from t
 
 Aim for sub-30s iterations.
 
-> Examples below use Windows-style backslashes and PowerShell line continuations. Forward slashes work everywhere with `dotnet` (`src/Tasks.UnitTests/Microsoft.Build.Tasks.UnitTests.csproj`); on Linux/macOS use `/` and shell line continuations (`\`), and the exe path becomes `artifacts/bin/<Proj>/Debug/net10.0/<Proj>` (no `.exe`).
+> Examples below use Windows-style backslashes and PowerShell line continuations. Forward slashes work everywhere with `dotnet` (`src/Tasks.UnitTests/Microsoft.Build.Tasks.UnitTests.csproj`); on Linux/macOS use `/` and shell line continuations (`\`), and the exe path becomes `artifacts/bin/<Proj>/Debug/net11.0/<Proj>` (no `.exe`).
 
 1. **Run via `dotnet test` with a single TFM and filter** (incremental build handles rebuilding automatically):
    ```powershell
    dotnet test src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj `
-     -f net10.0 -- --filter-method "*MyFeature*"
+     -f net11.0 -- --filter-method "*MyFeature*"
    ```
 2. **Or run the test exe directly** (fastest — no SDK overhead; build first if source changed):
    ```powershell
-   dotnet build src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj -c Debug -f net10.0
-   artifacts\bin\Microsoft.Build.Tasks.UnitTests\Debug\net10.0\Microsoft.Build.Tasks.UnitTests.exe `
+   dotnet build src\Tasks.UnitTests\Microsoft.Build.Tasks.UnitTests.csproj -c Debug -f net11.0
+   artifacts\bin\Microsoft.Build.Tasks.UnitTests\Debug\net11.0\Microsoft.Build.Tasks.UnitTests.exe `
      --filter-method "*MyFeature*" --no-progress
    ```
-   The exe path is TFM-specific: `Debug\net10.0\...exe` for net10.0, `Debug\net472\...exe` for net472. Switching TFM without rebuilding silently runs stale binaries.
+   The exe path is TFM-specific: `Debug\net11.0\...exe` for net11.0, `Debug\net472\...exe` for net472. Switching TFM without rebuilding silently runs stale binaries.
 
 ### Speeding up the dev loop further
 
 These trade safety for speed — use during iteration, **revert before final validation**:
 
-- **Single TFM**: pass `-f net10.0`. Halves runtime on Windows by skipping `net472`.
+-- **Single TFM**: pass `-f net11.0`. Halves runtime on Windows by skipping `net472`.
 - **Temporarily relax single-threaded execution**: drop a `xunit.runner.json` next to the test project (or override the existing one) with:
   ```json
   {
@@ -122,8 +122,8 @@ Match the source area you changed to its `*.UnitTests` project:
 
 | Scenario | Command |
 |----------|---------|
-| Fast scoped dev loop | `dotnet test <proj> -f net10.0 -- --filter-method "*X*"` |
-| Direct test exe | `artifacts\bin\<Proj>\Debug\net10.0\<Proj>.exe --filter-method "*X*" --no-progress` |
+| Fast scoped dev loop | `dotnet test <proj> -f net11.0 -- --filter-method "*X*"` |
+| Direct test exe | `artifacts\bin\<Proj>\Debug\net11.0\<Proj>.exe --filter-method "*X*" --no-progress` |
 | Single test by name | `dotnet test <proj> -- --filter-method "*MyTestMethod*"` |
 | Final per-project validation | `dotnet test <proj> -c Release` (all TFMs) |
 | Final full validation | `.\build.cmd -test -c Release` / `./build.sh --test -c Release` |

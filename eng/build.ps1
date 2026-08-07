@@ -1,10 +1,14 @@
 [CmdletBinding(PositionalBinding=$false)]
 Param(
   [string] $msbuildEngine,
-  [string] $configuration = "Debug",
-  [switch] $test,
+  [string][Alias('c')] $configuration = "Debug",
+  [string][Alias('v')] $verbosity,
+  [switch][Alias('t')] $test,
+  [switch] $ci,
+  [switch][Alias('bl')] $binaryLog,
+  [switch][Alias('nobl')] $excludeCIBinarylog,
   [switch] $stage2,
-  [string] $stage2Arguments = "",
+  [string[]] $stage2Argument = @(),
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
@@ -15,13 +19,29 @@ $buildScript = Join-Path $PSScriptRoot 'common\build.ps1'
 $commonBuildArgs = @('-configuration', $configuration) + $properties
 
 # Forward the argument if supplied. Needs to be done for all above explicit parameters that should be passed to the build.
+if ($verbosity) {
+  $commonBuildArgs += '-verbosity'
+  $commonBuildArgs += $verbosity
+}
+
 if ($msbuildEngine) {
   $commonBuildArgs += '-msbuildEngine'
   $commonBuildArgs += $msbuildEngine
 }
 
+# Forward the binary-log-related switches to both the stage 1 and stage 2 builds.
+if ($ci) {
+  $commonBuildArgs += '-ci'
+}
+if ($binaryLog) {
+  $commonBuildArgs += '-binaryLog'
+}
+if ($excludeCIBinarylog) {
+  $commonBuildArgs += '-excludeCIBinarylog'
+}
+
 # Supplying stage2Arguments implies a multi-stage build
-if ($stage2Arguments) {
+if ($stage2Argument.Count -gt 0) {
   $stage2 = $true
 }
 
@@ -65,6 +85,17 @@ $BootstrapRoot = Join-Path $Stage1BinDir "bootstrap"
 # Clean a previous stage1 artifacts folder and move the stage 1 outputs aside so stage 2 gets a clean $ArtifactsDir to build into.
 Remove-Item -Force -Recurse $Stage1Dir -ErrorAction SilentlyContinue
 Move-Item -Path $ArtifactsDir -Destination $Stage1Dir -Force
+
+# The move above relocated the stage 1 log directory (including its binlog) out of the published
+# $ArtifactsDir\log location. Copy the whole log folder back so CI publishes the stage 1 logs alongside
+# the stage 2 ones. This runs before the stage 2 build, so it won't clobber any stage 2 output. The
+# stage 1 binlog keeps its default Build.binlog name, distinct from the stage 2 Build.stage2.binlog.
+# Best-effort: never fail the build if the stage 1 log folder isn't there (e.g. when no logs were produced).
+$stage1LogDir = Join-Path $Stage1Dir 'log'
+if (Test-Path $stage1LogDir) {
+  New-Item -ItemType Directory -Force -Path $ArtifactsDir | Out-Null
+  Copy-Item -Path $stage1LogDir -Destination $ArtifactsDir -Recurse -Force -ErrorAction SilentlyContinue
+}
 
 # Mirror of tools.ps1 GetDefaultMSBuildEngine: presence of tools.vs => 'vs', else tools.dotnet => 'dotnet'.
 $GlobalJson = Get-Content -Raw -Path (Join-Path $RepoRoot 'global.json') | ConvertFrom-Json
@@ -111,15 +142,22 @@ $env:DOTNET_PERFLOG_DIR=$PerfLogDir
 $env:DOTNET_HOST_PATH = Join-Path $BootstrapRoot 'core\dotnet.exe'
 $env:DOTNET_INSTALL_DIR = Join-Path $BootstrapRoot 'core'
 
-# $stage2Arguments are appended to the stage 2 build only.
+# $stage2Argument are appended to the stage 2 build only.
 # Use this for switches like /mt that should not be passed to the stage1 build
 # until a stable version of MT is available in the images.
-# The @(...) wrapper is important: when -split returns exactly one element PowerShell gives back a
-# string, which would later splat one character per argument (so "/mt" becomes "/", "m", "t").
-# Wrapping with @() forces an array even for a single token.
-$stage2Args = @(if ($stage2Arguments) { $stage2Arguments -split '\s+' | Where-Object { $_ } } else { @() })
+$stage2Args = $stage2Argument
 
 $stage2BuildArgs = $commonBuildArgs
+
+# Give the stage 2 binary log a distinct name so it doesn't collide with the stage 1 binlog
+# (both otherwise default to Build.binlog) when CI publishes them to the same artifacts location.
+# Only do this when a binary log will actually be produced, so we don't force one to be created:
+# Arcade emits a binlog for CI builds (-ci) or when -binaryLog is passed explicitly, unless it's
+# suppressed with -excludeCIBinarylog.
+if (($ci -or $binaryLog) -and -not $excludeCIBinarylog) {
+  $stage2BuildArgs += '-binaryLogName'
+  $stage2BuildArgs += 'Build.stage2.binlog'
+}
 
 # Only run tests in stage2 when supplying the '-test' switch in a multi-stage build.
 if ($test) {

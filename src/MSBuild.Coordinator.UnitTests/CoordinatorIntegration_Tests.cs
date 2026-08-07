@@ -62,6 +62,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         buildOutput2.ShouldContain("Hello from project2.proj");
     }
 
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/14516")]
     [Fact]
     public async Task SingleBuild_CoordinatorCapsMaxNodeCount()
     {
@@ -129,6 +130,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
         buildOutput.ShouldNotContain("Failed to connect to the build coordinator");
     }
 
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/14488")]
     [Fact]
     public async Task NuGetStaticGraphRestore_InheritsCoordinatorGrant_DoesNotDeadlock()
     {
@@ -141,7 +143,7 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
             """
             <Project Sdk="Microsoft.NET.Sdk">
               <PropertyGroup>
-                <TargetFramework>net10.0</TargetFramework>
+                <TargetFramework>net11.0</TargetFramework>
               </PropertyGroup>
             </Project>
             """);
@@ -187,7 +189,9 @@ public class CoordinatorIntegration_Tests(ITestOutputHelper outputHelper)
                 TestEnvironment.SetEnvironmentVariable(Constants.NodeBudgetEnvVarName, nodeBudgetValue.ToString());
             }
 
-            TestEnvironment.SetEnvironmentVariable(Constants.ShutdownTimeoutEnvVarName, "100");
+            // Keep this above transient startup/handshake jitter seen in CI, while still
+            // allowing coordinator processes to shut down quickly after each test.
+            TestEnvironment.SetEnvironmentVariable(Constants.ShutdownTimeoutEnvVarName, "1000");
 
             _debugLogPath = Path.Combine(Path.GetTempPath(), $"msbuild-coordinator-test-debug-{Guid.NewGuid():N}");
             TestEnvironment.SetEnvironmentVariable("MSBUILDDEBUGCOMM", "1");

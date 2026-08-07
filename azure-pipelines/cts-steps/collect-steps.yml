@@ -43,17 +43,15 @@ steps:
 
 - task: UseDotNet@2
   # vstest spawns testhost.exe (an apphost) per test DLL; the test DLLs
-  # target net10.0, so testhost needs Microsoft.NETCore.App 10.0.x in the
-  # agent hostedtoolcache. We can't use `useGlobalJson: true` here because
-  # this repo's global.json uses Arcade's `tools.dotnet` field rather than
-  # the standard `sdk.version`, which UseDotNet@2 can't parse. The full
-  # SDK install used to compile the slnx is handled by eng/common/build.ps1
+  # target $(LatestDotNetCoreForMSBuild), so testhost needs a matching
+  # Microsoft.NETCore.App version in the agent hostedtoolcache.
+  # The full SDK install used to compile the slnx is handled by eng/common/build.ps1
   # which puts it in the repo-local .dotnet/ -- but apphosts don't look
   # there, only at DOTNET_ROOT.
-  displayName: Install .NET 10 runtime (testhost)
+  displayName: Install .NET runtime (testhost)
   inputs:
     packageType: runtime
-    version: 10.0.x
+    version: 11.0.x
     includePreviewVersions: true
 
 - task: NuGetAuthenticate@1
