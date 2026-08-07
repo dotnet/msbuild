@@ -258,7 +258,7 @@ namespace Microsoft.Build.Tasks
                 }
                 else if (FailIfNotIncremental)
                 {
-                    Log.LogErrorFromResources("Untar.FileComment", entryName, destinationPath.FullName);
+                    Log.LogErrorWithCodeFromResources("Untar.ErrorFailIfNotIncremental", entryName, destinationPath.FullName);
                     continue;
                 }
 

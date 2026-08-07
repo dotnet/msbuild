@@ -3157,6 +3157,10 @@
     <value>MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</value>
     <comment>{StrBegin="MSB4338: "}</comment>
   </data>
+  <data name="Untar.ErrorFailIfNotIncremental">
+    <value>MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</value>
+    <comment>{StrBegin="MSB4339: "}</comment>
+  </data>
   <data name="Untar.DidNotUntarBecauseOfFileMatch">
     <value>Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</value>
   </data>

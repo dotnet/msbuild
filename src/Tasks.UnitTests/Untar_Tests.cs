@@ -261,6 +261,8 @@ namespace Microsoft.Build.Tasks.UnitTests
                 };
 
                 untar.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                _mockEngine.Log.ShouldContain("MSB4339", customMessage: _mockEngine.Log);
             }
         }
 

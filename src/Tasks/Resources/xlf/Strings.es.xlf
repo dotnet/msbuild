@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="es" original="../Strings.resx">
     <body>
@@ -2861,6 +2861,11 @@
         <source>MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
         <target state="new">MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</target>
         <note>{StrBegin="MSB4338: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorFailIfNotIncremental">
+        <source>MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</source>
+        <target state="new">MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</target>
+        <note>{StrBegin="MSB4339: "}</note>
       </trans-unit>
       <trans-unit id="Untar.FileComment">
         <source>Untarring file "{0}" to "{1}".</source>
