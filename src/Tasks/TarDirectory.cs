@@ -146,17 +146,9 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            DateTimeOffset? deterministicTimestamp = null;
-            if (!string.IsNullOrEmpty(DeterministicTimestamp))
+            if (!TryGetDeterministicTimestamp(out DateTimeOffset? deterministicTimestamp))
             {
-                if (!TryParseTimestamp(DeterministicTimestamp, out DateTimeOffset parsedTimestamp))
-                {
-                    Log.LogErrorWithCodeFromResources("TarDirectory.InvalidDeterministicTimestamp", DeterministicTimestamp);
-
-                    return false;
-                }
-
-                deterministicTimestamp = parsedTimestamp;
+                return false;
             }
 
             BuildEngine3.Yield();
@@ -316,6 +308,36 @@ namespace Microsoft.Build.Tasks
                     CollectEntries((DirectoryInfo)info, basePath, entries);
                 }
             }
+        }
+
+        /// <summary>
+        /// Resolves the optional <see cref="DeterministicTimestamp"/> parameter, logging an error and returning
+        /// <see langword="false"/> if it is specified but cannot be parsed.
+        /// </summary>
+        /// <param name="deterministicTimestamp">
+        /// On success, the parsed timestamp, or <see langword="null"/> when no <see cref="DeterministicTimestamp"/> was
+        /// specified.
+        /// </param>
+        /// <returns><see langword="true"/> if the timestamp was absent or parsed successfully; otherwise <see langword="false"/>.</returns>
+        private bool TryGetDeterministicTimestamp(out DateTimeOffset? deterministicTimestamp)
+        {
+            deterministicTimestamp = null;
+
+            if (string.IsNullOrEmpty(DeterministicTimestamp))
+            {
+                return true;
+            }
+
+            if (!TryParseTimestamp(DeterministicTimestamp, out DateTimeOffset parsedTimestamp))
+            {
+                Log.LogErrorWithCodeFromResources("TarDirectory.InvalidDeterministicTimestamp", DeterministicTimestamp);
+
+                return false;
+            }
+
+            deterministicTimestamp = parsedTimestamp;
+
+            return true;
         }
 
         /// <summary>
