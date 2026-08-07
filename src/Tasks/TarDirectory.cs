@@ -7,6 +7,7 @@ using System.Formats.Tar;
 using System.Globalization;
 using System.IO;
 using System.IO.Compression;
+using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Utilities;
 
@@ -21,8 +22,13 @@ namespace Microsoft.Build.Tasks
     /// is unavailable in Visual Studio / MSBuild.exe.
     /// </remarks>
     [MSBuildMultiThreadableTask]
-    public sealed class TarDirectory : TaskExtension, IIncrementalTask, IMultiThreadableTask
+    public sealed class TarDirectory : TaskExtension, ICancelableTask, IIncrementalTask, IMultiThreadableTask
     {
+        /// <summary>
+        /// Stores a <see cref="CancellationTokenSource"/> used for cancellation.
+        /// </summary>
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
         /// <summary>
         /// Gets or sets the full path to the destination file to create.
         /// </summary>
@@ -73,6 +79,12 @@ namespace Microsoft.Build.Tasks
 
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
+        /// <inheritdoc cref="ICancelableTask.Cancel"/>
+        public void Cancel()
+        {
+            _cancellationTokenSource.Cancel();
+        }
 
         public override bool Execute()
         {
@@ -163,45 +175,82 @@ namespace Microsoft.Build.Tasks
                     // per-entry metadata is written exactly as TarFile.CreateFromDirectory would via WriteEntry.
                     using TarWriter writer = new TarWriter(compressionStream ?? destinationStream, format, leaveOpen: true);
 
+                    CancellationToken cancellationToken = _cancellationTokenSource.Token;
+
                     foreach ((FileSystemInfo info, string entryName) in EnumerateEntriesInDeterministicOrder())
                     {
+                        // Check for cancellation on every iteration so a cancelled build stops promptly rather than
+                        // writing out the entire remaining archive.
+                        if (cancellationToken.IsCancellationRequested)
+                        {
+                            break;
+                        }
+
                         if (deterministicTimestamp is DateTimeOffset timestamp)
                         {
-                            WriteStampedEntry(writer, format, info, entryName, timestamp);
+                            WriteStampedEntry(writer, format, info, entryName, timestamp, cancellationToken);
                         }
                         else
                         {
-                            writer.WriteEntry(info.FullName, entryName);
+                            // Flow the cancellation token into the runtime's write so a large entry's stream copy
+                            // can be interrupted mid-entry rather than only between entries.
+                            writer.WriteEntryAsync(info.FullName, entryName, cancellationToken)
+                                .ConfigureAwait(continueOnCapturedContext: false)
+                                .GetAwaiter()
+                                .GetResult();
                         }
                     }
                 }
+
+                // A break out of the loop above (rather than an OperationCanceledException from a mid-entry write)
+                // leaves a truncated or empty archive on disk. The write streams are now flushed and closed, so the
+                // file handle is released and the partial archive can be removed.
+                if (_cancellationTokenSource.IsCancellationRequested)
+                {
+                    TryDeletePartialArchive();
+                }
+            }
+            catch (OperationCanceledException) when (_cancellationTokenSource.IsCancellationRequested)
+            {
+                // A mid-entry write was interrupted by the cancellation token. Cancellation is a clean stop, not a
+                // task failure to report; delete the partially-written archive and let Execute return false via the
+                // IsCancellationRequested check.
+                TryDeletePartialArchive();
             }
             catch (Exception e)
             {
                 Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", SourceDirectory.FullName, DestinationFile.FullName, e.Message, string.Empty);
 
                 // Best-effort cleanup of the partially-written archive so a subsequent non-Overwrite build does
-                // not fail with "already exists" on a corrupt, incomplete file. Swallow any failure here — the
-                // original ErrorFailed above is the diagnostic that matters.
-                try
-                {
-                    DestinationFile.Refresh();
-                    if (DestinationFile.Exists)
-                    {
-                        DestinationFile.Delete();
-                    }
-                }
-                catch
-                {
-                    // Ignore: cleanup is best-effort and must not mask the real failure.
-                }
+                // not fail with "already exists" on a corrupt, incomplete file.
+                TryDeletePartialArchive();
             }
             finally
             {
                 BuildEngine3.Reacquire();
             }
 
-            return !Log.HasLoggedErrors;
+            return !_cancellationTokenSource.IsCancellationRequested && !Log.HasLoggedErrors;
+        }
+
+        /// <summary>
+        /// Best-effort deletion of a partially-written destination archive. Any failure is swallowed: cleanup must
+        /// not mask the real failure (an already-logged error, or a cancellation) that triggered it.
+        /// </summary>
+        private void TryDeletePartialArchive()
+        {
+            try
+            {
+                DestinationFile.Refresh();
+                if (DestinationFile.Exists)
+                {
+                    DestinationFile.Delete();
+                }
+            }
+            catch
+            {
+                // Ignore: cleanup is best-effort and must not mask the real failure.
+            }
         }
 
         /// <summary>
@@ -290,7 +339,7 @@ namespace Microsoft.Build.Tasks
         /// so its modification time can be overridden. The source file's Unix mode is preserved; Unix owner ids default
         /// to 0, which both matches Windows behavior and is the conventional choice for a reproducible archive.
         /// </summary>
-        private static void WriteStampedEntry(TarWriter writer, TarEntryFormat format, FileSystemInfo info, string entryName, DateTimeOffset timestamp)
+        private static void WriteStampedEntry(TarWriter writer, TarEntryFormat format, FileSystemInfo info, string entryName, DateTimeOffset timestamp, CancellationToken cancellationToken)
         {
             bool isSymbolicLink = info.LinkTarget is not null;
             bool isDirectory = info is DirectoryInfo && !isSymbolicLink;
@@ -326,7 +375,10 @@ namespace Microsoft.Build.Tasks
                     entry.DataStream = dataStream;
                 }
 
-                writer.WriteEntry(entry);
+                writer.WriteEntryAsync(entry, cancellationToken)
+                    .ConfigureAwait(continueOnCapturedContext: false)
+                    .GetAwaiter()
+                    .GetResult();
             }
             finally
             {

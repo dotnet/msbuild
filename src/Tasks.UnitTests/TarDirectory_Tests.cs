@@ -121,6 +121,38 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
+        public void CancelStopsBeforeWritingArchive()
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFolder sourceFolder = testEnvironment.CreateFolder(createFolder: true);
+
+                testEnvironment.CreateFile(sourceFolder, "A9E8E0B7F0C24F3E8F7F1B2C3D4E5F60.txt", "A9E8E0B7F0C24F3E8F7F1B2C3D4E5F60");
+
+                string tarFilePath = Path.Combine(testEnvironment.DefaultTestDirectory.Path, "test.tar");
+
+                TarDirectory tarDirectory = new TarDirectory
+                {
+                    BuildEngine = _mockEngine,
+                    DestinationFile = new FileInfo(tarFilePath),
+                    SourceDirectory = new DirectoryInfo(sourceFolder.Path),
+                    TaskEnvironment = TaskEnvironmentHelper.CreateForTest(),
+                };
+
+                // Cancelling before Execute means the very first write-loop iteration observes cancellation and stops.
+                tarDirectory.Cancel();
+
+                tarDirectory.Execute().ShouldBeFalse(_mockEngine.Log);
+
+                // Cancellation is a clean stop, not a failure, so no error is logged.
+                _mockEngine.Log.ShouldNotContain("MSB432", customMessage: _mockEngine.Log);
+
+                // The partially-written archive is cleaned up so a later non-Overwrite build is not blocked.
+                File.Exists(tarFilePath).ShouldBeFalse(_mockEngine.Log);
+            }
+        }
+
+        [Fact]
         public void LogsErrorIfDirectoryDoesNotExist()
         {
             TarDirectory tarDirectory = new TarDirectory
