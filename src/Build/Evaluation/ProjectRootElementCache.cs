@@ -458,7 +458,7 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            Clear();
+            base.ClearCachesAfterBuild();
         }
 
         /// <summary>
