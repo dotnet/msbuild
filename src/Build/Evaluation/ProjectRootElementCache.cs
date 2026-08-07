@@ -158,9 +158,6 @@ namespace Microsoft.Build.Evaluation
             LoadProjectsReadOnly = loadProjectsReadOnly;
         }
 
-        /// <inheritdoc />
-        internal override bool AutoReloadFromDisk => _autoReloadFromDisk;
-
         /// <summary>
         /// Returns true if given cache entry exists and is outdated.
         /// </summary>
@@ -448,6 +445,20 @@ namespace Microsoft.Build.Evaluation
                 _weakCache = new WeakValueDictionary<string, ProjectRootElement>(StringComparer.OrdinalIgnoreCase);
                 _strongCache = new LinkedList<ProjectRootElement>();
             }
+        }
+
+        /// <inheritdoc />
+        internal override void ClearCachesAfterBuild()
+        {
+            if (_autoReloadFromDisk && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+            {
+                // No need to clear it, as auto reload properly invalidates cache entries whose file changed on disk.
+                // That covers whatever restore rewrote, so discarding the cache would only force the build that
+                // follows restore to re-parse the entire import closure.
+                return;
+            }
+
+            Clear();
         }
 
         /// <summary>

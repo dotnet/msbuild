@@ -2082,7 +2082,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             if (!changeWaveEnabled)
             {
-                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString());
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
             }
 
             ChangeWaves.ResetStateForTests();
@@ -2143,7 +2143,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             File.WriteAllText(projectPath, contents);
 
             ProjectRootElementCache cache = new ProjectRootElementCache(autoReloadFromDisk: false);
-            cache.AutoReloadFromDisk.ShouldBeFalse();
             _parameters.ProjectRootElementCache = cache;
 
             var data = new BuildRequestData(

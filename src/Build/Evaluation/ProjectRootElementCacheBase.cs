@@ -13,11 +13,11 @@ namespace Microsoft.Build.Evaluation
         public bool LoadProjectsReadOnly { get; protected set; }
 
         /// <summary>
-        /// Whether this cache notices that a cached file changed on disk after it was read, and reloads it.
-        /// A cache that does so does not need to be discarded when something outside the build (such as restore)
-        /// rewrites part of the import graph.
+        /// Discards the cache after a build that requested <see cref="Execution.BuildRequestDataFlags.ClearCachesAfterBuild"/>,
+        /// because something outside the build (such as restore) may have rewritten part of the import graph.
+        /// A cache that notices such a rewrite on its own can override this to keep its contents.
         /// </summary>
-        internal virtual bool AutoReloadFromDisk => false;
+        internal virtual void ClearCachesAfterBuild() => Clear();
 
         /// <summary>
         /// Handler for which project root element just got added to the cache
