@@ -44,7 +44,8 @@
 
 .PARAMETER ArtifactsPath
     The root directory for BenchmarkDotNet artifacts. Defaults to artifacts/BenchmarkDotNet at
-    the repository root. Each target framework uses a subdirectory.
+    the repository root. Relative paths are resolved from the current PowerShell location. Each
+    target framework uses a subdirectory.
 
 .PARAMETER BenchmarkDotNetArguments
     Additional uncommon arguments passed to BenchmarkDotNet.
@@ -179,7 +180,7 @@ foreach ($scriptArgument in $scriptArguments.GetEnumerator())
 }
 
 $projectPath = Join-Path $PSScriptRoot 'MSBuild.Benchmarks.csproj'
-$artifactsRoot = [System.IO.Path]::GetFullPath($ArtifactsPath)
+$artifactsRoot = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($ArtifactsPath)
 
 foreach ($framework in $TargetFramework)
 {
