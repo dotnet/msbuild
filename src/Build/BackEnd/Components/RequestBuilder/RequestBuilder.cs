@@ -1143,6 +1143,9 @@ namespace Microsoft.Build.BackEnd
         {
             Assumed.NotNull(_targetBuilder, "Target builder is null");
 
+            using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
+                _requestEntry.RequestConfiguration.EnterProjectInstanceUsage();
+
             // We consider this the entrypoint for the project build for purposes of BuildCheck processing
             bool isRestoring = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring] is not null;
 
@@ -1221,8 +1224,6 @@ namespace Microsoft.Build.BackEnd
                 // Make sure to extract known immutable folders from properties and register them for fast up-to-date check
                 ConfigureKnownImmutableFolders();
 
-                // See comment on Microsoft.Build.Internal.Utilities.GenerateToolsVersionToUse
-                _requestEntry.RequestConfiguration.RetrieveFromCache();
                 if (_requestEntry.RequestConfiguration.Project.UsingDifferentToolsVersionFromProjectFile)
                 {
                     _projectLoggingContext.LogComment(MessageImportance.Low,

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -674,6 +675,51 @@ namespace Microsoft.Build.UnitTests.BackEnd
             clone.ProjectEvaluationId.ShouldBe(expectedEvalId);
         }
 
+        [Fact]
+        public void ProjectInstanceUsagePreventsConfigurationCaching()
+        {
+            string projectBody = """
+                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='Build' />
+                </Project>
+                """.Cleanup();
+
+            using var collection = new ProjectCollection();
+            using ProjectFromString projectFromString = new(
+                projectBody,
+                new Dictionary<string, string>(),
+                ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                collection);
+            Project project = projectFromString.Project;
+            project.FullPath = "foo";
+            ProjectInstance instance = project.CreateProjectInstance();
+
+            BuildRequestConfiguration configuration = new(new BuildRequestData(instance, [], null), "2.0")
+            {
+                ConfigurationId = 1,
+                IsCacheable = true,
+            };
+
+            configuration.CacheIfPossible();
+            configuration.IsCached.ShouldBeTrue();
+
+            using (configuration.EnterProjectInstanceUsage())
+            {
+                configuration.IsCached.ShouldBeFalse();
+
+                using (configuration.EnterProjectInstanceUsage())
+                {
+                    Task.Run(configuration.CacheIfPossible).GetAwaiter().GetResult();
+                    configuration.IsCached.ShouldBeFalse();
+                }
+
+                configuration.CacheIfPossible();
+                configuration.IsCached.ShouldBeFalse();
+            }
+
+            configuration.CacheIfPossible();
+            configuration.IsCached.ShouldBeTrue();
+        }
 
         [Fact]
         public void TestProjectEvaluationIdPreservedAcrossTranslateForFutureUse()
