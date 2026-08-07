@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -259,6 +260,95 @@ namespace Microsoft.Build.UnitTests.Evaluation
             "                $(AssemblyOriginatorKeyFile);\n\t                @(Compile);",
                             "@(_OutputPathItem->'%(FullPath)', ';');$(MSBuildAllProjects);"
         };
+
+        [Fact]
+        public void MarkerConstantsHaveExpectedValues()
+        {
+            ExpressionShredder.PropertyMarker.ShouldBe("$(");
+            ExpressionShredder.ItemVectorMarker.ShouldBe("@(");
+            ExpressionShredder.MetadataMarker.ShouldBe("%(");
+        }
+
+        [Theory]
+        [InlineData(ExpressionShredder.PropertyMarker)]
+        [InlineData(ExpressionShredder.ItemVectorMarker)]
+        [InlineData(ExpressionShredder.MetadataMarker)]
+        public void MarkerSearchesReturnExpectedIndexes(string marker)
+        {
+            string expression = $"x{marker}y{marker}z";
+
+            IndexOfMarker(marker, string.Empty, 0).ShouldBe(-1);
+            IndexOfMarker(marker, "value", 0).ShouldBe(-1);
+            IndexOfMarker(marker, expression, 0).ShouldBe(1);
+            IndexOfMarker(marker, expression, 2).ShouldBe(4);
+            IndexOfMarker(marker, expression, 4).ShouldBe(4);
+            IndexOfMarker(marker, expression, 6).ShouldBe(-1);
+            IndexOfMarker(marker, $"{marker[0]}x{marker}", 0).ShouldBe(2);
+            IndexOfMarker(marker, $"value{marker[0]}", 0).ShouldBe(-1);
+            IndexOfMarker(marker, marker, marker.Length).ShouldBe(-1);
+
+            static int IndexOfMarker(string marker, string expression, int startIndex)
+                => marker switch
+                {
+                    ExpressionShredder.PropertyMarker => ExpressionShredder.IndexOfPropertyMarker(expression, startIndex),
+                    ExpressionShredder.ItemVectorMarker => ExpressionShredder.IndexOfItemVectorMarker(expression, startIndex),
+                    ExpressionShredder.MetadataMarker => ExpressionShredder.IndexOfMetadataMarker(expression, startIndex),
+
+                    _ => Assumed.Unreachable<int>($"Unexpected marker: {marker}"),
+                };
+        }
+
+        [Theory]
+        [InlineData(ExpressionShredder.PropertyMarker)]
+        [InlineData(ExpressionShredder.ItemVectorMarker)]
+        [InlineData(ExpressionShredder.MetadataMarker)]
+        public void BoundedMarkerSearchesReturnExpectedIndexes(string marker)
+        {
+            string expression = $"x{marker}y{marker}z";
+
+            IndexOfMarker(marker, expression, 0, 0).ShouldBe(-1);
+            IndexOfMarker(marker, expression, 0, 2).ShouldBe(-1);
+            IndexOfMarker(marker, expression, 0, 3).ShouldBe(1);
+            IndexOfMarker(marker, expression, 2, 3).ShouldBe(-1);
+            IndexOfMarker(marker, expression, 2, 4).ShouldBe(4);
+            IndexOfMarker(marker, expression, 4, 2).ShouldBe(4);
+            IndexOfMarker(marker, expression, expression.Length, 0).ShouldBe(-1);
+            IndexOfMarker(marker, $"{marker[0]}x{marker}", 0, 3).ShouldBe(-1);
+            IndexOfMarker(marker, $"{marker[0]}x{marker}", 0, 4).ShouldBe(2);
+
+            static int IndexOfMarker(string marker, string expression, int startIndex, int count)
+                => marker switch
+                {
+                    ExpressionShredder.PropertyMarker => ExpressionShredder.IndexOfPropertyMarker(expression, startIndex, count),
+                    ExpressionShredder.ItemVectorMarker => ExpressionShredder.IndexOfItemVectorMarker(expression, startIndex, count),
+                    ExpressionShredder.MetadataMarker => ExpressionShredder.IndexOfMetadataMarker(expression, startIndex, count),
+
+                    _ => Assumed.Unreachable<int>($"Unexpected marker: {marker}"),
+                };
+        }
+
+        [Theory]
+        [InlineData(ExpressionShredder.PropertyMarker)]
+        [InlineData(ExpressionShredder.ItemVectorMarker)]
+        [InlineData(ExpressionShredder.MetadataMarker)]
+        public void MarkerContainsChecksReturnExpectedResults(string marker)
+        {
+            ContainsMarker(marker, string.Empty).ShouldBeFalse();
+            ContainsMarker(marker, "value").ShouldBeFalse();
+            ContainsMarker(marker, $"value{marker[0]}").ShouldBeFalse();
+            ContainsMarker(marker, $"{marker[0]}x{marker}").ShouldBeTrue();
+            ContainsMarker(marker, marker).ShouldBeTrue();
+
+            static bool ContainsMarker(string marker, string expression)
+                => marker switch
+                {
+                    ExpressionShredder.PropertyMarker => ExpressionShredder.ContainsPropertyMarker(expression),
+                    ExpressionShredder.ItemVectorMarker => ExpressionShredder.ContainsItemVectorMarker(expression),
+                    ExpressionShredder.MetadataMarker => ExpressionShredder.ContainsMetadataMarker(expression),
+
+                    _ => Assumed.Unreachable<bool>($"Unexpected marker: {marker}"),
+                };
+        }
 
         [Fact]
         public void Medley()

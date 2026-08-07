@@ -306,7 +306,7 @@ internal partial class Expander<P, I>
                 return null;
             }
 
-            if (!expression.Contains('@'))
+            if (!ExpressionShredder.ContainsItemVectorMarker(expression))
             {
                 return null;
             }

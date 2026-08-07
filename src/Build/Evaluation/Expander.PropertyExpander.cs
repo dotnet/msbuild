@@ -115,7 +115,7 @@ internal partial class Expander<P, I>
             int propertyStartIndex, propertyEndIndex;
 
             // If there are no substitutions, then just return the string.
-            propertyStartIndex = s_invariantCompareInfo.IndexOf(expression, "$(", CompareOptions.Ordinal);
+            propertyStartIndex = ExpressionShredder.IndexOfPropertyMarker(expression);
             if (propertyStartIndex == -1)
             {
                 return expression;
@@ -237,7 +237,7 @@ internal partial class Expander<P, I>
                     sourceIndex = propertyEndIndex + 1;
                 }
 
-                propertyStartIndex = s_invariantCompareInfo.IndexOf(expression, "$(", sourceIndex, CompareOptions.Ordinal);
+                propertyStartIndex = ExpressionShredder.IndexOfPropertyMarker(expression, sourceIndex);
             }
 
             // If we couldn't find any more property tags in the expression just copy the remainder into the result.

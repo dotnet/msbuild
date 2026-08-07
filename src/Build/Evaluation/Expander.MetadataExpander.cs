@@ -67,7 +67,7 @@ internal partial class Expander<P, I>
             Assumed.NotNull(metadata, "Cannot expand metadata without providing metadata");
 
             // PERF NOTE: pre-scanning the string for "%(" is cheaper than a full scan.
-            if (expression.IndexOf("%(", StringComparison.Ordinal) < 0)
+            if (!ExpressionShredder.ContainsMetadataMarker(expression))
             {
                 return expression;
             }
@@ -89,7 +89,7 @@ internal partial class Expander<P, I>
 
         private string Expand(string expression)
         {
-            if (expression.IndexOf("@(", StringComparison.Ordinal) < 0)
+            if (!ExpressionShredder.ContainsItemVectorMarker(expression))
             {
                 // No item vectors in the string — scan for metadata references directly.
                 ScanAndExpandMetadata(expression);
@@ -202,7 +202,7 @@ internal partial class Expander<P, I>
         {
             int lastCopied = startIndex;
 
-            int i = input.IndexOf("%(", startIndex, StringComparison.Ordinal);
+            int i = ExpressionShredder.IndexOfMetadataMarker(input, startIndex);
 
             while (i >= 0 && i < endIndex - 1)
             {
@@ -211,7 +211,7 @@ internal partial class Expander<P, I>
                 if (!ExpressionShredder.TryParseMetadataExpression(input, ref pos, endIndex, out string itemType, out string metadataName))
                 {
                     // Not a valid metadata reference — skip past '%(' and keep scanning.
-                    i = input.IndexOf("%(", i + 2, StringComparison.Ordinal);
+                    i = ExpressionShredder.IndexOfMetadataMarker(input, i + 2);
                     continue;
                 }
 
@@ -258,7 +258,7 @@ internal partial class Expander<P, I>
                 lastCopied = pos;
 
                 // Continue scanning after this reference.
-                i = input.IndexOf("%(", pos, StringComparison.Ordinal);
+                i = ExpressionShredder.IndexOfMetadataMarker(input, pos);
             }
 
             // Append any remaining text after the last reference.
