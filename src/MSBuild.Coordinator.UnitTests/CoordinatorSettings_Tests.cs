@@ -38,6 +38,7 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.PriorityAgingThreshold.ShouldBe(5);
         settings.HighPriorityReservedNodesIsAuto.ShouldBeFalse();
         settings.MaxNodesPerBuildIsAuto.ShouldBeFalse();
+        settings.IdleNodeCeiling.ShouldBe(0);
         settings.IsAutoStrictPolicyActive.ShouldBeFalse();
         settings.ShutdownTimeoutMs.ShouldBe(456);
         settings.ConnectionTimeoutMs.ShouldBe(654);
@@ -58,6 +59,7 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.MaxNodesPerBuild.ShouldBe(8);
         settings.HighPriorityReservedNodesIsAuto.ShouldBeFalse();
         settings.MaxNodesPerBuildIsAuto.ShouldBeFalse();
+        settings.IdleNodeCeiling.ShouldBe(0);
         settings.IsAutoStrictPolicyActive.ShouldBeFalse();
     }
 
@@ -159,12 +161,17 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
     }
 
     [Theory]
-    [InlineData(4, 0, 0)]
-    [InlineData(7, 0, 0)]
-    [InlineData(8, 4, 4)]
-    [InlineData(10, 4, 4)]
-    [InlineData(16, 4, 4)]
-    public void CoordinatorSettings_FromEnvironment_AutoComputesStrictPolicyDefaults(int totalBudget, int expectedReservedNodes, int expectedMaxNodesPerBuild)
+    [InlineData(7, 0, 0, 0)]
+    [InlineData(8, 4, 4, 8)]
+    [InlineData(10, 4, 4, 8)]
+    [InlineData(12, 4, 4, 8)]
+    [InlineData(15, 4, 4, 8)]
+    [InlineData(16, 4, 4, 8)]
+    public void CoordinatorSettings_FromEnvironment_AutoComputesStrictPolicyDefaults(
+        int totalBudget,
+        int expectedReservedNodes,
+        int expectedMaxNodesPerBuild,
+        int expectedIdleNodeCeiling)
     {
         using TestEnvironment env = TestEnvironment.Create(output);
 
@@ -177,6 +184,7 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.TotalNodeBudget.ShouldBe(totalBudget);
         settings.HighPriorityReservedNodes.ShouldBe(expectedReservedNodes);
         settings.MaxNodesPerBuild.ShouldBe(expectedMaxNodesPerBuild);
+        settings.IdleNodeCeiling.ShouldBe(expectedIdleNodeCeiling);
         settings.HighPriorityReservedNodesIsAuto.ShouldBeTrue();
         settings.MaxNodesPerBuildIsAuto.ShouldBeTrue();
         settings.IsAutoStrictPolicyActive.ShouldBe(expectedReservedNodes > 0 || expectedMaxNodesPerBuild > 0);
@@ -189,15 +197,16 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
     }
 
     [Theory]
-    [InlineData("-1", 1, 0, 0, false)]
-    [InlineData("-1", 7, 0, 0, false)]
-    [InlineData("-1", 8, 4, 4, true)]
-    [InlineData("-42", 16, 4, 4, true)]
+    [InlineData("-1", 1, 0, 0, 0, false)]
+    [InlineData("-1", 7, 0, 0, 0, false)]
+    [InlineData("-1", 8, 4, 4, 8, true)]
+    [InlineData("-42", 16, 4, 4, 8, true)]
     public void CoordinatorSettings_FromEnvironment_NegativeStrictPolicyValuesUseAuto(
         string envValue,
         int totalBudget,
         int expectedReservedNodes,
         int expectedMaxNodesPerBuild,
+        int expectedIdleNodeCeiling,
         bool expectedAutoStrictPolicyActive)
     {
         using TestEnvironment env = TestEnvironment.Create(output);
@@ -210,6 +219,7 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
 
         settings.HighPriorityReservedNodes.ShouldBe(expectedReservedNodes);
         settings.MaxNodesPerBuild.ShouldBe(expectedMaxNodesPerBuild);
+        settings.IdleNodeCeiling.ShouldBe(expectedIdleNodeCeiling);
         settings.HighPriorityReservedNodesIsAuto.ShouldBeTrue();
         settings.MaxNodesPerBuildIsAuto.ShouldBeTrue();
         settings.IsAutoStrictPolicyActive.ShouldBe(expectedAutoStrictPolicyActive);
@@ -229,6 +239,7 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
 
         settings.HighPriorityReservedNodes.ShouldBe(4);
         settings.MaxNodesPerBuild.ShouldBe(4);
+        settings.IdleNodeCeiling.ShouldBe(8);
         settings.HighPriorityReservedNodesIsAuto.ShouldBeTrue();
         settings.MaxNodesPerBuildIsAuto.ShouldBeTrue();
         settings.IsAutoStrictPolicyActive.ShouldBeTrue();
@@ -247,6 +258,7 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
 
         settings.HighPriorityReservedNodes.ShouldBe(7);
         settings.MaxNodesPerBuild.ShouldBe(8);
+        settings.IdleNodeCeiling.ShouldBe(0);
         settings.HighPriorityReservedNodesIsAuto.ShouldBeFalse();
         settings.MaxNodesPerBuildIsAuto.ShouldBeFalse();
         settings.IsAutoStrictPolicyActive.ShouldBeFalse();
@@ -265,6 +277,7 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
 
         settings.HighPriorityReservedNodes.ShouldBe(2);
         settings.MaxNodesPerBuild.ShouldBe(4);
+        settings.IdleNodeCeiling.ShouldBe(8);
         settings.HighPriorityReservedNodesIsAuto.ShouldBeFalse();
         settings.MaxNodesPerBuildIsAuto.ShouldBeTrue();
         settings.IsAutoStrictPolicyActive.ShouldBeTrue();
@@ -286,6 +299,7 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
 
         settings.HighPriorityReservedNodes.ShouldBe(4);
         settings.MaxNodesPerBuild.ShouldBe(2);
+        settings.IdleNodeCeiling.ShouldBe(0);
         settings.HighPriorityReservedNodesIsAuto.ShouldBeTrue();
         settings.MaxNodesPerBuildIsAuto.ShouldBeFalse();
         settings.IsAutoStrictPolicyActive.ShouldBeTrue();
@@ -307,6 +321,7 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
 
         settings.HighPriorityReservedNodes.ShouldBe(4);
         settings.MaxNodesPerBuild.ShouldBe(4);
+        settings.IdleNodeCeiling.ShouldBe(8);
         settings.HighPriorityReservedNodesIsAuto.ShouldBeTrue();
         settings.MaxNodesPerBuildIsAuto.ShouldBeTrue();
         settings.IsAutoStrictPolicyActive.ShouldBeTrue();
@@ -328,6 +343,7 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
 
         settings.HighPriorityReservedNodes.ShouldBe(4);
         settings.MaxNodesPerBuild.ShouldBe(4);
+        settings.IdleNodeCeiling.ShouldBe(8);
         settings.HighPriorityReservedNodesIsAuto.ShouldBeTrue();
         settings.MaxNodesPerBuildIsAuto.ShouldBeTrue();
         settings.IsAutoStrictPolicyActive.ShouldBeTrue();
@@ -349,6 +365,7 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
 
         settings.HighPriorityReservedNodes.ShouldBe(0);
         settings.MaxNodesPerBuild.ShouldBe(0);
+        settings.IdleNodeCeiling.ShouldBe(0);
         settings.HighPriorityReservedNodesIsAuto.ShouldBeFalse();
         settings.MaxNodesPerBuildIsAuto.ShouldBeFalse();
         settings.IsAutoStrictPolicyActive.ShouldBeFalse();
@@ -368,6 +385,7 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
 
         settings.HighPriorityReservedNodes.ShouldBe(0);
         settings.MaxNodesPerBuild.ShouldBe(4);
+        settings.IdleNodeCeiling.ShouldBe(8);
         settings.HighPriorityReservedNodesIsAuto.ShouldBeFalse();
         settings.MaxNodesPerBuildIsAuto.ShouldBeTrue();
         settings.IsAutoStrictPolicyActive.ShouldBeTrue();
@@ -389,6 +407,7 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
 
         settings.HighPriorityReservedNodes.ShouldBe(4);
         settings.MaxNodesPerBuild.ShouldBe(0);
+        settings.IdleNodeCeiling.ShouldBe(0);
         settings.HighPriorityReservedNodesIsAuto.ShouldBeTrue();
         settings.MaxNodesPerBuildIsAuto.ShouldBeFalse();
         settings.IsAutoStrictPolicyActive.ShouldBeTrue();

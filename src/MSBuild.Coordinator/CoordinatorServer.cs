@@ -20,7 +20,12 @@ namespace Microsoft.Build.Coordinator;
 internal sealed partial class CoordinatorServer(CoordinatorSettings settings, ICoordinatorDebugOutput? output = null) : IDisposable
 {
     private readonly CoordinatorSettings _settings = settings;
-    private readonly NodeBudgetManager _budgetManager = new(settings.TotalNodeBudget, settings.HighPriorityReservedNodes, settings.MaxNodesPerBuild, settings.PriorityAgingThreshold);
+    private readonly NodeBudgetManager _budgetManager = new(
+        settings.TotalNodeBudget,
+        settings.HighPriorityReservedNodes,
+        settings.MaxNodesPerBuild,
+        settings.PriorityAgingThreshold,
+        settings.IdleNodeCeiling);
     private readonly string _pipeName = settings.PipeName;
     private readonly int _heartbeatIntervalMs = settings.HeartbeatIntervalMs;
     private readonly int _shutdownTimeoutMs = settings.ShutdownTimeoutMs;
@@ -66,7 +71,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         // Start auto-shutdown timer.
         ResetShutdownTimer();
 
-        _output.WriteLine($"CoordinatorServer: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget}, high-priority reserved nodes={FormatHighPriorityReservedNodes(_settings.HighPriorityReservedNodes)}, max nodes per build={FormatMaxNodesPerBuild(_settings.MaxNodesPerBuild)}, priority aging threshold={_settings.PriorityAgingThreshold})");
+        _output.WriteLine($"CoordinatorServer: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget}, high-priority reserved nodes={FormatHighPriorityReservedNodes(_settings.HighPriorityReservedNodes)}, max nodes per build={FormatMaxNodesPerBuild(_settings.MaxNodesPerBuild)}, idle node ceiling={FormatIdleNodeCeiling(_settings.IdleNodeCeiling)}, priority aging threshold={_settings.PriorityAgingThreshold})");
         if (_settings.AutoStrictPolicyOptOutMessage is { } autoStrictPolicyOptOutMessage)
         {
             _output.WriteLine($"CoordinatorServer: Auto strict policy active. {autoStrictPolicyOptOutMessage}");
@@ -601,6 +606,9 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
 
     private static string FormatMaxNodesPerBuild(int value)
         => value == 0 ? "0 (uncapped)" : value.ToString();
+
+    private static string FormatIdleNodeCeiling(int value)
+        => value == 0 ? "0 (disabled)" : value.ToString();
 
     /// <summary>
     ///  Resets the auto-shutdown timer. If no builds are active or waiting when the timer

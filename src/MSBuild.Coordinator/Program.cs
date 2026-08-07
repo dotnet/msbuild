@@ -11,6 +11,9 @@ static string FormatHighPriorityReservedNodes(int value)
 static string FormatMaxNodesPerBuild(int value)
     => value == 0 ? "0 (uncapped)" : value.ToString();
 
+static string FormatIdleNodeCeiling(int value)
+    => value == 0 ? "0 (disabled)" : value.ToString();
+
 TelemetryManager.Instance.Initialize(isStandalone: true);
 
 CoordinatorSettings settings = CoordinatorSettings.FromEnvironment();
@@ -30,6 +33,7 @@ Console.WriteLine($"  Pipe: {settings.PipeName}");
 Console.WriteLine($"  Node budget: {settings.TotalNodeBudget}");
 Console.WriteLine($"  High-priority reserved nodes: {FormatHighPriorityReservedNodes(settings.HighPriorityReservedNodes)}");
 Console.WriteLine($"  Max nodes per build: {FormatMaxNodesPerBuild(settings.MaxNodesPerBuild)}");
+Console.WriteLine($"  Idle node ceiling: {FormatIdleNodeCeiling(settings.IdleNodeCeiling)}");
 if (settings.AutoStrictPolicyOptOutMessage is { } autoStrictPolicyOptOutMessage)
 {
     Console.WriteLine($"  Auto strict policy active. {autoStrictPolicyOptOutMessage}");

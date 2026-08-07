@@ -13,6 +13,13 @@ public class NodeBudgetManager_Tests
     private static BuildGrant NewGrant(int processId, int requestedNodes, CoordinatorBuildPriority priority = CoordinatorBuildPriority.Normal)
         => new(Guid.NewGuid(), processId, requestedNodes, priority);
 
+    private static NodeBudgetManager NewAutoManager(int totalBudget)
+        => new(
+            totalBudget,
+            highPriorityReservedNodes: totalBudget >= 8 ? CoordinatorSettings.DefaultAutoNodeSlice : 0,
+            maxNodesPerBuild: totalBudget >= 8 ? CoordinatorSettings.DefaultAutoNodeSlice : 0,
+            idleNodeCeiling: totalBudget >= 8 ? CoordinatorSettings.DefaultAutoIdleNodeCeiling : 0);
+
     private static void AssertSingleGrant(ImmutableArray<BuildGrant> grants, BuildGrant expected)
     {
         grants.Length.ShouldBe(1);
@@ -38,6 +45,12 @@ public class NodeBudgetManager_Tests
     }
 
     [Fact]
+    public void Constructor_NegativeIdleNodeCeiling_Throws()
+    {
+        Should.Throw<ArgumentOutOfRangeException>(() => new NodeBudgetManager(totalBudget: 4, idleNodeCeiling: -1));
+    }
+
+    [Fact]
     public void Constructor_NonPositivePriorityAgingThreshold_Throws()
     {
         Should.Throw<ArgumentOutOfRangeException>(() => new NodeBudgetManager(totalBudget: 4, priorityAgingThreshold: 0));
@@ -58,6 +71,14 @@ public class NodeBudgetManager_Tests
         NodeBudgetManager manager = new(totalBudget: 4, maxNodesPerBuild: 10);
 
         manager.MaxNodesPerBuild.ShouldBe(4);
+    }
+
+    [Fact]
+    public void Constructor_IdleNodeCeilingClampedToBudget()
+    {
+        NodeBudgetManager manager = new(totalBudget: 4, idleNodeCeiling: 10);
+
+        manager.IdleNodeCeiling.ShouldBe(4);
     }
 
     [Fact]
@@ -110,6 +131,133 @@ public class NodeBudgetManager_Tests
 
         granted.ShouldBe(2);
         grant.GrantedNodes.ShouldBe(2);
+    }
+
+    [Theory]
+    [InlineData(8, 4)]
+    [InlineData(10, 4)]
+    [InlineData(12, 8)]
+    [InlineData(15, 8)]
+    [InlineData(16, 8)]
+    public void TryGrant_AutoPolicy_IdleNormalUsesAvailableIdleCeiling(int totalBudget, int expectedGrant)
+    {
+        NodeBudgetManager manager = NewAutoManager(totalBudget);
+        BuildGrant normal = NewGrant(processId: 1, requestedNodes: 16);
+
+        manager.TryGrant(normal).ShouldBe(expectedGrant);
+    }
+
+    [Theory]
+    [InlineData(8)]
+    [InlineData(10)]
+    [InlineData(12)]
+    [InlineData(16)]
+    public void TryGrant_AutoPolicy_IdleHighUsesIdleCeiling(int totalBudget)
+    {
+        NodeBudgetManager manager = NewAutoManager(totalBudget);
+        BuildGrant high = NewGrant(processId: 1, requestedNodes: 16, CoordinatorBuildPriority.High);
+
+        manager.TryGrant(high).ShouldBe(8);
+    }
+
+    [Theory]
+    [InlineData(8)]
+    [InlineData(16)]
+    public void TryGrant_AutoPolicy_IdleLowNeverUsesIdleCeiling(int totalBudget)
+    {
+        NodeBudgetManager manager = NewAutoManager(totalBudget);
+        BuildGrant low = NewGrant(processId: 1, requestedNodes: 16, CoordinatorBuildPriority.Low);
+
+        manager.TryGrant(low).ShouldBe(4);
+    }
+
+    [Theory]
+    [InlineData(2, 2)]
+    [InlineData(4, 4)]
+    [InlineData(6, 4)]
+    [InlineData(8, 8)]
+    public void TryGrant_AutoPolicy_DoesNotRoundRequestsUp(int requestedNodes, int expectedGrant)
+    {
+        NodeBudgetManager manager = NewAutoManager(totalBudget: 16);
+        BuildGrant normal = NewGrant(processId: 1, requestedNodes);
+
+        manager.TryGrant(normal).ShouldBe(expectedGrant);
+    }
+
+    [Fact]
+    public void TryGrant_ExplicitCapFourDisablesIdleCeiling()
+    {
+        NodeBudgetManager manager = new(totalBudget: 16, highPriorityReservedNodes: 4, maxNodesPerBuild: 4);
+        BuildGrant normal = NewGrant(processId: 1, requestedNodes: 16);
+
+        manager.TryGrant(normal).ShouldBe(4);
+    }
+
+    [Fact]
+    public void TryGrant_ExplicitZeroCapRemainsUncapped()
+    {
+        NodeBudgetManager manager = new(totalBudget: 16, highPriorityReservedNodes: 0, maxNodesPerBuild: 0);
+        BuildGrant normal = NewGrant(processId: 1, requestedNodes: 16);
+
+        manager.TryGrant(normal).ShouldBe(16);
+    }
+
+    [Theory]
+    [InlineData(6, 6)]
+    [InlineData(16, 8)]
+    public void TryGrant_ExplicitCapEightRemainsEightNodeSlice(int requestedNodes, int expectedGrant)
+    {
+        NodeBudgetManager manager = new(totalBudget: 16, highPriorityReservedNodes: 4, maxNodesPerBuild: 8);
+        BuildGrant normal = NewGrant(processId: 1, requestedNodes);
+
+        manager.TryGrant(normal).ShouldBe(expectedGrant);
+    }
+
+    [Fact]
+    public void Release_AutoPolicy_BudgetFifteenDrainsQueuedNormalWithOneSlice()
+    {
+        NodeBudgetManager manager = NewAutoManager(totalBudget: 15);
+        BuildGrant first = NewGrant(processId: 1, requestedNodes: 15);
+        BuildGrant waiting = NewGrant(processId: 2, requestedNodes: 15);
+
+        manager.TryGrant(first).ShouldBe(8);
+        manager.TryGrant(waiting).ShouldBe(0);
+
+        AssertSingleGrant(manager.Release(first), waiting);
+        waiting.GrantedNodes.ShouldBe(4);
+    }
+
+    [Fact]
+    public void TryGrant_AutoPolicy_BudgetSixteenBurstsOnceAndPreservesHighReserve()
+    {
+        NodeBudgetManager manager = NewAutoManager(totalBudget: 16);
+        BuildGrant normal1 = NewGrant(processId: 1, requestedNodes: 16);
+        BuildGrant normal2 = NewGrant(processId: 2, requestedNodes: 16);
+        BuildGrant normal3 = NewGrant(processId: 3, requestedNodes: 16);
+        BuildGrant high = NewGrant(processId: 4, requestedNodes: 16, CoordinatorBuildPriority.High);
+
+        manager.TryGrant(normal1).ShouldBe(8);
+        manager.TryGrant(normal2).ShouldBe(4);
+        manager.TryGrant(normal3).ShouldBe(0);
+        manager.TryGrant(high).ShouldBe(4);
+
+        normal3.IsActive.ShouldBeFalse();
+        manager.WaitingBuildCount.ShouldBe(1);
+        manager.AllocatedNodes.ShouldBe(16);
+    }
+
+    [Fact]
+    public void Release_AutoPolicy_QueuedHighReceivesOneSlice()
+    {
+        NodeBudgetManager manager = NewAutoManager(totalBudget: 8);
+        BuildGrant first = NewGrant(processId: 1, requestedNodes: 8, CoordinatorBuildPriority.High);
+        BuildGrant waiting = NewGrant(processId: 2, requestedNodes: 8, CoordinatorBuildPriority.High);
+
+        manager.TryGrant(first).ShouldBe(8);
+        manager.TryGrant(waiting).ShouldBe(0);
+
+        AssertSingleGrant(manager.Release(first), waiting);
+        waiting.GrantedNodes.ShouldBe(4);
     }
 
     [Fact]

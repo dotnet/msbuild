@@ -72,6 +72,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         _output.Lines.ShouldContain(
             line => line.Contains("high-priority reserved nodes=7")
                 && line.Contains("max nodes per build=0 (uncapped)")
+                && line.Contains("idle node ceiling=0 (disabled)")
                 && line.Contains("priority aging threshold=5"));
 
         _cts.Cancel();
@@ -417,7 +418,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     }
 
     [Fact]
-    public async Task AutoStrictPolicy_CapsNormalAndReservesHighPriorityCapacity()
+    public async Task AutoStrictPolicy_BurstsOnlyFirstIdleGrantAndReservesHighPriorityCapacity()
     {
         using CoordinatorServer server = CreateServer(DefaultSettings with
         {
@@ -427,6 +428,10 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         });
         Task serverTask = server.RunAsync(_cts.Token);
 
+        _output.Lines.ShouldContain(
+            line => line.Contains("max nodes per build=4")
+                && line.Contains("idle node ceiling=8"));
+
         using NamedPipeClientStream normalClient1 = await ConnectClientPipeAsync();
         using BinaryWriter normalWriter1 = new(normalClient1, Encoding.UTF8, leaveOpen: true);
         using BinaryReader normalReader1 = new(normalClient1, Encoding.UTF8, leaveOpen: true);
@@ -434,7 +439,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         SendHandshake(normalWriter1, normalReader1, processId: 10001, capabilities: [Capabilities.Priority]);
         normalWriter1.Write(new RequestNodesMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
         normalReader1.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
-            .GrantedNodes.ShouldBe(4);
+            .GrantedNodes.ShouldBe(8);
 
         using NamedPipeClientStream normalClient2 = await ConnectClientPipeAsync();
         using BinaryWriter normalWriter2 = new(normalClient2, Encoding.UTF8, leaveOpen: true);
@@ -451,33 +456,23 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
 
         SendHandshake(normalWriter3, normalReader3, processId: 10003, capabilities: [Capabilities.Priority]);
         normalWriter3.Write(new RequestNodesMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
-        normalReader3.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
-            .GrantedNodes.ShouldBe(4);
-
-        using NamedPipeClientStream normalClient4 = await ConnectClientPipeAsync();
-        using BinaryWriter normalWriter4 = new(normalClient4, Encoding.UTF8, leaveOpen: true);
-        using BinaryReader normalReader4 = new(normalClient4, Encoding.UTF8, leaveOpen: true);
-
-        SendHandshake(normalWriter4, normalReader4, processId: 10004, capabilities: [Capabilities.Priority]);
-        normalWriter4.Write(new RequestNodesMessage(requestedNodes: 16, CoordinatorBuildPriority.Normal));
-        (await ReadServerMessageWithTimeout(normalReader4)).ShouldBeOfType<WaitMessage>();
+        (await ReadServerMessageWithTimeout(normalReader3)).ShouldBeOfType<WaitMessage>();
 
         using NamedPipeClientStream highClient = await ConnectClientPipeAsync();
         using BinaryWriter highWriter = new(highClient, Encoding.UTF8, leaveOpen: true);
         using BinaryReader highReader = new(highClient, Encoding.UTF8, leaveOpen: true);
 
-        SendHandshake(highWriter, highReader, processId: 10005, capabilities: [Capabilities.Priority]);
+        SendHandshake(highWriter, highReader, processId: 10004, capabilities: [Capabilities.Priority]);
         highWriter.Write(new RequestNodesMessage(requestedNodes: 16, CoordinatorBuildPriority.High));
         highReader.ReadServerMessage().ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(4);
 
         normalWriter1.Write(ReleaseNodesMessage.Instance);
-        (await ReadServerMessageWithTimeout(normalReader4)).ShouldBeOfType<NodeGrantMessage>()
+        (await ReadServerMessageWithTimeout(normalReader3)).ShouldBeOfType<NodeGrantMessage>()
             .GrantedNodes.ShouldBe(4);
 
         normalWriter2.Write(ReleaseNodesMessage.Instance);
         normalWriter3.Write(ReleaseNodesMessage.Instance);
-        normalWriter4.Write(ReleaseNodesMessage.Instance);
         highWriter.Write(ReleaseNodesMessage.Instance);
         _cts.Cancel();
 
