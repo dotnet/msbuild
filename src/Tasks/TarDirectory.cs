@@ -137,7 +137,10 @@ namespace Microsoft.Build.Tasks
 
                 // Scope the write streams to this block so they are flushed and closed before Execute returns,
                 // and — importantly — before the catch below attempts to delete a partially-written archive.
-                using (FileStream destinationStream = DestinationFile.OpenWrite())
+                // Use FileMode.Create rather than FileInfo.OpenWrite (which is FileMode.OpenOrCreate and does not
+                // truncate): if a shorter archive is written over a pre-existing longer file, OpenOrCreate would
+                // leave stale trailing bytes and produce a corrupt archive.
+                using (FileStream destinationStream = new FileStream(DestinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     // Wrap the destination stream in the requested compression, if any. The tar archive is always
                     // written to the (optionally compressed) stream, and the TarWriter is created with the requested
