@@ -187,6 +187,38 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             logger.AssertLogContains("RegisteredEnvOnlyCtorTestTask ctor env was null: False");
         }
+
+        /// <summary>
+        /// Verifies the user-visible exception when a whitespace-only project property is consumed as a path
+        /// through <see cref="TaskEnvironment.GetAbsolutePath(string)"/> inside a task.
+        /// </summary>
+        [Fact]
+        public void WhitespaceOnlyProjectPropertyPassedToGetAbsolutePathReportsActionableException()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
+            ChangeWaves.ResetStateForTests();
+            Task.RegisterTask<RegisteredWhitespacePathTestTask>();
+
+            string project = """
+                <Project DefaultTargets="Build">
+                  <PropertyGroup>
+                    <!-- Escaping preserves three spaces until task parameter binding unescapes the value. -->
+                    <WhitespacePath>%20%20%20</WhitespacePath>
+                  </PropertyGroup>
+                  <Target Name="Build">
+                    <RegisteredWhitespacePathTestTask Path="$(WhitespacePath)" />
+                  </Target>
+                </Project>
+                """;
+
+            MockLogger logger = new(_output) { AllowTaskCrashes = true };
+            ObjectModelHelpers.BuildProjectExpectFailure(project, logger);
+
+            logger.AssertLogContains("Received path length: 3");
+            BuildErrorEventArgs error = Assert.Single(logger.Errors);
+            Assert.Equal("MSB4018", error.Code);
+        }
     }
 
     /// <summary>
@@ -273,6 +305,24 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public override bool Execute()
         {
             Log.LogMessage(MessageImportance.High, "RegisteredEnvOnlyCtorTestTask ctor env was null: " + _ctorEnvironmentWasNull);
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// A task that consumes a string as a path during execution, exposing the exception produced by
+    /// <see cref="TaskEnvironment.GetAbsolutePath(string)"/> for a whitespace-only project value.
+    /// </summary>
+    public sealed class RegisteredWhitespacePathTestTask : Task, IMultiThreadableTask
+    {
+        public string Path { get; set; } = null!;
+
+        public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+        public override bool Execute()
+        {
+            Log.LogMessage(MessageImportance.High, $"Received path length: {Path.Length}");
+            TaskEnvironment.GetAbsolutePath(Path);
             return true;
         }
     }

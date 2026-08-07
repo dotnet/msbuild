@@ -156,6 +156,9 @@
   <data name="PathMustBeRooted" xml:space="preserve">
     <value>Path must be rooted.</value>
   </data>
+  <data name="PathCannotBeWhitespace" xml:space="preserve">
+    <value>The path consists only of whitespace. Specify a path that contains at least one non-whitespace character.</value>
+  </data>
   <data name="PathTooLong" xml:space="preserve">
     <value>Path: {0} exceeds the OS max path limit. The fully qualified file name must be less than {1} characters.</value>
   </data>

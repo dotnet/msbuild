@@ -112,6 +112,11 @@
         <target state="translated">{0} escreveu para: {1}</target>
         <note>{0} is the logger name. {1} is a list of full file paths separated by the current culture's list separator (followed by a space).</note>
       </trans-unit>
+      <trans-unit id="PathCannotBeWhitespace">
+        <source>The path consists only of whitespace. Specify a path that contains at least one non-whitespace character.</source>
+        <target state="new">The path consists only of whitespace. Specify a path that contains at least one non-whitespace character.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PathMustBeRooted">
         <source>Path must be rooted.</source>
         <target state="translated">Caminho deve ter raiz.</target>

@@ -104,6 +104,19 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
+        /// Creates an <see cref="InvalidProjectFileException"/> using the given location, resource, and format arguments.
+        /// </summary>
+        internal static InvalidProjectFileException CreateInvalidProjectException<T1, T2, T3>(
+            IElementLocation elementLocation,
+            string resourceName,
+            T1 arg0,
+            T2 arg1,
+            T3 arg2)
+        {
+            return CreateInvalidProjectException(null, elementLocation, resourceName, arg0, arg1, arg2);
+        }
+
+        /// <summary>
         /// Overload for two string format arguments.
         /// </summary>
         /// <param name="condition">The condition to check.</param>
@@ -252,6 +265,18 @@ namespace Microsoft.Build.Shared
         /// <param name="args">Extra arguments for formatting the error message.</param>
         private static void ThrowInvalidProject(string errorSubCategoryResourceName, IElementLocation elementLocation, string resourceName, params object[] args)
         {
+            throw CreateInvalidProjectException(errorSubCategoryResourceName, elementLocation, resourceName, args);
+        }
+
+        /// <summary>
+        /// Creates an <see cref="InvalidProjectFileException"/> using the given data.
+        /// </summary>
+        private static InvalidProjectFileException CreateInvalidProjectException(
+            string errorSubCategoryResourceName,
+            IElementLocation elementLocation,
+            string resourceName,
+            params object[] args)
+        {
             Assumed.NotNull(elementLocation);
 #if DEBUG
             if (errorSubCategoryResourceName != null)
@@ -265,7 +290,7 @@ namespace Microsoft.Build.Shared
 
             string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out string helpKeyword, resourceName, args);
 
-            throw new InvalidProjectFileException(elementLocation.File, elementLocation.Line, elementLocation.Column, 0 /* Unknown end line */, 0 /* Unknown end column */, message, errorSubCategory, errorCode, helpKeyword);
+            return new InvalidProjectFileException(elementLocation.File, elementLocation.Line, elementLocation.Column, 0 /* Unknown end line */, 0 /* Unknown end column */, message, errorSubCategory, errorCode, helpKeyword);
         }
     }
 }
