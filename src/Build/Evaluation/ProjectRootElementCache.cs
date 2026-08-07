@@ -158,6 +158,7 @@ namespace Microsoft.Build.Evaluation
             LoadProjectsReadOnly = loadProjectsReadOnly;
         }
 
+
         /// <summary>
         /// Returns true if given cache entry exists and is outdated.
         /// </summary>
@@ -448,17 +449,21 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <inheritdoc />
-        internal override void ClearCachesAfterBuild()
+        internal override void ClearCachesAfterBuildIfNeeded()
         {
-            if (_autoReloadFromDisk && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
+            if (!_autoReloadFromDisk || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
             {
-                // No need to clear it, as auto reload properly invalidates cache entries whose file changed on disk.
-                // That covers whatever restore rewrote, so discarding the cache would only force the build that
-                // follows restore to re-parse the entire import closure.
+                base.ClearCachesAfterBuildIfNeeded();
                 return;
             }
 
-            base.ClearCachesAfterBuild();
+            // Nothing to discard. The only files a restore rewrites that this cache may already hold are the ones it
+            // generates next to the project, such as nuget.g.props and nuget.g.targets, and IsInvalidEntry reloads
+            // those on the next read because their timestamp changed. The entries it never revalidates are the ones
+            // under a location FileClassifier treats as immutable - the NuGet cache, where a package's content is
+            // fixed by its version and is never rewritten in place, and the SDK and Visual Studio install, which a
+            // build does not write to at all - so a restore cannot have invalidated them either.
+            DebugTraceCache("Keeping cache after build (auto reload from disk): ", _weakCache.Count);
         }
 
         /// <summary>

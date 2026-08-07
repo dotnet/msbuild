@@ -13,13 +13,6 @@ namespace Microsoft.Build.Evaluation
         public bool LoadProjectsReadOnly { get; protected set; }
 
         /// <summary>
-        /// Discards the cache after a build that requested <see cref="Execution.BuildRequestDataFlags.ClearCachesAfterBuild"/>,
-        /// because something outside the build (such as restore) may have rewritten part of the import graph.
-        /// A cache that notices such a rewrite on its own can override this to keep its contents.
-        /// </summary>
-        internal virtual void ClearCachesAfterBuild() => Clear();
-
-        /// <summary>
         /// Handler for which project root element just got added to the cache
         /// </summary>
         internal delegate void ProjectRootElementCacheAddEntryHandler(object sender, ProjectRootElementCacheAddEntryEventArgs e);
@@ -64,6 +57,14 @@ namespace Microsoft.Build.Evaluation
         internal abstract void DiscardStrongReferences();
 
         internal abstract void Clear();
+
+        /// <summary>
+        /// Called when the host has determined that something outside the build - typically restore - may have
+        /// rewritten part of the import graph, and the cache must not go on serving what it read before that.
+        /// Discarding everything always satisfies that; a cache that can tell on its own which of its entries a
+        /// rewrite invalidated may override this to discard only those.
+        /// </summary>
+        internal virtual void ClearCachesAfterBuildIfNeeded() => Clear();
 
         internal abstract void DiscardImplicitReferences();
 
