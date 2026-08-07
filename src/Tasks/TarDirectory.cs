@@ -84,9 +84,21 @@ namespace Microsoft.Build.Tasks
 
             // Evaluate all preconditions before yielding so that failures (which do no real work) don't
             // pay the cost of yielding and reacquiring the build engine node.
+
+            // Check FailIfNotIncremental before the destination-exists handling below. In Question mode writing
+            // the archive is itself the "not incremental" condition, so this must win over ErrorFileExists —
+            // otherwise a pre-existing destination would surface the (incorrect) "delete or rename" advice instead
+            // of the intended not-incremental error.
+            if (FailIfNotIncremental)
+            {
+                Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailIfNotIncremental", SourceDirectory.FullName, DestinationFile.FullName);
+
+                return false;
+            }
+
             if (DestinationFile.Exists)
             {
-                if (!Overwrite || FailIfNotIncremental)
+                if (!Overwrite)
                 {
                     Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFileExists", DestinationFile.FullName);
 
@@ -104,13 +116,6 @@ namespace Microsoft.Build.Tasks
 
                     return false;
                 }
-            }
-
-            if (FailIfNotIncremental)
-            {
-                Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailIfNotIncremental", SourceDirectory.FullName, DestinationFile.FullName);
-
-                return false;
             }
 
             DateTimeOffset? deterministicTimestamp = null;
