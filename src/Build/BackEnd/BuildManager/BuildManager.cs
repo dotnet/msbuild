@@ -182,6 +182,11 @@ namespace Microsoft.Build.Execution
         private int _nextBuildSubmissionId;
 
         /// <summary>
+        /// The next process-wide build submission id used when Metrics correlation is enabled.
+        /// </summary>
+        private static int s_nextCorrelatedBuildSubmissionId;
+
+        /// <summary>
         /// The last BuildParameters used for building.
         /// </summary>
         private bool? _previousLowPriority = null;
@@ -2455,7 +2460,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private int GetNextSubmissionId()
         {
-            return _nextBuildSubmissionId++;
+            return EvaluationMetrics.IsSubmissionIdEnabled
+                ? Interlocked.Increment(ref s_nextCorrelatedBuildSubmissionId) - 1
+                : _nextBuildSubmissionId++;
         }
 
         /// <summary>
