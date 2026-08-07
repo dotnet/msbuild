@@ -126,6 +126,11 @@ namespace Microsoft.Build.BackEnd
         private Dictionary<string, int> _activelyBuildingTargets;
 
         /// <summary>
+        /// The number of operations currently using the in-memory project state.
+        /// </summary>
+        private int _projectInstanceUsageCount;
+
+        /// <summary>
         /// The node where this configuration's master results are stored.
         /// </summary>
         private int _resultsNodeId = Scheduler.InvalidNodeId;
@@ -640,6 +645,38 @@ namespace Microsoft.Build.BackEnd
                                                                       new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase));
 
         /// <summary>
+        /// Ensures the <see cref="ProjectInstance"/> is available and prevents it from being cached
+        /// until the returned scope is disposed. The synchronization lock is not held for the scope lifetime.
+        /// </summary>
+        internal ProjectInstanceUsageScope EnterProjectInstanceUsage() => new(this);
+
+        internal readonly struct ProjectInstanceUsageScope : IDisposable
+        {
+            private readonly BuildRequestConfiguration _configuration;
+
+            internal ProjectInstanceUsageScope(BuildRequestConfiguration configuration)
+            {
+                _configuration = configuration;
+
+                lock (_configuration._syncLock)
+                {
+                    _configuration.RetrieveFromCache();
+                    Assumed.False(_configuration.IsCached, "Configuration could not be retrieved before accessing the project.");
+                    _configuration._projectInstanceUsageCount++;
+                }
+            }
+
+            public void Dispose()
+            {
+                lock (_configuration._syncLock)
+                {
+                    Assumed.True(_configuration._projectInstanceUsageCount > 0, "No active ProjectInstance usage to complete.");
+                    _configuration._projectInstanceUsageCount--;
+                }
+            }
+        }
+
+        /// <summary>
         /// Holds a snapshot of the environment at the time we blocked.
         /// </summary>
         public FrozenDictionary<string, string> SavedEnvironmentVariables
@@ -725,7 +762,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_syncLock)
             {
-                if (IsActivelyBuilding || IsCached || !IsLoaded || !IsCacheable)
+                if (_projectInstanceUsageCount > 0 || IsActivelyBuilding || IsCached || !IsLoaded || !IsCacheable)
                 {
                     return;
                 }
