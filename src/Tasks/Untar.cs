@@ -92,6 +92,22 @@ namespace Microsoft.Build.Tasks
         /// <inheritdoc cref="Task.Execute"/>
         public override bool Execute()
         {
+            // Bridge from the synchronous ITask.Execute entrypoint to the asynchronous implementation with a
+            // single blocking call. The extraction pipeline is async so it can flow the cancellation token into
+            // the runtime's asynchronous I/O; keeping the only GetAwaiter().GetResult() here (rather than in the
+            // per-entry loop) avoids repeatedly blocking a thread-pool thread inside the loop.
+            return ExecuteAsync()
+                .ConfigureAwait(continueOnCapturedContext: false)
+                .GetAwaiter()
+                .GetResult();
+        }
+
+        /// <summary>
+        /// Asynchronously extracts every source archive to the destination folder.
+        /// </summary>
+        /// <returns>A <see cref="System.Threading.Tasks.Task{Boolean}"/> that resolves to <see langword="true"/> when extraction completed without errors or cancellation.</returns>
+        private async System.Threading.Tasks.Task<bool> ExecuteAsync()
+        {
             DirectoryInfo destinationDirectory;
             try
             {
@@ -133,7 +149,7 @@ namespace Microsoft.Build.Tasks
 
                             try
                             {
-                                Extract(reader, destinationDirectory);
+                                await ExtractAsync(reader, destinationDirectory).ConfigureAwait(continueOnCapturedContext: false);
                             }
                             catch (OperationCanceledException)
                             {
@@ -199,7 +215,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <param name="reader">The <see cref="TarReader"/> containing the entries to extract.</param>
         /// <param name="destinationDirectory">The <see cref="DirectoryInfo"/> to extract entries to.</param>
-        private void Extract(TarReader reader, DirectoryInfo destinationDirectory)
+        /// <returns>A <see cref="System.Threading.Tasks.Task"/> that completes when all entries have been processed.</returns>
+        private async System.Threading.Tasks.Task ExtractAsync(TarReader reader, DirectoryInfo destinationDirectory)
         {
             AbsolutePath fullDestinationDirectoryPath = TaskEnvironment.GetAbsolutePath(FileUtilities.EnsureTrailingSlash(destinationDirectory.FullName)).GetCanonicalForm();
 
@@ -294,10 +311,8 @@ namespace Microsoft.Build.Tasks
                     // (on Unix) applies the archived permissions masked to the 9 ownership rwx bits, dropping the
                     // setuid/setgid/sticky bits for security and respecting the process umask. The cancellation
                     // token is flowed through so extraction stops promptly when the task is cancelled.
-                    tarEntry.ExtractToFileAsync(destinationPath.FullName, overwrite: true, _cancellationTokenSource.Token)
-                        .ConfigureAwait(continueOnCapturedContext: false)
-                        .GetAwaiter()
-                        .GetResult();
+                    await tarEntry.ExtractToFileAsync(destinationPath.FullName, overwrite: true, _cancellationTokenSource.Token)
+                        .ConfigureAwait(continueOnCapturedContext: false);
                 }
                 catch (Exception e) when (e is IOException or UnauthorizedAccessException)
                 {
