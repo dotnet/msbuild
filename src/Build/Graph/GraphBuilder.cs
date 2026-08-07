@@ -153,16 +153,22 @@ namespace Microsoft.Build.Graph
 
                 var requiresTransitiveProjectReferences = _projectInterpretation.RequiresTransitiveProjectReferences(currentNode);
 
+                // Always add direct references. When a direct reference and a synthetic transitive reference resolve to
+                // the same node, whichever edge is added first wins the collision in GraphEdges.AddOrUpdateEdge and keeps
+                // its item type and metadata. Adding every direct reference before any transitive one makes the winner
+                // independent of ProjectReference order.
                 foreach (var referenceInfo in parsedProject.Value.ReferenceInfos)
                 {
-                    // Always add direct references.
                     currentNode.AddProjectReference(
                         allParsedProjects[referenceInfo.ReferenceConfiguration].GraphNode,
                         referenceInfo.ProjectReferenceItem,
                         edges);
+                }
 
-                    // Add transitive references only if the project requires it.
-                    if (requiresTransitiveProjectReferences)
+                // Add transitive references only if the project requires it.
+                if (requiresTransitiveProjectReferences)
+                {
+                    foreach (var referenceInfo in parsedProject.Value.ReferenceInfos)
                     {
                         foreach (var transitiveProjectReference in GetTransitiveProjectReferencesExcludingSelf(allParsedProjects[referenceInfo.ReferenceConfiguration]))
                         {
