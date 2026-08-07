@@ -1226,7 +1226,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</source>
-        <target state="new">MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</target>
+        <target state="translated">MSB3821: non è possibile elaborare il file {0} perché si trova nella zona Internet o nella zona con restrizioni, oppure perché presenta il Mark of the Web (MOTW). Rimuovere il MOTW se si considerano attendibili i file e si vuole elaborarli. Seguire le procedure consigliate per l'utilizzo sicuro di MSBuild - https://aka.ms/msbuild-security-documentation</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
@@ -3007,6 +3007,11 @@
         <target state="translated">MSB3723: il parametro "{0}" richiede l'impostazione del parametro "{1}" mancante.</target>
         <note>{StrBegin="MSB3723: "}</note>
       </trans-unit>
+      <trans-unit id="XmlPeekPoke.InputDtdProhibited">
+        <source>MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
+        <target state="new">MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="XslTransform.ArgumentError">
         <source>MSB3701: Unable to load arguments for the XslTransformation task. {0}</source>
         <target state="translated">MSB3701: non è possibile caricare argomenti per l'attività XslTransformation. {0}</target>
@@ -3021,6 +3026,11 @@
         <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
         <target state="translated">Si stanno abilitando impostazioni di sicurezza XSLT flessibili tramite il parametro UseTrustedSettings. Per altri dettagli sulle implicazioni di sicurezza di questa impostazione, vedere https://aka.ms/msbuild/xsltransformation-task</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XslTransform.TransformDtdProhibited">
+        <source>MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</source>
+        <target state="new">MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</target>
+        <note>{StrBegin="MSB3703: "}{0} is the XML input path or inline content indicator. {1} is the ProhibitDtd property name and should not be translated. {2} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
         <source>MSB3702: Unable to process the XsltParameters argument for the XslTransformation task. {0}</source>
@@ -3051,6 +3061,11 @@
         <source>One of XslContent, XslInputPath and XslCompiledDllPath arguments must be set.</source>
         <target state="translated">È necessario impostare uno degli argomenti XslContent, XslInputPath e XslCompiledDllPath.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XslTransform.XsltLoadDtdProhibited">
+        <source>MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
+        <target state="new">MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
+        <note>{StrBegin="MSB3704: "}{0} is the ProhibitDtd property name and should not be translated. {1} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadError">
         <source>MSB3704: Unable to load the specified Xslt. {0}</source>

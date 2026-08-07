@@ -553,11 +553,6 @@ namespace Microsoft.Build.UnitTests
         {
             using TestEnvironment env = TestEnvironment.Create();
 
-            // Ensure Change Wave 17.10 is enabled.
-            ChangeWaves.ResetStateForTests();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
             List<string> cmdLine = new()
             {
                 "-nologo",
@@ -581,46 +576,6 @@ namespace Microsoft.Build.UnitTests
 
             string output = process.StandardOutput.ReadToEnd();
             output.EndsWith(Environment.NewLine, StringComparison.Ordinal).ShouldBeTrue();
-
-            process.Close();
-        }
-
-        /// <summary>
-        /// PR: Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
-        /// </summary>
-        [Fact]
-        public void VersionSwitchDisableChangeWave()
-        {
-            using TestEnvironment env = TestEnvironment.Create();
-
-            // Disable Change Wave 17.10
-            ChangeWaves.ResetStateForTests();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
-            List<string> cmdLine = new()
-            {
-                "-nologo",
-                "-version"
-            };
-
-            using Process process = new()
-            {
-                StartInfo =
-                {
-                    FileName = RunnerUtilities.PathToCurrentlyRunningMsBuildExe,
-                    Arguments = string.Join(" ", cmdLine),
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                },
-            };
-
-            process.Start();
-            process.WaitForExit();
-            process.ExitCode.ShouldBe(0);
-
-            string output = process.StandardOutput.ReadToEnd();
-            output.EndsWith(Environment.NewLine, StringComparison.Ordinal).ShouldBeFalse();
 
             process.Close();
         }
@@ -859,6 +814,41 @@ namespace Microsoft.Build.UnitTests
             results.Contains("MyTarget").ShouldBe(targetResultPresent);
             results.Contains("\"Result\": \"Success\"").ShouldBe(targetResultPresent || restoreOnly);
             results.ShouldNotContain(ResourceUtilities.GetResourceString("BuildFailedWithPropertiesItemsOrTargetResultsRequested"));
+        }
+
+        /// <summary>
+        /// When no target is requested, <c>-getProperty</c>/<c>-getItem</c> evaluate only as far as
+        /// needed (partial evaluation, gated behind change wave 18.10). A project whose only error is
+        /// in the targets pass therefore succeeds for a property-only query, but reverts to failing
+        /// when the change wave is opted out (full evaluation).
+        /// </summary>
+        [Theory]
+        [InlineData(null, true)]      // wave enabled (default): partial evaluation stops before the failing targets pass
+        [InlineData("18.10", false)]  // wave disabled: full evaluation hits the failing targets pass
+        public void GetPropertyWithoutTargetUsesPartialEvaluation(string disableFeaturesFromVersion, bool expectedSuccess)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            if (disableFeaturesFromVersion is not null)
+            {
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", disableFeaturesFromVersion);
+            }
+
+            // The BeforeTargets expression only fails when the targets pass runs (pass 5); properties
+            // (pass 1) are unaffected, so a partial evaluation reads Foo without hitting the error.
+            TransientTestFile project = env.CreateFile("testProject.csproj", @"
+<Project>
+  <PropertyGroup>
+    <Foo>EvalValue</Foo>
+  </PropertyGroup>
+  <Target Name=""Bad"" BeforeTargets=""$([System.Int32]::Parse('notanumber'))"" />
+</Project>
+");
+            string results = RunnerUtilities.ExecMSBuild($" {project.Path} -getProperty:Foo", out bool success);
+            success.ShouldBe(expectedSuccess, results);
+            if (expectedSuccess)
+            {
+                results.ShouldContain("EvalValue");
+            }
         }
 
         [Fact]
@@ -1363,6 +1353,40 @@ namespace Microsoft.Build.UnitTests
             successfulExit.ShouldBeTrue();
 
             output.ShouldContain("[A=1]");
+        }
+
+        [UnixOnlyTheory]
+        [InlineData("")]
+        [InlineData("my.proj")]
+        public void ResponseFileInLogicalProjectDirectoryFoundImplicitly(string projectArgument)
+        {
+            string root = _env.CreateFolder().Path;
+            string realDirectory = Path.Combine(root, "repo", "project");
+            string logicalParentDirectory = Path.Combine(root, "links");
+            string linkDirectory = Path.Combine(logicalParentDirectory, "project");
+            Directory.CreateDirectory(realDirectory);
+            Directory.CreateDirectory(logicalParentDirectory);
+
+            string errorMessage = null;
+            NativeMethodsShared.MakeSymbolicLink(linkDirectory, realDirectory, ref errorMessage).ShouldBeTrue(errorMessage);
+
+            string content = """
+                <Project ToolsVersion="msbuilddefaulttoolsversion" xmlns="msbuildnamespace">
+                    <Target Name="t"><Warning Text="[A=$(A)]" /></Target>
+                </Project>
+                """.Cleanup();
+            File.WriteAllText(Path.Combine(realDirectory, "my.proj"), content);
+            File.WriteAllText(Path.Combine(root, "repo", "Directory.Build.rsp"), "/p:A=physical");
+            File.WriteAllText(Path.Combine(logicalParentDirectory, "Directory.Build.rsp"), "/p:A=logical");
+
+            _env.SetCurrentDirectory(linkDirectory);
+            _env.SetEnvironmentVariable("PWD", linkDirectory);
+
+            string output = RunnerUtilities.ExecMSBuild(projectArgument, out var successfulExit, _output);
+            successfulExit.ShouldBeTrue();
+
+            output.ShouldContain("[A=logical]");
+            output.ShouldNotContain("[A=physical]");
         }
 
         [Fact]
@@ -1916,6 +1940,85 @@ namespace Microsoft.Build.UnitTests
             string[] extensionsToIgnore = { ".sln", ".vcproj" };
             IgnoreProjectExtensionsHelper projectHelper = new IgnoreProjectExtensionsHelper(projects);
             MSBuildApp.ProcessProjectSwitch(Array.Empty<string>(), extensionsToIgnore, projectHelper.GetFiles).ShouldBe("test.proj"); // "Expected test.proj to be only project found"
+        }
+
+        [UnixOnlyFact]
+        public void ResolveProjectPathAgainstLogicalCurrentDirectoryPreservesSymlinkFromPwd()
+        {
+            string root = _env.CreateFolder().Path;
+            string realDirectory = Path.Combine(root, "real");
+            string linkDirectory = Path.Combine(root, "link");
+            Directory.CreateDirectory(realDirectory);
+
+            string errorMessage = null;
+            NativeMethodsShared.MakeSymbolicLink(linkDirectory, realDirectory, ref errorMessage).ShouldBeTrue(errorMessage);
+
+            _env.SetCurrentDirectory(linkDirectory);
+            _env.SetEnvironmentVariable("PWD", linkDirectory);
+            ChangeWaves.ResetStateForTests();
+
+            string relativeProjectPath = Path.Combine("MyApp", "MyApp.csproj");
+
+            MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
+                .ShouldBe(Path.Combine(linkDirectory, relativeProjectPath));
+        }
+
+        [UnixOnlyFact]
+        public void ResolveProjectPathAgainstLogicalCurrentDirectoryCanBeDisabledByChangeWave()
+        {
+            string root = _env.CreateFolder().Path;
+            string realDirectory = Path.Combine(root, "real");
+            string linkDirectory = Path.Combine(root, "link");
+            Directory.CreateDirectory(realDirectory);
+
+            string errorMessage = null;
+            NativeMethodsShared.MakeSymbolicLink(linkDirectory, realDirectory, ref errorMessage).ShouldBeTrue(errorMessage);
+
+            _env.SetCurrentDirectory(linkDirectory);
+            _env.SetEnvironmentVariable("PWD", linkDirectory);
+            _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString());
+            ChangeWaves.ResetStateForTests();
+
+            string relativeProjectPath = Path.Combine("MyApp", "MyApp.csproj");
+
+            MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
+                .ShouldBe(relativeProjectPath);
+        }
+
+        [UnixOnlyFact]
+        public void ResolveProjectPathAgainstLogicalCurrentDirectoryWithStalePwdReturnsUnchanged()
+        {
+            string root = _env.CreateFolder().Path;
+            string currentDirectory = Path.Combine(root, "current");
+            string stalePwdDirectory = Path.Combine(root, "elsewhere");
+            Directory.CreateDirectory(currentDirectory);
+            Directory.CreateDirectory(stalePwdDirectory);
+
+            // PWD points at a real directory that is not the current working directory, so it is stale.
+            _env.SetCurrentDirectory(currentDirectory);
+            _env.SetEnvironmentVariable("PWD", stalePwdDirectory);
+            ChangeWaves.ResetStateForTests();
+
+            string relativeProjectPath = Path.Combine("MyApp", "MyApp.csproj");
+
+            MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
+                .ShouldBe(relativeProjectPath);
+        }
+
+        [UnixOnlyFact]
+        public void ResolveProjectPathAgainstLogicalCurrentDirectoryWithParentTraversalReturnsUnchanged()
+        {
+            string currentDirectory = _env.CreateFolder().Path;
+
+            // PWD matches the current working directory, so the only guard that fires is the ".." segment check.
+            _env.SetCurrentDirectory(currentDirectory);
+            _env.SetEnvironmentVariable("PWD", currentDirectory);
+            ChangeWaves.ResetStateForTests();
+
+            string relativeProjectPath = Path.Combine("..", "sibling", "MyApp.csproj");
+
+            MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(relativeProjectPath)
+                .ShouldBe(relativeProjectPath);
         }
 
         /// <summary>
@@ -2613,6 +2716,28 @@ $@"<Project>
 
             logContents.ShouldContain("InitialTarget target ran");
             logContents.ShouldContain("Restore target ran");
+        }
+
+        /// <summary>
+        /// Regression test for dotnet/msbuild#14274 / dotnet/sdk#55245: restore must not inject the ExcludeRestorePackageImports
+        /// global property. Doing so aligns MSBuild's restore evaluation with the global property set NuGet's inner restore walk
+        /// uses, which makes a nonexistent &lt;ProjectReference&gt; leak into NuGet's _GenerateRestoreGraphProjectEntry MSBuild call
+        /// (which does not skip nonexistent projects) and fail with MSB3202 instead of being skipped.
+        /// </summary>
+        [Fact]
+        public void RestoreDoesNotInjectExcludeRestorePackageImports()
+        {
+            string projectContents = ObjectModelHelpers.CleanupFileContents(
+                @"<Project>
+  <Target Name=""Restore"">
+    <Message Text=""ExcludeRestorePackageImports=[$(ExcludeRestorePackageImports)]"" Importance=""High"" />
+  </Target>
+</Project>");
+
+            string logContents = ExecuteMSBuildExeExpectSuccess(projectContents, arguments: "/t:restore");
+
+            // The property must remain empty; MSBuild must not set it during restore.
+            logContents.ShouldContain("ExcludeRestorePackageImports=[]");
         }
 
         /// <summary>

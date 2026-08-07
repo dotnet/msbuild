@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -15,19 +16,40 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental
+namespace Microsoft.Build.Server
 {
     /// <summary>
     /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server
     /// </summary>
+    /// <remarks>
+    /// This type is public only so that the MSBuild command-line application can host the MSBuild server;
+    /// third-party use is not expected or supported. It exists to wrap the MSBuild CLI and offers nothing
+    /// beyond it, so invoke the CLI instead.
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
     {
         /// <summary>
         /// A callback used to execute command line build.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public delegate (int exitCode, string exitType) BuildCallback(string[] commandLine);
 
         private readonly BuildCallback _buildFunction;
+
+        /// <summary>
+        /// Backing field for <see cref="CurrentBuildShutsDownServerNode"/>.
+        /// </summary>
+        private static bool s_currentBuildShutsDownServerNode;
+
+        /// <summary>
+        /// Whether the build currently being served by this server node will tear the node down afterward
+        /// instead of leaving it resident for reuse (a "short-lived" server — a <c>/mt</c> build with node reuse
+        /// off). Only meaningful from within a server build callback; written and read on the same build thread,
+        /// so no synchronization is needed. Public because MSBuild.exe reads it and Microsoft.Build exposes no
+        /// InternalsVisibleTo to it.
+        /// </summary>
+        public static bool CurrentBuildShutsDownServerNode => s_currentBuildShutsDownServerNode;
 
         /// <summary>
         /// The endpoint used to talk to the host.
@@ -107,13 +129,6 @@ namespace Microsoft.Build.Experimental
                 shutdownException = new InvalidOperationException("MSBuild server is already running!");
                 return NodeEngineShutdownReason.Error;
             }
-
-            // Mark the process as a long-lived host so per-build BuildParameters instances
-            // inherit IsLongLivedHost = true. This drives the workaround that routes tasks
-            // whose static state would leak across invocations (e.g., NuGet RestoreTask) to
-            // a transient TaskHost instead of a reusable sidecar.
-            // See https://github.com/dotnet/msbuild/issues/13315.
-            BuildParameters.MarkProcessAsLongLivedHost();
 
             while (true)
             {
@@ -388,7 +403,6 @@ namespace Microsoft.Build.Experimental
             Directory.SetCurrentDirectory(command.StartupDirectory);
 
             CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
-
             Traits.UpdateFromEnvironment();
 
             Thread.CurrentThread.CurrentCulture = command.Culture;
@@ -452,6 +466,9 @@ namespace Microsoft.Build.Experimental
                     Console.SetOut(outWriter);
                     Console.SetError(errWriter);
 
+                    // Publish whether this build's server is short-lived so the build callback can report it.
+                    s_currentBuildShutsDownServerNode = command.ShutdownAfterBuild;
+
                     buildResult = _buildFunction(command.CommandLine);
                 }
             }
@@ -472,8 +489,8 @@ namespace Microsoft.Build.Experimental
             var response = new ServerNodeBuildResult(buildResult.exitCode, buildResult.exitType);
             SendPacket(response);
 
-            // Shutdown server if cancel was requested. This is consistent with nodes behavior.
-            _shutdownReason = _cancelRequested ? NodeEngineShutdownReason.BuildComplete : NodeEngineShutdownReason.BuildCompleteReuse;
+            // Shutdown server after this build if a cancel was requested, or if the client asked for no reuse. This is consistent with nodes behavior.
+            _shutdownReason = (_cancelRequested || command.ShutdownAfterBuild) ? NodeEngineShutdownReason.BuildComplete : NodeEngineShutdownReason.BuildCompleteReuse;
             _shutdownEvent.Set();
         }
 

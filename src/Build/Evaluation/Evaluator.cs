@@ -81,6 +81,19 @@ namespace Microsoft.Build.Evaluation
         private readonly List<ProjectItemGroupElement> _itemGroupElements;
 
         /// <summary>
+        /// When <c>MSBuildProvideItemGlobs</c> requests glob information, the set of
+        /// item types to expose; otherwise <see langword="null"/> (the feature is off and costs nothing).
+        /// </summary>
+        private HashSet<string> _itemGlobRequestedTypes;
+
+        /// <summary>
+        /// Evaluated include/exclude/remove item elements (condition-true, in document order) of the item types in
+        /// <see cref="_itemGlobRequestedTypes"/>, collected during the items pass so that <c>MSBuildItemGlob</c>
+        /// items can be synthesized from them. <see langword="null"/> when the feature is off.
+        /// </summary>
+        private List<ProjectItemElement> _itemGlobElements;
+
+        /// <summary>
         /// List of ProjectItemDefinitionElement's traversing into imports.
         /// Gathered during the first pass to avoid traversing again.
         /// </summary>
@@ -138,6 +151,11 @@ namespace Microsoft.Build.Evaluation
         /// Load settings, such as whether to ignore missing imports.
         /// </summary>
         private readonly ProjectLoadSettings _loadSettings;
+
+        /// <summary>
+        /// How far evaluation should proceed. <see cref="ProjectEvaluationStage.Full"/> runs every pass.
+        /// </summary>
+        private readonly ProjectEvaluationStage _evaluationStage;
 
         /// <summary>
         /// The maximum number of nodes to report for evaluation.
@@ -223,7 +241,8 @@ namespace Microsoft.Build.Evaluation
             bool profileEvaluation,
             bool interactive,
             ILoggingService loggingService,
-            BuildEventContext buildEventContext)
+            BuildEventContext buildEventContext,
+            ProjectEvaluationStage evaluationStage)
         {
             Assumed.NotNull(data);
             Assumed.NotNull(projectRootElementCache);
@@ -263,6 +282,7 @@ namespace Microsoft.Build.Evaluation
             _projectSupportsReturnsAttribute = new Dictionary<ProjectRootElement, bool>();
             _projectRootElement = projectRootElement;
             _loadSettings = loadSettings;
+            _evaluationStage = evaluationStage;
             _maxNodeCount = maxNodeCount;
             _environmentProperties = environmentProperties;
             _propertiesFromCommandLine = propertiesFromCommandLine ?? [];
@@ -324,7 +344,8 @@ namespace Microsoft.Build.Evaluation
             ISdkResolverService sdkResolverService,
             int submissionId,
             EvaluationContext evaluationContext,
-            bool interactive = false)
+            bool interactive = false,
+            ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
         {
             MSBuildEventSource.Log.EvaluateStart(root.ProjectFileLocation.File);
             var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
@@ -346,7 +367,8 @@ namespace Microsoft.Build.Evaluation
                 profileEvaluation,
                 interactive,
                 loggingService,
-                buildEventContext);
+                buildEventContext,
+                evaluationStage);
 
             try
             {
@@ -685,6 +707,13 @@ namespace Microsoft.Build.Evaluation
 
                 _data.InitialTargets = initialTargets;
                 MSBuildEventSource.Log.EvaluatePass1Stop(projectFile);
+
+                if (_evaluationStage <= ProjectEvaluationStage.Properties)
+                {
+                    _data.FinishEvaluation();
+                    return;
+                }
+
                 // Pass2: evaluate item definitions
                 // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
                 MSBuildEventSource.Log.EvaluatePass2Start(projectFile);
@@ -699,6 +728,13 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
                 MSBuildEventSource.Log.EvaluatePass2Stop(projectFile);
+
+                if (_evaluationStage <= ProjectEvaluationStage.ItemDefinitions)
+                {
+                    _data.FinishEvaluation();
+                    return;
+                }
+
                 LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
@@ -709,6 +745,8 @@ namespace Microsoft.Build.Evaluation
                     MSBuildEventSource.Log.EvaluatePass3Start(projectFile);
 
                     SynthesizeImportedProjectItems();
+
+                    DetectItemGlobRequest();
 
                     foreach (ProjectItemGroupElement itemGroup in _itemGroupElements)
                     {
@@ -744,7 +782,15 @@ namespace Microsoft.Build.Evaluation
                     lazyEvaluator = null;
                 }
 
+                SynthesizeItemGlobItems();
+
                 MSBuildEventSource.Log.EvaluatePass3Stop(projectFile);
+
+                if (_evaluationStage <= ProjectEvaluationStage.Items)
+                {
+                    _data.FinishEvaluation();
+                    return;
+                }
 
                 // Pass4: evaluate using-tasks
                 MSBuildEventSource.Log.EvaluatePass4Start(projectFile);
@@ -758,6 +804,14 @@ namespace Microsoft.Build.Evaluation
                         _expander,
                         ExpanderOptions.ExpandPropertiesAndItems,
                         _evaluationContext.FileSystem);
+                }
+
+                MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
+
+                if (_evaluationStage <= ProjectEvaluationStage.UsingTasks)
+                {
+                    _data.FinishEvaluation();
+                    return;
                 }
 
                 // If there was no DefaultTargets attribute found in the depth first pass,
@@ -778,7 +832,6 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget = new Dictionary<string, List<TargetSpecification>>(StringComparer.OrdinalIgnoreCase);
                 LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder = new LinkedList<ProjectTargetElement>();
                 Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets = new Dictionary<string, LinkedListNode<ProjectTargetElement>>(StringComparer.OrdinalIgnoreCase);
-                MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Targets))
                 {
@@ -2527,6 +2580,11 @@ namespace Microsoft.Build.Evaluation
             {
                 _data.EvaluatedItemElements.Add(itemElement);
             }
+
+            if (_itemGlobRequestedTypes != null && _itemGlobRequestedTypes.Contains(itemElement.ItemType))
+            {
+                _itemGlobElements.Add(itemElement);
+            }
         }
 
         /// <summary>
@@ -2686,6 +2744,92 @@ namespace Microsoft.Build.Evaluation
 
                 _data.AddItem(item);
             }
+        }
+
+        /// <summary>
+        /// Detects whether <c>MSBuildProvideItemGlobs</c> requests glob information
+        /// for one or more item types and, if so, prepares to collect their evaluated item elements. Does nothing
+        /// (and allocates nothing) when the property is unset or empty, keeping the feature zero-cost when unused.
+        /// </summary>
+        private void DetectItemGlobRequest()
+        {
+            P provideProperty = _data.GetProperty(Constants.MSBuildProvideItemGlobsPropertyName);
+            if (provideProperty is null || string.IsNullOrWhiteSpace(provideProperty.EvaluatedValue))
+            {
+                return;
+            }
+
+            _itemGlobRequestedTypes = new HashSet<string>(
+                ExpressionShredder.SplitSemiColonSeparatedList(provideProperty.EvaluatedValue),
+                StringComparer.OrdinalIgnoreCase);
+            _itemGlobElements = new List<ProjectItemElement>();
+        }
+
+        /// <summary>
+        /// When one or more item types were requested via <c>MSBuildProvideItemGlobs</c>,
+        /// synthesizes <c>MSBuildItemGlob</c> items exposing the unevaluated include/exclude/remove glob patterns of
+        /// those item types. Each include element yields one item whose identity is the item type and whose
+        /// <c>Include</c>, <c>Exclude</c> and <c>Remove</c> metadata carry the patterns with wildcards preserved.
+        /// The patterns match what <see cref="Project.GetAllGlobs()"/> returns.
+        /// </summary>
+        /// <remarks>
+        /// Called at the end of the items pass, after all items have been evaluated, so that item references in
+        /// exclude/remove specs resolve to their final values — the same point at which <c>GetAllGlobs</c> operates.
+        /// The patterns live in metadata rather than in the item's include, so they are never expanded against the
+        /// file system.
+        /// </remarks>
+        private void SynthesizeItemGlobItems()
+        {
+            if (_itemGlobElements is null || _itemGlobElements.Count == 0)
+            {
+                return;
+            }
+
+            List<GlobResult> globResults = GlobResultBuilder.BuildGlobResults(_itemGlobElements, _expander);
+            if (globResults.Count == 0)
+            {
+                return;
+            }
+
+            // Create a disconnected item element to back the factory — ProjectItemFactory derives the item type
+            // from its backing XML element.
+            ProjectItemElement syntheticItemElement = ProjectItemElement.CreateDisconnected(
+                Constants.MSBuildItemGlobItemType,
+                _projectRootElement);
+            _itemFactory.ItemElement = syntheticItemElement;
+
+            string definingProject = _projectRootElement.FullPath ?? string.Empty;
+
+            // GlobResultBuilder returns results in reverse document order; iterate in reverse so that the synthesized
+            // items appear in document order, preserving the authored include/exclude/remove precedence.
+            for (int i = globResults.Count - 1; i >= 0; i--)
+            {
+                GlobResult globResult = globResults[i];
+
+                // The identity is the item type (e.g. "Compile"). The patterns are carried in metadata, which is
+                // never expanded against the file system, so their wildcards are preserved verbatim.
+                I item = _itemFactory.CreateItem(globResult.ItemElement.ItemType, definingProject);
+
+                SetGlobMetadatum(item, Constants.ItemGlobIncludeMetadataName, globResult.IncludeGlobs);
+                SetGlobMetadatum(item, Constants.ItemGlobExcludeMetadataName, globResult.Excludes);
+                SetGlobMetadatum(item, Constants.ItemGlobRemoveMetadataName, globResult.Removes);
+
+                _data.AddItem(item);
+            }
+        }
+
+        private void SetGlobMetadatum(I item, string metadataName, IEnumerable<string> patterns)
+        {
+            ProjectMetadataElement metadataElement = ProjectMetadataElement.CreateDisconnected(metadataName, _projectRootElement);
+
+            // The pattern strings come from GlobResult: IncludeGlobs are unescaped, while Excludes/Removes are a
+            // mix of escaped literals and unescaped globs. SetMetadata expects an *escaped* value that it unescapes
+            // on read, so escape each pattern before joining. This makes %(Include)/%(Exclude)/%(Remove) round-trip
+            // to exactly the strings Project.GetAllGlobs() reports (even for patterns containing '%'), and keeps ';'
+            // an unambiguous separator. (A single glob pattern containing a literal ';' — vanishingly rare — is
+            // recoverable only from the *escaped* value: split on ';', then unescape each element. A naive split of
+            // the unescaped value cannot distinguish the pattern's own ';' from the separator.)
+            item.SetMetadata(metadataElement, string.Join(";", patterns.Select(p => EscapingUtilities.Escape(p))));
         }
 
         [Conditional("FEATURE_GUIDE_TO_VS_ON_UNSUPPORTED_PROJECTS")]

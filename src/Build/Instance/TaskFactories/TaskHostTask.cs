@@ -241,11 +241,6 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Gets information about the assembly from which the task type was loaded.
-        /// </summary>
-        public AssemblyLoadInfo LoadedTaskAssemblyInfo => _taskType.Assembly;
-
-        /// <summary>
         /// Sets the requested task parameter to the requested value.
         /// </summary>
         public void SetPropertyValue(TaskPropertyInfo property, object value)
@@ -593,8 +588,14 @@ namespace Microsoft.Build.BackEnd
             // If it crashed, or if it failed, it didn't succeed.
             _taskExecutionSucceeded = taskHostTaskComplete.TaskResult == TaskCompleteType.Success ? true : false;
 
-            // Update the task environment with the environment changes from the task host execution
-            _taskEnvironment.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
+            // In the TaskHostTaskComplete packet, EnvironmentMode == Identical means the task did not change the
+            // environment while running in the task host, so it already matches this node's environment and there is
+            // nothing to apply. Any other mode carries the task's post-execution environment, which we must propagate
+            // back here.
+            if (taskHostTaskComplete.EnvironmentMode != InvariantPayloadTransferMode.Identical)
+            {
+                _taskEnvironment.SetEnvironment(taskHostTaskComplete.BuildProcessEnvironment);
+            }
 
             // If it crashed during the execution phase, then we can effectively replicate the inproc task execution
             // behaviour by just throwing here and letting the taskbuilder code take care of it the way it would

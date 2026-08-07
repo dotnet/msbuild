@@ -90,7 +90,7 @@
   </Project>
   <Project Path="src/MSBuild/MSBuild.csproj">
     <Platform Solution="*|x64" Project="x64" />
-    <Platform Solution="Debug|ARM64" Project="ARM64" />
+    <Platform Solution="*|ARM64" Project="arm64" />
   </Project>
   <Project Path="src/MSBuildTaskHost/MSBuildTaskHost.csproj">
     <Platform Solution="*|x64" Project="x64" />

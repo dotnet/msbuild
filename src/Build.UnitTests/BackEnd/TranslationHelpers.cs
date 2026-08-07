@@ -47,6 +47,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Gets the number of bytes written to the stream backing the most recent write translator.
+        /// </summary>
+        internal static long GetWriteStreamLength()
+        {
+            return s_serializationStream.Length;
+        }
+
+        /// <summary>
         /// Compares two collections.
         /// </summary>
         /// <typeparam name="T">The collections element type.</typeparam>

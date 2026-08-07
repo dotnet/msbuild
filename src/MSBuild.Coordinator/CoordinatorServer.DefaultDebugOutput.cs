@@ -65,11 +65,17 @@ internal sealed partial class CoordinatorServer
                 {
                     using (StreamWriter writer = FileUtilities.OpenWrite(_debugDumpTraceFilePath, append: true))
                     {
-                        long now = DateTime.UtcNow.Ticks;
-                        float millisecondsSinceLastLog = (float)(now - s_lastTicks) / 10000L;
-                        s_lastTicks = now;
+                        DateTime now = DateTime.UtcNow;
+                        long nowTicks = now.Ticks;
+                        float millisecondsSinceLastLog = (float)(nowTicks - s_lastTicks) / TimeSpan.TicksPerMillisecond;
+                        s_lastTicks = nowTicks;
 
-                        writer.WriteLine($"{Thread.CurrentThread.Name} (TID {Environment.CurrentManagedThreadId}) {now,15} +{millisecondsSinceLastLog,10}ms: {message}");
+                        string? threadName = Thread.CurrentThread.Name;
+                        string threadDisplay = threadName.IsNullOrEmpty()
+                            ? $"TID {Environment.CurrentManagedThreadId}"
+                            : $"{threadName} (TID {Environment.CurrentManagedThreadId})";
+
+                        writer.WriteLine($"{threadDisplay,-24} {now:O} +{millisecondsSinceLastLog,8:F2}ms: {message}");
                     }
                 }
                 catch (IOException)

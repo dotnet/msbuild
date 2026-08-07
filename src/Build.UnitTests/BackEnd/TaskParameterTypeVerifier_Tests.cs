@@ -1,0 +1,457 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
+using System.IO;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Utilities;
+using Shouldly;
+using Xunit;
+
+namespace Microsoft.Build.UnitTests.BackEnd
+{
+    /// <summary>
+    /// Tests for TaskParameterTypeVerifier class
+    /// </summary>
+    public class TaskParameterTypeVerifier_Tests
+    {
+        #region IsValidScalarInputParameter Tests
+
+        [Fact]
+        public void IsValidScalarInputParameter_String_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(string)));
+        }
+
+        [Fact]
+        public void IsValidScalarInputParameter_ITaskItem_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ITaskItem)));
+        }
+
+        [Fact]
+        public void IsValidScalarInputParameter_Bool_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(bool)));
+        }
+
+        [Fact]
+        public void IsValidScalarInputParameter_Int_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(int)));
+        }
+
+        [Fact]
+        public void IsValidScalarInputParameter_Double_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(double)));
+        }
+
+        [Fact]
+        public void IsValidScalarInputParameter_DateTime_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(DateTime)));
+        }
+
+        [Fact]
+        public void IsValidScalarInputParameter_AbsolutePath_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(AbsolutePath)));
+        }
+
+        [Fact]
+        public void IsValidScalarInputParameter_Object_ReturnsFalse()
+        {
+            Assert.False(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(object)));
+        }
+
+        [Fact]
+        public void IsValidScalarInputParameter_StringArray_ReturnsFalse()
+        {
+            Assert.False(TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(string[])));
+        }
+
+        [Fact]
+        public void IsValidScalarInputParameter_CustomValueType_ReturnsTrue()
+        {
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(TestStruct)).ShouldBeTrue();
+        }
+
+        #endregion
+
+        #region IsValidVectorInputParameter Tests
+
+        [Fact]
+        public void IsValidVectorInputParameter_StringArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(string[])));
+        }
+
+        [Fact]
+        public void IsValidVectorInputParameter_ITaskItemArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(ITaskItem[])));
+        }
+
+        [Fact]
+        public void IsValidVectorInputParameter_BoolArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(bool[])));
+        }
+
+        [Fact]
+        public void IsValidVectorInputParameter_IntArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(int[])));
+        }
+
+        [Fact]
+        public void IsValidVectorInputParameter_DoubleArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(double[])));
+        }
+
+        [Fact]
+        public void IsValidVectorInputParameter_DateTimeArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(DateTime[])));
+        }
+
+        [Fact]
+        public void IsValidVectorInputParameter_AbsolutePathArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(AbsolutePath[])));
+        }
+
+        [Fact]
+        public void IsValidVectorInputParameter_String_ReturnsFalse()
+        {
+            Assert.False(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(string)));
+        }
+
+        [Fact]
+        public void IsValidVectorInputParameter_ObjectArray_ReturnsFalse()
+        {
+            Assert.False(TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(object[])));
+        }
+
+        #endregion
+
+        #region IsValueTypeOutputParameter Tests
+
+        [Fact]
+        public void IsValueTypeOutputParameter_String_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(string)));
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_Bool_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(bool)));
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_Int_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(int)));
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_AbsolutePath_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(AbsolutePath)));
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_StringArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(string[])));
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_BoolArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(bool[])));
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_IntArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(int[])));
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_AbsolutePathArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(AbsolutePath[])));
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_ITaskItem_ReturnsFalse()
+        {
+            Assert.False(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(ITaskItem)));
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_Object_ReturnsFalse()
+        {
+            Assert.False(TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(object)));
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_TaskItemOfInt_ReturnsFalse()
+        {
+            TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(TaskItem<int>)).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void IsValueTypeOutputParameter_CustomValueType_ReturnsTrue()
+        {
+            TaskParameterTypeVerifier.IsValueTypeOutputParameter(typeof(TestStruct)).ShouldBeTrue();
+        }
+
+        #endregion
+
+        #region IsValidInputParameter Tests
+
+        [Fact]
+        public void IsValidInputParameter_String_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(string)));
+        }
+
+        [Fact]
+        public void IsValidInputParameter_ITaskItem_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(ITaskItem)));
+        }
+
+        [Fact]
+        public void IsValidInputParameter_Bool_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(bool)));
+        }
+
+        [Fact]
+        public void IsValidInputParameter_AbsolutePath_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(AbsolutePath)));
+        }
+
+        [Fact]
+        public void IsValidInputParameter_StringArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(string[])));
+        }
+
+        [Fact]
+        public void IsValidInputParameter_ITaskItemArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(ITaskItem[])));
+        }
+
+        [Fact]
+        public void IsValidInputParameter_BoolArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(bool[])));
+        }
+
+        [Fact]
+        public void IsValidInputParameter_AbsolutePathArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidInputParameter(typeof(AbsolutePath[])));
+        }
+
+        [Fact]
+        public void IsValidInputParameter_Object_ReturnsFalse()
+        {
+            Assert.False(TaskParameterTypeVerifier.IsValidInputParameter(typeof(object)));
+        }
+
+        [Fact]
+        public void IsValidInputParameter_ObjectArray_ReturnsFalse()
+        {
+            Assert.False(TaskParameterTypeVerifier.IsValidInputParameter(typeof(object[])));
+        }
+
+        #endregion
+
+        #region IsValidOutputParameter Tests
+
+        [Fact]
+        public void IsValidOutputParameter_String_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(string)));
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_ITaskItem_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem)));
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_Bool_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(bool)));
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_AbsolutePath_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(AbsolutePath)));
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_StringArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(string[])));
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_ITaskItemArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ITaskItem[])));
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_BoolArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(bool[])));
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_AbsolutePathArray_ReturnsTrue()
+        {
+            Assert.True(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(AbsolutePath[])));
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_Object_ReturnsFalse()
+        {
+            Assert.False(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(object)));
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_ObjectArray_ReturnsFalse()
+        {
+            Assert.False(TaskParameterTypeVerifier.IsValidOutputParameter(typeof(object[])));
+        }
+
+        // ─── ITaskItem<T> and ITaskItem<T>[] coverage ─────────────────────────
+
+        public static TheoryData<Type> SupportedTaskItemTypeArguments =>
+            new TheoryData<Type>
+            {
+                typeof(string),
+                typeof(bool),
+                typeof(char),
+                typeof(byte),
+                typeof(sbyte),
+                typeof(short),
+                typeof(ushort),
+                typeof(int),
+                typeof(uint),
+                typeof(long),
+                typeof(ulong),
+                typeof(float),
+                typeof(double),
+                typeof(decimal),
+                typeof(DateTime),
+                typeof(AbsolutePath),
+                typeof(FileInfo),
+                typeof(DirectoryInfo),
+            };
+
+        public static TheoryData<Type> UnsupportedTaskItemTypeArguments =>
+            new TheoryData<Type>
+            {
+                typeof(Guid),
+                typeof(TimeSpan),
+                typeof(int?),
+                typeof(TestEnum),
+                typeof(TestStruct),
+            };
+
+        [Theory]
+        [MemberData(nameof(SupportedTaskItemTypeArguments))]
+        public void SupportedITaskItemTypeArgument_IsAccepted(Type typeArgument)
+        {
+            AssertTaskItemTypeArgumentSupport(typeof(ITaskItem<>), typeArgument, expected: true);
+            AssertTaskItemTypeArgumentSupport(typeof(TaskItem<>), typeArgument, expected: true);
+        }
+
+        [Theory]
+        [MemberData(nameof(UnsupportedTaskItemTypeArguments))]
+        public void UnsupportedITaskItemTypeArgument_IsRejected(Type typeArgument)
+        {
+            AssertTaskItemTypeArgumentSupport(typeof(ITaskItem<>), typeArgument, expected: false);
+            AssertTaskItemTypeArgumentSupport(typeof(TaskItem<>), typeArgument, expected: false);
+        }
+
+        [Fact]
+        public void DerivedTaskItemInterface_IsRejectedForInputAndAcceptedForOutput()
+        {
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(typeof(ICustomTaskItem<int>)).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsValidVectorInputParameter(typeof(ICustomTaskItem<int>[])).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ICustomTaskItem<int>)).ShouldBeTrue();
+            TaskParameterTypeVerifier.IsValidOutputParameter(typeof(ICustomTaskItem<int>[])).ShouldBeTrue();
+        }
+
+        private static void AssertTaskItemTypeArgumentSupport(Type genericTaskItemType, Type typeArgument, bool expected)
+        {
+            Type taskItemType = genericTaskItemType.MakeGenericType(typeArgument);
+            Type taskItemArrayType = taskItemType.MakeArrayType();
+
+            TaskParameterTypeVerifier.IsValidScalarInputParameter(taskItemType).ShouldBe(expected);
+            TaskParameterTypeVerifier.IsValidVectorInputParameter(taskItemArrayType).ShouldBe(expected);
+            TaskParameterTypeVerifier.IsAssignableToITaskItem(taskItemType).ShouldBe(expected);
+            TaskParameterTypeVerifier.IsAssignableToITaskItem(taskItemArrayType).ShouldBe(expected);
+            TaskParameterTypeVerifier.IsValidOutputParameter(taskItemType).ShouldBe(expected);
+            TaskParameterTypeVerifier.IsValidOutputParameter(taskItemArrayType).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void IsAssignableToITaskItem_TaskItemOfAbsolutePathArray_ReturnsTrue()
+        {
+            typeof(ITaskItem[]).IsAssignableFrom(typeof(TaskItem<AbsolutePath>[])).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(TaskItem<AbsolutePath>[])).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_TaskItemOfAbsolutePathArray_ReturnsTrue()
+        {
+            TaskParameterTypeVerifier.IsValidOutputParameter(typeof(TaskItem<AbsolutePath>[])).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void IsAssignableToITaskItem_TaskItemOfIntArray_ReturnsTrue()
+        {
+            typeof(ITaskItem[]).IsAssignableFrom(typeof(TaskItem<int>[])).ShouldBeFalse();
+            TaskParameterTypeVerifier.IsAssignableToITaskItem(typeof(TaskItem<int>[])).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void IsValidOutputParameter_TaskItemOfIntArray_ReturnsTrue()
+        {
+            TaskParameterTypeVerifier.IsValidOutputParameter(typeof(TaskItem<int>[])).ShouldBeTrue();
+        }
+
+        private enum TestEnum
+        {
+            Value,
+        }
+
+        private readonly struct TestStruct
+        {
+        }
+
+        private interface ICustomTaskItem<T> : ITaskItem<T>
+        {
+        }
+
+        #endregion
+    }
+}

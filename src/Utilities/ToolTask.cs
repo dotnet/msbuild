@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -246,14 +246,12 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                if (_encoding != null)
                 {
-                    if (_encoding != null)
-                    {
-                        // Keep the encoding of standard output & error consistent with the console code page.
-                        return _encoding;
-                    }
+                    // Keep the encoding of standard output & error consistent with the console code page.
+                    return _encoding;
                 }
+
                 return EncodingUtilities.CurrentSystemOemEncoding;
             }
         }
@@ -270,14 +268,12 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                if (_encoding != null)
                 {
-                    if (_encoding != null)
-                    {
-                        // Keep the encoding of standard output & error consistent with the console code page.
-                        return _encoding;
-                    }
+                    // Keep the encoding of standard output & error consistent with the console code page.
+                    return _encoding;
                 }
+
                 return EncodingUtilities.CurrentSystemOemEncoding;
             }
         }
@@ -918,7 +914,7 @@ namespace Microsoft.Build.Utilities
 
                 // Warn only -- occasionally temp files fail to delete because of virus checkers; we
                 // don't want the build to fail in such cases
-                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", filePath.OriginalValue, e.Message, lockedFileMessage);
+                LogPrivate.LogWarningWithCodeFromResources("FailedDeletingTempFile", filePath.OriginalValue, e.Message, lockedFileMessage);
             }
         }
 
@@ -1051,11 +1047,11 @@ namespace Microsoft.Build.Utilities
                 {
                     Assumed.NotEqual(Timeout, System.Threading.Timeout.Infinite, "A time-out value must have been specified or the task must be cancelled.");
 
-                    LogShared.LogWarningWithCodeFromResources("Shared.KillingProcess", processName, Timeout);
+                    LogPrivate.LogWarningWithCodeFromResources("KillingProcess", processName, Timeout);
                 }
                 else
                 {
-                    LogShared.LogWarningWithCodeFromResources("Shared.KillingProcessByCancellation", processName);
+                    LogPrivate.LogWarningWithCodeFromResources("KillingProcessByCancellation", processName);
                 }
 
                 int timeout = TaskProcessTerminationTimeout >= -1 ? TaskProcessTerminationTimeout : 5000;
@@ -1381,7 +1377,7 @@ namespace Microsoft.Build.Utilities
                 }
                 catch (ArgumentException)
                 {
-                    Log.LogErrorWithCodeFromResources("Message.InvalidImportance", StandardErrorImportance);
+                    LogShared.LogErrorWithCodeFromResources("Message_InvalidImportance", StandardErrorImportance);
                     return false;
                 }
             }
@@ -1401,7 +1397,7 @@ namespace Microsoft.Build.Utilities
                 }
                 catch (ArgumentException)
                 {
-                    Log.LogErrorWithCodeFromResources("Message.InvalidImportance", StandardOutputImportance);
+                    LogShared.LogErrorWithCodeFromResources("Message_InvalidImportance", StandardOutputImportance);
                     return false;
                 }
             }
@@ -1558,10 +1554,7 @@ namespace Microsoft.Build.Utilities
                         }
 
                         File.AppendAllText(_temporaryBatchFile, commandLineCommands, encoding);
-                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-                        {
-                            _encoding = encoding;
-                        }
+                        _encoding = encoding;
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 

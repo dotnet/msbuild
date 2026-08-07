@@ -76,6 +76,156 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         [Fact]
+        // Scenario: in a trimmed / Native AOT host the dynamic loading of plugin SDK resolvers is disabled.
+        // An SDK that can only be resolved by such a resolver must fail observably with a reported
+        // project-file error (MSB4282) rather than silently or by attempting an unsupported Assembly.LoadFrom.
+        public void AssertDynamicResolverLoadingDisabledFailsObservably()
+        {
+            bool switchWasSet = AppContext.TryGetSwitch("Microsoft.Build.EnableSdkResolverDynamicLoading", out bool originalValue);
+            try
+            {
+                AppContext.SetSwitch("Microsoft.Build.EnableSdkResolverDynamicLoading", false);
+
+                var service = new SdkResolverService();
+                service.InitializeForTests(new MockLoaderStrategy(includeResolversWithPatterns: true));
+
+                SdkReference sdk = new SdkReference("1sdkName", "referencedVersion", "minimumVersion");
+
+                Microsoft.Build.Exceptions.InvalidProjectFileException exception = Should.Throw<Microsoft.Build.Exceptions.InvalidProjectFileException>(() => service.ResolveSdk(
+                    BuildEventContext.InvalidSubmissionId,
+                    sdk,
+                    _loggingContext,
+                    new MockElementLocation("file"),
+                    "sln",
+                    "projectPath",
+                    interactive: false,
+                    isRunningInVisualStudio: false,
+                    failOnUnresolvedSdk: true));
+
+                exception.ErrorCode.ShouldBe("MSB4282");
+            }
+            finally
+            {
+                // AppContext switches cannot be returned to "unset"; restore the prior value (the default is
+                // enabled when unset), so other tests keep dynamic resolver loading on.
+                AppContext.SetSwitch("Microsoft.Build.EnableSdkResolverDynamicLoading", !switchWasSet || originalValue);
+            }
+        }
+
+#if NET
+        [Fact]
+        // Scenario: even with dynamic resolver loading disabled (trimmed / Native AOT host), an in-box SDK
+        // resolved by the reflection-free default resolver still succeeds, and the reflective manifest-load
+        // funnel is never reached.
+        public void AssertDefaultResolverSucceedsWhenDynamicLoadingDisabled()
+        {
+            bool switchWasSet = AppContext.TryGetSwitch("Microsoft.Build.EnableSdkResolverDynamicLoading", out bool originalValue);
+            try
+            {
+                AppContext.SetSwitch("Microsoft.Build.EnableSdkResolverDynamicLoading", false);
+
+                var service = new SdkResolverService();
+                var strategy = new MockLoaderStrategy(includeDefaultResolver: true);
+                service.InitializeForTests(strategy);
+
+                SdkReference sdk = new SdkReference("1sdkName", "referencedVersion", "minimumVersion");
+
+                var result = service.ResolveSdk(BuildEventContext.InvalidSubmissionId, sdk, _loggingContext, new MockElementLocation("file"), "sln", "projectPath", interactive: false, isRunningInVisualStudio: false, failOnUnresolvedSdk: true);
+
+                result.Success.ShouldBeTrue();
+                result.Path.ShouldBe("defaultpath");
+
+                // The reflection-based plugin-resolver load funnel must never have been reached.
+                strategy.ResolversHaveBeenLoaded.ShouldBeFalse();
+            }
+            finally
+            {
+                AppContext.SetSwitch("Microsoft.Build.EnableSdkResolverDynamicLoading", !switchWasSet || originalValue);
+            }
+        }
+#endif
+
+        [Fact]
+        // SdkResolver.Register validates its argument.
+        public void RegisterSdkResolver_NullResolver_Throws()
+        {
+            Should.Throw<ArgumentNullException>(() => SdkResolver.Register(null));
+        }
+
+        [Fact]
+        // Registering the same instance more than once has no additional effect.
+        public void RegisterSdkResolver_SameInstanceTwice_RegistersOnce()
+        {
+            var resolver = new MockRegisteredSdkResolver();
+            try
+            {
+                SdkResolver.Register(resolver);
+                SdkResolver.Register(resolver);
+
+                SdkResolver.RegisteredResolvers.Count(r => ReferenceEquals(r, resolver)).ShouldBe(1);
+            }
+            finally
+            {
+                SdkResolver.ClearRegisteredResolversForTests();
+            }
+        }
+
+        [Fact]
+        // A host-registered resolver is folded into the reflection-free default-resolver pass, ordered by Priority.
+        public void RegisteredResolverIsIncludedInDefaultResolversByPriority()
+        {
+            var resolver = new MockRegisteredSdkResolver(); // Priority 1
+            try
+            {
+                SdkResolver.Register(resolver);
+
+                IReadOnlyList<SdkResolver> defaultResolvers = new SdkResolverLoader().GetDefaultResolvers();
+
+                defaultResolvers.ShouldContain(resolver);
+
+                // Priority 1 sorts ahead of the built-in DefaultSdkResolver (Priority 10000).
+                defaultResolvers[0].ShouldBeSameAs(resolver);
+            }
+            finally
+            {
+                SdkResolver.ClearRegisteredResolversForTests();
+            }
+        }
+
+        [Fact]
+        // End to end: a resolver registered via SdkResolver.Register resolves an SDK through the service on
+        // the reflection-free path, with no on-disk resolver manifests involved.
+        public void RegisteredResolverResolvesSdkThroughService()
+        {
+            var resolver = new MockRegisteredSdkResolver();
+            try
+            {
+                SdkResolver.Register(resolver);
+
+                var service = new SdkResolverService();
+                service.InitializeForTests(new ManifestlessResolverLoader());
+
+                var result = service.ResolveSdk(
+                    BuildEventContext.InvalidSubmissionId,
+                    new SdkReference("RegisteredSdk", "1.0", minimumVersion: null),
+                    _loggingContext,
+                    new MockElementLocation("file"),
+                    solutionPath: null,
+                    projectPath: "projectPath",
+                    interactive: false,
+                    isRunningInVisualStudio: false,
+                    failOnUnresolvedSdk: false);
+
+                result.Success.ShouldBeTrue();
+                result.Path.ShouldBe("registeredPath");
+            }
+            finally
+            {
+                SdkResolver.ClearRegisteredResolversForTests();
+            }
+        }
+
+        [Fact]
         public void AssertSingleResolverErrorLoggedWhenSdkNotResolved()
         {
             var service = new SdkResolverService();
@@ -895,6 +1045,30 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             {
                 return _defaultResolvers;
             }
+        }
+
+        private sealed class MockRegisteredSdkResolver : SdkResolver
+        {
+            public override string Name => nameof(MockRegisteredSdkResolver);
+
+            public override int Priority => 1;
+
+            public override SdkResultBase Resolve(SdkReference sdk, SdkResolverContextBase resolverContext, SdkResultFactoryBase factory)
+            {
+                return sdk.Name.Equals("RegisteredSdk", StringComparison.Ordinal)
+                    ? factory.IndicateSuccess("registeredPath", sdk.Version)
+                    : null;
+            }
+        }
+
+        // A loader that exercises the real default-resolver pipeline (so resolvers registered via
+        // SdkResolver.Register flow through the base GetDefaultResolvers) but reports no on-disk resolver
+        // manifests, keeping the test independent of the machine's SdkResolvers folder. This validates
+        // end-to-end resolution on both .NET (first pass) and .NET Framework (default-resolver manifest pass).
+        private sealed class ManifestlessResolverLoader : SdkResolverLoader
+        {
+            internal override IReadOnlyList<SdkResolverManifest> GetResolversManifests(ElementLocation location)
+                => new List<SdkResolverManifest>();
         }
 
         private sealed class MockResolverReturnsNull : SdkResolver

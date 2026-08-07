@@ -59,6 +59,14 @@ public class Message_Tests
     }
 
     [Fact]
+    public void JoinGrant_RoundTrips()
+    {
+        Guid grantId = Guid.NewGuid();
+        ClientMessage message = WriteAndReadClientMessage(new JoinGrantMessage(grantId, requestedNodes: 16));
+        message.ShouldBe(new JoinGrantMessage(grantId, requestedNodes: 16));
+    }
+
+    [Fact]
     public void ReleaseNodes_RoundTrips()
     {
         ClientMessage message = WriteAndReadClientMessage(ReleaseNodesMessage.Instance);
@@ -77,6 +85,14 @@ public class Message_Tests
     {
         ServerMessage message = WriteAndReadServerMessage(new NodeGrantMessage(grantedNodes: 4));
         message.ShouldBe(new NodeGrantMessage(4));
+    }
+
+    [Fact]
+    public void NodeGrantWithId_RoundTrips()
+    {
+        Guid grantId = Guid.NewGuid();
+        ServerMessage message = WriteAndReadServerMessage(new NodeGrantMessage(grantId, grantedNodes: 4));
+        message.ShouldBe(new NodeGrantMessage(grantId, grantedNodes: 4));
     }
 
     [Fact]
@@ -101,6 +117,7 @@ public class Message_Tests
 
         writer.Write(new ClientHandshakeMessage(Guid.NewGuid(), processId: 12345, []));
         writer.Write(new RequestNodesMessage(requestedNodes: 8));
+        writer.Write(new JoinGrantMessage(Guid.NewGuid(), requestedNodes: 4));
         writer.Write(HeartbeatMessage.Instance);
         writer.Write(ReleaseNodesMessage.Instance);
 
@@ -109,6 +126,7 @@ public class Message_Tests
 
         reader.ReadClientMessage().ShouldBeOfType<ClientHandshakeMessage>();
         reader.ReadClientMessage().ShouldBe(new RequestNodesMessage(requestedNodes: 8));
+        reader.ReadClientMessage().ShouldBeOfType<JoinGrantMessage>();
         reader.ReadClientMessage().ShouldBe(HeartbeatMessage.Instance);
         reader.ReadClientMessage().ShouldBe(ReleaseNodesMessage.Instance);
     }
@@ -133,6 +151,68 @@ public class Message_Tests
         using MemoryStream stream = new();
         using BinaryWriter writer = new(stream);
         writer.Write((byte)99);
+        writer.Flush();
+
+        stream.Position = 0;
+        using BinaryReader reader = new(stream);
+
+        Should.Throw<InternalErrorException>(() => reader.ReadServerMessage());
+    }
+
+    [Fact]
+    public void ClientMessage_WithUnsupportedExtendedFields_Throws()
+    {
+        using MemoryStream stream = new();
+        using BinaryWriter writer = new(stream);
+        writer.Write((byte)0x84); // Heartbeat with extended-fields bit set
+        writer.Write((byte)0x00); // Extended fields value present but empty
+        writer.Flush();
+
+        stream.Position = 0;
+        using BinaryReader reader = new(stream);
+
+        Should.Throw<InternalErrorException>(() => reader.ReadClientMessage());
+    }
+
+    [Fact]
+    public void ServerMessage_WithUnsupportedExtendedFields_Throws()
+    {
+        using MemoryStream stream = new();
+        using BinaryWriter writer = new(stream);
+        writer.Write((byte)0x83); // Wait with extended-fields bit set
+        writer.Write((byte)0x00); // Extended fields value present but empty
+        writer.Flush();
+
+        stream.Position = 0;
+        using BinaryReader reader = new(stream);
+
+        Should.Throw<InternalErrorException>(() => reader.ReadServerMessage());
+    }
+
+    [Fact]
+    public void NodeGrant_WithUnknownExtendedFieldBits_Throws()
+    {
+        using MemoryStream stream = new();
+        using BinaryWriter writer = new(stream);
+        writer.Write((byte)0x82); // NodeGrant with extended-fields bit set
+        writer.Write((byte)0x02); // Unknown flag bit
+        writer.Write(4); // grantedNodes payload
+        writer.Flush();
+
+        stream.Position = 0;
+        using BinaryReader reader = new(stream);
+
+        Should.Throw<InternalErrorException>(() => reader.ReadServerMessage());
+    }
+
+    [Fact]
+    public void NodeGrant_WithReservedExtendedBit_Throws()
+    {
+        using MemoryStream stream = new();
+        using BinaryWriter writer = new(stream);
+        writer.Write((byte)0x82); // NodeGrant with extended-fields bit set
+        writer.Write((byte)0x80); // Reserved continuation bit set in extended byte
+        writer.Write(4); // grantedNodes payload
         writer.Flush();
 
         stream.Position = 0;

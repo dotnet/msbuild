@@ -5,7 +5,6 @@
 
 using System;
 using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
@@ -48,10 +47,15 @@ namespace Microsoft.Build.Shared
                 null;
         }
 
-        [UnconditionalSuppressMessage("Trimming", "IL2026:RequiresUnreferencedCode",
-            Justification = "This overrides AssemblyLoadContext.Load, which is not annotated with RequiresUnreferencedCode, so the requirement cannot be propagated to this method. Loading plugin assemblies by path is the intended purpose of this isolated load context.")]
         protected override Assembly? Load(AssemblyName assemblyName)
         {
+            if (!Framework.FeatureSwitches.EnableCustomPluginProbing)
+            {
+                // Custom plugin probing is disabled (for example when trimmed); fall back to the
+                // default AssemblyLoadContext rather than resolving dependencies by reflection.
+                return null;
+            }
+
             if (WellKnownAssemblyNames.Contains(assemblyName.Name!))
             {
                 // Force MSBuild assemblies to be loaded in the default ALC
