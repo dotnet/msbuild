@@ -1,0 +1,160 @@
+{
+  "//": "Normalization applied to replayed MSBuild text logs before the two runs are compared as line multisets. Rules are applied in order: 'prefix' strips the node/timestamp prefix, 'drop' removes a line entirely, 'replace' rewrites it, 'setOnly' marks a line as compared for presence rather than for count. Every entry documents why the raw text cannot be compared verbatim.",
+
+  "//prefix": "Stripped from every line before any other rule runs. Whether the file logger emits a node id and timestamp depends on the engine used to replay the binlog (MSBuild.exe does not, 'dotnet msbuild' does), not on the build being tested, so this has to come off first: otherwise every '^'-anchored drop rule below silently stops matching and dropped noise reappears as reported differences.",
+
+  "prefix": [
+    {
+      "pattern": "^\\d{1,2}:\\d{2}:\\d{2}\\.\\d{3}\\s+\\d+(?::\\d+)?>",
+      "reason": "Leading wall-clock timestamp plus node/submission id."
+    },
+    {
+      "pattern": "^\\s*\\d+(?::\\d+)?>",
+      "reason": "Node id prefix; -mt changes node assignment."
+    }
+  ],
+
+  "//drop": "NOTE: drop patterns are matched after the 'prefix' rules above have run, but before any 'replace' rule. A line therefore still carries its indentation and its trailing '(TaskId:N)', so anchoring a drop pattern with '$' will usually not match.",
+
+  "drop": [
+    {
+      "pattern": "^\\s*(GET|OK|CACHE|NotFound|Retrying) https?://",
+      "reason": "NuGet HTTP traffic depends on the state of the machine-level package cache, not on the build."
+    },
+    {
+      "pattern": "^\\s*(Restoring packages for |Restored |Installing |Installed |Acquiring lock for the installation of |Acquired lock for the installation of |Committing restore|Writing assets file to disk|Generating MSBuild file|Assets file has not changed|All projects are up-to-date for restore|Determining projects to restore|Persisting no-op dep graph|Reading project file|Restore completed in|Feeds used:|Package source mapping matches found|Total time taken)",
+      "reason": "NuGet restore progress varies with package-cache warmth and is not a property of the build engine."
+    },
+    {
+      "pattern": "^\\s*Installed:\\s*(\\(TaskId:\\d+\\))?\\s*$",
+      "reason": "Header of NuGet's cold-restore 'Installed:' summary. Only the first of the three builds performs a real restore; the later two are no-ops, so this block appears in exactly one of any two builds being compared - including two identical non-mt builds."
+    },
+    {
+      "pattern": "^\\s*\\d+ package\\(s\\) to \\S",
+      "reason": "Body of NuGet's cold-restore 'Installed:' summary (see above)."
+    },
+    {
+      "pattern": "\\.gdn\\.sarif",
+      "reason": "Guardian SARIF analysis output injected by the 1ES SDL template. It is an analysis result rather than a build output, and it is not emitted consistently between two identical builds, so the Copy task lines that move it around vary between runs. The files themselves are ignored by ArtifactCompareRules.json for the same reason."
+    },
+    {
+      "pattern": "X\\.509 certificate chain validation will use",
+      "reason": "NuGet signing-verification notice emitted only on a cold restore."
+    },
+    {
+      "pattern": "^\\s*Attempting to create process '[^']*VBCSCompiler",
+      "reason": "Roslyn compiler-server startup. Whether VBCSCompiler must be started depends on whether a server from an earlier build on the same machine is still alive, so both the message and its count are machine-state dependent."
+    },
+    {
+      "pattern": "^\\s*Successfully created process with process id \\d+",
+      "reason": "Roslyn compiler-server startup (see above); also contains a process id."
+    },
+    {
+      "pattern": "^\\s*Setting DOTNET_[A-Za-z_]+ to '",
+      "reason": "Emitted by the Roslyn compiler-server client (DOTNET_ROOT, DOTNET_TieredCompilation, ...) on the same code path as the VBCSCompiler startup messages above, so the count tracks server startups rather than compilations. Observed to vary between two identical non-mt builds."
+    },
+    {
+      "pattern": "^Build started ",
+      "reason": "Wall-clock start time."
+    },
+    {
+      "pattern": "^Time Elapsed ",
+      "reason": "Wall-clock duration."
+    },
+    {
+      "pattern": "^\\s*BinLogFilePath=",
+      "reason": "Binlog path differs between the baseline and candidate snapshots."
+    },
+    {
+      "pattern": "^\\s*BinaryLogger wrote to: ",
+      "reason": "Binlog path differs between the baseline and candidate snapshots."
+    },
+    {
+      "pattern": "^\\s*Logging verbosity is set to",
+      "reason": "Replay artifact, identical by construction."
+    },
+    {
+      "pattern": "^\\s*DOTNET_CLI_TELEMETRY_SESSIONID",
+      "reason": "Per-process telemetry session id."
+    },
+    {
+      "pattern": "^\\s*Creating directory \"",
+      "reason": "Parallel Copy/MakeDir invocations race to create the same directory: whoever loses the race finds it already present and logs nothing, so both the presence and the count of this message vary between two *identical* builds (observed in the non-mt control run). The resulting directory tree is verified byte-for-byte by the artifact comparison."
+    },
+    {
+      "pattern": "\\bMSBuildNodeCount\\s*=",
+      "reason": "-mt turns worker nodes from processes into threads, so the reported node count legitimately differs."
+    }
+  ],
+
+  "replace": [
+    {
+      "pattern": "\\s*\\((TaskId|TargetId|ProjectId):\\d+\\)",
+      "replacement": "",
+      "reason": "Engine-assigned ids depend on scheduling order."
+    },
+    {
+      "pattern": "^\\s*Project \"[^\"]+\" \\(\\d+(?::\\d+)?\\) is building \"(?<built>[^\"]+)\"[^\\r\\n]*$",
+      "replacement": "PROJECT BUILT: ${built}",
+      "reason": "A shared dependency is really built by whichever requester reaches it first; every other requester is served from the results cache and logs nothing. Both the requester and the exact target subset that ends up being executed are therefore scheduling artifacts. What must still match is the *set of projects* that participated, which this normalization preserves."
+    },
+    {
+      "pattern": "^\\s*Project \"(?<built>[^\"]+)\" \\(\\d+(?::\\d+)?\\) on node \\d+[^\\r\\n]*$",
+      "replacement": "PROJECT BUILT: ${built}",
+      "reason": "Same as above, for the top-level project-started form."
+    },
+    {
+      "pattern": "^\\s*Project \"(?<built>[^\"]+)\" on node \\d+[^\\r\\n]*$",
+      "replacement": "PROJECT BUILT: ${built}",
+      "reason": "Same as above, for the entry-point project-started form."
+    },
+    {
+      "pattern": "^\\s*Done Building Project \"(?<built>[^\"]+)\"[^\\r\\n]*$",
+      "replacement": "PROJECT DONE: ${built}",
+      "reason": "Pairs with the project-started normalization above."
+    },
+    {
+      "pattern": "\\(in \\d+(\\.\\d+)? (ms|sec|s|min)\\)",
+      "replacement": "(in T)",
+      "reason": "Durations."
+    },
+    {
+      "pattern": "\\b\\d+(\\.\\d+)?\\s?ms\\b",
+      "replacement": "Tms",
+      "reason": "Durations."
+    },
+    {
+      "pattern": "(?<![0-9a-fA-F])[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}(?![0-9a-fA-F])",
+      "replacement": "<guid>",
+      "reason": "Per-run GUIDs (telemetry ids, temp directory names, and the ids 1ES SDL injection embeds in generated ruleset file names such as Foo_<guid>_GdnDotnetAnalyzersMerged.ruleset). Anchored on hex-digit lookarounds rather than \\b: '_' is a word character, so \\b does not match between '_' and a hex digit and would miss exactly those embedded ids."
+    },
+    {
+      "pattern": "(?i)\\\\artifacts\\\\tmp\\\\[^\\\\\"]*",
+      "replacement": "\\artifacts\\tmp\\<temp>",
+      "reason": "Per-process temp file names."
+    }
+  ],
+
+  "setOnly": [
+    {
+      "pattern": "^[A-Za-z_][A-Za-z0-9_.]*:$",
+      "reason": "MSBuild's file logger re-emits a target header every time output from a different node interleaves, so the number of header lines is a pure scheduling artifact. Compared for presence instead. How many times each target actually executed is compared exactly, and enforced, by the structure/targets and structure/targetsByProject sections, which read TargetStarted events directly from the binlog."
+    },
+    {
+      "pattern": "^PROJECT (BUILT|DONE): ",
+      "reason": "See the project-started/finished normalization above: the number of build requests that actually execute (versus being satisfied from the results cache) is scheduling dependent, so these are compared for presence. How many times each project was actually built is compared exactly, and enforced, by the structure/projects section, which reads ProjectStarted events directly from the binlog."
+    }
+  ],
+
+  "//knownMtOnly": "Differences that only ever appear on the -mt side, are already fixed or filed, and are therefore reported separately instead of failing the comparison. These entries are applied only to the mt-vs-baseline comparison, never to the control. NOTE: an entry cannot be deleted when its fix merges to main - this pipeline applies -mt to the MSBuild that *drives* the build (the pool's installed Visual Studio MSBuild), not the one the build produces, so a fix only takes effect here once it ships in the VS on the agents.",
+  "knownMtOnly": [
+    {
+      "pattern": "^Task assembly was loaded from '.*' while the desired location was '.*'\\.$",
+      "reason": "Under -mt, a task routed to an out-of-process task host is represented in-proc by a TaskHostTask proxy whose own assembly location is always Microsoft.Build.dll, so MSBuild reported a mismatch for most task invocations (1364 extra lines in an official build of this repo). Log noise only: no build output changes, which the byte-level artifact comparison confirms. Fixed by https://github.com/dotnet/msbuild/pull/14550, but the messages are emitted by the installed Visual Studio MSBuild that drives the build - VSEng-MicroBuildVSStable is on MSBuild 18.8.2 while the fix is in main (18.11) - so this entry has to stay until that pool picks up a VS carrying it. Delete it then."
+    },
+    {
+      "pattern": "^[A-Za-z_][A-Za-z0-9_.]*:$",
+      "reason": "Collateral of the messages above: MSBuild's file logger only emits a target header when the target logs something at the current verbosity, so targets that are silent at normal verbosity acquire a header in the -mt log only. All 12 target names this suppresses appear in the -mt log only, and every one of their header blocks contains nothing but those messages. What this rule stops comparing is covered by the structure/targets and structure/targetsByProject sections, which take exact execution counts for every target - and every (project, target) pair - from the binlog event stream, are unaffected by verbosity or interleaving, always run, and are enforced. Delete this entry together with the one above."
+    }
+  ]
+}
