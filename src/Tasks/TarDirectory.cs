@@ -88,6 +88,22 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
+            // Bridge from the synchronous ITask.Execute entrypoint to the asynchronous implementation with a
+            // single blocking call. The write pipeline is async so it can flow the cancellation token into the
+            // runtime's asynchronous I/O; keeping the only GetAwaiter().GetResult() here (rather than in the
+            // per-entry loop) avoids repeatedly blocking a thread-pool thread inside the loop.
+            return ExecuteAsync()
+                .ConfigureAwait(continueOnCapturedContext: false)
+                .GetAwaiter()
+                .GetResult();
+        }
+
+        /// <summary>
+        /// Asynchronously writes every source entry to the destination archive.
+        /// </summary>
+        /// <returns>A <see cref="System.Threading.Tasks.Task{Boolean}"/> that resolves to <see langword="true"/> when the archive was written without errors or cancellation.</returns>
+        private async System.Threading.Tasks.Task<bool> ExecuteAsync()
+        {
             if (!SourceDirectory.Exists)
             {
                 Log.LogErrorWithCodeFromResources("TarDirectory.ErrorDirectoryDoesNotExist", SourceDirectory.FullName);
@@ -188,16 +204,14 @@ namespace Microsoft.Build.Tasks
 
                         if (deterministicTimestamp is DateTimeOffset timestamp)
                         {
-                            WriteStampedEntry(writer, format, info, entryName, timestamp, cancellationToken);
+                            await WriteStampedEntryAsync(writer, format, info, entryName, timestamp, cancellationToken).ConfigureAwait(continueOnCapturedContext: false);
                         }
                         else
                         {
                             // Flow the cancellation token into the runtime's write so a large entry's stream copy
                             // can be interrupted mid-entry rather than only between entries.
-                            writer.WriteEntryAsync(info.FullName, entryName, cancellationToken)
-                                .ConfigureAwait(continueOnCapturedContext: false)
-                                .GetAwaiter()
-                                .GetResult();
+                            await writer.WriteEntryAsync(info.FullName, entryName, cancellationToken)
+                                .ConfigureAwait(continueOnCapturedContext: false);
                         }
                     }
                 }
@@ -339,7 +353,7 @@ namespace Microsoft.Build.Tasks
         /// so its modification time can be overridden. The source file's Unix mode is preserved; Unix owner ids default
         /// to 0, which both matches Windows behavior and is the conventional choice for a reproducible archive.
         /// </summary>
-        private static void WriteStampedEntry(TarWriter writer, TarEntryFormat format, FileSystemInfo info, string entryName, DateTimeOffset timestamp, CancellationToken cancellationToken)
+        private static async System.Threading.Tasks.Task WriteStampedEntryAsync(TarWriter writer, TarEntryFormat format, FileSystemInfo info, string entryName, DateTimeOffset timestamp, CancellationToken cancellationToken)
         {
             bool isSymbolicLink = info.LinkTarget is not null;
             bool isDirectory = info is DirectoryInfo && !isSymbolicLink;
@@ -375,10 +389,8 @@ namespace Microsoft.Build.Tasks
                     entry.DataStream = dataStream;
                 }
 
-                writer.WriteEntryAsync(entry, cancellationToken)
-                    .ConfigureAwait(continueOnCapturedContext: false)
-                    .GetAwaiter()
-                    .GetResult();
+                await writer.WriteEntryAsync(entry, cancellationToken)
+                    .ConfigureAwait(continueOnCapturedContext: false);
             }
             finally
             {
