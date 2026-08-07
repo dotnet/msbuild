@@ -700,6 +700,49 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         #endregion
 
+        #region Enum Params
+
+        /// <summary>
+        /// Validate that setting an enum parameter binds the string value (case-insensitively) to the enum member.
+        /// </summary>
+        [Fact]
+        public void TestSetEnumParam()
+        {
+            ValidateTaskParameter("EnumParam", "Second", TaskBuilderTestTask.TestTaskEnum.Second);
+        }
+
+        /// <summary>
+        /// Validate that enum binding is case-insensitive.
+        /// </summary>
+        [Fact]
+        public void TestSetEnumParamCaseInsensitive()
+        {
+            ValidateTaskParameter("EnumParam", "first", TaskBuilderTestTask.TestTaskEnum.First);
+        }
+
+        /// <summary>
+        /// Validate that setting the parameter with an empty value does not cause it to be set.
+        /// </summary>
+        [Fact]
+        public void TestSetEnumParamEmptyAttribute()
+        {
+            ValidateTaskParameterNotSet("EnumParam", "");
+        }
+
+        /// <summary>
+        /// Validate that setting an enum parameter to a value that does not map to a defined member is an error.
+        /// </summary>
+        [Fact]
+        public void TestSetEnumParamInvalidValue()
+        {
+            var parameters = GetStandardParametersDictionary(true);
+            parameters["EnumParam"] = ("NotADefinedValue", ElementLocation.Create("foo.proj"));
+
+            Should.Throw<InvalidProjectFileException>(() => _host.SetTaskParameters(parameters));
+        }
+
+        #endregion
+
         #region FileInfo Params
 
         /// <summary>
