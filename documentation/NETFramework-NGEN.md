@@ -93,23 +93,33 @@ When this happens, the cost of JITting `Microsoft.Build.NuGetSdkResolver` will b
 
 ## NuGet.Frameworks
 
-When evaluating certain property functions, MSBuild requires functionality from `NuGet.Frameworks.dll`, which is not part of MSBuild proper.
+When evaluating certain property functions, MSBuild requires functionality from `NuGet.Frameworks`, which is not part of MSBuild proper.
 
-On .NET Framework, the assembly is loaded lazily from a path calculated based on the environment where MSBuild is running and the functionality is invoked
-via reflection. Similar to the NuGet resolver, the version is changing and it is not easy to know it statically at MSBuild's build time.
-But, since there are only a handful of APIs used by MSBuild and they take simple types such as strings and versions, this has been
-addressed by loading the assembly into a separate AppDomain. The AppDomain's config file is created in memory on the fly to contain the
-right binding redirects, allowing MSBuild to use `Assembly.Load` and get the native image loaded if it exists.
+On .NET Framework, under Change Wave 18.9 (the default), MSBuild calls a copy of the NuGet.Frameworks source that is compiled directly
+into `Microsoft.Build.dll` (see `src/Build/Utilities/NuGetFrameworks`). Because the code lives in `Microsoft.Build.dll` it is covered by the
+existing native image, so there is no reflection, no extra `AppDomain`, and no `MarshalByRefObject` marshaling. The trade-off is that the
+behavior is frozen to the snapshot we cloned: the source is a manual copy from [NuGet/NuGet.Client](https://github.com/NuGet/NuGet.Client),
+pinned to the same commit as the `NuGet.Build.Tasks` version the repo references (see `eng/Version.Details.xml`). A net472-only unit test
+(`NuGetFrameworkWrapperVendored_Tests`) compares the vendored copy against the live `NuGet.Frameworks` package the repo keeps current via
+darc; when that test fails it means the snapshot has drifted and should be re-cloned from the new pinned commit.
 
-This approach has some small startup cost (building the config, creating AppDomain & a `MarshalByRefObject`) and a small run-time overhead
-of cross-domain calls. The former is orders of magnitude smaller that the startup hit of JITting and the latter is negligible as long as
-the types moved across the AppDomain boundary do not require expensive marshaling. Additionally, the requirement to execute code in multiple
+Opting out of the wave (`MSBUILDDISABLEFEATURESFROMVERSION=18.9`) restores the historical behavior: the assembly is loaded lazily from a path
+calculated based on the environment where MSBuild is running and the functionality is invoked via reflection. Since the version is changing
+and it is not easy to know it statically at MSBuild's build time, but there are only a handful of APIs used by MSBuild and they take simple
+types such as strings and versions, this is addressed by loading the assembly into a separate AppDomain. The AppDomain's config file is created
+in memory on the fly to contain the right binding redirects, allowing MSBuild to use `Assembly.Load` and get the native image loaded if it exists.
+
+That reflection approach has some small startup cost (building the config, creating AppDomain & a `MarshalByRefObject`) and a small run-time
+overhead of cross-domain calls. The former is orders of magnitude smaller that the startup hit of JITting and the latter is negligible as long
+as the types moved across the AppDomain boundary do not require expensive marshaling. Additionally, the requirement to execute code in multiple
 AppDomains necessitates the use of `LoaderOptimization.MultiDomain` for loading all assemblies domain-neutral. This may come with run-time
-cost for certain code patterns, although none has been measured in MSBuild scenarios.
+cost for certain code patterns, although none has been measured in MSBuild scenarios. Vendoring the source under the change wave removes this
+machinery from the default path entirely.
 
 On .NET (Core), MSBuild takes a direct compile-time reference to `NuGet.Frameworks` and calls it through strongly-typed APIs, avoiding both
 the reflection overhead and the AppDomain machinery. .NET SDK construction deploys `NuGet.Frameworks.dll` next to `MSBuild.dll` and
 makes `MSBuild.deps.json` coherent.
+
 
 ## Task assemblies
 

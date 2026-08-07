@@ -20,7 +20,7 @@ internal sealed partial class NuGetFrameworkWrapper
     /// Formats <paramref name="version"/> with at least <paramref name="minVersionPartCount"/>
     /// components, trimming any trailing zero parts beyond that minimum.
     /// </summary>
-    private static string GetNonZeroVersionParts(Version version, int minVersionPartCount)
+    internal static string GetNonZeroVersionParts(Version version, int minVersionPartCount)
     {
         var nonZeroVersionParts = version.Revision == 0 ? version.Build == 0 ? version.Minor == 0 ? 1 : 2 : 3 : 4;
         return version.ToString(Math.Max(nonZeroVersionParts, minVersionPartCount));
@@ -32,7 +32,7 @@ internal sealed partial class NuGetFrameworkWrapper
     /// The Core branch supplies a strongly-typed adapter over <c>NuGetFramework</c>; the
     /// .NET Framework branch supplies a reflection-based adapter over <c>object</c>.
     /// </summary>
-    private interface ITfmAdapter<TParsed>
+    internal interface ITfmAdapter<TParsed>
     {
         TParsed Parse(string tfm);
         string GetFramework(TParsed parsed);
@@ -48,7 +48,7 @@ internal sealed partial class NuGetFrameworkWrapper
     /// devirtualize the adapter calls, so the shared body has the same runtime profile as the
     /// inlined per-target implementation it replaced.
     /// </summary>
-    private static string FilterTargetFrameworks<TParsed, TAdapter>(string incoming, string filter, TAdapter adapter)
+    internal static string FilterTargetFrameworks<TParsed, TAdapter>(string incoming, string filter, TAdapter adapter)
         where TAdapter : struct, ITfmAdapter<TParsed>
     {
         IEnumerable<(string originalTfm, TParsed parsedTfm)> incomingFrameworks = ParseTfms(incoming, adapter);
