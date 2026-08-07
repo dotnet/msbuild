@@ -168,6 +168,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14626")]
         [Theory]
         [MemberData(nameof(EnvironmentTypes))]
         public void TaskEnvironment_SetEnvironment_ShouldReplaceAllVariables(string environmentType)

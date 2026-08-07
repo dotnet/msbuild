@@ -451,6 +451,7 @@ public class EndToEndTests : IDisposable
     }
 
     // Windows only - due to targeting NetFx
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/14539")]
     [WindowsOnlyTheory]
     [MemberData(nameof(TFMinNonSdkCheckTestData))]
     public void TFMinNonSdkCheckTest(string projectContent, bool expectCheckTrigger)
