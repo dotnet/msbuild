@@ -77,6 +77,7 @@ param(
         'Expansion',
         'PropertyExpansion',
         'PropertyExpansionScaling',
+        'PropertyBagCardinality',
         'PropertyFunctions',
         'ItemExpansion',
         'ItemFunctions',

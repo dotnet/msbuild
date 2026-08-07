@@ -28,6 +28,7 @@ Multiple sets are combined with OR. Some sets are umbrellas for narrower sets:
 | --- | --- |
 | `Expansion` | `PropertyExpansion`, `PropertyExpansionScaling`, `PropertyFunctions`, `ItemExpansion`, `ItemFunctions`, `MetadataExpansion`, `MetadataExpansionScaling`, `MixedExpansion` |
 | `PropertyExpansion` | Regular property expansion and `PropertyFunctions` |
+| `PropertyExpansionScaling` | Property-reference scaling and `PropertyBagCardinality` |
 | `ItemExpansion` | Regular item expansion and `ItemFunctions` |
 | `Conditions` | `ConditionParsing`, `ConditionEvaluation` |
 | `ExpressionShredder` | `ExpressionShredderThroughput` |
@@ -35,7 +36,8 @@ Multiple sets are combined with OR. Some sets are umbrellas for narrower sets:
 
 Scaling sets remain separate. For example, `-Set MetadataExpansion` excludes
 `MetadataExpansionScaling`. The cross-cutting `Scaling` set contains both property- and
-metadata-expansion scaling benchmarks.
+metadata-expansion scaling benchmarks. `PropertyBagCardinality` varies the number of unreferenced
+properties while keeping the referenced properties and expression shapes fixed.
 
 `ExpressionShredderAllocations` is an opt-in cold-cache diagnostic for allocation-focused
 shredder work and is not included in the broad `ExpressionShredder` set.
