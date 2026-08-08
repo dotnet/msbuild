@@ -222,11 +222,7 @@ internal partial class Expander<P, I>
     /// Used to flag use of item expressions where they are illegal.
     /// </summary>
     internal static bool ExpressionContainsItemVector(string expression)
-    {
-        ExpressionShredder.ReferencedItemExpressionsEnumerator transformsEnumerator = ExpressionShredder.GetReferencedItemExpressions(expression);
-
-        return transformsEnumerator.MoveNext();
-    }
+        => ExpressionShredder.TryGetNextItemVectorExpression(expression, 0, out _);
 
     /// <summary>
     /// Expands embedded item metadata, properties, and embedded item lists (in that order) as specified in the provided options.

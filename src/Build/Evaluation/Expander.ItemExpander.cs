@@ -306,28 +306,22 @@ internal partial class Expander<P, I>
                 return null;
             }
 
-            if (!ExpressionShredder.ContainsItemVectorMarker(expression))
+            if (!ExpressionShredder.TryGetNextItemVectorExpression(expression, 0, out ExpressionShredder.ItemExpressionCapture expressionCapture))
             {
                 return null;
             }
-
-            ExpressionShredder.ReferencedItemExpressionsEnumerator matchesEnumerator = ExpressionShredder.GetReferencedItemExpressions(expression);
-
-            if (!matchesEnumerator.MoveNext())
-            {
-                return null;
-            }
-
-            ExpressionShredder.ItemExpressionCapture match = matchesEnumerator.Current;
 
             // We have a single valid @(itemlist) reference in the given expression.
             // If the passed-in expression contains exactly one item list reference,
             // with nothing else concatenated to the beginning or end, then proceed
             // with itemizing it, otherwise error.
-            ProjectErrorUtilities.VerifyThrowInvalidProject(match.Value == expression, elementLocation, "EmbeddedItemVectorCannotBeItemized", expression);
-            Assumed.False(matchesEnumerator.MoveNext(), "Expected just one item vector");
+            ProjectErrorUtilities.VerifyThrowInvalidProject(
+                expressionCapture.Index == 0 && expressionCapture.Length == expression.Length,
+                elementLocation,
+                "EmbeddedItemVectorCannotBeItemized",
+                expression);
 
-            return match;
+            return expressionCapture;
         }
 
         internal static IList<T> ExpandExpressionCaptureIntoItems<T>(
@@ -529,9 +523,7 @@ internal partial class Expander<P, I>
 
             Assumed.NotNull(items, "Cannot expand items without providing items");
 
-            ExpressionShredder.ReferencedItemExpressionsEnumerator matchesEnumerator = ExpressionShredder.GetReferencedItemExpressions(expression);
-
-            if (!matchesEnumerator.MoveNext())
+            if (!ExpressionShredder.TryGetNextItemVectorExpression(expression, 0, out ExpressionShredder.ItemExpressionCapture currentItem))
             {
                 return expression;
             }
@@ -544,7 +536,6 @@ internal partial class Expander<P, I>
             int lastStringIndex = 0;
             do
             {
-                ExpressionShredder.ItemExpressionCapture currentItem = matchesEnumerator.Current;
                 if (currentItem.Index > lastStringIndex)
                 {
                     if ((options & ExpanderOptions.BreakOnNotEmpty) != 0)
@@ -564,7 +555,7 @@ internal partial class Expander<P, I>
 
                 lastStringIndex = currentItem.Index + currentItem.Length;
             }
-            while (matchesEnumerator.MoveNext());
+            while (ExpressionShredder.TryGetNextItemVectorExpression(expression, lastStringIndex, out currentItem));
 
             builder.Append(expression, lastStringIndex, expression.Length - lastStringIndex);
 

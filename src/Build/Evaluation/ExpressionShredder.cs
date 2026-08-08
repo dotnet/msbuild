@@ -327,50 +327,35 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// Given a subexpression, finds referenced sub transform expressions
-        /// itemName and separator will be null if they are not found
-        /// return value will be null if no transform expressions are found
+        ///  Finds and parses the next valid item-vector expression at or after <paramref name="startIndex"/>.
         /// </summary>
-        internal static ReferencedItemExpressionsEnumerator GetReferencedItemExpressions(string expression)
-            => new(expression);
-
-        internal struct ReferencedItemExpressionsEnumerator(string expression)
+        /// <param name="expression">The expression to scan.</param>
+        /// <param name="startIndex">The index at which to begin scanning.</param>
+        /// <param name="itemVector">The parsed item-vector expression.</param>
+        /// <returns>
+        ///  <see langword="true"/> if a valid item-vector expression is found; otherwise,
+        ///  <see langword="false"/>.
+        /// </returns>
+        public static bool TryGetNextItemVectorExpression(string expression, int startIndex, out ItemExpressionCapture itemVector)
         {
-            private readonly string _expression = expression;
-            private int _index;
-            private ItemExpressionCapture _current;
-
-            public readonly ItemExpressionCapture Current => _current;
-
-            public bool MoveNext()
+            while ((startIndex = IndexOfItemVectorMarker(expression, startIndex)) >= 0)
             {
-                while (_index < _expression.Length)
+                if (TryParseItemVectorExpression(expression, startIndex, out itemVector))
                 {
-                    _index = IndexOfItemVectorMarker(_expression, _index);
-                    if (_index < 0)
-                    {
-                        _index = _expression.Length;
-                        break;
-                    }
-
-                    _index += 2;
-
-                    if (TryParseItemVectorExpression(_expression, ref _index, out _current))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
 
-                _current = default;
-                return false;
+                startIndex += 2;
             }
+
+            itemVector = default;
+            return false;
         }
 
-        private static bool TryParseItemVectorExpression(string expression, ref int index, out ItemExpressionCapture expressionCapture)
+        private static bool TryParseItemVectorExpression(string expression, int startIndex, out ItemExpressionCapture itemVector)
         {
             int end = expression.Length;
-            int startPoint = index - 2;
-            int restartPoint = index;
+            int index = startIndex + 2;
 
             SinkWhitespace(expression, ref index);
 
@@ -378,8 +363,7 @@ namespace Microsoft.Build.Evaluation
 
             if (!SinkValidName(expression, ref index, end))
             {
-                index = restartPoint;
-                expressionCapture = default;
+                itemVector = default;
                 return false;
             }
 
@@ -423,19 +407,15 @@ namespace Microsoft.Build.Evaluation
                 ItemExpressionCapture? functionCapture = SinkItemFunctionExpression(expression, startTransform, ref index, end);
                 if (functionCapture != null)
                 {
-                    if (transformExpressions == null)
-                    {
-                        // PERF: Almost all expressions have only one capture, so optimize for that case
-                        transformExpressions = new List<ItemExpressionCapture>(1);
-                    }
-
+                    // PERF: Almost all expressions have only one capture, so optimize for that case
+                    transformExpressions ??= new List<ItemExpressionCapture>(1);
                     transformExpressions.Add(functionCapture.Value);
+
                     SinkWhitespace(expression, ref index);
                     continue;
                 }
 
-                index = restartPoint;
-                expressionCapture = default;
+                itemVector = default;
                 return false;
             }
 
@@ -451,20 +431,18 @@ namespace Microsoft.Build.Evaluation
 
                 if (!Sink(expression, ref index, '\''))
                 {
-                    index = restartPoint;
-                    expressionCapture = default;
+                    itemVector = default;
                     return false;
                 }
 
                 int closingQuote = expression.IndexOf('\'', index);
                 if (closingQuote == -1)
                 {
-                    index = restartPoint;
-                    expressionCapture = default;
+                    itemVector = default;
                     return false;
                 }
 
-                separatorStart = index - startPoint;
+                separatorStart = index - startIndex;
                 separator = expression.Substring(index, closingQuote - index);
 
                 index = closingQuote + 1;
@@ -474,17 +452,24 @@ namespace Microsoft.Build.Evaluation
 
             if (!Sink(expression, ref index, ')'))
             {
-                index = restartPoint;
-                expressionCapture = default;
+                itemVector = default;
                 return false;
             }
 
-            int endPoint = index;
+            int length = index - startIndex;
 
             // Create an expression capture that encompasses the entire expression between the @( and the )
             // with the item name and any separator contained within it
             // and each transform expression contained within it (i.e. each ->XYZ)
-            expressionCapture = new ItemExpressionCapture(startPoint, endPoint - startPoint, Strings.WeakIntern(expression.AsSpan(startPoint, endPoint - startPoint)), itemName, separator, separatorStart, transformExpressions);
+            itemVector = new ItemExpressionCapture(
+                index: startIndex,
+                length,
+                subExpression: Strings.WeakIntern(expression.AsSpan(startIndex, length)),
+                itemType: itemName,
+                separator,
+                separatorStart,
+                captures: transformExpressions);
+
             return true;
         }
 
