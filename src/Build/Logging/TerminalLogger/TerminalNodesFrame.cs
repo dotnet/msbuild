@@ -16,7 +16,7 @@ internal sealed class TerminalNodesFrame
 {
     private const int MaxColumn = 120;
 
-    private readonly (TerminalNodeStatus nodeStatus, int durationLength)[] _nodes;
+    private readonly (TerminalNodeStatus nodeStatus, int durationLength, int renderedWidth)[] _nodes;
 
     private readonly StringBuilder _renderBuilder = new();
 
@@ -24,12 +24,22 @@ internal sealed class TerminalNodesFrame
     public int Height { get; }
     public int NodesCount { get; private set; }
 
+    /// <summary>
+    /// The width of the terminal this frame was rendered for, before it is capped to <see cref="MaxColumn"/>.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="Width"/> drives layout, but line wrapping happens at the real terminal width, so that
+    /// is what <see cref="GetPhysicalRows"/> needs.
+    /// </remarks>
+    public int TerminalWidth { get; }
+
     public TerminalNodesFrame(TerminalNodeStatus?[] nodes, int width, int height)
     {
         Width = Math.Min(width, MaxColumn);
+        TerminalWidth = width;
         Height = height;
 
-        _nodes = new (TerminalNodeStatus, int)[nodes.Length];
+        _nodes = new (TerminalNodeStatus, int, int)[nodes.Length];
 
         foreach (TerminalNodeStatus? status in nodes)
         {
@@ -78,11 +88,13 @@ internal sealed class TerminalNodesFrame
 
                 if (renderedWidth > Width)
                 {
+                    _nodes[i].renderedWidth = project.Length;
                     return project.AsSpan();
                 }
             }
         }
 
+        _nodes[i].renderedWidth = Math.Max(Width - 1, 1);
         var renderedTarget = !string.IsNullOrWhiteSpace(targetPrefix) ? $"{AnsiCodes.Colorize(targetPrefix, targetPrefixColor)} {target}" : target;
         var builder = StringBuilderCache.Acquire(renderedWidth);
         builder.Append(TerminalLogger.Indentation).Append(project);
@@ -120,8 +132,9 @@ internal sealed class TerminalNodesFrame
         StringBuilder sb = _renderBuilder;
         sb.Clear();
 
-        // Move cursor back to 1st line of nodes.
-        sb.AppendLine($"{AnsiCodes.CSI}{previousFrame.NodesCount + 1}{AnsiCodes.MoveUpToLineStart}");
+        // Move cursor back to 1st line of nodes. The previous frame's lines are reflowed by the
+        // terminal when it is resized, so measure them against the width we are rendering for now.
+        sb.AppendLine($"{AnsiCodes.CSI}{previousFrame.GetPhysicalRows(TerminalWidth) + 1}{AnsiCodes.MoveUpToLineStart}");
 
         int i = 0;
         for (; i < NodesCount; i++)
@@ -161,6 +174,23 @@ internal sealed class TerminalNodesFrame
         }
 
         return sb.ToString();
+    }
+
+    /// <summary>
+    /// Returns how many physical terminal rows this frame's lines occupy when wrapped at <paramref name="terminalWidth"/>.
+    /// </summary>
+    internal int GetPhysicalRows(int terminalWidth)
+    {
+        terminalWidth = Math.Max(terminalWidth, 1);
+
+        int physicalRows = 0;
+        for (int i = 0; i < NodesCount; i++)
+        {
+            int renderedWidth = Math.Max(_nodes[i].renderedWidth, 1);
+            physicalRows += ((renderedWidth - 1) / terminalWidth) + 1;
+        }
+
+        return physicalRows;
     }
 
     public void Clear()
