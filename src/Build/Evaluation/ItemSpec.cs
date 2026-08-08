@@ -262,25 +262,18 @@ namespace Microsoft.Build.Evaluation
         {
             isItemListExpression = false;
 
-            // Code corresponds to Expander.ExpandSingleItemVectorExpressionIntoItems
-            if (expression.Length == 0)
+            if (Expander<P, I>.TryExpandSingleItemVectorExpression(
+                    expression,
+                    ExpanderOptions.ExpandItems,
+                    elementLocation,
+                    out ExpressionShredder.ItemExpressionCapture itemVector))
             {
-                return null;
+                isItemListExpression = true;
+
+                return new ItemExpressionFragment(itemVector, expression, this, projectDirectory);
             }
 
-            var capture = Expander<P, I>.ExpandSingleItemVectorExpressionIntoExpressionCapture(
-                expression,
-                ExpanderOptions.ExpandItems,
-                elementLocation);
-
-            if (capture == null)
-            {
-                return null;
-            }
-
-            isItemListExpression = true;
-
-            return new ItemExpressionFragment(capture.Value, expression, this, projectDirectory);
+            return null;
         }
 
         /// <summary>

@@ -355,7 +355,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         {
             const string expression = "x@x@(; )@(First);@(Second, '|')";
 
-            ExpressionShredder.TryGetNextItemVectorExpression(expression, 0, out ExpressionShredder.ItemExpressionCapture first).ShouldBeTrue();
+            ExpressionShredder.TryGetNextItemVectorExpression(expression, out ExpressionShredder.ItemExpressionCapture first).ShouldBeTrue();
             first.Value.ShouldBe("@(First)");
 
             int nextIndex = first.Index + first.Length;

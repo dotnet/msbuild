@@ -222,7 +222,7 @@ internal partial class Expander<P, I>
     /// Used to flag use of item expressions where they are illegal.
     /// </summary>
     internal static bool ExpressionContainsItemVector(string expression)
-        => ExpressionShredder.TryGetNextItemVectorExpression(expression, 0, out _);
+        => ExpressionShredder.TryGetNextItemVectorExpression(expression, out _);
 
     /// <summary>
     /// Expands embedded item metadata, properties, and embedded item lists (in that order) as specified in the provided options.
@@ -399,11 +399,12 @@ internal partial class Expander<P, I>
         return ItemExpander.ExpandSingleItemVectorExpressionIntoItems(this, expression, _items, itemFactory, options, includeNullItems, out isTransformExpression, elementLocation);
     }
 
-    internal static ExpressionShredder.ItemExpressionCapture? ExpandSingleItemVectorExpressionIntoExpressionCapture(
-            string expression, ExpanderOptions options, IElementLocation elementLocation)
-    {
-        return ItemExpander.ExpandSingleItemVectorExpressionIntoExpressionCapture(expression, options, elementLocation);
-    }
+    internal static bool TryExpandSingleItemVectorExpression(
+        string expression,
+        ExpanderOptions options,
+        IElementLocation elementLocation,
+        out ExpressionShredder.ItemExpressionCapture itemVector)
+        => ItemExpander.TryExpandSingleItemVectorExpression(expression, options, elementLocation, out itemVector);
 
     internal IList<T> ExpandExpressionCaptureIntoItems<T>(
         ExpressionShredder.ItemExpressionCapture expressionCapture, IItemProvider<I> items, IItemFactory<I, T> itemFactory,

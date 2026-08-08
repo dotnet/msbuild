@@ -326,6 +326,10 @@ namespace Microsoft.Build.Evaluation
             return result;
         }
 
+        /// <inheritdoc cref="TryGetNextItemVectorExpression(string, int, out ItemExpressionCapture)"/>
+        public static bool TryGetNextItemVectorExpression(string expression, out ItemExpressionCapture itemVector)
+            => TryGetNextItemVectorExpression(expression, startIndex: 0, out itemVector);
+
         /// <summary>
         ///  Finds and parses the next valid item-vector expression at or after <paramref name="startIndex"/>.
         /// </summary>
@@ -404,12 +408,11 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 startTransform = index;
-                ItemExpressionCapture? functionCapture = SinkItemFunctionExpression(expression, startTransform, ref index, end);
-                if (functionCapture != null)
+                if (TryParseFunctionTransform(expression, startTransform, ref index, end, out ItemExpressionCapture transform))
                 {
                     // PERF: Almost all expressions have only one capture, so optimize for that case
                     transformExpressions ??= new List<ItemExpressionCapture>(1);
-                    transformExpressions.Add(functionCapture.Value);
+                    transformExpressions.Add(transform);
 
                     SinkWhitespace(expression, ref index);
                     continue;
@@ -551,18 +554,14 @@ namespace Microsoft.Build.Evaluation
                             continue;
                         }
 
-                        ItemExpressionCapture? functionCapture = SinkItemFunctionExpression(expression, startTransform, ref i, end);
-                        if (functionCapture != null)
+                        if (TryParseFunctionTransform(expression, startTransform, ref i, end, out _))
                         {
                             SinkWhitespace(expression, ref i);
                             continue;
                         }
 
-                        if (!isQuotedTransform && functionCapture == null)
-                        {
-                            i = restartPoint;
-                            transformOrFunctionFound = false;
-                        }
+                        i = restartPoint;
+                        transformOrFunctionFound = false;
                     }
 
                     if (!transformOrFunctionFound)
@@ -820,7 +819,7 @@ namespace Microsoft.Build.Evaluation
         /// and ends before the specified end index.
         /// Leaves index one past the end of the closing paren.
         /// </summary>
-        private static ItemExpressionCapture? SinkItemFunctionExpression(string expression, int startTransform, ref int i, int end)
+        private static bool TryParseFunctionTransform(string expression, int startTransform, ref int i, int end, out ItemExpressionCapture transform)
         {
             if (SinkValidName(expression, ref i, end))
             {
@@ -841,17 +840,13 @@ namespace Microsoft.Build.Evaluation
                         functionArguments = Strings.WeakIntern(expression.AsSpan(startFunctionArguments, endFunctionArguments - startFunctionArguments));
                     }
 
-                    ItemExpressionCapture capture = new ItemExpressionCapture(startTransform, i - startTransform, expression.Substring(startTransform, i - startTransform), null, null, -1, null, functionName, functionArguments);
-
-                    return capture;
+                    transform = new ItemExpressionCapture(startTransform, i - startTransform, expression.Substring(startTransform, i - startTransform), null, null, -1, null, functionName, functionArguments);
+                    return true;
                 }
+            }
 
-                return null;
-            }
-            else
-            {
-                return null;
-            }
+            transform = default;
+            return false;
         }
 
         /// <summary>

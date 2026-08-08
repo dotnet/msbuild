@@ -89,7 +89,7 @@ internal partial class Expander<P, I>
 
         private string Expand(string expression)
         {
-            if (!ExpressionShredder.TryGetNextItemVectorExpression(expression, 0, out ExpressionShredder.ItemExpressionCapture itemVector))
+            if (!ExpressionShredder.TryGetNextItemVectorExpression(expression, out ExpressionShredder.ItemExpressionCapture itemVector))
             {
                 // No well-formed item vectors in the string — scan for metadata references directly.
                 ScanAndExpandMetadata(expression);
