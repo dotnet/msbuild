@@ -78,6 +78,14 @@ namespace Microsoft.Build.BackEnd
         void SendData(int node, INodePacket packet);
 
         /// <summary>
+        /// Removes the provider's bookkeeping for a node that has shut down. Called on the serialized
+        /// node-shutdown path (under the BuildManager sync lock) so that context removal does not race a
+        /// concurrent SendData on the read/IO thread. See dotnet/msbuild#12438.
+        /// </summary>
+        /// <param name="nodeId">The node whose context should be removed.</param>
+        void RemoveNodeContext(int nodeId);
+
+        /// <summary>
         /// Shuts down all of the connected, managed nodes.  This call will not return until all nodes are shut down.
         /// </summary>
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>

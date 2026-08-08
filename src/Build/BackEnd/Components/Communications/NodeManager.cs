@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -33,7 +34,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Mapping of manager-produced node IDs to the provider hosting the node.
         /// </summary>
-        private readonly Dictionary<int, INodeProvider> _nodeIdToProvider;
+        /// <remarks>
+        /// Concurrent because it is read off the BuildManager sync lock by senders that run on a
+        /// node's pipe read/IO thread (for example the SDK resolver response handler), while it is
+        /// written under the sync lock by RemoveNode / AttemptCreateNode. See dotnet/msbuild#12438.
+        /// </remarks>
+        private readonly ConcurrentDictionary<int, INodeProvider> _nodeIdToProvider;
 
         /// <summary>
         /// The packet factory used to translate and route packets
@@ -74,7 +80,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private NodeManager()
         {
-            _nodeIdToProvider = new Dictionary<int, INodeProvider>();
+            _nodeIdToProvider = new ConcurrentDictionary<int, INodeProvider>();
             _packetFactory = new NodePacketFactory();
             _nextNodeId = _inprocNodeId + 1;
         }
@@ -241,11 +247,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="translator">The translator containing the data from which the packet should be reconstructed.</param>
         public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
         {
-            if (packetType == NodePacketType.NodeShutdown)
-            {
-                RemoveNodeFromMapping(nodeId);
-            }
-
             _packetFactory.DeserializeAndRoutePacket(nodeId, packetType, translator);
         }
 
@@ -266,11 +267,6 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to route.</param>
         public void RoutePacket(int nodeId, INodePacket packet)
         {
-            if (packet.Type == NodePacketType.NodeShutdown)
-            {
-                RemoveNodeFromMapping(nodeId);
-            }
-
             _packetFactory.RoutePacket(nodeId, packet);
         }
 
@@ -290,12 +286,28 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void RemoveNodeFromMapping(int nodeId)
         {
-            _nodeIdToProvider.Remove(nodeId);
-            if (_nodeIdToProvider.Count == 0)
+            _nodeIdToProvider.TryRemove(nodeId, out _);
+            if (_nodeIdToProvider.IsEmpty)
             {
                 // The inproc node is always 1 therefore when new nodes are requested we need to start at 2
                 _nextNodeId = _inprocNodeId + 1;
             }
+        }
+
+        /// <summary>
+        /// Removes all bookkeeping for a node that has shut down. Drops the owning provider's node context
+        /// and then the node-to-provider mapping. This runs on the BuildManager work-queue thread (under its
+        /// sync lock) in response to a NodeShutdown packet, which serializes teardown with scheduling so that
+        /// a concurrent SendData can never observe a half-torn-down node. See dotnet/msbuild#12438.
+        /// </summary>
+        public void RemoveNode(int nodeId)
+        {
+            if (_nodeIdToProvider.TryGetValue(nodeId, out INodeProvider? provider))
+            {
+                provider.RemoveNodeContext(nodeId);
+            }
+
+            RemoveNodeFromMapping(nodeId);
         }
 
         /// <summary>
@@ -334,7 +346,9 @@ namespace Microsoft.Build.BackEnd
 
             foreach (NodeInfo node in nodes)
             {
-                _nodeIdToProvider.Add(node.NodeId, nodeProvider);
+                // Node ids are unique within a build, so this must be a fresh mapping. Use TryAdd + assert
+                // (rather than the indexer) to preserve the original Dictionary.Add fail-fast on duplicates.
+                Assumed.True(_nodeIdToProvider.TryAdd(node.NodeId, nodeProvider), $"Node {node.NodeId} already has a provider.");
             }
 
             return nodes;

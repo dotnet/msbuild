@@ -164,6 +164,14 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// No-op for the in-proc provider. The in-proc node's context is removed by its own RoutePacket when
+        /// a NodeShutdown is routed; it is not subject to the out-of-proc teardown race in dotnet/msbuild#12438.
+        /// </summary>
+        public void RemoveNodeContext(int nodeId)
+        {
+        }
+
+        /// <summary>
         /// Causes all connected nodes to be shut down.
         /// </summary>
         /// <param name="enableReuse">Flag indicating if the nodes should prepare for reuse.</param>
