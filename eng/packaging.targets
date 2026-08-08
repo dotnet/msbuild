@@ -28,7 +28,7 @@
 <![CDATA[<Project InitialTargets="$(_NETStandardCompatErrorFileTarget)">
   <Target Name="$(_NETStandardCompatErrorFileTarget)"
           Condition="'%24(SuppressTfmSupportBuildWarnings)' == ''">
-    <Warning Text="$(PackageId) $(PackageVersion) doesn't support %24(TargetFramework) and has not been tested with it. Consider upgrading your TargetFramework to %(NETStandardCompatError.Supported) or later. You may also set &lt%3BSuppressTfmSupportBuildWarnings&gt%3Btrue&lt%3B/SuppressTfmSupportBuildWarnings&gt%3B in the project file to ignore this warning and attempt to run in this unsupported configuration at your own risk." />
+    <Warning Text="$(PackageId) $(PackageVersion) does not ship a runtime assembly for %24(TargetFramework). It provides a runtime implementation only for %(NETStandardCompatError.Supported) or later (and .NET Framework), plus a netstandard2.0 reference assembly that is for compilation only. Your project will compile against that reference assembly, but no runtime assembly is copied to your output, so the assembly will fail to load at run time unless an MSBuild host provides it (for example when your code runs as an MSBuild task, logger, or analyzer inside MSBuild). If your code runs standalone, retarget to %(NETStandardCompatError.Supported) or later. If it is a compile-only MSBuild extension loaded by an MSBuild host, reference this package with compile-only assets such as PrivateAssets=all and ExcludeAssets=runtime, then set &lt%3BSuppressTfmSupportBuildWarnings&gt%3Btrue&lt%3B/SuppressTfmSupportBuildWarnings&gt%3B to acknowledge this configuration and silence this warning." />
   </Target>
 </Project>]]>
       </_NETStandardCompatErrorFileContent>
