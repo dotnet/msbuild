@@ -1,7 +1,7 @@
 ---
 name: authoring-errors-and-warnings
-description: 'Guides authoring of MSBuild errors, warnings, and diagnostic messages. Consult when adding new MSBxxxx codes, writing or modifying user-facing diagnostic text, deciding between error/warning/message severity, working with Strings.resx resource files, formatting paths in error output, or evaluating whether a new warning could break WarnAsError builds.'
-argument-hint: 'Describe the error/warning being added or modified.'
+description: 'Guides authoring of MSBuild errors, warnings, and diagnostic messages for build end users. Consult when adding new MSBxxxx codes, deciding whether feedback belongs in an engine diagnostic or a task-author analyzer, writing user-facing diagnostic text, deciding between error/warning/message severity, working with Strings.resx resource files, formatting paths in error output, or evaluating whether a new warning could break WarnAsError builds.'
+argument-hint: 'Describe the diagnostic and who must change their code or build to resolve it.'
 ---
 
 # Error and Warning Authoring in MSBuild
@@ -123,11 +123,24 @@ ProjectFileErrorUtilities.ThrowInvalidProjectFile(
 - Include file and line number via `IElementLocation` when available — this enables IDE click-to-navigate
 - For paths that could contain spaces, ensure they're quoted in the message
 
+## Choose the Audience Before the Diagnostic Mechanism
+
+First identify who must act on the diagnostic:
+
+| Audience | Examples | Mechanism |
+|---|---|---|
+| Build end user | Invalid project input, missing SDK/toolset, failed task invocation, command-line misuse | Localized `MSBxxxx` engine or task diagnostic |
+| Task author | Unsafe API in a task implementation, unsupported task property type, task API migration opportunity | Roslyn `MSBuildTaskxxxx` analyzer |
+| Task author affected by an invalid compiler warning | MSBuild guarantees initialization that the compiler cannot see | `MSBuildTaskSPRxxxx` diagnostic suppressor |
+
+Do not add an engine warning to police task implementation source. Task-author diagnostics are consumed while compiling the task and have different IDs, packaging, compatibility rules, tests, code fixes, and performance requirements. Use the [task analyzer authoring skill](../authoring-task-analyzers/SKILL.md) instead.
+
 ## Checklist for New Errors/Warnings
 
 - [ ] Error code assigned from correct `Strings.resx` range
 - [ ] "Next message code" comment updated in the resx
 - [ ] Message answers: what happened, why, what to do
+- [ ] Audience identified; task-author source guidance routed to `authoring-task-analyzers`
 - [ ] `{StrBegin}` comment and placeholder documentation added
 - [ ] Severity chosen (error vs warning vs message) with WarnAsError considered
 - [ ] If warning: ChangeWave gating evaluated

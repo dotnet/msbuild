@@ -113,6 +113,7 @@
   <Project Path="src/Tasks/Microsoft.Build.Tasks.csproj">
     <Platform Solution="*|x64" Project="x64" />
   </Project>
+  <Project Path="src/TaskAnalyzer.Benchmarks/TaskAnalyzer.Benchmarks.csproj" />
   <Project Path="src/TaskAnalyzer/TaskAnalyzer.csproj" />
   <Project Path="src/TaskAnalyzer.Tests/TaskAnalyzer.Tests.csproj" />
   <Project Path="src/UnitTests.Shared/Microsoft.Build.UnitTests.Shared.csproj">
