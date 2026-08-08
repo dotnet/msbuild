@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "matcher": "powershell|bash|.*(?:add_issue_comment|add_reply_to_pull_request_comment|add_comment_to_pending_review|add_pull_request_review_comment|create_pull_request_review|submit_pending_pull_request_review|pull_request_review_write|discussion_comment_write)$",
+        "bash": "if command -v python3 >/dev/null 2>&1 && [ -f ./prefix-github-comments.py ]; then python3 ./prefix-github-comments.py || printf '%s\\n' '{}'; else printf '%s\\n' '{}'; fi",
+        "powershell": "try { if (Test-Path -LiteralPath './prefix-github-comments.ps1' -PathType Leaf) { & './prefix-github-comments.ps1' } else { '{}' } } catch { '{}' }",
+        "cwd": ".github/hooks/copilot-cli-comment-prefix",
+        "timeoutSec": 10
+      }
+    ]
+  }
+}
