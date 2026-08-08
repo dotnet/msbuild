@@ -45,6 +45,12 @@ namespace Microsoft.Build.Logging
         private readonly MemoryStream nameValueListStream;
 
         /// <summary>
+        /// The binary writer around the nameValueListStream, reused across NameValueList records
+        /// to avoid an allocation per distinct list.
+        /// </summary>
+        private readonly BinaryWriter nameValueListWriter;
+
+        /// <summary>
         /// The binary writer around the originalStream.
         /// </summary>
         private readonly BinaryWriter originalBinaryWriter;
@@ -131,6 +137,7 @@ namespace Microsoft.Build.Logging
             this.currentRecordStream = new MemoryStream(65536);
 
             this.nameValueListStream = new MemoryStream(256);
+            this.nameValueListWriter = new BinaryWriter(nameValueListStream);
 
             this.originalBinaryWriter = binaryWriter;
             this.currentRecordWriter = new BinaryWriter(currentRecordStream);
@@ -1248,9 +1255,8 @@ namespace Microsoft.Build.Logging
             // All that is redirected away from the 'currentRecordStream' - that will be flushed last
 
             nameValueListStream.SetLength(0);
-            var nameValueListBw = new BinaryWriter(nameValueListStream);
 
-            using (var _ = RedirectWritesToDifferentWriter(nameValueListBw, binaryWriter))
+            using (var _ = RedirectWritesToDifferentWriter(nameValueListWriter, binaryWriter))
             {
                 Write(nameValueIndexListBuffer.Count);
                 for (int i = 0; i < nameValueListBuffer.Count; i++)
