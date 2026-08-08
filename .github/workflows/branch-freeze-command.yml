@@ -23,8 +23,14 @@ permissions:
 
 concurrency:
   # Do not let two freeze/unfreeze operations modify tracking issues at once.
+  # This group is held for the whole run, including the `refresh` job below,
+  # which waits on the repository-wide `branch-freeze-write` queue. `queue: max`
+  # keeps up to 100 commands pending for that window instead of letting a newer
+  # command evict an older pending one -- an evicted command never toggles the
+  # freeze at all, and its author is never told.
   group: branch-freeze-command
   cancel-in-progress: false
+  queue: max
 
 jobs:
   command:
@@ -101,9 +107,9 @@ jobs:
         # exposes the affected branch for the refresh job below.
         run: pwsh -NoLogo -NoProfile -File "$env:GITHUB_WORKSPACE/.github/branch-freeze/workflows/handle-command.ps1"
 
-  # Refresh every open PR on the affected branch. The refresh and single-PR
-  # workflows share the same per-branch concurrency group, preventing a stale
-  # status write from winning a race with /freeze or /unfreeze.
+  # Refresh every open PR on the affected branch. All branch-freeze status
+  # writers share one queued concurrency group, preventing a stale write from
+  # winning a race with /freeze, /unfreeze, or a PR retarget.
   refresh:
     needs: command
     if: needs.command.outputs.changed == 'true'

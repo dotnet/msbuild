@@ -1,5 +1,20 @@
 Import-Module (Join-Path $PSScriptRoot 'GitHubCli.psm1') -Force
 
+function Get-GitHubPullRequest {
+    [OutputType([System.Management.Automation.PSCustomObject])]
+    param(
+        [Parameter(Mandatory)][string]$Repository,
+        [Parameter(Mandatory)][string]$Number
+    )
+
+    $pullRequestJson = Invoke-GitHubCli -Arguments @(
+        'pr', 'view', $Number,
+        '--repo', $Repository,
+        '--json', 'number,headRefOid,baseRefName'
+    )
+    return $pullRequestJson | ConvertFrom-Json
+}
+
 function Get-GitHubOpenPullRequest {
     [OutputType([System.Management.Automation.PSCustomObject])]
     param(
@@ -21,4 +36,7 @@ function Get-GitHubOpenPullRequest {
     return @(Invoke-GitHubCli -Arguments $arguments | ConvertFrom-Json)
 }
 
-Export-ModuleMember -Function 'Get-GitHubOpenPullRequest'
+Export-ModuleMember -Function @(
+    'Get-GitHubOpenPullRequest',
+    'Get-GitHubPullRequest'
+)

@@ -13,6 +13,16 @@ on:
       - ".github/workflows/branch-freeze-tests.yml"
       - ".github/branch-freeze/**"
       - ".github/branch-freeze-allowlist.txt"
+      # branch-freeze-refresh.yml keys its `workflow_run` trigger off these
+      # workflows' `name:` values, so a rename here silently stops stamping
+      # automation-created pull requests. Run the contract tests on those edits
+      # too, otherwise the guard never fires on the change that breaks it.
+      - ".github/workflows/backport.yml"
+      - ".github/workflows/dreaming.agent.lock.yml"
+      - ".github/workflows/flaky-test-detector.agent.lock.yml"
+      - ".github/workflows/flaky-test-fixer.agent.lock.yml"
+      - ".github/workflows/inter-branch-merge-flow.yml"
+      - ".github/workflows/SyncAnalyzerTemplateMSBuildVersion.yml"
   workflow_dispatch:
 
 permissions:
