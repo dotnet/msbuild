@@ -118,7 +118,29 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         /// <summary>
-        /// Let us have the following dependency structure
+        /// ResolveAssemblyReference implements <see cref="ICancelableTask"/>. When cancellation has been
+        /// requested before Execute runs, the task should exit immediately without resolving references.
+        /// </summary>
+        [Fact]
+        public void CancelBeforeExecuteReturnsFalse()
+        {
+            ITaskItem x = new TaskItem(Path.Combine(s_myComponentsRootPath, "X.dll"));
+            ResolveAssemblyReference t = new()
+            {
+                BuildEngine = new MockEngine(_output),
+                AssemblyFiles = [x],
+                SearchPaths = ["{RawFileName}"],
+            };
+
+            // Request cancellation before invoking Execute.
+            t.Cancel();
+
+            bool success = t.Execute();
+
+            success.ShouldBeFalse();
+            t.ResolvedFiles.ShouldBeNull();
+        }
+
         ///
         /// X which is in the gac, depends on Z which is not in the GAC
         ///

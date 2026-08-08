@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Xml.Linq;
 
 using Microsoft.Build.Eventing;
@@ -34,7 +35,7 @@ namespace Microsoft.Build.Tasks
     /// depend on those assemblyFiles including second and nth-order dependencies too.
     /// </summary>
     [MSBuildMultiThreadableTask]
-    public class ResolveAssemblyReference : TaskExtension, IIncrementalTask, IMultiThreadableTask
+    public class ResolveAssemblyReference : TaskExtension, IIncrementalTask, IMultiThreadableTask, ICancelableTask
     {
         /// <summary>
         /// key assembly used to trigger inclusion of facade references.
@@ -64,12 +65,22 @@ namespace Microsoft.Build.Tasks
         internal SystemState _cache = null;
 
         /// <summary>
+        /// Signals cancellation so that in-progress reference resolution can exit responsively.
+        /// </summary>
+        private readonly CancellationTokenSource _cancellationTokenSource = new();
+
+        /// <summary>
         /// Construct
         /// </summary>
         public ResolveAssemblyReference()
         {
             Strings.Initialize(Log);
         }
+
+        /// <summary>
+        /// Instructs the task to stop resolving references as soon as possible.
+        /// </summary>
+        public void Cancel() => _cancellationTokenSource.Cancel();
 
         private static class Strings
         {
@@ -2616,6 +2627,7 @@ namespace Microsoft.Build.Tasks
                         TaskEnvironment);
 
                     dependencyTable.FindDependenciesOfExternallyResolvedReferences = FindDependenciesOfExternallyResolvedReferences;
+                    dependencyTable.CancellationToken = _cancellationTokenSource.Token;
 
                     // If AutoUnify, then compute the set of assembly remappings.
                     var generalResolutionExceptions = new List<Exception>();
@@ -2851,6 +2863,13 @@ namespace Microsoft.Build.Tasks
                 catch (ArgumentException e)
                 {
                     Log.LogErrorWithCodeFromResources("General.InvalidArgument", e.Message);
+                }
+
+                // Cancellation was requested (for example via Ctrl-C or IDE build cancellation).
+                // Exit quietly without logging an error; the engine reports the cancellation.
+                catch (OperationCanceledException)
+                {
+                    success = false;
                 }
 
                 // InvalidParameterValueException is thrown inside RAR when we find a specific parameter
@@ -3406,6 +3425,11 @@ namespace Microsoft.Build.Tasks
         /// <returns>True if there was success.</returns>
         public override bool Execute()
         {
+            if (_cancellationTokenSource.IsCancellationRequested)
+            {
+                return false;
+            }
+
             if (AllowOutOfProcNode
                 && BuildEngine is IBuildEngine10 buildEngine10
                 && buildEngine10.EngineServices.IsOutOfProcRarNodeEnabled)
