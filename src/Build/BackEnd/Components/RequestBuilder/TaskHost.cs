@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
@@ -18,6 +19,11 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using ProjectElementContainer = Microsoft.Build.Construction.ProjectElementContainer;
+using ProjectItemElement = Microsoft.Build.Construction.ProjectItemElement;
+using ProjectRootElement = Microsoft.Build.Construction.ProjectRootElement;
+using ProjectRootElementCacheBase = Microsoft.Build.Evaluation.ProjectRootElementCacheBase;
+using ProjectTargetElement = Microsoft.Build.Construction.ProjectTargetElement;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
 using TaskLoggingContext = Microsoft.Build.BackEnd.Logging.TaskLoggingContext;
 #if FEATURE_REPORTFILEACCESSES
@@ -941,6 +947,196 @@ namespace Microsoft.Build.BackEnd
             public override bool IsTaskInputLoggingEnabled => _taskHost._host.BuildParameters.LogTaskInputs;
 
             public override bool IsOutOfProcRarNodeEnabled => _taskHost._host.BuildParameters.EnableRarNode;
+
+            /// <inheritdoc/>
+            public override int Version => Version3;
+
+            private static readonly char[] s_nonLiteralIncludeChars = ['$', '@', '%', '*', '?'];
+
+            /// <inheritdoc/>
+            public override bool TryGetItemSourceLocation(string itemType, string itemSpec, [MaybeNullWhen(false)] out string file, out int lineNumber, out int columnNumber)
+            {
+                file = null;
+                lineNumber = 0;
+                columnNumber = 0;
+
+#if FEATURE_APPDOMAIN
+                if (RemotingServices.IsTransparentProxy(_taskHost))
+                {
+                    // Reaching into the project XML cache across an AppDomain boundary (out-of-proc task host) is not supported.
+                    return false;
+                }
+#endif
+
+                if (_taskHost.IsOutOfProc)
+                {
+                    // Off the entry node the project XML is generally not in this node's ProjectRootElementCache and the
+                    // import closure (ProjectInstance.ImportPaths) is not transmitted, so resolution cannot be guaranteed.
+                    // Fail uniformly here rather than returning a partial, node-placement-dependent result.
+                    return false;
+                }
+
+                if (string.IsNullOrEmpty(itemType) || string.IsNullOrEmpty(itemSpec))
+                {
+                    return false;
+                }
+
+                ProjectInstance project = _taskHost._requestEntry?.RequestConfiguration?.Project;
+                ProjectRootElementCacheBase cache = project?.ProjectRootElementCache;
+                if (project is null || cache is null)
+                {
+                    return false;
+                }
+
+                // Collect the declaring XML item element across the project file and the rest of its import closure.
+                // Only already-cached XML is inspected; this best-effort diagnostic path never reloads project files
+                // from disk. To avoid reporting a confidently-wrong location, item elements declared inside a <Target>
+                // (produced at execution time, not part of the restore graph) are ignored, a literal match that carries
+                // a Condition (on the element or an ancestor) makes the result ambiguous because its active state cannot
+                // be determined from XML alone, and the lookup returns false when more than one literal match remains.
+                ElementLocation match = null;
+                bool ambiguous = false;
+
+                CollectItemElementLocation(cache, project.FullPath, itemType, itemSpec, ref match, ref ambiguous);
+
+                IReadOnlyList<string> imports = project.ImportPaths;
+                if (!ambiguous && imports is not null)
+                {
+                    foreach (string importPath in imports)
+                    {
+                        CollectItemElementLocation(cache, importPath, itemType, itemSpec, ref match, ref ambiguous);
+                        if (ambiguous)
+                        {
+                            break;
+                        }
+                    }
+                }
+
+                if (match is null || ambiguous)
+                {
+                    return false;
+                }
+
+                file = match.File;
+                lineNumber = match.Line;
+                columnNumber = match.Column;
+                return true;
+            }
+
+            /// <summary>
+            /// Scans the cached XML of <paramref name="path"/> for an item element whose type and literal Include match,
+            /// accumulating into <paramref name="match"/>. Sets <paramref name="ambiguous"/> when a second match is found,
+            /// or when a match carries a Condition on the element or an ancestor. Item elements declared inside a
+            /// &lt;Target&gt; are ignored.
+            /// </summary>
+            private static void CollectItemElementLocation(ProjectRootElementCacheBase cache, string path, string itemType, string itemSpec, ref ElementLocation match, ref bool ambiguous)
+            {
+                if (ambiguous || string.IsNullOrEmpty(path))
+                {
+                    return;
+                }
+
+                ProjectRootElement xml = cache.TryGet(path);
+                if (xml is null)
+                {
+                    return;
+                }
+
+                foreach (ProjectItemElement item in xml.GetAllChildrenOfType<ProjectItemElement>())
+                {
+                    if (!string.Equals(item.ItemType, itemType, StringComparison.OrdinalIgnoreCase)
+                        || !IncludeContainsLiteral(item.Include, itemSpec)
+                        || IsTargetScoped(item))
+                    {
+                        continue;
+                    }
+
+                    if (IsConditioned(item))
+                    {
+                        ambiguous = true;
+                        return;
+                    }
+
+                    if (match is not null)
+                    {
+                        ambiguous = true;
+                        return;
+                    }
+
+                    match = item.IncludeLocation;
+                }
+            }
+
+            /// <summary>
+            /// Returns <see langword="true"/> if the item element is declared inside a &lt;Target&gt;, i.e. it is produced
+            /// during execution rather than evaluation and is therefore not part of the restore graph.
+            /// </summary>
+            private static bool IsTargetScoped(ProjectItemElement item)
+            {
+                for (ProjectElementContainer parent = item.Parent; parent is not null; parent = parent.Parent)
+                {
+                    if (parent is ProjectTargetElement)
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            /// <summary>
+            /// Returns <see langword="true"/> if the item element, or any of its ancestor containers, carries a non-empty
+            /// Condition. Such elements cannot be confirmed active from XML alone, so a conditioned literal match is treated
+            /// as inconclusive and makes the result ambiguous rather than risk reporting a location that was conditioned in
+            /// or out of the evaluated project.
+            /// </summary>
+            private static bool IsConditioned(ProjectItemElement item)
+            {
+                if (!string.IsNullOrEmpty(item.Condition))
+                {
+                    return true;
+                }
+
+                for (ProjectElementContainer parent = item.Parent; parent is not null; parent = parent.Parent)
+                {
+                    if (!string.IsNullOrEmpty(parent.Condition))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
+            /// <summary>
+            /// Returns <see langword="true"/> if <paramref name="include"/> has a literal sub-value equal to
+            /// <paramref name="itemSpec"/>. Includes that use properties, item references, metadata, or wildcards
+            /// are treated as inconclusive and skipped.
+            /// </summary>
+            private static bool IncludeContainsLiteral(string include, string itemSpec)
+            {
+                if (string.IsNullOrEmpty(include))
+                {
+                    return false;
+                }
+
+                // Cold path (diagnostics only); favor clarity over allocation here.
+                foreach (string piece in include.Split(';'))
+                {
+                    string trimmed = piece.Trim();
+                    if (trimmed.Length == 0 || trimmed.IndexOfAny(s_nonLiteralIncludeChars) >= 0)
+                    {
+                        continue;
+                    }
+
+                    if (string.Equals(trimmed, itemSpec, StringComparison.Ordinal))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
 
 #if FEATURE_REPORTFILEACCESSES
             /// <summary>
