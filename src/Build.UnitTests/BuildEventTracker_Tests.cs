@@ -221,40 +221,48 @@ public class BuildEventTracker_Tests
     }
 
     [Fact]
-    public void KeepsRestoreProjectTimingActiveDuringMSBuildTasks()
+    public void OnlyKeepsInitialRestoreTimingActiveDuringMSBuildTasks()
     {
         var eventSource = new MockBuildEventSink(0);
-        var stopwatch = new MockStopwatch();
+        MockStopwatch[] stopwatches = [new(), new()];
+        int stopwatchIndex = 0;
         var tracker = new BuildEventTracker
         {
-            StopwatchFactory = () => stopwatch,
+            StopwatchFactory = () => stopwatches[stopwatchIndex++],
         };
 
         tracker.Attach(eventSource);
+        eventSource.InvokeBuildStarted(new BuildStartedEventArgs(string.Empty, string.Empty));
 
-        BuildEventContext context = CreateContext(evaluationId: 1, projectContextId: 2, nodeId: 3);
-        eventSource.InvokeProjectStarted(new ProjectStartedEventArgs(
-            string.Empty,
-            string.Empty,
-            "built.proj",
-            "Restore",
-            new Dictionary<string, string>(),
-            new List<DictionaryEntry>())
+        BuildEventContext initialRestoreContext = CreateContext(evaluationId: 1, projectContextId: 2, nodeId: 3);
+        eventSource.InvokeProjectStarted(CreateProjectStartedEvent("initial.proj", initialRestoreContext, "Restore"));
+        eventSource.InvokeTaskStarted(new TaskStartedEventArgs(null, null, "initial.proj", "task.dll", "MSBuild")
         {
-            BuildEventContext = context,
+            BuildEventContext = initialRestoreContext,
+        });
+        stopwatches[0].IsStarted.ShouldBeTrue();
+        eventSource.InvokeTaskFinished(new TaskFinishedEventArgs(null, null, "initial.proj", "task.dll", "MSBuild", true)
+        {
+            BuildEventContext = initialRestoreContext,
+        });
+        stopwatches[0].IsStarted.ShouldBeTrue();
+        eventSource.InvokeProjectFinished(new ProjectFinishedEventArgs(null, null, "initial.proj", true)
+        {
+            BuildEventContext = initialRestoreContext,
         });
 
-        eventSource.InvokeTaskStarted(new TaskStartedEventArgs(null, null, "built.proj", "task.dll", "MSBuild")
+        BuildEventContext laterRestoreContext = CreateContext(evaluationId: 4, projectContextId: 5, nodeId: 3);
+        eventSource.InvokeProjectStarted(CreateProjectStartedEvent("later.proj", laterRestoreContext, "Restore"));
+        eventSource.InvokeTaskStarted(new TaskStartedEventArgs(null, null, "later.proj", "task.dll", "MSBuild")
         {
-            BuildEventContext = context,
+            BuildEventContext = laterRestoreContext,
         });
-        stopwatch.IsStarted.ShouldBeTrue();
-
-        eventSource.InvokeTaskFinished(new TaskFinishedEventArgs(null, null, "built.proj", "task.dll", "MSBuild", true)
+        stopwatches[1].IsStarted.ShouldBeFalse();
+        eventSource.InvokeTaskFinished(new TaskFinishedEventArgs(null, null, "later.proj", "task.dll", "MSBuild", true)
         {
-            BuildEventContext = context,
+            BuildEventContext = laterRestoreContext,
         });
-        stopwatch.IsStarted.ShouldBeTrue();
+        stopwatches[1].IsStarted.ShouldBeTrue();
     }
 
     private static BuildEventContext CreateContext(int evaluationId, int projectContextId, int nodeId)
@@ -267,12 +275,15 @@ public class BuildEventTracker_Tests
             targetId: 1,
             taskId: 1);
 
-    private static ProjectStartedEventArgs CreateProjectStartedEvent(string projectFile, BuildEventContext context)
+    private static ProjectStartedEventArgs CreateProjectStartedEvent(
+        string projectFile,
+        BuildEventContext context,
+        string targetNames = "Build")
         => new(
             string.Empty,
             string.Empty,
             projectFile,
-            "Build",
+            targetNames,
             new Dictionary<string, string>(),
             new List<DictionaryEntry>())
         {

@@ -110,6 +110,8 @@ internal sealed class BuildEventTracker
     internal readonly record struct BuildFinishedSnapshot(DateTime Timestamp, TimeSpan Duration, bool Succeeded);
 
     private IEventSource? _eventSource;
+    private ProjectContextKey? _initialRestoreContext;
+    private bool _initialRestoreFinished;
 
     internal event Action<BuildStartedSnapshot>? BuildStartedTracked;
 
@@ -213,6 +215,8 @@ internal sealed class BuildEventTracker
     {
         _projects.Clear();
         _projectEvaluations.Clear();
+        _initialRestoreContext = null;
+        _initialRestoreFinished = false;
 
         BuildStartTime = e.Timestamp;
         BuildStartedTracked?.Invoke(new BuildStartedSnapshot(e.Timestamp));
@@ -249,13 +253,31 @@ internal sealed class BuildEventTracker
             stopwatch);
 
         _projects[project.ContextKey] = project;
+
+        if (!_initialRestoreFinished
+            && _initialRestoreContext is null
+            && project.TargetNames == RestoreTargetName)
+        {
+            _initialRestoreContext = project.ContextKey;
+        }
+
         ProjectStartedTracked?.Invoke(project);
     }
 
     private void OnProjectFinished(object sender, ProjectFinishedEventArgs e)
     {
         TrackedProject? project = CorrelateProject(e);
-        project?.Finish(e.Succeeded);
+        if (project is not null)
+        {
+            project.Finish(e.Succeeded);
+
+            if (project.ContextKey == _initialRestoreContext)
+            {
+                _initialRestoreContext = null;
+                _initialRestoreFinished = true;
+            }
+        }
+
         ProjectFinishedTracked?.Invoke(project, e);
     }
 
@@ -275,7 +297,7 @@ internal sealed class BuildEventTracker
     {
         TrackedProject? project = CorrelateProject(e);
         if (project is not null
-            && project.TargetNames != RestoreTargetName
+            && _initialRestoreContext is null
             && e.TaskName == MSBuildTaskName)
         {
             project.Yield();
@@ -288,7 +310,7 @@ internal sealed class BuildEventTracker
         TrackedProject? project = CorrelateProject(e);
 
         if (project is not null
-            && project.TargetNames != RestoreTargetName
+            && _initialRestoreContext is null
             && e.TaskName == MSBuildTaskName)
         {
             project.Resume();
