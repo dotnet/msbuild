@@ -2087,7 +2087,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
 
             // Matches how the MSBuild Server entry node configures its cache.
-            ProjectRootElementCache cache = RunSubmissionWithClearCachesAfterBuild(autoReloadFromDisk: true, out string projectPath);
+            ProjectRootElementCache cache = RunSubmission(autoReloadFromDisk: true, BuildRequestDataFlags.ClearCachesAfterBuild, out string projectPath);
 
             if (changeWaveEnabled)
             {
@@ -2106,7 +2106,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
         [Fact]
         public void ClearCachesAfterBuildStillClearsCacheThatDoesNotReloadFromDisk()
         {
-            ProjectRootElementCache cache = RunSubmissionWithClearCachesAfterBuild(autoReloadFromDisk: false, out string projectPath);
+            // Control: the same submission without the flag leaves the project in the cache, so the assertion
+            // below fails if the entry ever stops being discarded, rather than passing because a build of this
+            // shape never populated the cache in the first place.
+            RunSubmission(autoReloadFromDisk: false, BuildRequestDataFlags.None, out string controlProjectPath)
+                .TryGet(controlProjectPath).ShouldNotBeNull();
+
+            ProjectRootElementCache cache = RunSubmission(autoReloadFromDisk: false, BuildRequestDataFlags.ClearCachesAfterBuild, out string projectPath);
 
             cache.TryGet(projectPath).ShouldBeNull();
         }
@@ -2153,14 +2159,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequestDataFlags.ClearCachesAfterBuild)).OverallResult.ShouldBe(BuildResultCode.Success);
             _buildManager.EndBuild();
 
-            // The cache survived the flush, which is the optimization ...
+            // The cache survived the flush, which is the optimization. Reading the project file does not disturb
+            // the cache because the restore did not rewrite it.
             cache.TryGet(projectPath).ShouldNotBeNull();
 
-            // ... while the entry for the file the restore rewrote is dropped on the next read because its timestamp
-            // no longer matches, which is the revalidation that makes keeping the rest of the cache safe.
-            cache.TryGet(importPath).ShouldBeNull();
-
-            // ... and so the build that follows still sees what the restore rewrote.
+            // The build that follows still sees what the restore rewrote.
             _buildManager.BeginBuild(_parameters);
             BuildResult result = _buildManager.BuildRequest(new BuildRequestData(
                 projectPath,
@@ -2172,13 +2175,20 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.EndBuild();
 
             result.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // It saw it because reading the rewritten file revalidated its timestamp, dropped the stale entry and
+            // reloaded from disk, so the cache now holds the rewritten content instead of what it read before the
+            // restore. That revalidation is what makes keeping the rest of the cache safe.
+            ProjectRootElement reloadedImport = cache.TryGet(importPath);
+            reloadedImport.ShouldNotBeNull();
+            reloadedImport.Properties.ShouldContain(property => property.Name == "PropertyFromImport" && property.Value == "after");
         }
 
         /// <summary>
-        /// Runs a single build request carrying <see cref="BuildRequestDataFlags.ClearCachesAfterBuild"/> against a
-        /// trivial project, and returns the cache it used so the caller can assert on what survived.
+        /// Runs a single build request carrying <paramref name="flags"/> against a trivial project, and returns the
+        /// cache it used so the caller can assert on what survived.
         /// </summary>
-        private ProjectRootElementCache RunSubmissionWithClearCachesAfterBuild(bool autoReloadFromDisk, out string projectPath)
+        private ProjectRootElementCache RunSubmission(bool autoReloadFromDisk, BuildRequestDataFlags flags, out string projectPath)
         {
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
@@ -2198,7 +2208,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 null,
                 new[] { "test" },
                 null,
-                BuildRequestDataFlags.ClearCachesAfterBuild);
+                flags);
 
             _buildManager.BeginBuild(_parameters);
             BuildResult result = _buildManager.BuildRequest(data);
