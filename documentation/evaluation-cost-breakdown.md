@@ -1,618 +1,320 @@
 # Evaluation performance: where the time goes and what to do about it
 
-MSBuild Server is now enabled by default by recent .NET SDKs. It is not what introduced cross-build
-caching — reused **worker nodes** have kept parsed project XML between builds for a long time, and
-node reuse is on by default. What the server adds is that the **entry-point process** also survives,
-so process startup, JIT, and the evaluation done in the entry node stop being paid on every
-invocation.
+Measured on `dotnet/msbuild` at `f08c806268` (18.11.0), .NET 11.0.100-preview.7, Windows, 8 logical
+cores, Release. Subjects: a `dotnet new console` project for continuity with the previous revision of
+this document, and [OrchardCore](https://github.com/OrchardCMS/OrchardCore) (241 projects) as the
+real-world subject. Absolute numbers are machine specific; ratios and shares transfer.
 
-That still changes the picture materially, and this document re-establishes the baseline under the
-new default. It organises the remaining work into three pillars:
+Every claim below is measured. Where a measurement failed to separate an effect from noise, it says
+so rather than reporting the number.
 
-1. **[Cold builds](#pillar-1-cold-builds)** — before anything is warm. CI, fresh containers, a
-   developer's first build of the day. Note this cost is paid **per node**, not once per build.
-2. **[Warm builds](#pillar-2-warm-builds)** — every subsequent build in the session. The inner loop.
-3. **[Caching between builds](#pillar-3-caching-between-builds)** — what is already reused, what is
-   not, and the invalidation rules that decide what may safely be added.
+## What changed since the previous revision
 
-Every number here is measured; [Method](#method) describes how, and
-[Reproducing these numbers](#reproducing-these-numbers) shows how to re-run it. Absolute values are
-machine specific (Release build, .NET 11 preview, i7-11370H, warm OS file cache); ratios transfer.
+Three things moved, and together they invalidate the previous framing.
+
+1. **The restore flush is fixed.** [#14558](https://github.com/dotnet/msbuild/pull/14558) landed as
+   `ProjectRootElementCacheBase.ClearCachesAfterBuildIfNeeded`, gated on ChangeWave 18.11. A cache
+   that reloads from disk now survives restore instead of being discarded wholesale.
+2. **MSBuild Server is on by default** — but not from MSBuild. `ShouldUseMSBuildServer` is unchanged
+   and still returns true only for `MSBUILDUSESERVER=1` or `-mt`. The default lives in `dotnet/sdk`
+   (`MSBuildForwardingAppWithoutLogging`), which sets `MSBUILDUSESERVER` when it is unset.
+3. **`-mt` is scheduled for .NET 11.0.2xx.** It turns out to matter far more than the server does.
+
+### A measurement trap worth stating first
+
+**This repository's own bootstrap does not reproduce shipping default behaviour.** The pinned SDK
+(`11.0.100-preview.7.26360.111`) predates the `dotnet/sdk` change; none of `MSBUILDUSESERVER`,
+`DOTNET_CLI_USE_MSBUILD_SERVER` or `DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER` appear anywhere in its
+binaries. Verified empirically: a plain `dotnet build` through the bootstrap produces **no**
+`/nodemode:8` process, while `MSBUILDUSESERVER=1` produces one.
+
+Anyone benchmarking MSBuild with the bootstrap and no environment variable is measuring a
+configuration that no longer ships. Every server number in this document sets `MSBUILDUSESERVER=1`
+explicitly, which is a faithful emulation because that variable is the only lever the SDK has.
 
 ## Baseline
 
-Subject: a restored `dotnet new console` (`net11.0`). One evaluation reads **116 project files
-(1.4 MB of XML)** and produces 737 properties, 448 items, 4 item definitions, and 504 targets holding
-1152 child elements. 179 `<Import>` elements resolve to those 116 files.
+One evaluation of each subject, cold (fresh `ProjectCollection`, isolated `EvaluationContext` — what
+a command line build does per project) and warm (both shared — what design-time and project graph
+re-evaluation do).
 
-A no-op `dotnet msbuild -t:Build` of that project, MSBuild Server enabled:
+| | console | OrchardCore.Contents |
+| --- | ---: | ---: |
+| Imported files | 116 | 90 |
+| Properties / items / targets | 735 / 448 / 504 | 443 / 546 / 174 |
+| Cold evaluation | 110.7 ms | 72.9 ms |
+| Warm evaluation | 9.0 ms | 4.9 ms |
+| Allocated, cold | 13.5 MB | 8.1 MB |
 
-| | Build wall clock | Evaluation | Evaluation share |
+Where a cold evaluation goes, by exclusive time:
+
+| Scope | console | OrchardCore.Contents |
+| --- | ---: | ---: |
+| `LoadDocument` (read + parse + locate XML) | 47.2% | 33.8% |
+| `SdkResolverResolveSdk` | 20.5% | 21.9% |
+| `ExpandGlob` | 3.7% | **15.1%** |
+| `ApplyLazyItemOperations` | 3.7% | 17.5% |
+| `ReadTargetElements` | 5.9% | 4.2% |
+| `Parse` (XML tokenize/DOM, inside `LoadDocument`) | 4.7% | 4.5% |
+
+The console project understates globbing by a factor of four. It has 27 files in its cone;
+`OrchardCore.Contents` has 357. Any conclusion about glob cost drawn from a `dotnet new console`
+fixture is wrong, which is why this revision uses a real solution as the primary subject.
+
+`LoadDocument` decomposes as: reading bytes 25.5%, tokenizing XML 28.5%, building a stock DOM 12.2%,
+**attaching element locations 33.9%**. Location tracking — the line/column information behind error
+messages — is the single largest layer of XML loading, larger than the parse itself.
+
+## Finding 1: a single target framework spelled in the plural doubles evaluation
+
+This is the largest cheap win found in this pass.
+
+A project that declares `<TargetFrameworks>net11.0</TargetFrameworks>` is evaluated **twice** per
+build: once with no `TargetFramework` global property (the outer, framework-negotiating evaluation)
+and once with `TargetFramework=net11.0` (the inner build). A project that declares
+`<TargetFramework>net11.0</TargetFramework>` is evaluated once. The two evaluations differ in exactly
+one global property, and the second repeats all five passes of the first.
+
+Minimal fixture, one library plus one referencing app:
+
+| Library declares | Evaluations in the build |
+| --- | ---: |
+| `<TargetFrameworks>net11.0</TargetFrameworks>` | 3 |
+| `<TargetFramework>net11.0</TargetFramework>` | 2 |
+
+Scaled to 20 libraries plus an app, identical in every other respect, both configurations building
+successfully, server enabled, warm, median of 5:
+
+| Library declares | Evaluations / build | Evaluation CPU | Wall clock |
 | --- | ---: | ---: | ---: |
-| **Cold** (first build in the session) | ~1650 ms | **~368 ms** | 22% |
-| **Warm** (second and later builds) | ~459 ms | **~49 ms** | 11% |
+| `TargetFrameworks` (plural, one value) | 40 | 12 042 ms | 12 525 ms |
+| `TargetFramework` (singular) | 20 | 8 048 ms | **4 748 ms** |
 
-Evaluation drops **7.5x** between the first and later builds, because the server keeps the parsed XML
-resident *and* keeps the entry-point process alive. Evaluation timings are `/profileevaluation`
-figures corrected for that profiler's own measured overhead (88 ms warm, 178 ms cold — see
-[Method](#method)).
+**2.6x wall clock, from changing the name of a property.** The plural runs were also far noisier
+(6 368–26 560 ms, versus 4 328–5 466 ms singular); even comparing the *fastest* plural run against the
+median singular run, singular wins by 25%.
 
-For a single-project build the server is doing nearly all of that work, because the entry node
-evaluates the project and, without the server, that process is new every time. Node reuse alone
-cannot help there — but on a multi-project build it does, substantially. Total evaluation per build
-across four consecutive `-m:4` builds of 12 projects, **server off**:
+This shape is extremely common: repositories set `TargetFrameworks` from a shared property so that
+adding a second framework later is a one-line change, and pay for cross-targeting machinery they do
+not use. OrchardCore is exactly this — `CommonTargetFrameworks` is `net10.0`, assigned to
+`<TargetFrameworks>` in three `Directory.Build.props` files — and a warm inner-loop build of one of
+its modules performs **82 evaluations for 41 projects**, every pair differing only by
+`TargetFramework=net10.0`.
 
-| `-nodeReuse` | Build 1 | Build 2 | Build 3 | Build 4 | Worker nodes left alive |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| `true` (the default) | 3231 ms | 2443 ms | 2148 ms | **1559 ms** | 3 |
-| `false` | 3312 ms | 3150 ms | 3162 ms | 3348 ms | 0 |
+Two possible fixes, in increasing order of blast radius:
 
-Node reuse alone recovers about half the evaluation cost by the fourth build, with no server
-involved. So cross-build caching is not new; the server widens it and removes per-invocation startup.
+* **In the SDK**: when `TargetFrameworks` resolves to exactly one framework, skip the outer/inner
+  split and build it as a single-framework project. This benefits every repository using the idiom
+  without any of them changing anything. It is a behavioural change — `$(TargetFrameworks)` being set
+  is observable, and cross-targeting also changes output layout and packaging — so it wants a change
+  wave and a careful audit of what keys off "is this a cross-targeting build".
+* **In repositories**: use the singular property when there is one framework.
 
-Two framing facts for everything below:
+Honest limitation: patching OrchardCore's three `Directory.Build.props` to the singular property did
+halve its evaluations from 82 to 41, but the resulting build failed in my constrained setup (I was
+using `-p:BuildProjectReferences=false`, and a source generator dependency went unbuilt). The
+controlled 20-project measurement above is the one to trust; the OrchardCore run establishes only the
+evaluation count, not a timing result, and does not establish that OrchardCore can simply make this
+change.
 
-* **Evaluation is a minority of a single-project build**, 11-22%. It matters at scale — large
-  solutions, `ProjectGraph`, Visual Studio solution load and design-time builds — not on one small
-  project. Size any investment against the scenario it targets.
-* **Cost is fixed plus marginal.** There is a per-session fixed cost to warm the SDK import closure,
-  then a per-project marginal cost. Work on the fixed term is capped per build; work on the marginal
-  term multiplies by project count.
+## Finding 2: `-mt` is worth far more than the server, because it collapses per-node duplication
 
----
+Cold evaluation cost is paid **per node**, not per build. A default `-m` build starts up to eight
+worker nodes, each with its own `ProjectRootElementCache`, each parsing the same SDK independently.
+`-mt` collapses all of them into one process with one cache.
 
-## Pillar 1: Cold builds
+Inner loop, `OrchardCore.Contents` with `-p:BuildProjectReferences=false`, warm median of 7:
 
-### What "cold" actually scopes to
-
-"Cold" is not a property of the build, and not of each project — it is **per node**. The
-`ProjectRootElementCache` is shared through `BuildParameters` within a node, so the first project
-evaluated on a node pays to load and parse the whole SDK import closure and every later project on
-that node reuses it. That is exactly the fixed-plus-marginal split measured in
-[pillar 2](#how-warm-cost-scales-with-project-count): ~80-110 ms for the first project, ~16 ms for
-each one after it.
-
-The consequence is that a multi-proc build pays the fixed cost **once per node**, not once per build.
-Twelve projects, `-nr:false` so every build starts fully cold, server off, varying only node count:
-
-| Nodes | Wall clock | Total evaluation across the build |
+| Regime | Cold | Warm |
 | --- | ---: | ---: |
-| `-m:1` | 4660 ms | 1338 ms |
-| `-m:2` | 3011 ms | 1891 ms |
-| `-m:4` | 3010 ms | 3096 ms |
-| `-m:8` | 3755 ms | **6662 ms** |
+| no server | 6 228 ms | 4 425 ms |
+| server | 6 102 ms | 4 560 ms |
+| server + `MsBuildCacheFileEnumerations` | 6 337 ms | 4 210 ms |
+| **server + `-mt`** | **4 195 ms** | **1 796 ms** |
 
-Evaluation work grows about 5x for the same 12 projects. Each additional node adds roughly 760 ms of
-duplicated work in this measurement — one more independent parse of the same ~116 SDK files. A
-control with a **single** project shows node count alone changes nothing (499 ms at `-m:1` versus
-533 ms at `-m:8`), which attributes the growth to per-node duplication rather than to parallelism
-overhead.
+**The server on its own buys nothing measurable here** (4 560 ms versus 4 425 ms without it — the
+difference is inside the noise, and the wrong way round). `-mt` is 2.5x.
 
-Note also that wall clock stops improving after `-m:2` here and is *worse* at `-m:8`: for twelve
-small projects the duplicated evaluation outweighs the parallelism. These absolute figures are
-inflated by `/profileevaluation` and by cold JIT in each fresh node, so treat the ratios rather than
-the milliseconds as the result.
+The reason is visible in evaluation cost across consecutive builds in one session:
 
-### The server changes this, but only together with `-mt`
-
-MSBuild Server on its own does not remove the duplication. Without `-mt` the server only orchestrates
-and still delegates project work to separate worker nodes, so each of those nodes keeps its own
-`ProjectRootElementCache`. What it does change is that the nodes and the entry process survive, so the
-duplicated cost is paid on the first build of a session and amortized afterwards.
-
-With `-mt` the server runs project work on **threads inside the single server process**. Each in-proc
-node is a thread (`NodeProviderInProc` creates one `_inProcNodeThread` per node, up to `MaxNodeCount`
-in multithreaded mode, and the scheduler sets out-of-proc affinity to zero), so there is exactly one
-`ProjectRootElementCache` for the whole build and the SDK is parsed once. Twelve projects, three
-consecutive builds, total evaluation per build:
-
-| Configuration | Build 1 | Build 2 | Build 3 |
-| --- | ---: | ---: | ---: |
-| server off, `-m:8` | 7023 ms | 3541 ms | 2950 ms |
-| server on, `-m:8` | 8593 ms | 2469 ms | 2099 ms |
-| server on, `-mt` | **1123 ms** | **949 ms** | **1074 ms** |
-
-`-mt` is **6-7x cheaper on the cold build** and 2-3x cheaper warm — and it is essentially flat,
-because there is no per-node duplication left to amortize. Verified that the `-mt` run really does
-the same work: all 12 projects build, exit code 0, in 2.29 s. Sampling the live process tree during a
-build confirms the topology: `-m:8` shows worker processes (`/nodemode:1`) alongside the server, while
-`-mt` shows **none at all**.
-
-Two caveats that bound how much of this is bankable today:
-
-* **`MaxNodeCount` defaults to 1**, so `-mt` on its own gives a single in-proc node and no
-  parallelism. It needs `-m`/`-m:N` alongside it.
-* **Only evaluation collapses into one process; task execution largely does not.** In multithreaded
-  mode `TaskRouter` runs a task in-process only if its type carries
-  `MSBuildMultiThreadableTaskAttribute`, and routes everything else to an out-of-proc sidecar TaskHost
-  for isolation — necessary, because concurrent projects now share one process and a legacy task may
-  mutate environment variables or the working directory. MSBuild's own tasks and the SDK's tasks are
-  largely annotated, but `Microsoft.Build.Tasks.CodeAnalysis.dll` (Roslyn's `Csc`/`Vbc`) is not, so
-  the compile step of every project still goes out of process. That is why the `-mt` run above still
-  shows `/nodemode:2` TaskHost processes. **Maturing `-mt` is therefore substantially an annotation
-  effort in other repositories**, and its measured win here is specific to the evaluation half of the
-  build.
-
-This makes `-mt` the single largest lever measured anywhere in this document for cold multi-proc
-builds, which is exactly the CI shape. It is still experimental and opt-in; `-mt` implies the server
-(`ShouldUseMSBuildServer` returns true when `MSBUILDUSESERVER` is unset and the build is
-multithreaded).
-
-Two practical consequences:
-
-* **A CI build does not pay cold cost once.** It pays it once per node, so `-m:8` on a fresh machine
-  parses the SDK up to eight times. How much that matters depends on project count: with 12 projects
-  the fixed term dominates, while with 500 projects the marginal term does and the duplication is a
-  smaller share.
-* **Anything that reduces the fixed term is worth more on a multi-proc cold build than the
-  single-project numbers below suggest**, because the saving is multiplied by node count. That
-  applies to persisting the parsed construction model across processes (pillar 3), and it is what
-  `-mt` already achieves by collapsing the node count to one.
-* **Maturing `-mt` is the highest-leverage item for cold CI builds** on this evidence. It attacks the
-  duplication directly rather than making each duplicate cheaper.
-
-### Where the time goes in a cold evaluation
-
-The first project on a node pays for acquiring and parsing all 116 files. Exclusive time per scope,
-from MSBuild's own `Microsoft-Build` event source markers over 25 cold evaluations:
-
-| Category | Share of cold evaluation |
-| --- | ---: |
-| **Acquiring and parsing project XML** (`LoadDocument` + `Parse`) | **~52%** |
-| **SDK resolution** | **~21%** |
-| Import expression expansion and probing | ~7% |
-| Item evaluation including globbing | ~7% |
-| Property and condition evaluation | ~6% |
-| Target and task registration | ~6% |
-
-A cold evaluation is dominated by *acquiring* project XML, not by evaluating it. All five evaluation
-passes combined, excluding document loading, parsing and SDK resolution, are under 25%.
-
-### Reading a file is the cheap part
-
-From CPU profiles (`dotnet-trace`, stacks folded by category, two captures of 60 and 120 cold
-evaluations), as a share of thread time inside evaluation:
-
-| Category | Share |
-| --- | ---: |
-| Garbage collection | **27-30%** |
-| File attribute queries (`GetFileAttributesEx`, `FillAttributeInfo`, `GetFileType`) | **18-21%** |
-| Opening and closing file handles (`CreateFile`, `CloseHandle`) | **11-13%** |
-| XML tokenizing | 9-11% |
-| Reading bytes (`ReadFile`) | 6-7% |
-| XML DOM construction | 3-4% |
-| Path normalization | 3% |
-| Directory enumeration | 3% |
-
-Attribute queries plus handle open/close are roughly **30%** — four to five times the 6-7% spent
-actually reading 1.4 MB. Isolating the layers over the same 117 files with a warm OS cache:
-
-| Layer | Time for 117 files | Share |
-| --- | ---: | ---: |
-| Reading bytes (open, read, close) | 8.4 ms | 40% |
-| Tokenizing XML | 5.7 ms | 27% |
-| Building a stock `XmlDocument` | 4.2 ms | 20% |
-| Attaching element locations (`XmlDocumentWithLocation`) | 2.9 ms | 14% |
-| **Total** | **21.2 ms** | |
-| Stat every file (`FileInfo.LastWriteTimeUtc`) | 4.8 ms | *additional* |
-
-`XmlDocumentWithLocation` is **not** the villain it is often assumed to be: element locations add 14%
-to document loading, not a multiple.
-
-### Allocation drives the GC share
-
-| Scenario | Allocated | Gen0 | Gen1 | Gen2 | GC pause |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| Cold, full evaluation | **13.6 MB** | 2.60 | 1.08 | 0.32 | **19.0 ms** |
-| Cold, properties only | 11.1 MB | 2.04 | 1.00 | 0.20 | 13.6 ms |
-| Warm, full evaluation | 1.5 MB | 0.24 | 0.04 | 0.00 | 0.53 ms |
-
-Per evaluation; BenchmarkDotNet's `MemoryDiagnoser` independently reports 13.9 MB cold and 1.5 MB
-warm. Allocating roughly **10 MB per MB of project XML** is both the GC cost and the reason cold
-evaluation cannot get much faster without changing what gets built.
-
-### What to do
-
-1. **Stop stat-ing files that cannot change.** `ProjectRootElement.LoadDocument` unconditionally
-   calls `GetFileInfoNoThrow` to record `LastWriteTime` — about 4.8 ms per evaluation, ~5% of a cold
-   evaluation, on top of the open the read already performs.
-   `ProjectRootElementCache.IsInvalidEntry` already skips its staleness check for files that
-   `FileClassifier.IsNonModifiable` recognises; `LoadDocument` does not apply the same reasoning.
-   Small, self-contained, no invalidation risk (see [pillar 3](#pillar-3-caching-between-builds)).
-2. **Mature `-mt`.** Collapsing project execution into one process removes the per-node duplication
-   entirely and was measured at 6-7x on a cold 12-project build. Nothing else in this document
-   attacks the cold multi-proc shape that directly. Note the win measured here is on the *evaluation*
-   half: task execution still leaves the process for any task not marked
-   `MSBuildMultiThreadableTaskAttribute`, which today includes Roslyn's `Csc`/`Vbc`. Annotating the
-   remaining hot tasks — largely work in `dotnet/roslyn` and `dotnet/sdk` — is what converts this into
-   a whole-build win.
-3. **Reduce allocation in document loading.** 13.6 MB to read 1.4 MB is the direct cause of the
-   27-30% GC share. This is also what a persisted construction model would attack (pillar 3), and its
-   value is multiplied by node count for as long as builds stay multi-process.
-4. **Reduce imports that resolve to nothing.** 179 import elements produce 116 loaded files; 79 are
-   skipped on a false condition and 1 wildcard matches nothing. None loads a file, but each costs
-   expression expansion and, for the `Exists(...)` conditions gating most of them, a file probe.
-   Mostly an SDK authoring question rather than an engine one.
-
----
-
-## Pillar 2: Warm builds
-
-In a warm build the XML is already parsed, so the profile inverts. Per-pass share of a warm
-evaluation, three consecutive server builds:
-
-| Pass | Share of warm evaluation |
-| --- | ---: |
-| **Properties (pass 1)** — imports, property expansion, conditions | **~58%** |
-| **Targets (pass 5)** — `ProjectTargetInstance` / `ProjectTaskInstance` construction | **~22%** |
-| Items (pass 3) including lazy item operations | ~10% |
-| Item definitions, using-tasks, initial properties | remainder |
-
-### How warm cost scales with project count
-
-A real solution evaluates *different* projects sharing the same SDK imports. Median marginal cost per
-project over 12 distinct console projects, in four cache regimes (two independent runs):
-
-| Regime | Each later project | 12 projects |
-| --- | ---: | ---: |
-| Shared `ProjectCollection` + fully shared `EvaluationContext` | **12-14 ms** | ~270 ms |
-| Shared `ProjectCollection` + `SharedSDKCache` — **closest to the build path** | **14-18 ms** | ~300 ms |
-| Shared `ProjectCollection` + fully isolated context per project | 32-35 ms | ~475 ms |
-| Fresh collection and context per project | 94-98 ms | ~1150 ms |
-
-**The build path is the second row.** `BuildRequestConfiguration.InitializeProject` constructs
-`ProjectInstance` without an `EvaluationContext`, so `ProjectInstance.Initialize` creates an
-`Isolated` one per project — but it *does* pass a shared `sdkResolverService` explicitly, and project
-XML is shared through `BuildParameters.ProjectRootElementCache`. So SDK resolution and parsed XML are
-already shared across projects within a build; only the file existence cache and glob cache are not.
-
-Those two are worth very different amounts:
-
-| What is not shared | Marginal cost added |
-| --- | ---: |
-| SDK resolution across projects (**already shared today**) | ~18 ms per project |
-| File existence and glob caches (**not shared today**) | **~3 ms per project** |
-
-So the headroom from sharing the `EvaluationContext` is ~3 ms per project, about 20% of the marginal
-term — not the large win it first appears. `SharingPolicy.SharedSDKCache` specifically would add
-**nothing**, because the build path already shares SDK resolution.
-
-| Projects | Today (~16 ms marginal) | With shared file caches (~13 ms) |
+| Run | server: evaluation CPU | server + `-mt`: evaluation CPU |
 | ---: | ---: | ---: |
-| 12 | ~300 ms | ~270 ms |
-| 100 | ~1.7 s | ~1.4 s |
-| 500 | ~8 s | ~6.6 s |
+| 1 | 16 960 ms | 10 633 ms |
+| 2 | 16 063 ms | 10 608 ms |
+| 3 | 13 635 ms | 6 594 ms |
+| 4 | 12 948 ms | 4 751 ms |
+| 5 | 13 727 ms | **4 628 ms** |
 
-### What to do
+Under the plain server, evaluation CPU flattens out around 13 s and stops improving. Under `-mt` it
+falls to 4.6 s — **3x less evaluation work for the same build** — because the XML is parsed once
+instead of once per node, and the JIT warms once instead of once per node.
 
-1. **Reduce the irreducible per-project cost — the largest warm item.** Of the ~16 ms a project costs
-   today, only ~3 ms is missing cache sharing; the remaining ~13 ms is genuine re-evaluation. Every
-   project re-evaluates all ~116 SDK files' property groups, item groups and targets even though the
-   XML is parsed and the SDKs are resolved. Pass 1 (~58%) and pass 5 (~22%) are the hot code:
-   `Expander`, `ConditionEvaluator`, `LazyItemEvaluator`, and `ProjectTargetInstance` construction.
-   On a 500-project solution this is ~6.6 s of the ~8 s evaluation total.
+This reframes the server's value. The server saves entry-process startup and keeps the entry node's
+XML cache warm, but in a multi-project build the entry node is not where evaluation happens: worker
+nodes are, and those already survived between builds via node reuse. `-mt` is the change that
+actually removes duplicated evaluation work.
 
-   The structural idea: MSBuild's import order is project → `Sdk.props` → SDK props → project body →
-   `Sdk.targets` → SDK targets. The prefix through `Sdk.props` depends only on global properties and
-   the SDK, not on the project body, so for projects sharing global properties it produces identical
-   results today and is recomputed per project. Snapshotting and reusing that prefix is the only idea
-   here that attacks the marginal term structurally rather than by micro-optimization. Its
-   invalidation story is in [pillar 3](#pillar-3-caching-between-builds).
-2. **Share the file existence and glob caches across projects within a build.** ~3 ms per project,
-   ~20% of the marginal term. The context is `Isolated` today for correctness reasons; the safe
-   boundary is discussed under invalidation below.
-3. **Adopt partial evaluation where targets are not needed.** `ProjectEvaluationStage.UsingTasks` and
-   `.Items` already skip target and using-task registration — 22% of a warm evaluation and 1.7 MB of
-   allocation. The win depends on callers adopting it; a build itself needs targets, so this applies
-   to tooling and query scenarios rather than to builds.
+## Finding 3: evaluation results are never reused between builds
 
----
+In every one of the consecutive runs above, the profiler reports **81 evaluations**. Not 80, not 40 —
+the same 81, every build, in a warm server session with nothing changed on disk.
 
-## Pillar 3: Caching between builds
+Only *XML* is cached across builds (and only in the entry node, and now only correctly since
+[#14558](https://github.com/dotnet/msbuild/pull/14558)). Everything downstream of the parse — the five
+evaluation passes, property and item computation, glob expansion, target registration — is redone in
+full for every project on every build.
 
-Cross-build caching is not new — reused worker nodes have kept parsed XML for a long time, and the
-server extends that to the entry-point process. But exactly one artifact is cached this way, and
-everything else is rebuilt from scratch on every build. The remaining opportunity is gated entirely
-on invalidation.
+So the ceiling on cross-build caching is large: under `-mt` steady state, a build that changes nothing
+still spends 4.6 s of CPU re-deriving evaluation results that are bit-for-bit identical to the
+previous build's.
 
-### What is cached, where, and for how long
+What stands between here and there is invalidation, and the shape of the key is known:
 
-Three different lifetimes matter. They are easy to conflate, and the differences drive everything
-below.
+* **Project file and its entire import closure**, by path and last-write-time. `ProjectRootElementCache`
+  already does exactly this, so the mechanism exists and is proven.
+* **Global properties**, which is what makes the outer and inner evaluations of Finding 1 distinct.
+* **Environment variables read during evaluation**, which is the hard part — evaluation can read
+  arbitrary environment state through property functions, and there is no record of which variables a
+  given evaluation actually consulted. Making this tractable probably means recording the set of
+  environment reads during evaluation and keying on it, the same way the file closure is keyed.
 
-**Within one build, across projects:**
+The immutable-directory carve-out below is what makes the file half cheap: files under the SDK
+install and the NuGet package folder are not stat-ed at all.
 
-| Cache | Shared across projects? | Owner |
-| --- | --- | --- |
-| Parsed project XML (`ProjectRootElement`) | **Yes** | `BuildParameters.ProjectRootElementCache` |
-| SDK resolution results | **Yes** | `CachingSdkResolverService`, keyed `(submissionId, SDK name)` |
-| Evaluated `ProjectInstance` per (project, global properties) | **Yes** | `ConfigCache` |
-| Target results per configuration | **Yes** | `ResultsCache` |
-| Glob results and file existence probes | **No** | `EvaluationContext`, created `Isolated` per project |
+## Finding 4: the optimized `FileMatcher` regresses evaluation-time globbing
 
-**Between builds in a reused *worker* node** (node reuse is on by default, no server required):
+[PR #14663](https://github.com/dotnet/msbuild/pull/14663) introduces an optimized wildcard matcher
+behind ChangeWave 18.11. Measured from the evaluation side, same binary, wave on versus off, median of
+3 alternating runs:
 
-`OutOfProcNode` holds `static ProjectRootElementCacheBase s_projectRootElementCacheBase`, constructed
-as `new ProjectRootElementCache(true /* automatically reload any changes from disk */)`. So parsed
-project XML has *already* survived across builds in worker nodes for a long time. Measured above:
-with node reuse on and the server off, evaluation across four consecutive 12-project builds falls
-from 3231 ms to 1559 ms, while with `-nr:false` it stays flat. **The server did not introduce
-cross-build XML caching**; it extends the same mechanism to the entry-point process, which is what
-makes it visible on single-project builds where the entry node does the evaluating.
+| Project | files / dirs | optimized | legacy | ratio |
+| --- | ---: | ---: | ---: | ---: |
+| `dotnet new console` | 27 / 8 | 1.02 ms | 3.70 ms | 0.28x (faster) |
+| `OrchardCore.OpenId` | 100 / 27 | 7.46 ms | 6.41 ms | 1.16x |
+| `OrchardCore.Contents` | 357 / 62 | 16.61 ms | 10.91 ms | **1.52x** |
 
-**Between builds in a reused *server* node:**
+The three `OrchardCore.Contents` pairs do not overlap (optimized 16.0–17.3 ms, legacy 9.7–11.4 ms).
+The regression grows with tree size, which is backwards: large trees are where glob cost matters. For
+that project it is +5.7 ms on a ~73 ms evaluation, so **roughly +8% of the whole cold evaluation**.
+
+Two structural notes, both established by reading the code rather than by measurement:
+
+* `CanUseDirectEnumeration` requires `!_usesFileSystemEntryCache`, and `EvaluationContext` always
+  constructs its `FileMatcher` with a `FileEntryExpansionCache`. The direct `FileSystemEnumerator`
+  traversal that produces the PR's headline numbers is therefore **unreachable from evaluation**;
+  evaluation always takes the cached-callback path.
+* Warm, shared-context re-evaluation drops `ExpandGlob` to ~1% of evaluation because glob results are
+  cached in the `EvaluationContext`. The regression is specific to cold, isolated-context evaluation —
+  which is what a command line build does for every project.
+
+The independent review on that PR attributes the regression to the optimized drivers being
+single-threaded where the legacy path fans out with `Parallel.ForEach`, demonstrated by the ratios
+collapsing to ~1.0x when pinned to one core. That is a better-supported root cause than anything
+measurable from the evaluation side, and it predicts the regression worsens with core count.
+
+## What is cached, where, and for how long
+
+Between builds in a reused **server** node:
 
 | Artifact | Survives? | Why |
 | --- | --- | --- |
-| Parsed project XML | **Only when no restore runs** | `reuseProjectRootElementCache: s_isServerNode` selects a static `ProjectRootElementCache` and passes `autoReloadFromDisk: reuseProjectRootElementCache` — but an implicit `-restore` discards it, see [the restore flush](#the-restore-flush) |
+| Parsed project XML | **Yes** | static `ProjectRootElementCache` with `autoReloadFromDisk`, and since #14558 restore no longer discards it |
 | JIT-compiled code, loaded assemblies | **Yes** | same process |
-| `FileMatcher` / `FileUtilities` file-existence statics | **Yes**, unless the caller passes `BuildRequestDataFlags.ClearCachesAfterBuild` | process-wide statics |
-| SDK resolution results | **No** | `BuildManager` calls `SdkResolverService.ClearCache(submissionId)` when each submission completes |
-| Evaluated `ProjectInstance` / target results | **No** | `BuildParameters.ResetCaches` defaults to `true`, so `ConfigCache` and `ResultsCache` are reset per build |
-| Glob and file existence results | **No** | `EvaluationContext` is per project, never mind per build |
-| `ChangeWaves` / `Traits` ambient state | **Yes — unintentionally** | see [invalidation](#invalidation-the-deciding-constraint) |
+| Glob expansions | **No** (opt-in) | `s_cachedGlobExpansions` is process-wide but only used when `MsBuildCacheFileEnumerations` is set; otherwise the cache lives on the per-build `EvaluationContext` |
+| SDK resolution results | **No** | `BuildManager` calls `SdkResolverService.ClearCache(submissionId)` as each submission completes |
+| Evaluated `ProjectInstance` / target results | **No** | `BuildParameters.ResetCaches` defaults to true |
+| `FileMatcher` / file-existence statics | **No** after restore | deliberately cleared; they hold negative results no timestamp can invalidate |
 
-Verified for SDK resolution: three consecutive builds in one server session each emit the same SDK
-resolution work — ~20 ms per build that no current cache recovers. Verified for evaluation results:
-warm server builds report ~49 ms of evaluation on *every* build, so nothing about the evaluation
-itself is reused.
+SDK resolution is worth calling out: it is 20–22% of a cold evaluation, dominated by
+`Microsoft.DotNet.MSBuildWorkloadSdkResolver` (16.7–22.4 ms), and it is discarded at the end of every
+submission. Within a build the cache is shared, so this is a fixed per-build cost rather than a
+per-project one — modest next to Findings 1 and 2, but it is pure repetition, and the inputs
+(installed SDKs, workload manifests) are files, so the invalidation story is the tractable one.
 
-### The restore flush
+### How the surviving cache invalidates
 
-The XML row above carries a caveat that costs more than everything else in the table combined. The
-implicit restore issues its build request with `BuildRequestDataFlags.ClearCachesAfterBuild`, and
-`BuildManager.CheckAllSubmissionsComplete` responds by calling `ProjectRootElementCache.Clear()`,
-which replaces the weak and strong caches wholesale — all 116 files, not just what restore touched.
-Restore then hands over to the build, which finds an empty cache and re-parses the entire closure.
+`IsInvalidEntry`, on every `Get`:
 
-That flush is load-bearing in the classic case: with `autoReloadFromDisk: false` nothing else would
-notice that restore rewrote `nuget.g.props`/`nuget.g.targets`, and the process exits afterwards, so
-there is nothing to preserve. Under the server both facts invert — the timestamp check already covers
-restore's edits, and the cache being discarded is precisely the one meant to survive.
+1. `!_autoReloadFromDisk` → always valid (the non-reused case; the cache dies with the build).
+2. `FileClassifier.Shared.IsNonModifiable(path)` → assumed valid, **the file is never stat-ed**.
+   Registered immutable locations include the entire .NET SDK install and the NuGet package folders.
+3. File missing on disk → valid (an in-memory project never saved).
+4. `LastWriteTime != LastWriteTimeWhenRead` → invalid, reload.
 
-Measured in-process, so that process startup and JIT do not mask the effect, by timing the evaluation
-that follows a restore-like submission:
-
-| Cache | Scenario | Penalty |
-| --- | --- | --- |
-| reloads from disk (server) | 1 project | +250 ms / **+11.88 MB** |
-| reloads from disk (server) | 12 projects | +380 ms / **+12.73 MB** |
-| does not reload (classic) | 1 project | +274 ms / +11.87 MB |
-
-The allocation figures are the reliable signal: 11.9 MB matches parsing the full 1.4 MB closure from
-scratch, and it was identical on every round. The cost is paid **once per build**, by whichever
-project is evaluated first — that evaluation repopulates the cache for everything behind it, so the
-twelve-project case costs about the same as the one-project case. It is a fixed per-build tax rather
-than a per-project one, and it lands only on the entry node; worker nodes were always exempt.
-
-The practical consequence is that the server's cross-build XML cache does nothing for `dotnet build`,
-only for `dotnet build --no-restore` — which is the opposite of where the inner-loop benefit was
-supposed to land. Filed as [#14556](https://github.com/dotnet/msbuild/issues/14556) and fixed in
-[#14558](https://github.com/dotnet/msbuild/pull/14558) by skipping only the `Clear()` when the cache
-reloads from disk, behind change wave 18.10.
-
-### How the one cross-build cache invalidates
-
-`ProjectRootElementCache` is the only artifact deliberately kept across builds, so its invalidation is
-the whole of MSBuild's current cross-build correctness story. On every `Get`, `IsInvalidEntry` decides
-whether the cached entry may be used:
-
-1. **`!_autoReloadFromDisk` → entry is always considered valid.** This is the non-reused case, where
-   the cache lives only as long as the build, so nothing can change underneath it.
-2. **`FileClassifier.Shared.IsNonModifiable(path)` → assumed valid, and the file is never stat-ed.**
-   Immutable locations are registered by `RequestBuilder.ConfigureKnownImmutableFolders` during a
-   build and include `NetCoreRoot` (the entire .NET SDK), `NuGetPackageFolders`,
-   `FrameworkPathOverride`, and Microsoft reference assemblies. `MSBUILDDONOTCACHEMODIFICATIONTIME=1`
-   forces the timestamp check even for these.
-3. **File does not exist on disk → valid.** An in-memory project that was never saved.
-4. **`fileInfo.LastWriteTime != projectRootElement.LastWriteTimeWhenRead` → invalid, reload from
-   disk.** This is the actual invalidation.
-5. Optionally, a full content comparison, behind a test-only environment variable.
-
-On top of that there is structural eviction: `_weakCache` is a `WeakValueDictionary`, so entries can
-be collected, and `_strongCache` is a bounded MRU list. An entry can therefore disappear and be
-re-read even when it was still valid.
-
-So the rule is: **path plus last-write-time, except inside directories declared immutable, where the
-timestamp is not consulted at all.**
-
-That carve-out is a deliberate performance tradeoff — it is what avoids stat-ing the 114 SDK files on
-every lookup — but it does mean that editing a file inside the SDK or the NuGet package cache is not
-guaranteed to be observed by a reused node. The ordering above settles what was previously left open:
-step 2 returns before step 4 ever executes, so for a file under an immutable root the timestamp is
-never consulted at all. An edit to an SDK `.props` file *was* observed to take effect in a reused
-server session during testing, but that cannot have come from the timestamp check — it can only have
-been structural eviction of a weakly-held entry, which is luck rather than a guarantee. **The
-carve-out should be treated as "staleness is permitted here", not as "staleness cannot happen".**
-Anyone developing SDK content against a reused node should set `MSBUILDDONOTCACHEMODIFICATIONTIME=1`
+Step 2 returns before step 4 ever runs, so for anything under an immutable root the timestamp is
+never consulted. Editing a file inside the SDK is therefore **not guaranteed** to be observed by a
+reused node; if an edit does appear it is structural eviction from the weak cache, not invalidation.
+Anyone authoring SDK content against a reused node should set `MSBUILDDONOTCACHEMODIFICATIONTIME=1`
 or shut the server down between iterations.
 
-### Invalidation: the deciding constraint
+## What to do, in order of confidence
 
-Cross-build caching is only as good as its invalidation. The measured evidence splits cleanly along
-one axis.
-
-**The file axis is sound, and this is proven.** Six mutations applied between builds in a single
-server session, each probed by re-reading the affected property or item:
-
-| # | Mutation between builds | Picked up? |
-| --- | --- | --- |
-| 1 | baseline (fresh server) | — |
-| 2 | edit a property in the project file | **yes** |
-| 3 | add a file matching a glob | **yes** |
-| 4 | edit an imported `.props` file | **yes** |
-| 5 | create a file that an `Exists(...)` import condition tests | **yes** |
-| 6 | delete that file again | **yes** |
-
-All six behave correctly, for the reasons in
-[How the one cross-build cache invalidates](#how-the-one-cross-build-cache-invalidates): cases 2 and 4
-are caught by the last-write-time check, and cases 3, 5 and 6 never involve the cross-build cache at
-all, because glob results and `Exists(...)` probes live in the per-project `EvaluationContext`.
-
-The deeper reason the timestamp key is *sound* rather than merely adequate: the construction model is
-a pure function of a file's bytes. `ProjectParser.Parse` is purely syntactic — an `<Import>` keeps its
-`Project` and `Condition` attributes as literal, unexpanded strings, and even the implicit
-`Sdk.props`/`Sdk.targets` imports synthesized from an `Sdk="..."` attribute carry the SDK name
-unresolved. Global properties decide *which* files get parsed, never *what* parsing a file produces,
-which is why a cache keyed on path alone is shared safely across projects with different global
-properties.
-
-A corollary worth stating because it is easy to get wrong: **"conditionally imported" and "cacheable"
-are orthogonal.** Conditionality is a property of the `<Import>` element; immutability is a property
-of the file. `Microsoft.NET.Sdk.VisualBasic.props` is one of the 79 imports skipped on a false
-condition here, yet it is the same immutable file a Visual Basic project loads unconditionally.
-Conditions run exactly as they do today, before any cache lookup, so a cache never changes which
-files an evaluation loads.
-
-**The ambient-state axis is broken, and this is also proven.** Environment-derived static state is
-*not* reset between builds. `ChangeWaves` caches its parsed wave on first use and never re-reads
-`MSBUILDDISABLEFEATURESFROMVERSION` (`ShouldApplyChangeWave` is true only while
-`ConversionState == NotConvertedYet || _cachedWave == null`):
-
-| `MSBUILDDISABLEFEATURESFROMVERSION` | Without server | With server |
-| --- | --- | --- |
-| `17.0` | `17.10` | `17.10` |
-| `99.0` | `18.10` | `17.10` (**stuck on the first build's value**) |
-| `17.0` | `17.10` | `17.10` |
-
-The worse variant needs no server at all. Out-of-proc worker nodes are reused by default while the
-entry-point process is fresh each invocation, so **projects within a single build disagree** about
-which change waves are enabled depending on which node evaluated them. With `-m:4` and the server
-explicitly off, reproduced identically on three consecutive trials:
-
-```
-set=17.12  -> 1:17.12  2:17.12  3:17.12  4:17.12
-set=18.5   -> 1:18.5   2:17.12  3:17.12  4:17.12
-                       ^^^^^^^^^^^^^^^^^^^^^^^^^ stale, from the previous build
-```
-
-Tracked as [dotnet/msbuild#14547](https://github.com/dotnet/msbuild/issues/14547). It also undermines
-the general refresh mechanism, because `Traits.UpdateFromEnvironment()` — which both `OutOfProcNode`
-and `OutOfProcServerNode` already call per build — is itself gated on
-`ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)`, so stale change-wave state can freeze
-`Traits` refresh too.
-
-**The principle that falls out:** caches keyed on *file content identity* are safe and already work;
-caches of *ambient process state* have no key at all, and the one place MSBuild caches ambient state
-is already wrong. Any new cross-build cache must be keyed on file identity, or must explicitly
-enumerate and key on the ambient inputs it depends on.
-
-A third category is worth naming because it is neither: **caches that are deliberately not
-invalidated**, like the immutable-directory carve-out above. Those are sound only as long as the
-"immutable" declaration holds, and they trade correctness under SDK authoring for speed under normal
-use. New caches should prefer an explicit key over an assumed-immutable declaration where the cost
-allows it.
-
-### What to do, in order of confidence
-
-1. **Fix per-build state isolation.** This gates the entire pillar. If a reused process produces
-   wrong results, reuse gets switched off and both the server's 7.5x and node reuse's ~50% are lost
-   with it. Note this is not a server-only concern: the change-wave leak is *worse* on reused worker
-   nodes, which are the default and predate the server. Reset `ChangeWaves` alongside the existing
-   `Traits.UpdateFromEnvironment()` calls in `OutOfProcNode` and `OutOfProcServerNode`, ordered so
-   `ChangeWaves` refreshes first; audit the remaining environment-derived statics for the same
-   cached-on-first-use-with-no-reset pattern; give reused nodes one explicit "reset per request" path
-   instead of today's scattered resets; add regression tests covering both the server and the
-   multi-proc worker-node case.
-2. **Cache SDK resolution across builds in a session.** ~20 ms per build, currently discarded by
-   `ClearCache(submissionId)`. Invalidation is tractable: the result is a function of the SDK name and
-   the resolver's own inputs (installed SDK, workload manifests on disk), all of which are files, so
-   the sound-axis rule applies. The cache must be invalidated when those manifests change; a
-   last-write-time check over the manifest set mirrors what `ProjectRootElementCache` already does.
-   Self-contained within MSBuild; making it survive across *processes* additionally needs
-   coordination with `dotnet/sdk`.
-3. **Share the file existence and glob caches across projects within a build.** ~3 ms per project.
-   The context is `Isolated` today because a shared existence cache can serve stale results if a build
-   writes a file that a later project imports — a real risk, since builds generate files. The safe
-   boundary already exists: `FileClassifier.IsNonModifiable` identifies the SDK install directory,
-   where **114 of the 116 imported files** live. Sharing probe results only for paths that cannot
-   change during a build captures most of the win with no staleness risk.
-4. **Persist the parsed construction model across processes.** Sound by the file-axis rule, and its
-   invalidation is already proven by the six tests above. The ceiling has moved for the *inner loop* —
-   reused nodes already keep this resident within a session, so persisting it across *processes* helps
-   the first build on each node rather than every build. But note that is not a small population: a
-   cold `-m:8` build has eight such nodes, each re-parsing the same SDK files independently
-   (see [what "cold" scopes to](#what-cold-actually-scopes-to)), so an on-disk cache read by every
-   node saves the duplication as well as the first parse. Two open questions decide whether the prize
-   is collectible: **deserialization is not free** (the win exists only if materializing a cached
-   model beats 5.7 ms of tokenizing plus 4.2 ms of DOM construction), and **`ProjectRootElement` is
-   mutable and owns an `XmlDocument`**, so a shared cache needs a read-only or copy-on-write form.
-5. **Caching whole evaluation results — the largest prize and the hardest invalidation.** Warm
-   evaluation is ~49 ms per build for one project and ~16 ms per project at scale; caching results
-   across builds would remove nearly all of it. But a sound key must cover every input: every
-   imported file's content, all global properties, the environment variables actually read, every
-   `Exists(...)` result, every glob result, and every property function result. MSBuild cannot
-   currently enumerate those, because the file system abstraction is not a complete choke point —
-   `XmlReaderExtension` opens a `FileStream` directly and `GetFileInfoNoThrow` stats directly, both
-   bypassing `IFileSystem`. **Closing that leak is the prerequisite**, and is worth doing on its own
-   merits regardless of whether this cache is ever built.
-
-   The `Sdk.props`-prefix idea from pillar 2 is the tractable subset of this: its inputs are just the
-   global properties and the SDK, both of which are known before evaluation starts, so it can be keyed
-   soundly without solving general input tracking.
-
----
+1. **Make a one-value `TargetFrameworks` stop meaning "cross-target".** Measured 2.6x wall clock on a
+   controlled 20-project tree and a halving of evaluation count on OrchardCore. Cheapest measured win
+   available, and it needs no new caching or invalidation machinery. Needs a change wave and an audit
+   of what keys off cross-targeting.
+2. **Ship `-mt`.** Measured 2.5x on the inner loop and 3x less evaluation CPU, because it removes the
+   per-node duplication that node reuse never addressed. Nothing else in this document comes close for
+   a multi-project build.
+3. **Do not default ChangeWave 18.11 to the optimized `FileMatcher` until wall-clock parity is
+   demonstrated** on a real, SDK-shaped tree at >= 8 cores. As measured it is a regression for
+   evaluation-time globs, worsening with tree size, and the fast path it was benchmarked on cannot be
+   reached from evaluation.
+4. **Cache evaluation results across builds.** The prize is the whole 4.6 s of steady-state evaluation
+   CPU that a no-op `-mt` build still spends. The file half of the key is already solved by
+   `ProjectRootElementCache`; global properties are easy; environment reads are the open problem and
+   should be scoped first, because they decide whether this is feasible at all.
+5. **Cache SDK resolution across builds in a session.** ~17–22 ms per build, currently discarded per
+   submission. Small, but it is pure repetition and its inputs are files.
+6. **Attack XML location tracking.** 33.9% of `LoadDocument`, which is itself 34–47% of a cold
+   evaluation — so roughly 12–16% of cold evaluation is spent recording line and column numbers.
+   Worth an experiment in storing locations more compactly, or lazily for files that never produce a
+   diagnostic. This only pays where XML is still being parsed, so it shrinks as Findings 2 and 4 land.
 
 ## Method
 
-Four independent lenses, cross-checked against each other:
+Numbers come from four lenses, described in
+[`src/MSBuild.Benchmarks/Analysis/README.md`](../src/MSBuild.Benchmarks/Analysis/README.md):
 
-| Lens | What it answers | Mechanism |
-| --- | --- | --- |
-| Event source markers | Wall clock per phase, including time blocked on I/O | In-process `EventListener` on `Microsoft-Build` |
-| CPU profile | Where time goes below the markers, including GC and syscalls | `dotnet-trace`, stacks folded into categories |
-| Injected file system | Logical versus real file operations, redundant probing | `MSBuildFileSystemBase` via `EvaluationContext` |
-| BenchmarkDotNet | Statistically valid wall clock and allocation | `FullEvaluationBenchmark` with `MemoryDiagnoser` |
+* **Event source markers** (`Microsoft-Build`), reconstructed into an inclusive/exclusive tree. This
+  is what produces the per-scope tables. Listener overhead is measured and reported alongside.
+* **An injected `MSBuildFileSystemBase`** that counts logical versus real file system operations.
+* **Allocation and GC** via `GC.GetTotalAllocatedBytes` and `GC.CollectionCount`.
+* **Binary logs**, read with the binlog tooling, for evaluation counts and global properties per
+  evaluation in real builds.
 
-They agree: the marker-derived cold total (90 ms in-process) matches BenchmarkDotNet's mean (90.2 ms);
-the harness's allocation figures match `MemoryDiagnoser`'s; and the marker breakdown's ~52% for
-document loading and parsing is consistent with the CPU profile's syscall and XML shares.
+Cautions learned the hard way in this pass:
 
-End-to-end build numbers use `/profileevaluation` corrected for its own overhead, measured by running
-the same build with and without the profiler: **88 ms warm, 178 ms cold**. Reported evaluation totals
-of 137 ms warm and 546 ms cold therefore correspond to ~49 ms and ~368 ms.
-
-Caveats:
-
-* **The OS file cache is warm in all measurements.** A genuinely cold disk makes the I/O categories
-  larger, not smaller, so the conclusions here are conservative.
-* **`/profileevaluation` is not free**, hence the correction above. Per-element tracking also
-  distorts *proportions* toward scopes with many elements, so pass-level shares from it are treated
-  as approximate and the precise breakdowns come from the in-process lenses.
-* **Steady state takes ~70 evaluations to reach.** Any evaluation benchmark warming up less than that
-  is measuring tiered JIT compilation.
-* **This is one small project.** More source files shift weight toward globbing and item evaluation;
-  more `ProjectReference`s shift it toward the marginal term. The 116 SDK imports are the same for
-  every SDK-style project, so the shape generalizes even where the absolute values do not.
+* `-profileevaluation` reports evaluation summed over all projects and all nodes, so it routinely
+  exceeds wall clock on a parallel build. It is a measure of *work*, not of elapsed time.
+* Toggling a change wave to A/B a feature is only valid once you have enumerated everything else that
+  wave gates. Wave 18.11 gates the optimized matcher, the restore-flush fix, two out-of-proc node
+  changes and three `Xml*` task defaults; in an in-process, evaluation-only harness only the first is
+  reachable, which is what makes the toggle a clean control *there* and nowhere else.
+* Wall clock on multi-project builds was too noisy on this machine to separate effects smaller than
+  about 20%; evaluation counts and marker times were stable enough to use. Where only the noisy lens
+  was available, this document says so instead of reporting a number.
+* Reaching evaluation steady state takes roughly 60–80 evaluations.
 
 ## Reproducing these numbers
 
-Build the repository in Release, then:
-
 ```powershell
+./build.cmd -configuration Release
+
 # Marker, file system, allocation and XML breakdown for one project.
-dotnet artifacts/bin/MSBuild.Benchmarks/Release/net11.0/MSBuild.Benchmarks.dll --analyze --output breakdown.md
+dotnet artifacts/bin/MSBuild.Benchmarks/Release/net11.0/MSBuild.Benchmarks.dll --analyze --project <path>
 
 # Per-project marginal cost across many distinct projects, in four cache regimes.
-dotnet artifacts/bin/MSBuild.Benchmarks/Release/net11.0/MSBuild.Benchmarks.dll --analyze --multi-project <directory>
+dotnet artifacts/bin/MSBuild.Benchmarks/Release/net11.0/MSBuild.Benchmarks.dll --analyze --multi-project <dir>
 
 # Statistically valid wall clock and allocation.
 dotnet artifacts/bin/MSBuild.Benchmarks/Release/net11.0/MSBuild.Benchmarks.dll --filter *FullEvaluationBenchmark*
-
-# CPU profile folded into categories (needs dotnet-trace and Python 3).
-./src/MSBuild.Benchmarks/Analysis/Collect-EvaluationProfile.ps1 -Iterations 120
 ```
 
-The harness creates and restores its own `dotnet new console` fixture. Pass `--project <path>` to
-analyze a different project. See
-[`src/MSBuild.Benchmarks/Analysis/README.md`](../src/MSBuild.Benchmarks/Analysis/README.md).
+Set `MSBUILDUSESERVER=1` for any server measurement; the bootstrap will not do it for you.
 
 ## Related documents
 
-* [MSBuild Server](MSBuild-Server.md)
-* [Partial (stop-after-pass) project evaluation](specs/proposed/partial-evaluation.md)
-* [MSBuild evaluation profiling](evaluation-profiling.md) (`/profileevaluation`)
-* [Event source markers](specs/event-source.md)
-* [Evaluation performance investigations](specs/proposed/evaluation-perf.md)
-* [dotnet/msbuild#14547](https://github.com/dotnet/msbuild/issues/14547) — ChangeWaves state is not
-  reset between builds in reused nodes
+* [`documentation/MSBuild-Server.md`](MSBuild-Server.md)
+* [`documentation/specs/proposed/evaluation-perf.md`](specs/proposed/evaluation-perf.md)
+* [`documentation/wiki/ChangeWaves.md`](wiki/ChangeWaves.md)
