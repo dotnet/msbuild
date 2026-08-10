@@ -2534,7 +2534,12 @@ namespace Microsoft.Build.Shared
                 return ([], action, string.Empty, null);
             }
 
-            if (action is not SearchAction.RunSearch and not SearchAction.LogDriveEnumeratingWildcard)
+            if (action == SearchAction.LogDriveEnumeratingWildcard)
+            {
+                return GetFilesImplementation(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
+            }
+
+            if (action != SearchAction.RunSearch)
             {
                 throw new NotSupportedException(action.ToString());
             }
@@ -2573,9 +2578,7 @@ namespace Microsoft.Build.Shared
                     }
                     else if (excludeAction == SearchAction.LogDriveEnumeratingWildcard)
                     {
-                        trackedAction = excludeAction;
-                        trackedExcludeFileSpec = excludeSpec;
-                        AddExclude(excludeSpec, excludeState);
+                        return GetFilesImplementation(projectDirectoryUnescaped, filespecUnescaped, excludeSpecsUnescaped);
                     }
                     else if (excludeAction == SearchAction.RunSearch)
                     {

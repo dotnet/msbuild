@@ -395,6 +395,45 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
         fileSystem.EnumerationCalls.ShouldBeEmpty();
     }
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void DriveEnumeratingWildcardUsesLegacyTraversal(bool useAsExclude)
+    {
+        Helpers.ResetStateForDriveEnumeratingWildcardTests(_environment, "0");
+        TransientTestFolder project = _environment.CreateFolder();
+        string root = Path.GetPathRoot(project.Path)!;
+        string driveEnumeratingWildcard = Path.Combine(root, "**", "*.log");
+        int enumerationCalls = 0;
+
+        IReadOnlyList<string> Enumerate(
+            FileMatcher.FileSystemEntity entityType,
+            string path,
+            string pattern,
+            string projectDirectory,
+            bool stripProjectDirectory)
+        {
+            enumerationCalls++;
+            return [];
+        }
+
+        DirectRecordingFileSystem fileSystem = new(FileSystems.Default);
+        FileMatcher optimized = new(
+            fileSystem,
+            Enumerate,
+            implementation: FileMatcherImplementation.Optimized,
+            allowDirectEnumeration: true);
+
+        var result = useAsExclude
+            ? optimized.GetFiles(project.Path, ToPlatformPath("**/*.cs"), [driveEnumeratingWildcard])
+            : optimized.GetFiles(projectDirectoryUnescaped: null, driveEnumeratingWildcard);
+
+        result.Action.ShouldBe(FileMatcher.SearchAction.LogDriveEnumeratingWildcard);
+        result.ExcludeFileSpec.ShouldBe(useAsExclude ? driveEnumeratingWildcard : string.Empty);
+        enumerationCalls.ShouldBeGreaterThan(0);
+        fileSystem.EnumerationCalls.ShouldBeEmpty();
+    }
+
     [Fact]
     public void DirectDriverPreservesLexicalDotSegments()
     {
