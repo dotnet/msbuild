@@ -32,14 +32,16 @@ internal sealed class NodeBudgetManager
     public int HighPriorityReservedNodes { get; }
 
     /// <summary>
-    ///  Gets the maximum number of nodes granted to one build. Zero means uncapped.
+    ///  Gets the maximum number of nodes granted to one build when
+    ///  <see cref="MaxNodesPerBuildWhenIdle"/> does not apply. Zero means uncapped.
     /// </summary>
     public int MaxNodesPerBuild { get; }
 
     /// <summary>
-    ///  Gets the opportunistic node ceiling for an idle build. Zero means disabled.
+    ///  Gets the maximum number of nodes granted to an eligible build when no root grants are active
+    ///  and no requests are waiting. Zero means disabled.
     /// </summary>
-    public int IdleNodeCeiling { get; }
+    public int MaxNodesPerBuildWhenIdle { get; }
 
     /// <summary>
     ///  Gets the number of bypasses required to age a queued build by one priority level.
@@ -85,26 +87,26 @@ internal sealed class NodeBudgetManager
     /// </summary>
     /// <param name="totalBudget">The maximum number of nodes available across all builds.</param>
     /// <param name="highPriorityReservedNodes">The number of nodes withheld from low and normal priority grants.</param>
-    /// <param name="maxNodesPerBuild">The maximum number of nodes granted to one build. Zero means uncapped.</param>
+    /// <param name="maxNodesPerBuild">The maximum number of nodes granted to one build when <paramref name="maxNodesPerBuildWhenIdle"/> does not apply. Zero means uncapped.</param>
     /// <param name="priorityAgingThreshold">The number of bypasses required to age a queued build by one priority level.</param>
-    /// <param name="idleNodeCeiling">The opportunistic node ceiling for an idle build. Zero means disabled.</param>
+    /// <param name="maxNodesPerBuildWhenIdle">The maximum number of nodes granted to an eligible build when no root grants are active and no requests are waiting. Zero means disabled.</param>
     public NodeBudgetManager(
         int totalBudget,
         int highPriorityReservedNodes = 0,
         int maxNodesPerBuild = 0,
         int priorityAgingThreshold = CoordinatorSettings.DefaultPriorityAgingThreshold,
-        int idleNodeCeiling = 0)
+        int maxNodesPerBuildWhenIdle = 0)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(totalBudget, nameof(totalBudget));
         ArgumentOutOfRangeException.ThrowIfNegative(highPriorityReservedNodes, nameof(highPriorityReservedNodes));
         ArgumentOutOfRangeException.ThrowIfNegative(maxNodesPerBuild, nameof(maxNodesPerBuild));
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(priorityAgingThreshold, nameof(priorityAgingThreshold));
-        ArgumentOutOfRangeException.ThrowIfNegative(idleNodeCeiling, nameof(idleNodeCeiling));
+        ArgumentOutOfRangeException.ThrowIfNegative(maxNodesPerBuildWhenIdle, nameof(maxNodesPerBuildWhenIdle));
 
         TotalBudget = totalBudget;
         HighPriorityReservedNodes = Math.Min(highPriorityReservedNodes, Math.Max(0, totalBudget - 1));
         MaxNodesPerBuild = maxNodesPerBuild == 0 ? 0 : Math.Min(maxNodesPerBuild, totalBudget);
-        IdleNodeCeiling = idleNodeCeiling == 0 ? 0 : Math.Min(idleNodeCeiling, totalBudget);
+        MaxNodesPerBuildWhenIdle = Math.Min(maxNodesPerBuildWhenIdle, totalBudget);
         PriorityAgingThreshold = priorityAgingThreshold;
         _nonHighPriorityBudgetLimit = ComputeNonHighPriorityBudgetLimit();
     }
@@ -133,8 +135,8 @@ internal sealed class NodeBudgetManager
 
         lock (_lock)
         {
-            bool isIdle = _activeGrants.Count == 0 && _waitQueue.Count == 0;
             bool hasWaiters = _waitQueue.Count > 0;
+            bool isIdle = _activeGrants.Count == 0 && !hasWaiters;
             if (hasWaiters && ShouldQueueBehindWaiters_NoLock(grant))
             {
                 QueueGrant_NoLock(grant);
@@ -150,7 +152,7 @@ internal sealed class NodeBudgetManager
                 return 0;
             }
 
-            int grantedNodes = isIdle ? GetIdleGrantableNodes(grant, available) : 0;
+            int grantedNodes = isIdle ? GetGrantableNodesWhenIdle(grant, available) : 0;
             if (grantedNodes <= 0)
             {
                 grantedNodes = GetGrantableNodes(grant, available);
@@ -301,18 +303,18 @@ internal sealed class NodeBudgetManager
         return available >= desiredNodes ? desiredNodes : 0;
     }
 
-    private int GetIdleGrantableNodes(BuildGrant grant, int available)
+    private int GetGrantableNodesWhenIdle(BuildGrant grant, int available)
     {
         if (MaxNodesPerBuild <= 0
-            || IdleNodeCeiling <= MaxNodesPerBuild
+            || MaxNodesPerBuildWhenIdle <= MaxNodesPerBuild
             || grant.Priority == CoordinatorBuildPriority.Low
-            || grant.RequestedNodes < IdleNodeCeiling
-            || available < IdleNodeCeiling)
+            || grant.RequestedNodes < MaxNodesPerBuildWhenIdle
+            || available < MaxNodesPerBuildWhenIdle)
         {
             return 0;
         }
 
-        return IdleNodeCeiling;
+        return MaxNodesPerBuildWhenIdle;
     }
 
     private int GetMaxNodesForGrant(BuildGrant grant)

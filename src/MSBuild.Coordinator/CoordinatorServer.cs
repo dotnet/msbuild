@@ -25,7 +25,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         settings.HighPriorityReservedNodes,
         settings.MaxNodesPerBuild,
         settings.PriorityAgingThreshold,
-        settings.IdleNodeCeiling);
+        settings.MaxNodesPerBuildWhenIdle);
     private readonly string _pipeName = settings.PipeName;
     private readonly int _heartbeatIntervalMs = settings.HeartbeatIntervalMs;
     private readonly int _shutdownTimeoutMs = settings.ShutdownTimeoutMs;
@@ -71,7 +71,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         // Start auto-shutdown timer.
         ResetShutdownTimer();
 
-        _output.WriteLine($"CoordinatorServer: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget}, high-priority reserved nodes={FormatHighPriorityReservedNodes(_settings.HighPriorityReservedNodes)}, max nodes per build={FormatMaxNodesPerBuild(_settings.MaxNodesPerBuild)}, idle node ceiling={FormatIdleNodeCeiling(_settings.IdleNodeCeiling)}, priority aging threshold={_settings.PriorityAgingThreshold})");
+        _output.WriteLine($"CoordinatorServer: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget}, high-priority reserved nodes={FormatHighPriorityReservedNodes(_settings.HighPriorityReservedNodes)}, max nodes per build={FormatMaxNodesPerBuild(_settings.MaxNodesPerBuild)}, max nodes per build when idle={FormatMaxNodesPerBuildWhenIdle(_settings.MaxNodesPerBuildWhenIdle)}, priority aging threshold={_settings.PriorityAgingThreshold})");
         if (_settings.AutoStrictPolicyOptOutMessage is { } autoStrictPolicyOptOutMessage)
         {
             _output.WriteLine($"CoordinatorServer: Auto strict policy active. {autoStrictPolicyOptOutMessage}");
@@ -607,7 +607,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
     private static string FormatMaxNodesPerBuild(int value)
         => value == 0 ? "0 (uncapped)" : value.ToString();
 
-    private static string FormatIdleNodeCeiling(int value)
+    private static string FormatMaxNodesPerBuildWhenIdle(int value)
         => value == 0 ? "0 (disabled)" : value.ToString();
 
     /// <summary>

@@ -72,7 +72,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
         _output.Lines.ShouldContain(
             line => line.Contains("high-priority reserved nodes=7")
                 && line.Contains("max nodes per build=0 (uncapped)")
-                && line.Contains("idle node ceiling=0 (disabled)")
+                && line.Contains("max nodes per build when idle=0 (disabled)")
                 && line.Contains("priority aging threshold=5"));
 
         _cts.Cancel();
@@ -430,7 +430,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
 
         _output.Lines.ShouldContain(
             line => line.Contains("max nodes per build=4")
-                && line.Contains("idle node ceiling=8"));
+                && line.Contains("max nodes per build when idle=8"));
 
         using NamedPipeClientStream normalClient1 = await ConnectClientPipeAsync();
         using BinaryWriter normalWriter1 = new(normalClient1, Encoding.UTF8, leaveOpen: true);

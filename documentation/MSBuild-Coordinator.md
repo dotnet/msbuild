@@ -158,8 +158,8 @@ Build Queued:
   Build → Heartbeat (every 5s while waiting)
   Eventually: Build ← NodeGrantMessage(N)
     [In uncapped mode, N is fair-share computed from available nodes and contenders,
-     capped by requested nodes (N <= 4 here). In capped mode, queued grants use the
-     fixed contention slice up to the request and cap.]
+     capped by the requested node count. In capped mode, N is the smaller of the
+     requested node count and the per-build cap.]
 
 Nested Build:
   Root Build → ClientHandshakeMessage(..., capabilities: nested-grants)
@@ -235,16 +235,11 @@ Nested grants are capability-gated. Older peers that do not advertise `nested-gr
 
 When multiple builds compete for limited nodes, the coordinator either computes a fair share per grant or grants up to a fixed per-build cap, depending on configuration.
 
-The coordinator first resolves the high-priority reservation and the per-build cap. By default, total node budgets below 8 use no reservation and no per-build cap. Total node budgets 8 and above reserve 4 nodes for high-priority requests and use a 4-node contention slice. The automatic policy also has an 8-node idle ceiling: when there are no active root grants and no waiters, an eligible first request can opportunistically receive two slices.
+The coordinator first resolves the high-priority reservation and the per-build cap. By default, total node budgets below 8 use no reservation and no per-build cap. At budgets 8 and above, the computed defaults reserve 4 nodes for high-priority requests and set the per-build cap to 4.
 
-The idle grant is immediate and opportunistic rather than a larger cap:
+One exception avoids limiting a build when the coordinator has no other work. If no root grants are active and no requests are waiting, the first `Normal` or `High` request may receive up to 8 nodes. A `Normal` request can receive 8 only when 8 nodes remain available after the high-priority reservation; a `High` request can use any 8 available nodes. `Low` requests and requests for fewer than 8 nodes use the regular per-build cap.
 
-- `Normal` receives 8 only when it requests at least 8 and at least 8 nodes are immediately available in the non-high-priority pool. With the default 4-node reservation, this means 4 nodes at total budgets 8-11 and 8 nodes at budgets 12 and above.
-- `High` receives 8 when it requests at least 8 and 8 total nodes are immediately available, so it may combine the reserved slice with one normal slice at budgets 8 and above.
-- `Low` never receives the idle grant and remains limited to one 4-node slice.
-- Requests below 8 fall back to ordinary capped sizing. Requests below 4 remain request-sized, while requests for 5-7 receive 4.
-
-Once any root grant is active, every new request uses the 4-node contention slice. Wait-queue draining always uses that slice and never the idle ceiling, even when the drained request becomes the only active build. Grants are immutable for their lifetime, so an existing 8-node grant is not reduced when contention arrives.
+Queued requests never use this exception; they use the regular capped or fair-share calculation even when a queued request becomes the only remaining build. Grants do not change during a build, so an existing 8-node grant is not reduced when another request arrives.
 
 New requests that arrive while same- or higher-priority builds are already queued are placed in the wait queue in both capped and uncapped modes.
 
@@ -257,7 +252,7 @@ granted_nodes = min(fair_share, requested_nodes)
 
 `same_effective_priority_waiting_builds` includes the build currently being evaluated for a grant. Effective priority includes aging: after higher-priority work bypasses a queued request a fixed number of times, that request is considered at the next higher effective priority. By default, a queued request ages upward by one effective priority level after 3 bypasses. Set `MSBUILDCOORDINATORPRIORITYAGINGTHRESHOLD` to a positive integer to tune that threshold.
 
-When `MSBUILDCOORDINATORMAXNODESPERBUILD` is positive, each build can receive at most that many nodes. Requests for at least the effective cap are only granted when enough nodes are available to grant that cap. The automatic idle path described above is evaluated first only for an otherwise idle coordinator; if 8 nodes are not immediately available, the request falls back to this ordinary 4-node calculation instead of waiting for 8:
+When `MSBUILDCOORDINATORMAXNODESPERBUILD` is set to a positive value, it is a hard cap. When the variable uses its computed 4-node default, the first-request exception described above is evaluated before the regular capped calculation. All other requests use the following calculation:
 
 ```
 effective_cap = max_nodes_per_build for High, or min(max_nodes_per_build, low_normal_pool) for Low/Normal
@@ -280,7 +275,7 @@ This ensures:
 - Each grant is capped by what the build requested and by the configured per-build cap
 - Uncapped mode divides available nodes across wait-queue contenders in the current drain phase
 - Capped mode grants up to the per-build cap and may leave partial capacity idle to preserve FIFO ordering
-- The automatic idle ceiling is used only for a new request when no root grants or waiters exist; queued grants never use it
+- Only an eligible first request to an otherwise idle coordinator can exceed the computed 4-node cap
 - Wait-queue entries are processed FIFO within the same effective priority and capacity pool
 - Higher-priority queued builds are drained before lower-priority queued builds
 - Lower-priority builds age as higher-priority builds bypass them, preventing starvation
@@ -297,16 +292,16 @@ The coordinator can reserve a fixed amount of capacity for high-priority request
 
 By default these settings are computed from the coordinator node budget:
 
-| Total node budget | High-priority reservation | Contention cap | Automatic idle ceiling |
-| ---: | ---: | ---: | ---: |
-| 1-7 | 0 | 0 (uncapped) | Disabled |
-| 8+ | 4 | 4 | 8 |
+| Total node budget | High-priority reservation | Max nodes per build |
+| ---: | ---: | ---: |
+| 1-7 | 0 | 0 (uncapped) |
+| 8+ | 4 | 4 (the first eligible request may receive 8 while idle) |
 
 Set either variable to `0` to disable that setting. Set a positive integer to force a specific value; values larger than the node budget are clamped to the effective range. Missing, empty, negative, or non-integer values use the computed value.
 
-The 8-node idle ceiling is derived only when `MSBUILDCOORDINATORMAXNODESPERBUILD` uses its automatic value. Explicit values remain literal and trustworthy: an explicit cap of 4 disables idle borrowing, an explicit cap of 8 creates ordinary 8-node capped grants rather than a 4-node contention slice with an idle exception, and explicit `0` disables the cap. Setting both reservation and cap to `0` restores the uncapped, no-reservation compatibility behavior.
+An explicit positive value for `MSBUILDCOORDINATORMAXNODESPERBUILD` is always a hard cap and disables this exception. Setting both reservation and cap to `0` restores the uncapped, no-reservation compatibility behavior.
 
-When a reservation is configured, Low and Normal requests are granted from `TotalNodeBudget - HighPriorityReservedNodes`, clamped so that at least one node remains available to non-high-priority builds. When a per-build cap is configured, that non-high-priority pool may leave capacity idle if the remaining capacity is too small for the next waiting build. High requests may use the full node budget, but still respect `MSBUILDCOORDINATORMAXNODESPERBUILD` when a per-build cap is configured. This keeps capacity available for high-priority work without changing grants that are already running.
+When a reservation is configured, Low and Normal requests are granted from `TotalNodeBudget - HighPriorityReservedNodes`, clamped so that at least one node remains available to non-high-priority builds. When a per-build cap is configured, that non-high-priority pool may leave capacity idle if the remaining capacity is too small for the next waiting build. High requests may use the full node budget, but still respect an explicitly configured `MSBUILDCOORDINATORMAXNODESPERBUILD`. With the computed default, only the eligible first request described above may exceed 4 nodes. This keeps capacity available for high-priority work without changing grants that are already running.
 
 The reservation is intentionally generalized. A design-time-build client can map UI-blocking work to `High`, but the coordinator only sees priority; it does not contain DTB-specific logic.
 
@@ -317,20 +312,8 @@ Overflow capacity does not need a separate setting. Users who intentionally want
 **First Normal Build Requests Full Budget** (8 total nodes, computed defaults)
 - No builds are active and no builds are waiting
 - Build A requests 8 nodes
-- Only 4 non-high-priority nodes are available after the reservation, so the 8-node idle ceiling cannot be used
+- Only 4 nodes remain available to Normal priority after the high-priority reservation
 - Build A is `Normal`, so it is granted 4 nodes
-
-**First Normal Build Requests Full Budget** (12 total nodes, computed defaults)
-- No builds are active and no builds are waiting
-- Build A requests at least 8 nodes
-- Eight non-high-priority nodes are immediately available, so Build A is granted 8 nodes
-- A later request uses the 4-node contention slice; Build A keeps its immutable 8-node grant
-
-**First High-Priority Build Requests Full Budget** (8 total nodes, computed defaults)
-- No builds are active and no builds are waiting
-- Build A requests 8 nodes at `High` priority
-- Build A combines the reserved slice and one normal slice and is granted 8 nodes
-- `Low` requests never use this idle path
 
 **Normal Build Plus High-Priority Build** (8 total nodes, computed defaults)
 - Build A is `Normal` and requests 8 nodes
@@ -351,16 +334,10 @@ Overflow capacity does not need a separate setting. Users who intentionally want
 **Three Full-Budget Requests Launched Together** (16 total nodes, computed defaults)
 - Builds A, B, and C are launched at roughly the same time, each requesting 16 nodes
 - Build A arrives while the coordinator is idle and receives 8 nodes
-- Build B receives the 4-node contention slice
+- Build B receives 4 nodes
 - Build C receives `WaitMessage` because only the 4-node high-priority reservation remains
 - A high-priority request can still receive the reserved 4 nodes
 - When Build A releases, queued Build C receives 4 nodes, not another idle 8-node grant
-
-**Partial Non-High-Priority Fragment** (15 total nodes, computed defaults)
-- Build A arrives while idle and receives 8 nodes
-- Only a 3-node non-high-priority fragment remains, so Build B receives `WaitMessage`
-- Build A keeps its 8-node grant while Build B waits
-- When Build A releases, Build B receives the ordinary 4-node contention slice
 
 **Uncapped Fair-Share Scenario** (8 total nodes, reservation and per-build cap disabled)
 - Build A and Build X are active with 4 nodes each (budget fully allocated)
@@ -419,10 +396,10 @@ Overflow capacity does not need a separate setting. Users who intentionally want
 | `MSBUILDCOORDINATORGRANTID` | (empty) | Internal token used by child processes to join an active root grant |
 | `MSBUILDCOORDINATORBUILDREQUESTPRIORITY` | `Normal` | Request coordinator queue priority for this build. Valid values are `Low`, `Normal`, and `High`; missing, empty, or invalid values use `Normal`. |
 | `MSBUILDCOORDINATORHIGHPRIORITYRESERVEDNODES` | Computed default: 0 for budgets below 8; otherwise 4 | Reserve nodes from low/normal-priority grants for high-priority requests. Set to 0 to disable. Missing, empty, negative, or non-integer values use the computed default. |
-| `MSBUILDCOORDINATORMAXNODESPERBUILD` | Computed default: uncapped for budgets below 8; otherwise a 4-node contention slice with an 8-node idle ceiling | Cap the number of nodes granted to one build. The idle ceiling applies only when this setting is automatic. Set to 0 to disable; an explicit positive value is used as the ordinary hard cap. Missing, empty, negative, or non-integer values use the computed default. |
+| `MSBUILDCOORDINATORMAXNODESPERBUILD` | Computed default: uncapped for budgets below 8; otherwise 4, with the first eligible request allowed up to 8 while idle | Limit the number of nodes granted to one build. An explicit positive value is always a hard cap; set to 0 to disable the cap. Missing, empty, negative, or non-integer values use the computed default. |
 | `MSBUILDCOORDINATORPRIORITYAGINGTHRESHOLD` | 3 | Number of bypasses required before a queued request ages upward by one effective priority level. Missing, empty, non-positive, or non-integer values use 3. |
 
-*Note*: `MSBUILDCOORDINATORNODEBUDGET` controls the total machine budget. Set it higher than the processor count to intentionally experiment with oversubscription. For example, on a 16-core machine, `MSBUILDCOORDINATORNODEBUDGET=20` with computed defaults gives the first idle eligible request up to 8 nodes, then uses 4-node contention slices while retaining 4 nodes for high-priority work. When the computed defaults enable a reservation or cap, coordinator startup/debug output includes the resolved reservation, contention cap, idle ceiling, and the relevant opt-out environment variables.
+*Note*: `MSBUILDCOORDINATORNODEBUDGET` controls the total machine budget. Set it higher than the processor count to intentionally experiment with oversubscription. For example, on a 16-core machine, `MSBUILDCOORDINATORNODEBUDGET=20` with computed defaults allows the first eligible request to receive 8 nodes, limits later grants to 4 nodes, and retains 4 nodes for high-priority work. Coordinator startup/debug output includes the resolved values and the relevant opt-out environment variables.
 
 ---
 

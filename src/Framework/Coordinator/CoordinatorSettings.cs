@@ -24,7 +24,7 @@ internal sealed record class CoordinatorSettings()
     public const int DefaultConnectionTimeoutMs = 5_000;
     public const int DefaultShutdownTimeoutMs = 60_000;
     public const int DefaultAutoNodeSlice = 4;
-    public const int DefaultAutoIdleNodeCeiling = DefaultAutoNodeSlice * 2;
+    public const int DefaultAutoMaxNodesPerBuildWhenIdle = DefaultAutoNodeSlice * 2;
     public const int AutoNodeConfiguration = -1;
     public const int DefaultHighPriorityReservedNodes = AutoNodeConfiguration;
     public const int DefaultMaxNodesPerBuild = AutoNodeConfiguration;
@@ -93,9 +93,9 @@ internal sealed record class CoordinatorSettings()
     public bool MaxNodesPerBuildIsAuto
         => !_maxNodesPerBuild.HasValue;
 
-    public int IdleNodeCeiling
+    public int MaxNodesPerBuildWhenIdle
         => MaxNodesPerBuildIsAuto && MaxNodesPerBuild > 0
-            ? Math.Min(DefaultAutoIdleNodeCeiling, TotalNodeBudget)
+            ? Math.Min(DefaultAutoMaxNodesPerBuildWhenIdle, TotalNodeBudget)
             : 0;
 
     public int PriorityAgingThreshold
