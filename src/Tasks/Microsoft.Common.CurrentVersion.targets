@@ -50,12 +50,12 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
        These registrations cannot live in Microsoft.Common.tasks: that is the *default tasks* file, which is evaluated once per
        toolset and shared by every project in the build, so it only ever sees environment, reserved, toolset and global
-       properties (see Toolset.InitializeProperties). $(NetCoreSdkRoot), $(UsingMicrosoftNETSdk) and $(NETCoreSdkVersion) are
+       properties (see Toolset.InitializeProperties). $(NetCoreSdkRoot) and $(NETCoreSdkVersion) are
        per-project SDK properties and are empty there, which silently disables the registration. Here they are evaluated as part
        of normal project evaluation, after the .NET SDK props have run, so they resolve correctly.
   -->
-  <UsingTask TaskName="Microsoft.Build.Tasks.TarDirectory" AssemblyFile="$(NetCoreSdkRoot)Microsoft.Build.Tasks.Core.dll" Runtime="NET" Condition="'$(MSBuildRuntimeType)' == 'Full' and '$(UsingMicrosoftNETSdk)' == 'true' and '$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '11'))" />
-  <UsingTask TaskName="Microsoft.Build.Tasks.Untar" AssemblyFile="$(NetCoreSdkRoot)Microsoft.Build.Tasks.Core.dll" Runtime="NET" Condition="'$(MSBuildRuntimeType)' == 'Full' and '$(UsingMicrosoftNETSdk)' == 'true' and '$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '11'))" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.TarDirectory" AssemblyFile="$(NetCoreSdkRoot)Microsoft.Build.Tasks.Core.dll" Runtime="NET" Condition="'$(MSBuildRuntimeType)' == 'Full' and '$(NetCoreSdkRoot)' != '' and '$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '11'))" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.Untar" AssemblyFile="$(NetCoreSdkRoot)Microsoft.Build.Tasks.Core.dll" Runtime="NET" Condition="'$(MSBuildRuntimeType)' == 'Full' and '$(NetCoreSdkRoot)' != '' and '$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '11'))" />
 
   <!-- By default, we are creating a managed app because .NET 2.0 projects did not have this property. -->
   <PropertyGroup Condition="'$(TargetRuntime)' == ''">
