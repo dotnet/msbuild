@@ -3323,6 +3323,54 @@ EndGlobal
             MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeTrue();
         }
 
+        [Theory]
+        [InlineData("/mt", null, true)]
+        [InlineData("/mt:true", null, true)]
+        [InlineData("/mt:false", null, false)]
+        [InlineData("/mt:false", "/mt", true)]
+        [InlineData("/mt", "/mt:false", false)]
+        [InlineData("/mt:false", "/mt:true", true)]
+        [InlineData("/mt:true", "/mt:false", false)]
+        public void MultiThreadedSwitchUsesLatestValue(string firstArgument, string secondArgument, bool expected)
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", null);
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(
+                secondArgument is null ? [firstArgument] : [firstArgument, secondArgument],
+                switches);
+
+            switches.HaveErrors().ShouldBeFalse();
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void MSBuildForceMultiThreadedEnvironmentVariableOverridesSwitch()
+        {
+            using TestEnvironment testEnvironment = TestEnvironment.Create(_output);
+            testEnvironment.SetEnvironmentVariable("MSBUILDFORCEMULTITHREADED", "1");
+
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(["/mt:false"], switches);
+
+            MSBuildApp.IsMultiThreadedEnabled(switches).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void MultiThreadedSwitchRejectsInvalidBooleanValue()
+        {
+            CommandLineSwitches switches = new CommandLineSwitches();
+            CommandLineParser parser = new CommandLineParser();
+            parser.GatherCommandLineSwitches(["/mt:invalid"], switches);
+
+            CommandLineSwitchException exception = Should.Throw<CommandLineSwitchException>(
+                () => MSBuildApp.IsMultiThreadedEnabled(switches));
+            exception.Message.ShouldContain("MSB1072");
+        }
+
         [Fact]
         public void MSBuildForceMultiThreadedEnvironmentVariableUnsetDoesNotEnableMultiThreadedMode()
         {

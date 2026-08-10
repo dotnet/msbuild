@@ -2763,13 +2763,21 @@ namespace Microsoft.Build.CommandLine
         internal static bool IsMultiThreadedEnabled(CommandLineSwitches commandLineSwitches)
         {
             // Allow forcing multi-threaded mode via an environment variable, for example to opt in
-            // without modifying command lines (parallel to MSBUILDDISABLENODEREUSE for /nodeReuse).
+            // without modifying command lines.
             if (Traits.Instance.ForceMultiThreaded)
             {
                 return true;
             }
 
-            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded);
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded))
+            {
+                return ProcessBooleanSwitch(
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MultiThreaded],
+                    defaultValue: true,
+                    resourceName: "InvalidMultiThreadedValue");
+            }
+
+            return false;
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
