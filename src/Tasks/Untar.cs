@@ -43,10 +43,17 @@ namespace Microsoft.Build.Tasks
         private string[] _excludePatterns = [];
 
         /// <summary>
-        /// Gets or sets a <see cref="DirectoryInfo"/> with a destination folder path to untar the files to.
+        /// Gets or sets a <see cref="ITaskItem"/> with a destination folder path to untar the files to.
         /// </summary>
+        /// <remarks>
+        /// The path parameters are exposed as <see cref="ITaskItem"/> rather than <see cref="DirectoryInfo"/>/
+        /// <see cref="FileInfo"/> so that .NET Framework MSBuild can reflect over this task's parameters when
+        /// dispatching it to the .NET task host. That inspection resolves parameter types through a
+        /// <c>MetadataLoadContext</c> in which the only available core assembly is .NET Framework's, whose
+        /// <c>System.Runtime</c> facade does not forward <see cref="FileInfo"/> or <see cref="DirectoryInfo"/>.
+        /// </remarks>
         [Required]
-        public DirectoryInfo DestinationFolder { get; set; } = null!;
+        public ITaskItem DestinationFolder { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets a value that indicates whether read-only files should be overwritten.
@@ -59,11 +66,11 @@ namespace Microsoft.Build.Tasks
         public bool SkipUnchangedFiles { get; set; } = true;
 
         /// <summary>
-        /// Gets or sets an array of <see cref="FileInfo"/> objects containing the paths to tar archive files to untar.
+        /// Gets or sets an array of <see cref="ITaskItem"/> objects containing the paths to tar archive files to untar.
         /// The compression (none, GZip, or ZStandard) is detected automatically from the archive contents.
         /// </summary>
         [Required]
-        public FileInfo[] SourceFiles { get; set; } = null!;
+        public ITaskItem[] SourceFiles { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets an MSBuild glob expression that specifies which files to include being untarred from the archive.
@@ -122,8 +129,10 @@ namespace Microsoft.Build.Tasks
 
                 if (!Log.HasLoggedErrors)
                 {
-                    foreach (FileInfo sourceFile in SourceFiles.TakeWhile(i => !_cancellationTokenSource.IsCancellationRequested))
+                    foreach (ITaskItem sourceItem in SourceFiles.TakeWhile(i => !_cancellationTokenSource.IsCancellationRequested))
                     {
+                        FileInfo sourceFile = new FileInfo(TaskEnvironment.GetAbsolutePath(sourceItem.ItemSpec).Value);
+
                         if (!FileSystems.Default.FileExists(sourceFile.FullName))
                         {
                             Log.LogErrorWithCodeFromResources("Untar.ErrorFileDoesNotExist", sourceFile.FullName);
@@ -204,15 +213,17 @@ namespace Microsoft.Build.Tasks
         /// <returns><see langword="true"/> if the destination directory was created; otherwise <see langword="false"/>.</returns>
         private bool TryCreateDestinationDirectory([NotNullWhen(true)] out DirectoryInfo? destinationDirectory)
         {
+            string destinationFolderPath = TaskEnvironment.GetAbsolutePath(DestinationFolder.ItemSpec).Value;
+
             try
             {
-                destinationDirectory = Directory.CreateDirectory(DestinationFolder.FullName);
+                destinationDirectory = Directory.CreateDirectory(destinationFolderPath);
 
                 return true;
             }
             catch (Exception e)
             {
-                Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotCreateDestinationDirectory", DestinationFolder.FullName, e.Message);
+                Log.LogErrorWithCodeFromResources("Untar.ErrorCouldNotCreateDestinationDirectory", destinationFolderPath, e.Message);
 
                 destinationDirectory = null;
 

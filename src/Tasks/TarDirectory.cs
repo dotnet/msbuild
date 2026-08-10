@@ -30,10 +30,27 @@ namespace Microsoft.Build.Tasks
         private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
 
         /// <summary>
-        /// Gets or sets the full path to the destination file to create.
+        /// The <see cref="SourceDirectory"/> item resolved against the task's working directory.
+        /// </summary>
+        /// <remarks>
+        /// The path parameters are exposed as <see cref="ITaskItem"/> rather than <see cref="DirectoryInfo"/>/
+        /// <see cref="FileInfo"/> so that .NET Framework MSBuild can reflect over this task's parameters when
+        /// dispatching it to the .NET task host. That inspection resolves parameter types through a
+        /// <c>MetadataLoadContext</c> in which the only available core assembly is .NET Framework's, whose
+        /// <c>System.Runtime</c> facade does not forward <see cref="FileInfo"/> or <see cref="DirectoryInfo"/>.
+        /// </remarks>
+        private DirectoryInfo _sourceDirectory = null!;
+
+        /// <summary>
+        /// The <see cref="DestinationFile"/> item resolved against the task's working directory.
+        /// </summary>
+        private FileInfo _destinationFile = null!;
+
+        /// <summary>
+        /// Gets or sets a <see cref="ITaskItem"/> with the path to the destination file to create.
         /// </summary>
         [Required]
-        public FileInfo DestinationFile { get; set; } = null!;
+        public ITaskItem DestinationFile { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets a value indicating whether the destination file should be overwritten.
@@ -41,10 +58,10 @@ namespace Microsoft.Build.Tasks
         public bool Overwrite { get; set; }
 
         /// <summary>
-        /// Gets or sets the full path to the source directory to create a tar archive from.
+        /// Gets or sets a <see cref="ITaskItem"/> with the path to the source directory to create a tar archive from.
         /// </summary>
         [Required]
-        public DirectoryInfo SourceDirectory { get; set; } = null!;
+        public ITaskItem SourceDirectory { get; set; } = null!;
 
         /// <summary>
         /// Question the incremental nature of this task.
@@ -53,18 +70,33 @@ namespace Microsoft.Build.Tasks
         public bool FailIfNotIncremental { get; set; }
 
         /// <summary>
-        /// Gets or sets the compression to apply to the tar archive.
-        /// The default is <see cref="TarCompression.None"/>.
-        /// This parameter is optional.
+        /// Gets or sets the compression to apply to the tar archive. Supported values are <c>None</c> (the default),
+        /// <c>GZip</c> and <c>ZStandard</c>, matched case-insensitively.
+        /// This parameter is optional; when empty, no compression is applied.
         /// </summary>
-        public TarCompression Compression { get; set; } = TarCompression.None;
+        /// <remarks>
+        /// Like <see cref="Format"/>, this is typed as <see cref="string"/> rather than <see cref="TarCompression"/>.
+        /// When .NET Framework MSBuild dispatches this task to the .NET task host it resolves each parameter type in
+        /// the parent process by assembly-qualified name; <see cref="TarCompression"/> is nested in this task, which
+        /// exists only in the .NET build of Microsoft.Build.Tasks.Core, so the lookup would bind against the .NET
+        /// Framework build of that assembly and fail.
+        /// </remarks>
+        public string? Compression { get; set; }
 
         /// <summary>
-        /// Gets or sets the tar entry format to use for the archive.
-        /// The default is <see cref="TarEntryFormat.Pax"/>.
-        /// This parameter is optional.
+        /// Gets or sets the tar entry format to use for the archive. Supported values are <c>Pax</c> (the default),
+        /// <c>Ustar</c>, <c>V7</c> and <c>Gnu</c>, matched case-insensitively.
+        /// This parameter is optional; when empty, <see cref="TarEntryFormat.Pax"/> is used.
         /// </summary>
-        public TarEntryFormat Format { get; set; } = TarEntryFormat.Pax;
+        /// <remarks>
+        /// This is deliberately typed as <see cref="string"/> rather than <see cref="TarEntryFormat"/>. When .NET
+        /// Framework MSBuild dispatches this task to the .NET task host it must still reflect over the task's
+        /// parameters in the parent process, resolving parameter types through a <c>MetadataLoadContext</c> whose
+        /// resolver only spans the task assembly's own directory, the MSBuild directory and the .NET Framework
+        /// runtime directory. System.Formats.Tar ships in the shared framework and is in none of those, so exposing
+        /// a type from it here would make the parameter unresolvable and fail the load in the parent.
+        /// </remarks>
+        public string? Format { get; set; }
 
         /// <summary>
         /// Gets or sets an optional timestamp to stamp on every entry in the archive in place of the source files'
@@ -104,9 +136,12 @@ namespace Microsoft.Build.Tasks
         /// <returns>A <see cref="System.Threading.Tasks.Task{Boolean}"/> that resolves to <see langword="true"/> when the archive was written without errors or cancellation.</returns>
         private async System.Threading.Tasks.Task<bool> ExecuteAsync()
         {
-            if (!SourceDirectory.Exists)
+            _sourceDirectory = new DirectoryInfo(TaskEnvironment.GetAbsolutePath(SourceDirectory.ItemSpec).Value);
+            _destinationFile = new FileInfo(TaskEnvironment.GetAbsolutePath(DestinationFile.ItemSpec).Value);
+
+            if (!_sourceDirectory.Exists)
             {
-                Log.LogErrorWithCodeFromResources("TarDirectory.ErrorDirectoryDoesNotExist", SourceDirectory.FullName);
+                Log.LogErrorWithCodeFromResources("TarDirectory.ErrorDirectoryDoesNotExist", _sourceDirectory.FullName);
                 return false;
             }
 
@@ -119,28 +154,28 @@ namespace Microsoft.Build.Tasks
             // of the intended not-incremental error.
             if (FailIfNotIncremental)
             {
-                Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailIfNotIncremental", SourceDirectory.FullName, DestinationFile.FullName);
+                Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailIfNotIncremental", _sourceDirectory.FullName, _destinationFile.FullName);
 
                 return false;
             }
 
-            if (DestinationFile.Exists)
+            if (_destinationFile.Exists)
             {
                 if (!Overwrite)
                 {
-                    Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFileExists", DestinationFile.FullName);
+                    Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFileExists", _destinationFile.FullName);
 
                     return false;
                 }
 
                 try
                 {
-                    File.Delete(DestinationFile.FullName);
+                    File.Delete(_destinationFile.FullName);
                 }
                 catch (Exception e)
                 {
-                    string lockedFileMessage = LockCheck.GetLockedFileMessage(DestinationFile.FullName);
-                    Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", SourceDirectory.FullName, DestinationFile.FullName, e.Message, lockedFileMessage);
+                    string lockedFileMessage = LockCheck.GetLockedFileMessage(_destinationFile.FullName);
+                    Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", _sourceDirectory.FullName, _destinationFile.FullName, e.Message, lockedFileMessage);
 
                     return false;
                 }
@@ -151,26 +186,37 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
+            if (!TryGetEntryFormat(out TarEntryFormat format))
+            {
+                Log.LogErrorWithCodeFromResources("TarDirectory.InvalidFormat", Format);
+
+                return false;
+            }
+
+            if (!TryGetCompression(out TarCompression compression))
+            {
+                Log.LogErrorWithCodeFromResources("TarDirectory.InvalidCompression", Compression);
+
+                return false;
+            }
+
             BuildEngine3.Yield();
 
             try
             {
-                Log.LogMessageFromResources(MessageImportance.High, "TarDirectory.Comment", SourceDirectory.FullName, DestinationFile.FullName);
-
-                // Unknown is only reachable if it was explicitly set; fall back to the Pax default.
-                TarEntryFormat format = Format == TarEntryFormat.Unknown ? TarEntryFormat.Pax : Format;
+                Log.LogMessageFromResources(MessageImportance.High, "TarDirectory.Comment", _sourceDirectory.FullName, _destinationFile.FullName);
 
                 // Scope the write streams to this block so they are flushed and closed before Execute returns,
                 // and — importantly — before the catch below attempts to delete a partially-written archive.
                 // Use FileMode.Create rather than FileInfo.OpenWrite (which is FileMode.OpenOrCreate and does not
                 // truncate): if a shorter archive is written over a pre-existing longer file, OpenOrCreate would
                 // leave stale trailing bytes and produce a corrupt archive.
-                using (FileStream destinationStream = new FileStream(DestinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (FileStream destinationStream = new FileStream(_destinationFile.FullName, FileMode.Create, FileAccess.Write, FileShare.None))
                 {
                     // Wrap the destination stream in the requested compression, if any. The tar archive is always
                     // written to the (optionally compressed) stream, and the TarWriter is created with the requested
                     // TarEntryFormat so every entry is emitted in that format.
-                    using Stream? compressionStream = Compression switch
+                    using Stream? compressionStream = compression switch
                     {
                         TarCompression.GZip => new GZipStream(destinationStream, CompressionLevel.Optimal),
                         TarCompression.ZStandard => new ZstandardStream(destinationStream, CompressionLevel.Optimal),
@@ -225,7 +271,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e)
             {
-                Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", SourceDirectory.FullName, DestinationFile.FullName, e.Message, string.Empty);
+                Log.LogErrorWithCodeFromResources("TarDirectory.ErrorFailed", _sourceDirectory.FullName, _destinationFile.FullName, e.Message, string.Empty);
 
                 // Best-effort cleanup of the partially-written archive so a subsequent non-Overwrite build does
                 // not fail with "already exists" on a corrupt, incomplete file.
@@ -247,10 +293,10 @@ namespace Microsoft.Build.Tasks
         {
             try
             {
-                DestinationFile.Refresh();
-                if (DestinationFile.Exists)
+                _destinationFile.Refresh();
+                if (_destinationFile.Exists)
                 {
-                    DestinationFile.Delete();
+                    _destinationFile.Delete();
                 }
             }
             catch
@@ -268,10 +314,10 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private List<(FileSystemInfo Info, string EntryName)> EnumerateEntriesInDeterministicOrder()
         {
-            string basePath = FileUtilities.EnsureTrailingSlash(SourceDirectory.FullName);
+            string basePath = FileUtilities.EnsureTrailingSlash(_sourceDirectory.FullName);
 
             List<(FileSystemInfo Info, string EntryName)> entries = [];
-            CollectEntries(SourceDirectory, basePath, entries);
+            CollectEntries(_sourceDirectory, basePath, entries);
 
             // Order determinism: sort by the in-archive entry name using an ordinal comparison. Because a
             // directory's entry name ends in '/', it is always a prefix of the names of everything it contains,
@@ -367,6 +413,56 @@ namespace Microsoft.Build.Tasks
             }
 
             return DateTimeOffset.TryParseExact(value, s_timestampFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal, out timestamp);
+        }
+
+        /// <summary>
+        /// Resolves <see cref="Format"/> to a <see cref="TarEntryFormat"/>. An empty value selects the
+        /// <see cref="TarEntryFormat.Pax"/> default.
+        /// </summary>
+        /// <returns><see langword="true"/> when the value was empty or named a supported format.</returns>
+        private bool TryGetEntryFormat(out TarEntryFormat format)
+        {
+            format = TarEntryFormat.Pax;
+
+            if (string.IsNullOrWhiteSpace(Format))
+            {
+                return true;
+            }
+
+            if (!Enum.TryParse(Format, ignoreCase: true, out TarEntryFormat parsed) || !Enum.IsDefined(typeof(TarEntryFormat), parsed))
+            {
+                return false;
+            }
+
+            // Unknown is not a real on-disk format; treat it as the Pax default so an explicitly supplied
+            // "Unknown" behaves as it did when this parameter was typed as TarEntryFormat.
+            format = parsed == TarEntryFormat.Unknown ? TarEntryFormat.Pax : parsed;
+
+            return true;
+        }
+
+        /// <summary>
+        /// Resolves <see cref="Compression"/> to a <see cref="TarCompression"/>. An empty value selects
+        /// <see cref="TarCompression.None"/>.
+        /// </summary>
+        /// <returns><see langword="true"/> when the value was empty or named a supported compression.</returns>
+        private bool TryGetCompression(out TarCompression compression)
+        {
+            compression = TarCompression.None;
+
+            if (string.IsNullOrWhiteSpace(Compression))
+            {
+                return true;
+            }
+
+            if (!Enum.TryParse(Compression, ignoreCase: true, out TarCompression parsed) || !Enum.IsDefined(typeof(TarCompression), parsed))
+            {
+                return false;
+            }
+
+            compression = parsed;
+
+            return true;
         }
 
         /// <summary>

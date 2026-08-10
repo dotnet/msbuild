@@ -3118,6 +3118,14 @@
     <value>MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</value>
     <comment>{StrBegin="MSB4325: "}</comment>
   </data>
+  <data name="TarDirectory.InvalidFormat">
+    <value>MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</value>
+    <comment>{StrBegin="MSB4326: "}</comment>
+  </data>
+  <data name="TarDirectory.InvalidCompression">
+    <value>MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</value>
+    <comment>{StrBegin="MSB4327: "}</comment>
+  </data>
   <data name="TarDirectory.Comment">
     <value>Creating tar archive from directory "{0}" to "{1}".</value>
   </data>
