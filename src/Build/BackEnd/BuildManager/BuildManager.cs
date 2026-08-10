@@ -1230,6 +1230,18 @@ namespace Microsoft.Build.Execution
 
                             loggingService.LogTelemetry(buildEventContext: null, _buildTelemetry.EventName, _buildTelemetry.GetProperties());
 
+                            // Emit per-task execution details as a separate "build/tasks/details" event.
+                            // The SDK merges these into the aggregated build/tasks telemetry event,
+                            // providing parity with the Activity-based path used by VS telemetry.
+                            if (!Traits.Instance.ExcludeTasksDetailsFromTelemetry)
+                            {
+                                Dictionary<string, string>? tasksDetailsProperties = _telemetryConsumingLogger?.WorkerNodeTelemetryData.GetTasksDetailsProperties();
+                                if (tasksDetailsProperties is not null)
+                                {
+                                    loggingService.LogTelemetry(buildEventContext: null, TasksDetailsTelemetry.TasksDetailsEventName, tasksDetailsProperties);
+                                }
+                            }
+
                             EndBuildTelemetry();
 
                             // Clean telemetry to make it ready for next build submission.
@@ -1494,7 +1506,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public void ShutdownAllNodes()
         {
-            Experimental.MSBuildClient.ShutdownServer(CancellationToken.None);
+            Microsoft.Build.Server.MSBuildClient.ShutdownServer(CancellationToken.None);
 
             _nodeManager ??= (INodeManager)((IBuildComponentHost)this).GetComponent(BuildComponentType.NodeManager);
             _nodeManager.ShutdownAllNodes();
@@ -3169,9 +3181,12 @@ namespace Microsoft.Build.Execution
                 {
                     // Reset the project root element cache if specified which ensures that projects will be re-loaded from disk.  We do not need to reset the
                     // cache on child nodes because the OutOfProcNode class sets "autoReloadFromDisk" to "true" which handles the case when a restore modifies
-                    // part of the import graph.
-                    _buildParameters?.ProjectRootElementCache?.Clear();
+                    // part of the import graph. The same reasoning applies to any cache that reloads from disk on the node running this build, such as the
+                    // one the MSBuild Server entry node reuses across builds, so the cache itself decides how much of it a restore invalidated.
+                    _buildParameters?.ProjectRootElementCache?.ClearCachesAfterBuildIfNeeded();
 
+                    // Unlike the XML cache, these hold negative results (a file that did not exist, a glob that matched nothing) which no
+                    // timestamp check can invalidate, and which restore invalidates precisely by creating files. They are always cleared.
                     FileMatcher.ClearCaches();
                     FileUtilities.ClearFileExistenceCache();
                 }
