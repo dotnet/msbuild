@@ -124,22 +124,11 @@ internal sealed class TerminalProjectInfo
                 message.Severity is TerminalMessageSeverity.Error or TerminalMessageSeverity.Warning);
     }
 
-    private int GetBuildMessageCount(TerminalMessageSeverity severity)
+private int GetBuildMessageCount(TerminalMessageSeverity severity) =>
+    severity switch
     {
-        if (_buildMessages is null)
-        {
-            return 0;
-        }
-
-        int count = 0;
-        foreach (TerminalBuildMessage message in _buildMessages)
-        {
-            if (message.Severity == severity)
-            {
-                count++;
-            }
-        }
-
-        return count;
-    }
+        TerminalMessageSeverity.Error => Project.ErrorCount,
+        TerminalMessageSeverity.Warning => Project.WarningCount,
+        _ => 0,
+    };
 }
