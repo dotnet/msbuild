@@ -8,14 +8,6 @@ using System.Linq;
 namespace Microsoft.Build.Logging;
 
 /// <summary>
-/// A struct containing relevant evaluation-time data that may not be knowable just from ProjectStart events.
-/// </summary>
-/// <param name="ProjectFile"></param>
-/// <param name="TargetFramework"></param>
-/// <param name="RuntimeIdentifier"></param>
-internal readonly record struct EvalProjectInfo(string? ProjectFile, string? TargetFramework, string? RuntimeIdentifier);
-
-/// <summary>
 /// Represents a project being built.
 /// </summary>
 internal sealed class TerminalProjectInfo
@@ -33,6 +25,8 @@ internal sealed class TerminalProjectInfo
         ProjectFile = project.EvaluationProjectFile;
         TargetFramework = project.TargetFramework;
         RuntimeIdentifier = project.RuntimeIdentifier;
+        ErrorCount = project.ErrorCount;
+        WarningCount = project.WarningCount;
         Stopwatch = stopwatch;
 
         if (project.IsTimingActive)
@@ -74,12 +68,12 @@ internal sealed class TerminalProjectInfo
     /// <summary>
     /// The number of errors included in the terminal summary.
     /// </summary>
-    public int ErrorCount => GetBuildMessageCount(TerminalMessageSeverity.Error);
+    public int ErrorCount { get; private set; }
 
     /// <summary>
     /// The number of warnings included in the terminal summary.
     /// </summary>
-    public int WarningCount => GetBuildMessageCount(TerminalMessageSeverity.Warning);
+    public int WarningCount { get; private set; }
 
     /// <summary>
     /// True when the project has error or warning build messages; otherwise false.
@@ -123,6 +117,8 @@ internal sealed class TerminalProjectInfo
     internal void Update(BuildEventTracker.ProjectSnapshot project)
     {
         Succeeded = project.Succeeded == true;
+        ErrorCount = project.ErrorCount;
+        WarningCount = project.WarningCount;
 
         if (project.IsTimingActive)
         {
@@ -145,12 +141,4 @@ internal sealed class TerminalProjectInfo
             : BuildMessages.Where(message =>
                 message.Severity is TerminalMessageSeverity.Error or TerminalMessageSeverity.Warning);
     }
-
-private int GetBuildMessageCount(TerminalMessageSeverity severity) =>
-    severity switch
-    {
-        TerminalMessageSeverity.Error => Project.ErrorCount,
-        TerminalMessageSeverity.Warning => Project.WarningCount,
-        _ => 0,
-    };
 }

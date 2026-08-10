@@ -12,6 +12,11 @@ internal sealed class BuildEventTracker
     private const string MSBuildTaskName = "MSBuild";
     private const string RestoreTargetName = "Restore";
 
+    private readonly record struct EvalProjectInfo(
+        string? ProjectFile,
+        string? TargetFramework,
+        string? RuntimeIdentifier);
+
     private sealed class TrackedProjectState
     {
         private readonly StopwatchAbstraction _stopwatch;
