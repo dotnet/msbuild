@@ -19,8 +19,8 @@ public class BuildEventTracker_Tests
     {
         var eventSource = new MockBuildEventSink(0);
         var tracker = new BuildEventTracker();
-        var correlatedProjects = new List<BuildEventTracker.TrackedProject?>();
-        BuildEventTracker.TrackedProject? startedProject = null;
+        var correlatedProjects = new List<BuildEventTracker.ProjectSnapshot?>();
+        BuildEventTracker.ProjectSnapshot? startedProject = null;
 
         tracker.ProjectStartedTracked += project => startedProject = project;
         tracker.ProjectFinishedTracked += (project, _) => correlatedProjects.Add(project);
@@ -66,15 +66,16 @@ public class BuildEventTracker_Tests
         eventSource.InvokeProjectFinished(new ProjectFinishedEventArgs(null, null, "built.proj", true) { BuildEventContext = context });
 
         startedProject.ShouldNotBeNull();
-        startedProject.ProjectContextId.ShouldBe(3);
-        startedProject.NodeId.ShouldBe(4);
-        startedProject.EvaluationId.ShouldBe(2);
-        startedProject.ProjectFile.ShouldBe("built.proj");
-        startedProject.EvaluationProjectFile.ShouldBe("evaluated.proj");
-        startedProject.TargetFramework.ShouldBe("net11.0");
-        startedProject.RuntimeIdentifier.ShouldBe("win-x64");
+        BuildEventTracker.ProjectSnapshot projectStartedSnapshot = startedProject.Value;
+        projectStartedSnapshot.ProjectContextId.ShouldBe(3);
+        projectStartedSnapshot.NodeId.ShouldBe(4);
+        projectStartedSnapshot.EvaluationId.ShouldBe(2);
+        projectStartedSnapshot.ProjectFile.ShouldBe("built.proj");
+        projectStartedSnapshot.EvaluationProjectFile.ShouldBe("evaluated.proj");
+        projectStartedSnapshot.TargetFramework.ShouldBe("net11.0");
+        projectStartedSnapshot.RuntimeIdentifier.ShouldBe("win-x64");
         correlatedProjects.Count.ShouldBe(8);
-        correlatedProjects.ShouldAllBe(project => project == startedProject);
+        correlatedProjects.ShouldAllBe(project => project.HasValue && project.Value.ContextKey == projectStartedSnapshot.ContextKey);
     }
 
     [Fact]
@@ -82,7 +83,7 @@ public class BuildEventTracker_Tests
     {
         var eventSource = new MockBuildEventSink(0);
         var tracker = new BuildEventTracker();
-        var correlatedProjects = new List<BuildEventTracker.TrackedProject?>();
+        var correlatedProjects = new List<BuildEventTracker.ProjectSnapshot?>();
 
         tracker.WarningTracked += (project, _) => correlatedProjects.Add(project);
         tracker.Attach(eventSource);
@@ -165,28 +166,41 @@ public class BuildEventTracker_Tests
         {
             StopwatchFactory = () => stopwatch,
         };
-        BuildEventTracker.TrackedProject? trackedProject = null;
+        BuildEventTracker.ProjectSnapshot? startedProject = null;
+        BuildEventTracker.ProjectSnapshot? targetStartedProject = null;
+        BuildEventTracker.ProjectSnapshot? taskStartedProject = null;
+        BuildEventTracker.ProjectSnapshot? taskFinishedProject = null;
+        BuildEventTracker.ProjectSnapshot? warningProject = null;
+        BuildEventTracker.ProjectSnapshot? errorProject = null;
+        BuildEventTracker.ProjectSnapshot? finishedProject = null;
 
-        tracker.ProjectStartedTracked += project => trackedProject = project;
+        tracker.ProjectStartedTracked += project => startedProject = project;
+        tracker.TargetStartedTracked += (project, _) => targetStartedProject = project;
+        tracker.TaskStartedTracked += (project, _) => taskStartedProject = project;
+        tracker.TaskFinishedTracked += (project, _) => taskFinishedProject = project;
+        tracker.WarningTracked += (project, _) => warningProject = project;
+        tracker.ErrorTracked += (project, _) => errorProject = project;
+        tracker.ProjectFinishedTracked += (project, _) => finishedProject = project;
         tracker.Attach(eventSource);
 
         BuildEventContext context = CreateContext(evaluationId: 1, projectContextId: 2, nodeId: 3);
         eventSource.InvokeProjectStarted(CreateProjectStartedEvent("built.proj", context));
 
-        trackedProject.ShouldNotBeNull();
-        trackedProject.Stopwatch.ShouldBe(stopwatch);
+        startedProject.ShouldNotBeNull();
         stopwatch.IsStarted.ShouldBeTrue();
-        trackedProject.CurrentTarget.ShouldBeNull();
-        trackedProject.Succeeded.ShouldBeNull();
-        trackedProject.WarningCount.ShouldBe(0);
-        trackedProject.ErrorCount.ShouldBe(0);
+        startedProject.Value.CurrentTarget.ShouldBeNull();
+        startedProject.Value.Succeeded.ShouldBeNull();
+        startedProject.Value.WarningCount.ShouldBe(0);
+        startedProject.Value.ErrorCount.ShouldBe(0);
+        startedProject.Value.IsTimingActive.ShouldBeTrue();
 
         eventSource.InvokeTargetStarted(new TargetStartedEventArgs(null, null, "Build", "built.proj", "built.targets")
         {
             BuildEventContext = context,
         });
 
-        trackedProject.CurrentTarget.ShouldBe("Build");
+        targetStartedProject.ShouldNotBeNull();
+        targetStartedProject.Value.CurrentTarget.ShouldBe("Build");
 
         eventSource.InvokeTaskStarted(new TaskStartedEventArgs(null, null, "built.proj", "task.dll", "MSBuild")
         {
@@ -194,6 +208,8 @@ public class BuildEventTracker_Tests
         });
 
         stopwatch.IsStarted.ShouldBeFalse();
+        taskStartedProject.ShouldNotBeNull();
+        taskStartedProject.Value.IsTimingActive.ShouldBeFalse();
 
         eventSource.InvokeTaskFinished(new TaskFinishedEventArgs(null, null, "built.proj", "task.dll", "MSBuild", true)
         {
@@ -201,6 +217,8 @@ public class BuildEventTracker_Tests
         });
 
         stopwatch.IsStarted.ShouldBeTrue();
+        taskFinishedProject.ShouldNotBeNull();
+        taskFinishedProject.Value.IsTimingActive.ShouldBeTrue();
 
         eventSource.InvokeWarningRaised(CreateWarningEvent(context));
         eventSource.InvokeErrorRaised(new BuildErrorEventArgs(null, "CODE", null, 0, 0, 0, 0, "error", null, null)
@@ -208,16 +226,27 @@ public class BuildEventTracker_Tests
             BuildEventContext = context,
         });
 
-        trackedProject.WarningCount.ShouldBe(1);
-        trackedProject.ErrorCount.ShouldBe(1);
+        warningProject.ShouldNotBeNull();
+        warningProject.Value.WarningCount.ShouldBe(1);
+        warningProject.Value.ErrorCount.ShouldBe(0);
+        errorProject.ShouldNotBeNull();
+        errorProject.Value.WarningCount.ShouldBe(1);
+        errorProject.Value.ErrorCount.ShouldBe(1);
 
         eventSource.InvokeProjectFinished(new ProjectFinishedEventArgs(null, null, "built.proj", true)
         {
             BuildEventContext = context,
         });
 
-        trackedProject.Succeeded.ShouldBe(true);
+        finishedProject.ShouldNotBeNull();
+        finishedProject.Value.Succeeded.ShouldBe(true);
+        finishedProject.Value.IsTimingActive.ShouldBeFalse();
         stopwatch.IsStarted.ShouldBeFalse();
+
+        startedProject.Value.CurrentTarget.ShouldBeNull();
+        startedProject.Value.Succeeded.ShouldBeNull();
+        startedProject.Value.WarningCount.ShouldBe(0);
+        startedProject.Value.ErrorCount.ShouldBe(0);
     }
 
     [Fact]

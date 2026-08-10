@@ -26,42 +26,50 @@ internal sealed class TerminalProjectInfo
     /// Initializes a new <see cref="TerminalProjectInfo"/> for the tracked project.
     /// </summary>
     /// <param name="project">The tracked project.</param>
-    public TerminalProjectInfo(BuildEventTracker.TrackedProject project)
+    /// <param name="stopwatch">The stopwatch used for terminal rendering.</param>
+    public TerminalProjectInfo(BuildEventTracker.ProjectSnapshot project, StopwatchAbstraction stopwatch)
     {
-        Project = project;
-    }
+        Id = project.ProjectContextId;
+        ProjectFile = project.EvaluationProjectFile;
+        TargetFramework = project.TargetFramework;
+        RuntimeIdentifier = project.RuntimeIdentifier;
+        Stopwatch = stopwatch;
 
-    internal BuildEventTracker.TrackedProject Project { get; }
+        if (project.IsTimingActive)
+        {
+            Stopwatch.Start();
+        }
+    }
 
     /// <summary>
     /// The int value of the ProjectContext id of this project execution.
     /// </summary>
-    public int Id => Project.ProjectContextId;
+    public int Id { get; }
 
     /// <summary>
     /// The full path to the project file.
     /// </summary>
-    public string? ProjectFile => Project.EvaluationProjectFile;
+    public string? ProjectFile { get; }
 
     /// <summary>
     /// A stopwatch to time the build of the project.
     /// </summary>
-    public StopwatchAbstraction Stopwatch => Project.Stopwatch;
+    public StopwatchAbstraction Stopwatch { get; }
 
     /// <summary>
     /// The target framework of the project or null if not multi-targeting.
     /// </summary>
-    public string? TargetFramework => Project.TargetFramework;
+    public string? TargetFramework { get; }
 
     /// <summary>
     /// The runtime identifier of the project or null if platform-agnostic.
     /// </summary>
-    public string? RuntimeIdentifier => Project.RuntimeIdentifier;
+    public string? RuntimeIdentifier { get; }
 
     /// <summary>
     /// True if the project built successfully; otherwise false.
     /// </summary>
-    public bool Succeeded => Project.Succeeded == true;
+    public bool Succeeded { get; private set; }
 
     /// <summary>
     /// The number of errors included in the terminal summary.
@@ -110,6 +118,20 @@ internal sealed class TerminalProjectInfo
     {
         _buildMessages ??= [];
         _buildMessages.Add(new TerminalBuildMessage(severity, message));
+    }
+
+    internal void Update(BuildEventTracker.ProjectSnapshot project)
+    {
+        Succeeded = project.Succeeded == true;
+
+        if (project.IsTimingActive)
+        {
+            Stopwatch.Start();
+        }
+        else
+        {
+            Stopwatch.Stop();
+        }
     }
 
     /// <summary>
