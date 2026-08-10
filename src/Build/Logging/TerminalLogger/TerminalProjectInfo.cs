@@ -25,8 +25,6 @@ internal sealed class TerminalProjectInfo
         ProjectFile = project.EvaluationProjectFile;
         TargetFramework = project.TargetFramework;
         RuntimeIdentifier = project.RuntimeIdentifier;
-        ErrorCount = project.ErrorCount;
-        WarningCount = project.WarningCount;
         Stopwatch = stopwatch;
 
         if (project.IsTimingActive)
@@ -68,12 +66,12 @@ internal sealed class TerminalProjectInfo
     /// <summary>
     /// The number of errors included in the terminal summary.
     /// </summary>
-    public int ErrorCount { get; private set; }
+    public int ErrorCount => GetBuildMessageCount(TerminalMessageSeverity.Error);
 
     /// <summary>
     /// The number of warnings included in the terminal summary.
     /// </summary>
-    public int WarningCount { get; private set; }
+    public int WarningCount => GetBuildMessageCount(TerminalMessageSeverity.Warning);
 
     /// <summary>
     /// True when the project has error or warning build messages; otherwise false.
@@ -117,8 +115,6 @@ internal sealed class TerminalProjectInfo
     internal void Update(BuildEventTracker.ProjectSnapshot project)
     {
         Succeeded = project.Succeeded == true;
-        ErrorCount = project.ErrorCount;
-        WarningCount = project.WarningCount;
 
         if (project.IsTimingActive)
         {
@@ -140,5 +136,24 @@ internal sealed class TerminalProjectInfo
             ? []
             : BuildMessages.Where(message =>
                 message.Severity is TerminalMessageSeverity.Error or TerminalMessageSeverity.Warning);
+    }
+
+    private int GetBuildMessageCount(TerminalMessageSeverity severity)
+    {
+        if (_buildMessages is null)
+        {
+            return 0;
+        }
+
+        int count = 0;
+        foreach (TerminalBuildMessage message in _buildMessages)
+        {
+            if (message.Severity == severity)
+            {
+                count++;
+            }
+        }
+
+        return count;
     }
 }
