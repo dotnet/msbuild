@@ -103,15 +103,14 @@
   <UsingTask TaskName="Microsoft.Build.Tasks.XslTransformation"                     AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <UsingTask TaskName="Microsoft.Build.Tasks.ZipDirectory"                          AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <!-- TarDirectory relies on System.Formats.Tar, which is only available on .NET (not .NET Framework), so it is compiled only into the .NETCoreApp tasks assembly.
-       On Core MSBuild it loads in-proc. On .NET Framework MSBuild it is unavailable in the netfx tasks assembly, so under the .NET SDK we point at the SDK's .NETCoreApp
-       tasks assembly and dispatch it into the .NET TaskHost via Runtime="NET". -->
+       Only the Core registration lives here: this file is the *default tasks* file, which is evaluated once per toolset with only environment,
+       reserved, toolset and global properties available (see Toolset.InitializeProperties). $(MSBuildRuntimeType) is a reserved property so it can be
+       used, but SDK properties such as $(NetCoreSdkRoot) cannot. The .NET Framework registration therefore lives in Microsoft.Common.CurrentVersion.targets,
+       which is evaluated per project. -->
   <UsingTask TaskName="Microsoft.Build.Tasks.TarDirectory"                          AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildRuntimeType)' == 'Core'" />
-  <UsingTask TaskName="Microsoft.Build.Tasks.TarDirectory"                          AssemblyFile="$(NetCoreSdkRoot)Microsoft.Build.Tasks.Core.dll" Runtime="NET" Condition="'$(MSBuildRuntimeType)' == 'Full' and '$(UsingMicrosoftNETSdk)' == 'true' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '11'))" />
   <!-- Untar relies on System.Formats.Tar, which is only available on .NET (not .NET Framework), so it is compiled only into the .NETCoreApp tasks assembly.
-       On Core MSBuild it loads in-proc. On .NET Framework MSBuild it is unavailable in the netfx tasks assembly, so under the .NET SDK we point at the SDK's .NETCoreApp
-       tasks assembly and dispatch it into the .NET TaskHost via Runtime="NET". -->
+       See the note above TarDirectory for why only the Core registration lives here. -->
   <UsingTask TaskName="Microsoft.Build.Tasks.Untar"                                 AssemblyName="Microsoft.Build.Tasks.Core, Version=15.1.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" Condition="'$(MSBuildRuntimeType)' == 'Core'" />
-  <UsingTask TaskName="Microsoft.Build.Tasks.Untar"                                 AssemblyFile="$(NetCoreSdkRoot)Microsoft.Build.Tasks.Core.dll" Runtime="NET" Condition="'$(MSBuildRuntimeType)' == 'Full' and '$(UsingMicrosoftNETSdk)' == 'true' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '11'))" />
 
   <!--
     Roslyn tasks are now in an assembly owned and shipped by Roslyn, see src/Tasks/Microsoft.NET.Build.Tasks/targets/Microsoft.NET.Sdk.targets.
