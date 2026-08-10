@@ -1143,8 +1143,11 @@ namespace Microsoft.Build.BackEnd
         {
             Assumed.NotNull(_targetBuilder, "Target builder is null");
 
+            // MT request engines share the configuration cache. A configuration becomes cacheable after its last
+            // target, but post-build telemetry still accesses its ProjectInstance. Keep the project in memory
+            // for this entire operation so another request cannot cache it during execution.
             using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
-                _requestEntry.RequestConfiguration.EnterProjectInstanceUsage();
+                _requestEntry.RequestConfiguration.AcquireProjectInstanceUsage();
 
             // We consider this the entrypoint for the project build for purposes of BuildCheck processing
             bool isRestoring = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring] is not null;

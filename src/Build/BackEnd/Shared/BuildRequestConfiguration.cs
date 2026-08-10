@@ -645,11 +645,15 @@ namespace Microsoft.Build.BackEnd
                                                                       new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase));
 
         /// <summary>
-        /// Ensures the <see cref="ProjectInstance"/> is available and prevents it from being cached
-        /// until the returned scope is disposed. The synchronization lock is not held for the scope lifetime.
+        /// Keeps the <see cref="ProjectInstance"/> in memory while the caller uses it, preventing a concurrent
+        /// memory-pressure cache sweep. Retrieves the project first if it was already cached.
         /// </summary>
-        internal ProjectInstanceUsageScope EnterProjectInstanceUsage() => new(this);
+        internal ProjectInstanceUsageScope AcquireProjectInstanceUsage() => new(this);
 
+        /// <summary>
+        /// Tracks one active <see cref="ProjectInstance"/> consumer. Consume with <see langword="using"/>;
+        /// do not dispose copies.
+        /// </summary>
         internal readonly struct ProjectInstanceUsageScope : IDisposable
         {
             private readonly BuildRequestConfiguration _configuration;

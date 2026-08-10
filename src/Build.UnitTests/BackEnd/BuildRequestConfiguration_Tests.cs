@@ -703,11 +703,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
             configuration.CacheIfPossible();
             configuration.IsCached.ShouldBeTrue();
 
-            using (configuration.EnterProjectInstanceUsage())
+            using (configuration.AcquireProjectInstanceUsage())
             {
                 configuration.IsCached.ShouldBeFalse();
 
-                using (configuration.EnterProjectInstanceUsage())
+                using (configuration.AcquireProjectInstanceUsage())
                 {
                     Task.Run(configuration.CacheIfPossible).GetAwaiter().GetResult();
                     configuration.IsCached.ShouldBeFalse();
