@@ -32,7 +32,7 @@ public class ItemSpecModifiersCachingBenchmark
     /// </summary>
     private const int RepeatedReads = 10;
 
-    private string _tempDir = null!;
+    private TemporaryDirectory _tempDir = null!;
     private string[] _filePaths = null!;
     private ProjectCollection _projectCollection = null!;
     private ProjectRootElement _projectRoot = null!;
@@ -42,9 +42,8 @@ public class ItemSpecModifiersCachingBenchmark
     [GlobalSetup]
     public void GlobalSetup()
     {
-        _tempDir = Path.Combine(Path.GetTempPath(), "MSBuildBenchmarks", Guid.NewGuid().ToString("N"));
-        string srcDir = Path.Combine(_tempDir, "src", "Framework");
-        Directory.CreateDirectory(srcDir);
+        _tempDir = new TemporaryDirectory(nameof(ItemSpecModifiersCachingBenchmark));
+        string srcDir = _tempDir.CreateDirectory(Path.Combine("src", "Framework"));
 
         _filePaths = new string[ItemCount];
         for (int i = 0; i < ItemCount; i++)
@@ -56,7 +55,7 @@ public class ItemSpecModifiersCachingBenchmark
 
         _projectCollection = new ProjectCollection();
         _projectRoot = ProjectRootElement.Create(_projectCollection);
-        _projectRoot.FullPath = Path.Combine(_tempDir, "Test.csproj");
+        _projectRoot.FullPath = _tempDir.GetPath("Test.csproj");
 
         ProjectItemGroupElement itemGroup = _projectRoot.AddItemGroup();
         for (int i = 0; i < ItemCount; i++)
@@ -87,11 +86,7 @@ public class ItemSpecModifiersCachingBenchmark
     public void GlobalCleanup()
     {
         _projectCollection.Dispose();
-
-        if (Directory.Exists(_tempDir))
-        {
-            Directory.Delete(_tempDir, recursive: true);
-        }
+        _tempDir.Dispose();
     }
 
     // -----------------------------------------------------------------------

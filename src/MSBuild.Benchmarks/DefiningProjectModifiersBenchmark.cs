@@ -32,7 +32,7 @@ public class DefiningProjectModifiersBenchmark
     /// </summary>
     private const int RepeatedReads = 10;
 
-    private string _tempDir = null!;
+    private TemporaryDirectory _tempDir = null!;
     private ProjectCollection _projectCollection = null!;
     private ProjectRootElement _singleProjectRoot = null!;
     private ProjectRootElement _multiProjectRoot = null!;
@@ -43,9 +43,8 @@ public class DefiningProjectModifiersBenchmark
     [GlobalSetup]
     public void GlobalSetup()
     {
-        _tempDir = Path.Combine(Path.GetTempPath(), "MSBuildBenchmarks", Guid.NewGuid().ToString("N"));
-        string srcDir = Path.Combine(_tempDir, "src");
-        Directory.CreateDirectory(srcDir);
+        _tempDir = new TemporaryDirectory(nameof(DefiningProjectModifiersBenchmark));
+        string srcDir = _tempDir.CreateDirectory("src");
 
         // Create dummy files.
         for (int i = 0; i < ItemsPerProject; i++)
@@ -59,7 +58,7 @@ public class DefiningProjectModifiersBenchmark
         // All items defined in one project file. DefiningProjectFullPath is the same for all items,
         // so a cache keyed by defining project path would hit on every item after the first.
         _singleProjectRoot = ProjectRootElement.Create(_projectCollection);
-        _singleProjectRoot.FullPath = Path.Combine(_tempDir, "SingleProject.csproj");
+        _singleProjectRoot.FullPath = _tempDir.GetPath("SingleProject.csproj");
 
         ProjectItemGroupElement singleProjectItemGroup = _singleProjectRoot.AddItemGroup();
         for (int i = 0; i < ItemsPerProject; i++)
@@ -72,7 +71,7 @@ public class DefiningProjectModifiersBenchmark
         // each define items, so there are two distinct DefiningProjectFullPath values.
         // Imported project defines half the items.
         ProjectRootElement importRoot = ProjectRootElement.Create(_projectCollection);
-        importRoot.FullPath = Path.Combine(_tempDir, "Imported.props");
+        importRoot.FullPath = _tempDir.GetPath("Imported.props");
         ProjectItemGroupElement importItemGroup = importRoot.AddItemGroup();
         for (int i = 0; i < ItemsPerProject / 2; i++)
         {
@@ -83,7 +82,7 @@ public class DefiningProjectModifiersBenchmark
 
         // Main project imports the props file and defines the other half.
         _multiProjectRoot = ProjectRootElement.Create(_projectCollection);
-        _multiProjectRoot.FullPath = Path.Combine(_tempDir, "MainProject.csproj");
+        _multiProjectRoot.FullPath = _tempDir.GetPath("MainProject.csproj");
         _multiProjectRoot.AddImport("Imported.props");
         ProjectItemGroupElement mainItemGroup = _multiProjectRoot.AddItemGroup();
         for (int i = ItemsPerProject / 2; i < ItemsPerProject; i++)
@@ -135,11 +134,7 @@ public class DefiningProjectModifiersBenchmark
     {
         ItemSpecModifiers.ClearDefiningProjectCache();
         _projectCollection.Dispose();
-
-        if (Directory.Exists(_tempDir))
-        {
-            Directory.Delete(_tempDir, recursive: true);
-        }
+        _tempDir.Dispose();
     }
 
     // -----------------------------------------------------------------------

@@ -13,9 +13,10 @@ namespace MSBuild.Benchmarks;
 ///  Measures end-to-end project evaluation for isolated and combined lazy item operations.
 /// </summary>
 /// <remarks>
-///  Each invocation creates a project collection and loads a project from disk, so measurements
-///  include XML parsing and common evaluation overhead. Files are created during global setup and
-///  are expected to be served from the operating system's filesystem cache during measurement.
+///  Each invocation deliberately creates and disposes a project collection, then loads and evaluates
+///  a project from disk. This measures the full cold path, including project collection construction,
+///  XML parsing, and common evaluation overhead. Files are created during global setup and are expected
+///  to be served from the operating system's filesystem cache during measurement.
 /// </remarks>
 [BenchmarkCategory("Items", "ItemEvaluation")]
 [MemoryDiagnoser]

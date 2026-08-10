@@ -40,6 +40,7 @@ public class EscapingUtilitiesCachingBenchmark
     /// </summary>
     private const string EscapableVariantCharacters = "%*?@$();";
 
+    // Shared across benchmark instances so setup never reuses cache keys created by an earlier instance.
     private static int s_generation;
 
     private string[] _fewSpecialCharsCacheMisses = null!;

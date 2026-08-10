@@ -11,6 +11,10 @@ namespace MSBuild.Benchmarks;
 /// <summary>
 ///  Benchmarks condition scanning, parsing, and expression-tree construction without evaluation.
 /// </summary>
+/// <remarks>
+///  Each invocation creates a parser directly, bypassing the production expression-tree cache, so
+///  cache state from <see cref="ConditionEvaluationBenchmark"/> does not affect these measurements.
+/// </remarks>
 [BenchmarkCategory("Conditions", "ConditionParsing")]
 [MemoryDiagnoser]
 public class ConditionParsingBenchmark
