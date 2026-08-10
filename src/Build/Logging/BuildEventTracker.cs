@@ -9,22 +9,105 @@ namespace Microsoft.Build.Logging;
 
 internal sealed class BuildEventTracker
 {
+    private const string MSBuildTaskName = "MSBuild";
+    private const string RestoreTargetName = "Restore";
+
+    internal sealed class TrackedProject
+    {
+        private readonly StopwatchAbstraction _stopwatch;
+
+        internal TrackedProject(
+            ProjectContextKey contextKey,
+            int evaluationId,
+            string? projectFile,
+            string? targetNames,
+            string? evaluationProjectFile,
+            string? targetFramework,
+            string? runtimeIdentifier,
+            StopwatchAbstraction stopwatch)
+        {
+            ContextKey = contextKey;
+            EvaluationId = evaluationId;
+            ProjectFile = projectFile;
+            TargetNames = targetNames;
+            EvaluationProjectFile = evaluationProjectFile;
+            TargetFramework = targetFramework;
+            RuntimeIdentifier = runtimeIdentifier;
+            _stopwatch = stopwatch;
+
+            _stopwatch.Start();
+        }
+
+        internal ProjectContextKey ContextKey { get; }
+
+        internal int ProjectContextId => ContextKey.ProjectContextId;
+
+        internal int NodeId => ContextKey.NodeId;
+
+        internal int EvaluationId { get; }
+
+        internal string? ProjectFile { get; }
+
+        internal string? TargetNames { get; }
+
+        internal string? EvaluationProjectFile { get; }
+
+        internal string? TargetFramework { get; }
+
+        internal string? RuntimeIdentifier { get; }
+
+        internal string? CurrentTarget { get; private set; }
+
+        internal bool? Succeeded { get; private set; }
+
+        internal int ErrorCount { get; private set; }
+
+        internal int WarningCount { get; private set; }
+
+        internal bool HasErrorsOrWarnings => ErrorCount > 0 || WarningCount > 0;
+
+        internal double ElapsedSeconds => _stopwatch.ElapsedSeconds;
+
+        internal StopwatchAbstraction Stopwatch => _stopwatch;
+
+        internal void StartTarget(string targetName)
+        {
+            CurrentTarget = targetName;
+            _stopwatch.Start();
+        }
+
+        internal void Yield()
+        {
+            _stopwatch.Stop();
+        }
+
+        internal void Resume()
+        {
+            _stopwatch.Start();
+        }
+
+        internal void AddWarning()
+        {
+            WarningCount++;
+        }
+
+        internal void AddError()
+        {
+            ErrorCount++;
+        }
+
+        internal void Finish(bool succeeded)
+        {
+            Succeeded = succeeded;
+            _stopwatch.Stop();
+        }
+    }
+
+    internal Func<StopwatchAbstraction>? StopwatchFactory { get; set; }
+
     internal readonly record struct BuildStartedSnapshot(DateTime Timestamp);
 
     internal readonly record struct BuildFinishedSnapshot(DateTime Timestamp, TimeSpan Duration, bool Succeeded);
-
-    internal sealed record ProjectSnapshot(
-        int ProjectContextId,
-        int NodeId,
-        int EvaluationId,
-        string? ProjectFile,
-        string? TargetNames,
-        string? EvaluationProjectFile,
-        string? TargetFramework,
-        string? RuntimeIdentifier)
-    {
-        internal ProjectContextKey ContextKey => new(NodeId, ProjectContextId);
-    }
 
     private IEventSource? _eventSource;
 
@@ -32,25 +115,25 @@ internal sealed class BuildEventTracker
 
     internal event Action<BuildFinishedSnapshot>? BuildFinishedTracked;
 
-    internal event Action<ProjectSnapshot>? ProjectStartedTracked;
+    internal event Action<TrackedProject>? ProjectStartedTracked;
 
-    internal event Action<ProjectSnapshot?, ProjectFinishedEventArgs>? ProjectFinishedTracked;
+    internal event Action<TrackedProject?, ProjectFinishedEventArgs>? ProjectFinishedTracked;
 
-    internal event Action<ProjectSnapshot?, TargetStartedEventArgs>? TargetStartedTracked;
+    internal event Action<TrackedProject?, TargetStartedEventArgs>? TargetStartedTracked;
 
-    internal event Action<ProjectSnapshot?, TargetFinishedEventArgs>? TargetFinishedTracked;
+    internal event Action<TrackedProject?, TargetFinishedEventArgs>? TargetFinishedTracked;
 
-    internal event Action<ProjectSnapshot?, TaskStartedEventArgs>? TaskStartedTracked;
+    internal event Action<TrackedProject?, TaskStartedEventArgs>? TaskStartedTracked;
 
-    internal event Action<ProjectSnapshot?, TaskFinishedEventArgs>? TaskFinishedTracked;
+    internal event Action<TrackedProject?, TaskFinishedEventArgs>? TaskFinishedTracked;
 
     internal event Action<BuildStatusEventArgs>? StatusEventTracked;
 
-    internal event Action<ProjectSnapshot?, BuildMessageEventArgs>? MessageTracked;
+    internal event Action<TrackedProject?, BuildMessageEventArgs>? MessageTracked;
 
-    internal event Action<ProjectSnapshot?, BuildWarningEventArgs>? WarningTracked;
+    internal event Action<TrackedProject?, BuildWarningEventArgs>? WarningTracked;
 
-    internal event Action<ProjectSnapshot?, BuildErrorEventArgs>? ErrorTracked;
+    internal event Action<TrackedProject?, BuildErrorEventArgs>? ErrorTracked;
 
     internal DateTime BuildStartTime { get; private set; }
 
@@ -82,7 +165,7 @@ internal sealed class BuildEventTracker
     /// <remarks>
     /// Keyed by the node and node-unique project context ID passed to logger callbacks.
     /// </remarks>
-    private readonly Dictionary<ProjectContextKey, ProjectSnapshot> _projects = [];
+    private readonly Dictionary<ProjectContextKey, TrackedProject> _projects = [];
 
     private readonly Dictionary<EvalContext, EvalProjectInfo> _projectEvaluations = [];
 
@@ -153,15 +236,17 @@ internal sealed class BuildEventTracker
 
         _projectEvaluations.TryGetValue(new EvalContext(buildEventContext), out EvalProjectInfo evalInfo);
 
-        ProjectSnapshot project = new(
-            buildEventContext.ProjectContextId,
-            buildEventContext.NodeId,
+        StopwatchAbstraction stopwatch = StopwatchFactory?.Invoke() ?? new SystemStopwatch();
+
+        TrackedProject project = new(
+            new ProjectContextKey(buildEventContext),
             buildEventContext.EvaluationId,
             e.ProjectFile,
             e.TargetNames,
             evalInfo.ProjectFile,
             evalInfo.TargetFramework,
-            evalInfo.RuntimeIdentifier);
+            evalInfo.RuntimeIdentifier,
+            stopwatch);
 
         _projects[project.ContextKey] = project;
         ProjectStartedTracked?.Invoke(project);
@@ -169,12 +254,16 @@ internal sealed class BuildEventTracker
 
     private void OnProjectFinished(object sender, ProjectFinishedEventArgs e)
     {
-        ProjectFinishedTracked?.Invoke(CorrelateProject(e), e);
+        TrackedProject? project = CorrelateProject(e);
+        project?.Finish(e.Succeeded);
+        ProjectFinishedTracked?.Invoke(project, e);
     }
 
     private void OnTargetStarted(object sender, TargetStartedEventArgs e)
     {
-        TargetStartedTracked?.Invoke(CorrelateProject(e), e);
+        TrackedProject? project = CorrelateProject(e);
+        project?.StartTarget(e.TargetName);
+        TargetStartedTracked?.Invoke(project, e);
     }
 
     private void OnTargetFinished(object sender, TargetFinishedEventArgs e)
@@ -184,12 +273,28 @@ internal sealed class BuildEventTracker
 
     private void OnTaskStarted(object sender, TaskStartedEventArgs e)
     {
-        TaskStartedTracked?.Invoke(CorrelateProject(e), e);
+        TrackedProject? project = CorrelateProject(e);
+        if (project is not null
+            && project.TargetNames != RestoreTargetName
+            && e.TaskName == MSBuildTaskName)
+        {
+            project.Yield();
+        }
+        TaskStartedTracked?.Invoke(project, e);
     }
 
     private void OnTaskFinished(object sender, TaskFinishedEventArgs e)
     {
-        TaskFinishedTracked?.Invoke(CorrelateProject(e), e);
+        TrackedProject? project = CorrelateProject(e);
+
+        if (project is not null
+            && project.TargetNames != RestoreTargetName
+            && e.TaskName == MSBuildTaskName)
+        {
+            project.Resume();
+        }
+
+        TaskFinishedTracked?.Invoke(project, e);
     }
 
     private void OnStatusEventRaised(object sender, BuildStatusEventArgs e)
@@ -209,12 +314,16 @@ internal sealed class BuildEventTracker
 
     private void OnWarningRaised(object sender, BuildWarningEventArgs e)
     {
-        WarningTracked?.Invoke(CorrelateProject(e), e);
+        TrackedProject? project = CorrelateProject(e);
+        project?.AddWarning();
+        WarningTracked?.Invoke(project, e);
     }
 
     private void OnErrorRaised(object sender, BuildErrorEventArgs e)
     {
-        ErrorTracked?.Invoke(CorrelateProject(e), e);
+        TrackedProject? project = CorrelateProject(e);
+        project?.AddError();
+        ErrorTracked?.Invoke(project, e);
     }
 
     private void CaptureEvalContext(ProjectEvaluationFinishedEventArgs evalFinish)
@@ -253,13 +362,13 @@ internal sealed class BuildEventTracker
         }
     }
 
-    private ProjectSnapshot? CorrelateProject(BuildEventArgs e)
+    private TrackedProject? CorrelateProject(BuildEventArgs e)
     {
         BuildEventContext? buildEventContext = e.BuildEventContext;
         return buildEventContext is not null
             && _projects.TryGetValue(
                 new ProjectContextKey(buildEventContext),
-                out ProjectSnapshot? project)
+                out TrackedProject? project)
                     ? project
                     : null;
     }

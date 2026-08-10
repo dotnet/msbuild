@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Microsoft.Build.CommandLine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Shouldly;
@@ -18,8 +19,8 @@ public class BuildEventTracker_Tests
     {
         var eventSource = new MockBuildEventSink(0);
         var tracker = new BuildEventTracker();
-        var correlatedProjects = new List<BuildEventTracker.ProjectSnapshot?>();
-        BuildEventTracker.ProjectSnapshot? startedProject = null;
+        var correlatedProjects = new List<BuildEventTracker.TrackedProject?>();
+        BuildEventTracker.TrackedProject? startedProject = null;
 
         tracker.ProjectStartedTracked += project => startedProject = project;
         tracker.ProjectFinishedTracked += (project, _) => correlatedProjects.Add(project);
@@ -55,7 +56,6 @@ public class BuildEventTracker_Tests
             BuildEventContext = context,
         });
 
-        eventSource.InvokeProjectFinished(new ProjectFinishedEventArgs(null, null, "built.proj", true) { BuildEventContext = context });
         eventSource.InvokeTargetStarted(new TargetStartedEventArgs(null, null, "Build", "built.proj", "built.targets") { BuildEventContext = context });
         eventSource.InvokeTargetFinished(new TargetFinishedEventArgs(null, null, "Build", "built.proj", "built.targets", true) { BuildEventContext = context });
         eventSource.InvokeTaskStarted(new TaskStartedEventArgs(null, null, "built.proj", "task.dll", "Task") { BuildEventContext = context });
@@ -63,6 +63,7 @@ public class BuildEventTracker_Tests
         eventSource.InvokeMessageRaised(new BuildMessageEventArgs("message", null, null, MessageImportance.High) { BuildEventContext = context });
         eventSource.InvokeWarningRaised(new BuildWarningEventArgs(null, "CODE", null, 0, 0, 0, 0, "warning", null, null) { BuildEventContext = context });
         eventSource.InvokeErrorRaised(new BuildErrorEventArgs(null, "CODE", null, 0, 0, 0, 0, "error", null, null) { BuildEventContext = context });
+        eventSource.InvokeProjectFinished(new ProjectFinishedEventArgs(null, null, "built.proj", true) { BuildEventContext = context });
 
         startedProject.ShouldNotBeNull();
         startedProject.ProjectContextId.ShouldBe(3);
@@ -81,7 +82,7 @@ public class BuildEventTracker_Tests
     {
         var eventSource = new MockBuildEventSink(0);
         var tracker = new BuildEventTracker();
-        var correlatedProjects = new List<BuildEventTracker.ProjectSnapshot?>();
+        var correlatedProjects = new List<BuildEventTracker.TrackedProject?>();
 
         tracker.WarningTracked += (project, _) => correlatedProjects.Add(project);
         tracker.Attach(eventSource);
@@ -153,6 +154,107 @@ public class BuildEventTracker_Tests
         eventSource.InvokeWarningRaised(new BuildWarningEventArgs(null, "CODE", null, 0, 0, 0, 0, "warning", null, null));
 
         warningCount.ShouldBe(0);
+    }
+
+    [Fact]
+    public void MaintainsProjectLifecycleState()
+    {
+        var eventSource = new MockBuildEventSink(0);
+        var stopwatch = new MockStopwatch();
+        var tracker = new BuildEventTracker
+        {
+            StopwatchFactory = () => stopwatch,
+        };
+        BuildEventTracker.TrackedProject? trackedProject = null;
+
+        tracker.ProjectStartedTracked += project => trackedProject = project;
+        tracker.Attach(eventSource);
+
+        BuildEventContext context = CreateContext(evaluationId: 1, projectContextId: 2, nodeId: 3);
+        eventSource.InvokeProjectStarted(CreateProjectStartedEvent("built.proj", context));
+
+        trackedProject.ShouldNotBeNull();
+        trackedProject.Stopwatch.ShouldBe(stopwatch);
+        stopwatch.IsStarted.ShouldBeTrue();
+        trackedProject.CurrentTarget.ShouldBeNull();
+        trackedProject.Succeeded.ShouldBeNull();
+        trackedProject.WarningCount.ShouldBe(0);
+        trackedProject.ErrorCount.ShouldBe(0);
+
+        eventSource.InvokeTargetStarted(new TargetStartedEventArgs(null, null, "Build", "built.proj", "built.targets")
+        {
+            BuildEventContext = context,
+        });
+
+        trackedProject.CurrentTarget.ShouldBe("Build");
+
+        eventSource.InvokeTaskStarted(new TaskStartedEventArgs(null, null, "built.proj", "task.dll", "MSBuild")
+        {
+            BuildEventContext = context,
+        });
+
+        stopwatch.IsStarted.ShouldBeFalse();
+
+        eventSource.InvokeTaskFinished(new TaskFinishedEventArgs(null, null, "built.proj", "task.dll", "MSBuild", true)
+        {
+            BuildEventContext = context,
+        });
+
+        stopwatch.IsStarted.ShouldBeTrue();
+
+        eventSource.InvokeWarningRaised(CreateWarningEvent(context));
+        eventSource.InvokeErrorRaised(new BuildErrorEventArgs(null, "CODE", null, 0, 0, 0, 0, "error", null, null)
+        {
+            BuildEventContext = context,
+        });
+
+        trackedProject.WarningCount.ShouldBe(1);
+        trackedProject.ErrorCount.ShouldBe(1);
+
+        eventSource.InvokeProjectFinished(new ProjectFinishedEventArgs(null, null, "built.proj", true)
+        {
+            BuildEventContext = context,
+        });
+
+        trackedProject.Succeeded.ShouldBe(true);
+        stopwatch.IsStarted.ShouldBeFalse();
+    }
+
+    [Fact]
+    public void KeepsRestoreProjectTimingActiveDuringMSBuildTasks()
+    {
+        var eventSource = new MockBuildEventSink(0);
+        var stopwatch = new MockStopwatch();
+        var tracker = new BuildEventTracker
+        {
+            StopwatchFactory = () => stopwatch,
+        };
+
+        tracker.Attach(eventSource);
+
+        BuildEventContext context = CreateContext(evaluationId: 1, projectContextId: 2, nodeId: 3);
+        eventSource.InvokeProjectStarted(new ProjectStartedEventArgs(
+            string.Empty,
+            string.Empty,
+            "built.proj",
+            "Restore",
+            new Dictionary<string, string>(),
+            new List<DictionaryEntry>())
+        {
+            BuildEventContext = context,
+        });
+
+        eventSource.InvokeTaskStarted(new TaskStartedEventArgs(null, null, "built.proj", "task.dll", "MSBuild")
+        {
+            BuildEventContext = context,
+        });
+        stopwatch.IsStarted.ShouldBeTrue();
+
+        eventSource.InvokeTaskFinished(new TaskFinishedEventArgs(null, null, "built.proj", "task.dll", "MSBuild", true)
+        {
+            BuildEventContext = context,
+        });
+        stopwatch.IsStarted.ShouldBeTrue();
     }
 
     private static BuildEventContext CreateContext(int evaluationId, int projectContextId, int nodeId)
