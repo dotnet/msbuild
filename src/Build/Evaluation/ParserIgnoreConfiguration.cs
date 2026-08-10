@@ -21,7 +21,7 @@ namespace Microsoft.Build.Evaluation
     /// 2. User profile (~/.msbuild/)
     /// 3. MSBUILD_PARSE_CONFIG environment variable paths
     /// </summary>
-    internal sealed class UnknownElementsConfiguration : ITranslatable
+    internal sealed class ParserIgnoreConfiguration : ITranslatable
     {
         internal const string ConfigFileName = "Directory.Parse.config";
         internal const string EnvironmentVariableName = "MSBUILD_PARSE_CONFIG";
@@ -46,14 +46,14 @@ namespace Microsoft.Build.Evaluation
         private HashSet<string> _loadedConfigFiles;
         private readonly ConcurrentDictionary<string, int> _skippedItems = new(StringComparer.OrdinalIgnoreCase);
 
-        private UnknownElementsConfiguration()
+        private ParserIgnoreConfiguration()
         {
             _allowedAttributes = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
             _allowedChildren = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
             _loadedConfigFiles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
 
-        private UnknownElementsConfiguration(ITranslator translator)
+        private ParserIgnoreConfiguration(ITranslator translator)
             : this()
         {
             ((ITranslatable)this).Translate(translator);
@@ -61,9 +61,9 @@ namespace Microsoft.Build.Evaluation
 
         internal IReadOnlyCollection<string> LoadedConfigFiles => _loadedConfigFiles;
 
-        internal static UnknownElementsConfiguration Empty { get; } = new UnknownElementsConfiguration();
+        internal static ParserIgnoreConfiguration Empty { get; } = new ParserIgnoreConfiguration();
 
-        public static bool Equals(UnknownElementsConfiguration? left, UnknownElementsConfiguration? right)
+        public static bool Equals(ParserIgnoreConfiguration? left, ParserIgnoreConfiguration? right)
         {
             if (ReferenceEquals(left, right))
             {
@@ -159,12 +159,12 @@ namespace Microsoft.Build.Evaluation
             return $"Loaded Directory.Parse.config from: {string.Join(", ", _loadedConfigFiles)}";
         }
 
-        internal static UnknownElementsConfiguration Merge(UnknownElementsConfiguration left, UnknownElementsConfiguration right)
+        internal static ParserIgnoreConfiguration Merge(ParserIgnoreConfiguration left, ParserIgnoreConfiguration right)
         {
             ArgumentNullException.ThrowIfNull(left);
             ArgumentNullException.ThrowIfNull(right);
 
-            var merged = new UnknownElementsConfiguration();
+            var merged = new ParserIgnoreConfiguration();
 
             UnionEntries(merged._allowedAttributes, left._allowedAttributes);
             UnionEntries(merged._allowedAttributes, right._allowedAttributes);
@@ -178,16 +178,16 @@ namespace Microsoft.Build.Evaluation
             return merged;
         }
 
-        internal static UnknownElementsConfiguration LoadFromFile(string filePath)
+        internal static ParserIgnoreConfiguration LoadFromFile(string filePath)
         {
-            var config = new UnknownElementsConfiguration();
+            var config = new ParserIgnoreConfiguration();
             config.LoadFile(filePath);
             return config;
         }
 
-        internal static UnknownElementsConfiguration LoadGlobalConfig()
+        internal static ParserIgnoreConfiguration LoadGlobalConfig()
         {
-            var config = new UnknownElementsConfiguration();
+            var config = new ParserIgnoreConfiguration();
 
             string? envValue = Environment.GetEnvironmentVariable(EnvironmentVariableName);
             if (!string.IsNullOrEmpty(envValue))
@@ -225,9 +225,9 @@ namespace Microsoft.Build.Evaluation
             return set ?? new HashSet<string>(StringComparer.OrdinalIgnoreCase);
         }
 
-        internal static UnknownElementsConfiguration FactoryForDeserialization(ITranslator translator)
+        internal static ParserIgnoreConfiguration FactoryForDeserialization(ITranslator translator)
         {
-            return new UnknownElementsConfiguration(translator);
+            return new ParserIgnoreConfiguration(translator);
         }
 
         private static void UnionEntries(Dictionary<string, HashSet<string>> destination, Dictionary<string, HashSet<string>> source)

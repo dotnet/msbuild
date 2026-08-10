@@ -12,7 +12,7 @@ namespace Microsoft.Build.Evaluation
     {
         public bool LoadProjectsReadOnly { get; protected set; }
 
-        public UnknownElementsConfiguration UnknownElementsConfiguration { get; protected set; }
+        public ParserIgnoreConfiguration ParserIgnoreConfiguration { get; protected set; }
 
         /// <summary>
         /// Handler for which project root element just got added to the cache
@@ -72,15 +72,15 @@ namespace Microsoft.Build.Evaluation
 
         internal abstract void DiscardAnyWeakReference(ProjectRootElement projectRootElement);
 
-        internal void SetUnknownElementsConfiguration(UnknownElementsConfiguration configuration)
+        internal void SetParserIgnoreConfiguration(ParserIgnoreConfiguration configuration)
         {
-            if (UnknownElementsConfiguration.Equals(UnknownElementsConfiguration, configuration))
+            if (ParserIgnoreConfiguration.Equals(ParserIgnoreConfiguration, configuration))
             {
                 return;
             }
 
             DiscardImplicitReferences();
-            UnknownElementsConfiguration = configuration;
+            ParserIgnoreConfiguration = configuration;
         }
 
         /// <summary>

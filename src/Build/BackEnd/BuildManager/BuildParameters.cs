@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -240,7 +240,7 @@ namespace Microsoft.Build.Execution
         /// The configuration for allowed unknown attributes/elements during parsing.
         /// Loaded on the main node and serialized to worker nodes.
         /// </summary>
-        private UnknownElementsConfiguration _unknownElementsConfiguration;
+        private ParserIgnoreConfiguration _ParserIgnoreConfiguration;
 
         /// <summary>
         /// Constructor for those who intend to set all properties themselves.
@@ -268,7 +268,7 @@ namespace Microsoft.Build.Execution
 
             _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(projectCollection.GlobalPropertiesCollection);
             _propertiesFromCommandLine = projectCollection.PropertiesFromCommandLine;
-            _unknownElementsConfiguration = projectCollection.UnknownElementsConfiguration;
+            _ParserIgnoreConfiguration = projectCollection.ParserIgnoreConfiguration;
         }
 
         /// <summary>
@@ -337,7 +337,7 @@ namespace Microsoft.Build.Execution
             IsTelemetryEnabled = other.IsTelemetryEnabled;
             ProjectCacheDescriptor = other.ProjectCacheDescriptor;
             _enableTargetOutputLogging = other.EnableTargetOutputLogging;
-            _unknownElementsConfiguration = other._unknownElementsConfiguration;
+            _ParserIgnoreConfiguration = other._ParserIgnoreConfiguration;
         }
 
         /// <summary>
@@ -834,10 +834,10 @@ namespace Microsoft.Build.Execution
         /// Gets or sets the configuration for allowed unknown attributes/elements during parsing.
         /// When set, this configuration is used for parsing and evaluation.
         /// </summary>
-        internal UnknownElementsConfiguration UnknownElementsConfiguration
+        internal ParserIgnoreConfiguration ParserIgnoreConfiguration
         {
-            get => _unknownElementsConfiguration;
-            set => _unknownElementsConfiguration = value;
+            get => _ParserIgnoreConfiguration;
+            set => _ParserIgnoreConfiguration = value;
         }
 
         /// <summary>
@@ -1012,7 +1012,7 @@ namespace Microsoft.Build.Execution
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
             translator.Translate(ref _multiThreaded);
-            translator.Translate(ref _unknownElementsConfiguration, UnknownElementsConfiguration.FactoryForDeserialization);
+            translator.Translate(ref _ParserIgnoreConfiguration, ParserIgnoreConfiguration.FactoryForDeserialization);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.

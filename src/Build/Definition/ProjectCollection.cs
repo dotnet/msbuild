@@ -384,7 +384,7 @@ namespace Microsoft.Build.Evaluation
                 
                 if (!Traits.Instance.EscapeHatches.DisableParseConfig)
                 {
-                    ProjectRootElementCache.SetUnknownElementsConfiguration(UnknownElementsConfiguration.LoadGlobalConfig());
+                    ProjectRootElementCache.SetParserIgnoreConfiguration(ParserIgnoreConfiguration.LoadGlobalConfig());
                 }
 
                 if (reuseProjectRootElementCache)
@@ -573,16 +573,16 @@ namespace Microsoft.Build.Evaluation
         /// Gets or sets the configuration for allowed unknown attributes/elements during parsing.
         /// When set, this configuration will be used by builds started from this collection.
         /// </summary>
-        internal UnknownElementsConfiguration UnknownElementsConfiguration
+        internal ParserIgnoreConfiguration ParserIgnoreConfiguration
         {
-            get => ProjectRootElementCache.UnknownElementsConfiguration;
-            set => ProjectRootElementCache.SetUnknownElementsConfiguration(value);
+            get => ProjectRootElementCache.ParserIgnoreConfiguration;
+            set => ProjectRootElementCache.SetParserIgnoreConfiguration(value);
         }
 
         /// <summary>
         /// The config state before LoadParseConfigForStartup was called, used to restore on unload.
         /// </summary>
-        private UnknownElementsConfiguration _preStartupUnknownElementsConfiguration;
+        private ParserIgnoreConfiguration _preStartupParserIgnoreConfiguration;
 
         /// <summary>
         /// Loads a Directory.Parse.config by walking up from the specified directory
@@ -593,7 +593,7 @@ namespace Microsoft.Build.Evaluation
         /// <exception cref="InvalidOperationException">Thrown if startup config is already loaded.</exception>
         public void LoadParseConfigForStartup(string startingDirectory)
         {
-            if (_preStartupUnknownElementsConfiguration is not null)
+            if (_preStartupParserIgnoreConfiguration is not null)
             {
                 throw new InvalidOperationException("LoadParseConfigForStartup called while startup config is already loaded. Call UnloadParseConfigForStartup first.");
             }
@@ -603,17 +603,17 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            var config = ProjectRootElementCache.UnknownElementsConfiguration;
+            var config = ProjectRootElementCache.ParserIgnoreConfiguration;
             if (config is null)
             {
                 return;
             }
 
-            string configPath = FileUtilities.GetPathOfFileAbove(UnknownElementsConfiguration.ConfigFileName, startingDirectory);
+            string configPath = FileUtilities.GetPathOfFileAbove(ParserIgnoreConfiguration.ConfigFileName, startingDirectory);
             if (!string.IsNullOrEmpty(configPath) && !config.ContainsLoadedFile(configPath))
             {
-                _preStartupUnknownElementsConfiguration = config;
-                ProjectRootElementCache.SetUnknownElementsConfiguration(UnknownElementsConfiguration.Merge(config, UnknownElementsConfiguration.LoadFromFile(configPath)));
+                _preStartupParserIgnoreConfiguration = config;
+                ProjectRootElementCache.SetParserIgnoreConfiguration(ParserIgnoreConfiguration.Merge(config, ParserIgnoreConfiguration.LoadFromFile(configPath)));
             }
         }
 
@@ -622,10 +622,10 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public void UnloadParseConfigForStartup()
         {
-            if (_preStartupUnknownElementsConfiguration is not null)
+            if (_preStartupParserIgnoreConfiguration is not null)
             {
-                ProjectRootElementCache.SetUnknownElementsConfiguration(_preStartupUnknownElementsConfiguration);
-                _preStartupUnknownElementsConfiguration = null;
+                ProjectRootElementCache.SetParserIgnoreConfiguration(_preStartupParserIgnoreConfiguration);
+                _preStartupParserIgnoreConfiguration = null;
             }
         }
 

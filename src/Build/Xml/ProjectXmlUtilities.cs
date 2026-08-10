@@ -56,7 +56,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// Throw an invalid project exception if there are any child elements at all
         /// </summary>
-        internal static void VerifyThrowProjectNoChildElements(XmlElementWithLocation element, UnknownElementsConfiguration config)
+        internal static void VerifyThrowProjectNoChildElements(XmlElementWithLocation element, ParserIgnoreConfiguration config)
         {
             foreach (var child in GetVerifyThrowProjectChildElements(element))
             {
@@ -138,7 +138,7 @@ namespace Microsoft.Build.Internal
         /// <summary>
         /// If there are any attributes on the element, throws an InvalidProjectFileException complaining that the attribute is not valid on this element.
         /// </summary>
-        internal static void VerifyThrowProjectNoAttributes(XmlElementWithLocation element, UnknownElementsConfiguration config)
+        internal static void VerifyThrowProjectNoAttributes(XmlElementWithLocation element, ParserIgnoreConfiguration config)
         {
             if (element.HasAttributes)
             {
@@ -178,7 +178,7 @@ namespace Microsoft.Build.Internal
         /// Verify that all attributes on the element are on the list of legal attributes.
         /// When genericElementName is provided, only that name is checked in the config (not the actual element name).
         /// </summary>
-        internal static void VerifyThrowProjectAttributes(XmlElementWithLocation element, HashSet<string> validAttributes, UnknownElementsConfiguration config, string genericElementName = null)
+        internal static void VerifyThrowProjectAttributes(XmlElementWithLocation element, HashSet<string> validAttributes, ParserIgnoreConfiguration config, string genericElementName = null)
         {
             foreach (XmlAttributeWithLocation attribute in element.Attributes)
             {
@@ -200,7 +200,7 @@ namespace Microsoft.Build.Internal
         /// If the element is allowed, it is silently skipped.
         /// </summary>
         /// <returns>True if the element was skipped (caller should continue), false if the element was not in config and an exception was thrown.</returns>
-        internal static bool ThrowIfProjectInvalidChildElement(string name, string parentName, ElementLocation location, UnknownElementsConfiguration config)
+        internal static bool ThrowIfProjectInvalidChildElement(string name, string parentName, ElementLocation location, ParserIgnoreConfiguration config)
         {
             if (config?.CheckSkipElement(parentName, name) == true)
             {

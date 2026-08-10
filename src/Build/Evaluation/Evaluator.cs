@@ -192,7 +192,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly ProjectRootElementCacheBase _projectRootElementCache;
 
-        private UnknownElementsConfiguration _unknownElementsConfiguration;
+        private ParserIgnoreConfiguration _ParserIgnoreConfiguration;
 
         /// <summary>
         /// The logging context to be used and piped down throughout evaluation.
@@ -309,35 +309,35 @@ namespace Microsoft.Build.Evaluation
             _streamImports.Add(string.Empty);
         }
 
-        private void InitializeUnknownElementsConfiguration()
+        private void InitializeParserIgnoreConfiguration()
         {
-            _unknownElementsConfiguration = _projectRootElementCache.UnknownElementsConfiguration;
+            _ParserIgnoreConfiguration = _projectRootElementCache.ParserIgnoreConfiguration;
 
             if (Traits.Instance.EscapeHatches.DisableParseConfig || string.IsNullOrEmpty(_projectRootElement.FullPath))
             {
                 return;
             }
 
-            string projectConfigPath = FileUtilities.GetPathOfFileAbove(UnknownElementsConfiguration.ConfigFileName, _projectRootElement.DirectoryPath);
+            string projectConfigPath = FileUtilities.GetPathOfFileAbove(ParserIgnoreConfiguration.ConfigFileName, _projectRootElement.DirectoryPath);
             if (string.IsNullOrEmpty(projectConfigPath))
             {
                 return;
             }
 
-            if (_unknownElementsConfiguration is null)
+            if (_ParserIgnoreConfiguration is null)
             {
-                _unknownElementsConfiguration = UnknownElementsConfiguration.LoadFromFile(projectConfigPath);
+                _ParserIgnoreConfiguration = ParserIgnoreConfiguration.LoadFromFile(projectConfigPath);
             }
-            else if (!_unknownElementsConfiguration.ContainsLoadedFile(projectConfigPath))
+            else if (!_ParserIgnoreConfiguration.ContainsLoadedFile(projectConfigPath))
             {
-                _unknownElementsConfiguration = UnknownElementsConfiguration.Merge(_unknownElementsConfiguration, UnknownElementsConfiguration.LoadFromFile(projectConfigPath));
+                _ParserIgnoreConfiguration = ParserIgnoreConfiguration.Merge(_ParserIgnoreConfiguration, ParserIgnoreConfiguration.LoadFromFile(projectConfigPath));
             }
             else
             {
                 return;
             }
 
-            _projectRootElementCache.SetUnknownElementsConfiguration(_unknownElementsConfiguration);
+            _projectRootElementCache.SetParserIgnoreConfiguration(_ParserIgnoreConfiguration);
         }
 
         /// <summary>
@@ -425,7 +425,7 @@ namespace Microsoft.Build.Evaluation
                     items = evaluator._data.Items;
                 }
 
-                string skippedMessage = evaluator._unknownElementsConfiguration?.GetSkippedSummaryMessage();
+                string skippedMessage = evaluator._ParserIgnoreConfiguration?.GetSkippedSummaryMessage();
                 if (skippedMessage is not null)
                 {
                     evaluator._evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, skippedMessage);
@@ -701,9 +701,9 @@ namespace Microsoft.Build.Evaluation
                 _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
                 _evaluationLoggingContext.LogProjectEvaluationStarted();
 
-                InitializeUnknownElementsConfiguration();
+                InitializeParserIgnoreConfiguration();
 
-                string configMessage = _unknownElementsConfiguration?.GetLoadedConfigsMessage();
+                string configMessage = _ParserIgnoreConfiguration?.GetLoadedConfigsMessage();
                 if (configMessage is not null)
                 {
                     _evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, configMessage);

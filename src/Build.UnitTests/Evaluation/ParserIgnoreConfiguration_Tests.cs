@@ -13,11 +13,11 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
-    public class UnknownElementsConfiguration_Tests : IDisposable
+    public class ParserIgnoreConfiguration_Tests : IDisposable
     {
         private readonly string _testDir;
 
-        public UnknownElementsConfiguration_Tests()
+        public ParserIgnoreConfiguration_Tests()
         {
             _testDir = Path.Combine(Path.GetTempPath(), "MSBuildTest_UnknownElements_" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(_testDir);
@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ParsesValidConfigFile()
         {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
+            string configPath = Path.Combine(_testDir, ParserIgnoreConfiguration.ConfigFileName);
             File.WriteAllText(configPath, @"<ParseConfig>
   <IgnoreAttributes>
     <Ignore Element=""Target"" Name=""Foo"" />
@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
   </IgnoreChildren>
 </ParseConfig>");
 
-            var config = UnknownElementsConfiguration.LoadFromFile(configPath);
+            var config = ParserIgnoreConfiguration.LoadFromFile(configPath);
 
             config.LoadedConfigFiles.Count.ShouldBe(1);
             config.CheckSkipAttribute("Target", "Foo").ShouldBeTrue();
@@ -56,10 +56,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void IsCaseInsensitive()
         {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
+            string configPath = Path.Combine(_testDir, ParserIgnoreConfiguration.ConfigFileName);
             File.WriteAllText(configPath, @"<ParseConfig><IgnoreAttributes><Ignore Element=""Target"" Name=""Foo"" /></IgnoreAttributes></ParseConfig>");
 
-            var config = UnknownElementsConfiguration.LoadFromFile(configPath);
+            var config = ParserIgnoreConfiguration.LoadFromFile(configPath);
 
             config.CheckSkipAttribute("target", "foo").ShouldBeTrue();
             config.CheckSkipAttribute("TARGET", "FOO").ShouldBeTrue();
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void IgnoresInvalidEntries()
         {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
+            string configPath = Path.Combine(_testDir, ParserIgnoreConfiguration.ConfigFileName);
             File.WriteAllText(configPath, @"<ParseConfig>
   <IgnoreAttributes>
     <Ignore Element="""" Name=""Foo"" />
@@ -84,7 +84,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
   </BogusSection>
 </ParseConfig>");
 
-            var config = UnknownElementsConfiguration.LoadFromFile(configPath);
+            var config = ParserIgnoreConfiguration.LoadFromFile(configPath);
 
             config.CheckSkipAttribute("Target", "ValidOne").ShouldBeTrue();
             config.CheckSkipAttribute("Target", "Foo").ShouldBeFalse();
@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void ReturnsEmptyWhenNoConfigExists()
         {
-            var config = UnknownElementsConfiguration.LoadFromFile(Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName));
+            var config = ParserIgnoreConfiguration.LoadFromFile(Path.Combine(_testDir, ParserIgnoreConfiguration.ConfigFileName));
 
             config.LoadedConfigFiles.Count.ShouldBe(0);
             config.CheckSkipAttribute("Target", "Foo").ShouldBeFalse();
@@ -105,16 +105,16 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [Fact]
         public void MergeCombinesEntriesAndDeduplicatesFiles()
         {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
+            string configPath = Path.Combine(_testDir, ParserIgnoreConfiguration.ConfigFileName);
             File.WriteAllText(configPath, @"<ParseConfig><IgnoreAttributes><Ignore Element=""Target"" Name=""Foo"" /></IgnoreAttributes></ParseConfig>");
 
             string extraConfigPath = Path.Combine(_testDir, "extra.config");
             File.WriteAllText(extraConfigPath, @"<ParseConfig><IgnoreChildren><Ignore Element=""Project"" Name=""CustomThing"" /></IgnoreChildren></ParseConfig>");
 
-            var merged = UnknownElementsConfiguration.Merge(
-                UnknownElementsConfiguration.LoadFromFile(configPath),
-                UnknownElementsConfiguration.LoadFromFile(extraConfigPath));
-            merged = UnknownElementsConfiguration.Merge(merged, UnknownElementsConfiguration.LoadFromFile(configPath));
+            var merged = ParserIgnoreConfiguration.Merge(
+                ParserIgnoreConfiguration.LoadFromFile(configPath),
+                ParserIgnoreConfiguration.LoadFromFile(extraConfigPath));
+            merged = ParserIgnoreConfiguration.Merge(merged, ParserIgnoreConfiguration.LoadFromFile(configPath));
 
             merged.CheckSkipAttribute("Target", "Foo").ShouldBeTrue();
             merged.CheckSkipElement("Project", "CustomThing").ShouldBeTrue();
@@ -127,27 +127,27 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string envConfigPath = Path.Combine(_testDir, "env.config");
             File.WriteAllText(envConfigPath, @"<ParseConfig><IgnoreChildren><Ignore Element=""Project"" Name=""CustomThing"" /></IgnoreChildren></ParseConfig>");
 
-            string oldEnv = Environment.GetEnvironmentVariable(UnknownElementsConfiguration.EnvironmentVariableName);
+            string oldEnv = Environment.GetEnvironmentVariable(ParserIgnoreConfiguration.EnvironmentVariableName);
             try
             {
-                Environment.SetEnvironmentVariable(UnknownElementsConfiguration.EnvironmentVariableName, envConfigPath);
-                var config = UnknownElementsConfiguration.LoadGlobalConfig();
+                Environment.SetEnvironmentVariable(ParserIgnoreConfiguration.EnvironmentVariableName, envConfigPath);
+                var config = ParserIgnoreConfiguration.LoadGlobalConfig();
 
                 config.CheckSkipElement("Project", "CustomThing").ShouldBeTrue();
             }
             finally
             {
-                Environment.SetEnvironmentVariable(UnknownElementsConfiguration.EnvironmentVariableName, oldEnv);
+                Environment.SetEnvironmentVariable(ParserIgnoreConfiguration.EnvironmentVariableName, oldEnv);
             }
         }
 
         [Fact]
         public void RecordsSkippedItems()
         {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
+            string configPath = Path.Combine(_testDir, ParserIgnoreConfiguration.ConfigFileName);
             File.WriteAllText(configPath, @"<ParseConfig><IgnoreAttributes><Ignore Element=""Target"" Name=""Foo"" /></IgnoreAttributes></ParseConfig>");
 
-            var config = UnknownElementsConfiguration.LoadFromFile(configPath);
+            var config = ParserIgnoreConfiguration.LoadFromFile(configPath);
 
             config.GetSkippedSummaryMessage().ShouldBeNull();
 
@@ -164,12 +164,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [MemberData(nameof(AttributeSkipCases))]
         public void AllowedAttributeIsSkipped(string configElement, string configName, string projectXml)
         {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
+            string configPath = Path.Combine(_testDir, ParserIgnoreConfiguration.ConfigFileName);
             File.WriteAllText(configPath, $@"<ParseConfig><IgnoreAttributes><Ignore Element=""{configElement}"" Name=""{configName}"" /></IgnoreAttributes></ParseConfig>");
             string projectFile = Path.Combine(_testDir, "test.proj");
             File.WriteAllText(projectFile, projectXml);
 
-            using (var pc = CreateProjectCollection(UnknownElementsConfiguration.LoadFromFile(configPath)))
+            using (var pc = CreateProjectCollection(ParserIgnoreConfiguration.LoadFromFile(configPath)))
             {
                 var project = new Project(projectFile, null, null, pc, ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreEmptyImports | ProjectLoadSettings.IgnoreInvalidImports);
                 project.ShouldNotBeNull();
@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string projectFile = Path.Combine(_testDir, "test.proj");
             File.WriteAllText(projectFile, projectXml);
 
-            using (var pc = CreateProjectCollection(UnknownElementsConfiguration.Empty))
+            using (var pc = CreateProjectCollection(ParserIgnoreConfiguration.Empty))
             {
                 Should.Throw<InvalidProjectFileException>(() => new Project(projectFile, null, null, pc, ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreEmptyImports | ProjectLoadSettings.IgnoreInvalidImports));
             }
@@ -195,12 +195,12 @@ namespace Microsoft.Build.UnitTests.Evaluation
         [MemberData(nameof(ChildSkipCases))]
         public void AllowedChildIsSkipped(string configElement, string configName, string projectXml)
         {
-            string configPath = Path.Combine(_testDir, UnknownElementsConfiguration.ConfigFileName);
+            string configPath = Path.Combine(_testDir, ParserIgnoreConfiguration.ConfigFileName);
             File.WriteAllText(configPath, $@"<ParseConfig><IgnoreChildren><Ignore Element=""{configElement}"" Name=""{configName}"" /></IgnoreChildren></ParseConfig>");
             string projectFile = Path.Combine(_testDir, "test.proj");
             File.WriteAllText(projectFile, projectXml);
 
-            using (var pc = CreateProjectCollection(UnknownElementsConfiguration.LoadFromFile(configPath)))
+            using (var pc = CreateProjectCollection(ParserIgnoreConfiguration.LoadFromFile(configPath)))
             {
                 var project = new Project(projectFile, null, null, pc, ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreEmptyImports | ProjectLoadSettings.IgnoreInvalidImports);
                 project.ShouldNotBeNull();
@@ -216,7 +216,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string projectFile = Path.Combine(_testDir, "test.proj");
             File.WriteAllText(projectFile, projectXml);
 
-            using (var pc = CreateProjectCollection(UnknownElementsConfiguration.Empty))
+            using (var pc = CreateProjectCollection(ParserIgnoreConfiguration.Empty))
             {
                 Should.Throw<InvalidProjectFileException>(() => new Project(projectFile, null, null, pc, ProjectLoadSettings.IgnoreMissingImports | ProjectLoadSettings.IgnoreEmptyImports | ProjectLoadSettings.IgnoreInvalidImports));
             }
@@ -254,10 +254,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
             new object[] { "Task", "Custom", @"<Project><Target Name=""T""><Message Text=""hi""><Custom /></Message></Target></Project>" },
         };
 
-        private static ProjectCollection CreateProjectCollection(UnknownElementsConfiguration config)
+        private static ProjectCollection CreateProjectCollection(ParserIgnoreConfiguration config)
         {
             var projectCollection = new ProjectCollection();
-            projectCollection.UnknownElementsConfiguration = config;
+            projectCollection.ParserIgnoreConfiguration = config;
             return projectCollection;
         }
     }
