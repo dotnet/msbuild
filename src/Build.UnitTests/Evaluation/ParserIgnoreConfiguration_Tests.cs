@@ -9,7 +9,6 @@ using Microsoft.Build.Evaluation;
 using Shouldly;
 using Xunit;
 
-#nullable disable
 
 namespace Microsoft.Build.UnitTests.Evaluation
 {
@@ -127,7 +126,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             string envConfigPath = Path.Combine(_testDir, "env.config");
             File.WriteAllText(envConfigPath, @"<ParseConfig><IgnoreChildren><Ignore Element=""Project"" Name=""CustomThing"" /></IgnoreChildren></ParseConfig>");
 
-            string oldEnv = Environment.GetEnvironmentVariable(ParserIgnoreConfiguration.EnvironmentVariableName);
+            string? oldEnv = Environment.GetEnvironmentVariable(ParserIgnoreConfiguration.EnvironmentVariableName);
             try
             {
                 Environment.SetEnvironmentVariable(ParserIgnoreConfiguration.EnvironmentVariableName, envConfigPath);
@@ -175,7 +174,7 @@ namespace Microsoft.Build.UnitTests.Evaluation
             config.CheckSkipAttribute("Target", "Foo");
             config.CheckSkipAttribute("Target", "Foo");
 
-            string summary = config.GetSkippedSummaryMessage();
+            string? summary = config.GetSkippedSummaryMessage();
             summary.ShouldNotBeNull();
             summary.ShouldContain("Attribute:Target:Foo");
             summary.ShouldContain("2 occurrences");
