@@ -240,7 +240,7 @@ namespace Microsoft.Build.Execution
         /// The configuration for allowed unknown attributes/elements during parsing.
         /// Loaded on the main node and serialized to worker nodes.
         /// </summary>
-        private ParserIgnoreConfiguration _ParserIgnoreConfiguration;
+        private ParserIgnoreConfiguration _ParserIgnoreConfiguration = ParserIgnoreConfiguration.Empty;
 
         /// <summary>
         /// Constructor for those who intend to set all properties themselves.
