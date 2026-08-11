@@ -399,19 +399,25 @@ namespace Microsoft.Build.Evaluation
             }
             finally
             {
-                evaluator._observationSession?.Complete(evaluationSucceeded);
-
-                IEnumerable globalProperties = null;
-                IEnumerable properties = null;
-                IEnumerable items = null;
-
-                if (evaluator._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent)
+                try
                 {
-                    globalProperties = evaluator._data.GlobalPropertiesDictionary;
-                    properties = Traits.LogAllEnvironmentVariables ? evaluator._data.Properties : evaluator.FilterOutEnvironmentDerivedProperties(evaluator._data.Properties);
-                    items = evaluator._data.Items;
+                    IEnumerable globalProperties = null;
+                    IEnumerable properties = null;
+                    IEnumerable items = null;
+
+                    if (evaluator._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent)
+                    {
+                        globalProperties = evaluator._data.GlobalPropertiesDictionary;
+                        properties = Traits.LogAllEnvironmentVariables ? evaluator._data.Properties : evaluator.FilterOutEnvironmentDerivedProperties(evaluator._data.Properties);
+                        items = evaluator._data.Items;
+                    }
+
+                    evaluator._evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, evaluator._evaluationProfiler.ProfiledResult);
                 }
-                evaluator._evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, evaluator._evaluationProfiler.ProfiledResult);
+                finally
+                {
+                    evaluator._observationSession?.Complete(evaluationSucceeded);
+                }
             }
 
             MSBuildEventSource.Log.EvaluateStop(root.ProjectFileLocation.File);
