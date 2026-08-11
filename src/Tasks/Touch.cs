@@ -163,21 +163,24 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
+#if NETFRAMEWORK && FEATURE_WINDOWSINTEROP
+            // File.SetLastAccessTime and File.SetLastWriteTime open the file with GENERIC_WRITE on .NET Framework,
+            // which fails with a sharing violation when the file is already open elsewhere without FILE_SHARE_WRITE.
+            // Open it with FILE_WRITE_ATTRIBUTES instead, like .NET (Core) does.
+            SetLastAccessTime setLastAccessTime = NativeMethods.SetLastAccessTime;
+            SetLastWriteTime setLastWriteTime = NativeMethods.SetLastWriteTime;
+#else
+            SetLastAccessTime setLastAccessTime = File.SetLastAccessTime;
+            SetLastWriteTime setLastWriteTime = File.SetLastWriteTime;
+#endif
+
             return ExecuteImpl(
                 File.Exists,
                 File.Create,
                 File.GetAttributes,
                 File.SetAttributes,
-#if NETFRAMEWORK && FEATURE_WINDOWSINTEROP
-                // File.SetLastAccessTime and File.SetLastWriteTime open the file with GENERIC_WRITE on .NET
-                // Framework, which fails with a sharing violation when the file is already open elsewhere
-                // without FILE_SHARE_WRITE. Open it with FILE_WRITE_ATTRIBUTES instead, like .NET (Core) does.
-                NativeMethods.SetLastAccessTime,
-                NativeMethods.SetLastWriteTime);
-#else
-                File.SetLastAccessTime,
-                File.SetLastWriteTime);
-#endif
+                setLastAccessTime,
+                setLastWriteTime);
         }
 
         /// <summary>
