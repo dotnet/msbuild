@@ -16,10 +16,9 @@ namespace Microsoft.Build.Evaluation
     /// <summary>
     /// Manages a set of allowed unknown attributes and elements that should be silently skipped
     /// during project parsing instead of throwing an InvalidProjectFileException.
-    /// Configuration is loaded from Directory.Parse.config files discovered additively from:
-    /// 1. Next to the MSBuild executable
-    /// 2. User profile (~/.msbuild/)
-    /// 3. MSBUILD_PARSE_CONFIG environment variable paths
+    /// Configuration is loaded from Directory.Parse.config files discovered from:
+    /// 1. MSBUILD_PARSE_CONFIG environment variable paths
+    /// 2. Walking up from the project file's directory (passed via ProjectCollection constructor)
     /// </summary>
     internal sealed class ParserIgnoreConfiguration : ITranslatable
     {

@@ -86,26 +86,21 @@ Configuration is discovered from two sources:
 
 1. **`MSBUILD_PARSE_CONFIG` environment variable** — Semicolon-separated (Windows) or colon-separated (Unix) list of config file paths. Always loaded when a `ProjectCollection` is created.
 
-2. **Project directory walk** — The CLI walks up from the target project file's directory looking for `Directory.Parse.config` (same pattern as `Directory.Build.rsp`). Called via `ProjectCollection.LoadParseConfigForStartup(directory)` before any project is loaded.
+2. **Project directory walk** — The CLI walks up from the target project file's directory looking for `Directory.Parse.config` (same pattern as `Directory.Build.rsp`). This is passed as `parseConfigDirectory` to the `ProjectCollection` constructor.
 
 These are merged additively — entries from either source are combined.
 
-## Public API
+## Integration
 
-### `ProjectCollection.LoadParseConfigForStartup(string startingDirectory)`
+The `ProjectCollection` constructor accepts an optional `parseConfigDirectory` parameter. When provided, it walks up from that directory to find a `Directory.Parse.config` and merges it with the environment variable config. XMake passes the project file's directory.
 
-Walks up from `startingDirectory` to find a `Directory.Parse.config`, merges it with the current config, and sets it on the cache. Must be called before loading projects. Call `UnloadParseConfigForStartup()` after the build to restore the previous state.
-
-### `ProjectCollection.UnloadParseConfigForStartup()`
-
-Restores the parse configuration to the state before `LoadParseConfigForStartup` was called.
-
+The `ParserIgnoreConfiguration` property on `ProjectCollection` and `BuildParameters` is `internal`. External hosts that need to configure parse rules should use the constructor parameter or the environment variable.
 
 ## Logging
 
 - **Config files loaded**: Logged at evaluation start (`MessageImportance.Low`). Lists all loaded config file paths.
-- **Config files embedded**: Each loaded config file is logged as a `ProjectImportedEventArgs`, causing the binary logger to embed the file content in the binlog.
-- **Skipped items summary**: Logged after evaluation completes (`MessageImportance.Low`). Lists all skipped attributes/elements with occurrence counts.
+- **Config files embedded**: Each loaded config file is embedded in the binary log archive (visible as an embedded file, not as a project import).
+- **Skipped items summary**: Logged after each evaluation completes (`MessageImportance.Low`). Lists skipped attributes/elements with occurrence counts for that evaluation.
 
 ## Feature Flag
 
