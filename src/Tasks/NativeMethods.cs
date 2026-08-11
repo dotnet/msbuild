@@ -154,8 +154,8 @@ namespace Microsoft.Build.Tasks
             }
 
             bool success = isLastAccessTime
-                ? Windows.Win32.PInvoke.SetFileTime(handle, null, fileTime, null)
-                : Windows.Win32.PInvoke.SetFileTime(handle, null, null, fileTime);
+                ? Windows.Win32.PInvoke.SetFileTime((HANDLE)fileHandle.DangerousGetHandle(), null, fileTime, null)
+                : Windows.Win32.PInvoke.SetFileTime((HANDLE)fileHandle.DangerousGetHandle(), null, null, fileTime);
             errorCode = Marshal.GetLastWin32Error();
 
             if (!success)
