@@ -44,7 +44,8 @@ public class MSBuildPathMatcherBenchmark
         _matcher = new MSBuildPathMatcher(
             wildcardDirectory,
             filePattern,
-            useCultureSensitiveMatch: Scenario is PatternScenario.RepeatedAnchor or PatternScenario.MultipleGlobstars);
+            preserveLegacyRegexSemantics: Scenario is PatternScenario.RepeatedAnchor or PatternScenario.MultipleGlobstars,
+            useInvariantCulture: true);
         _candidates = CreateCandidates();
 
         FileMatcher.Default.GetFileSpecInfoWithRegexObject(

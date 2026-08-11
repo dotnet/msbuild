@@ -52,6 +52,10 @@ namespace Microsoft.Build.Shared.FileSystem
     /// </summary>
     internal interface IDirectFileSystemEnumeration
     {
+        /// <summary>
+        /// Whether enumeration is set-equivalent to direct <see cref="System.IO"/> enumeration and does not filter,
+        /// redirect, synthesize, or cache entries.
+        /// </summary>
         bool SupportsDirectEnumeration { get; }
     }
 }

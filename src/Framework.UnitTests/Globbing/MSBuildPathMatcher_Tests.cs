@@ -260,11 +260,11 @@ public class MSBuildPathMatcher_Tests
             MSBuildPathMatcher directoryMatcher = new(
                 ToPlatformPath("**/\u200B"),
                 "*.cs",
-                useCultureSensitiveMatch: true);
+                preserveLegacyRegexSemantics: true);
             MSBuildPathMatcher fileMatcher = new(
                 ToPlatformPath("**/a"),
                 "\u200B.cs",
-                useCultureSensitiveMatch: true);
+                preserveLegacyRegexSemantics: true);
 
             directoryMatcher.MatchesFile("\u00AD", "source.cs").ShouldBeFalse();
             fileMatcher.MatchesFile("a", "\u00AD.cs").ShouldBeFalse();
@@ -276,10 +276,55 @@ public class MSBuildPathMatcher_Tests
     }
 
     [Fact]
+    public void LegacyRegexSemanticsDependOnCurrentCulture()
+    {
+        CultureInfo originalCulture = Thread.CurrentThread.CurrentCulture;
+
+        try
+        {
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+            MSBuildPathMatcher invariantMatcher = new(
+                ToPlatformPath("**/I"),
+                "*.cs",
+                preserveLegacyRegexSemantics: true);
+            bool[] invariantMatches = GetMatches(invariantMatcher);
+
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+            MSBuildPathMatcher englishMatcher = new(
+                ToPlatformPath("**/I"),
+                "*.cs",
+                preserveLegacyRegexSemantics: true);
+            bool[] englishMatches = GetMatches(englishMatcher);
+
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("tr-TR");
+            MSBuildPathMatcher turkishMatcher = new(
+                ToPlatformPath("**/I"),
+                "*.cs",
+                preserveLegacyRegexSemantics: true);
+            bool[] turkishMatches = GetMatches(turkishMatcher);
+
+            invariantMatches.ShouldBe([true, false, false]);
+            englishMatches.ShouldBe([true, true, false]);
+            turkishMatches.ShouldBe([false, false, true]);
+        }
+        finally
+        {
+            Thread.CurrentThread.CurrentCulture = originalCulture;
+        }
+
+        static bool[] GetMatches(MSBuildPathMatcher matcher) =>
+        [
+            matcher.MatchesFile("i", "source.cs"),
+            matcher.MatchesFile("İ", "source.cs"),
+            matcher.MatchesFile("ı", "source.cs"),
+        ];
+    }
+
+    [Fact]
     public void CultureSensitiveQuestionMarkMatchesLegacyRegexSemantics()
     {
-        MSBuildPathMatcher regular = new("**", "?", useCultureSensitiveMatch: true);
-        MSBuildPathMatcher trailingDot = new("**", "?.", useCultureSensitiveMatch: true);
+        MSBuildPathMatcher regular = new("**", "?", preserveLegacyRegexSemantics: true);
+        MSBuildPathMatcher trailingDot = new("**", "?.", preserveLegacyRegexSemantics: true);
 
         regular.MatchesFile(ReadOnlySpan<char>.Empty, "\n").ShouldBeFalse();
         trailingDot.MatchesFile(ReadOnlySpan<char>.Empty, "a").ShouldBeFalse();

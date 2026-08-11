@@ -32,7 +32,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         protected ManagedFileSystem() { }
 
-        public bool SupportsDirectEnumeration => true;
+        public virtual bool SupportsDirectEnumeration => true;
 
         public TextReader ReadFile(string path)
         {

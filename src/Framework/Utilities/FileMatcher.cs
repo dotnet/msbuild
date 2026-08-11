@@ -6,6 +6,7 @@ using System.Buffers;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 #if !NETFRAMEWORK
 using System.IO;
 #else
@@ -38,13 +39,80 @@ namespace Microsoft.Build.Shared
         Optimized,
     }
 
+    internal enum FileMatcherCaseFolding
+    {
+        Auto,
+        LegacyCurrentCulture,
+        InvariantCulture,
+    }
+
+    internal enum FileMatcherDriver : byte
+    {
+        Legacy,
+        OptimizedCallback,
+        OptimizedDirect,
+    }
+
+    internal enum FileMatcherFallbackReason : byte
+    {
+        None,
+        LegacyImplementation,
+        OptimizedImplementationUnavailable,
+        CacheBackedWithoutApplicableExcludes,
+        UnsupportedFileSpec,
+        RelativeFileSpecWithoutProjectDirectory,
+        AncestorExcludeRequiresLexicalPrefix,
+        InvalidExcludeRequiresExactIdentity,
+    }
+
     /// <summary>
     /// Functions for matching file names with patterns.
     /// </summary>
     internal class FileMatcher
     {
+        internal enum CacheDriverProfile : byte
+        {
+            LegacyUncached,
+            LegacyCached,
+            OptimizedFallbackUncached,
+            OptimizedFallbackCached,
+            OptimizedCallbackUncached,
+            OptimizedCallbackCached,
+            OptimizedDirect,
+        }
+
+        internal readonly struct DriverSelection
+        {
+            internal DriverSelection(
+                FileMatcherDriver driver,
+                FileMatcherFallbackReason fallbackReason,
+                CacheDriverProfile cacheProfile)
+            {
+                Driver = driver;
+                FallbackReason = fallbackReason;
+                CacheProfile = cacheProfile;
+            }
+
+            internal FileMatcherDriver Driver { get; }
+            internal FileMatcherFallbackReason FallbackReason { get; }
+            private CacheDriverProfile CacheProfile { get; }
+
+            internal string CacheKeyPrefix => CacheProfile switch
+            {
+                CacheDriverProfile.LegacyUncached => "lu;",
+                CacheDriverProfile.LegacyCached => "lc;",
+                CacheDriverProfile.OptimizedFallbackUncached => "ofu;",
+                CacheDriverProfile.OptimizedFallbackCached => "ofc;",
+                CacheDriverProfile.OptimizedCallbackUncached => "ocu;",
+                CacheDriverProfile.OptimizedCallbackCached => "occ;",
+                CacheDriverProfile.OptimizedDirect => "od;",
+                _ => throw new NotSupportedException(CacheProfile.ToString()),
+            };
+        }
+
         private readonly IFileSystem _fileSystem;
         private readonly FileMatcherImplementation _implementation;
+        private readonly FileMatcherCaseFolding _caseFolding;
         private readonly bool _allowDirectEnumeration;
         private readonly bool _usesFileSystemEntryCache;
         private const string recursiveDirectoryMatch = "**";
@@ -68,12 +136,14 @@ namespace Microsoft.Build.Shared
         internal static readonly char[] directorySeparatorCharacters = FileUtilities.Slashes;
 
         // until Cloudbuild switches to EvaluationContext, we need to keep their dependence on global glob caching via an environment variable
-        private static readonly Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>> s_cachedGlobExpansions = new Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>>(() => new ConcurrentDictionary<string, IReadOnlyList<string>>(StringComparer.OrdinalIgnoreCase));
-        private static readonly Lazy<ConcurrentDictionary<string, object>> s_cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
-        private static readonly Lazy<ConcurrentDictionary<string, (Regex regex, bool needsRecursion, bool isLegalFileSpec)>> s_regexCache = new(() => new(StringComparer.Ordinal));
+        private static readonly Lazy<ConcurrentDictionary<string, IReadOnlyList<string>>> s_cachedGlobExpansions = new(() => new ConcurrentDictionary<string, IReadOnlyList<string>>(StringComparer.Ordinal));
+        private static readonly Lazy<ConcurrentDictionary<string, object>> s_cachedGlobExpansionsLock = new(() => new ConcurrentDictionary<string, object>(StringComparer.Ordinal));
+        private static readonly Lazy<ConcurrentDictionary<
+            (string FileSpec, FileMatcherCaseFolding CaseFolding, string CultureName),
+            (Regex regex, bool needsRecursion, bool isLegalFileSpec)>> s_regexCache = new();
 
         private readonly ConcurrentDictionary<string, IReadOnlyList<string>> _cachedGlobExpansions;
-        private readonly Lazy<ConcurrentDictionary<string, object>> _cachedGlobExpansionsLock = new Lazy<ConcurrentDictionary<string, object>>(() => new ConcurrentDictionary<string, object>(StringComparer.OrdinalIgnoreCase));
+        private readonly Lazy<ConcurrentDictionary<string, object>> _cachedGlobExpansionsLock = new(() => new ConcurrentDictionary<string, object>(StringComparer.Ordinal));
 
         public const RegexOptions DefaultRegexOptions = RegexOptions.IgnoreCase;
 
@@ -111,7 +181,8 @@ namespace Microsoft.Build.Shared
         public FileMatcher(
             IFileSystem fileSystem,
             ConcurrentDictionary<string, IReadOnlyList<string>> fileEntryExpansionCache = null,
-            FileMatcherImplementation implementation = FileMatcherImplementation.Auto) : this(
+            FileMatcherImplementation implementation = FileMatcherImplementation.Auto,
+            FileMatcherCaseFolding caseFolding = FileMatcherCaseFolding.Auto) : this(
             fileSystem,
             (entityType, path, pattern, projectDirectory, stripProjectDirectory) => GetAccessibleFileSystemEntries(
                 fileSystem,
@@ -122,7 +193,8 @@ namespace Microsoft.Build.Shared
                 stripProjectDirectory),
             fileEntryExpansionCache,
             implementation,
-            allowDirectEnumeration: true)
+            allowDirectEnumeration: true,
+            caseFolding)
         {
         }
 
@@ -131,7 +203,8 @@ namespace Microsoft.Build.Shared
             GetFileSystemEntries getFileSystemEntries,
             ConcurrentDictionary<string, IReadOnlyList<string>> getFileSystemDirectoryEntriesCache = null,
             FileMatcherImplementation implementation = FileMatcherImplementation.Auto,
-            bool allowDirectEnumeration = false)
+            bool allowDirectEnumeration = false,
+            FileMatcherCaseFolding caseFolding = FileMatcherCaseFolding.Auto)
         {
             if (Traits.Instance.MSBuildCacheFileEnumerations)
             {
@@ -145,6 +218,7 @@ namespace Microsoft.Build.Shared
 
             _fileSystem = fileSystem;
             _implementation = implementation;
+            _caseFolding = caseFolding;
             _allowDirectEnumeration = allowDirectEnumeration;
             _usesFileSystemEntryCache = getFileSystemDirectoryEntriesCache is not null;
 
@@ -784,11 +858,13 @@ namespace Microsoft.Build.Shared
                 string filespec,                // can be null
                 string directoryPattern,        // can be null
                 Regex regexFileMatch,           // can be null
+                bool requiresLegacyRegexSemantics,
                 bool needsRecursion)
             {
                 Filespec = filespec;
                 DirectoryPattern = directoryPattern;
                 RegexFileMatch = regexFileMatch;
+                RequiresLegacyRegexSemantics = requiresLegacyRegexSemantics;
                 NeedsRecursion = needsRecursion;
             }
 
@@ -807,6 +883,10 @@ namespace Microsoft.Build.Shared
             /// Wild-card matching.
             /// </summary>
             public Regex RegexFileMatch { get; }
+            /// <summary>
+            /// Whether the specification requires regex-compatible matching.
+            /// </summary>
+            public bool RequiresLegacyRegexSemantics { get; }
             /// <summary>
             /// If true, then recursion is required.
             /// </summary>
@@ -1542,7 +1622,7 @@ namespace Microsoft.Build.Shared
             if (isLegalFileSpec)
             {
                 string matchFileExpression = RegularExpressionFromFileSpec(fixedDirectoryPart, wildcardDirectoryPart, filenamePart);
-                regexFileMatch = new Regex(matchFileExpression, DefaultRegexOptions);
+                regexFileMatch = new Regex(matchFileExpression, CaseInsensitiveRegexOptions);
             }
             else
             {
@@ -1557,9 +1637,13 @@ namespace Microsoft.Build.Shared
            out bool needsRecursion,
            out bool isLegalFileSpec)
         {
-            var result = s_regexCache.Value.GetOrAdd(filespec, spec =>
+            FileMatcherCaseFolding caseFolding = ResolvedCaseFolding;
+            string cultureName = caseFolding == FileMatcherCaseFolding.LegacyCurrentCulture
+                ? CultureInfo.CurrentCulture.Name
+                : string.Empty;
+            var result = s_regexCache.Value.GetOrAdd((filespec, caseFolding, cultureName), key =>
             {
-                GetFileSpecInfoWithRegexObjectCore(spec, out var regex, out var needsRec, out var isLegal);
+                GetFileSpecInfoWithRegexObjectCore(key.FileSpec, out var regex, out var needsRec, out var isLegal);
                 return (regex, needsRec, isLegal);
             });
             regexFileMatch = result.regex;
@@ -1980,19 +2064,33 @@ namespace Microsoft.Build.Shared
                 return (CreateArrayWithSingleItemIfNotExcluded(filespecUnescaped, excludeSpecsUnescaped), SearchAction.None, string.Empty, null);
             }
 
+            DriverSelection selection = SelectDriver(
+                projectDirectoryUnescaped,
+                filespecUnescaped,
+                excludeSpecsUnescaped);
+
+            if (Traits.Instance.LogExpandedWildcards)
+            {
+                DebugTrace.WriteLine(
+                    $"FileMatcher selected {selection.Driver}; fallback={selection.FallbackReason}; filespec={filespecUnescaped}",
+                    category: nameof(FileMatcher));
+            }
+
             if (_cachedGlobExpansions == null)
             {
                 return GetFilesForImplementation(
                     projectDirectoryUnescaped,
                     filespecUnescaped,
-                    excludeSpecsUnescaped);
+                    excludeSpecsUnescaped,
+                    selection);
             }
 
             var enumerationKey = ComputeFileEnumerationCacheKey(
                 projectDirectoryUnescaped,
                 filespecUnescaped,
                 excludeSpecsUnescaped,
-                ResolvedImplementation);
+                selection,
+                ResolvedCaseFolding);
 
             IReadOnlyList<string>? files;
             string[] fileList;
@@ -2014,7 +2112,8 @@ namespace Microsoft.Build.Shared
                                     (fileList, action, excludeFileSpec, globFailure) = GetFilesForImplementation(
                                         projectDirectoryUnescaped,
                                         filespecUnescaped,
-                                        excludeSpecsUnescaped);
+                                        excludeSpecsUnescaped,
+                                        selection);
 
                                     return fileList;
                                 });
@@ -2033,14 +2132,12 @@ namespace Microsoft.Build.Shared
             string projectDirectoryUnescaped,
             string filespecUnescaped,
             List<string> excludes,
-            FileMatcherImplementation implementation)
+            DriverSelection selection,
+            FileMatcherCaseFolding caseFolding)
         {
             Debug.Assert(projectDirectoryUnescaped != null);
             Debug.Assert(filespecUnescaped != null);
             Debug.Assert(Path.IsPathRooted(projectDirectoryUnescaped));
-
-            const string projectPathPrependedToken = "p";
-            const string pathValityExceptionTriggeredToken = "e";
 
             var excludeSize = 0;
 
@@ -2054,59 +2151,40 @@ namespace Microsoft.Build.Shared
 
             using (var sb = new ReuseableStringBuilder(projectDirectoryUnescaped.Length + filespecUnescaped.Length + excludeSize))
             {
-                sb.Append(implementation == FileMatcherImplementation.Legacy ? "l;" : "o;");
-
-                var pathValidityExceptionTriggered = false;
-
-                try
+                sb.Append(selection.CacheKeyPrefix);
+                if (caseFolding == FileMatcherCaseFolding.LegacyCurrentCulture)
                 {
-                    // Ideally, ensure that the cache key is an absolute, normalized path so that other projects evaluating an equivalent glob can get a hit.
-                    // Corollary caveat: including the project directory when the glob is independent of it leads to cache misses
-
-                    var filespecUnescapedFullyQualified = Path.Combine(projectDirectoryUnescaped, filespecUnescaped);
-
-                    if (filespecUnescapedFullyQualified.Equals(filespecUnescaped, StringComparison.Ordinal))
-                    {
-                        // filespec is absolute, don't include the project directory path
-                        sb.Append(filespecUnescaped);
-                    }
-                    else
-                    {
-                        // filespec is not absolute, include the project directory path
-                        // differentiate fully qualified filespecs vs relative filespecs that got prepended with the project directory
-                        sb.Append(projectPathPrependedToken);
-                        sb.Append(filespecUnescapedFullyQualified);
-                    }
-
-                    // increase the chance of cache hits when multiple relative globs refer to the same base directory
-                    // todo https://github.com/dotnet/msbuild/issues/3889
-                    // if (FileUtilities.ContainsRelativePathSegments(filespecUnescaped))
-                    // {
-                    //    filespecUnescaped = FileUtilities.GetFullPathNoThrow(filespecUnescaped);
-                    // }
+                    sb.Append("c:");
+                    sb.Append(CultureInfo.CurrentCulture.Name);
+                    sb.Append(';');
                 }
-                catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
+                else
                 {
-                    pathValidityExceptionTriggered = true;
+                    sb.Append("c:o;");
                 }
 
-                if (pathValidityExceptionTriggered)
-                {
-                    sb.Append(pathValityExceptionTriggeredToken);
-                    sb.Append(projectPathPrependedToken);
-                    sb.Append(projectDirectoryUnescaped);
-                    sb.Append(filespecUnescaped);
-                }
+                AppendField("p", projectDirectoryUnescaped);
+                AppendField("i", filespecUnescaped);
 
                 if (excludes != null)
                 {
                     foreach (var exclude in excludes)
                     {
-                        sb.Append(exclude);
+                        AppendField("e", exclude);
                     }
                 }
 
                 return sb.ToString();
+
+                void AppendField(string name, string value)
+                {
+                    sb.Append(name);
+                    sb.Append(':');
+                    sb.Append(value.Length.ToString(CultureInfo.InvariantCulture));
+                    sb.Append(':');
+                    sb.Append(value);
+                    sb.Append(';');
+                }
             }
         }
 
@@ -2124,7 +2202,8 @@ namespace Microsoft.Build.Shared
             string projectDirectoryUnescaped,
             string filespecUnescaped,
             out bool stripProjectDirectory,
-            out RecursionState result)
+            out RecursionState result,
+            bool createRegexFileMatch = true)
         {
             stripProjectDirectory = false;
             result = new RecursionState();
@@ -2230,7 +2309,12 @@ namespace Microsoft.Build.Shared
                 matchWithRegex ? null : filenamePart,
                 directoryPattern,
                 // if using the file pattern, ignore the regular expression
-                matchWithRegex ? new Regex(RegularExpressionFromFileSpec(oldFixedDirectoryPart, wildcardDirectoryPart, filenamePart), RegexOptions.IgnoreCase) : null,
+                matchWithRegex && createRegexFileMatch
+                    ? new Regex(
+                        RegularExpressionFromFileSpec(oldFixedDirectoryPart, wildcardDirectoryPart, filenamePart),
+                        CaseInsensitiveRegexOptions)
+                    : null,
+                matchWithRegex,
                 needsRecursion);
 
             result.SearchData = searchData;
@@ -2406,7 +2490,7 @@ namespace Microsoft.Build.Shared
             return index;
         }
 
-        private static string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, List<string> excludeSpecsUnescaped)
+        private string[] CreateArrayWithSingleItemIfNotExcluded(string filespecUnescaped, List<string> excludeSpecsUnescaped)
         {
             if (excludeSpecsUnescaped != null)
             {
@@ -2420,7 +2504,7 @@ namespace Microsoft.Build.Shared
                         return [];
                     }
 
-                    var match = Default.FileMatch(excludeSpec, filespecUnescaped);
+                    var match = FileMatch(excludeSpec, filespecUnescaped);
 
                     if (match.isLegalFileSpec && match.isMatch)
                     {
@@ -2435,31 +2519,22 @@ namespace Microsoft.Build.Shared
         private (string[] FileList, SearchAction Action, string ExcludeFileSpec, string? GlobFailure) GetFilesForImplementation(
             string? projectDirectoryUnescaped,
             string filespecUnescaped,
-            List<string>? excludeSpecsUnescaped)
+            List<string>? excludeSpecsUnescaped,
+            DriverSelection selection)
         {
-            FileMatcherImplementation implementation = ResolvedImplementation;
-
-            return implementation switch
+            return selection.Driver switch
             {
-                FileMatcherImplementation.Legacy => GetFilesImplementation(
+                FileMatcherDriver.Legacy => GetFilesImplementation(
                     projectDirectoryUnescaped,
                     filespecUnescaped,
                     excludeSpecsUnescaped),
-                FileMatcherImplementation.Optimized => !SupportsOptimizedImplementation
-                    || (_usesFileSystemEntryCache && excludeSpecsUnescaped?.Count is not > 0)
-                    || RequiresLegacyImplementation(
-                        projectDirectoryUnescaped,
-                        filespecUnescaped,
-                        excludeSpecsUnescaped)
-                    ? GetFilesImplementation(
-                        projectDirectoryUnescaped,
-                        filespecUnescaped,
-                        excludeSpecsUnescaped)
-                    : GetFilesOptimizedImplementation(
-                        projectDirectoryUnescaped,
-                        filespecUnescaped,
-                        excludeSpecsUnescaped),
-                _ => throw new NotSupportedException(implementation.ToString()),
+                FileMatcherDriver.OptimizedCallback or FileMatcherDriver.OptimizedDirect =>
+                    GetFilesOptimizedImplementation(
+                    projectDirectoryUnescaped,
+                    filespecUnescaped,
+                    excludeSpecsUnescaped,
+                    selection.Driver),
+                _ => throw new NotSupportedException(selection.Driver.ToString()),
             };
         }
 
@@ -2467,12 +2542,16 @@ namespace Microsoft.Build.Shared
             && (_usesFileSystemEntryCache
                 || _fileSystem is IDirectFileSystemEnumeration { SupportsDirectEnumeration: true });
 
-        private static bool RequiresLegacyImplementation(
+        private bool RequiresLegacyImplementation(
             string? projectDirectory,
             string fileSpec,
             List<string>? excludeSpecs)
         {
-            if (IsDriveRelativeFileSpec(fileSpec) || EndsWithMSBuildDirectorySeparator(fileSpec))
+            bool projectDirectoryIsRoot = IsFileSystemRoot(projectDirectory);
+            if (IsDriveRelativeFileSpec(fileSpec)
+                || EndsWithMSBuildDirectorySeparator(fileSpec)
+                || ((CanStartAtFileSystemRoot(fileSpec) || projectDirectoryIsRoot)
+                    && IsDriveEnumeratingWildcard(projectDirectory, fileSpec)))
             {
                 return true;
             }
@@ -2483,6 +2562,8 @@ namespace Microsoft.Build.Shared
                 {
                     if (IsDriveRelativeFileSpec(excludeSpec)
                         || EndsWithMSBuildDirectorySeparator(excludeSpec)
+                        || ((CanStartAtFileSystemRoot(excludeSpec) || projectDirectoryIsRoot)
+                            && IsDriveEnumeratingWildcard(projectDirectory, excludeSpec))
                         || (projectDirectory is null && !Path.IsPathRooted(excludeSpec)))
                     {
                         return true;
@@ -2491,6 +2572,52 @@ namespace Microsoft.Build.Shared
             }
 
             return false;
+
+            static bool CanStartAtFileSystemRoot(string spec) =>
+                spec.Length > 0
+                && (FileUtilities.IsAnySlash(spec[0]) || Path.IsPathRooted(spec));
+
+            static bool IsFileSystemRoot(string? directory)
+            {
+                if (directory is null
+                    || directory.Length == 0
+                    || (!FileUtilities.IsAnySlash(directory[^1])
+                        && !directory.StartsWith("//", StringComparison.Ordinal)
+                        && !directory.StartsWith(@"\\", StringComparison.Ordinal)))
+                {
+                    return false;
+                }
+
+                string? root = Path.GetPathRoot(directory);
+                return root is not null
+                    && string.Equals(directory, root, FileUtilities.PathComparison);
+            }
+
+            bool IsDriveEnumeratingWildcard(string? projectRoot, string spec)
+            {
+                GetFileSpecInfo(
+                    spec,
+                    out string fixedDirectoryPart,
+                    out string wildcardDirectoryPart,
+                    out _,
+                    out _,
+                    out bool isLegalFileSpec);
+
+                if (isLegalFileSpec && projectRoot is not null && !Path.IsPathRooted(fixedDirectoryPart))
+                {
+                    try
+                    {
+                        fixedDirectoryPart = Path.Combine(projectRoot, fixedDirectoryPart);
+                    }
+                    catch (ArgumentException)
+                    {
+                        return false;
+                    }
+                }
+
+                return isLegalFileSpec
+                    && IsDriveEnumeratingWildcardPattern(fixedDirectoryPart, wildcardDirectoryPart);
+            }
         }
 
         private static bool EndsWithMSBuildDirectorySeparator(string fileSpec) =>
@@ -2508,16 +2635,372 @@ namespace Microsoft.Build.Shared
                 : FileMatcherImplementation.Legacy
             : _implementation;
 
+        internal DriverSelection SelectDriver(
+            string? projectDirectory,
+            string fileSpec,
+            List<string>? excludeSpecs)
+        {
+            if (ResolvedImplementation == FileMatcherImplementation.Legacy)
+            {
+                return LegacySelection(FileMatcherFallbackReason.LegacyImplementation);
+            }
+
+            if (!SupportsOptimizedImplementation)
+            {
+                return OptimizedFallback(FileMatcherFallbackReason.OptimizedImplementationUnavailable);
+            }
+
+            if (RequiresLegacyImplementation(projectDirectory, fileSpec, excludeSpecs))
+            {
+                return OptimizedFallback(FileMatcherFallbackReason.UnsupportedFileSpec);
+            }
+
+            if (HasAncestorExcludeRequiringLexicalPrefix(projectDirectory, fileSpec, excludeSpecs))
+            {
+                return OptimizedFallback(FileMatcherFallbackReason.AncestorExcludeRequiresLexicalPrefix);
+            }
+
+            if (!_usesFileSystemEntryCache
+                && string.IsNullOrEmpty(projectDirectory)
+                && !Path.IsPathRooted(fileSpec))
+            {
+                return new DriverSelection(
+                    FileMatcherDriver.OptimizedCallback,
+                    FileMatcherFallbackReason.RelativeFileSpecWithoutProjectDirectory,
+                    CacheDriverProfile.OptimizedCallbackUncached);
+            }
+
+            if (_usesFileSystemEntryCache
+                && !HasPotentiallyApplicableWildcardExclude(projectDirectory, fileSpec, excludeSpecs))
+            {
+                return OptimizedFallback(FileMatcherFallbackReason.CacheBackedWithoutApplicableExcludes);
+            }
+
+            if (_usesFileSystemEntryCache)
+            {
+                return new DriverSelection(
+                    FileMatcherDriver.OptimizedCallback,
+                    FileMatcherFallbackReason.None,
+                    CacheDriverProfile.OptimizedCallbackCached);
+            }
+
+            if (HasLiteralExclude(excludeSpecs))
+            {
+                return new DriverSelection(
+                    FileMatcherDriver.OptimizedCallback,
+                    FileMatcherFallbackReason.None,
+                    CacheDriverProfile.OptimizedCallbackUncached);
+            }
+
+            if (HasInvalidWildcardExclude(excludeSpecs))
+            {
+                return new DriverSelection(
+                    FileMatcherDriver.OptimizedCallback,
+                    FileMatcherFallbackReason.InvalidExcludeRequiresExactIdentity,
+                    CacheDriverProfile.OptimizedCallbackUncached);
+            }
+
+            return new DriverSelection(
+                FileMatcherDriver.OptimizedDirect,
+                FileMatcherFallbackReason.None,
+                CacheDriverProfile.OptimizedDirect);
+
+            DriverSelection LegacySelection(FileMatcherFallbackReason reason) => new(
+                FileMatcherDriver.Legacy,
+                reason,
+                _usesFileSystemEntryCache
+                    ? CacheDriverProfile.LegacyCached
+                    : CacheDriverProfile.LegacyUncached);
+
+            DriverSelection OptimizedFallback(FileMatcherFallbackReason reason) => new(
+                FileMatcherDriver.Legacy,
+                reason,
+                _usesFileSystemEntryCache
+                    ? CacheDriverProfile.OptimizedFallbackCached
+                    : CacheDriverProfile.OptimizedFallbackUncached);
+
+            static bool HasLiteralExclude(List<string>? excludes)
+            {
+                if (excludes is not null)
+                {
+                    foreach (string exclude in excludes)
+                    {
+                        if (!HasWildcards(exclude))
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
+            }
+
+            void GetExcludeLegality(string exclude, out bool isLegal)
+            {
+                GetFileSpecInfo(
+                    exclude,
+                    out _,
+                    out _,
+                    out _,
+                    out _,
+                    out isLegal);
+            }
+
+            bool HasInvalidWildcardExclude(List<string>? excludes)
+            {
+                if (excludes is not null)
+                {
+                    foreach (string exclude in excludes)
+                    {
+                        if (HasWildcards(exclude))
+                        {
+                            GetExcludeLegality(exclude, out bool isLegal);
+                            if (!isLegal)
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+
+                return false;
+            }
+        }
+
+        private bool HasAncestorExcludeRequiringLexicalPrefix(
+            string? projectDirectory,
+            string fileSpec,
+            List<string>? excludeSpecs)
+        {
+            if (excludeSpecs is null)
+            {
+                return false;
+            }
+
+            foreach (string excludeSpec in excludeSpecs)
+            {
+                if (FirstWildcardDirectorySegmentIsGlobstar(excludeSpec))
+                {
+                    continue;
+                }
+
+                GetFileSpecInfo(
+                    fileSpec,
+                    out string includeBaseDirectory,
+                    out _,
+                    out _,
+                    out _,
+                    out bool includeIsLegal);
+                GetFileSpecInfo(
+                    excludeSpec,
+                    out string excludeBaseDirectory,
+                    out string excludeWildcardDirectory,
+                    out _,
+                    out _,
+                    out bool excludeIsLegal);
+
+                if (!includeIsLegal
+                    || !excludeIsLegal
+                    || excludeWildcardDirectory.Length == 0)
+                {
+                    continue;
+                }
+
+                if (projectDirectory is not null)
+                {
+                    try
+                    {
+                        includeBaseDirectory = Path.Combine(projectDirectory, includeBaseDirectory);
+                        excludeBaseDirectory = Path.Combine(projectDirectory, excludeBaseDirectory);
+                    }
+                    catch (ArgumentException)
+                    {
+                        continue;
+                    }
+                }
+
+                includeBaseDirectory = Normalize(includeBaseDirectory);
+                excludeBaseDirectory = Normalize(excludeBaseDirectory);
+                if (excludeBaseDirectory.Length < includeBaseDirectory.Length
+                    && IsSubdirectoryOf(
+                        includeBaseDirectory,
+                        excludeBaseDirectory,
+                        StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+
+            static bool FirstWildcardDirectorySegmentIsGlobstar(string spec)
+            {
+                ReadOnlySpan<char> span = spec.AsSpan();
+                int firstWildcard = span.IndexOfAny('*', '?');
+                int lastSeparator = span.LastIndexOfAny('/', '\\');
+                if (firstWildcard < 0 || firstWildcard > lastSeparator)
+                {
+                    return true;
+                }
+
+                int segmentStart = span[..firstWildcard].LastIndexOfAny('/', '\\') + 1;
+                int separatorAfterWildcard = span[firstWildcard..].IndexOfAny('/', '\\');
+                int segmentEnd = separatorAfterWildcard < 0
+                    ? span.Length
+                    : firstWildcard + separatorAfterWildcard;
+                return span[segmentStart..segmentEnd].SequenceEqual("**");
+            }
+        }
+
+        private bool HasPotentiallyApplicableWildcardExclude(
+            string? projectDirectory,
+            string fileSpec,
+            List<string>? excludeSpecs)
+        {
+            if (excludeSpecs?.Count is not > 0)
+            {
+                return false;
+            }
+
+            ReadOnlySpan<char> includeBaseDirectory = GetFixedDirectory(fileSpec);
+            bool includeIsRooted = Path.IsPathRooted(fileSpec);
+
+            foreach (string excludeSpec in excludeSpecs)
+            {
+                if (!HasWildcards(excludeSpec))
+                {
+                    continue;
+                }
+
+                ReadOnlySpan<char> excludeBaseDirectory = GetFixedDirectory(excludeSpec);
+                if (FixedDirectoriesOverlap(
+                        projectDirectory,
+                        includeIsRooted,
+                        includeBaseDirectory,
+                        Path.IsPathRooted(excludeSpec),
+                        excludeBaseDirectory))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+
+            static ReadOnlySpan<char> GetFixedDirectory(string spec)
+            {
+                ReadOnlySpan<char> span = spec.AsSpan();
+                int firstWildcard = span.IndexOfAny('*', '?');
+                ReadOnlySpan<char> beforeWildcard = firstWildcard >= 0
+                    ? span[..firstWildcard]
+                    : span;
+                int lastSeparator = beforeWildcard.LastIndexOfAny('/', '\\');
+                return lastSeparator >= 0
+                    ? span[..(lastSeparator + 1)]
+                    : ReadOnlySpan<char>.Empty;
+            }
+
+            static bool FixedDirectoriesOverlap(
+                string? projectDirectory,
+                bool includeIsRooted,
+                ReadOnlySpan<char> includeBaseDirectory,
+                bool excludeIsRooted,
+                ReadOnlySpan<char> excludeBaseDirectory)
+            {
+                if (includeIsRooted == excludeIsRooted)
+                {
+                    return SpansOverlap(includeBaseDirectory, excludeBaseDirectory);
+                }
+
+                if (projectDirectory is null)
+                {
+                    return false;
+                }
+
+                try
+                {
+                    string qualifiedInclude = includeIsRooted
+                        ? includeBaseDirectory.ToString()
+                        : Path.Combine(projectDirectory, includeBaseDirectory.ToString());
+                    string qualifiedExclude = excludeIsRooted
+                        ? excludeBaseDirectory.ToString()
+                        : Path.Combine(projectDirectory, excludeBaseDirectory.ToString());
+                    return string.Equals(
+                            qualifiedInclude,
+                            qualifiedExclude,
+                            StringComparison.OrdinalIgnoreCase)
+                        || IsSubdirectoryOf(
+                            qualifiedInclude,
+                            qualifiedExclude,
+                            StringComparison.OrdinalIgnoreCase)
+                        || IsSubdirectoryOf(
+                            qualifiedExclude,
+                            qualifiedInclude,
+                            StringComparison.OrdinalIgnoreCase);
+                }
+                catch (ArgumentException)
+                {
+                    return false;
+                }
+
+                static bool SpansOverlap(
+                    ReadOnlySpan<char> includeBaseDirectory,
+                    ReadOnlySpan<char> excludeBaseDirectory)
+                {
+                    return IsSameOrSubdirectory(includeBaseDirectory, excludeBaseDirectory)
+                        || IsSameOrSubdirectory(excludeBaseDirectory, includeBaseDirectory);
+
+                    static bool IsSameOrSubdirectory(
+                        ReadOnlySpan<char> possibleChild,
+                        ReadOnlySpan<char> possibleParent)
+                    {
+                        if (possibleParent.IsEmpty)
+                        {
+                            return true;
+                        }
+
+                        if (possibleChild.Equals(possibleParent, StringComparison.OrdinalIgnoreCase))
+                        {
+                            return true;
+                        }
+
+                        return possibleChild.Length > possibleParent.Length
+                            && possibleChild.StartsWith(possibleParent, StringComparison.OrdinalIgnoreCase)
+                            && (FileUtilities.IsSlash(possibleParent[^1])
+                                || FileUtilities.IsSlash(possibleChild[possibleParent.Length]));
+                    }
+                }
+            }
+        }
+
+        internal FileMatcherCaseFolding ResolvedCaseFolding
+        {
+            get
+            {
+                if (_caseFolding != FileMatcherCaseFolding.Auto)
+                {
+                    return _caseFolding;
+                }
+
+                return Traits.Instance.UseLegacyCultureSensitiveFileGlobs
+                    || _implementation == FileMatcherImplementation.Legacy
+                    || !ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
+                    ? FileMatcherCaseFolding.LegacyCurrentCulture
+                    : FileMatcherCaseFolding.InvariantCulture;
+            }
+        }
+
         private (string[] FileList, SearchAction Action, string ExcludeFileSpec, string? GlobFailure) GetFilesOptimizedImplementation(
             string? projectDirectoryUnescaped,
             string filespecUnescaped,
-            List<string>? excludeSpecsUnescaped)
+            List<string>? excludeSpecsUnescaped,
+            FileMatcherDriver driver)
         {
             SearchAction action = GetFileSearchData(
                 projectDirectoryUnescaped,
                 filespecUnescaped,
                 out bool stripProjectDirectory,
-                out RecursionState state);
+                out RecursionState state,
+                createRegexFileMatch: false);
 
             if (action == SearchAction.ReturnEmptyList)
             {
@@ -2544,6 +3027,17 @@ namespace Microsoft.Build.Shared
                 throw new NotSupportedException(action.ToString());
             }
 
+            if (excludeSpecsUnescaped is not null)
+            {
+                foreach (string excludeSpec in excludeSpecsUnescaped)
+                {
+                    if (string.Equals(filespecUnescaped, excludeSpec, StringComparison.Ordinal))
+                    {
+                        return ([], action, string.Empty, null);
+                    }
+                }
+            }
+
             GetFileSpecInfo(
                 filespecUnescaped,
                 out _,
@@ -2565,7 +3059,8 @@ namespace Microsoft.Build.Shared
                         projectDirectoryUnescaped,
                         excludeSpec,
                         out _,
-                        out RecursionState excludeState);
+                        out RecursionState excludeState,
+                        createRegexFileMatch: false);
 
                     if (excludeAction == SearchAction.ReturnFileSpec)
                     {
@@ -2592,14 +3087,7 @@ namespace Microsoft.Build.Shared
             }
 
             List<string> files = [];
-            bool useDirectEnumeration = false;
-
-#if NET || FEATURE_MSIOREDIST
-            useDirectEnumeration = CanUseDirectEnumeration(
-                projectDirectoryUnescaped,
-                filespecUnescaped,
-                literalExcludes);
-#endif
+            bool useDirectEnumeration = driver == FileMatcherDriver.OptimizedDirect;
 
             MSBuildPathMatcher includeMatcher = CreatePathMatcher(
                 state,
@@ -2632,7 +3120,11 @@ namespace Microsoft.Build.Shared
                 else
 #endif
                 {
-                    EnumerateDirectory(state.BaseDirectory, relativeDirectory: string.Empty);
+                    EnumerateDirectory(
+                        state.BaseDirectory,
+                        relativeDirectory: string.Empty,
+                        files,
+                        parallelizeSubdirectories: true);
                 }
             }
             catch (Exception ex) when (IsIoRelatedExceptionOrAggregate(ex))
@@ -2646,7 +3138,11 @@ namespace Microsoft.Build.Shared
 
             return ([.. files], trackedAction, trackedExcludeFileSpec, null);
 
-            void EnumerateDirectory(string directory, string relativeDirectory)
+            void EnumerateDirectory(
+                string directory,
+                string relativeDirectory,
+                List<string> destination,
+                bool parallelizeSubdirectories)
             {
                 if (ShouldSkipRecursiveDirectory(directory))
                 {
@@ -2676,7 +3172,7 @@ namespace Microsoft.Build.Shared
                     IReadOnlyList<string> filesInDirectory = _getFileSystemEntries(
                         FileSystemEntity.Files,
                         directory,
-                        null,
+                        state.SearchData.Filespec,
                         projectDirectoryUnescaped,
                         stripProjectDirectory);
 
@@ -2701,7 +3197,7 @@ namespace Microsoft.Build.Shared
 
                         if (!excluded)
                         {
-                            files.Add(file);
+                            destination.Add(file);
                         }
                     }
                 }
@@ -2718,23 +3214,93 @@ namespace Microsoft.Build.Shared
                     null,
                     false);
 
-                foreach (string subdirectory in subdirectories)
-                {
-                    string directoryName = Path.GetFileName(subdirectory);
-                    string childRelativeDirectory = relativeDirectory.Length == 0
-                        ? directoryName
-                        : Path.Combine(relativeDirectory, directoryName);
+                int maxDegreeOfParallelism = Math.Min(
+                    subdirectories.Count,
+                    Math.Max(1, NativeMethods.GetLogicalCoreCount() / 2));
 
-                    if (includeMatcher.MatchesDirectory(relativeDirectory, directoryName) != DirectoryMatchType.NoDescendantFilesMatch
-                        && !IsExcludedSubtree(subdirectory))
+                if (!parallelizeSubdirectories || maxDegreeOfParallelism < 2)
+                {
+                    foreach (string subdirectory in subdirectories)
                     {
-                        EnumerateDirectory(subdirectory, childRelativeDirectory);
+                        EnumerateSubdirectory(subdirectory, relativeDirectory, destination);
                     }
+
+                    return;
+                }
+
+                List<string>?[] partitionResults = new List<string>?[subdirectories.Count];
+                Parallel.For(
+                    0,
+                    subdirectories.Count,
+                    new ParallelOptions { MaxDegreeOfParallelism = maxDegreeOfParallelism },
+                    index =>
+                    {
+                        List<string> partition = [];
+                        EnumerateSubdirectory(subdirectories[index], relativeDirectory, partition);
+                        partitionResults[index] = partition;
+                    });
+
+                foreach (List<string>? partition in partitionResults)
+                {
+                    if (partition is not null)
+                    {
+                        destination.AddRange(partition);
+                    }
+                }
+            }
+
+            void EnumerateSubdirectory(
+                string subdirectory,
+                string parentRelativeDirectory,
+                List<string> destination)
+            {
+                string directoryName = Path.GetFileName(subdirectory);
+                string childRelativeDirectory = parentRelativeDirectory.Length == 0
+                    ? directoryName
+                    : Path.Combine(parentRelativeDirectory, directoryName);
+
+                if (includeMatcher.MatchesDirectory(parentRelativeDirectory, directoryName) != DirectoryMatchType.NoDescendantFilesMatch
+                    && !IsExcludedSubtree(subdirectory))
+                {
+                    EnumerateDirectory(
+                        subdirectory,
+                        childRelativeDirectory,
+                        destination,
+                        parallelizeSubdirectories: false);
                 }
             }
 
             void AddExclude(string excludeSpec, RecursionState excludeState)
             {
+                string excludeBaseDirectory = excludeState.BaseDirectory;
+                string includeBaseDirectory = state.BaseDirectory;
+
+                if (!string.Equals(excludeBaseDirectory, includeBaseDirectory, StringComparison.OrdinalIgnoreCase))
+                {
+                    if (excludeBaseDirectory.Length == includeBaseDirectory.Length)
+                    {
+                        return;
+                    }
+
+                    if (excludeBaseDirectory.Length > includeBaseDirectory.Length)
+                    {
+                        if (!IsSubdirectoryOf(excludeBaseDirectory, includeBaseDirectory))
+                        {
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if (!IsSubdirectoryOf(includeBaseDirectory, excludeBaseDirectory)
+                            || excludeState.RemainingWildcardDirectory.Length == 0)
+                        {
+                            return;
+                        }
+
+                        excludeState.BaseDirectory = includeBaseDirectory;
+                    }
+                }
+
                 GetFileSpecInfo(
                     excludeSpec,
                     out _,
@@ -2752,7 +3318,7 @@ namespace Microsoft.Build.Shared
                         useCachedCallback: false)));
             }
 
-            static MSBuildPathMatcher CreatePathMatcher(
+            MSBuildPathMatcher CreatePathMatcher(
                 RecursionState searchState,
                 string filePattern,
                 bool matchForExclusion,
@@ -2764,12 +3330,12 @@ namespace Microsoft.Build.Shared
                     filesystemCaseSensitive: NativeMethods.IsLinux && !matchForExclusion && !useCachedCallback,
                     matchFileNameInternally: matchForExclusion
                         || useCachedCallback
-                        || searchState.SearchData.RegexFileMatch is not null
+                        || searchState.SearchData.RequiresLegacyRegexSemantics
                         || searchState.SearchData.DirectoryPattern is not null,
                     treatStarDotStarAsAllFiles: true,
                     useTrailingDotRegex: !matchForExclusion
                         && (!useCachedCallback
-                            || searchState.SearchData.RegexFileMatch is not null),
+                            || searchState.SearchData.RequiresLegacyRegexSemantics),
                     useWin32FileNameMatch: NativeMethods.IsWindows
                         && !matchForExclusion
                         && !useCachedCallback
@@ -2777,7 +3343,8 @@ namespace Microsoft.Build.Shared
                     useWin32DirectoryMatch: NativeMethods.IsWindows
                         && !matchForExclusion
                         && !useCachedCallback,
-                    useCultureSensitiveMatch: searchState.SearchData.RegexFileMatch is not null);
+                    preserveLegacyRegexSemantics: searchState.SearchData.RequiresLegacyRegexSemantics,
+                    useInvariantCulture: ResolvedCaseFolding == FileMatcherCaseFolding.InvariantCulture);
             }
 
             bool IsExcludedSubtree(string directory)
@@ -2834,21 +3401,9 @@ namespace Microsoft.Build.Shared
             }
         }
 
-        private bool CanUseDirectEnumeration(
-            string? projectDirectory,
-            string fileSpec,
-            HashSet<string>? literalExcludes)
-        {
-#if NET || FEATURE_MSIOREDIST
-            return _allowDirectEnumeration
-                && !_usesFileSystemEntryCache
-                && literalExcludes is null
-                && _fileSystem is IDirectFileSystemEnumeration { SupportsDirectEnumeration: true }
-                && (!string.IsNullOrEmpty(projectDirectory) || Path.IsPathRooted(fileSpec));
-#else
-            return false;
-#endif
-        }
+        private RegexOptions CaseInsensitiveRegexOptions => ResolvedCaseFolding == FileMatcherCaseFolding.InvariantCulture
+            ? DefaultRegexOptions | RegexOptions.CultureInvariant
+            : DefaultRegexOptions;
 
     internal static string TranslateWin32Expression(string pattern)
     {
@@ -3115,20 +3670,26 @@ namespace Microsoft.Build.Shared
                 string? projectDirectory,
                 bool stripProjectDirectory)
             {
+                ReadOnlySpan<char> projectDirectorySpan = projectDirectory.AsSpan();
+                while (projectDirectorySpan.Length > 1 && FileUtilities.IsSlash(projectDirectorySpan[^1]))
+                {
+                    projectDirectorySpan = projectDirectorySpan[..^1];
+                }
+
                 if (!stripProjectDirectory
                     || projectDirectory is null
-                    || !lexicalEnumerationRoot.StartsWith(projectDirectory, StringComparison.Ordinal))
+                    || !lexicalEnumerationRoot.AsSpan().StartsWith(projectDirectorySpan, StringComparison.Ordinal))
                 {
                     return lexicalEnumerationRoot;
                 }
 
-                int relativeStart = projectDirectory.Length;
+                int relativeStart = projectDirectorySpan.Length;
                 if (relativeStart == lexicalEnumerationRoot.Length)
                 {
                     return string.Empty;
                 }
 
-                if (!FileUtilities.IsSlash(projectDirectory[projectDirectory.Length - 1])
+                if (!FileUtilities.IsSlash(projectDirectorySpan[^1])
                     && !FileUtilities.IsSlash(lexicalEnumerationRoot[relativeStart]))
                 {
                     return lexicalEnumerationRoot;
