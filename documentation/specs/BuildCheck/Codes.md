@@ -17,6 +17,7 @@ Report codes are chosen to conform to suggested guidelines. Those guidelines are
 | [BC0203](#bc0203----property-declared-but-never-used) | None | Project | 9.0.100 | Property declared but never used. |
 | [BC0301](#bc0301---building-from-downloads-folder) | None | Project | 9.0.300 | Building from Downloads folder. |
 | [BC0302](#bc0302---building-using-the-exec-task) | Warning | N/A | 9.0.300 | Building using the Exec task. |
+| [BC0303](#bc0303---writelinestofile-should-specify-overwrite) | Warning | N/A | 11.0.100 | WriteLinesToFile should specify Overwrite. |
 
 Notes: 
  * What does the 'N/A' scope mean? The scope of checks are only applicable and configurable in cases where evaluation-time data are being used and the source of the data is determinable and available. Otherwise the scope of whole build is always checked.
@@ -202,6 +203,13 @@ Place your projects into trusted locations - including cases when you intend to 
 "The 'Exec' task should not be used to build projects."
 
 Building projects using the dotnet/msbuild/nuget CLI in the `Exec` task is not recommended, as it spawns a separate build process that the MSBuild engine cannot track. Please use the [MSBuild task](https://learn.microsoft.com/visualstudio/msbuild/msbuild-task) instead.
+
+<a name="BC0303"></a>
+## BC0303 - WriteLinesToFile should specify Overwrite.
+
+"The 'Overwrite' parameter should be specified when using the 'WriteLinesToFile' task."
+
+The [`WriteLinesToFile` task](https://learn.microsoft.com/visualstudio/msbuild/writelinestofile-task) appends to its output file by default. This can cause duplicate content during incremental builds when the same task runs more than once. Set `Overwrite` explicitly to `true` to replace the file contents or to `false` when appending is intentional.
 
 <BR/>
 <BR/>
