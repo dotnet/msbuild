@@ -74,7 +74,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
         _output.WriteLine($"CoordinatorServer: Accept loop started on pipe '{_pipeName}' (budget={_settings.TotalNodeBudget}, high-priority reserved nodes={FormatHighPriorityReservedNodes(_settings.HighPriorityReservedNodes)}, max nodes per build={FormatMaxNodesPerBuild(_settings.MaxNodesPerBuild)}, max nodes per build when idle={FormatMaxNodesPerBuildWhenIdle(_settings.MaxNodesPerBuildWhenIdle)}, priority aging threshold={_settings.PriorityAgingThreshold})");
         if (_settings.AutoStrictPolicyOptOutMessage is { } autoStrictPolicyOptOutMessage)
         {
-            _output.WriteLine($"CoordinatorServer: Auto strict policy active. {autoStrictPolicyOptOutMessage}");
+            _output.WriteLine($"CoordinatorServer: Computed reservation or per-build cap active. {autoStrictPolicyOptOutMessage}");
         }
 
         ConcurrentDictionary<Task, byte> clientTasks = [];

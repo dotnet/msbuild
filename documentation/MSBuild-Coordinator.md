@@ -38,7 +38,7 @@ The coordinator solves this by:
 │                    System with Multiple Builds                   │
 └──────────────────────────────────────────────────────────────────┘
 
-  Build 1                 Build 2                 Build 3
+  Build 1 (Normal)        Build 2 (High)          Build 3 (Normal)
     │                       │                       │
     │ RequestNodes(4)       │ RequestNodes(4)       │ RequestNodes(4)
     │                       │                       │
@@ -53,6 +53,7 @@ The coordinator solves this by:
         │  ┌──────────────────────────────┐  │
         │  │  Node Budget Manager         │  │
         │  │  • Total Budget: 8 nodes     │  │
+        │  │  • Computed defaults         │  │
         │  │  • Allocated: 8              │  │
         │  │  • Available: 0              │  │
         │  └──────────────────────────────┘  │

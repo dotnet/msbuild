@@ -36,7 +36,7 @@ Console.WriteLine($"  Max nodes per build: {FormatMaxNodesPerBuild(settings.MaxN
 Console.WriteLine($"  Max nodes per build when idle: {FormatMaxNodesPerBuildWhenIdle(settings.MaxNodesPerBuildWhenIdle)}");
 if (settings.AutoStrictPolicyOptOutMessage is { } autoStrictPolicyOptOutMessage)
 {
-    Console.WriteLine($"  Auto strict policy active. {autoStrictPolicyOptOutMessage}");
+    Console.WriteLine($"  Computed reservation or per-build cap active. {autoStrictPolicyOptOutMessage}");
 }
 
 Console.WriteLine($"  Heartbeat interval: {settings.HeartbeatIntervalMs}ms");

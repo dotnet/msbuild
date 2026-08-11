@@ -475,6 +475,26 @@ public class NodeBudgetManager_Tests
     }
 
     [Fact]
+    public void TryGrant_NewNormalBypassesUnagedLowPriorityWaiter()
+    {
+        NodeBudgetManager manager = new(totalBudget: 8, highPriorityReservedNodes: 4, maxNodesPerBuild: 4);
+        BuildGrant normalActive = NewGrant(processId: 1, requestedNodes: 2);
+        manager.TryGrant(normalActive).ShouldBe(2);
+
+        BuildGrant lowWaiting = NewGrant(processId: 2, requestedNodes: 4, CoordinatorBuildPriority.Low);
+        manager.TryGrant(lowWaiting).ShouldBe(0);
+
+        BuildGrant newNormal = NewGrant(processId: 3, requestedNodes: 2);
+        manager.TryGrant(newNormal).ShouldBe(2);
+
+        newNormal.IsActive.ShouldBeTrue();
+        lowWaiting.IsActive.ShouldBeFalse();
+        lowWaiting.BypassCount.ShouldBe(1);
+        manager.WaitingBuildCount.ShouldBe(1);
+        manager.AllocatedNodes.ShouldBe(4);
+    }
+
+    [Fact]
     public void TryGrant_NewNormalDoesNotBypassAgedLowPriorityWaiter()
     {
         NodeBudgetManager manager = new(totalBudget: 8, highPriorityReservedNodes: 4, maxNodesPerBuild: 4);
