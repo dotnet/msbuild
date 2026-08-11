@@ -15,6 +15,13 @@ namespace Microsoft.Build.Evaluation
         public ParserIgnoreConfiguration ParserIgnoreConfiguration { get; protected set; }
 
         /// <summary>
+        /// Whether <see cref="SetParserIgnoreConfiguration"/> has already been applied to this cache. A null
+        /// <see cref="ParserIgnoreConfiguration"/> is a legitimate configuration - it is what the escape hatch
+        /// produces - so it cannot itself stand for "never set".
+        /// </summary>
+        private bool _parserIgnoreConfigurationInitialized;
+
+        /// <summary>
         /// Handler for which project root element just got added to the cache
         /// </summary>
         internal delegate void ProjectRootElementCacheAddEntryHandler(object sender, ProjectRootElementCacheAddEntryEventArgs e);
@@ -79,7 +86,16 @@ namespace Microsoft.Build.Evaluation
                 return;
             }
 
-            DiscardImplicitReferences();
+            // Entries parsed under the previous configuration may have skipped - or refused to skip - unknown
+            // attributes and elements that the new one treats differently, so they must be reparsed. A cache that
+            // has not had a configuration applied yet holds nothing parsed under a different one, so on that first
+            // initialization - which happens once per newly created cache - there is nothing to invalidate.
+            if (_parserIgnoreConfigurationInitialized)
+            {
+                DiscardImplicitReferences();
+            }
+
+            _parserIgnoreConfigurationInitialized = true;
             ParserIgnoreConfiguration = configuration;
         }
 

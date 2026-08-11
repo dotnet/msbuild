@@ -142,6 +142,27 @@ namespace Microsoft.Build.UnitTests.Evaluation
         }
 
         [Fact]
+        public void ConfigurationIsAppliedToSimpleProjectRootElementCache()
+        {
+            string envConfigPath = Path.Combine(_testDir, "env.config");
+            File.WriteAllText(envConfigPath, @"<ParseConfig><IgnoreChildren><Ignore Element=""Project"" Name=""CustomThing"" /></IgnoreChildren></ParseConfig>");
+
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MsBuildUseSimpleProjectRootElementCacheConcurrency", "true");
+            env.SetEnvironmentVariable(ParserIgnoreConfiguration.EnvironmentVariableName, envConfigPath);
+
+            using var projectCollection = new ProjectCollection();
+
+            projectCollection.ProjectRootElementCache.ShouldBeOfType<SimpleProjectRootElementCache>();
+            projectCollection.ParserIgnoreConfiguration.CheckSkipElement("Project", "CustomThing").ShouldBeTrue();
+
+            // Replacing the configuration invalidates what the cache parsed under the old one, which the simple
+            // cache has to be able to do as well.
+            projectCollection.ParserIgnoreConfiguration = ParserIgnoreConfiguration.Empty;
+            projectCollection.ParserIgnoreConfiguration.CheckSkipElement("Project", "CustomThing").ShouldBeFalse();
+        }
+
+        [Fact]
         public void RecordsSkippedItems()
         {
             string configPath = Path.Combine(_testDir, ParserIgnoreConfiguration.ConfigFileName);
