@@ -1703,7 +1703,8 @@ namespace Microsoft.Build.CommandLine
                     enableTargetOutputLogging: isTaskAndTargetItemLoggingRequired,
                     loadProjectsReadOnly: !isPreprocess,
                     useAsynchronousLogging: true,
-                    reuseProjectRootElementCache: s_isServerNode);
+                    reuseProjectRootElementCache: s_isServerNode,
+                    parseConfigDirectory: Path.GetDirectoryName(Path.GetFullPath(projectFile)));
 
                 // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
                 projectCollection.PropertiesFromCommandLine = [.. globalProperties.Keys];

@@ -276,6 +276,13 @@ namespace Microsoft.Build.Framework
         public readonly bool AlwaysEvaluateDangerousGlobs = Environment.GetEnvironmentVariable("MSBuildAlwaysEvaluateDangerousGlobs") == "1";
 
         /// <summary>
+        /// Disables automatic loading of Directory.Parse.config from global locations
+        /// (MSBuild exe directory, user profile, MSBUILD_PARSE_CONFIG env var).
+        /// When set, configuration must be explicitly provided via ProjectCollection or BuildParameters.
+        /// </summary>
+        public readonly bool DisableParseConfig = Environment.GetEnvironmentVariable("MSBUILD_DISABLE_PARSE_CONFIG") == "1";
+
+        /// <summary>
         /// Disables skipping full up to date check for immutable files. See FileClassifier class.
         /// </summary>
         public readonly bool AlwaysDoImmutableFilesUpToDateCheck = Environment.GetEnvironmentVariable("MSBUILDDONOTCACHEMODIFICATIONTIME") == "1";
