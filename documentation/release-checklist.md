@@ -205,7 +205,7 @@ Steps are **mostly parallel** unless noted.
 
 - [ ] **5.1** Push packages to nuget.org.
 
-  > **How publishing works:** We don't push packages ourselves. We hand a link to the **`PackageArtifacts`** artifact of the official build to the _.NET Release Team_, and they push to nuget.org. Search past mail for the subject _"Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org"_ for the template.
+  > **How publishing works:** We don't push packages ourselves. We hand a link to the **Release** artifacts of the official build to the _.NET Release Team_, and they push to nuget.org. Search past mail for the subject _"Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org"_ for the template.
 
   - [ ] **5.1a** Determine the exact MSBuild version that actually shipped to customers. \
   ⚠️ **VS and the SDK routinely ship _different_ patch versions off the same `vs{{THIS_RELEASE_VERSION}}` branch, and the branch keeps advancing after GA — so this must be looked up, never inferred from `eng/Versions.props` at branch HEAD or from the Phase 4.4 insertion PR.**
@@ -217,7 +217,7 @@ Steps are **mostly parallel** unless noted.
     - _Worked example (18.9): the Phase 4.4 insertion PR said `18.9.0`, VS `rel/stable` said `18.9.1`, branch HEAD was already `18.9.8` — and the correct answer was `18.9.6`, from the coupled .NET 10.0.4xx SDK._
   - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`). \
   _Each `vs*` build bumps the patch, so exactly one build produces a given `{{THIS_RELEASE_EXACT_VERSION}}`. To confirm, check `eng/Versions.props` at that build's source commit._
-  - [ ] **5.1c** From that build, open the **Publish Artifacts** step and grab the link to the published **`PackageArtifacts`** artifact. The packages to publish live in its **`Shipping/`** subfolder (`NonShipping/` holds localization / `VS.ExternalAPIs.*` / analyzer packages, which are **not** published to nuget.org). Verify `Shipping/` contains all of:
+  - [ ] **5.1c** From that build, open the **Publish Artifacts** step and grab the link to the **`PackageArtifacts/Release`** drop. Verify the **Release** folder contains all of:
     - `Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.Framework.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
@@ -225,7 +225,7 @@ Steps are **mostly parallel** unless noted.
     - `Microsoft.Build.Tasks.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.NET.StringTools.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.Templates.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
-  - [ ] **5.1d** Email the _.NET Release Team_ with the `PackageArtifacts` link from 5.1c and ask them to publish to nuget.org.
+  - [ ] **5.1d** Email the _.NET Release Team_ with the `Release` link from 5.1c and ask them to publish to nuget.org.
 
 - [ ] **5.2** Publish docs
 
