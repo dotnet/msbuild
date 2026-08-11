@@ -333,7 +333,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
         }
     }
 
-    [UnixOnlyTheory]
+    [LinuxOnlyTheory]
     [InlineData(false)]
     [InlineData(true)]
     public void ProcessWideResultCachePartitionsOptimizedDrivers(bool callbackFirst)
@@ -372,7 +372,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
         }
     }
 
-    [UnixOnlyFact]
+    [LinuxOnlyFact]
     public void ProcessWideResultCachePartitionsConcurrentOptimizedDrivers()
     {
         TransientTestFolder root = _environment.CreateFolder();
@@ -407,7 +407,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
         }
     }
 
-    [UnixOnlyTheory]
+    [LinuxOnlyTheory]
     [InlineData(false)]
     [InlineData(true)]
     public void ProcessWideResultCachePartitionsOptimizedCallbackDrivers(bool cachedFirst)
@@ -445,7 +445,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
         }
     }
 
-    [UnixOnlyFact]
+    [LinuxOnlyFact]
     public void ProcessWideResultCachePartitionsConcurrentOptimizedCallbackDrivers()
     {
         TransientTestFolder root = _environment.CreateFolder();
@@ -481,7 +481,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
         }
     }
 
-    [UnixOnlyTheory]
+    [LinuxOnlyTheory]
     [InlineData(false)]
     [InlineData(true)]
     public void ProcessWideResultCachePartitionsOptimizedFallbackDrivers(bool cachedFirst)
@@ -518,7 +518,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
         }
     }
 
-    [UnixOnlyFact]
+    [LinuxOnlyFact]
     public void ProcessWideResultCachePartitionsConcurrentOptimizedFallbackDrivers()
     {
         TransientTestFolder root = _environment.CreateFolder();
@@ -553,7 +553,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
         }
     }
 
-    [UnixOnlyTheory]
+    [LinuxOnlyTheory]
     [InlineData(false, false)]
     [InlineData(true, false)]
     [InlineData(false, true)]
@@ -598,7 +598,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
         }
     }
 
-    [UnixOnlyFact]
+    [LinuxOnlyFact]
     public void ProcessWideResultCachePartitionsConcurrentLegacyDrivers()
     {
         TransientTestFolder root = _environment.CreateFolder();
@@ -700,7 +700,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
         }
     }
 
-    [UnixOnlyTheory]
+    [LinuxOnlyTheory]
     [InlineData(false)]
     [InlineData(true)]
     public void ProcessWideResultCacheDistinguishesProjectDirectoryCasing(bool upperFirst)
@@ -1367,7 +1367,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
         optimizedResult.FileList.ShouldBeEmpty();
     }
 
-    [UnixOnlyTheory]
+    [LinuxOnlyTheory]
     [InlineData(false)]
     [InlineData(true)]
     public void RegexModePreservesLinuxDriverCasing(bool useEntryCache)
