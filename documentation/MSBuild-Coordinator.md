@@ -70,7 +70,7 @@ The coordinator solves this by:
         │  └──────────────────────────────┘  │
         └────────────────────────────────────┘
 
-  Later, when one 4-node build releases:
+  Later, when Build 1 releases its 4-node Normal grant:
     Build 3 ◄── NodeGrant(4)
 ```
 
