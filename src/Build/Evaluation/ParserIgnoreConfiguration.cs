@@ -26,6 +26,14 @@ namespace Microsoft.Build.Evaluation
         internal const string ConfigFileName = "Directory.Parse.config";
         internal const string EnvironmentVariableName = "MSBUILD_PARSE_CONFIG";
 
+        // Generic element names for dynamically-named elements in the config.
+        // These allow rules like Attribute:Property:X to apply to all property elements.
+        internal const string GenericPropertyElement = "Property";
+        internal const string GenericItemElement = "Item";
+        internal const string GenericItemDefinitionElement = "ItemDefinition";
+        internal const string GenericMetadataElement = "Metadata";
+        internal const string GenericUsingTaskBodyElement = "UsingTaskBody";
+
         /// <summary>
         /// Static collection of config file paths to embed in the binlog.
         /// Populated during config loading, consumed by BinaryLogger.Shutdown.

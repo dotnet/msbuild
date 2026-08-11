@@ -229,7 +229,7 @@ namespace Microsoft.Build.Construction
 
             foreach (XmlElementWithLocation childElement in ProjectXmlUtilities.GetVerifyThrowProjectChildElements(element))
             {
-                ProjectXmlUtilities.VerifyThrowProjectAttributes(childElement, ValidAttributesOnlyConditionAndLabel, _ParserIgnoreConfiguration, "Property");
+                ProjectXmlUtilities.VerifyThrowProjectAttributes(childElement, ValidAttributesOnlyConditionAndLabel, _ParserIgnoreConfiguration, ParserIgnoreConfiguration.GenericPropertyElement);
                 XmlUtilities.VerifyThrowProjectValidElementName(childElement);
                 ProjectErrorUtilities.VerifyThrowInvalidProject(!XMakeElements.ReservedItemNames.Contains(childElement.Name) && !ReservedPropertyNames.IsReservedProperty(childElement.Name), childElement.Location, "CannotModifyReservedProperty", childElement.Name);
 
@@ -328,7 +328,7 @@ namespace Microsoft.Build.Construction
 
                 if (!isKnownAttribute && !isValidMetadataNameInAttribute)
                 {
-                    if (_ParserIgnoreConfiguration?.CheckSkipAttribute("Item", attribute.Name) != true)
+                    if (_ParserIgnoreConfiguration?.CheckSkipAttribute(ParserIgnoreConfiguration.GenericItemElement, attribute.Name) != true)
                     {
                         ProjectXmlUtilities.ThrowProjectInvalidAttribute(attribute);
                     }
@@ -403,7 +403,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private ProjectMetadataElement ParseProjectMetadataElement(XmlElementWithLocation element, ProjectElementContainer parent)
         {
-            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnlyConditionAndLabel, _ParserIgnoreConfiguration, "Metadata");
+            ProjectXmlUtilities.VerifyThrowProjectAttributes(element, ValidAttributesOnlyConditionAndLabel, _ParserIgnoreConfiguration, ParserIgnoreConfiguration.GenericMetadataElement);
 
             XmlUtilities.VerifyThrowProjectValidElementName(element);
 
@@ -507,7 +507,7 @@ namespace Microsoft.Build.Construction
                 }
                 else
                 {
-                    ProjectXmlUtilities.VerifyThrowProjectAttributes(childElement, ValidAttributesOnUsingTaskParameter, _ParserIgnoreConfiguration, "Parameter");
+                    ProjectXmlUtilities.VerifyThrowProjectAttributes(childElement, ValidAttributesOnUsingTaskParameter, _ParserIgnoreConfiguration, XMakeElements.usingTaskParameter);
                     XmlUtilities.VerifyThrowProjectValidElementName(childElement);
                     ProjectUsingTaskParameterElement parameter = new ProjectUsingTaskParameterElement(childElement, parameterGroup, _project);
                     parameterGroup.AppendParentedChildNoChecks(parameter);
@@ -568,7 +568,7 @@ namespace Microsoft.Build.Construction
                             ProjectXmlUtilities.ThrowProjectInvalidChildElementDueToDuplicate(childElement);
                         }
 
-                        ProjectXmlUtilities.VerifyThrowProjectAttributes(childElement, ValidAttributesOnUsingTaskBody, _ParserIgnoreConfiguration, "UsingTaskBody");
+                        ProjectXmlUtilities.VerifyThrowProjectAttributes(childElement, ValidAttributesOnUsingTaskBody, _ParserIgnoreConfiguration, ParserIgnoreConfiguration.GenericUsingTaskBodyElement);
 
                         child = new ProjectUsingTaskBodyElement(childElement, usingTask, _project);
                         foundTaskElement = true;
@@ -689,7 +689,7 @@ namespace Microsoft.Build.Construction
             {
                 if (childElement.Name != XMakeElements.output)
                 {
-                    if (_ParserIgnoreConfiguration?.CheckSkipElement("Task", childElement.Name) == true)
+                    if (_ParserIgnoreConfiguration?.CheckSkipElement(XMakeElements.usingTaskBody, childElement.Name) == true)
                     {
                         continue;
                     }
@@ -767,7 +767,7 @@ namespace Microsoft.Build.Construction
 
                 if (!isKnownAttribute && !isValidMetadataNameInAttribute)
                 {
-                    if (_ParserIgnoreConfiguration?.CheckSkipAttribute("ItemDefinition", attribute.Name) != true)
+                    if (_ParserIgnoreConfiguration?.CheckSkipAttribute(ParserIgnoreConfiguration.GenericItemDefinitionElement, attribute.Name) != true)
                     {
                         ProjectXmlUtilities.ThrowProjectInvalidAttribute(attribute);
                     }
@@ -782,7 +782,7 @@ namespace Microsoft.Build.Construction
                 }
                 else if (!ValidAttributesOnlyConditionAndLabel.Contains(attribute.Name))
                 {
-                    if (_ParserIgnoreConfiguration?.CheckSkipAttribute("ItemDefinition", attribute.Name) != true)
+                    if (_ParserIgnoreConfiguration?.CheckSkipAttribute(ParserIgnoreConfiguration.GenericItemDefinitionElement, attribute.Name) != true)
                     {
                         ProjectXmlUtilities.ThrowProjectInvalidAttribute(attribute);
                     }
