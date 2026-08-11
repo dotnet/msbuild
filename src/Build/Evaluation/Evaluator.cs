@@ -178,6 +178,11 @@ namespace Microsoft.Build.Evaluation
         private readonly EvaluationContext _evaluationContext;
 
         /// <summary>
+        /// Prototype dependency observations for this evaluation.
+        /// </summary>
+        private readonly EvaluationObservationSession _observationSession;
+
+        /// <summary>
         /// The environment properties with which evaluation should take place.
         /// </summary>
         private readonly PropertyDictionary<ProjectPropertyInstance> _environmentProperties;
@@ -259,52 +264,76 @@ namespace Microsoft.Build.Evaluation
             data = new PropertyTrackingEvaluatorDataWrapper<P, I, M, D>(data, _evaluationLoggingContext, Traits.Instance.LogPropertyTracking);
 
             // If the host wishes to provide a directory cache for this evaluation, create a new EvaluationContext with the right file system.
-            _evaluationContext = evaluationContext;
             IDirectoryCache directoryCache = directoryCacheFactory?.GetDirectoryCacheForEvaluation(_evaluationLoggingContext.BuildEventContext.EvaluationId);
+            IFileSystem fileSystem = evaluationContext.FileSystem;
             if (directoryCache is not null)
             {
-                IFileSystem fileSystem = new DirectoryCacheFileSystemWrapper(evaluationContext.FileSystem, directoryCache);
-                _evaluationContext = evaluationContext.ContextWithFileSystem(fileSystem);
+                fileSystem = new DirectoryCacheFileSystemWrapper(fileSystem, directoryCache);
             }
 
-            // Create containers for the evaluation results
-            data.InitializeForEvaluation(toolsetProvider, _evaluationContext, _evaluationLoggingContext);
+            _observationSession = EvaluationObservationSession.TryCreate(
+                _evaluationLoggingContext.BuildEventContext.EvaluationId,
+                projectRootElement.ProjectFileLocation.File,
+                evaluationStage,
+                evaluationContext.Policy,
+                directoryCache is not null);
 
-            _expander = new Expander<P, I>(data, data, _evaluationContext, _evaluationLoggingContext);
-
-            _data = data;
-            _itemGroupElements = new List<ProjectItemGroupElement>();
-            _itemDefinitionGroupElements = new List<ProjectItemDefinitionGroupElement>();
-            _usingTaskElements = new List<KeyValuePair<string, ProjectUsingTaskElement>>();
-            _targetElements = new List<ProjectTargetElement>();
-            _importsSeen = new Dictionary<string, ProjectImportElement>(StringComparer.OrdinalIgnoreCase);
-            _initialTargetsList = new List<string>();
-            _projectSupportsReturnsAttribute = new Dictionary<ProjectRootElement, bool>();
-            _projectRootElement = projectRootElement;
-            _loadSettings = loadSettings;
-            _evaluationStage = evaluationStage;
-            _maxNodeCount = maxNodeCount;
-            _environmentProperties = environmentProperties;
-            _propertiesFromCommandLine = propertiesFromCommandLine ?? [];
-            _itemFactory = itemFactory;
-            _projectRootElementCache = projectRootElementCache;
-            _sdkResolverService = sdkResolverService;
-            _submissionId = submissionId;
-            _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
-            _isRunningInVisualStudio = string.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("BuildingInsideVisualStudio")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
-
-            // In 15.9 we added support for the global property "NuGetInteractive" to allow SDK resolvers to be interactive.
-            // In 16.0 we added the /interactive command-line argument so the line below keeps back-compat
-            _interactive = interactive || string.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("NuGetInteractive")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
-
-            // The last modified project is the project itself unless its an in-memory project
-            if (projectRootElement.FullPath != null)
+            try
             {
-                _lastModifiedProject = projectRootElement;
+                if (_observationSession is not null)
+                {
+                    fileSystem = new RecordingFileSystem(fileSystem, _observationSession);
+                }
+
+                _evaluationContext = ReferenceEquals(fileSystem, evaluationContext.FileSystem)
+                    ? evaluationContext
+                    : evaluationContext.ContextWithFileSystem(fileSystem);
+
+                // Create containers for the evaluation results
+                data.InitializeForEvaluation(toolsetProvider, _evaluationContext, _evaluationLoggingContext);
+
+                _expander = new Expander<P, I>(data, data, _evaluationContext, _evaluationLoggingContext);
+
+                _data = data;
+                _itemGroupElements = new List<ProjectItemGroupElement>();
+                _itemDefinitionGroupElements = new List<ProjectItemDefinitionGroupElement>();
+                _usingTaskElements = new List<KeyValuePair<string, ProjectUsingTaskElement>>();
+                _targetElements = new List<ProjectTargetElement>();
+                _importsSeen = new Dictionary<string, ProjectImportElement>(StringComparer.OrdinalIgnoreCase);
+                _initialTargetsList = new List<string>();
+                _projectSupportsReturnsAttribute = new Dictionary<ProjectRootElement, bool>();
+                _projectRootElement = projectRootElement;
+                _loadSettings = loadSettings;
+                _evaluationStage = evaluationStage;
+                _maxNodeCount = maxNodeCount;
+                _environmentProperties = environmentProperties;
+                _propertiesFromCommandLine = propertiesFromCommandLine ?? [];
+                _itemFactory = itemFactory;
+                _projectRootElementCache = projectRootElementCache;
+                _sdkResolverService = sdkResolverService;
+                _submissionId = submissionId;
+                _evaluationProfiler = new EvaluationProfiler(profileEvaluation);
+                _isRunningInVisualStudio = string.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("BuildingInsideVisualStudio")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
+
+                // In 15.9 we added support for the global property "NuGetInteractive" to allow SDK resolvers to be interactive.
+                // In 16.0 we added the /interactive command-line argument so the line below keeps back-compat
+                _interactive = interactive || string.Equals("true", _data.GlobalPropertiesDictionary.GetProperty("NuGetInteractive")?.EvaluatedValue, StringComparison.OrdinalIgnoreCase);
+
+                // The last modified project is the project itself unless its an in-memory project
+                if (projectRootElement.FullPath != null)
+                {
+                    _lastModifiedProject = projectRootElement;
+                }
+
+                _streamImports = new List<string>();
+                // When the imports are concatenated with a semicolon, this automatically prepends a semicolon if and only if another element is later added.
+                _streamImports.Add(string.Empty);
             }
-            _streamImports = new List<string>();
-            // When the imports are concatenated with a semicolon, this automatically prepends a semicolon if and only if another element is later added.
-            _streamImports.Add(string.Empty);
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                _observationSession?.Complete(evaluationSucceeded: false);
+                throw;
+            }
         }
 
         /// <summary>
@@ -370,9 +399,11 @@ namespace Microsoft.Build.Evaluation
                 buildEventContext,
                 evaluationStage);
 
+            bool evaluationSucceeded = false;
             try
             {
                 evaluator.Evaluate();
+                evaluationSucceeded = true;
             }
             catch (PathTooLongException ex)
             {
@@ -381,18 +412,25 @@ namespace Microsoft.Build.Evaluation
             }
             finally
             {
-                IEnumerable globalProperties = null;
-                IEnumerable properties = null;
-                IEnumerable items = null;
-
-                if (evaluator._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent)
+                try
                 {
-                    globalProperties = evaluator._data.GlobalPropertiesDictionary;
-                    properties = Traits.LogAllEnvironmentVariables ? evaluator._data.Properties : evaluator.FilterOutEnvironmentDerivedProperties(evaluator._data.Properties);
-                    items = evaluator._data.Items;
-                }
+                    IEnumerable globalProperties = null;
+                    IEnumerable properties = null;
+                    IEnumerable items = null;
 
-                evaluator._evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, evaluator._evaluationProfiler.ProfiledResult);
+                    if (evaluator._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent)
+                    {
+                        globalProperties = evaluator._data.GlobalPropertiesDictionary;
+                        properties = Traits.LogAllEnvironmentVariables ? evaluator._data.Properties : evaluator.FilterOutEnvironmentDerivedProperties(evaluator._data.Properties);
+                        items = evaluator._data.Items;
+                    }
+
+                    evaluator._evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, evaluator._evaluationProfiler.ProfiledResult);
+                }
+                finally
+                {
+                    evaluator._observationSession?.Complete(evaluationSucceeded);
+                }
             }
 
             MSBuildEventSource.Log.EvaluateStop(root.ProjectFileLocation.File);

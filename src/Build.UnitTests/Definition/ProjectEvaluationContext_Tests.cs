@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Construction;
@@ -187,6 +189,397 @@ namespace Microsoft.Build.UnitTests.Definition
                 {
                     { _env.DefaultTestDirectory.Path, 1 }
                 });
+        }
+
+        [Fact]
+        public void EvaluationObservationCanBeDisabled()
+        {
+            int reportsCreated = 0;
+            using IDisposable scope = EvaluationObservationSession.TestOnlyConfigure(
+                enabled: false,
+                _ => reportsCreated++);
+
+            string projectFile = _env.CreateFile(
+                "disabled.proj",
+                """
+                <Project>
+                  <PropertyGroup Condition="Exists('disabled.marker')">
+                    <Observed>true</Observed>
+                  </PropertyGroup>
+                </Project>
+                """.Cleanup()).Path;
+
+            Project.FromFile(projectFile, new ProjectOptions
+            {
+                ProjectCollection = _env.CreateProjectCollection().Collection,
+            });
+
+            reportsCreated.ShouldBe(0);
+        }
+
+        [Fact]
+        public void EvaluationObservationDoesNotChangeEvaluatedState()
+        {
+            _env.CreateFile("state.marker", string.Empty);
+            _env.CreateFile("State.cs", string.Empty);
+            string projectFile = _env.CreateFile(
+                "state.proj",
+                """
+                <Project>
+                  <PropertyGroup Condition="Exists('state.marker')">
+                    <Observed>true</Observed>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <Compile Include="*.cs" />
+                  </ItemGroup>
+                </Project>
+                """.Cleanup()).Path;
+
+            Project baseline;
+            using (EvaluationObservationSession.TestOnlyConfigure(enabled: false))
+            {
+                baseline = Project.FromFile(projectFile, new ProjectOptions
+                {
+                    ProjectCollection = _env.CreateProjectCollection().Collection,
+                });
+            }
+
+            EvaluationObservationReport report = null;
+            Project observed;
+            using (EvaluationObservationSession.TestOnlyConfigure(
+                enabled: true,
+                createdReport => report = createdReport))
+            {
+                observed = Project.FromFile(projectFile, new ProjectOptions
+                {
+                    ProjectCollection = _env.CreateProjectCollection().Collection,
+                });
+            }
+
+            report.ShouldNotBeNull();
+            observed.GetPropertyValue("Observed").ShouldBe(baseline.GetPropertyValue("Observed"));
+            observed.GetItems("Compile").Select(item => item.EvaluatedInclude)
+                .ShouldBe(baseline.GetItems("Compile").Select(item => item.EvaluatedInclude));
+        }
+
+        [Fact]
+        public void EvaluationObservationRecordsProbesAndEnumerations()
+        {
+            EvaluationObservationReport report = null;
+            using IDisposable scope = EvaluationObservationSession.TestOnlyConfigure(
+                enabled: true,
+                createdReport => report = createdReport);
+
+            _env.CreateFile("Observed.cs", string.Empty);
+            string projectFile = _env.CreateFile(
+                "observed.proj",
+                """
+                <Project>
+                  <PropertyGroup Condition="Exists('missing.props')">
+                    <Imported>true</Imported>
+                  </PropertyGroup>
+                  <ItemGroup>
+                    <Compile Include="*.cs" />
+                  </ItemGroup>
+                </Project>
+                """.Cleanup()).Path;
+
+            Project project = Project.FromFile(projectFile, new ProjectOptions
+            {
+                ProjectCollection = _env.CreateProjectCollection().Collection,
+            });
+
+            report.ShouldNotBeNull();
+            report.ProjectPath.ShouldBe(projectFile);
+            report.ReadyForCacheHits.ShouldBeFalse();
+            report.EvaluationSucceeded.ShouldBeTrue();
+            (report.Reasons & EvaluationObservationReason.PrototypeCategoriesIncomplete)
+                .ShouldBe(EvaluationObservationReason.PrototypeCategoriesIncomplete);
+            (report.Reasons & EvaluationObservationReason.ProjectXmlContentNotObserved)
+                .ShouldBe(EvaluationObservationReason.ProjectXmlContentNotObserved);
+            (report.Reasons & EvaluationObservationReason.UnversionedProjectRootElementCache)
+                .ShouldBe(EvaluationObservationReason.UnversionedProjectRootElementCache);
+            (report.Reasons & EvaluationObservationReason.AmbiguousNegativeProbe)
+                .ShouldBe(EvaluationObservationReason.AmbiguousNegativeProbe);
+
+            string missingPath = Path.Combine(_env.DefaultTestDirectory.Path, "missing.props");
+            report.PathProbes.ShouldContain(observation =>
+                FileUtilities.PathsEqual(observation.Path, missingPath) &&
+                observation.Kind == EvaluationPathKind.FileOrDirectory &&
+                !observation.Exists);
+
+            string observedFile = Path.Combine(_env.DefaultTestDirectory.Path, "Observed.cs");
+            report.DirectoryEnumerations.ShouldContain(observation =>
+                FileUtilities.PathsEqual(observation.Path, _env.DefaultTestDirectory.Path) &&
+                observation.Completion == EvaluationEnumerationCompletion.Complete &&
+                observation.Entries.Any(entry => FileUtilities.PathsEqual(entry, observedFile)));
+
+            project.GetItems("Compile").ShouldContain(item =>
+                string.Equals(Path.GetFileName(item.EvaluatedInclude), "Observed.cs", StringComparison.OrdinalIgnoreCase));
+        }
+
+        [Fact]
+        public void EvaluationObservationMarksHostDirectoryCacheAsUnversioned()
+        {
+            EvaluationObservationReport report = null;
+            using IDisposable scope = EvaluationObservationSession.TestOnlyConfigure(
+                enabled: true,
+                createdReport => report = createdReport);
+
+            string projectFile = _env.CreateFile(
+                "directory-cache.proj",
+                """
+                <Project>
+                  <PropertyGroup Condition="Exists('directory-cache.marker')">
+                    <Observed>true</Observed>
+                  </PropertyGroup>
+                </Project>
+                """.Cleanup()).Path;
+
+            Project.FromFile(projectFile, new ProjectOptions
+            {
+                ProjectCollection = _env.CreateProjectCollection().Collection,
+                DirectoryCacheFactory = new Helpers.LoggingDirectoryCacheFactory(),
+            });
+
+            report.ShouldNotBeNull();
+            (report.Reasons & EvaluationObservationReason.UnversionedDirectoryCache)
+                .ShouldBe(EvaluationObservationReason.UnversionedDirectoryCache);
+        }
+
+        [Fact]
+        public void EvaluationObservationMarksSharedSdkResolverCacheAsUnversioned()
+        {
+            EvaluationObservationReport report = null;
+            using IDisposable scope = EvaluationObservationSession.TestOnlyConfigure(
+                enabled: true,
+                createdReport => report = createdReport);
+
+            string projectFile = _env.CreateFile("shared-sdk-cache.proj", "<Project />").Path;
+
+            Project.FromFile(projectFile, new ProjectOptions
+            {
+                ProjectCollection = _env.CreateProjectCollection().Collection,
+                EvaluationContext = EvaluationContext.Create(EvaluationContext.SharingPolicy.SharedSDKCache),
+            });
+
+            report.ShouldNotBeNull();
+            (report.Reasons & EvaluationObservationReason.UnversionedSdkResolverCache)
+                .ShouldBe(EvaluationObservationReason.UnversionedSdkResolverCache);
+        }
+
+        [Fact]
+        public void EvaluationObservationMarksPartialEvaluationAsIncomplete()
+        {
+            EvaluationObservationReport report = null;
+            using IDisposable scope = EvaluationObservationSession.TestOnlyConfigure(
+                enabled: true,
+                createdReport => report = createdReport);
+
+            string projectFile = _env.CreateFile("partial.proj", "<Project />").Path;
+
+            ProjectInstance.FromProjectRootElement(
+                ProjectRootElement.Open(projectFile),
+                new ProjectOptions
+                {
+                    ProjectCollection = _env.CreateProjectCollection().Collection,
+                    EvaluationStage = ProjectEvaluationStage.Properties,
+                });
+
+            report.ShouldNotBeNull();
+            (report.Reasons & EvaluationObservationReason.IncompleteEvaluationStage)
+                .ShouldBe(EvaluationObservationReason.IncompleteEvaluationStage);
+        }
+
+        [Fact]
+        public void EvaluationObservationCallbackFailureIsReportedAfterEvaluation()
+        {
+            string projectFile = _env.CreateFile(
+                "callback.proj",
+                """
+                <Project>
+                  <PropertyGroup>
+                    <Observed>true</Observed>
+                  </PropertyGroup>
+                </Project>
+                """.Cleanup()).Path;
+            Project project = null;
+
+            InvalidOperationException exception = Should.Throw<InvalidOperationException>(() =>
+            {
+                using IDisposable scope = EvaluationObservationSession.TestOnlyConfigure(
+                    enabled: true,
+                    _ => throw new ApplicationException("Callback failed."));
+
+                project = Project.FromFile(projectFile, new ProjectOptions
+                {
+                    ProjectCollection = _env.CreateProjectCollection().Collection,
+                });
+            });
+
+            exception.InnerException.ShouldBeOfType<ApplicationException>();
+            project.ShouldNotBeNull();
+            project.GetPropertyValue("Observed").ShouldBe("true");
+        }
+
+        [Fact]
+        public async Task SharedEvaluationContextProducesDisjointObservationReports()
+        {
+            var reports = new ConcurrentBag<EvaluationObservationReport>();
+            using IDisposable scope = EvaluationObservationSession.TestOnlyConfigure(
+                enabled: true,
+                reports.Add);
+
+            string firstProject = _env.CreateFile(
+                "first.proj",
+                """
+                <Project>
+                  <PropertyGroup Condition="Exists('first.marker')" />
+                </Project>
+                """.Cleanup()).Path;
+            string secondProject = _env.CreateFile(
+                "second.proj",
+                """
+                <Project>
+                  <PropertyGroup Condition="Exists('second.marker')" />
+                </Project>
+                """.Cleanup()).Path;
+
+            EvaluationContext context = EvaluationContext.Create(EvaluationContext.SharingPolicy.Shared);
+            ProjectCollection firstCollection = _env.CreateProjectCollection().Collection;
+            ProjectCollection secondCollection = _env.CreateProjectCollection().Collection;
+
+            await Task.WhenAll(
+                Task.Run(() => Project.FromFile(firstProject, new ProjectOptions
+                {
+                    ProjectCollection = firstCollection,
+                    EvaluationContext = context,
+                })),
+                Task.Run(() => Project.FromFile(secondProject, new ProjectOptions
+                {
+                    ProjectCollection = secondCollection,
+                    EvaluationContext = context,
+                })));
+
+            reports.Count.ShouldBe(2);
+
+            string firstMarker = Path.Combine(_env.DefaultTestDirectory.Path, "first.marker");
+            string secondMarker = Path.Combine(_env.DefaultTestDirectory.Path, "second.marker");
+
+            reports.Count(report =>
+                FileUtilities.PathsEqual(report.ProjectPath, firstProject) &&
+                report.PathProbes.Any(observation => FileUtilities.PathsEqual(observation.Path, firstMarker)) &&
+                !report.PathProbes.Any(observation => FileUtilities.PathsEqual(observation.Path, secondMarker)))
+                .ShouldBe(1);
+            reports.Count(report =>
+                FileUtilities.PathsEqual(report.ProjectPath, secondProject) &&
+                report.PathProbes.Any(observation => FileUtilities.PathsEqual(observation.Path, secondMarker)) &&
+                !report.PathProbes.Any(observation => FileUtilities.PathsEqual(observation.Path, firstMarker)))
+                .ShouldBe(1);
+
+            reports.ShouldAllBe(report =>
+                (report.Reasons & EvaluationObservationReason.UnversionedSharedCache) != 0);
+        }
+
+        [Fact]
+        public void RecordingFileSystemPreservesPartialEnumeration()
+        {
+            EvaluationObservationSession session = EvaluationObservationSession.CreateForTests();
+            var innerFileSystem = new PartialEnumerationFileSystem();
+            var recordingFileSystem = new RecordingFileSystem(innerFileSystem, session);
+
+            using (IEnumerator<string> enumerator = recordingFileSystem.EnumerateFiles("root").GetEnumerator())
+            {
+                enumerator.MoveNext().ShouldBeTrue();
+                enumerator.Current.ShouldBe("first.cs");
+            }
+
+            EvaluationObservationReport report = session.Complete(evaluationSucceeded: true);
+
+            innerFileSystem.EntriesProduced.ShouldBe(1);
+            report.DirectoryEnumerations.ShouldHaveSingleItem()
+                .Completion.ShouldBe(EvaluationEnumerationCompletion.Partial);
+            report.DirectoryEnumerations[0].Entries.ShouldBe(["first.cs"]);
+            (report.Reasons & EvaluationObservationReason.PartialEnumeration)
+                .ShouldBe(EvaluationObservationReason.PartialEnumeration);
+        }
+
+        [Fact]
+        public void RecordingFileSystemDoesNotRetainEnumerationAfterCompletion()
+        {
+            EvaluationObservationSession session = EvaluationObservationSession.CreateForTests();
+            var recordingFileSystem = new RecordingFileSystem(new PartialEnumerationFileSystem(), session);
+            IEnumerator<string> enumerator = recordingFileSystem.EnumerateFiles("root").GetEnumerator();
+
+            enumerator.MoveNext().ShouldBeTrue();
+            EvaluationObservationReport report = session.Complete(evaluationSucceeded: true);
+            enumerator.Dispose();
+
+            report.DirectoryEnumerations.ShouldBeEmpty();
+            session.TestOnlyRetainedObservationCount.ShouldBe(0);
+        }
+
+        [Fact]
+        public void RecordingFileSystemMarksConflictingProbeResults()
+        {
+            EvaluationObservationSession session = EvaluationObservationSession.CreateForTests();
+            var recordingFileSystem = new RecordingFileSystem(new AlternatingProbeFileSystem(), session);
+
+            recordingFileSystem.FileExists("probe").ShouldBeFalse();
+            recordingFileSystem.FileExists("probe").ShouldBeTrue();
+
+            EvaluationObservationReport report = session.Complete(evaluationSucceeded: true);
+
+            (report.Reasons & EvaluationObservationReason.AmbiguousNegativeProbe)
+                .ShouldBe(EvaluationObservationReason.AmbiguousNegativeProbe);
+            (report.Reasons & EvaluationObservationReason.ConflictingObservation)
+                .ShouldBe(EvaluationObservationReason.ConflictingObservation);
+        }
+
+        [Fact]
+        public void RecordingFileSystemRecordsMetadataAndFileReads()
+        {
+            EvaluationObservationSession session = EvaluationObservationSession.CreateForTests();
+            var recordingFileSystem = new RecordingFileSystem(new ReadAndMetadataFileSystem(), session);
+            string textPath = Path.Combine(_env.DefaultTestDirectory.Path, "text.txt");
+            string readerPath = Path.Combine(_env.DefaultTestDirectory.Path, "reader.txt");
+
+            recordingFileSystem.ReadFileAllText(textPath).ShouldBe("content");
+            recordingFileSystem.ReadFile(readerPath).ReadToEnd().ShouldBe("reader");
+            recordingFileSystem.GetAttributes(textPath).ShouldBe(FileAttributes.ReadOnly);
+            recordingFileSystem.GetLastWriteTimeUtc(textPath).ShouldBe(new DateTime(1234, DateTimeKind.Utc));
+
+            EvaluationObservationReport report = session.Complete(evaluationSucceeded: true);
+
+            EvaluationFileReadObservation textRead = report.FileReads.Single(
+                observation => FileUtilities.PathsEqual(observation.Path, textPath));
+            textRead.IsVerifiable.ShouldBeTrue();
+            textRead.ContentHash.ShouldNotBeNull();
+
+            EvaluationFileReadObservation readerRead = report.FileReads.Single(
+                observation => FileUtilities.PathsEqual(observation.Path, readerPath));
+            readerRead.IsVerifiable.ShouldBeFalse();
+            readerRead.ContentHash.ShouldBeNull();
+            report.MetadataReads.Count(observation => FileUtilities.PathsEqual(observation.Path, textPath))
+                .ShouldBe(2);
+            (report.Reasons & EvaluationObservationReason.UnverifiableFileRead)
+                .ShouldBe(EvaluationObservationReason.UnverifiableFileRead);
+        }
+
+        [Fact]
+        public void RecordingFileSystemMarksReadAndMetadataFailures()
+        {
+            EvaluationObservationSession session = EvaluationObservationSession.CreateForTests();
+            var recordingFileSystem = new RecordingFileSystem(new ThrowingFileSystem(), session);
+
+            Should.Throw<IOException>(() => recordingFileSystem.ReadFileAllText("read"));
+            Should.Throw<IOException>(() => recordingFileSystem.GetAttributes("metadata"));
+
+            EvaluationObservationReport report = session.Complete(evaluationSucceeded: false);
+
+            report.EvaluationSucceeded.ShouldBeFalse();
+            (report.Reasons & EvaluationObservationReason.ExternalOperationFailure)
+                .ShouldBe(EvaluationObservationReason.ExternalOperationFailure);
         }
 
         [Theory]
@@ -998,6 +1391,64 @@ namespace Microsoft.Build.UnitTests.Definition
                 });
 
             evaluationCount.ShouldBe(2);
+        }
+
+        private abstract class TestFileSystemBase : IFileSystem
+        {
+            public virtual TextReader ReadFile(string path) => throw new NotSupportedException();
+            public virtual Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share) => throw new NotSupportedException();
+            public virtual string ReadFileAllText(string path) => throw new NotSupportedException();
+            public virtual byte[] ReadFileAllBytes(string path) => throw new NotSupportedException();
+            public virtual IEnumerable<string> EnumerateFiles(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly) => throw new NotSupportedException();
+            public virtual IEnumerable<string> EnumerateDirectories(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly) => throw new NotSupportedException();
+            public virtual IEnumerable<string> EnumerateFileSystemEntries(string path, string searchPattern = "*", SearchOption searchOption = SearchOption.TopDirectoryOnly) => throw new NotSupportedException();
+            public virtual FileAttributes GetAttributes(string path) => throw new NotSupportedException();
+            public virtual DateTime GetLastWriteTimeUtc(string path) => throw new NotSupportedException();
+            public virtual bool DirectoryExists(string path) => throw new NotSupportedException();
+            public virtual bool FileExists(string path) => throw new NotSupportedException();
+            public virtual bool FileOrDirectoryExists(string path) => throw new NotSupportedException();
+        }
+
+        private sealed class PartialEnumerationFileSystem : TestFileSystemBase
+        {
+            internal int EntriesProduced { get; private set; }
+
+            public override IEnumerable<string> EnumerateFiles(
+                string path,
+                string searchPattern = "*",
+                SearchOption searchOption = SearchOption.TopDirectoryOnly)
+            {
+                EntriesProduced++;
+                yield return "first.cs";
+                EntriesProduced++;
+                yield return "second.cs";
+            }
+        }
+
+        private sealed class AlternatingProbeFileSystem : TestFileSystemBase
+        {
+            private bool _exists;
+
+            public override bool FileExists(string path)
+            {
+                bool result = _exists;
+                _exists = true;
+                return result;
+            }
+        }
+
+        private sealed class ReadAndMetadataFileSystem : TestFileSystemBase
+        {
+            public override TextReader ReadFile(string path) => new StringReader("reader");
+            public override string ReadFileAllText(string path) => "content";
+            public override FileAttributes GetAttributes(string path) => FileAttributes.ReadOnly;
+            public override DateTime GetLastWriteTimeUtc(string path) => new(1234, DateTimeKind.Utc);
+        }
+
+        private sealed class ThrowingFileSystem : TestFileSystemBase
+        {
+            public override string ReadFileAllText(string path) => throw new IOException("Read failed.");
+            public override FileAttributes GetAttributes(string path) => throw new IOException("Metadata failed.");
         }
 
         private void EvaluateProjects(IEnumerable<string> projectContents, EvaluationContext context, Action<Project> afterEvaluationAction)
