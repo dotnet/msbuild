@@ -786,14 +786,28 @@ namespace Microsoft.Build.Graph
             {
                 foreach (string targetName in entryProjectTargets)
                 {
+                    foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
+                    {
+                        if (IsSyntheticSolutionNode(entryPointNode))
+                        {
+                            var solutionEdge = new ProjectGraphBuildRequest(entryPointNode, [targetName]);
+                            if (encounteredEdges.Add(solutionEdge))
+                            {
+                                edgesToVisit.Enqueue(solutionEdge);
+                            }
+                        }
+                    }
+
                     // Special-case the "Build" target. The solution's metaproj invokes each project's default targets.
                     if (targetName.Equals("Build", StringComparison.OrdinalIgnoreCase))
                     {
                         foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
                         {
                             var entryEdge = new ProjectGraphBuildRequest(entryPointNode, GetEntryTargets(entryPointNode));
-                            encounteredEdges.Add(entryEdge);
-                            edgesToVisit.Enqueue(entryEdge);
+                            if (encounteredEdges.Add(entryEdge))
+                            {
+                                edgesToVisit.Enqueue(entryEdge);
+                            }
 
                             // For solution graphs, also enqueue the project nodes directly with their default targets.
                             // The synthetic solution node can't propagate targets (no ProjectReferenceTargets),
@@ -867,23 +881,28 @@ namespace Microsoft.Build.Graph
                     {
                         foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
                         {
+                            if (IsSyntheticSolutionNode(entryPointNode))
+                            {
+                                // Targets defined by solution imports execute only on the generated solution
+                                // project. Generated traversal targets also dispatch to the projects.
+                                if (ShouldPropagateSolutionTarget(entryPointNode, targetName))
+                                {
+                                    foreach (ProjectGraphNode projectNode in entryPointNode.ProjectReferences)
+                                    {
+                                        ProjectGraphBuildRequest projectEdge = new(projectNode, [targetName]);
+                                        if (encounteredEdges.Add(projectEdge))
+                                        {
+                                            edgesToVisit.Enqueue(projectEdge);
+                                        }
+                                    }
+                                }
+
+                                continue;
+                            }
+
                             ProjectGraphBuildRequest entryEdge = new(entryPointNode, [targetName]);
                             encounteredEdges.Add(entryEdge);
                             edgesToVisit.Enqueue(entryEdge);
-
-                            // The synthetic solution node has no ProjectReferenceTargets, so solution-wide
-                            // targets must also be seeded directly on each project in the solution.
-                            if (IsSyntheticSolutionNode(entryPointNode))
-                            {
-                                foreach (ProjectGraphNode projectNode in entryPointNode.ProjectReferences)
-                                {
-                                    ProjectGraphBuildRequest projectEdge = new(projectNode, [targetName]);
-                                    if (encounteredEdges.Add(projectEdge))
-                                    {
-                                        edgesToVisit.Enqueue(projectEdge);
-                                    }
-                                }
-                            }
                         }
                     }
                 }
@@ -902,6 +921,17 @@ namespace Microsoft.Build.Graph
             bool IsSyntheticSolutionNode(ProjectGraphNode node) =>
                 Solution is not null
                 && node.ProjectInstance.GlobalProperties.ContainsKey(SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty);
+
+            bool ShouldPropagateSolutionTarget(ProjectGraphNode solutionNode, string targetName)
+            {
+                if (_generatedSolutionTargets is null)
+                {
+                    return true;
+                }
+
+                return solutionNode.ProjectInstance.Targets.TryGetValue(targetName, out ProjectTargetInstance target)
+                    && FileUtilities.PathComparer.Equals(target.Location.File, solutionNode.ProjectInstance.FullPath);
+            }
 
             // Traverse the entire graph, visiting each edge once.
             while (edgesToVisit.Count > 0)

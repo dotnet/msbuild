@@ -2980,6 +2980,62 @@ $@"
             exception.Message.ShouldContain("AnotherTarget");
         }
 
+        [Fact]
+        public void BuildApiSolutionImportedTargetRunsOnlyOnSolutionNode()
+        {
+            TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
+            TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "SolutionOnlyTarget.sln");
+            _env.CreateFile(
+                "Directory.Solution.targets",
+                """
+                <Project>
+                  <Target Name="SolutionOnly" />
+                </Project>
+                """);
+
+            ProjectGraph graph = ProjectGraph.CreateForBuild(
+                new ProjectGraphBuildOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
+                    ProjectCollection = _env.CreateProjectCollection().Collection,
+                    Targets = ["SolutionOnly"]
+                });
+
+            ProjectGraphNode solutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+            ProjectGraphNode projectNode = graph.ProjectNodes.Single(node => node != solutionNode);
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(["SolutionOnly"]);
+
+            targetLists[solutionNode].ShouldBe(["SolutionOnly"]);
+            targetLists[projectNode].ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void BuildApiProjectTraversalTargetAlsoRunsOnSolutionNode()
+        {
+            TransientTestFile projectFile = CreateProjectFile(
+                env: _env,
+                projectNumber: 1,
+                extraContent: """
+                    <Target Name="CustomTarget" />
+                    """);
+            TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "ProjectTraversalTarget.sln");
+
+            ProjectGraph graph = ProjectGraph.CreateForBuild(
+                new ProjectGraphBuildOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
+                    ProjectCollection = _env.CreateProjectCollection().Collection,
+                    Targets = ["Project1:CustomTarget"]
+                });
+
+            ProjectGraphNode solutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+            ProjectGraphNode projectNode = graph.ProjectNodes.Single(node => node != solutionNode);
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(["Project1:CustomTarget"]);
+
+            targetLists[solutionNode].ShouldBe(["Project1:CustomTarget"]);
+            targetLists[projectNode].ShouldBe(["CustomTarget"]);
+        }
+
         [Theory]
         [InlineData(null)]
         [InlineData("")]

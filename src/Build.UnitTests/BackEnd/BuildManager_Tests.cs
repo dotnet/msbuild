@@ -4788,6 +4788,63 @@ $@"<Project InitialTargets=`Sleep`>
         }
 
         [Fact]
+        public void GraphBuildProjectTraversalTargetRunsSolutionNode()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+            ProjectCollection projectCollection = env.CreateProjectCollection().Collection;
+
+            TransientTestFolder root = env.CreateFolder(createFolder: true);
+            TransientTestFolder projectFolder = env.CreateFolder(Path.Combine(root.Path, "Project1"), createFolder: true);
+            env.CreateFile(
+                projectFolder,
+                "Project1.csproj",
+                """
+                <Project>
+                  <Target Name="CustomTarget">
+                    <Message Text="ProjectCustomTargetRan" Importance="High" />
+                  </Target>
+                </Project>
+                """);
+
+            TransientTestFile solutionFile = env.CreateFile(
+                root,
+                "ProjectTraversal.sln",
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 16
+                VisualStudioVersion = 16.0.29326.124
+                MinimumVisualStudioVersion = 10.0.40219.1
+                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project1", "Project1\Project1.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|Any CPU = Debug|Any CPU
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+                    EndGlobalSection
+                EndGlobal
+                """);
+
+            ProjectGraph graph = ProjectGraph.CreateForBuild(
+                new ProjectGraphBuildOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
+                    ProjectCollection = projectCollection,
+                    Targets = ["Project1:CustomTarget"]
+                });
+
+            GraphBuildRequestData request = new(graph, ["Project1:CustomTarget"], projectCollection.HostServices);
+            GraphBuildResult result = _buildManager.Build(_parameters, request);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            _logger.AssertLogContains("ProjectCustomTargetRan");
+            _logger.TargetStartedEvents.ShouldContain(target => target.TargetName == "Project1:CustomTarget");
+            _logger.TargetStartedEvents.ShouldContain(target => target.TargetName == "CustomTarget");
+        }
+
+        [Fact]
         public void GraphBuildSolutionCleanUsesProjectConfiguration()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
