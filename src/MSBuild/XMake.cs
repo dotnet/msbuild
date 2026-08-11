@@ -1703,13 +1703,11 @@ namespace Microsoft.Build.CommandLine
                     enableTargetOutputLogging: isTaskAndTargetItemLoggingRequired,
                     loadProjectsReadOnly: !isPreprocess,
                     useAsynchronousLogging: true,
-                    reuseProjectRootElementCache: s_isServerNode);
+                    reuseProjectRootElementCache: s_isServerNode,
+                    parseConfigDirectory: Path.GetDirectoryName(Path.GetFullPath(projectFile)));
 
                 // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
                 projectCollection.PropertiesFromCommandLine = [.. globalProperties.Keys];
-
-                // Load parse config from the project file's directory before any project is loaded.
-                projectCollection.LoadParseConfigForStartup(Path.GetDirectoryName(Path.GetFullPath(projectFile)));
 
                 if (toolsVersion != null && !projectCollection.ContainsToolset(toolsVersion))
                 {
@@ -2009,7 +2007,6 @@ namespace Microsoft.Build.CommandLine
             }
             finally
             {
-                projectCollection?.UnloadParseConfigForStartup();
                 projectCollection?.Dispose();
                 FileUtilities.ClearCacheDirectory();
 

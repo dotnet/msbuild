@@ -251,7 +251,7 @@ namespace Microsoft.Build.Evaluation
         /// <param name="loggers">The loggers to register. May be null.</param>
         /// <param name="toolsetDefinitionLocations">The locations from which to load toolsets.</param>
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, ToolsetDefinitionLocations toolsetDefinitionLocations)
-            : this(globalProperties, loggers, toolsetDefinitionLocations, 1 /* node count */, false /* do not only log critical events */, loadProjectsReadOnly: false, useAsynchronousLogging: false, reuseProjectRootElementCache: false, enableTargetOutputLogging: false)
+            : this(globalProperties, loggers, toolsetDefinitionLocations, 1 /* node count */, false /* do not only log critical events */, loadProjectsReadOnly: false, useAsynchronousLogging: false, reuseProjectRootElementCache: false, enableTargetOutputLogging: false, parseConfigDirectory: null)
         {
         }
 
@@ -338,12 +338,27 @@ namespace Microsoft.Build.Evaluation
         /// <param name="enableTargetOutputLogging">If set to true, loggers will collect and send Target outputs when targets are finished executing.</param>
         [RequiresUnreferencedCode("Registers loggers, which can load forwarding logger assemblies by reflection at runtime; incompatible with trimming.")]
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging)
-            : this(globalProperties, loggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging, reuseProjectRootElementCache, enableTargetOutputLogging)
+            : this(globalProperties, loggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging, reuseProjectRootElementCache, enableTargetOutputLogging, parseConfigDirectory: null)
         {
-            // Forwarding loggers load logger assemblies by reflection, which is incompatible with
-            // trimming - that is why every overload taking forwarding loggers is RequiresUnreferencedCode
-            // while the overloads taking none are not. The trim-safe construction happens in the chained
-            // private constructor above; only this reflective registration is gated behind the attribute.
+            try
+            {
+                RegisterForwardingLoggers(remoteLoggers);
+            }
+            catch (Exception)
+            {
+                ShutDownLoggingService();
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Instantiates a project collection with the specified parameters and a directory to search
+        /// for a Directory.Parse.config file (walked upward from the given directory).
+        /// </summary>
+        [RequiresUnreferencedCode("Registers loggers, which can load forwarding logger assemblies by reflection at runtime; incompatible with trimming.")]
+        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging, string parseConfigDirectory)
+            : this(globalProperties, loggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging, reuseProjectRootElementCache, enableTargetOutputLogging, parseConfigDirectory)
+        {
             try
             {
                 RegisterForwardingLoggers(remoteLoggers);
@@ -360,7 +375,7 @@ namespace Microsoft.Build.Evaluation
         /// registers ordinary (non-forwarding) loggers, but does not load forwarding loggers by
         /// reflection, so the overloads that take none can be called without RequiresUnreferencedCode.
         /// </summary>
-        private ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging)
+        private ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging, string parseConfigDirectory)
         {
             _loadedProjects = new LoadedProjectCollection();
             ToolsetLocations = toolsetDefinitionLocations;
@@ -381,16 +396,27 @@ namespace Microsoft.Build.Evaluation
                 // we do not need to auto reload.
                 bool autoReloadFromDisk = reuseProjectRootElementCache;
                 ProjectRootElementCache = new ProjectRootElementCache(autoReloadFromDisk, loadProjectsReadOnly);
-                
-                if (!Traits.Instance.EscapeHatches.DisableParseConfig)
-                {
-                    ProjectRootElementCache.SetParserIgnoreConfiguration(ParserIgnoreConfiguration.LoadGlobalConfig());
-                }
 
                 if (reuseProjectRootElementCache)
                 {
                     s_projectRootElementCache = ProjectRootElementCache;
                 }
+            }
+
+            if (!Traits.Instance.EscapeHatches.DisableParseConfig)
+            {
+                var config = ParserIgnoreConfiguration.LoadGlobalConfig();
+
+                if (!string.IsNullOrEmpty(parseConfigDirectory))
+                {
+                    string configPath = FileUtilities.GetPathOfFileAbove(ParserIgnoreConfiguration.ConfigFileName, parseConfigDirectory);
+                    if (!string.IsNullOrEmpty(configPath) && !config.ContainsLoadedFile(configPath))
+                    {
+                        config = ParserIgnoreConfiguration.Merge(config, ParserIgnoreConfiguration.LoadFromFile(configPath));
+                    }
+                }
+
+                ProjectRootElementCache.SetParserIgnoreConfiguration(config);
             }
 
             OnlyLogCriticalEvents = onlyLogCriticalEvents;
@@ -498,7 +524,7 @@ namespace Microsoft.Build.Evaluation
                     // Take care to ensure that there is never more than one value observed
                     // from this property even in the case of race conditions while lazily initializing.
                     var local = new ProjectCollection(null, null, ToolsetDefinitionLocations.Default,
-                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true, reuseProjectRootElementCache: false, enableTargetOutputLogging: false);
+                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true, reuseProjectRootElementCache: false, enableTargetOutputLogging: false, parseConfigDirectory: null);
 
                     if (Interlocked.CompareExchange(ref s_globalProjectCollection, local, null) != null)
                     {
@@ -577,56 +603,6 @@ namespace Microsoft.Build.Evaluation
         {
             get => ProjectRootElementCache.ParserIgnoreConfiguration;
             set => ProjectRootElementCache.SetParserIgnoreConfiguration(value);
-        }
-
-        /// <summary>
-        /// The config state before LoadParseConfigForStartup was called, used to restore on unload.
-        /// </summary>
-        private ParserIgnoreConfiguration _preStartupParserIgnoreConfiguration;
-
-        /// <summary>
-        /// Loads a Directory.Parse.config by walking up from the specified directory
-        /// and adds it to the current parse configuration. Call <see cref="UnloadParseConfigForStartup"/>
-        /// to restore the previous state after the build completes.
-        /// </summary>
-        /// <param name="startingDirectory">The directory to start searching from (typically the build's working directory).</param>
-        /// <exception cref="InvalidOperationException">Thrown if startup config is already loaded.</exception>
-        public void LoadParseConfigForStartup(string startingDirectory)
-        {
-            if (_preStartupParserIgnoreConfiguration is not null)
-            {
-                throw new InvalidOperationException("LoadParseConfigForStartup called while startup config is already loaded. Call UnloadParseConfigForStartup first.");
-            }
-
-            if (Traits.Instance.EscapeHatches.DisableParseConfig || string.IsNullOrEmpty(startingDirectory))
-            {
-                return;
-            }
-
-            var config = ProjectRootElementCache.ParserIgnoreConfiguration;
-            if (config is null)
-            {
-                return;
-            }
-
-            string configPath = FileUtilities.GetPathOfFileAbove(ParserIgnoreConfiguration.ConfigFileName, startingDirectory);
-            if (!string.IsNullOrEmpty(configPath) && !config.ContainsLoadedFile(configPath))
-            {
-                _preStartupParserIgnoreConfiguration = config;
-                ProjectRootElementCache.SetParserIgnoreConfiguration(ParserIgnoreConfiguration.Merge(config, ParserIgnoreConfiguration.LoadFromFile(configPath)));
-            }
-        }
-
-        /// <summary>
-        /// Restores the parse configuration to the state before <see cref="LoadParseConfigForStartup"/> was called.
-        /// </summary>
-        public void UnloadParseConfigForStartup()
-        {
-            if (_preStartupParserIgnoreConfiguration is not null)
-            {
-                ProjectRootElementCache.SetParserIgnoreConfiguration(_preStartupParserIgnoreConfiguration);
-                _preStartupParserIgnoreConfiguration = null;
-            }
         }
 
         /// <summary>

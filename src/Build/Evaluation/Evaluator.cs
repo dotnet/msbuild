@@ -192,8 +192,6 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private readonly ProjectRootElementCacheBase _projectRootElementCache;
 
-        private ParserIgnoreConfiguration _ParserIgnoreConfiguration;
-
         /// <summary>
         /// The logging context to be used and piped down throughout evaluation.
         /// </summary>
@@ -309,36 +307,6 @@ namespace Microsoft.Build.Evaluation
             _streamImports.Add(string.Empty);
         }
 
-        private void InitializeParserIgnoreConfiguration()
-        {
-            _ParserIgnoreConfiguration = _projectRootElementCache.ParserIgnoreConfiguration;
-
-            if (Traits.Instance.EscapeHatches.DisableParseConfig || string.IsNullOrEmpty(_projectRootElement.FullPath))
-            {
-                return;
-            }
-
-            string projectConfigPath = FileUtilities.GetPathOfFileAbove(ParserIgnoreConfiguration.ConfigFileName, _projectRootElement.DirectoryPath);
-            if (string.IsNullOrEmpty(projectConfigPath))
-            {
-                return;
-            }
-
-            if (_ParserIgnoreConfiguration is null)
-            {
-                _ParserIgnoreConfiguration = ParserIgnoreConfiguration.LoadFromFile(projectConfigPath);
-            }
-            else if (!_ParserIgnoreConfiguration.ContainsLoadedFile(projectConfigPath))
-            {
-                _ParserIgnoreConfiguration = ParserIgnoreConfiguration.Merge(_ParserIgnoreConfiguration, ParserIgnoreConfiguration.LoadFromFile(projectConfigPath));
-            }
-            else
-            {
-                return;
-            }
-
-            _projectRootElementCache.SetParserIgnoreConfiguration(_ParserIgnoreConfiguration);
-        }
 
         /// <summary>
         /// Delegate passed to methods to provide basic expression evaluation
@@ -425,7 +393,7 @@ namespace Microsoft.Build.Evaluation
                     items = evaluator._data.Items;
                 }
 
-                string skippedMessage = evaluator._ParserIgnoreConfiguration?.GetSkippedSummaryMessage();
+                string skippedMessage = evaluator._projectRootElementCache.ParserIgnoreConfiguration?.GetSkippedSummaryMessage();
                 if (skippedMessage is not null)
                 {
                     evaluator._evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, skippedMessage);
@@ -701,9 +669,7 @@ namespace Microsoft.Build.Evaluation
                 _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
                 _evaluationLoggingContext.LogProjectEvaluationStarted();
 
-                InitializeParserIgnoreConfiguration();
-
-                string configMessage = _ParserIgnoreConfiguration?.GetLoadedConfigsMessage();
+                string configMessage = _projectRootElementCache.ParserIgnoreConfiguration?.GetLoadedConfigsMessage();
                 if (configMessage is not null)
                 {
                     _evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, configMessage);
