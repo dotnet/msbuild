@@ -700,25 +700,32 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 IsCacheable = true,
             };
 
-            configuration.CacheIfPossible();
-            configuration.IsCached.ShouldBeTrue();
-
-            using (configuration.AcquireProjectInstanceUsage())
+            try
             {
-                configuration.IsCached.ShouldBeFalse();
+                configuration.CacheIfPossible();
+                configuration.IsCached.ShouldBeTrue();
 
                 using (configuration.AcquireProjectInstanceUsage())
                 {
-                    Task.Run(configuration.CacheIfPossible).GetAwaiter().GetResult();
+                    configuration.IsCached.ShouldBeFalse();
+
+                    using (configuration.AcquireProjectInstanceUsage())
+                    {
+                        Task.Run(configuration.CacheIfPossible).GetAwaiter().GetResult();
+                        configuration.IsCached.ShouldBeFalse();
+                    }
+
+                    configuration.CacheIfPossible();
                     configuration.IsCached.ShouldBeFalse();
                 }
 
                 configuration.CacheIfPossible();
-                configuration.IsCached.ShouldBeFalse();
+                configuration.IsCached.ShouldBeTrue();
             }
-
-            configuration.CacheIfPossible();
-            configuration.IsCached.ShouldBeTrue();
+            finally
+            {
+                configuration.ClearCacheFile();
+            }
         }
 
         [Fact]
