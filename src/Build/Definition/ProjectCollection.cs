@@ -405,6 +405,8 @@ namespace Microsoft.Build.Evaluation
 
             if (!Traits.Instance.EscapeHatches.DisableParseConfig)
             {
+                ParserIgnoreConfiguration.ClearBinlogEmbedPaths();
+
                 var config = ParserIgnoreConfiguration.LoadGlobalConfig();
 
                 if (!string.IsNullOrEmpty(parseConfigDirectory))

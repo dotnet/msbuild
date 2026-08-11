@@ -153,6 +153,8 @@ namespace Microsoft.Build.Evaluation
                 sb.Append($" {kvp.Key} ({kvp.Value} occurrence{(kvp.Value > 1 ? "s" : string.Empty)});");
             }
 
+            _skippedItems.Clear();
+
             sb.Length--;
             return sb.ToString();
         }
