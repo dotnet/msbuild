@@ -99,7 +99,7 @@ internal partial class Expander<P, I>
         ///  </para>
         ///  <para>
         ///  If no function name is found, we default to
-        ///  <see cref="Transforms.ExpandQuotedExpressionFunction"/>.
+        ///  <see cref="Transforms.ExpandQuotedExpressionFunction(List{TransformEntry}, List{TransformEntry}, string, bool, IElementLocation)"/>.
         ///  </para>
         /// </remarks>
         /// <returns>
@@ -130,26 +130,29 @@ internal partial class Expander<P, I>
                 string argumentsExpression = capture.FunctionArguments;
 
                 string[] arguments = null;
-
-                if (functionName == null)
-                {
-                    functionName = "ExpandQuotedExpressionFunction";
-                    arguments = [function];
-                }
-                else if (argumentsExpression != null)
-                {
-                    arguments = ExtractFunctionArguments(elementLocation, argumentsExpression, argumentsExpression.AsMemory());
-                }
-
                 TransformKind kind;
 
-                if (ItemSpecModifiers.IsDerivableItemSpecModifier(functionName))
+                // Quoted transforms have no function name. Select their kind directly to avoid synthesizing
+                // a function name and one-element argument array, then performing name-based dispatch.
+                if (functionName is null)
                 {
-                    kind = TransformKind.ItemSpecModifierFunction;
+                    kind = TransformKind.ExpandQuotedExpressionFunction;
                 }
-                else if (!s_intrinsicTransforms.TryGetValue(functionName, out kind))
+                else
                 {
-                    kind = TransformKind.ExecuteStringFunction;
+                    if (argumentsExpression is not null)
+                    {
+                        arguments = ExtractFunctionArguments(elementLocation, argumentsExpression, argumentsExpression.AsMemory());
+                    }
+
+                    if (ItemSpecModifiers.IsDerivableItemSpecModifier(functionName))
+                    {
+                        kind = TransformKind.ItemSpecModifierFunction;
+                    }
+                    else if (!s_intrinsicTransforms.TryGetValue(functionName, out kind))
+                    {
+                        kind = TransformKind.ExecuteStringFunction;
+                    }
                 }
 
                 switch (kind)
@@ -185,7 +188,17 @@ internal partial class Expander<P, I>
                         Transforms.Reverse(input, output, arguments, functionName, elementLocation);
                         break;
                     case TransformKind.ExpandQuotedExpressionFunction:
-                        Transforms.ExpandQuotedExpressionFunction(input, output, arguments, includeNullEntries, functionName, elementLocation);
+                        // The unnamed form stores the quoted expression in capture.Value. An explicitly named
+                        // invocation uses parsed arguments so its existing syntax validation is preserved.
+                        if (functionName is null)
+                        {
+                            Transforms.ExpandQuotedExpressionFunction(input, output, function, includeNullEntries, elementLocation);
+                        }
+                        else
+                        {
+                            Transforms.ExpandQuotedExpressionFunction(input, output, arguments, includeNullEntries, functionName, elementLocation);
+                        }
+
                         break;
                     case TransformKind.ExecuteStringFunction:
                         Transforms.ExecuteStringFunction(expander, input, output, arguments, includeNullEntries, functionName, elementLocation);

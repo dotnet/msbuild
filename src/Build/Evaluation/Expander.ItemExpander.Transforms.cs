@@ -513,7 +513,7 @@ internal partial class Expander<P, I>
             }
 
             /// <summary>
-            /// Intrinsic function that transforms expressions like the %(foo) in @(Compile->'%(foo)').
+            ///  Intrinsic function that transforms expressions like the %(foo) in @(Compile->'%(foo)').
             /// </summary>
             internal static void ExpandQuotedExpressionFunction(
                 List<TransformEntry> input,
@@ -525,13 +525,22 @@ internal partial class Expander<P, I>
             {
                 ProjectErrorUtilities.VerifyThrowInvalidProject(arguments?.Length == 1, elementLocation, "InvalidItemFunctionSyntax", functionName, arguments == null ? 0 : arguments.Length);
 
-                string quotedExpressionFunction = arguments[0];
-                OneOrMultipleMetadataMatches matches = GetQuotedExpressionMatches(quotedExpressionFunction, elementLocation);
+                ExpandQuotedExpressionFunction(input, output, arguments[0], includeNullEntries, elementLocation);
+            }
+
+            internal static void ExpandQuotedExpressionFunction(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string text,
+                bool includeNullEntries,
+                IElementLocation elementLocation)
+            {
+                OneOrMultipleMetadataMatches matches = GetQuotedExpressionMatches(text, elementLocation);
 
                 switch (matches.Type)
                 {
                     case MetadataMatchType.None:
-                        ExpandLiteralTransform(input, output, quotedExpressionFunction, includeNullEntries);
+                        ExpandLiteralTransform(input, output, text, includeNullEntries);
                         return;
 
                     case MetadataMatchType.ExactSingle:
@@ -539,11 +548,11 @@ internal partial class Expander<P, I>
                         return;
 
                     case MetadataMatchType.InexactSingle:
-                        ExpandSingleMetadataTransform(input, output, quotedExpressionFunction, matches.Single, includeNullEntries, elementLocation);
+                        ExpandSingleMetadataTransform(input, output, text, matches.Single, includeNullEntries, elementLocation);
                         return;
 
                     case MetadataMatchType.Multiple:
-                        ExpandMultipleMetadataTransform(input, output, quotedExpressionFunction, matches.Multiple, includeNullEntries, elementLocation);
+                        ExpandMultipleMetadataTransform(input, output, text, matches.Multiple, includeNullEntries, elementLocation);
                         return;
                 }
             }
@@ -582,7 +591,7 @@ internal partial class Expander<P, I>
             private static void ExpandSingleMetadataTransform(
                 List<TransformEntry> input,
                 List<TransformEntry> output,
-                string quotedExpressionFunction,
+                string text,
                 MetadataMatch match,
                 bool includeNullEntries,
                 IElementLocation elementLocation)
@@ -592,7 +601,7 @@ internal partial class Expander<P, I>
 
                 int prefixLength = match.Index;
                 int suffixIndex = match.Index + match.Length;
-                int suffixLength = quotedExpressionFunction.Length - suffixIndex;
+                int suffixLength = text.Length - suffixIndex;
 
                 foreach (TransformEntry item in input)
                 {
@@ -601,14 +610,14 @@ internal partial class Expander<P, I>
                     {
                         if (prefixLength > 0)
                         {
-                            includeBuilder.Append(quotedExpressionFunction, 0, prefixLength);
+                            includeBuilder.Append(text, 0, prefixLength);
                         }
 
                         includeBuilder.Append(GetMetadataValueFromMatch(match, item.Value, item.Item, elementLocation));
 
                         if (suffixLength > 0)
                         {
-                            includeBuilder.Append(quotedExpressionFunction, suffixIndex, suffixLength);
+                            includeBuilder.Append(text, suffixIndex, suffixLength);
                         }
 
                         include = includeBuilder.ToString();
@@ -624,7 +633,7 @@ internal partial class Expander<P, I>
             private static void ExpandMultipleMetadataTransform(
                 List<TransformEntry> input,
                 List<TransformEntry> output,
-                string quotedExpressionFunction,
+                string text,
                 List<MetadataMatch> matches,
                 bool includeNullEntries,
                 IElementLocation elementLocation)
@@ -640,12 +649,12 @@ internal partial class Expander<P, I>
                         int currentIndex = 0;
                         foreach (MetadataMatch match in matches)
                         {
-                            includeBuilder.Append(quotedExpressionFunction, currentIndex, match.Index - currentIndex);
+                            includeBuilder.Append(text, currentIndex, match.Index - currentIndex);
                             includeBuilder.Append(GetMetadataValueFromMatch(match, item.Value, item.Item, elementLocation));
                             currentIndex = match.Index + match.Length;
                         }
 
-                        includeBuilder.Append(quotedExpressionFunction, currentIndex, quotedExpressionFunction.Length - currentIndex);
+                        includeBuilder.Append(text, currentIndex, text.Length - currentIndex);
                         include = includeBuilder.ToString();
                         includeBuilder.Clear();
                     }
@@ -676,17 +685,17 @@ internal partial class Expander<P, I>
             /// In the vast majority of cases, we'll only have 1-2 matches.
             /// Qualified metadata (e.g. <c>%(ItemType.Name)</c>) is not allowed in transforms and will throw.
             /// </summary>
-            private static OneOrMultipleMetadataMatches GetQuotedExpressionMatches(string quotedExpressionFunction, IElementLocation elementLocation)
+            private static OneOrMultipleMetadataMatches GetQuotedExpressionMatches(string text, IElementLocation elementLocation)
             {
                 // Exact metadata references can use cached names or the built-in modifier lookup.
-                if (quotedExpressionFunction is ['%', '(', .., ')'] &&
-                    (TryGetCachedMetadataMatch(quotedExpressionFunction, out string cachedName)
-                     || s_itemSpecModifiers.TryGetValue(quotedExpressionFunction, out cachedName)))
+                if (text is ['%', '(', .., ')'] &&
+                    (TryGetCachedMetadataMatch(text, out string cachedName)
+                     || s_itemSpecModifiers.TryGetValue(text, out cachedName)))
                 {
                     return new OneOrMultipleMetadataMatches(cachedName);
                 }
 
-                int metadataMarkerIndex = ExpressionShredder.IndexOfMetadataMarker(quotedExpressionFunction);
+                int metadataMarkerIndex = ExpressionShredder.IndexOfMetadataMarker(text);
                 if (metadataMarkerIndex == -1)
                 {
                     return OneOrMultipleMetadataMatches.None;
@@ -700,16 +709,16 @@ internal partial class Expander<P, I>
                 {
                     int refEnd = metadataMarkerIndex + 2;
 
-                    if (!ExpressionShredder.TryParseMetadataExpression(quotedExpressionFunction, ref refEnd, quotedExpressionFunction.Length, out string itemType, out string name))
+                    if (!ExpressionShredder.TryParseMetadataExpression(text, ref refEnd, text.Length, out string itemType, out string name))
                     {
-                        metadataMarkerIndex = ExpressionShredder.IndexOfMetadataMarker(quotedExpressionFunction, metadataMarkerIndex + 2);
+                        metadataMarkerIndex = ExpressionShredder.IndexOfMetadataMarker(text, metadataMarkerIndex + 2);
                         continue;
                     }
 
                     // Qualified metadata is not allowed in transforms.
                     if (itemType != null)
                     {
-                        string matchValue = quotedExpressionFunction.Substring(metadataMarkerIndex, refEnd - metadataMarkerIndex);
+                        string matchValue = text.Substring(metadataMarkerIndex, refEnd - metadataMarkerIndex);
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "QualifiedMetadataInTransformNotAllowed", matchValue, name);
                     }
 
@@ -726,7 +735,7 @@ internal partial class Expander<P, I>
                         multipleMatches.Add(new MetadataMatch(metadataMarkerIndex, matchLength, name));
                     }
 
-                    metadataMarkerIndex = ExpressionShredder.IndexOfMetadataMarker(quotedExpressionFunction, refEnd);
+                    metadataMarkerIndex = ExpressionShredder.IndexOfMetadataMarker(text, refEnd);
                 }
                 while (metadataMarkerIndex >= 0);
 
@@ -737,7 +746,7 @@ internal partial class Expander<P, I>
 
                 if (hasFirstMatch)
                 {
-                    OneOrMultipleMetadataMatches singleMatch = new(quotedExpressionFunction, firstMatch.Index, firstMatch.Length, firstMatch.Name);
+                    OneOrMultipleMetadataMatches singleMatch = new(text, firstMatch.Index, firstMatch.Length, firstMatch.Name);
 
                     if (singleMatch.Type == MetadataMatchType.ExactSingle && !ItemSpecModifiers.IsItemSpecModifier(firstMatch.Name))
                     {
@@ -751,14 +760,19 @@ internal partial class Expander<P, I>
             }
 
             /// <summary>
-            /// Given a string such as %(ReferenceAssembly), check if the inner substring matches the cached value.
-            /// If so, return the cached substring without allocating.
+            ///  Tries to reuse the metadata name cached from the most recently parsed exact quoted
+            ///  metadata reference.
             /// </summary>
             /// <remarks>
-            /// <see cref="ExpandQuotedExpressionFunction"/> often receives the same expression for multiple calls.
-            /// To save on regex overhead, we cache the last substring extracted from a regex match.
-            /// This is thread-safe as long as all checks work on a consistent local reference.
+            ///  The cached name is copied to a local and validated against <paramref name="stringToCheck"/>
+            ///  before it is returned, so another thread may safely replace the cached value concurrently.
             /// </remarks>
+            /// <param name="stringToCheck">The quoted metadata expression to inspect.</param>
+            /// <param name="cachedMatch">The cached metadata name when it matches the expression.</param>
+            /// <returns>
+            ///  <see langword="true"/> when the cached metadata name matches the expression; otherwise,
+            ///  <see langword="false"/>.
+            /// </returns>
             private static bool TryGetCachedMetadataMatch(string stringToCheck, out string cachedMatch)
             {
                 // Pull a local reference first in case the cached value is swapped.
