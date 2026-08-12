@@ -648,6 +648,10 @@ namespace Microsoft.Build.BackEnd
         /// Keeps the <see cref="ProjectInstance"/> in memory while the caller uses it, preventing a concurrent
         /// memory-pressure cache sweep. Retrieves the project first if it was already cached.
         /// </summary>
+        /// <remarks>
+        /// The usage count belongs to this configuration. A shallow clone that shares the same
+        /// <see cref="ProjectInstance"/> has independent synchronization and usage tracking.
+        /// </remarks>
         internal ProjectInstanceUsageScope AcquireProjectInstanceUsage() => new(this);
 
         /// <summary>
@@ -672,6 +676,8 @@ namespace Microsoft.Build.BackEnd
 
             public void Dispose()
             {
+                Assumed.NotNull(_configuration, "ProjectInstance usage scope was not initialized.");
+
                 lock (_configuration._syncLock)
                 {
                     Assumed.True(_configuration._projectInstanceUsageCount > 0, "No active ProjectInstance usage to complete.");

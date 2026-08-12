@@ -676,7 +676,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
-        public void ProjectInstanceUsagePreventsConfigurationCaching()
+        public async Task CacheIfPossible_WhileProjectInstanceUsageIsHeld_DoesNotCache()
         {
             string projectBody = """
                 <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
@@ -684,7 +684,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 </Project>
                 """.Cleanup();
 
-            using var collection = new ProjectCollection();
+            ProjectCollection collection = _env.CreateProjectCollection().Collection;
             using ProjectFromString projectFromString = new(
                 projectBody,
                 new Dictionary<string, string>(),
@@ -700,32 +700,39 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 IsCacheable = true,
             };
 
-            try
+            _env.WithTransientTestState(new TransientConfigurationCacheFile(configuration));
+
+            configuration.CacheIfPossible();
+            configuration.IsCached.ShouldBeTrue();
+
+            using (configuration.AcquireProjectInstanceUsage())
             {
-                configuration.CacheIfPossible();
-                configuration.IsCached.ShouldBeTrue();
+                configuration.IsCached.ShouldBeFalse();
 
                 using (configuration.AcquireProjectInstanceUsage())
                 {
-                    configuration.IsCached.ShouldBeFalse();
-
-                    using (configuration.AcquireProjectInstanceUsage())
-                    {
-                        Task.Run(configuration.CacheIfPossible).GetAwaiter().GetResult();
-                        configuration.IsCached.ShouldBeFalse();
-                    }
-
-                    configuration.CacheIfPossible();
+                    await Task.Run(configuration.CacheIfPossible);
                     configuration.IsCached.ShouldBeFalse();
                 }
 
                 configuration.CacheIfPossible();
-                configuration.IsCached.ShouldBeTrue();
+                configuration.IsCached.ShouldBeFalse();
             }
-            finally
+
+            configuration.CacheIfPossible();
+            configuration.IsCached.ShouldBeTrue();
+        }
+
+        private sealed class TransientConfigurationCacheFile : TransientTestState
+        {
+            private readonly BuildRequestConfiguration _configuration;
+
+            internal TransientConfigurationCacheFile(BuildRequestConfiguration configuration)
             {
-                configuration.ClearCacheFile();
+                _configuration = configuration;
             }
+
+            public override void Revert() => _configuration.ClearCacheFile();
         }
 
         [Fact]
