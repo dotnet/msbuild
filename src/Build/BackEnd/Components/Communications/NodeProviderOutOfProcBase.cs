@@ -1028,7 +1028,7 @@ namespace Microsoft.Build.BackEnd
             /// <summary>
             /// Tracks the state of the packet sent to terminate the node.
             /// </summary>
-            private volatile ExitPacketState _exitPacketState;
+            private ExitPacketState _exitPacketState;
 
             /// <summary>
             /// The minimum packet version supported by both the host and the node.

@@ -184,7 +184,9 @@ namespace Microsoft.Build.CommandLine
         private bool _updateEnvironmentAndLog;
 
         /// <summary>
-        /// setting this to true means we're running a long-lived sidecar node.
+        /// Whether this task host was launched with node reuse, so it does not exit at the end of a
+        /// build. Whether it then stays connected to its launcher as a sidecar, or disconnects into
+        /// the machine-wide pool, is what <see cref="NodeBuildComplete.PrepareForReuse"/> says.
         /// </summary>
         private bool _nodeReuse;
 

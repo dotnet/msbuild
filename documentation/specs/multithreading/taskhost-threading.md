@@ -155,7 +155,7 @@ Each task gets a `TaskExecutionContext` stored in `_taskContexts` (ConcurrentDic
 
 The TaskHost process can execute multiple tasks, both sequentially and concurrently. After finishing one task, it returns to an idle state and waits for either a new task or a shutdown signal. When a task calls `BuildProjectFile`, the TaskHost blocks (incrementing `_blockedTaskCount`, then decrementing `_activeTaskCount`), allowing the scheduler to dispatch a nested task to the same process while the outer task is blocked waiting for the callback response.
 
-A **sidecar** is a TaskHost that matches its launcher's runtime and architecture and is used for routing of non-multithreadable tasks in `-mt` execution and under `MSBUILDFORCEALLTASKSOUTOFPROC`. A sidecar shares the lifetime of its launcher.
+A **sidecar** is a TaskHost that matches its launcher's runtime and architecture and is used for routing of non-multithreadable tasks in `-mt` execution and under `MSBUILDFORCEALLTASKSOUTOFPROC`. Under Change Wave 18.11 a sidecar shares the lifetime of its launcher; opting out of the wave makes it disconnect and idle after each build, as every TaskHost did before.
 
 ### Event Loop Cycle
 
@@ -210,7 +210,7 @@ Before [#14584](https://github.com/dotnet/msbuild/pull/14584), sidecar TaskHosts
 
 TaskHosts required for a different runtime or architecture are unchanged. Reusable ones continue to disconnect so another compatible process can claim them. CLR2 TaskHosts are never node-reused, and TaskHosts created by an explicit `TaskFactory="TaskHostFactory"` request are deliberately launched without node reuse; both exit at the end of the build. Keeping reusable cross-runtime or cross-architecture TaskHosts connected would cost one idle process per worker node for a task that only ever runs in one of them at a time: with ten projects of which one needs an `Architecture="x86"` TaskHost, under `-m:4` and reordered so the scheduler places it on a different worker each build, staying connected left three idle TaskHosts (~153 MB) where disconnecting leaves one (~51 MB).
 
-A sidecar runs the same runtime and architecture as its launcher, so sharing across processes is less helpful. Its launcher identifies it with `NodeBuildComplete.PrepareForReuse`; nothing new goes on the wire.
+A sidecar runs the same runtime and architecture as its launcher, so sharing across processes is less helpful. Its launcher identifies it with `NodeBuildComplete.PrepareForReuse`; nothing new goes on the wire, and an older launcher never sets that flag for a TaskHost it launched with node reuse, so no protocol version change is needed in either direction.
 
 A sidecar is therefore never shared across launcher processes. Reuse within one launcher's lifetime -- including consecutive command-line invocations handled by the same MSBuild server or any long-lived `BuildManager` -- is unchanged, which is where it pays off.
 
