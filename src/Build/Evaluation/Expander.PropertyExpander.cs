@@ -37,15 +37,37 @@ internal partial class Expander<P, I>
     /// Expands property expressions, like $(Configuration) and $(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation).
     /// </summary>
     /// <remarks>
-    /// This is a private nested class, exposed only through the Expander class.
+    /// This is a private nested type, exposed only through the Expander class.
     /// That allows it to hide its private methods even from Expander.
     /// </remarks>
-    private static class PropertyExpander
+    private readonly ref struct PropertyExpander
     {
         private const string RegistryPrefix = "Registry:";
         private const string SolutionsVsVersionProperty = "Solutions.VSVersion";
         private const string SolutionsVsVersionExpression = "$(" + SolutionsVsVersionProperty + ")";
         private const string VstsDbDirectoryProperty = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory";
+
+        private readonly IPropertyProvider<P> _properties;
+        private readonly ExpanderOptions _options;
+        private readonly IElementLocation _elementLocation;
+        private readonly PropertiesUseTracker _propertiesUseTracker;
+        private readonly IFileSystem _fileSystem;
+        private readonly bool _isTruncationEnabled;
+
+        private PropertyExpander(
+            IPropertyProvider<P> properties,
+            ExpanderOptions options,
+            IElementLocation elementLocation,
+            PropertiesUseTracker propertiesUseTracker,
+            IFileSystem fileSystem)
+        {
+            _properties = properties;
+            _options = options;
+            _elementLocation = elementLocation;
+            _propertiesUseTracker = propertiesUseTracker;
+            _fileSystem = fileSystem;
+            _isTruncationEnabled = IsTruncationEnabled(options);
+        }
 
         /// <summary>
         /// This method takes a string which may contain any number of
@@ -122,6 +144,12 @@ internal partial class Expander<P, I>
                 return expression;
             }
 
+            PropertyExpander expander = new(properties, options, elementLocation, propertiesUseTracker, fileSystem);
+            return expander.ExpandPropertiesLeaveTypedAndEscaped(expression, markerIndex);
+        }
+
+        private object ExpandPropertiesLeaveTypedAndEscaped(string expression, int markerIndex)
+        {
             // We will build our set of results as object components
             // so that we can either maintain the object's type in the event
             // that we have a single component, or convert to a string
@@ -177,7 +205,7 @@ internal partial class Expander<P, I>
                 }
                 else if (!isPotentialPropertyFunction && !isPotentialRegistryFunction)
                 {
-                    propertyValue = LookupProperty(properties, expression, startIndex, endIndex, elementLocation, propertiesUseTracker);
+                    propertyValue = LookupProperty(expression, startIndex, endIndex);
                 }
                 else
                 {
@@ -186,17 +214,12 @@ internal partial class Expander<P, I>
                         startIndex,
                         endIndex,
                         isPotentialRegistryFunction,
-                        isPotentialPropertyFunction,
-                        properties,
-                        options,
-                        elementLocation,
-                        propertiesUseTracker,
-                        fileSystem);
+                        isPotentialPropertyFunction);
                 }
 
                 if (propertyValue != null)
                 {
-                    if (IsTruncationEnabled(options))
+                    if (_isTruncationEnabled)
                     {
                         string value = propertyValue.ToString();
                         if (value.Length > CharacterLimitPerExpansion)
@@ -290,17 +313,12 @@ internal partial class Expander<P, I>
             return nestLevel == 0 ? index - 1 : -1;
         }
 
-        private static object ExpandProperty(
+        private object ExpandProperty(
             string expression,
             int startIndex,
             int endIndex,
             bool tryExtractRegistryFunction,
-            bool tryExtractPropertyFunction,
-            IPropertyProvider<P> properties,
-            ExpanderOptions options,
-            IElementLocation elementLocation,
-            PropertiesUseTracker propertiesUseTracker,
-            IFileSystem fileSystem)
+            bool tryExtractPropertyFunction)
         {
             // startIndex and endIndex inclusively delimit the property body.
             int length = endIndex - startIndex + 1;
@@ -331,8 +349,7 @@ internal partial class Expander<P, I>
                 // This is a registry reference, like $(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)
                 // Note: ExpandRegistryValue returns an empty string if not on Windows.
                 return ExpandRegistryValue(
-                    expression.Substring(startIndex, length),
-                    elementLocation);
+                    expression.Substring(startIndex, length));
             }
 
             if (tryExtractPropertyFunction)
@@ -340,16 +357,11 @@ internal partial class Expander<P, I>
                 // This is likely to be a function expression
                 return ExpandPropertyBody(
                     expression.Substring(startIndex, length),
-                    propertyValue: null,
-                    properties,
-                    options,
-                    elementLocation,
-                    propertiesUseTracker,
-                    fileSystem);
+                    propertyValue: null);
             }
 
             // This is a regular property
-            return LookupProperty(properties, expression, startIndex, endIndex, elementLocation, propertiesUseTracker);
+            return LookupProperty(expression, startIndex, endIndex);
         }
 
         /// <summary>
@@ -364,6 +376,12 @@ internal partial class Expander<P, I>
             PropertiesUseTracker propertiesUseTracker,
             IFileSystem fileSystem)
         {
+            PropertyExpander expander = new(properties, options, elementLocation, propertiesUseTracker, fileSystem);
+            return expander.ExpandPropertyBody(propertyBody, propertyValue);
+        }
+
+        private object ExpandPropertyBody(string propertyBody, object propertyValue)
+        {
             Function function = null;
             string propertyName = propertyBody;
 
@@ -371,7 +389,7 @@ internal partial class Expander<P, I>
             // Spaces are not valid property name chars, but $( Foo ) is allowed, and should always expand to BLANK.
             // Do a very fast check for leading and trailing whitespace, and trim them from the property body if we have any.
             // But we will do a property name lookup on the propertyName that we held onto.
-            if (Char.IsWhiteSpace(propertyBody[0]) || Char.IsWhiteSpace(propertyBody[propertyBody.Length - 1]))
+            if (char.IsWhiteSpace(propertyBody[0]) || char.IsWhiteSpace(propertyBody[^1]))
             {
                 propertyBody = propertyBody.Trim();
             }
@@ -390,11 +408,11 @@ internal partial class Expander<P, I>
                     // This is a function
                     function = Function.ExtractPropertyFunction(
                         propertyBody,
-                        elementLocation,
+                        _elementLocation,
                         propertyValue,
-                        propertiesUseTracker,
-                        fileSystem,
-                        propertiesUseTracker.LoggingContext);
+                        _propertiesUseTracker,
+                        _fileSystem,
+                        _propertiesUseTracker.LoggingContext);
 
                     // We may not have been able to parse out a function
                     if (function != null)
@@ -407,7 +425,7 @@ internal partial class Expander<P, I>
                     {
                         // In the event that we have been handed an unrecognized property body, throw
                         // an invalid function property exception.
-                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", propertyBody, String.Empty);
+                        ProjectErrorUtilities.ThrowInvalidProject(_elementLocation, "InvalidFunctionPropertyExpression", propertyBody, String.Empty);
                         return null;
                     }
                 }
@@ -418,29 +436,22 @@ internal partial class Expander<P, I>
 
                     if (indexerStart < 0 || indexerEnd < 0)
                     {
-                        ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", propertyBody, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedSquareBrackets"));
+                        ProjectErrorUtilities.ThrowInvalidProject(_elementLocation, "InvalidFunctionPropertyExpression", propertyBody, AssemblyResources.GetString("InvalidFunctionPropertyExpressionDetailMismatchedSquareBrackets"));
                     }
                     else
                     {
-                        propertyValue = LookupProperty(properties, propertyBody, 0, indexerStart - 1, elementLocation, propertiesUseTracker);
+                        propertyValue = LookupProperty(propertyBody, 0, indexerStart - 1);
                         propertyBody = propertyBody.Substring(indexerStart);
 
                         // recurse so that the function representing the indexer can be executed on the property value
-                        return ExpandPropertyBody(
-                            propertyBody,
-                            propertyValue,
-                            properties,
-                            options,
-                            elementLocation,
-                            propertiesUseTracker,
-                            fileSystem);
+                        return ExpandPropertyBody(propertyBody, propertyValue);
                     }
                 }
                 else
                 {
                     // In the event that we have been handed an unrecognized property body, throw
                     // an invalid function property exception.
-                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidFunctionPropertyExpression", propertyBody, String.Empty);
+                    ProjectErrorUtilities.ThrowInvalidProject(_elementLocation, "InvalidFunctionPropertyExpression", propertyBody, string.Empty);
                     return null;
                 }
             }
@@ -448,9 +459,9 @@ internal partial class Expander<P, I>
             // Find the property value in our property collection.  This
             // will automatically return "" (empty string) if the property
             // doesn't exist in the collection, and we're not executing a static function
-            if (!String.IsNullOrEmpty(propertyName))
+            if (!string.IsNullOrEmpty(propertyName))
             {
-                propertyValue = LookupProperty(properties, propertyName, elementLocation, propertiesUseTracker);
+                propertyValue = LookupProperty(propertyName);
             }
 
             if (function != null)
@@ -460,9 +471,9 @@ internal partial class Expander<P, I>
                     // Because of the rich expansion capabilities of MSBuild, we need to keep things
                     // as strings, since property expansion & string embedding can happen anywhere
                     // propertyValue can be null here, when we're invoking a static function
-                    propertyValue = function.Execute(propertyValue, properties, options, elementLocation);
+                    propertyValue = function.Execute(propertyValue, _properties, _options, _elementLocation);
                 }
-                catch (Exception) when (options.HasFlag(ExpanderOptions.LeavePropertiesUnexpandedOnError))
+                catch (Exception) when (_options.HasFlag(ExpanderOptions.LeavePropertiesUnexpandedOnError))
                 {
                     propertyValue = propertyBody;
                 }
@@ -550,24 +561,24 @@ internal partial class Expander<P, I>
         /// <summary>
         /// Look up a simple property reference by the name of the property, e.g. "Foo" when expanding $(Foo).
         /// </summary>
-        private static object LookupProperty(IPropertyProvider<P> properties, string propertyName, IElementLocation elementLocation, PropertiesUseTracker propertiesUseTracker)
+        private object LookupProperty(string propertyName)
         {
-            return LookupProperty(properties, propertyName, 0, propertyName.Length - 1, elementLocation, propertiesUseTracker);
+            return LookupProperty(propertyName, 0, propertyName.Length - 1);
         }
 
         /// <summary>
         /// Look up a simple property reference by the name of the property, e.g. "Foo" when expanding $(Foo).
         /// </summary>
-        private static object LookupProperty(IPropertyProvider<P> properties, string propertyName, int startIndex, int endIndex, IElementLocation elementLocation, PropertiesUseTracker propertiesUseTracker)
+        private object LookupProperty(string propertyName, int startIndex, int endIndex)
         {
-            P property = properties.GetProperty(propertyName, startIndex, endIndex);
+            P property = _properties.GetProperty(propertyName, startIndex, endIndex);
 
             object propertyValue;
 
             bool isArtificial = property == null && ((endIndex - startIndex) >= 7) &&
                                MSBuildNameIgnoreCaseComparer.Default.Equals("MSBuild", propertyName, startIndex, 7);
 
-            propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, elementLocation, property == null, isArtificial);
+            _propertiesUseTracker.TrackRead(propertyName, startIndex, endIndex, _elementLocation, property == null, isArtificial);
 
             if (isArtificial)
             {
@@ -575,11 +586,11 @@ internal partial class Expander<P, I>
                 // whose values vary according to the file they are in.
                 if (startIndex != 0 || endIndex != propertyName.Length)
                 {
-                    propertyValue = ExpandMSBuildThisFileProperty(propertyName.Substring(startIndex, endIndex - startIndex + 1), elementLocation);
+                    propertyValue = ExpandMSBuildThisFileProperty(propertyName.Substring(startIndex, endIndex - startIndex + 1));
                 }
                 else
                 {
-                    propertyValue = ExpandMSBuildThisFileProperty(propertyName, elementLocation);
+                    propertyValue = ExpandMSBuildThisFileProperty(propertyName);
                 }
             }
             else if (property == null)
@@ -590,10 +601,10 @@ internal partial class Expander<P, I>
             {
                 if (property is ProjectPropertyInstance.EnvironmentDerivedProjectPropertyInstance environmentDerivedProperty)
                 {
-                    environmentDerivedProperty.loggingContext = propertiesUseTracker.LoggingContext;
+                    environmentDerivedProperty.loggingContext = _propertiesUseTracker.LoggingContext;
                 }
 
-                propertyValue = property.GetEvaluatedValueEscaped(elementLocation);
+                propertyValue = property.GetEvaluatedValueEscaped(_elementLocation);
             }
 
             return propertyValue;
@@ -606,14 +617,14 @@ internal partial class Expander<P, I>
         /// never been saved) then returns empty string.
         /// If the property name is not one of those properties, returns empty string.
         /// </summary>
-        private static object ExpandMSBuildThisFileProperty(string propertyName, IElementLocation elementLocation)
+        private object ExpandMSBuildThisFileProperty(string propertyName)
         {
             if (!ReservedPropertyNames.IsReservedProperty(propertyName))
             {
                 return String.Empty;
             }
 
-            if (elementLocation.File.Length == 0)
+            if (_elementLocation.File.Length == 0)
             {
                 return String.Empty;
             }
@@ -624,27 +635,27 @@ internal partial class Expander<P, I>
             // all different lengths, this sequence is efficient.
             if (String.Equals(propertyName, ReservedPropertyNames.thisFile, StringComparison.OrdinalIgnoreCase))
             {
-                value = Path.GetFileName(elementLocation.File);
+                value = Path.GetFileName(_elementLocation.File);
             }
             else if (String.Equals(propertyName, ReservedPropertyNames.thisFileName, StringComparison.OrdinalIgnoreCase))
             {
-                value = Path.GetFileNameWithoutExtension(elementLocation.File);
+                value = Path.GetFileNameWithoutExtension(_elementLocation.File);
             }
             else if (String.Equals(propertyName, ReservedPropertyNames.thisFileFullPath, StringComparison.OrdinalIgnoreCase))
             {
-                value = FileUtilities.NormalizePath(elementLocation.File);
+                value = FileUtilities.NormalizePath(_elementLocation.File);
             }
             else if (String.Equals(propertyName, ReservedPropertyNames.thisFileExtension, StringComparison.OrdinalIgnoreCase))
             {
-                value = Path.GetExtension(elementLocation.File);
+                value = Path.GetExtension(_elementLocation.File);
             }
             else if (String.Equals(propertyName, ReservedPropertyNames.thisFileDirectory, StringComparison.OrdinalIgnoreCase))
             {
-                value = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(elementLocation.File));
+                value = FileUtilities.EnsureTrailingSlash(Path.GetDirectoryName(_elementLocation.File));
             }
             else if (String.Equals(propertyName, ReservedPropertyNames.thisFileDirectoryNoRoot, StringComparison.OrdinalIgnoreCase))
             {
-                string directory = Path.GetDirectoryName(elementLocation.File);
+                string directory = Path.GetDirectoryName(_elementLocation.File);
                 int rootLength = Path.GetPathRoot(directory).Length;
                 value = FileUtilities.EnsureTrailingNoLeadingSlash(directory, rootLength);
             }
@@ -660,7 +671,7 @@ internal partial class Expander<P, I>
         /// "TaskLocation" is the name of the value.  The name of the value and the preceding "@" may be omitted if
         /// the default value is desired.
         /// </summary>
-        private static string ExpandRegistryValue(string registryExpression, IElementLocation elementLocation)
+        private string ExpandRegistryValue(string registryExpression)
         {
 #if RUNTIME_TYPE_NETCORE
             // .NET Core MSBuild used to always return empty, so match that behavior
@@ -672,14 +683,14 @@ internal partial class Expander<P, I>
 #endif
 
             // Remove "Registry:" prefix
-            string registryLocation = registryExpression.Substring(9);
+            string registryLocation = registryExpression.Substring(RegistryPrefix.Length);
 
             // Split off the value name -- the part after the "@" sign. If there's no "@" sign, then it's the default value name
             // we want.
             int firstAtSignOffset = registryLocation.IndexOf('@');
             int lastAtSignOffset = registryLocation.LastIndexOf('@');
 
-            ProjectErrorUtilities.VerifyThrowInvalidProject(firstAtSignOffset == lastAtSignOffset, elementLocation, "InvalidRegistryPropertyExpression", "$(" + registryExpression + ")", String.Empty);
+            ProjectErrorUtilities.VerifyThrowInvalidProject(firstAtSignOffset == lastAtSignOffset, _elementLocation, "InvalidRegistryPropertyExpression", "$(" + registryExpression + ")", String.Empty);
 
             string valueName = lastAtSignOffset == -1 || lastAtSignOffset == registryLocation.Length - 1
                 ? null : registryLocation.Substring(lastAtSignOffset + 1);
@@ -738,7 +749,7 @@ internal partial class Expander<P, I>
                 }
                 catch (Exception ex) when (!ExceptionHandling.NotExpectedRegistryException(ex))
                 {
-                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "InvalidRegistryPropertyExpression", $"$({registryExpression})", ex.Message);
+                    ProjectErrorUtilities.ThrowInvalidProject(_elementLocation, "InvalidRegistryPropertyExpression", $"$({registryExpression})", ex.Message);
                 }
             }
 
