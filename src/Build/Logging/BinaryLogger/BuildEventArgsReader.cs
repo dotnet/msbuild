@@ -34,6 +34,12 @@ namespace Microsoft.Build.Logging
         private bool _skipUnknownEventParts;
 
         /// <summary>
+        /// Common fields already read by <see cref="Read(BinaryLogEventFilter)"/> in order to evaluate the
+        /// event filter, handed over to the type specific deserialization instead of being read twice.
+        /// </summary>
+        private BuildEventArgsFields? _prefetchedFields;
+
+        /// <summary>
         /// A list of string records we've encountered so far. If it's a small string, it will be the string directly.
         /// If it's a large string, it will be a pointer into a temporary page file where the string content will be
         /// written out to. This is necessary so we don't keep all the strings in memory when reading large binlogs.
@@ -209,7 +215,22 @@ namespace Microsoft.Build.Logging
         /// The next <see cref="BuildEventArgs"/>.
         /// If there are no more records, returns <see langword="null"/>.
         /// </returns>
-        public BuildEventArgs? Read()
+        public BuildEventArgs? Read() => Read(eventFilter: null);
+
+        /// <summary>
+        /// Reads the next log record from the <see cref="BinaryReader"/>, skipping the records rejected
+        /// by <paramref name="eventFilter"/>.
+        /// </summary>
+        /// <param name="eventFilter">
+        /// An optional filter deciding which events are deserialized and returned. For length-framed
+        /// binlogs rejected events skip their type-specific payload without deserializing it.
+        /// </param>
+        /// <returns>
+        /// The next accepted <see cref="BuildEventArgs"/>.
+        /// If there are no more records, returns <see langword="null"/>.
+        /// </returns>
+        /// <exception cref="BinaryLogEventFilterException">The filter callback threw an exception.</exception>
+        public BuildEventArgs? Read(BinaryLogEventFilter? eventFilter)
         {
             CheckErrorsSubscribed();
             BuildEventArgs? result = null;
@@ -230,9 +251,70 @@ namespace Microsoft.Build.Logging
                 }
 
                 bool hasError = false;
+                bool filteredOut = false;
                 try
                 {
-                    result = ReadBuildEventArgs(recordKind);
+                    // Events that cannot be judged from the common fields alone (legacy binlogs that are
+                    // not length-framed, and TargetSkipped whose original context lives in the
+                    // type-specific payload) have to be deserialized before the filter can run.
+                    BinaryLogEventFilter? filterBeforeDeserialization = null;
+                    BinaryLogEventFilter? filterAfterDeserialization = null;
+                    if (eventFilter is not null)
+                    {
+                        if (_fileFormatVersion < BinaryLogger.ForwardCompatibilityMinimalVersion ||
+                            recordKind == BinaryLogRecordKind.TargetSkipped)
+                        {
+                            filterAfterDeserialization = eventFilter;
+                        }
+                        else
+                        {
+                            filterBeforeDeserialization = eventFilter;
+                        }
+                    }
+
+                    if (filterBeforeDeserialization is not null)
+                    {
+                        BuildEventArgsFields commonFields = ReadBuildEventArgsFields();
+                        var metadata = new BinaryLogEventMetadata(recordKind, commonFields.BuildEventContext);
+
+                        if (ApplyEventFilter(filterBeforeDeserialization, metadata))
+                        {
+                            // The type specific deserialization starts by reading the very same common
+                            // fields - hand over the ones we've just read instead of rereading them.
+                            _prefetchedFields = commonFields;
+                        }
+                        else
+                        {
+                            SkipBytes(_readStream.BytesCountAllowedToReadRemaining);
+                            filteredOut = true;
+                        }
+                    }
+
+                    if (!filteredOut)
+                    {
+                        try
+                        {
+                            result = ReadBuildEventArgs(recordKind);
+                        }
+                        finally
+                        {
+                            _prefetchedFields = null;
+                        }
+
+                        if (result is not null && filterAfterDeserialization is not null)
+                        {
+                            var metadata = new BinaryLogEventMetadata(
+                                recordKind,
+                                result.BuildEventContext,
+                                (result as TargetSkippedEventArgs)?.OriginalBuildEventContext);
+
+                            if (!ApplyEventFilter(filterAfterDeserialization, metadata))
+                            {
+                                result = null;
+                                filteredOut = true;
+                            }
+                        }
+                    }
                 }
                 catch (Exception e) when (
                     // We throw this on mismatches in metadata (name-value list, strings index).
@@ -254,7 +336,7 @@ namespace Microsoft.Build.Logging
                     HandleError(ErrorFactory, _skipUnknownEvents, ReaderErrorType.UnknownFormatOfEventData, recordKind, e);
                 }
 
-                if (result == null && !hasError)
+                if (result == null && !hasError && !filteredOut)
                 {
                     int localSerializedEventLength = serializedEventLength;
                     BinaryLogRecordKind localRecordKind = recordKind;
@@ -293,6 +375,20 @@ namespace Microsoft.Build.Logging
                 {
                     throw new InvalidDataException(msgFactory(), innerException);
                 }
+            }
+        }
+
+        private static bool ApplyEventFilter(BinaryLogEventFilter eventFilter, BinaryLogEventMetadata metadata)
+        {
+            try
+            {
+                return eventFilter(metadata);
+            }
+            catch (Exception ex)
+            {
+                // Wrap so that callers can tell a failing filter callback apart from a problem with
+                // the log being read - the latter can be recoverable, the former never is.
+                throw new BinaryLogEventFilterException(ex);
             }
         }
 
@@ -1377,6 +1473,12 @@ namespace Microsoft.Build.Logging
 
         private BuildEventArgsFields ReadBuildEventArgsFields(bool readImportance = false)
         {
+            if (_prefetchedFields is { } prefetched)
+            {
+                _prefetchedFields = null;
+                return prefetched;
+            }
+
             BuildEventArgsFieldFlags flags = (BuildEventArgsFieldFlags)ReadInt32();
             var result = new BuildEventArgsFields();
             result.Flags = flags;
@@ -1472,6 +1574,9 @@ namespace Microsoft.Build.Logging
                 result.Arguments = arguments;
             }
 
+            // Note: for _fileFormatVersion >= 13 the importance is driven by the flags, not by
+            // readImportance - which is what makes prefetching the common fields (see _prefetchedFields)
+            // safe: it is only ever done for length-framed logs, which are always version 18 or higher.
             if ((_fileFormatVersion < 13 && readImportance) || (_fileFormatVersion >= 13 && (flags & BuildEventArgsFieldFlags.Importance) != 0))
             {
                 result.Importance = (MessageImportance)ReadInt32();

@@ -89,6 +89,17 @@ namespace Microsoft.Build.Logging
         /// </summary>
         public bool AllowForwardCompatibility { private get; init; }
 
+        /// <summary>
+        /// Gets or sets a filter deciding which build events are deserialized and dispatched.
+        /// </summary>
+        /// <remarks>
+        /// For length-framed binlogs, rejected events skip their type-specific payload without being
+        /// deserialized. Auxiliary records are always read so retained events can resolve their string
+        /// and name/value-list references. The filter is responsible for retaining a structurally
+        /// consistent event set. It is only applied when replaying structured events.
+        /// </remarks>
+        public BinaryLogEventFilter? EventFilter { get; init; }
+
         /// <inheritdoc cref="IBuildEventArgsReaderNotifications.RecoverableReadError"/>
         public event Action<BinaryLogReaderErrorEventArgs>? RecoverableReadError;
 
@@ -242,8 +253,12 @@ namespace Microsoft.Build.Logging
                 : null;
             bool supportsForwardCompatibility = reader.FileFormatVersion >= BinaryLogger.ForwardCompatibilityMinimalVersion;
 
+            // Raw record passthrough would bypass the filter altogether, so a set filter forces
+            // structured reading - the records have to be deserialized to be filtered and rewritten.
+            bool structuredReadingOnly = HasStructuredEventsSubscribers || !supportsForwardCompatibility || EventFilter is not null;
+
             // Allow any possible deferred subscriptions to be registered
-            if (HasStructuredEventsSubscribers || !supportsForwardCompatibility)
+            if (structuredReadingOnly)
             {
                 _onStructuredReadingOnly?.Invoke();
             }
@@ -256,7 +271,7 @@ namespace Microsoft.Build.Logging
             reader.ArchiveFileEncountered += _archiveFileEncountered;
             reader.StringReadDone += _stringReadDone;
 
-            if (HasStructuredEventsSubscribers || !supportsForwardCompatibility)
+            if (structuredReadingOnly)
             {
                 if (this._rawLogRecordReceived != null)
                 {
@@ -272,7 +287,7 @@ namespace Microsoft.Build.Logging
                 reader.SkipUnknownEventParts = skipUnknown;
                 reader.RecoverableReadError += RecoverableReadError;
 
-                while (!cancellationToken.IsCancellationRequested && reader.Read() is { } instance)
+                while (!cancellationToken.IsCancellationRequested && reader.Read(EventFilter) is { } instance)
                 {
                     Dispatch(instance);
                 }
