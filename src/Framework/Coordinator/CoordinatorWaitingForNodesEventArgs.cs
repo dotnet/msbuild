@@ -6,14 +6,7 @@ using System.IO;
 
 namespace Microsoft.Build.Framework.Coordinator;
 
-/// <summary>
-/// Raised by the build coordinator while it is waiting for the coordination server to grant it worker nodes.
-/// </summary>
-/// <remarks>
-/// Recognize this diagnostic by its concrete type (<c>is CoordinatorWaitingForNodesEventArgs</c>), not by
-/// comparing message text.
-/// </remarks>
-public sealed class CoordinatorWaitingForNodesEventArgs : BuildMessageEventArgs, IExtendedBuildEventArgs
+internal sealed class CoordinatorWaitingForNodesEventArgs : BuildMessageEventArgs, IExtendedBuildEventArgs
 {
     /// <inheritdoc />
     string IExtendedBuildEventArgs.ExtendedType
@@ -22,26 +15,11 @@ public sealed class CoordinatorWaitingForNodesEventArgs : BuildMessageEventArgs,
         set { /* Type is fixed for this event. */ }
     }
 
-    /// <inheritdoc />
     public Dictionary<string, string?>? ExtendedMetadata { get; set; }
 
-    /// <inheritdoc />
     public string? ExtendedData { get; set; }
 
-    /// <summary>
-    /// Default constructor. Used for deserialization.
-    /// </summary>
-    internal CoordinatorWaitingForNodesEventArgs()
-    {
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="CoordinatorWaitingForNodesEventArgs"/> class.
-    /// </summary>
-    /// <param name="message">Text message.</param>
-    /// <param name="senderName">Name of event sender.</param>
-    /// <param name="importance">Importance of the message.</param>
-    public CoordinatorWaitingForNodesEventArgs(string? message, string? senderName, MessageImportance importance)
+    internal CoordinatorWaitingForNodesEventArgs(string? message, string? senderName, MessageImportance importance)
         : base(message, helpKeyword: null, senderName, importance)
     {
     }
@@ -50,11 +28,5 @@ public sealed class CoordinatorWaitingForNodesEventArgs : BuildMessageEventArgs,
     {
         base.WriteToStream(writer);
         writer.WriteExtendedBuildEventData(this);
-    }
-
-    internal override void CreateFromStream(BinaryReader reader, int version)
-    {
-        base.CreateFromStream(reader, version);
-        reader.ReadExtendedBuildEventData(this);
     }
 }

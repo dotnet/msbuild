@@ -572,10 +572,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public Task PrintGlobalMessage_NullContext_HighImportance_Rendered()
+        public void PrintGlobalMessage_NullContext_HighImportance_Rendered()
         {
-            // Global diagnostics forwarded from an out-of-process helper (e.g. NuGet's restore console host)
-            // have a null BuildEventContext. High-importance null-context messages should always be rendered.
+            _terminallogger.Verbosity = LoggerVerbosity.Detailed;
+
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 var args = MakeMessageEventArgs("Global diagnostic message.", MessageImportance.High);
@@ -583,7 +583,22 @@ namespace Microsoft.Build.UnitTests
                 _centralNodeEventSource.InvokeMessageRaised(args);
             });
 
-            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+            _outputWriter.ToString().ShouldContain("Global diagnostic message.");
+        }
+
+        [Fact]
+        public void PrintGlobalMessage_NullContext_HighImportance_SkippedAtNormalVerbosity()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Normal;
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                var args = MakeMessageEventArgs("Global diagnostic message.", MessageImportance.High);
+                args.BuildEventContext = null;
+                _centralNodeEventSource.InvokeMessageRaised(args);
+            });
+
+            _outputWriter.ToString().ShouldNotContain("Global diagnostic message.");
         }
 
         [Fact]
@@ -604,8 +619,8 @@ namespace Microsoft.Build.UnitTests
         public Task PrintCoordinatorMessage_InvalidContext_Rendered()
         {
             // The build coordinator logs its "waiting for nodes" diagnostic with BuildEventContext.Invalid
-            // because it runs outside the context of any particular project. It is identified as a coordinator
-            // diagnostic by its concrete type (CoordinatorWaitingForNodesEventArgs), and should still be rendered.
+            // because it runs outside the context of any particular project. Its stable ExtendedType identifies
+            // it before and after node transport.
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 _centralNodeEventSource.InvokeMessageRaised(new Microsoft.Build.Framework.Coordinator.CoordinatorWaitingForNodesEventArgs(
@@ -618,6 +633,25 @@ namespace Microsoft.Build.UnitTests
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public void PrintCoordinatorMessage_InvalidContext_SkippedAtQuietVerbosity()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Quiet;
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(new Microsoft.Build.Framework.Coordinator.CoordinatorWaitingForNodesEventArgs(
+                    AssemblyResources.GetString("CoordinatorWaitingForNodes"),
+                    senderName: null,
+                    MessageImportance.High)
+                {
+                    BuildEventContext = BuildEventContext.Invalid,
+                });
+            });
+
+            _outputWriter.ToString().ShouldNotContain(AssemblyResources.GetString("CoordinatorWaitingForNodes"));
         }
 
         [Fact]
@@ -644,10 +678,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public Task PrintMessage_InvalidContext_HighImportance_UnrecognizedMessage_Skipped()
         {
-            // A High-importance message with BuildEventContext.Invalid that is not a recognized coordinator
-            // diagnostic (neither a CoordinatorWaitingForNodesEventArgs nor an ExtendedBuildMessageEventArgs with
-            // the coordinator's ExtendedType) should not be echoed directly to the terminal (it is not a
-            // recognized global message).
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("Some unrelated Invalid-context message.", MessageImportance.High, buildEventContext: BuildEventContext.Invalid));
@@ -657,12 +687,21 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void PrintMessage_InvalidContext_HighImportance_RenderedAtDetailedVerbosity()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Detailed;
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("Some unrelated Invalid-context message.", MessageImportance.High, buildEventContext: BuildEventContext.Invalid));
+            });
+
+            _outputWriter.ToString().ShouldContain("Some unrelated Invalid-context message.");
+        }
+
+        [Fact]
         public Task PrintMessage_InvalidContext_HighImportance_MatchingTextButNotExtendedType_Skipped()
         {
-            // A plain BuildMessageEventArgs (neither a CoordinatorWaitingForNodesEventArgs nor an
-            // ExtendedBuildMessageEventArgs) that happens to carry the exact same text as the coordinator's
-            // "waiting for nodes" diagnostic must NOT be recognized as a coordinator diagnostic. Recognition is
-            // based on the event's type/ExtendedType, not on comparing rendered message text.
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs(AssemblyResources.GetString("CoordinatorWaitingForNodes"), MessageImportance.High, buildEventContext: BuildEventContext.Invalid));

@@ -1,5 +1,0 @@
-﻿]9;4;3;\Global diagnostic message.
-[?25l[1F
-[?25h
-Build [32;1msucceeded[m in 5.0s
-]9;4;0;\

@@ -11,10 +11,6 @@ using Xunit;
 
 namespace Microsoft.Build.UnitTests
 {
-    /// <summary>
-    /// Tests for ForwardingTerminalLogger message handling.
-    /// Regression test for issue #14345: coordinator messages with null context should be forwarded.
-    /// </summary>
     public class ForwardingTerminalLogger_Tests
     {
         private sealed class MockEventRedirector : IEventRedirector
@@ -52,7 +48,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        public void MessageRaised_WithNullContextAndHighImportance_IsForwarded()
+        public void MessageRaised_WithNullContextAndHighImportance_IsNotForwardedAtNormalVerbosity()
         {
             // Arrange
             var mockEventRedirector = new MockEventRedirector();
@@ -65,41 +61,64 @@ namespace Microsoft.Build.UnitTests
             var mockEventSource = new MockEventSource();
             forwardingLogger.Initialize(mockEventSource);
 
-            // Act: Raise a message with null context and HIGH importance (coordinator message)
-            var coordinatorMessage = new BuildMessageEventArgs(
-                "Waiting for coordinator to grant build resources...",
+            var globalMessage = new BuildMessageEventArgs(
+                "Global diagnostic message.",
                 null,
-                "Coordinator",
+                "Test",
                 MessageImportance.High,
                 DateTime.Now)
             {
                 BuildEventContext = null
             };
 
-            mockEventSource.RaiseMessage(coordinatorMessage);
+            mockEventSource.RaiseMessage(globalMessage);
 
-            // Assert: Message should be forwarded
-            mockEventRedirector.ForwardedEvents.ShouldHaveSingleItem();
-            mockEventRedirector.ForwardedEvents[0].ShouldBe(coordinatorMessage);
+            mockEventRedirector.ForwardedEvents.ShouldBeEmpty();
         }
 
         [Fact]
-        public void MessageRaised_WithNullContextAndNormalImportance_IsNotForwarded()
+        public void MessageRaised_WithNullContextAndHighImportance_IsForwardedAtDetailedVerbosity()
         {
-            // Arrange
             var mockEventRedirector = new MockEventRedirector();
             var forwardingLogger = new ForwardingTerminalLogger
             {
                 BuildEventRedirector = mockEventRedirector,
-                Verbosity = LoggerVerbosity.Normal
+                Verbosity = LoggerVerbosity.Detailed
             };
 
             var mockEventSource = new MockEventSource();
             forwardingLogger.Initialize(mockEventSource);
 
-            // Act: Raise a message with null context and NORMAL importance
-            var normalMessage = new BuildMessageEventArgs(
-                "This is a normal importance global message",
+            var globalMessage = new BuildMessageEventArgs(
+                "Global diagnostic message.",
+                null,
+                "Test",
+                MessageImportance.High,
+                DateTime.Now)
+            {
+                BuildEventContext = null
+            };
+
+            mockEventSource.RaiseMessage(globalMessage);
+
+            mockEventRedirector.ForwardedEvents.ShouldHaveSingleItem().ShouldBe(globalMessage);
+        }
+
+        [Fact]
+        public void MessageRaised_WithNullContextAndNormalImportance_IsNotForwardedAtDetailedVerbosity()
+        {
+            var mockEventRedirector = new MockEventRedirector();
+            var forwardingLogger = new ForwardingTerminalLogger
+            {
+                BuildEventRedirector = mockEventRedirector,
+                Verbosity = LoggerVerbosity.Detailed
+            };
+
+            var mockEventSource = new MockEventSource();
+            forwardingLogger.Initialize(mockEventSource);
+
+            var globalMessage = new BuildMessageEventArgs(
+                "Global diagnostic message.",
                 null,
                 "Test",
                 MessageImportance.Normal,
@@ -108,9 +127,8 @@ namespace Microsoft.Build.UnitTests
                 BuildEventContext = null
             };
 
-            mockEventSource.RaiseMessage(normalMessage);
+            mockEventSource.RaiseMessage(globalMessage);
 
-            // Assert: Message should NOT be forwarded (null context, not high importance)
             mockEventRedirector.ForwardedEvents.ShouldBeEmpty();
         }
 
@@ -177,50 +195,6 @@ namespace Microsoft.Build.UnitTests
 
             // Assert: Even HIGH importance messages should be filtered in quiet mode
             mockEventRedirector.ForwardedEvents.ShouldBeEmpty();
-        }
-
-        [Fact]
-        public void MessageRaised_MultipleCoordinatorMessages_AreAllForwarded()
-        {
-            // Arrange
-            var mockEventRedirector = new MockEventRedirector();
-            var forwardingLogger = new ForwardingTerminalLogger
-            {
-                BuildEventRedirector = mockEventRedirector,
-                Verbosity = LoggerVerbosity.Normal
-            };
-
-            var mockEventSource = new MockEventSource();
-            forwardingLogger.Initialize(mockEventSource);
-
-            // Act: Raise multiple coordinator messages
-            var waitMessage = new BuildMessageEventArgs(
-                "Waiting for coordinator to grant build resources...",
-                null,
-                "Coordinator",
-                MessageImportance.High,
-                DateTime.Now)
-            {
-                BuildEventContext = null
-            };
-
-            var grantMessage = new BuildMessageEventArgs(
-                "Coordinator granted 4 node(s) for this build.",
-                null,
-                "Coordinator",
-                MessageImportance.High,
-                DateTime.Now)
-            {
-                BuildEventContext = null
-            };
-
-            mockEventSource.RaiseMessage(waitMessage);
-            mockEventSource.RaiseMessage(grantMessage);
-
-            // Assert: Both messages should be forwarded
-            mockEventRedirector.ForwardedEvents.Count.ShouldBe(2);
-            mockEventRedirector.ForwardedEvents[0].ShouldBe(waitMessage);
-            mockEventRedirector.ForwardedEvents[1].ShouldBe(grantMessage);
         }
     }
 }

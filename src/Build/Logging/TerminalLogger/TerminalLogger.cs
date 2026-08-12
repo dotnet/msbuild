@@ -1198,14 +1198,19 @@ public sealed partial class TerminalLogger : INodeLogger
         var buildEventContext = e.BuildEventContext;
         string? message = e.Message;
 
-        // Null context (e.g. an out-of-process helper) is trusted alone; BuildEventContext.Invalid additionally
-        // requires a recognized coordinator diagnostic, since Invalid can also be (mis-)used by in-process code
-        // that IS associated with the current build.
-        if (buildEventContext is null || buildEventContext == BuildEventContext.Invalid)
+        if (buildEventContext is null)
         {
-            bool isRecognizedGlobalMessage = buildEventContext is null || IsCoordinatorMessage(e);
+            if (Verbosity > LoggerVerbosity.Normal && message is not null && e.Importance == MessageImportance.High)
+            {
+                RenderImmediateMessage(message);
+            }
 
-            if (Verbosity > LoggerVerbosity.Quiet && message is not null && e.Importance == MessageImportance.High && isRecognizedGlobalMessage)
+            return;
+        }
+
+        if (buildEventContext == BuildEventContext.Invalid && IsCoordinatorMessage(e))
+        {
+            if (Verbosity > LoggerVerbosity.Quiet && message is not null && e.Importance == MessageImportance.High)
             {
                 RenderImmediateMessage(message);
             }
@@ -1435,7 +1440,6 @@ public sealed partial class TerminalLogger : INodeLogger
     /// <param name="e">Raised message event.</param>
     /// <returns>true if the event is a recognized coordinator diagnostic.</returns>
     private static bool IsCoordinatorMessage(BuildMessageEventArgs e) =>
-        e is Microsoft.Build.Framework.Coordinator.CoordinatorWaitingForNodesEventArgs ||
         e is IExtendedBuildEventArgs { ExtendedType: Microsoft.Build.Framework.Coordinator.Constants.WaitingForNodesEventType };
 
 

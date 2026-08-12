@@ -120,9 +120,9 @@ public sealed partial class ForwardingTerminalLogger : IForwardingLogger
             return;
         }
 
-        // Never forward messages without context unless they have high importance
-        // (high importance messages from coordinator/global context are still forwarded)
-        if (e.BuildEventContext is null && e.Importance != MessageImportance.High)
+        // Preserve context-less diagnostics from out-of-process helpers at detailed verbosity.
+        if (e.BuildEventContext is null &&
+            (e.Importance != MessageImportance.High || Verbosity <= LoggerVerbosity.Normal))
         {
             return;
         }
