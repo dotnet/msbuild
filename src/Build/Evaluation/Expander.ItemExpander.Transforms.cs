@@ -10,6 +10,7 @@ using System.IO;
 #endif
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -527,78 +528,147 @@ internal partial class Expander<P, I>
                 string quotedExpressionFunction = arguments[0];
                 OneOrMultipleMetadataMatches matches = GetQuotedExpressionMatches(quotedExpressionFunction, elementLocation);
 
-                // This is just a sanity check in case a code change causes something in the call stack to take this reference.
+                switch (matches.Type)
+                {
+                    case MetadataMatchType.None:
+                        ExpandLiteralTransform(input, output, quotedExpressionFunction, includeNullEntries);
+                        return;
+
+                    case MetadataMatchType.ExactSingle:
+                        ExpandExactMetadataTransform(input, output, matches.Single, includeNullEntries, elementLocation);
+                        return;
+
+                    case MetadataMatchType.InexactSingle:
+                        ExpandSingleMetadataTransform(input, output, quotedExpressionFunction, matches.Single, includeNullEntries, elementLocation);
+                        return;
+
+                    case MetadataMatchType.Multiple:
+                        ExpandMultipleMetadataTransform(input, output, quotedExpressionFunction, matches.Multiple, includeNullEntries, elementLocation);
+                        return;
+                }
+            }
+
+            private static void ExpandLiteralTransform(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string literal,
+                bool includeNullEntries)
+            {
+                foreach (TransformEntry item in input)
+                {
+                    AddTransformResult(output, item.Value is null ? null : literal, item.Item, includeNullEntries);
+                }
+            }
+
+            private static void ExpandExactMetadataTransform(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                MetadataMatch match,
+                bool includeNullEntries,
+                IElementLocation elementLocation)
+            {
+                foreach (TransformEntry item in input)
+                {
+                    string include = null;
+                    if (item.Value is not null)
+                    {
+                        include = GetMetadataValueFromMatch(match, item.Value, item.Item, elementLocation);
+                    }
+
+                    AddTransformResult(output, include, item.Item, includeNullEntries);
+                }
+            }
+
+            private static void ExpandSingleMetadataTransform(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string quotedExpressionFunction,
+                MetadataMatch match,
+                bool includeNullEntries,
+                IElementLocation elementLocation)
+            {
+                SpanBasedStringBuilder includeBuilder = s_includeBuilder ?? new SpanBasedStringBuilder();
+                s_includeBuilder = null;
+
+                int prefixLength = match.Index;
+                int suffixIndex = match.Index + match.Length;
+                int suffixLength = quotedExpressionFunction.Length - suffixIndex;
+
+                foreach (TransformEntry item in input)
+                {
+                    string include = null;
+                    if (item.Value is not null)
+                    {
+                        if (prefixLength > 0)
+                        {
+                            includeBuilder.Append(quotedExpressionFunction, 0, prefixLength);
+                        }
+
+                        includeBuilder.Append(GetMetadataValueFromMatch(match, item.Value, item.Item, elementLocation));
+
+                        if (suffixLength > 0)
+                        {
+                            includeBuilder.Append(quotedExpressionFunction, suffixIndex, suffixLength);
+                        }
+
+                        include = includeBuilder.ToString();
+                        includeBuilder.Clear();
+                    }
+
+                    AddTransformResult(output, include, item.Item, includeNullEntries);
+                }
+
+                s_includeBuilder = includeBuilder;
+            }
+
+            private static void ExpandMultipleMetadataTransform(
+                List<TransformEntry> input,
+                List<TransformEntry> output,
+                string quotedExpressionFunction,
+                List<MetadataMatch> matches,
+                bool includeNullEntries,
+                IElementLocation elementLocation)
+            {
                 SpanBasedStringBuilder includeBuilder = s_includeBuilder ?? new SpanBasedStringBuilder();
                 s_includeBuilder = null;
 
                 foreach (TransformEntry item in input)
                 {
                     string include = null;
-
-                    // If we've been handed a null entry by an upstream transform
-                    // then we don't want to try to tranform it with an itemspec modification.
-                    // Simply allow the null to be passed along (if, we are including nulls as specified by includeNullEntries
-                    if (item.Value != null)
+                    if (item.Value is not null)
                     {
-                        int curIndex = 0;
-
-                        switch (matches.Type)
+                        int currentIndex = 0;
+                        foreach (MetadataMatch match in matches)
                         {
-                            case MetadataMatchType.None:
-                                // If we didn't match anything, just use the original string.
-                                include = quotedExpressionFunction;
-                                break;
-
-                            // If we matched on a full string, we don't have to concatenate anything.
-                            case MetadataMatchType.ExactSingle:
-                                include = GetMetadataValueFromMatch(matches.Single, item.Value, item.Item, elementLocation, ref curIndex);
-                                break;
-
-                            // If we matched on a partial string, just replace the single group.
-                            case MetadataMatchType.InexactSingle:
-                                includeBuilder.Append(quotedExpressionFunction, 0, matches.Single.Index);
-                                includeBuilder.Append(
-                                    GetMetadataValueFromMatch(matches.Single, item.Value, item.Item, elementLocation, ref curIndex));
-                                includeBuilder.Append(quotedExpressionFunction, curIndex, quotedExpressionFunction.Length - curIndex);
-                                include = includeBuilder.ToString();
-                                includeBuilder.Clear();
-                                break;
-
-                            // Otherwise, iteratively replace each match group.
-                            case MetadataMatchType.Multiple:
-                                foreach (MetadataMatch match in matches.Multiple)
-                                {
-                                    includeBuilder.Append(quotedExpressionFunction, curIndex, match.Index - curIndex);
-                                    includeBuilder.Append(
-                                        GetMetadataValueFromMatch(match, item.Value, item.Item, elementLocation, ref curIndex));
-                                }
-
-                                includeBuilder.Append(quotedExpressionFunction, curIndex, quotedExpressionFunction.Length - curIndex);
-                                include = includeBuilder.ToString();
-                                includeBuilder.Clear();
-                                break;
-                            default:
-                                break;
+                            includeBuilder.Append(quotedExpressionFunction, currentIndex, match.Index - currentIndex);
+                            includeBuilder.Append(GetMetadataValueFromMatch(match, item.Value, item.Item, elementLocation));
+                            currentIndex = match.Index + match.Length;
                         }
+
+                        includeBuilder.Append(quotedExpressionFunction, currentIndex, quotedExpressionFunction.Length - currentIndex);
+                        include = includeBuilder.ToString();
+                        includeBuilder.Clear();
                     }
 
-                    // Include may be empty. Historically we have created items with empty include
-                    // and ultimately set them on tasks, but we don't do that anymore as it's broken.
-                    // Instead we optionally add a null, so that input and output lists are the same length; this allows
-                    // the caller to possibly do correlation.
-
-                    // We pass in the existing item so we can copy over its metadata
-                    if (!string.IsNullOrEmpty(include))
-                    {
-                        output.Add(new TransformEntry(include, item.Item));
-                    }
-                    else if (includeNullEntries)
-                    {
-                        output.Add(new TransformEntry(value: null, item.Item));
-                    }
+                    AddTransformResult(output, include, item.Item, includeNullEntries);
                 }
 
                 s_includeBuilder = includeBuilder;
+            }
+
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            private static void AddTransformResult(List<TransformEntry> output, string include, I item, bool includeNullEntries)
+            {
+                // Empty transforms are optionally retained as null entries so callers can correlate
+                // transform results with their source items.
+                if (!include.IsNullOrEmpty())
+                {
+                    output.Add(new TransformEntry(include, item));
+                }
+                else if (includeNullEntries)
+                {
+                    output.Add(new TransformEntry(value: null, item));
+                }
             }
 
             /// <summary>
@@ -608,75 +678,70 @@ internal partial class Expander<P, I>
             /// </summary>
             private static OneOrMultipleMetadataMatches GetQuotedExpressionMatches(string quotedExpressionFunction, IElementLocation elementLocation)
             {
-                // Start with fast paths to avoid any allocations.
-                if (TryGetCachedMetadataMatch(quotedExpressionFunction, out string cachedName)
-                    || s_itemSpecModifiers.TryGetValue(quotedExpressionFunction, out cachedName))
+                // Exact metadata references can use cached names or the built-in modifier lookup.
+                if (quotedExpressionFunction is ['%', '(', .., ')'] &&
+                    (TryGetCachedMetadataMatch(quotedExpressionFunction, out string cachedName)
+                     || s_itemSpecModifiers.TryGetValue(quotedExpressionFunction, out cachedName)))
                 {
                     return new OneOrMultipleMetadataMatches(cachedName);
                 }
 
-                // Scan for %(Name) references manually.
-                int firstIndex = quotedExpressionFunction.IndexOf("%(", StringComparison.Ordinal);
-                if (firstIndex == -1)
+                int metadataMarkerIndex = ExpressionShredder.IndexOfMetadataMarker(quotedExpressionFunction);
+                if (metadataMarkerIndex == -1)
                 {
                     return OneOrMultipleMetadataMatches.None;
                 }
 
                 List<MetadataMatch> multipleMatches = null;
-                MetadataMatch? firstMatch = null;
+                MetadataMatch firstMatch = default;
+                bool hasFirstMatch = false;
 
-                int pos = firstIndex;
-                while (pos < quotedExpressionFunction.Length - 1)
+                do
                 {
-                    if (quotedExpressionFunction[pos] != '%' || quotedExpressionFunction[pos + 1] != '(')
-                    {
-                        pos++;
-                        continue;
-                    }
-
-                    int refEnd = pos + 2;
+                    int refEnd = metadataMarkerIndex + 2;
 
                     if (!ExpressionShredder.TryParseMetadataExpression(quotedExpressionFunction, ref refEnd, quotedExpressionFunction.Length, out string itemType, out string name))
                     {
-                        pos += 2;
+                        metadataMarkerIndex = ExpressionShredder.IndexOfMetadataMarker(quotedExpressionFunction, metadataMarkerIndex + 2);
                         continue;
                     }
 
                     // Qualified metadata is not allowed in transforms.
                     if (itemType != null)
                     {
-                        string matchValue = quotedExpressionFunction.Substring(pos, refEnd - pos);
+                        string matchValue = quotedExpressionFunction.Substring(metadataMarkerIndex, refEnd - metadataMarkerIndex);
                         ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "QualifiedMetadataInTransformNotAllowed", matchValue, name);
                     }
 
-                    int matchLength = refEnd - pos;
+                    int matchLength = refEnd - metadataMarkerIndex;
 
-                    if (firstMatch == null)
+                    if (!hasFirstMatch)
                     {
-                        firstMatch = new MetadataMatch(pos, matchLength, name);
+                        firstMatch = new MetadataMatch(metadataMarkerIndex, matchLength, name);
+                        hasFirstMatch = true;
                     }
                     else
                     {
-                        multipleMatches ??= [firstMatch.Value];
-                        multipleMatches.Add(new MetadataMatch(pos, matchLength, name));
+                        multipleMatches ??= [firstMatch];
+                        multipleMatches.Add(new MetadataMatch(metadataMarkerIndex, matchLength, name));
                     }
 
-                    pos = refEnd;
+                    metadataMarkerIndex = ExpressionShredder.IndexOfMetadataMarker(quotedExpressionFunction, refEnd);
                 }
+                while (metadataMarkerIndex >= 0);
 
                 if (multipleMatches != null)
                 {
                     return new OneOrMultipleMetadataMatches(multipleMatches);
                 }
 
-                if (firstMatch != null)
+                if (hasFirstMatch)
                 {
-                    MetadataMatch match = firstMatch.Value;
-                    OneOrMultipleMetadataMatches singleMatch = new(quotedExpressionFunction, match.Index, match.Length, match.Name);
+                    OneOrMultipleMetadataMatches singleMatch = new(quotedExpressionFunction, firstMatch.Index, firstMatch.Length, firstMatch.Name);
 
-                    if (singleMatch.Type == MetadataMatchType.ExactSingle && !ItemSpecModifiers.IsItemSpecModifier(match.Name))
+                    if (singleMatch.Type == MetadataMatchType.ExactSingle && !ItemSpecModifiers.IsItemSpecModifier(firstMatch.Name))
                     {
-                        s_lastParsedQuotedExpression = match.Name;
+                        s_lastParsedQuotedExpression = firstMatch.Name;
                     }
 
                     return singleMatch;
@@ -705,8 +770,7 @@ internal partial class Expander<P, I>
 
                 // Quickly cancel out of definite misses.
                 int length = stringToCheck.Length;
-                if (length == cachedMatch.Length + QuotedExpressionSurroundCharCount
-                    && stringToCheck[0] == '%' && stringToCheck[1] == '(' && stringToCheck[length - 1] == ')')
+                if (length == cachedMatch.Length + QuotedExpressionSurroundCharCount)
                 {
                     // If the inner slice is a hit, don't allocate a string.
                     ReadOnlySpan<char> span = stringToCheck.AsSpan(2, length - QuotedExpressionSurroundCharCount);
@@ -963,8 +1027,7 @@ internal partial class Expander<P, I>
                 MetadataMatch match,
                 string itemSpec,
                 IItem sourceOfMetadata,
-                IElementLocation elementLocation,
-                ref int curIndex)
+                IElementLocation elementLocation)
             {
                 string value = null;
                 try
@@ -991,7 +1054,6 @@ internal partial class Expander<P, I>
                     ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "CannotEvaluateItemMetadata", match.Name, ex.Message);
                 }
 
-                curIndex = match.Index + match.Length;
                 return value;
             }
         }
