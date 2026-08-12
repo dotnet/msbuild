@@ -250,6 +250,27 @@ namespace Microsoft.Build.UnitTests.Evaluation
             pii.EvaluatedInclude.ShouldBe("false");
         }
 
+        [Theory]
+        [InlineData("@(unsetItem)", false)]
+        [InlineData("@(unsetItem->Distinct())", true)]
+        public void EmptyItemVectorReportsWhetherExpressionIsTransform(string expression, bool expected)
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateItemFunctionExpander();
+            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(project, "i");
+
+            IList<ProjectItemInstance> items = expander.ExpandSingleItemVectorExpressionIntoItems(
+                expression,
+                itemFactory,
+                ExpanderOptions.ExpandItems,
+                includeNullItems: false,
+                out bool isTransformExpression,
+                MockElementLocation.Instance);
+
+            items.ShouldBeEmpty();
+            isTransformExpression.ShouldBe(expected);
+        }
+
         /// <summary>
         /// Expand an item vector function Metadata()->DirectoryName()->Distinct()
         /// </summary>
