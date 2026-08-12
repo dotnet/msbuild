@@ -1032,7 +1032,7 @@ internal partial class Expander<P, I>
                 string value = null;
                 try
                 {
-                    if (ItemSpecModifiers.IsDerivableItemSpecModifier(match.Name))
+                    if (match.IsDerivableItemSpecModifier)
                     {
                         // If we're not a ProjectItem or ProjectItemInstance, then ProjectDirectory will be null.
                         // In that case,
@@ -1042,7 +1042,7 @@ internal partial class Expander<P, I>
                         string directoryToUse = sourceOfMetadata.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
                         string definingProjectEscaped = sourceOfMetadata.GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath);
 
-                        value = ItemSpecModifiers.GetItemSpecModifier(itemSpec, match.Name, directoryToUse, definingProjectEscaped);
+                        value = ItemSpecModifiers.GetItemSpecModifier(itemSpec, match.ModifierKind, directoryToUse, definingProjectEscaped);
                     }
                     else
                     {
