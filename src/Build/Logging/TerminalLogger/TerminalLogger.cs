@@ -208,6 +208,7 @@ public sealed partial class TerminalLogger : INodeLogger
     internal TerminalLogger()
     {
         Terminal = new Terminal();
+        SubscribeToTrackedEvents();
     }
 
     internal TerminalLogger(LoggerVerbosity verbosity) : this()
@@ -222,6 +223,7 @@ public sealed partial class TerminalLogger : INodeLogger
     {
         Terminal = terminal;
         _manualRefresh = true;
+        SubscribeToTrackedEvents();
     }
 
     /// <summary>
@@ -419,18 +421,6 @@ public sealed partial class TerminalLogger : INodeLogger
         // Detect if we're in replay mode
         _isReplayMode = eventSource is IBinaryLogReplaySource;
 
-        _eventTracker.BuildStartedTracked += OnBuildStarted;
-        _eventTracker.BuildFinishedTracked += OnBuildFinished;
-        _eventTracker.ProjectStartedTracked += OnProjectStarted;
-        _eventTracker.ProjectFinishedTracked += ProjectFinished;
-        _eventTracker.TargetStartedTracked += TargetStarted;
-        _eventTracker.TargetFinishedTracked += TargetFinished;
-        _eventTracker.TaskStartedTracked += TaskStarted;
-        _eventTracker.TaskFinishedTracked += TaskFinished;
-        _eventTracker.StatusEventTracked += StatusEventRaised;
-        _eventTracker.MessageTracked += MessageRaised;
-        _eventTracker.WarningTracked += WarningRaised;
-        _eventTracker.ErrorTracked += ErrorRaised;
         _eventTracker.Attach(eventSource);
 
         if (eventSource is IEventSource4 eventSource4)
@@ -520,18 +510,6 @@ public sealed partial class TerminalLogger : INodeLogger
     public void Shutdown()
     {
         _eventTracker.Detach();
-        _eventTracker.BuildStartedTracked -= OnBuildStarted;
-        _eventTracker.BuildFinishedTracked -= OnBuildFinished;
-        _eventTracker.ProjectStartedTracked -= OnProjectStarted;
-        _eventTracker.ProjectFinishedTracked -= ProjectFinished;
-        _eventTracker.TargetStartedTracked -= TargetStarted;
-        _eventTracker.TargetFinishedTracked -= TargetFinished;
-        _eventTracker.TaskStartedTracked -= TaskStarted;
-        _eventTracker.TaskFinishedTracked -= TaskFinished;
-        _eventTracker.StatusEventTracked -= StatusEventRaised;
-        _eventTracker.MessageTracked -= MessageRaised;
-        _eventTracker.WarningTracked -= WarningRaised;
-        _eventTracker.ErrorTracked -= ErrorRaised;
 
         NativeMethodsShared.RestoreConsoleMode(_originalConsoleMode);
 
@@ -560,6 +538,10 @@ public sealed partial class TerminalLogger : INodeLogger
     /// </summary>
     private void OnBuildStarted(BuildEventTracker.BuildStartedSnapshot _)
     {
+        _restoreContext = null;
+        _restoreFinished = false;
+        _restoreFailed = false;
+
         if (!_manualRefresh && _showNodesDisplay)
         {
             _refresher = new Thread(ThreadProc);
@@ -705,8 +687,6 @@ public sealed partial class TerminalLogger : INodeLogger
                 break;
             case ProjectEvaluationStartedEventArgs _evalStart:
                 break;
-            case ProjectEvaluationFinishedEventArgs:
-                break;
             case LoggersRegisteredEventArgs loggerEvent:
                 _registeredLoggers.AddRange(loggerEvent.Loggers);
                 break;
@@ -731,7 +711,7 @@ public sealed partial class TerminalLogger : INodeLogger
         TerminalProjectInfo projectInfo = new(project, _createStopwatch?.Invoke() ?? new SystemStopwatch());
         _projects[project.ContextKey] = projectInfo;
 
-        if (project.TargetNames == "Restore" && !_restoreFinished)
+        if (string.Equals(project.TargetNames, "Restore", StringComparison.OrdinalIgnoreCase) && !_restoreFinished)
         {
             _restoreContext = project.ContextKey;
 
@@ -781,7 +761,7 @@ public sealed partial class TerminalLogger : INodeLogger
             return;
         }
 
-        project.Update(trackedProject.Value);
+        project.Finish(e.Succeeded);
 
         // In quiet mode, only show projects with errors or warnings.
         // In higher verbosity modes, show projects based on other criteria.
@@ -1010,7 +990,7 @@ public sealed partial class TerminalLogger : INodeLogger
         {
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
 
-            project.Update(projectSnapshot);
+            project.ResumeTiming();
             string targetName = projectSnapshot.CurrentTarget ?? e.TargetName;
             if (targetName == CachePluginStartTarget)
             {
@@ -1106,16 +1086,16 @@ public sealed partial class TerminalLogger : INodeLogger
     private void TaskStarted(BuildEventTracker.ProjectSnapshot? trackedProject, TaskStartedEventArgs e)
     {
         if (_restoreContext is null
-            && e.TaskName == MSBuildTaskName
+            && string.Equals(e.TaskName, MSBuildTaskName, StringComparison.OrdinalIgnoreCase)
             && trackedProject is not null)
         {
+            // This will yield the node, so preemptively mark it idle.
+            UpdateNodeStatus(trackedProject.Value.NodeId, null);
+
             if (TryGetProject(trackedProject, out TerminalProjectInfo? project))
             {
-                project.Update(trackedProject.Value);
+                project.YieldTiming();
             }
-
-            // This will yield the node, so preemptively mark it idle
-            UpdateNodeStatus(trackedProject.Value.NodeId, null);
         }
     }
 
@@ -1125,15 +1105,16 @@ public sealed partial class TerminalLogger : INodeLogger
     private void TaskFinished(BuildEventTracker.ProjectSnapshot? trackedProject, TaskFinishedEventArgs e)
     {
         if (_restoreContext is null
-            && e.TaskName == MSBuildTaskName
-            && TryGetProject(trackedProject, out TerminalProjectInfo? project))
+            && string.Equals(e.TaskName, MSBuildTaskName, StringComparison.OrdinalIgnoreCase)
+            && trackedProject is BuildEventTracker.ProjectSnapshot projectSnapshot
+            && TryGetProject(projectSnapshot, out TerminalProjectInfo? project))
         {
-            project.Update(trackedProject!.Value);
+            project.ResumeTiming();
             string projectFile = Path.GetFileNameWithoutExtension(e.ProjectFile);
-            string targetName = trackedProject.Value.CurrentTarget ?? "";
+            string targetName = projectSnapshot.CurrentTarget ?? "";
 
             TerminalNodeStatus nodeStatus = new(projectFile, project.TargetFramework, project.RuntimeIdentifier, GetDisplayTargetName(targetName), project.Stopwatch);
-            UpdateNodeStatus(trackedProject.Value.NodeId, nodeStatus);
+            UpdateNodeStatus(projectSnapshot.NodeId, nodeStatus);
         }
     }
 
@@ -1403,6 +1384,22 @@ public sealed partial class TerminalLogger : INodeLogger
     }
 
     #endregion
+
+    private void SubscribeToTrackedEvents()
+    {
+        _eventTracker.BuildStartedTracked += OnBuildStarted;
+        _eventTracker.BuildFinishedTracked += OnBuildFinished;
+        _eventTracker.ProjectStartedTracked += OnProjectStarted;
+        _eventTracker.ProjectFinishedTracked += ProjectFinished;
+        _eventTracker.TargetStartedTracked += TargetStarted;
+        _eventTracker.TargetFinishedTracked += TargetFinished;
+        _eventTracker.TaskStartedTracked += TaskStarted;
+        _eventTracker.TaskFinishedTracked += TaskFinished;
+        _eventTracker.StatusEventTracked += StatusEventRaised;
+        _eventTracker.MessageTracked += MessageRaised;
+        _eventTracker.WarningTracked += WarningRaised;
+        _eventTracker.ErrorTracked += ErrorRaised;
+    }
 
     #region Refresher thread implementation
 

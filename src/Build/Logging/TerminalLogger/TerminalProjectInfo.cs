@@ -13,6 +13,8 @@ namespace Microsoft.Build.Logging;
 internal sealed class TerminalProjectInfo
 {
     private List<TerminalBuildMessage>? _buildMessages;
+    private int _errorCount;
+    private int _warningCount;
 
     /// <summary>
     /// Initializes a new <see cref="TerminalProjectInfo"/> for the tracked project.
@@ -26,11 +28,7 @@ internal sealed class TerminalProjectInfo
         TargetFramework = project.TargetFramework;
         RuntimeIdentifier = project.RuntimeIdentifier;
         Stopwatch = stopwatch;
-
-        if (project.IsTimingActive)
-        {
-            Stopwatch.Start();
-        }
+        Stopwatch.Start();
     }
 
     /// <summary>
@@ -66,12 +64,12 @@ internal sealed class TerminalProjectInfo
     /// <summary>
     /// The number of errors included in the terminal summary.
     /// </summary>
-    public int ErrorCount => GetBuildMessageCount(TerminalMessageSeverity.Error);
+    public int ErrorCount => _errorCount;
 
     /// <summary>
     /// The number of warnings included in the terminal summary.
     /// </summary>
-    public int WarningCount => GetBuildMessageCount(TerminalMessageSeverity.Warning);
+    public int WarningCount => _warningCount;
 
     /// <summary>
     /// True when the project has error or warning build messages; otherwise false.
@@ -110,21 +108,27 @@ internal sealed class TerminalProjectInfo
     {
         _buildMessages ??= [];
         _buildMessages.Add(new TerminalBuildMessage(severity, message));
+
+        switch (severity)
+        {
+            case TerminalMessageSeverity.Error:
+                _errorCount++;
+                break;
+            case TerminalMessageSeverity.Warning:
+                _warningCount++;
+                break;
+        }
     }
 
-    internal void Update(BuildEventTracker.ProjectSnapshot project)
+    internal void Finish(bool succeeded)
     {
-        Succeeded = project.Succeeded == true;
-
-        if (project.IsTimingActive)
-        {
-            Stopwatch.Start();
-        }
-        else
-        {
-            Stopwatch.Stop();
-        }
+        Succeeded = succeeded;
+        Stopwatch.Stop();
     }
+
+    internal void ResumeTiming() => Stopwatch.Start();
+
+    internal void YieldTiming() => Stopwatch.Stop();
 
     /// <summary>
     /// Filters the build messages to only include errors and warnings.
@@ -136,24 +140,5 @@ internal sealed class TerminalProjectInfo
             ? []
             : BuildMessages.Where(message =>
                 message.Severity is TerminalMessageSeverity.Error or TerminalMessageSeverity.Warning);
-    }
-
-    private int GetBuildMessageCount(TerminalMessageSeverity severity)
-    {
-        if (_buildMessages is null)
-        {
-            return 0;
-        }
-
-        int count = 0;
-        foreach (TerminalBuildMessage message in _buildMessages)
-        {
-            if (message.Severity == severity)
-            {
-                count++;
-            }
-        }
-
-        return count;
     }
 }

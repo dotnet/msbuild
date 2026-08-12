@@ -7,11 +7,11 @@ using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Logging;
 
+/// <summary>
+/// Correlates build events with immutable project lifecycle snapshots.
+/// </summary>
 internal sealed class BuildEventTracker
 {
-    private const string MSBuildTaskName = "MSBuild";
-    private const string RestoreTargetName = "Restore";
-
     private readonly record struct EvalProjectInfo(
         string? ProjectFile,
         string? TargetFramework,
@@ -19,8 +19,6 @@ internal sealed class BuildEventTracker
 
     private sealed class TrackedProjectState
     {
-        private readonly StopwatchAbstraction _stopwatch;
-
         internal TrackedProjectState(
             ProjectContextKey contextKey,
             int evaluationId,
@@ -28,8 +26,7 @@ internal sealed class BuildEventTracker
             string? targetNames,
             string? evaluationProjectFile,
             string? targetFramework,
-            string? runtimeIdentifier,
-            StopwatchAbstraction stopwatch)
+            string? runtimeIdentifier)
         {
             ContextKey = contextKey;
             EvaluationId = evaluationId;
@@ -38,9 +35,6 @@ internal sealed class BuildEventTracker
             EvaluationProjectFile = evaluationProjectFile;
             TargetFramework = targetFramework;
             RuntimeIdentifier = runtimeIdentifier;
-            _stopwatch = stopwatch;
-
-            _stopwatch.Start();
         }
 
         internal ProjectContextKey ContextKey { get; }
@@ -69,25 +63,9 @@ internal sealed class BuildEventTracker
 
         internal int WarningCount { get; private set; }
 
-        internal bool IsTimingActive { get; private set; } = true;
-
         internal void StartTarget(string targetName)
         {
             CurrentTarget = targetName;
-            _stopwatch.Start();
-            IsTimingActive = true;
-        }
-
-        internal void Yield()
-        {
-            _stopwatch.Stop();
-            IsTimingActive = false;
-        }
-
-        internal void Resume()
-        {
-            _stopwatch.Start();
-            IsTimingActive = true;
         }
 
         internal void AddWarning()
@@ -103,8 +81,6 @@ internal sealed class BuildEventTracker
         internal void Finish(bool succeeded)
         {
             Succeeded = succeeded;
-            _stopwatch.Stop();
-            IsTimingActive = false;
         }
 
         internal ProjectSnapshot CreateSnapshot() => new(
@@ -118,12 +94,8 @@ internal sealed class BuildEventTracker
             CurrentTarget,
             Succeeded,
             ErrorCount,
-            WarningCount,
-            TimeSpan.FromSeconds(_stopwatch.ElapsedSeconds),
-            IsTimingActive);
+            WarningCount);
     }
-
-    internal Func<StopwatchAbstraction>? StopwatchFactory { get; set; }
 
     internal readonly record struct BuildStartedSnapshot(DateTime Timestamp);
 
@@ -143,9 +115,7 @@ internal sealed class BuildEventTracker
         string? CurrentTarget,
         bool? Succeeded,
         int ErrorCount,
-        int WarningCount,
-        TimeSpan Duration,
-        bool IsTimingActive)
+        int WarningCount)
     {
         internal int ProjectContextId => ContextKey.ProjectContextId;
 
@@ -155,8 +125,6 @@ internal sealed class BuildEventTracker
     }
 
     private IEventSource? _eventSource;
-    private ProjectContextKey? _initialRestoreContext;
-    private bool _initialRestoreFinished;
 
     internal event Action<BuildStartedSnapshot>? BuildStartedTracked;
 
@@ -220,6 +188,7 @@ internal sealed class BuildEventTracker
     {
         ArgumentNullException.ThrowIfNull(eventSource);
 
+        Detach();
         _eventSource = eventSource;
 
         eventSource.BuildStarted += OnBuildStarted;
@@ -260,8 +229,6 @@ internal sealed class BuildEventTracker
     {
         _projects.Clear();
         _projectEvaluations.Clear();
-        _initialRestoreContext = null;
-        _initialRestoreFinished = false;
 
         BuildStartTime = e.Timestamp;
         BuildStartedTracked?.Invoke(new BuildStartedSnapshot(e.Timestamp));
@@ -285,8 +252,6 @@ internal sealed class BuildEventTracker
 
         _projectEvaluations.TryGetValue(new EvalContext(buildEventContext), out EvalProjectInfo evalInfo);
 
-        StopwatchAbstraction stopwatch = StopwatchFactory?.Invoke() ?? new SystemStopwatch();
-
         TrackedProjectState project = new(
             new ProjectContextKey(buildEventContext),
             buildEventContext.EvaluationId,
@@ -294,17 +259,9 @@ internal sealed class BuildEventTracker
             e.TargetNames,
             evalInfo.ProjectFile,
             evalInfo.TargetFramework,
-            evalInfo.RuntimeIdentifier,
-            stopwatch);
+            evalInfo.RuntimeIdentifier);
 
         _projects[project.ContextKey] = project;
-
-        if (!_initialRestoreFinished
-            && _initialRestoreContext is null
-            && project.TargetNames == RestoreTargetName)
-        {
-            _initialRestoreContext = project.ContextKey;
-        }
 
         ProjectStartedTracked?.Invoke(project.CreateSnapshot());
     }
@@ -315,12 +272,6 @@ internal sealed class BuildEventTracker
         if (project is not null)
         {
             project.Finish(e.Succeeded);
-
-            if (project.ContextKey == _initialRestoreContext)
-            {
-                _initialRestoreContext = null;
-                _initialRestoreFinished = true;
-            }
         }
 
         ProjectFinishedTracked?.Invoke(project?.CreateSnapshot(), e);
@@ -341,26 +292,12 @@ internal sealed class BuildEventTracker
     private void OnTaskStarted(object sender, TaskStartedEventArgs e)
     {
         TrackedProjectState? project = CorrelateProject(e);
-        if (project is not null
-            && _initialRestoreContext is null
-            && e.TaskName == MSBuildTaskName)
-        {
-            project.Yield();
-        }
         TaskStartedTracked?.Invoke(project?.CreateSnapshot(), e);
     }
 
     private void OnTaskFinished(object sender, TaskFinishedEventArgs e)
     {
         TrackedProjectState? project = CorrelateProject(e);
-
-        if (project is not null
-            && _initialRestoreContext is null
-            && e.TaskName == MSBuildTaskName)
-        {
-            project.Resume();
-        }
-
         TaskFinishedTracked?.Invoke(project?.CreateSnapshot(), e);
     }
 
