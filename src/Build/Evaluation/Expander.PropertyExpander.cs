@@ -42,6 +42,11 @@ internal partial class Expander<P, I>
     /// </remarks>
     private static class PropertyExpander
     {
+        private const string RegistryPrefix = "Registry:";
+        private const string SolutionsVsVersionProperty = "Solutions.VSVersion";
+        private const string SolutionsVsVersionExpression = "$(" + SolutionsVsVersionProperty + ")";
+        private const string VstsDbDirectoryProperty = @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory";
+
         /// <summary>
         /// This method takes a string which may contain any number of
         /// "$(propertyname)" tags in it.  It replaces all those tags with
@@ -110,13 +115,9 @@ internal partial class Expander<P, I>
 
             Assumed.NotNull(properties, "Cannot expand properties without providing properties");
 
-            // These are also zero-based indices into the expression, but
-            // these tell us where the current property tag begins and ends.
-            int propertyStartIndex, propertyEndIndex;
-
             // If there are no substitutions, then just return the string.
-            propertyStartIndex = ExpressionShredder.IndexOfPropertyMarker(expression);
-            if (propertyStartIndex == -1)
+            int markerIndex = ExpressionShredder.IndexOfPropertyMarker(expression);
+            if (markerIndex == -1)
             {
                 return expression;
             }
@@ -127,126 +128,228 @@ internal partial class Expander<P, I>
             // if concatenation is required.
             using SpanBasedConcatenator results = new();
 
-            // The sourceIndex is the zero-based index into the expression,
+            // The index is the zero-based index into the expression,
             // where we've essentially read up to and copied into the target string.
-            int sourceIndex = 0;
+            int index = 0;
 
-            // Search for "$(" in the expression.  Loop until we don't find it
-            // any more.
-            while (propertyStartIndex != -1)
+            // Search for "$(" in the expression.  Loop until we don't find it any more.
+            while (markerIndex >= 0)
             {
                 // Append the result with the portion of the expression up to
-                // (but not including) the "$(", and advance the sourceIndex pointer.
-                if (propertyStartIndex - sourceIndex > 0)
+                // (but not including) the "$(", and advance the index pointer.
+                if (markerIndex - index > 0)
                 {
-                    results.Add(expression.AsMemory(sourceIndex, propertyStartIndex - sourceIndex));
+                    results.Add(expression.AsMemory(index, markerIndex - index));
                 }
+
+                int startIndex = markerIndex + 2;
 
                 // Following the "$(" we need to locate the matching ')'
                 // Scan for the matching closing bracket, skipping any nested ones
                 // This is a very complete, fast validation of parenthesis matching including for nested
                 // function calls.
-                propertyEndIndex = ScanForClosingParenthesis(expression.AsSpan(), propertyStartIndex + 2, out bool tryExtractPropertyFunction, out bool tryExtractRegistryFunction);
+                int closingParenIndex = FindClosingParenthesis(
+                    expression,
+                    startIndex,
+                    out bool isPotentialPropertyFunction,
+                    out bool isPotentialRegistryFunction);
 
-                if (propertyEndIndex == -1)
+                if (closingParenIndex < 0)
                 {
                     // If we didn't find the closing parenthesis, that means this
-                    // isn't really a well-formed property tag.  Just literally
-                    // copy the remainder of the expression (starting with the "$("
-                    // that we found) into the result, and quit.
-                    results.Add(expression.AsMemory(propertyStartIndex, expression.Length - propertyStartIndex));
-                    sourceIndex = expression.Length;
+                    // isn't really a well-formed property. Copy the remainder of the
+                    // expression (starting with the "$(" that we found) into the result, and return.
+                    results.Add(expression.AsMemory(markerIndex));
+                    index = expression.Length;
+                    return results.GetResult();
+                }
+
+                // Expand the property body between the "$(" marker and its matching closing parenthesis.
+                int endIndex = closingParenIndex - 1;
+                int length = closingParenIndex - startIndex;
+
+                object propertyValue;
+
+                if (length == 0)
+                {
+                    // Compat: $() should return string.Empty
+                    propertyValue = string.Empty;
+                }
+                else if (!isPotentialPropertyFunction && !isPotentialRegistryFunction)
+                {
+                    propertyValue = LookupProperty(properties, expression, startIndex, endIndex, elementLocation, propertiesUseTracker);
                 }
                 else
                 {
-                    // Aha, we found the closing parenthesis.  All the stuff in
-                    // between the "$(" and the ")" constitutes the property body.
-                    // Note: Current propertyStartIndex points to the "$", and
-                    // propertyEndIndex points to the ")".  That's why we have to
-                    // add 2 for the start of the substring, and subtract 2 for
-                    // the length.
-                    string propertyBody;
-
-                    // A property value of null will indicate that we're calling a static function on a type
-                    object propertyValue;
-
-                    // Compat: $() should return String.Empty
-                    if (propertyStartIndex + 2 == propertyEndIndex)
-                    {
-                        propertyValue = String.Empty;
-                    }
-                    else if ((expression.Length - (propertyStartIndex + 2)) > 9 && tryExtractRegistryFunction && s_invariantCompareInfo.IndexOf(expression, "Registry:", propertyStartIndex + 2, 9, CompareOptions.OrdinalIgnoreCase) == propertyStartIndex + 2)
-                    {
-                        propertyBody = expression.Substring(propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
-
-                        // If the property body starts with any of our special objects, then deal with them
-                        // This is a registry reference, like $(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)
-                        propertyValue = ExpandRegistryValue(propertyBody, elementLocation); // This func returns an empty string if not on Windows
-                    }
-
-                    // Compat hack: as a special case, $(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory) should return String.Empty
-                    // In this case, tryExtractRegistryFunction will be false. Note that very few properties are exactly 77 chars, so this check should be fast.
-                    else if ((propertyEndIndex - (propertyStartIndex + 2)) == 77 && s_invariantCompareInfo.IndexOf(expression, @"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory", propertyStartIndex + 2, 77, CompareOptions.OrdinalIgnoreCase) == propertyStartIndex + 2)
-                    {
-                        propertyValue = String.Empty;
-                    }
-
-                    // Compat hack: WebProjects may have an import with a condition like:
-                    //       Condition=" '$(Solutions.VSVersion)' == '8.0'"
-                    // These would have been '' in prior versions of msbuild but would be treated as a possible string function in current versions.
-                    // Be compatible by returning an empty string here.
-                    else if ((propertyEndIndex - (propertyStartIndex + 2)) == 19 && String.Equals(expression, "$(Solutions.VSVersion)", StringComparison.Ordinal))
-                    {
-                        propertyValue = String.Empty;
-                    }
-                    else if (tryExtractPropertyFunction)
-                    {
-                        propertyBody = expression.Substring(propertyStartIndex + 2, propertyEndIndex - propertyStartIndex - 2);
-
-                        // This is likely to be a function expression
-                        propertyValue = ExpandPropertyBody(
-                            propertyBody,
-                            null,
-                            properties,
-                            options,
-                            elementLocation,
-                            propertiesUseTracker,
-                            fileSystem);
-                    }
-                    else // This is a regular property
-                    {
-                        propertyValue = LookupProperty(properties, expression, propertyStartIndex + 2, propertyEndIndex - 1, elementLocation, propertiesUseTracker);
-                    }
-
-                    if (propertyValue != null)
-                    {
-                        if (IsTruncationEnabled(options))
-                        {
-                            var value = propertyValue.ToString();
-                            if (value.Length > CharacterLimitPerExpansion)
-                            {
-                                propertyValue = TruncateString(value);
-                            }
-                        }
-
-                        // Record our result, and advance
-                        // our sourceIndex pointer to the character just after the closing
-                        // parenthesis.
-                        results.Add(propertyValue);
-                    }
-                    sourceIndex = propertyEndIndex + 1;
+                    propertyValue = ExpandProperty(
+                        expression,
+                        startIndex,
+                        endIndex,
+                        isPotentialRegistryFunction,
+                        isPotentialPropertyFunction,
+                        properties,
+                        options,
+                        elementLocation,
+                        propertiesUseTracker,
+                        fileSystem);
                 }
 
-                propertyStartIndex = ExpressionShredder.IndexOfPropertyMarker(expression, sourceIndex);
+                if (propertyValue != null)
+                {
+                    if (IsTruncationEnabled(options))
+                    {
+                        string value = propertyValue.ToString();
+                        if (value.Length > CharacterLimitPerExpansion)
+                        {
+                            propertyValue = TruncateString(value);
+                        }
+                    }
+
+                    results.Add(propertyValue);
+                }
+
+                index = closingParenIndex + 1;
+                markerIndex = ExpressionShredder.IndexOfPropertyMarker(expression, index);
             }
 
-            // If we couldn't find any more property tags in the expression just copy the remainder into the result.
-            if (expression.Length - sourceIndex > 0)
+            // If we couldn't find any more property markers in the expression just copy the remainder into the result.
+            if (expression.Length - index > 0)
             {
-                results.Add(expression.AsMemory(sourceIndex, expression.Length - sourceIndex));
+                results.Add(expression.AsMemory(index));
             }
 
             return results.GetResult();
+        }
+
+        /// <summary>
+        ///  Finds the closing parenthesis that matches the opening parenthesis immediately
+        ///  preceding <paramref name="index"/>.
+        /// </summary>
+        /// <param name="expression">The expression to scan.</param>
+        /// <param name="index">The index at which to begin scanning.</param>
+        /// <param name="isPotentialPropertyFunction">
+        ///  Whether the property body might contain a property function.
+        /// </param>
+        /// <param name="isPotentialRegistryFunction">
+        ///  Whether the property body might contain a registry function.
+        /// </param>
+        /// <returns>
+        ///  The index of the matching closing parenthesis, or <c>-1</c> if it was not found.
+        /// </returns>
+        private static int FindClosingParenthesis(
+            string expression,
+            int index,
+            out bool isPotentialPropertyFunction,
+            out bool isPotentialRegistryFunction)
+        {
+            int nestLevel = 1;
+            int length = expression.Length;
+
+            isPotentialPropertyFunction = false;
+            isPotentialRegistryFunction = false;
+
+            // Scan for our closing ')'
+            while (index < length && nestLevel > 0)
+            {
+                char character = expression[index];
+
+                switch (character)
+                {
+                    case '\'' or '`' or '"':
+                        int quoteIndex = expression.IndexOf(character, index + 1);
+
+                        if (quoteIndex < 0)
+                        {
+                            return -1;
+                        }
+
+                        index = quoteIndex;
+                        break;
+
+                    case '(':
+                        nestLevel++;
+                        break;
+
+                    case ')':
+                        nestLevel--;
+                        break;
+
+                    case '.' or '[' or '$':
+                        isPotentialPropertyFunction = true;
+                        break;
+
+                    case ':':
+                        isPotentialRegistryFunction = true;
+                        break;
+                }
+
+                index++;
+            }
+
+            // We will have parsed past the ')', so step back one character.
+            return nestLevel == 0 ? index - 1 : -1;
+        }
+
+        private static object ExpandProperty(
+            string expression,
+            int startIndex,
+            int endIndex,
+            bool tryExtractRegistryFunction,
+            bool tryExtractPropertyFunction,
+            IPropertyProvider<P> properties,
+            ExpanderOptions options,
+            IElementLocation elementLocation,
+            PropertiesUseTracker propertiesUseTracker,
+            IFileSystem fileSystem)
+        {
+            // startIndex and endIndex inclusively delimit the property body.
+            int length = endIndex - startIndex + 1;
+
+            // Compat hack: as a special case, $(HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\9.0\VSTSDB@VSTSDBDirectory) should return string.Empty
+            // Note that very few properties have this exact length, so this check should be fast.
+            if (length == VstsDbDirectoryProperty.Length &&
+                string.Compare(expression, startIndex, VstsDbDirectoryProperty, 0, VstsDbDirectoryProperty.Length, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                return string.Empty;
+            }
+
+            // Compat hack: WebProjects may have an import with a condition like:
+            //       Condition=" '$(Solutions.VSVersion)' == '8.0'"
+            // These would have been '' in prior versions of msbuild but would be treated as a possible string function in current versions.
+            // Be compatible by returning an empty string here.
+            if (length == SolutionsVsVersionProperty.Length &&
+                string.Equals(expression, SolutionsVsVersionExpression, StringComparison.Ordinal))
+            {
+                return string.Empty;
+            }
+
+            if (tryExtractRegistryFunction &&
+                length >= RegistryPrefix.Length &&
+                string.Compare(expression, startIndex, RegistryPrefix, 0, RegistryPrefix.Length, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                // If the property body starts with any of our special objects, then deal with them
+                // This is a registry reference, like $(Registry:HKEY_LOCAL_MACHINE\Software\Vendor\Tools@TaskLocation)
+                // Note: ExpandRegistryValue returns an empty string if not on Windows.
+                return ExpandRegistryValue(
+                    expression.Substring(startIndex, length),
+                    elementLocation);
+            }
+
+            if (tryExtractPropertyFunction)
+            {
+                // This is likely to be a function expression
+                return ExpandPropertyBody(
+                    expression.Substring(startIndex, length),
+                    propertyValue: null,
+                    properties,
+                    options,
+                    elementLocation,
+                    propertiesUseTracker,
+                    fileSystem);
+            }
+
+            // This is a regular property
+            return LookupProperty(properties, expression, startIndex, endIndex, elementLocation, propertiesUseTracker);
         }
 
         /// <summary>

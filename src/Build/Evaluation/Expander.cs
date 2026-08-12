@@ -481,16 +481,11 @@ internal partial class Expander<P, I>
     /// essentially, pushes and pops on a stack of parentheses to do this.
     /// Takes the expression and the index to start at.
     /// Returns the index of the matching parenthesis, or -1 if it was not found.
-    /// Also returns flags to indicate if a propertyfunction or registry property is likely
-    /// to be found in the expression.
     /// </summary>
-    private static int ScanForClosingParenthesis(ReadOnlySpan<char> expression, int index, out bool potentialPropertyFunction, out bool potentialRegistryFunction)
+    private static int ScanForClosingParenthesis(ReadOnlySpan<char> expression, int index)
     {
         int nestLevel = 1;
         int length = expression.Length;
-
-        potentialPropertyFunction = false;
-        potentialRegistryFunction = false;
 
         // Scan for our closing ')'
         while (index < length && nestLevel > 0)
@@ -498,41 +493,24 @@ internal partial class Expander<P, I>
             char character = expression[index];
             switch (character)
             {
-                case '\'':
-                case '`':
-                case '"':
-                    {
-                        index++;
-                        index = ScanForClosingQuote(character, expression, index);
+                case '\'' or '`' or '"':
+                    index++;
+                    index = ScanForClosingQuote(character, expression, index);
 
-                        if (index < 0)
-                        {
-                            return -1;
-                        }
-                        break;
+                    if (index < 0)
+                    {
+                        return -1;
                     }
+
+                    break;
+
                 case '(':
-                    {
-                        nestLevel++;
-                        break;
-                    }
+                    nestLevel++;
+                    break;
+
                 case ')':
-                    {
-                        nestLevel--;
-                        break;
-                    }
-                case '.':
-                case '[':
-                case '$':
-                    {
-                        potentialPropertyFunction = true;
-                        break;
-                    }
-                case ':':
-                    {
-                        potentialRegistryFunction = true;
-                        break;
-                    }
+                    nestLevel--;
+                    break;
             }
 
             index++;
@@ -632,7 +610,7 @@ internal partial class Expander<P, I>
                 n += 2; // skip over the opening '$('
 
                 // Scan for the matching closing bracket, skipping any nested ones
-                n = ScanForClosingParenthesis(argumentsSpan, n, out _, out _);
+                n = ScanForClosingParenthesis(argumentsSpan, n);
 
                 if (n == -1)
                 {
