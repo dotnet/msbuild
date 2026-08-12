@@ -1048,15 +1048,31 @@ internal partial class Expander<P, I>
                 {
                     if (match.IsDerivableItemSpecModifier)
                     {
-                        // If we're not a ProjectItem or ProjectItemInstance, then ProjectDirectory will be null.
-                        // In that case,
-                        // 1. in multiprocess mode we're safe to get the current directory as we'll be running on TaskItems which
-                        // only exist within a target where we can trust the current directory
-                        // 2. in single process mode we get the project directory set for the thread
-                        string directoryToUse = sourceOfMetadata.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
-                        string definingProjectEscaped = sourceOfMetadata.GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath);
+                        ItemSpecModifierKind modifierKind = match.ModifierKind;
+                        string directoryToUse = null;
+                        string definingProjectEscaped = null;
 
-                        value = ItemSpecModifiers.GetItemSpecModifier(itemSpec, match.ModifierKind, directoryToUse, definingProjectEscaped);
+                        // Only path-based and defining-project modifiers need project context. ProjectItem and
+                        // ProjectItemInstance provide ProjectDirectory; otherwise, single-process evaluation sets
+                        // the thread working directory, and multiprocess TaskItems can trust the process directory.
+                        switch (modifierKind)
+                        {
+                            case ItemSpecModifierKind.FullPath:
+                            case ItemSpecModifierKind.RootDir:
+                            case ItemSpecModifierKind.Directory:
+                                directoryToUse = sourceOfMetadata.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
+                                break;
+
+                            case ItemSpecModifierKind.DefiningProjectFullPath:
+                            case ItemSpecModifierKind.DefiningProjectDirectory:
+                            case ItemSpecModifierKind.DefiningProjectName:
+                            case ItemSpecModifierKind.DefiningProjectExtension:
+                                directoryToUse = sourceOfMetadata.ProjectDirectory ?? FileUtilities.CurrentThreadWorkingDirectory ?? Directory.GetCurrentDirectory();
+                                definingProjectEscaped = sourceOfMetadata.GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath);
+                                break;
+                        }
+
+                        value = ItemSpecModifiers.GetItemSpecModifier(itemSpec, modifierKind, directoryToUse, definingProjectEscaped);
                     }
                     else
                     {
