@@ -3114,7 +3114,7 @@
       </trans-unit>
       <trans-unit id="XmlPeekPoke.InputDtdProhibited">
         <source>MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
-        <target state="new">MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
+        <target state="translated">MSB3733: XML 入力に DTD が含まれています。セキュリティ上の理由から、DTD は既定で禁止されています。DTD を削除するか、"{1}" タスクで "{0}" を "false" に設定して DTD を無視することで表示しないようにします。</target>
         <note />
       </trans-unit>
       <trans-unit id="XslTransform.ArgumentError">
@@ -3134,7 +3134,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.TransformDtdProhibited">
         <source>MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</source>
-        <target state="new">MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</target>
+        <target state="translated">MSB3703: XML 入力 "{0}" に DTD が含まれているため、変換を実行できません。セキュリティ上の理由から、DTD は既定で禁止されています。DTD を削除するか、入力を信頼できる場合は、"{1}" タスクで "{2}" を "false" に設定して DTD を無視します。</target>
         <note>{StrBegin="MSB3703: "}{0} is the XML input path or inline content indicator. {1} is the ProhibitDtd property name and should not be translated. {2} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
@@ -3169,7 +3169,7 @@
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadDtdProhibited">
         <source>MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
-        <target state="new">MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</target>
+        <target state="translated">MSB3704: DTD が含まれているため、指定された XSLT を読み込めません。セキュリティ上の理由から、DTD は既定で禁止されています。DTD を削除するか、入力を信頼できる場合は、"{1}" タスクで "{0}" を "false" に設定して DTD を無視します。</target>
         <note>{StrBegin="MSB3704: "}{0} is the ProhibitDtd property name and should not be translated. {1} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadError">
