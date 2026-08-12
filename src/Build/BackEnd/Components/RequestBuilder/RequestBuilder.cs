@@ -1143,12 +1143,6 @@ namespace Microsoft.Build.BackEnd
         {
             Assumed.NotNull(_targetBuilder, "Target builder is null");
 
-            // MT request engines share the configuration cache. A configuration becomes cacheable after its last
-            // target, but post-build telemetry still accesses its ProjectInstance. Keep the project in memory
-            // for this entire operation so another request cannot cache it during execution.
-            using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
-                _requestEntry.RequestConfiguration.AcquireProjectInstanceUsage();
-
             // We consider this the entrypoint for the project build for purposes of BuildCheck processing
             bool isRestoring = _requestEntry.RequestConfiguration.GlobalProperties[MSBuildConstants.MSBuildIsRestoring] is not null;
 
@@ -1158,10 +1152,15 @@ namespace Microsoft.Build.BackEnd
 
             buildCheckManager?.SetDataSource(BuildCheckDataSource.BuildExecution);
 
-            // Make sure it is null before loading the configuration into the request, because if there is a problem
-            // we do not wand to have an invalid projectLoggingContext floating around. Also if this is null the error will be
-            // logged with the node logging context
+            // Make sure it is null before loading or restoring the configuration so an invalid context is not reused.
+            // The failure paths below create a temporary project logging context before propagating the error.
             _projectLoggingContext = null;
+
+            // MT request engines share the configuration cache. A configuration becomes cacheable after its last
+            // target, but post-build telemetry still accesses its ProjectInstance. Keep the project in memory
+            // for this entire operation so another request cannot cache it during execution.
+            using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
+                AcquireProjectInstanceUsageWithProjectLoggingContext();
 
             try
             {
@@ -1198,11 +1197,7 @@ namespace Microsoft.Build.BackEnd
             catch
             {
                 // make sure that any errors thrown by a child project are logged in the context of their parent project: create a temporary projectLoggingContext
-                _projectLoggingContext = new ProjectLoggingContext(
-                    _nodeLoggingContext,
-                    _requestEntry.Request,
-                    _requestEntry.RequestConfiguration.ProjectFullPath,
-                    _requestEntry.RequestConfiguration.ToolsVersion);
+                CreateTemporaryProjectLoggingContext();
 
                 throw;
             }
@@ -1316,6 +1311,28 @@ namespace Microsoft.Build.BackEnd
 
                 return resultFromTargetBuilder;
             }
+        }
+
+        private BuildRequestConfiguration.ProjectInstanceUsageScope AcquireProjectInstanceUsageWithProjectLoggingContext()
+        {
+            try
+            {
+                return _requestEntry.RequestConfiguration.AcquireProjectInstanceUsage();
+            }
+            catch
+            {
+                CreateTemporaryProjectLoggingContext();
+                throw;
+            }
+        }
+
+        private void CreateTemporaryProjectLoggingContext()
+        {
+            _projectLoggingContext = new ProjectLoggingContext(
+                _nodeLoggingContext,
+                _requestEntry.Request,
+                _requestEntry.RequestConfiguration.ProjectFullPath,
+                _requestEntry.RequestConfiguration.ToolsVersion);
         }
 
         private void UpdateStatisticsPostBuild()
