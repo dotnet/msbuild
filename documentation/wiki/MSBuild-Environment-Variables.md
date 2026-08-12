@@ -35,7 +35,7 @@ Some of the env variables listed here are unsupported, meaning there is no guara
 - `MSBUILDFORCEINLINETASKFACTORIESOUTOFPROC`
   - Set this to force all inline tasks to run out of process. It is not compatible with custom TaskFactories.
 - `MSBUILDFORCEMULTITHREADED=1`
-  - Force MSBuild to run in multi-threaded mode (using in-proc nodes for parallel build). This overrides the `-multiThreaded` / `-mt` command-line switch.
+  - Force MSBuild to run in multi-threaded mode (using in-proc nodes for parallel build). This overrides and ignores any `-multiThreaded` / `-mt` command-line switch.
 - `MSBUILDENABLEMULTITHREADED=1`
   - Enable multi-threaded mode by default while allowing an explicit `-multiThreaded:false` / `-mt:false` command-line switch to disable it.
 - `MSBUILD_CONSOLE_USE_DEFAULT_ENCODING`
