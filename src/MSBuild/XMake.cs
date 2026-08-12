@@ -25,7 +25,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
@@ -33,6 +32,7 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
+using Microsoft.Build.Server;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
@@ -1511,6 +1511,19 @@ namespace Microsoft.Build.CommandLine
         private static void ResetBuildState()
         {
             commandLineParser.ResetGatheringSwitchesState();
+            s_globalMessagesToLogInBuildLoggers.Clear();
+
+            if (s_originalProcessPriority is { } originalProcessPriority)
+            {
+                try
+                {
+                    using Process currentProcess = Process.GetCurrentProcess();
+                    currentProcess.PriorityClass = originalProcessPriority;
+                    s_originalProcessPriority = null;
+                }
+                // Restoring priority can fail due to platform permissions; priority changes are best effort.
+                catch (Win32Exception) { }
+            }
         }
 
         /// <summary>
@@ -1535,6 +1548,11 @@ namespace Microsoft.Build.CommandLine
         /// List of messages to be sent to the logger when it is attached
         /// </summary>
         private static readonly List<BuildManager.DeferredBuildMessage> s_globalMessagesToLogInBuildLoggers = new();
+
+        /// <summary>
+        /// The process priority to restore after a low-priority build.
+        /// </summary>
+        private static ProcessPriorityClass? s_originalProcessPriority;
 
         /// <summary>
         /// The original console output mode if we changed it as part of initialization.
@@ -1685,7 +1703,8 @@ namespace Microsoft.Build.CommandLine
                     enableTargetOutputLogging: isTaskAndTargetItemLoggingRequired,
                     loadProjectsReadOnly: !isPreprocess,
                     useAsynchronousLogging: true,
-                    reuseProjectRootElementCache: s_isServerNode);
+                    reuseProjectRootElementCache: s_isServerNode,
+                    parseConfigDirectory: Path.GetDirectoryName(Path.GetFullPath(projectFile)));
 
                 // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
                 projectCollection.PropertiesFromCommandLine = [.. globalProperties.Keys];
@@ -2483,6 +2502,7 @@ namespace Microsoft.Build.CommandLine
                     using Process currentProcess = Process.GetCurrentProcess();
                     if (currentProcess.PriorityClass != ProcessPriorityClass.Idle)
                     {
+                        s_originalProcessPriority ??= currentProcess.PriorityClass;
                         currentProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
                     }
                 }
@@ -3126,6 +3146,18 @@ namespace Microsoft.Build.CommandLine
         }
 
         /// <summary>
+        /// Processes the server instance id switch, which a client passes to the transient server it
+        /// launches for its own exclusive use. Both sides fold it into the pipe and mutex names, so a
+        /// transient server is unreachable by anyone else.
+        /// </summary>
+        /// <param name="parameters">The command line parameters for the switch.</param>
+        /// <returns>The instance id, or null for the resident server.</returns>
+        internal static string ProcessServerInstanceIdSwitch(string[] parameters)
+            => parameters.Length > 0 && !string.IsNullOrEmpty(parameters[parameters.Length - 1])
+                ? parameters[parameters.Length - 1]
+                : null;
+
+        /// <summary>
         /// Processes the node reuse switch, the user can set node reuse to true, false or not set the switch. If the switch is
         /// not set the system will check to see if the process is being run as an administrator. This check in localnode provider
         /// will determine the node reuse setting for that case.
@@ -3415,7 +3447,7 @@ namespace Microsoft.Build.CommandLine
                             return (exitCode, exitType.ToString());
                         };
 
-                        OutOfProcServerNode serverNode = new(buildFunction);
+                        OutOfProcServerNode serverNode = new(buildFunction, ProcessServerInstanceIdSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ServerInstanceId]));
 
                         s_isServerNode = true;
                         shutdownReason = serverNode.Run(out nodeException);
@@ -4669,15 +4701,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void ShowVersion()
         {
-            // Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-            {
-                Console.WriteLine(ProjectCollection.Version.ToString());
-            }
-            else
-            {
-                Console.Write(ProjectCollection.Version.ToString());
-            }
+            Console.WriteLine(ProjectCollection.Version.ToString());
         }
 
         private static void ShowFeatureAvailability(string[] features)

@@ -553,11 +553,6 @@ namespace Microsoft.Build.UnitTests
         {
             using TestEnvironment env = TestEnvironment.Create();
 
-            // Ensure Change Wave 17.10 is enabled.
-            ChangeWaves.ResetStateForTests();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", "");
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
             List<string> cmdLine = new()
             {
                 "-nologo",
@@ -581,46 +576,6 @@ namespace Microsoft.Build.UnitTests
 
             string output = process.StandardOutput.ReadToEnd();
             output.EndsWith(Environment.NewLine, StringComparison.Ordinal).ShouldBeTrue();
-
-            process.Close();
-        }
-
-        /// <summary>
-        /// PR: Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
-        /// </summary>
-        [Fact]
-        public void VersionSwitchDisableChangeWave()
-        {
-            using TestEnvironment env = TestEnvironment.Create();
-
-            // Disable Change Wave 17.10
-            ChangeWaves.ResetStateForTests();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_10.ToString());
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
-            List<string> cmdLine = new()
-            {
-                "-nologo",
-                "-version"
-            };
-
-            using Process process = new()
-            {
-                StartInfo =
-                {
-                    FileName = RunnerUtilities.PathToCurrentlyRunningMsBuildExe,
-                    Arguments = string.Join(" ", cmdLine),
-                    UseShellExecute = false,
-                    RedirectStandardOutput = true,
-                },
-            };
-
-            process.Start();
-            process.WaitForExit();
-            process.ExitCode.ShouldBe(0);
-
-            string output = process.StandardOutput.ReadToEnd();
-            output.EndsWith(Environment.NewLine, StringComparison.Ordinal).ShouldBeFalse();
 
             process.Close();
         }
