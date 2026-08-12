@@ -34,6 +34,9 @@ namespace Microsoft.Build.Server
     [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class MSBuildClient
     {
+        private const int NewServerConnectionTimeoutMilliseconds = 5_000;
+        private const int TransientServerConnectionTimeoutMilliseconds = 10_000;
+
         /// <summary>
         /// The build inherits all the environment variables from the client process.
         /// This property allows to add extra environment variables or reset some of the existing ones.
@@ -71,6 +74,19 @@ namespace Microsoft.Build.Server
         /// Handshake between server and client.
         /// </summary>
         private readonly ServerNodeHandshake _handshake;
+
+        /// <summary>
+        /// Identifies the transient server this client launches for its own exclusive use, or
+        /// <see langword="null"/> when this client talks to the resident server.
+        /// </summary>
+        /// <remarks>
+        /// A transient server is torn down after the single build it serves, so it must not be
+        /// reachable by any other client: without this, every transient build resolves to the same
+        /// endpoint as the resident server and orders that to shut down instead. Giving each one its
+        /// own id also lets concurrent transient builds run their own servers rather than contending
+        /// on one set of pipe and mutex names.
+        /// </remarks>
+        private readonly string? _serverInstanceId;
 
         /// <summary>
         /// The named pipe name for client-server communication.
@@ -172,6 +188,7 @@ namespace Microsoft.Build.Server
             _msbuildLocation = msbuildLocation;
             _multiThreaded = multiThreaded;
             _shutdownServerAfterBuild = shutdownServerAfterBuild;
+            _serverInstanceId = shutdownServerAfterBuild ? Guid.NewGuid().ToString("N") : null;
 
             // Client <-> Server communication stream
             _handshake = GetHandshake();
@@ -239,7 +256,7 @@ namespace Microsoft.Build.Server
                 }
 
                 // Connect to server.
-                if (!TryConnectToServer(serverIsAlreadyRunning ? 1_000 : 20_000))
+                if (!TryConnectToServer(serverIsAlreadyRunning ? 1_000 : NewServerConnectionTimeoutMilliseconds))
                 {
                     return _exitResult;
                 }
@@ -531,54 +548,13 @@ namespace Microsoft.Build.Server
 
             try
             {
-                string[] msBuildServerOptions =
-                [
-                    "/nologo",
-                    NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcServerNode)
-                ];
                 NodeLauncher nodeLauncher = new NodeLauncher();
                 CommunicationsUtilities.Trace("Starting Server...");
 
-                // Set DOTNET_ROOT so the apphost server child can locate the runtime; this
-                // override is replaced by the client's environment on the first build command
-                // (see OutOfProcServerNode.HandleServerNodeBuildCommand → SetEnvironment).
-                // This is a shared cached dictionary reused by other node launches, so it must not
-                // be mutated in place.
-                IDictionary<string, string?>? baseOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides();
-                IDictionary<string, string?>? environmentOverrides = baseOverrides;
-
-                // When this build is multithreaded (/mt), launch the long-lived server (build
-                // orchestrator) process with Server GC. Other processes may get higher throughput
-                // with Server GC, but we want to enable it only for the highest-impact one where
-                // most of the work of the actual build will happen in MT mode. GC mode is fixed at
-                // CLR startup, so it must be set in the child's launch environment via DOTNET_gcServer
-                // (which only affects .NET/CoreCLR and, since .NET 9, takes precedence over
-                // runtimeconfig.json). The decision is made from this (launch-time) invocation's command
-                // line; a server is keyed by handshake and reused, so a later differing /mt choice does
-                // not re-launch it.
-                //
-                // This is scoped to the server process only. Sidecar TaskHost (nodemode 2) and worker
-                // (nodemode 1) nodes are launched through other code paths that never set this knob, and
-                // the server resets its own environment to the client's on the first build command (so
-                // DOTNET_gcServer is removed before it ever spawns children). Those nodes therefore keep
-                // the default Workstation GC.
-                //
-                // Copy the shared base overrides (preserving its comparer) before adding the GC override.
-                // Honor an explicit user-set DOTNET_gcServer (e.g. "0" to force Workstation GC in a
-                // memory-constrained container): only inject the default when the user hasn't set it.
-                if (_multiThreaded &&
-                    Environment.GetEnvironmentVariable("DOTNET_gcServer") is null)
-                {
-                    environmentOverrides = baseOverrides is null
-                        ? new Dictionary<string, string?>()
-                        : new Dictionary<string, string?>(baseOverrides);
-                    environmentOverrides["DOTNET_gcServer"] = "1";
-                }
-
                 NodeLaunchData launchData = new(
                     MSBuildLocation: _msbuildLocation,
-                    CommandLineArgs: string.Join(" ", msBuildServerOptions),
-                    EnvironmentOverrides: environmentOverrides);
+                    CommandLineArgs: string.Join(" ", GetServerCommandLineOptions()),
+                    EnvironmentOverrides: GetServerEnvironmentOverrides());
 
                 using Process msbuildProcess = nodeLauncher.Start(launchData, nodeId: 0);
                 _launchedServerPid = msbuildProcess.Id;
@@ -592,6 +568,53 @@ namespace Microsoft.Build.Server
             }
 
             return true;
+        }
+
+        private string[] GetServerCommandLineOptions()
+            => _serverInstanceId is null
+                ?
+                [
+                    "/nologo",
+                    NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcServerNode)
+                ]
+                :
+                [
+                    "/nologo",
+                    NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcServerNode),
+                    $"{OutOfProcServerNode.ServerInstanceIdCommandLineSwitch}{_serverInstanceId}"
+                ];
+
+        private IDictionary<string, string?>? GetServerEnvironmentOverrides()
+        {
+            // The cached base dictionary is shared by other node launches and must not be mutated.
+            IDictionary<string, string?>? baseOverrides = DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides();
+            bool enableServerGC = _multiThreaded && Environment.GetEnvironmentVariable("DOTNET_gcServer") is null;
+            bool boundTransientConnectionTimeout = _serverInstanceId is not null;
+
+            if (!enableServerGC && !boundTransientConnectionTimeout)
+            {
+                return baseOverrides;
+            }
+
+            IDictionary<string, string?> environmentOverrides = baseOverrides is null
+                ? new Dictionary<string, string?>()
+                : new Dictionary<string, string?>(baseOverrides);
+
+            if (enableServerGC)
+            {
+                environmentOverrides["DOTNET_gcServer"] = "1";
+            }
+
+            if (boundTransientConnectionTimeout)
+            {
+                // No other client knows this server's identity, so it cannot be reused if its
+                // launching client exits before connecting.
+                environmentOverrides["MSBUILDNODECONNECTIONTIMEOUT"] =
+                    Math.Min(CommunicationsUtilities.NodeConnectionTimeout, TransientServerConnectionTimeoutMilliseconds)
+                        .ToString(CultureInfo.InvariantCulture);
+            }
+
+            return environmentOverrides;
         }
 
         private bool TrySendBuildCommand() => TrySendPacket(() => GetServerNodeBuildCommand());
@@ -643,10 +666,12 @@ namespace Microsoft.Build.Server
                         _shutdownServerAfterBuild);
         }
 
-        private ServerNodeHandshake GetHandshake() => new(CommunicationsUtilities.GetHandshakeOptions(
-            taskHost: false,
-            taskHostParameters: TaskHostParameters.Empty,
-            architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
+        private ServerNodeHandshake GetHandshake() => new(
+            CommunicationsUtilities.GetHandshakeOptions(
+                taskHost: false,
+                taskHostParameters: TaskHostParameters.Empty,
+                architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()),
+            _serverInstanceId);
 
         /// <summary>
         /// Handle cancellation.

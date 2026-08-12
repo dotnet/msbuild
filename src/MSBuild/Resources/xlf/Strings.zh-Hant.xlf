@@ -241,7 +241,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
-        <source>  -multithreaded
+        <source>  -multithreaded[:true|false]
                      Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
@@ -254,7 +254,7 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
+        <target state="needs-review-translation">  -multithreaded
                      在 MSBuild 中啟用實驗性多執行緒模式。
                      這表示 MSBuild 將使用多個執行緒
                      來平行建置專案，
@@ -312,6 +312,16 @@
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidMultiThreadedValue">
+        <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
+        <target state="new">MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1072: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -multithreaded parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>

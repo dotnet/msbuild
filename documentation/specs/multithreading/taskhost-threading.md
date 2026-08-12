@@ -197,7 +197,7 @@ A TaskHost launched without node reuse normally sets `BuildComplete` and exits. 
 
 A sidecar sends nothing back to report the reset. Its owner already knows the node is idle -- a build cannot complete while one of its tasks is still outstanding, which `HandleNodeBuildComplete()` asserts on receipt -- and it does not need to be told when the reset has finished, because the reset is ordered behind `NodeBuildComplete` on the same pipe and runs on the packet-processing thread, so the next build's `TaskHostConfiguration` cannot overtake it. The owner therefore retires the still-connected sidecar from its active set locally at the point it sends `NodeBuildComplete`.
 
-Because a sidecar stays connected, its owner exiting -- normally, via `dotnet build-server shutdown`, or by crashing -- breaks the pipe and the pre-existing `LinkStatus.Failed` handler terminates it. No shutdown cascade or process enumeration is needed to reap one, which is what `dotnet build-server shutdown` previously could not do. A sidecar has no idle timeout; it waits indefinitely on its owner's connection.
+Because a sidecar stays connected, its owner exiting -- normally, via `dotnet build-server shutdown`, or by crashing -- breaks the pipe, and the `LinkStatus.Failed` handler terminates it. Reaping a sidecar therefore requires no shutdown cascade and no process enumeration: it is reachable through the connection it already holds. A sidecar has no idle timeout; it waits indefinitely on its owner's connection.
 
 #### Lifetime change
 
