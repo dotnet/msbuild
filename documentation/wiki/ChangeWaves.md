@@ -37,7 +37,7 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.11
 - [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs](https://github.com/dotnet/msbuild/pull/14285)
-- [A TaskHost that exists only to keep a task out of the process that launched it — `-mt` routing of a non-multithreadable task, or `MSBUILDFORCEALLTASKSOUTOFPROC` — is owned by that process, staying connected across its builds and exiting with it, instead of disconnecting into a machine-wide pool any process may claim. TaskHosts of a different runtime or architecture are unaffected and stay pooled.](https://github.com/dotnet/msbuild/pull/14584)
+- [TaskHosts used to run a task out of process under `-mt` stay connected to the process that launched them and exit with it, instead of remaining available for any other process to reuse. TaskHosts of a different runtime or architecture are unaffected.](https://github.com/dotnet/msbuild/pull/14584)
 - [Out-of-proc communication uses larger read-ahead buffers and pre-buffers TaskHost packet bodies to reduce pipe reads.](https://github.com/dotnet/msbuild/pull/14505)
 - [Restore no longer discards a ProjectRootElementCache that reloads changed files from disk, so the build that follows an implicit restore does not re-parse the import closure.](https://github.com/dotnet/msbuild/pull/14558)
 
