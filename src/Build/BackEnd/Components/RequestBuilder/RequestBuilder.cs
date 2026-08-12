@@ -1156,9 +1156,9 @@ namespace Microsoft.Build.BackEnd
             // The failure paths below create a temporary project logging context before propagating the error.
             _projectLoggingContext = null;
 
-            // MT request engines share the configuration cache. A configuration becomes cacheable after its last
-            // target, but post-build telemetry still accesses its ProjectInstance. Keep the project in memory
-            // for this entire operation so another request cannot cache it during execution.
+            // The configuration cache is shared across the node and may be swept for memory pressure on a
+            // BuildRequestEngine thread. A configuration becomes cacheable after its last target, but post-build
+            // telemetry still accesses its ProjectInstance, so keep the project in memory for this entire operation.
             using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
                 AcquireProjectInstanceUsageWithProjectLoggingContext();
 
