@@ -5003,7 +5003,13 @@ $@"<Project InitialTargets=`Sleep`>
             ClientMessage request = await ReadCoordinatorMessageWithTimeoutAsync(reader);
             writer.Write(new NodeGrantMessage(grantedNodes: 1));
 
-            (await ReadCoordinatorMessageWithTimeoutAsync(reader)).ShouldBe(ReleaseNodesMessage.Instance);
+            ClientMessage message = await ReadCoordinatorMessageWithTimeoutAsync(reader);
+            while (message is HeartbeatMessage)
+            {
+                message = await ReadCoordinatorMessageWithTimeoutAsync(reader);
+            }
+
+            message.ShouldBe(ReleaseNodesMessage.Instance);
             return request;
         }
 
