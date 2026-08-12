@@ -313,7 +313,7 @@ namespace Microsoft.Build.CommandLine
             // Perform the single authoritative command-line parse for this process. It yields:
             //   - canRunServer: whether the command line is compatible with hosting the build on the server;
             //   - multiThreaded: the response-file-aware /mt determination (includes the auto-response file,
-            //     any project Directory.Build.rsp, @response files, and MSBUILDFORCEMULTITHREADED);
+            //     any project Directory.Build.rsp, @response files, and the multi-threading environment variables);
             //   - shutdownServerAfterBuild: whether the server must tear itself down after this build;
             //   - the gathered switches, which the in-proc build path below reuses so it does not re-parse.
             bool canRunServer = CanRunServerBasedOnCommandLineSwitches(
@@ -388,7 +388,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="commandLine">Raw command-line arguments.</param>
         /// <param name="multiThreaded">Set to whether this is a multithreaded (/mt) build, determined from
         /// the fully-parsed switches (which expand response files - including any project <c>Directory.Build.rsp</c> -
-        /// and honor MSBUILDFORCEMULTITHREADED) using the same logic as the in-proc build path.</param>
+        /// and honor the multi-threading environment variables) using the same logic as the in-proc build path.</param>
         /// <param name="shutdownServerAfterBuild">Set to <see langword="true"/> when the server should tear itself
         /// down after this build instead of staying resident for reuse.</param>
         /// <param name="switchesFromAutoResponseFile">The gathered response-file switches (auto-response file plus any
@@ -2763,14 +2763,21 @@ namespace Microsoft.Build.CommandLine
 
         internal static bool IsMultiThreadedEnabled(CommandLineSwitches commandLineSwitches)
         {
-            // Allow forcing multi-threaded mode via an environment variable, for example to opt in
-            // without modifying command lines (parallel to MSBUILDDISABLENODEREUSE for /nodeReuse).
+            // MSBUILDFORCEMULTITHREADED is authoritative: it wins over an explicit -mt:false.
             if (Traits.Instance.ForceMultiThreaded)
             {
                 return true;
             }
 
-            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded);
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded))
+            {
+                return ProcessBooleanSwitch(
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MultiThreaded],
+                    defaultValue: true,
+                    resourceName: "InvalidMultiThreadedValue");
+            }
+
+            return Traits.Instance.EnableMultiThreaded;
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
@@ -3011,7 +3018,7 @@ namespace Microsoft.Build.CommandLine
             return automatedEnvironmentVariables.Any(envVar => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envVar)));
         }
 
-        private static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)
+        internal static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)
         {
             // combine the auto-response file switches with the command line switches in a left-to-right manner, where the
             // auto-response file switches are on the left (default options), and the command line switches are on the
