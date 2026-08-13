@@ -382,10 +382,11 @@ namespace Microsoft.Build.BackEnd
                         BuildResult resultToReport = new BuildResult(request, result, null);
                         BuildRequestConfiguration config = ((IConfigCache)_componentHost.GetComponent(BuildComponentType.ConfigCache))[request.ConfigurationId];
 
-                        // Retrieve the config if it has been cached, since this would contain our instance data.  It is safe to do this outside of a lock
-                        // since only one thread can run in the BuildRequestEngine at a time, and it is EvaluateRequestStates which would cause us to
-                        // cache configurations if we are running out of memory.
-                        config.RetrieveFromCache();
+                        // Retrieve the project if it is cached and keep it in memory while preparing the result for
+                        // transfer. Multiple in-proc request engines share the configuration cache, so another engine
+                        // may run a memory-pressure sweep concurrently.
+                        using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
+                            config.AcquireProjectInstanceUsage();
                         ((IBuildResults)resultToReport).SavedCurrentDirectory = config.SavedCurrentDirectory;
                         ((IBuildResults)resultToReport).SavedEnvironmentVariables = config.SavedEnvironmentVariables;
                         if ((request.BuildRequestDataFlags & BuildRequestDataFlags.IgnoreExistingProjectState) != BuildRequestDataFlags.IgnoreExistingProjectState)
