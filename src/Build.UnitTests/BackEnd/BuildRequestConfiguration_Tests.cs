@@ -713,6 +713,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     await Task.Run(configuration.CacheIfPossible);
                     configuration.IsCached.ShouldBeFalse();
+
+                    // Caching nulls these out, so assert the project state itself and not just the flag.
+                    instance.GlobalPropertiesDictionary.ShouldNotBeNull();
+                    instance.PropertiesToBuildWith.ShouldNotBeNull();
+                    instance.ItemsToBuildWith.ShouldNotBeNull();
                 }
 
                 configuration.CacheIfPossible();
