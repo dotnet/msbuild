@@ -1242,7 +1242,7 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
         files.ShouldNotContain(path => path.Contains($"{Path.DirectorySeparatorChar}obj{Path.DirectorySeparatorChar}"));
         fileSystem.EnumerationCalls.ShouldNotBeEmpty();
         fileSystem.EnumerationCalls.ShouldNotContain(
-            call => Path.GetFileName(call.Path).Equals("obj", StringComparison.OrdinalIgnoreCase));
+            call => string.Equals(Path.GetFileName(call.Path), "obj", StringComparison.OrdinalIgnoreCase));
     }
 
     [Fact]
