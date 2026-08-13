@@ -75,7 +75,8 @@ flowchart TD
 
 ## Execution flow
 
-1. A deterministic custom job runs daily or through `workflow_dispatch`.
+1. A deterministic custom job runs daily or through an authorized `workflow_dispatch`. Dispatches
+   carrying pull-request `aw_context` are rejected.
 2. The job uses GitHub OIDC to authenticate as `msbuild-azdo-reader`.
 3. `queries/Get-MtBuildTimeRegressions.kql` queries `perfstar-dev/PerfStarDataRaw`.
 4. `workflows/Invoke-MtBuildTimeRegressionScan.ps1` resolves each candidate's PerfStar run, discards
@@ -180,10 +181,20 @@ mechanism used by the other Agentic Workflows.
 ## Issue deduplication
 
 The deterministic scan hashes the sorted unique `Backend/Os/ScenarioPair` candidate set into a
-stable `candidateSetKey`. The agent searches for that exact visible marker before creating an issue,
-uses the key in a deterministic title, and the `create-issue` safe output independently enforces
-exact-title deduplication. The separate workflow run ID remains an audit marker, not a deduplication
-key.
+stable `candidateSetKey`. The agent accepts an existing issue or pull request as coverage only when
+it was authored by `github-actions[bot]` and contains both the hidden
+`gh-aw-workflow-id: mt-build-regression.agent` marker and the exact visible candidate-set marker.
+Issue and pull-request safe outputs explicitly use `GITHUB_TOKEN`, making that author check stable.
+Title-only safe-output deduplication is deliberately disabled because a public issue could copy the
+deterministic title and suppress a legitimate report. The separate workflow run ID remains an audit
+marker, not a deduplication key.
+
+## Dispatch and checkout boundary
+
+The credentialed scan runs only after gh-aw's `pre_activation` authorization check succeeds.
+Free-form `workflow_dispatch` context cannot select a pull request: both the scan and agent activation
+reject `aw_context.item_type == pull_request`, making gh-aw's generated pull-request checkout path
+unreachable.
 
 ## Current limitations
 
