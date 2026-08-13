@@ -22,6 +22,11 @@ namespace Microsoft.Build.Unittest
             return new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetSuccessResult());
         }
 
+        public static TargetResult GetEmptySkippedTargetResult()
+        {
+            return new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetSkippedResult());
+        }
+
         public static TargetResult GetNonEmptySucceedingTargetResult()
         {
             return new TargetResult(new TaskItem[1] { new TaskItem("i", "v") }, BuildResultUtilities.GetSuccessResult());

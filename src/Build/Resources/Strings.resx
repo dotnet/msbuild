@@ -2083,6 +2083,12 @@ Utilization:          {0} Average Utilization: {1:###.0}</value>
       LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
     </comment>
   </data>
+  <data name="ResultsCacheMissDueToSkippedTarget" xml:space="preserve">
+    <value>Cached results for "{0}" cannot be reused because target "{1}" has a skipped result, so the project will be built again. Conditionally skipped initial and default targets prevent results from being reused.</value>
+    <comment>
+      LOCALIZATION: {0} is a file path. {1} is a target name.
+    </comment>
+  </data>
   <data name="DefaultSDKResolverError" xml:space="preserve">
     <value>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</value>
   </data>

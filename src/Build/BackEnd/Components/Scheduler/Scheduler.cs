@@ -1772,7 +1772,7 @@ namespace Microsoft.Build.BackEnd
                 // First, determine if we have already built this request and have results for it.  If we do, we prepare the responses for it
                 // directly here.  We COULD simply report these as blocking the parent request and let the scheduler pick them up later when the parent
                 // comes back up as schedulable, but we prefer to send the results back immediately so this request can (potentially) continue uninterrupted.
-                ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+                ScheduleResponse response = TrySatisfyRequestFromCache(nodeForResults, request, skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(), logSkippedTargetCacheMiss: true);
                 if (response != null)
                 {
                     TraceScheduler($"Request {request.GlobalRequestId} (node request {request.NodeRequestId}) satisfied from the cache.");
@@ -2017,7 +2017,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Attempts to get a result from the cache to satisfy the request, and returns the appropriate response if possible.
         /// </summary>
-        private ScheduleResponse TrySatisfyRequestFromCache(int nodeForResults, BuildRequest request, bool skippedResultsDoNotCauseCacheMiss)
+        private ScheduleResponse TrySatisfyRequestFromCache(int nodeForResults, BuildRequest request, bool skippedResultsDoNotCauseCacheMiss, bool logSkippedTargetCacheMiss = false)
         {
             BuildRequestConfiguration config = _configCache[request.ConfigurationId];
             ResultsCacheResponse resultsResponse = _resultsCache.SatisfyRequest(request, config.ProjectInitialTargets, config.ProjectDefaultTargets, skippedResultsDoNotCauseCacheMiss);
@@ -2027,7 +2027,32 @@ namespace Microsoft.Build.BackEnd
                 return GetResponseForResult(nodeForResults, request, resultsResponse.Results);
             }
 
+            if (logSkippedTargetCacheMiss && resultsResponse.SkippedTargetCausingCacheMiss is not null)
+            {
+                LogCacheMissDueToSkippedTarget(request, config, resultsResponse.SkippedTargetCausingCacheMiss);
+            }
+
             return null;
+        }
+
+        /// <summary>
+        /// Reports that results which were already in the cache could not be reused because one of the configuration's
+        /// initial or default targets has a skipped result, so the project has to be scheduled and built again.
+        /// </summary>
+        /// <remarks>
+        /// A conditionally skipped initial or default target is trivial to introduce and effectively invisible: it
+        /// silently disables result reuse for the whole configuration. See https://github.com/dotnet/msbuild/issues/11753.
+        /// </remarks>
+        private void LogCacheMissDueToSkippedTarget(BuildRequest request, BuildRequestConfiguration configuration, string skippedTarget)
+        {
+            _componentHost.LoggingService.LogComment(
+                request.ParentBuildEventContext ?? BuildEventContext.Invalid,
+                MessageImportance.Low,
+                "ResultsCacheMissDueToSkippedTarget",
+                configuration.ProjectFullPath,
+                skippedTarget);
+
+            TraceScheduler($"Request {request.GlobalRequestId} (node request {request.NodeRequestId}) could not be satisfied from the cache because target \"{skippedTarget}\" has a skipped result; the project will be built again.");
         }
 
         /// <returns>True if caches misses are allowed, false otherwise</returns>

@@ -170,7 +170,7 @@ namespace Microsoft.Build.BackEnd
                     if (AreBuildResultFlagsCompatible(request, allResults))
                     {
                         // Check for targets explicitly specified.
-                        bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, checkTargetsMissingResults: true, skippedResultsDoNotCauseCacheMiss);
+                        bool explicitTargetsSatisfied = CheckResults(allResults, request.Targets, checkTargetsMissingResults: true, skippedResultsDoNotCauseCacheMiss, out _);
 
                         if (explicitTargetsSatisfied)
                         {
@@ -178,9 +178,11 @@ namespace Microsoft.Build.BackEnd
                             response.Type = ResultsCacheResponseType.Satisfied;
 
                             // Check for the initial targets.  If we don't know what the initial targets are, we assume they are not satisfied.
-                            if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, checkTargetsMissingResults: false, skippedResultsDoNotCauseCacheMiss))
+                            string skippedInitialTarget = null;
+                            if (configInitialTargets == null || !CheckResults(allResults, configInitialTargets, checkTargetsMissingResults: false, skippedResultsDoNotCauseCacheMiss, out skippedInitialTarget))
                             {
                                 response.Type = ResultsCacheResponseType.NotSatisfied;
+                                response.SkippedTargetCausingCacheMiss = skippedInitialTarget;
                             }
 
                             // We could still be missing implicit targets, so check those...
@@ -188,9 +190,11 @@ namespace Microsoft.Build.BackEnd
                             {
                                 // Check for the default target, if necessary.  If we don't know what the default targets are, we
                                 // assume they are not satisfied.
-                                if (configDefaultTargets == null || !CheckResults(allResults, configDefaultTargets, checkTargetsMissingResults: false, skippedResultsDoNotCauseCacheMiss))
+                                string skippedDefaultTarget = null;
+                                if (configDefaultTargets == null || !CheckResults(allResults, configDefaultTargets, checkTargetsMissingResults: false, skippedResultsDoNotCauseCacheMiss, out skippedDefaultTarget))
                                 {
                                     response.Type = ResultsCacheResponseType.NotSatisfied;
+                                    response.SkippedTargetCausingCacheMiss ??= skippedDefaultTarget;
                                 }
                             }
 
@@ -303,15 +307,25 @@ namespace Microsoft.Build.BackEnd
         /// <param name="checkTargetsMissingResults">If missing targets will be checked for.</param>
         /// <param name="skippedResultsAreOK">If true, a status of "skipped" counts as having valid results
         /// for that target.  Otherwise, a skipped target is treated as equivalent to a missing target.</param>
+        /// <param name="skippedTarget">Receives the name of the first target that was rejected because it has a
+        /// skipped result. Null if no target was rejected for that reason. Used for diagnostics only.</param>
         /// <returns>False if there were missing results, true otherwise.</returns>
-        private static bool CheckResults(BuildResult result, List<string> targets, bool checkTargetsMissingResults, bool skippedResultsAreOK)
+        private static bool CheckResults(BuildResult result, List<string> targets, bool checkTargetsMissingResults, bool skippedResultsAreOK, out string skippedTarget)
         {
+            skippedTarget = null;
             bool returnValue = true;
             bool missingTargetFound = false;
             foreach (string target in targets)
             {
                 if (!result.TryGetResultsForTarget(target, out TargetResult targetResult) || (targetResult.ResultCode == TargetResultCode.Skipped && !skippedResultsAreOK))
                 {
+                    // Distinguish "we have a skipped result" from "we have no result at all". Only the former is
+                    // surprising enough to be worth reporting to the user.
+                    if (targetResult is not null && targetResult.ResultCode == TargetResultCode.Skipped)
+                    {
+                        skippedTarget ??= target;
+                    }
+
                     if (checkTargetsMissingResults)
                     {
                         missingTargetFound = true;

@@ -966,6 +966,13 @@
       's' should reflect the localized abbreviation for seconds
     </note>
       </trans-unit>
+      <trans-unit id="ResultsCacheMissDueToSkippedTarget">
+        <source>Cached results for "{0}" cannot be reused because target "{1}" has a skipped result, so the project will be built again. Conditionally skipped initial and default targets prevent results from being reused.</source>
+        <target state="new">Cached results for "{0}" cannot be reused because target "{1}" has a skipped result, so the project will be built again. Conditionally skipped initial and default targets prevent results from being reused.</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a target name.
+    </note>
+      </trans-unit>
       <trans-unit id="SDKPathCheck_Failed">
         <source>The directory does not exist: {0}. .NET Runtime Task Host could not be instantiated. See https://aka.ms/nettaskhost for details on how to resolve this error.</source>
         <target state="translated">La directory non esiste: {0}. Non è possibile creare un'istanza dell'host attività di runtime .NET. Per informazioni dettagliate su come risolvere l'errore, vedere https://aka.ms/nettaskhost.</target>

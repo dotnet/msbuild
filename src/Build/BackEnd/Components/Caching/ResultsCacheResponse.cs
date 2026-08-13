@@ -39,6 +39,17 @@ namespace Microsoft.Build.BackEnd
         public BuildResult Results;
 
         /// <summary>
+        /// When the cache held results for the configuration but the request was still not satisfied because one of the
+        /// configuration's initial or default targets has a skipped result, the name of that target. Null otherwise.
+        /// </summary>
+        /// <remarks>
+        /// This is purely diagnostic. Callers use it to explain why an otherwise usable cached result had to be
+        /// rebuilt, because a conditionally skipped initial or default target is an easy thing to introduce and
+        /// an extremely hard thing to notice.
+        /// </remarks>
+        public string SkippedTargetCausingCacheMiss;
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="type">The response type.</param>
@@ -46,6 +57,7 @@ namespace Microsoft.Build.BackEnd
         {
             Type = type;
             Results = null;
+            SkippedTargetCausingCacheMiss = null;
         }
     }
 }

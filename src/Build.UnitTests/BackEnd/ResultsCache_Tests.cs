@@ -189,6 +189,126 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(BuildResultCode.Success, response.Results.OverallResult);
         }
 
+        /// <summary>
+        /// A skipped initial target prevents the cached results from being reused. The response has to say which
+        /// target caused that, otherwise the cache miss is invisible.
+        /// </summary>
+        [Fact]
+        public void TestSkippedInitialTargetIsReportedAsCacheMissReason()
+        {
+            ResultsCache cache = new ResultsCache();
+            BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[] { "testTarget" }, null, BuildEventContext.Invalid, null);
+
+            BuildResult result = new BuildResult(request);
+            result.AddResultsForTarget("initialTarget", BuildResultUtilities.GetEmptySkippedTargetResult());
+            result.AddResultsForTarget("testTarget", BuildResultUtilities.GetEmptySucceedingTargetResult());
+            cache.AddResult(result);
+
+            ResultsCacheResponse response = cache.SatisfyRequest(
+                request,
+                new List<string> { "initialTarget" },
+                new List<string>(),
+                skippedResultsDoNotCauseCacheMiss: false);
+
+            response.Type.ShouldBe(ResultsCacheResponseType.NotSatisfied);
+            response.SkippedTargetCausingCacheMiss.ShouldBe("initialTarget");
+        }
+
+        /// <summary>
+        /// The same, for a default target, which is only consulted when the request specifies no targets.
+        /// </summary>
+        [Fact]
+        public void TestSkippedDefaultTargetIsReportedAsCacheMissReason()
+        {
+            ResultsCache cache = new ResultsCache();
+            BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, Array.Empty<string>(), null, BuildEventContext.Invalid, null);
+
+            BuildResult result = new BuildResult(request);
+            result.AddResultsForTarget("defaultTarget", BuildResultUtilities.GetEmptySkippedTargetResult());
+            cache.AddResult(result);
+
+            ResultsCacheResponse response = cache.SatisfyRequest(
+                request,
+                new List<string>(),
+                new List<string> { "defaultTarget" },
+                skippedResultsDoNotCauseCacheMiss: false);
+
+            response.Type.ShouldBe(ResultsCacheResponseType.NotSatisfied);
+            response.SkippedTargetCausingCacheMiss.ShouldBe("defaultTarget");
+        }
+
+        /// <summary>
+        /// A target that has no result at all is an ordinary cache miss, not the surprising kind, so it must not be
+        /// reported as a skipped target.
+        /// </summary>
+        [Fact]
+        public void TestMissingInitialTargetIsNotReportedAsSkipped()
+        {
+            ResultsCache cache = new ResultsCache();
+            BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[] { "testTarget" }, null, BuildEventContext.Invalid, null);
+
+            BuildResult result = new BuildResult(request);
+            result.AddResultsForTarget("testTarget", BuildResultUtilities.GetEmptySucceedingTargetResult());
+            cache.AddResult(result);
+
+            ResultsCacheResponse response = cache.SatisfyRequest(
+                request,
+                new List<string> { "initialTargetWithNoResult" },
+                new List<string>(),
+                skippedResultsDoNotCauseCacheMiss: false);
+
+            response.Type.ShouldBe(ResultsCacheResponseType.NotSatisfied);
+            response.SkippedTargetCausingCacheMiss.ShouldBeNull();
+        }
+
+        /// <summary>
+        /// A satisfied request never carries a cache miss reason.
+        /// </summary>
+        [Fact]
+        public void TestSatisfiedRequestHasNoCacheMissReason()
+        {
+            ResultsCache cache = new ResultsCache();
+            BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[] { "testTarget" }, null, BuildEventContext.Invalid, null);
+
+            BuildResult result = new BuildResult(request);
+            result.AddResultsForTarget("initialTarget", BuildResultUtilities.GetEmptySucceedingTargetResult());
+            result.AddResultsForTarget("testTarget", BuildResultUtilities.GetEmptySucceedingTargetResult());
+            cache.AddResult(result);
+
+            ResultsCacheResponse response = cache.SatisfyRequest(
+                request,
+                new List<string> { "initialTarget" },
+                new List<string>(),
+                skippedResultsDoNotCauseCacheMiss: false);
+
+            response.Type.ShouldBe(ResultsCacheResponseType.Satisfied);
+            response.SkippedTargetCausingCacheMiss.ShouldBeNull();
+        }
+
+        /// <summary>
+        /// When skipped results are acceptable, a skipped initial target is not a cache miss at all.
+        /// </summary>
+        [Fact]
+        public void TestSkippedInitialTargetIsNotAMissWhenSkippedResultsAreAllowed()
+        {
+            ResultsCache cache = new ResultsCache();
+            BuildRequest request = new BuildRequest(1 /* submissionId */, 0, 1, new string[] { "testTarget" }, null, BuildEventContext.Invalid, null);
+
+            BuildResult result = new BuildResult(request);
+            result.AddResultsForTarget("initialTarget", BuildResultUtilities.GetEmptySkippedTargetResult());
+            result.AddResultsForTarget("testTarget", BuildResultUtilities.GetEmptySucceedingTargetResult());
+            cache.AddResult(result);
+
+            ResultsCacheResponse response = cache.SatisfyRequest(
+                request,
+                new List<string> { "initialTarget" },
+                new List<string>(),
+                skippedResultsDoNotCauseCacheMiss: true);
+
+            response.Type.ShouldBe(ResultsCacheResponseType.Satisfied);
+            response.SkippedTargetCausingCacheMiss.ShouldBeNull();
+        }
+
         [Fact]
         public void TestCacheOnDifferentBuildFlagsPerRequest_ProvideProjectStateAfterBuild()
         {
