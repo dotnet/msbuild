@@ -528,6 +528,12 @@ namespace Microsoft.Build.ProjectCache
 
             async ValueTask<(CacheResult Result, int ProjectContextId)> ProcessCacheRequestAsync()
             {
+                // The configuration cache is shared with the in-proc node's BuildRequestEngine, which may run a
+                // memory-pressure sweep on its own thread. Keep the project in memory for this entire operation:
+                // the ProjectInstance below is handed to the plugin and is used until the query completes.
+                using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
+                    cacheRequest.Configuration.AcquireProjectInstanceUsage();
+
                 EvaluateProjectIfNecessary(cacheRequest.Submission, cacheRequest.Configuration);
 
                 BuildRequestData buildRequest = new BuildRequestData(
