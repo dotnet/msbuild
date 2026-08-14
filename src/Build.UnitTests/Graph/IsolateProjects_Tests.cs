@@ -250,7 +250,7 @@ BuildEngine5.BuildProjectFilesInParallel(
             using (TestEnvironment env = TestEnvironment.Create())
             {
                 ChangeWaves.ResetStateForTests();
-                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_10.ToString());
+                env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
 
                 AssertDependencyResultLeakBuild(
                     (result, logger) =>
