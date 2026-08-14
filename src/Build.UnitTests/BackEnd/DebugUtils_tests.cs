@@ -16,7 +16,7 @@ namespace Microsoft.Build.UnitTests
 {
     public class DebugUtils_Tests
     {
-        [UnixOnlyFact]
+        [Fact]
         public void UppercaseDebugEngineEnvironmentVariableEnablesDebugEngine()
         {
             using TestEnvironment env = TestEnvironment.Create();
