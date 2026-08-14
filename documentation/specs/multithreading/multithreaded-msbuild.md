@@ -305,6 +305,7 @@ When this is a `-mt` (`-multithreaded`) build and `MSBUILDUSESERVER` is unset, M
 | unset | yes | **Yes** | `ImpliedByMt` |
 | unset | no | No | — |
 
-`-mt` is detected from the full, response-file-aware command-line parse, so it counts wherever it is supplied — command line, auto-response file, a project `Directory.Build.rsp`, an `@response` file, or `MSBUILDFORCEMULTITHREADED`. The same value decides whether an engaged server is launched with [Server GC](../../MSBuild-Server.md#garbage-collection).
+`-mt` is detected from the full, response-file-aware command-line parse, so it counts wherever it is supplied — command line, auto-response file, a project `Directory.Build.rsp`, or an `@response` file. `MSBUILDENABLEMULTITHREADED=1` enables the mode by default, while an explicit `-mt:false` disables it. `MSBUILDFORCEMULTITHREADED=1` is authoritative and enables the mode regardless of the command-line value. The resulting value decides whether an engaged server is launched with [Server GC](../../MSBuild-Server.md#garbage-collection).
 
-
+The proposed resident/transient routing and TaskHost lifetime model are
+specified in [MT Request Routing and TaskHost Ownership](server-taskhost-ownership.md).

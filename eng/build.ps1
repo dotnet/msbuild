@@ -1,8 +1,9 @@
 [CmdletBinding(PositionalBinding=$false)]
 Param(
   [string] $msbuildEngine,
-  [string] $configuration = "Debug",
-  [switch] $test,
+  [string][Alias('c')] $configuration = "Debug",
+  [string][Alias('v')] $verbosity,
+  [switch][Alias('t')] $test,
   [switch] $ci,
   [switch][Alias('bl')] $binaryLog,
   [switch][Alias('nobl')] $excludeCIBinarylog,
@@ -14,10 +15,30 @@ Param(
 $pwshPath = (Get-Process -Id $PID).Path
 $buildScript = Join-Path $PSScriptRoot 'common\build.ps1'
 
+# The stage builds run out-of-proc so that stage 2 doesn't inherit stage 1's state variables, but
+# they are invoked through `pwsh -Command` rather than `pwsh -File`. `-File` passes every argument
+# as a literal string, which typed parameters such as `[bool] $nodeReuse` and `[bool] $msbuildMultiThreaded`
+# can't bind to. `-Command` re-parses the arguments as PowerShell, so `-mt 1` arrives as an integer.
+# Quote anything that isn't a simple token so it survives that re-parse intact
+# (e.g. '-warnnotaserror NU1901;NU1902;NU1903', where ';' would otherwise separate statements).
+function Get-BuildCommand([string[]] $arguments) {
+  $quoted = $arguments | ForEach-Object {
+    if ($_ -match '^[\w\-/\\.:=+]+$') { $_ } else { "'" + ($_ -replace "'", "''") + "'" }
+  }
+  # Default to a failure exit code so that an error which prevents the script from running at all
+  # (e.g. a parameter binding failure) isn't reported as success by the trailing `exit`.
+  "`$global:LASTEXITCODE = 1`n& '$($buildScript -replace "'", "''")' $($quoted -join ' ')`nexit `$LASTEXITCODE"
+}
+
 # Arguments common to the stage1 and stage2 builds, including any caller-supplied $properties.
 $commonBuildArgs = @('-configuration', $configuration) + $properties
 
 # Forward the argument if supplied. Needs to be done for all above explicit parameters that should be passed to the build.
+if ($verbosity) {
+  $commonBuildArgs += '-verbosity'
+  $commonBuildArgs += $verbosity
+}
+
 if ($msbuildEngine) {
   $commonBuildArgs += '-msbuildEngine'
   $commonBuildArgs += $msbuildEngine
@@ -53,11 +74,12 @@ if ($test -and -not $stage2) {
 }
 
 # Log the stage 1 build command so that it's clear which arguments flow to it.
+$stage1Command = Get-BuildCommand $buildArgs
 if ($stage2) {
-  Write-Host "Stage 1 build: & `"$buildScript`" $buildArgs"
+  Write-Host "Stage 1 build: $stage1Command"
 }
 
-& $pwshPath -NoLogo -NoProfile -ExecutionPolicy ByPass -File "$buildScript" @buildArgs
+& $pwshPath -NoLogo -NoProfile -ExecutionPolicy ByPass -Command $stage1Command
 
 if (-not $stage2) {
   exit $LASTEXITCODE
@@ -160,8 +182,9 @@ if ($test) {
 
 $stage2BuildArgs += $stage2Args
 
-Write-Host "Stage 2 build: & `"$buildScript`" $stage2BuildArgs"
+$stage2Command = Get-BuildCommand $stage2BuildArgs
+Write-Host "Stage 2 build: $stage2Command"
 # Needs to run out-of-proc to not inherit the stage 1 build's state variables.
-& $pwshPath -NoLogo -NoProfile -ExecutionPolicy ByPass -File "$buildScript" @stage2BuildArgs
+& $pwshPath -NoLogo -NoProfile -ExecutionPolicy ByPass -Command $stage2Command
 
 exit $LASTEXITCODE

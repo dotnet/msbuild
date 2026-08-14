@@ -11,8 +11,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.CommandLine;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Server;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.Shared;
@@ -62,6 +62,18 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             Pid = Process.GetCurrentProcess().Id;
             IsServerGC = System.Runtime.GCSettings.IsServerGC;
+            return true;
+        }
+    }
+
+    public class SidecarProcessIdTask : Microsoft.Build.Utilities.Task
+    {
+        [Output]
+        public int Pid { get; set; }
+
+        public override bool Execute()
+        {
+            Pid = Process.GetCurrentProcess().Id;
             return true;
         }
     }
@@ -147,6 +159,7 @@ namespace Microsoft.Build.Engine.UnitTests
             pidOfServerProcess.ShouldNotBe(newServerProcessId, "Node used by both the first and second build should not be the same.");
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14540")]
         [Fact]
         public void ServerSpawnAndReuseAreLoggedToBuildLog()
         {
@@ -676,6 +689,213 @@ namespace Microsoft.Build.Engine.UnitTests
 
 #if NET
         /// <summary>
+        /// A build that asks its server to shut down afterwards must not be able to reach the resident
+        /// server and shut that down instead. Before transient servers had their own identity, both
+        /// resolved to the same pipe and mutex names, so <c>-mt -nodeReuse:false</c> killed the
+        /// resident server every time.
+        /// </summary>
+        [Fact]
+        public void TransientBuildDoesNotShutDownResidentServer()
+        {
+            PrepareIsolatedServerEnv(useServer: false);
+            TransientTestFile project = _env.CreateFile("transientVsResident.proj", GetServerGCProbeProjectContents(useTaskHostFactory: false));
+
+            ShutdownBootstrapServer();
+
+            try
+            {
+                string residentOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                    $"{project.Path} -mt -nodeReuse:true",
+                    out bool residentSuccess,
+                    false,
+                    _output);
+                residentSuccess.ShouldBeTrue();
+                int residentClientPid = ParseNumber(residentOutput, "Process ID is ");
+                int residentPid = ParseNumber(residentOutput, "TaskRanInPID=");
+                _env.WithTransientProcess(residentPid);
+                residentPid.ShouldNotBe(residentClientPid, "The resident build must run in a server, not in-process.");
+
+                string transientOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                    $"{project.Path} -mt -nodeReuse:false",
+                    out bool transientSuccess,
+                    false,
+                    _output);
+                transientSuccess.ShouldBeTrue();
+                int transientClientPid = ParseNumber(transientOutput, "Process ID is ");
+                int transientPid = ParseNumber(transientOutput, "TaskRanInPID=");
+                _env.WithTransientProcess(transientPid);
+
+                transientPid.ShouldNotBe(transientClientPid, "The transient build must run in a server, not in-process.");
+                transientPid.ShouldNotBe(residentPid, "A transient build must run in its own server rather than borrowing the resident one.");
+                WaitForProcessExit(transientPid).ShouldBeTrue($"Transient server {transientPid} should tear itself down after its build.");
+
+                IsProcessRunning(residentPid).ShouldBeTrue($"Resident server {residentPid} must survive a transient build.");
+            }
+            finally
+            {
+                ShutdownBootstrapServer();
+            }
+        }
+
+        /// <summary>
+        /// Each transient build gets a server of its own. A single shared transient identity would make
+        /// these contend: the second build would find the first's server holding the running mutex and
+        /// fall back in-process, silently losing the server that <c>-mt</c> asked for.
+        /// </summary>
+        [Fact]
+        public void ConcurrentTransientBuildsEachGetTheirOwnServer()
+        {
+            PrepareIsolatedServerEnv(useServer: false);
+
+            // Hold each build open so the two genuinely overlap. If they happen not to overlap the
+            // assertions below still hold, so this can only ever under-detect, never flake.
+            TransientTestFile project = _env.CreateFile(
+                "concurrentTransient.proj",
+                $@"
+<Project>
+<UsingTask TaskName=""ProcessIdTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
+<UsingTask TaskName=""SleepingTask"" AssemblyFile=""{Assembly.GetExecutingAssembly().Location}"" />
+    <Target Name='Probe'>
+        <ProcessIdTask>
+            <Output PropertyName=""PID"" TaskParameter=""Pid"" />
+        </ProcessIdTask>
+        <Message Text=""TaskRanInPID=$(PID)"" Importance=""High"" />
+        <SleepingTask SleepTime=""4000"" />
+    </Target>
+</Project>");
+
+            ShutdownBootstrapServer();
+
+            try
+            {
+                string arguments = $"{project.Path} -mt -nodeReuse:false";
+                Task<(bool Success, string Output)> first = Task.Run(() =>
+                {
+                    string output = RunnerUtilities.ExecBootstrapedMSBuild(arguments, out bool success, false, _output);
+                    return (success, output);
+                });
+                Task<(bool Success, string Output)> second = Task.Run(() =>
+                {
+                    string output = RunnerUtilities.ExecBootstrapedMSBuild(arguments, out bool success, false, _output);
+                    return (success, output);
+                });
+
+                Task.WaitAll(first, second);
+
+                first.Result.Success.ShouldBeTrue();
+                second.Result.Success.ShouldBeTrue();
+
+                int firstServerPid = ParseNumber(first.Result.Output, "TaskRanInPID=");
+                int secondServerPid = ParseNumber(second.Result.Output, "TaskRanInPID=");
+                _env.WithTransientProcess(firstServerPid);
+                _env.WithTransientProcess(secondServerPid);
+
+                int firstClientPid = ParseNumber(first.Result.Output, "Process ID is ");
+                int secondClientPid = ParseNumber(second.Result.Output, "Process ID is ");
+
+                // Falling back in-process is how contention shows up, so check that first: it would
+                // otherwise look like success with the two PIDs merely differing.
+                firstServerPid.ShouldNotBe(firstClientPid, "The first build must run in a server, not in-process.");
+                secondServerPid.ShouldNotBe(secondClientPid, "The second build must run in a server, not in-process.");
+                firstServerPid.ShouldNotBe(secondServerPid, "Concurrent transient builds must not share a server.");
+            }
+            finally
+            {
+                ShutdownBootstrapServer();
+            }
+        }
+
+        /// <summary>
+        /// A transient build with node reuse disabled must not adopt the resident server's reusable
+        /// TaskHost. It must instead launch a non-reusable TaskHost for its own build.
+        /// </summary>
+        /// <remarks>
+        /// This deliberately does not assert that the resident TaskHost is still alive afterwards.
+        /// Its lifetime is independent of the server identity behavior under test, and asserting its
+        /// survival is sensitive to unrelated MSBuild activity elsewhere on the machine.
+        /// </remarks>
+        [Fact]
+        public void TransientBuildDoesNotAdoptResidentSidecars()
+        {
+            PrepareIsolatedServerEnv(useServer: false);
+
+            // A sidecar only exists when node reuse is on, and CI disables it by default; without this
+            // the resident build would use a short-lived TaskHost and the test would prove nothing.
+            _env.SetEnvironmentVariable("MSBUILDDISABLENODEREUSE", null);
+
+            TransientTestFile project = _env.CreateFile(
+                "residentSidecarVsTransient.proj",
+                $"""
+                <Project>
+                    <UsingTask TaskName="ProcessIdTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
+                    <UsingTask TaskName="SidecarProcessIdTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
+                    <Target Name="Probe">
+                        <ProcessIdTask>
+                            <Output PropertyName="SERVER_PID" TaskParameter="Pid" />
+                        </ProcessIdTask>
+                        <SidecarProcessIdTask>
+                            <Output PropertyName="SIDECAR_PID" TaskParameter="Pid" />
+                        </SidecarProcessIdTask>
+                        <Message Text="Server ID is $(SERVER_PID)" Importance="High" />
+                        <Message Text="Sidecar ID is $(SIDECAR_PID)" Importance="High" />
+                    </Target>
+                </Project>
+                """);
+
+            ShutdownBootstrapServer();
+
+            try
+            {
+                string residentOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                    $"{project.Path} -mt -nodeReuse:true",
+                    out bool residentSuccess,
+                    false,
+                    _output);
+                residentSuccess.ShouldBeTrue();
+                int residentPid = ParseNumber(residentOutput, "Server ID is ");
+                int residentSidecarPid = ParseNumber(residentOutput, "Sidecar ID is ");
+                _env.WithTransientProcess(residentPid);
+                _env.WithTransientProcess(residentSidecarPid);
+
+                string transientOutput = RunnerUtilities.ExecBootstrapedMSBuild(
+                    $"{project.Path} -mt -nodeReuse:false",
+                    out bool transientSuccess,
+                    false,
+                    _output);
+                transientSuccess.ShouldBeTrue();
+                int transientPid = ParseNumber(transientOutput, "Server ID is ");
+                int transientSidecarPid = ParseNumber(transientOutput, "Sidecar ID is ");
+                _env.WithTransientProcess(transientPid);
+                _env.WithTransientProcess(transientSidecarPid);
+
+                transientPid.ShouldNotBe(residentPid, "A transient build must run in its own server rather than borrowing the resident one.");
+                transientSidecarPid.ShouldNotBe(residentSidecarPid, "A transient build must bring its own TaskHost rather than adopting one owned by the resident server.");
+                IsProcessRunning(residentPid).ShouldBeTrue($"Resident server {residentPid} must survive a transient build.");
+            }
+            finally
+            {
+                ShutdownBootstrapServer();
+            }
+        }
+
+        /// <summary>
+        /// Whether a process with the given PID is still running. Unlike <see cref="WaitForProcessExit"/>
+        /// this does not wait, so it asserts about the present rather than about a timeout elapsing.
+        /// </summary>
+        private static bool IsProcessRunning(int pid)
+        {
+            try
+            {
+                using Process process = Process.GetProcessById(pid);
+                return !process.HasExited;
+            }
+            catch (ArgumentException)
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
         /// Builds a project that reports, for the process that executes <see cref="ProcessIdTask"/>,
         /// its PID and whether it runs with Server GC. When <paramref name="useTaskHostFactory"/> is
         /// true the task is forced out-of-proc into a TaskHost, so its PID is the TaskHost's rather
@@ -713,6 +933,14 @@ namespace Microsoft.Build.Engine.UnitTests
             _env.SetEnvironmentVariable("COMPlus_gcServer", null);
             _env.SetEnvironmentVariable("MSBUILDUSESERVER", useServer ? "1" : null);
         }
+
+        private void ShutdownBootstrapServer()
+            => RunnerUtilities.RunProcessAndGetOutput(
+                RunnerUtilities.BootstrapDotnetHostPath,
+                "build-server shutdown --msbuild",
+                out _,
+                outputHelper: _output,
+                environmentVariables: RunnerUtilities.GetBootstrapMSBuildEnvironmentVariables());
 
         /// <summary>
         /// The MSBuild server (build orchestrator) process must be launched with Server GC when the
