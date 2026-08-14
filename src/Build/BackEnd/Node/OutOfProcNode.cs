@@ -715,6 +715,8 @@ namespace Microsoft.Build.Execution
             // Grab the system parameters.
             _buildParameters = configuration.BuildParameters;
 
+            s_projectRootElementCacheBase.SetParserIgnoreConfiguration(configuration.BuildParameters.ParserIgnoreConfiguration);
+
             _buildParameters.ProjectRootElementCache = s_projectRootElementCacheBase;
 
             // Snapshot the current environment

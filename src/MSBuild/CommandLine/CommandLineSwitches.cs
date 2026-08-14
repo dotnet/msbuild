@@ -121,6 +121,7 @@ namespace Microsoft.Build.CommandLine.Experimental
             MultiThreaded,
             ParentPacketVersion,
             NoLogo,
+            ServerInstanceId,
             // This has to be kept as last enum value
             NumberOfParameterizedSwitches,
         }
@@ -297,7 +298,8 @@ namespace Microsoft.Build.CommandLine.Experimental
             new ParameterizedSwitchInfo(  ["featureAvailability", "fa"],        ParameterizedSwitch.FeatureAvailability,        null,                           true,           "MissingFeatureAvailabilityError",     true,   false,   "HelpMessage_46_FeatureAvailabilitySwitch"),
             new ParameterizedSwitchInfo(  ["multithreaded", "mt"],              ParameterizedSwitch.MultiThreaded,              null,                           false,          null,                                  true,   false,   "HelpMessage_49_MultiThreadedSwitch"),
             new ParameterizedSwitchInfo(  ["parentpacketversion"],              ParameterizedSwitch.ParentPacketVersion,        null,                           false,          null,                                  false,  false,   null),
-            new ParameterizedSwitchInfo(  ["nologo"],                           ParameterizedSwitch.NoLogo,                     null,                           false,          null,                                  true,   false,   "HelpMessage_5_NoLogoSwitch")
+            new ParameterizedSwitchInfo(  ["nologo"],                           ParameterizedSwitch.NoLogo,                     null,                           false,          null,                                  true,   false,   "HelpMessage_5_NoLogoSwitch"),
+            new ParameterizedSwitchInfo(  ["serverinstanceid"],                 ParameterizedSwitch.ServerInstanceId,           null,                           false,          null,                                  false,  false,   null)
             // Add to ParameterizedSwitch enum (before NumberOfParameterizedSwitches):
         };
 
@@ -473,7 +475,8 @@ namespace Microsoft.Build.CommandLine.Experimental
                     is not ParameterizedSwitch.Project
                     and not ParameterizedSwitch.NodeMode
                     and not ParameterizedSwitch.Check
-                    and not ParameterizedSwitch.ParentPacketVersion)
+                    and not ParameterizedSwitch.ParentPacketVersion
+                    and not ParameterizedSwitch.ServerInstanceId)
                 {
                     Debug.Assert(!string.IsNullOrEmpty(s_parameterizedSwitchesMap[i].resourceId), "All parameterized switches should be cross-checked against the help message strings except from project switch");
                 }
@@ -714,13 +717,11 @@ namespace Microsoft.Build.CommandLine.Experimental
 
         /// <summary>
         /// Checks if the provided multiple valued parametrized switch needs to be unquoted.
-        /// The method will return 'true' in case:
-        ///     The changewave 17.10 is not set and
-        ///     The parametrized switch is 'Target'
+        /// The method will return 'true' in case the parametrized switch is 'Target'.
         /// </summary>
         private bool IsMultipleAllowedSwitchParameterDueToUnquote(bool unquoteParameter, ParameterizedSwitch parameterizedSwitch)
         {
-            if (!unquoteParameter || !Traits.Instance.EscapeHatches.UnquoteTargetSwitchParameters)
+            if (!unquoteParameter)
             {
                 return false;
             }

@@ -25,7 +25,6 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Experimental;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.ProjectCache;
 using Microsoft.Build.Framework;
@@ -33,6 +32,7 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Graph;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Logging;
+using Microsoft.Build.Server;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 using Microsoft.Build.Shared.FileSystem;
@@ -313,7 +313,7 @@ namespace Microsoft.Build.CommandLine
             // Perform the single authoritative command-line parse for this process. It yields:
             //   - canRunServer: whether the command line is compatible with hosting the build on the server;
             //   - multiThreaded: the response-file-aware /mt determination (includes the auto-response file,
-            //     any project Directory.Build.rsp, @response files, and MSBUILDFORCEMULTITHREADED);
+            //     any project Directory.Build.rsp, @response files, and the multi-threading environment variables);
             //   - shutdownServerAfterBuild: whether the server must tear itself down after this build;
             //   - the gathered switches, which the in-proc build path below reuses so it does not re-parse.
             bool canRunServer = CanRunServerBasedOnCommandLineSwitches(
@@ -388,7 +388,7 @@ namespace Microsoft.Build.CommandLine
         /// <param name="commandLine">Raw command-line arguments.</param>
         /// <param name="multiThreaded">Set to whether this is a multithreaded (/mt) build, determined from
         /// the fully-parsed switches (which expand response files - including any project <c>Directory.Build.rsp</c> -
-        /// and honor MSBUILDFORCEMULTITHREADED) using the same logic as the in-proc build path.</param>
+        /// and honor the multi-threading environment variables) using the same logic as the in-proc build path.</param>
         /// <param name="shutdownServerAfterBuild">Set to <see langword="true"/> when the server should tear itself
         /// down after this build instead of staying resident for reuse.</param>
         /// <param name="switchesFromAutoResponseFile">The gathered response-file switches (auto-response file plus any
@@ -1511,6 +1511,19 @@ namespace Microsoft.Build.CommandLine
         private static void ResetBuildState()
         {
             commandLineParser.ResetGatheringSwitchesState();
+            s_globalMessagesToLogInBuildLoggers.Clear();
+
+            if (s_originalProcessPriority is { } originalProcessPriority)
+            {
+                try
+                {
+                    using Process currentProcess = Process.GetCurrentProcess();
+                    currentProcess.PriorityClass = originalProcessPriority;
+                    s_originalProcessPriority = null;
+                }
+                // Restoring priority can fail due to platform permissions; priority changes are best effort.
+                catch (Win32Exception) { }
+            }
         }
 
         /// <summary>
@@ -1535,6 +1548,11 @@ namespace Microsoft.Build.CommandLine
         /// List of messages to be sent to the logger when it is attached
         /// </summary>
         private static readonly List<BuildManager.DeferredBuildMessage> s_globalMessagesToLogInBuildLoggers = new();
+
+        /// <summary>
+        /// The process priority to restore after a low-priority build.
+        /// </summary>
+        private static ProcessPriorityClass? s_originalProcessPriority;
 
         /// <summary>
         /// The original console output mode if we changed it as part of initialization.
@@ -1685,7 +1703,8 @@ namespace Microsoft.Build.CommandLine
                     enableTargetOutputLogging: isTaskAndTargetItemLoggingRequired,
                     loadProjectsReadOnly: !isPreprocess,
                     useAsynchronousLogging: true,
-                    reuseProjectRootElementCache: s_isServerNode);
+                    reuseProjectRootElementCache: s_isServerNode,
+                    parseConfigDirectory: Path.GetDirectoryName(Path.GetFullPath(projectFile)));
 
                 // globalProperties collection contains values only from CommandLine at this stage populated by ProcessCommandLineSwitches
                 projectCollection.PropertiesFromCommandLine = [.. globalProperties.Keys];
@@ -2483,6 +2502,7 @@ namespace Microsoft.Build.CommandLine
                     using Process currentProcess = Process.GetCurrentProcess();
                     if (currentProcess.PriorityClass != ProcessPriorityClass.Idle)
                     {
+                        s_originalProcessPriority ??= currentProcess.PriorityClass;
                         currentProcess.PriorityClass = ProcessPriorityClass.BelowNormal;
                     }
                 }
@@ -2743,14 +2763,21 @@ namespace Microsoft.Build.CommandLine
 
         internal static bool IsMultiThreadedEnabled(CommandLineSwitches commandLineSwitches)
         {
-            // Allow forcing multi-threaded mode via an environment variable, for example to opt in
-            // without modifying command lines (parallel to MSBUILDDISABLENODEREUSE for /nodeReuse).
+            // MSBUILDFORCEMULTITHREADED is authoritative: it wins over an explicit -mt:false.
             if (Traits.Instance.ForceMultiThreaded)
             {
                 return true;
             }
 
-            return commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded);
+            if (commandLineSwitches.IsParameterizedSwitchSet(CommandLineSwitches.ParameterizedSwitch.MultiThreaded))
+            {
+                return ProcessBooleanSwitch(
+                    commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MultiThreaded],
+                    defaultValue: true,
+                    resourceName: "InvalidMultiThreadedValue");
+            }
+
+            return Traits.Instance.EnableMultiThreaded;
         }
 
         private static bool ProcessTerminalLoggerConfiguration(CommandLineSwitches commandLineSwitches, out string aggregatedParameters)
@@ -2991,7 +3018,7 @@ namespace Microsoft.Build.CommandLine
             return automatedEnvironmentVariables.Any(envVar => !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(envVar)));
         }
 
-        private static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)
+        internal static CommandLineSwitches CombineSwitchesRespectingPriority(CommandLineSwitches switchesFromAutoResponseFile, CommandLineSwitches switchesNotFromAutoResponseFile, string commandLine)
         {
             // combine the auto-response file switches with the command line switches in a left-to-right manner, where the
             // auto-response file switches are on the left (default options), and the command line switches are on the
@@ -3124,6 +3151,18 @@ namespace Microsoft.Build.CommandLine
 
             return parentPacketVersion;
         }
+
+        /// <summary>
+        /// Processes the server instance id switch, which a client passes to the transient server it
+        /// launches for its own exclusive use. Both sides fold it into the pipe and mutex names, so a
+        /// transient server is unreachable by anyone else.
+        /// </summary>
+        /// <param name="parameters">The command line parameters for the switch.</param>
+        /// <returns>The instance id, or null for the resident server.</returns>
+        internal static string ProcessServerInstanceIdSwitch(string[] parameters)
+            => parameters.Length > 0 && !string.IsNullOrEmpty(parameters[parameters.Length - 1])
+                ? parameters[parameters.Length - 1]
+                : null;
 
         /// <summary>
         /// Processes the node reuse switch, the user can set node reuse to true, false or not set the switch. If the switch is
@@ -3415,7 +3454,7 @@ namespace Microsoft.Build.CommandLine
                             return (exitCode, exitType.ToString());
                         };
 
-                        OutOfProcServerNode serverNode = new(buildFunction);
+                        OutOfProcServerNode serverNode = new(buildFunction, ProcessServerInstanceIdSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.ServerInstanceId]));
 
                         s_isServerNode = true;
                         shutdownReason = serverNode.Run(out nodeException);
@@ -4669,15 +4708,7 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private static void ShowVersion()
         {
-            // Change Version switch output to finish with a newline https://github.com/dotnet/msbuild/pull/9485
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-            {
-                Console.WriteLine(ProjectCollection.Version.ToString());
-            }
-            else
-            {
-                Console.Write(ProjectCollection.Version.ToString());
-            }
+            Console.WriteLine(ProjectCollection.Version.ToString());
         }
 
         private static void ShowFeatureAvailability(string[] features)
