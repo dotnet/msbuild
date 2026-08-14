@@ -16,6 +16,16 @@ namespace Microsoft.Build.UnitTests
 {
     public class DebugUtils_Tests
     {
+        [UnixOnlyFact]
+        public void UppercaseDebugEngineEnvironmentVariableEnablesDebugEngine()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBuildDebugEngine", null);
+            env.SetEnvironmentVariable("MSBUILDDEBUGENGINE", "1");
+
+            new Traits().DebugEngine.ShouldBeTrue();
+        }
+
         [Fact]
         public void DumpExceptionToFileShouldWriteInDebugDumpPath()
         {

@@ -203,7 +203,10 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public readonly bool EmitLogsAsMessage = string.Equals(Environment.GetEnvironmentVariable(MSBuildLoggingArgsLevelEnvVarName), "message", StringComparison.OrdinalIgnoreCase);
 
-        public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
+        public readonly bool DebugEngine =
+            !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine")) ||
+            (!NativeMethods.IsWindows &&
+             !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGENGINE")));
         public readonly bool DebugScheduler;
         public readonly bool DebugNodeCommunication;
         public readonly bool DebugUnitTests = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugUnitTests"));
