@@ -92,10 +92,10 @@ fi
 
 # Log the stage 1 build command so that it's clear which arguments flow to it.
 if [ "$stage2" = true ]; then
-  echo "Stage 1 build: bash \"$build_script\" ${build_args[*]}"
+  printf 'Stage 1 build: %q %q %s\n' "$BASH" "$build_script" "$(printf '%q ' "${build_args[@]}")"
 fi
 
-bash "$build_script" "${build_args[@]}"
+"$BASH" "$build_script" "${build_args[@]}"
 stage1_exit_code=$?
 
 if [ "$stage2" != true ]; then
@@ -174,7 +174,7 @@ fi
 # until a stable version of MT is available in the images.
 stage2_build_args+=( ${stage2Arguments[@]+"${stage2Arguments[@]}"} )
 
-echo "Stage 2 build: bash \"$build_script\" ${stage2_build_args[*]}"
+printf 'Stage 2 build: %q %q %s\n' "$BASH" "$build_script" "$(printf '%q ' "${stage2_build_args[@]}")"
 # Needs to run out-of-proc to not inherit the stage 1 build's state variables.
-bash "$build_script" "${stage2_build_args[@]}"
+"$BASH" "$build_script" "${stage2_build_args[@]}"
 exit $?
