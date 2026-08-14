@@ -8,9 +8,7 @@
 // implemented by oleaut32.dll.
 
 using System;
-#if NET
 using System.Runtime.CompilerServices;
-#endif
 using Windows.Win32;
 using Windows.Win32.Foundation;
 
@@ -42,7 +40,11 @@ internal unsafe struct ICreateTypeLib : IComIID
         get => ref Unsafe.AsRef(in IID_ICreateTypeLib);
     }
 #else
-    readonly Guid IComIID.Guid => IID_ICreateTypeLib;
+    readonly ref readonly Guid IComIID.Guid
+    {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        get => ref Unsafe.AsRef(in IID_ICreateTypeLib);
+    }
 #endif
 
     private readonly void** _lpVtbl;

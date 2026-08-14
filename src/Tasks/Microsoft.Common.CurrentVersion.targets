@@ -42,6 +42,21 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
   <Import Project="$(CustomBeforeMicrosoftCommonTargets)" Condition="'$(CustomBeforeMicrosoftCommonTargets)' != '' and Exists('$(CustomBeforeMicrosoftCommonTargets)')"/>
 
+  <!--
+       TarDirectory and Untar rely on System.Formats.Tar, which is only available on .NET (not .NET Framework), so they are
+       compiled only into the .NETCoreApp tasks assembly. On Core MSBuild they load in-proc and are registered in
+       Microsoft.Common.tasks. On .NET Framework MSBuild they are absent from the netfx tasks assembly, so under the .NET SDK
+       we point at the SDK's .NETCoreApp tasks assembly and dispatch them into the .NET TaskHost via Runtime="NET".
+
+       These registrations cannot live in Microsoft.Common.tasks: that is the *default tasks* file, which is evaluated once per
+       toolset and shared by every project in the build, so it only ever sees environment, reserved, toolset and global
+       properties (see Toolset.InitializeProperties). $(NetCoreSdkRoot) and $(NETCoreSdkVersion) are
+       per-project SDK properties and are empty there, which silently disables the registration. Here they are evaluated as part
+       of normal project evaluation, after the .NET SDK props have run, so they resolve correctly.
+  -->
+  <UsingTask TaskName="Microsoft.Build.Tasks.TarDirectory" AssemblyFile="$(NetCoreSdkRoot)Microsoft.Build.Tasks.Core.dll" Runtime="NET" Condition="'$(MSBuildRuntimeType)' == 'Full' and '$(NetCoreSdkRoot)' != '' and '$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '11'))" />
+  <UsingTask TaskName="Microsoft.Build.Tasks.Untar" AssemblyFile="$(NetCoreSdkRoot)Microsoft.Build.Tasks.Core.dll" Runtime="NET" Condition="'$(MSBuildRuntimeType)' == 'Full' and '$(NetCoreSdkRoot)' != '' and '$(NETCoreSdkVersion)' != '' and $([MSBuild]::VersionGreaterThanOrEquals('$(NETCoreSdkVersion)', '11'))" />
+
   <!-- By default, we are creating a managed app because .NET 2.0 projects did not have this property. -->
   <PropertyGroup Condition="'$(TargetRuntime)' == ''">
     <TargetRuntime>Managed</TargetRuntime>
@@ -1387,11 +1402,11 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     <!-- RESOURCE ITEMS -->
     <AssignLinkMetadata Items="@(Resource)"
-                        Condition="'@(Resource)' != '' and '%(Resource.DefiningProjectFullPath)' != '$(MSBuildProjectFullPath)' and $([MSBuild]::AreFeaturesEnabled('17.10'))">
+                        Condition="'@(Resource)' != '' and '%(Resource.DefiningProjectFullPath)' != '$(MSBuildProjectFullPath)'">
       <Output TaskParameter="OutputItems" ItemName="_Temp" />
     </AssignLinkMetadata>
 
-    <ItemGroup Condition="$([MSBuild]::AreFeaturesEnabled('17.10'))">
+    <ItemGroup>
       <Resource Remove="@(_Temp)" />
       <Resource Include="@(_Temp)" />
       <_Temp Remove="@(_Temp)" />
@@ -4931,6 +4946,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+      <Output TaskParameter="WroteAtLeastOneFile" PropertyName="_WroteMainAssemblyToOutputDirectory"/>
 
     </Copy>
 
@@ -4947,6 +4963,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </CopyRefAssembly>
 
     <Message Importance="High" Text="$(MSBuildProjectName) -&gt; @(MainAssembly->'%(FullPath)')" Condition="'$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)'!='true'" />
+
+    <!--
+      Advance the marker considered by projects that reference this one during their up-to-date
+      checks. It must move forward when either:
+        * this project produces reference assemblies and its implementation assembly changed on
+          this build (referencing projects may need to copy the updated implementation), or
+        * copy-local (possibly transitive) references were actually copied on this build, as
+          captured by _CopyFilesMarkedCopyLocal in $(_CopyLocalReferencesCopiedInThisBuild).
+      Both signals are OR'd into this single Touch so the marker is written at most once per
+      build. _CopyFilesMarkedCopyLocal is a DependsOnTargets dependency of this target, so its
+      capture always runs before this Touch.
+    -->
+    <Touch Files="@(CopyUpToDateMarker)"
+      AlwaysCreate="true"
+      Condition="('$(ProduceReferenceAssembly)' == 'true' and '$(_WroteMainAssemblyToOutputDirectory)' == 'true') or '$(_CopyLocalReferencesCopiedInThisBuild)' == 'true'" />
+
+    <ItemGroup Condition="'$(ProduceReferenceAssembly)' == 'true'">
+      <FileWrites Include="@(CopyUpToDateMarker)" />
+    </ItemGroup>
 
     <!-- Copy the additional modules. -->
     <Copy
@@ -5111,13 +5146,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     </Copy>
 
-    <!-- If this project produces reference assemblies *and* copied (possibly transitive)
-         references on this build, subsequent builds of projects that depend on it must
-         not be considered up to date, so touch this marker file that is considered an
-         input to projects that reference this one. -->
-    <Touch Files="@(CopyUpToDateMarker)"
-      AlwaysCreate="true"
-      Condition="'@(ReferencesCopiedInThisBuild)' != '' and '$(WroteAtLeastOneFile)' == 'true'" />
+    <!-- Record whether copy-local (possibly transitive) references were actually copied on this
+         build. When they were, projects that depend on this one must not be considered up to date.
+         The marker file that carries that signal is touched once, later, in CopyFilesToOutputDirectory
+         (which depends on this target), so the same file isn't written twice in a normal build. -->
+    <PropertyGroup>
+      <_CopyLocalReferencesCopiedInThisBuild Condition="'@(ReferencesCopiedInThisBuild)' != '' and '$(WroteAtLeastOneFile)' == 'true'">true</_CopyLocalReferencesCopiedInThisBuild>
+    </PropertyGroup>
 
     <ItemGroup>
       <FileWrites Include="@(CopyUpToDateMarker)" />
@@ -5182,6 +5217,63 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     <!-- Enforce 1 level deep content copying by replacing the recursive content target with the target that retrieves the content for the current project only. -->
     <_RecursiveTargetForContentCopying Condition=" '$(MSBuildCopyContentTransitively)' == 'false' ">_GetCopyToOutputDirectoryItemsFromThisProject</_RecursiveTargetForContentCopying>
   </PropertyGroup>
+
+  <!--
+    ============================================================
+                                        ProjectReferenceTargets for Static Graph
+
+    Define the project-to-project calling patterns for graph builds.
+    These items tell the static graph which targets a project calls
+    on its referenced projects for Build, Clean, and Rebuild.
+
+    These must accurately describe the MSBuild task calls in:
+      - ResolveProjectReferences (Build / GetTargetPath + GetNativeManifest)
+      - GetCopyToOutputDirectoryItems (_RecursiveTargetForContentCopying)
+      - CleanReferencedProjects (Clean)
+      - Rebuild (Clean + Build)
+
+    SDKs can extend these by appending to the ProjectReferenceTargetsFor*
+    properties before this evaluation, or by adding additional
+    ProjectReferenceTargets items after import.
+    ============================================================
+  -->
+  <!--
+      Properties for extension of ProjectReferenceTargets.
+      Append any current value which may have been provided in a Directory.Build.props since the intent was likely to append, not prepend.
+  -->
+  <PropertyGroup Condition="'$(IsGraphBuild)' == 'true' and '$(IsCrossTargetingBuild)' != 'true'">
+    <!-- Empty case is for builds which do not import the target files that set BuildProjectReferences -->
+    <_MainReferenceTargetForBuild Condition="'$(BuildProjectReferences)' == '' or '$(BuildProjectReferences)' == 'true'">.projectReferenceTargetsOrDefaultTargets</_MainReferenceTargetForBuild>
+    <_MainReferenceTargetForBuild Condition="'$(_MainReferenceTargetForBuild)' == ''">GetTargetPath</_MainReferenceTargetForBuild>
+
+    <ProjectReferenceTargetsForBuild>$(_MainReferenceTargetForBuild);GetNativeManifest;$(_RecursiveTargetForContentCopying);$(ProjectReferenceTargetsForBuild)</ProjectReferenceTargetsForBuild>
+  </PropertyGroup>
+  <!-- Cross-targeting outer builds define their protocol in Microsoft.Common.CrossTargeting.targets -->
+  <PropertyGroup Condition="'$(IsGraphBuild)' == 'true'">
+    <ProjectReferenceTargetsForClean>Clean;$(ProjectReferenceTargetsForClean)</ProjectReferenceTargetsForClean>
+    <ProjectReferenceTargetsForRebuild>$(ProjectReferenceTargetsForClean);$(ProjectReferenceTargetsForBuild);$(ProjectReferenceTargetsForRebuild)</ProjectReferenceTargetsForRebuild>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsGraphBuild)' == 'true'">
+    <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuildInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForBuildInOuterBuild)' != '' " OuterBuild="true" />
+    <ProjectReferenceTargets Include="Build" Targets="GetTargetFrameworks" OuterBuild="true" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
+    <ProjectReferenceTargets Include="Build" Targets="$(ProjectReferenceTargetsForBuild)" Condition=" '$(ProjectReferenceTargetsForBuild)' != '' " />
+
+    <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForCleanInOuterBuild)" Condition=" '$(ProjectReferenceTargetsForCleanInOuterBuild)' != '' " OuterBuild="true" />
+    <ProjectReferenceTargets Include="Clean" Targets="GetTargetFrameworks" OuterBuild="true" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
+    <ProjectReferenceTargets Include="Clean" Targets="$(ProjectReferenceTargetsForClean)" Condition=" '$(ProjectReferenceTargetsForClean)' != '' " />
+
+    <!--
+     Note: SkipNonexistentTargets="true" on the following three items means that an outer build node's call to its existent
+     GetTargetFrameworks target will fail if its inner build nodes don't define GetTargetFrameworksWithPlatformForSingleTargetFramework.
+     This is necessary since the P2P protocol cannot express the targets called from the outer build to the inner build.
+     -->
+    <ProjectReferenceTargets Include="Build" Targets="GetTargetFrameworksWithPlatformForSingleTargetFramework" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
+    <ProjectReferenceTargets Include="Clean" Targets="GetTargetFrameworksWithPlatformForSingleTargetFramework" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
+    <ProjectReferenceTargets Include="Rebuild" Targets="GetTargetFrameworksWithPlatformForSingleTargetFramework" SkipNonexistentTargets="true" Condition="'$(IsCrossTargetingBuild)' != 'true'" />
+
+    <ProjectReferenceTargets Include="Rebuild" Targets="$(ProjectReferenceTargetsForRebuild)" Condition=" '$(ProjectReferenceTargetsForRebuild)' != '' " />
+  </ItemGroup>
 
   <Target Name="_PopulateCommonStateForGetCopyToOutputDirectoryItems">
     <!-- In the general case, clients need very little of the metadata which is generated by invoking this target on this project and its children.  For those

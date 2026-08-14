@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Collections
 {
@@ -42,8 +41,8 @@ namespace Microsoft.Build.Collections
         /// <param name="selector">function to translate items in the backing collection to the resulting type.</param>
         public CopyOnReadEnumerable(IEnumerable<TSource> backingEnumerable, object syncRoot, Func<TSource, TResult> selector)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(backingEnumerable);
-            ErrorUtilities.VerifyThrowArgumentNull(syncRoot);
+            ArgumentNullException.ThrowIfNull(backingEnumerable);
+            ArgumentNullException.ThrowIfNull(syncRoot);
 
             _backingEnumerable = backingEnumerable;
             _syncRoot = syncRoot;

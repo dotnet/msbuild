@@ -1,10 +1,10 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Diagnostics;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Logging;
 
@@ -133,7 +133,7 @@ internal class ReusableLogger : INodeLogger, IEventSource5
 
     public ReusableLogger(ILogger? originalLogger)
     {
-        ErrorUtilities.VerifyThrowArgumentNull(originalLogger);
+        ArgumentNullException.ThrowIfNull(originalLogger);
         _originalLogger = originalLogger!;
     }
 
@@ -338,7 +338,7 @@ internal class ReusableLogger : INodeLogger, IEventSource5
         }
         else
         {
-            ErrorUtilities.VerifyThrow(_buildTimeEventSource == null, "Already registered for build-time.");
+            Assumed.Null(_buildTimeEventSource, "Already registered for build-time.");
             _buildTimeEventSource = eventSource;
             UnregisterForEvents(_designTimeEventSource);
             RegisterForEvents(_buildTimeEventSource);
@@ -368,13 +368,35 @@ internal class ReusableLogger : INodeLogger, IEventSource5
         }
         else
         {
-            ErrorUtilities.VerifyThrow(_designTimeEventSource != null, "Already unregistered for design-time.");
+            Assumed.NotNull(_designTimeEventSource, "Already unregistered for design-time.");
             UnregisterForEvents(_designTimeEventSource!);
             _originalLogger.Shutdown();
         }
     }
 
     #endregion
+
+    /// <summary>
+    /// Reroutes the wrapped logger's subscriptions without reinitializing it.
+    /// </summary>
+    internal void RerouteActiveEventSource(IEventSource newEventSource)
+    {
+        ArgumentNullException.ThrowIfNull(newEventSource);
+
+        if (_buildTimeEventSource != null)
+        {
+            UnregisterForEvents(_buildTimeEventSource);
+            _buildTimeEventSource = newEventSource;
+            RegisterForEvents(_buildTimeEventSource);
+        }
+        else
+        {
+            Assumed.NotNull(_designTimeEventSource, "ReusableLogger must be initialized before its event source can be rerouted.");
+            UnregisterForEvents(_designTimeEventSource!);
+            _designTimeEventSource = newEventSource;
+            RegisterForEvents(_designTimeEventSource);
+        }
+    }
 
     /// <summary>
     /// Registers for all of the events on the specified event source.

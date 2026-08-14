@@ -22,20 +22,26 @@
         "vs17.14": {
             "MergeToBranch": "vs18.0"
         },
-        // Automate opening PRs to merge msbuild's vs18.0 (SDK 10.0.1xx) into vs18.3 (SDK 10.0.2xx, VS)
+        // Automate opening PRs to merge msbuild's vs18.0 (SDK 10.0.1xx) into vs18.6 (SDK 10.0.3xx, VS)
+        // vs18.3 (SDK 10.0.2xx) retired 2026-06: SDK band 10.0.2xx out of support (EoS May 2026) and VS 18.3 out of support.
         "vs18.0": {
-            "MergeToBranch": "vs18.3"
-        },
-        // Automate opening PRs to merge msbuild's vs18.3 (SDK 10.0.2xx) into vs18.6 (VS, SDK 10.0.3xx)
-        "vs18.3": {
             "MergeToBranch": "vs18.6"
         },
-        // Automate opening PRs to merge msbuild's vs18.6 (VS, SDK 10.0.3xx) into vs18.7 (VS)
+        // Automate opening PRs to merge msbuild's vs18.6 (VS, SDK 10.0.3xx) into vs18.8 (VS)
+        // vs18.7 (VS-only) retired 2026-07: VS 18.7 out of support (oldest serviced VS is 18.8 on rel/oobstable) and no SDK band is paired with it.
         "vs18.6": {
-            "MergeToBranch": "vs18.7"
+            "MergeToBranch": "vs18.8"
         },
-        // Automate opening PRs to merge msbuild's vs18.7 (VS, SDK 10.0.4xx) into main (VS canary, SDK main & next-feature-band)
-        "vs18.7": {
+        // Automate opening PRs to merge msbuild's vs18.8 (VS) into vs18.9 (VS, SDK 10.0.4xx)
+        "vs18.8": {
+            "MergeToBranch": "vs18.9"
+        },
+        // Automate opening PRs to merge msbuild's vs18.9 (VS, SDK 10.0.4xx) into vs18.10 (VS)
+        "vs18.9": {
+            "MergeToBranch": "vs18.10"
+        },
+        // Automate opening PRs to merge msbuild's vs18.10 (VS) into main (VS canary, SDK main & next-feature-band)
+        "vs18.10": {
             "MergeToBranch": "main"
         }
     }

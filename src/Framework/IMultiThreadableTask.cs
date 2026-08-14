@@ -29,7 +29,12 @@ namespace Microsoft.Build.Framework
         /// Gets or sets the task execution environment, which provides access to project current directory and environment variables in a thread-safe manner.
         /// </summary>
         /// <remarks>
-        /// This property is set on behalf of the Task by the MSBuild engine before the Task is executed. It should <strong>never</strong> be set by a Task itself.
+        /// The MSBuild engine sets this property on behalf of the task before the task is executed, so a task should
+        /// not overwrite it during execution. The one exception is constructor injection: if a task declares a public
+        /// constructor that takes a <see cref="TaskEnvironment"/>, the engine invokes that constructor with the current
+        /// environment, and the task is expected to assign this property from within it. This lets the task compute
+        /// environment-dependent default values during construction (property initializers run before the engine could
+        /// otherwise assign the property).
         /// </remarks>
         /// <value>Task environment which provides access to project current directory and environment variables.</value>
         TaskEnvironment TaskEnvironment { get; set; }

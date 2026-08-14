@@ -264,5 +264,37 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             Task.WaitAll(tasks);
         }
+
+        [Fact]
+        public void HasAssemblyAttributes_Batch_AgreesWithSingular()
+        {
+            // The batch overload was added to share a single GIT acquisition + GetAssemblyFromScope
+            // across multiple probes on the net472 path. It must return the same per-name result
+            // the singular `HasAssemblyAttribute(name)` overload returns. Mixes a known-present
+            // attribute (every SDK-built assembly has TargetFrameworkAttribute) with two clearly
+            // bogus names so both true and false outcomes are exercised in one call.
+            using MetadataReader reader = MetadataReader.Create(ThisAssemblyPath);
+            reader.ShouldNotBeNull();
+
+            string[] names =
+            [
+                "System.Runtime.Versioning.TargetFrameworkAttribute",
+                "Definitely.Not.A.Real.Attribute",
+                "Another.Missing.AttributeName",
+            ];
+
+            bool[] batch = new bool[names.Length];
+            reader.HasAssemblyAttributes(names, batch);
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                batch[i].ShouldBe(reader.HasAssemblyAttribute(names[i]), $"mismatch on '{names[i]}'");
+            }
+
+            // Sanity: the well-known one must be present and the bogus ones must be absent.
+            batch[0].ShouldBeTrue();
+            batch[1].ShouldBeFalse();
+            batch[2].ShouldBeFalse();
+        }
     }
 }

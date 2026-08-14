@@ -32,7 +32,7 @@ namespace Microsoft.Build.Framework
         /// <inheritdoc/>
         public AbsolutePath ProjectDirectory
         {
-            get => new AbsolutePath(NativeMethods.GetCurrentDirectory(), ignoreRootedCheck: true);
+            get => new AbsolutePath(Environment.CurrentDirectory, ignoreRootedCheck: true);
             set => NativeMethods.SetCurrentDirectory(value.Value);
         }
 

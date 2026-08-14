@@ -10,6 +10,12 @@ The opt-out comes in the form of setting the environment variable `MSBUILDDISABL
 
 The opt-out should be just a *temporary* workaround for a problem - as the feature will anyways become permanent eventually. For this reason - **please make sure to create or upvote a bug describing the issue making you opt-out**.
 
+### Change waves and reused processes
+
+`MSBUILDDISABLEFEATURESFROMVERSION` is read once per process, so a process that outlives a single build - a reused worker node or an MSBuild Server node - keeps the change wave it started with. To make sure every process taking part in a build agrees on the change wave, the resolved change wave is part of the node handshake: a node that resolved a different change wave refuses the connection and MSBuild starts a fresh one instead. Changing `MSBUILDDISABLEFEATURESFROMVERSION` between builds therefore starts new nodes rather than reusing the existing ones. Values that resolve to the same change wave (for example an unset variable and a value in an invalid format) still allow node reuse.
+
+Task hosts are deliberately left out of this. A task host connection can span two different MSBuild versions - most notably the .NET task host, where a .NET Framework parent such as Visual Studio talks to a child taken from the installed .NET SDK - and the resolved change wave is version-relative, because the environment variable is clamped and rounded into the wave list of whichever binary reads it. Two versions can therefore resolve the same variable to different waves. Unlike a worker node, a task host that fails the handshake cannot be replaced by a compatible one, since the parent can only relaunch the very same executable, so the build would fail with MSB4216. A task host consequently keeps the change wave it started with even across builds.
+
 ## When do they become permanent?
 
 A wave of features is eligible to "rotate out" (i.e. become standard functionality) six months after its release. For example, wave 16.8 stayed opt-out through wave 16.10, becoming standard functionality when wave 17.0 is introduced.
@@ -28,6 +34,21 @@ Change wave checks around features will be removed in the release that accompani
 # Change Waves & Associated Features
 
 ## Current Rotation of Change Waves
+
+### 18.11
+- [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs](https://github.com/dotnet/msbuild/pull/14285)
+- [Out-of-proc communication uses larger read-ahead buffers and pre-buffers TaskHost packet bodies to reduce pipe reads.](https://github.com/dotnet/msbuild/pull/14505)
+- [Restore no longer discards a ProjectRootElementCache that reloads changed files from disk, so the build that follows an implicit restore does not re-parse the import closure.](https://github.com/dotnet/msbuild/pull/14558)
+
+### 18.10
+- [Resolve relative project paths against the Unix logical current directory from `PWD`, so builds under symlinked directories produce stable project full paths and related output paths.](https://github.com/dotnet/msbuild/pull/13752)
+- [Restore passes ExcludeRestorePackageImports=true as a global property so NuGet's restore no longer triggers a second evaluation of every project.](https://github.com/dotnet/msbuild/issues/14273)
+- [`-getProperty`/`-getItem` (without a target) stop evaluation after the pass that produces the requested data instead of running a full evaluation, avoiding later passes such as target registration.](https://github.com/dotnet/msbuild/pull/14290)
+
+
+### 18.9
+- [GenerateResource: typed ResX data/metadata entries in Mark-of-the-Web files are now treated as untrusted and blocked with MSB3821; unblock the file (or set MSBUILDDISABLEFEATURESFROMVERSION=18.9) to restore prior behavior. ResXFileRef entries are always blocked regardless of this wave.](https://github.com/dotnet/msbuild/pull/14015)
+- [TaskHost named-pipe buffers default to 1 MB (was 128 KB), reducing send backpressure for large TaskHostConfiguration packets. Tunable via MSBUILDNODECONNECTIONBUFFERSIZE](https://github.com/dotnet/msbuild/pull/14094)
 
 ### 18.8
 - [RAR task: across multiple input properties, resolve relative paths against the project directory (not the process current directory)](https://github.com/dotnet/msbuild/pull/13319)
@@ -49,37 +70,6 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.4
 - [Start throwing on null or empty paths in MultiProcess and MultiThreaded Task Environment Drivers.](https://github.com/dotnet/msbuild/pull/12914)
-
-## Change waves that will be removed in the release accompanying .NET 11
-
-### 18.3
-- [Replace Transactional property with ChangeWave control, implement atomic file replacement with retry logic, and update tests.](https://github.com/dotnet/msbuild/pull/12627)
-
-### 17.14
-- ~[.SLNX support - use the new parser for .sln and .slnx](https://github.com/dotnet/msbuild/pull/10836)~ reverted after compat problems discovered
-- ~~[Support custom culture in RAR](https://github.com/dotnet/msbuild/pull/11000)~~ - see [11607](https://github.com/dotnet/msbuild/pull/11607) for details
-- [VS Telemetry](https://github.com/dotnet/msbuild/pull/11255)
-
-### 17.12
-- [Log TaskParameterEvent for scalar parameters](https://github.com/dotnet/msbuild/pull/9908)
-- [Convert.ToString during a property evaluation uses the InvariantCulture for all types](https://github.com/dotnet/msbuild/pull/9874)
-- [Fix oversharing of build results in ResultsCache](https://github.com/dotnet/msbuild/pull/9987)
-- [Add ParameterName and PropertyName to TaskParameterEventArgs](https://github.com/dotnet/msbuild/pull/10130)
-- [Emit eval props if requested by any sink](https://github.com/dotnet/msbuild/pull/10243)
-- [Load Microsoft.DotNet.MSBuildSdkResolver into default load context (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/10603)
-
-### 17.10
-- [AppDomain configuration is serialized without using BinFmt](https://github.com/dotnet/msbuild/pull/9320) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`. **Please note that [any usage of BinaryFormatter is insecure](https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide).**
-- [Warning on serialization custom events by default in .NET framework](https://github.com/dotnet/msbuild/pull/9318)
-- [Cache SDK resolver data process-wide](https://github.com/dotnet/msbuild/pull/9335)
-- [Target parameters will be unquoted](https://github.com/dotnet/msbuild/pull/9452), meaning  the ';' symbol in the parameter target name will always be treated as separator
-- [Add Link metadata to Resources in AssignLinkMetadata target](https://github.com/dotnet/msbuild/pull/9464)
-- [Change Version switch output to finish with a newline](https://github.com/dotnet/msbuild/pull/9485)
-- [Load NuGet.Frameworks into secondary AppDomain (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/9446)
-- [Update Traits when environment has been changed](https://github.com/dotnet/msbuild/pull/9655)
-- [Exec task does not trim leading whitespaces for ConsoleOutput](https://github.com/dotnet/msbuild/pull/9722)
-- [Introduce [MSBuild]::StableStringHash overloads](https://github.com/dotnet/msbuild/issues/9519)
-- [Keep the encoding of standard output & error consistent with the console code page for ToolTask](https://github.com/dotnet/msbuild/pull/9539)
 
 ## Change Waves No Longer In Rotation
 
@@ -131,3 +121,36 @@ Change wave checks around features will be removed in the release that accompani
 - [Delete destination file before copy](https://github.com/dotnet/msbuild/pull/8685)
 - [Moving from SHA1 to SHA256 for Hash task](https://github.com/dotnet/msbuild/pull/8812)
 - [Deprecating custom derived BuildEventArgs](https://github.com/dotnet/msbuild/pull/8917) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`
+
+### 17.10
+
+- [AppDomain configuration is serialized without using BinFmt](https://github.com/dotnet/msbuild/pull/9320) - feature can be opted out only if [BinaryFormatter](https://learn.microsoft.com/en-us/dotnet/api/system.runtime.serialization.formatters.binary.binaryformatter) is allowed at runtime by editing `MSBuild.runtimeconfig.json`. **Please note that [any usage of BinaryFormatter is insecure](https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-security-guide).**
+- [Warning on serialization custom events by default in .NET framework](https://github.com/dotnet/msbuild/pull/9318)
+- [Cache SDK resolver data process-wide](https://github.com/dotnet/msbuild/pull/9335)
+- [Target parameters will be unquoted](https://github.com/dotnet/msbuild/pull/9452), meaning  the ';' symbol in the parameter target name will always be treated as separator
+- [Add Link metadata to Resources in AssignLinkMetadata target](https://github.com/dotnet/msbuild/pull/9464)
+- [Change Version switch output to finish with a newline](https://github.com/dotnet/msbuild/pull/9485)
+- [Load NuGet.Frameworks into secondary AppDomain (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/9446)
+- [Update Traits when environment has been changed](https://github.com/dotnet/msbuild/pull/9655)
+- [Exec task does not trim leading whitespaces for ConsoleOutput](https://github.com/dotnet/msbuild/pull/9722)
+- [Introduce [MSBuild]::StableStringHash overloads](https://github.com/dotnet/msbuild/issues/9519)
+- [Keep the encoding of standard output & error consistent with the console code page for ToolTask](https://github.com/dotnet/msbuild/pull/9539)
+
+### 17.12
+
+- [Log TaskParameterEvent for scalar parameters](https://github.com/dotnet/msbuild/pull/9908)
+- [Convert.ToString during a property evaluation uses the InvariantCulture for all types](https://github.com/dotnet/msbuild/pull/9874)
+- [Fix oversharing of build results in ResultsCache](https://github.com/dotnet/msbuild/pull/9987)
+- [Add ParameterName and PropertyName to TaskParameterEventArgs](https://github.com/dotnet/msbuild/pull/10130)
+- [Emit eval props if requested by any sink](https://github.com/dotnet/msbuild/pull/10243)
+- [Load Microsoft.DotNet.MSBuildSdkResolver into default load context (MSBuild.exe only)](https://github.com/dotnet/msbuild/pull/10603)
+
+### 17.14
+
+- ~[.SLNX support - use the new parser for .sln and .slnx](https://github.com/dotnet/msbuild/pull/10836)~ reverted after compat problems discovered
+- ~~[Support custom culture in RAR](https://github.com/dotnet/msbuild/pull/11000)~~ - see [11607](https://github.com/dotnet/msbuild/pull/11607) for details
+- [VS Telemetry](https://github.com/dotnet/msbuild/pull/11255)
+
+### 18.3
+
+- [Replace Transactional property with ChangeWave control, implement atomic file replacement with retry logic, and update tests.](https://github.com/dotnet/msbuild/pull/12627)

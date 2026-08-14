@@ -284,14 +284,12 @@ namespace Microsoft.Build.Utilities
                     return _standardOutputEncoding;
                 }
 
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                if (_encoding != null)
                 {
-                    if (_encoding != null)
-                    {
-                        // Keep the encoding of standard output & error consistent with the console code page.
-                        return _encoding;
-                    }
+                    // Keep the encoding of standard output & error consistent with the console code page.
+                    return _encoding;
                 }
+
                 return EncodingUtilities.CurrentSystemOemEncoding;
             }
         }
@@ -314,14 +312,12 @@ namespace Microsoft.Build.Utilities
                     return _standardErrorEncoding;
                 }
 
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
+                if (_encoding != null)
                 {
-                    if (_encoding != null)
-                    {
-                        // Keep the encoding of standard output & error consistent with the console code page.
-                        return _encoding;
-                    }
+                    // Keep the encoding of standard output & error consistent with the console code page.
+                    return _encoding;
                 }
+
                 return EncodingUtilities.CurrentSystemOemEncoding;
             }
         }
@@ -812,8 +808,8 @@ namespace Microsoft.Build.Utilities
 
             if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
             {
-                _standardOutputEOF = new ManualResetEvent(false);
-                _standardErrorEOF = new ManualResetEvent(false);
+                // One count each for the stdout and stderr EOF notifications.
+                _eofCountdown = new CountdownEvent(2);
             }
 
             _toolExited = new ManualResetEvent(false);
@@ -909,8 +905,8 @@ namespace Microsoft.Build.Utilities
                     _standardErrorDataAvailable.Dispose();
                     _standardOutputDataAvailable.Dispose();
 
-                    _standardOutputEOF?.Dispose();
-                    _standardErrorEOF?.Dispose();
+                    _eofCountdown?.Dispose();
+                    _eofCountdown = null;
 
                     _toolExited.Dispose();
                     _toolTimeoutExpired.Dispose();
@@ -962,7 +958,7 @@ namespace Microsoft.Build.Utilities
 
                 // Warn only -- occasionally temp files fail to delete because of virus checkers; we
                 // don't want the build to fail in such cases
-                LogShared.LogWarningWithCodeFromResources("Shared.FailedDeletingTempFile", filePath.OriginalValue, e.Message, lockedFileMessage);
+                LogPrivate.LogWarningWithCodeFromResources("FailedDeletingTempFile", filePath.OriginalValue, e.Message, lockedFileMessage);
             }
         }
 
@@ -1057,7 +1053,7 @@ namespace Microsoft.Build.Utilities
                             break;
 
                         default:
-                            ErrorUtilities.ThrowInternalError("Unknown tool notification.");
+                            InternalError.Throw("Unknown tool notification.");
                             break;
                     }
                 }
@@ -1093,14 +1089,13 @@ namespace Microsoft.Build.Utilities
 
                 if (!isBeingCancelled)
                 {
-                    ErrorUtilities.VerifyThrow(Timeout != System.Threading.Timeout.Infinite,
-                        "A time-out value must have been specified or the task must be cancelled.");
+                    Assumed.NotEqual(Timeout, System.Threading.Timeout.Infinite, "A time-out value must have been specified or the task must be cancelled.");
 
-                    LogShared.LogWarningWithCodeFromResources("Shared.KillingProcess", processName, Timeout);
+                    LogPrivate.LogWarningWithCodeFromResources("KillingProcess", processName, Timeout);
                 }
                 else
                 {
-                    LogShared.LogWarningWithCodeFromResources("Shared.KillingProcessByCancellation", processName);
+                    LogPrivate.LogWarningWithCodeFromResources("KillingProcessByCancellation", processName);
                 }
 
                 int timeout = TaskProcessTerminationTimeout >= -1 ? TaskProcessTerminationTimeout : 5000;
@@ -1173,10 +1168,21 @@ namespace Microsoft.Build.Utilities
                 //
                 // Use a bounded timeout as a safety net for the grandchild case where
                 // EOF never arrives because grand child inherited the pipe and keeps it open.
-                const int eofTimeoutSec = 2;
+                const int eofTimeoutSec = 30;
 
-                WaitHandle[] eofEvents = [_standardOutputEOF, _standardErrorEOF];
-                WaitHandle.WaitAll(eofEvents, TimeSpan.FromSeconds(eofTimeoutSec));
+                // CountdownEvent.Wait is STA-safe (it falls back to a single-handle wait),
+                // unlike WaitHandle.WaitAll over multiple handles which throws
+                // NotSupportedException on STA threads (for example when a task such as
+                // AspNetCompiler runs on an STA thread).
+                bool allEOFReceived = _eofCountdown.Wait(TimeSpan.FromSeconds(eofTimeoutSec));
+                if (!allEOFReceived)
+                {
+                    // Timeout: a grandchild process likely still holds the pipe open.
+                    // Drain whatever data has already arrived before returning.
+                    LogMessagesFromStandardError();
+                    LogMessagesFromStandardOutput();
+                    LogPrivate.LogMessageFromResources(MessageImportance.Low, "ToolTask.PipeEOFTimeout", eofTimeoutSec);
+                }
             }
             else
             {
@@ -1222,8 +1228,7 @@ namespace Microsoft.Build.Utilities
             MessageImportance messageImportance,
             StandardOutputOrErrorQueueType queueType)
         {
-            ErrorUtilities.VerifyThrow(dataQueue != null,
-                "The data queue must be available.");
+            Assumed.NotNull(dataQueue, "The data queue must be available.");
 
             // synchronize access to the queue -- this is a producer-consumer problem
             // NOTE: the synchronization problem here is actually not about the queue
@@ -1255,8 +1260,7 @@ namespace Microsoft.Build.Utilities
                     }
                 }
 
-                ErrorUtilities.VerifyThrow(dataAvailableSignal != null,
-                    "The signalling event must be available.");
+                Assumed.NotNull(dataAvailableSignal, "The signalling event must be available.");
 
                 // the queue is empty, so reset the notification
                 // NOTE: intentionally, do the reset inside the lock, because
@@ -1284,8 +1288,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="unused"></param>
         private void ReceiveTimeoutNotification(object unused)
         {
-            ErrorUtilities.VerifyThrow(_toolTimeoutExpired != null,
-                "The signalling event for tool time-out must be available.");
+            Assumed.NotNull(_toolTimeoutExpired, "The signalling event for tool time-out must be available.");
             lock (_eventCloseLock)
             {
                 if (!_eventsDisposed)
@@ -1304,8 +1307,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="e"></param>
         protected void ReceiveExitNotification(object sender, EventArgs e)
         {
-            ErrorUtilities.VerifyThrow(_toolExited != null,
-                "The signalling event for tool exit must be available.");
+            Assumed.NotNull(_toolExited, "The signalling event for tool exit must be available.");
 
             lock (_eventCloseLock)
             {
@@ -1351,18 +1353,14 @@ namespace Microsoft.Build.Utilities
         {
             if (e.Data == null)
             {
-                // The AsyncStreamReader sends Data=null when the pipe reaches EOF.
-                // Signal the appropriate EOF event so WaitForProcessExit knows
-                // all data from this stream has been delivered.
-                ManualResetEvent eofEvent = (dataQueue == _standardErrorData) ? _standardErrorEOF : _standardOutputEOF;
-                if (eofEvent != null)
+                // The AsyncStreamReader sends Data=null exactly once per stream when the
+                // pipe reaches EOF. Count it down so WaitForProcessExit knows when all
+                // data from both streams has been delivered.
+                lock (_eventCloseLock)
                 {
-                    lock (_eventCloseLock)
+                    if (!_eventsDisposed && _eofCountdown is { IsSet: false })
                     {
-                        if (!_eventsDisposed)
-                        {
-                            eofEvent.Set();
-                        }
+                        _eofCountdown.Signal();
                     }
                 }
 
@@ -1370,7 +1368,7 @@ namespace Microsoft.Build.Utilities
             }
 
             // NOTE: don't ignore empty string, because we need to log that
-            ErrorUtilities.VerifyThrow(dataQueue != null, "The data queue must be available.");
+            Assumed.NotNull(dataQueue, "The data queue must be available.");
 
             // synchronize access to the queue -- this is a producer-consumer problem
             // NOTE: we lock the entire queue instead of using synchronized queue
@@ -1383,8 +1381,7 @@ namespace Microsoft.Build.Utilities
             {
                 dataQueue.Enqueue(e.Data);
 
-                ErrorUtilities.VerifyThrow(dataAvailableSignal != null,
-                    "The signalling event must be available.");
+                Assumed.NotNull(dataAvailableSignal, "The signalling event must be available.");
 
                 // signal the availability of data
                 // NOTE: intentionally, do the signalling inside the lock, because
@@ -1424,7 +1421,7 @@ namespace Microsoft.Build.Utilities
                 }
                 catch (ArgumentException)
                 {
-                    Log.LogErrorWithCodeFromResources("Message.InvalidImportance", StandardErrorImportance);
+                    LogShared.LogErrorWithCodeFromResources("Message_InvalidImportance", StandardErrorImportance);
                     return false;
                 }
             }
@@ -1444,7 +1441,7 @@ namespace Microsoft.Build.Utilities
                 }
                 catch (ArgumentException)
                 {
-                    Log.LogErrorWithCodeFromResources("Message.InvalidImportance", StandardOutputImportance);
+                    LogShared.LogErrorWithCodeFromResources("Message_InvalidImportance", StandardOutputImportance);
                     return false;
                 }
             }
@@ -1601,10 +1598,7 @@ namespace Microsoft.Build.Utilities
                         }
 
                         File.AppendAllText(_temporaryBatchFile, commandLineCommands, encoding);
-                        if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-                        {
-                            _encoding = encoding;
-                        }
+                        _encoding = encoding;
 
                         string batchFileForCommandLine = _temporaryBatchFile;
 
@@ -1722,8 +1716,7 @@ namespace Microsoft.Build.Utilities
                 }
                 else
                 {
-                    ErrorUtilities.VerifyThrow(nextAction == HostObjectInitializationStatus.UseAlternateToolToExecute,
-                        "Invalid return status");
+                    Assumed.Equal(nextAction, HostObjectInitializationStatus.UseAlternateToolToExecute, "Invalid return status");
 
                     // No host object was provided, or at least not one that supports all of the
                     // switches/parameters we need.  So shell out to the command-line tool.
@@ -1905,16 +1898,11 @@ namespace Microsoft.Build.Utilities
         private bool _eventsDisposed;
 
         /// <summary>
-        /// Signalled when the stdout AsyncStreamReader reaches EOF (sends Data=null).
-        /// Used by WaitForProcessExit to know when all stdout data has been delivered.
+        /// Counts down once for each of stdout/stderr when its AsyncStreamReader reaches
+        /// EOF (sends Data=null). Used by WaitForProcessExit to know when all data from
+        /// both streams has been delivered.
         /// </summary>
-        private ManualResetEvent _standardOutputEOF;
-
-        /// <summary>
-        /// Signalled when the stderr AsyncStreamReader reaches EOF (sends Data=null).
-        /// Used by WaitForProcessExit to know when all stderr data has been delivered.
-        /// </summary>
-        private ManualResetEvent _standardErrorEOF;
+        private CountdownEvent _eofCountdown;
 
         /// <summary>
         /// List of name, value pairs to be passed to the spawned tool's environment.

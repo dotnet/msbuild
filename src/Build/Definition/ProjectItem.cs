@@ -127,12 +127,12 @@ namespace Microsoft.Build.Evaluation
                              PropertyDictionary<ProjectMetadata> directMetadataCloned,
                              List<ProjectItemDefinition> inheritedItemDefinitionsCloned)
         {
-            ErrorUtilities.VerifyThrowInternalNull(project);
-            ErrorUtilities.VerifyThrowArgumentNull(xml);
+            Assumed.NotNull(project);
+            ArgumentNullException.ThrowIfNull(xml);
 
             // Orcas accidentally allowed empty includes if they resulted from expansion: we preserve that bug
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeEscaped);
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedIncludeBeforeWildcardExpansionEscaped);
+            ArgumentNullException.ThrowIfNull(evaluatedIncludeEscaped);
+            ArgumentNullException.ThrowIfNull(evaluatedIncludeBeforeWildcardExpansionEscaped);
 
             _xml = xml;
             _project = project;
@@ -407,7 +407,7 @@ namespace Microsoft.Build.Evaluation
                 return Link.GetMetadata(name);
             }
 
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
 
             ProjectMetadata result = null;
 
@@ -473,7 +473,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         string IItem.GetMetadataValueEscaped(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
 
             string value = null;
 
@@ -635,7 +635,7 @@ namespace Microsoft.Build.Evaluation
                 return Link.RemoveMetadata(name);
             }
 
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
             ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsItemSpecModifier(name), "ItemSpecModifierCannotBeCustomMetadata", name);
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
             ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
@@ -782,7 +782,7 @@ namespace Microsoft.Build.Evaluation
         /// </remarks>
         internal void ChangeItemType(string newItemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(newItemType, "ItemType");
+            ArgumentException.ThrowIfNullOrEmpty(newItemType, "ItemType");
             Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
             ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 
@@ -929,8 +929,8 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             public string ItemType
             {
-                get { return _xml.ItemType; }
-                set { ErrorUtilities.ThrowInternalError("Cannot change the item type on ProjectItem.ProjectItemFactory"); }
+                get => _xml.ItemType;
+                set => InternalError.Throw("Cannot change the item type on ProjectItem.ProjectItemFactory");
             }
 
             /// <summary>
@@ -1005,7 +1005,7 @@ namespace Microsoft.Build.Evaluation
             /// </comments>
             public ProjectItem CreateItem(string evaluatedIncludeEscaped, string evaluatedIncludeBeforeWildcardExpansion, string definingProject)
             {
-                ErrorUtilities.VerifyThrowInternalNull(_xml, "xml");
+                Assumed.NotNull(_xml);
 
                 return new ProjectItem(_project, _xml, evaluatedIncludeEscaped, evaluatedIncludeBeforeWildcardExpansion, null /* no metadata */, null /* no inherited definition metadata */);
             }
@@ -1029,7 +1029,7 @@ namespace Microsoft.Build.Evaluation
             /// </summary>
             private ProjectItem CreateItem(string evaluatedIncludeEscaped, string evaluatedIncludeBeforeWildcardExpansionEscaped, ProjectItem source)
             {
-                ErrorUtilities.VerifyThrowInternalNull(_xml, "xml");
+                Assumed.NotNull(_xml);
 
                 // The new item inherits any metadata originating in item definitions, which
                 // takes precedence over its own item definition metadata.

@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -42,8 +41,8 @@ namespace Microsoft.Build.Utilities
         /// </summary>
         public TargetPlatformSDK(string targetPlatformIdentifier, Version targetPlatformVersion, string path)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformIdentifier);
-            ErrorUtilities.VerifyThrowArgumentNull(targetPlatformVersion);
+            ArgumentNullException.ThrowIfNull(targetPlatformIdentifier);
+            ArgumentNullException.ThrowIfNull(targetPlatformVersion);
             TargetPlatformIdentifier = targetPlatformIdentifier;
             TargetPlatformVersion = targetPlatformVersion;
             Path = path;

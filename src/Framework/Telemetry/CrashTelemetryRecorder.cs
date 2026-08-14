@@ -84,11 +84,11 @@ internal static class CrashTelemetryRecorder
             // Initialize here because the process is about to die — this may be
             // the only chance to set up telemetry (e.g., crash before Main() init,
             // or in a task AppDomain with separate static state).
-            TelemetryManager.Instance?.Initialize(isStandalone: false);
+            TelemetryManager.Instance.Initialize(isStandalone: false);
 
-            using IActivity? activity = TelemetryManager.Instance
-                ?.DefaultActivitySource
+            using IActivity? activity = TelemetryManager.Instance.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Crash);
+
             activity?.SetTags(crashTelemetry);
 
             PostFaultEvent(crashTelemetry);
@@ -120,8 +120,7 @@ internal static class CrashTelemetryRecorder
             // is responsible for initialization. Calling Initialize from here would create a
             // VS telemetry session when tests call MSBuildApp.Execute() in-process, causing
             // environment variable side effects.
-            using IActivity? activity = TelemetryManager.Instance
-                ?.DefaultActivitySource
+            using IActivity? activity = TelemetryManager.Instance.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Crash);
             activity?.SetTags(crashTelemetry);
 
@@ -225,10 +224,9 @@ internal static class CrashTelemetryRecorder
     {
         try
         {
-            TelemetryManager.Instance?.Initialize(crashTelemetry.IsStandaloneExecution ?? false);
+            TelemetryManager.Instance.Initialize(crashTelemetry.IsStandaloneExecution ?? false);
 
-            using IActivity? activity = TelemetryManager.Instance
-                ?.DefaultActivitySource
+            using IActivity? activity = TelemetryManager.Instance.DefaultActivitySource
                 ?.StartActivity(TelemetryConstants.Crash);
             activity?.SetTags(crashTelemetry);
         }

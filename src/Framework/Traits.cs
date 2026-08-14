@@ -1,8 +1,7 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Globalization;
 
 namespace Microsoft.Build.Framework
 {
@@ -45,6 +44,12 @@ namespace Microsoft.Build.Framework
         /// equivalent to passing -multiThreaded / -mt on the command line.
         /// </summary>
         public readonly bool ForceMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDFORCEMULTITHREADED") == "1";
+
+        /// <summary>
+        /// Enable MSBuild multi-threaded mode by default while allowing an explicit
+        /// -multiThreaded:false / -mt:false command-line switch to disable it.
+        /// </summary>
+        public readonly bool EnableMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDENABLEMULTITHREADED") == "1";
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern
@@ -131,10 +136,45 @@ namespace Microsoft.Build.Framework
         public readonly int DictionaryBasedItemRemoveThreshold = EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDDICTIONARYBASEDITEMREMOVETHRESHOLD", 100);
 
         /// <summary>
+        /// Size in bytes of the kernel buffers backing the named pipes used to communicate with out-of-process
+        /// .NET nodes (worker nodes and .NET TaskHosts). A larger buffer lets the sending side queue more (or
+        /// larger) packets before it blocks waiting for the receiver to drain, which removes most of the
+        /// backpressure stalls when shipping large TaskHostConfiguration packets to sidecar TaskHosts in
+        /// multi-threaded (-mt) builds. Tunable via MSBUILDNODECONNECTIONBUFFERSIZE; when unset it defaults to
+        /// 1 MB under change wave 18.9, falling back to the historical 128 KB when that wave is opted out.
+        /// Note: the legacy .NET Framework 3.5 task host (MSBuildTaskHost) uses its own endpoint and is
+        /// intentionally unaffected by this setting - it keeps the historical 128 KB buffer.
+        /// </summary>
+        public readonly int NodeConnectionBufferSize = GetNodeConnectionBufferSize();
+
+        private static int GetNodeConnectionBufferSize()
+        {
+            int configured = EnvironmentUtilities.GetValueAsInt32OrDefault("MSBUILDNODECONNECTIONBUFFERSIZE", -1);
+            if (configured > 0)
+            {
+                return configured;
+            }
+
+            const int DefaultBufferSize = 1024 * 1024;
+            const int LegacyBufferSize = 128 * 1024;
+            return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_9) ? DefaultBufferSize : LegacyBufferSize;
+        }
+
+        /// <summary>
         /// Launches a persistent RAR process.
         /// </summary>
         /// TODO: Replace with command line flag when feature is completed. The environment variable is intented to avoid exposing the flag early.
         public readonly bool EnableRarNode = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildRarNode"));
+
+        /// <summary>
+        /// Enables the build coordinator for cross-process node budget management.
+        /// </summary>
+        public readonly bool EnableCoordinator = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable(UseCoordinatorEnvVarName));
+
+        /// <summary>
+        /// Name of environment variable used to enable the build coordinator.
+        /// </summary>
+        public const string UseCoordinatorEnvVarName = "MSBUILDUSECOORDINATOR";
 
         /// <summary>
         /// Name of environment variables used to enable MSBuild server.
@@ -198,10 +238,7 @@ namespace Microsoft.Build.Framework
         public static void UpdateFromEnvironment()
         {
             // Re-create Traits instance to update values in Traits according to current environment.
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-            {
-                _instance = new Traits();
-            }
+            _instance = new Traits();
         }
     }
 
@@ -243,6 +280,13 @@ namespace Microsoft.Build.Framework
         /// Disables skipping full drive/filesystem globs that are behind a false condition.
         /// </summary>
         public readonly bool AlwaysEvaluateDangerousGlobs = Environment.GetEnvironmentVariable("MSBuildAlwaysEvaluateDangerousGlobs") == "1";
+
+        /// <summary>
+        /// Disables automatic loading of Directory.Parse.config from global locations
+        /// (MSBuild exe directory, user profile, MSBUILD_PARSE_CONFIG env var).
+        /// When set, configuration must be explicitly provided via ProjectCollection or BuildParameters.
+        /// </summary>
+        public readonly bool DisableParseConfig = Environment.GetEnvironmentVariable("MSBUILD_DISABLE_PARSE_CONFIG") == "1";
 
         /// <summary>
         /// Disables skipping full up to date check for immutable files. See FileClassifier class.
@@ -453,14 +497,6 @@ namespace Microsoft.Build.Framework
             }
         }
 
-        public bool UnquoteTargetSwitchParameters
-        {
-            get
-            {
-                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
-            }
-        }
-
         private static bool? ParseNullableBoolFromEnvironmentVariable(string environmentVariable)
         {
             var value = Environment.GetEnvironmentVariable(environmentVariable);
@@ -470,14 +506,9 @@ namespace Microsoft.Build.Framework
                 return null;
             }
 
-            if (bool.TryParse(value, out bool result))
-            {
-                return result;
-            }
-
-            ThrowInternalError($"Environment variable \"{environmentVariable}\" should have values \"true\", \"false\" or undefined");
-
-            return null;
+            return bool.TryParse(value, out bool result)
+                ? result
+                : InternalError.Throw<bool?>($"Environment variable \"{environmentVariable}\" should have values \"true\", \"false\" or undefined");
         }
 
         private static ProjectInstanceTranslationMode? ComputeProjectInstanceTranslation()
@@ -499,9 +530,7 @@ namespace Microsoft.Build.Framework
                 return ProjectInstanceTranslationMode.Partial;
             }
 
-            ThrowInternalError($"Invalid escape hatch for project instance translation: {mode}");
-
-            return null;
+            return InternalError.Throw<ProjectInstanceTranslationMode?>($"Invalid escape hatch for project instance translation: {mode}");
         }
 
         private static SdkReferencePropertyExpansionMode? ComputeSdkReferencePropertyExpansion()
@@ -539,9 +568,7 @@ namespace Microsoft.Build.Framework
                 return SdkReferencePropertyExpansionMode.ExpandLeaveEscaped;
             }
 
-            ThrowInternalError($"Invalid escape hatch for SdkReference property expansion: {mode}");
-
-            return null;
+            return InternalError.Throw<SdkReferencePropertyExpansionMode?>($"Invalid escape hatch for SdkReference property expansion: {mode}");
         }
 
         public enum ProjectInstanceTranslationMode
@@ -556,75 +583,6 @@ namespace Microsoft.Build.Framework
             DefaultExpand,
             ExpandUnescape,
             ExpandLeaveEscaped
-        }
-
-        /// <summary>
-        /// Throws InternalErrorException.
-        /// </summary>
-        /// <remarks>
-        /// Clone of ErrorUtilities.ThrowInternalError which isn't available in Framework.
-        /// </remarks>
-        internal static void ThrowInternalError(string message)
-        {
-            throw new InternalErrorException(message);
-        }
-
-        /// <summary>
-        /// Throws InternalErrorException.
-        /// This is only for situations that would mean that there is a bug in MSBuild itself.
-        /// </summary>
-        /// <remarks>
-        /// Clone from ErrorUtilities which isn't available in Framework.
-        /// </remarks>
-        internal static void ThrowInternalError(string message, params object?[] args)
-        {
-            throw new InternalErrorException(FormatString(message, args));
-        }
-
-        /// <summary>
-        /// Formats the given string using the variable arguments passed in.
-        ///
-        /// PERF WARNING: calling a method that takes a variable number of arguments is expensive, because memory is allocated for
-        /// the array of arguments -- do not call this method repeatedly in performance-critical scenarios
-        ///
-        /// Thread safe.
-        /// </summary>
-        /// <param name="unformatted">The string to format.</param>
-        /// <param name="args">Optional arguments for formatting the given string.</param>
-        /// <returns>The formatted string.</returns>
-        /// <remarks>
-        /// Clone from ResourceUtilities which isn't available in Framework.
-        /// </remarks>
-        internal static string FormatString(string unformatted, params object?[] args)
-        {
-            string formatted = unformatted;
-
-            // NOTE: String.Format() does not allow a null arguments array
-            if ((args?.Length > 0))
-            {
-#if DEBUG
-                // If you accidentally pass some random type in that can't be converted to a string,
-                // FormatResourceString calls ToString() which returns the full name of the type!
-                foreach (object? param in args)
-                {
-                    // Check it has a real implementation of ToString() and the type is not actually System.String
-                    if (param != null)
-                    {
-                        if (string.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal) &&
-                            param.GetType() != typeof(string))
-                        {
-                            ThrowInternalError("Invalid resource parameter type, was {0}",
-                                param.GetType().FullName);
-                        }
-                    }
-                }
-#endif
-                // Format the string, using the variable arguments passed in.
-                // NOTE: all String methods are thread-safe
-                formatted = String.Format(CultureInfo.CurrentCulture, unformatted, args);
-            }
-
-            return formatted;
         }
     }
 }

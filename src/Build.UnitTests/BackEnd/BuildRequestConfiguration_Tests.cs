@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -254,6 +255,35 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequestConfiguration deserializedConfig = packet as BuildRequestConfiguration;
 
             Assert.Equal(config, deserializedConfig);
+
+            // RequestedTargets is excluded from InternalEquals, so assert the empty-list round-trip explicitly.
+            deserializedConfig.RequestedTargets.ShouldBeEmpty();
+        }
+
+        /// <summary>
+        /// Regression test for the solution metaproject bug where building a solution with a
+        /// non-standard target (e.g. "Pack") in a multi-node/parallel build fails with MSB4057.
+        /// The requested targets must round-trip through translation; otherwise a configuration
+        /// that crosses a node boundary loses them and the generated solution metaproject omits
+        /// the user-requested targets.
+        /// </summary>
+        [Fact]
+        public void TestTranslationPreservesRequestedTargets()
+        {
+            PropertyDictionary<ProjectPropertyInstance> properties = new PropertyDictionary<ProjectPropertyInstance>();
+            properties.Set(ProjectPropertyInstance.Create("this", "that"));
+
+            BuildRequestData data = new BuildRequestData("file", properties.ToDictionary(), "4.0", ["Build", "Pack"], null);
+            BuildRequestConfiguration config = new BuildRequestConfiguration(data, "2.0");
+
+            config.RequestedTargets.ShouldBe(["Build", "Pack"]);
+
+            ((ITranslatable)config).Translate(TranslationHelpers.GetWriteTranslator());
+            INodePacket packet = BuildRequestConfiguration.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
+
+            BuildRequestConfiguration deserializedConfig = packet as BuildRequestConfiguration;
+
+            deserializedConfig.RequestedTargets.ShouldBe(["Build", "Pack"]);
         }
 
         [Fact]
@@ -645,6 +675,70 @@ namespace Microsoft.Build.UnitTests.BackEnd
             clone.ProjectEvaluationId.ShouldBe(expectedEvalId);
         }
 
+        [Fact]
+        public async Task CacheIfPossible_WhileProjectInstanceUsageIsHeld_DoesNotCache()
+        {
+            string projectBody = """
+                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                    <Target Name='Build' />
+                </Project>
+                """.Cleanup();
+
+            ProjectCollection collection = _env.CreateProjectCollection().Collection;
+            using ProjectFromString projectFromString = new(
+                projectBody,
+                new Dictionary<string, string>(),
+                ObjectModelHelpers.MSBuildDefaultToolsVersion,
+                collection);
+            Project project = projectFromString.Project;
+            project.FullPath = "foo";
+            ProjectInstance instance = project.CreateProjectInstance();
+
+            BuildRequestConfiguration configuration = new(new BuildRequestData(instance, [], null), "2.0")
+            {
+                ConfigurationId = 1,
+                IsCacheable = true,
+            };
+
+            _env.WithTransientTestState(new TransientConfigurationCacheFile(configuration));
+
+            configuration.CacheIfPossible();
+            configuration.IsCached.ShouldBeTrue();
+
+            using (configuration.AcquireProjectInstanceUsage())
+            {
+                configuration.IsCached.ShouldBeFalse();
+
+                using (configuration.AcquireProjectInstanceUsage())
+                {
+                    await Task.Run(configuration.CacheIfPossible);
+                    configuration.IsCached.ShouldBeFalse();
+
+                    // Caching nulls these out, so assert the project state itself and not just the flag.
+                    instance.GlobalPropertiesDictionary.ShouldNotBeNull();
+                    instance.PropertiesToBuildWith.ShouldNotBeNull();
+                    instance.ItemsToBuildWith.ShouldNotBeNull();
+                }
+
+                configuration.CacheIfPossible();
+                configuration.IsCached.ShouldBeFalse();
+            }
+
+            configuration.CacheIfPossible();
+            configuration.IsCached.ShouldBeTrue();
+        }
+
+        private sealed class TransientConfigurationCacheFile : TransientTestState
+        {
+            private readonly BuildRequestConfiguration _configuration;
+
+            internal TransientConfigurationCacheFile(BuildRequestConfiguration configuration)
+            {
+                _configuration = configuration;
+            }
+
+            public override void Revert() => _configuration.ClearCacheFile();
+        }
 
         [Fact]
         public void TestProjectEvaluationIdPreservedAcrossTranslateForFutureUse()

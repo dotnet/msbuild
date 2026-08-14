@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -62,15 +62,12 @@ namespace Microsoft.Build.Evaluation
             return _cache.GetOrAdd(projectFile, key =>
             {
                 ProjectRootElement rootElement = loadFunc(key, this);
-                ErrorUtilities.VerifyThrowInternalNull(rootElement, "projectRootElement");
-                ErrorUtilities.VerifyThrow(
-                    rootElement.FullPath.Equals(key, StringComparison.OrdinalIgnoreCase),
-                    $"Got project back with incorrect path. Expected path: {key}, received path: {rootElement.FullPath}.");
+                Assumed.NotNull(rootElement);
+                Assumed.Equal(rootElement.FullPath, key, StringComparison.OrdinalIgnoreCase, $"Got project back with incorrect path. Expected path: {key}, received path: {rootElement.FullPath}.");
 
                 AddEntry(rootElement);
 
-                ErrorUtilities.VerifyThrow(_cache.TryGetValue(key, out _),
-                    "Project should have been added into cache and boosted");
+                Assumed.True(_cache.TryGetValue(key, out _), "Project should have been added into cache and boosted");
 
                 return rootElement;
             });
@@ -114,12 +111,14 @@ namespace Microsoft.Build.Evaluation
 
         internal override void DiscardImplicitReferences()
         {
-            throw new NotImplementedException();
+            // This cache does not track whether an entry was explicitly loaded - Get ignores isExplicitlyLoaded -
+            // so every entry it holds is an implicit reference and discarding all of them is the correct behavior.
+            Clear();
         }
 
         internal override void DiscardAnyWeakReference(ProjectRootElement projectRootElement)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectRootElement);
+            ArgumentNullException.ThrowIfNull(projectRootElement);
 
             // A PRE may be unnamed if it was only used in memory.
             if (projectRootElement.FullPath != null)

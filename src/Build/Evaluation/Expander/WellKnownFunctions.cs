@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -643,10 +643,7 @@ namespace Microsoft.Build.Evaluation.Expander
             {
                 if (ParseArgs.TryGetArg(args, out string? arg0))
                 {
-                    // Prevent loading methods refs from StringTools if ChangeWave opted out.
-                    returnVal = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10)
-                        ? IntrinsicFunctions.StableStringHash(arg0)
-                        : IntrinsicFunctions.StableStringHashLegacy(arg0);
+                    returnVal = IntrinsicFunctions.StableStringHash(arg0);
                     return true;
                 }
                 else if (ParseArgs.TryGetArgs(args, out string? arg1, out string? arg2) && Enum.TryParse<IntrinsicFunctions.StringHashingAlgorithm>(arg2, true, out var hashAlgorithm) && arg1 != null && arg2 != null)
@@ -952,7 +949,7 @@ namespace Microsoft.Build.Evaluation.Expander
                 if (string.Equals(methodName, nameof(IntrinsicFunctions.RegisterBuildCheck), StringComparison.OrdinalIgnoreCase))
                 {
                     string projectPath = properties.GetProperty("MSBuildProjectFullPath")?.EvaluatedValue ?? string.Empty;
-                    ErrorUtilities.VerifyThrow(loggingContext != null, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
+                    Assumed.NotNull(loggingContext, $"The logging context is missed. {nameof(IntrinsicFunctions.RegisterBuildCheck)} can not be invoked.");
                     if (ParseArgs.TryGetArg(args, out string? arg0) && arg0 != null)
                     {
                         returnVal = IntrinsicFunctions.RegisterBuildCheck(projectPath, arg0, loggingContext);

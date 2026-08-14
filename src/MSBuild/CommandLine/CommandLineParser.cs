@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -274,9 +274,9 @@ namespace Microsoft.Build.CommandLine.Experimental
                             }
                         }
 
-                        // Special case: for the switches "/m" (or "/maxCpuCount") and "/bl" (or "/binarylogger") we wish to pretend we saw a default argument
-                        // This allows a subsequent /m:n on the command line to override it.
-                        // We could create a new kind of switch with optional parameters, but it's a great deal of churn for this single case.
+                        // Special case: for switches with an optional parameter, pretend we saw their default argument.
+                        // This allows a subsequent explicit value on the command line to override it.
+                        // We could create a new kind of switch with optional parameters, but it would cause significant churn.
                         // Note that if no "/m" or "/maxCpuCount" switch -- either with or without parameters -- is present, then we still default to 1 cpu
                         // for backwards compatibility.
                         if (string.IsNullOrEmpty(switchParameters))
@@ -298,6 +298,11 @@ namespace Microsoft.Build.CommandLine.Experimental
                                      string.Equals(switchName, "profileevaluation", StringComparison.OrdinalIgnoreCase))
                             {
                                 switchParameters = ":no-file";
+                            }
+                            else if (string.Equals(switchName, "mt", StringComparison.OrdinalIgnoreCase) ||
+                                     string.Equals(switchName, "multithreaded", StringComparison.OrdinalIgnoreCase))
+                            {
+                                switchParameters = ":true";
                             }
                         }
 
@@ -546,11 +551,14 @@ namespace Microsoft.Build.CommandLine.Experimental
         private static string GetProjectDirectory(string[] projectSwitchParameters)
         {
             string projectDirectory = ".";
-            ErrorUtilities.VerifyThrow(projectSwitchParameters.Length <= 1, "Expect exactly one project at a time.");
+            Assumed.LessThanOrEqual(projectSwitchParameters.Length, 1, "Expect exactly one project at a time.");
 
             if (projectSwitchParameters.Length == 1)
             {
                 var projectFile = FileUtilities.FixFilePath(projectSwitchParameters[0]);
+
+                // Rebase relative paths onto the logical ($PWD) directory so response-file discovery matches the build's project full path.
+                projectFile = MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(projectFile);
 
                 if (FileSystems.Default.DirectoryExists(projectFile))
                 {
@@ -564,7 +572,7 @@ namespace Microsoft.Build.CommandLine.Experimental
                 }
             }
 
-            return projectDirectory;
+            return MSBuildApp.ResolveProjectPathAgainstLogicalCurrentDirectory(projectDirectory);
         }
 
         /// <summary>
@@ -597,11 +605,9 @@ namespace Microsoft.Build.CommandLine.Experimental
             // check if there is any quoting in the name portion of the switch
             string unquotedSwitchIndicatorAndName = QuotingUtilities.Unquote(commandLineArg.Substring(0, quotedSwitchParameterIndicator), out var doubleQuotesRemovedFromSwitchIndicatorAndName);
 
-            ErrorUtilities.VerifyThrow(switchName == unquotedSwitchIndicatorAndName.Substring(switchIndicatorsLength),
-                "The switch name extracted from either the partially or completely unquoted arg should be the same.");
+            Assumed.Equal(switchName, unquotedSwitchIndicatorAndName.Substring(switchIndicatorsLength), "The switch name extracted from either the partially or completely unquoted arg should be the same.");
 
-            ErrorUtilities.VerifyThrow(doubleQuotesRemovedFromArg >= doubleQuotesRemovedFromSwitchIndicatorAndName,
-                "The name portion of the switch cannot contain more quoting than the arg itself.");
+            Assumed.GreaterThanOrEqual(doubleQuotesRemovedFromArg, doubleQuotesRemovedFromSwitchIndicatorAndName, "The name portion of the switch cannot contain more quoting than the arg itself.");
 
             string switchParameters;
             // if quoting in the name portion of the switch was terminated
@@ -629,7 +635,7 @@ namespace Microsoft.Build.CommandLine.Experimental
                 }
             }
 
-            ErrorUtilities.VerifyThrow(switchParameters != null, "We must be able to extract the switch parameters.");
+            Assumed.NotNull(switchParameters, "We must be able to extract the switch parameters.");
 
             return switchParameters;
         }

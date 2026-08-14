@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -81,6 +81,19 @@ namespace Microsoft.Build.Evaluation
         private readonly List<ProjectItemGroupElement> _itemGroupElements;
 
         /// <summary>
+        /// When <c>MSBuildProvideItemGlobs</c> requests glob information, the set of
+        /// item types to expose; otherwise <see langword="null"/> (the feature is off and costs nothing).
+        /// </summary>
+        private HashSet<string> _itemGlobRequestedTypes;
+
+        /// <summary>
+        /// Evaluated include/exclude/remove item elements (condition-true, in document order) of the item types in
+        /// <see cref="_itemGlobRequestedTypes"/>, collected during the items pass so that <c>MSBuildItemGlob</c>
+        /// items can be synthesized from them. <see langword="null"/> when the feature is off.
+        /// </summary>
+        private List<ProjectItemElement> _itemGlobElements;
+
+        /// <summary>
         /// List of ProjectItemDefinitionElement's traversing into imports.
         /// Gathered during the first pass to avoid traversing again.
         /// </summary>
@@ -104,6 +117,13 @@ namespace Microsoft.Build.Evaluation
         /// Paths to imports already seen and where they were imported from; used to flag duplicate imports
         /// </summary>
         private readonly Dictionary<string, ProjectImportElement> _importsSeen;
+
+        /// <summary>
+        /// Resolved imports collected during the depth-first pass, used to optionally synthesize
+        /// <c>MSBuildImportedProject</c> items at the start of item evaluation.
+        /// Each entry records the imported file, the importing element, and the SDK result (if any).
+        /// </summary>
+        private List<(ProjectRootElement ImportedProject, ProjectImportElement ImportingElement, SdkResult SdkResult)> _resolvedImports;
 
         /// <summary>
         /// Depth first collection of InitialTargets strings declared in the main
@@ -131,6 +151,11 @@ namespace Microsoft.Build.Evaluation
         /// Load settings, such as whether to ignore missing imports.
         /// </summary>
         private readonly ProjectLoadSettings _loadSettings;
+
+        /// <summary>
+        /// How far evaluation should proceed. <see cref="ProjectEvaluationStage.Full"/> runs every pass.
+        /// </summary>
+        private readonly ProjectEvaluationStage _evaluationStage;
 
         /// <summary>
         /// The maximum number of nodes to report for evaluation.
@@ -216,13 +241,14 @@ namespace Microsoft.Build.Evaluation
             bool profileEvaluation,
             bool interactive,
             ILoggingService loggingService,
-            BuildEventContext buildEventContext)
+            BuildEventContext buildEventContext,
+            ProjectEvaluationStage evaluationStage)
         {
-            ErrorUtilities.VerifyThrowInternalNull(data);
-            ErrorUtilities.VerifyThrowInternalNull(projectRootElementCache);
-            ErrorUtilities.VerifyThrowInternalNull(evaluationContext);
-            ErrorUtilities.VerifyThrowInternalNull(loggingService);
-            ErrorUtilities.VerifyThrowInternalNull(buildEventContext);
+            Assumed.NotNull(data);
+            Assumed.NotNull(projectRootElementCache);
+            Assumed.NotNull(evaluationContext);
+            Assumed.NotNull(loggingService);
+            Assumed.NotNull(buildEventContext);
 
             _evaluationLoggingContext = new EvaluationLoggingContext(
                 loggingService,
@@ -256,6 +282,7 @@ namespace Microsoft.Build.Evaluation
             _projectSupportsReturnsAttribute = new Dictionary<ProjectRootElement, bool>();
             _projectRootElement = projectRootElement;
             _loadSettings = loadSettings;
+            _evaluationStage = evaluationStage;
             _maxNodeCount = maxNodeCount;
             _environmentProperties = environmentProperties;
             _propertiesFromCommandLine = propertiesFromCommandLine ?? [];
@@ -279,6 +306,7 @@ namespace Microsoft.Build.Evaluation
             // When the imports are concatenated with a semicolon, this automatically prepends a semicolon if and only if another element is later added.
             _streamImports.Add(string.Empty);
         }
+
 
         /// <summary>
         /// Delegate passed to methods to provide basic expression evaluation
@@ -317,7 +345,8 @@ namespace Microsoft.Build.Evaluation
             ISdkResolverService sdkResolverService,
             int submissionId,
             EvaluationContext evaluationContext,
-            bool interactive = false)
+            bool interactive = false,
+            ProjectEvaluationStage evaluationStage = ProjectEvaluationStage.Full)
         {
             MSBuildEventSource.Log.EvaluateStart(root.ProjectFileLocation.File);
             var profileEvaluation = (loadSettings & ProjectLoadSettings.ProfileEvaluation) != 0 || loggingService.IncludeEvaluationProfile;
@@ -339,7 +368,8 @@ namespace Microsoft.Build.Evaluation
                 profileEvaluation,
                 interactive,
                 loggingService,
-                buildEventContext);
+                buildEventContext,
+                evaluationStage);
 
             try
             {
@@ -363,6 +393,12 @@ namespace Microsoft.Build.Evaluation
                     items = evaluator._data.Items;
                 }
 
+                string skippedMessage = evaluator._projectRootElementCache.ParserIgnoreConfiguration?.GetSkippedSummaryMessage();
+                if (skippedMessage is not null)
+                {
+                    evaluator._evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, skippedMessage);
+                }
+
                 evaluator._evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, evaluator._evaluationProfiler.ProfiledResult);
             }
 
@@ -375,7 +411,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal static List<I> CreateItemsFromInclude(string rootDirectory, ProjectItemElement itemElement, IItemFactory<I, I> itemFactory, string unevaluatedIncludeEscaped, Expander<P, I> expander, ILoggingService loggingService, string buildEventFileInfoFullPath, BuildEventContext buildEventContext)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(unevaluatedIncludeEscaped);
+            ArgumentException.ThrowIfNullOrEmpty(unevaluatedIncludeEscaped);
 
             List<I> items = new List<I>();
             itemFactory.ItemElement = itemElement;
@@ -581,7 +617,7 @@ namespace Microsoft.Build.Evaluation
                             targetOnErrorChildren.Add(ReadOnErrorElement(onError));
                             break;
                         default:
-                            ErrorUtilities.ThrowInternalError("Unexpected child");
+                            InternalError.Throw("Unexpected child");
                             break;
                     }
                 }
@@ -629,9 +665,15 @@ namespace Microsoft.Build.Evaluation
             string projectFile = string.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
             using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
             {
-                ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
+                Assumed.Equal(_data.EvaluationId, BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
                 _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
                 _evaluationLoggingContext.LogProjectEvaluationStarted();
+
+                string configMessage = _projectRootElementCache.ParserIgnoreConfiguration?.GetLoadedConfigsMessage();
+                if (configMessage is not null)
+                {
+                    _evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, configMessage);
+                }
 
                 // Track loads only after start of evaluation was actually logged
                 using var assemblyLoadsTracker =
@@ -657,7 +699,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
+                Assumed.NotEqual(_data.EvaluationId, BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
                 MSBuildEventSource.Log.EvaluatePass0Stop(projectFile);
 
@@ -678,6 +720,13 @@ namespace Microsoft.Build.Evaluation
 
                 _data.InitialTargets = initialTargets;
                 MSBuildEventSource.Log.EvaluatePass1Stop(projectFile);
+
+                if (_evaluationStage <= ProjectEvaluationStage.Properties)
+                {
+                    _data.FinishEvaluation();
+                    return;
+                }
+
                 // Pass2: evaluate item definitions
                 // Don't box via IEnumerator and foreach; cache count so not to evaluate via interface each iteration
                 MSBuildEventSource.Log.EvaluatePass2Start(projectFile);
@@ -692,6 +741,13 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
                 MSBuildEventSource.Log.EvaluatePass2Stop(projectFile);
+
+                if (_evaluationStage <= ProjectEvaluationStage.ItemDefinitions)
+                {
+                    _data.FinishEvaluation();
+                    return;
+                }
+
                 LazyItemEvaluator<P, I, M, D> lazyEvaluator = null;
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Items))
                 {
@@ -700,6 +756,11 @@ namespace Microsoft.Build.Evaluation
 
                     // Pass3: evaluate project items
                     MSBuildEventSource.Log.EvaluatePass3Start(projectFile);
+
+                    SynthesizeImportedProjectItems();
+
+                    DetectItemGlobRequest();
+
                     foreach (ProjectItemGroupElement itemGroup in _itemGroupElements)
                     {
                         using (_evaluationProfiler.TrackElement(itemGroup))
@@ -734,7 +795,15 @@ namespace Microsoft.Build.Evaluation
                     lazyEvaluator = null;
                 }
 
+                SynthesizeItemGlobItems();
+
                 MSBuildEventSource.Log.EvaluatePass3Stop(projectFile);
+
+                if (_evaluationStage <= ProjectEvaluationStage.Items)
+                {
+                    _data.FinishEvaluation();
+                    return;
+                }
 
                 // Pass4: evaluate using-tasks
                 MSBuildEventSource.Log.EvaluatePass4Start(projectFile);
@@ -748,6 +817,14 @@ namespace Microsoft.Build.Evaluation
                         _expander,
                         ExpanderOptions.ExpandPropertiesAndItems,
                         _evaluationContext.FileSystem);
+                }
+
+                MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
+
+                if (_evaluationStage <= ProjectEvaluationStage.UsingTasks)
+                {
+                    _data.FinishEvaluation();
+                    return;
                 }
 
                 // If there was no DefaultTargets attribute found in the depth first pass,
@@ -768,7 +845,6 @@ namespace Microsoft.Build.Evaluation
                 Dictionary<string, List<TargetSpecification>> targetsWhichRunAfterByTarget = new Dictionary<string, List<TargetSpecification>>(StringComparer.OrdinalIgnoreCase);
                 LinkedList<ProjectTargetElement> activeTargetsByEvaluationOrder = new LinkedList<ProjectTargetElement>();
                 Dictionary<string, LinkedListNode<ProjectTargetElement>> activeTargets = new Dictionary<string, LinkedListNode<ProjectTargetElement>>(StringComparer.OrdinalIgnoreCase);
-                MSBuildEventSource.Log.EvaluatePass4Stop(projectFile);
 
                 using (_evaluationProfiler.TrackPass(EvaluationPass.Targets))
                 {
@@ -831,7 +907,7 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            ErrorUtilities.VerifyThrow(_evaluationProfiler.IsEmpty(), "Evaluation profiler stack is not empty.");
+            Assumed.True(_evaluationProfiler.IsEmpty(), "Evaluation profiler stack is not empty.");
         }
 
         private IEnumerable FilterOutEnvironmentDerivedProperties(PropertyDictionary<P> dictionary)
@@ -937,7 +1013,7 @@ namespace Microsoft.Build.Evaluation
                         case ProjectSdkElement sdk: // This case is handled by implicit imports.
                             break;
                         default:
-                            ErrorUtilities.ThrowInternalError("Unexpected child type");
+                            InternalError.Throw("Unexpected child type");
                             break;
                     }
                 }
@@ -1413,6 +1489,9 @@ namespace Microsoft.Build.Evaluation
                     {
                         _data.RecordImport(importElement, importedProjectRootElement, importedProjectRootElement.Version, sdkResult);
 
+                        _resolvedImports ??= [];
+                        _resolvedImports.Add((importedProjectRootElement, importElement, sdkResult));
+
                         PerformDepthFirstPass(importedProjectRootElement);
                     }
                 }
@@ -1495,7 +1574,7 @@ namespace Microsoft.Build.Evaluation
                             _itemDefinitionGroupElements.Add(itemDefinition);
                             break;
                         default:
-                            ErrorUtilities.ThrowInternalError("Unexpected child type");
+                            InternalError.Throw("Unexpected child type");
                             break;
                     }
                 }
@@ -2514,6 +2593,11 @@ namespace Microsoft.Build.Evaluation
             {
                 _data.EvaluatedItemElements.Add(itemElement);
             }
+
+            if (_itemGlobRequestedTypes != null && _itemGlobRequestedTypes.Contains(itemElement.ItemType))
+            {
+                _itemGlobElements.Add(itemElement);
+            }
         }
 
         /// <summary>
@@ -2624,6 +2708,141 @@ namespace Microsoft.Build.Evaluation
                     mayBeReserved: false,
                     loggingContext: _evaluationLoggingContext);
             }
+        }
+
+        /// <summary>
+        /// When the <c>MSBuildProvideImportedProjects</c> property is set to <c>true</c>,
+        /// synthesizes <c>MSBuildImportedProject</c> items from the resolved imports,
+        /// making the import tree available to targets and tasks as regular items.
+        /// Called at the beginning of the items pass, after all properties have been evaluated.
+        /// </summary>
+        private void SynthesizeImportedProjectItems()
+        {
+            if (_resolvedImports is null)
+            {
+                return;
+            }
+
+            P provideProperty = _data.GetProperty(Constants.MSBuildProvideImportedProjectsPropertyName);
+            if (provideProperty is null || !string.Equals(provideProperty.EvaluatedValue, "true", StringComparison.OrdinalIgnoreCase))
+            {
+                return;
+            }
+
+            // Create a disconnected item element to back the factory — needed because
+            // ProjectItemFactory derives ItemType from its backing XML element.
+            ProjectItemElement syntheticItemElement = ProjectItemElement.CreateDisconnected(
+                Constants.MSBuildImportedProjectItemType,
+                _projectRootElement);
+            _itemFactory.ItemElement = syntheticItemElement;
+
+            string definingProject = _projectRootElement.FullPath ?? string.Empty;
+
+            foreach (var (importedProject, importingElement, sdkResult) in _resolvedImports)
+            {
+                I item = _itemFactory.CreateItem(importedProject.EscapedFullPath ?? string.Empty, definingProject);
+
+                ProjectMetadataElement importingPathMetadata = ProjectMetadataElement.CreateDisconnected(
+                    Constants.ImportingProjectPathMetadataName,
+                    _projectRootElement);
+                item.SetMetadata(importingPathMetadata, importingElement.ContainingProject.EscapedFullPath ?? string.Empty);
+
+                if (sdkResult?.SdkReference?.Name is { } sdkName)
+                {
+                    ProjectMetadataElement sdkMetadata = ProjectMetadataElement.CreateDisconnected(
+                        Constants.SdkMetadataName,
+                        _projectRootElement);
+                    item.SetMetadata(sdkMetadata, sdkName);
+                }
+
+                _data.AddItem(item);
+            }
+        }
+
+        /// <summary>
+        /// Detects whether <c>MSBuildProvideItemGlobs</c> requests glob information
+        /// for one or more item types and, if so, prepares to collect their evaluated item elements. Does nothing
+        /// (and allocates nothing) when the property is unset or empty, keeping the feature zero-cost when unused.
+        /// </summary>
+        private void DetectItemGlobRequest()
+        {
+            P provideProperty = _data.GetProperty(Constants.MSBuildProvideItemGlobsPropertyName);
+            if (provideProperty is null || string.IsNullOrWhiteSpace(provideProperty.EvaluatedValue))
+            {
+                return;
+            }
+
+            _itemGlobRequestedTypes = new HashSet<string>(
+                ExpressionShredder.SplitSemiColonSeparatedList(provideProperty.EvaluatedValue),
+                StringComparer.OrdinalIgnoreCase);
+            _itemGlobElements = new List<ProjectItemElement>();
+        }
+
+        /// <summary>
+        /// When one or more item types were requested via <c>MSBuildProvideItemGlobs</c>,
+        /// synthesizes <c>MSBuildItemGlob</c> items exposing the unevaluated include/exclude/remove glob patterns of
+        /// those item types. Each include element yields one item whose identity is the item type and whose
+        /// <c>Include</c>, <c>Exclude</c> and <c>Remove</c> metadata carry the patterns with wildcards preserved.
+        /// The patterns match what <see cref="Project.GetAllGlobs()"/> returns.
+        /// </summary>
+        /// <remarks>
+        /// Called at the end of the items pass, after all items have been evaluated, so that item references in
+        /// exclude/remove specs resolve to their final values — the same point at which <c>GetAllGlobs</c> operates.
+        /// The patterns live in metadata rather than in the item's include, so they are never expanded against the
+        /// file system.
+        /// </remarks>
+        private void SynthesizeItemGlobItems()
+        {
+            if (_itemGlobElements is null || _itemGlobElements.Count == 0)
+            {
+                return;
+            }
+
+            List<GlobResult> globResults = GlobResultBuilder.BuildGlobResults(_itemGlobElements, _expander);
+            if (globResults.Count == 0)
+            {
+                return;
+            }
+
+            // Create a disconnected item element to back the factory — ProjectItemFactory derives the item type
+            // from its backing XML element.
+            ProjectItemElement syntheticItemElement = ProjectItemElement.CreateDisconnected(
+                Constants.MSBuildItemGlobItemType,
+                _projectRootElement);
+            _itemFactory.ItemElement = syntheticItemElement;
+
+            string definingProject = _projectRootElement.FullPath ?? string.Empty;
+
+            // GlobResultBuilder returns results in reverse document order; iterate in reverse so that the synthesized
+            // items appear in document order, preserving the authored include/exclude/remove precedence.
+            for (int i = globResults.Count - 1; i >= 0; i--)
+            {
+                GlobResult globResult = globResults[i];
+
+                // The identity is the item type (e.g. "Compile"). The patterns are carried in metadata, which is
+                // never expanded against the file system, so their wildcards are preserved verbatim.
+                I item = _itemFactory.CreateItem(globResult.ItemElement.ItemType, definingProject);
+
+                SetGlobMetadatum(item, Constants.ItemGlobIncludeMetadataName, globResult.IncludeGlobs);
+                SetGlobMetadatum(item, Constants.ItemGlobExcludeMetadataName, globResult.Excludes);
+                SetGlobMetadatum(item, Constants.ItemGlobRemoveMetadataName, globResult.Removes);
+
+                _data.AddItem(item);
+            }
+        }
+
+        private void SetGlobMetadatum(I item, string metadataName, IEnumerable<string> patterns)
+        {
+            ProjectMetadataElement metadataElement = ProjectMetadataElement.CreateDisconnected(metadataName, _projectRootElement);
+
+            // The pattern strings come from GlobResult: IncludeGlobs are unescaped, while Excludes/Removes are a
+            // mix of escaped literals and unescaped globs. SetMetadata expects an *escaped* value that it unescapes
+            // on read, so escape each pattern before joining. This makes %(Include)/%(Exclude)/%(Remove) round-trip
+            // to exactly the strings Project.GetAllGlobs() reports (even for patterns containing '%'), and keeps ';'
+            // an unambiguous separator. (A single glob pattern containing a literal ';' — vanishingly rare — is
+            // recoverable only from the *escaped* value: split on ';', then unescape each element. A naive split of
+            // the unescaped value cannot distinguish the pattern's own ';' from the separator.)
+            item.SetMetadata(metadataElement, string.Join(";", patterns.Select(p => EscapingUtilities.Escape(p))));
         }
 
         [Conditional("FEATURE_GUIDE_TO_VS_ON_UNSUPPORTED_PROJECTS")]

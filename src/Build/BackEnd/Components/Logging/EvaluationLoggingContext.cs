@@ -6,7 +6,6 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BackEnd.Components.Logging
 {
@@ -42,7 +41,7 @@ namespace Microsoft.Build.BackEnd.Components.Logging
         /// <param name="profilerResult">Parameter contains the profiler result of the project evaluation.</param>
         internal void LogProjectEvaluationFinished(IEnumerable globalProperties, IEnumerable properties, IEnumerable items, ProfilerResult? profilerResult)
         {
-            ErrorUtilities.VerifyThrow(IsValid, "invalid");
+            Assumed.True(IsValid, "invalid");
             LoggingService.LogProjectEvaluationFinished(BuildEventContext, _projectFile, globalProperties, properties, items, profilerResult);
             IsValid = false;
         }

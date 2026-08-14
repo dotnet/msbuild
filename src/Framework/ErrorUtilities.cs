@@ -2,11 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.CompilerServices;
-using Microsoft.Build.Framework.Utilities;
 
 namespace Microsoft.Build.Framework;
 
@@ -16,151 +15,6 @@ namespace Microsoft.Build.Framework;
 
 internal static class FrameworkErrorUtilities
 {
-    private static readonly bool s_enableMSBuildDebugTracing = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDENABLEDEBUGTRACING"));
-
-    public static void DebugTraceMessage(string category, string message)
-    {
-        if (s_enableMSBuildDebugTracing)
-        {
-            Trace.WriteLine(message, category);
-        }
-    }
-
-    public static void DebugTraceMessage(string category, ref DebugTraceInterpolatedStringHandler handler)
-    {
-        if (s_enableMSBuildDebugTracing)
-        {
-            Trace.WriteLine(handler.GetFormattedText(), category);
-        }
-    }
-
-    /// <summary>
-    ///  Interpolated string handler used by <see cref="DebugTraceMessage(string, ref DebugTraceInterpolatedStringHandler)"/>
-    ///  to defer string formatting unless tracing is enabled.
-    /// </summary>
-    [InterpolatedStringHandler]
-    public ref struct DebugTraceInterpolatedStringHandler
-    {
-        private StringBuilderHelper _builder;
-
-        public DebugTraceInterpolatedStringHandler(int literalLength, int formattedCount, out bool isEnabled)
-        {
-            isEnabled = s_enableMSBuildDebugTracing;
-            _builder = isEnabled ? new(literalLength) : default;
-        }
-
-        public readonly void AppendLiteral(string value)
-            => _builder.AppendLiteral(value);
-
-        public readonly void AppendFormatted<TValue>(TValue value)
-            => _builder.AppendFormatted(value);
-
-        public readonly void AppendFormatted<TValue>(TValue value, string format)
-            where TValue : IFormattable
-            => _builder.AppendFormatted(value, format);
-
-        public string GetFormattedText()
-            => _builder.GetFormattedText();
-    }
-
-    /// <summary>
-    /// This method should be used in places where one would normally put
-    /// an "assert". It should be used to validate that our assumptions are
-    /// true, where false would indicate that there must be a bug in our
-    /// code somewhere. This should not be used to throw errors based on bad
-    /// user input or anything that the user did wrong.
-    /// </summary>
-    public static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string message)
-    {
-        if (!condition)
-        {
-            ThrowInternalError(message);
-        }
-    }
-
-    public static void VerifyThrow(
-        [DoesNotReturnIf(false)] bool condition,
-        [InterpolatedStringHandlerArgument(nameof(condition))] ref IsTrueInterpolatedStringHandler handler)
-    {
-        if (!condition)
-        {
-            ThrowInternalError(handler.GetFormattedText());
-        }
-    }
-
-    [InterpolatedStringHandler]
-    public ref struct IsTrueInterpolatedStringHandler
-    {
-        private StringBuilderHelper _builder;
-
-        public IsTrueInterpolatedStringHandler(int literalLength, int formattedCount, bool condition, out bool isEnabled)
-        {
-            isEnabled = !condition;
-            _builder = isEnabled ? new(literalLength) : default;
-        }
-
-        public readonly void AppendLiteral(string value)
-            => _builder.AppendLiteral(value);
-
-        public readonly void AppendFormatted<TValue>(TValue value)
-            => _builder.AppendFormatted(value);
-
-        public readonly void AppendFormatted<TValue>(TValue value, string format)
-            where TValue : IFormattable
-            => _builder.AppendFormatted(value, format);
-
-        public string GetFormattedText()
-            => _builder.GetFormattedText();
-    }
-
-    /// <summary>
-    /// Helper to throw an InternalErrorException when the specified parameter is null.
-    /// This should be used ONLY if this would indicate a bug in MSBuild rather than
-    /// anything caused by user action.
-    /// </summary>
-    /// <param name="parameter">The value of the argument.</param>
-    /// <param name="parameterName">Parameter that should not be null.</param>
-    public static void VerifyThrowInternalNull(
-        [NotNull] object? parameter,
-        [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        if (parameter is null)
-        {
-            ThrowInternalError($"{parameterName} unexpectedly null");
-        }
-    }
-
-    /// <summary>
-    /// Helper to throw an InternalErrorException when the specified parameter is null or zero length.
-    /// This should be used ONLY if this would indicate a bug in MSBuild rather than
-    /// anything caused by user action.
-    /// </summary>
-    /// <param name="parameterValue">The value of the argument.</param>
-    /// <param name="parameterName">Parameter that should not be null or zero length</param>
-    public static void VerifyThrowInternalLength(
-        [NotNull] string? parameterValue,
-        [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
-    {
-        VerifyThrowInternalNull(parameterValue, parameterName);
-
-        if (parameterValue.Length == 0)
-        {
-            ThrowInternalError($"{parameterName} unexpectedly empty");
-        }
-    }
-
-    public static void VerifyThrowInternalLength<T>(
-        [NotNull] T[]? parameterValue,
-        [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
-    {
-        VerifyThrowInternalNull(parameterValue, parameterName);
-
-        if (parameterValue.Length == 0)
-        {
-            ThrowInternalError($"{parameterName} unexpectedly empty");
-        }
-    }
-
     /// <summary>
     /// Helper to throw an InternalErrorException when the specified parameter is not a rooted path.
     /// This should be used ONLY if this would indicate a bug in MSBuild rather than
@@ -171,61 +25,88 @@ internal static class FrameworkErrorUtilities
     {
         if (!Path.IsPathRooted(value))
         {
-            ThrowInternalError($"{value} unexpectedly not a rooted path");
+            InternalError.Throw($"{value} unexpectedly not a rooted path");
         }
     }
 
     /// <summary>
-    /// Throws InternalErrorException.
-    /// This is only for situations that would mean that there is a bug in MSBuild itself.
+    ///  A utility that verifies the parameters provided to a standard <see cref="ICollection{T}.CopyTo"/> call.
     /// </summary>
-    [DoesNotReturn]
-    public static void ThrowInternalError(string message)
-        => throw new InternalErrorException(message);
-
-    /// <summary>
-    /// Throws InternalErrorException.
-    /// This is only for situations that would mean that there is a bug in MSBuild itself.
-    /// </summary>
-    [DoesNotReturn]
-    public static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler)
-        => ThrowInternalError(handler.GetFormattedText());
-
-    /// <summary>
-    /// Throws InternalErrorException.
-    /// This is only for situations that would mean that there is a bug in MSBuild itself.
-    /// </summary>
-    [DoesNotReturn]
-    public static void ThrowInternalError(string message, Exception innerException)
-        => throw new InternalErrorException(message, innerException);
-
-    /// <summary>
-    /// Throws InternalErrorException.
-    /// This is only for situations that would mean that there is a bug in MSBuild itself.
-    /// </summary>
-    [DoesNotReturn]
-    public static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler, Exception innerException)
-        => ThrowInternalError(handler.GetFormattedText(), innerException);
-
-    /// <summary>
-    /// Throws InternalErrorException.
-    /// Indicates the code path followed should not have been possible.
-    /// This is only for situations that would mean that there is a bug in MSBuild itself.
-    /// </summary>
-    [DoesNotReturn]
-    public static void ThrowInternalErrorUnreachable()
-        => ThrowInternalError("Unreachable?");
-
-    /// <summary>
-    /// Throws InternalErrorException.
-    /// Indicates the code path followed should not have been possible.
-    /// This is only for situations that would mean that there is a bug in MSBuild itself.
-    /// </summary>
-    public static void VerifyThrowInternalErrorUnreachable([DoesNotReturnIf(false)] bool condition)
+    /// <typeparam name="T">The element type of the collection.</typeparam>
+    /// <param name="collection">The destination collection to copy into.</param>
+    /// <param name="index">The zero-based index in <paramref name="collection"/> at which copying begins.</param>
+    /// <param name="requiredCapacity">The number of elements that need to be copied.</param>
+    /// <param name="collectionParamName">The name of the <paramref name="collection"/> parameter.</param>
+    /// <param name="indexParamName">The name of the <paramref name="index"/> parameter.</param>
+    /// <exception cref="ArgumentNullException">If <paramref name="collection"/> is null.</exception>
+    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="index"/> falls outside of the bounds of <paramref name="collection"/>.</exception>
+    /// <exception cref="ArgumentException">
+    ///  If there is insufficient capacity to copy the collection contents into <paramref name="collection"/>
+    ///  when starting at <paramref name="index"/>.
+    /// </exception>
+    public static void VerifyCollectionCopyToArguments<T>(
+        [NotNull] ICollection<T>? collection,
+        int index,
+        int requiredCapacity,
+        [CallerArgumentExpression(nameof(collection))] string? collectionParamName = null,
+        [CallerArgumentExpression(nameof(index))] string? indexParamName = null)
     {
-        if (!condition)
+        ArgumentNullException.ThrowIfNull(collection, collectionParamName);
+        ArgumentOutOfRangeException.ThrowIfNegative(index, indexParamName);
+        ArgumentOutOfRangeException.ThrowIfGreaterThanOrEqual(index, collection.Count, indexParamName);
+
+        int capacity = collection.Count - index;
+        if (requiredCapacity > capacity)
         {
-            ThrowInternalErrorUnreachable();
+            throw new ArgumentException(SR.CollectionCopyToFailureProvidedArrayIsTooSmall, collectionParamName);
+        }
+    }
+
+    /// <summary>
+    ///  Throws an <see cref="ArgumentException"/> if the given collection is not null but of zero length.
+    /// </summary>
+    /// <typeparam name="T">The element type of the collection.</typeparam>
+    /// <param name="parameter">The collection to check.</param>
+    /// <param name="parameterName">The name of the <paramref name="parameter"/>.</param>
+    public static void VerifyThrowArgumentLengthIfNotNull<T>(IReadOnlyCollection<T>? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+    {
+        if (parameter?.Count == 0)
+        {
+            ThrowArgumentLength(parameterName);
+        }
+    }
+
+    /// <summary>
+    ///  Throws an <see cref="ArgumentException"/> if the string has zero length, unless it is
+    ///  null, in which case no exception is thrown.
+    /// </summary>
+    /// <param name="parameter">The string to check.</param>
+    /// <param name="parameterName">The name of the <paramref name="parameter"/>.</param>
+    public static void VerifyThrowArgumentLengthIfNotNull(string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+    {
+        if (parameter?.Length == 0)
+        {
+            ThrowArgumentLength(parameterName);
+        }
+    }
+
+    [DoesNotReturn]
+    private static void ThrowArgumentLength(string? parameterName)
+        => throw new ArgumentException(SR.Argument_EmptyString, parameterName);
+
+    /// <summary>
+    ///  Throws an <see cref="ArgumentNullException"/> if the given string parameter is null,
+    ///  and an <see cref="ArgumentException"/> if it contains invalid path or file characters.
+    /// </summary>
+    /// <param name="parameter">The path to check.</param>
+    /// <param name="parameterName">The name of the <paramref name="parameter"/>.</param>
+    public static void VerifyThrowArgumentInvalidPath([NotNull] string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+    {
+        ArgumentNullException.ThrowIfNull(parameter, parameterName);
+
+        if (FileUtilities.PathIsInvalid(parameter))
+        {
+            throw new ArgumentException(SR.FormatParameterCannotHaveInvalidPathChars(parameterName, parameter));
         }
     }
 }

@@ -247,7 +247,7 @@ namespace Microsoft.Build.Tasks.Xaml
         /// </summary>
         internal bool ParseXmlDocument(XmlDocument xmlDocument)
         {
-            ErrorUtilities.VerifyThrow(xmlDocument != null, nameof(xmlDocument));
+            Assumed.NotNull(xmlDocument, nameof(xmlDocument));
 
             // find the root element
             XmlNode node = xmlDocument.FirstChild;

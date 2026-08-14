@@ -1,0 +1,155 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#if NET
+
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Internal;
+using Shouldly;
+using Xunit;
+
+namespace Microsoft.Build.Engine.UnitTests.BackEnd
+{
+    /// <summary>
+    /// Tests for <see cref="NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch"/>, the .NET task
+    /// host (TaskHost node) side tolerance that lets a worker node which did not emit an
+    /// architecture bit (e.g. a .NET Framework MSBuild) connect to an SDK TaskHost node running
+    /// on x64 or arm64.
+    /// </summary>
+    public sealed class NodeEndpointOutOfProcBase_Tests
+    {
+        private const HandshakeOptions BaseNet = HandshakeOptions.TaskHost | HandshakeOptions.NET;
+
+        [Fact]
+        public void NoArchBitWorkerNode_X64TaskHost_IsTolerated()
+        {
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)(BaseNet | HandshakeOptions.X64),
+                receivedOptions: (int)BaseNet).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void NoArchBitWorkerNode_Arm64TaskHost_IsTolerated()
+        {
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)(BaseNet | HandshakeOptions.Arm64),
+                receivedOptions: (int)BaseNet).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void X64WorkerNode_X64TaskHost_NotConsideredMismatch()
+        {
+            // Equal handshakes never hit IsAllowedBitnessMismatch in production; verify it
+            // still returns false so the tolerance is scoped to the no-arch-bit worker node only.
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)(BaseNet | HandshakeOptions.X64),
+                receivedOptions: (int)(BaseNet | HandshakeOptions.X64)).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void X64WorkerNode_Arm64TaskHost_NotTolerated()
+        {
+            // True architecture mismatch (worker node sent X64, TaskHost node expects Arm64) is rejected.
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)(BaseNet | HandshakeOptions.Arm64),
+                receivedOptions: (int)(BaseNet | HandshakeOptions.X64)).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Arm64WorkerNode_X64TaskHost_NotTolerated()
+        {
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)(BaseNet | HandshakeOptions.X64),
+                receivedOptions: (int)(BaseNet | HandshakeOptions.Arm64)).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void NoArchBitWorkerNode_NoArchBitTaskHost_NotTolerated()
+        {
+            // The tolerance is scoped to x64/arm64 TaskHost nodes; an x86-equivalent (no arch bit)
+            // TaskHost node must not silently accept any handshake. Such a parent and TaskHost node
+            // agree exactly anyway, so IsHandshakePartValid accepts them before reaching here.
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)BaseNet,
+                receivedOptions: (int)BaseNet).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void X64WorkerNode_X86TaskHost_NotTolerated()
+        {
+            // x86 is encoded as the absence of X64/Arm64 rather than a flag of its own, so an
+            // x86 TaskHost node expects no architecture bit. A parent that positively declared x64
+            // is a genuine bitness mismatch and must be rejected: the tolerance only ever widens
+            // what an x64/arm64 TaskHost node accepts, never what an x86 one does.
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)BaseNet,
+                receivedOptions: (int)(BaseNet | HandshakeOptions.X64)).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void Arm64WorkerNode_X86TaskHost_NotTolerated()
+        {
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)BaseNet,
+                receivedOptions: (int)(BaseNet | HandshakeOptions.Arm64)).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void NonSidecarParent_SidecarTaskHost_NotTolerated()
+        {
+            // NodeReuse is what separates a long-lived sidecar TaskHost from one that exits with
+            // the build. A parent that did not ask for a sidecar must not be admitted to one just
+            // because it omitted its architecture bit, or it would take the sidecar over and later
+            // return it to the global reconnectable pool.
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)(BaseNet | HandshakeOptions.NodeReuse | HandshakeOptions.X64),
+                receivedOptions: (int)BaseNet).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void SidecarParent_NonSidecarTaskHost_NotTolerated()
+        {
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)(BaseNet | HandshakeOptions.X64),
+                receivedOptions: (int)(BaseNet | HandshakeOptions.NodeReuse)).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void SidecarParent_SidecarTaskHost_ArchitectureStillTolerated()
+        {
+            // Scoping the tolerance to architecture must not break the case it exists for.
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)(BaseNet | HandshakeOptions.NodeReuse | HandshakeOptions.X64),
+                receivedOptions: (int)(BaseNet | HandshakeOptions.NodeReuse)).ShouldBeTrue();
+        }
+
+        [Fact]
+        public void DifferingLowPriority_NotTolerated()
+        {
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)(BaseNet | HandshakeOptions.LowPriority | HandshakeOptions.X64),
+                receivedOptions: (int)BaseNet).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void DifferingAdministrator_NotTolerated()
+        {
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)(BaseNet | HandshakeOptions.Administrator | HandshakeOptions.X64),
+                receivedOptions: (int)BaseNet).ShouldBeFalse();
+        }
+
+        [Fact]
+        public void HandshakeVersionInUpperByte_IsIgnored()
+        {
+            // The upper byte carries the handshake version and must not affect the comparison.
+            const int VersionBits = 13 << 24;
+
+            NodeEndpointOutOfProcBase.IsAllowedBitnessMismatch(
+                expectedOptions: (int)(BaseNet | HandshakeOptions.NodeReuse | HandshakeOptions.X64) | VersionBits,
+                receivedOptions: (int)(BaseNet | HandshakeOptions.NodeReuse)).ShouldBeTrue();
+        }
+    }
+}
+
+#endif
