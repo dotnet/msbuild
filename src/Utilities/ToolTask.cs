@@ -218,7 +218,7 @@ namespace Microsoft.Build.Utilities
         /// Set to the special value "ansi" to use the current system ANSI code page (GetACP), which some native
         /// tools (e.g., MSVC link.exe/cl.exe) use for their output. When not set, the current system OEM code page is used.
         /// </summary>
-        public virtual string StdOutEncoding
+        public virtual string StandardOutputEncodingName
         {
             get => StandardOutputEncoding.EncodingName;
             set => _standardOutputEncoding = EncodingUtilities.GetEncodingFromName(value);
@@ -229,7 +229,7 @@ namespace Microsoft.Build.Utilities
         /// Set to the special value "ansi" to use the current system ANSI code page (GetACP), which some native
         /// tools (e.g., MSVC link.exe/cl.exe) use for their output. When not set, the current system OEM code page is used.
         /// </summary>
-        public virtual string StdErrEncoding
+        public virtual string StandardErrorEncodingName
         {
             get => StandardErrorEncoding.EncodingName;
             set => _standardErrorEncoding = EncodingUtilities.GetEncodingFromName(value);
@@ -278,7 +278,7 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                // An explicitly-set StdOutEncoding takes precedence over everything else.
+                // An explicitly-set StandardOutputEncodingName takes precedence over everything else.
                 if (_standardOutputEncoding != null)
                 {
                     return _standardOutputEncoding;
@@ -306,7 +306,7 @@ namespace Microsoft.Build.Utilities
         {
             get
             {
-                // An explicitly-set StdErrEncoding takes precedence over everything else.
+                // An explicitly-set StandardErrorEncodingName takes precedence over everything else.
                 if (_standardErrorEncoding != null)
                 {
                     return _standardErrorEncoding;

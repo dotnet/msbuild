@@ -132,19 +132,33 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         protected override Encoding StandardErrorEncoding => _standardErrorEncoding;
 
+        /// <inheritdoc />
+        public override string StandardOutputEncodingName
+        {
+            get => StandardOutputEncoding.EncodingName;
+            set => _standardOutputEncoding = EncodingUtilities.GetEncodingFromName(value);
+        }
+
+        /// <inheritdoc />
+        public override string StandardErrorEncodingName
+        {
+            get => StandardErrorEncoding.EncodingName;
+            set => _standardErrorEncoding = EncodingUtilities.GetEncodingFromName(value);
+        }
+
         /// <summary>
         /// Project visible property specifying the encoding of the captured task standard output stream
         /// </summary>
         /// <remarks>The special value "ansi" selects the current system ANSI code page (GetACP).</remarks>
         [Output]
-        public override string StdOutEncoding
+        public string StdOutEncoding
         {
             get => StandardOutputEncoding.EncodingName;
             set
             {
                 try
                 {
-                    _standardOutputEncoding = EncodingUtilities.GetEncodingFromName(value);
+                    StandardOutputEncodingName = value;
                 }
                 catch (ArgumentException)
                 {
@@ -159,14 +173,14 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         /// <remarks>The special value "ansi" selects the current system ANSI code page (GetACP).</remarks>
         [Output]
-        public override string StdErrEncoding
+        public string StdErrEncoding
         {
             get => StandardErrorEncoding.EncodingName;
             set
             {
                 try
                 {
-                    _standardErrorEncoding = EncodingUtilities.GetEncodingFromName(value);
+                    StandardErrorEncodingName = value;
                 }
                 catch (ArgumentException)
                 {

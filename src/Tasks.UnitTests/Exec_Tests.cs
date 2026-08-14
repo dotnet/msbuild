@@ -849,6 +849,18 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
+        public void StandardEncodingNamesAndLegacyAliasesShareValues()
+        {
+            Exec exec = PrepareExec("echo [%cd%]");
+
+            exec.StandardErrorEncodingName = "US-ASCII";
+            Assert.Contains("US-ASCII", exec.StdErrEncoding);
+
+            exec.StdOutEncoding = "US-ASCII";
+            Assert.Contains("US-ASCII", exec.StandardOutputEncodingName);
+        }
+
+        [Fact]
         public void AnyExistingEnvVarCalledErrorLevelIsIgnored()
         {
             string oldValue = Environment.GetEnvironmentVariable("errorlevel");

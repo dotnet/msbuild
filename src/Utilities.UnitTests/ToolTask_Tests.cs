@@ -298,44 +298,44 @@ namespace Microsoft.Build.UnitTests
         /// long-standing behavior and is preserved so that tools relying on the OEM code page are not broken.
         /// </summary>
         [WindowsOnlyFact]
-        public void StdEncodingDefaultsToOem()
+        public void StandardEncodingNamesDefaultToOem()
         {
             using MyTool t = new MyTool();
-            t.StdOutEncoding.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
-            t.StdErrEncoding.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
+            t.StandardOutputEncodingName.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
+            t.StandardErrorEncodingName.ShouldBe(EncodingUtilities.CurrentSystemOemEncoding.EncodingName);
         }
 
         /// <summary>
-        /// Setting StdOutEncoding/StdErrEncoding to the special value "ansi" (case-insensitive) selects the
+        /// Setting StandardOutputEncodingName/StandardErrorEncodingName to the special value "ansi" (case-insensitive) selects the
         /// current system ANSI code page (GetACP), e.g. for native tools like link.exe/cl.exe.
         /// </summary>
         [WindowsOnlyTheory]
         [InlineData("ansi")]
         [InlineData("ANSI")]
         [InlineData("Ansi")]
-        public void StdEncodingAnsiKnobSelectsAnsiCodePage(string ansiValue)
+        public void StandardEncodingNamesSelectAnsiCodePage(string ansiValue)
         {
             using MyTool t = new MyTool();
-            t.StdOutEncoding = ansiValue;
-            t.StdErrEncoding = ansiValue;
+            t.StandardOutputEncodingName = ansiValue;
+            t.StandardErrorEncodingName = ansiValue;
 
-            t.StdOutEncoding.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
-            t.StdErrEncoding.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
+            t.StandardOutputEncodingName.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
+            t.StandardErrorEncodingName.ShouldBe(EncodingUtilities.CurrentSystemAnsiEncoding.EncodingName);
         }
 
         /// <summary>
-        /// An explicitly-set StdOutEncoding/StdErrEncoding value takes precedence over the OEM default and can be
+        /// An explicitly-set StandardOutputEncodingName/StandardErrorEncodingName value takes precedence over the OEM default and can be
         /// set to any named encoding, not just the "ansi" special value.
         /// </summary>
         [WindowsOnlyFact]
-        public void StdEncodingHonorsExplicitNamedEncoding()
+        public void StandardEncodingNamesHonorExplicitNamedEncoding()
         {
             using MyTool t = new MyTool();
-            t.StdOutEncoding = "utf-8";
-            t.StdErrEncoding = "utf-8";
+            t.StandardOutputEncodingName = "utf-8";
+            t.StandardErrorEncodingName = "utf-8";
 
-            t.StdOutEncoding.ShouldBe(Encoding.UTF8.EncodingName);
-            t.StdErrEncoding.ShouldBe(Encoding.UTF8.EncodingName);
+            t.StandardOutputEncodingName.ShouldBe(Encoding.UTF8.EncodingName);
+            t.StandardErrorEncodingName.ShouldBe(Encoding.UTF8.EncodingName);
         }
 
         /// <summary>
