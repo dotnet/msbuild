@@ -68,7 +68,7 @@ namespace Microsoft.Build.Graph
         /// </summary>
         private readonly ConcurrentDictionary<ConfigurationMetadata, ConcurrentBag<string>> _projectReferrers = new();
 
-        private readonly Func<SolutionFile, IDictionary<string, string>, SolutionProjectGenerationResult> _solutionProjectFactory;
+        private readonly Func<SolutionFile, IDictionary<string, string>, ProjectInstance[]> _solutionProjectFactory;
 
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Graph
             ProjectInterpretation projectInterpretation,
             int degreeOfParallelism,
             ProjectGraphMode mode,
-            Func<SolutionFile, IDictionary<string, string>, SolutionProjectGenerationResult> solutionProjectFactory,
+            Func<SolutionFile, IDictionary<string, string>, ProjectInstance[]> solutionProjectFactory,
             CancellationToken cancellationToken)
         {
             _solutionProjectFactory = solutionProjectFactory;
@@ -188,11 +188,12 @@ namespace Microsoft.Build.Graph
                 generationGlobalProperties[PropertyNames.IsGraphBuild] = "true";
                 generationGlobalProperties[SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty] = $"{Solution.FullPath}.metaproj";
 
-                SolutionProjectGenerationResult generationResult =
+                ProjectInstance[] generationResult =
                     _solutionProjectFactory(Solution, generationGlobalProperties);
 
-                syntheticSolutionInstance = generationResult.TraversalProject;
-                GeneratedSolutionMetaprojects = generationResult.Metaprojects;
+                syntheticSolutionInstance = generationResult[0];
+                GeneratedSolutionMetaprojects =
+                    new ArraySegment<ProjectInstance>(generationResult, 1, generationResult.Length - 1);
             }
             else
             {

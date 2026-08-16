@@ -254,11 +254,11 @@ namespace Microsoft.Build.Construction
                 projectCollection: null,
                 buildParameters: null);
 
-            return projectGenerator.Generate().ToProjectInstances();
+            return projectGenerator.Generate();
         }
 
         [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
-        internal static SolutionProjectGenerationResult GenerateForGraph(
+        internal static ProjectInstance[] GenerateForGraph(
             SolutionFile solution,
             IDictionary<string, string> globalProperties,
             ProjectCollection projectCollection,
@@ -792,7 +792,7 @@ namespace Microsoft.Build.Construction
         /// about the solution is the private variable "solutionFile"
         /// </summary>
         [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
-        private SolutionProjectGenerationResult Generate()
+        private ProjectInstance[] Generate()
         {
             // The Version is not available in the new parser.
             if (!_solutionFile.UseNewParser)
@@ -820,7 +820,7 @@ namespace Microsoft.Build.Construction
         /// referenced in the solution.
         /// </summary>
         [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
-        private SolutionProjectGenerationResult CreateSolutionProject(string wrapperProjectToolsVersion, bool explicitToolsVersionSpecified)
+        private ProjectInstance[] CreateSolutionProject(string wrapperProjectToolsVersion, bool explicitToolsVersionSpecified)
         {
             AddFakeReleaseSolutionConfigurationIfNecessary();
 
@@ -848,16 +848,17 @@ namespace Microsoft.Build.Construction
             }
 
             // Create the list of our generated projects.
-            var metaprojects = new List<ProjectInstance>(projectsInOrder.Count);
+            var projectInstances = new List<ProjectInstance>(projectsInOrder.Count + 1);
 
             // Create the project instance for the traversal project.
             ProjectInstance traversalInstance = CreateTraversalInstance(wrapperProjectToolsVersion, explicitToolsVersionSpecified, projectsInOrder);
+            projectInstances.Add(traversalInstance);
 
             // Compute the solution configuration which will be used for this build.  We will use it later.
             _selectedSolutionConfiguration = String.Format(CultureInfo.InvariantCulture, "{0}|{1}", traversalInstance.GetProperty("Configuration").EvaluatedValue, traversalInstance.GetProperty("Platform").EvaluatedValue);
 
             // Now evaluate all of the projects in the solution and handle them appropriately.
-            EvaluateAndAddProjects(projectsInOrder, metaprojects, traversalInstance, _selectedSolutionConfiguration);
+            EvaluateAndAddProjects(projectsInOrder, projectInstances, traversalInstance, _selectedSolutionConfiguration);
 
             if (_batchProjectTargets)
             {
@@ -880,20 +881,18 @@ namespace Microsoft.Build.Construction
             // Special environment variable to allow people to see the in-memory MSBuild project generated
             // to represent the SLN.
 
-            EmitMetaproject(traversalInstance.ToProjectRootElement(), traversalInstance.FullPath);
-
-            foreach (ProjectInstance metaproject in metaprojects)
+            foreach (ProjectInstance instance in projectInstances)
             {
-                EmitMetaproject(metaproject.ToProjectRootElement(), metaproject.FullPath);
+                EmitMetaproject(instance.ToProjectRootElement(), instance.FullPath);
             }
 
-            return new SolutionProjectGenerationResult(traversalInstance, metaprojects);
+            return projectInstances.ToArray();
         }
 
         /// <summary>
         /// Examine each project in the solution, add references and targets for it, and create metaprojects if necessary.
         /// </summary>
-        private void EvaluateAndAddProjects(List<ProjectInSolution> projectsInOrder, List<ProjectInstance> metaprojects, ProjectInstance traversalInstance, string selectedSolutionConfiguration)
+        private void EvaluateAndAddProjects(List<ProjectInSolution> projectsInOrder, List<ProjectInstance> projectInstances, ProjectInstance traversalInstance, string selectedSolutionConfiguration)
         {
             // Now add all of the per-project items, targets and metaprojects.
             foreach (ProjectInSolution project in projectsInOrder)
@@ -929,7 +928,7 @@ namespace Microsoft.Build.Construction
                 if (!canBuildDirectly)
                 {
                     ProjectInstance metaproject = CreateMetaproject(traversalInstance, project, projectConfiguration);
-                    metaprojects.Add(metaproject);
+                    projectInstances.Add(metaproject);
                 }
             }
 

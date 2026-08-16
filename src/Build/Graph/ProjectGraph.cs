@@ -479,7 +479,7 @@ namespace Microsoft.Build.Graph
             SolutionProjectGenerationContext generationContext,
             CancellationToken cancellationToken = default)
         {
-            Func<SolutionFile, IDictionary<string, string>, SolutionProjectGenerationResult> solutionProjectFactory =
+            Func<SolutionFile, IDictionary<string, string>, ProjectInstance[]> solutionProjectFactory =
                 (solution, globalProperties) =>
                     SolutionProjectGenerator.GenerateForGraph(
                         solution,
@@ -495,7 +495,7 @@ namespace Microsoft.Build.Graph
 
         private ProjectGraph(
             ProjectGraphOptions options,
-            Func<SolutionFile, IDictionary<string, string>, SolutionProjectGenerationResult> solutionProjectFactory,
+            Func<SolutionFile, IDictionary<string, string>, ProjectInstance[]> solutionProjectFactory,
             CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(options.ProjectCollection, nameof(options.ProjectCollection));
