@@ -37,8 +37,6 @@ namespace Microsoft.Build.Graph
 
         public IReadOnlyCollection<ProjectGraphNode> EntryPointNodes { get; private set; }
 
-        public IReadOnlyCollection<ProjectGraphNode> OriginalEntryPointNodes { get; private set; }
-
         public GraphEdges Edges { get; private set; }
 
         public SolutionFile Solution { get; private set; }
@@ -114,9 +112,10 @@ namespace Microsoft.Build.Graph
 
             AddEdges(allParsedProjects);
 
-            OriginalEntryPointNodes = _entryPointConfigurationMetadata.Select(e => allParsedProjects[e].GraphNode).ToList();
+            IReadOnlyCollection<ProjectGraphNode> originalEntryPointNodes =
+                _entryPointConfigurationMetadata.Select(e => allParsedProjects[e].GraphNode).ToList();
 
-            DetectCycles(OriginalEntryPointNodes, _projectInterpretation, allParsedProjects);
+            DetectCycles(originalEntryPointNodes, _projectInterpretation, allParsedProjects);
 
             var projectNodes = allParsedProjects.Values.Select(p => p.GraphNode).ToList();
 
@@ -125,15 +124,15 @@ namespace Microsoft.Build.Graph
                 && (_solutionProjectFactory is not null
                     || ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)))
             {
-                var syntheticSolutionNode = CreateSyntheticSolutionNode(OriginalEntryPointNodes);
+                var syntheticSolutionNode = CreateSyntheticSolutionNode(originalEntryPointNodes);
                 projectNodes.Add(syntheticSolutionNode);
                 EntryPointNodes = [syntheticSolutionNode];
                 RootNodes = [syntheticSolutionNode];
             }
             else
             {
-                EntryPointNodes = OriginalEntryPointNodes;
-                RootNodes = GetGraphRoots(OriginalEntryPointNodes);
+                EntryPointNodes = originalEntryPointNodes;
+                RootNodes = GetGraphRoots(originalEntryPointNodes);
             }
 
             ProjectNodes = projectNodes;

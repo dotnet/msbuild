@@ -64,8 +64,6 @@ namespace Microsoft.Build.Graph
 
         private readonly EvaluationContext _evaluationContext = null;
 
-        private readonly IReadOnlyCollection<ProjectGraphNode> _originalEntryPointNodes;
-
         private GraphBuilder.GraphEdges Edges { get; }
 
         internal GraphBuilder.GraphEdges TestOnly_Edges => Edges;
@@ -555,7 +553,6 @@ namespace Microsoft.Build.Graph
             graphBuilder.BuildGraph();
 
             EntryPointNodes = graphBuilder.EntryPointNodes;
-            _originalEntryPointNodes = graphBuilder.OriginalEntryPointNodes;
             GraphRoots = graphBuilder.RootNodes;
             ProjectNodes = graphBuilder.ProjectNodes;
             Edges = graphBuilder.Edges;
@@ -764,6 +761,9 @@ namespace Microsoft.Build.Graph
 
             var encounteredEdges = new HashSet<ProjectGraphBuildRequest>();
             var edgesToVisit = new Queue<ProjectGraphBuildRequest>();
+            ProjectGraphNode syntheticSolutionNode = EntryPointNodes.FirstOrDefault(IsSyntheticSolutionNode);
+            IReadOnlyCollection<ProjectGraphNode> solutionProjectEntryNodes =
+                syntheticSolutionNode?.ProjectReferences ?? EntryPointNodes;
 
             if (entryProjectTargets == null || entryProjectTargets.Count == 0)
             {
@@ -836,7 +836,7 @@ namespace Microsoft.Build.Graph
                             // Resolve against the original solution entry points because multitargeting projects
                             // have multiple graph nodes with the same project path.
                             ProjectGraphNode GetNodeForProject(ProjectInSolution project) =>
-                                _originalEntryPointNodes.First(node => string.Equals(node.ProjectInstance.FullPath, project.AbsolutePath, StringComparison.OrdinalIgnoreCase));
+                                solutionProjectEntryNodes.First(node => string.Equals(node.ProjectInstance.FullPath, project.AbsolutePath, StringComparison.OrdinalIgnoreCase));
                         }
                     }
 
