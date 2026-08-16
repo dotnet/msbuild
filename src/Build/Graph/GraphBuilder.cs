@@ -68,7 +68,7 @@ namespace Microsoft.Build.Graph
         /// </summary>
         private readonly ConcurrentDictionary<ConfigurationMetadata, ConcurrentBag<string>> _projectReferrers = new();
 
-        private readonly SolutionProjectFactory _solutionProjectFactory;
+        private readonly Func<SolutionFile, IDictionary<string, string>, SolutionProjectGenerationResult> _solutionProjectFactory;
 
         public GraphBuilder(
             IEnumerable<ProjectGraphEntryPoint> entryPoints,
@@ -77,7 +77,7 @@ namespace Microsoft.Build.Graph
             ProjectInterpretation projectInterpretation,
             int degreeOfParallelism,
             ProjectGraphMode mode,
-            SolutionProjectFactory solutionProjectFactory,
+            Func<SolutionFile, IDictionary<string, string>, SolutionProjectGenerationResult> solutionProjectFactory,
             CancellationToken cancellationToken)
         {
             _solutionProjectFactory = solutionProjectFactory;

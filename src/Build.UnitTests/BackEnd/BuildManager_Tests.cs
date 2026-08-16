@@ -9,6 +9,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 
 using Microsoft.Build.BackEnd;
@@ -36,6 +37,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class BuildManager_Tests : IDisposable
     {
+        private const string ProjectTypeGuid = "{9A19103F-16F7-4668-BE54-9A1E7A4F7556}";
+        private const string Project1Guid = "{79B5EBA6-5D27-4976-BC31-14422245A59A}";
+        private const string Project2Guid = "{2022C11A-1405-4983-BEC2-3A8B0233108F}";
+
         /// <summary>
         /// The mock logger for testing.
         /// </summary>
@@ -4738,24 +4743,12 @@ $@"<Project InitialTargets=`Sleep`>
                 </Project>
                 """);
 
-            TransientTestFile solutionFile = env.CreateFile(root, "GeneratedGraph.sln",
-                """
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio Version 16
-                VisualStudioVersion = 16.0.29326.124
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleProject", "SimpleProject\SimpleProject.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|Any CPU = Debug|Any CPU
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                    EndGlobalSection
-                EndGlobal
-                """);
+            TransientTestFile solutionFile = CreateSolution(
+                env,
+                root,
+                "GeneratedGraph.sln",
+                "Debug|Any CPU",
+                ("SimpleProject", @"SimpleProject\SimpleProject.csproj", Project1Guid, "Debug|Any CPU"));
 
             env.CreateFile(root, $"after.{Path.GetFileName(solutionFile.Path)}.targets",
                 """
@@ -4799,26 +4792,12 @@ $@"<Project InitialTargets=`Sleep`>
                   </Target>
                 </Project>
                 """);
-            TransientTestFile solutionFile = _env.CreateFile(
+            TransientTestFile solutionFile = CreateSolution(
+                _env,
                 root,
                 "SolutionOnlyTarget.sln",
-                """
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio Version 16
-                VisualStudioVersion = 16.0.29326.124
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SimpleProject", "SimpleProject\SimpleProject.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|Any CPU = Debug|Any CPU
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                    EndGlobalSection
-                EndGlobal
-                """);
+                "Debug|Any CPU",
+                ("SimpleProject", @"SimpleProject\SimpleProject.csproj", Project1Guid, "Debug|Any CPU"));
             _env.CreateFile(
                 root,
                 "Directory.Solution.targets",
@@ -4863,34 +4842,20 @@ $@"<Project InitialTargets=`Sleep`>
                 </Project>
                 """);
 
-            TransientTestFile solutionFile = env.CreateFile(
+            TransientTestFile solutionFile = CreateSolution(
+                env,
                 root,
                 "ProjectTraversal.sln",
-                """
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio Version 16
-                VisualStudioVersion = 16.0.29326.124
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project1", "Project1\Project1.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|Any CPU = Debug|Any CPU
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                    EndGlobalSection
-                EndGlobal
-                """);
+                "Debug|Any CPU",
+                ("Project1", @"Project1\Project1.csproj", Project1Guid, "Debug|Any CPU"));
 
             ProjectGraph graph = ProjectGraph.CreateForBuild(
-                new ProjectGraphBuildOptions
+                new ProjectGraphOptions
                 {
                     EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
-                    ProjectCollection = projectCollection,
-                    Targets = ["Project1:CustomTarget"]
-                });
+                    ProjectCollection = projectCollection
+                },
+                ["Project1:CustomTarget"]);
 
             GraphBuildRequestData request = new(graph, ["Project1:CustomTarget"], projectCollection.HostServices);
             GraphBuildResult result = _buildManager.Build(_parameters, request);
@@ -4919,24 +4884,12 @@ $@"<Project InitialTargets=`Sleep`>
                 </Project>
                 """);
 
-            TransientTestFile solutionFile = env.CreateFile(root, "ConfiguredSolution.sln",
-                """
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio Version 16
-                VisualStudioVersion = 16.0.29326.124
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConfiguredProject", "ConfiguredProject\ConfiguredProject.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|x64 = Debug|x64
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|x64.ActiveCfg = Debug|Any CPU
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|x64.Build.0 = Debug|Any CPU
-                    EndGlobalSection
-                EndGlobal
-                """);
+            TransientTestFile solutionFile = CreateSolution(
+                env,
+                root,
+                "ConfiguredSolution.sln",
+                "Debug|x64",
+                ("ConfiguredProject", @"ConfiguredProject\ConfiguredProject.csproj", Project1Guid, "Debug|Any CPU"));
 
             env.CreateFile(root, $"after.{Path.GetFileName(solutionFile.Path)}.targets",
                 """
@@ -4986,24 +4939,12 @@ $@"<Project InitialTargets=`Sleep`>
                 </Project>
                 """);
 
-            TransientTestFile innerSolution = env.CreateFile(innerFolder, "Inner.sln",
-                """
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio Version 16
-                VisualStudioVersion = 16.0.29326.124
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "InnerProject", "InnerProject.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|AnyCPU = Debug|AnyCPU
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|AnyCPU.ActiveCfg = Debug|AnyCPU
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|AnyCPU.Build.0 = Debug|AnyCPU
-                    EndGlobalSection
-                EndGlobal
-                """);
+            TransientTestFile innerSolution = CreateSolution(
+                env,
+                innerFolder,
+                "Inner.sln",
+                "Debug|AnyCPU",
+                ("InnerProject", "InnerProject.csproj", Project1Guid, "Debug|AnyCPU"));
 
             TransientTestFolder outerProjectFolder = env.CreateFolder(Path.Combine(root.Path, "OuterProject"), createFolder: true);
             env.CreateFile(outerProjectFolder, "OuterProject.csproj",
@@ -5018,24 +4959,12 @@ $@"<Project InitialTargets=`Sleep`>
                 </Project>
                 """);
 
-            TransientTestFile outerSolution = env.CreateFile(root, "Outer.sln",
-                """
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio Version 16
-                VisualStudioVersion = 16.0.29326.124
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OuterProject", "OuterProject\OuterProject.csproj", "{2022C11A-1405-4983-BEC2-3A8B0233108F}"
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|Any CPU = Debug|Any CPU
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                        {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                    EndGlobalSection
-                EndGlobal
-                """);
+            TransientTestFile outerSolution = CreateSolution(
+                env,
+                root,
+                "Outer.sln",
+                "Debug|Any CPU",
+                ("OuterProject", @"OuterProject\OuterProject.csproj", Project2Guid, "Debug|Any CPU"));
 
             ProjectGraph graph = new(new ProjectGraphEntryPoint(outerSolution.Path), projectCollection);
             GraphBuildRequestData request = new(graph, Array.Empty<string>(), projectCollection.HostServices);
@@ -5137,24 +5066,12 @@ $@"<Project InitialTargets=`Sleep`>
                 </Project>
                 """);
 
-            TransientTestFile solutionFile = env.CreateFile(root, "FailingSolution.sln",
-                """
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio Version 16
-                VisualStudioVersion = 16.0.29326.124
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project", "Project\Project.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|Any CPU = Debug|Any CPU
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                    EndGlobalSection
-                EndGlobal
-                """);
+            TransientTestFile solutionFile = CreateSolution(
+                env,
+                root,
+                "FailingSolution.sln",
+                "Debug|Any CPU",
+                ("Project", @"Project\Project.csproj", Project1Guid, "Debug|Any CPU"));
 
             env.CreateFile(root, $"after.{Path.GetFileName(solutionFile.Path)}.targets",
                 """
@@ -5194,24 +5111,12 @@ $@"<Project InitialTargets=`Sleep`>
                 </Project>
                 """);
 
-            TransientTestFile solutionFile = env.CreateFile(root, "ProjectFailure.sln",
-                """
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio Version 16
-                VisualStudioVersion = 16.0.29326.124
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project", "Project\Project.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|Any CPU = Debug|Any CPU
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                    EndGlobalSection
-                EndGlobal
-                """);
+            TransientTestFile solutionFile = CreateSolution(
+                env,
+                root,
+                "ProjectFailure.sln",
+                "Debug|Any CPU",
+                ("Project", @"Project\Project.csproj", Project1Guid, "Debug|Any CPU"));
 
             string solutionHookOutput = Path.Combine(root.Path, "solution-hook-ran.txt");
             env.CreateFile(root, $"after.{Path.GetFileName(solutionFile.Path)}.targets",
@@ -5251,24 +5156,12 @@ $@"<Project InitialTargets=`Sleep`>
                 </Project>
                 """);
 
-            TransientTestFile solutionFile = env.CreateFile(root, "Ordering.sln",
-                """
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio Version 16
-                VisualStudioVersion = 16.0.29326.124
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project", "Project\Project.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|Any CPU = Debug|Any CPU
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                    EndGlobalSection
-                EndGlobal
-                """);
+            TransientTestFile solutionFile = CreateSolution(
+                env,
+                root,
+                "Ordering.sln",
+                "Debug|Any CPU",
+                ("Project", @"Project\Project.csproj", Project1Guid, "Debug|Any CPU"));
 
             env.CreateFile(root, $"after.{Path.GetFileName(solutionFile.Path)}.targets",
                 """
@@ -5336,28 +5229,13 @@ $@"<Project InitialTargets=`Sleep`>
                 </Project>
                 """);
 
-            TransientTestFile solutionFile = env.CreateFile(root, "CustomTargets.sln",
-                """
-                Microsoft Visual Studio Solution File, Format Version 12.00
-                # Visual Studio Version 16
-                VisualStudioVersion = 16.0.29326.124
-                MinimumVisualStudioVersion = 10.0.40219.1
-                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project1", "Project1\Project1.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
-                EndProject
-                Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project2", "Project2\Project2.csproj", "{2022C11A-1405-4983-BEC2-3A8B0233108F}"
-                EndProject
-                Global
-                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        Debug|Any CPU = Debug|Any CPU
-                    EndGlobalSection
-                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                        {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                        {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                        {2022C11A-1405-4983-BEC2-3A8B0233108F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                    EndGlobalSection
-                EndGlobal
-                """);
+            TransientTestFile solutionFile = CreateSolution(
+                env,
+                root,
+                "CustomTargets.sln",
+                "Debug|Any CPU",
+                ("Project1", @"Project1\Project1.csproj", Project1Guid, "Debug|Any CPU"),
+                ("Project2", @"Project2\Project2.csproj", Project2Guid, "Debug|Any CPU"));
 
             ProjectGraph graph = new(new ProjectGraphEntryPoint(solutionFile.Path), projectCollection);
             GraphBuildRequestData request = new(graph, [target], projectCollection.HostServices);
@@ -5397,24 +5275,12 @@ $@"<Project InitialTargets=`Sleep`>
                     </Project>
                     """);
 
-                TransientTestFile solutionFile = env.CreateFile(root, "Legacy.sln",
-                    """
-                    Microsoft Visual Studio Solution File, Format Version 12.00
-                    # Visual Studio Version 16
-                    VisualStudioVersion = 16.0.29326.124
-                    MinimumVisualStudioVersion = 10.0.40219.1
-                    Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Project", "Project\Project.csproj", "{79B5EBA6-5D27-4976-BC31-14422245A59A}"
-                    EndProject
-                    Global
-                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                            Debug|Any CPU = Debug|Any CPU
-                        EndGlobalSection
-                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-                            {79B5EBA6-5D27-4976-BC31-14422245A59A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-                        EndGlobalSection
-                    EndGlobal
-                    """);
+                TransientTestFile solutionFile = CreateSolution(
+                    env,
+                    root,
+                    "Legacy.sln",
+                    "Debug|Any CPU",
+                    ("Project", @"Project\Project.csproj", Project1Guid, "Debug|Any CPU"));
 
                 env.CreateFile(root, $"after.{Path.GetFileName(solutionFile.Path)}.targets",
                     """
@@ -5487,6 +5353,44 @@ $@"<Project InitialTargets=`Sleep`>
             graph.ProjectNodes.ShouldHaveSingleItem().ShouldBe(syntheticSolutionNode);
             result.ResultsByNode.ContainsKey(syntheticSolutionNode).ShouldBeTrue();
             _logger.AssertLogContains("EmptySolutionHookRan");
+        }
+
+        private static TransientTestFile CreateSolution(
+            TestEnvironment env,
+            TransientTestFolder root,
+            string fileName,
+            string solutionConfiguration,
+            params (string Name, string RelativePath, string Guid, string ProjectConfiguration)[] projects)
+        {
+            var contents = new StringBuilder(
+                """
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 16
+                VisualStudioVersion = 16.0.29326.124
+                MinimumVisualStudioVersion = 10.0.40219.1
+
+                """);
+
+            foreach ((string name, string relativePath, string guid, _) in projects)
+            {
+                contents.AppendLine($"Project(\"{ProjectTypeGuid}\") = \"{name}\", \"{relativePath}\", \"{guid}\"");
+                contents.AppendLine("EndProject");
+            }
+
+            contents.AppendLine("Global");
+            contents.AppendLine("    GlobalSection(SolutionConfigurationPlatforms) = preSolution");
+            contents.AppendLine($"        {solutionConfiguration} = {solutionConfiguration}");
+            contents.AppendLine("    EndGlobalSection");
+            contents.AppendLine("    GlobalSection(ProjectConfigurationPlatforms) = postSolution");
+            foreach ((_, _, string guid, string projectConfiguration) in projects)
+            {
+                contents.AppendLine($"        {guid}.{solutionConfiguration}.ActiveCfg = {projectConfiguration}");
+                contents.AppendLine($"        {guid}.{solutionConfiguration}.Build.0 = {projectConfiguration}");
+            }
+
+            contents.AppendLine("    EndGlobalSection");
+            contents.AppendLine("EndGlobal");
+            return env.CreateFile(root, fileName, contents.ToString());
         }
 
         /// <summary>

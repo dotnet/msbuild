@@ -2952,13 +2952,7 @@ $@"
             TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "GeneratedSolution.sln");
             ProjectCollection projectCollection = _env.CreateProjectCollection().Collection;
 
-            ProjectGraph graph = ProjectGraph.CreateForBuild(
-                new ProjectGraphBuildOptions
-                {
-                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
-                    ProjectCollection = projectCollection,
-                    Targets = ["CustomTarget"]
-                });
+            ProjectGraph graph = CreateGraphForBuild(solutionFile.Path, projectCollection, "CustomTarget");
 
             ProjectGraphNode solutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
 
@@ -2968,29 +2962,6 @@ $@"
                 .ShouldContain(item =>
                     item.EvaluatedInclude == "CustomTarget"
                     && item.GetMetadataValue(ItemMetadataNames.ProjectReferenceTargetsMetadataName) == "CustomTarget");
-        }
-
-        [Fact]
-        public void BuildApiRejectsTargetNotSpecifiedDuringConstruction()
-        {
-            TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
-            TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "TargetBoundSolution.sln");
-
-            ProjectGraph graph = ProjectGraph.CreateForBuild(
-                new ProjectGraphBuildOptions
-                {
-                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
-                    ProjectCollection = _env.CreateProjectCollection().Collection,
-                    Targets = ["CustomTarget"]
-                });
-
-            graph.GetTargetLists(["CustomTarget"]);
-
-            ArgumentException exception = Should.Throw<ArgumentException>(
-                () => graph.GetTargetLists(["AnotherTarget"]));
-
-            exception.ParamName.ShouldBe("entryProjectTargets");
-            exception.Message.ShouldContain("AnotherTarget");
         }
 
         [Fact]
@@ -3006,13 +2977,10 @@ $@"
                 </Project>
                 """);
 
-            ProjectGraph graph = ProjectGraph.CreateForBuild(
-                new ProjectGraphBuildOptions
-                {
-                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
-                    ProjectCollection = _env.CreateProjectCollection().Collection,
-                    Targets = ["SolutionOnly"]
-                });
+            ProjectGraph graph = CreateGraphForBuild(
+                solutionFile.Path,
+                _env.CreateProjectCollection().Collection,
+                "SolutionOnly");
 
             ProjectGraphNode solutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
             ProjectGraphNode projectNode = graph.ProjectNodes.Single(node => node != solutionNode);
@@ -3033,13 +3001,10 @@ $@"
                     """);
             TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "ProjectTraversalTarget.sln");
 
-            ProjectGraph graph = ProjectGraph.CreateForBuild(
-                new ProjectGraphBuildOptions
-                {
-                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
-                    ProjectCollection = _env.CreateProjectCollection().Collection,
-                    Targets = ["Project1:CustomTarget"]
-                });
+            ProjectGraph graph = CreateGraphForBuild(
+                solutionFile.Path,
+                _env.CreateProjectCollection().Collection,
+                "Project1:CustomTarget");
 
             ProjectGraphNode solutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
             ProjectGraphNode projectNode = graph.ProjectNodes.Single(node => node != solutionNode);
@@ -3047,24 +3012,6 @@ $@"
 
             targetLists[solutionNode].ShouldBe(["Project1:CustomTarget"]);
             targetLists[projectNode].ShouldBe(["CustomTarget"]);
-        }
-
-        [Theory]
-        [InlineData(null)]
-        [InlineData("")]
-        [InlineData(" ")]
-        public void BuildApiRejectsInvalidTargetNames(string targetName)
-        {
-            ArgumentException exception = Should.Throw<ArgumentException>(
-                () => ProjectGraph.CreateForBuild(
-                    new ProjectGraphBuildOptions
-                    {
-                        EntryPoints = [],
-                        ProjectCollection = _env.CreateProjectCollection().Collection,
-                        Targets = [targetName]
-                    }));
-
-            exception.ParamName.ShouldBe("Targets");
         }
 
         [Fact]
@@ -3178,13 +3125,10 @@ $@"
                 TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
                 TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "GeneratedSolution.sln");
 
-                ProjectGraph graph = ProjectGraph.CreateForBuild(
-                    new ProjectGraphBuildOptions
-                    {
-                        EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
-                        ProjectCollection = _env.CreateProjectCollection().Collection,
-                        Targets = ["Build"]
-                    });
+                ProjectGraph graph = CreateGraphForBuild(
+                    solutionFile.Path,
+                    _env.CreateProjectCollection().Collection,
+                    "Build");
 
                 ProjectGraphNode solutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
 
@@ -3479,6 +3423,20 @@ $@"
                     EndGlobalSection
                 EndGlobal
                 """);
+        }
+
+        private static ProjectGraph CreateGraphForBuild(
+            string entryPoint,
+            ProjectCollection projectCollection,
+            params string[] targets)
+        {
+            return ProjectGraph.CreateForBuild(
+                new ProjectGraphOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(entryPoint)],
+                    ProjectCollection = projectCollection
+                },
+                targets);
         }
 
         public void Dispose()

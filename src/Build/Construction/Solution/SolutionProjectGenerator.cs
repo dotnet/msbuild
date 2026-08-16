@@ -91,6 +91,15 @@ namespace Microsoft.Build.Construction
             "ValidateProjects",
             "GetSolutionConfigurationContents");
 
+        internal static bool IsSolutionGraphBuildEntryPoint(ProjectInstance projectInstance) =>
+            projectInstance.GlobalProperties.ContainsKey(SolutionGraphBuildEntryPointProperty);
+
+        internal static bool IsGeneratedSolutionGraphBuildEntryPoint(ProjectInstance projectInstance) =>
+            projectInstance.GlobalProperties.TryGetValue(
+                SolutionGraphBuildEntryPointProperty,
+                out string generatedSolutionProjectPath)
+            && FileUtilities.PathComparer.Equals(projectInstance.FullPath, generatedSolutionProjectPath);
+
 #if FEATURE_ASPNET_COMPILER
         /// <summary>
         /// Version 2.0

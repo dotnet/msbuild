@@ -130,12 +130,12 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                     ProjectGraphEntryPoint entryPoint = new(filterFile.Path, new Dictionary<string, string>());
 
                     ProjectGraph graphFromSolution = ProjectGraph.CreateForBuild(
-                        new ProjectGraphBuildOptions
+                        new ProjectGraphOptions
                         {
                             EntryPoints = [entryPoint],
-                            ProjectCollection = projectCollection,
-                            Targets = ["SimpleProjectTarget"]
-                        });
+                            ProjectCollection = projectCollection
+                        },
+                        ["SimpleProjectTarget"]);
                     logger.AssertNoErrors();
                     graphFromSolution.ProjectNodes.Count.ShouldBe(2);
                     ProjectGraphNode solutionNode = graphFromSolution.EntryPointNodes.ShouldHaveSingleItem();

@@ -1845,21 +1845,7 @@ namespace Microsoft.Build.Execution
             // The first instance is the traversal project, which goes into this configuration
             config.Project = instances[0];
 
-            // The remaining instances are the metaprojects which describe the dependencies for each project as well as how to invoke the project itself.
-            for (int i = 1; i < instances.Length; i++)
-            {
-                // Create new configurations for each of these if they don't already exist.  That could happen if there are multiple
-                // solutions in this build which refer to the same project, in which case we want them to refer to the same
-                // metaproject as well.
-                var newConfig = new BuildRequestConfiguration(
-                    GetNewConfigurationId(),
-                    instances[i])
-                { ExplicitlyLoaded = config.ExplicitlyLoaded };
-                if (_configCache!.GetMatchingConfiguration(newConfig) == null)
-                {
-                    _configCache.AddConfiguration(newConfig);
-                }
-            }
+            RegisterSolutionMetaprojects(instances, startIndex: 1, config.ExplicitlyLoaded);
         }
 
         /// <summary>
@@ -2291,12 +2277,11 @@ namespace Microsoft.Build.Execution
 
                 if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11))
                 {
-                    var graphOptions = new ProjectGraphBuildOptions
+                    var graphOptions = new ProjectGraphOptions
                     {
                         EntryPoints = submission.BuildRequestData.ProjectGraphEntryPoints!,
                         ProjectCollection = projectCollection,
-                        ProjectInstanceFactoryFunc = ProjectInstanceFactory,
-                        Targets = targets
+                        ProjectInstanceFactoryFunc = ProjectInstanceFactory
                     };
                     var generationContext = new SolutionProjectGenerationContext(
                         ((IBuildComponentHost)this).LoggingService,
@@ -2396,13 +2381,27 @@ namespace Microsoft.Build.Execution
 
             lock (_syncLock)
             {
-                foreach (ProjectInstance metaproject in projectGraph.GeneratedSolutionMetaprojects)
+                RegisterSolutionMetaprojects(projectGraph.GeneratedSolutionMetaprojects, startIndex: 0, explicitlyLoaded: false);
+            }
+        }
+
+        private void RegisterSolutionMetaprojects(
+            IReadOnlyList<ProjectInstance> instances,
+            int startIndex,
+            bool explicitlyLoaded)
+        {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
+            for (int i = startIndex; i < instances.Count; i++)
+            {
+                var configuration = new BuildRequestConfiguration(GetNewConfigurationId(), instances[i])
                 {
-                    var configuration = new BuildRequestConfiguration(GetNewConfigurationId(), metaproject);
-                    if (_configCache!.GetMatchingConfiguration(configuration) is null)
-                    {
-                        _configCache.AddConfiguration(configuration);
-                    }
+                    ExplicitlyLoaded = explicitlyLoaded
+                };
+
+                if (_configCache!.GetMatchingConfiguration(configuration) is null)
+                {
+                    _configCache.AddConfiguration(configuration);
                 }
             }
         }
@@ -2415,7 +2414,7 @@ namespace Microsoft.Build.Execution
             }
 
             ProjectGraphNode entryPointNode = projectGraph.EntryPointNodes.First();
-            return entryPointNode.ProjectInstance.GlobalProperties.ContainsKey(SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty)
+            return SolutionProjectGenerator.IsSolutionGraphBuildEntryPoint(entryPointNode.ProjectInstance)
                 ? entryPointNode
                 : null;
         }
@@ -2436,18 +2435,11 @@ namespace Microsoft.Build.Execution
             var graphBuildStateLock = new object();
 
             var blockedNodes = new HashSet<ProjectGraphNode>(projectGraph.ProjectNodes);
-            if (syntheticSolutionNode is not null)
-            {
-                blockedNodes.Add(syntheticSolutionNode);
-            }
-
             var finishedNodes = new HashSet<ProjectGraphNode>(blockedNodes.Count);
             var buildingNodes = new Dictionary<BuildSubmissionBase, ProjectGraphNode>();
             var resultsPerNode = new Dictionary<ProjectGraphNode, BuildResult>(projectGraph.ProjectNodes.Count);
             BuildResult? syntheticSolutionNodeResult = null;
             ExceptionDispatchInfo? submissionException = null;
-            int finishedProjectNodesCount = 0;
-            int projectNodesCount = projectGraph.ProjectNodes.Count - (syntheticSolutionNode is null ? 0 : 1);
             bool projectNodeFailed = false;
 
             while (blockedNodes.Count > 0 || buildingNodes.Count > 0)
@@ -2464,9 +2456,7 @@ namespace Microsoft.Build.Execution
                 lock (graphBuildStateLock)
                 {
                     var unblockedNodes = blockedNodes
-                        .Where(node =>
-                            node.ProjectReferences.All(projectReference => finishedNodes.Contains(projectReference))
-                            && (!IsSyntheticSolutionNode(node) || finishedProjectNodesCount == projectNodesCount))
+                        .Where(node => node.ProjectReferences.All(projectReference => finishedNodes.Contains(projectReference)))
                         .ToList();
                     foreach (var node in unblockedNodes)
                     {
@@ -2484,11 +2474,6 @@ namespace Microsoft.Build.Execution
                         {
                             // An empty target list here means "no targets" instead of "default targets", so don't even build it.
                             finishedNodes.Add(node);
-                            if (!IsSyntheticSolutionNode(node))
-                            {
-                                finishedProjectNodesCount++;
-                            }
-
                             blockedNodes.Remove(node);
 
                             waitHandle.Set();
@@ -2538,7 +2523,6 @@ namespace Microsoft.Build.Execution
                                 }
                                 else
                                 {
-                                    finishedProjectNodesCount++;
                                     BuildResult finishedBuildResult = finishedBuildSubmission.BuildResult!;
                                     projectNodeFailed |= finishedBuildResult.OverallResult == BuildResultCode.Failure;
                                     resultsPerNode.Add(finishedNode, finishedBuildResult);
@@ -2563,12 +2547,7 @@ namespace Microsoft.Build.Execution
                     return false;
                 }
 
-                return !node.ProjectInstance.GlobalProperties.TryGetValue(
-                    SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty,
-                    out string? generatedSolutionProjectPath)
-                    || !FileUtilities.PathComparer.Equals(
-                        node.ProjectInstance.FullPath,
-                        generatedSolutionProjectPath);
+                return !SolutionProjectGenerator.IsGeneratedSolutionGraphBuildEntryPoint(node.ProjectInstance);
             }
         }
 

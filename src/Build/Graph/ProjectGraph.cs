@@ -453,38 +453,21 @@ namespace Microsoft.Build.Graph
         {
         }
 
-        /// <summary>
-        /// Constructs a target-bound project graph using the generated solution traversal project.
-        /// </summary>
-        /// <param name="options">The options used to construct the target-bound graph.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken"/> to observe.</param>
-        /// <returns>The constructed project graph.</returns>
         [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
-        public static ProjectGraph CreateForBuild(
-            ProjectGraphBuildOptions options,
+        internal static ProjectGraph CreateForBuild(
+            ProjectGraphOptions options,
+            IReadOnlyCollection<string> targets,
             CancellationToken cancellationToken = default)
         {
-            ArgumentNullException.ThrowIfNull(options);
-            ArgumentNullException.ThrowIfNull(options.EntryPoints);
             ArgumentNullException.ThrowIfNull(options.ProjectCollection);
-            ArgumentNullException.ThrowIfNull(options.Targets);
-
-            ImmutableArray<string> targets = options.Targets.ToImmutableArray();
-            if (targets.Any(targetName => string.IsNullOrWhiteSpace(targetName)))
-            {
-                throw new ArgumentException(
-                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                        "OM_TargetNameNullOrEmpty",
-                        nameof(CreateForBuild)),
-                    nameof(options.Targets));
-            }
+            ArgumentNullException.ThrowIfNull(targets);
 
             var generationContext = new SolutionProjectGenerationContext(
                 options.ProjectCollection.LoggingService,
                 BuildEventContext.Invalid,
                 SdkResolverService.Instance,
                 targets,
-                options.ToolsVersionOverride,
+                toolsVersionOverride: null,
                 BuildEventContext.InvalidSubmissionId);
 
             return CreateForBuild(options, generationContext, cancellationToken);
@@ -492,20 +475,11 @@ namespace Microsoft.Build.Graph
 
         [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
         internal static ProjectGraph CreateForBuild(
-            ProjectGraphBuildOptions options,
+            ProjectGraphOptions options,
             SolutionProjectGenerationContext generationContext,
             CancellationToken cancellationToken = default)
         {
-            var graphOptions = new ProjectGraphOptions
-            {
-                EntryPoints = options.EntryPoints,
-                ProjectCollection = options.ProjectCollection,
-                ProjectInstanceFactoryFunc = options.ProjectInstanceFactoryFunc,
-                DegreeOfParallelism = options.DegreeOfParallelism,
-                Mode = options.Mode
-            };
-
-            SolutionProjectFactory solutionProjectFactory =
+            Func<SolutionFile, IDictionary<string, string>, SolutionProjectGenerationResult> solutionProjectFactory =
                 (solution, globalProperties) =>
                     SolutionProjectGenerator.GenerateForGraph(
                         solution,
@@ -514,14 +488,14 @@ namespace Microsoft.Build.Graph
                         generationContext);
 
             return new ProjectGraph(
-                graphOptions,
+                options,
                 solutionProjectFactory,
                 cancellationToken);
         }
 
         private ProjectGraph(
             ProjectGraphOptions options,
-            SolutionProjectFactory solutionProjectFactory,
+            Func<SolutionFile, IDictionary<string, string>, SolutionProjectGenerationResult> solutionProjectFactory,
             CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(options.ProjectCollection, nameof(options.ProjectCollection));
@@ -723,27 +697,6 @@ namespace Microsoft.Build.Graph
         {
             ThrowOnEmptyTargetNames(entryProjectTargets);
 
-            ProjectGraphNode generatedSolutionNode = Solution is not null
-                && EntryPointNodes.Count == 1
-                && IsGeneratedSolutionNode(EntryPointNodes.First())
-                    ? EntryPointNodes.First()
-                    : null;
-
-            if (generatedSolutionNode is not null && entryProjectTargets is not null)
-            {
-                foreach (string targetName in entryProjectTargets)
-                {
-                    if (!generatedSolutionNode.ProjectInstance.Targets.ContainsKey(targetName))
-                    {
-                        throw new ArgumentException(
-                            ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
-                                "OM_ProjectGraphTargetNotGenerated",
-                                targetName),
-                            nameof(entryProjectTargets));
-                    }
-                }
-            }
-
             // Seed the dictionary with empty lists for every buildable node. In this particular case though an empty list means "build nothing" rather than "default targets".
             var targetLists = new Dictionary<ProjectGraphNode, ImmutableList<string>>(ProjectNodes.Count);
             foreach (ProjectGraphNode projectNode in ProjectNodes)
@@ -751,17 +704,10 @@ namespace Microsoft.Build.Graph
                 targetLists[projectNode] = ImmutableList<string>.Empty;
             }
 
-            foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
-            {
-                if (!targetLists.ContainsKey(entryPointNode))
-                {
-                    targetLists[entryPointNode] = ImmutableList<string>.Empty;
-                }
-            }
-
             var encounteredEdges = new HashSet<ProjectGraphBuildRequest>();
             var edgesToVisit = new Queue<ProjectGraphBuildRequest>();
-            ProjectGraphNode syntheticSolutionNode = EntryPointNodes.FirstOrDefault(IsSyntheticSolutionNode);
+            ProjectGraphNode syntheticSolutionNode = EntryPointNodes.FirstOrDefault(
+                node => SolutionProjectGenerator.IsSolutionGraphBuildEntryPoint(node.ProjectInstance));
             IReadOnlyCollection<ProjectGraphNode> solutionProjectEntryNodes =
                 syntheticSolutionNode?.ProjectReferences ?? EntryPointNodes;
 
@@ -781,7 +727,7 @@ namespace Microsoft.Build.Graph
                 {
                     foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
                     {
-                        if (IsSyntheticSolutionNode(entryPointNode))
+                        if (ReferenceEquals(entryPointNode, syntheticSolutionNode))
                         {
                             var solutionEdge = new ProjectGraphBuildRequest(entryPointNode, [targetName]);
                             if (encounteredEdges.Add(solutionEdge))
@@ -844,11 +790,11 @@ namespace Microsoft.Build.Graph
                     {
                         foreach (ProjectGraphNode entryPointNode in EntryPointNodes)
                         {
-                            if (IsSyntheticSolutionNode(entryPointNode))
+                            if (ReferenceEquals(entryPointNode, syntheticSolutionNode))
                             {
                                 // A target-bound generated solution uses ProjectReferenceTargets. A legacy
                                 // placeholder cannot describe arbitrary targets before GetTargetLists is called.
-                                if (!IsGeneratedSolutionNode(entryPointNode)
+                                if (!SolutionProjectGenerator.IsGeneratedSolutionGraphBuildEntryPoint(entryPointNode.ProjectInstance)
                                     && !HasProjectReferenceTarget(entryPointNode, targetName))
                                 {
                                     foreach (ProjectGraphNode projectNode in entryPointNode.ProjectReferences)
@@ -871,16 +817,6 @@ namespace Microsoft.Build.Graph
                     }
                 }
             }
-
-            bool IsSyntheticSolutionNode(ProjectGraphNode node) =>
-                Solution is not null
-                && node.ProjectInstance.GlobalProperties.ContainsKey(SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty);
-
-            static bool IsGeneratedSolutionNode(ProjectGraphNode node) =>
-                node.ProjectInstance.GlobalProperties.TryGetValue(
-                    SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty,
-                    out string generatedSolutionProjectPath)
-                && FileUtilities.PathComparer.Equals(node.ProjectInstance.FullPath, generatedSolutionProjectPath);
 
             static bool HasProjectReferenceTarget(ProjectGraphNode node, string targetName)
             {
