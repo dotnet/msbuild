@@ -734,6 +734,11 @@
         <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
         <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
+      <trans-unit id="OM_ProjectGraphTargetNotGenerated">
+        <source>Method GetTargetLists cannot request target "{0}" because that target was not specified when the target-bound graph was constructed. Recreate the graph and include the target in ProjectGraphBuildOptions.Targets.</source>
+        <target state="new">Method GetTargetLists cannot request target "{0}" because that target was not specified when the target-bound graph was constructed. Recreate the graph and include the target in ProjectGraphBuildOptions.Targets.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
         <target state="translated">Non è possibile chiamare il metodo {0} con una raccolta contenente nomi di destinazione Null o vuoti.</target>

@@ -129,11 +129,29 @@ namespace Microsoft.Build.Engine.UnitTests.Construction
                     projectCollection.RegisterLogger(logger);
                     ProjectGraphEntryPoint entryPoint = new(filterFile.Path, new Dictionary<string, string>());
 
-                    // We only need to construct the graph, since that tells us what would build if we were to build it.
-                    ProjectGraph graphFromSolution = new(entryPoint, projectCollection);
+                    ProjectGraph graphFromSolution = ProjectGraph.CreateForBuild(
+                        new ProjectGraphBuildOptions
+                        {
+                            EntryPoints = [entryPoint],
+                            ProjectCollection = projectCollection,
+                            Targets = ["SimpleProjectTarget"]
+                        });
                     logger.AssertNoErrors();
-                    graphFromSolution.ProjectNodes.ShouldHaveSingleItem();
-                    graphFromSolution.ProjectNodes.Single().ProjectInstance.ProjectFileLocation.LocationString.ShouldBe(simpleProject.Path);
+                    graphFromSolution.ProjectNodes.Count.ShouldBe(2);
+                    ProjectGraphNode solutionNode = graphFromSolution.EntryPointNodes.ShouldHaveSingleItem();
+                    graphFromSolution.ProjectNodes.ShouldContain(solutionNode);
+                    graphFromSolution.ProjectNodes
+                        .Single(node => node.ProjectInstance.ProjectFileLocation.LocationString == simpleProject.Path)
+                        .ProjectInstance.ProjectFileLocation.LocationString.ShouldBe(simpleProject.Path);
+                    solutionNode.ProjectInstance.GetItems("ProjectReference")
+                        .ShouldHaveSingleItem()
+                        .EvaluatedInclude.ShouldBe(simpleProject.Path);
+
+                    ProjectGraph preconstructedGraph = new(entryPoint, projectCollection);
+                    ProjectGraphNode preconstructedSolutionNode = preconstructedGraph.EntryPointNodes.ShouldHaveSingleItem();
+                    preconstructedSolutionNode.ProjectInstance.FullPath.ShouldBe(filterFile.Path);
+                    preconstructedSolutionNode.ProjectReferences.ShouldHaveSingleItem()
+                        .ProjectInstance.FullPath.ShouldBe(simpleProject.Path);
                 }
                 else
                 {

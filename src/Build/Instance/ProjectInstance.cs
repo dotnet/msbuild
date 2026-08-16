@@ -670,11 +670,19 @@ namespace Microsoft.Build.Execution
         /// Used by this class when generating legacy solution wrappers.
         /// </summary>
         internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId)
+            : this(xml, globalProperties, toolsVersion, 0, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId)
+        {
+        }
+
+        /// <summary>
+        /// Creates a mutable ProjectInstance directly, using the specified logging service and solution version.
+        /// </summary>
+        internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, int visualStudioVersionFromSolution, BuildParameters buildParameters, ILoggingService loggingService, BuildEventContext buildEventContext, ISdkResolverService sdkResolverService, int submissionId)
         {
             ArgumentNullException.ThrowIfNull(xml);
             ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(toolsVersion, nameof(toolsVersion));
             ArgumentNullException.ThrowIfNull(buildParameters);
-            Initialize(xml, globalProperties, toolsVersion, null, 0 /* no solution version specified */, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId);
+            Initialize(xml, globalProperties, toolsVersion, null, visualStudioVersionFromSolution, buildParameters, loggingService, buildEventContext, sdkResolverService, submissionId);
         }
 
         /// <summary>

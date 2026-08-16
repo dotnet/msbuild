@@ -633,9 +633,26 @@ namespace Microsoft.Build.Logging
             {
                 projectImportsCollector.AddFile(projectArgs.ProjectFile);
             }
+            else if (e is BuildSubmissionStartedEventArgs submissionArgs && submissionArgs.EntryProjectsFullPath is not null)
+            {
+                foreach (string entryProject in submissionArgs.EntryProjectsFullPath)
+                {
+                    projectImportsCollector.AddFile(entryProject);
+                }
+            }
             else if (e is MetaprojectGeneratedEventArgs { metaprojectXml: { } } metaprojectArgs)
             {
                 projectImportsCollector.AddFileFromMemory(metaprojectArgs.ProjectFile, metaprojectArgs.metaprojectXml);
+
+                const string metaprojectSuffix = ".metaproj";
+                if (metaprojectArgs.ProjectFile.EndsWith(metaprojectSuffix, StringComparison.OrdinalIgnoreCase))
+                {
+                    string possibleSolutionPath = metaprojectArgs.ProjectFile[..^metaprojectSuffix.Length];
+                    if (FileUtilities.IsSolutionFilename(possibleSolutionPath))
+                    {
+                        projectImportsCollector.AddFile(possibleSolutionPath);
+                    }
+                }
             }
             else if (e is ResponseFileUsedEventArgs responseFileArgs && responseFileArgs.ResponseFilePath != null)
             {

@@ -223,9 +223,9 @@ namespace Microsoft.Build.Graph
                 }
 
                 ProjectGraphEntryPoint? entryPoint = ProjectGraphEntryPoints?.FirstOrDefault();
-                if (entryPoint != null)
+                if (entryPoint?.GlobalProperties is { } globalProperties)
                 {
-                    return entryPoint.Value.GlobalProperties.AsReadOnly();
+                    return globalProperties.AsReadOnly();
                 }
 
                 return ImmutableDictionary<string, string?>.Empty;

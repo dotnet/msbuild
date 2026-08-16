@@ -37,6 +37,7 @@ Change wave checks around features will be removed in the release that accompani
 
 ### 18.11
 - [XmlPeek, XmlPoke, and XslTransformation default to prohibiting embedded DTDs](https://github.com/dotnet/msbuild/pull/14285)
+- [Static graph builds of solutions include a synthetic solution node so solution-level targets and hooks execute.](https://github.com/dotnet/msbuild/pull/14407)
 - [Out-of-proc communication uses larger read-ahead buffers and pre-buffers TaskHost packet bodies to reduce pipe reads.](https://github.com/dotnet/msbuild/pull/14505)
 - [Restore no longer discards a ProjectRootElementCache that reloads changed files from disk, so the build that follows an implicit restore does not re-parse the import closure.](https://github.com/dotnet/msbuild/pull/14558)
 
