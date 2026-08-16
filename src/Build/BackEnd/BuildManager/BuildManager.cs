@@ -2307,7 +2307,7 @@ namespace Microsoft.Build.Execution
                         submission.SubmissionId,
                         _buildParameters);
 
-                    projectGraph = ProjectGraph.CreateForBuild(graphOptions, generationContext, targets);
+                    projectGraph = ProjectGraph.CreateForBuild(graphOptions, generationContext);
                 }
                 else
                 {

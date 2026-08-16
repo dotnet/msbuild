@@ -66,8 +66,6 @@ namespace Microsoft.Build.Graph
 
         private readonly IReadOnlyCollection<ProjectGraphNode> _originalEntryPointNodes;
 
-        private readonly ImmutableHashSet<string> _generatedSolutionTargets;
-
         private GraphBuilder.GraphEdges Edges { get; }
 
         internal GraphBuilder.GraphEdges TestOnly_Edges => Edges;
@@ -453,7 +451,6 @@ namespace Microsoft.Build.Graph
             : this(
                 options,
                 solutionProjectFactory: null,
-                generatedSolutionTargets: null,
                 cancellationToken)
         {
         }
@@ -492,14 +489,13 @@ namespace Microsoft.Build.Graph
                 options.ToolsVersionOverride,
                 BuildEventContext.InvalidSubmissionId);
 
-            return CreateForBuild(options, generationContext, targets, cancellationToken);
+            return CreateForBuild(options, generationContext, cancellationToken);
         }
 
         [RequiresUnreferencedCode("Evaluates a generated solution metaproject, which resolves SDKs and loads loggers by reflection at runtime; incompatible with trimming.")]
         internal static ProjectGraph CreateForBuild(
             ProjectGraphBuildOptions options,
             SolutionProjectGenerationContext generationContext,
-            IReadOnlyCollection<string> targets,
             CancellationToken cancellationToken = default)
         {
             var graphOptions = new ProjectGraphOptions
@@ -522,14 +518,12 @@ namespace Microsoft.Build.Graph
             return new ProjectGraph(
                 graphOptions,
                 solutionProjectFactory,
-                targets,
                 cancellationToken);
         }
 
         private ProjectGraph(
             ProjectGraphOptions options,
             SolutionProjectFactory solutionProjectFactory,
-            IReadOnlyCollection<string> generatedSolutionTargets,
             CancellationToken cancellationToken)
         {
             ArgumentNullException.ThrowIfNull(options.ProjectCollection, nameof(options.ProjectCollection));
@@ -538,8 +532,6 @@ namespace Microsoft.Build.Graph
             {
                 throw new ArgumentOutOfRangeException(nameof(options.DegreeOfParallelism), "DegreeOfParallelism must be greater than zero.");
             }
-
-            _generatedSolutionTargets = generatedSolutionTargets?.ToImmutableHashSet(StringComparer.OrdinalIgnoreCase);
 
             var measurementInfo = BeginMeasurement();
 
@@ -734,14 +726,17 @@ namespace Microsoft.Build.Graph
         {
             ThrowOnEmptyTargetNames(entryProjectTargets);
 
-            if (_generatedSolutionTargets is not null
-                && Solution is not null
-                && entryProjectTargets is not null)
+            ProjectGraphNode generatedSolutionNode = Solution is not null
+                && EntryPointNodes.Count == 1
+                && IsGeneratedSolutionNode(EntryPointNodes.First())
+                    ? EntryPointNodes.First()
+                    : null;
+
+            if (generatedSolutionNode is not null && entryProjectTargets is not null)
             {
                 foreach (string targetName in entryProjectTargets)
                 {
-                    if (!_generatedSolutionTargets.Contains(targetName)
-                        && !SolutionProjectGenerator._defaultTargetNames.Contains(targetName))
+                    if (!generatedSolutionNode.ProjectInstance.Targets.ContainsKey(targetName))
                     {
                         throw new ArgumentException(
                             ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword(
@@ -853,7 +848,7 @@ namespace Microsoft.Build.Graph
                             {
                                 // A target-bound generated solution uses ProjectReferenceTargets. A legacy
                                 // placeholder cannot describe arbitrary targets before GetTargetLists is called.
-                                if (_generatedSolutionTargets is null
+                                if (!IsGeneratedSolutionNode(entryPointNode)
                                     && !HasProjectReferenceTarget(entryPointNode, targetName))
                                 {
                                     foreach (ProjectGraphNode projectNode in entryPointNode.ProjectReferences)
@@ -880,6 +875,12 @@ namespace Microsoft.Build.Graph
             bool IsSyntheticSolutionNode(ProjectGraphNode node) =>
                 Solution is not null
                 && node.ProjectInstance.GlobalProperties.ContainsKey(SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty);
+
+            static bool IsGeneratedSolutionNode(ProjectGraphNode node) =>
+                node.ProjectInstance.GlobalProperties.TryGetValue(
+                    SolutionProjectGenerator.SolutionGraphBuildEntryPointProperty,
+                    out string generatedSolutionProjectPath)
+                && FileUtilities.PathComparer.Equals(node.ProjectInstance.FullPath, generatedSolutionProjectPath);
 
             static bool HasProjectReferenceTarget(ProjectGraphNode node, string targetName)
             {
