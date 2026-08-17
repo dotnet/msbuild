@@ -31,8 +31,10 @@ public sealed class AssemblyResolutionSearchLogging_Tests
             .ShouldHaveSingleItem();
         searchEvent.RequestedAssemblyName.ShouldBe("Requested, Version=1.0.0.0");
         searchEvent.SearchAttempts.Count.ShouldBe(3);
-        searchEvent.SearchAttempts[0].Result.ShouldBe(AssemblyResolutionSearchResult.FileNotFound);
+        searchEvent.SearchAttempts[0].Result.ShouldBe(AssemblyResolutionSearchResult.NotInGac);
+        searchEvent.SearchAttempts[0].AssemblyName.ShouldBeNull();
         searchEvent.SearchAttempts[1].Result.ShouldBe(AssemblyResolutionSearchResult.FusionNamesDidNotMatch);
+        searchEvent.SearchAttempts[1].AssemblyName.ShouldBe("Candidate, Version=2.0.0.0");
         searchEvent.SearchAttempts[2].IsAssemblyFoldersExSearch.ShouldBeTrue();
         searchEvent.MessageFormats.ShouldNotBeNull().SearchPath.ShouldBe(
             "        " + AssemblyResources.PrimaryResources.GetString(
@@ -115,7 +117,8 @@ public sealed class AssemblyResolutionSearchLogging_Tests
             {
                 FileNameAttempted = "first.dll",
                 SearchPath = "first-path",
-                Reason = NoMatchReason.FileNotFound,
+                AssemblyName = new AssemblyNameExtension("Ignored, Version=3.0.0.0"),
+                Reason = NoMatchReason.NotInGac,
             },
             new ResolutionSearchLocation
             {
