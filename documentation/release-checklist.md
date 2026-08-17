@@ -27,7 +27,7 @@ Fill in these values before starting. Version increments are irregular — they 
 | Placeholder | Description | Value |
 |---|---|---|
 | `{{PREVIOUS_RELEASE_VERSION}}` | Version being replaced as latest | |
-| `{{PREVIOUS_RELEASE_EXACT_VERSION}}` | The `VersionPrefix` the **previous** release actually shipped as — used by Phase 5.3a to look up its tag. It is **often not** `{{PREVIOUS_RELEASE_VERSION}}.0` (e.g. 18.8 shipped as `18.8.2`). Read it from the previous release's tracking issue, or from `git tag --list 'v{{PREVIOUS_RELEASE_VERSION}}.*'`. | |
+| `{{PREVIOUS_RELEASE_EXACT_VERSION}}` | The `VersionPrefix` the **previous** release actually shipped as — used by Phase 5.3a to look up its tag. Read it from the previous release's tracking issue, or from `git tag --list 'v{{PREVIOUS_RELEASE_VERSION}}.*'`. | |
 | `{{THIS_RELEASE_VERSION}}` | Version being released now | |
 | `{{THIS_RELEASE_EXACT_VERSION}}` | The `VersionPrefix` that **actually shipped** to customers — determined in Phase 5.1a, **not** assumed. It is usually `{{THIS_RELEASE_VERSION}}.0`, but servicing insertions and SDK-coupled releases routinely ship a higher patch (e.g. 18.7 shipped as `18.7.1`; 18.9 shipped as `18.9.6` via the SDK while VS `rel/stable` carried `18.9.1`). **Not known when first instantiating this checklist — leave blank until Phase 5.1a confirms it.** | |
 | `{{NEXT_VERSION}}` | Version that main will be bumped to | |
