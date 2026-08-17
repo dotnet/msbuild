@@ -24,3 +24,6 @@ eng/common/** linguist-vendored linguist-generated
 
 # Display XLF files collapsed by default in PR diffs
 *.xlf linguist-generated=true
+
+# VerifyTests
+*.verified.txt text eol=lf working-tree-encoding=UTF-8

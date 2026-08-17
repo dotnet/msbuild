@@ -75,6 +75,16 @@ namespace Microsoft.Build.Framework.Telemetry
         public string? Host { get; set; }
 
         /// <summary>
+        /// True if buildcheck was used.
+        /// </summary>
+        public bool? BuildCheckEnabled { get; set; }
+
+        /// <summary>
+        /// True if Smart Application Control was enabled.
+        /// </summary>
+        public bool? SACEnabled { get; set; }
+
+        /// <summary>
         /// State of MSBuild server process before this build.
         /// One of 'cold', 'hot', null (if not run as server)
         /// </summary>
@@ -143,6 +153,16 @@ namespace Microsoft.Build.Framework.Telemetry
             if (Version != null)
             {
                 properties["BuildEngineVersion"] = Version.ToString();
+            }
+
+            if (BuildCheckEnabled != null)
+            {
+                properties["BuildCheckEnabled"] = BuildCheckEnabled.Value.ToString(CultureInfo.InvariantCulture);
+            }
+
+            if (SACEnabled != null)
+            {
+                properties["SACEnabled"] = SACEnabled.Value.ToString(CultureInfo.InvariantCulture);
             }
 
             return properties;

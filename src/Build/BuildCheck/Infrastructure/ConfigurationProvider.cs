@@ -7,19 +7,21 @@ using System.Linq;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure.EditorConfig;
 using Microsoft.Build.Experimental.BuildCheck;
 using System.Collections.Concurrent;
+using Microsoft.Build.Experimental.BuildCheck.Utilities;
+using Microsoft.Build.BuildCheck.Infrastructure;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-internal sealed class ConfigurationProvider
+internal sealed class ConfigurationProvider : IConfigurationProvider
 {
     private readonly EditorConfigParser _editorConfigParser = new EditorConfigParser();
 
     private const string BuildCheck_ConfigurationKey = "build_check";
 
     /// <summary>
-    /// The dictionary used for storing the BuildAnalyzerConfiguration per projectfile and rule id. The key is equal to {projectFullPath}-{ruleId}.
+    /// The dictionary used for storing the BuildCheckConfiguration per projectfile and rule id. The key is equal to {projectFullPath}-{ruleId}.
     /// </summary>
-    private readonly ConcurrentDictionary<string, BuildAnalyzerConfiguration> _buildAnalyzerConfiguration = new ConcurrentDictionary<string, BuildAnalyzerConfiguration>(StringComparer.InvariantCultureIgnoreCase);
+    private readonly ConcurrentDictionary<string, CheckConfiguration> _checkConfiguration = new ConcurrentDictionary<string, CheckConfiguration>(StringComparer.InvariantCultureIgnoreCase);
 
     /// <summary>
     /// The dictionary used for storing the key-value pairs retrieved from the .editorconfigs for specific projectfile. The key is equal to projectFullPath.
@@ -31,14 +33,13 @@ internal sealed class ConfigurationProvider
     /// </summary>
     private readonly ConcurrentDictionary<string, CustomConfigurationData> _customConfigurationData = new ConcurrentDictionary<string, CustomConfigurationData>(StringComparer.InvariantCultureIgnoreCase);
 
-    private readonly string[] _infrastructureConfigurationKeys = new string[] {
-        nameof(BuildAnalyzerConfiguration.EvaluationAnalysisScope).ToLower(),
-        nameof(BuildAnalyzerConfiguration.IsEnabled).ToLower(),
-        nameof(BuildAnalyzerConfiguration.Severity).ToLower()
+    private readonly string[] _infrastructureConfigurationKeys = {
+        BuildCheckConstants.scopeConfigurationKey,
+        BuildCheckConstants.severityConfigurationKey,
     };
 
     /// <summary>
-    /// Gets the user specified unrecognized configuration for the given analyzer rule.
+    /// Gets the user specified unrecognized configuration for the given check rule.
     /// 
     /// The configuration module should as well check that CustomConfigurationData
     ///  for a particular rule is equal across the whole build (for all projects)  - otherwise it should error out.
@@ -84,7 +85,7 @@ internal sealed class ConfigurationProvider
     /// <param name="ruleId"></param>
     /// <throws><see cref="BuildCheckConfigurationException"/> If CustomConfigurationData differs in a build for a same ruleId</throws>
     /// <returns></returns>
-    internal void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
+    public void CheckCustomConfigurationDataValidity(string projectFullPath, string ruleId)
     {
         var configuration = GetCustomConfiguration(projectFullPath, ruleId);
         VerifyCustomConfigurationEquality(ruleId, configuration);
@@ -101,12 +102,12 @@ internal sealed class ConfigurationProvider
         }
     }
 
-    internal BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
+    public CheckConfigurationEffective[] GetMergedConfigurations(
         string projectFullPath,
-        BuildAnalyzer analyzer)
-        => FillConfiguration(projectFullPath, analyzer.SupportedRules, GetMergedConfiguration);
+        Check check)
+        => FillConfiguration(projectFullPath, check.SupportedRules, GetMergedConfiguration);
 
-    internal BuildAnalyzerConfiguration[] GetUserConfigurations(
+    public CheckConfiguration[] GetUserConfigurations(
         string projectFullPath,
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetUserConfiguration);
@@ -122,17 +123,17 @@ internal sealed class ConfigurationProvider
         IReadOnlyList<string> ruleIds)
         => FillConfiguration(projectFullPath, ruleIds, GetCustomConfiguration);
 
-    internal BuildAnalyzerConfigurationInternal[] GetMergedConfigurations(
-        BuildAnalyzerConfiguration[] userConfigs,
-        BuildAnalyzer analyzer)
+    public CheckConfigurationEffective[] GetMergedConfigurations(
+        CheckConfiguration[] userConfigs,
+        Check check)
     {
-        var configurations = new BuildAnalyzerConfigurationInternal[userConfigs.Length];
+        var configurations = new CheckConfigurationEffective[userConfigs.Length];
 
         for (int idx = 0; idx < userConfigs.Length; idx++)
         {
             configurations[idx] = MergeConfiguration(
-                analyzer.SupportedRules[idx].Id,
-                analyzer.SupportedRules[idx].DefaultConfiguration,
+                check.SupportedRules[idx].Id,
+                check.SupportedRules[idx].DefaultConfiguration,
                 userConfigs[idx]);
         }
 
@@ -217,27 +218,28 @@ internal sealed class ConfigurationProvider
     }
 
     /// <summary>
-    /// Gets effective user specified (or default) configuration for the given analyzer rule.
+    /// Gets effective user specified (or default) configuration for the given check rule.
     /// The configuration values CAN be null upon this operation.
     /// 
-    /// The configuration module should as well check that BuildAnalyzerConfigurationInternal.EvaluationAnalysisScope
+    /// The configuration module should as well check that BuildCheckConfigurationInternal.EvaluationCheckScope
     ///  for all rules is equal - otherwise it should error out.
     /// </summary>
     /// <param name="projectFullPath"></param>
     /// <param name="ruleId"></param>
     /// <returns></returns>
-    internal BuildAnalyzerConfiguration GetUserConfiguration(string projectFullPath, string ruleId)
+    internal CheckConfiguration GetUserConfiguration(string projectFullPath, string ruleId)
     {
         var cacheKey = $"{ruleId}-{projectFullPath}";
 
-        var editorConfigValue = _buildAnalyzerConfiguration.GetOrAdd(cacheKey, (key) =>
+        var editorConfigValue = _checkConfiguration.GetOrAdd(cacheKey, (key) =>
         {
-            BuildAnalyzerConfiguration? editorConfig = BuildAnalyzerConfiguration.Null;
+            CheckConfiguration? editorConfig = CheckConfiguration.Null;
+            editorConfig.RuleId = ruleId;
             var config = GetConfiguration(projectFullPath, ruleId);
 
             if (config.Any())
             {
-                editorConfig = BuildAnalyzerConfiguration.Create(config);
+                editorConfig = CheckConfiguration.Create(config);
             }
 
             return editorConfig;
@@ -247,38 +249,53 @@ internal sealed class ConfigurationProvider
     }
 
     /// <summary>
-    /// Gets effective configuration for the given analyzer rule.
+    /// Gets effective configuration for the given check rule.
     /// The configuration values are guaranteed to be non-null upon this merge operation.
     /// </summary>
     /// <param name="projectFullPath"></param>
-    /// <param name="analyzerRule"></param>
+    /// <param name="checkRule"></param>
     /// <returns></returns>
-    internal BuildAnalyzerConfigurationInternal GetMergedConfiguration(string projectFullPath, BuildAnalyzerRule analyzerRule)
-        => GetMergedConfiguration(projectFullPath, analyzerRule.Id, analyzerRule.DefaultConfiguration);
+    internal CheckConfigurationEffective GetMergedConfiguration(string projectFullPath, CheckRule checkRule)
+        => GetMergedConfiguration(projectFullPath, checkRule.Id, checkRule.DefaultConfiguration);
 
-    internal BuildAnalyzerConfigurationInternal MergeConfiguration(
+    internal CheckConfigurationEffective MergeConfiguration(
         string ruleId,
-        BuildAnalyzerConfiguration defaultConfig,
-        BuildAnalyzerConfiguration editorConfig)
-        => new BuildAnalyzerConfigurationInternal(
+        CheckConfiguration defaultConfig,
+        CheckConfiguration editorConfig)
+        => new CheckConfigurationEffective(
             ruleId: ruleId,
-            evaluationAnalysisScope: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.EvaluationAnalysisScope),
-            isEnabled: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.IsEnabled),
-            severity: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.Severity));
+            evaluationCheckScope: GetConfigValue(editorConfig, defaultConfig, cfg => cfg.EvaluationCheckScope),
+            severity: GetSeverityValue(editorConfig, defaultConfig));
 
-    private BuildAnalyzerConfigurationInternal GetMergedConfiguration(
+    private CheckConfigurationEffective GetMergedConfiguration(
         string projectFullPath,
         string ruleId,
-        BuildAnalyzerConfiguration defaultConfig)
+        CheckConfiguration defaultConfig)
         => MergeConfiguration(ruleId, defaultConfig, GetUserConfiguration(projectFullPath, ruleId));
 
     private T GetConfigValue<T>(
-        BuildAnalyzerConfiguration editorConfigValue,
-        BuildAnalyzerConfiguration defaultValue,
-        Func<BuildAnalyzerConfiguration, T?> propertyGetter) where T : struct
+        CheckConfiguration editorConfigValue,
+        CheckConfiguration defaultValue,
+        Func<CheckConfiguration, T?> propertyGetter) where T : struct
         => propertyGetter(editorConfigValue) ??
            propertyGetter(defaultValue) ??
-           EnsureNonNull(propertyGetter(BuildAnalyzerConfiguration.Default));
+           EnsureNonNull(propertyGetter(CheckConfiguration.Default));
+
+    private CheckResultSeverity GetSeverityValue(CheckConfiguration editorConfigValue, CheckConfiguration defaultValue)
+    {
+        CheckResultSeverity? resultSeverity = null;
+
+        // Consider Default as null, so the severity from the default value could be selected.
+        // Default severity is not recognized by the infrastructure and serves for configuration purpuses only. 
+        if (editorConfigValue.Severity != null && editorConfigValue.Severity != CheckResultSeverity.Default)
+        {
+            resultSeverity = editorConfigValue.Severity;
+        }
+
+        resultSeverity ??= defaultValue.Severity ?? EnsureNonNull(CheckConfiguration.Default.Severity);
+
+        return resultSeverity.Value;
+    }
 
     private static T EnsureNonNull<T>(T? value) where T : struct
     {

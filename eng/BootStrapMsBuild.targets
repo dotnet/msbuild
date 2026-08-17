@@ -202,56 +202,40 @@
            AlwaysCreate="true" />
   </Target>
 
-  <Target Name="BootstrapNetCore" DependsOnTargets="CleanBootstrapFolder">
+  <!-- The task allow to download sdk bits for the specified version. It will be used later to bootstrap the runnable MSBuild. -->
+  <UsingTask TaskName="InstallDotNetCoreTask"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"
+             TaskFactory="RoslynCodeTaskFactory">
+    <Task>
+      <Code Source="$(MSBuildThisFileDirectory)..\src\MSBuild.Bootstrap.Utils\Tasks\InstallDotNetCoreTask.cs" Language="cs" />
+    </Task>
+  </UsingTask>
+  <Target Name="AcquireSdk"
+          BeforeTargets="PrepareForBuild"
+          Condition="!$(TargetFramework.StartsWith('net4'))">
 
-    <!-- Publish the project first.  The more obvious way to do this would be to depend on the Publish target,
-         but that causes a target dependency cycle, even though it seems like AfterTargets="AfterBuild" should
-         probably not count as a link in the cycle. -->
-    <MSBuild Projects="$(MSBuildProjectFile)" Targets="Publish" BuildInParallel="$(BuildInParallel)" />
+    <PropertyGroup>
+      <InstallDir>$(ArtifactsBinDir)bootstrap\core\</InstallDir>
+    </PropertyGroup>
+
+    <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetRoot)" InstallDir="$(InstallDir)" Version="$(BootstrapSdkVersion)"/>
+  </Target>
+
+  <Target Name="BootstrapNetCore" DependsOnTargets="AcquireSdk">
 
     <ItemGroup>
-      <!-- Copy all items from the publish folder to the bootstrap folder.  We might be able to just use the published
-            version as the bootstrapped version, but the extra separation here seems like it could be valuable. -->
-      <DeployedItems Include="$(PublishDir)\**\*.*" />
-
-      <NuGetSdkResolverManifest Include= "$(RepoRoot)src\MSBuild\SdkResolvers\Standalone\Microsoft.Build.NuGetSdkResolver.xml" />
-      <InstalledSdks Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Sdks\**\*.*" />
-      <InstalledExtensions Include="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Current\**\*.*" Exclude="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Current\Microsoft.Common.props" />
+     <!-- *.deps.json are excluded because the SDK rewrites these files for consistency with the rest of the SDK, so take their version. -->
+      <FreshlyBuiltNetBinaries Include="$(OutDir)**\*.*" Exclude="$(OutDir)**\*.deps.json" />
     </ItemGroup>
-    <Copy SourceFiles="@(DeployedItems)"
-          DestinationFolder="$(BootstrapDestination)%(RecursiveDir)" />
 
-    <Copy SourceFiles="@(NuGetSdkResolverManifest)"
-          DestinationFolder="$(BootstrapDestination)SdkResolvers\Microsoft.Build.NuGetSdkResolver" />
-
-    <Copy SourceFiles="$(RuntimeIdentifierGraphPath)"
-          DestinationFolder="$(BootstrapDestination)" />
-
-    <Copy SourceFiles="@(InstalledSdks)"
-          DestinationFiles="@(InstalledSdks -> '$(BootstrapDestination)Sdks\%(RecursiveDir)%(Filename)%(Extension)')" />
-
-    <!-- The .NET SDK has a dependency on DependencyModel, but relies on having it in the final
-         MSBuild.deps.json, which differs from ours because it's generated in the SDK repo.
-
-         Copy it from "next to MSBuild" in the pre-bootstrap SDK to our little weirdo bootstrap
-         layout next to the SDK tasks, so it can get loaded by the SDK tasks that need it. -->
-    <Copy SourceFiles="$(DOTNET_INSTALL_DIR)\sdk\$(DotNetCliVersion)\Microsoft.Extensions.DependencyModel.dll"
-          DestinationFolder="$(BootstrapDestination)Sdks\Microsoft.NET.Sdk\tools\$(LatestDotNetCoreForMSBuild)" />
-
-    <Copy SourceFiles="@(InstalledExtensions)"
-          DestinationFolder="$(BootstrapDestination)Current\%(RecursiveDir)" />
-
+    <!-- The copying of these dependencies is required by bootstrap\**\sdk\**\NuGet.RestoreEx.targets. Otherwise NuGet.Build.Tasks.dll can not be found. -->
     <Copy SourceFiles="@(_NuGetRuntimeDependencies)"
-          DestinationFolder="$(BootstrapDestination)" />
+          DestinationFolder="$(InstallDir)sdk\$(BootstrapSdkVersion)\"
+          SkipUnchangedFiles="true" />
 
-    <Copy SourceFiles="$(RepoRoot)src\MSBuild.Bootstrap\RedirectNuGetConsoleProcess.After.Microsoft.Common.targets"
-          DestinationFolder="$(BootstrapDestination)\Current\Microsoft.Common.targets\ImportAfter" />
+    <Copy SourceFiles="@(FreshlyBuiltNetBinaries)"
+          DestinationFiles="@(FreshlyBuiltNetBinaries->'$(InstallDir)sdk\$(BootstrapSdkVersion)\%(RecursiveDir)%(Filename)%(Extension)')" />
 
-    <Copy SourceFiles="$(RepoRoot)src\MSBuild.Bootstrap\RedirectNuGetConsoleProcess.After.Microsoft.Common.targets"
-          DestinationFolder="$(BootstrapDestination)\Current\SolutionFile\ImportAfter" />
-
-    <!-- Disable workload resolver until we can figure out whether it can work in the bootstrap
-         https://github.com/dotnet/msbuild/issues/6566 -->
-    <Touch Files="$(BootstrapDestination)\DisableWorkloadResolver.sentinel" AlwaysCreate="true" />
   </Target>
+
 </Project>

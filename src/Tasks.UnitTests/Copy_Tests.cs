@@ -110,8 +110,8 @@ namespace Microsoft.Build.UnitTests
             _alwaysOverwriteReadOnlyFiles = Environment.GetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar);
             _alwaysRetry = Environment.GetEnvironmentVariable(Copy.AlwaysRetryEnvVar);
 
-            Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, String.Empty);
-            Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, String.Empty);
+            Environment.SetEnvironmentVariable(Copy.AlwaysOverwriteReadOnlyFilesEnvVar, null);
+            Environment.SetEnvironmentVariable(Copy.AlwaysRetryEnvVar, null);
 
             Copy.RefreshInternalEnvironmentValues();
         }

@@ -223,7 +223,7 @@ namespace Microsoft.Build.UnitTests
             }
             else
             {
-                Assert.True(false, "unexpected guid in ITypeLib2.GetCustData");
+                Assert.Fail("unexpected guid in ITypeLib2.GetCustData");
                 pVarVal = null;
             }
         }

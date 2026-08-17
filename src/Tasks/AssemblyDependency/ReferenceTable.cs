@@ -1258,14 +1258,11 @@ namespace Microsoft.Build.Tasks
             Reference reference)
         {
             bool isImmutableFrameworkReference = false;
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8))
+            // For a path to be an immutable reference, it must be externally resolved and has a FrameworkReferenceName defined.
+            if (assemblyName == null && !string.IsNullOrEmpty(rawFileNameCandidate) && reference.IsPrimary && reference.ExternallyResolved)
             {
-                // For a path to be an immutable reference, it must be externally resolved and has a FrameworkReferenceName defined.
-                if (assemblyName == null && !string.IsNullOrEmpty(rawFileNameCandidate) && reference.IsPrimary && reference.ExternallyResolved)
-                {
-                    string frameworkReferenceName = reference.PrimarySourceItem.GetMetadata(ItemMetadataNames.frameworkReferenceName);
-                    isImmutableFrameworkReference = !string.IsNullOrEmpty(frameworkReferenceName);
-                }
+                string frameworkReferenceName = reference.PrimarySourceItem.GetMetadata(ItemMetadataNames.frameworkReferenceName);
+                isImmutableFrameworkReference = !string.IsNullOrEmpty(frameworkReferenceName);
             }
 
             // Now, resolve this reference.

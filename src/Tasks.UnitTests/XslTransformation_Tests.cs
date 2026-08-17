@@ -126,7 +126,7 @@ namespace Microsoft.Build.UnitTests
                             t.XmlInputPaths = (TaskItem[])xmlValue;
                             break;
                         default:
-                            Assert.True(false, "Test error");
+                            Assert.Fail("Test error");
                             break;
                     }
 
@@ -142,7 +142,7 @@ namespace Microsoft.Build.UnitTests
                             t.XslCompiledDllPath = (TaskItem)xslValue;
                             break;
                         default:
-                            Assert.True(false, "Test error");
+                            Assert.Fail("Test error");
                             break;
                     }
 
@@ -187,7 +187,7 @@ namespace Microsoft.Build.UnitTests
                         t.XmlInputPaths = (TaskItem[])xmlValue;
                         break;
                     default:
-                        Assert.True(false, "Test error");
+                        Assert.Fail("Test error");
                         break;
                 }
 
@@ -236,7 +236,7 @@ namespace Microsoft.Build.UnitTests
                         t.XslCompiledDllPath = (TaskItem)xslValue;
                         break;
                     default:
-                        Assert.True(false, "Test error");
+                        Assert.Fail("Test error");
                         break;
                 }
 
@@ -1212,7 +1212,7 @@ namespace Microsoft.Build.UnitTests
             }
             catch (Exception e)
             {
-                Assert.True(false, "Compiler didn't work" + e.ToString());
+                Assert.Fail("Compiler didn't work" + e.ToString());
             }
 
             asmBldr.Save(Path.GetFileName(outputFile), PortableExecutableKinds.ILOnly, ImageFileMachine.I386);

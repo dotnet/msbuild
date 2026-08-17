@@ -213,6 +213,11 @@ namespace Microsoft.Build.UnitTests
             {
                 _reportTelemetry = true;
             }
+
+            if (eventSource is IEventSource4 eventSource4)
+            {
+                eventSource4.IncludeEvaluationPropertiesAndItems();
+            }
         }
 
         /// <summary>
@@ -533,7 +538,7 @@ namespace Microsoft.Build.UnitTests
                         PrintFullLog();
                     }
 
-                    Assert.True(false, $"Log was not expected to contain '{contains}', but did.");
+                    Assert.Fail($"Log was not expected to contain '{contains}', but did.");
                 }
             }
         }

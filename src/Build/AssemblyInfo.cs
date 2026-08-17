@@ -38,3 +38,5 @@ using System.Security.Permissions;
 
 [assembly: Dependency("BuildXL.Utilities.Core", LoadHint.Sometimes)]
 [assembly: Dependency("BuildXL.Processes", LoadHint.Sometimes)]
+
+[assembly: TypeForwardedTo(typeof(Microsoft.Build.Execution.BuildRequestDataFlags))]

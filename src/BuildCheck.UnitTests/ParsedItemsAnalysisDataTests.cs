@@ -10,7 +10,7 @@ using Xunit;
 
 namespace Microsoft.Build.BuildCheck.UnitTests;
 
-public class ParsedItemsAnalysisDataTests
+public class ParsedItemsCheckDataTests
 {
     [Fact]
     public void ItemsHolder_GetItemsOfType_ShouldFilterProperly()

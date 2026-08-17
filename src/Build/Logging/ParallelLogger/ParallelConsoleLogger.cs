@@ -1212,6 +1212,10 @@ namespace Microsoft.Build.BackEnd.Logging
                     propertyOutputMap[evaluationKey] = value;
                 }
             }
+            else if (e is BuildCanceledEventArgs buildCanceled)
+            {
+                Console.WriteLine(e.Message);
+            }
         }
 
         private void DisplayDeferredStartedEvents(BuildEventContext e)

@@ -82,7 +82,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 EnableNodeReuse = false
             };
             _buildManager = new BuildManager();
-            _projectCollection = new ProjectCollection();
+            _projectCollection = new ProjectCollection(globalProperties: null, _parameters.Loggers, ToolsetDefinitionLocations.Default);
 
             _env = TestEnvironment.Create(output);
             _inProcEnvCheckTransientEnvironmentVariable = _env.SetEnvironmentVariable("MSBUILDINPROCENVCHECK", "1");
@@ -137,8 +137,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -254,8 +254,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             _logger.ProjectStartedEvents.Count.ShouldBe(1);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             properties.TryGetValue("InitialProperty1", out string propertyValue).ShouldBeTrue();
             propertyValue.ShouldBe("InitialProperty1", StringCompareShould.IgnoreCase);
@@ -571,8 +571,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -611,8 +611,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -655,8 +655,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
 
-            ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
-            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            ProjectEvaluationFinishedEventArgs evalFinishedEvent = _logger.EvaluationFinishedEvents[0];
+            Dictionary<string, string> properties = ExtractProjectStartedPropertyList(evalFinishedEvent.Properties);
 
             Assert.True(properties.TryGetValue("InitialProperty1", out string propertyValue));
             Assert.Equal("InitialProperty1", propertyValue);
@@ -704,7 +704,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
                 MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
-            BuildResult result = _buildManager.Build(_parameters, data);
+            // We need to recreate build parameters to ensure proper capturing of newly set environment variables
+            BuildParameters parameters = new BuildParameters
+            {
+                ShutdownInProcNodeOnBuildFinish = true,
+                Loggers = new ILogger[] { _logger },
+                EnableNodeReuse = false
+            };
+
+            BuildResult result = _buildManager.Build(parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
             Assert.Single(_logger.ProjectStartedEvents);
@@ -760,11 +768,21 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _env.SetEnvironmentVariable("MsBuildForwardPropertiesFromChild", "InitialProperty3;IAMNOTREAL");
             _env.SetEnvironmentVariable("MSBUILDNOINPROCNODE", "1");
 
+            _env.SetEnvironmentVariable("MSBUILDLOGPROPERTIESANDITEMSAFTEREVALUATION", "0");
+
             var project = CreateProject(contents, null, _projectCollection, false);
             var data = new BuildRequestData(project.FullPath, new Dictionary<string, string>(),
                 MSBuildDefaultToolsVersion, Array.Empty<string>(), null);
 
-            BuildResult result = _buildManager.Build(_parameters, data);
+            // We need to recreate build parameters to ensure proper capturing of newly set environment variables
+            BuildParameters parameters = new BuildParameters
+            {
+                ShutdownInProcNodeOnBuildFinish = true,
+                Loggers = new ILogger[] { _logger },
+                EnableNodeReuse = false
+            };
+
+            BuildResult result = _buildManager.Build(parameters, data);
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("[success]");
             Assert.Equal(3, _logger.ProjectStartedEvents.Count);
@@ -785,7 +803,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal("InitialProperty3", propertyValue);
 
             projectStartedEvent = _logger.ProjectStartedEvents[2];
-            Assert.Null(projectStartedEvent.Properties);
+            properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
+            (properties == null || properties.Count == 0).ShouldBeTrue();
         }
 
         /// <summary>
@@ -822,7 +841,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
-            Assert.Null(properties);
+            (properties == null || properties.Count == 0).ShouldBeTrue();
         }
 
         /// <summary>
@@ -919,7 +938,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             ProjectStartedEventArgs projectStartedEvent = _logger.ProjectStartedEvents[0];
             Dictionary<string, string> properties = ExtractProjectStartedPropertyList(projectStartedEvent.Properties);
-            Assert.Null(properties);
+            (properties == null || properties.Count == 0).ShouldBeTrue();
         }
 
         /// <summary>
@@ -1494,11 +1513,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildManager.EndBuild();
         }
 
+#pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously: needs to be async for xunit's timeout system
         /// <summary>
         /// A canceled build
         /// </summary>
         [Fact(Timeout = 20_000)]
-        public void CancelledBuild()
+        public async System.Threading.Tasks.Task CancelledBuild()
+#pragma warning restore CS1998 // Async method lacks 'await' operators and will run synchronously
         {
             Console.WriteLine("Starting CancelledBuild test that is known to hang.");
             string contents = CleanupFileContents(@"
@@ -1636,13 +1657,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             string contents = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
  <Target Name='test'>
-    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(10)) + @"'/>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
     <Message Text='[errormessage]'/>
  </Target>
 </Project>
 ");
             BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
             _buildManager.BeginBuild(_parameters);
+            Stopwatch sw = Stopwatch.StartNew();
             BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
             asyncResult.ExecuteAsync(null, null);
 
@@ -1654,6 +1676,50 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
             _logger.AssertLogDoesntContain("[errormessage]");
+            // The build should bail out immediately after executing CancelAllSubmissions, build stalling for a longer time
+            //  is very unexpected.
+            sw.Elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(10));
+        }
+
+        /// <summary>
+        /// A canceled build which waits for the task to get started before canceling.  Because it is a 12.. task, we should
+        /// cancel the task and exit out after a short period wherein we wait for the task to exit cleanly.
+        ///
+        /// This test also exercises the possibility of CancelAllSubmissions being executed after EndBuild -
+        /// which can happen even if they are synchronously executed in expected order - the CancelAllSubmissions is internally
+        /// asynchronous and hence part of the execution can happen after EndBuild.
+        /// </summary>
+        [Fact]
+        public void CancelledBuildWithDelay40_WithThreatSwap()
+        {
+            string contents = CleanupFileContents(@"
+<Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
+ <Target Name='test'>
+    <Exec Command='" + Helpers.GetSleepCommand(TimeSpan.FromSeconds(20)) + @"'/>
+    <Message Text='[errormessage]'/>
+ </Target>
+</Project>
+");
+            BuildRequestData data = GetBuildRequestData(contents, Array.Empty<string>(), MSBuildDefaultToolsVersion);
+            _buildManager.BeginBuild(_parameters);
+            Stopwatch sw = Stopwatch.StartNew();
+            BuildSubmission asyncResult = _buildManager.PendBuildRequest(data);
+            asyncResult.ExecuteAsync(null, null);
+
+            Thread.Sleep(500);
+            // Simulate the case where CancelAllSubmissions is called after EndBuild or its internal queued task is swapped
+            //  and executed after EndBuild starts execution.
+            System.Threading.Tasks.Task.Delay(500).ContinueWith(t => _buildManager.CancelAllSubmissions());
+            _buildManager.EndBuild();
+
+            asyncResult.WaitHandle.WaitOne();
+            BuildResult result = asyncResult.BuildResult;
+
+            Assert.Equal(BuildResultCode.Failure, result.OverallResult); // "Build should have failed."
+            _logger.AssertLogDoesntContain("[errormessage]");
+            // The build should bail out immediately after executing CancelAllSubmissions, build stalling for a longer time
+            //  is very unexpected.
+            sw.Elapsed.ShouldBeLessThan(TimeSpan.FromSeconds(10));
         }
 
         /// <summary>
@@ -3475,9 +3541,11 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private static Dictionary<string, string> ExtractProjectStartedPropertyList(IEnumerable properties)
         {
-            // Gather a sorted list of all the properties.
-            return properties?.Cast<DictionaryEntry>()
-                .ToDictionary(prop => (string)prop.Key, prop => (string)prop.Value, StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> propertiesLookup = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Internal.Utilities.EnumerateProperties(properties, propertiesLookup,
+                static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
+
+            return propertiesLookup;
         }
 
         /// <summary>
@@ -4280,13 +4348,16 @@ $@"<Project InitialTargets=`Sleep`>
 
             using (var buildSession = new Helpers.BuildManagerSession(_env))
             {
-                var graphResult = buildSession.BuildGraphSubmission(
-                    new GraphBuildRequestData(
-                        projectGraphEntryPoints: new[] { new ProjectGraphEntryPoint(graph.GraphRoots.First().ProjectInstance.FullPath) },
+                var requestData = new GraphBuildRequestData(
+                        projectGraphEntryPoints: new[] { new ProjectGraphEntryPoint(
+                            graph.GraphRoots.First().ProjectInstance.FullPath,
+                            new Dictionary<string, string>() { {"property1", "value1" } }) },
                         targetsToBuild: Array.Empty<string>(),
                         hostServices: null,
                         flags: BuildRequestDataFlags.None,
-                        graphBuildOptions: new GraphBuildOptions { Build = false }));
+                        graphBuildOptions: new GraphBuildOptions { Build = false });
+
+                var graphResult = buildSession.BuildGraphSubmission(requestData);
 
                 graphResult.OverallResult.ShouldBe(BuildResultCode.Success);
                 logger = buildSession.Logger;

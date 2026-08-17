@@ -96,7 +96,7 @@ namespace Microsoft.Build.UnitTests
 
             msg += "Not found!\r\n";
             Console.WriteLine(msg);
-            Assert.True(false, msg); // Could not find the parameter.
+            Assert.Fail(msg); // Could not find the parameter.
 
             return 0;
         }
@@ -185,7 +185,7 @@ namespace Microsoft.Build.UnitTests
                     {
                         msg += String.Format(" Found something!\r\n");
                         Console.WriteLine(msg);
-                        Assert.True(false, msg); // Found the startsWith but shouldn't have.
+                        Assert.Fail(msg); // Found the startsWith but shouldn't have.
                         return;
                     }
                 }
@@ -221,7 +221,7 @@ namespace Microsoft.Build.UnitTests
             {
                 msg += "Not found!\r\n";
                 Console.WriteLine(msg);
-                Assert.True(false, msg);
+                Assert.Fail(msg);
             }
         }
 
@@ -253,7 +253,7 @@ namespace Microsoft.Build.UnitTests
             {
                 msg += "Found!\r\n";
                 Console.WriteLine(msg);
-                Assert.True(false, msg);
+                Assert.Fail(msg);
             }
         }
 
@@ -284,7 +284,7 @@ namespace Microsoft.Build.UnitTests
             {
                 msg += "Does not match!\r\n";
                 Console.WriteLine(msg);
-                Assert.True(false, msg);
+                Assert.Fail(msg);
             }
         }
 

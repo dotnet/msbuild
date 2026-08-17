@@ -127,7 +127,7 @@ public abstract class BuildExceptionBase : Exception
         string? deserializedStackTrace = reader.ReadOptionalString();
         string? source = reader.ReadOptionalString();
         string? helpLink = reader.ReadOptionalString();
-        int hResult = reader.ReadOptionalInt32();
+        int hResult = reader.ReadOptionalInt32() ?? 0;
 
         IDictionary<string, string?>? customKeyedSerializedData = null;
         if (reader.ReadByte() == 1)

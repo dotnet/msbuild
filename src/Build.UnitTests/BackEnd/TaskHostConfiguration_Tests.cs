@@ -739,12 +739,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 if (x == null || y == null)
                 {
-                    Assert.True(false, "The two item lists are not equal -- one of them is null");
+                    Assert.Fail("The two item lists are not equal -- one of them is null");
                 }
 
                 if (x.Length != y.Length)
                 {
-                    Assert.True(false, "The two item lists have different lengths, so they cannot be equal");
+                    Assert.Fail("The two item lists have different lengths, so they cannot be equal");
                 }
 
                 for (int i = 0; i < x.Length; i++)
@@ -765,7 +765,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 if (x == null || y == null)
                 {
-                    Assert.True(false, "The two items are not equal -- one of them is null");
+                    Assert.Fail("The two items are not equal -- one of them is null");
                 }
 
                 Assert.Equal(x.ItemSpec, y.ItemSpec);
@@ -779,7 +779,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 {
                     if (!metadataFromY.Contains(metadataName))
                     {
-                        Assert.True(false, string.Format("Only one item contains the '{0}' metadata", metadataName));
+                        Assert.Fail(string.Format("Only one item contains the '{0}' metadata", metadataName));
                     }
                     else
                     {

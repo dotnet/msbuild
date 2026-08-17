@@ -303,6 +303,9 @@ namespace Microsoft.Build.Execution
             return _componentFactories.GetComponent(type);
         }
 
+        TComponent IBuildComponentHost.GetComponent<TComponent>(BuildComponentType type)
+            => (TComponent)((IBuildComponentHost)this).GetComponent(type);
+
         #endregion
 
         #region INodePacketFactory Members
@@ -583,8 +586,6 @@ namespace Microsoft.Build.Execution
 #if RUNTIME_TYPE_NETCORE
                 if (packet is LogMessagePacketBase logMessage
                     && logMessage.EventType == LoggingEventType.CustomEvent
-                    &&
-                    (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_8) || !Traits.Instance.EscapeHatches.IsBinaryFormatterSerializationAllowed)
                     && Traits.Instance.EscapeHatches.EnableWarningOnCustomBuildEvent)
                 {
                     BuildEventArgs buildEvent = logMessage.NodeBuildEvent.Value.Value;
@@ -778,9 +779,12 @@ namespace Microsoft.Build.Execution
                 _loggingService.IncludeTaskInputs = true;
             }
 
-            if (configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItems)
+            if (configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent)
             {
-                _loggingService.IncludeEvaluationPropertiesAndItems = true;
+                _loggingService.SetIncludeEvaluationPropertiesAndItemsInEvents(
+                    configuration.LoggingNodeConfiguration.IncludeEvaluationPropertiesAndItemsInProjectStartedEvent,
+                    configuration.LoggingNodeConfiguration
+                        .IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent);
             }
 
             try

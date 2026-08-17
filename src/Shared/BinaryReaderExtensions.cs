@@ -22,9 +22,9 @@ namespace Microsoft.Build.Shared
 #if !TASKHOST
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
-        public static int ReadOptionalInt32(this BinaryReader reader)
+        public static int? ReadOptionalInt32(this BinaryReader reader)
         {
-            return reader.ReadByte() == 0 ? 0 : reader.ReadInt32();
+            return reader.ReadByte() == 0 ? null : reader.ReadInt32();
         }
 
 #if !TASKHOST

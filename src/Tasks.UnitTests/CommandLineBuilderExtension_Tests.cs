@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 catch (ArgumentException e)
                 {
-                    Assert.True(false, "Got an unexpected exception:" + e.Message);
+                    Assert.Fail("Got an unexpected exception:" + e.Message);
                 }
 
                 // Now try a bogus boolean.

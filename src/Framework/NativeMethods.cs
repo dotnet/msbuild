@@ -54,6 +54,9 @@ internal static class NativeMethods
     private const string WINDOWS_FILE_SYSTEM_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\FileSystem";
     private const string WINDOWS_LONG_PATHS_ENABLED_VALUE_NAME = "LongPathsEnabled";
 
+    private const string WINDOWS_SAC_REGISTRY_KEY = @"SYSTEM\CurrentControlSet\Control\CI\Policy";
+    private const string WINDOWS_SAC_VALUE_NAME = "VerifiedAndReputablePolicyState";
+
     internal static DateTime MinFileDate { get; } = DateTime.FromFileTimeUtc(0);
 
     internal static HandleRef NullHandleRef = new HandleRef(null, IntPtr.Zero);
@@ -655,10 +658,90 @@ internal static class NativeMethods
                 return LongPathsStatus.Enabled;
             }
             else
-            { 
+            {
                 return LongPathsStatus.Disabled;
             }
         }
+    }
+
+    private static SAC_State? s_sacState;
+
+    /// <summary>
+    /// Get from registry state of the Smart App Control (SAC) on the system.
+    /// </summary>
+    /// <returns>State of SAC</returns>
+    internal static SAC_State GetSACState()
+    {
+        s_sacState ??= GetSACStateInternal();
+
+        return s_sacState.Value;
+    }
+
+    internal static SAC_State GetSACStateInternal()
+    {
+        if (IsWindows)
+        {
+            try
+            {
+                return GetSACStateRegistry();
+            }
+            catch
+            {
+                return SAC_State.Missing;
+            }
+        }
+
+        return SAC_State.NotApplicable;
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static SAC_State GetSACStateRegistry()
+    {
+        SAC_State SACState = SAC_State.Missing;
+
+        using (RegistryKey policyKey = Registry.LocalMachine.OpenSubKey(WINDOWS_SAC_REGISTRY_KEY))
+        {
+            if (policyKey != null)
+            {
+                object sacValue = policyKey.GetValue(WINDOWS_SAC_VALUE_NAME, -1);
+                SACState = Convert.ToInt32(sacValue) switch
+                {
+                    0 => SAC_State.Off,
+                    1 => SAC_State.Enforcement,
+                    2 => SAC_State.Evaluation,
+                    _ => SAC_State.Missing,
+                };
+            }
+        }
+
+        return SACState;
+    }
+
+    /// <summary>
+    /// State of Smart App Control (SAC) on the system.
+    /// </summary>
+    internal enum SAC_State
+    {
+        /// <summary>
+        /// 1: SAC is on and enforcing.
+        /// </summary>
+        Enforcement,
+        /// <summary>
+        /// 2: SAC is on and in evaluation mode.
+        /// </summary>
+        Evaluation,
+        /// <summary>
+        /// 0: SAC is off.
+        /// </summary>
+        Off,
+        /// <summary>
+        /// The registry key is missing.
+        /// </summary>
+        Missing,
+        /// <summary>
+        /// Not on Windows.
+        /// </summary>
+        NotApplicable
     }
 
     /// <summary>

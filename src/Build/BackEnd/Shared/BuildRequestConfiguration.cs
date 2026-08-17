@@ -762,7 +762,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         /// <param name="request">The request </param>
         /// <returns>An array of t</returns>
-        public List<string> GetTargetsUsedToBuildRequest(BuildRequest request)
+        public List<(string name, TargetBuiltReason reason)> GetTargetsUsedToBuildRequest(BuildRequest request)
         {
             ErrorUtilities.VerifyThrow(request.ConfigurationId == ConfigurationId, "Request does not match configuration.");
             ErrorUtilities.VerifyThrow(_projectInitialTargets != null, "Initial targets have not been set.");
@@ -775,13 +775,31 @@ namespace Microsoft.Build.BackEnd
                     "Targets must be same as proxy targets");
             }
 
-            List<string> initialTargets = _projectInitialTargets;
-            List<string> nonInitialTargets = (request.Targets.Count == 0) ? _projectDefaultTargets : request.Targets;
+            bool hasInitialTargets = request.Targets.Count == 0 ? false : true;
 
-            var allTargets = new List<string>(initialTargets.Count + nonInitialTargets.Count);
+            List<(string name, TargetBuiltReason reason)> allTargets = new(
+                _projectInitialTargets.Count +
+                (hasInitialTargets ? _projectDefaultTargets.Count : request.Targets.Count));
 
-            allTargets.AddRange(initialTargets);
-            allTargets.AddRange(nonInitialTargets);
+            foreach (var target in _projectInitialTargets)
+            {
+                allTargets.Add((target, TargetBuiltReason.InitialTargets));
+            }
+
+            if (hasInitialTargets)
+            {
+                foreach (var target in request.Targets)
+                {
+                    allTargets.Add((target, TargetBuiltReason.EntryTargets));
+                }
+            }
+            else
+            {
+                foreach (var target in _projectDefaultTargets)
+                {
+                    allTargets.Add((target, TargetBuiltReason.DefaultTargets));
+                }
+            }
 
             return allTargets;
         }

@@ -278,7 +278,7 @@ namespace Microsoft.Build.UnitTests
             else
             {
                 ppTI = null;
-                Assert.True(false, "unexpected hRef value");
+                Assert.Fail("unexpected hRef value");
             }
         }
 
@@ -345,7 +345,7 @@ namespace Microsoft.Build.UnitTests
             else
             {
                 ppTI = null;
-                Assert.True(false, "unexpected hRef value");
+                Assert.Fail("unexpected hRef value");
             }
         }
 

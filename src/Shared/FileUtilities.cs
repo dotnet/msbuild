@@ -577,26 +577,6 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Gets the path value that is associated with the specified key in a dictionary with <see cref="string"/> values.
-        /// Normalizes the value as a path.
-        /// </summary>
-        /// <param name="dictionary">The dictionary to search.</param>
-        /// <param name="key">The key to locate.</param>
-        /// <param name="value">When this method returns, the value associated with the specified key normalized as a path, if the key is found; otherwise <see langword="null"/>.</param>
-        /// <returns><see langword="true"/> if the dictionary contains an element that has the specified key; otherwise, <see langword="false"/>.</returns>
-        /// <remarks>Use this method to get paths from dictionaries of properties whose default values may contain backslashes.</remarks>
-        internal static bool TryGetPathValue<TKey>(this IReadOnlyDictionary<TKey, string> dictionary, TKey key, out string value)
-        {
-            bool result = dictionary.TryGetValue(key, out value);
-            if (result)
-            {
-                value = NormalizePath(value);
-            }
-
-            return result;
-        }
-
-        /// <summary>
         /// If on Unix, convert backslashes to slashes for strings that resemble paths.
         /// This overload takes and returns ReadOnlyMemory of characters.
         /// </summary>
@@ -1542,5 +1522,16 @@ namespace Microsoft.Build.Shared
             FileExistenceCache.Clear();
         }
 #endif
+
+        internal static void ReadFromStream(this Stream stream, byte[] content, int startIndex, int length)
+        {
+#if NET7_0_OR_GREATER
+            stream.ReadExactly(content, startIndex, length);
+#else
+#pragma warning disable CA2022 // Avoid inexact read with 'Stream.Read'
+            stream.Read(content, 0, length);
+#pragma warning restore CA2022 // Avoid inexact read with 'Stream.Read'
+#endif
+        }
     }
 }

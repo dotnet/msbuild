@@ -333,7 +333,26 @@ namespace Microsoft.Build.Evaluation
                 loggingService,
                 buildEventContext);
 
-            evaluator.Evaluate();
+            try
+            {
+                evaluator.Evaluate();
+            }
+            finally
+            {
+                IEnumerable globalProperties = null;
+                IEnumerable properties = null;
+                IEnumerable items = null;
+
+                if (evaluator._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent)
+                {
+                    globalProperties = evaluator._data.GlobalPropertiesDictionary;
+                    properties = Traits.LogAllEnvironmentVariables ? evaluator._data.Properties : evaluator.FilterOutEnvironmentDerivedProperties(evaluator._data.Properties);
+                    items = evaluator._data.Items;
+                }
+
+                evaluator._evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, evaluator._evaluationProfiler.ProfiledResult);
+            }
+
             MSBuildEventSource.Log.EvaluateStop(root.ProjectFileLocation.File);
         }
 
@@ -595,11 +614,15 @@ namespace Microsoft.Build.Evaluation
         private void Evaluate()
         {
             string projectFile = String.IsNullOrEmpty(_projectRootElement.ProjectFileLocation.File) ? "(null)" : _projectRootElement.ProjectFileLocation.File;
-            using (AssemblyLoadsTracker.StartTracking(_evaluationLoggingContext, AssemblyLoadingContext.Evaluation))
             using (_evaluationProfiler.TrackPass(EvaluationPass.TotalEvaluation))
             {
                 ErrorUtilities.VerifyThrow(_data.EvaluationId == BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
                 _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
+                _evaluationLoggingContext.LogProjectEvaluationStarted();
+
+                // Track loads only after start of evaluation was actually logged
+                using var assemblyLoadsTracker =
+                    AssemblyLoadsTracker.StartTracking(_evaluationLoggingContext, AssemblyLoadingContext.Evaluation);
 
                 _logProjectImportedEvents = Traits.Instance.EscapeHatches.LogProjectImports;
 
@@ -620,8 +643,6 @@ namespace Microsoft.Build.Evaluation
                         SetBuiltInProperty(ReservedPropertyNames.interactive, "true");
                     }
                 }
-
-                _evaluationLoggingContext.LogProjectEvaluationStarted();
 
                 ErrorUtilities.VerifyThrow(_data.EvaluationId != BuildEventContext.InvalidEvaluationId, "Evaluation should produce an evaluation ID");
 
@@ -798,19 +819,6 @@ namespace Microsoft.Build.Evaluation
             }
 
             ErrorUtilities.VerifyThrow(_evaluationProfiler.IsEmpty(), "Evaluation profiler stack is not empty.");
-
-            IEnumerable globalProperties = null;
-            IEnumerable properties = null;
-            IEnumerable items = null;
-
-            if (this._evaluationLoggingContext.LoggingService.IncludeEvaluationPropertiesAndItems)
-            {
-                globalProperties = _data.GlobalPropertiesDictionary;
-                properties = Traits.LogAllEnvironmentVariables ? _data.Properties : FilterOutEnvironmentDerivedProperties(_data.Properties);
-                items = _data.Items;
-            }
-
-            _evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, _evaluationProfiler.ProfiledResult);
         }
 
         private IEnumerable FilterOutEnvironmentDerivedProperties(PropertyDictionary<P> dictionary)
@@ -1199,7 +1207,7 @@ namespace Microsoft.Build.Evaluation
         {
             foreach (ProjectPropertyInstance toolsetProperty in _data.Toolset.Properties.Values)
             {
-                _data.SetProperty(toolsetProperty.Name, ((IProperty)toolsetProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
+                _data.SetProperty(toolsetProperty.Name, ((IProperty)toolsetProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */, loggingContext: _evaluationLoggingContext);
             }
 
             if (_data.SubToolsetVersion == null)
@@ -1208,7 +1216,7 @@ namespace Microsoft.Build.Evaluation
                 // is most likely not a subtoolset now, we need to add VisualStudioVersion if its not already a property.
                 if (!_data.Properties.Contains(Constants.VisualStudioVersionPropertyName))
                 {
-                    _data.SetProperty(Constants.VisualStudioVersionPropertyName, MSBuildConstants.CurrentVisualStudioVersion, false /* NOT global property */, false /* may NOT be a reserved name */);
+                    _data.SetProperty(Constants.VisualStudioVersionPropertyName, MSBuildConstants.CurrentVisualStudioVersion, false /* NOT global property */, false /* may NOT be a reserved name */, loggingContext: _evaluationLoggingContext);
                 }
             }
             else
@@ -1218,14 +1226,14 @@ namespace Microsoft.Build.Evaluation
                 // set the property even if there is no matching sub-toolset.
                 if (!_data.Properties.Contains(Constants.SubToolsetVersionPropertyName))
                 {
-                    _data.SetProperty(Constants.SubToolsetVersionPropertyName, _data.SubToolsetVersion, false /* NOT global property */, false /* may NOT be a reserved name */);
+                    _data.SetProperty(Constants.SubToolsetVersionPropertyName, _data.SubToolsetVersion, false /* NOT global property */, false /* may NOT be a reserved name */, loggingContext: _evaluationLoggingContext);
                 }
 
                 if (_data.Toolset.SubToolsets.TryGetValue(_data.SubToolsetVersion, out SubToolset subToolset))
                 {
                     foreach (ProjectPropertyInstance subToolsetProperty in subToolset.Properties.Values)
                     {
-                        _data.SetProperty(subToolsetProperty.Name, ((IProperty)subToolsetProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */);
+                        _data.SetProperty(subToolsetProperty.Name, ((IProperty)subToolsetProperty).EvaluatedValueEscaped, false /* NOT global property */, false /* may NOT be a reserved name */, loggingContext: _evaluationLoggingContext);
                     }
                 }
             }
@@ -1243,7 +1251,7 @@ namespace Microsoft.Build.Evaluation
 
             foreach (ProjectPropertyInstance globalProperty in _data.GlobalPropertiesDictionary)
             {
-                _data.SetProperty(globalProperty.Name, ((IProperty)globalProperty).EvaluatedValueEscaped, true /* IS global property */, false /* may NOT be a reserved name */);
+                _data.SetProperty(globalProperty.Name, ((IProperty)globalProperty).EvaluatedValueEscaped, true /* IS global property */, false /* may NOT be a reserved name */, loggingContext: _evaluationLoggingContext);
             }
 
             return _data.GlobalPropertiesDictionary.Count;
@@ -1257,7 +1265,7 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private P SetBuiltInProperty(string name, string evaluatedValueEscaped)
         {
-            P property = _data.SetProperty(name, evaluatedValueEscaped, false /* NOT global property */, true /* OK to be a reserved name */);
+            P property = _data.SetProperty(name, evaluatedValueEscaped, false /* NOT global property */, true /* OK to be a reserved name */, loggingContext: _evaluationLoggingContext);
             return property;
         }
 
@@ -1295,7 +1303,7 @@ namespace Microsoft.Build.Evaluation
 
                 _expander.PropertiesUseTracker.CheckPreexistingUndefinedUsage(propertyElement, evaluatedValue, _evaluationLoggingContext);
 
-                _data.SetProperty(propertyElement, evaluatedValue);
+                _data.SetProperty(propertyElement, evaluatedValue, _evaluationLoggingContext);
             }
         }
 
@@ -1588,7 +1596,7 @@ namespace Microsoft.Build.Evaluation
                 if (!_fallbackSearchPathsCache.DirectoryExists(extensionPathExpanded))
                 {
                     // Set to log an error only if the change wave is enabled.
-                    missingDirectoryDespiteTrueCondition = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_6) && !containsWildcards;
+                    missingDirectoryDespiteTrueCondition = !containsWildcards;
                     continue;
                 }
 
@@ -2562,7 +2570,8 @@ namespace Microsoft.Build.Evaluation
                         ? $"{_lastModifiedProject.FullPath}{streamImports}"
                         : $"{_lastModifiedProject.FullPath}{streamImports};{oldValue.EvaluatedValue}",
                     isGlobalProperty: false,
-                    mayBeReserved: false);
+                    mayBeReserved: false,
+                    loggingContext: _evaluationLoggingContext);
             }
         }
 
@@ -2570,7 +2579,8 @@ namespace Microsoft.Build.Evaluation
         private void VerifyVSDistributionPath(string path, ElementLocation importLocationInProject)
         {
             if (path.IndexOf("Microsoft\\VisualStudio", StringComparison.OrdinalIgnoreCase) >= 0
-                || path.IndexOf("Microsoft/VisualStudio", StringComparison.OrdinalIgnoreCase) >= 0)
+                || path.IndexOf("Microsoft/VisualStudio", StringComparison.OrdinalIgnoreCase) >= 0
+                || path.IndexOf("$(VCTargetsPath)", StringComparison.OrdinalIgnoreCase) >= 0)
             {
                 ProjectErrorUtilities.ThrowInvalidProject(importLocationInProject, "ImportedProjectFromVSDistribution", path);
             }

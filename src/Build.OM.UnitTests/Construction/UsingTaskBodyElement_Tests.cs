@@ -46,7 +46,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>
@@ -106,7 +106,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             {
                 ProjectUsingTaskBodyElement body = GetBodyXml();
                 body.TaskBody = null;
-                Assert.True(false);
+                Assert.Fail();
             });
         }
         /// <summary>

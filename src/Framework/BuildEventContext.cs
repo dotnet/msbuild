@@ -115,6 +115,16 @@ namespace Microsoft.Build.Framework
         }
 
         #endregion
+        internal BuildEventContext WithInstanceIdAndContextId(int projectInstanceId, int projectContextId)
+        {
+            return new BuildEventContext(_submissionId, _nodeId, _evaluationId, projectInstanceId, projectContextId,
+                _targetId, _taskId);
+        }
+
+        internal BuildEventContext WithInstanceIdAndContextId(BuildEventContext other)
+        {
+            return WithInstanceIdAndContextId(other.ProjectInstanceId, other.ProjectContextId);
+        }
 
         #region Properties
 

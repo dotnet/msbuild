@@ -1,0 +1,10 @@
+﻿directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mMSB3026[m: MSB3026: Could not copy "sourcePath" to "destinationPath". Beginning retry 1 in x ms.
+directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mMSB3026[m: MSB3026: Could not copy "sourcePath" to "destinationPath". Beginning retry 2 in x ms.
+directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mMSB3026[m: MSB3026: Could not copy "sourcePath" to "destinationPath". Beginning retry 3 in x ms.
+  project [31;1mfailed with 3 warning(s)[m (0.2s)
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mMSB3026[m: MSB3026: Could not copy "sourcePath" to "destinationPath". Beginning retry 1 in x ms.
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mMSB3026[m: MSB3026: Could not copy "sourcePath" to "destinationPath". Beginning retry 2 in x ms.
+    directory/[1mfile[m(1,2,3,4): [33;1mwarning[m [33;1mMSB3026[m: MSB3026: Could not copy "sourcePath" to "destinationPath". Beginning retry 3 in x ms.
+[?25l[1F
+[?25h
+Build [31;1mfailed with 3 warning(s)[m in 5.0s

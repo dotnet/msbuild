@@ -48,7 +48,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
         <!-- Extract necessary information for SetPlatform negotiation -->
         <!-- This target does not run for cpp projects. -->
         <IsVcxOrNativeProj>false</IsVcxOrNativeProj>
-        <Platform Condition="$([MSBuild]::AreFeaturesEnabled('17.4'))">$(Platform)</Platform>
+        <Platform>$(Platform)</Platform>
         <Platforms>$(Platforms)</Platforms>
       </_ThisProjectBuildMetadata>
     </ItemGroup>
