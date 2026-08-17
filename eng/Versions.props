@@ -84,7 +84,7 @@
     <!-- BootstrapSdkVersion MUST match the dotnet version in global.json. The bootstrap SDK provides the
          runtime under artifacts/bin/bootstrap/core that tests use as DOTNET_ROOT; if it lags behind the
          SDK in global.json, tools from that SDK (such as Roslyn's csc) fail to find a compatible runtime. -->
-    <BootstrapSdkVersion>10.0.110</BootstrapSdkVersion>
+    <BootstrapSdkVersion>10.0.111</BootstrapSdkVersion>
   </PropertyGroup>
 
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
