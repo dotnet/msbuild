@@ -673,7 +673,7 @@ namespace Microsoft.Build.Logging
             WriteMessageFields(e, writeMessage: false, writeImportance: true);
             WriteAssemblyConflictReferenceDetails(e.Victor);
             WriteAssemblyConflictReferenceDetails(e.Victim);
-            WriteAssemblyConflictMessageFormats(e.MessageFormats!);
+            WriteAssemblyConflictMessageFormats(e.MessageFormats!, includeWarningFormats: false);
 
             return BinaryLogRecordKind.AssemblyConflictDependencyDetails;
         }
@@ -693,12 +693,10 @@ namespace Microsoft.Build.Logging
             Write(e.EndColumnNumber);
 
             WriteDeduplicatedString(e.SimpleAssemblyName);
-            WriteDeduplicatedString(e.VictorFusionName);
-            WriteDeduplicatedString(e.VictimFusionName);
             Write((int)e.LossReason);
             WriteAssemblyConflictReferenceDetails(e.Victor);
             WriteAssemblyConflictReferenceDetails(e.Victim);
-            WriteAssemblyConflictMessageFormats(e.MessageFormats!);
+            WriteAssemblyConflictMessageFormats(e.MessageFormats!, includeWarningFormats: true);
 
             return BinaryLogRecordKind.AssemblyConflictWarning;
         }
@@ -707,7 +705,6 @@ namespace Microsoft.Build.Logging
         {
             WriteDeduplicatedString(details.FusionName);
             WriteDeduplicatedString(details.FullPath);
-            Write(details.UseUnifiedHeader);
             Write(details.IsPrimary);
             Write(details.IsResolved);
             WriteDeduplicatedString(details.UnresolvedPrimaryItemSpec);
@@ -725,17 +722,21 @@ namespace Microsoft.Build.Logging
             }
         }
 
-        private void WriteAssemblyConflictMessageFormats(AssemblyConflictMessageFormats formats)
+        private void WriteAssemblyConflictMessageFormats(AssemblyConflictMessageFormats formats, bool includeWarningFormats)
         {
-            WriteDeduplicatedString(formats.ConflictFound);
-            WriteDeduplicatedString(formats.ConflictHigherVersionChosen);
-            WriteDeduplicatedString(formats.ConflictPrimaryChosen);
-            WriteDeduplicatedString(formats.ConflictUnsolvable);
             WriteDeduplicatedString(formats.ReferenceDependsOn);
             WriteDeduplicatedString(formats.UnifiedReferenceDependsOn);
             WriteDeduplicatedString(formats.UnresolvedPrimaryItemSpec);
             WriteDeduplicatedString(formats.PrimarySourceItemsForReference);
-            WriteDeduplicatedString(formats.FoundConflicts);
+
+            if (includeWarningFormats)
+            {
+                WriteDeduplicatedString(formats.ConflictFound);
+                WriteDeduplicatedString(formats.ConflictHigherVersionChosen);
+                WriteDeduplicatedString(formats.ConflictPrimaryChosen);
+                WriteDeduplicatedString(formats.ConflictUnsolvable);
+                WriteDeduplicatedString(formats.FoundConflicts);
+            }
         }
 
         private BinaryLogRecordKind Write(CriticalBuildMessageEventArgs e)
