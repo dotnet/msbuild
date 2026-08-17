@@ -259,10 +259,7 @@ Steps are **mostly parallel** unless noted.
 - [ ] **5.4b** Update `tools.dotnet` in [`global.json`](https://github.com/dotnet/msbuild/blob/main/global.json) to the latest released SDK in the targeted band.
 - [ ] **5.5** Verify the overall subscription map across **every still-supported branch** — each `vsXX.Y` branch has an Arcade subscription matching its targeted .NET band, and each supported branch's outbound subscriptions land in the right downstream (e.g. SDK band, VMR). \
   You can find more info [here](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/52573/MSBuild-Maestro-Flow).
-- [ ] **5.6** Sync the public Change Waves docs. Check whether [`documentation/wiki/ChangeWaves.md`](./wiki/ChangeWaves.md) changed during this release: \
-`git diff v{{PREVIOUS_RELEASE_EXACT_VERSION}} origin/vs{{THIS_RELEASE_VERSION}} -- documentation/wiki/ChangeWaves.md` \
-If it did (a new `### {{THIS_RELEASE_VERSION}}` section, or edits to existing waves), the public [Change Waves Learn page](https://learn.microsoft.com/en-us/visualstudio/msbuild/change-waves?view=visualstudio) must be updated to match — either make the update or file an issue tracking it, and link it here.
-- [ ] **5.7** Review this tracking issue for any process deviations. If the process changed, create a PR to update `documentation/release-checklist.md` with the improvements.
+- [ ] **5.6** Review this tracking issue for any process deviations. If the process changed, create a PR to update `documentation/release-checklist.md` with the improvements.
 
 ---
 
