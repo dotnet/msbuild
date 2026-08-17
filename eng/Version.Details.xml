@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Dependencies>
-  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="813f634ceb016018f5acc9bd3c2b16e17dff4686" BarId="324908" />
+  <Source Uri="https://github.com/dotnet/dotnet" Mapping="msbuild" Sha="7cdb217445905f3342bbb0266a4497b9a014389a" BarId="326717" />
   <ProductDependencies>
     <!-- Necessary for source-build. This allows the live version of the package to be used by source-build. -->
     <Dependency Name="System.CodeDom" Version="10.0.10">
@@ -106,9 +106,9 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="11.0.0-beta.26407.8">
+    <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="11.0.0-beta.26414.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>212960245c74330fbfb71776563638061e35446c</Sha>
+      <Sha>09a0bcffb8286738e8679282171cd1ba548c8c52</Sha>
     </Dependency>
     <!-- This is the NuGet.* package family. NuGet.Frameworks is also pulled in via this
          version on .NET Core, where Microsoft.Build takes a direct compile-time PackageReference
@@ -120,13 +120,13 @@
       <Uri>https://github.com/nuget/nuget.client</Uri>
       <Sha>c82ceb9ad93dc8fdcb51fb6807c8e8c70f1443e8</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.11.0-1.26407.4">
+    <Dependency Name="Microsoft.Net.Compilers.Toolset" Version="5.11.0-1.26415.2">
       <Uri>https://github.com/dotnet/roslyn</Uri>
-      <Sha>b0622a0834c029d7bfc3244b600eef4f0057a4bf</Sha>
+      <Sha>0280f7f9457d50a46cd523ce0082807b5d70b236</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="11.0.0-beta.26407.8">
+    <Dependency Name="Microsoft.DotNet.XUnitV3Extensions" Version="11.0.0-beta.26414.2">
       <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>212960245c74330fbfb71776563638061e35446c</Sha>
+      <Sha>09a0bcffb8286738e8679282171cd1ba548c8c52</Sha>
     </Dependency>
   </ToolsetDependencies>
 </Dependencies>
