@@ -586,7 +586,6 @@ namespace Microsoft.Build.Logging
         {
             string? fusionName = ReadOptionalString();
             string? fullPath = ReadOptionalString();
-            bool useUnifiedHeader = ReadBoolean();
             bool isPrimary = ReadBoolean();
             bool isResolved = ReadBoolean();
             string? unresolvedPrimaryItemSpec = ReadOptionalString();
@@ -601,31 +600,51 @@ namespace Microsoft.Build.Logging
             return new AssemblyConflictReferenceDetails(
                 fusionName ?? string.Empty,
                 fullPath,
-                useUnifiedHeader,
                 isPrimary,
                 isResolved,
                 unresolvedPrimaryItemSpec,
                 dependees);
         }
 
-        private AssemblyConflictMessageFormats ReadAssemblyConflictMessageFormats()
-            => new(
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty,
-                ReadOptionalString() ?? string.Empty);
+        private AssemblyConflictMessageFormats ReadAssemblyConflictMessageFormats(bool includeWarningFormats)
+        {
+            string referenceDependsOn = ReadOptionalString() ?? string.Empty;
+            string unifiedReferenceDependsOn = ReadOptionalString() ?? string.Empty;
+            string unresolvedPrimaryItemSpec = ReadOptionalString() ?? string.Empty;
+            string primarySourceItemsForReference = ReadOptionalString() ?? string.Empty;
+
+            string conflictFound = string.Empty;
+            string conflictHigherVersionChosen = string.Empty;
+            string conflictPrimaryChosen = string.Empty;
+            string conflictUnsolvable = string.Empty;
+            string foundConflicts = string.Empty;
+            if (includeWarningFormats)
+            {
+                conflictFound = ReadOptionalString() ?? string.Empty;
+                conflictHigherVersionChosen = ReadOptionalString() ?? string.Empty;
+                conflictPrimaryChosen = ReadOptionalString() ?? string.Empty;
+                conflictUnsolvable = ReadOptionalString() ?? string.Empty;
+                foundConflicts = ReadOptionalString() ?? string.Empty;
+            }
+
+            return new(
+                conflictFound,
+                conflictHigherVersionChosen,
+                conflictPrimaryChosen,
+                conflictUnsolvable,
+                referenceDependsOn,
+                unifiedReferenceDependsOn,
+                unresolvedPrimaryItemSpec,
+                primarySourceItemsForReference,
+                foundConflicts);
+        }
 
         private BuildEventArgs ReadAssemblyConflictDependencyDetailsMessageEventArgs()
         {
             BuildEventArgsFields fields = ReadBuildEventArgsFields(readImportance: true);
             AssemblyConflictReferenceDetails victor = ReadAssemblyConflictReferenceDetails();
             AssemblyConflictReferenceDetails victim = ReadAssemblyConflictReferenceDetails();
-            AssemblyConflictMessageFormats formats = ReadAssemblyConflictMessageFormats();
+            AssemblyConflictMessageFormats formats = ReadAssemblyConflictMessageFormats(includeWarningFormats: false);
 
             var e = new AssemblyConflictDependencyDetailsMessageEventArgs(
                 victor,
@@ -647,17 +666,13 @@ namespace Microsoft.Build.Logging
             ReadDiagnosticFields(fields);
 
             string simpleAssemblyName = ReadOptionalString() ?? string.Empty;
-            string victorFusionName = ReadOptionalString() ?? string.Empty;
-            string victimFusionName = ReadOptionalString() ?? string.Empty;
             var lossReason = (AssemblyConflictLossReason)ReadInt32();
             AssemblyConflictReferenceDetails victor = ReadAssemblyConflictReferenceDetails();
             AssemblyConflictReferenceDetails victim = ReadAssemblyConflictReferenceDetails();
-            AssemblyConflictMessageFormats formats = ReadAssemblyConflictMessageFormats();
+            AssemblyConflictMessageFormats formats = ReadAssemblyConflictMessageFormats(includeWarningFormats: true);
 
             var e = new AssemblyConflictWarningEventArgs(
                 simpleAssemblyName,
-                victorFusionName,
-                victimFusionName,
                 lossReason,
                 victor,
                 victim,

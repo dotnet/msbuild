@@ -1283,8 +1283,6 @@ namespace Microsoft.Build.UnitTests
                 e => e.HelpKeyword,
                 e => e.ProjectFile,
                 e => e.SimpleAssemblyName,
-                e => e.VictorFusionName,
-                e => e.VictimFusionName,
                 e => e.LossReason.ToString(),
                 e => e.Message,
                 e => DescribeConflictReferenceDetails(e.Victor),
@@ -1332,7 +1330,6 @@ namespace Microsoft.Build.UnitTests
             var victim = new AssemblyConflictReferenceDetails(
                 "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
                 "/deps/D.dll",
-                useUnifiedHeader: true,
                 isPrimary: false,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
@@ -1341,7 +1338,6 @@ namespace Microsoft.Build.UnitTests
             var victor = new AssemblyConflictReferenceDetails(
                 "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
                 "/deps/v1/D.dll",
-                useUnifiedHeader: false,
                 isPrimary: true,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
@@ -1349,12 +1345,10 @@ namespace Microsoft.Build.UnitTests
 
             var args = new AssemblyConflictWarningEventArgs(
                 "D",
-                victor.FusionName,
-                victim.FusionName,
                 AssemblyConflictLossReason.WasNotPrimary,
                 victor,
                 victim,
-                CreateConflictMessageFormats(),
+                AssemblyConflictTestData.MessageFormats,
                 "MSB3277",
                 file: null,
                 lineNumber: 0,
@@ -1379,27 +1373,14 @@ namespace Microsoft.Build.UnitTests
         }
 
         private static string DescribeConflictReferenceDetails(AssemblyConflictReferenceDetails details)
-            => $"{details.FusionName};{details.FullPath};{details.UseUnifiedHeader};{details.IsPrimary};{details.IsResolved};{details.UnresolvedPrimaryItemSpec};"
+            => $"{details.FusionName};{details.FullPath};{details.IsPrimary};{details.IsResolved};{details.UnresolvedPrimaryItemSpec};"
                 + string.Join("|", details.Dependees.Select(d => $"{d.DependeeFullPath}=[{string.Join(",", d.SourceItemSpecs)}]"));
-
-        private static AssemblyConflictMessageFormats CreateConflictMessageFormats()
-            => new(
-                "There was a conflict between \"{0}\" and \"{1}\".",
-                "\"{0}\" was chosen because it had a higher version.",
-                "\"{0}\" was chosen because it was primary and \"{1}\" was not.",
-                "MSB3243: No way to resolve conflict between \"{0}\" and \"{1}\". Choosing \"{0}\" arbitrarily.",
-                "References which depend on \"{0}\" [{1}].",
-                "References which depend on or have been unified to \"{0}\" [{1}].",
-                "Unresolved primary reference with an item include of \"{0}\".",
-                "Project file item includes which caused reference \"{0}\".",
-                "Found conflicts between different versions of \"{0}\" that could not be resolved.\n{1}");
 
         private static AssemblyConflictDependencyDetailsMessageEventArgs CreateAssemblyConflictDependencyDetailsEvent()
         {
             var victor = new AssemblyConflictReferenceDetails(
                 "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
                 "/libs/v1/D.dll",
-                useUnifiedHeader: false,
                 isPrimary: true,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
@@ -1408,7 +1389,6 @@ namespace Microsoft.Build.UnitTests
             var victim = new AssemblyConflictReferenceDetails(
                 "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
                 "/libs/v2/D.dll",
-                useUnifiedHeader: true,
                 isPrimary: false,
                 isResolved: false,
                 unresolvedPrimaryItemSpec: "D, Version=2.0.0.0",
@@ -1417,7 +1397,7 @@ namespace Microsoft.Build.UnitTests
             return new AssemblyConflictDependencyDetailsMessageEventArgs(
                 victor,
                 victim,
-                CreateConflictMessageFormats(),
+                AssemblyConflictTestData.MessageFormats,
                 "ResolveAssemblyReference",
                 MessageImportance.Low,
                 DateTime.UtcNow)
@@ -1431,7 +1411,6 @@ namespace Microsoft.Build.UnitTests
             var victor = new AssemblyConflictReferenceDetails(
                 "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
                 "/libs/v1/D.dll",
-                useUnifiedHeader: false,
                 isPrimary: true,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
@@ -1440,7 +1419,6 @@ namespace Microsoft.Build.UnitTests
             var victim = new AssemblyConflictReferenceDetails(
                 "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
                 "/libs/v2/D.dll",
-                useUnifiedHeader: true,
                 isPrimary: false,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
@@ -1448,12 +1426,10 @@ namespace Microsoft.Build.UnitTests
 
             return new AssemblyConflictWarningEventArgs(
                 "D",
-                victor.FusionName,
-                victim.FusionName,
                 AssemblyConflictLossReason.WasNotPrimary,
                 victor,
                 victim,
-                CreateConflictMessageFormats(),
+                AssemblyConflictTestData.MessageFormats,
                 "MSB3277",
                 @"C:\foo\bar.proj",
                 42,

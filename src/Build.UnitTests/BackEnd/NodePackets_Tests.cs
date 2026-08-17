@@ -408,7 +408,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             => new(
                 "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
                 "/libs/v1/D.dll",
-                useUnifiedHeader: false,
                 isPrimary: true,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
@@ -418,29 +417,16 @@ namespace Microsoft.Build.UnitTests.BackEnd
             => new(
                 "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
                 "/libs/v2/D.dll",
-                useUnifiedHeader: true,
                 isPrimary: false,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
                 [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
 
-        private static AssemblyConflictMessageFormats CreateAssemblyConflictMessageFormats()
-            => new(
-                "There was a conflict between \"{0}\" and \"{1}\".",
-                "\"{0}\" was chosen because it had a higher version.",
-                "\"{0}\" was chosen because it was primary and \"{1}\" was not.",
-                "MSB3243: No way to resolve conflict between \"{0}\" and \"{1}\". Choosing \"{0}\" arbitrarily.",
-                "References which depend on \"{0}\" [{1}].",
-                "References which depend on or have been unified to \"{0}\" [{1}].",
-                "Unresolved primary reference with an item include of \"{0}\".",
-                "Project file item includes which caused reference \"{0}\".",
-                "Found conflicts between different versions of \"{0}\" that could not be resolved.\n{1}");
-
         private static AssemblyConflictDependencyDetailsMessageEventArgs CreateAssemblyConflictDependencyDetails()
             => new(
                 CreateAssemblyConflictVictorDetails(),
                 CreateAssemblyConflictVictimDetails(),
-                CreateAssemblyConflictMessageFormats(),
+                AssemblyConflictTestData.MessageFormats,
                 "ResolveAssemblyReference",
                 MessageImportance.Low,
                 DateTime.UtcNow);
@@ -451,12 +437,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             AssemblyConflictReferenceDetails victim = CreateAssemblyConflictVictimDetails();
             return new(
                 "D",
-                victor.FusionName,
-                victim.FusionName,
                 AssemblyConflictLossReason.WasNotPrimary,
                 victor,
                 victim,
-                CreateAssemblyConflictMessageFormats(),
+                AssemblyConflictTestData.MessageFormats,
                 "MSB3277",
                 @"C:\foo\bar.proj",
                 42,
