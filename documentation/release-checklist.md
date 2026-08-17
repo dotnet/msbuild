@@ -29,7 +29,7 @@ Fill in these values before starting. Version increments are irregular — they 
 | `{{PREVIOUS_RELEASE_VERSION}}` | Version being replaced as latest | |
 | `{{PREVIOUS_RELEASE_EXACT_VERSION}}` | The `VersionPrefix` the **previous** release actually shipped as — used by Phase 5.3a to look up its tag. Read it from the previous release's tracking issue, or from `git tag --list 'v{{PREVIOUS_RELEASE_VERSION}}.*'`. | |
 | `{{THIS_RELEASE_VERSION}}` | Version being released now | |
-| `{{THIS_RELEASE_EXACT_VERSION}}` | The `VersionPrefix` that **actually shipped** to customers — determined in Phase 5.1a, **not** assumed. It is usually `{{THIS_RELEASE_VERSION}}.0`, but servicing insertions and SDK-coupled releases routinely ship a higher patch (e.g. 18.7 shipped as `18.7.1`; 18.9 shipped as `18.9.6` via the SDK while VS `rel/stable` carried `18.9.1`). **Not known when first instantiating this checklist — leave blank until Phase 5.1a confirms it.** | |
+| `{{THIS_RELEASE_EXACT_VERSION}}` | The `VersionPrefix` that **actually shipped** to customers — determined in Phase 5.1a, **not** assumed. It is usually `{{THIS_RELEASE_VERSION}}.0`, but servicing insertions routinely ship a higher patch. **Not known when first instantiating this checklist — leave blank until Phase 5.1a confirms it.** | |
 | `{{NEXT_VERSION}}` | Version that main will be bumped to | |
 | `{{BRANCH_SNAP_DATE}}` | Date we create `vs{{THIS_RELEASE_VERSION}}` from `main`. | |
 | `{{INSIDERS_SNAP_DATE}}` | Date VS snaps `main` → `rel/insiders`. Final-branded MSBuild must be in VS `main` **before** this date. From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) | |
