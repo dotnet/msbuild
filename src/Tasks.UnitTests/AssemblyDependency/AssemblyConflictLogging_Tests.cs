@@ -100,8 +100,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             AssemblyConflictWarningEventArgs structuredWarning = structuredEngine.WarningEvents[0].ShouldBeOfType<AssemblyConflictWarningEventArgs>();
             structuredWarning.Code.ShouldBe("MSB3277");
             structuredWarning.SimpleAssemblyName.ShouldBe("D");
-            structuredWarning.VictorFusionName.ShouldContain("D, Version=1.0.0.0");
-            structuredWarning.VictimFusionName.ShouldContain("D, Version=2.0.0.0");
+            structuredWarning.Victor.FusionName.ShouldContain("D, Version=1.0.0.0");
+            structuredWarning.Victim.FusionName.ShouldContain("D, Version=2.0.0.0");
             structuredWarning.Victor.Dependees.ShouldNotBeEmpty();
             structuredWarning.Victim.Dependees.ShouldNotBeEmpty();
 

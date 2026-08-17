@@ -44,7 +44,7 @@ Change wave checks around features will be removed in the release that accompani
 - RAR writes one structured search event for each reference instead of one message for each rejected assembly candidate. This change reduces binary-log size and preserves the diagnostic text. Loggers receive one multiline message for each reference. Set `MSBUILDDISABLEFEATURESFROMVERSION=18.11` to retain individual candidate messages.
 - RAR now logs structured events for version-conflict dependency details. These events replace large text messages for MSB3277 warnings and low-importance diagnostics.
   - The events contain victor and victim identities, dependency chains, and source items.
-  - Invariant-English builds produce the same text. Localized builds now use invariant-English templates to make binary-log replay culture-stable.
+  - Events capture the producer's localized templates so replay preserves the text from the original build regardless of the reader's culture.
   - Strict readers older than binary-log format 29 reject the newer format. Forward-compatible readers skip the structured conflict records.
   - Set `MSBUILDDISABLEFEATURESFROMVERSION=18.11` to restore the legacy localized plain-text events.
 

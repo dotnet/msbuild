@@ -13,6 +13,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Unittest;
+using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
@@ -547,7 +548,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             => new(
                 "D, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null",
                 "/libs/v1/D.dll",
-                useUnifiedHeader: false,
                 isPrimary: true,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
@@ -557,23 +557,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             => new(
                 "D, Version=2.0.0.0, Culture=neutral, PublicKeyToken=null",
                 "/libs/v2/D.dll",
-                useUnifiedHeader: true,
                 isPrimary: false,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
                 [new AssemblyConflictDependee("/libs/B.dll", ["B"])]);
-
-        private static AssemblyConflictMessageFormats CreateConflictMessageFormats()
-            => new(
-                "There was a conflict between \"{0}\" and \"{1}\".",
-                "\"{0}\" was chosen because it had a higher version.",
-                "\"{0}\" was chosen because it was primary and \"{1}\" was not.",
-                "MSB3243: No way to resolve conflict between \"{0}\" and \"{1}\". Choosing \"{0}\" arbitrarily.",
-                "References which depend on \"{0}\" [{1}].",
-                "References which depend on or have been unified to \"{0}\" [{1}].",
-                "Unresolved primary reference with an item include of \"{0}\".",
-                "Project file item includes which caused reference \"{0}\".",
-                "Found conflicts between different versions of \"{0}\" that could not be resolved.\n{1}");
 
         [Fact]
         public void TestLogAssemblyConflictDependencyDetailsMessageEventMP()
@@ -581,7 +568,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs(
                 CreateConflictVictorDetails(),
                 CreateConflictVictimDetails(),
-                CreateConflictMessageFormats(),
+                AssemblyConflictTestData.MessageFormats,
                 "ResolveAssemblyReference",
                 MessageImportance.Low,
                 DateTime.UtcNow);
@@ -601,12 +588,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
             AssemblyConflictReferenceDetails victim = CreateConflictVictimDetails();
             var warningEvent = new AssemblyConflictWarningEventArgs(
                 "D",
-                victor.FusionName,
-                victim.FusionName,
                 AssemblyConflictLossReason.WasNotPrimary,
                 victor,
                 victim,
-                CreateConflictMessageFormats(),
+                AssemblyConflictTestData.MessageFormats,
                 "MSB3277",
                 @"C:\foo\bar.proj",
                 42,
@@ -626,6 +611,34 @@ namespace Microsoft.Build.UnitTests.BackEnd
             deserializedWarning.Code.ShouldBe("MSB3277");
             deserializedWarning.SimpleAssemblyName.ShouldBe("D");
             deserializedWarning.Message.ShouldBe(warningEvent.Message);
+        }
+
+        [Fact]
+        public void TaskHostTaskForwardsSupportedEvents()
+        {
+            var criticalEvent = new CriticalBuildMessageEventArgs(null, null, null, 0, 0, 0, 0, "Critical message", null, "Task");
+            var searchEvent = new AssemblyResolutionSearchTraceEventArgs();
+            var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs();
+            var warningEvent = new AssemblyConflictWarningEventArgs();
+            var telemetryEvent = new TelemetryEventArgs
+            {
+                EventName = "Task telemetry",
+                Properties = new Dictionary<string, string> { ["Property"] = "Value" },
+            };
+            var engine = new MockEngine();
+
+            TaskHostTask.HandleLoggedMessage(engine, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, criticalEvent)));
+            TaskHostTask.HandleLoggedMessage(engine, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, searchEvent)));
+            TaskHostTask.HandleLoggedMessage(engine, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, detailsEvent)));
+            TaskHostTask.HandleLoggedMessage(engine, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, warningEvent)));
+            TaskHostTask.HandleLoggedMessage(engine, new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(0, telemetryEvent)));
+
+            engine.MessageEvents.Length.ShouldBe(3);
+            engine.MessageEvents[0].ShouldBeSameAs(criticalEvent);
+            engine.MessageEvents[1].ShouldBeSameAs(searchEvent);
+            engine.MessageEvents[2].ShouldBeSameAs(detailsEvent);
+            engine.WarningEvents.ShouldHaveSingleItem().ShouldBeSameAs(warningEvent);
+            engine.Log.ShouldContain("Received telemetry event 'Task telemetry'");
         }
 
         /// <summary>

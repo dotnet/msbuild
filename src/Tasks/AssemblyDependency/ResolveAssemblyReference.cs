@@ -52,6 +52,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private const string DotNetAssemblyRuntimeVersion = "v4.0.30319";
 
+        private const string FoundConflictsWarningCode = "MSB3277";
+
         /// <summary>
         /// Delegate to a method that takes a targetFrameworkDirectory and returns an array of redist or subset list paths
         /// </summary>
@@ -116,6 +118,7 @@ namespace Microsoft.Build.Tasks
             public static string UnificationByFrameworkRetarget;
             public static string UnifiedDependency;
             public static string UnifiedPrimaryReference;
+            public static AssemblyConflictMessageFormats AssemblyConflictFormats;
 
             private static volatile bool initialized;
             private static readonly LockType s_initializeLock = new();
@@ -186,36 +189,20 @@ namespace Microsoft.Build.Tasks
                         ConsideredAndRejectedBecauseNotAFileNameOnDisk,
                         TargetedProcessorArchitectureDoesNotMatch);
 
+                    string foundConflicts = GetResource("ResolveAssemblyReference.FoundConflicts");
+                    AssemblyConflictFormats = new(
+                        GetResource("ResolveAssemblyReference.ConflictFound"),
+                        GetResource("ResolveAssemblyReference.ConflictHigherVersionChosen"),
+                        GetResource("ResolveAssemblyReference.ConflictPrimaryChosen"),
+                        GetResource("ResolveAssemblyReference.ConflictUnsolvable"),
+                        GetResource("ResolveAssemblyReference.ReferenceDependsOn"),
+                        GetResource("ResolveAssemblyReference.UnifiedReferenceDependsOn"),
+                        GetResource("ResolveAssemblyReference.UnResolvedPrimaryItemSpec"),
+                        GetResource("ResolveAssemblyReference.PrimarySourceItemsForReference"),
+                        MessageParser.TryStripAnyCode(foundConflicts, out string strippedMessage) ? strippedMessage : foundConflicts);
+
                     initialized = true;
                 }
-            }
-        }
-
-        private static class InvariantAssemblyConflictMessageFormats
-        {
-            /// <summary>
-            /// The warning code in the "ResolveAssemblyReference.FoundConflicts" resource string.
-            /// </summary>
-            internal const string FoundConflictsWarningCode = "MSB3277";
-
-            internal static readonly AssemblyConflictMessageFormats Instance = new(
-                GetResource("ResolveAssemblyReference.ConflictFound"),
-                GetResource("ResolveAssemblyReference.ConflictHigherVersionChosen"),
-                GetResource("ResolveAssemblyReference.ConflictPrimaryChosen"),
-                GetResource("ResolveAssemblyReference.ConflictUnsolvable"),
-                GetResource("ResolveAssemblyReference.ReferenceDependsOn"),
-                GetResource("ResolveAssemblyReference.UnifiedReferenceDependsOn"),
-                GetResource("ResolveAssemblyReference.UnResolvedPrimaryItemSpec"),
-                GetResource("ResolveAssemblyReference.PrimarySourceItemsForReference"),
-                GetStrippedFoundConflicts());
-
-            private static string GetResource(string name)
-                => AssemblyResources.PrimaryResources.GetString(name, CultureInfo.InvariantCulture);
-
-            private static string GetStrippedFoundConflicts()
-            {
-                string raw = GetResource("ResolveAssemblyReference.FoundConflicts");
-                return MessageParser.TryStripAnyCode(raw, out string strippedMessage) ? strippedMessage : raw;
             }
         }
 
@@ -2361,29 +2348,29 @@ namespace Microsoft.Build.Tasks
             string details = string.Empty;
             if (logWarning)
             {
-                AssemblyConflictReferenceDetails victorDetails = BuildConflictReferenceDetails(victorFusionName, victor, useUnifiedHeader: false);
-                AssemblyConflictReferenceDetails victimDetails = BuildConflictReferenceDetails(fusionName, conflictCandidate, useUnifiedHeader: true);
+                AssemblyConflictReferenceDetails victorDetails = BuildConflictReferenceDetails(victorFusionName, victor);
+                AssemblyConflictReferenceDetails victimDetails = BuildConflictReferenceDetails(fusionName, conflictCandidate);
 
                 // Log this warning for all AutoUnify values because RAR selected an older reference.
-                output = LogFoundConflictsWarning(assemblyName.Name, victorFusionName, fusionName, lossReason, victorDetails, victimDetails, materializeMessage: OutputUnresolvedAssemblyConflicts) ?? string.Empty;
+                output = LogFoundConflictsWarning(assemblyName.Name, lossReason, victorDetails, victimDetails, materializeMessage: OutputUnresolvedAssemblyConflicts) ?? string.Empty;
             }
             else
             {
-                output = AssemblyConflictMessageFormatter.FormatHeaderOnly(victorFusionName, fusionName, lossReason, conflictCandidate.IsPrimary, InvariantAssemblyConflictMessageFormats.Instance);
+                output = AssemblyConflictMessageFormatter.FormatHeaderOnly(victorFusionName, fusionName, lossReason, conflictCandidate.IsPrimary, Strings.AssemblyConflictFormats);
                 Log.LogMessage(ChooseReferenceLoggingImportance(conflictCandidate), output);
 
                 bool logDependencyDetails = Log.LogsMessagesOfImportance(MessageImportance.Low);
                 if (logDependencyDetails || OutputUnresolvedAssemblyConflicts)
                 {
-                    AssemblyConflictReferenceDetails victorDetails = BuildConflictReferenceDetails(victorFusionName, victor, useUnifiedHeader: false);
-                    AssemblyConflictReferenceDetails victimDetails = BuildConflictReferenceDetails(fusionName, conflictCandidate, useUnifiedHeader: true);
+                    AssemblyConflictReferenceDetails victorDetails = BuildConflictReferenceDetails(victorFusionName, victor);
+                    AssemblyConflictReferenceDetails victimDetails = BuildConflictReferenceDetails(fusionName, conflictCandidate);
 
                     if (logDependencyDetails)
                     {
                         var detailsEvent = new AssemblyConflictDependencyDetailsMessageEventArgs(
                             victorDetails,
                             victimDetails,
-                            InvariantAssemblyConflictMessageFormats.Instance,
+                            Strings.AssemblyConflictFormats,
                             GetType().Name,
                             MessageImportance.Low,
                             DateTime.UtcNow);
@@ -2399,7 +2386,7 @@ namespace Microsoft.Build.Tasks
                         details = AssemblyConflictMessageFormatter.FormatDependencyDetails(
                             victorDetails,
                             victimDetails,
-                            InvariantAssemblyConflictMessageFormats.Instance);
+                            Strings.AssemblyConflictFormats);
                     }
                 }
             }
@@ -2426,17 +2413,15 @@ namespace Microsoft.Build.Tasks
         /// </returns>
         private string LogFoundConflictsWarning(
             string simpleAssemblyName,
-            string victorFusionName,
-            string victimFusionName,
             AssemblyConflictLossReason lossReason,
             AssemblyConflictReferenceDetails victorDetails,
             AssemblyConflictReferenceDetails victimDetails,
             bool materializeMessage)
         {
-            const string warningCode = InvariantAssemblyConflictMessageFormats.FoundConflictsWarningCode;
+            const string warningCode = FoundConflictsWarningCode;
             string helpKeyword = Log.HelpKeywordPrefix is null ? null : Log.HelpKeywordPrefix + "ResolveAssemblyReference.FoundConflicts";
             string body = materializeMessage
-                ? AssemblyConflictMessageFormatter.FormatWarningBody(victorFusionName, victimFusionName, lossReason, victimDetails.IsPrimary, victorDetails, victimDetails, InvariantAssemblyConflictMessageFormats.Instance)
+                ? AssemblyConflictMessageFormatter.FormatWarningBody(lossReason, victorDetails, victimDetails, Strings.AssemblyConflictFormats)
                 : null;
 
             if (BuildEngine is IBuildEngine8 buildEngine8 && buildEngine8.ShouldTreatWarningAsError(warningCode))
@@ -2445,35 +2430,29 @@ namespace Microsoft.Build.Tasks
                 // The logging thread promotes a directly logged warning asynchronously.
                 // Promote MSB3277 here to preserve the synchronous legacy behavior.
                 // This path is uncommon, so immediate formatting has a small performance effect.
-                body ??= AssemblyConflictMessageFormatter.FormatWarningBody(victorFusionName, victimFusionName, lossReason, victimDetails.IsPrimary, victorDetails, victimDetails, InvariantAssemblyConflictMessageFormats.Instance);
+                body ??= AssemblyConflictMessageFormatter.FormatWarningBody(lossReason, victorDetails, victimDetails, Strings.AssemblyConflictFormats);
                 string message = AssemblyConflictMessageFormatter.FormatWarningMessage(
                     simpleAssemblyName,
-                    victorFusionName,
-                    victimFusionName,
-                    lossReason,
-                    victimDetails.IsPrimary,
-                    victorDetails,
-                    victimDetails,
-                    InvariantAssemblyConflictMessageFormats.Instance);
+                    body,
+                    Strings.AssemblyConflictFormats);
                 Log.LogError(subcategory: null, errorCode: warningCode, helpKeyword: helpKeyword, helpLink: null, file: null, lineNumber: 0, columnNumber: 0, endLineNumber: 0, endColumnNumber: 0, message: message);
                 return body;
             }
 
             var warningEvent = new AssemblyConflictWarningEventArgs(
                 simpleAssemblyName,
-                victorFusionName,
-                victimFusionName,
                 lossReason,
                 victorDetails,
                 victimDetails,
-                InvariantAssemblyConflictMessageFormats.Instance,
+                Strings.AssemblyConflictFormats,
                 warningCode,
                 BuildEngine.ProjectFileOfTaskNode,
                 BuildEngine.LineNumberOfTaskNode,
                 BuildEngine.ColumnNumberOfTaskNode,
                 helpKeyword,
                 GetType().Name,
-                DateTime.UtcNow);
+                DateTime.UtcNow,
+                formattedBody: body);
             BuildEngine.LogWarningEvent(warningEvent);
 
             // Preserve the legacy logMessage metadata, which contains the conflict body without the outer MSB3277 wrapper.
@@ -2486,21 +2465,22 @@ namespace Microsoft.Build.Tasks
         /// The result matches the data from
         /// <see cref="LogReferenceDependenciesAndSourceItemsToStringBuilder(string, Reference, StringBuilder, bool)"/>.
         /// </summary>
-        private static AssemblyConflictReferenceDetails BuildConflictReferenceDetails(string fusionName, Reference reference, bool useUnifiedHeader)
+        private static AssemblyConflictReferenceDetails BuildConflictReferenceDetails(string fusionName, Reference reference)
         {
             Assumed.NotNull(reference);
 
             string unresolvedPrimaryItemSpec = null;
             HashSet<Reference> dependeeReferences = reference.GetDependees();
             int dependeeCount = dependeeReferences.Count + (reference.IsPrimary && reference.IsResolved ? 1 : 0);
-            var dependees = new List<AssemblyConflictDependee>(dependeeCount);
+            var dependees = new AssemblyConflictDependee[dependeeCount];
+            int dependeeIndex = 0;
 
             if (reference.IsPrimary)
             {
                 if (reference.IsResolved)
                 {
                     // Include the primary reference as its own dependee to preserve the legacy text.
-                    dependees.Add(BuildConflictDependee(reference));
+                    dependees[dependeeIndex++] = BuildConflictDependee(reference);
                 }
                 else
                 {
@@ -2511,13 +2491,12 @@ namespace Microsoft.Build.Tasks
 
             foreach (Reference dependeeReference in dependeeReferences)
             {
-                dependees.Add(BuildConflictDependee(dependeeReference));
+                dependees[dependeeIndex++] = BuildConflictDependee(dependeeReference);
             }
 
             return new AssemblyConflictReferenceDetails(
                 fusionName,
                 reference.FullPath,
-                useUnifiedHeader,
                 reference.IsPrimary,
                 reference.IsResolved,
                 unresolvedPrimaryItemSpec,
@@ -2527,10 +2506,11 @@ namespace Microsoft.Build.Tasks
         private static AssemblyConflictDependee BuildConflictDependee(Reference dependeeReference)
         {
             Dictionary<string, ITaskItem>.ValueCollection sourceItems = dependeeReference.GetSourceItems();
-            var sourceItemSpecs = new List<string>(sourceItems.Count);
+            var sourceItemSpecs = new string[sourceItems.Count];
+            int sourceItemIndex = 0;
             foreach (ITaskItem sourceItem in sourceItems)
             {
-                sourceItemSpecs.Add(sourceItem.ItemSpec);
+                sourceItemSpecs[sourceItemIndex++] = sourceItem.ItemSpec;
             }
 
             return new AssemblyConflictDependee(dependeeReference.FullPath, sourceItemSpecs);
