@@ -178,17 +178,7 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
 
     /// <inheritdoc />
     public override string? Message
-    {
-        get
-        {
-            if (_formattedMessage is null && _messageFormats is not null)
-            {
-                _formattedMessage = FormatMessage();
-            }
-
-            return _formattedMessage ?? base.Message;
-        }
-    }
+        => _messageFormats is null ? base.Message : (_formattedMessage ??= FormatMessage());
 
     internal AssemblyResolutionSearchTraceMessageFormats? MessageFormats => _messageFormats;
 
@@ -226,6 +216,7 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
     private string FormatMessage()
     {
         var builder = new StringBuilder();
+        AssemblyResolutionSearchTraceMessageFormats formats = _messageFormats!;
         string? lastSearchPath = null;
 
         for (int i = 0; i < _searchAttempts.Count; i++)
@@ -237,29 +228,29 @@ public sealed class AssemblyResolutionSearchTraceEventArgs : BuildMessageEventAr
                 AppendMessage(
                     builder,
                     attempt.ParentAssembly is null
-                        ? Format(_messageFormats!.SearchPath, attempt.SearchPath)
-                        : Format(_messageFormats!.SearchPathAddedByParentAssembly, attempt.SearchPath, attempt.ParentAssembly));
+                        ? Format(formats.SearchPath, attempt.SearchPath)
+                        : Format(formats.SearchPathAddedByParentAssembly, attempt.SearchPath, attempt.ParentAssembly));
 
                 if (attempt.IsAssemblyFoldersExSearch)
                 {
-                    AppendMessage(builder, _messageFormats.SearchedAssemblyFoldersEx);
+                    AppendMessage(builder, formats.SearchedAssemblyFoldersEx);
                 }
             }
 
             string? message = attempt.Result switch
             {
                 AssemblyResolutionSearchResult.FileNotFound when !attempt.IsAssemblyFoldersExSearch
-                    => Format(_messageFormats!.FileNotFound, attempt.FileNameAttempted),
+                    => Format(formats.FileNotFound, attempt.FileNameAttempted),
                 AssemblyResolutionSearchResult.FusionNamesDidNotMatch
-                    => Format(_messageFormats!.FusionNamesDidNotMatch, attempt.FileNameAttempted, attempt.AssemblyName, RequestedAssemblyName),
+                    => Format(formats.FusionNamesDidNotMatch, attempt.FileNameAttempted, attempt.AssemblyName, RequestedAssemblyName),
                 AssemblyResolutionSearchResult.TargetHadNoFusionName
-                    => Format(_messageFormats!.TargetHadNoFusionName, attempt.FileNameAttempted),
+                    => Format(formats.TargetHadNoFusionName, attempt.FileNameAttempted),
                 AssemblyResolutionSearchResult.NotInGac
-                    => Format(_messageFormats!.NotInGac, attempt.FileNameAttempted),
+                    => Format(formats.NotInGac, attempt.FileNameAttempted),
                 AssemblyResolutionSearchResult.NotAFileNameOnDisk when !attempt.IsAssemblyFoldersExSearch
-                    => Format(_messageFormats!.NotAFileNameOnDisk, attempt.FileNameAttempted),
+                    => Format(formats.NotAFileNameOnDisk, attempt.FileNameAttempted),
                 AssemblyResolutionSearchResult.ProcessorArchitectureDoesNotMatch
-                    => Format(_messageFormats!.ProcessorArchitectureDoesNotMatch, attempt.FileNameAttempted, attempt.ProcessorArchitecture, TargetProcessorArchitecture),
+                    => Format(formats.ProcessorArchitectureDoesNotMatch, attempt.FileNameAttempted, attempt.ProcessorArchitecture, TargetProcessorArchitecture),
                 _ => null,
             };
 
