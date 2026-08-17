@@ -18,12 +18,27 @@ using error = Microsoft.Build.BuildEngine.Shared.ErrorUtilities;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+    /// 
     /// A BuildPropertyGroup is a collection of BuildProperty objects. This could be represented by a persisted &lt;PropertyGroup&gt;
     /// element in the project file, or it could be a virtual collection of properties, such as in the case of global properties,
     /// environment variable properties, or the final evaluated properties of a project. These two types of PropertyGroups
     /// (persisted and virtual) are handled differently by many of the methods in this class, but in order to reduce the number of
     /// concepts for the consumer of the OM, we've merged them into a single class.
     /// </summary>
+    /// <remarks>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
+    /// </remarks>
     /// <owner>RGoel</owner>
     [DebuggerDisplay("BuildPropertyGroup (Count = { Count }, Condition = { Condition })")]
     public class BuildPropertyGroup : IItemPropertyGrouping, IEnumerable
@@ -32,7 +47,7 @@ namespace Microsoft.Build.BuildEngine
 
         // This is the XML element representing the <PropertyGroup> in the XMake
         // project file.  If this BuildPropertyGroup object doesn't represent an
-        // actual <PropertyGroup> element in the XMake project file, it's 
+        // actual <PropertyGroup> element in the XMake project file, it's
         // okay if this remains null throughout the life of this object.
         private XmlElement propertyGroupElement = null;
 
@@ -66,7 +81,7 @@ namespace Microsoft.Build.BuildEngine
         // in the order that they appear in the project file.  In this list,
         // there can be multiple properties of the same name.  This member
         // is only valid (non-null) if this is a persisted <PropertyGroup>.
-        // For virtual property groups (e.g., evaluated property groups, 
+        // For virtual property groups (e.g., evaluated property groups,
         // global property groups, etc.), this will remain null.
         private ArrayList propertyList = null;
 
@@ -133,16 +148,46 @@ namespace Microsoft.Build.BuildEngine
         #region Constructors
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Default constructor, that creates an empty virtual (non-persisted) BuildPropertyGroup.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildPropertyGroup()
             : this(null, 0)
         {
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Default constructor, that creates an empty virtual (non-persisted) BuildPropertyGroup.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildPropertyGroup(Project parentProject)
             : this(parentProject, 0)
         {
@@ -316,11 +361,26 @@ namespace Microsoft.Build.BuildEngine
         #region Properties
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// This returns a boolean telling you whether this particular property
         /// group was imported from another project, or whether it was defined
         /// in the main project.  For virtual property groups which have no
         /// persistence, this is false.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public bool IsImported
         {
@@ -331,8 +391,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Accessor for the condition on the property group.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public string Condition
         {
@@ -343,7 +418,7 @@ namespace Microsoft.Build.BuildEngine
 
             set
             {
-                // If this BuildPropertyGroup object is not actually represented by a 
+                // If this BuildPropertyGroup object is not actually represented by a
                 // <PropertyGroup> element in the project file, then do not allow
                 // the caller to set the condition.
                 MustBePersisted("CannotSetCondition", null);
@@ -359,11 +434,26 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Allows setting the condition for imported property groups. Changes will not be persisted.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public void SetImportedPropertyGroupCondition(string condition)
         {
-            // If this BuildPropertyGroup object is not actually represented by a 
+            // If this BuildPropertyGroup object is not actually represented by a
             // <PropertyGroup> element in the project file, then do not allow
             // the caller to set the condition.
             MustBePersisted("CannotSetCondition", null);
@@ -456,8 +546,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// 
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
         /// Returns the number of properties contained in this BuildPropertyGroup.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public int Count
         {
@@ -524,6 +629,11 @@ namespace Microsoft.Build.BuildEngine
         #region Operators
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// This is the indexer for the BuildPropertyGroup class, which allows the caller to set or get the property data using simple
         /// array indexer [] notation. The caller passes in the property name inside the [], and out comes the  BuildProperty object,
         /// which can be typecast to a string in order to get just the property value. Or if it's used on the left of the "="
@@ -533,17 +643,27 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         /// <param name="propertyName"></param>
         /// <returns>The property with the given name, or null if it does not exist in this group</returns>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildProperty this[string propertyName]
         {
             get
             {
                 // We don't support this method for PropertyGroups that are persisted.
-                // This is because persisted PropertyGroups can contain multiple 
+                // This is because persisted PropertyGroups can contain multiple
                 // properties with the same name, so you can't index by name.
                 MustBeVirtual("CannotAccessPropertyByName");
 
-                // Do the lookup in the hash table using the hash table's 
-                // indexer method.  Get back the property data object, 
+                // Do the lookup in the hash table using the hash table's
+                // indexer method.  Get back the property data object,
                 // which will be "null" if the property hasn't been set. Note
                 // that we key off property names in a case-insensitive fashion.
                 return (BuildProperty)propertyTableByName[propertyName];
@@ -567,11 +687,26 @@ namespace Microsoft.Build.BuildEngine
         #region Methods
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// This IEnumerable method returns an IEnumerator object, which allows
         /// the caller to enumerate through the BuildProperty objects contained in
         /// this BuildPropertyGroup.
         /// </summary>
         /// <returns></returns>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public IEnumerator GetEnumerator
             (
@@ -609,6 +744,11 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// This method creates a copy of the BuildPropertyGroup. A shallow clone will reference the same BuildProperty objects as the
         /// original. A deep clone will deep clone the BuildProperty objects themselves. If this is a persisted BuildPropertyGroup, only
         /// deep clones are allowed, because you can't have the same XML element belonging to two parents.
@@ -616,6 +756,16 @@ namespace Microsoft.Build.BuildEngine
         /// <owner>RGoel</owner>
         /// <param name="deepClone"></param>
         /// <returns>The cloned BuildPropertyGroup.</returns>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public BuildPropertyGroup Clone
         (
             bool deepClone
@@ -630,7 +780,7 @@ namespace Microsoft.Build.BuildEngine
 
                 if (deepClone)
                 {
-                    // Loop through every BuildProperty in our collection, and add those same properties 
+                    // Loop through every BuildProperty in our collection, and add those same properties
                     // to the cloned collection.
 
                     // Create a new virtual BuildPropertyGroup.
@@ -697,7 +847,7 @@ namespace Microsoft.Build.BuildEngine
                     this.importedFromAnotherProject
                     );
 
-                // Loop through every BuildProperty in our collection, and add those same properties 
+                // Loop through every BuildProperty in our collection, and add those same properties
                 // to the cloned collection.
                 foreach (BuildProperty property in this)
                 {
@@ -734,8 +884,8 @@ namespace Microsoft.Build.BuildEngine
             BuildPropertyGroup globalProperties
         )
         {
-            // The consumer of the OM has the ability to add new properties to the 
-            // GlobalProperties BuildPropertyGroup, and the OM doesn't expose the 
+            // The consumer of the OM has the ability to add new properties to the
+            // GlobalProperties BuildPropertyGroup, and the OM doesn't expose the
             // property type, because that would be too dangerous.  So all properties
             // created by the OM consumer will be "normal" properties, even those
             // set in the GlobalProperties BuildPropertyGroup.  But in order to make
@@ -782,7 +932,7 @@ namespace Microsoft.Build.BuildEngine
         {
             // We don't support this method for PropertyGroups that are
             // represented by an actual <PropertyGroup> element.  This is because
-            // persisted PropertyGroups can contain multiple properties with the same 
+            // persisted PropertyGroups can contain multiple properties with the same
             // name, so the behavior of SetProperty becomes ambiguous.
             MustBeVirtual("NeedVirtualPropertyGroup");
 
@@ -794,12 +944,12 @@ namespace Microsoft.Build.BuildEngine
 
             if (existingProperty != null)
             {
-                // If the existing property is an XMake reserved property, we may have an 
+                // If the existing property is an XMake reserved property, we may have an
                 // invalid project file, because reserved properties are not allowed to
                 // be set.
-                // Don't fail if the new property is itself a "reserved" property.  We 
-                // want to be able to override reserved properties with new reserved 
-                // properties, otherwise the engine itself would never be allowed to 
+                // Don't fail if the new property is itself a "reserved" property.  We
+                // want to be able to override reserved properties with new reserved
+                // properties, otherwise the engine itself would never be allowed to
                 // change the value of a reserved property.
                 ProjectErrorUtilities.VerifyThrowInvalidProject(
                     (existingProperty.Type != PropertyType.ReservedProperty) ||
@@ -808,7 +958,7 @@ namespace Microsoft.Build.BuildEngine
 
                 // Also make sure it's not a read-only property (such as a property
                 // that was set at the XMake command-line), but don't actually throw
-                // an error in this case.  Only output properties from tasks are allowed 
+                // an error in this case.  Only output properties from tasks are allowed
                 // to override read-only properties
                 if ((existingProperty.Type == PropertyType.GlobalProperty) &&
                     (newProperty.Type != PropertyType.OutputProperty))
@@ -861,6 +1011,11 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Sets a property taking the property name and value as strings directly.
         ///
         /// Either overrides the value of the property with the given name, or adds it if it
@@ -873,18 +1028,43 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         /// <param name="propertyName"></param>
         /// <param name="propertyValue"></param>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public void SetProperty(string propertyName, string propertyValue)
         {
             this.SetProperty(new BuildProperty(propertyName, propertyValue));
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Sets a property in this PropertyGroup, optionally escaping the property value so
         /// that it will be treated as a literal.
         /// </summary>
         /// <param name="propertyName"></param>
         /// <param name="propertyValue"></param>
         /// <param name="treatPropertyValueAsLiteral"></param>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public void SetProperty
             (
@@ -898,6 +1078,11 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// The AddNewProperty method adds a new property element to the persisted
         /// &lt;PropertyGroup&gt; at the end.  This method takes the property name and
         /// value as strings directly, so that the BuildProperty object can be created
@@ -906,6 +1091,16 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="propertyName"></param>
         /// <param name="propertyValue"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public BuildProperty AddNewProperty
         (
@@ -926,6 +1121,11 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Adds a new property to the PropertyGroup, optionally escaping the property value so
         /// that it will be treated as a literal.
         /// </summary>
@@ -933,6 +1133,16 @@ namespace Microsoft.Build.BuildEngine
         /// <param name="propertyValue"></param>
         /// <param name="treatPropertyValueAsLiteral"></param>
         /// <returns></returns>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public BuildProperty AddNewProperty
             (
@@ -1025,10 +1235,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Removes the given BuildProperty object from either a persisted or a virtual
         /// BuildPropertyGroup.
         /// </summary>
         /// <param name="property"></param>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public void RemoveProperty
         (
@@ -1037,7 +1262,7 @@ namespace Microsoft.Build.BuildEngine
         {
             error.VerifyThrowArgumentNull(property, nameof(property));
 
-            // If this is a persisted <PropertyGroup>, then remove the property element from 
+            // If this is a persisted <PropertyGroup>, then remove the property element from
             // the XML and from the array list.
             if (IsPersisted)
             {
@@ -1069,9 +1294,24 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Removes all properties with the given name from either a persisted or a virtual BuildPropertyGroup. For persisted
         /// PropertyGroups, there could be multiple. For a virtual BuildPropertyGroup, there can be only one.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         /// <param name="propertyName"></param>
         public void RemoveProperty
@@ -1085,10 +1325,10 @@ namespace Microsoft.Build.BuildEngine
             {
                 MustBePersisted("NeedPersistedPropertyGroup", XMakeElements.propertyGroup);
 
-                // For persisted <PropertyGroup>'s, there could be multiple properties 
-                // with the given name.  We need to loop through our arraylist of properties, 
-                // finding all the ones with the given property name, and delete them.  But we 
-                // shouldn't be modifying the arraylist while we're still enumerating through 
+                // For persisted <PropertyGroup>'s, there could be multiple properties
+                // with the given name.  We need to loop through our arraylist of properties,
+                // finding all the ones with the given property name, and delete them.  But we
+                // shouldn't be modifying the arraylist while we're still enumerating through
                 // it.  So, first we create a new list of all the properties we want to remove,
                 // and then we later go through and actually remove them.
                 ArrayList propertiesToRemove = new ArrayList();
@@ -1114,7 +1354,7 @@ namespace Microsoft.Build.BuildEngine
             {
                 MustBeVirtual("NeedVirtualPropertyGroup");
 
-                // We only need to remove the BuildProperty object with the given name from 
+                // We only need to remove the BuildProperty object with the given name from
                 // the Hashtable.  There can be only one.
                 this.propertyTableByName.Remove(propertyName);
 
@@ -1191,7 +1431,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal void ClearHelper(bool clearImportedPropertyGroup)
         {
-            // If this group is backed by XML, clear all attributes and 
+            // If this group is backed by XML, clear all attributes and
             // children out unless it's an imported group, in which case we don't want to modify the XML
             if (IsPersisted && !clearImportedPropertyGroup)
             {
@@ -1245,8 +1485,23 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Removes all properties and conditions from this BuildPropertyGroup.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>RGoel</owner>
         public void Clear
             (
@@ -1273,7 +1528,7 @@ namespace Microsoft.Build.BuildEngine
                 else
                 {
                     // This is not a change to the contents of the project file, however
-                    // this change does require a re-evaluation of the project.  For 
+                    // this change does require a re-evaluation of the project.  For
                     // example, if a global property changes....
                     this.ParentProject.MarkProjectAsDirtyForReevaluation();
                 }
@@ -1326,9 +1581,9 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         private void SetExtensionsPathProperties()
         {
-            // We set the MSBuildExtensionsPath variables here because we don't want to make them official 
-            // reserved properties; we need the ability for people to override our default in their 
-            // environment or as a global property.  
+            // We set the MSBuildExtensionsPath variables here because we don't want to make them official
+            // reserved properties; we need the ability for people to override our default in their
+            // environment or as a global property.
 
             // "MSBuildExtensionsPath32". This points to whatever the value of "Program Files (x86)" environment variable is;
             // but on a 32 bit box this isn't set, and we should use "Program Files" instead.
@@ -1346,9 +1601,9 @@ namespace Microsoft.Build.BuildEngine
             string extensionsPath32 = Path.Combine(programFiles32, ReservedPropertyNames.extensionsPathSuffix);
             SetProperty(new BuildProperty(ReservedPropertyNames.extensionsPath32, extensionsPath32, PropertyType.EnvironmentProperty));
 
-            // MSBuildExtensionsPath:  The way this used to work is that it would point to "Program Files\MSBuild" on both 
+            // MSBuildExtensionsPath:  The way this used to work is that it would point to "Program Files\MSBuild" on both
             // 32-bit and 64-bit machines.  We have a switch to continue using that behavior; however the default is now for
-            // MSBuildExtensionsPath to always point to the same location as MSBuildExtensionsPath32. 
+            // MSBuildExtensionsPath to always point to the same location as MSBuildExtensionsPath32.
 
             bool useLegacyMSBuildExtensionsPathBehavior = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLEGACYEXTENSIONSPATH"));
 
@@ -1398,7 +1653,7 @@ namespace Microsoft.Build.BuildEngine
             if (this.Count == compareToPropertyGroup.Count)
             {
                 // If both bags do have the same number of elements, it should
-                // be sufficient to check if one bag contains all of the 
+                // be sufficient to check if one bag contains all of the
                 // elements in the other.
                 foreach (DictionaryEntry entry in this.propertyTableByName)
                 {
@@ -1449,8 +1704,8 @@ namespace Microsoft.Build.BuildEngine
         {
             error.VerifyThrowInvalidOperation(IsVirtual, errorResourceName, XMakeElements.propertyGroup);
 
-            // If this is a virtual BuildPropertyGroup (not a <PropertyGroup> element), then 
-            // we should not have an ArrayList of BuildProperty objects ... we should only have 
+            // If this is a virtual BuildPropertyGroup (not a <PropertyGroup> element), then
+            // we should not have an ArrayList of BuildProperty objects ... we should only have
             // the hash table.
             error.VerifyThrow(this.propertyList == null,
                 "ArrayList of BuildProperty objects not expected for a virtual BuildPropertyGroup.");

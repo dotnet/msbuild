@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests
         public void Initialize()
         {
             // Create some items and place them in a dictionary
-            // Add some include information so that when we check the final 
+            // Add some include information so that when we check the final
             // item spec we can verify that the item was recreated properly
             BuildItem buildItem1 = new BuildItem("BuildItem1", "Item1");
             buildItem1.Include = "TestInclude1";
@@ -70,7 +70,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(1,requestMapping.HandleId,"Expected NodeProxyId to be 1");
             Assert.AreEqual(1,requestMapping.RequestId,"Expected RequestId to be 1");
             requestMapping.AddResultToCache(resultWithOutputs);
-            Assert.IsTrue(resultWithOutputs.EvaluationResult == ((BuildResultCacheEntry)cacheScope.GetCacheEntry("TaskItems")).BuildResult, 
+            Assert.IsTrue(resultWithOutputs.EvaluationResult == ((BuildResultCacheEntry)cacheScope.GetCacheEntry("TaskItems")).BuildResult,
                 "Expected EvaluationResult to be the same after it was retrieved from the cache");
             Assert.IsTrue(((BuildItem[])resultWithOutputs.OutputsByTarget["TaskItems"])[0].Include == ((BuildResultCacheEntry)cacheScope.GetCacheEntry("TaskItems")).BuildItems[0].Include,
                 "Expected EvaluationResult to be the same after it was retrieved from the cache");
@@ -89,7 +89,7 @@ namespace Microsoft.Build.UnitTests
             Assert.AreEqual(1, requestMapping.HandleId, "Expected NodeProxyId to be 1");
             Assert.AreEqual(1, requestMapping.RequestId, "Expected RequestId to be 1");
             requestMapping.AddResultToCache(uncacheableResult);
-            Assert.IsNull(cacheScope.GetCacheEntry("TaskItems"), 
+            Assert.IsNull(cacheScope.GetCacheEntry("TaskItems"),
                 "Expected null to be retrieved from the cache as the targetNamesList should not have been added");
         }
 
@@ -124,7 +124,7 @@ namespace Microsoft.Build.UnitTests
         } */
 
         /// <summary>
-        /// Make sure that the correct InternalErrorException exception is thrown if a null build result is 
+        /// Make sure that the correct InternalErrorException exception is thrown if a null build result is
         /// attempted to be cached. This test is
         /// here to describe the behavior but it is not run because it causes a pop up.
         /// </summary>

@@ -33,7 +33,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         // all bellow are very inefficient,
         // in reality we do cache these collections  until invalidated and use lazy access for dictionaries.
-        // TODO: Might bring that infrastructure here as well ... 
+        // TODO: Might bring that infrastructure here as well ...
         public IDictionary<string, string> GlobalProperties => this.Source.GlobalProperties;
         public ICollection<string> ItemTypes => this.Source.ItemTypes;
 

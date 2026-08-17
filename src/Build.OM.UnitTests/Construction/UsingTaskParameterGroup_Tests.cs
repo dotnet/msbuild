@@ -135,7 +135,9 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         /// </summary>
         private static UsingTaskParameterGroupElement GetParameterGroupXml(string contents)
         {
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(contents)));
+            using ProjectRootElementFromString projectRootElementFromString = new(contents);
+            ProjectRootElement project = projectRootElementFromString.Project;
+
             ProjectUsingTaskElement usingTask = (ProjectUsingTaskElement)Helpers.GetFirst(project.Children);
             return usingTask.ParameterGroup;
         }

@@ -49,7 +49,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                     <Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <PropertyGroup>
                             <value>true</value>
-                        </PropertyGroup>  
+                        </PropertyGroup>
                        <UsingTask TaskName='TaskName' AssemblyFile='AssemblyName.dll' Condition='$(value)==true'/>
                     </Project>";
 
@@ -60,7 +60,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                     <Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <PropertyGroup>
                             <n>xmlValue</n>
-                        </PropertyGroup>     
+                        </PropertyGroup>
                     </Project>
                 ";
 
@@ -177,7 +177,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                         <Target Name='TestTarget'>
                             <Message Text='Executed TestTarget'/>
                         </Target>
-                    
+
                 ";
 
         /// <summary>
@@ -232,7 +232,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                     <Project ToolsVersion='4.0' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <PropertyGroup>
                             <n>xmlValue</n>
-                        </PropertyGroup>                        
+                        </PropertyGroup>
                         <Target Name='CreatePropertyTarget'>
                             <CreateProperty Value='v'>
                                   <Output TaskParameter='Value' PropertyName='p'/>
@@ -247,7 +247,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                         <Target Name='printn'>
                             <Message Text='value is $(n)'/>
                         </Target>
-                       
+
                     </Project>
                 ";
 
@@ -266,14 +266,14 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                         </Target>
                         <Target Name='Target2'>
                             <Message Text='Executed Target 2'/>
-                        </Target>                           
+                        </Target>
                     </Project>
                 ";
 
         /// <summary>
         /// Test Data Item
         /// </summary>
-        internal const string ContentInvalidTargetsWithOutput = @" 
+        internal const string ContentInvalidTargetsWithOutput = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                         <Target Name='Target1' Outputs='$(p);@(i);$(q)'>
                             <CreateProperty Value='v'>
@@ -288,7 +288,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Test Data Item
         /// </summary>
-        internal const string ContentValidTargetsWithOutput = @" 
+        internal const string ContentValidTargetsWithOutput = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                                 <PropertyGroup>
                                 <x>y</x>
@@ -307,13 +307,13 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                                 <q>u</q>
                             </PropertyGroup>
                         </Target>
-                          
+
                     </Project>";
 
         /// <summary>
         /// Test Data Item
         /// </summary>
-        internal const string ItemGroup = @" 
+        internal const string ItemGroup = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <ItemGroup>
                                 <i Include='a' Condition='1==0'/>
@@ -325,7 +325,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Test Data Item
         /// </summary>
-        internal const string ItemGroup2 = @" 
+        internal const string ItemGroup2 = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <ItemGroup Condition='true'>
                                 <j Include='2a' Condition='1==0'/>
@@ -336,19 +336,19 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                                 <i2 Include='2a' Condition='1==0'/>
                                 <i2 Include='2b' Condition='true'/>
                                 <i2 Include='2c' Condition='true'/>
-                            </ItemGroup>  
+                            </ItemGroup>
                             <ItemGroup>
                                 <k Include='2a' Condition='1==0'/>
                                 <k Include='2b' Condition='true'/>
                                 <k Include='2c' Condition='true'/>
                             </ItemGroup>
-                           
+
                     </Project>";
 
         /// <summary>
         /// Test Data Item
         /// </summary>
-        internal const string ItemGroup3 = @" 
+        internal const string ItemGroup3 = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <ItemGroup Condition='true'>
                                 <i Include='2a' Condition='1==0'/>
@@ -362,7 +362,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                                 <i Include='2a' Condition='1==0'/>
                                 <i Include='2b' Condition='true'/>
                                 <i Include='2c' Condition='true'/>
-                            </ItemGroup>  
+                            </ItemGroup>
                             <ItemGroup>
                                 <i Include='2a' Condition='1==0'/>
                                 <i Include='2b' Condition='true'/>
@@ -373,7 +373,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// <summary>
         /// Test Data Item
         /// </summary>
-        internal const string PropertyGroup = @" 
+        internal const string PropertyGroup = @"
                     <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
                             <PropertyGroup Condition='true'>
                                 <n1 Condition='true'>v1</n1>

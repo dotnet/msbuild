@@ -57,7 +57,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         }
 
         /// <summary>
-        /// Null 
+        /// Null
         /// </summary>
         [Fact]
         public void Null1()
@@ -66,7 +66,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         }
 
         /// <summary>
-        /// Null 
+        /// Null
         /// </summary>
         [Fact]
         public void Null2()
@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         }
 
         /// <summary>
-        /// Invalid start 
+        /// Invalid start
         /// </summary>
         [Fact]
         public void InvalidValue2()
@@ -86,7 +86,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             });
         }
         /// <summary>
-        /// Invalid small end 
+        /// Invalid small end
         /// </summary>
         [Fact]
         public void InvalidValue4()
@@ -97,7 +97,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             });
         }
         /// <summary>
-        /// Invalid large end 
+        /// Invalid large end
         /// </summary>
         [Fact]
         public void InvalidValue5()
@@ -160,7 +160,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         {
             Assert.True(0 == MSBuildNameIgnoreCaseComparer.Default.GetHashCode((string)null));
 
-            MSBuildNameIgnoreCaseComparer.Default.GetHashCode(""); // doesn't throw            
+            MSBuildNameIgnoreCaseComparer.Default.GetHashCode(""); // doesn't throw
             Assert.Equal(MSBuildNameIgnoreCaseComparer.Default.GetHashCode("aBc"), MSBuildNameIgnoreCaseComparer.Default.GetHashCode("AbC"));
         }
 

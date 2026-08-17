@@ -148,7 +148,7 @@ namespace Microsoft.Build.BackEnd
                 else if (loadProject)
                 {
                     // We already had a configuration, load the project
-                    // If it exists but it cached, retrieve it 
+                    // If it exists but it cached, retrieve it
                     if (configuration.IsCached)
                     {
                         configuration.RetrieveFromCache();

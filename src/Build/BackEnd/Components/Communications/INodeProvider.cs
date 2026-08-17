@@ -30,7 +30,7 @@ namespace Microsoft.Build.BackEnd
     }
 
     /// <summary>
-    /// This interface represents a collection of nodes in the system.  It provides methods to 
+    /// This interface represents a collection of nodes in the system.  It provides methods to
     /// enumerate active nodes as well as send data and receive events from those nodes.
     /// </summary>
     internal interface INodeProvider : IBuildComponent

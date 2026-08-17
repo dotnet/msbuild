@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 #nullable disable
 
@@ -51,9 +52,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Question whether this task is incremental.
         /// </summary>
-        /// <remarks>When question is true, then this task would not write to disk.  If CanBeIncremental is true, then error out.</remarks>
+        /// <remarks>When question is true, then error out if WriteOnlyWhenDifferent would have
+        /// written to the file.</remarks>
         public bool FailIfNotIncremental { get; set; }
 
+        [Obsolete]
         public bool CanBeIncremental => WriteOnlyWhenDifferent;
 
         /// <summary>
@@ -69,7 +72,7 @@ namespace Microsoft.Build.Tasks
                 // do not return if Lines is null, because we may
                 // want to delete the file in that case
                 StringBuilder buffer = new StringBuilder();
-                if (Lines != null && (!FailIfNotIncremental || WriteOnlyWhenDifferent))
+                if (Lines != null)
                 {
                     foreach (ITaskItem line in Lines)
                     {
@@ -131,41 +134,23 @@ namespace Microsoft.Build.Tasks
                             MSBuildEventSource.Log.WriteLinesToFileUpToDateStop(File.ItemSpec, false);
                         }
 
-                        if (FailIfNotIncremental)
-                        {
-                            if (Lines?.Length > 0)
-                            {
-                                Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorReadingFile", File.ItemSpec);
-                                return false;
-                            }
-                        }
-                        else
-                        {
-                            System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
-                        }
+                        System.IO.File.WriteAllText(File.ItemSpec, contentsAsString, encoding);
                     }
                     else
                     {
-                        if (FailIfNotIncremental && Lines?.Length > 0)
+                        if (WriteOnlyWhenDifferent)
                         {
-                            Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, string.Empty);
-                            return false;
+                            Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", File.ItemSpec);
                         }
-                        else
-                        {
-                            if (WriteOnlyWhenDifferent)
-                            {
-                                Log.LogMessageFromResources(MessageImportance.Normal, "WriteLinesToFile.UnusedWriteOnlyWhenDifferent", File.ItemSpec);
-                            }
 
-                            Directory.CreateDirectory(directoryPath);
-                            System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
-                        }
+                        Directory.CreateDirectory(directoryPath);
+                        System.IO.File.AppendAllText(File.ItemSpec, buffer.ToString(), encoding);
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                 {
-                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, e.Message);
+                    string lockedFileMessage = LockCheck.GetLockedFileMessage(File.ItemSpec);
+                    Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", File.ItemSpec, e.Message, lockedFileMessage);
                     success = false;
                 }
             }

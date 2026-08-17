@@ -16,7 +16,7 @@ using Microsoft.Build.Utilities;
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
-    /// Base class for task that determines the appropriate manifest resource name to 
+    /// Base class for task that determines the appropriate manifest resource name to
     /// assign to a given resx or other resource.
     /// </summary>
     public abstract class CreateManifestResourceName : TaskExtension
@@ -229,8 +229,8 @@ namespace Microsoft.Build.Tasks
                     ResourceFilesWithManifestResourceNames[i].SetMetadata("ManifestResourceName", manifestName);
 
                     // Add a LogicalName metadata to Non-Resx resources
-                    // LogicalName isn't used for Resx resources because the ManifestResourceName metadata determines the filename of the 
-                    // .resources file which then is used as the embedded resource manifest name                    
+                    // LogicalName isn't used for Resx resources because the ManifestResourceName metadata determines the filename of the
+                    // .resources file which then is used as the embedded resource manifest name
                     if (string.IsNullOrEmpty(ResourceFilesWithManifestResourceNames[i].GetMetadata("LogicalName")) &&
                         string.Equals(ResourceFilesWithManifestResourceNames[i].GetMetadata("Type"), "Non-Resx", StringComparison.OrdinalIgnoreCase))
                     {
@@ -291,7 +291,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Make a folder subname into an Everett-compatible identifier 
+        /// Make a folder subname into an Everett-compatible identifier
         /// </summary>
         private static void MakeValidEverettSubFolderIdentifier(StringBuilder builder, string subName)
         {

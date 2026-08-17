@@ -205,7 +205,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         {
                             try
                             {
-                                var sr = new StreamReader(fs);
+                                using var sr = new StreamReader(fs, Encoding.UTF8, detectEncodingFromByteOrderMarks: true, 1024, leaveOpen: true);
                                 string data = sr.ReadToEnd();
                                 if (!string.IsNullOrEmpty(data))
                                 {
@@ -610,14 +610,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SupportedOSPlatform("windows")]
         public static void SignFile(string certPath, SecureString certPassword, Uri timestampUrl, string path)
         {
-            X509Certificate2 cert = new X509Certificate2(certPath, certPassword, X509KeyStorageFlags.PersistKeySet);
+            using X509Certificate2 cert = new X509Certificate2(certPath, certPassword, X509KeyStorageFlags.PersistKeySet);
             SignFile(cert, timestampUrl, path);
         }
 
         private static bool UseSha256Algorithm(X509Certificate2 cert)
         {
             Oid oid = cert.SignatureAlgorithm;
-            // Issue 6732: Clickonce does not support sha384/sha512 file hash so we default to sha256 
+            // Issue 6732: Clickonce does not support sha384/sha512 file hash so we default to sha256
             // for certs with that signature algorithm.
             return string.Equals(oid.FriendlyName, "sha256RSA", StringComparison.OrdinalIgnoreCase) ||
                    string.Equals(oid.FriendlyName, "sha384RSA", StringComparison.OrdinalIgnoreCase) ||
@@ -705,8 +705,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         CmiManifestSigner2 signer;
                         if (useSha256 && rsa is RSACryptoServiceProvider rsacsp)
                         {
-                            RSACryptoServiceProvider csp = SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256);
-                            signer = new CmiManifestSigner2(csp, cert, useSha256);
+#pragma warning disable CA2000 // Dispose objects before losing scope because CmiManifestSigner2 will dispose the RSACryptoServiceProvider
+                            signer = new CmiManifestSigner2(SignedCmiManifest2.GetFixedRSACryptoServiceProvider(rsacsp, useSha256), cert, useSha256);
+#pragma warning restore CA2000 // Dispose objects before losing scope
                         }
                         else
                         {

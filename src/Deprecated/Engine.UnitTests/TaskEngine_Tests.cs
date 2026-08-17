@@ -24,9 +24,9 @@ namespace Microsoft.Build.UnitTests
     public class TaskEngineTest
     {
         /*********************************************************************************
-         * 
+         *
          *                                     BOOL
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a "bool" parameter where no XML attribute was specified on the task.
@@ -38,7 +38,7 @@ namespace Microsoft.Build.UnitTests
             XmlElement taskNode;
             TaskEngine taskEngine;
             MockTask mockTask;
-            ItemBucket itemBucket; 
+            ItemBucket itemBucket;
             EngineProxy engineProxy;
             taskNode = CreateXmlTaskNode();
             taskNode.RemoveAttribute("MyBoolParam");
@@ -130,9 +130,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     BOOL[]
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a "bool[]" parameter where no XML attribute was specified on the task.
@@ -235,9 +235,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     INT
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a "int" parameter where no XML attribute was specified on the task.
@@ -340,9 +340,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     INT[]
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a "int[]" parameter where no XML attribute was specified on the task.
@@ -445,9 +445,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     STRING
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a "string" parameter where no XML attribute was specified on the task.
@@ -550,9 +550,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     STRING[]
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a "string[]" parameter where no XML attribute was specified on the task.
@@ -680,9 +680,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     ITASKITEM
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a "ITaskItem" parameter where no XML attribute was specified on the task.
@@ -887,9 +887,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     ITASKITEM[]
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a "string[]" parameter where no XML attribute was specified on the task.
@@ -992,9 +992,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     [REQUIRED] BOOL
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a REQUIRED "bool" parameter where no XML attribute was specified on the task.
@@ -1077,9 +1077,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     [REQUIRED] BOOL[]
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a REQUIRED "bool[]" parameter where no XML attribute was specified on the task.
@@ -1174,9 +1174,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     [REQUIRED] INT
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a REQUIRED "int" parameter where no XML attribute was specified on the task.
@@ -1259,9 +1259,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     [REQUIRED] INT[]
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a REQUIRED "int[]" parameter where no XML attribute was specified on the task.
@@ -1356,9 +1356,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     [REQUIRED] STRING
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a REQUIRED "string" parameter where no XML attribute was specified on the task.
@@ -1441,9 +1441,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     [REQUIRED] STRING[]
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a REQUIRED "string[]" parameter where no XML attribute was specified on the task.
@@ -1538,9 +1538,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     [REQUIRED] ITASKITEM
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a REQUIRED "ITaskItem" parameter where no XML attribute was specified on the task.
@@ -1623,9 +1623,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     [REQUIRED] ITASKITEM[]
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Initialize a REQUIRED "string[]" parameter where no XML attribute was specified on the task.
@@ -1720,9 +1720,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                  OUTPUT PARAMS
-         * 
+         *
          *********************************************************************************/
         /// <summary>
         /// Attempts to gather outputs from a task parameter of type "ArrayList".  This should fail. Bug #416910
@@ -1774,7 +1774,7 @@ namespace Microsoft.Build.UnitTests
             InstantiateMockTaskHelper(taskNode, out taskEngine, out mockTask, out itemBucket, out engineProxy);
 
             taskEngine.GatherGeneratedTaskOutputs(LookupHelpers.CreateLookup(new Hashtable()), myTaskOutputSpecification, "NullITaskItemArrayOutputParameter", "MyItemList", null, mockTask);
-            // Did not throw InvalidProjectFileException  
+            // Did not throw InvalidProjectFileException
         }
 
         /// <summary>
@@ -1828,7 +1828,7 @@ namespace Microsoft.Build.UnitTests
             InstantiateMockTaskHelper(taskNode, out taskEngine, out mockTask, out itemBucket, out engineProxy);
 
             taskEngine.GatherGeneratedTaskOutputs(LookupHelpers.CreateLookup(new Hashtable()), myTaskOutputSpecification, "EmptyStringInStringArrayOutputParameter", "MyItemList", null, mockTask);
-            // Did not throw InvalidProjectFileException  
+            // Did not throw InvalidProjectFileException
         }
 
         /// <summary>
@@ -1854,7 +1854,7 @@ namespace Microsoft.Build.UnitTests
             InstantiateMockTaskHelper(taskNode, out taskEngine, out mockTask, out itemBucket, out engineProxy);
 
             taskEngine.GatherGeneratedTaskOutputs(GetEnteredScopeLookup(), myTaskOutputSpecification, "StringOutputParameter", "MyItemList", null, mockTask);
-            // Did not throw InvalidProjectFileException  
+            // Did not throw InvalidProjectFileException
         }
 
         /// <summary>
@@ -1880,7 +1880,7 @@ namespace Microsoft.Build.UnitTests
             InstantiateMockTaskHelper(taskNode, out taskEngine, out mockTask, out itemBucket, out engineProxy);
 
             taskEngine.GatherGeneratedTaskOutputs(GetEnteredScopeLookup(), myTaskOutputSpecification, "StringArrayOutputParameter", "MyItemList", null, mockTask);
-            // Did not throw InvalidProjectFileException  
+            // Did not throw InvalidProjectFileException
         }
 
         /// <summary>
@@ -1906,7 +1906,7 @@ namespace Microsoft.Build.UnitTests
             InstantiateMockTaskHelper(taskNode, out taskEngine, out mockTask, out itemBucket, out engineProxy);
 
             taskEngine.GatherGeneratedTaskOutputs(GetEnteredScopeLookup(), myTaskOutputSpecification, "IntOutputParameter", "MyItemList", null, mockTask);
-            // Did not throw InvalidProjectFileException  
+            // Did not throw InvalidProjectFileException
         }
 
         /// <summary>
@@ -1932,7 +1932,7 @@ namespace Microsoft.Build.UnitTests
             InstantiateMockTaskHelper(taskNode, out taskEngine, out mockTask, out itemBucket, out engineProxy);
 
             taskEngine.GatherGeneratedTaskOutputs(GetEnteredScopeLookup(), myTaskOutputSpecification, "IntArrayOutputParameter", "MyItemList", null, mockTask);
-            // Did not throw InvalidProjectFileException  
+            // Did not throw InvalidProjectFileException
         }
 
 
@@ -1985,7 +1985,7 @@ namespace Microsoft.Build.UnitTests
             InstantiateMockTaskHelper(taskNode, out taskEngine, out mockTask, out itemBucket, out engineProxy);
 
             taskEngine.GatherGeneratedTaskOutputs(LookupHelpers.CreateLookup(new Hashtable()), myTaskOutputSpecification, "ITaskItemOutputParameter", "MyItemList", null, mockTask);
-            // Did not throw InvalidProjectFileException  
+            // Did not throw InvalidProjectFileException
         }
 
         /// <summary>
@@ -2011,7 +2011,7 @@ namespace Microsoft.Build.UnitTests
             InstantiateMockTaskHelper(taskNode, out taskEngine, out mockTask, out itemBucket, out engineProxy);
 
             taskEngine.GatherGeneratedTaskOutputs(GetEnteredScopeLookup(), myTaskOutputSpecification, "TaskItemOutputParameter", "MyItemList", null, mockTask);
-            // Did not throw InvalidProjectFileException  
+            // Did not throw InvalidProjectFileException
         }
 
         /// <summary>
@@ -2037,7 +2037,7 @@ namespace Microsoft.Build.UnitTests
             InstantiateMockTaskHelper(taskNode, out taskEngine, out mockTask, out itemBucket, out engineProxy);
 
             taskEngine.GatherGeneratedTaskOutputs(GetEnteredScopeLookup(), myTaskOutputSpecification, "TaskItemArrayOutputParameter", "MyItemList", null, mockTask);
-            // Did not throw InvalidProjectFileException  
+            // Did not throw InvalidProjectFileException
         }
 
         /// <summary>
@@ -2063,7 +2063,7 @@ namespace Microsoft.Build.UnitTests
             InstantiateMockTaskHelper(taskNode, out taskEngine, out mockTask, out itemBucket, out engineProxy);
 
             taskEngine.GatherGeneratedTaskOutputs(GetEnteredScopeLookup(), myTaskOutputSpecification, "MyTaskItemOutputParameter", "MyItemList", null, mockTask);
-            // Did not throw InvalidProjectFileException  
+            // Did not throw InvalidProjectFileException
         }
 
         /// <summary>
@@ -2089,7 +2089,7 @@ namespace Microsoft.Build.UnitTests
             InstantiateMockTaskHelper(taskNode, out taskEngine, out mockTask, out itemBucket, out engineProxy);
 
             taskEngine.GatherGeneratedTaskOutputs(GetEnteredScopeLookup(), myTaskOutputSpecification, "MyTaskItemArrayOutputParameter", "MyItemList", null, mockTask);
-            // Did not throw InvalidProjectFileException  
+            // Did not throw InvalidProjectFileException
         }
 
         [Test]
@@ -2113,7 +2113,7 @@ namespace Microsoft.Build.UnitTests
                                    TaskExecutionMode.ExecuteTaskAndGatherOutputs,
                                    LookupHelpers.CreateLookup(new Hashtable())));
         }
-        
+
         [Test]
         public void TasksNotDiscoveredWhenTaskConditionFalse()
         {
@@ -2238,7 +2238,7 @@ namespace Microsoft.Build.UnitTests
                                      Condition=""'%(LogicalName)' != '' "">
                          <Output TaskParameter=""Value"" PropertyName=""LinkSwitches""/>
                     </CreateProperty>
-                    <Message Text=`final:[$(LinkSwitches)]`/>                    
+                    <Message Text=`final:[$(LinkSwitches)]`/>
                 </Target>
                 </Project>
             ", logger);
@@ -2265,7 +2265,7 @@ namespace Microsoft.Build.UnitTests
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                   <ItemGroup>
                     <i Include=`" + files[0] + "`><output>" + files[1] + @"</output></i>
-                  </ItemGroup> 
+                  </ItemGroup>
                   <ItemGroup>
                      <EmbeddedResource Include='a.resx'>
                     <LogicalName>foo</LogicalName>
@@ -2278,7 +2278,7 @@ namespace Microsoft.Build.UnitTests
                     </EmbeddedResource>
                     </ItemGroup>
                   <Target Name=`t2` DependsOnTargets=`t`>
-                    <Message Text=`final:[$(LinkSwitches)]`/>   
+                    <Message Text=`final:[$(LinkSwitches)]`/>
                   </Target>
                   <Target Name=`t` Inputs=`%(i.Identity)` Outputs=`%(i.Output)`>
                     <Message Text=`start:[Hello]`/>
@@ -2286,7 +2286,7 @@ namespace Microsoft.Build.UnitTests
                                      Condition=""'%(LogicalName)' != '' "">
                          <Output TaskParameter=""Value"" PropertyName=""LinkSwitches""/>
                     </CreateProperty>
-                    <Message Text=`end:[hello]`/>                    
+                    <Message Text=`end:[hello]`/>
                 </Target>
                 </Project>
             ", logger);
@@ -2308,9 +2308,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /*********************************************************************************
-         * 
+         *
          *                                     Helpers
-         * 
+         *
          *********************************************************************************/
         private void InstantiateMockTaskHelper
             (
@@ -2347,7 +2347,7 @@ namespace Microsoft.Build.UnitTests
             Engine engine = new Engine(@"c:\");
             Project project = new Project(engine);
             EngineCallback engineCallback = new EngineCallback(engine);
-            TaskExecutionModule taskExecutionModule = new TaskExecutionModule(engineCallback, 
+            TaskExecutionModule taskExecutionModule = new TaskExecutionModule(engineCallback,
                                         TaskExecutionModule.TaskExecutionModuleMode.SingleProcMode, false);
             ProjectBuildState buildContext = new ProjectBuildState(null, null, new BuildEventContext(0, 1, 1, 1));
             int nodeProxyID = engineCallback.CreateTaskContext(project, null, buildContext, taskNode, EngineCallback.inProcNode, new BuildEventContext(BuildEventContext.InvalidNodeId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId));
@@ -2359,7 +2359,7 @@ namespace Microsoft.Build.UnitTests
                                     project.FullFileName,
                                     engine.LoggingServices,
                                     nodeProxyID,
-                                    taskExecutionModule, 
+                                    taskExecutionModule,
                                     new BuildEventContext(0, 1, 1, 1)
                                 );
             taskEngine.TaskClass = taskClass;

@@ -35,7 +35,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger l = new MockLogger();
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                    <Target Name='CleanUp'>
                       <Message Text='CleanUp-was-called.'/>
                    </Target>
@@ -90,9 +90,9 @@ namespace Microsoft.Build.UnitTests
                     </root>");
 
                 Project p = ObjectModelHelpers.CreateInMemoryProject(@"
-                    <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                    <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                         <Target Name='Build'>
-                            
+
                             <GenerateResource
                                 Sources='" + resx + @"'
                                 ExecuteAsTool='false'
@@ -100,11 +100,11 @@ namespace Microsoft.Build.UnitTests
                                     <Output TaskParameter='FilesWritten' ItemName='FilesWrittenItem'/>
                                     <Output TaskParameter='FilesWritten' PropertyName='FilesWrittenProperty'/>
                             </GenerateResource>
-                                               
+
                             <OnError ExecuteTargets='ErrorTarget'/>
                         </Target>
 
-                        <Target Name='ErrorTarget'>    
+                        <Target Name='ErrorTarget'>
                             <Message Text='[@(fileswrittenitem)]'/>
                             <Message Text='[$(fileswrittenproperty)]'/>
                         </Target>
@@ -146,16 +146,16 @@ namespace Microsoft.Build.UnitTests
             MockLogger l = new MockLogger();
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                    <Target Name='Build'>
                       <!-- Create a bunch of items and properties -->
                       <CreateItem Include='a1'>
                         <Output ItemName='i1' TaskParameter='Include'/>
-                      </CreateItem> 
+                      </CreateItem>
                       <ItemGroup>
                         <i1 Include='a2'/>
-                      </ItemGroup> 
+                      </ItemGroup>
                       <CreateProperty Value='v1'>
                         <Output PropertyName='p1' TaskParameter='Value'/>
                       </CreateProperty>
@@ -193,7 +193,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger l = new MockLogger();
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                    <Target Name='CleanUp'>
                       <Message Text='CleanUp-was-called.'/>
                    </Target>
@@ -227,7 +227,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger l = new MockLogger();
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                    <Target Name='CleanUp'>
                       <Message Text='CleanUp-was-called.'/>
                    </Target>
@@ -263,7 +263,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger l = new MockLogger();
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                    <Target Name='CleanUp' DependsOnTargets='CleanUp2'>
                       <Message Text='CleanUp-was-called.'/>
                    </Target>
@@ -298,7 +298,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger l = new MockLogger();
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                    <Target Name='CleanUp'>
                       <Message Text='CleanUp-was-called.'/>
                    </Target>
@@ -332,7 +332,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger l = new MockLogger();
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                    <Target Name='Build'>
                       <Error Text='This is an error.'/>
                       <OnError ExecuteTargets='CleanUp'/>
@@ -360,7 +360,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger l = new MockLogger();
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                    <Target Name='CleanUp'>
                       <Message Text='CleanUp-was-called.'/>
                    </Target>
@@ -390,7 +390,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger l = new MockLogger();
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                    <Target Name='CleanUp'>
                       <Message Text='CleanUp-was-called.'/>
                    </Target>
@@ -421,7 +421,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger l = new MockLogger();
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                    <PropertyGroup>
                      <Part1>Clean</Part1>
                      <Part2>Up</Part2>
@@ -456,7 +456,7 @@ namespace Microsoft.Build.UnitTests
             MockLogger l = new MockLogger();
             Project p = ObjectModelHelpers.CreateInMemoryProject(@"
 
-                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`> 
+                <Project DefaultTargets=`Build` ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
                    <Target Name='CleanUp1'>
                       <Message Text='CleanUp1-was-called.'/>
                       <Error Text='Error in CleanUp1.'/>

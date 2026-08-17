@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 
 namespace Microsoft.Build.Framework.Telemetry;
@@ -97,54 +98,59 @@ internal class LoggingConfigurationTelemetry : TelemetryBase
     /// </summary>
     public bool BinaryLoggerUsedDefaultName { get; set; }
 
-    public override void UpdateEventProperties()
+    public override IDictionary<string, string> GetProperties()
     {
-        Properties["TerminalLogger"] = TerminalLogger.ToString(CultureInfo.InvariantCulture);
+        var properties = new Dictionary<string, string>();
+
+        // populate property values
+        properties["TerminalLogger"] = TerminalLogger.ToString(CultureInfo.InvariantCulture);
 
         if (TerminalLoggerUserIntent != null)
         {
-            Properties["TerminalLoggerUserIntent"] = TerminalLoggerUserIntent;
+            properties["TerminalLoggerUserIntent"] = TerminalLoggerUserIntent;
         }
 
         if (TerminalLoggerUserIntentSource != null)
         {
-            Properties["TerminalLoggerUserIntentSource"] = TerminalLoggerUserIntentSource;
+            properties["TerminalLoggerUserIntentSource"] = TerminalLoggerUserIntentSource;
         }
 
         if (TerminalLoggerDefault != null)
         {
-            Properties["TerminalLoggerDefault"] = TerminalLoggerDefault;
+            properties["TerminalLoggerDefault"] = TerminalLoggerDefault;
         }
 
         if (TerminalLoggerDefaultSource != null)
         {
-            Properties["TerminalLoggerDefaultSource"] = TerminalLoggerDefaultSource;
+            properties["TerminalLoggerDefaultSource"] = TerminalLoggerDefaultSource;
         }
 
-        Properties["ConsoleLogger"] = ConsoleLogger.ToString(CultureInfo.InvariantCulture);
+        properties["ConsoleLogger"] = ConsoleLogger.ToString(CultureInfo.InvariantCulture);
         if (ConsoleLoggerType != null)
         {
-            Properties["ConsoleLoggerType"] = ConsoleLoggerType;
+            properties["ConsoleLoggerType"] = ConsoleLoggerType;
         }
 
         if (ConsoleLoggerVerbosity != null)
         {
-            Properties["ConsoleLoggerVerbosity"] = ConsoleLoggerVerbosity;
+            properties["ConsoleLoggerVerbosity"] = ConsoleLoggerVerbosity;
         }
 
-        Properties["FileLogger"] = FileLogger.ToString(CultureInfo.InvariantCulture);
+        properties["FileLogger"] = FileLogger.ToString(CultureInfo.InvariantCulture);
         if (FileLoggerType != null)
         {
-            Properties["FileLoggerType"] = FileLoggerType;
-            Properties["FileLoggersCount"] = FileLoggersCount.ToString(CultureInfo.InvariantCulture);
+            properties["FileLoggerType"] = FileLoggerType;
+            properties["FileLoggersCount"] = FileLoggersCount.ToString(CultureInfo.InvariantCulture);
         }
 
         if (FileLoggerVerbosity != null)
         {
-            Properties["FileLoggerVerbosity"] = FileLoggerVerbosity;
+            properties["FileLoggerVerbosity"] = FileLoggerVerbosity;
         }
 
-        Properties["BinaryLogger"] = BinaryLogger.ToString(CultureInfo.InvariantCulture);
-        Properties["BinaryLoggerUsedDefaultName"] = BinaryLoggerUsedDefaultName.ToString(CultureInfo.InvariantCulture);
+        properties["BinaryLogger"] = BinaryLogger.ToString(CultureInfo.InvariantCulture);
+        properties["BinaryLoggerUsedDefaultName"] = BinaryLoggerUsedDefaultName.ToString(CultureInfo.InvariantCulture);
+
+        return properties;
     }
 }

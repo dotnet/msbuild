@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\Common\CommonTest.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="CustomAnalyzer2.props" Pack="true" PackagePath="build\CustomAnalyzer2.props" />
+    <Content Include="README.md" />
+  </ItemGroup>
+
+  <Import Project="..\Common\CommonTest.targets" />
+  
+</Project>

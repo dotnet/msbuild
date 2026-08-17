@@ -16,7 +16,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
     internal sealed class Build : LogProcessNode
     {
         /// <summary>
-        /// A lookup table mapping of project identifiers to project nodes (which can be nested multiple layers). 
+        /// A lookup table mapping of project identifiers to project nodes (which can be nested multiple layers).
         /// </summary>
         private readonly ConcurrentDictionary<int, Project> _projectIdToProjectMap = new ConcurrentDictionary<int, Project>();
 
@@ -93,7 +93,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
         }
 
         /// <summary>
-        /// Handler for a TaskCommandLine log event. Sets the command line arguments on the appropriate task. 
+        /// Handler for a TaskCommandLine log event. Sets the command line arguments on the appropriate task.
         /// </summary>
         /// <param name="taskCommandLineEventArgs">The <see cref="TaskCommandLineEventArgs"/> instance containing the event data.</param>
         public void AddCommandLine(TaskCommandLineEventArgs taskCommandLineEventArgs)

@@ -11,34 +11,34 @@ using System.Text;
 namespace Microsoft.Build.Shared
 {
     /// <summary>
-    /// This class implements some static methods to assist with command-line parsing of 
+    /// This class implements some static methods to assist with command-line parsing of
     /// parameters that could be quoted, and thus could contain nested escaped quotes.
     /// </summary>
     internal static class QuotingUtilities
     {
         /*
          * Quoting Rules:
-         * 
+         *
          * A string is considered quoted if it is enclosed in double-quotes. A double-quote can be escaped with a backslash, or it
          * is automatically escaped if it is the last character in an explicitly terminated quoted string. A backslash itself can
          * be escaped with another backslash IFF it precedes a double-quote, otherwise it is interpreted literally.
-         * 
+         *
          * e.g.
          *      abc"cde"xyz         --> "cde" is quoted
          *      abc"xyz             --> "xyz" is quoted (the terminal double-quote is assumed)
          *      abc"xyz"            --> "xyz" is quoted (the terminal double-quote is explicit)
-         * 
+         *
          *      abc\"cde"xyz        --> "xyz" is quoted (the terminal double-quote is assumed)
          *      abc\\"cde"xyz       --> "cde" is quoted
          *      abc\\\"cde"xyz      --> "xyz" is quoted (the terminal double-quote is assumed)
-         * 
+         *
          *      abc"""xyz           --> """ is quoted
          *      abc""""xyz          --> """ and "xyz" are quoted (the terminal double-quote is assumed)
          *      abc"""""xyz         --> """ is quoted
          *      abc""""""xyz        --> """ and """ are quoted
          *      abc"cde""xyz        --> "cde"" is quoted
          *      abc"xyz""           --> "xyz"" is quoted (the terminal double-quote is explicit)
-         * 
+         *
          *      abc""xyz            --> nothing is quoted
          *      abc""cde""xyz       --> nothing is quoted
          */

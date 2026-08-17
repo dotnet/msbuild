@@ -47,7 +47,7 @@
 
       <Output TaskParameter="TargetOutputs" ItemName="%(X64ProjectReference.OutputItemType)" />
     </MSBuild>
-    
+
     <PropertyGroup>
       <X86BinPath>@(MSBuildResolvedProjectReferencePath->'%(RootDir)%(Directory)')</X86BinPath>
       <X64BinPath>@(MSBuildX64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</X64BinPath>

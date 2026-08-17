@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.RequestBuilder;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -463,6 +464,11 @@ namespace Microsoft.Build.BackEnd.Logging
         }
 
         /// <summary>
+        /// Gets or sets a value that will error when the build process fails an up-to-date check.
+        /// </summary>
+        public bool Question { get; set; }
+
+        /// <summary>
         /// The list of descriptions which describe how to create forwarding loggers on a node.
         /// This is used by the node provider to get a list of registered descriptions so that
         /// they can be transmitted to child nodes.
@@ -797,6 +803,8 @@ namespace Microsoft.Build.BackEnd.Logging
                 // this information default to 1
                 _maxCPUCount = buildComponentHost.BuildParameters.MaxNodeCount;
 
+                Question = buildComponentHost.BuildParameters.Question;
+
                 // Ask the component host if onlyLogCriticalEvents is true or false. If the host does
                 // not have this information default to false.
                 _onlyLogCriticalEvents = buildComponentHost.BuildParameters.OnlyLogCriticalEvents;
@@ -998,13 +1006,13 @@ namespace Microsoft.Build.BackEnd.Logging
 
                     // Get the Id of the eventSourceSink which was created for the first logger.
                     // We keep a reference to this Id so that all other central loggers registered on this logging service (from registerLogger)
-                    // will be attached to that eventSource sink so that they get all of the events forwarded by 
+                    // will be attached to that eventSource sink so that they get all of the events forwarded by
                     // forwarded by the CentralForwardingLogger
                     _centralForwardingLoggerSinkId = centralForwardingLoggerDescription.LoggerId;
                 }
                 else
                 {
-                    // We have already create a forwarding logger and have a single eventSink which 
+                    // We have already create a forwarding logger and have a single eventSink which
                     // a logger can listen to inorder to get all events in the system
                     EventSourceSink eventSource = (EventSourceSink)_eventSinkDictionary[_centralForwardingLoggerSinkId];
 
@@ -1035,7 +1043,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 }
             }
 
-            // UNDONE: (Logging) This should re-initialize this logging service. 
+            // UNDONE: (Logging) This should re-initialize this logging service.
         }
 
         /// <summary>
@@ -1225,7 +1233,7 @@ namespace Microsoft.Build.BackEnd.Logging
         /// </summary>
         /// <param name="buildEvent">BuildEventArgs to process</param>
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
-        internal virtual void ProcessLoggingEvent(object buildEvent)
+        protected internal virtual void ProcessLoggingEvent(object buildEvent)
         {
             ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
@@ -1641,10 +1649,10 @@ namespace Microsoft.Build.BackEnd.Logging
                 // them.
                 _filterEventSource.Consume(eventArg);
 
-                // Now that the forwarding loggers have been given the chance to log the build started and finished events we need to check the 
+                // Now that the forwarding loggers have been given the chance to log the build started and finished events we need to check the
                 // central logger sinks to see if they have received the events or not. If the sink has not received the event we need to send it to the
                 // logger for backwards compatibility with orcas.
-                // In addition we need to make sure we manually forward the events because in orcas the forwarding loggers were not allowed to 
+                // In addition we need to make sure we manually forward the events because in orcas the forwarding loggers were not allowed to
                 // forward build started or build finished events. In the new OM we allow the loggers to forward the events. However since orcas did not forward them
                 // we need to support loggers which cannot forward the events.
                 if (eventArg is BuildStartedEventArgs)
@@ -1751,8 +1759,16 @@ namespace Microsoft.Build.BackEnd.Logging
                 Build.Logging.ConsoleLogger consoleLogger => consoleLogger.GetMinimumMessageImportance(),
                 Build.Logging.ConfigurableForwardingLogger forwardingLogger => forwardingLogger.GetMinimumMessageImportance(),
 
-                // Central forwarding loggers are used in worker nodes if logging verbosity could not be optimized, i.e. in cases
-                // where we must log everything. They can be ignored in inproc nodes.
+                // The BuildCheck connector logger consumes only high priority messages.
+                BuildCheckForwardingLogger => MessageImportance.High,
+                BuildCheckConnectorLogger => MessageImportance.High,
+
+                // If this is not an OutOfProc node, we can ignore the central forwarding logger, because we'll be
+                // setting the message importance to accurate level based on the exact needs of the central logger.
+                // That will happen in separate call to this method, with the central logger itself. This is because in the
+                // inproc case, we register the central loggers (that are the destination for the logging),
+                // wherease in the out-of-proc case, we register the forwarding loggers only - and those need to make sure
+                // to forward at minimum what is required by the central logger.
                 CentralForwardingLogger => (_nodeId > 1 ? MessageImportance.Low : null),
 
                 // The null logger has no effect on minimum verbosity.

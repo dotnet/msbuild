@@ -4,6 +4,7 @@
 using System;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
+using System.Threading;
 
 #nullable disable
 
@@ -12,7 +13,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Verifies that a file matches the expected file hash.
     /// </summary>
-    public sealed class VerifyFileHash : TaskExtension
+    public sealed class VerifyFileHash : TaskExtension, ICancelableTask
     {
         /// <summary>
         /// The file path.
@@ -56,7 +57,7 @@ namespace Microsoft.Build.Tasks
                 return false;
             }
 
-            byte[] hash = GetFileHash.ComputeHash(algorithmFactory, File);
+            byte[] hash = GetFileHash.ComputeHash(algorithmFactory, File, _cancellationTokenSource.Token);
             string actualHash = GetFileHash.EncodeHash(encoding, hash);
             var comparison = encoding == Tasks.HashEncoding.Hex
                 ? StringComparison.OrdinalIgnoreCase
@@ -68,6 +69,13 @@ namespace Microsoft.Build.Tasks
             }
 
             return !Log.HasLoggedErrors;
+        }
+
+        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+
+        public void Cancel()
+        {
+            _cancellationTokenSource.Cancel();
         }
     }
 }

@@ -25,7 +25,7 @@ namespace Microsoft.Build.Shared
         }
 
         /// <summary>
-        /// Go though an enumeration and create a sorted list of strings which can be parsed as versions. Keep around the original 
+        /// Go though an enumeration and create a sorted list of strings which can be parsed as versions. Keep around the original
         /// string because it may contain a v and this would be required to create the correct path on disk if the string was part of a path.
         /// </summary>
         internal static SortedDictionary<Version, List<string>> GatherVersionStrings(Version targetPlatformVersion, IEnumerable versions)

@@ -305,7 +305,7 @@ namespace Microsoft.Build.Tasks
         {
             string pathToTool = null;
 
-            // If COMPLUS_InstallRoot\COMPLUS_Version are set (the dogfood world), we want to find it there, instead of 
+            // If COMPLUS_InstallRoot\COMPLUS_Version are set (the dogfood world), we want to find it there, instead of
             // the SDK, which may or may not be installed. The following will look there.
             if (!String.IsNullOrEmpty(Environment.GetEnvironmentVariable("COMPLUS_InstallRoot")) || !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("COMPLUS_Version")))
             {
@@ -401,7 +401,7 @@ namespace Microsoft.Build.Tasks
                 // The arguments to the "/compiler" switch are themselves switches to be passed to
                 // the compiler when generating the serialization assembly.
 
-                // Add the compiler command switches for strong naming on the serialization assembly          
+                // Add the compiler command switches for strong naming on the serialization assembly
                 if (KeyFile != null)
                 {
                     commandLineBuilder.AppendNestedSwitch("/compiler:", "/keyfile:", KeyFile);

@@ -25,7 +25,7 @@ namespace Microsoft.Build.Tasks
         // Filename
         internal string filename;
 
-        // Date and time the file was last modified           
+        // Date and time the file was last modified
         internal DateTime lastModified;
 
         // Whether the file exists or not.

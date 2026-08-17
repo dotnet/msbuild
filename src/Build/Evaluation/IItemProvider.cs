@@ -15,7 +15,7 @@ namespace Microsoft.Build.Evaluation
     {
         /// <summary>
         /// Returns a list of items with the specified item type.
-        /// 
+        ///
         /// If there are no items of this type, returns an empty list.
         /// </summary>
         /// <param name="itemType">The item type of items to return.</param>

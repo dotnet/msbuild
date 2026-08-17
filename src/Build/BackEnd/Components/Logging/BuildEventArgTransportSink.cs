@@ -47,7 +47,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         #region Properties
         /// <summary>
-        /// Provide a friendly name for the sink to make it easier to differentiate during 
+        /// Provide a friendly name for the sink to make it easier to differentiate during
         /// debugging and display
         /// </summary>
         public string Name

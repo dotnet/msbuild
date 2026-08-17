@@ -102,7 +102,8 @@ namespace Microsoft.Build.UnitTests.Definition
             {
                 return; // "TODO: under Unix this runs out of stack. Investigate"
             }
-            ToolsetReader reader = new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>());  // we don't use the test registry key because we want to verify the install
+            using var collection = new ProjectCollection();
+            ToolsetReader reader = new ToolsetRegistryReader(collection.EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>());  // we don't use the test registry key because we want to verify the install
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
             string msbuildOverrideTasksPath;
@@ -121,7 +122,9 @@ namespace Microsoft.Build.UnitTests.Definition
         [WindowsOnlyFact]
         public void DefaultValueInRegistryDoesNotExist()
         {
-            ToolsetReader reader = new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), new MockRegistryKey(testRegistryPath, "3.5" /* fail to find subkey 3.5 */));
+            using var collection = new ProjectCollection();
+            using var registry = new MockRegistryKey(testRegistryPath, "3.5" /* fail to find subkey 3.5 */);
+            ToolsetReader reader = new ToolsetRegistryReader(collection.EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), registry);
 
             Dictionary<string, Toolset> values = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
 
@@ -466,7 +469,11 @@ namespace Microsoft.Build.UnitTests.Definition
         }
         private ToolsetRegistryReader GetStandardRegistryReader()
         {
-            return new ToolsetRegistryReader(new ProjectCollection().EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), new MockRegistryKey(testRegistryPath));
+            using var collection = new ProjectCollection();
+#pragma warning disable CA2000 // The return object depends on the registry key that should not be disposed in this scope.
+            var registry = new MockRegistryKey(testRegistryPath);
+#pragma warning restore CA2000 // The return object depends on the registry key that should not be disposed in this scope.
+            return new ToolsetRegistryReader(collection.EnvironmentProperties, new PropertyDictionary<ProjectPropertyInstance>(), registry);
         }
 
         /// <summary>

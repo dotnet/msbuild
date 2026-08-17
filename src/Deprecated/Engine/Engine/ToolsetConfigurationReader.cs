@@ -137,7 +137,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         Configuration configuration = readApplicationConfiguration();
 
-                        // This will be null if the application config file does not have the following section 
+                        // This will be null if the application config file does not have the following section
                         // definition for the msbuildToolsets section as the first child element.
                         //   <configSections>
                         //     <section name=""msbuildToolsets"" type=""Microsoft.Build.BuildEngine.ToolsetConfigurationSection, Microsoft.Build.Engine"" />
@@ -153,8 +153,8 @@ namespace Microsoft.Build.BuildEngine
                             configurationSection = configuration.GetSection("msbuildToolsets") as ToolsetConfigurationSection;
                         }
                     }
-                    // ConfigurationException is obsolete, but we catch it rather than 
-                    // ConfigurationErrorsException (which is what we throw below) because it is more 
+                    // ConfigurationException is obsolete, but we catch it rather than
+                    // ConfigurationErrorsException (which is what we throw below) because it is more
                     // general and we don't want to miss catching some other derived exception.
                     catch (ConfigurationException ex)
                     {
@@ -181,7 +181,7 @@ namespace Microsoft.Build.BuildEngine
     /// <summary>
     /// This class is used to programmatically read msbuildToolsets section
     /// in from the configuration file.  An example of application config file:
-    /// 
+    ///
     /// &lt;configuration&gt;
     ///     &lt;msbuildToolsets default="2.0"&gt;
     ///         &lt;toolset toolsVersion="2.0"&gt;
@@ -193,7 +193,7 @@ namespace Microsoft.Build.BuildEngine
     ///         &lt;/toolset&gt;
     ///     &lt;/msbuildToolsets&gt;
     /// &lt;/configuration&gt;
-    /// 
+    ///
     /// </summary>
     /// <remarks>
     /// Internal for unit testing only
@@ -201,7 +201,7 @@ namespace Microsoft.Build.BuildEngine
     internal sealed class ToolsetConfigurationSection : ConfigurationSection
     {
         /// <summary>
-        /// toolsVersion element collection 
+        /// toolsVersion element collection
         /// </summary>
         [ConfigurationProperty("", IsDefaultCollection = true)]
         public ToolsetElementCollection Toolsets
@@ -392,7 +392,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Property element collection 
+        /// Property element collection
         /// </summary>
         [ConfigurationProperty("", IsDefaultCollection = true)]
         public PropertyElementCollection PropertyElements
@@ -479,7 +479,7 @@ namespace Microsoft.Build.BuildEngine
 
             /// <summary>
             /// Collection type
-            /// This has to be public as cannot change access modifier when overriding  
+            /// This has to be public as cannot change access modifier when overriding
             /// </summary>
             public override ConfigurationElementCollectionType CollectionType
             {

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-
 using Microsoft.Build.BackEnd;
 
 namespace Microsoft.Build.Experimental.FileAccess
@@ -17,6 +16,8 @@ namespace Microsoft.Build.Experimental.FileAccess
         private ReportedFileOperation _operation;
         private RequestedAccess _requestedAccess;
         private uint _processId;
+        private uint _id;
+        private uint _correlationId;
         private uint _error;
         private DesiredAccess _desiredAccess;
         private FlagsAndAttributes _flagsAndAttributes;
@@ -28,6 +29,8 @@ namespace Microsoft.Build.Experimental.FileAccess
             ReportedFileOperation operation,
             RequestedAccess requestedAccess,
             uint processId,
+            uint id,
+            uint correlationId,
             uint error,
             DesiredAccess desiredAccess,
             FlagsAndAttributes flagsAndAttributes,
@@ -38,6 +41,8 @@ namespace Microsoft.Build.Experimental.FileAccess
             _operation = operation;
             _requestedAccess = requestedAccess;
             _processId = processId;
+            _id = id;
+            _correlationId = correlationId;
             _error = error;
             _desiredAccess = desiredAccess;
             _flagsAndAttributes = flagsAndAttributes;
@@ -56,7 +61,7 @@ namespace Microsoft.Build.Experimental.FileAccess
         /// <summary>The requested access.</summary>
         public RequestedAccess RequestedAccess
         {
-            get => _requestedAccess;
+            readonly get => _requestedAccess;
             private set => _requestedAccess = value;
         }
 
@@ -66,6 +71,22 @@ namespace Microsoft.Build.Experimental.FileAccess
             readonly get => _processId;
             private set => _processId = value;
         }
+
+        /// <summary>Id of file access.</summary>
+        public uint Id
+        {
+            readonly get => _id;
+            private set => _id = value;
+        }
+
+
+        /// <summary>Correlation id of file access.</summary>
+        public uint CorrelationId
+        {
+            readonly get => _correlationId;
+            private set => _correlationId = value;
+        }
+
 
         /// <summary>The error code of the operation.</summary>
         public uint Error
@@ -114,6 +135,8 @@ namespace Microsoft.Build.Experimental.FileAccess
             translator.TranslateEnum(ref _operation, (int)_operation);
             translator.TranslateEnum(ref _requestedAccess, (int)_requestedAccess);
             translator.Translate(ref _processId);
+            translator.Translate(ref _id);
+            translator.Translate(ref _correlationId);
             translator.Translate(ref _error);
             translator.TranslateEnum(ref _desiredAccess, (int)_desiredAccess);
             translator.TranslateEnum(ref _flagsAndAttributes, (int)_flagsAndAttributes);

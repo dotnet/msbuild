@@ -33,7 +33,7 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// Relevant file if any.
-        /// If none is provided, the file containing the Error 
+        /// If none is provided, the file containing the Error
         /// task will be used.
         /// </summary>
         public string File { get; set; }
@@ -52,7 +52,7 @@ namespace Microsoft.Build.Tasks
             {
                 string message = ResourceUtilities.ExtractMessageCode(false /* all codes */, Log.FormatResourceString(Resource, Arguments), out string errorCode);
 
-                // If the user specifies a code, that should override. 
+                // If the user specifies a code, that should override.
                 Code ??= errorCode;
 
                 Log.LogError(null, Code, HelpKeyword, File, 0, 0, 0, 0, message);

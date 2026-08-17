@@ -35,8 +35,8 @@ namespace Microsoft.Build.BuildEngine
             Target newTarget = msbuildProject.Targets.AddNewTarget(targetName);
             if (subTargetName == "Publish")
             {
-                // Well, hmmm.  The VCBuild doesn't support any kind of 
-                // a "Publish" operation.  The best we can really do is offer up a 
+                // Well, hmmm.  The VCBuild doesn't support any kind of
+                // a "Publish" operation.  The best we can really do is offer up a
                 // message saying so.
                 SolutionWrapperProject.AddErrorWarningMessageElement(newTarget, XMakeElements.error, true, "SolutionVCProjectNoPublish");
             }
@@ -221,7 +221,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         // The code below is mostly copied from the VCBuild task that we shipped in 3.5.
-        // It is the logic it uses to find vcbuild.exe. That logic had a flaw - 
+        // It is the logic it uses to find vcbuild.exe. That logic had a flaw -
         // in 64 bit MSBuild, in a vanilla command window (like in Team Build) it would not
         // find vcbuild.exe. We use the logic below to predict whether VCBuild will find it,
         // and if it won't, we will pass the "hint" to use the 64 bit program files location.
@@ -231,7 +231,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         // root registry key for VS9
         private const string vs9RegKey = @"SOFTWARE\Microsoft\VisualStudio\9.0";
-        // the name of the value containing disk install directory for the IDE components 
+        // the name of the value containing disk install directory for the IDE components
         // ("...\common7\ide" for layouts)
         private const string vs9InstallDirValueName = "InstallDir";
         // relative path from the above directory to vcbuild.exe on layouts
@@ -244,7 +244,7 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         // root registry key for VC9
         private const string vc9RegKey = @"SOFTWARE\Microsoft\VCExpress\9.0";
-        // the name of the value containing disk install directory for the IDE components 
+        // the name of the value containing disk install directory for the IDE components
         // ("...\common7\ide" for layouts)
         private const string vc9InstallDirValueName = "InstallDir";
         // relative path from the above directory to vcbuild.exe on layouts

@@ -157,7 +157,7 @@ namespace Microsoft.Build.Shared
         /// </summary>
         private LoadedType GetLoadedType(Concurrent.ConcurrentDictionary<TypeFilter, Concurrent.ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>> cache, string typeName, AssemblyLoadInfo assembly)
         {
-            // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which 
+            // A given type filter have been used on a number of assemblies, Based on the type filter we will get another dictionary which
             // will map a specific AssemblyLoadInfo to a AssemblyInfoToLoadedTypes class which knows how to find a typeName in a given assembly.
             Concurrent.ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes> loadInfoToType =
                 cache.GetOrAdd(_isDesiredType, (_) => new Concurrent.ConcurrentDictionary<AssemblyLoadInfo, AssemblyInfoToLoadedTypes>());
@@ -172,14 +172,14 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Given a type filter and an asssemblyInfo object keep track of what types in a given assembly which match the typefilter.
         /// Also, use this information to determine if a given TypeName is in the assembly which is pointed to by the AssemblyLoadInfo object.
-        /// 
+        ///
         /// This type represents a combination of a type filter and an assemblyInfo object.
         /// </summary>
         private class AssemblyInfoToLoadedTypes
         {
             /// <summary>
             /// Lock to prevent two threads from using this object at the same time.
-            /// Since we fill up internal structures with what is in the assembly 
+            /// Since we fill up internal structures with what is in the assembly
             /// </summary>
             private readonly Object _lockObject = new Object();
 
@@ -287,7 +287,7 @@ namespace Microsoft.Build.Shared
             }
 
             /// <summary>
-            /// Scan the assembly pointed to by the assemblyLoadInfo for public types. We will use these public types to do partial name matching on 
+            /// Scan the assembly pointed to by the assemblyLoadInfo for public types. We will use these public types to do partial name matching on
             /// to find tasks, loggers, and task factories.
             /// </summary>
             private void ScanAssemblyForPublicTypes()

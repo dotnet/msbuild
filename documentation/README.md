@@ -53,6 +53,7 @@ The folder contains collection of docs and references for MSBuild, detailed info
 * [Low priority nodes](specs/low-priority-switch.md)
 * [Threading in MSBuild worker nodes](specs/threading.md)
 * [Nodes orchestration](wiki/Nodes-Orchestration.md)
+* [Logging Internals](wiki/Logging-Internals.md)
 * [Project cache plugin](specs/project-cache.md)
 * [Support for remote host objects](specs/remote-host-object.md)
 * [Static graph](specs/static-graph.md)

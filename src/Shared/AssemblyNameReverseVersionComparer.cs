@@ -19,10 +19,10 @@ namespace Microsoft.Build.Shared
 
         /// <summary>
         /// Compare x and y by version only.
-        /// 
+        ///
         /// Change the return value to sort the values in reverse order.
-        /// 
-        /// If x is greater than y  return -1 indicating x is less than y. 
+        ///
+        /// If x is greater than y  return -1 indicating x is less than y.
         /// If x is less than y  return 1 indicating x is greater than  y.
         /// If x and y are equal return 0.
         /// </summary>

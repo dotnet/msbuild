@@ -24,13 +24,13 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
     /// Also see Toolset tests in the Project test class.
     /// </summary>
     [TestFixture]
-    public sealed class Import_Tests 
+    public sealed class Import_Tests
     {
         /// <summary>
         /// Condition Test, Simple Condition, assert only accessible after evaluation.
         /// </summary>
         [Test]
-        public void ConditionGet_Simple() 
+        public void ConditionGet_Simple()
         {
             string importPath = String.Empty;
             try
@@ -44,9 +44,9 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 import = CompatibilityTestHelpers.FindFirstMatchingImportByPath(p.Imports, importPath);
                 Assertion.AssertEquals("true", import.Condition);
             }
-            finally 
+            finally
             {
-                CompatibilityTestHelpers.RemoveFile(importPath);           
+                CompatibilityTestHelpers.RemoveFile(importPath);
             }
         }
 
@@ -81,7 +81,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             string importPath = String.Empty;
             try
             {
-                importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("import.proj", TestData.Content3SimpleTargetsDefaultSpecified); 
+                importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("import.proj", TestData.Content3SimpleTargetsDefaultSpecified);
                 Project p = new Project();
                 p.AddNewImport(importPath, "true");
                 object o = p.EvaluatedProperties;
@@ -122,9 +122,9 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 CompatibilityTestHelpers.RemoveFile(projectPath);
             }
         }
-       
+
         /// <summary>
-        /// ProjectPath Test, get when set in the constructor. 
+        /// ProjectPath Test, get when set in the constructor.
         /// </summary>
         [Test]
         public void ProjectPathGetWhenSetInCtor()
@@ -135,10 +135,10 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("import.proj", TestData.Content3SimpleTargetsDefaultSpecified);
                 Project p = new Project();
                 p.AddNewImport(importPath, "true");
-                object o = p.EvaluatedProperties;  
-   
+                object o = p.EvaluatedProperties;
+
                 // The verbosity of this assertion is to abstract the internal implentation of FindFirstMatchingImportByPath.
-                Assertion.AssertEquals(importPath, CompatibilityTestHelpers.FindFirstMatchingImportByPath(p.Imports, importPath).ProjectPath); 
+                Assertion.AssertEquals(importPath, CompatibilityTestHelpers.FindFirstMatchingImportByPath(p.Imports, importPath).ProjectPath);
             }
             finally
             {
@@ -147,7 +147,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// ProjectPath Test, get when set in ctor 
+        /// ProjectPath Test, get when set in ctor
         /// </summary>
         [Test]
         public void EvaluatedProjectPathGetWhenSetInCtor()
@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
             {
                 Project p = new Project();
                 p.Load(projectPath);
- 
+
                 // The verbosity of this assertion is to abstract the internal implentation of FindFirstMatchingImportByPath.
                 Assertion.AssertEquals(fullImportPath, CompatibilityTestHelpers.FindFirstMatchingImportByPath(p.Imports, importPath).EvaluatedProjectPath);
             }
@@ -171,14 +171,14 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// ProjectPath Test, get when set in loaded xml. 
+        /// ProjectPath Test, get when set in loaded xml.
         /// </summary>
         [Test]
         public void ProjectPathGetWhenSetInXML()
         {
             string projectPath = String.Empty;
             string importPath = String.Empty;
-            string fullImportPath = String.Empty;            
+            string fullImportPath = String.Empty;
             try
             {
                 projectPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("project.proj", TestData.ContentImportA);
@@ -186,7 +186,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
                 fullImportPath = ObjectModelHelpers.CreateFileInTempProjectDirectory(importPath, TestData.ContentA);
                 Project p = new Project();
                 p.Load(projectPath);
-                Assertion.AssertEquals(importPath, CompatibilityTestHelpers.FindFirstMatchingImportByPath(p.Imports, importPath).ProjectPath);           
+                Assertion.AssertEquals(importPath, CompatibilityTestHelpers.FindFirstMatchingImportByPath(p.Imports, importPath).ProjectPath);
             }
             finally
             {
@@ -264,7 +264,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         }
 
         /// <summary>
-        /// IsImported Test, true when import is via an imported project. 
+        /// IsImported Test, true when import is via an imported project.
         /// </summary>
         [Test]
         public void IsImported_ProjectImportImport()
@@ -300,7 +300,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         public void ProjectPathSet_ScalarValue()
         {
             string importPath = String.Empty;
-            string importPath2 = String.Empty;           
+            string importPath2 = String.Empty;
             try
             {
                 importPath = ObjectModelHelpers.CreateFileInTempProjectDirectory("import.proj", TestData.Content3SimpleTargetsDefaultSpecified);

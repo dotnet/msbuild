@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+	  <MSBuildAnalyzer>$([MSBuild]::RegisterBuildCheck($(MSBuildThisFileDirectory)InvalidCustomAnalyzer.dll))</MSBuildAnalyzer>
+  </PropertyGroup>
+</Project>

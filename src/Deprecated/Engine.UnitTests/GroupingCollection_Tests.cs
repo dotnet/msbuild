@@ -202,7 +202,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Make sure linked property group and item group counting works correctly. 
+        /// Make sure linked property group and item group counting works correctly.
         /// Parent grouping collections depend on child grouping collections to update the count for nested groups.
         /// </summary>
         /// <owner>LukaszG</owner>
@@ -243,13 +243,13 @@ namespace Microsoft.Build.UnitTests
             nestedGroup.Clear();
             nestedGroup.InsertAtEnd(this.ig2);
             nestedGroup.InsertAfter(this.ig3, this.ig2);
-            
+
             childGroup1.RemovePropertyGroup(this.pg1);
             childGroup1.RemoveItemGroup(this.ig1);
             childGroup1.InsertAtEnd(this.ig3);
 
             childGroup2.RemovePropertyGroup(this.pg1);
-            
+
             masterGroup.RemoveItemGroup(this.ig2);
 
             Assertion.AssertEquals(nestedGroup.ItemGroupCount, 2);

@@ -154,12 +154,12 @@ namespace Microsoft.NET.StringTools
         /// Appends a string.
         /// </summary>
         /// <param name="value">The string to append.</param>
-        public void Append(string value)
+        public void Append(string? value)
         {
             if (!string.IsNullOrEmpty(value))
             {
-                _spans.Add(value.AsMemory());
-                Length += value.Length;
+                _spans.Add(value!.AsMemory());
+                Length += value!.Length;
             }
         }
 

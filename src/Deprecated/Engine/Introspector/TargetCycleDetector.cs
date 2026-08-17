@@ -146,7 +146,7 @@ namespace Microsoft.Build.BuildEngine
                     BreadthFirstTraversal(node);
                 }
             }
-            // Verify that all nodes have been reached 
+            // Verify that all nodes have been reached
             foreach (GraphNode node in dependencyGraph.Values)
             {
                 if (node.traversalIndex == GraphNode.InvalidIndex)
@@ -199,10 +199,10 @@ namespace Microsoft.Build.BuildEngine
                     }
 
                     // If the request being analyzed came from one of the child nodes, its incoming external request's
-                    // handleId will point at a routing context on the parent engine. If the outgoing request 
-                    // orginated from another child the two requests (outgoing and incoming) point at different 
-                    // routing contexts. In that case it is necessary to unwind the incoming request to the routing 
-                    // context of the outgoing request. If outgoing request originated from the parent node - 
+                    // handleId will point at a routing context on the parent engine. If the outgoing request
+                    // orginated from another child the two requests (outgoing and incoming) point at different
+                    // routing contexts. In that case it is necessary to unwind the incoming request to the routing
+                    // context of the outgoing request. If outgoing request originated from the parent node -
                     // there will be only one routing request.
                     if (node.targetState.TargetId.nodeId != 0)
                     {

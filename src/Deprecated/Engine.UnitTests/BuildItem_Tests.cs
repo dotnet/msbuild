@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests
 
             // Custom metadata count only
             Assertion.AssertEquals(2, item.CustomMetadataCount);
-            
+
             // All metadata count
             Assertion.AssertEquals(2 + FileUtilities.ItemSpecModifiers.All.Length, item.MetadataCount);
         }
@@ -103,7 +103,7 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void MetadataIncludesItemDefinitionMetadata()
         {
-            // Get an item of type "i" that has an item definition library 
+            // Get an item of type "i" that has an item definition library
             // for type "i" that has default value "m1" for metadata "m"
             // and has value "n1" for metadata "n"
             BuildItem item = GetXmlBackedItemWithDefinitionLibrary();
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests
             item.SetMetadata("n", "n1");
             return item;
         }
-        
+
         private static BuildItem CreateBuildItemFromXmlDocument(XmlDocument doc)
         {
             ItemDefinitionLibrary itemDefinitionLibrary = new ItemDefinitionLibrary(new Project());

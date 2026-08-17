@@ -95,7 +95,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests.VersioningAnd
         /// - This should be an unresolved reference, we shouldn't fallback to the old version.
         /// Rationale:
         /// The fusion loader is going to want to respect the unified-to assembly. There's no point in
-        /// feeding it the wrong version, and the drawback is that builds would be different from 
+        /// feeding it the wrong version, and the drawback is that builds would be different from
         /// machine-to-machine.
         /// </summary>
         [Fact]

@@ -21,12 +21,12 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     For the ExternalProjectsProvider mock infrastructure we'll try to use very similar model as in the actual implementation in VS.
 
     Typical flow for "linked object" of type "Foo"
-    [ ---  Client Collection                                    ]                           [ Server collection (can be different process) ] 
+    [ ---  Client Collection                                    ]                           [ Server collection (can be different process) ]
     (Foo) localView <=> (FooLink) link <=> FooLinkRemoter (Proxy) <=~connection mechanism~=> FooLinkRemoter(stub) <=> (Real object)
-    
+
     FooLinkRemoter would be whatever ExternalProviders see useful to provide FooLink implementation and is compatable with connection mechanism
     it might be completely different interface since some link types would be either inefficient or impossible to serialize for example and pass cross process.
-    
+
     Here we can cheat a little bit, since we run both Client and Server collection in the same process so we can ignore connection mechanism (typically some
     form of serialization/deserialization) and just give the "client" link implementation the same Remoter object we create on the "server"
 
@@ -137,6 +137,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     internal interface IImportHolder
     {
         ProjectCollectionLinker Linker { get; }
+
         UInt32 LocalId { get; }
     }
 
@@ -160,14 +161,17 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
 
         public Project LoadProject(string path) => this.Collection.LoadProject(path);
+
         public Project LoadProjectIgnoreMissingImports(string path) => LoadProjectWithSettings(path, ProjectLoadSettings.IgnoreMissingImports);
+
         public Project LoadProjectWithSettings(string path, ProjectLoadSettings settings) => new Project(path, null, null, this.Collection, settings);
 
 
         public Project LoadInMemoryWithSettings(string content, ProjectLoadSettings settings = ProjectLoadSettings.Default)
         {
             content = ObjectModelHelpers.CleanupFileContents(content);
-            ProjectRootElement xml = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement xml = projectRootElementFromString.Project;
             Project project = new Project(xml, null, null, this.Collection, settings);
             return project;
         }
@@ -389,6 +393,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             public ProjectCollectionLinker Linker { get; private set; }
 
             public T Linked { get; private set; }
+
             public RMock Remoter { get; private set; }
         }
 
@@ -401,6 +406,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         internal sealed class ConnectedProjectCollections
         {
             private List<ProjectCollectionLinker> group = new List<ProjectCollectionLinker>();
+
             public ProjectCollectionLinker AddNew()
             {
                 var linker = new ProjectCollectionLinker(this);
@@ -448,7 +454,9 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
                 this.Linker = linker;
                 this.ActiveImports = ImportedLinksMap.Create();
             }
+
             public ProjectCollectionLinker Linker { get; }
+
             public ImportedLinksMap ActiveImports { get; private set; }
 
             public void Clear()

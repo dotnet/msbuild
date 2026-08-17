@@ -28,8 +28,8 @@ namespace Microsoft.Build.BuildEngine
     }
 
     /// <summary>
-    /// This class is responsible for maintaining the set of object 
-    /// cached during a build session. This class is not thread safe and 
+    /// This class is responsible for maintaining the set of object
+    /// cached during a build session. This class is not thread safe and
     /// is intended to be used from the Engine thread.
     /// </summary>
     internal class CacheManager

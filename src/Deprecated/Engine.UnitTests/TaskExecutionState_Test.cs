@@ -56,7 +56,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test the case where the execution directory does not equal the current directory. In that 
+        /// Test the case where the execution directory does not equal the current directory. In that
         /// case the current directory should be switched to the execution directory
         /// </summary>
         [Test]
@@ -195,7 +195,7 @@ namespace Microsoft.Build.UnitTests
             )
             : base(howToExecuteTask,
                 lookupForInference,
-                lookupForExecution, 
+                lookupForExecution,
                 taskXmlNode,
                 hostObject,
                 projectFileOfTaskNode,

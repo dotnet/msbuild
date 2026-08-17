@@ -27,6 +27,11 @@
         <target state="translated">Выход из команды с кодом "{0}".</target>
         <note />
       </trans-unit>
+      <trans-unit id="LockCheck.FileLocked">
+        <source>The file is locked by: "{0}"</source>
+        <target state="translated">"{0}" блокирует этот файл</target>
+        <note />
+      </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
         <target state="translated">MSB6010: не удалось найти файл манифеста платформы по адресу "{0}".</target>

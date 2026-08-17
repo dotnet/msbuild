@@ -21,7 +21,7 @@ namespace Microsoft.Build.BuildEngine
     /// The node completes the class instantiating by providing the object with node side data.
     /// This class is distinct from the task engine in that it (possibly) travels cross process
     /// between the engine and the node carrying with it the data needed to instantiate the task
-    /// engine. The task engine can't subsume this class because the task engine is bound to the 
+    /// engine. The task engine can't subsume this class because the task engine is bound to the
     /// node process and can't travel cross process.
     /// </summary>
     internal class TaskExecutionState
@@ -216,8 +216,8 @@ namespace Microsoft.Build.BuildEngine
 
         #region MethodsNeededForUnitTesting
         /// <summary>
-        /// Since we could not derrive from TaskEngine and have no Interface, we need to overide the method in here and 
-        /// replace the calls when testing the class because of the calls to TaskEngine. If at a future time we get a mock task 
+        /// Since we could not derrive from TaskEngine and have no Interface, we need to overide the method in here and
+        /// replace the calls when testing the class because of the calls to TaskEngine. If at a future time we get a mock task
         /// engine, Interface or a non sealed TaskEngine these methods can disappear.
         /// </summary>
         /// <returns></returns>

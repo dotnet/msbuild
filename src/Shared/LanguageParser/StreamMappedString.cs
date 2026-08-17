@@ -25,7 +25,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         private StreamReader _reader;
 
         /// <summary>
-        /// When false, try to guess the encoding of binaryStream. When true, force the 
+        /// When false, try to guess the encoding of binaryStream. When true, force the
         /// encoding to ANSI.
         /// </summary>
         private bool _forceANSI;
@@ -110,7 +110,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 _reader = new StreamReader( // HIGHCHAR: Falling back to ANSI for VB source files.
                     _binaryStream,
 #if FEATURE_ENCODING_DEFAULT
-                    Encoding.Default,    // Default means ANSI. 
+                    Encoding.Default,    // Default means ANSI.
 #else
                     Encoding.ASCII,
 #endif

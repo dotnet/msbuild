@@ -1,0 +1,172 @@
+id: 
+name: GitOps.PullRequestIssueManagement
+description: GitOps.PullRequestIssueManagement primitive
+owner: 
+resource: repository
+disabled: false
+where: 
+configuration:
+  resourceManagementConfiguration:
+    scheduledSearches:
+    - description: Mark Stale Issues
+      frequencies:
+      - daily:
+          time: 17:0
+      filters:
+      - isOpen
+      - hasLabel:
+          label: needs-more-info
+      - isNotPartOfMilestone:
+          milestone: Backlog
+      - isNotPartOfMilestone:
+          milestone: Discussion
+      - hasLabel:
+          label: triaged
+      - isIssue
+      - isNotLabeledWith:
+          label: stale
+      - noActivitySince:
+          days: 30
+      - isNotLabeledWith:
+          label: bot-exclude
+      actions:
+      - addLabel:
+          label: stale
+      - addReply:
+          reply: This issue is marked as stale because feedback has been requested for 30 days with no response. Please respond within 14 days or this issue will be closed due to inactivity.
+    - description: Close Stale Issues
+      frequencies:
+      - daily:
+          time: 12:0
+      filters:
+      - isOpen
+      - hasLabel:
+          label: stale
+      - isNotLabeledWith:
+          label: bot-exclude
+      - noActivitySince:
+          days: 14
+      - isNotPartOfMilestone:
+          milestone: Backlog
+      - isNotPartOfMilestone:
+          milestone: Discussion
+      - hasLabel:
+          label: triaged
+      actions:
+      - closeIssue
+      - addReply:
+          reply: This issue was closed due to inactivity. If you can still reproduce this bug, please comment with the requested information, detailed steps to reproduce the problem, or any other notes that might help in the investigation.
+      - addLabel:
+          label: closed-by-bot
+    eventResponderTasks:
+    - if:
+      - payloadType: Issue_Comment
+      - isOpen
+      - hasLabel:
+          label: stale
+      - hasLabel:
+          label: triaged
+      - not:
+          hasLabel:
+            label: bot-exclude
+      then:
+      - removeLabel:
+          label: stale
+      - removeLabel:
+          label: triaged
+      description: Unstale Open Issues that get comments
+    - if:
+      - payloadType: Issue_Comment
+      - not: isOpen
+      - hasLabel:
+          label: stale
+      - hasLabel:
+          label: triaged
+      - not:
+          hasLabel:
+            label: bot-exclude
+      then:
+      - removeLabel:
+          label: triaged
+      description: Remove label triaged from closed stale issues that get comments
+    - if:
+      - payloadType: Issues
+      - labelAdded:
+          label: needs-more-info
+      - not:
+          hasLabel:
+            label: triaged
+      then:
+      - addLabel:
+          label: triaged
+      description: Add label triaged to issue when needs-more-info is applied
+    - if:
+      - payloadType: Issue_Comment
+      - isActivitySender:
+          issueAuthor: True
+      - hasLabel:
+          label: needs-more-info
+      - hasLabel:
+          label: triaged
+      then:
+      - removeLabel:
+          label: triaged
+      - addLabel:
+          label: author-responded
+      - removeLabel:
+          label: needs-more-info
+      description: author responds to `needs-more-info` gets `author-responded`
+    - if:
+      - payloadType: Pull_Request
+      - or:
+        - isAction:
+            action: Opened
+        - isAction:
+            action: Reopened
+        - labelAdded:
+            label: Servicing-consider
+      - or:
+        - targetsBranch:
+            branch: vs17.0
+        - targetsBranch:
+            branch: vs17.2
+        - targetsBranch:
+            branch: vs17.4
+        - targetsBranch:
+            branch: vs17.5
+        - targetsBranch:
+            branch: vs17.6
+        - targetsBranch:
+            branch: vs17.7
+        - targetsBranch:
+            branch: vs17.8
+        - targetsBranch:
+            branch: vs17.9
+        - targetsBranch:
+            branch: vs17.10
+        - targetsBranch:
+            branch: vs16.11
+        - targetsBranch:
+            branch: vs15.9
+      then:
+      - addReply:
+          reply: Hello! I noticed that you're targeting one of our servicing branches. Please consider updating the version.
+      description: Comment on vs* branches
+    - if:
+      - payloadType: Pull_Request
+      - or:
+        - isAction:
+            action: Opened
+        - isAction:
+            action: Reopened
+      - or:
+        - filesMatchPattern:
+            pattern: ^.+\.swr$
+        - filesMatchPattern:
+            pattern: src/Package/MSBuild.VSSetup.*/.*
+      then:
+      - addReply:
+          reply: Hello @${issueAuthor}, I noticed that you’re changing an *.swr file or any file under src/Package/MSBuild.VSSetup.*. Please make sure to validate this change by an experimental VS insertion. This is accomplished by pushing to an exp/* branch, which requires write permissions to this repo.
+      description: Remind to run VS Perf DDRITs when deployed assemblies change
+onFailure: 
+onSuccess: 

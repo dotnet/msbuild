@@ -139,7 +139,7 @@ namespace Microsoft.Build.BackEnd
 
         #region Methods
         /// <summary>
-        /// Prepares the engine for a new build and spins up the engine thread.  
+        /// Prepares the engine for a new build and spins up the engine thread.
         /// The engine must be in the Idle state, and not already be initialized.
         /// </summary>
         /// <param name="loggingContext">The logging context for the node.</param>
@@ -154,7 +154,7 @@ namespace Microsoft.Build.BackEnd
         void CleanupForBuild();
 
         /// <summary>
-        /// Submits the specified request to the build queue. 
+        /// Submits the specified request to the build queue.
         /// </summary>
         /// <param name="request">The request to build.</param>
         /// <remarks>It is only valid to call this method when the engine is in the Idle or

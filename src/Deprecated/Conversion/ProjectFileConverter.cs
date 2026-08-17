@@ -116,9 +116,23 @@ namespace Microsoft.Build.Conversion
      *
      **************************************************************************/
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
     /// This class performs a project file format conversion from Visual Studio
     /// .NET 2002 or 2003 to MSBuild format (for Whidbey).
     /// </summary>
+    /// <remarks>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
+    /// </remarks>
     /// <owner>rgoel</owner>
     public sealed class ProjectFileConverter
     {
@@ -192,9 +206,24 @@ namespace Microsoft.Build.Conversion
         private Dictionary<string, string> propertiesToEscape = null;
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Default constructor.  We need a constructor that takes zero parameters,
         /// because this class needs to be instantiated from COM.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>rgoel</owner>
         public ProjectFileConverter
             (
@@ -209,9 +238,24 @@ namespace Microsoft.Build.Conversion
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// The read/write accessor for the old project filename.  This must be
         /// set by the consumer before calling Convert().
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>rgoel</owner>
         public string OldProjectFile
         {
@@ -226,9 +270,24 @@ namespace Microsoft.Build.Conversion
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// The read/write accessor for the new project filename.  This must be
         /// set by the consumer before calling Convert().
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>rgoel</owner>
         public string NewProjectFile
         {
@@ -243,12 +302,27 @@ namespace Microsoft.Build.Conversion
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// The read/write accessor for the boolean which tells the converter
         /// whether the project file we're converting is a "main" project file
         /// or a .USER file.  Most of the conversion logic is identical for
         /// both types of files, but for example, one difference is that the
         /// "main" project file gets an &lt;Import&gt; tag inserted at the end.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>rgoel</owner>
         public bool IsUserFile
         {
@@ -263,10 +337,25 @@ namespace Microsoft.Build.Conversion
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// The read/write accessor for the solution file which contains this
         /// project being converted.  This is used to look up information about the
         /// project-to-project references.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>rgoel</owner>
         public string SolutionFile
         {
@@ -281,9 +370,24 @@ namespace Microsoft.Build.Conversion
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Indicates if the last attempted conversion was skipped because the project is already in the latest format.
         /// This will always return false;
         /// </summary>
+        ///<remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>SumedhK</owner>
         /// <value>true, if conversion was skipped</value>
         public bool ConversionSkippedBecauseProjectAlreadyConverted
@@ -295,8 +399,23 @@ namespace Microsoft.Build.Conversion
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// This property returns the list of warnings that were generated during the conversion
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>faisalmo</owner>
         /// <value>true, if conversion was skipped</value>
         [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Public interface that has shipped previously. ")]
@@ -309,9 +428,24 @@ namespace Microsoft.Build.Conversion
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Is the conversion a minor upgrade operation?
         /// Minor upgrade also means the converted project file can be opened in old VS as well, so we won't update the tools version.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public bool IsMinorUpgrade
         {
             get
@@ -326,11 +460,26 @@ namespace Microsoft.Build.Conversion
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// This is the entry point method, which performs the project file format
         /// conversion.  This method will overwrite "newProjectFile" if it already
         /// exists, so the caller of this method should confirm with the user
         /// that that's what he really wants to do.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         /// <owner>rgoel</owner>
         public void Convert()
         {
@@ -667,7 +816,7 @@ namespace Microsoft.Build.Conversion
                     )
                 {
                     // If it's minor upgrade, or nothing changed and the project was already TV 4.0 or higher,
-                    // set the ToolsVersion back to its old value. 
+                    // set the ToolsVersion back to its old value.
                     xmakeProject.ToolsVersion = oldToolsVersion;
                 }
             }
@@ -888,7 +1037,7 @@ namespace Microsoft.Build.Conversion
             {
                 if (String.Equals(propertyElement.Name, XMakeProjectStrings.TargetFrameworkSubset, StringComparison.OrdinalIgnoreCase))
                 {
-                    // For the Client profile, which was the only profile supported in Orcas SP1, we want to replace 
+                    // For the Client profile, which was the only profile supported in Orcas SP1, we want to replace
                     // <TargetFrameworkSubset/> with <TargetFrameworkProfile/>.
                     if (String.Equals(propertyElement.Value, XMakeProjectStrings.ClientProfile, StringComparison.OrdinalIgnoreCase))
                     {
@@ -899,7 +1048,7 @@ namespace Microsoft.Build.Conversion
 
                     // In all cases, <TargetFrameworkSubset/> is no longer supported.  If it comes from the project
                     // that we're converting, then we forcibly remove it.  If it comes from some import... the user is
-                    // on their own.  
+                    // on their own.
                     if (propertyElement.ContainingProject == xmakeProject)
                     {
                         propertyElement.Parent.RemoveChild(propertyElement);
@@ -914,12 +1063,27 @@ namespace Microsoft.Build.Conversion
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Performs conversions specific to F# projects (VS2008 CTP -> VS2012) and (VS2010 -> VS2012).
         /// This involves: changing the location of FSharp targets,
         /// and for 2008CTP, adding explicit mscorlib and FSharp.Core references.
         /// </summary>
         /// <param name="actuallyMakeChanges">if true, make the changes, otherwise, don't actually make any changes, but do report the return boolean as to whether you would make changes</param>
         /// <returns>true if anything was (would be) changed, false otherwise</returns>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public bool FSharpSpecificConversions(bool actuallyMakeChanges)
         {
             // For FSharp projects, should import different location of FSharp targets
@@ -957,8 +1121,8 @@ namespace Microsoft.Build.Conversion
             // local function: wraps specified string value into Exists('value')
             Func<string, string> exists = s => string.Format(CultureInfo.InvariantCulture, "Exists('{0}')", s);
 
-            // local function: 
-            // Creates property group element containing one property fsharpDev12PlusProperty with value 'path'. 
+            // local function:
+            // Creates property group element containing one property fsharpDev12PlusProperty with value 'path'.
             // If addCondition is true, property group will have Exists(path) condition
             Action<string, ProjectElementContainer> appendPropertyGroupForDev12PlusTargetsPath =
                 (path, parent) =>
@@ -1061,7 +1225,7 @@ namespace Microsoft.Build.Conversion
 
                 someNonNullImportElement.Parent.InsertBeforeChild(chooseElement, someNonNullImportElement);
 
-                // Expected fragment of the project file after upgrade 
+                // Expected fragment of the project file after upgrade
                 //<Choose>
                 //  <When Condition="'$(VisualStudioVersion)' == '11.0'">
                 //    <PropertyGroup>
@@ -1074,7 +1238,7 @@ namespace Microsoft.Build.Conversion
                 //    </PropertyGroup>
                 //  </Otherwise>
                 //</Choose>
-                //<Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />           
+                //<Import Project="$(FSharpTargetsPath)" Condition="Exists('$(FSharpTargetsPath)')" />
 
                 var whenVsVersionIsDev11 = xmakeProject.CreateWhenElement("'$(VisualStudioVersion)' == '11.0'");
                 chooseElement.AppendChild(whenVsVersionIsDev11);
@@ -1148,7 +1312,7 @@ namespace Microsoft.Build.Conversion
                 }
             }
 
-            // try to find reference to FSharp.Core 
+            // try to find reference to FSharp.Core
             ProjectItemElement fsharpCoreItem = null;
             foreach (var item in xmakeProject.Items.Where(x => x.ItemType == ReferenceItemType))
             {
@@ -1350,10 +1514,25 @@ namespace Microsoft.Build.Conversion
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// This is the entry point method, which performs the project file format
         /// conversion.  This method will simply create a new MSBuild Project object
         /// in memory, instead of trying to write it to disk.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         public ProjectRootElement ConvertInMemory()
         {
             ConvertInMemoryToMSBuildProject();

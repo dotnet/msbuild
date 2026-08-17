@@ -9,6 +9,9 @@ parameters:
 - name: signTypeParameter
   type: string
   default: 'test'
+- name: enableOptProf
+  type: boolean
+  default: false
 
 jobs:
 - job: Windows_NT
@@ -26,13 +29,25 @@ jobs:
   - name: VisualStudio.MajorVersion
     value: 17
   - name: VisualStudio.ChannelName
-    value: 'int.d17.8' # MSBuild's vs17.8 branch corresponds to this VS channel
+    value: 'int.d17.11' # MSBuild's vs17.11 branch corresponds to this VS channel
   - name: VisualStudio.DropName
     value: Products/$(System.TeamProject)/$(Build.Repository.Name)/$(Build.SourceBranchName)/$(Build.BuildNumber)
 
   steps:
   - task: NuGetToolInstaller@1
     displayName: 'Install NuGet.exe'
+  - pwsh: Get-MpComputerStatus
+
+  - pwsh: Set-MpPreference -DisableRealtimeMonitoring $true
+
+  - task: PowerShell@2
+    displayName: Setup Private Feeds Credentials
+    inputs:
+      filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
+      arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
+    env:
+      Token: $(dn-bot-dnceng-artifact-feeds-rw)
+
 
   - task: NuGetCommand@2
     displayName: Restore internal tools
@@ -62,6 +77,7 @@ jobs:
       AccessToken: '$(System.AccessToken)'
       feedSource: 'https://devdiv.pkgs.visualstudio.com/DefaultCollection/_packaging/MicroBuildToolset/nuget/v3/index.json'
     displayName: 'Install OptProf Plugin'
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
   # Required by MicroBuildBuildVSBootstrapper
   - task: MicroBuildSwixPlugin@4
@@ -77,12 +93,6 @@ jobs:
               /p:VisualStudioDropAccessToken=$(System.AccessToken)
               /p:VisualStudioDropName=$(VisualStudio.DropName)
               /p:DotNetSignType=${{ parameters.signTypeParameter }}
-              /p:DotNetPublishToBlobFeed=true
-              /p:DotNetPublishBlobFeedKey=$(dotnetfeed-storage-access-key-1)
-              /p:DotNetPublishBlobFeedUrl=https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json
-              /p:PublishToSymbolServer=true
-              /p:DotNetSymbolServerTokenMsdl=$(microsoft-symbol-server-pat)
-              /p:DotNetSymbolServerTokenSymWeb=$(symweb-symbol-server-pat)
               /p:TeamName=MSBuild
               /p:DotNetPublishUsingPipelines=true
               /p:VisualStudioIbcDrop=$(OptProfDrop)
@@ -94,7 +104,7 @@ jobs:
     condition: succeeded()
 
   # Required by Microsoft policy
-  - template: \eng\common\templates-official\steps\generate-sbom.yml@self
+  - template: /eng/common/templates-official/steps/generate-sbom.yml@self
 
   # Publish OptProf configuration files
   - task: 1ES.PublishArtifactsDrop@1
@@ -105,7 +115,7 @@ jobs:
       toLowerCase: false
       usePat: true
     displayName: 'OptProf - Publish to Artifact Services - ProfilingInputs'
-    condition: succeeded()
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
   # Build VS bootstrapper
   # Generates $(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
@@ -116,7 +126,7 @@ jobs:
       manifests: $(VisualStudio.SetupManifestList)
       outputFolder: '$(Build.SourcesDirectory)\artifacts\VSSetup\$(BuildConfiguration)\Insertion'
     displayName: 'OptProf - Build VS bootstrapper'
-    condition: succeeded()
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
   # Publish run settings
   - task: PowerShell@2
@@ -128,7 +138,7 @@ jobs:
                 /p:BootstrapperInfoPath=$(Build.StagingDirectory)\MicroBuild\Output\BootstrapperInfo.json
                 /p:VisualStudioIbcTrainingSettingsPath=$(Build.SourcesDirectory)\eng\config\OptProf.runsettings
     displayName: 'OptProf - Build IBC training settings'
-    condition: succeeded()
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
   # Publish bootstrapper info
   - task: 1ES.PublishBuildArtifacts@1
@@ -206,7 +216,7 @@ jobs:
     displayName: Tag build as ready for optimization training
     inputs:
       tags: 'ready-for-training'
-    condition: succeeded()
+    condition: and(succeeded(), ${{ parameters.enableOptProf }})
 
   - task: ms-vseng.MicroBuildTasks.521a94ea-9e68-468a-8167-6dcf361ea776.MicroBuildCleanup@1
     displayName: Execute cleanup tasks
@@ -225,7 +235,7 @@ jobs:
       - name: Managed
         pool:
           name: AzurePipelines-EO
-          image: AzurePipelinesUbuntu22.04compliantGPT
+          image: 1ESPT-Ubuntu22.04
           os: linux
 
 - template: /eng/common/templates-official/job/publish-build-assets.yml@self
@@ -236,7 +246,7 @@ jobs:
       - Windows_NT
       - Source_Build_Managed
     pool:
-      name: AzurePipelines-EO
-      image: 1ESPT-Windows2022
+      name: $(DncEngInternalBuildPool)
+      image: $(WindowsImage)
       os: windows
 

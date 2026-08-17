@@ -38,7 +38,7 @@ namespace Microsoft.Build.BackEnd.Logging
 
         /// <summary>
         /// Based on bufferWidth split message into multiple lines and indent if needed.
-        /// TAB character are interpreted by standard Console logic. 
+        /// TAB character are interpreted by standard Console logic.
         /// </summary>
         /// <param name="message">Input message. May contains tabs and new lines. Both \r\n and \n is supported but replaced into current environment new line.</param>
         /// <param name="prefixAlreadyWritten">true if message already contains prefix (message context, timestamp, etc...).</param>

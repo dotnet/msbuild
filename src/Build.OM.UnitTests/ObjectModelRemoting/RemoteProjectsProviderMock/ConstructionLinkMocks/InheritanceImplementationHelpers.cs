@@ -11,7 +11,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     /// <summary>
     /// The C# does not really provide a easy way to efficiently implement inheritance in cases like this
     /// for abstract classes or interface, when there is a hierarchy, it is not way to share the implementation.
-    /// Like if one have IFoo and IBar : IFoo (or as we do abstractFoo, abstractBar:abstractFoo) 
+    /// Like if one have IFoo and IBar : IFoo (or as we do abstractFoo, abstractBar:abstractFoo)
     /// we can provide implementation for IFoo, but we can not use that for implementations for IBar.
     /// Since no multiple inheritance or other suitable mechanism for code share across classes is supported by C#,
     /// Instead IBar implementation should fully implement both IFoo and IBar interfaces.

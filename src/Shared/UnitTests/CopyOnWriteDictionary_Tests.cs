@@ -14,7 +14,7 @@ using Xunit;
 namespace Microsoft.Build.UnitTests.OM.Collections
 {
     /// <summary>
-    /// Tests for the CopyOnWriteDictionary 
+    /// Tests for the CopyOnWriteDictionary
     /// </summary>
     public class CopyOnWriteDictionary_Tests
     {
@@ -109,7 +109,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         }
 
         /// <summary>
-        /// Cloning sees the same values 
+        /// Cloning sees the same values
         /// </summary>
         [Fact]
         public void CloneVisibility()
@@ -125,7 +125,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
         }
 
         /// <summary>
-        /// Clone uses same comparer 
+        /// Clone uses same comparer
         /// </summary>
         [Fact]
         public void CloneComparer()

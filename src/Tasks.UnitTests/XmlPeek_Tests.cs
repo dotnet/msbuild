@@ -3,8 +3,13 @@
 
 using System;
 using System.IO;
+
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
+
+using Shouldly;
+
 using Xunit;
 
 #nullable disable
@@ -314,6 +319,17 @@ namespace Microsoft.Build.UnitTests
 
             // Verify that the task was indeed found.
             logger.AssertLogDoesntContain("MSB4036");
+        }
+
+        [Fact]
+        public void PeekWithNoParameters()
+        {
+            MockLogger log = new();
+            Project project = ObjectModelHelpers.CreateInMemoryProject(@"<Project><Target Name=""Test""><XmlPeek /></Target></Project>", log);
+
+            project.Build().ShouldBeFalse();
+            log.AssertLogContains("MSB4044");
+            log.AssertLogContains("\"Query\"");
         }
 
         private void Prepare(string xmlFile, out string xmlInputPath)

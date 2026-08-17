@@ -104,7 +104,7 @@ namespace Microsoft.Build.UnitTests
                                   sc.Write, null, null);
                 L.Initialize(es, i);
                 string msg = "my 1337 message";
-                
+
                 BuildMessageEventArgs be = new BuildMessageEventArgs(msg, "help", "sender", j);
                 be.BuildEventContext = new BuildEventContext(1, 2, 3, 4);
                 es.RaiseMessageEvent(null, be);
@@ -279,7 +279,7 @@ namespace Microsoft.Build.UnitTests
                 (new SerialConsoleLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Detailed));
             Assertion.AssertEquals( false,
                 (new SerialConsoleLogger(LoggerVerbosity.Detailed)).IsVerbosityAtLeast(LoggerVerbosity.Diagnostic));
-            
+
             Assertion.AssertEquals( true,
                 (new SerialConsoleLogger(LoggerVerbosity.Diagnostic)).IsVerbosityAtLeast(LoggerVerbosity.Quiet));
             Assertion.AssertEquals( true,
@@ -362,7 +362,7 @@ namespace Microsoft.Build.UnitTests
         public void SingleMessageTests_quiet_medium()
         {
                 SingleMessageTest(LoggerVerbosity.Quiet,
-                                 MessageImportance.Normal, false); 
+                                 MessageImportance.Normal, false);
         }
 
         [Test]
@@ -373,7 +373,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Test]
-        public void SingleMessageTests_medium_low() 
+        public void SingleMessageTests_medium_low()
         {
                 SingleMessageTest(LoggerVerbosity.Minimal,
                                  MessageImportance.Low, false);
@@ -383,7 +383,7 @@ namespace Microsoft.Build.UnitTests
         public void SingleMessageTests_medium_medium()
         {
                 SingleMessageTest(LoggerVerbosity.Minimal,
-                                 MessageImportance.Normal, false); 
+                                 MessageImportance.Normal, false);
         }
 
         [Test]
@@ -402,9 +402,9 @@ namespace Microsoft.Build.UnitTests
 
         [Test]
         public void SingleMessageTests_normal_medium()
-        { 
+        {
                 SingleMessageTest(LoggerVerbosity.Normal,
-                                 MessageImportance.Normal, true); 
+                                 MessageImportance.Normal, true);
         }
 
         [Test]
@@ -425,7 +425,7 @@ namespace Microsoft.Build.UnitTests
         public void SingleMessageTests_detailed_medium()
         {
                 SingleMessageTest(LoggerVerbosity.Detailed,
-                                 MessageImportance.Normal, true); 
+                                 MessageImportance.Normal, true);
         }
 
         [Test]
@@ -443,10 +443,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Test]
-        public void SingleMessageTests_diagnostic_medium() 
+        public void SingleMessageTests_diagnostic_medium()
         {
                 SingleMessageTest(LoggerVerbosity.Diagnostic,
-                                 MessageImportance.Normal, true); 
+                                 MessageImportance.Normal, true);
         }
 
         [Test]
@@ -648,7 +648,7 @@ namespace Microsoft.Build.UnitTests
                 BuildErrorEventArgs beea = new BuildErrorEventArgs("VBC",
                                 "31415", "file.vb", 42, 0, 0, 0,
                                 "Some long message", "help", "sender");
-                
+
                 beea.BuildEventContext = buildEventContext;
                 es.RaiseErrorEvent(null, beea);
 
@@ -1076,7 +1076,7 @@ namespace Microsoft.Build.UnitTests
             string ss = cl.IndentString(s, 0);
 
             //should be a no-op
-            Assertion.AssertEquals("foo" + Environment.NewLine, ss); 
+            Assertion.AssertEquals("foo" + Environment.NewLine, ss);
         }
 
         [Test]
@@ -1092,8 +1092,8 @@ namespace Microsoft.Build.UnitTests
             //should convert lines to system format
             Assertion.AssertEquals("    foo" + Environment.NewLine +
                                    "    bar" + Environment.NewLine +
-                                   "    baz" + Environment.NewLine + 
-                                   "    " + Environment.NewLine, ss); 
+                                   "    baz" + Environment.NewLine +
+                                   "    " + Environment.NewLine, ss);
         }
 
         [Test]
@@ -1107,7 +1107,7 @@ namespace Microsoft.Build.UnitTests
             //should convert lines to system format
             Assertion.AssertEquals("foo" + Environment.NewLine +
                                    "bar" + Environment.NewLine +
-                                   "baz" + Environment.NewLine + Environment.NewLine, ss); 
+                                   "baz" + Environment.NewLine + Environment.NewLine, ss);
         }
 
         [Test]
@@ -1303,19 +1303,19 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void CustomDisplayedAtDetailed()
         {
-            EventSource es = new EventSource(); 
-            SimulatedConsole sc = new SimulatedConsole(); 
+            EventSource es = new EventSource();
+            SimulatedConsole sc = new SimulatedConsole();
             ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Detailed,
                                                 sc.Write, null, null);
-            L.Initialize(es); 
+            L.Initialize(es);
 
-            MyCustomBuildEventArgs c = 
+            MyCustomBuildEventArgs c =
                     new MyCustomBuildEventArgs("msg");
 
             es.RaiseCustomEvent(null, c);
 
-            Assertion.AssertEquals("msg" + Environment.NewLine, 
-                                   sc.ToString()); 
+            Assertion.AssertEquals("msg" + Environment.NewLine,
+                                   sc.ToString());
         }
 
         [Test]
@@ -1338,18 +1338,18 @@ namespace Microsoft.Build.UnitTests
         [Test]
         public void CustomNotDisplayedAtNormal()
         {
-            EventSource es = new EventSource(); 
-            SimulatedConsole sc = new SimulatedConsole(); 
+            EventSource es = new EventSource();
+            SimulatedConsole sc = new SimulatedConsole();
             ConsoleLogger L = new ConsoleLogger(LoggerVerbosity.Normal,
                                                 sc.Write, null, null);
-            L.Initialize(es); 
+            L.Initialize(es);
 
-            MyCustomBuildEventArgs c = 
+            MyCustomBuildEventArgs c =
                     new MyCustomBuildEventArgs("msg");
 
             es.RaiseCustomEvent(null, c);
 
-            Assertion.AssertEquals(String.Empty, sc.ToString()); 
+            Assertion.AssertEquals(String.Empty, sc.ToString());
         }
 
         /// <summary>
@@ -1453,7 +1453,7 @@ namespace Microsoft.Build.UnitTests
             cl2.ParseParameters();
 
             WriteAndValidateProperties(cl, sc, false);
-        }       
+        }
 
         /// <summary>
         /// Create some items and log them
@@ -1488,7 +1488,7 @@ namespace Microsoft.Build.UnitTests
 
             item1type = "type" + Environment.NewLine;
             item2type = "type2" + Environment.NewLine;
-            
+
             string log = sc.ToString();
 
             Console.WriteLine("[" + log + "]");
@@ -1650,7 +1650,7 @@ namespace Microsoft.Build.UnitTests
             cl2.ParseParameters();
 
             WriteAndValidateItems(cl2, sc, false);
-        }       
+        }
 
         [Test]
         public void ParametersEmptyTests()
@@ -1766,7 +1766,7 @@ namespace Microsoft.Build.UnitTests
             es.RaiseBuildStartedEvent(null,
                          new BuildStartedEventArgs("bs", null));
 
-            // BuildFinished 
+            // BuildFinished
             es.RaiseBuildFinishedEvent(null,
                           new BuildFinishedEventArgs("bf",
                                                      null, true));
@@ -1783,12 +1783,12 @@ namespace Microsoft.Build.UnitTests
             Assertion.Assert(!actualLog.Contains(warningString));
             Assertion.Assert(!actualLog.Contains("<red>"));
             Assertion.Assert(!actualLog.Contains("<yellow>"));
-            
+
             // errorString = 0 Error(s)
             // warningString = 0 Warning(s)
             errorString = ResourceUtilities.FormatResourceString("ErrorCount", 0);
             warningString = ResourceUtilities.FormatResourceString("WarningCount", 0);
-            
+
             // Verify that the log has correct error and warning string
             Assertion.Assert(actualLog.Contains(errorString));
             Assertion.Assert(actualLog.Contains(warningString));
@@ -1835,8 +1835,8 @@ namespace Microsoft.Build.UnitTests
 
             es.RaiseErrorEvent(null, beea);
 
-            // NOTE: We don't call the es.RaiseBuildFinishedEvent(...) here as this 
-            // would call ResetConsoleLoggerState and we will fail to detect if Initialize() 
+            // NOTE: We don't call the es.RaiseBuildFinishedEvent(...) here as this
+            // would call ResetConsoleLoggerState and we will fail to detect if Initialize()
             // is not calling it.
 
             // Log so far
@@ -1860,7 +1860,7 @@ namespace Microsoft.Build.UnitTests
             es.RaiseBuildStartedEvent(null,
                          new BuildStartedEventArgs("bs", null));
 
-            // BuildFinished 
+            // BuildFinished
             es.RaiseBuildFinishedEvent(null,
                           new BuildFinishedEventArgs("bf",
                                                      null, true));
@@ -1922,7 +1922,7 @@ namespace Microsoft.Build.UnitTests
 
                 TaskStartedEventArgs taskStarted1 = new TaskStartedEventArgs(null, null, null, null, "task");
                 taskStarted1.BuildEventContext = project1Started.BuildEventContext;
-                // TaskStarted Event 
+                // TaskStarted Event
                 es.RaiseTaskStartedEvent(null, taskStarted1);
 
                 BuildMessageEventArgs messsage1 = new BuildMessageEventArgs(null, null, null, MessageImportance.High);
@@ -1950,7 +1950,7 @@ namespace Microsoft.Build.UnitTests
 
                 TaskStartedEventArgs taskStarted2 = new TaskStartedEventArgs(null, null, null, null, "task2");
                 taskStarted2.BuildEventContext = project2Started.BuildEventContext;
-                // TaskStarted Event 
+                // TaskStarted Event
                 es.RaiseTaskStartedEvent(null, taskStarted2);
 
                 BuildMessageEventArgs messsage2 = new BuildMessageEventArgs(null, null, null, MessageImportance.High);
@@ -2000,7 +2000,7 @@ namespace Microsoft.Build.UnitTests
                 // BuildStarted event
                 es.RaiseBuildStartedEvent(null,
                              new BuildStartedEventArgs("bs", null));
-                // BuildFinished 
+                // BuildFinished
                 es.RaiseBuildFinishedEvent(null,
                               new BuildFinishedEventArgs("bf",
                                                          null, true));
@@ -2054,7 +2054,7 @@ namespace Microsoft.Build.UnitTests
                                                      null, true));
             actualLog = sc.ToString();
             Assertion.Assert(actualLog.Contains(ResourceUtilities.FormatResourceString("DeferredMessagesAvailiable")));
-            
+
             es = new EventSource();
             sc = new SimulatedConsole();
             // Create a ConsoleLogger with Normal verbosity
@@ -2159,9 +2159,9 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify that in the MP case and the older serial logger that there is no extra newline after the project done event. 
+        /// Verify that in the MP case and the older serial logger that there is no extra newline after the project done event.
         /// We cannot verify there is a newline after the project done event for the MP single proc log because
-        /// nunit is showing up as an unknown output type, this causes us to not print the newline because we think it may be to a 
+        /// nunit is showing up as an unknown output type, this causes us to not print the newline because we think it may be to a
         /// text file.
         /// </summary>
         [Test]
@@ -2172,7 +2172,7 @@ namespace Microsoft.Build.UnitTests
             {
                 Console.Out.WriteLine("Iteration of I is {" + i + "}");
 
-                
+
                 EventSource es = new EventSource();
                 //Create a simulated console
                 SimulatedConsole sc = new SimulatedConsole();

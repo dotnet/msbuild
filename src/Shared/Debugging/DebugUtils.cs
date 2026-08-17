@@ -22,6 +22,13 @@ namespace Microsoft.Build.Shared.Debugging
 
         static DebugUtils()
         {
+            SetDebugPath();
+        }
+
+        // DebugUtils are initialized early on by the test runner - during preparing data for DataMemeberAttribute of some test,
+        //  for that reason it is not easily possible to inject the DebugPath in tests via env var (unless we want to run expensive exec style test).
+        internal static void SetDebugPath()
+        {
             string environmentDebugPath = FileUtilities.TrimAndStripAnyQuotes(Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH"));
             string debugDirectory = environmentDebugPath;
 
@@ -95,7 +102,7 @@ namespace Microsoft.Build.Shared.Debugging
 
         public static readonly bool ShouldDebugCurrentProcess = CurrentProcessMatchesDebugName();
 
-        public static string DebugPath { get; }
+        public static string DebugPath { get; private set; }
 
         public static string FindNextAvailableDebugFilePath(string fileName)
         {

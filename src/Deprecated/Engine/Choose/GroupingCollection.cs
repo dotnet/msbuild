@@ -102,7 +102,7 @@ namespace Microsoft.Build.BuildEngine
             }
         }
         /// <summary>
-        /// This ICollection method copies the contents of this collection to an 
+        /// This ICollection method copies the contents of this collection to an
         /// array.
         /// </summary>
         /// <remarks>
@@ -171,7 +171,7 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// This ICollection method copies the contents of this collection to an 
+        /// This ICollection method copies the contents of this collection to an
         /// array.
         /// </summary>
         /// <remarks>

@@ -15,7 +15,7 @@ namespace Microsoft.Build.BackEnd
     /// There are two cases:
     /// 1. The request was blocked waiting on a target in the same project.  In this case this class will contain
     ///    no information other than the request id.
-    /// 2. The request was blocked on some set of build requests.  This class will then contain the build results 
+    /// 2. The request was blocked on some set of build requests.  This class will then contain the build results
     ///    needed to satisfy those requests.
     /// </summary>
     internal class BuildRequestUnblocker : ITranslatable, INodePacket

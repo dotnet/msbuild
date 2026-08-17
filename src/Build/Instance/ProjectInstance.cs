@@ -14,6 +14,7 @@ using System.Xml;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.BackEnd.SdkResolution;
+using Microsoft.Build.Experimental.BuildCheck.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Definition;
@@ -21,6 +22,7 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Evaluation.Context;
 using Microsoft.Build.FileSystem;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Instance;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
@@ -34,6 +36,7 @@ using SdkResult = Microsoft.Build.BackEnd.SdkResolution.SdkResult;
 namespace Microsoft.Build.Execution
 {
     using Utilities = Microsoft.Build.Internal.Utilities;
+
     /// <summary>
     /// Enum for controlling project instance creation
     /// </summary>
@@ -124,7 +127,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Items in the project. This is a dictionary of ordered lists of a single type of items keyed by item type.
         /// </summary>
-        private ItemDictionary<ProjectItemInstance> _items;
+        private IItemDictionary<ProjectItemInstance> _items;
 
         /// <summary>
         /// Items organized by evaluatedInclude value
@@ -151,7 +154,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// The item definitions from the parent Project.
         /// </summary>
-        private RetrievableEntryHashSet<ProjectItemDefinitionInstance> _itemDefinitions;
+        private IRetrievableEntryHashSet<ProjectItemDefinitionInstance> _itemDefinitions;
 
         /// <summary>
         /// The HostServices to use during a build.
@@ -182,6 +185,12 @@ namespace Microsoft.Build.Execution
         private TaskRegistry _taskRegistry;
         private bool _translateEntireState;
         private int _evaluationId = BuildEventContext.InvalidEvaluationId;
+
+        /// <summary>
+        /// The property and item filter used when creating this instance, or null if this is not a filtered copy
+        /// of another ProjectInstance. <seealso cref="ProjectInstance(ProjectInstance, bool, RequestedProjectState)"/>
+        /// </summary>
+        private RequestedProjectState _requestedProjectStateFilter;
 
         /// <summary>
         /// Creates a ProjectInstance directly.
@@ -243,6 +252,23 @@ namespace Microsoft.Build.Execution
         /// <returns>A new project instance</returns>
         public ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection)
             : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: null, directoryCacheFactory: null, interactive: false)
+        {
+        }
+
+        /// <summary>
+        /// Creates a ProjectInstance directly.
+        /// No intermediate Project object is created.
+        /// This is ideal if the project is simply going to be built, and not displayed or edited.
+        /// </summary>
+        /// <param name="projectFile">The path to the project file.</param>
+        /// <param name="globalProperties">The global properties to use.</param>
+        /// <param name="toolsVersion">The tools version. May be <see langword="null"/>.</param>
+        /// <param name="subToolsetVersion">The sub-toolset version, used in tandem with <paramref name="toolsVersion"/> to determine the set of toolset properties. May be <see langword="null"/>.</param>
+        /// <param name="projectCollection">Project collection</param>
+        /// <param name="context">Context to evaluate inside, potentially sharing caches with other evaluations.</param>
+        /// <param name="interactive">Indicates if loading the project is allowed to interact with the user.</param>
+        internal ProjectInstance(string projectFile, IDictionary<string, string> globalProperties, string toolsVersion, string subToolsetVersion, ProjectCollection projectCollection, EvaluationContext context, bool interactive = false)
+            : this(projectFile, globalProperties, toolsVersion, subToolsetVersion, projectCollection, projectLoadSettings: null, evaluationContext: context, directoryCacheFactory: null, interactive: interactive)
         {
         }
 
@@ -389,6 +415,82 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// Creates a ProjectInstance from an immutable <see cref="Project"/>.
+        /// The resulting <see cref="ProjectInstance"/> object wraps the <see cref="Project"/>
+        /// object. Unlike the ProjectInstance(Project project, ProjectInstanceSettings settings)
+        /// constructor, the properties and items are not cloned.
+        /// </summary>
+        /// <param name="linkedProject">The immutable <see cref="Project"/>.</param>
+        /// <param name="fastItemLookupNeeded">Whether the fast item lookup cache is required.</param>
+        private ProjectInstance(Project linkedProject, bool fastItemLookupNeeded)
+        {
+            ErrorUtilities.VerifyThrowInternalNull(linkedProject, nameof(linkedProject));
+
+            var projectPath = linkedProject.FullPath;
+            _directory = Path.GetDirectoryName(projectPath);
+            _projectFileLocation = ElementLocation.Create(projectPath);
+            _hostServices = linkedProject.ProjectCollection.HostServices;
+            _isImmutable = true;
+
+            EvaluationId = linkedProject.EvaluationCounter;
+
+            // ProjectProperties
+            InitializeImmutableProjectPropertyInstances(linkedProject.Properties);
+            var projectPropertiesConverter = GetImmutableElementCollectionConverter<ProjectProperty, ProjectPropertyInstance>(linkedProject.Properties);
+            _properties = new PropertyDictionary<ProjectPropertyInstance>(projectPropertiesConverter);
+
+            // ProjectItemDefinitions
+            InitializeImmutableProjectItemDefinitionInstances(linkedProject.ItemDefinitions);
+            _itemDefinitions = GetImmutableElementCollectionConverter<ProjectItemDefinition, ProjectItemDefinitionInstance>(linkedProject.ItemDefinitions);
+
+            // ProjectItems
+            InitializeImmutableProjectItemInstances(linkedProject.Items);
+            var itemsByType = linkedProject.Items as IDictionary<string, ICollection<ProjectItem>>;
+            _items = new ImmutableItemDictionary<ProjectItem, ProjectItemInstance>(itemsByType, linkedProject.Items);
+
+            // ItemsByEvaluatedInclude
+            if (fastItemLookupNeeded)
+            {
+                _itemsByEvaluatedInclude = new MultiDictionary<string, ProjectItemInstance>(StringComparer.OrdinalIgnoreCase);
+                foreach (var item in linkedProject.Items)
+                {
+                    if (item is IImmutableInstanceProvider<ProjectItemInstance> immutableInstanceProvider)
+                    {
+                        _itemsByEvaluatedInclude.Add(item.EvaluatedInclude, immutableInstanceProvider.ImmutableInstance);
+                    }
+                }
+            }
+
+            _globalProperties = new PropertyDictionary<ProjectPropertyInstance>(linkedProject.GlobalPropertiesCount);
+            foreach (var property in linkedProject.GlobalPropertiesEnumerable)
+            {
+                _globalProperties.Set(ProjectPropertyInstance.Create(property.Key, property.Value));
+            }
+
+            CreateEnvironmentVariablePropertiesSnapshot(linkedProject.ProjectCollection.EnvironmentProperties);
+            CreateTargetsSnapshot(linkedProject.Targets, null, null, null, null);
+            CreateImportsSnapshot(linkedProject.Imports, linkedProject.ImportsIncludingDuplicates);
+
+            Toolset = linkedProject.ProjectCollection.GetToolset(linkedProject.ToolsVersion);
+            SubToolsetVersion = linkedProject.SubToolsetVersion;
+            TaskRegistry = new TaskRegistry(Toolset, linkedProject.ProjectCollection.ProjectRootElementCache);
+
+            ProjectRootElementCache = linkedProject.ProjectCollection.ProjectRootElementCache;
+
+            EvaluatedItemElements = new List<ProjectItemElement>(linkedProject.Items.Count);
+            foreach (var item in linkedProject.Items)
+            {
+                EvaluatedItemElements.Add(item.Xml);
+            }
+
+            _usingDifferentToolsVersionFromProjectFile = false;
+            _originalProjectToolsVersion = linkedProject.ToolsVersion;
+            _explicitToolsVersionSpecified = linkedProject.SubToolsetVersion != null;
+
+            _isImmutable = true;
+        }
+
+        /// <summary>
         /// Creates a ProjectInstance directly.
         /// No intermediate Project object is created.
         /// This is ideal if the project is simply going to be built, and not displayed or edited.
@@ -498,7 +600,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         internal ProjectInstance(ProjectRootElement xml, IDictionary<string, string> globalProperties, string toolsVersion, ILoggingService loggingService, int visualStudioVersionFromSolution, ProjectCollection projectCollection, ISdkResolverService sdkResolverService, int submissionId)
         {
-            BuildEventContext buildEventContext = new BuildEventContext(0, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTaskId);
+            BuildEventContext buildEventContext = new BuildEventContext(submissionId, 0, BuildEventContext.InvalidProjectInstanceId, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidTargetId, BuildEventContext.InvalidTaskId);
             Initialize(xml, globalProperties, toolsVersion, null, visualStudioVersionFromSolution, new BuildParameters(projectCollection), loggingService, buildEventContext, sdkResolverService, submissionId);
         }
 
@@ -601,6 +703,7 @@ namespace Microsoft.Build.Execution
             _isImmutable = isImmutable;
             _evaluationId = that.EvaluationId;
             _translateEntireState = that._translateEntireState;
+            _requestedProjectStateFilter = filter?.DeepClone();
 
             if (filter == null)
             {
@@ -783,6 +886,51 @@ namespace Microsoft.Build.Execution
                 options.EvaluationContext,
                 options.DirectoryCacheFactory,
                 options.Interactive);
+        }
+
+        /// <summary>
+        /// Create a ProjectInstance from an immutable project source.
+        /// </summary>
+        /// <param name="project">The immutable <see cref="Project"/> on which the ProjectInstance is based.</param>
+        /// <param name="settings">The <see cref="ProjectInstanceSettings"/> to use.</param>
+        public static ProjectInstance FromImmutableProjectSource(Project project, ProjectInstanceSettings settings)
+        {
+            bool fastItemLookupNeeded = settings.HasFlag(ProjectInstanceSettings.ImmutableWithFastItemLookup);
+            return new ProjectInstance(project, fastItemLookupNeeded);
+        }
+
+        private static ImmutableElementCollectionConverter<TCached, T> GetImmutableElementCollectionConverter<TCached, T>(
+            ICollection<TCached> elementsCollection)
+            where T : class, IKeyed
+        {
+            // The elementsCollection we receive here is implemented in CPS as a special collection
+            // that is both IDictionary<string, TCached> and also IDictionary<(string, int, int), TCached>.
+            // This allows it to represent the fundamental operations of an IRetrievableEntryHashSet.
+            // The IDictionary<(string, int, int), TCached> interface is used to handle the
+            // IRetrievableEntryHashSet's Get(string key, int index, int length) method. Here we take
+            // elementsCollection and put it into an ImmutableElementCollectionConverter, which
+            // represents the elementsCollection as an IRetrievableEntryHashSet<T>.
+            // That IRetrievableEntryHashSet is then used either directly or as a backing source for
+            // another collection wrapper (e.g. PropertyDictionary).
+            if (elementsCollection is not IDictionary<string, TCached> elementsDictionary ||
+                elementsCollection is not IDictionary<(string, int, int), TCached> constrainedElementsDictionary)
+            {
+                throw new ArgumentException(nameof(elementsCollection));
+            }
+
+            return new ImmutableElementCollectionConverter<TCached, T>(elementsDictionary, constrainedElementsDictionary);
+        }
+
+        private static ImmutableElementCollectionConverter<TCached, T> GetImmutableElementCollectionConverter<TCached, T>(
+            IDictionary<string, TCached> elementsDictionary)
+            where T : class, IKeyed
+        {
+            if (elementsDictionary is not IDictionary<(string, int, int), TCached> constrainedElementsDictionary)
+            {
+                throw new ArgumentException(nameof(elementsDictionary));
+            }
+
+            return new ImmutableElementCollectionConverter<TCached, T>(elementsDictionary, constrainedElementsDictionary);
         }
 
         /// <summary>
@@ -993,6 +1141,12 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
+        /// The property and item filter used when creating this instance, or null if this is not a filtered copy
+        /// of another ProjectInstance. <seealso cref="ProjectInstance(ProjectInstance, bool, RequestedProjectState)"/>
+        /// </summary>
+        internal RequestedProjectState RequestedProjectStateFilter => _requestedProjectStateFilter;
+
+        /// <summary>
         /// Task classes and locations known to this project.
         /// This is the project-specific task registry, which is consulted before
         /// the toolset's task registry.
@@ -1101,7 +1255,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Gets the items
         /// </summary>
-        ItemDictionary<ProjectItemInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Items
+        IItemDictionary<ProjectItemInstance> IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.Items
         {
             [DebuggerStepThrough]
             get
@@ -1283,7 +1437,7 @@ namespace Microsoft.Build.Execution
         /// Actual collection of items in this project,
         /// for the build to start with.
         /// </summary>
-        internal ItemDictionary<ProjectItemInstance> ItemsToBuildWith
+        internal IItemDictionary<ProjectItemInstance> ItemsToBuildWith
         {
             [DebuggerStepThrough]
             get
@@ -1403,7 +1557,7 @@ namespace Microsoft.Build.Execution
         /// Only called during evaluation, so does not check for immutability.
         /// </summary>
         void IEvaluatorData<ProjectPropertyInstance, ProjectItemInstance, ProjectMetadataInstance, ProjectItemDefinitionInstance>.
-            InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext)
+            InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext, LoggingContext loggingContext)
         {
             // All been done in the constructor.  We don't allow re-evaluation of project instances.
         }
@@ -1936,7 +2090,7 @@ namespace Microsoft.Build.Execution
         /// </comment>
         public string ExpandString(string unexpandedValue)
         {
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this, FileSystems.Default);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this, FileSystems.Default, _loggingContext);
 
             string result = expander.ExpandIntoStringAndUnescape(unexpandedValue, ExpanderOptions.ExpandPropertiesAndItems, ProjectFileLocation);
 
@@ -1954,7 +2108,7 @@ namespace Microsoft.Build.Execution
         /// </comment>
         public bool EvaluateCondition(string condition)
         {
-            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this, FileSystems.Default);
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = new Expander<ProjectPropertyInstance, ProjectItemInstance>(this, this, FileSystems.Default, _loggingContext);
 
             bool result = ConditionEvaluator.EvaluateCondition(
                 condition,
@@ -1963,9 +2117,8 @@ namespace Microsoft.Build.Execution
                 ExpanderOptions.ExpandPropertiesAndItems,
                 Directory,
                 ProjectFileLocation,
-                null /* no logging service */,
-                BuildEventContext.Invalid,
-                FileSystems.Default);
+                FileSystems.Default,
+                null /* no logging context */);
 
             return result;
         }
@@ -1982,7 +2135,7 @@ namespace Microsoft.Build.Execution
             rootElement.DefaultTargets = String.Join(";", DefaultTargets);
             rootElement.ToolsVersion = ToolsVersion;
 
-            // Add all of the item definitions.            
+            // Add all of the item definitions.
             ProjectItemDefinitionGroupElement itemDefinitionGroupElement = rootElement.AddItemDefinitionGroup();
             foreach (ProjectItemDefinitionInstance itemDefinitionInstance in _itemDefinitions.Values)
             {
@@ -2105,6 +2258,7 @@ namespace Microsoft.Build.Execution
         {
             translator.TranslateDictionary(ref _globalProperties, ProjectPropertyInstance.FactoryForDeserialization);
             translator.TranslateDictionary(ref _properties, ProjectPropertyInstance.FactoryForDeserialization);
+            translator.Translate(ref _requestedProjectStateFilter);
             translator.Translate(ref _isImmutable);
             TranslateItems(translator);
         }
@@ -2253,7 +2407,7 @@ namespace Microsoft.Build.Execution
             }
 
             // If a ToolsVersion has been passed in using the /tv:xx switch, we want to generate an
-            // old-style solution wrapper project if it's < 4.0, to work around ordering issues.  
+            // old-style solution wrapper project if it's < 4.0, to work around ordering issues.
             if (toolsVersion != null)
             {
                 if (
@@ -2261,7 +2415,7 @@ namespace Microsoft.Build.Execution
                        String.Equals(toolsVersion, "3.0", StringComparison.OrdinalIgnoreCase) ||
                        String.Equals(toolsVersion, "3.5", StringComparison.OrdinalIgnoreCase))
                 {
-                    // Spawn the Orcas SolutionWrapperProject generator.  
+                    // Spawn the Orcas SolutionWrapperProject generator.
                     loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedExplicitToolsVersion", toolsVersion);
                     projectInstances = GenerateSolutionWrapperUsingOldOM(projectFile, globalProperties, toolsVersion, buildParameters.ProjectRootElementCache, buildParameters, loggingService, projectBuildEventContext, isExplicitlyLoaded, sdkResolverService, submissionId);
                 }
@@ -2272,7 +2426,7 @@ namespace Microsoft.Build.Execution
             }
 
             // If the user didn't pass in a ToolsVersion, still try to make a best-effort guess as to whether
-            // we should be generating a 4.0+ or a 3.5-style wrapper project based on the version of the solution. 
+            // we should be generating a 4.0+ or a 3.5-style wrapper project based on the version of the solution.
             else
             {
                 string solutionFile = projectFile;
@@ -2282,9 +2436,9 @@ namespace Microsoft.Build.Execution
                 }
                 SolutionFile.GetSolutionFileAndVisualStudioMajorVersions(solutionFile, out int solutionVersion, out int visualStudioVersion);
 
-                // If we get to this point, it's because it's a valid version.  Map the solution version 
-                // to the equivalent MSBuild ToolsVersion, and unless it's Dev10 or newer, spawn the old 
-                // engine to generate the solution wrapper.  
+                // If we get to this point, it's because it's a valid version.  Map the solution version
+                // to the equivalent MSBuild ToolsVersion, and unless it's Dev10 or newer, spawn the old
+                // engine to generate the solution wrapper.
                 if (solutionVersion <= 9) /* Whidbey or before */
                 {
                     loggingService.LogComment(projectBuildEventContext, MessageImportance.Low, "OldWrapperGeneratedOldSolutionVersion", "2.0", solutionVersion);
@@ -2360,7 +2514,7 @@ namespace Microsoft.Build.Execution
 
             if (loggers != null)
             {
-                parameters.Loggers = (loggers is ICollection<ILogger>) ? ((ICollection<ILogger>)loggers) : new List<ILogger>(loggers);
+                parameters.Loggers = (loggers is ICollection<ILogger> loggersCollection) ? loggersCollection : new List<ILogger>(loggers);
 
                 // Enables task parameter logging based on whether any of the loggers attached
                 // to the Project have their verbosity set to Diagnostic. If no logger has
@@ -2600,7 +2754,7 @@ namespace Microsoft.Build.Execution
             int submissionId)
         {
             // Pass the toolsVersion of this project through, which will never be null -- either we passed the /tv:nn
-            // switch straight through, or we fabricated a ToolsVersion based on the solution version.  
+            // switch straight through, or we fabricated a ToolsVersion based on the solution version.
             // It's needed to determine which <UsingTask> tags to put in, whether to put a ToolsVersion parameter
             // on the <MSBuild> task tags, and what MSBuildToolsPath to use when scanning child projects
             // for dependency information.
@@ -2645,14 +2799,26 @@ namespace Microsoft.Build.Execution
                 }
             }
 
-            XmlReaderSettings xrs = new XmlReaderSettings();
-            xrs.DtdProcessing = DtdProcessing.Ignore;
+            XmlReaderSettings xrs = new XmlReaderSettings
+            {
+                DtdProcessing = DtdProcessing.Ignore
+            };
 
-            ProjectRootElement projectRootElement = new ProjectRootElement(XmlReader.Create(new StringReader(wrapperProjectXml), xrs), projectRootElementCache, isExplicitlyLoaded,
-                preserveFormatting: false);
-            projectRootElement.DirectoryPath = Path.GetDirectoryName(projectFile);
-            ProjectInstance instance = new ProjectInstance(projectRootElement, globalProperties, toolsVersion, buildParameters, loggingService, projectBuildEventContext, sdkResolverService, submissionId);
-            return new ProjectInstance[] { instance };
+            StringReader sr = new StringReader(wrapperProjectXml);
+            using (XmlReader xmlReader = XmlReader.Create(sr, xrs))
+            {
+                ProjectRootElement projectRootElement = new(
+                    xmlReader,
+                    projectRootElementCache,
+                    isExplicitlyLoaded,
+                    preserveFormatting: false)
+                {
+                    DirectoryPath = Path.GetDirectoryName(projectFile)
+                };
+                ProjectInstance instance = new(projectRootElement, globalProperties, toolsVersion, buildParameters, loggingService, projectBuildEventContext, sdkResolverService, submissionId);
+
+                return new[] { instance };
+            }
         }
 
         /// <summary>
@@ -2692,6 +2858,47 @@ namespace Microsoft.Build.Execution
                 return new ObjectModel.ReadOnlyDictionary<string, TValue>(dictionary);
             }
         }
+
+        private static void InitializeImmutableProjectItemDefinitionInstances(IDictionary<string, ProjectItemDefinition> projectItemDefinitions)
+        {
+            foreach (var projectItemDefinition in projectItemDefinitions.Values)
+            {
+                if (projectItemDefinition is IImmutableInstanceProvider<ProjectItemDefinitionInstance> immutableInstanceProvider)
+                {
+                    immutableInstanceProvider.ImmutableInstance = new ProjectItemDefinitionInstance(projectItemDefinition);
+                }
+            }
+        }
+
+        private static void InitializeImmutableProjectPropertyInstances(ICollection<ProjectProperty> projectProperties)
+        {
+            foreach (var projectProperty in projectProperties)
+            {
+                if (projectProperty is IImmutableInstanceProvider<ProjectPropertyInstance> immutableInstanceProvider)
+                {
+                    immutableInstanceProvider.ImmutableInstance = InstantiateProjectPropertyInstance(projectProperty, isImmutable: true);
+                }
+            }
+        }
+
+        private static ProjectPropertyInstance InstantiateProjectPropertyInstance(ProjectProperty property, bool isImmutable)
+        {
+            // Allow reserved property names, since this is how they are added to the project instance.
+            // The caller has prevented users setting them themselves.
+            var instance = ProjectPropertyInstance.Create(
+                                property.Name,
+                                ((IProperty)property).EvaluatedValueEscaped,
+                                true /* MAY be reserved name */,
+                                isImmutable,
+                                property.IsEnvironmentProperty);
+            return instance;
+        }
+
+        /// <summary>
+        /// Logging context - set during the evaluation.
+        /// Can be null - especially if the project was fetched from the cache.
+        /// </summary>
+        private LoggingContext _loggingContext;
 
         /// <summary>
         /// Common code for the constructors that evaluate directly.
@@ -2733,7 +2940,7 @@ namespace Microsoft.Build.Execution
             _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
             _hostServices = buildParameters.HostServices;
             this.ProjectRootElementCache = buildParameters.ProjectRootElementCache;
-
+            _loggingContext = new AnalyzerLoggingContext(loggingService, buildEventContext);
             this.EvaluatedItemElements = new List<ProjectItemElement>();
 
             _explicitToolsVersionSpecified = (explicitToolsVersion != null);
@@ -2771,7 +2978,7 @@ namespace Microsoft.Build.Execution
                 this.SubToolsetVersion = this.Toolset.GenerateSubToolsetVersionUsingVisualStudioVersion(globalProperties, visualStudioVersionFromSolution);
             }
 
-            // Create a task registry which will fall back on the toolset task registry if necessary.          
+            // Create a task registry which will fall back on the toolset task registry if necessary.
             this.TaskRegistry = new TaskRegistry(this.Toolset, ProjectRootElementCache);
 
             if (globalProperties != null)
@@ -2780,9 +2987,9 @@ namespace Microsoft.Build.Execution
                 {
                     if (String.Equals(globalProperty.Key, Constants.SubToolsetVersionPropertyName, StringComparison.OrdinalIgnoreCase) && explicitSubToolsetVersion != null)
                     {
-                        // if we have a sub-toolset version explicitly provided by the ProjectInstance constructor, AND a sub-toolset version provided as a global property, 
-                        // make sure that the one passed in with the constructor wins.  If there isn't a matching global property, the sub-toolset version will be set at 
-                        // a later point. 
+                        // if we have a sub-toolset version explicitly provided by the ProjectInstance constructor, AND a sub-toolset version provided as a global property,
+                        // make sure that the one passed in with the constructor wins.  If there isn't a matching global property, the sub-toolset version will be set at
+                        // a later point.
                         _globalProperties.Set(ProjectPropertyInstance.Create(globalProperty.Key, explicitSubToolsetVersion, false /* may not be reserved */, _isImmutable));
                     }
                     else
@@ -2934,44 +3141,60 @@ namespace Microsoft.Build.Execution
 
             foreach (ProjectItem item in items)
             {
-                List<ProjectItemDefinitionInstance> inheritedItemDefinitions = null;
-
-                if (item.InheritedItemDefinitions != null)
-                {
-                    inheritedItemDefinitions = new List<ProjectItemDefinitionInstance>(item.InheritedItemDefinitions.Count);
-
-                    foreach (ProjectItemDefinition inheritedItemDefinition in item.InheritedItemDefinitions)
-                    {
-                        // All item definitions in this list should be present in the collection of item definitions
-                        // on the project we are cloning.
-                        inheritedItemDefinitions.Add(_itemDefinitions[inheritedItemDefinition.ItemType]);
-                    }
-                }
-
-                CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = null;
-
-                if (item.DirectMetadata != null)
-                {
-                    directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
-
-                    IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
-                    directMetadata.ImportProperties(projectMetadataInstances);
-                }
-
-                // For externally constructed ProjectItem, fall back to the publicly available EvaluateInclude
-                var evaluatedIncludeEscaped = ((IItem)item).EvaluatedIncludeEscaped;
-                evaluatedIncludeEscaped ??= item.EvaluatedInclude;
-                var evaluatedIncludeBeforeWildcardExpansionEscaped = item.EvaluatedIncludeBeforeWildcardExpansionEscaped;
-                evaluatedIncludeBeforeWildcardExpansionEscaped ??= item.EvaluatedInclude;
-
-                ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, evaluatedIncludeEscaped, evaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, item.Xml.ContainingProject.EscapedFullPath);
-
+                ProjectItemInstance instance = InstantiateProjectItemInstance(item);
                 _items.Add(instance);
-
                 projectItemToInstanceMap?.Add(item, instance);
             }
 
             return projectItemToInstanceMap;
+        }
+
+        private void InitializeImmutableProjectItemInstances(ICollection<ProjectItem> projectItems)
+        {
+            foreach (var projectItem in projectItems)
+            {
+                if (projectItem is IImmutableInstanceProvider<ProjectItemInstance> immutableInstanceProvider)
+                {
+                    ProjectItemInstance instance = InstantiateProjectItemInstance(projectItem);
+                    immutableInstanceProvider.ImmutableInstance = instance;
+                }
+            }
+        }
+
+        private ProjectItemInstance InstantiateProjectItemInstance(ProjectItem item)
+        {
+            List<ProjectItemDefinitionInstance> inheritedItemDefinitions = null;
+
+            if (item.InheritedItemDefinitions != null)
+            {
+                inheritedItemDefinitions = new List<ProjectItemDefinitionInstance>(item.InheritedItemDefinitions.Count);
+
+                foreach (ProjectItemDefinition inheritedItemDefinition in item.InheritedItemDefinitions)
+                {
+                    // All item definitions in this list should be present in the collection of item definitions
+                    // on the project we are cloning.
+                    inheritedItemDefinitions.Add(_itemDefinitions[inheritedItemDefinition.ItemType]);
+                }
+            }
+
+            CopyOnWritePropertyDictionary<ProjectMetadataInstance> directMetadata = null;
+
+            if (item.DirectMetadata != null)
+            {
+                directMetadata = new CopyOnWritePropertyDictionary<ProjectMetadataInstance>();
+
+                IEnumerable<ProjectMetadataInstance> projectMetadataInstances = item.DirectMetadata.Select(directMetadatum => new ProjectMetadataInstance(directMetadatum));
+                directMetadata.ImportProperties(projectMetadataInstances);
+            }
+
+            // For externally constructed ProjectItem, fall back to the publicly available EvaluateInclude
+            var evaluatedIncludeEscaped = ((IItem)item).EvaluatedIncludeEscaped;
+            evaluatedIncludeEscaped ??= item.EvaluatedInclude;
+            var evaluatedIncludeBeforeWildcardExpansionEscaped = item.EvaluatedIncludeBeforeWildcardExpansionEscaped;
+            evaluatedIncludeBeforeWildcardExpansionEscaped ??= item.EvaluatedInclude;
+
+            ProjectItemInstance instance = new ProjectItemInstance(this, item.ItemType, evaluatedIncludeEscaped, evaluatedIncludeBeforeWildcardExpansionEscaped, directMetadata, inheritedItemDefinitions, item.Xml.ContainingProject.EscapedFullPath);
+            return instance;
         }
 
         /// <summary>
@@ -2979,7 +3202,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void CreateItemDefinitionsSnapshot(IDictionary<string, ProjectItemDefinition> itemDefinitions)
         {
-            _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(MSBuildNameIgnoreCaseComparer.Default);
+            _itemDefinitions = new RetrievableEntryHashSet<ProjectItemDefinitionInstance>(itemDefinitions.Count, MSBuildNameIgnoreCaseComparer.Default);
 
             foreach (ProjectItemDefinition definition in itemDefinitions.Values)
             {
@@ -2996,9 +3219,7 @@ namespace Microsoft.Build.Execution
 
             foreach (ProjectProperty property in properties)
             {
-                // Allow reserved property names, since this is how they are added to the project instance. 
-                // The caller has prevented users setting them themselves.
-                ProjectPropertyInstance instance = ProjectPropertyInstance.Create(property.Name, ((IProperty)property).EvaluatedValueEscaped, true /* MAY be reserved name */, isImmutable, property.IsEnvironmentProperty);
+                ProjectPropertyInstance instance = InstantiateProjectPropertyInstance(property, isImmutable);
                 _properties.Set(instance);
             }
         }

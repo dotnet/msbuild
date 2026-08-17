@@ -12,7 +12,7 @@ namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
     /// This context is created to contain information about a build request that has been forwarded to
-    /// a child node for execution. All further communication from the child with regard to the build 
+    /// a child node for execution. All further communication from the child with regard to the build
     /// request (such a logging messages, errors, follow up build requests or build result) will be
     /// processing using information from this context.
     /// </summary>

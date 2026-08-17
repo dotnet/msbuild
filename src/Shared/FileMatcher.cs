@@ -1697,9 +1697,6 @@ namespace Microsoft.Build.Shared
             // Store the information whether the tail was checked when a pattern "*?" occurred
             bool tailChecked = false;
 
-#if MONO    // MONO doesn't support local functions
-            Func<char, char, int, int, bool> CompareIgnoreCase = (inputChar, patternChar, iIndex, pIndex) =>
-#else
             // Function for comparing two characters, ignoring case
             // PERF NOTE:
             // Having a local function instead of a variable increases the speed by approx. 2 times.
@@ -1708,7 +1705,6 @@ namespace Microsoft.Build.Shared
             // when we have to compare two non ASCII characters. Using just string.Compare for
             // character comparison, would reduce the speed by approx. 5 times.
             bool CompareIgnoreCase(ref ReadOnlySpan<char> input, int iIndex, int pIndex)
-#endif
             {
                 char inputChar = input[iIndex];
                 char patternChar = pattern[pIndex];
@@ -1728,9 +1724,6 @@ namespace Microsoft.Build.Shared
                 }
                 return MemoryExtensions.Equals(input.Slice(iIndex, 1), pattern.AsSpan(pIndex, 1), StringComparison.OrdinalIgnoreCase);
             }
-#if MONO
-            ; // The end of the CompareIgnoreCase anonymous function
-#endif
 
             while (inputIndex < inputLength)
             {

@@ -38,7 +38,7 @@ namespace Microsoft.Build.BuildEngine
             string segment;
 
             // Walk along the string, keeping track of whether we are in an item list expression.
-            // If we hit a semi-colon or the end of the string and we aren't in an item list, 
+            // If we hit a semi-colon or the end of the string and we aren't in an item list,
             // add the segment to the list.
             for (int current = 0; current < expression.Length; current++)
             {
@@ -348,8 +348,8 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
-        /// Returns true if the character at the specified index 
-        /// is the specified char. 
+        /// Returns true if the character at the specified index
+        /// is the specified char.
         /// Leaves index one past the character.
         /// </summary>
         private static bool Sink(string expression, ref int i, char c)

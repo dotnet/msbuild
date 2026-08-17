@@ -15,7 +15,7 @@ namespace Microsoft.Build.BackEnd
         /// Notifies the Node to set a configuration for a particular build.  This is sent before
         /// any BuildRequests are made and will not be sent again for a particular build.  This instructs
         /// the node to prepare to receive build requests.
-        /// 
+        ///
         /// Contains:
         /// Build ID
         /// Environment variables
@@ -30,11 +30,11 @@ namespace Microsoft.Build.BackEnd
         NodeConfiguration,
 
         /// <summary>
-        /// A BuildRequestConfiguration object.  
+        /// A BuildRequestConfiguration object.
         /// When sent TO a node, this informs the node of a build configuration.
         /// When sent FROM a node, this requests a BuildRequestConfigurationResponse to map the configuration to the
         /// appropriate global configuration ID.
-        /// 
+        ///
         /// Contents:
         /// Configuration ID
         /// Project Filename
@@ -45,7 +45,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// A response to a request to map a build configuration
-        /// 
+        ///
         /// Contents:
         /// Node Configuration ID
         /// Global Configuration ID
@@ -54,7 +54,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Information about a project that has been loaded by a node.
-        /// 
+        ///
         /// Contents:
         /// Global Configuration ID
         /// Initial Targets
@@ -64,7 +64,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Packet used to inform the scheduler that a node's active build request is blocked.
-        /// 
+        ///
         /// Contents:
         /// Build Request ID
         /// Active Targets
@@ -75,7 +75,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// Packet used to unblocked a blocked request on a node.
-        /// 
+        ///
         /// Contents:
         /// Build Request ID
         /// Build Results for child requests, if any.
@@ -84,7 +84,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// A BuildRequest object
-        /// 
+        ///
         /// Contents:
         /// Build Request ID
         /// Configuration ID
@@ -95,7 +95,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// A BuildResult object
-        /// 
+        ///
         /// Contents:
         /// Build ID
         /// Project Instance ID
@@ -107,7 +107,7 @@ namespace Microsoft.Build.BackEnd
 
         /// <summary>
         /// A logging message.
-        /// 
+        ///
         /// Contents:
         /// Build Event Type
         /// Build Event Args
@@ -115,8 +115,8 @@ namespace Microsoft.Build.BackEnd
         LogMessage,
 
         /// <summary>
-        /// Informs the node that the build is complete.  
-        /// 
+        /// Informs the node that the build is complete.
+        ///
         /// Contents:
         /// Prepare For Reuse
         /// </summary>
@@ -125,21 +125,21 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Reported by the node (or node provider) when a node has terminated.  This is the final packet that will be received
         /// from a node.
-        /// 
+        ///
         /// Contents:
         /// Reason
         /// </summary>
         NodeShutdown,
 
         /// <summary>
-        /// Notifies the task host to set the task-specific configuration for a particular task execution. 
+        /// Notifies the task host to set the task-specific configuration for a particular task execution.
         /// This is sent in place of NodeConfiguration and gives the task host all the information it needs
-        /// to set itself up and execute the task that matches this particular configuration. 
-        /// 
+        /// to set itself up and execute the task that matches this particular configuration.
+        ///
         /// Contains:
-        /// Node ID (of parent MSBuild node, to make the logging work out) 
+        /// Node ID (of parent MSBuild node, to make the logging work out)
         /// Startup directory
-        /// Environment variables 
+        /// Environment variables
         /// UI Culture information
         /// App Domain Configuration XML
         /// Task name
@@ -149,12 +149,12 @@ namespace Microsoft.Build.BackEnd
         TaskHostConfiguration,
 
         /// <summary>
-        /// Informs the parent node that the task host has finished executing a 
-        /// particular task.  Does not need to contain identifying information 
-        /// about the task, because the task host will only ever be connected to 
-        /// one parent node at a a time, and will only ever be executing one task 
-        /// for that node at any one time.  
-        /// 
+        /// Informs the parent node that the task host has finished executing a
+        /// particular task.  Does not need to contain identifying information
+        /// about the task, because the task host will only ever be connected to
+        /// one parent node at a a time, and will only ever be executing one task
+        /// for that node at any one time.
+        ///
         /// Contents:
         /// Task result (success / failure)
         /// Resultant parameter values (for output gathering)
@@ -162,11 +162,11 @@ namespace Microsoft.Build.BackEnd
         TaskHostTaskComplete,
 
         /// <summary>
-        /// Message sent from the node to its paired task host when a task that 
-        /// supports ICancellableTask is cancelled.  
-        /// 
+        /// Message sent from the node to its paired task host when a task that
+        /// supports ICancellableTask is cancelled.
+        ///
         /// Contents:
-        /// (nothing) 
+        /// (nothing)
         /// </summary>
         TaskHostTaskCancelled,
 
@@ -213,13 +213,13 @@ namespace Microsoft.Build.BackEnd
         ServerNodeBuildResult = 0xF1,
 
         /// <summary>
-        /// Info about server console activity. 
+        /// Info about server console activity.
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
         ServerNodeConsoleWrite = 0xF2,
 
         /// <summary>
-        /// Command to cancel ongoing build. 
+        /// Command to cancel ongoing build.
         /// Keep this enum value constant intact as this is part of contract with dotnet CLI
         /// </summary>
         ServerNodeBuildCancel = 0xF3,

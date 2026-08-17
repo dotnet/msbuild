@@ -20,7 +20,7 @@ namespace Microsoft.Build.BuildEngine
         void PostBuildRequestsToHost(BuildRequest[] buildRequests);
 
         /// <summary>
-        /// This method is called to send results to the parent engine in response to an earlier 
+        /// This method is called to send results to the parent engine in response to an earlier
         /// build request.
         /// </summary>
         /// <param name="buildResult"></param>

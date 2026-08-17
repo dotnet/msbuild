@@ -26,21 +26,21 @@ namespace Microsoft.Build.Internal
     internal static class Utilities
     {
         /// <summary>
-        /// Save off the contents of the environment variable that specifies whether we should treat higher toolsversions as the current 
+        /// Save off the contents of the environment variable that specifies whether we should treat higher toolsversions as the current
         /// toolsversion.  (Some hosts require this.)
         /// </summary>
         private static bool s_shouldTreatHigherToolsVersionsAsCurrent = (Environment.GetEnvironmentVariable("MSBUILDTREATHIGHERTOOLSVERSIONASCURRENT") != null);
 
         /// <summary>
-        /// Save off the contents of the environment variable that specifies whether we should treat all toolsversions, regardless of 
+        /// Save off the contents of the environment variable that specifies whether we should treat all toolsversions, regardless of
         /// whether they are higher or lower, as the current toolsversion.  (Some hosts require this.)
         /// </summary>
         private static bool s_shouldTreatOtherToolsVersionsAsCurrent = (Environment.GetEnvironmentVariable("MSBUILDTREATALLTOOLSVERSIONSASCURRENT") != null);
 
         /// <summary>
-        /// If set, default to the ToolsVersion from the project file (or if that doesn't isn't set, default to 2.0).  Otherwise, use Dev12+ 
-        /// defaulting logic: first check the MSBUILDDEFAULTTOOLSVERSION environment variable, then check for a DefaultOverrideToolsVersion, 
-        /// then if both fail, use the current ToolsVersion. 
+        /// If set, default to the ToolsVersion from the project file (or if that doesn't isn't set, default to 2.0).  Otherwise, use Dev12+
+        /// defaulting logic: first check the MSBUILDDEFAULTTOOLSVERSION environment variable, then check for a DefaultOverrideToolsVersion,
+        /// then if both fail, use the current ToolsVersion.
         /// </summary>
         private static bool s_uselegacyDefaultToolsVersionBehavior = (Environment.GetEnvironmentVariable("MSBUILDLEGACYDEFAULTTOOLSVERSION") != null);
 
@@ -56,10 +56,10 @@ namespace Microsoft.Build.Internal
 
         /// <summary>
         /// INTERNAL FOR UNIT-TESTING ONLY
-        /// 
-        /// We've got several environment variables that we read into statics since we don't expect them to ever 
-        /// reasonably change, but we need some way of refreshing their values so that we can modify them for 
-        /// unit testing purposes. 
+        ///
+        /// We've got several environment variables that we read into statics since we don't expect them to ever
+        /// reasonably change, but we need some way of refreshing their values so that we can modify them for
+        /// unit testing purposes.
         /// </summary>
         internal static void RefreshInternalEnvironmentValues()
         {
@@ -94,7 +94,7 @@ namespace Microsoft.Build.Internal
                 }
             }
 
-            // The value does not contain valid XML markup.  Store it as text, so it gets 
+            // The value does not contain valid XML markup.  Store it as text, so it gets
             // escaped properly.
             node.InnerText = s;
         }
@@ -108,10 +108,10 @@ namespace Microsoft.Build.Internal
         {
             // XmlNode.InnerXml gives back a string that consists of the set of characters
             // in between the opening and closing elements of the XML node, without doing any
-            // unescaping.  Any "strange" character sequences (like "<![CDATA[...]]>" will remain 
+            // unescaping.  Any "strange" character sequences (like "<![CDATA[...]]>" will remain
             // exactly so and will not be translated or interpreted.  The only modification that
             // .InnerXml will do is that it will normalize any Xml contained within.  This means
-            // normalizing whitespace between XML attributes and quote characters that surround XML 
+            // normalizing whitespace between XML attributes and quote characters that surround XML
             // attributes.  If PreserveWhitespace is false, then it will also normalize whitespace
             // between elements.
             //
@@ -138,19 +138,19 @@ namespace Microsoft.Build.Internal
             // use ... InnerXml or InnerText.  There are two basic scenarios we care about.
             //
             // 1.)  The first scenario is that the user is trying to create a property whose
-            //      contents are actually XML.  That is to say that the contents may be written 
+            //      contents are actually XML.  That is to say that the contents may be written
             //      to a XML file, or may be passed in as a string to XmlDocument.LoadXml.
-            //      In this case, we would want to use XmlNode.InnerXml, because we DO NOT want 
-            //      character sequences to be unescaped.  If we did unescape them, then whatever 
+            //      In this case, we would want to use XmlNode.InnerXml, because we DO NOT want
+            //      character sequences to be unescaped.  If we did unescape them, then whatever
             //      XML parser tried to read in the stream as XML later on would totally barf.
             //
             // 2.)  The second scenario is the the user is trying to create a property that
             //      is just intended to be treated as a string.  That string may be very large
             //      and could contain all sorts of whitespace, carriage returns, special characters,
-            //      etc.  But in the end, it's just a big string.  In this case, whatever 
+            //      etc.  But in the end, it's just a big string.  In this case, whatever
             //      task is actually processing this string ... it's not going to know anything
             //      about character sequences such as &amp; and &lt;.  These character sequences
-            //      are specific to XML markup.  So, here we want to use XmlNode.InnerText so that 
+            //      are specific to XML markup.  So, here we want to use XmlNode.InnerText so that
             //      the character sequences get unescaped into their actual character before
             //      the string is passed to the task (or wherever else the property is used).
             //      Of course, if the string value of the property needs to contain characters
@@ -325,7 +325,7 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Figure out what ToolsVersion to use to actually build the project with. 
+        /// Figure out what ToolsVersion to use to actually build the project with.
         /// </summary>
         /// <param name="explicitToolsVersion">The user-specified ToolsVersion (through e.g. /tv: on the command line)</param>
         /// <param name="toolsVersionFromProject">The ToolsVersion from the project file</param>
@@ -338,8 +338,8 @@ namespace Microsoft.Build.Internal
         {
             string toolsVersionToUse = explicitToolsVersion;
 
-            // hosts may need to treat toolsversions later than the current one as the current one ... or may just 
-            // want to treat all toolsversions as though they're the current one, so give them that ability 
+            // hosts may need to treat toolsversions later than the current one as the current one ... or may just
+            // want to treat all toolsversions as though they're the current one, so give them that ability
             // through an environment variable
             if (s_shouldTreatOtherToolsVersionsAsCurrent)
             {
@@ -361,15 +361,15 @@ namespace Microsoft.Build.Internal
                     }
                 }
 
-                // If ToolsVersion has not either been explicitly set or been overridden via one of the methods 
+                // If ToolsVersion has not either been explicitly set or been overridden via one of the methods
                 // mentioned above
                 if (toolsVersionToUse == null)
                 {
-                    // We want to generate the ToolsVersion based on the legacy behavior if EITHER: 
-                    // - the environment variable (MSBUILDLEGACYDEFAULTTOOLSVERSION) is set 
-                    // - the current ToolsVersion doesn't actually exist.  This is extremely unlikely 
-                    //   to happen normally, but may happen in checked-in toolset scenarios, in which 
-                    //   case we want to make sure we're at least as tolerant as Dev11 was. 
+                    // We want to generate the ToolsVersion based on the legacy behavior if EITHER:
+                    // - the environment variable (MSBUILDLEGACYDEFAULTTOOLSVERSION) is set
+                    // - the current ToolsVersion doesn't actually exist.  This is extremely unlikely
+                    //   to happen normally, but may happen in checked-in toolset scenarios, in which
+                    //   case we want to make sure we're at least as tolerant as Dev11 was.
                     Toolset currentToolset = null;
 
                     if (getToolset != null)
@@ -377,11 +377,11 @@ namespace Microsoft.Build.Internal
                         currentToolset = getToolset(MSBuildConstants.CurrentToolsVersion);
                     }
 
-                    // if we want to do the legacy behavior, act as we did through Dev11:  
+                    // if we want to do the legacy behavior, act as we did through Dev11:
                     // - If project file defines a ToolsVersion that has a valid toolset associated with it, use that
                     // - Otherwise, if project file defines an invalid ToolsVersion, use the current ToolsVersion
-                    // - Otherwise, if project file does not define a ToolsVersion, use the default ToolsVersion (must 
-                    //   be "2.0" since 2.0 projects did not have a ToolsVersion field). 
+                    // - Otherwise, if project file does not define a ToolsVersion, use the default ToolsVersion (must
+                    //   be "2.0" since 2.0 projects did not have a ToolsVersion field).
                     if (s_uselegacyDefaultToolsVersionBehavior || (getToolset != null && currentToolset == null))
                     {
                         if (!String.IsNullOrEmpty(toolsVersionFromProject))
@@ -389,8 +389,8 @@ namespace Microsoft.Build.Internal
                             toolsVersionToUse = toolsVersionFromProject;
 
                             // If we can tell that the toolset specified in the project is not present
-                            // then we'll use the current version.  Otherwise, we'll assume our caller 
-                            // knew what it was doing. 
+                            // then we'll use the current version.  Otherwise, we'll assume our caller
+                            // knew what it was doing.
                             if (getToolset != null && getToolset(toolsVersionToUse) == null)
                             {
                                 toolsVersionToUse = MSBuildConstants.CurrentToolsVersion;
@@ -403,9 +403,9 @@ namespace Microsoft.Build.Internal
                     }
                     else
                     {
-                        // Otherwise, first check to see if the default ToolsVersion has been set in the environment.  
-                        // Ideally we'll check to make sure it's a valid ToolsVersion, but if we don't have the ability 
-                        // to do so, we'll assume the person who set the environment variable knew what they were doing. 
+                        // Otherwise, first check to see if the default ToolsVersion has been set in the environment.
+                        // Ideally we'll check to make sure it's a valid ToolsVersion, but if we don't have the ability
+                        // to do so, we'll assume the person who set the environment variable knew what they were doing.
                         if (!String.IsNullOrEmpty(s_defaultToolsVersionFromEnvironment))
                         {
                             if (getToolset == null || getToolset(s_defaultToolsVersionFromEnvironment) != null)
@@ -414,11 +414,11 @@ namespace Microsoft.Build.Internal
                             }
                         }
 
-                        // Otherwise, check to see if the override default toolsversion from the toolset works.  Though 
-                        // it's attached to the Toolset, it's actually MSBuild version dependent, so any loaded Toolset 
-                        // should have the same one. 
+                        // Otherwise, check to see if the override default toolsversion from the toolset works.  Though
+                        // it's attached to the Toolset, it's actually MSBuild version dependent, so any loaded Toolset
+                        // should have the same one.
                         //
-                        // And if that doesn't work, then just fall back to the current ToolsVersion. 
+                        // And if that doesn't work, then just fall back to the current ToolsVersion.
                         if (toolsVersionToUse == null)
                         {
                             if (getToolset != null && currentToolset != null)
@@ -468,9 +468,9 @@ namespace Microsoft.Build.Internal
 
             PropertyDictionary<ProjectPropertyInstance> environmentProperties = new PropertyDictionary<ProjectPropertyInstance>(environmentVariablesBag.Count + 2);
 
-            // We set the MSBuildExtensionsPath variables here because we don't want to make them official 
-            // reserved properties; we need the ability for people to override our default in their 
-            // environment or as a global property.  
+            // We set the MSBuildExtensionsPath variables here because we don't want to make them official
+            // reserved properties; we need the ability for people to override our default in their
+            // environment or as a global property.
 
 #if !FEATURE_INSTALLED_MSBUILD
             string extensionsPath = BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory;
@@ -489,11 +489,11 @@ namespace Microsoft.Build.Internal
             string extensionsPath64 = extensionsPath;
             environmentProperties.Set(ProjectPropertyInstance.Create(ReservedPropertyNames.extensionsPath64, extensionsPath64, true));
 #else
-            // "MSBuildExtensionsPath64". This points to whatever the value of "Program Files" environment variable is on a 
+            // "MSBuildExtensionsPath64". This points to whatever the value of "Program Files" environment variable is on a
             // 64-bit machine, and is empty on a 32-bit machine.
             if (FrameworkLocationHelper.programFiles64 != null)
             {
-                // if ProgramFiles and ProgramFiles(x86) are the same, then this is a 32-bit box, 
+                // if ProgramFiles and ProgramFiles(x86) are the same, then this is a 32-bit box,
                 // so we only want to set MSBuildExtensionsPath64 if they're not
                 string extensionsPath64 = NativeMethodsShared.IsWindows
                                               ? Path.Combine(
@@ -505,9 +505,9 @@ namespace Microsoft.Build.Internal
 #endif
 
 #if FEATURE_INSTALLED_MSBUILD
-            // MSBuildExtensionsPath:  The way this used to work is that it would point to "Program Files\MSBuild" on both 
+            // MSBuildExtensionsPath:  The way this used to work is that it would point to "Program Files\MSBuild" on both
             // 32-bit and 64-bit machines.  We have a switch to continue using that behavior; however the default is now for
-            // MSBuildExtensionsPath to always point to the same location as MSBuildExtensionsPath32. 
+            // MSBuildExtensionsPath to always point to the same location as MSBuildExtensionsPath32.
 
             bool useLegacyMSBuildExtensionsPathBehavior = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLEGACYEXTENSIONSPATH"));
 
@@ -583,7 +583,7 @@ namespace Microsoft.Build.Internal
         }
 
         /// <summary>
-        /// Extension to IEnumerable to get the count if it 
+        /// Extension to IEnumerable to get the count if it
         /// can be quickly gotten, otherwise 0.
         /// </summary>
         public static int FastCountOrZero(this IEnumerable enumerable)

@@ -10,6 +10,7 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks.Dataflow;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -281,6 +282,9 @@ namespace Microsoft.Build.BackEnd
                         TraceEngine("CFB: Rethrowing shutdown exceptions");
                         throw new AggregateException(deactivateExceptions);
                     }
+
+                    var buildCheckManager = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider)!.Instance;
+                    buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
                 },
                 isLastTask: true);
 
@@ -1122,7 +1126,7 @@ namespace Microsoft.Build.BackEnd
             lock (issuingEntry.GlobalLock)
             {
                 var existingResultsToReport = new List<BuildResult>();
-                var unresolvedConfigurationsAdded = new HashSet<NGen<int>>();
+                var unresolvedConfigurationsAdded = new HashSet<int>();
 
                 foreach (FullyQualifiedBuildRequest request in newRequests)
                 {

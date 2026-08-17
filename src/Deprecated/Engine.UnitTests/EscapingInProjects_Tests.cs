@@ -148,7 +148,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
         /// <summary>
         /// If I try to add a new item to a project, and my new item's Include has a property that
-        /// contains an unescaped semicolon in it, then we shouldn't try to match it up against any existing 
+        /// contains an unescaped semicolon in it, then we shouldn't try to match it up against any existing
         /// wildcards.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -203,17 +203,17 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         {
             // Populate the project directory with three physical files on disk -- a.weirdo, b.weirdo, c.weirdo.
             ModifyItem.CreateThreeWeirdoFilesHelper();
-            
+
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
                         <MyWildcard Include=`*.weirdo` />
                     </ItemGroup>
-                
+
                 </Project>
                 ";
 
@@ -221,7 +221,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
@@ -229,7 +229,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                         <MyWildcard Include=`foo;bar.weirdo` />
                         <MyWildcard Include=`c.weirdo` />
                     </ItemGroup>
-                
+
                 </Project>
                 ";
 
@@ -250,17 +250,17 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         {
             // Populate the project directory with three physical files on disk -- a.weirdo, b.weirdo, c.weirdo.
             ModifyItem.CreateThreeWeirdoFilesHelper();
-            
+
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
                         <MyWildcard Include=`*.weirdo` />
                     </ItemGroup>
-                
+
                 </Project>
                 ";
 
@@ -268,13 +268,13 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <ItemGroup>
                         <MyWildcard Include=`*.weirdo` />
                     </ItemGroup>
-                
+
                 </Project>
                 ";
 
@@ -287,7 +287,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
 
         /// <summary>
         /// If I try to modify an item in a project, and my new item's Include has a property that
-        /// contains an unescaped semicolon in it, then we shouldn't try to match it up against any existing 
+        /// contains an unescaped semicolon in it, then we shouldn't try to match it up against any existing
         /// wildcards.
         /// </summary>
         /// <owner>RGoel</owner>
@@ -296,11 +296,11 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
         {
             // Populate the project directory with three physical files on disk -- a.weirdo, b.weirdo, c.weirdo.
             ModifyItem.CreateThreeWeirdoFilesHelper();
-            
+
             // ************************************
             //               BEFORE
             // ************************************
-            string projectOriginalContents = @" 
+            string projectOriginalContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -310,7 +310,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     <ItemGroup>
                         <MyWildcard Include=`*.weirdo` />
                     </ItemGroup>
-                
+
                 </Project>
                 ";
 
@@ -318,7 +318,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             // ************************************
             //               AFTER
             // ************************************
-            string projectNewExpectedContents = @" 
+            string projectNewExpectedContents = @"
                 <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
 
                     <PropertyGroup>
@@ -330,7 +330,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                         <MyWildcard Include=`$(FileNameWithSemicolon).weirdo` />
                         <MyWildcard Include=`c.weirdo` />
                     </ItemGroup>
-                
+
                 </Project>
                 ";
 
@@ -547,7 +547,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
                 </Project>
             ");
-            
+
             // ---------------------
             // Class1.cs
             // ---------------------
@@ -607,7 +607,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
                 </Project>
             ");
-            
+
             // ---------------------
             // Class1.cs
             // ---------------------
@@ -665,7 +665,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
                 </Project>
             ");
-            
+
             // ---------------------
             // Class1.cs
             // ---------------------
@@ -723,7 +723,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
                 </Project>
             ");
-            
+
             // ---------------------
             // Class1.cs
             // ---------------------
@@ -924,7 +924,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
                     <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.targets` />
 
                     <!-- The old OM, which is what this solution is being built under, doesn't understand
-                         BeforeTargets, so this test was failing, because _AssignManagedMetadata was set 
+                         BeforeTargets, so this test was failing, because _AssignManagedMetadata was set
                          up as a BeforeTarget for Build.  Copied here so that build will return the correct
                          information again. -->
                     <Target Name=`BeforeBuild`>
@@ -957,7 +957,7 @@ namespace Microsoft.Build.UnitTests.EscapingInProjects_Tests
             MockLogger log = ObjectModelHelpers.BuildTempProjectFileWithTargetsExpectSuccess(@"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1.sln", new string[] { targetForFirstProject }, new BuildPropertyGroup());
 
             Assertion.Assert(@"Did not find expected file Console;!@(foo)'^(Application1.exe",
-                File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir, 
+                File.Exists(Path.Combine(ObjectModelHelpers.TempProjectDir,
                 @"SLN;!@(foo)'^1\Console;!@(foo)'^(Application1\bin\debug\Console;!@(foo)'^(Application1.exe")));
         }
     }

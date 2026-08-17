@@ -20,12 +20,12 @@ namespace Microsoft.Build.UnitTests
     public class ProjectSchemaValidationHandlerTest
     {
         /***********************************************************************
-         * 
+         *
          * Test:        ProjectSchemaValidationHandlerTest.VerifyProjectSchema
-         *  
+         *
          * This calls VerifyProjectSchema to validate a project file passed, where
          * the project contents are invalid
-         * 
+         *
          **********************************************************************/
         [Fact]
         public void VerifyInvalidProjectSchema()
@@ -175,12 +175,12 @@ namespace Microsoft.Build.UnitTests
         }
 
         /***********************************************************************
-         * 
+         *
          * Test:        ProjectSchemaValidationHandlerTest.VerifyProjectSchema
-         *  
+         *
          * This calls VerifyProjectSchema to validate a project XML
          * specified in a string, where the project passed is valid
-         * 
+         *
          **********************************************************************/
         [Fact]
         public void VerifyValidProjectSchema()
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests
 
                 // ProjectSchemaValidationHandler.VerifyProjectSchema
                 //    (
-                //    projectFilename, 
+                //    projectFilename,
                 //    msbuildTempXsdFilenames[0],
                 //    @"c:\"
                 //    );
@@ -289,7 +289,7 @@ namespace Microsoft.Build.UnitTests
             Directory.CreateDirectory(msbuildXsdRootDirectory);
 
             Stream msbuildXsdStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Microsoft.Build.CommandLine.UnitTests.Microsoft.Build.xsd");
-            StreamReader msbuildXsdStreamReader = new StreamReader(msbuildXsdStream);
+            using StreamReader msbuildXsdStreamReader = new StreamReader(msbuildXsdStream);
             string msbuildXsdContents = msbuildXsdStreamReader.ReadToEnd();
             string msbuildTempXsdFilename = Path.Combine(msbuildXsdRootDirectory, "Microsoft.Build.xsd");
             File.WriteAllText(msbuildTempXsdFilename, msbuildXsdContents);
@@ -298,14 +298,14 @@ namespace Microsoft.Build.UnitTests
             Directory.CreateDirectory(msbuildXsdSubDirectory);
 
             msbuildXsdStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Microsoft.Build.CommandLine.UnitTests.Microsoft.Build.Core.xsd");
-            msbuildXsdStreamReader = new StreamReader(msbuildXsdStream);
-            msbuildXsdContents = msbuildXsdStreamReader.ReadToEnd();
+            using StreamReader msbuildXsdStreamReader2 = new StreamReader(msbuildXsdStream);
+            msbuildXsdContents = msbuildXsdStreamReader2.ReadToEnd();
             string msbuildTempXsdFilename2 = Path.Combine(msbuildXsdSubDirectory, "Microsoft.Build.Core.xsd");
             File.WriteAllText(msbuildTempXsdFilename2, msbuildXsdContents);
 
             msbuildXsdStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Microsoft.Build.CommandLine.UnitTests.Microsoft.Build.CommonTypes.xsd");
-            msbuildXsdStreamReader = new StreamReader(msbuildXsdStream);
-            msbuildXsdContents = msbuildXsdStreamReader.ReadToEnd();
+            using StreamReader msbuildXsdStreamReader3 = new StreamReader(msbuildXsdStream);
+            msbuildXsdContents = msbuildXsdStreamReader3.ReadToEnd();
             string msbuildTempXsdFilename3 = Path.Combine(msbuildXsdSubDirectory, "Microsoft.Build.CommonTypes.xsd");
             File.WriteAllText(msbuildTempXsdFilename3, msbuildXsdContents);
 

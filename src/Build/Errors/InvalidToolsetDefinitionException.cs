@@ -139,7 +139,7 @@ namespace Microsoft.Build.Exceptions
 
         /// <summary>
         /// Throws an InvalidToolsetDefinitionException.
-        /// 
+        ///
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
@@ -156,7 +156,7 @@ namespace Microsoft.Build.Exceptions
         /// <summary>
         /// Throws an InvalidToolsetDefinitionException including a specified inner exception,
         /// which may be interesting to hosts.
-        /// 
+        ///
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios

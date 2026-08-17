@@ -54,8 +54,8 @@ namespace Microsoft.Build.BuildEngine.Shared
         internal static readonly char[] illegalTargetNameCharacters = new char[] { '$', '@', '(', ')', '%', '*', '?', '.' };
 
         // Names that cannot be used as property or item names because they are reserved
-        internal static readonly string[] illegalPropertyOrItemNames = new string[] { 
-//            XMakeElements.project, // "Project" is not reserved, because unfortunately ProjectReference items 
+        internal static readonly string[] illegalPropertyOrItemNames = new string[] {
+//            XMakeElements.project, // "Project" is not reserved, because unfortunately ProjectReference items
                                      // already use it as metadata name.
             XMakeElements.visualStudioProject,
             XMakeElements.target,

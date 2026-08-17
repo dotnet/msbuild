@@ -21,7 +21,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
     public class TaskHostTaskComplete_Tests
     {
         /// <summary>
-        /// Tests various valid ways to construct this packet.  
+        /// Tests various valid ways to construct this packet.
         /// </summary>
         [Fact]
         public void TestConstructors()
@@ -32,8 +32,10 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 new FileAccessData(
                     ReportedFileOperation.CreateFile,
                     RequestedAccess.Read,
-                    0,
-                    0,
+                    processId: 123,
+                    id: 1,
+                    correlationId: 0,
+                    error: 0,
                     DesiredAccess.GENERIC_READ,
                     FlagsAndAttributes.FILE_ATTRIBUTE_NORMAL,
                     "foo",
@@ -90,7 +92,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test invalid constructor permutations. 
+        /// Test invalid constructor permutations.
         /// </summary>
         [Fact]
         public void TestInvalidConstructors()
@@ -176,7 +178,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem. 
+        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem.
         /// </summary>
         [Fact]
         public void TestTranslationWithITaskItemInDictionary()
@@ -202,7 +204,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         /// <summary>
-        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array. 
+        /// Test serialization / deserialization when the parameter dictionary contains an ITaskItem array.
         /// </summary>
         [Fact]
         public void TestTranslationWithITaskItemArrayInDictionary()

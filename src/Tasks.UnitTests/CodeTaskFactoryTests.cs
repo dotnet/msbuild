@@ -16,6 +16,7 @@ namespace Microsoft.Build.UnitTests
 #if FEATURE_CODETASKFACTORY
 
     using System.CodeDom.Compiler;
+    using Microsoft.Build.Tasks.UnitTests;
 
     public sealed class CodeTaskFactoryTests
     {
@@ -1119,6 +1120,81 @@ namespace Microsoft.Build.UnitTests
 
             MockLogger mockLogger = Helpers.BuildProjectWithNewOMExpectSuccess(projectFileContents);
             mockLogger.AssertLogContains("Hello, World!");
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFromSourceFileInBinlog()
+        {
+            string taskName = "HelloTask";
+
+            string sourceContent = $$"""
+                namespace InlineTask
+                {
+                    using Microsoft.Build.Utilities;
+
+                    public class {{taskName}} : Task
+                    {
+                        public override bool Execute()
+                        {
+                            Log.LogMessage("Hello, world!");
+                            return !Log.HasLoggedErrors;
+                        }
+                    }
+                }
+                """;
+
+            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildFromSourceAndCheckForEmbeddedFileInBinlog(
+                FactoryType.CodeTaskFactory, taskName, sourceContent, true);
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFromSourceFileInBinlogWhenFailsToCompile()
+        {
+            string taskName = "HelloTask";
+
+            string sourceContent =  $$"""
+                namespace InlineTask
+                {
+                    using Microsoft.Build.Utilities;
+
+                    public class {{taskName}} : Task
+                    {
+                """;
+
+            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildFromSourceAndCheckForEmbeddedFileInBinlog(
+                FactoryType.CodeTaskFactory, taskName, sourceContent, false);
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFileInBinlog()
+        {
+            string taskXml = @"
+                <Task>
+                    <Code Type=""Fragment"" Language=""cs"">
+                        <![CDATA[
+                              Log.LogMessage(""Hello, World!"");
+                		   ]]>
+                    </Code>
+                </Task>";
+
+            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildAndCheckForEmbeddedFileInBinlog(
+                FactoryType.CodeTaskFactory, "HelloTask", taskXml, true);
+        }
+
+        [Fact]
+        public void EmbedsGeneratedFileInBinlogWhenFailsToCompile()
+        {
+            string taskXml = @"
+                <Task>
+                    <Code Type=""Fragment"" Language=""cs"">
+                        <![CDATA[
+                              Log.LogMessage(""Hello, World!
+                		   ]]>
+                    </Code>
+                </Task>";
+
+            CodeTaskFactoryEmbeddedFileInBinlogTestHelper.BuildAndCheckForEmbeddedFileInBinlog(
+                FactoryType.CodeTaskFactory, "HelloTask", taskXml, false);
         }
     }
 #else

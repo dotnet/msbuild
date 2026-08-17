@@ -117,7 +117,7 @@ namespace Microsoft.Build.Evaluation
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="type"></param>
         /// <returns></returns>
@@ -135,7 +135,7 @@ namespace Microsoft.Build.Evaluation
                     return _tokenString;
                 }
 
-                // Return a token string for 
+                // Return a token string for
                 // an error message.
                 switch (_tokenType)
                 {

@@ -12,7 +12,7 @@ namespace Microsoft.Build.Logging.StructuredLogger
     /// <summary>
     /// This class encapsulates functionality for a collection of properties (name value pairs) in a
     /// hierarchical way. (e.g. if the parameter is defined and identical in the parent, it is not
-    /// stored in this instance). 
+    /// stored in this instance).
     /// </summary>
     internal sealed class PropertyBag
     {

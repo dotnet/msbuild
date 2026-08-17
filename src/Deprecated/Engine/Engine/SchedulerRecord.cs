@@ -41,7 +41,7 @@ namespace Microsoft.Build.BuildEngine
 
         #region Properties
         /// <summary>
-        /// Returns true if this request is blocked waiting for the child requests to 
+        /// Returns true if this request is blocked waiting for the child requests to
         /// complete
         /// </summary>
         internal bool Blocked

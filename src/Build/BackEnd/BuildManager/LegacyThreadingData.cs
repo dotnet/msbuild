@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
@@ -19,10 +20,10 @@ namespace Microsoft.Build.Execution
     {
         #region Fields
         /// <summary>
-        /// Store the pair of start/end events used by a particular submission to track their ownership 
-        /// of the legacy thread. 
-        /// Item1: Start event, tracks when the submission has permission to start building. 
-        /// Item2: End event, signalled when that submission is no longer using the legacy thread. 
+        /// Store the pair of start/end events used by a particular submission to track their ownership
+        /// of the legacy thread.
+        /// Item1: Start event, tracks when the submission has permission to start building.
+        /// Item2: End event, signalled when that submission is no longer using the legacy thread.
         /// </summary>
         private readonly IDictionary<int, Tuple<AutoResetEvent, ManualResetEvent>> _legacyThreadingEventsById = new Dictionary<int, Tuple<AutoResetEvent, ManualResetEvent>>();
 
@@ -37,8 +38,8 @@ namespace Microsoft.Build.Execution
         private RequestBuilder _instanceForMainThread;
 
         /// <summary>
-        /// Lock object for startNewRequestBuilderMainThreadEventsById, since it's possible for multiple submissions to be 
-        /// submitted at the same time. 
+        /// Lock object for startNewRequestBuilderMainThreadEventsById, since it's possible for multiple submissions to be
+        /// submitted at the same time.
         /// </summary>
         private readonly Object _legacyThreadingEventsLock = new Object();
         #endregion
@@ -79,9 +80,10 @@ namespace Microsoft.Build.Execution
         #endregion
 
         /// <summary>
-        /// Given a submission ID, assign it "start" and "finish" events to track its use of 
+        /// Given a submission ID, assign it "start" and "finish" events to track its use of
         /// the legacy thread.
         /// </summary>
+        [SuppressMessage("Microsoft.Dispose", "CA2000:Dispose objects before losing scope", Justification = "The events are disposed in UnregisterSubmissionForLegacyThread")]
         internal void RegisterSubmissionForLegacyThread(int submissionId)
         {
             lock (_legacyThreadingEventsLock)
@@ -95,8 +97,8 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// This submission is completely done with the legacy thread, so unregister it 
-        /// from the dictionary so that we don't leave random events lying around. 
+        /// This submission is completely done with the legacy thread, so unregister it
+        /// from the dictionary so that we don't leave random events lying around.
         /// </summary>
         internal void UnregisterSubmissionForLegacyThread(int submissionId)
         {
@@ -104,13 +106,17 @@ namespace Microsoft.Build.Execution
             {
                 ErrorUtilities.VerifyThrow(_legacyThreadingEventsById.ContainsKey(submissionId), "Submission {0} should have been previously registered with LegacyThreadingData", submissionId);
 
+                // Dispose the events
+                _legacyThreadingEventsById[submissionId].Item1?.Dispose();
+                _legacyThreadingEventsById[submissionId].Item2?.Dispose();
+
                 _legacyThreadingEventsById.Remove(submissionId);
             }
         }
 
         /// <summary>
-        /// Given a submission ID, return the event being used to track when that submission is ready 
-        /// to be executed on the legacy thread. 
+        /// Given a submission ID, return the event being used to track when that submission is ready
+        /// to be executed on the legacy thread.
         /// </summary>
         internal WaitHandle GetStartRequestBuilderMainThreadEventForSubmission(int submissionId)
         {
@@ -127,8 +133,8 @@ namespace Microsoft.Build.Execution
         }
 
         /// <summary>
-        /// Given a submission ID, return the event being used to track when that submission is ready 
-        /// to be executed on the legacy thread. 
+        /// Given a submission ID, return the event being used to track when that submission is ready
+        /// to be executed on the legacy thread.
         /// </summary>
         internal Task GetLegacyThreadInactiveTask(int submissionId)
         {

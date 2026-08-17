@@ -30,7 +30,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate node as boolean
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
             if (String.Equals(_functionName, "exists", StringComparison.OrdinalIgnoreCase))
             {
@@ -63,7 +63,7 @@ namespace Microsoft.Build.Evaluation
                     // Ignore invalid characters or path related exceptions
 
                     // We will ignore the PathTooLong exception caused by GetFullPath because in single proc this code
-                    // is not executed and the condition is just evaluated to false as File.Exists and Directory.Exists does not throw in this situation. 
+                    // is not executed and the condition is just evaluated to false as File.Exists and Directory.Exists does not throw in this situation.
                     // To be consistant with that we will return a false in this case also.
                     // DevDiv Bugs: 46035
 

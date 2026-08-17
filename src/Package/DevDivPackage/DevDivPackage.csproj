@@ -7,6 +7,8 @@
     <PlatformTarget>x86</PlatformTarget>
     <DisableSemVer2>true</DisableSemVer2>
     <IsVisualStudioInsertionPackage>true</IsVisualStudioInsertionPackage>
+    <!-- VS insertion packages are not needed when doing a .NET product build. -->
+    <ExcludeFromDotNetBuild>true</ExcludeFromDotNetBuild>
   </PropertyGroup>
 
   <ItemGroup>

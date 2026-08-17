@@ -107,7 +107,7 @@ namespace Microsoft.Build.Tasks
         /// to ensure that certain runtime frameworks are installed depending on the
         /// target framework.
         /// set BypassFrameworkInstallChecks to true in order to bypass those checks.
-        /// </summary>        
+        /// </summary>
         public bool BypassFrameworkInstallChecks { get; set; }
 
         /// <summary>
@@ -146,7 +146,7 @@ namespace Microsoft.Build.Tasks
             FrameworkNameVersioning moniker;
             FrameworkNameVersioning monikerWithNoProfile = null;
 
-            // Are we targeting a profile. 
+            // Are we targeting a profile.
             bool targetingProfile;
 
             try
@@ -154,7 +154,7 @@ namespace Microsoft.Build.Tasks
                 moniker = new FrameworkNameVersioning(TargetFrameworkMoniker);
                 targetingProfile = !String.IsNullOrEmpty(moniker.Profile);
 
-                // If we are targeting a profile we need to generate a set of reference assembly paths which describe where the full framework 
+                // If we are targeting a profile we need to generate a set of reference assembly paths which describe where the full framework
                 //  exists, to do so we need to get the reference assembly location without the profile as part of the moniker.
                 if (targetingProfile)
                 {
@@ -216,7 +216,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e)
             {
-                // The reason we need to do exception E here is because we are in a task and have the ability to log the message and give the user 
+                // The reason we need to do exception E here is because we are in a task and have the ability to log the message and give the user
                 // feedback as to its cause, tasks if at all possible should not have exception leave them.
                 Log.LogErrorWithCodeFromResources("GetReferenceAssemblyPaths.ProblemGeneratingReferencePaths", TargetFrameworkMoniker, e.Message);
 

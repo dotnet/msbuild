@@ -19,15 +19,15 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Evaluate as boolean
         /// </summary>
-        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state, LoggingContext loggingContext = null)
+        internal override bool BoolEvaluate(ConditionEvaluator.IConditionEvaluationState state)
         {
-            if (!LeftChild.TryBoolEvaluate(state, out bool leftBool, loggingContext))
+            if (!LeftChild.TryBoolEvaluate(state, out bool leftBool))
             {
                 ProjectErrorUtilities.ThrowInvalidProject(
                     state.ElementLocation,
                     "ExpressionDoesNotEvaluateToBoolean",
                     LeftChild.GetUnexpandedValue(state),
-                    LeftChild.GetExpandedValue(state, loggingContext),
+                    LeftChild.GetExpandedValue(state),
                     state.Condition);
             }
 
@@ -38,7 +38,7 @@ namespace Microsoft.Build.Evaluation
             }
             else
             {
-                if (!RightChild.TryBoolEvaluate(state, out bool rightBool, loggingContext))
+                if (!RightChild.TryBoolEvaluate(state, out bool rightBool))
                 {
                     ProjectErrorUtilities.ThrowInvalidProject(
                         state.ElementLocation,

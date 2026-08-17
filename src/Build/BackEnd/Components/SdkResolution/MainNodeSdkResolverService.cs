@@ -39,7 +39,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 
         // Test hook
-        internal void InitializeForTests(SdkResolverLoader resolverLoader = null, IList<SdkResolver> resolvers = null)
+        internal void InitializeForTests(SdkResolverLoader resolverLoader = null, IReadOnlyList<SdkResolver> resolvers = null)
         {
             ((CachingSdkResolverService)_cachedSdkResolver).InitializeForTests(resolverLoader, resolvers);
         }

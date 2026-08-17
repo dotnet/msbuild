@@ -95,7 +95,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             List<ProjectImportElement> imports = Helpers.MakeList(project.Imports);
 
@@ -117,7 +118,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     </Project>
                 ";
 
-            ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectRootElement project = projectRootElementFromString.Project;
 
             ProjectImportElement import = (ProjectImportElement)Helpers.GetFirst(project.Children);
 
@@ -173,7 +175,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>",
                     file1);
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
                 ProjectImportElement import = Helpers.GetFirst(project.Xml.Imports);
                 import.Project = file2;
 
@@ -211,7 +214,8 @@ namespace Microsoft.Build.UnitTests.OM.Construction
 </Project>",
                     file);
 
-                Project project = new Project(XmlReader.Create(new StringReader(content)));
+                using ProjectFromString projectFromString = new(content);
+                Project project = projectFromString.Project;
                 ProjectImportElement import = Helpers.GetFirst(project.Xml.Imports);
                 import.Condition = "false";
 
@@ -251,9 +255,11 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             try
             {
                 Directory.CreateDirectory(testTempPath);
-                ProjectRootElement project = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectfileContent)));
+                using ProjectRootElementFromString projectFileProject = new(projectfileContent);
+                ProjectRootElement project = projectFileProject.Project;
                 project.Save(projectfile);
-                project = ProjectRootElement.Create(XmlReader.Create(new StringReader(targetsfileContent)));
+                using ProjectRootElementFromString targetsFileProject = new(targetsfileContent);
+                project = targetsFileProject.Project;
                 project.Save(targetsFile);
                 Project msbuildProject = new Project(projectfile);
             }

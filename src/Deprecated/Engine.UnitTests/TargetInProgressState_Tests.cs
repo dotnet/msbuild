@@ -43,7 +43,7 @@ namespace Microsoft.Build.UnitTests
                       <Target Name='t' DependsOnTargets='Build'/>
                     <Import Project=`$(MSBuildBinPath)\Microsoft.CSharp.Targets` />
                     </Project>
-                "); 
+                ");
             EngineCallback engineCallback = new EngineCallback(engine);
             Target build = project.Targets["Build"];
             List<ProjectBuildState> waitingBuildStates = null;
@@ -60,8 +60,8 @@ namespace Microsoft.Build.UnitTests
             initiatingRequest.AddBlockingTarget("Build");
             BuildRequest [] outstandingBuildRequests = null;
             string projectName = "SuperTestProject";
-            
-            
+
+
 
             TargetInProgessState targetInProgress1 = new TargetInProgessState(
                                                               engineCallback,
@@ -71,7 +71,7 @@ namespace Microsoft.Build.UnitTests
                                                               outstandingBuildRequests,
                                                               projectName
                                                           );
-            
+
             targetInProgress1.ParentTargetsForBuildRequests = null;
             Assertion.AssertNull(targetInProgress1.ParentTargetsForBuildRequests);
             Assertion.Assert(!targetInProgress1.RequestedByHost);
@@ -212,7 +212,7 @@ namespace Microsoft.Build.UnitTests
                 originalWrapper.name = string.Empty;
                 originalWrapper.nodeId = 6;
                 originalWrapper.projectId = 8;
-                
+
                 stream.Position = 0;
                 // Serialize
                 originalWrapper.WriteToStream(writer);

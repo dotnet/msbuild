@@ -9,23 +9,53 @@ using System;
 using System.Collections;
 using System.Diagnostics;
 using System.IO;
+using System.Security.AccessControl;
 using System.Threading;
 using Microsoft.Build.BuildEngine.Shared;
-using System.Security.AccessControl;
 
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
+    /// This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+    /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+    /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+    /// 
     /// This class hosts a node class in the child process. It uses shared memory to communicate
     /// with the local node provider.
     /// Wraps a Node.
     /// </summary>
+    /// <remarks>
+    /// <format type="text/markdown"><![CDATA[
+    /// ## Remarks
+    /// > [!WARNING]
+    /// > This class (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+    /// > <xref:Microsoft.Build.Construction>
+    /// > <xref:Microsoft.Build.Evaluation>
+    /// > <xref:Microsoft.Build.Execution>
+    /// ]]></format>
+    /// </remarks>
     public class LocalNode
     {
         #region Static Constructors
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// Hook up an unhandled exception handler, in case our error handling paths are leaky
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
         static LocalNode()
         {
             AppDomain currentDomain = AppDomain.CurrentDomain;
@@ -110,10 +140,10 @@ namespace Microsoft.Build.BuildEngine
             // The writer thread should be created before the
             // reader thread because some LocalCallDescriptors
             // assume the shared memory for the writer thread
-            // has already been created. The method will both 
-            // instantiate the shared memory for the writer 
+            // has already been created. The method will both
+            // instantiate the shared memory for the writer
             // thread and also start the writer thread itself.
-            // We will verifyThrow in the method if the 
+            // We will verifyThrow in the method if the
             // sharedMemory was not created correctly.
             engineCallback.StartWriterThread(nodeNumber);
 
@@ -124,7 +154,7 @@ namespace Microsoft.Build.BuildEngine
                         // Generate the name for the shared memory region
                         LocalNodeProviderGlobalNames.NodeInputMemoryName(nodeNumber),
                         SharedMemoryType.ReadOnly,
-                        // Reuse an existing shared memory region as it should have already 
+                        // Reuse an existing shared memory region as it should have already
                         // been created by the parent node side
                         true
                   );
@@ -150,7 +180,7 @@ namespace Microsoft.Build.BuildEngine
             Thread writerThread = engineCallback.GetWriterThread();
             // The threads may not exist if the child has timed out before the parent has told the node
             // to start up its communication threads. This can happen if the node is started with /nodemode:x
-            // and no parent is running, or if the parent node has spawned a new process and then crashed 
+            // and no parent is running, or if the parent node has spawned a new process and then crashed
             // before establishing communication with the child node.
             writerThread?.Join();
 
@@ -214,9 +244,25 @@ namespace Microsoft.Build.BuildEngine
         }
 
         /// <summary>
+        /// This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// <see href="/dotnet/api/microsoft.build.construction">Microsoft.Build.Construction</see>
+        /// <see href="/dotnet/api/microsoft.build.evaluation">Microsoft.Build.Evaluation</see>
+        /// <see href="/dotnet/api/microsoft.build.execution">Microsoft.Build.Execution</see>
+        /// 
         /// This function starts local node when process is launched and shuts it down on time out
         /// Called by msbuild.exe.
         /// </summary>
+        /// <remarks>
+        /// <format type="text/markdown"><![CDATA[
+        /// ## Remarks
+        /// > [!WARNING]
+        /// > This method (and the whole namespace) is deprecated. Please use the classes in these namespaces instead: 
+        /// > <xref:Microsoft.Build.Construction>
+        /// > <xref:Microsoft.Build.Evaluation>
+        /// > <xref:Microsoft.Build.Execution>
+        /// ]]></format>
+        /// </remarks>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Reliability", "CA2000:Dispose objects before losing scope", Justification = "Agreed not to touch entries from Deprecated folder")]
         public static void StartLocalNodeServer(int nodeNumber)
         {
             // Create global events necessary for handshaking with the parent
@@ -263,7 +309,7 @@ namespace Microsoft.Build.BuildEngine
                     globalNodeActivate.Reset();
                     // Set the global inuse event so other parent processes know this node is now initialized
                     globalNodeInUse.Set();
-                    // Make a copy of the parents handle to protect ourselves in case the parent dies, 
+                    // Make a copy of the parents handle to protect ourselves in case the parent dies,
                     // this is to prevent a parent from reserving a node another parent is trying to use.
                     globalNodeReserveHandle =
                         new EventWaitHandle(false, EventResetMode.ManualReset, LocalNodeProviderGlobalNames.NodeReserveEventName(nodeNumber));
@@ -359,7 +405,7 @@ namespace Microsoft.Build.BuildEngine
                     {
                         // Read the list of LocalCallDescriptors from sharedMemory,
                         // this will be null if a large object is being read from shared
-                        // memory and will continue to be null until the large object has 
+                        // memory and will continue to be null until the large object has
                         // been completly sent.
                         IList localCallDescriptorList = sharedMemory.Read();
 
@@ -472,7 +518,7 @@ namespace Microsoft.Build.BuildEngine
 
             inUseEvent.Set();
 
-            // Clear the environment so that we dont have extra variables laying around, this 
+            // Clear the environment so that we dont have extra variables laying around, this
             // may be a performance hog but needs to be done
             IDictionary variableDictionary = Environment.GetEnvironmentVariables();
             foreach (string variableName in variableDictionary.Keys)
@@ -518,7 +564,7 @@ namespace Microsoft.Build.BuildEngine
 
             if (!isParentAlive)
             {
-                // No logging's going to reach the parent at this point: 
+                // No logging's going to reach the parent at this point:
                 // indicate on the console what's going on
                 string message = ResourceUtilities.FormatResourceString("ParentProcessUnexpectedlyDied", node.NodeId);
                 Console.WriteLine(message);
@@ -605,8 +651,8 @@ namespace Microsoft.Build.BuildEngine
         // This event is used to cause the child to create the shared memory structures to start communication
         // with the parent
         private static EventWaitHandle globalInitiateActivationEvent;
-        // This event is used to indicate to the parent that shared memory buffers have been created and are ready for 
-        // use 
+        // This event is used to indicate to the parent that shared memory buffers have been created and are ready for
+        // use
         private static EventWaitHandle globalNodeActivate;
         // Private local events
         private static ManualResetEvent communicationThreadExitEvent = new ManualResetEvent(false);

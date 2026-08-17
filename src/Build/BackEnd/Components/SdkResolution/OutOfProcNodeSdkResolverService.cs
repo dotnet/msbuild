@@ -20,7 +20,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
     /// sends requests to the main node that SDK resolution is handled in a central location.  This instance is registered in <see cref="Microsoft.Build.Execution.OutOfProcNode"/>
     /// using a factory so that parameters can be passed to the constructor.  This service caches responses for a given build so that it can avoid sending
     /// a packet where possible.  The cache is always in effect here because the out-of-proc node is only used for builds.
-    /// 
+    ///
     /// Since this object is a registered <see cref="IBuildComponent"/>, it is a singleton for the main process.  To get an instance of it, you
     /// must have access to an <see cref="IBuildComponentHost"/> and call <see cref="IBuildComponentHost.GetComponent"/> and pass <see cref="BuildComponentType.SdkResolverService"/>.
     /// </summary>

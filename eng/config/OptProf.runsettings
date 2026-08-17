@@ -21,6 +21,20 @@
   </SessionConfiguration>
   <DataCollectionRunSettings>
     <DataCollectors>
+      <DataCollector uri="datacollector://microsoft/DevDiv/TestExtensions/LingeringProcessCollector/v1" friendlyName="Lingering Process Collector" enabled="True">
+        <Configuration>
+          <KillLingeringProcesses>false</KillLingeringProcesses>
+          <LoggingBehavior>Warning</LoggingBehavior>
+          <CollectDumps>true</CollectDumps>
+          <RootDumpDirectory>%SystemDrive%\dumps</RootDumpDirectory>
+          <WhiteList>
+            <ProcessName>devenv</ProcessName>
+          </WhiteList>
+          <ShutdownCommands>
+            <ShutdownCommand Process="VBCSCompiler" Command="%ProcessPath%" Arguments="-shutdown" Timeout="60000" />
+          </ShutdownCommands>
+        </Configuration>
+      </DataCollector>
       <DataCollector uri="datacollector://microsoft/DevDiv/TestExtensions/ProcDumpCollector/v1" friendlyName="ProcDump Collector" enabled="True">
         <Configuration>
           <RootDumpDirectory>C:\Test\Dumps</RootDumpDirectory>

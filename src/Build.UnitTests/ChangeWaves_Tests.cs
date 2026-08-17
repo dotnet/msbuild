@@ -58,7 +58,7 @@ namespace Microsoft.Build.Engine.UnitTests
 
             TransientTestFile file = testEnvironment.CreateFile("proj.csproj", projectFile);
 
-            ProjectCollection collection = new ProjectCollection();
+            using ProjectCollection collection = new ProjectCollection();
             MockLogger log = new MockLogger(_output);
             collection.RegisterLogger(log);
 

@@ -810,13 +810,10 @@ namespace Microsoft.Build.CommandLine
             // Wait for the RunTask task runner thread before shutting down so that we can cleanly dispose all WaitHandles.
             _taskRunnerThread?.Join();
 
-            if (_debugCommunications)
-            {
-                using (StreamWriter writer = File.CreateText(String.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), Process.GetCurrentProcess().Id)))
-                {
-                    writer.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
-                }
-            }
+            using StreamWriter debugWriter = _debugCommunications
+                ? File.CreateText(string.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), Process.GetCurrentProcess().Id))
+                : null;
+            debugWriter?.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
 
 #if !CLR2COMPATIBILITY
             _registeredTaskObjectCache.DisposeCacheObjects(RegisteredTaskObjectLifetime.Build);
@@ -827,8 +824,15 @@ namespace Microsoft.Build.CommandLine
             // so reset it away from a user-requested folder that may get deleted.
             NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
-            // Restore the original environment.
-            CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+            // Restore the original environment, best effort.
+            try
+            {
+                CommunicationsUtilities.SetEnvironment(_savedEnvironment);
+            }
+            catch (Exception ex)
+            {
+                debugWriter?.WriteLine("Failed to restore the original environment: {0}.", ex);
+            }
 
             if (_nodeEndpoint.LinkStatus == LinkStatus.Active)
             {

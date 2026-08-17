@@ -53,7 +53,7 @@ namespace Microsoft.Build.Evaluation
 
         private BuildEventContext _logBuildEventContext;
         /// <summary>
-        ///  Location contextual information which are attached to logging events to 
+        ///  Location contextual information which are attached to logging events to
         ///  say where they are in relation to the process, engine, project, target,task which is executing
         /// </summary>
         internal BuildEventContext LogBuildEventContext

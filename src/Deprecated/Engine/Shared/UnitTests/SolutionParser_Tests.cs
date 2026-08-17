@@ -34,7 +34,7 @@ namespace Microsoft.Build.UnitTests
 
             p.ParseFirstProjectLine
             (
-                "Project(\"{Project GUID}\") = \"Project name\", \"Relative path to project file\", \"Unique name-GUID\"", 
+                "Project(\"{Project GUID}\") = \"Project name\", \"Relative path to project file\", \"Unique name-GUID\"",
                  proj
             );
             Assertion.AssertEquals(SolutionProjectType.Unknown, proj.ProjectType);
@@ -56,7 +56,7 @@ namespace Microsoft.Build.UnitTests
 
             p.ParseFirstProjectLine
             (
-                "Project(\" {Project GUID} \")  = \" Project name \",  \" Relative path to project file \"    , \" Unique name-GUID \"", 
+                "Project(\" {Project GUID} \")  = \" Project name \",  \" Relative path to project file \"    , \" Unique name-GUID \"",
                  proj
             );
             Assertion.AssertEquals(SolutionProjectType.Unknown, proj.ProjectType);
@@ -94,7 +94,7 @@ namespace Microsoft.Build.UnitTests
                         </References>
                     </GENERAL>
                 </EFPROJECT>";
-               
+
                 File.WriteAllText(proj1Path, etpProjContent);
 
                 // Create the SolutionParser object
@@ -350,7 +350,7 @@ namespace Microsoft.Build.UnitTests
                 File.Delete(proj2Path);
                 File.Delete(proj3Path);
             }
-            
+
         }
 
         /// <summary>
@@ -450,14 +450,14 @@ namespace Microsoft.Build.UnitTests
 
             p.ParseFirstProjectLine
             (
-                "Project(\"{Project GUID}\")  = \"MyProject,(=IsGreat)\",  \"Relative path to project file\"    , \"Unique name-GUID\"", 
+                "Project(\"{Project GUID}\")  = \"MyProject,(=IsGreat)\",  \"Relative path to project file\"    , \"Unique name-GUID\"",
                  proj
             );
             Assertion.AssertEquals(SolutionProjectType.Unknown, proj.ProjectType);
             Assertion.AssertEquals("MyProject,(=IsGreat)", proj.ProjectName);
             Assertion.AssertEquals("Relative path to project file", proj.RelativePath);
             Assertion.AssertEquals("Unique name-GUID", proj.ProjectGuid);
-        }   
+        }
 
         /// <summary>
         /// Helper method to create a SolutionParser object, and call it to parse the SLN file
@@ -502,7 +502,7 @@ namespace Microsoft.Build.UnitTests
 
             SolutionParser solution = ParseSolutionHelper(solutionFileContents);
         }
-        
+
         /// <summary>
         /// Expected version numbers less than 7 to cause an invalid project file exception.
         /// </summary>
@@ -547,7 +547,7 @@ namespace Microsoft.Build.UnitTests
                 ";
 
             SolutionParser solution = ParseSolutionHelper(solutionFileContents);
-            
+
             Assertion.AssertEquals(9, solution.Version);
         }
 
@@ -566,7 +566,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Test to parse a very basic .sln file to validate that description property in a solution file 
+        /// Test to parse a very basic .sln file to validate that description property in a solution file
         /// is properly handled.
         /// </summary>
         /// <owner>yroy</owner>
@@ -650,7 +650,7 @@ namespace Microsoft.Build.UnitTests
             SolutionParser solution = ParseSolutionHelper(solutionFileContents);
 
             Assertion.AssertEquals(3, solution.Projects.Length);
-            
+
             Assertion.AssertEquals(SolutionProjectType.ManagedProject,  solution.Projects[0].ProjectType);
             Assertion.AssertEquals("ConsoleApplication1",                      solution.Projects[0].ProjectName);
             Assertion.AssertEquals(@"ConsoleApplication1\ConsoleApplication1.vbproj", solution.Projects[0].RelativePath);
@@ -675,7 +675,7 @@ namespace Microsoft.Build.UnitTests
             Assertion.AssertEquals(null,                                       solution.Projects[2].ParentProjectGuid);
             Assertion.AssertEquals("ClassLibrary1",                            solution.Projects[2].GetUniqueProjectName());
 
-        }   
+        }
 
         /// <summary>
         /// Exercises solution folders, and makes sure that samely named projects in different
@@ -731,7 +731,7 @@ namespace Microsoft.Build.UnitTests
             SolutionParser solution = ParseSolutionHelper(solutionFileContents);
 
             Assertion.AssertEquals(5, solution.Projects.Length);
-            
+
             Assertion.AssertEquals(@"ClassLibrary1\ClassLibrary1.csproj",      solution.Projects[0].RelativePath);
             Assertion.AssertEquals("{34E0D07D-CF8F-459D-9449-C4188D8C5564}",   solution.Projects[0].ProjectGuid);
             Assertion.AssertEquals(0,                                          solution.Projects[0].Dependencies.Count);
@@ -815,7 +815,7 @@ namespace Microsoft.Build.UnitTests
             SolutionParser solution = ParseSolutionHelper(solutionFileContents);
 
             Assertion.AssertEquals(3, solution.Projects.Length);
-            
+
             Assertion.AssertEquals(@"ClassLibrary1\ClassLibrary1.csproj",      solution.Projects[0].RelativePath);
             Assertion.AssertEquals("{05A5AD00-71B5-4612-AF2F-9EA9121C4111}",   solution.Projects[0].ProjectGuid);
             Assertion.AssertEquals(1,                                          solution.Projects[0].Dependencies.Count);
@@ -891,7 +891,7 @@ namespace Microsoft.Build.UnitTests
             SolutionParser solution = ParseSolutionHelper(solutionFileContents.Replace('`', '"'));
 
             Assertion.AssertEquals(1, solution.Projects.Length);
-            
+
             Assertion.AssertEquals(SolutionProjectType.WebProject,      solution.Projects[0].ProjectType);
             Assertion.AssertEquals(@"C:\WebSites\WebApplication3\",            solution.Projects[0].ProjectName);
             Assertion.AssertEquals(@"C:\WebSites\WebApplication3\",            solution.Projects[0].RelativePath);
@@ -974,7 +974,7 @@ namespace Microsoft.Build.UnitTests
             SolutionParser solution = ParseSolutionHelper(solutionFileContents);
 
             Assertion.AssertEquals(3, solution.Projects.Length);
-            
+
             Assertion.AssertEquals(SolutionProjectType.WebProject,      solution.Projects[0].ProjectType);
             Assertion.AssertEquals(@"C:\WebSites\WebApplication3\",            solution.Projects[0].GetUniqueProjectName());
 
@@ -1138,7 +1138,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Make sure the project configurations in solution configurations get parsed correctly 
+        /// Make sure the project configurations in solution configurations get parsed correctly
         /// for a simple mixed C#/VC solution
         /// </summary>
         /// <owner>LukaszG</owner>
@@ -1237,7 +1237,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Make sure the project configurations in solution configurations get parsed correctly 
+        /// Make sure the project configurations in solution configurations get parsed correctly
         /// for a more tricky solution
         /// </summary>
         /// <owner>LukaszG</owner>

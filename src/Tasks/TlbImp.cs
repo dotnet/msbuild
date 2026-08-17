@@ -273,7 +273,7 @@ namespace Microsoft.Build.Tasks
                     return false;
                 }
 
-                // Verify that an allowed combination of TlbImpTransformFlags has been 
+                // Verify that an allowed combination of TlbImpTransformFlags has been
                 // passed to the Transform property.
                 if (!ValidateTransformFlags())
                 {

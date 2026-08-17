@@ -19,7 +19,7 @@ using Microsoft.Build.UnitTests;
 namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
 {
     /// <summary>
-    /// Test Fixture Class for the v9 Object Model Public Interface Compatibility Tests for the EngineFileUtilities Class. 
+    /// Test Fixture Class for the v9 Object Model Public Interface Compatibility Tests for the EngineFileUtilities Class.
     /// This is not a PRI 1 class for coverage
     /// </summary>
     [TestFixture]
@@ -30,7 +30,7 @@ namespace Microsoft.Build.UnitTests.OM.OrcasCompatibility
         /// </summary>
         /// <remarks>found by kevinpi, Managed Lanaguages Team</remarks>
         [Test]
-        public void EscapeString_Null() 
+        public void EscapeString_Null()
         {
             try
             {

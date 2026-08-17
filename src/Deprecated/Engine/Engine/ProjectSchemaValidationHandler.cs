@@ -124,7 +124,7 @@ namespace Microsoft.Build.BuildEngine
                 schemaFile = Path.Combine(binPath, "Microsoft.Build.xsd");
             }
 
-            // Log the schema file we're using, particularly since it can vary 
+            // Log the schema file we're using, particularly since it can vary
             // according to  the toolset being used
             engineLoggingServices.LogComment(buildEventContext, "SchemaFileLocation", schemaFile);
 

@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests
 
             // Instead, directly write the ANSI character into the memory buffer.
             sourcesStream.Seek(11, SeekOrigin.Begin);
-            sourcesStream.WriteByte(0xc3);    // Plug the 'Ã' in 
+            sourcesStream.WriteByte(0xc3);    // Plug the 'Ã' in
             sourcesStream.Seek(0, SeekOrigin.Begin);
 
             // Should not throw an exception because we force ANSI.

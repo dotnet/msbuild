@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <PropertyGroup>
+	  <MSBuildAnalyzer>$([MSBuild]::RegisterBuildCheck($(MSBuildThisFileDirectory)CustomAnalyzer2.dll))</MSBuildAnalyzer>
+  </PropertyGroup>
+</Project>

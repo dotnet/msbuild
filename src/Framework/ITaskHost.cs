@@ -11,7 +11,7 @@ namespace Microsoft.Build.Framework
     /// <summary>
     /// This empty interface is used to pass host objects from an IDE to individual
     /// tasks.  Depending on the task itself and what kinds parameters and functionality
-    /// it exposes, the task should define its own interface that inherits from this one, 
+    /// it exposes, the task should define its own interface that inherits from this one,
     /// and then use that interface to communicate with the host.
     /// </summary>
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]

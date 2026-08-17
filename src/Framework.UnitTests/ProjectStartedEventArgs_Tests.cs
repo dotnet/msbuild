@@ -51,7 +51,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Verify different Items and properties are not taken into account in the equals comparison. They should 
+        /// Verify different Items and properties are not taken into account in the equals comparison. They should
         /// not be considered as part of the equals evaluation
         /// </summary>
         [Fact]
@@ -75,7 +75,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Create a derived class so that we can test the default constructor in order to increase code coverage and 
+        /// Create a derived class so that we can test the default constructor in order to increase code coverage and
         /// verify this code path does not cause any exceptions.
         /// </summary>
         private sealed class ProjectStartedEventArgs2 : ProjectStartedEventArgs

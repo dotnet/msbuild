@@ -15,7 +15,7 @@ using Microsoft.Win32;
 namespace Microsoft.Build.BuildEngine
 {
     /// <summary>
-    /// Thin wrapper around Microsoft.Win32.RegistryKey that can be 
+    /// Thin wrapper around Microsoft.Win32.RegistryKey that can be
     /// subclassed for testing purposes
     /// </summary>
     internal class RegistryKeyWrapper

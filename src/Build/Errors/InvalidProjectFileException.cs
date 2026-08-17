@@ -80,7 +80,7 @@ namespace Microsoft.Build.Exceptions
         #region Serialization (update when adding new class members)
 
         /// <summary>
-        /// Protected constructor used for (de)serialization. 
+        /// Protected constructor used for (de)serialization.
         /// If we ever add new members to this class, we'll need to update this.
         /// </summary>
         /// <param name="info"></param>
@@ -370,7 +370,7 @@ namespace Microsoft.Build.Exceptions
         }
 
         /// <summary>
-        /// Whether the exception has already been logged. Allows the exception to be logged at the 
+        /// Whether the exception has already been logged. Allows the exception to be logged at the
         /// most appropriate location, but continue to be propagated.
         /// </summary>
         public bool HasBeenLogged

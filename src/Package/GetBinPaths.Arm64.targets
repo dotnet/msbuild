@@ -25,7 +25,7 @@
 
       <Output TaskParameter="TargetOutputs" ItemName="%(Arm64ProjectReference.OutputItemType)" />
     </MSBuild>
-    
+
     <PropertyGroup>
       <FrameworkBinPath>@(FrameworkResolvedProjectReferencePath->'%(RootDir)%(Directory)')</FrameworkBinPath>
       <Arm64BinPath>@(MSBuildArm64ResolvedProjectReferencePath->'%(RootDir)%(Directory)')</Arm64BinPath>

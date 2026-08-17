@@ -10,7 +10,7 @@ using Microsoft.Build.Framework.Profiler;
 namespace Microsoft.Build.Logging
 {
     /// <summary>
-    /// Comparer for <see cref="EvaluationLocation"/> that ignores 
+    /// Comparer for <see cref="EvaluationLocation"/> that ignores
     /// both <see cref="EvaluationLocation.Id"/> and <see cref="EvaluationLocation.ParentId"/>
     /// </summary>
     internal class EvaluationLocationIdAgnosticComparer : IEqualityComparer<EvaluationLocation>

@@ -253,8 +253,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// If a "Code" is passed to the task, use it to override the code 
-        /// (if any) defined in the error message. 
+        /// If a "Code" is passed to the task, use it to override the code
+        /// (if any) defined in the error message.
         /// </summary>
         [Fact]
         public void ErrorFromResourcesWithOverriddenCode()
@@ -281,7 +281,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Simple case of logging a resource-based error that takes 
+        /// Simple case of logging a resource-based error that takes
         /// arguments
         /// </summary>
         [Fact]
@@ -308,8 +308,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// If invalid arguments are passed to the task, it should still 
-        /// log an error informing the user of that. 
+        /// If invalid arguments are passed to the task, it should still
+        /// log an error informing the user of that.
         /// </summary>
         [Fact]
         public void ErrorFromResourcesWithInvalidArguments()
@@ -335,8 +335,8 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// If no resource string is passed to ErrorFromResources, we should error 
-        /// because a required parameter is missing. 
+        /// If no resource string is passed to ErrorFromResources, we should error
+        /// because a required parameter is missing.
         /// </summary>
         [Fact]
         public void ErrorFromResourcesNoResources()

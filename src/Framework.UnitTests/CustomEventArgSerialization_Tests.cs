@@ -192,7 +192,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare two BuildEventArgs 
+        /// Compare two BuildEventArgs
         /// </summary>
         private static void VerifyBuildErrorEventArgs(BuildErrorEventArgs genericEvent, BuildErrorEventArgs newGenericEvent)
         {
@@ -614,7 +614,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare the BuildProperties in propertyList with the Name Value pairs in the entryList. 
+        /// Compare the BuildProperties in propertyList with the Name Value pairs in the entryList.
         /// We need to make sure that each of the BuildProperties passed into the serializer come out correctly
         /// </summary>
         /// <param name="entryList">List of DictionaryEntries which were deserialized</param>
@@ -701,7 +701,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Compare two project started events 
+        /// Compare two project started events
         /// </summary>
         private static void VerifyProjectStartedEvent(ProjectStartedEventArgs genericEvent, ProjectStartedEventArgs newGenericEvent)
         {
@@ -973,6 +973,83 @@ namespace Microsoft.Build.UnitTests
             newGenericEvent.ProjectFile.ShouldBe(genericEvent.ProjectFile, StringCompareShould.IgnoreCase); // "Expected ProjectFile to Match"
             newGenericEvent.TaskFile.ShouldBe(genericEvent.TaskFile, StringCompareShould.IgnoreCase); // "Expected TaskFile to Match"
             newGenericEvent.TaskName.ShouldBe(genericEvent.TaskName, StringCompareShould.IgnoreCase); // "Expected TaskName to Match"
+        }
+
+
+        [Fact]
+        public void TestTelemetryEventArgs_AllProperties()
+        {
+            // Test using reasonable values
+            TelemetryEventArgs genericEvent = new TelemetryEventArgs { EventName = "Good", Properties = new Dictionary<string, string> { { "Key", "Value" } } };
+            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+
+            TelemetryEventArgs newGenericEvent = RoundTrip(genericEvent);
+
+            VerifyGenericEventArg(genericEvent, newGenericEvent);
+            VerifyTelemetryEvent(genericEvent, newGenericEvent);
+        }
+
+        [Fact]
+        public void TestTelemetryEventArgs_NullProperties()
+        {
+            // Test using reasonable values
+            TelemetryEventArgs genericEvent = new TelemetryEventArgs { EventName = "Good", Properties = null };
+            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+
+            TelemetryEventArgs newGenericEvent = RoundTrip(genericEvent);
+
+            // quirk - the properties dict is initialized to an empty dictionary by the default constructor, so it's not _really_ round-trippable.
+            // so we modify the source event for easier comparison here.
+            genericEvent.Properties = new Dictionary<string, string>();
+
+            VerifyGenericEventArg(genericEvent, newGenericEvent);
+            VerifyTelemetryEvent(genericEvent, newGenericEvent);
+        }
+
+        [Fact]
+        public void TestTelemetryEventArgs_NullEventName()
+        {
+            // Test using null event name
+            TelemetryEventArgs genericEvent = new TelemetryEventArgs { EventName = null, Properties = new Dictionary<string, string> { { "Key", "Value" } } };
+            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+
+            TelemetryEventArgs newGenericEvent = RoundTrip(genericEvent);
+
+            VerifyGenericEventArg(genericEvent, newGenericEvent);
+            VerifyTelemetryEvent(genericEvent, newGenericEvent);
+        }
+
+        [Fact]
+        public void TestTelemetryEventArgs_NullPropertyValue()
+        {
+            // Test using null property value name
+            TelemetryEventArgs genericEvent = new TelemetryEventArgs { EventName = "Good", Properties = new Dictionary<string, string> { { "Key", null } } };
+            genericEvent.BuildEventContext = new BuildEventContext(5, 4, 3, 2);
+
+            TelemetryEventArgs newGenericEvent = RoundTrip(genericEvent);
+
+            VerifyGenericEventArg(genericEvent, newGenericEvent);
+            VerifyTelemetryEvent(genericEvent, newGenericEvent);
+        }
+
+        private T RoundTrip<T>(T original)
+            where T : BuildEventArgs, new()
+        {
+            _stream.Position = 0;
+            original.WriteToStream(_writer);
+            long streamWriteEndPosition = _stream.Position;
+
+            _stream.Position = 0;
+            var actual = new T();
+            actual.CreateFromStream(_reader, _eventArgVersion);
+            _stream.Position.ShouldBe(streamWriteEndPosition); // "Stream End Positions Should Match"
+            return actual;
+        }
+
+        private static void VerifyTelemetryEvent(TelemetryEventArgs expected, TelemetryEventArgs actual)
+        {
+            actual.EventName.ShouldBe(expected.EventName);
+            actual.Properties.ShouldBe(expected.Properties);
         }
     }
 }

@@ -23,7 +23,7 @@ namespace Microsoft.Build.Tasks
         #region Properties
 
         /// <summary>
-        /// ITypeLib pointer 
+        /// ITypeLib pointer
         /// </summary>
         internal ITypeLib typeLibPointer;
 
@@ -40,14 +40,14 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// path to the reference, with typelibrary number stripped, if any (so ref1.dll\2 becomes ref1.dll).
-        /// The full path is only used for loading the type library, and it's not necessary 
+        /// The full path is only used for loading the type library, and it's not necessary
         /// to do it after the interface pointer is cached in this object.
         /// </summary>
         internal string strippedTypeLibPath;
 
         /// <summary>
-        /// When using TlbImp.exe, we need to make sure that we keep track of the non-stripped typelib path, 
-        /// because that's what we need to pass to TlbImp.  
+        /// When using TlbImp.exe, we need to make sure that we keep track of the non-stripped typelib path,
+        /// because that's what we need to pass to TlbImp.
         /// </summary>
         internal string fullTypeLibPath;
 
@@ -67,12 +67,12 @@ namespace Microsoft.Build.Tasks
         internal ComReferenceWrapperInfo resolvedWrapper;
 
         /// <summary>
-        /// List of the paths to COM wrapper assemblies that this reference is dependent upon. 
+        /// List of the paths to COM wrapper assemblies that this reference is dependent upon.
         /// </summary>
         internal List<string> dependentWrapperPaths;
 
         /// <summary>
-        /// Reference to the ITaskItem generated from the resolved reference, if any. 
+        /// Reference to the ITaskItem generated from the resolved reference, if any.
         /// </summary>
         internal ITaskItem referencePathItem;
 
@@ -125,12 +125,12 @@ namespace Microsoft.Build.Tasks
             }
 
             // Now that we have the path, we can call InitializeWithPath to get the correct TYPELIBATTR set up
-            // and the correct ITypeLib pointer. 
+            // and the correct ITypeLib pointer.
             return InitializeWithPath(log, silent, this.fullTypeLibPath, originalTaskItem, targetProcessorArchitecture);
         }
 
         /// <summary>
-        /// Initialize the object with a type library path 
+        /// Initialize the object with a type library path
         /// </summary>
         internal bool InitializeWithPath(TaskLoggingHelper log, bool silent, string path, ITaskItem originalTaskItem, string targetProcessorArchitecture)
         {
@@ -139,12 +139,12 @@ namespace Microsoft.Build.Tasks
             this.taskItem = originalTaskItem;
 
             // Note that currently we DO NOT remap file ADO references. This is because when pointing to a file on disk,
-            // it seems unnatural to remap it to something else - a file reference means "use THIS component". 
+            // it seems unnatural to remap it to something else - a file reference means "use THIS component".
             // This is still under debate though, and may be revised later.
 
             // save both the stripped and full path in our object -- for the most part we just need the stripped path, but if
-            // we're using tlbimp.exe, we need to pass the full path w/ type lib number to it, or it won't generate the interop 
-            // assembly correctly. 
+            // we're using tlbimp.exe, we need to pass the full path w/ type lib number to it, or it won't generate the interop
+            // assembly correctly.
             this.fullTypeLibPath = path;
             this.strippedTypeLibPath = ComReference.StripTypeLibNumberFromPath(path, File.Exists);
 

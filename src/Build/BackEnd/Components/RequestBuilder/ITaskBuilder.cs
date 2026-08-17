@@ -18,7 +18,7 @@ namespace Microsoft.Build.BackEnd
     internal enum TaskExecutionMode
     {
         /// <summary>
-        /// This entry is necessary to use the enum with binary math. It is never used outside 
+        /// This entry is necessary to use the enum with binary math. It is never used outside
         /// intermediate calculations.
         /// </summary>
         Invalid = 0,

@@ -202,7 +202,7 @@ namespace Microsoft.Build.Tasks
         public ITaskItem[] DisallowedSDKDependencies { get; set; }
 
         /// <summary>
-        /// List of dependencies passed from the targets file that will have the metadata RuntimeReferenceOnly set as true. 
+        /// List of dependencies passed from the targets file that will have the metadata RuntimeReferenceOnly set as true.
         /// For instance "VCLibs 11" should have such a metadata set to true in projects targeting Win 8.1 or higher.
         /// </summary>
         public ITaskItem[] RuntimeReferenceOnlySDKDependencies { get; set; }
@@ -220,7 +220,7 @@ namespace Microsoft.Build.Tasks
         public string TargetedSDKArchitecture { get; set; }
 
         /// <summary>
-        /// Enables warning when MaxPlatformVersion is not present in the manifest and the ESDK platform version (from its path) 
+        /// Enables warning when MaxPlatformVersion is not present in the manifest and the ESDK platform version (from its path)
         /// is different than the target platform version (from the project)
         /// </summary>
         public bool WarnOnMissingPlatformVersion { get; set; }
@@ -306,7 +306,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            // We need to check to see if there are any SDKNames on any of the reference items in the project. If there are 
+            // We need to check to see if there are any SDKNames on any of the reference items in the project. If there are
             // then we do not want those SDKs to expand their reference assemblies by default because we are going to use RAR to look inside of them for certain reference assemblies only.
             var sdkNamesOnReferenceItems = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             if (References != null)
@@ -333,14 +333,14 @@ namespace Microsoft.Build.Tasks
             // Set of sdks which are not compatible with other sdks of the same product famuily or with the same sdk name
             var sdksNotCompatibleWithOtherSDKs = new HashSet<SDKReference>();
 
-            // Go through each reference passed in and determine if it is in the set of installed SDKs. 
+            // Go through each reference passed in and determine if it is in the set of installed SDKs.
             // Also create new output items if the item is in an installed SDK and set the metadata correctly.
             foreach (ITaskItem referenceItem in SDKReferences)
             {
                 // Parse the SDK reference item include. The name could have been added by a user and may have extra spaces or be not well formatted.
                 SDKReference reference = ParseSDKReference(referenceItem);
 
-                // Could not parse the reference, lets skip over this reference item. An error would have been logged in the ParseSDKReference method to tell the 
+                // Could not parse the reference, lets skip over this reference item. An error would have been logged in the ParseSDKReference method to tell the
                 // user why the parsing did not happen.
                 if (reference == null)
                 {
@@ -1002,7 +1002,7 @@ namespace Microsoft.Build.Tasks
             /// <summary>
             /// After resolving a reference we need to check to see if there is a SDKManifest file in the root directory and if there is we need to extract the frameworkidentity.
             /// We ignore other attributes to leave room for expansion of the file format.
-            /// 
+            ///
             /// </summary>
             private void GetSDKManifestAttributes()
             {
@@ -1281,7 +1281,7 @@ namespace Microsoft.Build.Tasks
                 }
 
                 // The SDKManifest may have had a number of frameworkidentity entries inside of it. We want to match the one
-                // which has the correct configuration and architecture. If a perfect match cannot be found 
+                // which has the correct configuration and architecture. If a perfect match cannot be found
                 // then we will look for ones that declare only the configuration. If that cannot be found we just try and find an element that only is "FrameworkIdentity".
                 if (String.IsNullOrEmpty(FrameworkIdentity))
                 {
@@ -1385,7 +1385,7 @@ namespace Microsoft.Build.Tasks
 
                                 bool containsKey = architectureLocations.TryGetValue(architectureComponent, out string architectureLocation);
 
-                                // If we have not seen this architecture before (and it has a compatible configuration with what we are targeting) then add it. 
+                                // If we have not seen this architecture before (and it has a compatible configuration with what we are targeting) then add it.
                                 // Also, replace the entry if we have already added an entry for a non configuration specific entry and we now have a configuration specific entry that matches what we are targeting.
                                 if ((configurationComponent == null && !containsKey) || (configurationComponent?.Equals(sdkConfiguration, StringComparison.OrdinalIgnoreCase) == true))
                                 {
