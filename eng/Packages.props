@@ -1,55 +1,34 @@
 <Project>
+  <!-- Import references updated by Dependabot.
+       This file is for package references updated manually or by Darc/Maestro. -->
+  <Import Project="dependabot\Packages.props" />
+
   <!--
     Make sure to update the binding redirects (in src\MSBuild\app.config and src\MSBuild\app.amd64.config) for any changes to
     the list of assemblies redistributed by MSBuild (non-MSBuild assemblies in the .vsix package).
      -->
   <ItemGroup>
-    <PackageReference Update="BenchmarkDotNet" Version="0.12.1" />
-    <PackageReference Update="jnm2.ReferenceAssemblies.net35" Version="1.0.1" />
-    <PackageReference Update="LargeAddressAware" Version="1.0.5" />
-    <PackageReference Update="Microsoft.Build.NuGetSdkResolver" Version="5.11.2-rc.2" /><!-- Pinning to latest on the feed to allow NuGetBuildTasksVersion to update to newer -->
-    <PackageReference Update="Microsoft.CodeAnalysis.Build.Tasks" Version="$(MicrosoftNetCompilersToolsetVersion)" />
-    <PackageReference Update="Microsoft.DotNet.GenAPI" Version="2.1.0-prerelease-02404-02" />
-    <PackageReference Update="Microsoft.Extensions.DependencyModel" Version="2.1.0" />
-    <PackageReference Update="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetVersion)" />
-    <PackageReference Update="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" />
-    <PackageReference Update="Microsoft.VisualStudio.Setup.Configuration.Interop" Version="1.16.30" />
-    <PackageReference Update="Microsoft.Win32.Registry" Version="4.3.0" />
-    <PackageReference Update="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
-    <PackageReference Update="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
-    <PackageReference Update="PdbGit" Version="3.0.41" />
-    <PackageReference Update="Shouldly" Version="3.0.0" />
-    <PackageReference Update="SourceLink.Create.CommandLine" Version="2.1.2" />
-    <PackageReference Update="System.CodeDom" Version="4.4.0" />
-    <PackageReference Update="System.Collections.Immutable" Version="5.0.0" />
-    <PackageReference Update="System.Configuration.ConfigurationManager" Version="6.0.0" />
-
-    <PackageReference Update="System.Memory" Version="4.5.4" />
-    <PackageReference Update="System.Reflection.Metadata" Version="1.6.0" />
-    <PackageReference Update="System.Resources.Extensions" Version="4.6.0" />
-    <PackageReference Update="System.Runtime.CompilerServices.Unsafe" Version="5.0.0"/>
-    <PackageReference Update="System.Security.Cryptography.Pkcs" Version="4.7.0" />
-    <PackageReference Update="System.Security.Cryptography.Xml" Version="4.7.0" />
-    <PackageReference Update="System.Security.Permissions" Version="6.0.0" />
-    <PackageReference Update="System.Security.Principal.Windows" Version="5.0.0" />
-    <PackageReference Update="System.Text.Encoding.CodePages" Version="4.0.1" />
-    <PackageReference Update="System.Text.Json" Version="4.7.0" />
-    <PackageReference Update="System.Threading.Tasks.Dataflow" Version="4.9.0" />
-    <PackageReference Update="xunit.assert" Version="$(XUnitVersion)" />
-    <PackageReference Update="xunit.console" Version="$(XUnitVersion)" />
-    <PackageReference Update="xunit.core" Version="$(XUnitVersion)" />
+    <PackageVersion Include="Microsoft.Build.NuGetSdkResolver" Version="$(NuGetBuildTasksVersion)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Build.Tasks" Version="$(MicrosoftNetCompilersToolsetVersion)" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Collections" Version="$(MicrosoftCodeAnalysisCollectionsVersion)" />
+    <PackageVersion Include="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsVersion)" />
+    <PackageVersion Include="Microsoft.IO.Redist" Version="$(MicrosoftIORedistVersion)" />
+    <PackageVersion Include="Microsoft.Net.Compilers.Toolset" Version="$(MicrosoftNetCompilersToolsetVersion)" Condition="'$(UsingToolMicrosoftNetCompilers)' != 'true'" />
+    <PackageVersion Include="NuGet.Build.Tasks" Version="$(NuGetBuildTasksVersion)" />
+    <PackageVersion Include="NuGet.Build.Tasks.Console" Version="$(NuGetBuildTasksVersion)" />
+    <PackageVersion Include="NuGet.Frameworks" Version="$(NuGetBuildTasksVersion)" />
+    <PackageVersion Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
+    <PackageVersion Include="System.Configuration.ConfigurationManager" Version="$(SystemConfigurationConfigurationManagerVersion)" />
+    <PackageVersion Include="System.Memory" Version="$(SystemMemoryVersion)" />
+    <PackageVersion Include="System.Net.Http" Version="$(SystemNetHttpVersion)" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="$(SystemReflectionMetadataVersion)" />
+    <PackageVersion Include="System.Reflection.MetadataLoadContext" Version="$(SystemReflectionMetadataLoadContextVersion)" />
+    <PackageVersion Include="System.Resources.Extensions" Version="$(SystemResourcesExtensionsPackageVersion)" />
+    <PackageVersion Include="System.Runtime.CompilerServices.Unsafe" Version="$(SystemRuntimeCompilerServicesUnsafeVersion)" />
+    <PackageVersion Include="System.Security.Principal.Windows" Version="$(SystemSecurityPrincipalWindowsVersion)" />
+    <PackageVersion Include="System.Text.Encoding.CodePages" Version="$(SystemTextEncodingCodePagesVersion)" />
+    <PackageVersion Include="System.Text.Json" Version="$(SystemTextJsonVersion)" />
+    <PackageVersion Include="System.Threading.Tasks.Dataflow" Version="$(SystemThreadingTasksDataflowVersion)" />
+    <PackageVersion Include="xunit.console" Version="$(XUnitVersion)" />
   </ItemGroup>
-
-  <ItemGroup Condition="'$(MonoBuild)' == 'true' or $([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'netcoreapp2.1'))">
-    <PackageReference Update="Microsoft.Extensions.DependencyModel" Version="5.0.0"/>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
-    <GlobalPackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All"/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <GlobalPackageReference Include="Microsoft.VisualStudio.SDK.EmbedInteropTypes" Version="15.0.15" PrivateAssets="All" Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'" />
-  </ItemGroup>
-
 </Project>

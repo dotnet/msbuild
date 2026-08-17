@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if NET35_UNITTEST
 extern alias StringToolsNet35;
@@ -13,6 +13,8 @@ using Xunit;
 #if NET35_UNITTEST
 using StringToolsNet35::Microsoft.NET.StringTools;
 #endif
+
+#nullable disable
 
 namespace Microsoft.NET.StringTools.Tests
 {
@@ -94,6 +96,28 @@ namespace Microsoft.NET.StringTools.Tests
             internableString.ReferenceEquals(str).ShouldBeTrue();
             internableString = new InternableString(new string(str.ToCharArray()));
             internableString.ReferenceEquals(str).ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData("012345678")] // odd number of characters
+        [InlineData("0123456789")] // even number of characters
+        public void GetHashCodeIsStableRegardlessOfSpanLength(string testString)
+        {
+            int hashCode = new InternableString(testString).GetHashCode();
+
+            // Chop the string into 2-3 parts and verify that the hash code is unchanged.
+            for (int i = 0; i < testString.Length - 1; i++)
+            {
+                for (int j = i + 1; j < testString.Length; j++)
+                {
+                    SpanBasedStringBuilder stringBuilder = new SpanBasedStringBuilder();
+                    stringBuilder.Append(testString.Substring(0, i));
+                    stringBuilder.Append(testString.Substring(i, j - i));
+                    stringBuilder.Append(testString.Substring(j));
+                    InternableString internableString = new InternableString(stringBuilder);
+                    internableString.GetHashCode().ShouldBe(hashCode);
+                }
+            }
         }
 
         [Theory]

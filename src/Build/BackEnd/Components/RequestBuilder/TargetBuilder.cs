@@ -1,20 +1,23 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
-using ElementLocation = Microsoft.Build.Construction.ElementLocation;
 using BuildAbortedException = Microsoft.Build.Exceptions.BuildAbortedException;
+using ElementLocation = Microsoft.Build.Construction.ElementLocation;
+using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
 using TaskItem = Microsoft.Build.Execution.ProjectItemInstance.TaskItem;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -403,21 +406,18 @@ namespace Microsoft.Build.BackEnd
                 (
                 !_cancellationToken.IsCancellationRequested &&
                 !stopProcessingStack &&
-                !_targetsToBuild.IsEmpty
-                )
+                _targetsToBuild.Any())
             {
                 TargetEntry currentTargetEntry = _targetsToBuild.Peek();
                 switch (currentTargetEntry.State)
                 {
                     case TargetEntryState.Dependencies:
                         // Ensure we are dealing with a target which actually exists.
-                        ProjectErrorUtilities.VerifyThrowInvalidProject
-                        (
+                        ProjectErrorUtilities.VerifyThrowInvalidProject(
                         _requestEntry.RequestConfiguration.Project.Targets.ContainsKey(currentTargetEntry.Name),
                         currentTargetEntry.ReferenceLocation,
                         "TargetDoesNotExist",
-                        currentTargetEntry.Name
-                        );
+                        currentTargetEntry.Name);
 
                         // If we already have results for this target which were not skipped, we can ignore it.  In 
                         // addition, we can also ignore its before and after targets -- if this target has already run, 
@@ -555,6 +555,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     // If we've already dealt with this target and it didn't skip, let's log appropriately
                     // Otherwise we don't want anything more to do with it.
+                    bool success = targetResult.ResultCode == TargetResultCode.Success;
                     var skippedTargetEventArgs = new TargetSkippedEventArgs(message: null)
                     {
                         BuildEventContext = _projectLoggingContext.BuildEventContext,
@@ -562,7 +563,9 @@ namespace Microsoft.Build.BackEnd
                         TargetFile = currentTargetEntry.Target.Location.File,
                         ParentTarget = currentTargetEntry.ParentEntry?.Target.Name,
                         BuildReason = currentTargetEntry.BuildReason,
-                        OriginallySucceeded = targetResult.ResultCode == TargetResultCode.Success
+                        OriginallySucceeded = success,
+                        SkipReason = success ? TargetSkipReason.PreviouslyBuiltSuccessfully : TargetSkipReason.PreviouslyBuiltUnsuccessfully,
+                        OriginalBuildEventContext = targetResult.OriginalBuildEventContext
                     };
 
                     _projectLoggingContext.LogBuildEvent(skippedTargetEventArgs);
@@ -608,7 +611,7 @@ namespace Microsoft.Build.BackEnd
                 // Pop down to our parent, since any other dependencies our parent had should no longer
                 // execute.  If we encounter an error target on the way down, also stop since the failure
                 // of one error target in a set declared in OnError should not cause the others to stop running.
-                while ((!_targetsToBuild.IsEmpty) && (_targetsToBuild.Peek() != topEntry.ParentEntry) && !_targetsToBuild.Peek().ErrorTarget)
+                while ((_targetsToBuild.Any()) && (_targetsToBuild.Peek() != topEntry.ParentEntry) && !_targetsToBuild.Peek().ErrorTarget)
                 {
                     TargetEntry entry = _targetsToBuild.Pop();
                     entry.LeaveLegacyCallTargetScopes();

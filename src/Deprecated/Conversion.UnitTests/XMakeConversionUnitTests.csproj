@@ -33,9 +33,6 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Source Files -->
-    <Compile Include="..\..\Shared\FxCopExclusions\Microsoft.Build.Shared.Suppressions.cs">
-      <ExcludeFromStyleCop>true</ExcludeFromStyleCop>
-    </Compile>
     <Compile Include="..\..\shared\unittests\MockLogger.cs" />
     <Compile Include="..\..\shared\unittests\ObjectModelHelpers.cs" />
     <Compile Include="OldVSProjectFileReader_Tests.cs" />

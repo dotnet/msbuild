@@ -1,21 +1,133 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
+using Microsoft.Build.UnitTests.Shared;
 using Microsoft.Build.Utilities;
+#if NETFRAMEWORK
+using Microsoft.IO;
+#else
+using System.IO;
+#endif
 using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests
 {
     public class RoslynCodeTaskFactory_Tests
     {
         private const string TaskName = "MyInlineTask";
+
+        [Fact]
+        public void InlineTaskWithAssemblyPlatformAgnostic()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                string location = Assembly.GetExecutingAssembly().Location;
+                TransientTestFile inlineTask = env.CreateFile(folder, "5106.proj", @$"
+<Project>
+
+  <UsingTask TaskName=""MyInlineTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+    <Task>
+      <Reference Include=""" + Path.Combine(Path.GetDirectoryName(location), "..", "..", "..", "Samples", "Dependency",
+#if DEBUG
+      "Debug"
+#else
+      "Release"
+#endif
+      , "net472", "Dependency.dll") + @""" />
+      <Using Namespace=""Dependency"" />
+      <Code Type=""Fragment"" Language=""cs"" >
+<![CDATA[
+Log.LogError(Alpha.GetString());
+]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+<Target Name=""ToRun"">
+  <MyInlineTask/>
+</Target>
+
+</Project>
+");
+                string output = RunnerUtilities.ExecMSBuild(inlineTask.Path, out bool success);
+                success.ShouldBeTrue(output);
+                output.ShouldContain("Alpha.GetString");
+            }
+        }
+
+        [Fact]
+        [SkipOnPlatform(TestPlatforms.AnyUnix, ".NETFramework 4.0 isn't on unix machines.")]
+        public void InlineTaskWithAssembly()
+        {
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFolder folder = env.CreateFolder(createFolder: true);
+                TransientTestFile assemblyProj = env.CreateFile(folder, "5106.csproj", @$"
+                    <Project DefaultTargets=""Build"">
+                        <PropertyGroup>
+                            <TargetFrameworkVersion>{MSBuildConstants.StandardTestTargetFrameworkVersion}</TargetFrameworkVersion>
+                            <OutputType>Library</OutputType>
+                        </PropertyGroup>
+                        <ItemGroup>
+                            <Reference Include=""System""/>
+                            <Compile Include=""Class1.cs""/>
+                        </ItemGroup>
+                        <Import Project=""$(MSBuildBinPath)\Microsoft.CSharp.targets"" />
+                    </Project>
+");
+                TransientTestFile csFile = env.CreateFile(folder, "Class1.cs", @"
+using System;
+
+namespace _5106 {
+    public class Class1 {
+        public static string ToPrint() {
+            return ""Hello!"";
+        }
+    }
+}
+");
+                string output = RunnerUtilities.ExecMSBuild(assemblyProj.Path + $" /p:OutDir={Path.Combine(folder.Path, "subFolder")} /restore", out bool success);
+                success.ShouldBeTrue(output);
+
+                TransientTestFile inlineTask = env.CreateFile(folder, "5106.proj", @$"
+<Project>
+
+  <UsingTask TaskName=""MyInlineTask"" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+    <Task>
+      <Reference Include=""{Path.Combine(folder.Path, "subFolder", "5106.dll")}"" />
+      <Reference Include=""netstandard"" />
+      <Using Namespace=""_5106"" />
+      <Code Type=""Fragment"" Language=""cs"" >
+<![CDATA[
+Log.LogError(Class1.ToPrint());
+]]>
+      </Code>
+    </Task>
+  </UsingTask>
+
+<Target Name=""ToRun"">
+  <MyInlineTask/>
+</Target>
+
+</Project>
+");
+                output = RunnerUtilities.ExecMSBuild(inlineTask.Path, out success);
+                success.ShouldBeTrue();
+                output.ShouldContain("Hello!");
+            }
+        }
 
         [Fact]
         public void RoslynCodeTaskFactory_ReuseCompilation()
@@ -85,7 +197,7 @@ namespace Microsoft.Build.Tasks.UnitTests
 
             // with broken cache we get two Compiling messages
             // as we fail to reuse the first assembly
-            messages.Count().ShouldBe(1);
+            messages.Length.ShouldBe(1);
         }
 
         [Fact]
@@ -94,8 +206,12 @@ namespace Microsoft.Build.Tasks.UnitTests
             const string fragment = "Dim x = 0";
             string expectedSourceCode = $@"'------------------------------------------------------------------------------
 ' <auto-generated>
-'     This code was generated by a tool.
-'     Runtime Version:4.0.30319.42000
+'     This code was generated by a tool." +
+#if NETFRAMEWORK
+@"
+'     Runtime Version:4.0.30319.42000" +
+#endif
+@$"
 '
 '     Changes to this file may cause incorrect behavior and will be lost if
 '     the code is regenerated.
@@ -162,8 +278,12 @@ End Namespace
             string expectedSourceCode = $@"'------------------------------------------------------------------------------
 ' <auto-generated>
 '     This code was generated by a tool.
-'     Runtime Version:4.0.30319.42000
-'
+" +
+#if NETFRAMEWORK
+@"'     Runtime Version:4.0.30319.42000
+" +
+#endif
+@$"'
 '     Changes to this file may cause incorrect behavior and will be lost if
 '     the code is regenerated.
 ' </auto-generated>
@@ -279,8 +399,12 @@ End Namespace
             string expectedSourceCode = $@"'------------------------------------------------------------------------------
 ' <auto-generated>
 '     This code was generated by a tool.
-'     Runtime Version:4.0.30319.42000
-'
+" +
+#if NETFRAMEWORK
+@"'     Runtime Version:4.0.30319.42000
+" +
+#endif
+@$"'
 '     Changes to this file may cause incorrect behavior and will be lost if
 '     the code is regenerated.
 ' </auto-generated>
@@ -326,6 +450,9 @@ End Namespace
             TryLoadTaskBodyAndExpectSuccess("<Code Language=\"vb\">code</Code>", expectedCodeLanguage: "VB");
             TryLoadTaskBodyAndExpectSuccess("<Code Language=\"visualbasic\">code</Code>", expectedCodeLanguage: "VB");
             TryLoadTaskBodyAndExpectSuccess("<Code Language=\"ViSuAl BaSic\">code</Code>", expectedCodeLanguage: "VB");
+
+            // Default when the Language attribute is not present.
+            TryLoadTaskBodyAndExpectSuccess("<Code>code</Code>", expectedCodeLanguage: "CS");
         }
 
         [Fact]
@@ -340,8 +467,39 @@ End Namespace
             {
                 TransientTestFile file = testEnvironment.CreateFile(fileName: "236D48CE30064161B31B55DBF088C8B2", contents: "6159BD98607A460AA4F11D2FA92E5436");
 
+                // When Source is provided and Type is not provided, Type is expected to default to Type="Class".
                 TryLoadTaskBodyAndExpectSuccess($"<Code Source=\"{file.Path}\"/>", expectedCodeType: RoslynCodeTaskFactoryCodeType.Class);
+
+                foreach (RoslynCodeTaskFactoryCodeType codeType in Enum.GetValues(typeof(RoslynCodeTaskFactoryCodeType)).Cast<RoslynCodeTaskFactoryCodeType>())
+                {
+                    TryLoadTaskBodyAndExpectSuccess($"<Code Source=\"{file.Path}\" Type=\"{codeType}\">code</Code>", expectedCodeType: codeType);
+                }
             }
+        }
+
+        [Fact]
+        public void CSharpClass()
+        {
+            const string taskClassSourceCode = @"namespace InlineTask
+{
+    using Microsoft.Build.Utilities;
+
+    public class HelloWorld : Task
+    {
+        public override bool Execute()
+        {
+            Log.LogMessage(""Hello, world!"");
+            return !Log.HasLoggedErrors;
+        }
+    }
+}
+";
+
+            TryLoadTaskBodyAndExpectSuccess(
+                $"<Code Type=\"Class\">{taskClassSourceCode}</Code>",
+                expectedSourceCode: taskClassSourceCode,
+                expectedCodeType: RoslynCodeTaskFactoryCodeType.Class,
+                expectedCodeLanguage: "CS");
         }
 
         [Fact]
@@ -351,8 +509,12 @@ End Namespace
             string expectedSourceCode = $@"//------------------------------------------------------------------------------
 // <auto-generated>
 //     This code was generated by a tool.
-//     Runtime Version:4.0.30319.42000
-//
+" +
+#if NETFRAMEWORK
+@"//     Runtime Version:4.0.30319.42000
+" +
+#endif
+$@"//
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
 // </auto-generated>
@@ -409,8 +571,12 @@ namespace InlineCode {{
             string expectedSourceCode = $@"//------------------------------------------------------------------------------
 // <auto-generated>
 //     This code was generated by a tool.
-//     Runtime Version:4.0.30319.42000
-//
+" +
+#if NETFRAMEWORK
+@"//     Runtime Version:4.0.30319.42000
+" +
+#endif
+$@"//
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
 // </auto-generated>
@@ -518,8 +684,12 @@ namespace InlineCode {{
             string expectedSourceCode = $@"//------------------------------------------------------------------------------
 // <auto-generated>
 //     This code was generated by a tool.
-//     Runtime Version:4.0.30319.42000
-//
+" +
+#if NETFRAMEWORK
+@"//     Runtime Version:4.0.30319.42000
+" +
+#endif
+@$"//
 //     Changes to this file may cause incorrect behavior and will be lost if
 //     the code is regenerated.
 // </auto-generated>
@@ -546,6 +716,142 @@ namespace InlineCode {{
                 taskBody: $"<Code Type=\"Method\">{method}</Code>",
                 expectedSourceCode: expectedSourceCode,
                 expectedCodeType: RoslynCodeTaskFactoryCodeType.Method);
+        }
+
+        [Fact]
+        public void CSharpClassSourceCodeFromFile()
+        {
+            const string taskClassSourceCode = @"namespace InlineTask
+{
+    using Microsoft.Build.Utilities;
+
+    public class HelloWorld : Task
+    {
+        public override bool Execute()
+        {
+            Log.LogMessage(""Hello, world!"");
+            return !Log.HasLoggedErrors;
+        }
+    }
+}
+";
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFile file = env.CreateFile(fileName: "CSharpClassSourceCodeFromFile.tmp", contents: taskClassSourceCode);
+
+                TryLoadTaskBodyAndExpectSuccess(
+                    $"<Code Source=\"{file.Path}\" />",
+                    expectedSourceCode: taskClassSourceCode,
+                    expectedCodeType: RoslynCodeTaskFactoryCodeType.Class,
+                    expectedCodeLanguage: "CS");
+            }
+        }
+
+        [Fact]
+        public void CSharpFragmentSourceCodeFromFile()
+        {
+            const string sourceCodeFileContents = "int x = 0;";
+            const string expectedSourceCode = @"//------------------------------------------------------------------------------
+// <auto-generated>
+//     This code was generated by a tool.
+" +
+#if NETFRAMEWORK
+@"//     Runtime Version:4.0.30319.42000
+" +
+#endif
+                                              $@"//
+//     Changes to this file may cause incorrect behavior and will be lost if
+//     the code is regenerated.
+// </auto-generated>
+//------------------------------------------------------------------------------
+
+namespace InlineCode {{
+    using Microsoft.Build.Framework;
+    using Microsoft.Build.Utilities;
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    
+    
+    public class {TaskName} : Microsoft.Build.Utilities.Task {{
+        
+        private bool _Success = true;
+        
+        public virtual bool Success {{
+            get {{
+                return _Success;
+            }}
+            set {{
+                _Success = value;
+            }}
+        }}
+        
+        public override bool Execute() {{
+{sourceCodeFileContents}
+            return Success;
+        }}
+    }}
+}}
+";
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFile file = testEnvironment.CreateFile(fileName: "CSharpFragmentSourceCodeFromFile.tmp", contents: sourceCodeFileContents);
+
+                TryLoadTaskBodyAndExpectSuccess(
+                    $"<Code Source=\"{file.Path}\" Type=\"Fragment\"/>",
+                    expectedSourceCode: expectedSourceCode,
+                    expectedCodeType: RoslynCodeTaskFactoryCodeType.Fragment);
+            }
+        }
+
+        [Fact]
+        public void CSharpMethodSourceCodeFromFile()
+        {
+            const string sourceCodeFileContents = @"public override bool Execute() { int x = 0; return true; }";
+            const string expectedSourceCode = @"//------------------------------------------------------------------------------
+// <auto-generated>
+//     This code was generated by a tool.
+" +
+#if NETFRAMEWORK
+@"//     Runtime Version:4.0.30319.42000
+" +
+#endif
+                                              @$"//
+//     Changes to this file may cause incorrect behavior and will be lost if
+//     the code is regenerated.
+// </auto-generated>
+//------------------------------------------------------------------------------
+
+namespace InlineCode {{
+    using Microsoft.Build.Framework;
+    using Microsoft.Build.Utilities;
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Linq;
+    using System.Text;
+    
+    
+    public class MyInlineTask : Microsoft.Build.Utilities.Task {{
+        
+{sourceCodeFileContents}
+    }}
+}}
+";
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                TransientTestFile file = testEnvironment.CreateFile(fileName: "CSharpMethodSourceCodeFromFile.tmp", contents: sourceCodeFileContents);
+
+                TryLoadTaskBodyAndExpectSuccess(
+                    $"<Code Source=\"{file.Path}\" Type=\"Method\"/>",
+                    expectedSourceCode: expectedSourceCode,
+                    expectedCodeType: RoslynCodeTaskFactoryCodeType.Method);
+            }
         }
 
         [Fact]
@@ -721,6 +1027,47 @@ namespace InlineCode {{
             }
         }
 
+        [Fact]
+        public void MismatchedTaskNameAndTaskClassName()
+        {
+            const string taskName = "SayHello";
+            const string className = "HelloWorld";
+            taskName.ShouldNotBe(className, "The test is misconfigured.");
+            string errorMessage = string.Format(ResourceUtilities.GetResourceString("CodeTaskFactory.CouldNotFindTaskInAssembly"), taskName);
+
+            const string projectContent = @"<Project>
+  <UsingTask TaskName=""" + taskName + @""" TaskFactory=""RoslynCodeTaskFactory"" AssemblyFile=""$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll"">
+    <Task>
+      <Code Type=""Class"">
+namespace InlineTask
+{
+    using Microsoft.Build.Utilities;
+
+    public class " + className + @" : Task
+    {
+        public override bool Execute()
+        {
+            Log.LogMessage(""Hello, world!"");
+            return !Log.HasLoggedErrors;
+        }
+    }
+}
+      </Code>
+    </Task>
+  </UsingTask>
+  <Target Name=""Build"">
+    <" + taskName + @" />
+  </Target>
+</Project>";
+
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(projectContent);
+                var logger = proj.BuildProjectExpectFailure();
+                logger.AssertLogContains(errorMessage);
+            }
+        }
+
         private void TryLoadTaskBodyAndExpectFailure(string taskBody, string expectedErrorMessage)
         {
             if (expectedErrorMessage == null)
@@ -755,7 +1102,6 @@ namespace InlineCode {{
             IReadOnlyList<string> expectedWarningMessages = null)
         {
             MockEngine buildEngine = new MockEngine();
-            
 
             TaskLoggingHelper log = new TaskLoggingHelper(buildEngine, TaskName)
             {

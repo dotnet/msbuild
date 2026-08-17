@@ -1963,7 +1963,7 @@
       </trans-unit>
       <trans-unit id="STARequired">
         <source>MSB4056: The MSBuild engine must be called on a single-threaded-apartment. Current threading model is "{0}". Proceeding, but some tasks may not function correctly.</source>
-        <target state="translated">MSB4056: Se debe llamar al motor de MSBuild en Singlethread-Apartment. El modelo de subprocesos actual es '"{0}". El proceso continúa, pero es posible que algunas tareas no funcionen correctamente.</target>
+        <target state="translated">MSB4056: Se debe llamar al motor de MSBuild en Singlethread-Apartment. El modelo de subprocesos actual es "{0}". El proceso continúa, pero es posible que algunas tareas no funcionen correctamente.</target>
         <note>{StrBegin="MSB4056: "}</note>
         <alt-trans match-quality="100%" tool="BlackBox/MSR MT">
           <target state-qualifier="tm-suggestion">MSB4056: Das MSBuild-Modul muss in einem Singlethread-Apartment aufgerufen werden. Das aktuelle Threadmodell ist {0}. Der Vorgang wird fortgesetzt, aber einige Aufgaben werden möglicherweise nicht ordnungsgemäß ausgeführt.</target>

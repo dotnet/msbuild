@@ -1,0 +1,76 @@
+use vs
+
+package name=Microsoft.Build.Arm64
+        version=$(Version)
+        vs.package.machineArch=arm64
+        vs.package.language=neutral
+
+vs.relatedProcessFiles
+  vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\arm64\Microsoft.Build.dll"
+  vs.relatedProcessFile Path="[InstallDir]\MSBuild\Current\Bin\arm64\Microsoft.Build.Tasks.Core.dll"
+
+folder InstallDir:\MSBuild\Current\Bin\arm64
+  file source=$(Arm64BinPath)MSBuild.exe vs.file.ngenArchitecture=arm64
+  file source=$(Arm64BinPath)MSBuild.exe.config
+
+  file source=$(FrameworkBinPath)x64\Microsoft.Build.Framework.tlb
+  file source=$(Arm64BinPath)Microsoft.Build.dll vs.file.ngenArchitecture=arm64
+  file source=$(Arm64BinPath)Microsoft.Build.Tasks.Core.dll vs.file.ngenArchitecture=arm64
+  file source=$(Arm64BinPath)Microsoft.Common.CurrentVersion.targets
+  file source=$(Arm64BinPath)Microsoft.Common.CrossTargeting.targets
+  file source=$(Arm64BinPath)Microsoft.Common.overridetasks
+  file source=$(Arm64BinPath)Microsoft.Common.targets
+  file source=$(Arm64BinPath)Microsoft.Common.tasks
+  file source=$(Arm64BinPath)Microsoft.Managed.targets
+  file source=$(Arm64BinPath)Microsoft.Managed.Before.targets
+  file source=$(Arm64BinPath)Microsoft.Managed.After.targets
+  file source=$(Arm64BinPath)Microsoft.CSharp.CurrentVersion.targets
+  file source=$(Arm64BinPath)Microsoft.CSharp.CrossTargeting.targets
+  file source=$(Arm64BinPath)Microsoft.CSharp.targets
+  file source=$(Arm64BinPath)Microsoft.Net.props
+  file source=$(Arm64BinPath)Microsoft.NetFramework.CurrentVersion.props
+  file source=$(Arm64BinPath)Microsoft.NetFramework.CurrentVersion.targets
+  file source=$(Arm64BinPath)Microsoft.NetFramework.props
+  file source=$(Arm64BinPath)Microsoft.NetFramework.targets
+  file source=$(Arm64BinPath)Microsoft.VisualBasic.CurrentVersion.targets
+  file source=$(Arm64BinPath)Microsoft.VisualBasic.CrossTargeting.targets
+  file source=$(Arm64BinPath)Microsoft.VisualBasic.targets
+  file source=$(Arm64BinPath)MSBuild.rsp
+  file source=$(Arm64BinPath)Workflow.targets
+  file source=$(Arm64BinPath)Workflow.VisualBasic.targets
+  file source=$(Arm64BinPath)Microsoft.Xaml.targets
+  file source=$(Arm64BinPath)Microsoft.Data.Entity.targets
+  file source=$(Arm64BinPath)Microsoft.ServiceModel.targets
+  file source=$(Arm64BinPath)Microsoft.WinFx.targets
+  file source=$(Arm64BinPath)Microsoft.WorkflowBuildExtensions.targets
+
+folder InstallDir:\MSBuild\Current\Bin\arm64\MSBuild
+  file source=$(Arm64BinPath)\MSBuild\Microsoft.Build.Core.xsd
+  file source=$(Arm64BinPath)\MSBuild\Microsoft.Build.CommonTypes.xsd
+
+folder InstallDir:\MSBuild\Current\Bin\arm64\cs
+  file source=$(Arm64BinPath)cs\MSBuild.resources.dll
+folder InstallDir:\MSBuild\Current\Bin\arm64\de
+  file source=$(Arm64BinPath)de\MSBuild.resources.dll
+folder InstallDir:\MSBuild\Current\Bin\arm64\es
+  file source=$(Arm64BinPath)es\MSBuild.resources.dll
+folder InstallDir:\MSBuild\Current\Bin\arm64\fr
+  file source=$(Arm64BinPath)fr\MSBuild.resources.dll
+folder InstallDir:\MSBuild\Current\Bin\arm64\it
+  file source=$(Arm64BinPath)it\MSBuild.resources.dll
+folder InstallDir:\MSBuild\Current\Bin\arm64\ja
+  file source=$(Arm64BinPath)ja\MSBuild.resources.dll
+folder InstallDir:\MSBuild\Current\Bin\arm64\ko
+  file source=$(Arm64BinPath)ko\MSBuild.resources.dll
+folder InstallDir:\MSBuild\Current\Bin\arm64\pl
+  file source=$(Arm64BinPath)pl\MSBuild.resources.dll
+folder InstallDir:\MSBuild\Current\Bin\arm64\pt-BR
+  file source=$(Arm64BinPath)pt-BR\MSBuild.resources.dll
+folder InstallDir:\MSBuild\Current\Bin\arm64\ru
+  file source=$(Arm64BinPath)ru\MSBuild.resources.dll
+folder InstallDir:\MSBuild\Current\Bin\arm64\tr
+  file source=$(Arm64BinPath)tr\MSBuild.resources.dll
+folder InstallDir:\MSBuild\Current\Bin\arm64\zh-Hans
+  file source=$(Arm64BinPath)zh-Hans\MSBuild.resources.dll
+folder InstallDir:\MSBuild\Current\Bin\arm64\zh-Hant
+  file source=$(Arm64BinPath)zh-Hant\MSBuild.resources.dll

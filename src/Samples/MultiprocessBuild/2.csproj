@@ -1,4 +1,4 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="3.5">
+<Project>
   <PropertyGroup>
     <AssemblyPath Condition="'$(AssemblyPath)' == ''">PortableTask.dll</AssemblyPath>
   </PropertyGroup>
@@ -8,4 +8,4 @@
     <Sleep Seconds="3" />
      <Message Importance="high" Text="## finishing 2 ##"/>
   </Target>
-</Project> 
+</Project>

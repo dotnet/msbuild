@@ -1,17 +1,17 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Xml;
-
-using Microsoft.Build.Evaluation;
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+using Microsoft.Build.Evaluation;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -29,14 +29,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose X='Y'/>
                     </Project>
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read choose with unexpected Condition attribute.
@@ -48,14 +47,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose Condition='true'/>
                     </Project>
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read choose with unexpected child
@@ -66,7 +64,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <X/>
                         </Choose>
@@ -74,8 +72,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read choose with a When containing no Condition attribute
@@ -86,7 +83,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <When>
                                 <PropertyGroup><x/></PropertyGroup>
@@ -99,8 +96,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read choose with only an otherwise
@@ -111,7 +107,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <Otherwise/>
                         </Choose>
@@ -119,8 +115,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read choose with two otherwises
@@ -131,7 +126,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <Otherwise/>
                             <Otherwise/>
@@ -140,8 +135,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read choose with otherwise before when
@@ -152,7 +146,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <Otherwise/>
                             <When Condition='c'/>
@@ -161,8 +155,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read empty choose
@@ -176,7 +169,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose/>
                     </Project>
                 ";
@@ -185,8 +178,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectChooseElement choose = (ProjectChooseElement)Helpers.GetFirst(project.Children);
 
                 Assert.Null(Helpers.GetFirst(choose.Children));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read choose with only a when
@@ -195,7 +187,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadChooseOnlyWhen()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <When Condition='c'/>
                         </Choose>
@@ -216,7 +208,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadChooseBothWhenOtherwise()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <When Condition='c1'/>
                             <When Condition='c2'/>
@@ -252,14 +244,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                     builder2.Append("</When></Choose>");
                 }
 
-                string content = "<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>";
+                string content = "<Project>";
                 content += builder1.ToString();
                 content += builder2.ToString();
                 content += @"</Project>";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Setting a When's condition should dirty the project
@@ -268,13 +259,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void SettingWhenConditionDirties()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Choose>
                             <When Condition='true'>
                               <PropertyGroup>
                                 <p>v1</p>
-                              </PropertyGroup> 
-                            </When>      
+                              </PropertyGroup>
+                            </When>
                         </Choose>
                     </Project>
                 ";

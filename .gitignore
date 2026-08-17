@@ -21,6 +21,9 @@ artifacts/
 # Visual Studio 2015 cache/options directory
 .vs/
 
+# Verify result files
+*.received.*
+
 *_i.c
 *_p.c
 *_i.h
@@ -31,7 +34,6 @@ artifacts/
 *.pdb
 *.pgc
 *.pgd
-*.rsp
 *.sbr
 *.tlb
 *.tli
@@ -136,12 +138,6 @@ csx/
 # Windows Store app package directory
 AppPackages/
 
-# Visual Studio cache files
-# files ending in .cache can be ignored
-*.[Cc]ache
-# but keep track of directories ending in .cache
-!*.[Cc]ache/
-
 # Others
 ClientBin/
 [Ss]tyle[Cc]op.*
@@ -220,5 +216,11 @@ Samples/MultiprocessBuild/PortableTask.dll
 stage1/
 .tools
 
-# ETL traces    
+# ETL traces
 *.etl.zip
+
+# .DS_Store for macOS
+**/.DS_Store
+
+# We keep launchSettings.json local
+**/launchSettings.json

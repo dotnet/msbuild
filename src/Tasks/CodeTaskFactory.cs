@@ -1,26 +1,28 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
 #if FEATURE_CODETASKFACTORY
-    using System.CodeDom.Compiler;
     using System.CodeDom;
+    using System.CodeDom.Compiler;
     using System.Collections.Concurrent;
-    using System.Diagnostics.CodeAnalysis;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
     using System.Globalization;
     using System.IO;
     using System.Reflection;
     using System.Text;
     using System.Xml;
+    using Microsoft.Build.Shared.FileSystem;
 
     /// <summary>
     /// A task factory which can take code dom supported languages and create a task out of it
@@ -160,7 +162,7 @@ namespace Microsoft.Build.Tasks
         public Type TaskType { get; private set; }
 
         /// <summary>
-        /// Get the type information for all task parameters
+        /// Get the type information for all task parameters.
         /// </summary>
         public TaskPropertyInfo[] GetTaskParameters()
         {
@@ -170,7 +172,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Initialze the task factory
+        /// Initializes the task factory.
         /// </summary>
         public bool Initialize(string taskName, IDictionary<string, TaskPropertyInfo> taskParameters, string taskElementContents, IBuildEngine taskFactoryLoggingHost)
         {
@@ -306,7 +308,7 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Create a taskfactory instance which contains the data that needs to be refreshed between task invocations
+        /// Create a taskfactory instance which contains the data that needs to be refreshed between task invocations.
         /// </summary>
         public ITask CreateTask(IBuildEngine loggingHost)
         {
@@ -683,18 +685,24 @@ namespace Microsoft.Build.Tasks
 
                 try
                 {
+                    // Framework and Utilities are default references but are often
+                    // specified in the UsingTask anyway; if so just ignore them.
+                    //
+                    // Do this with an explicit upfront check rather than loading the
+                    // assembly and then checking its name, because that can cause
+                    // the loader to have multiple copies of these assemblies as in
+                    // https://github.com/dotnet/msbuild/issues/7108.
+
+                    string name = AssemblyName.GetAssemblyName(assemblyFile).FullName;
+                    if (name == _msbuildFrameworkName ||
+                        name == _msbuildUtilitiesName)
+                    {
+                        return false;
+                    }
+
                     Assembly candidateAssembly = Assembly.UnsafeLoadFrom(assemblyFile);
                     if (candidateAssembly != null)
                     {
-                        string name = candidateAssembly.FullName;
-                        if (name == _msbuildFrameworkName ||
-                            name == _msbuildUtilitiesName)
-                        {
-                            // Framework and Utilities are default references but are often
-                            // specified in the UsingTask anyway; if so just ignore them.
-                            return false;
-                        }
-
                         candidateAssemblyLocation = candidateAssembly.Location;
                         s_knownReferenceAssemblies[candidateAssembly.FullName] = candidateAssembly;
                     }
@@ -803,19 +811,13 @@ namespace Microsoft.Build.Tasks
                 var fullSpec = new FullTaskSpecification(finalReferencedAssemblies, fullCode);
                 if (!s_compiledTaskCache.TryGetValue(fullSpec, out Assembly existingAssembly))
                 {
-                    // Invokes compilation. 
-
-                    // Note: CompileAssemblyFromSource uses Path.GetTempPath() directory, but will not create it. In some cases 
-                    // this will throw inside CompileAssemblyFromSource. To work around this, ensure the temp directory exists. 
-                    // See: https://github.com/Microsoft/msbuild/issues/328
-                    Directory.CreateDirectory(Path.GetTempPath());
-
+                    // Invokes compilation.
                     CompilerResults compilerResults = provider.CompileAssemblyFromSource(compilerParameters, fullCode);
 
                     string outputPath = null;
                     if (compilerResults.Errors.Count > 0 || Environment.GetEnvironmentVariable("MSBUILDLOGCODETASKFACTORYOUTPUT") != null)
                     {
-                        string tempDirectory = Path.GetTempPath();
+                        string tempDirectory = FileUtilities.TempFileDirectory;
                         string fileName = Guid.NewGuid().ToString() + ".txt";
                         outputPath = Path.Combine(tempDirectory, fileName);
                         File.WriteAllText(outputPath, fullCode);
@@ -1046,7 +1048,7 @@ namespace Microsoft.Build.Tasks
                 TaskResources = AssemblyResources.PrimaryResources,
                 HelpKeywordPrefix = "MSBuild."
             };
-            
+
             log.LogErrorWithCodeFromResources("TaskFactoryNotSupportedFailure", nameof(CodeTaskFactory));
 
             return false;

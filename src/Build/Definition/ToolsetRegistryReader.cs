@@ -1,21 +1,22 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_WIN32_REGISTRY
 
 using System;
 using System.Collections.Generic;
-
-using Microsoft.Build.Shared;
-using error = Microsoft.Build.Shared.ErrorUtilities;
-using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;
-using RegistryException = Microsoft.Build.Exceptions.RegistryException;
-using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
-using Constants = Microsoft.Build.Internal.Constants;
-using Microsoft.Build.Construction;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
+using Constants = Microsoft.Build.Internal.Constants;
+using error = Microsoft.Build.Shared.ErrorUtilities;
+using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
+using RegistryException = Microsoft.Build.Exceptions.RegistryException;
+using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -323,7 +324,7 @@ namespace Microsoft.Build.Evaluation
                 object result = wrapper.GetValue(valueName);
 
                 // RegistryKey.GetValue returns null if the value is not present
-                // and String.Empty if the value is present and no data is defined. 
+                // and String.Empty if the value is present and no data is defined.
                 // We preserve this distinction, because a string property in the registry with
                 // no value really has an empty string for a value (which is a valid property value)
                 // rather than null for a value (which is an invalid property value)

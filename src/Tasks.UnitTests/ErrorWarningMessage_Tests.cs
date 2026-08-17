@@ -1,14 +1,16 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class ErrorWarningMessage_Tests
+    public sealed class ErrorWarningMessage_Tests
     {
         /// <summary>
         /// Simple case
@@ -162,7 +164,7 @@ namespace Microsoft.Build.UnitTests
                 // don't set text
             };
 
-            
+
 
             bool retval = err.Execute();
 
@@ -354,6 +356,3 @@ namespace Microsoft.Build.UnitTests
         }
     }
 }
-
-
-

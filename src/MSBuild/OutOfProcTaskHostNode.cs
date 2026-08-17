@@ -1,24 +1,27 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Globalization;
-using System.Threading;
+using System.IO;
 using System.Reflection;
-
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+#if !CLR2COMPATIBILITY
+using Microsoft.Build.Experimental.FileAccess;
+#endif
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 #if FEATURE_APPDOMAIN
 using System.Runtime.Remoting;
 #endif
+
+#nullable disable
 
 namespace Microsoft.Build.CommandLine
 {
@@ -33,7 +36,7 @@ namespace Microsoft.Build.CommandLine
 #if CLR2COMPATIBILITY
         IBuildEngine3
 #else
-        IBuildEngine9
+        IBuildEngine10
 #endif
     {
         /// <summary>
@@ -164,6 +167,13 @@ namespace Microsoft.Build.CommandLine
         private RegisteredTaskObjectCacheBase _registeredTaskObjectCache;
 #endif
 
+#if FEATURE_REPORTFILEACCESSES
+        /// <summary>
+        /// The file accesses reported by the most recently completed task.
+        /// </summary>
+        private List<FileAccessData> _fileAccessData = new List<FileAccessData>();
+#endif
+
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -172,7 +182,7 @@ namespace Microsoft.Build.CommandLine
             // We don't know what the current build thinks this variable should be until RunTask(), but as a fallback in case there are
             // communications before we get the configuration set up, just go with what was already in the environment from when this node
             // was initially launched.
-            _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
+            _debugCommunications = Traits.Instance.DebugNodeCommunication;
 
             _receivedPackets = new Queue<INodePacket>();
 
@@ -189,6 +199,10 @@ namespace Microsoft.Build.CommandLine
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostConfiguration, TaskHostConfiguration.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.TaskHostTaskCancelled, TaskHostTaskCancelled.FactoryForDeserialization, this);
             thisINodePacketFactory.RegisterPacketHandler(NodePacketType.NodeBuildComplete, NodeBuildComplete.FactoryForDeserialization, this);
+
+#if !CLR2COMPATIBILITY
+            EngineServices = new EngineServicesImpl(this);
+#endif
         }
 
         #region IBuildEngine Implementation (Properties)
@@ -275,6 +289,8 @@ namespace Microsoft.Build.CommandLine
         /// </summary>
         private ICollection<string> WarningsAsErrors { get; set; }
 
+        private ICollection<string> WarningsNotAsErrors { get; set; }
+
         private ICollection<string> WarningsAsMessages { get; set; }
 
         public bool ShouldTreatWarningAsError(string warningCode)
@@ -285,7 +301,12 @@ namespace Microsoft.Build.CommandLine
                 return false;
             }
 
-            return WarningsAsErrors.Count == 0 || WarningsAsErrors.Contains(warningCode);
+            return (WarningsAsErrors.Count == 0 && WarningAsErrorNotOverriden(warningCode)) || WarningsAsMessages.Contains(warningCode);
+        }
+
+        private bool WarningAsErrorNotOverriden(string warningCode)
+        {
+            return WarningsNotAsErrors?.Contains(warningCode) != true;
         }
         #endregion
 
@@ -492,6 +513,50 @@ namespace Microsoft.Build.CommandLine
         }
 
         #endregion
+
+        #region IBuildEngine10 Members
+
+        [Serializable]
+        private sealed class EngineServicesImpl : EngineServices
+        {
+            private readonly OutOfProcTaskHostNode _taskHost;
+
+            internal EngineServicesImpl(OutOfProcTaskHostNode taskHost)
+            {
+                _taskHost = taskHost;
+            }
+
+            /// <summary>
+            /// No logging verbosity optimization in OOP nodes.
+            /// </summary>
+            public override bool LogsMessagesOfImportance(MessageImportance importance) => true;
+
+            /// <inheritdoc />
+            public override bool IsTaskInputLoggingEnabled
+            {
+                get
+                {
+                    ErrorUtilities.VerifyThrow(_taskHost._currentConfiguration != null, "We should never have a null configuration during a BuildEngine callback!");
+                    return _taskHost._currentConfiguration.IsTaskInputLoggingEnabled;
+                }
+            }
+
+#if FEATURE_REPORTFILEACCESSES
+            /// <summary>
+            /// Reports a file access from a task.
+            /// </summary>
+            /// <param name="fileAccessData">The file access to report.</param>
+            public void ReportFileAccess(FileAccessData fileAccessData)
+            {
+                _taskHost._fileAccessData.Add(fileAccessData);
+            }
+#endif
+        }
+
+        public EngineServices EngineServices { get; }
+
+#endregion
+
 #endif
 
         #region INodePacketFactory Members
@@ -575,9 +640,7 @@ namespace Microsoft.Build.CommandLine
             // Snapshot the current environment
             _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
 
-            string pipeName = "MSBuild" + Process.GetCurrentProcess().Id;
-
-            _nodeEndpoint = new NodeEndpointOutOfProcTaskHost(pipeName);
+            _nodeEndpoint = new NodeEndpointOutOfProcTaskHost();
             _nodeEndpoint.OnLinkStatusChanged += new LinkStatusChangedDelegate(OnLinkStatusChanged);
             _nodeEndpoint.Listen(this);
 
@@ -749,7 +812,7 @@ namespace Microsoft.Build.CommandLine
 
             if (_debugCommunications)
             {
-                using (StreamWriter writer = File.CreateText(String.Format(CultureInfo.CurrentCulture, Path.Combine(Path.GetTempPath(), @"MSBuild_NodeShutdown_{0}.txt"), Process.GetCurrentProcess().Id)))
+                using (StreamWriter writer = File.CreateText(String.Format(CultureInfo.CurrentCulture, Path.Combine(FileUtilities.TempFileDirectory, @"MSBuild_NodeShutdown_{0}.txt"), Process.GetCurrentProcess().Id)))
                 {
                     writer.WriteLine("Node shutting down with reason {0}.", _shutdownReason);
                 }
@@ -832,6 +895,7 @@ namespace Microsoft.Build.CommandLine
             _updateEnvironment = !taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostDoNotUpdateEnvironment", "1", StringComparison.OrdinalIgnoreCase);
             _updateEnvironmentAndLog = taskConfiguration.BuildProcessEnvironment.ContainsValueAndIsEqual("MSBuildTaskHostUpdateEnvironmentAndLog", "1", StringComparison.OrdinalIgnoreCase);
             WarningsAsErrors = taskConfiguration.WarningsAsErrors;
+            WarningsNotAsErrors = taskConfiguration.WarningsNotAsErrors;
             WarningsAsMessages = taskConfiguration.WarningsAsMessages;
             try
             {
@@ -857,8 +921,7 @@ namespace Microsoft.Build.CommandLine
                 // As a fix, we will create the class directly without wrapping it in a domain
                 _taskWrapper = new OutOfProcTaskAppDomainWrapper();
 
-                taskResult = _taskWrapper.ExecuteTask
-                (
+                taskResult = _taskWrapper.ExecuteTask(
                     this as IBuildEngine,
                     taskName,
                     taskLocation,
@@ -868,25 +931,16 @@ namespace Microsoft.Build.CommandLine
 #if FEATURE_APPDOMAIN
                     taskConfiguration.AppDomainSetup,
 #endif
-                    taskParams
-                );
+                    taskParams);
             }
-            catch (Exception e)
+            catch (ThreadAbortException)
             {
-                if (e is ThreadAbortException)
-                {
-                    // This thread was aborted as part of Cancellation, we will return a failure task result
-                    taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
-                }
-                else
-                if (ExceptionHandling.IsCriticalException(e))
-                {
-                    throw;
-                }
-                else
-                {
-                    taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
-                }
+                // This thread was aborted as part of Cancellation, we will return a failure task result
+                taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
+            }
+            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+            {
+                taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
             }
             finally
             {
@@ -897,18 +951,16 @@ namespace Microsoft.Build.CommandLine
                     IDictionary<string, string> currentEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
                     currentEnvironment = UpdateEnvironmentForMainNode(currentEnvironment);
 
-                    if (taskResult == null)
-                    {
-                        taskResult = new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
-                    }
+                    taskResult ??= new OutOfProcTaskHostTaskResult(TaskCompleteType.Failure);
 
                     lock (_taskCompleteLock)
                     {
-                        _taskCompletePacket = new TaskHostTaskComplete
-                                                    (
-                                                        taskResult,
-                                                        currentEnvironment
-                                                    );
+                        _taskCompletePacket = new TaskHostTaskComplete(
+                            taskResult,
+#if FEATURE_REPORTFILEACCESSES
+                            _fileAccessData,
+#endif
+                            currentEnvironment);
                     }
 
 #if FEATURE_APPDOMAIN
@@ -927,11 +979,20 @@ namespace Microsoft.Build.CommandLine
                     lock (_taskCompleteLock)
                     {
                         // Create a minimal taskCompletePacket to carry the exception so that the TaskHostTask does not hang while waiting
-                        _taskCompletePacket = new TaskHostTaskComplete(new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e), null);
+                        _taskCompletePacket = new TaskHostTaskComplete(
+                            new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedAfterExecution, e),
+#if FEATURE_REPORTFILEACCESSES
+                            _fileAccessData,
+#endif
+                            null);
                     }
                 }
                 finally
                 {
+#if FEATURE_REPORTFILEACCESSES
+                    _fileAccessData = new List<FileAccessData>();
+#endif
+
                     // Call CleanupTask to unload any domains and other necessary cleanup in the taskWrapper
                     _taskWrapper.CleanupTask();
 
@@ -953,16 +1014,16 @@ namespace Microsoft.Build.CommandLine
 
             if (_updateEnvironment)
             {
-                foreach (string variable in s_mismatchedEnvironmentValues.Keys)
+                foreach (KeyValuePair<string, KeyValuePair<string, string>> variable in s_mismatchedEnvironmentValues)
                 {
-                    string oldValue = s_mismatchedEnvironmentValues[variable].Key;
-                    string newValue = s_mismatchedEnvironmentValues[variable].Value;
+                    string oldValue = variable.Value.Key;
+                    string newValue = variable.Value.Value;
 
                     // We don't check the return value, because having the variable not exist == be
                     // null is perfectly valid, and mismatchedEnvironmentValues stores those values
                     // as null as well, so the String.Equals should still return that they are equal.
                     string environmentValue = null;
-                    environment.TryGetValue(variable, out environmentValue);
+                    environment.TryGetValue(variable.Key, out environmentValue);
 
                     if (String.Equals(environmentValue, oldValue, StringComparison.OrdinalIgnoreCase))
                     {
@@ -980,14 +1041,14 @@ namespace Microsoft.Build.CommandLine
                         {
                             if (_updateEnvironmentAndLog)
                             {
-                                LogMessageFromResource(MessageImportance.Low, "ModifyingTaskHostEnvironmentVariable", variable, newValue, environmentValue ?? String.Empty);
+                                LogMessageFromResource(MessageImportance.Low, "ModifyingTaskHostEnvironmentVariable", variable.Key, newValue, environmentValue ?? String.Empty);
                             }
 
-                            updatedEnvironment[variable] = newValue;
+                            updatedEnvironment[variable.Key] = newValue;
                         }
                         else
                         {
-                            updatedEnvironment.Remove(variable);
+                            updatedEnvironment.Remove(variable.Key);
                         }
                     }
                 }
@@ -1016,35 +1077,32 @@ namespace Microsoft.Build.CommandLine
 
             if (_updateEnvironment)
             {
-                foreach (string variable in s_mismatchedEnvironmentValues.Keys)
+                foreach (KeyValuePair<string, KeyValuePair<string, string>> variable in s_mismatchedEnvironmentValues)
                 {
                     // Since this is munging the property list for returning to the parent process,
                     // then the value we wish to replace is the one that is in this process, and the
                     // replacement value is the one that originally came from the parent process,
                     // instead of the other way around.
-                    string oldValue = s_mismatchedEnvironmentValues[variable].Value;
-                    string newValue = s_mismatchedEnvironmentValues[variable].Key;
+                    string oldValue = variable.Value.Value;
+                    string newValue = variable.Value.Key;
 
                     // We don't check the return value, because having the variable not exist == be
                     // null is perfectly valid, and mismatchedEnvironmentValues stores those values
                     // as null as well, so the String.Equals should still return that they are equal.
                     string environmentValue = null;
-                    environment.TryGetValue(variable, out environmentValue);
+                    environment.TryGetValue(variable.Key, out environmentValue);
 
                     if (String.Equals(environmentValue, oldValue, StringComparison.OrdinalIgnoreCase))
                     {
-                        if (updatedEnvironment == null)
-                        {
-                            updatedEnvironment = new Dictionary<string, string>(environment, StringComparer.OrdinalIgnoreCase);
-                        }
+                        updatedEnvironment ??= new Dictionary<string, string>(environment, StringComparer.OrdinalIgnoreCase);
 
                         if (newValue != null)
                         {
-                            updatedEnvironment[variable] = newValue;
+                            updatedEnvironment[variable.Key] = newValue;
                         }
                         else
                         {
-                            updatedEnvironment.Remove(variable);
+                            updatedEnvironment.Remove(variable.Key);
                         }
                     }
                 }
@@ -1077,36 +1135,36 @@ namespace Microsoft.Build.CommandLine
                 // after the node is launched.
                 s_mismatchedEnvironmentValues = new Dictionary<string, KeyValuePair<string, string>>(StringComparer.OrdinalIgnoreCase);
 
-                foreach (string variable in _savedEnvironment.Keys)
+                foreach (KeyValuePair<string, string> variable in _savedEnvironment)
                 {
-                    string oldValue = _savedEnvironment[variable];
+                    string oldValue = variable.Value;
                     string newValue;
-                    if (!environment.TryGetValue(variable, out newValue))
+                    if (!environment.TryGetValue(variable.Key, out newValue))
                     {
-                        s_mismatchedEnvironmentValues[variable] = new KeyValuePair<string, string>(null, oldValue);
+                        s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(null, oldValue);
                     }
                     else
                     {
                         if (!String.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
                         {
-                            s_mismatchedEnvironmentValues[variable] = new KeyValuePair<string, string>(newValue, oldValue);
+                            s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(newValue, oldValue);
                         }
                     }
                 }
 
-                foreach (string variable in environment.Keys)
+                foreach (KeyValuePair<string, string> variable in environment)
                 {
-                    string newValue = environment[variable];
+                    string newValue = variable.Value;
                     string oldValue;
-                    if (!_savedEnvironment.TryGetValue(variable, out oldValue))
+                    if (!_savedEnvironment.TryGetValue(variable.Key, out oldValue))
                     {
-                        s_mismatchedEnvironmentValues[variable] = new KeyValuePair<string, string>(newValue, null);
+                        s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(newValue, null);
                     }
                     else
                     {
                         if (!String.Equals(oldValue, newValue, StringComparison.OrdinalIgnoreCase))
                         {
-                            s_mismatchedEnvironmentValues[variable] = new KeyValuePair<string, string>(newValue, oldValue);
+                            s_mismatchedEnvironmentValues[variable.Key] = new KeyValuePair<string, string>(newValue, oldValue);
                         }
                     }
                 }
@@ -1120,7 +1178,11 @@ namespace Microsoft.Build.CommandLine
         {
             if (_nodeEndpoint?.LinkStatus == LinkStatus.Active)
             {
-                if (!e.GetType().GetTypeInfo().IsSerializable)
+#pragma warning disable SYSLIB0050
+                // Types which are not serializable and are not IExtendedBuildEventArgs as
+                // those always implement custom serialization by WriteToStream and CreateFromStream.
+                if (!e.GetType().GetTypeInfo().IsSerializable && e is not IExtendedBuildEventArgs)
+#pragma warning disable SYSLIB0050
                 {
                     // log a warning and bail.  This will end up re-calling SendBuildEvent, but we know for a fact
                     // that the warning that we constructed is serializable, so everything should be good.
@@ -1128,7 +1190,8 @@ namespace Microsoft.Build.CommandLine
                     return;
                 }
 
-                _nodeEndpoint.SendData(new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e)));
+                LogMessagePacket logMessage = new LogMessagePacket(new KeyValuePair<int, BuildEventArgs>(_currentConfiguration.NodeId, e));
+                _nodeEndpoint.SendData(logMessage);
             }
         }
 
@@ -1140,13 +1203,11 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration when we're trying to log messages!");
 
             // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
-            BuildMessageEventArgs message = new BuildMessageEventArgs
-                                                (
+            BuildMessageEventArgs message = new BuildMessageEventArgs(
                                                     ResourceUtilities.FormatString(AssemblyResources.GetString(messageResource), messageArgs),
                                                     null,
                                                     _currentConfiguration.TaskName,
-                                                    importance
-                                                );
+                                                    importance);
 
             LogMessageEvent(message);
         }
@@ -1159,8 +1220,7 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration when we're trying to log warnings!");
 
             // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
-            BuildWarningEventArgs warning = new BuildWarningEventArgs
-                                                (
+            BuildWarningEventArgs warning = new BuildWarningEventArgs(
                                                     null,
                                                     null,
                                                     ProjectFileOfTaskNode,
@@ -1170,8 +1230,7 @@ namespace Microsoft.Build.CommandLine
                                                     0,
                                                     ResourceUtilities.FormatString(AssemblyResources.GetString(messageResource), messageArgs),
                                                     null,
-                                                    _currentConfiguration.TaskName
-                                                );
+                                                    _currentConfiguration.TaskName);
 
             LogWarningEvent(warning);
         }
@@ -1184,8 +1243,7 @@ namespace Microsoft.Build.CommandLine
             ErrorUtilities.VerifyThrow(_currentConfiguration != null, "We should never have a null configuration when we're trying to log errors!");
 
             // Using the CLR 2 build event because this class is shared between MSBuildTaskHost.exe (CLR2) and MSBuild.exe (CLR4+)
-            BuildErrorEventArgs error = new BuildErrorEventArgs
-                                                (
+            BuildErrorEventArgs error = new BuildErrorEventArgs(
                                                     null,
                                                     null,
                                                     ProjectFileOfTaskNode,
@@ -1195,8 +1253,7 @@ namespace Microsoft.Build.CommandLine
                                                     0,
                                                     AssemblyResources.GetString(messageResource),
                                                     null,
-                                                    _currentConfiguration.TaskName
-                                                );
+                                                    _currentConfiguration.TaskName);
 
             LogErrorEvent(error);
         }

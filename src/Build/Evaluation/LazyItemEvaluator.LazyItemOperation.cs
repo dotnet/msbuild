@@ -1,15 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Construction;
-using Microsoft.Build.Eventing;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Linq;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Eventing;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -27,11 +28,11 @@ namespace Microsoft.Build.Evaluation
             protected readonly Expander<P, I> _expander;
             protected readonly bool _conditionResult;
 
-            //  This is used only when evaluating an expression, which instantiates
+            // This is used only when evaluating an expression, which instantiates
             //  the items and then removes them
             protected readonly IItemFactory<I, I> _itemFactory;
             internal ItemSpec<P, I> Spec => _itemSpec;
-            
+
             protected LazyItemOperation(OperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
             {
                 _itemElement = builder.ItemElement;
@@ -42,16 +43,16 @@ namespace Microsoft.Build.Evaluation
 
                 _lazyEvaluator = lazyEvaluator;
 
-                _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, itemType => GetReferencedItems(itemType, ImmutableHashSet<string>.Empty));
+                _evaluatorData = new EvaluatorData(_lazyEvaluator._outerEvaluatorData, _referencedItemLists);
                 _itemFactory = new ItemFactoryWrapper(_itemElement, _lazyEvaluator._itemFactory);
-                _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, _lazyEvaluator.FileSystem);
+                _expander = new Expander<P, I>(_evaluatorData, _evaluatorData, _lazyEvaluator.EvaluationContext);
 
                 _itemSpec.Expander = _expander;
             }
 
-            protected EngineFileUtilities EngineFileUtilities => _lazyEvaluator.EngineFileUtilities;
+            protected FileMatcher FileMatcher => _lazyEvaluator.FileMatcher;
 
-            public void Apply(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            public void Apply(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 MSBuildEventSource.Log.ApplyLazyItemOperationsStart(_itemElement.ItemType);
                 using (_lazyEvaluator._evaluationProfiler.TrackElement(_itemElement))
@@ -61,7 +62,7 @@ namespace Microsoft.Build.Evaluation
                 MSBuildEventSource.Log.ApplyLazyItemOperationsStop(_itemElement.ItemType);
             }
 
-            protected virtual void ApplyImpl(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected virtual void ApplyImpl(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 var items = SelectItems(listBuilder, globsToIgnore);
                 MutateItems(items);
@@ -71,28 +72,16 @@ namespace Microsoft.Build.Evaluation
             /// <summary>
             /// Produce the items to operate on. For example, create new ones or select existing ones
             /// </summary>
-            protected virtual ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected virtual ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
                 return listBuilder.Select(itemData => itemData.Item)
-                                  .ToImmutableList();
+                                  .ToImmutableArray();
             }
 
-            // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/Microsoft/msbuild/issues/2328
-            protected virtual void MutateItems(ImmutableList<I> items) { }
+            // todo Refactoring: MutateItems should clone each item before mutation. See https://github.com/dotnet/msbuild/issues/2328
+            protected virtual void MutateItems(ImmutableArray<I> items) { }
 
-            protected virtual void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder) { }
-
-            private IList<I> GetReferencedItems(string itemType, ImmutableHashSet<string> globsToIgnore)
-            {
-                if (_referencedItemLists.TryGetValue(itemType, out var itemList))
-                {
-                    return itemList.GetMatchedItems(globsToIgnore);
-                }
-                else
-                {
-                    return ImmutableList<I>.Empty;
-                }
-            }
+            protected virtual void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder) { }
 
             [DebuggerDisplay(@"{DebugString()}")]
             protected readonly struct ItemBatchingContext
@@ -112,7 +101,7 @@ namespace Microsoft.Build.Evaluation
                 public IMetadataTable GetMetadataTable()
                 {
                     return CapturedItems == null
-                        ? (IMetadataTable) OperationItem
+                        ? (IMetadataTable)OperationItem
                         : new ItemOperationMetadataTable(OperationItem, CapturedItems);
                 }
 
@@ -173,9 +162,9 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableList<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
+            protected void DecorateItemsWithMetadata(IEnumerable<ItemBatchingContext> itemBatchingContexts, ImmutableArray<ProjectMetadataElement> metadata, bool? needToExpandMetadata = null)
             {
-                if (metadata.Count > 0)
+                if (metadata.Length > 0)
                 {
                     ////////////////////////////////////////////////////
                     // UNDONE: Implement batching here.
@@ -230,7 +219,6 @@ namespace Microsoft.Build.Evaluation
                         // End of legal area for metadata expressions.
                         _expander.Metadata = null;
                     }
-
                     // End of pseudo batching
                     ////////////////////////////////////////////////////
                     // Start of old code
@@ -238,11 +226,11 @@ namespace Microsoft.Build.Evaluation
                     {
                         // Metadata expressions are allowed here.
                         // Temporarily gather and expand these in a table so they can reference other metadata elements above.
-                        EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemType);
+                        EvaluatorMetadataTable metadataTable = new EvaluatorMetadataTable(_itemType, capacity: metadata.Length);
                         _expander.Metadata = metadataTable;
 
                         // Also keep a list of everything so we can get the predecessor objects correct.
-                        List<Pair<ProjectMetadataElement, string>> metadataList = new List<Pair<ProjectMetadataElement, string>>(metadata.Count);
+                        List<Pair<ProjectMetadataElement, string>> metadataList = new(metadata.Length);
 
                         foreach (var metadataElement in metadata)
                         {
@@ -255,13 +243,12 @@ namespace Microsoft.Build.Evaluation
                                     metadataExpansionOptions,
                                     ParserOptions.AllowAll,
                                     _expander,
-                                    _lazyEvaluator
-                                    ))
+                                    _lazyEvaluator))
                             {
                                 continue;
                             }
 
-                            string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location);
+                            string evaluatedValue = _expander.ExpandIntoStringLeaveEscaped(metadataElement.Value, metadataExpansionOptions, metadataElement.Location, _lazyEvaluator._loggingContext);
                             evaluatedValue = FileUtilities.MaybeAdjustFilePath(evaluatedValue, metadataElement.ContainingProject.DirectoryPath);
 
                             metadataTable.SetValue(metadataElement, evaluatedValue);
@@ -283,17 +270,18 @@ namespace Microsoft.Build.Evaluation
                 }
             }
 
-            protected bool NeedToExpandMetadataForEachItem(ImmutableList<ProjectMetadataElement> metadata, out ItemsAndMetadataPair itemsAndMetadataFound)
+            private static IEnumerable<string> GetMetadataValuesAndConditions(ImmutableArray<ProjectMetadataElement> metadata)
             {
-                List<string> values = new List<string>(metadata.Count * 2);
-
                 foreach (var metadataElement in metadata)
                 {
-                    values.Add(metadataElement.Value);
-                    values.Add(metadataElement.Condition);
+                    yield return metadataElement.Value;
+                    yield return metadataElement.Condition;
                 }
+            }
 
-                itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(values);
+            protected bool NeedToExpandMetadataForEachItem(ImmutableArray<ProjectMetadataElement> metadata, out ItemsAndMetadataPair itemsAndMetadataFound)
+            {
+                itemsAndMetadataFound = ExpressionShredder.GetReferencedItemNamesAndMetadata(GetMetadataValuesAndConditions(metadata));
 
                 bool needToExpandMetadataForEachItem = false;
 

@@ -1,13 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
-using System.Linq;
+using System.Reflection;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using System.Reflection;
+
+#nullable disable
 
 namespace Microsoft.Build.BackEnd
 {
@@ -69,11 +71,11 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref typeName);
 
             var type = Type.GetType(typeName);
-            ErrorUtilities.VerifyThrowInvalidOperation(type != null, "type cannot be null");
-            ErrorUtilities.VerifyThrowInvalidOperation(
+            ErrorUtilities.VerifyThrow(type != null, "type cannot be null");
+            ErrorUtilities.VerifyThrow(
                 typeof(T).IsAssignableFrom(type),
                 $"{typeName} must be a {typeof(T).FullName}");
-            ErrorUtilities.VerifyThrowInvalidOperation(
+            ErrorUtilities.VerifyThrow(
                 typeof(ITranslatable).IsAssignableFrom(type),
                 $"{typeName} must be a {nameof(ITranslatable)}");
 
@@ -82,26 +84,30 @@ namespace Microsoft.Build.BackEnd
                 t =>
                 {
                     ConstructorInfo constructor = null;
-#if FEATURE_TYPE_GETCONSTRUCTOR
                     constructor = type.GetConstructor(BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null);
-#else
-                    constructor =
-                        type
-                            .GetTypeInfo()
-                            .GetConstructors(BindingFlags.Instance | BindingFlags.NonPublic)
-                            .FirstOrDefault(c => c.GetParameters().Length == 0);
-#endif
-                    ErrorUtilities.VerifyThrowInvalidOperation(
+                    ErrorUtilities.VerifyThrow(
                         constructor != null,
-                        $"{typeName} must have a private parameterless constructor");
+                        "{0} must have a private parameterless constructor", typeName);
                     return constructor;
                 });
 
-            var targetInstanceChild = (ITranslatable) parameterlessConstructor.Invoke(Array.Empty<object>());
+            var targetInstanceChild = (ITranslatable)parameterlessConstructor.Invoke(Array.Empty<object>());
 
             targetInstanceChild.Translate(translator);
 
-            return (T) targetInstanceChild;
+            return (T)targetInstanceChild;
+        }
+
+        public static void TranslateOptionalBuildEventContext(this ITranslator translator, ref BuildEventContext buildEventContext)
+        {
+            if (translator.Mode == TranslationDirection.ReadFromStream)
+            {
+                buildEventContext = translator.Reader.ReadOptionalBuildEventContext();
+            }
+            else
+            {
+                translator.Writer.WriteOptionalBuildEventContext(buildEventContext);
+            }
         }
     }
 }

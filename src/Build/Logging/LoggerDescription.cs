@@ -1,16 +1,15 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Reflection;
 using System.IO;
-
+using System.Reflection;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-using Microsoft.Build.BackEnd;
-
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
-using System.Linq;
+
+#nullable disable
 
 namespace Microsoft.Build.Logging
 {
@@ -30,14 +29,12 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Creates a logger description from given data
         /// </summary>
-        public LoggerDescription
-        (
+        public LoggerDescription(
             string loggerClassName,
             string loggerAssemblyName,
             string loggerAssemblyFile,
             string loggerSwitchParameters,
-            LoggerVerbosity verbosity
-        ) : this(loggerClassName,
+            LoggerVerbosity verbosity) : this(loggerClassName,
             loggerAssemblyName,
             loggerAssemblyFile,
             loggerSwitchParameters,
@@ -49,15 +46,13 @@ namespace Microsoft.Build.Logging
         /// <summary>
         /// Creates a logger description from given data
         /// </summary>
-        public LoggerDescription
-        (
+        public LoggerDescription(
             string loggerClassName,
             string loggerAssemblyName,
             string loggerAssemblyFile,
             string loggerSwitchParameters,
             LoggerVerbosity verbosity,
-            bool isOptional
-        )
+            bool isOptional)
         {
             _loggerClassName = loggerClassName;
 
@@ -167,22 +162,10 @@ namespace Microsoft.Build.Logging
                     InternalLoggerException.Throw(null, null, "LoggerNotFoundError", true, this.Name);
                 }
             }
-            catch (Exception e /* Wrap all other exceptions in a more meaningful exception*/)
+            catch (Exception e) // Wrap other exceptions in a more meaningful exception. LoggerException and InternalLoggerException are already meaningful.
+            when (!(e is LoggerException /* Polite logger Failure*/ || e is InternalLoggerException /* LoggerClass not found*/ || ExceptionHandling.IsCriticalException(e)))
             {
-                // Two of the possible exceptions are already in reasonable exception types
-                if (e is LoggerException /* Polite logger Failure*/ || e is InternalLoggerException /* LoggerClass not found*/)
-                {
-                    throw;
-                }
-                else
-                {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
-                    InternalLoggerException.Throw(e, null, "LoggerCreationError", true, Name);
-                }
+                InternalLoggerException.Throw(e, null, "LoggerCreationError", true, Name);
             }
 
             return forwardingLogger;
@@ -238,25 +221,15 @@ namespace Microsoft.Build.Logging
                 string message = ResourceUtilities.FormatResourceStringStripCodeAndKeyword("LoggerInstantiationFailureErrorInvalidCast", _loggerClassName, _loggerAssembly.AssemblyLocation, e.Message);
                 throw new LoggerException(message, e.InnerException);
             }
-            catch (TargetInvocationException e)
+            catch (TargetInvocationException e) when (e.InnerException is LoggerException le)
             {
                 // At this point, the interesting stack is the internal exception;
                 // the outer exception is System.Reflection stuff that says nothing
                 // about the nature of the logger failure.
-                Exception innerException = e.InnerException;
-
-                if (innerException is LoggerException)
-                {
-                    // Logger failed politely during construction. In order to preserve
-                    // the stack trace at which the error occurred we wrap the original
-                    // exception instead of throwing.
-                    LoggerException l = ((LoggerException)innerException);
-                    throw new LoggerException(l.Message, innerException, l.ErrorCode, l.HelpKeyword);
-                }
-                else
-                {
-                    throw;
-                }
+                // Logger failed politely during construction. In order to preserve
+                // the stack trace at which the error occurred we wrap the original
+                // exception instead of throwing.
+                throw new LoggerException(le.Message, le, le.ErrorCode, le.HelpKeyword);
             }
 
             return logger;
@@ -281,11 +254,7 @@ namespace Microsoft.Build.Logging
         {
             return type.GetTypeInfo().IsClass &&
                 !type.GetTypeInfo().IsAbstract &&
-#if FEATURE_TYPE_GETINTERFACE
                 (type.GetTypeInfo().GetInterface("IForwardingLogger") != null);
-#else
-                (type.GetInterfaces().Any(interfaceType => interfaceType.Name == "IForwardingLogger"));
-#endif
         }
 
         /// <summary>
@@ -297,11 +266,7 @@ namespace Microsoft.Build.Logging
         {
             return type.GetTypeInfo().IsClass &&
                 !type.GetTypeInfo().IsAbstract &&
-#if FEATURE_TYPE_GETINTERFACE
                 (type.GetTypeInfo().GetInterface("ILogger") != null);
-#else
-                (type.GetInterfaces().Any(interfaceType => interfaceType.Name == "ILogger"));
-#endif
         }
 
         /// <summary>
@@ -382,7 +347,7 @@ namespace Microsoft.Build.Logging
             translator.Translate(ref _loggerId);
         }
 
-        static internal LoggerDescription FactoryForTranslation(ITranslator translator)
+        internal static LoggerDescription FactoryForTranslation(ITranslator translator)
         {
             LoggerDescription description = new LoggerDescription();
             ((ITranslatable)description).Translate(translator);

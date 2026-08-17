@@ -1,14 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 
+#nullable disable
+
 namespace Microsoft.Build.Shared.FileSystem
 {
-    internal class CachingFileSystemWrapper : IFileSystem
+    internal sealed class CachingFileSystemWrapper : IFileSystem
     {
         private readonly IFileSystem _fileSystem;
         private readonly ConcurrentDictionary<string, bool> _existenceCache = new ConcurrentDictionary<string, bool>();
@@ -19,9 +21,9 @@ namespace Microsoft.Build.Shared.FileSystem
             _fileSystem = fileSystem;
         }
 
-        public bool DirectoryEntryExists(string path)
+        public bool FileOrDirectoryExists(string path)
         {
-            return CachedExistenceCheck(path, p => _fileSystem.DirectoryEntryExists(p));
+            return CachedExistenceCheck(path, p => _fileSystem.FileOrDirectoryExists(p));
         }
 
         public FileAttributes GetAttributes(string path)
@@ -31,7 +33,7 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public DateTime GetLastWriteTimeUtc(string path)
         {
-            return _lastWriteTimeCache.GetOrAdd(path, p =>_fileSystem.GetLastWriteTimeUtc(p));
+            return _lastWriteTimeCache.GetOrAdd(path, p => _fileSystem.GetLastWriteTimeUtc(p));
         }
 
         public bool DirectoryExists(string path)

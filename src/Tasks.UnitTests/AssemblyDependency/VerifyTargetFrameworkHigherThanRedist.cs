@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System.Collections.Generic;
 using System.IO;
 using Microsoft.Build.Framework;
@@ -5,6 +8,8 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
 using Xunit.Abstractions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -123,7 +128,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// not warn -- this is a hack until we figure out how to properly deal with .NET assemblies being removed from the framework.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void HigherThanHighestInRedistListForMSBuildAssembly()
         {
             MockEngine e = new MockEngine(_output);
@@ -153,8 +157,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario."
 
-            // TODO: https://github.com/Microsoft/msbuild/issues/2305
-            //e.AssertLogContains("Microsoft.Build.dll");
+            // TODO: https://github.com/dotnet/msbuild/issues/2305
+            // e.AssertLogContains("Microsoft.Build.dll");
             Assert.Empty(t2.ResolvedFiles);
 
             ResolveAssemblyReference t3 = new ResolveAssemblyReference();
@@ -165,7 +169,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario."
 
-            // TODO: https://github.com/Microsoft/msbuild/issues/2305
+            // TODO: https://github.com/dotnet/msbuild/issues/2305
             // e.AssertLogContains("Microsoft.Build.dll");
             Assert.Single(t1.ResolvedFiles);
         }
@@ -260,7 +264,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// not warn -- this is a hack until we figure out how to properly deal with .NET assemblies being removed from the framework.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void DependenciesHigherThanHighestInRedistListForMSBuildAssembly()
         {
             MockEngine e = new MockEngine(_output);
@@ -292,19 +295,19 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario"
             e.AssertLogContains("DependsOnMSBuild12");
 
-            // TODO: https://github.com/Microsoft/msbuild/issues/2305
+            // TODO: https://github.com/dotnet/msbuild/issues/2305
             // e.AssertLogContains("Microsoft.Build.dll");
             Assert.Empty(t2.ResolvedFiles);
 
             ResolveAssemblyReference t3 = new ResolveAssemblyReference();
-            //t2.TargetFrameworkVersion is null
+            // t2.TargetFrameworkVersion is null
 
             ExecuteRAROnItemsAndRedist(t3, e, items, redistString, false);
 
             Assert.Equal(1, e.Warnings); // "Expected one warning in this scenario"
             e.AssertLogContains("DependsOnMSBuild12");
 
-            // TODO: https://github.com/Microsoft/msbuild/issues/2305
+            // TODO: https://github.com/dotnet/msbuild/issues/2305
             // e.AssertLogContains("Microsoft.Build.dll");
             Assert.Empty(t3.ResolvedFiles);
         }

@@ -1,23 +1,29 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
+using Microsoft.Build.Shared.FileSystem;
+
 using System.Text;
 using System.Reflection;
-using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
 using System.Collections.Generic;
 using System.Collections;
 using System.Globalization;
 using System.Linq;
+#if FEATURE_HANDLEPROCESSCORRUPTEDSTATEEXCEPTIONS
 using System.Runtime.ExceptionServices;
+#endif
 using System.Text.RegularExpressions;
-using Microsoft.Build.Shared.FileSystem;
+using System.Runtime.Versioning;
+using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
-#if FEATURE_COM_INTEROP
     /// <summary>
     /// The original ITypeInfo interface in the CLR has incorrect definitions for GetRefTypeOfImplType and GetRefTypeInfo.
     /// It uses ints for marshalling handles which will result in a crash on 64 bit systems. This is a temporary interface
@@ -55,7 +61,7 @@ namespace Microsoft.Build.Tasks
     [GuidAttribute("00020406-0000-0000-C000-000000000046")]
     [InterfaceTypeAttribute(ComInterfaceType.InterfaceIsIUnknown)]
     [ComImport]
-    internal interface UCOMICreateITypeLib
+    internal interface ICreateTypeLib
     {
         void CreateTypeInfo();
         void SetName();
@@ -71,7 +77,9 @@ namespace Microsoft.Build.Tasks
 
     [ComImport]
     [Guid("E5CB7A31-7512-11d2-89CE-0080C792E5D8")]
+#if !NETSTANDARD2_0_OR_GREATER // NS2.0 doesn't have COM so this can't appear in the ref assembly
     [TypeLibType(TypeLibTypeFlags.FCanCreate)]
+#endif
     [ClassInterface(ClassInterfaceType.None)]
     internal class CorMetaDataDispenser
     {
@@ -80,14 +88,16 @@ namespace Microsoft.Build.Tasks
     [ComImport]
     [Guid("809c652e-7396-11d2-9771-00a0c9b4d50c")]
     [InterfaceType(ComInterfaceType.InterfaceIsIUnknown /*0x0001*/)]
+#if !NETSTANDARD2_0_OR_GREATER // NS2.0 doesn't have COM so this can't appear in the ref assembly
     [TypeLibType(TypeLibTypeFlags.FRestricted /*0x0200*/)]
+#endif
     internal interface IMetaDataDispenser
     {
         [return: MarshalAs(UnmanagedType.Interface)]
         object DefineScope([In] ref Guid rclsid, [In] UInt32 dwCreateFlags, [In] ref Guid riid);
 
         [return: MarshalAs(UnmanagedType.Interface)]
-        object OpenScope([In][MarshalAs(UnmanagedType.LPWStr)]  string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid);
+        object OpenScope([In][MarshalAs(UnmanagedType.LPWStr)] string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid);
 
         [return: MarshalAs(UnmanagedType.Interface)]
         object OpenScopeOnMemory([In] IntPtr pData, [In] UInt32 cbData, [In] UInt32 dwOpenFlags, [In] ref Guid riid);
@@ -341,7 +351,9 @@ namespace Microsoft.Build.Tasks
         public uint cchBuf;
     }
 
-    [ComImport, Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [ComImport]
+    [Guid("E707DCDE-D1CD-11D2-BAB9-00C04F8ECEAE")]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
     internal interface IAssemblyCache
     {
         /* Unused.
@@ -380,7 +392,9 @@ namespace Microsoft.Build.Tasks
         DOWNLOAD = 4
     }
 
-    [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("CD193BC0-B4BC-11d2-9833-00C04FC31D2E")]
+    [ComImport]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("CD193BC0-B4BC-11d2-9833-00C04FC31D2E")]
     internal interface IAssemblyName
     {
         [PreserveSig]
@@ -432,7 +446,9 @@ namespace Microsoft.Build.Tasks
         int Clone(out IAssemblyName pAsmName);
     }// IAssemblyName
 
-    [ComImport, InterfaceType(ComInterfaceType.InterfaceIsIUnknown), Guid("21b8916c-f28e-11d2-a473-00c04f8ef448")]
+    [ComImport]
+    [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+    [Guid("21b8916c-f28e-11d2-a473-00c04f8ef448")]
     internal interface IAssemblyEnum
     {
         [PreserveSig]
@@ -469,8 +485,6 @@ namespace Microsoft.Build.Tasks
                                     | RETARGETABLE
     }
 
-#endif
-
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal struct STARTUPINFO
     {
@@ -503,12 +517,6 @@ namespace Microsoft.Build.Tasks
         public int dwThreadId;
     }
 
-    internal enum SymbolicLink
-    {
-        File = 0,
-        Directory = 1
-    }
-
     /// <summary>
     /// Interop methods.
     /// </summary>
@@ -529,6 +537,7 @@ namespace Microsoft.Build.Tasks
 
         internal const int HRESULT_E_CLASSNOTREGISTERED = -2147221164;
 
+        internal const int ERROR_INVALID_FILENAME = -2147024773; // Illegal characters in name
         internal const int ERROR_ACCESS_DENIED = -2147024891; // ACL'd or r/o
         internal const int ERROR_SHARING_VIOLATION = -2147024864; // File locked by another use
 
@@ -554,9 +563,9 @@ namespace Microsoft.Build.Tasks
         }
 
         // Set of IMAGE_FILE constants which represent the processor architectures for native assemblies.
-        internal const UInt16 IMAGE_FILE_MACHINE_UNKNOWN = 0x0; //	The contents of this field are assumed to be applicable to any machine type
+        internal const UInt16 IMAGE_FILE_MACHINE_UNKNOWN = 0x0; // The contents of this field are assumed to be applicable to any machine type
         internal const UInt16 IMAGE_FILE_MACHINE_INVALID = UInt16.MaxValue; // Invalid value for the machine type.
-        internal const UInt16 IMAGE_FILE_MACHINE_AMD64 = 0x8664; //	x64
+        internal const UInt16 IMAGE_FILE_MACHINE_AMD64 = 0x8664; // x64
         internal const UInt16 IMAGE_FILE_MACHINE_ARM = 0x1c0; // ARM little endian
         internal const UInt16 IMAGE_FILE_MACHINE_ARMV7 = 0x1c4; // ARMv7 (or higher) Thumb mode only
         internal const UInt16 IMAGE_FILE_MACHINE_I386 = 0x14c; // Intel 386 or later processors and compatible processors
@@ -777,7 +786,9 @@ namespace Microsoft.Build.Tasks
         #region PInvoke
         private const string Crypt32DLL = "crypt32.dll";
         private const string Advapi32DLL = "advapi32.dll";
+#if !RUNTIME_TYPE_NETCORE
         private const string MscoreeDLL = "mscoree.dll";
+#endif
 
         //------------------------------------------------------------------------------
         // CreateHardLink
@@ -788,7 +799,7 @@ namespace Microsoft.Build.Tasks
         [DllImport("libc", SetLastError = true)]
         internal static extern int link(string oldpath, string newpath);
 
-        internal static bool MakeHardLink(string newFileName, string exitingFileName, ref string errorMessage)
+        internal static bool MakeHardLink(string newFileName, string exitingFileName, ref string errorMessage, TaskLoggingHelper log)
         {
             bool hardLinkCreated;
             if (NativeMethodsShared.IsWindows)
@@ -799,49 +810,20 @@ namespace Microsoft.Build.Tasks
             else
             {
                 hardLinkCreated = link(exitingFileName, newFileName) == 0;
-                errorMessage = hardLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
+                errorMessage = hardLinkCreated ? null : log.FormatResourceString("Copy.NonWindowsLinkErrorMessage", "link()", Marshal.GetLastWin32Error());
             }
 
             return hardLinkCreated;
         }
 
         //------------------------------------------------------------------------------
-        // CreateSymbolicLink
-        //------------------------------------------------------------------------------
-        [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
-        [return: MarshalAs(UnmanagedType.I1)]
-        internal static extern bool CreateSymbolicLink(string symLinkFileName, string targetFileName, SymbolicLink dwFlags);
-
-        [DllImport("libc", SetLastError = true)]
-        internal static extern int symlink(string oldpath, string newpath);
-
-        internal static bool MakeSymbolicLink(string newFileName, string exitingFileName, ref string errorMessage)
-        {
-            bool symbolicLinkCreated;
-            if (NativeMethodsShared.IsWindows)
-            {
-                symbolicLinkCreated = CreateSymbolicLink(newFileName, exitingFileName, SymbolicLink.File);
-                errorMessage = symbolicLinkCreated ? null : Marshal.GetExceptionForHR(Marshal.GetHRForLastWin32Error()).Message;
-            }
-            else
-            {
-                symbolicLinkCreated = symlink(exitingFileName, newFileName) == 0;
-                errorMessage = symbolicLinkCreated ? null : "The link() library call failed with the following error code: " + Marshal.GetLastWin32Error();
-            }
-
-            return symbolicLinkCreated;
-        }
-
-        //------------------------------------------------------------------------------
         // MoveFileEx
         //------------------------------------------------------------------------------
         [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode, EntryPoint = "MoveFileEx")]
-        internal static extern bool MoveFileExWindows
-        (
+        internal static extern bool MoveFileExWindows(
             [In] string existingFileName,
             [In] string newFileName,
-            [In] MoveFileFlags flags
-        );
+            [In] MoveFileFlags flags);
 
         /// <summary>
         /// Add implementation of this function when not running on windows. The implementation is
@@ -900,14 +882,12 @@ namespace Microsoft.Build.Tasks
         // UnRegisterTypeLib
         //------------------------------------------------------------------------------
         [DllImport("oleaut32", PreserveSig = false, EntryPoint = "UnRegisterTypeLib")]
-        internal static extern void UnregisterTypeLib
-        (
+        internal static extern void UnregisterTypeLib(
             [In] ref Guid guid,
             [In] short wMajorVerNum,
             [In] short wMinorVerNum,
             [In] int lcid,
-            [In] System.Runtime.InteropServices.ComTypes.SYSKIND syskind
-        );
+            [In] System.Runtime.InteropServices.ComTypes.SYSKIND syskind);
 
         //------------------------------------------------------------------------------
         // LoadTypeLib
@@ -975,8 +955,7 @@ namespace Microsoft.Build.Tasks
         //------------------------------------------------------------------------------
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CreateProcess
-        (
+        internal static extern bool CreateProcess(
             string lpApplicationName,
             string lpCommandLine,
             IntPtr lpProcessAttributes,
@@ -987,8 +966,7 @@ namespace Microsoft.Build.Tasks
             IntPtr lpEnvironment,
             string lpCurrentDirectory,
             [In] ref STARTUPINFO lpStartupInfo,
-            out PROCESS_INFORMATION lpProcessInformation
-        );
+            out PROCESS_INFORMATION lpProcessInformation);
 
         //------------------------------------------------------------------------------
         // ImageNtHeader
@@ -1018,11 +996,11 @@ namespace Microsoft.Build.Tasks
             return false;
         }
 
-#if FEATURE_COM_INTEROP
         //------------------------------------------------------------------------------
         // CreateAssemblyCache
         //------------------------------------------------------------------------------
         [DllImport("fusion.dll")]
+        [SupportedOSPlatform("windows")]
         internal static extern uint CreateAssemblyCache(out IAssemblyCache ppAsmCache, uint dwReserved);
 
         [DllImport("fusion.dll")]
@@ -1034,6 +1012,7 @@ namespace Microsoft.Build.Tasks
                 IntPtr pvReserved);
 
         [DllImport("fusion.dll")]
+        [SupportedOSPlatform("windows")]
         internal static extern int CreateAssemblyNameObject(
                 out IAssemblyName ppAssemblyNameObj,
                 [MarshalAs(UnmanagedType.LPWStr)]
@@ -1043,14 +1022,16 @@ namespace Microsoft.Build.Tasks
 
         /// <summary>
         /// GetCachePath from fusion.dll.
-        /// Using StringBuilder here is a way to pass a preallocated buffer of characters to (native) functions that require it.
         /// A common design pattern in unmanaged C++ is calling a function twice, once to determine the length of the string
-        /// and then again to pass the client-allocated character buffer. StringBuilder is the most straightforward way
-        /// to allocate a mutable buffer of characters and pass it around.
+        /// and then again to pass the client-allocated character buffer.
         /// </summary>
+        /// <param name="cacheFlags">Value that indicates the source of the cached assembly.</param>
+        /// <param name="cachePath">The returned pointer to the path.</param>
+        /// <param name="pcchPath">The requested maximum length of CachePath, and upon return, the actual length of CachePath.</param>
+        /// 
         [DllImport("fusion.dll", CharSet = CharSet.Unicode)]
-        internal static extern int GetCachePath(AssemblyCacheFlags cacheFlags, StringBuilder cachePath, ref int pcchPath);
-#endif
+        [SupportedOSPlatform("windows")]
+        internal static extern unsafe int GetCachePath(AssemblyCacheFlags cacheFlags, [Out] char* cachePath, ref int pcchPath);
 
         //------------------------------------------------------------------------------
         // PFXImportCertStore
@@ -1063,13 +1044,13 @@ namespace Microsoft.Build.Tasks
         //------------------------------------------------------------------------------
         [DllImport(Crypt32DLL, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        internal static extern bool CertCloseStore([In]   IntPtr CertStore, CertStoreClose Flags);
+        internal static extern bool CertCloseStore([In] IntPtr CertStore, CertStoreClose Flags);
 
         //------------------------------------------------------------------------------
         // CertEnumCertificatesInStore
         //------------------------------------------------------------------------------
         [DllImport(Crypt32DLL, SetLastError = true)]
-        internal static extern IntPtr CertEnumCertificatesInStore([In]   IntPtr CertStore, [In]   IntPtr PrevCertContext);
+        internal static extern IntPtr CertEnumCertificatesInStore([In] IntPtr CertStore, [In] IntPtr PrevCertContext);
 
         //------------------------------------------------------------------------------
         // CryptAcquireCertificatePrivateKey
@@ -1115,15 +1096,15 @@ namespace Microsoft.Build.Tasks
 
 #if FEATURE_MSCOREE
         /// <summary>
-        /// Get the runtime version for a given file
+        /// Get the runtime version for a given file.
         /// </summary>
-        /// <param name="szFullPath">The path of the file to be examined</param>
+        /// <param name="szFileName">The path of the file to be examined.</param>
         /// <param name="szBuffer">The buffer allocated for the version information that is returned.</param>
-        /// <param name="cchBuffer">The size, in wide characters, of szBuffer</param>
+        /// <param name="cchBuffer">The size, in wide characters, of szBuffer.</param>
         /// <param name="dwLength">The size, in bytes, of the returned szBuffer.</param>
-        /// <returns>HResult</returns>
+        /// <returns>HResult.</returns>
         [DllImport(MscoreeDLL, SetLastError = true, CharSet = CharSet.Unicode)]
-        internal static extern uint GetFileVersion(String szFullPath, StringBuilder szBuffer, int cchBuffer, out uint dwLength);
+        internal static extern unsafe uint GetFileVersion([MarshalAs(UnmanagedType.LPWStr)] string szFileName, [Out] char* szBuffer, int cchBuffer, out int dwLength);
 #endif
         #endregion
 
@@ -1250,7 +1231,6 @@ namespace Microsoft.Build.Tasks
         }
         #endregion
         #region InternalClass
-#if FEATURE_COM_INTEROP
         /// <summary>
         /// This class is a wrapper over the native GAC enumeration API.
         /// </summary>
@@ -1488,7 +1468,6 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
         }
-#endif
         #endregion
     }
 }

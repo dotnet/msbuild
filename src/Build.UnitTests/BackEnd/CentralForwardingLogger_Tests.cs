@@ -1,10 +1,12 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Framework;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Logging
 {
@@ -54,8 +56,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 CentralForwardingLogger centralLogger = new CentralForwardingLogger();
                 centralLogger.Initialize(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the correct exception is thrown when the logger is initialized with a null 
@@ -68,8 +69,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 CentralForwardingLogger centralLogger = new CentralForwardingLogger();
                 centralLogger.Initialize(null, 4);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the shutdown method will null out the event redirector
@@ -145,7 +145,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// us to check to see if the forwarding logger is
         /// sending us the events we send in.
         /// </summary>
-        private class TestEventRedirector : IEventRedirector
+        private sealed class TestEventRedirector : IEventRedirector
         {
             #region Data
 

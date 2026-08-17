@@ -1,13 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Xml;
 using System.Diagnostics;
-using System.Linq;
-using Microsoft.Build.Collections;
+using System.Xml;
 using Microsoft.Build.ObjectModelRemoting;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Construction
 {
@@ -28,7 +28,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Initialize a parented ProjectItemDefinitionGroupElement
         /// </summary>
-        internal ProjectItemDefinitionGroupElement(XmlElement xmlElement, ProjectRootElement parent, ProjectRootElement containingProject)
+        internal ProjectItemDefinitionGroupElement(XmlElement xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
             ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
@@ -45,7 +45,7 @@ namespace Microsoft.Build.Construction
         /// <summary>
         /// Get a list of child item definitions.
         /// </summary>
-        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => new ReadOnlyCollection<ProjectItemDefinitionElement>(Children.OfType<ProjectItemDefinitionElement>());
+        public ICollection<ProjectItemDefinitionElement> ItemDefinitions => GetChildrenOfType<ProjectItemDefinitionElement>();
 
         /// <summary>
         /// Convenience method that picks a location based on a heuristic:

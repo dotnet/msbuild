@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.FileSystem
 {
@@ -14,7 +16,7 @@ namespace Microsoft.Build.Shared.FileSystem
      * Any new code should depend on MSBuildFileSystemBase instead of IFileSystem, if possible.
      *
      * MSBuild uses IFileSystem internally and adapts MSBuildFileSystemBase instances received from the outside to IFileSystem.
-     * Ideally there should be only one, public interface. However, such an interface would need to be put into the 
+     * Ideally there should be only one, public interface. However, such an interface would need to be put into the
      * Microsoft.Build.Framework assembly, but that assembly cannot take new types because it breaks some old version of Nuget.exe.
      * IFileSystem cannot be deleted for the same reason.
      */
@@ -42,6 +44,6 @@ namespace Microsoft.Build.Shared.FileSystem
 
         bool FileExists(string path);
 
-        bool DirectoryEntryExists(string path);
+        bool FileOrDirectoryExists(string path);
     }
 }

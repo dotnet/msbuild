@@ -1,14 +1,17 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Shared;
-using Microsoft.Build.Framework;
-using System.Collections.Generic;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Execution
 {
@@ -54,9 +57,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private Dictionary<string, NodeAffinity> _projectAffinities;
 
-#if FEATURE_COM_INTEROP
         private Lazy<IRunningObjectTableWrapper> _runningObjectTable = new Lazy<IRunningObjectTableWrapper>(() => new RunningObjectTable());
-#endif
 
         /// <summary>
         /// Gets any host object applicable to this task name
@@ -86,25 +87,27 @@ namespace Microsoft.Build.Execution
             {
                 if (monikerNameOrITaskHost.IsMoniker)
                 {
-#if FEATURE_COM_INTEROP
-
-                    try
+                    if (NativeMethodsShared.IsWindows)
                     {
-                        object objectFromRunningObjectTable =
-                            _runningObjectTable.Value.GetObject(monikerNameOrITaskHost.MonikerName);
-                        return (ITaskHost)objectFromRunningObjectTable;
+                        try
+                        {
+                            object objectFromRunningObjectTable =
+                                _runningObjectTable.Value.GetObject(monikerNameOrITaskHost.MonikerName);
+                            return (ITaskHost)objectFromRunningObjectTable;
+                        }
+                        catch (Exception ex) when (ex is COMException || ex is InvalidCastException)
+                        {
+                            throw new HostObjectException(projectFile, targetName, taskName, ex);
+                        }
                     }
-                    catch (Exception ex) when (ex is COMException || ex is InvalidCastException)
+                    else
                     {
-                        throw new HostObjectException(projectFile, targetName, taskName, ex);
+                        throw new HostObjectException(
+                            projectFile,
+                            targetName,
+                            taskName,
+                            "COM Monikers can only be used on Windows");
                     }
-#else
-                    throw new HostObjectException(
-                        projectFile,
-                        targetName,
-                        taskName,
-                        "FEATURE_COM_INTEROP is disabled (non full framework). Host object can only be ITaskHost");
-#endif
                 }
                 else
                 {
@@ -120,14 +123,14 @@ namespace Microsoft.Build.Execution
         public void RegisterHostObject(string projectFile, string targetName, string taskName, ITaskHost hostObject)
         {
 
-/* Unmerged change from project 'Microsoft.Build (netcoreapp2.1)'
-Before:
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
-            ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName");
-After:
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile));
-            ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName));
-*/
+            /* Unmerged change from project 'Microsoft.Build (netcoreapp2.1)'
+            Before:
+                        ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile");
+                        ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName");
+            After:
+                        ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile));
+                        ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName));
+            */
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
             ErrorUtilities.VerifyThrowArgumentNull(targetName, nameof(targetName));
             ErrorUtilities.VerifyThrowArgumentNull(taskName, nameof(taskName));
@@ -144,7 +147,6 @@ After:
             hostObjects.RegisterHostObject(targetName, taskName, hostObject);
         }
 
-#if FEATURE_COM_INTEROP
         /// <summary>
         /// Register a remote host object for a particular task/target pair.
         /// The remote host object require registered in Running Object Table(ROT) already.
@@ -159,6 +161,7 @@ After:
         /// <param name="targetName">target name</param>
         /// <param name="taskName">task name</param>
         /// <param name="monikerName">the Moniker used to register host object in ROT</param>
+        [SupportedOSPlatform("windows")]
         public void RegisterHostObject(string projectFile, string targetName, string taskName, string monikerName)
         {
             ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
@@ -172,7 +175,6 @@ After:
 
             hostObjects.RegisterHostObject(targetName, taskName, monikerName);
         }
-#endif
 
         /// <summary>
         /// Unregister the project's host objects, if any and remove any node affinities associated with it.
@@ -369,16 +371,15 @@ After:
             }
         }
 
-#if FEATURE_COM_INTEROP
         /// <summary>
         /// Test only
         /// </summary>
         /// <param name="runningObjectTable"></param>
+        [SupportedOSPlatform("windows")]
         internal void SetTestRunningObjectTable(IRunningObjectTableWrapper runningObjectTable)
         {
             _runningObjectTable = new Lazy<IRunningObjectTableWrapper>(() => runningObjectTable);
         }
-#endif
 
         internal class MonikerNameOrITaskHost
         {
@@ -444,10 +445,10 @@ After:
                 }
             }
 
-#if FEATURE_COM_INTEROP
             /// <summary>
             /// Registers a host object for this project file
             /// </summary>
+            [SupportedOSPlatform("windows")]
             internal void RegisterHostObject(string targetName, string taskName, string monikerName)
             {
                 if (monikerName == null)
@@ -459,7 +460,6 @@ After:
                     _hostObjects[new TargetTaskKey(targetName, taskName)] = new MonikerNameOrITaskHost(monikerName);
                 }
             }
-#endif
 
             /// <summary>
             /// Gets any host object for this project file matching the task and target names specified.

@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.IO;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
@@ -7,6 +10,8 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
 {
@@ -26,7 +31,7 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 Path.Combine(s_rootPathPrefix, "assemblyfromconfig", "folder501000x86", "v5assembly.dll")
             });
         }
-        
+
         [Fact]
         public void AssemblyFoldersFromConfigTest()
         {
@@ -40,10 +45,10 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
                     BuildEngine = new MockEngine(_output),
-                    Assemblies = new ITaskItem[] {new TaskItem("assemblyfromconfig2")},
-                    SearchPaths = new[] {moniker}
+                    Assemblies = new ITaskItem[] { new TaskItem("assemblyfromconfig2") },
+                    SearchPaths = new[] { moniker }
                 };
-                
+
                 Execute(t);
 
                 Assert.Single(t.ResolvedFiles);
@@ -69,8 +74,8 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
                     BuildEngine = new MockEngine(_output),
-                    Assemblies = new ITaskItem[] {new TaskItem("assemblyfromconfig_common.dll")},
-                    SearchPaths = new[] {moniker},
+                    Assemblies = new ITaskItem[] { new TaskItem("assemblyfromconfig_common.dll") },
+                    SearchPaths = new[] { moniker },
                     TargetProcessorArchitecture = "x86"
                 };
 
@@ -143,8 +148,8 @@ namespace Microsoft.Build.Tasks.UnitTests.AssemblyDependency
                 ResolveAssemblyReference t = new ResolveAssemblyReference
                 {
                     BuildEngine = new MockEngine(_output),
-                    Assemblies = new ITaskItem[] {new TaskItem("assemblyfromconfig_common.dll")},
-                    SearchPaths = new[] {moniker},
+                    Assemblies = new ITaskItem[] { new TaskItem("assemblyfromconfig_common.dll") },
+                    SearchPaths = new[] { moniker },
                     TargetProcessorArchitecture = "x86"
                 };
 

@@ -1,18 +1,25 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 using Microsoft.Win32;
-using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
-using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
 using Xunit;
 using Xunit.Abstractions;
+using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
+using NativeMethods = Microsoft.Build.Tasks.NativeMethods;
+using SystemProcessorArchitecture = System.Reflection.ProcessorArchitecture;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -499,11 +506,11 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             // ==[Related File Extensions Testing]================================================================================================
 
             // ==[Unification Testing]============================================================================================================
-            //@"C:\MyComponents\v0.5\UnifyMe.dll",                                 // For unification testing, a version that doesn't exist.
+            // @"C:\MyComponents\v0.5\UnifyMe.dll",                                 // For unification testing, a version that doesn't exist.
             s_unifyMeDll_V10Path,
             s_unifyMeDll_V20Path,
             s_unifyMeDll_V30Path,
-            //@"C:\MyComponents\v4.0\UnifyMe.dll",
+            // @"C:\MyComponents\v4.0\UnifyMe.dll",
             Path.Combine(s_myApp_V05Path, "DependsOnUnified.dll"),
             Path.Combine(s_myApp_V10Path, "DependsOnUnified.dll"),
             Path.Combine(s_myApp_V20Path, "DependsOnUnified.dll"),
@@ -516,8 +523,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             // ==[Test assemblies reference higher versions than the current target framework=====================================================
             Path.Combine(s_myComponentsMiscPath, "DependsOnOnlyv4Assemblies.dll"),  // Only depends on 4.0.0 assemblies
-            Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), //Is in redist list and is a 9.0 assembly
-            Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), //Depends on 9.0 assemblies
+            Path.Combine(s_myComponentsMiscPath, "ReferenceVersion9.dll"), // Is in redist list and is a 9.0 assembly
+            Path.Combine(s_myComponentsMiscPath, "DependsOn9.dll"), // Depends on 9.0 assemblies
             Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), // Depends on 9.0 assemblies
             Path.Combine(s_myComponents10Path, "DependsOn9.dll"), // Depends on 9.0 assemblies
             Path.Combine(s_myComponents20Path, "DependsOn9.dll"), // Depends on 9.0 assemblies
@@ -541,6 +548,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             Path.Combine(s_myComponentsRootPath, "V.dll"),
             Path.Combine(s_myComponents2RootPath, "W.dll"),
             Path.Combine(s_myComponentsRootPath, "X.dll"),
+            Path.Combine(s_myComponentsRootPath, "X.pdb"),
             Path.Combine(s_myComponentsRootPath, "Y.dll"),
             Path.Combine(s_myComponentsRootPath, "Z.dll"),
 
@@ -912,7 +920,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            return new string[0];
+            return Array.Empty<string>();
         }
 
         /// <summary>
@@ -1045,8 +1053,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Equals(path, @"c:\OldClrBug\MyFileLoadExceptionAssembly.dll", StringComparison.OrdinalIgnoreCase)
-            )
+                String.Equals(path, @"c:\OldClrBug\MyFileLoadExceptionAssembly.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // An older LKG of the CLR could throw a FileLoadException if it doesn't recognize
                 // the assembly. We need to support this for dogfooding purposes.
@@ -1055,8 +1062,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Equals(path, @"c:\Regress313086\mscorlib.dll", StringComparison.OrdinalIgnoreCase)
-            )
+                String.Equals(path, @"c:\Regress313086\mscorlib.dll", StringComparison.OrdinalIgnoreCase))
             {
                 // This is an mscorlib that returns null for its assembly name.
                 return null;
@@ -1064,8 +1070,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Equals(path, Path.Combine(s_myVersion20Path, "BadImage.dll"), StringComparison.OrdinalIgnoreCase)
-            )
+                String.Equals(path, Path.Combine(s_myVersion20Path, "BadImage.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 throw new System.BadImageFormatException(@"The format of the file '" + Path.Combine(s_myVersion20Path, "BadImage.dll") + "' is invalid");
             }
@@ -1074,8 +1079,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             (
                 String.Equals(path, Path.Combine(s_myProjectPath, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
                 || String.Equals(path, Path.Combine(s_myVersion20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
-                || String.Equals(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
-            )
+                || String.Equals(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 // This is an mscorlib.dll with no metadata.
                 return null;
@@ -1084,8 +1088,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if
             (
                 String.Equals(path, Path.Combine(s_myVersion20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
-                || String.Equals(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
-            )
+                || String.Equals(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 // This is an mscorlib.dll with no metadata.
                 return null;
@@ -1250,8 +1253,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if
             (
-                String.Equals(path, Path.Combine(s_myVersion20Path, "System.Data.dll"), StringComparison.OrdinalIgnoreCase)
-            )
+                String.Equals(path, Path.Combine(s_myVersion20Path, "System.Data.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension(AssemblyRef.SystemData);
@@ -1384,7 +1386,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 return new AssemblyNameExtension("DependsOn9, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
             }
 
-            //A second assembly which depends on version 9 framework assemblies.
+            // A second assembly which depends on version 9 framework assemblies.
             if (String.Equals(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension("DependsOn9Also, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b17a5c561934e089");
@@ -1428,6 +1430,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             {
                 // Simulate a strongly named assembly.
                 return new AssemblyNameExtension("D, Version=1.0.0.0, Culture=Neutral, PublicKeyToken=null");
+            }
+
+            if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "X.pdb"), StringComparison.OrdinalIgnoreCase))
+            {
+                // return new AssemblyNameExtension("X, Version=2.0.0.0, Culture=Neutral, PublicKeyToken=null");
+                throw new BadImageFormatException("X.pdb is a PDB file, not a managed assembly");
             }
 
             if (String.Equals(path, @"C:\Regress714052\X86\a.dll", StringComparison.OrdinalIgnoreCase))
@@ -1780,14 +1788,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <param name="dependencies">Receives the list of dependencies.</param>
         /// <param name="scatterFiles">Receives the list of associated scatter files.</param>
         /// <param name="frameworkName">Receives the assembly framework name.</param>
-        internal static void GetAssemblyMetadata
-        (
+        internal static void GetAssemblyMetadata(
             string path,
             ConcurrentDictionary<string, AssemblyMetadata> assemblyMetadataCache,
             out AssemblyNameExtension[] dependencies,
             out string[] scatterFiles,
-            out FrameworkNameVersioning frameworkName
-        )
+            out FrameworkNameVersioning frameworkName)
         {
             dependencies = GetDependencies(path);
             scatterFiles = null;
@@ -1806,10 +1812,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Cached implementation. Given an assembly name, crack it open and retrieve the TargetFrameworkAttribute
         /// </summary>
-        internal static FrameworkNameVersioning GetTargetFrameworkAttribute
-        (
-            string path
-        )
+        internal static FrameworkNameVersioning GetTargetFrameworkAttribute(
+            string path)
         {
             FrameworkNameVersioning frameworkName = null;
 
@@ -1983,7 +1987,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, @"c:\Regress313086\mscorlib.dll", StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[] { };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myVersion20Path, "System.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2083,19 +2087,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if
             (
                 String.Equals(path, Path.Combine(s_myVersion20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
-                || String.Equals(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase)
-            )
+                || String.Equals(path, Path.Combine(s_myVersionPocket20Path, "mscorlib.dll"), StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[]
-                {
-                };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, @"MyRelativeAssembly.dll", StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[]
-                {
-                };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myAppRootPath, "DependsOnSimpleA.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2204,9 +2203,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, s_myLibraries_V1_E_EDllPath, StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[]
-                {
-                };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myApp_V05Path, "DependsOnWeaklyNamedUnified.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2292,7 +2289,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 };
             }
 
-            //A second assembly which depends on version 9 framework assemblies.
+            // A second assembly which depends on version 9 framework assemblies.
             if (String.Equals(path, Path.Combine(s_myComponentsMiscPath, "DependsOn9Also.dll"), StringComparison.OrdinalIgnoreCase))
             {
                 return new AssemblyNameExtension[]
@@ -2352,7 +2349,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, Path.Combine(s_myComponents2RootPath, "W.dll"), StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[] { };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "X.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2365,7 +2362,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Z.dll"), StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[] { };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Y.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2378,7 +2375,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "Microsoft.Build.dll"), StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[] { };
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, Path.Combine(s_myComponentsRootPath, "DependsOnMSBuild12.dll"), StringComparison.OrdinalIgnoreCase))
@@ -2437,7 +2434,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             if (String.Equals(path, @"C:\DirectoryContainsdllAndWinmd\c.winmd", StringComparison.OrdinalIgnoreCase))
             {
                 // Simulate a strongly named assembly.
-                return new AssemblyNameExtension[0];
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, @"C:\DirectoryContainstwoWinmd\a.winmd", StringComparison.OrdinalIgnoreCase))
@@ -2451,12 +2448,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             if (String.Equals(path, @"C:\DirectoryContainstwoWinmd\c.winmd", StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[0];
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (path.StartsWith(@"C:\FakeSDK\", StringComparison.OrdinalIgnoreCase))
             {
-                return new AssemblyNameExtension[0];
+                return Array.Empty<AssemblyNameExtension>();
             }
 
             if (String.Equals(path, s_portableDllPath, StringComparison.OrdinalIgnoreCase))
@@ -2496,6 +2493,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <summary>
         /// Registry access delegate. Given a hive and a view, return the registry base key.
         /// </summary>
+        [SupportedOSPlatform("windows")]
         private static RegistryKey GetBaseKey(RegistryHive hive, RegistryView view)
         {
             if (hive == RegistryHive.CurrentUser)
@@ -2517,55 +2515,56 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <param name="baseKey">The base registry key.</param>
         /// <param name="subKey">The subkey</param>
         /// <returns>An enumeration of strings.</returns>
+        [SupportedOSPlatform("windows")]
         private static IEnumerable<string> GetRegistrySubKeyNames(RegistryKey baseKey, string subKey)
         {
             if (baseKey == Registry.CurrentUser)
             {
                 if (String.Equals(subKey, @"Software\Regress714052", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix\Mix", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86\X86", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None\None", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NetFramework", StringComparison.OrdinalIgnoreCase))
@@ -2603,16 +2602,14 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx\Infragistics.MyControlWithPastTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase)
                     || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.x86chk\AssemblyFoldersEx\RawDropControls", StringComparison.OrdinalIgnoreCase)
                     || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\ZControlA", StringComparison.OrdinalIgnoreCase)
-                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\ZControlB", StringComparison.OrdinalIgnoreCase)
-                )
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\ZControlB", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if
                 (
-                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0", StringComparison.OrdinalIgnoreCase)
-                )
+                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0", StringComparison.OrdinalIgnoreCase))
                 {
                     // This control has a service pack
                     return new string[] { "sp1", "sp2" };
@@ -2663,12 +2660,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\A", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\AssemblyFoldersEx\B", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86", StringComparison.OrdinalIgnoreCase))
                 {
@@ -2692,21 +2689,21 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\Mix\Mix", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\X86\X86", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\MSIL\MSIL", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Regress714052\v2.0.0\None\None", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NetFramework", StringComparison.OrdinalIgnoreCase))
@@ -2721,12 +2718,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.FancyControl.1.0", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyHKLMControl.1.0", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework", StringComparison.OrdinalIgnoreCase))
@@ -2741,12 +2738,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\.NETCompactFramework\v2.0.3600\PocketPC\AssemblyFoldersEx\AFETestDeviceControl", StringComparison.OrdinalIgnoreCase))
                 {
-                    return new string[] { };
+                    return Array.Empty<string>();
                 }
 
                 if (String.Equals(subKey, @"Software\Microsoft\Microsoft SDKs\Windows", StringComparison.OrdinalIgnoreCase))
@@ -2766,6 +2763,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// <param name="baseKey">The base registry key.</param>
         /// <param name="subKey">The subkey</param>
         /// <returns>A string containing the default value.</returns>
+        [SupportedOSPlatform("windows")]
         private static string GetRegistrySubKeyDefaultValue(RegistryKey baseKey, string subKey)
         {
             if (baseKey == Registry.CurrentUser)
@@ -2804,32 +2802,28 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 (
                     String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithFutureTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase)
                     || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithPastTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase)
-                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0", StringComparison.OrdinalIgnoreCase)
-                )
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0", StringComparison.OrdinalIgnoreCase))
                 {
                     return s_myComponentsV20Path;
                 }
 
                 if
                 (
-                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0", StringComparison.OrdinalIgnoreCase)
-                )
+                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\MyComponentBase";
                 }
 
                 if
                 (
-                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0\sp1", StringComparison.OrdinalIgnoreCase)
-                )
+                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0\sp1", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\MyComponentServicePack1";
                 }
 
                 if
                 (
-                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0\sp2", StringComparison.OrdinalIgnoreCase)
-                )
+                    String.Equals(subKey, @"Software\Microsoft\.NetFramework\v2.0.50727\AssemblyFoldersEx\Infragistics.MyControlWithServicePack.1.0\sp2", StringComparison.OrdinalIgnoreCase))
                 {
                     return @"C:\MyComponentServicePack2";
                 }
@@ -2837,8 +2831,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 if
                 (
                     String.Equals(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx\Infragistics.MyNDP1Control.1.0", StringComparison.OrdinalIgnoreCase)
-                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx\Infragistics.MyControlWithPastTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase)
-                )
+                    || String.Equals(subKey, @"Software\Microsoft\.NetFramework\v1.0\AssemblyFoldersEx\Infragistics.MyControlWithPastTargetNDPVersion.1.0", StringComparison.OrdinalIgnoreCase))
                 {
                     return s_myComponentsV10Path;
                 }
@@ -2918,7 +2911,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         /// </summary>
         /// <param name="appConfigFile"></param>
         /// <param name="redirects"></param>
-        protected static string WriteAppConfig(string redirects)
+        protected static string WriteAppConfig(string redirects, string appConfigNameSuffix = null)
         {
             string appConfigContents =
             "<configuration>\n" +
@@ -2927,7 +2920,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             "    </runtime>\n" +
             "</configuration>";
 
-            string appConfigFile = FileUtilities.GetTemporaryFile();
+            string appConfigFile = FileUtilities.GetTemporaryFileName() + appConfigNameSuffix;
             File.WriteAllText(appConfigFile, appConfigContents);
             return appConfigFile;
         }
@@ -3001,29 +2994,27 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     t.FindSerializationAssemblies = false;
                     t.FindRelatedFiles = false;
                     t.StateFile = null;
-	                t.Execute
-	                (
-	                    fileExists,
-	                    directoryExists,
-	                    getDirectories,
-	                    getAssemblyName,
-	                    getAssemblyMetadata,
-	#if FEATURE_WIN32_REGISTRY
-	                    getRegistrySubKeyNames,
-	                    getRegistrySubKeyDefaultValue,
-	#endif
-	                    getLastWriteTime,
-	                    getRuntimeVersion,
-	#if FEATURE_WIN32_REGISTRY
-	                    openBaseKey,
-	#endif
-	                    checkIfAssemblyIsInGac,
-	                    isWinMDFile,
-	                    readMachineTypeFromPEHeader
-	                );
+                    t.Execute(
+                        fileExists,
+                        directoryExists,
+                        getDirectories,
+                        getAssemblyName,
+                        getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
+                        getRegistrySubKeyNames,
+                        getRegistrySubKeyDefaultValue,
+#endif
+                        getLastWriteTime,
+                        getRuntimeVersion,
+#if FEATURE_WIN32_REGISTRY
+                        openBaseKey,
+#endif
+                        checkIfAssemblyIsInGac,
+                        isWinMDFile,
+                        readMachineTypeFromPEHeader);
 
                     // A few checks. These should always be true or it may be a perf issue for project load.
-                    ITaskItem[] loadModeResolvedFiles = new TaskItem[0];
+                    ITaskItem[] loadModeResolvedFiles = Array.Empty<TaskItem>();
                     if (t.ResolvedFiles != null)
                     {
                         loadModeResolvedFiles = (ITaskItem[])t.ResolvedFiles.Clone();
@@ -3062,27 +3053,25 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                     string cache = rarCacheFile;
                     t.StateFile = cache;
                     File.Delete(t.StateFile);
-	                succeeded =
-	                    t.Execute
-	                    (
-	                        fileExists,
-	                        directoryExists,
-	                        getDirectories,
-	                        getAssemblyName,
-	                        getAssemblyMetadata,
-	#if FEATURE_WIN32_REGISTRY
-	                        getRegistrySubKeyNames,
-	                        getRegistrySubKeyDefaultValue,
-	#endif
-	                        getLastWriteTime,
-	                        getRuntimeVersion,
-	#if FEATURE_WIN32_REGISTRY
-	                        openBaseKey,
-	#endif
-	                        checkIfAssemblyIsInGac,
-	                        isWinMDFile,
-	                        readMachineTypeFromPEHeader
-	                    );
+                    succeeded =
+                        t.Execute(
+                            fileExists,
+                            directoryExists,
+                            getDirectories,
+                            getAssemblyName,
+                            getAssemblyMetadata,
+#if FEATURE_WIN32_REGISTRY
+                            getRegistrySubKeyNames,
+                            getRegistrySubKeyDefaultValue,
+#endif
+                            getLastWriteTime,
+                            getRuntimeVersion,
+#if FEATURE_WIN32_REGISTRY
+                            openBaseKey,
+#endif
+                            checkIfAssemblyIsInGac,
+                            isWinMDFile,
+                            readMachineTypeFromPEHeader);
                     if (FileUtilities.FileExistsNoThrow(t.StateFile))
                     {
                         Assert.Single(t.FilesWritten);
@@ -3097,7 +3086,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         // OriginalItemSpec attribute on resolved items is to support VS in figuring out which
                         // project file reference caused a particular resolved file.
                         string originalItemSpec = t.ResolvedFiles[i].GetMetadata("OriginalItemSpec");
-                        Assert.True(ContainsItem(t.Assemblies, originalItemSpec) || ContainsItem(t.AssemblyFiles, originalItemSpec)); //                         "Expected to find OriginalItemSpec in Assemblies or AssemblyFiles task parameters"
+                        Assert.True(ContainsItem(t.Assemblies, originalItemSpec) || ContainsItem(t.AssemblyFiles, originalItemSpec)); // "Expected to find OriginalItemSpec in Assemblies or AssemblyFiles task parameters"
                     }
                 }
             }
@@ -3141,15 +3130,12 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 
             t.Assemblies = items;
             t.SearchPaths = searchPaths.ToArray();
-            string redistFile = FileUtilities.GetTemporaryFile();
+            string redistFile = FileUtilities.GetTemporaryFileName();
             try
             {
-                File.Delete(redistFile);
-                File.WriteAllText
-                (
+                File.WriteAllText(
                     redistFile,
-                    redistString
-                );
+                    redistString);
 
                 t.InstalledAssemblyTables = new TaskItem[] { new TaskItem(redistFile) };
 

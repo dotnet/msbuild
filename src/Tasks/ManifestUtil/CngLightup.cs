@@ -1,8 +1,5 @@
-﻿// ==++==
-// 
-//   Copyright (c) Microsoft Corporation.  All rights reserved.
-// 
-// ==--==
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 // Supported preprocessor declarations:
 //
@@ -22,6 +19,8 @@
 using System.Diagnostics;
 using System.Reflection;
 using System.Security.Cryptography.X509Certificates;
+
+#nullable disable
 
 namespace System.Security.Cryptography
 {
@@ -584,7 +583,7 @@ namespace System.Security.Cryptography
             return cspParameters;
         }
 
-        private static Type GetSystemCoreType(string namespaceQualifiedTypeName, bool throwOnError=true)
+        private static Type GetSystemCoreType(string namespaceQualifiedTypeName, bool throwOnError = true)
         {
 #if CNG_LIGHTUP_NO_SYSTEM_CORE
             string assemblyQualifiedTypeName = namespaceQualifiedTypeName + ", " + AssemblyRef.SystemCore;

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 
@@ -8,10 +8,13 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Xunit;
+using Xunit.NetCore.Extensions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class CombinePath_Tests
+    public sealed class CombinePath_Tests
     {
         /// <summary>
         /// Base path is relative.  Paths are relative.
@@ -173,7 +176,7 @@ namespace Microsoft.Build.UnitTests
             t.BuildEngine = new MockEngine();
 
             t.BasePath = @"c:\abc\def";
-            t.Paths = new ITaskItem[0];
+            t.Paths = System.Array.Empty<ITaskItem>();
             Assert.True(t.Execute()); // "success"
 
             ObjectModelHelpers.AssertItemsMatch(@"
@@ -201,9 +204,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Specified paths contain invalid characters.  Task should continue processing remaining items.
         /// </summary>
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // No invalid characters on Unix
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp)]
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "No invalid characters on Unix.")]
         public void InvalidPath()
         {
             CombinePath t = new CombinePath();

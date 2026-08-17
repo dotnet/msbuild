@@ -1,5 +1,7 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
@@ -16,8 +18,8 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
     /// </summary>
     internal static class ProjectElemetExportHelper
     {
-        delegate MockProjectElementLinkRemoter ExporterFactory(ProjectCollectionLinker exporter, ProjectElement xml);
-        private class ElementInfo
+        private delegate MockProjectElementLinkRemoter ExporterFactory(ProjectCollectionLinker exporter, ProjectElement xml);
+        private sealed class ElementInfo
         {
             public static ElementInfo New<T, RMock>()
                 where RMock : MockProjectElementLinkRemoter, new()
@@ -77,7 +79,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
             return exporter.Export<ProjectElement, RMock>(xml);
         }
 
-        private static bool IsOfType<T> (ProjectElement xml) { return xml is T; }
+        private static bool IsOfType<T>(ProjectElement xml) { return xml is T; }
 
         private static Dictionary<Type, ExporterFactory> knownTypes = new Dictionary<Type, ExporterFactory>();
 

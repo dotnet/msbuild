@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Feature SiLA2Version="1.0" FeatureVersion="1.0" MaturityLevel="Verified" Originator="org.silastandard"
+         Category="examples"
+         xmlns="http://www.sila-standard.org"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://www.sila-standard.org https://gitlab.com/SiLA2/sila_base/raw/master/schema/FeatureDefinition.xsd">
+  <Identifier>GreetingProvider</Identifier>
+  <DisplayName>Greeting Provider</DisplayName>
+  <Description>
+    Example implementation of a minimum Feature. Provides a Greeting to the Client
+    and a StartYear property, informing about the year the Server has been started.
+  </Description>
+  <Command>
+    <Identifier>SayHello</Identifier>
+    <DisplayName>Say Hello</DisplayName>
+    <Description>Does what it says: returns "Hello SiLA 2 + [Name]" to the client.</Description>
+    <Observable>No</Observable>
+    <Parameter>
+      <Identifier>Name</Identifier>
+      <DisplayName>Name</DisplayName>
+      <Description>The name, SayHello shall use to greet.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Parameter>
+    <Response>
+      <Identifier>Greeting</Identifier>
+      <DisplayName>Greeting</DisplayName>
+      <Description>The greeting string, returned to the SiLA Client.</Description>
+      <DataType>
+        <Basic>String</Basic>
+      </DataType>
+    </Response>
+  </Command>
+  <Property>
+    <Identifier>StartYear</Identifier>
+    <DisplayName>Start Year</DisplayName>
+    <Description>Returns the year the SiLA Server has been started in.</Description>
+    <Observable>No</Observable>
+    <DataType>
+      <Basic>Integer</Basic>
+    </DataType>
+  </Property>
+</Feature>

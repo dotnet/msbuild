@@ -1,15 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml;
-
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
@@ -17,12 +16,14 @@ using Microsoft.Build.Shared;
 using Toolset = Microsoft.Build.Evaluation.Toolset;
 using XmlElementWithLocation = Microsoft.Build.Construction.XmlElementWithLocation;
 
+#nullable disable
+
 namespace Microsoft.Build.Internal
 {
     /// <summary>
     /// This class contains utility methods for the MSBuild engine.
     /// </summary>
-    static internal class Utilities
+    internal static class Utilities
     {
         /// <summary>
         /// Save off the contents of the environment variable that specifies whether we should treat higher toolsversions as the current 
@@ -353,7 +354,7 @@ namespace Microsoft.Build.Internal
                         // This is higher than the 'legacy' toolsversion values.
                         // Therefore we need to enter best effort mode and
                         // present the current one.
-                        if (toolsVersionAsVersion > new Version(15,0))
+                        if (toolsVersionAsVersion > new Version(15, 0))
                         {
                             toolsVersionToUse = MSBuildConstants.CurrentToolsVersion;
                         }
@@ -616,7 +617,7 @@ namespace Microsoft.Build.Internal
             return enumerator.ToEnumerable().ToArray();
         }
 
-        public static void EnumerateProperties(IEnumerable properties, Action<KeyValuePair<string, string>> callback)
+        public static void EnumerateProperties<TArg>(IEnumerable properties, TArg arg, Action<TArg, KeyValuePair<string, string>> callback)
         {
             if (properties == null)
             {
@@ -627,14 +628,14 @@ namespace Microsoft.Build.Internal
             {
                 propertyInstanceDictionary.Enumerate((key, value) =>
                 {
-                    callback(new KeyValuePair<string, string>(key, value));
+                    callback(arg, new KeyValuePair<string, string>(key, value));
                 });
             }
             else if (properties is PropertyDictionary<ProjectProperty> propertyDictionary)
             {
                 propertyDictionary.Enumerate((key, value) =>
                 {
-                    callback(new KeyValuePair<string, string>(key, value));
+                    callback(arg, new KeyValuePair<string, string>(key, value));
                 });
             }
             else
@@ -643,15 +644,15 @@ namespace Microsoft.Build.Internal
                 {
                     if (item is IProperty property && !string.IsNullOrEmpty(property.Name))
                     {
-                        callback(new KeyValuePair<string, string>(property.Name, property.EvaluatedValue ?? string.Empty));
+                        callback(arg, new KeyValuePair<string, string>(property.Name, property.EvaluatedValue ?? string.Empty));
                     }
                     else if (item is DictionaryEntry dictionaryEntry && dictionaryEntry.Key is string key && !string.IsNullOrEmpty(key))
                     {
-                        callback(new KeyValuePair<string, string>(key, dictionaryEntry.Value as string ?? string.Empty));
+                        callback(arg, new KeyValuePair<string, string>(key, dictionaryEntry.Value as string ?? string.Empty));
                     }
                     else if (item is KeyValuePair<string, string> kvp)
                     {
-                        callback(kvp);
+                        callback(arg, kvp);
                     }
                     else
                     {

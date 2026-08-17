@@ -1,15 +1,17 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.IO;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -55,7 +57,7 @@ namespace Microsoft.Build.Tasks
         private string _command;
 
         // '^' before _any_ character escapes that character, don't escape it.
-        private static readonly char[] _charactersToEscape = { '(', ')', '=', ';', '!', ',', '&', ' '};
+        private static readonly char[] _charactersToEscape = { '(', ')', '=', ';', '!', ',', '&', ' ' };
 
         #endregion
 
@@ -181,7 +183,7 @@ namespace Microsoft.Build.Tasks
         /// if they aren't used.  ConsoleOutput is a combination of stdout and stderr.
         /// </summary>
         [Output]
-        public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>(): _nonEmptyOutput.ToArray();
+        public ITaskItem[] ConsoleOutput => !ConsoleToMSBuild ? Array.Empty<ITaskItem>() : _nonEmptyOutput.ToArray();
 
         #endregion
 
@@ -194,7 +196,7 @@ namespace Microsoft.Build.Tasks
             var encoding = EncodingUtilities.BatchFileEncoding(Command + WorkingDirectory, UseUtf8Encoding);
 
             // Temporary file with the extension .Exec.bat
-            _batchFile = FileUtilities.GetTemporaryFile(".exec.cmd");
+            _batchFile = FileUtilities.GetTemporaryFileName(".exec.cmd");
 
             // UNICODE Batch files are not allowed as of WinXP. We can't use normal ANSI code pages either,
             // since console-related apps use OEM code pages "for historical reasons". Sigh.
@@ -370,7 +372,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="message"></param>
         protected override void LogToolCommand(string message)
         {
-            //Dont print the command line if Echo is Off.
+            // Dont print the command line if Echo is Off.
             if (!EchoOff)
             {
                 base.LogToolCommand(Command);
@@ -513,7 +515,7 @@ namespace Microsoft.Build.Tasks
                 var systemCmd = ToolLocationHelper.GetPathToSystemFile("cmd.exe");
 
 #if WORKAROUND_COREFX_19110
-                // Work around https://github.com/Microsoft/msbuild/issues/2273 and
+                // Work around https://github.com/dotnet/msbuild/issues/2273 and
                 // https://github.com/dotnet/corefx/issues/19110, which result in
                 // a bad path being returned above on Nano Server SKUs of Windows.
                 if (!FileSystems.Default.FileExists(systemCmd))
@@ -598,51 +600,37 @@ namespace Microsoft.Build.Tasks
                 if (NativeMethodsShared.IsWindows)
                 {
                     commandLine.AppendSwitch("/Q"); // echo off
-                    if(!Traits.Instance.EscapeHatches.UseAutoRunWhenLaunchingProcessUnderCmd)
+                    if (!Traits.Instance.EscapeHatches.UseAutoRunWhenLaunchingProcessUnderCmd)
                     {
                         commandLine.AppendSwitch("/D"); // do not load AutoRun configuration from the registry (perf)
                     }
                     commandLine.AppendSwitch("/C"); // run then terminate
 
-                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_10))
+                    StringBuilder fileName = null;
+
+                    // Escape special characters that need to be escaped.
+                    for (int i = 0; i < batchFileForCommandLine.Length; i++)
                     {
-                        StringBuilder fileName = null;
+                        char c = batchFileForCommandLine[i];
 
-                        // Escape special characters that need to be escaped.
-                        for (int i = 0; i < batchFileForCommandLine.Length; i++)
+                        if (ShouldEscapeCharacter(c) && (i == 0 || batchFileForCommandLine[i - 1] != '^'))
                         {
-                            char c = batchFileForCommandLine[i];
-
-                            if (ShouldEscapeCharacter(c) && (i == 0 || batchFileForCommandLine[i - 1] != '^'))
+                            // Avoid allocating a new string until we know we have something to escape.
+                            if (fileName == null)
                             {
-                                // Avoid allocating a new string until we know we have something to escape.
-                                if (fileName == null)
-                                {
-                                    fileName = StringBuilderCache.Acquire(batchFileForCommandLine.Length);
-                                    fileName.Append(batchFileForCommandLine, 0, i);
-                                }
-
-                                fileName.Append('^');
+                                fileName = StringBuilderCache.Acquire(batchFileForCommandLine.Length);
+                                fileName.Append(batchFileForCommandLine, 0, i);
                             }
 
-                            fileName?.Append(c);
+                            fileName.Append('^');
                         }
 
-                        if (fileName != null)
-                        {
-                            batchFileForCommandLine = StringBuilderCache.GetStringAndRelease(fileName);
-                        }
+                        fileName?.Append(c);
                     }
-                    else
+
+                    if (fileName != null)
                     {
-                        // If for some crazy reason the path has a & character and a space in it
-                        // then get the short path of the temp path, which should not have spaces in it
-                        // and then escape the &
-                        if (batchFileForCommandLine.Contains("&") && !batchFileForCommandLine.Contains("^&"))
-                        {
-                            batchFileForCommandLine = NativeMethodsShared.GetShortFilePath(batchFileForCommandLine);
-                            batchFileForCommandLine = batchFileForCommandLine.Replace("&", "^&");
-                        }
+                        batchFileForCommandLine = StringBuilderCache.GetStringAndRelease(fileName);
                     }
                 }
 

@@ -1,10 +1,12 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -93,7 +95,7 @@ namespace Microsoft.Build.Tasks
                     // there is no disk in drive A:, please insert one.  We don't want that. 
                     // SetErrorMode will let us disable this, but we should set the error
                     // mode back, since this may have wide-ranging effects.
-                    oldMode = NativeMethodsShared.SetErrorMode(1 /* ErrorModes.SEM_FAILCRITICALERRORS */);
+                    NativeMethodsShared.SetThreadErrorMode(1 /* ErrorModes.SEM_FAILCRITICALERRORS */, out oldMode);
                 }
 
                 try
@@ -174,7 +176,7 @@ namespace Microsoft.Build.Tasks
                     // Reset the error mode on Windows
                     if (NativeMethodsShared.IsWindows)
                     {
-                        NativeMethodsShared.SetErrorMode(oldMode);
+                        NativeMethodsShared.SetThreadErrorMode(oldMode, out _);
                     }
                 }
             }
@@ -228,6 +230,11 @@ namespace Microsoft.Build.Tasks
         /// The name of the file.
         /// </summary>
         private readonly string _filename;
+
+        /// <summary>
+        /// Holds the full path equivalent of _filename
+        /// </summary>
+        public string FileNameFullPath;
 
         /// <summary>
         /// Actual file or directory information

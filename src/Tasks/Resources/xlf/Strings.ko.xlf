@@ -121,6 +121,16 @@
         <target state="translated">MSB3654: 서명을 연기하려면 적어도 공개 키를 지정해야 합니다.  KeyFile 또는 KeyContainer 속성을 사용하여 공개 키를 제공하거나 서명 연기를 비활성화하세요.</target>
         <note>{StrBegin="MSB3654: "}</note>
       </trans-unit>
+      <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullAndEmptyRootElementName">
+        <source>MSB3991: '{0}' is not set or empty. When {1} is false, make sure to set a non-empty value for '{0}'.</source>
+        <target state="translated">MSB3991: '{0}'이(가) 설정되지 않았거나 비어 있습니다. {1}이(가) false인 경우 '{0}'에 비어 있지 않은 값을 설정해야 합니다.</target>
+        <note>{StrBegin="MSB3991: "}</note>
+      </trans-unit>
+      <trans-unit id="CombineTargetFrameworkInfoProperties.NotNullRootElementName">
+        <source>MSB3992: '{0}' is not set. When {1} is true, make sure to set a value for '{0}'.</source>
+        <target state="translated">MSB3992: '{0}'이(가) 설정되지 않았습니다. {1}이(가) true인 경우 '{0}'에 값을 설정해야 합니다.</target>
+        <note>{StrBegin="MSB3992: "}</note>
+      </trans-unit>
       <trans-unit id="Compiler.FatalArguments">
         <source>MSB3881: Fatal Error: more than {0} command line arguments.</source>
         <target state="translated">MSB3881: 심각한 오류: 명령줄 인수가 {0}개를 넘었습니다.</target>
@@ -181,10 +191,20 @@
         <target state="translated">"{0}"을(를) "{1}"(으)로 복사하기 위해 하드 링크를 만듭니다.</target>
         <note>LOCALIZATION: {0} and {1} are paths.</note>
       </trans-unit>
+      <trans-unit id="Copy.IOException">
+        <source>MSB3894: Got {0} copying "{1}" to "{2}" and HR is {3}</source>
+        <target state="translated">MSB3894: {0}을(를) “{1}”(으)로 복사하는 “{2}”이(가) 있고 HR은 {3}입니다.</target>
+        <note>{StrBegin="MSB3894: "} LOCALIZATION: {0} is exception.ToString(), {1} and {2} are paths, {3} is a number")</note>
+      </trans-unit>
       <trans-unit id="Copy.LinkFailed">
         <source>MSB3893: Could not use a link to copy "{0}" to "{1}".</source>
         <target state="translated">MSB3893: 링크를 사용하여 "{0}"을(를) "{1}"에 복사할 수 없습니다.</target>
         <note>{StrBegin="MSB3893: "} LOCALIZATION: {0} and {1} are paths.</note>
+      </trans-unit>
+      <trans-unit id="Copy.NonWindowsLinkErrorMessage">
+        <source>The {0} library call failed with the following error code: {1}.</source>
+        <target state="translated">오류 코드 {1}(으)로 인해 {0} 라이브러리 호출이 실패했습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="Copy.RetryingAsFileCopy">
         <source>Could not use a link to copy "{0}" to "{1}". Copying the file instead. {2}</source>
@@ -200,6 +220,16 @@
         <source>Removing read-only attribute from "{0}".</source>
         <target state="translated">"{0}"에서 읽기 전용 특성을 제거하고 있습니다.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="Copy.RetryingAsSymbolicLink">
+        <source>Could not use a hard link to copy "{0}" to "{1}". Copying the file with symbolic link instead. {2}</source>
+        <target state="translated">하드 링크를 사용하여 "{0}(를) "{1}"에 복사할 수 없습니다. 대신 바로 가기 링크로 파일을 복사합니다. {2}</target>
+        <note>LOCALIZATION: {0} and {1} are paths. {2} is an optional localized message.</note>
+      </trans-unit>
+      <trans-unit id="Copy.RetryingOnAccessDenied">
+        <source>MSB3895: Retrying on ERROR_ACCESS_DENIED because environment variable MSBUILDALWAYSRETRY=1</source>
+        <target state="translated">MSB3895: 환경 변수 MSBUILDALWAYSRETRY=1이므로 ERROR_ACCESS_DENIED에서 다시 시도합니다.</target>
+        <note>{StrBegin="MSB3895: "} LOCALIZATION: Do NOT translate MSBUILDALWAYSRETRY)</note>
       </trans-unit>
       <trans-unit id="Copy.SourceIsDirectory">
         <source>MSB3025: The source file "{0}" is actually a directory.  The "Copy" task does not support copying directories.</source>
@@ -295,6 +325,21 @@
         <source>MSB3061: Unable to delete file "{0}". {1}</source>
         <target state="translated">MSB3061: "{0}" 파일을 삭제할 수 없습니다. {1}</target>
         <note>{StrBegin="MSB3061: "}</note>
+      </trans-unit>
+      <trans-unit id="Delete.InvalidRetryCount">
+        <source>MSB3028: {0} is an invalid retry count. Value must not be negative.</source>
+        <target state="translated">MSB3028: {0}은(는) 잘못된 재시도 횟수입니다. 값은 음수일 수 없습니다.</target>
+        <note>{StrBegin="MSB3028: "} LOCALIZATION: {0} is a number.</note>
+      </trans-unit>
+      <trans-unit id="Delete.InvalidRetryDelay">
+        <source>MSB3029: {0} is an invalid retry delay. Value must not be negative.</source>
+        <target state="translated">MSB3029: {0}은(는) 잘못된 재시도 간격입니다. 값은 음수일 수 없습니다.</target>
+        <note>{StrBegin="MSB3029: "} LOCALIZATION: {0} is a number.</note>
+      </trans-unit>
+      <trans-unit id="Delete.Retrying">
+        <source>MSB3062: Could not delete file "{0}". Beginning retry {1} in {2}ms. {3}</source>
+        <target state="translated">MSB3062: "{0}" 파일을 삭제할 수 없습니다. {2} ms에서 다시 시도 {1}을(를) 시작합니다. {3}</target>
+        <note>{StrBegin="MSB3062: "} LOCALIZATION: {0} are paths. {1} and {2} are numbers. {3} is an optional localized message.</note>
       </trans-unit>
       <trans-unit id="Delete.SkippingNonexistentFile">
         <source>File "{0}" doesn't exist. Skipping.</source>
@@ -514,6 +559,11 @@
         <target state="translated">MSB3667: "{0}"에 파일이 이미 있습니다. 사전 계산 캐시를 만들려면 어셈블리 자체를 빌드하는 대신 어셈블리에 종속되는 단일 프로젝트를 빌드하고 있는지 확인하세요. ResolveAssemblyReference 작업을 정상적으로 실행 중인 경우 ResolveAssemblyReference 작업의 "AssemblyInformationCacheOutputPath" 매개 변수를 설정하지 마세요.</target>
         <note>{StrBegin="MSB3667: "}</note>
       </trans-unit>
+      <trans-unit id="General.TaskRequiresWindows">
+        <source>MSB3096: Task "{0}" is only supported when building on Windows.</source>
+        <target state="translated">MSB3096: 작업 "{0}"은(는) Windows에서 빌드할 때만 지원됩니다.</target>
+        <note>{StrBegin="MSB3096: "}</note>
+      </trans-unit>
       <trans-unit id="General.UndefineProperties">
         <source>Removing Properties:</source>
         <target state="translated">속성 제거:</target>
@@ -593,6 +643,11 @@
         <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
         <target state="translated">MSB3094: "{2}"은(는) 항목을 {0}개 참조하고 "{3}"은(는) 항목을 {1}개 참조합니다. 참조하는 항목 수는 같아야 합니다.</target>
         <note>{StrBegin="MSB3094: "}</note>
+      </trans-unit>
+      <trans-unit id="GenerateBindingRedirects.CreatingBindingRedirectionFile">
+        <source>Creating binding redirection file "{0}".</source>
+        <target state="translated">바인딩 리디렉션 파일 "{0}"을(를) 만드는 중입니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="GenerateBindingRedirects.MissingConfigurationNode">
         <source>MSB3831: The application configuration file must have root configuration element.</source>
@@ -1009,6 +1064,13 @@
         <target state="translated">MSB3190: ClickOnce는 요청 실행 수준 '{0}'을(를) 지원하지 않습니다.</target>
         <note>{StrBegin="MSB3190: "}</note>
       </trans-unit>
+      <trans-unit id="GenerateResource.BinaryFormatterUse">
+        <source>MSB3825: Resource "{0}" of type "{1}" is deserialized via BinaryFormatter at runtime. BinaryFormatter is deprecated due to possible security risks and will be removed with .NET 9. If you wish to continue using it, set property "GenerateResourceWarnOnBinaryFormatterUse" to false.
+           More information: https://aka.ms/msbuild/net8-binaryformatter</source>
+        <target state="translated">MSB3825: "{1}" 유형의 "{0}" 리소스가 런타임 시 BinaryFormatter를 통해 역직렬화됩니다. BinaryFormatter는 가능한 보안 위험으로 인해 사용되지 않으며 .NET 9에서 제거됩니다. 계속 사용하려면 "GenerateResourceWarnOnBinaryFormatterUse" 속성을 false로 설정하세요.
+            추가 정보: https://aka.ms/msbuild/net8-binaryformatter</target>
+        <note>{StrBegin="MSB3825: "}</note>
+      </trans-unit>
       <trans-unit id="GenerateResource.CoreSupportsLimitedScenarios">
         <source>MSB3824: In order to build with .NET Core, resource inputs must be in .txt or .resx format.</source>
         <target state="translated">MSB3824: .NET Core로 빌드하려면 리소스 입력이 .txt 또는 .resx 형식이어야 합니다.</target>
@@ -1038,6 +1100,11 @@
         <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
         <target state="translated">MSB3821: {0} 파일은 인터넷 또는 제한 영역에 있거나 파일에 웹 표시가 있으므로 처리할 수 없습니다. 이러한 파일을 처리하려면 웹 표시를 제거하세요.</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
+      </trans-unit>
+      <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
+        <source>MSB3826: Resource \"{0}\" in \"{1}\" uses MIME type \"{2}\", which is not supported by MSBuild when running on .NET.</source>
+        <target state="translated">MSB3826: \"{1}\"의 리소스 \"{0}\"은(는) .NET에서 실행할 때 MSBuild에서 지원하지 않는 MIME 형식 \"{2}\"을 사용합니다.</target>
+        <note>{StrBegin="MSB3826: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.OutputDoesntExist">
         <source>Output file "{0}" does not exist.</source>
@@ -1141,7 +1208,7 @@
       </trans-unit>
       <trans-unit id="GenerateResource.InvalidHexEscapeValue">
         <source>MSB3569: Invalid hex value after '\u' in resource "{0}", value '{1}'.</source>
-        <target state="translated">MSB3569: "{0}" 리소스에서 '\u' 뒤의 16진수가 잘못되었습니다. '{1}' 값</target>
+        <target state="translated">MSB3569: 리소스 "{0}", 값 '{1}'에서 '\u' 뒤의 16진수 값이 잘못되었습니다.</target>
         <note>{StrBegin="MSB3569: "}</note>
       </trans-unit>
       <trans-unit id="GenerateResource.CannotWriteSTRFile">
@@ -1326,6 +1393,51 @@
         <target state="translated">MSB3441: "{0}"의 어셈블리 이름을 가져올 수 없습니다. {1}</target>
         <note>{StrBegin="MSB3441: "}</note>
       </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.AnyCPUDefault">
+        <source>Choosing AnyCPU by default.</source>
+        <target state="translated">기본적으로 AnyCPU를 선택합니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.DisplayChosenPlatform">
+        <source>Project '{0}' will build with platform: '{1}'.</source>
+        <target state="translated">'{0}' 프로젝트는 '{1}' 플랫폼으로 빌드됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.FoundMappingInTable">
+        <source>Found mapping '{0}'='{1}' in given lookup table: '{2}'.</source>
+        <target state="translated">지정된 조회 테이블 '{2}'에서 매핑 '{0}'='{1}'을(를) 찾았습니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.InvalidLookupTableFormat">
+        <source>MSB3983: The PlatformLookupTable '{0}' is in an invalid format and won't be used. The format should be 'A=B;C=D'.</source>
+        <target state="translated">MSB3983: PlatformLookupTable '{0}'의 형식이 잘못되어 사용되지 않습니다. 형식은 'A=B;C=D'여야 합니다.</target>
+        <note>{StrBegin="MSB3983: "}</note>
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.LookupTableParsed">
+        <source>Parsed lookup table:'{0}'.</source>
+        <target state="translated">구문 분석된 조회 테이블: '{0}'.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.NoCompatiblePlatformFound">
+        <source>MSB3981: Could not determine what '{0}' should be built as. The project will be built without the Platform property set.</source>
+        <target state="translated">MSB3981: 빌드해야 하는 '{0}'을(를) 결정할 수 없습니다. 프로젝트는 Platform 속성을 설정하지 않고 빌드됩니다.</target>
+        <note>{StrBegin="MSB3981: "}</note>
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.NoPlatformsListed">
+        <source>MSB3982: EnableDynamicPlatformResolution is true but referenced project '{0}' has no 'Platforms' or 'Platform' metadata set. It will be built without a specified platform.</source>
+        <target state="translated">MSB3982: EnableDynamicPlatformResolution이 true이지만 참조된 프로젝트 '{0}'에 'Platforms' 또는 'Platform' 메타데이터 세트가 없습니다. 지정된 플랫폼 없이 구축됩니다.</target>
+        <note>{StrBegin="MSB3982: "}</note>
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.ReferencedProjectHasDefinitivePlatform">
+        <source>Platform property of referenced project '{0}' matches current project's platform: '{1}'. Referenced project will be built without a global Platform property.</source>
+        <target state="translated">참조된 프로젝트 '{0}'의 플랫폼 속성이 현재 프로젝트의 플랫폼 '{1}'과(와) 일치합니다. 참조된 프로젝트는 전역 Platform 속성 없이 빌드됩니다.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="GetCompatiblePlatform.SamePlatform">
+        <source>ProjectReference and current project have the same platform.</source>
+        <target state="translated">ProjectReference와 현재 프로젝트는 동일한 플랫폼을 가지고 있습니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="GetFrameworkSdkPath.CouldNotFindSDK">
         <source>Could not locate the expected version of the Microsoft Windows SDK. Looked for a location specified in the "{0}" value of the registry key "{1}". If your build process does not need the SDK then this can be ignored. Otherwise you can solve the problem by doing one of the following:  1) Install the Microsoft Windows SDK.  2) Install Visual Studio 2010.  3) Manually set the above registry key to the correct location.</source>
         <target state="translated">원하는 Microsoft Windows SDK 버전을 찾을 수 없습니다. "{1}" 레지스트리 키의 "{0}" 값에 지정된 위치를 검색했습니다. 빌드 프로세스에서 SDK가 필요하지 않으면 이 메시지를 무시해도 됩니다. 그렇지 않으면 다음 중 하나를 수행하여 문제를 해결할 수 있습니다. 1) Microsoft Windows SDK를 설치합니다.  2) Visual Studio 2010을 설치합니다. 3) 위의 레지스트리 키를 올바른 위치로 직접 설정합니다.</target>
@@ -1502,6 +1614,11 @@
         <target state="translated">MSB3216: "{0}" 어셈블리를 등록할 수 없습니다. 액세스가 거부되었습니다. 관리자로 애플리케이션을 실행하고 있는지 확인하세요. {1}</target>
         <note>{StrBegin="MSB3216: "}</note>
       </trans-unit>
+      <trans-unit id="RemoveDir.EmptyPath">
+        <source>MSB3232: An empty directory was passed to RemoveDir and was ignored.</source>
+        <target state="translated">MSB3232: 빈 디렉터리가 RemoveDir에 전달되어 무시되었습니다.</target>
+        <note>{StrBegin="MSB3232: "}</note>
+      </trans-unit>
       <trans-unit id="RemoveDir.Error">
         <source>MSB3231: Unable to remove directory "{0}". {1}</source>
         <target state="translated">MSB3231: "{0}" 디렉터리를 제거할 수 없습니다. {1}</target>
@@ -1556,6 +1673,13 @@
         <source>AssemblyFoldersEx location: "{0}"</source>
         <target state="translated">AssemblyFoldersEx 위치: "{0}"</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.NoBecauseBadImage">
+        <source>This reference is not "CopyLocal" because it is a bad image. It may be a native binary, or it may not be an assembly at all.</source>
+        <target state="translated">이 참조는 잘못된 이미지이므로 "CopyLocal"이 아닙니다. 네이티브 이진이거나 어셈블리가 아닐 수 있습니다.</target>
+        <note>
+      LOCALIZATION: Please don't localize "CopyLocal" this is an item meta-data name.
+    </note>
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.SearchedAssemblyFoldersEx">
         <source>Considered AssemblyFoldersEx locations.</source>
@@ -1612,8 +1736,8 @@
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName">
-        <source>Considered "{0}", which existed but didn't have a valid identity. This may not be an assembly.</source>
-        <target state="translated">이미 있는 "{0}"(으)로 간주했지만 유효한 ID가 없습니다. 어셈블리가 아닐 수 있습니다.</target>
+        <source>Considered "{0}", which existed but did not appear to be a valid .NET assembly.</source>
+        <target state="translated">존재하지만 유효한 .NET 어셈블리로 보이지 않는 "{0}"(으)로 간주됩니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch">
@@ -2021,7 +2145,7 @@
         <target state="translated">TargetFramework 프로필 목록 정보:</target>
         <note />
       </trans-unit>
-      <trans-unit id="ResolveAssemblyReference.TargetFrameworkWhiteListLogHeader">
+      <trans-unit id="ResolveAssemblyReference.TargetFrameworkAllowListLogHeader">
         <source>TargetFramework Profile List Paths:</source>
         <target state="translated">TargetFramework 프로필 목록 경로:</target>
         <note />
@@ -2044,6 +2168,11 @@
       <trans-unit id="ResolveAssemblyReference.NoSubSetRedistListName">
         <source>The redist list file "{0}" has a null or empty Redist name in the FileList element. Make sure the Redist Name is not null or empty.</source>
         <target state="translated">재배포 가능 패키지 목록 파일 "{0}"의 FileList 요소에 null이거나 비어 있는 재배포 가능 패키지 이름이 있습니다. 재배포 가능 패키지 이름이 null이거나 비어 있지 않도록 하세요.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ResolveAssemblyReference.WritingCacheFile">
+        <source>Updating assembly cache file "{0}".</source>
+        <target state="translated">어셈블리 캐시 파일 "{0}"을(를) 업데이트하는 중입니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ResolveComReference.TreatingTlbOfActiveXAsNonEmbedded">
@@ -2265,6 +2394,11 @@
         <source>MSB3326: Cannot import the following key file: {0}. The key file may be password protected. To correct this, try to import the certificate again or import the certificate manually into the current user’s personal certificate store.</source>
         <target state="translated">MSB3326: 키 파일 {0}을(를) 가져올 수 없습니다. 해당 키 파일이 암호로 보호되어 있을 수 있습니다. 이 문제를 해결하려면 인증서를 다시 가져오거나 현재 사용자의 개인 인증서 저장소로 인증서를 직접 가져오세요.</target>
         <note>{StrBegin="MSB3326: "}</note>
+      </trans-unit>
+      <trans-unit id="ResolveKeySource.PfxUnsupported">
+        <source>PFX signing not supported on .NET Core.</source>
+        <target state="translated">PFX 서명은 .NET Core에서 지원되지 않습니다.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ResolveKeySource.ResolvedThumbprintEmpty">
         <source>MSB3327: Unable to find code signing certificate in the current user’s Windows certificate store. To correct this, either disable signing of the ClickOnce manifest or install the certificate into the certificate store.</source>
@@ -2535,6 +2669,11 @@
         <target state="translated">파일 "{0}"의 압축을 "{1}"에 푸는 중입니다.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Unzip.ZipSlipExploit">
+        <source>Entry is outside the target directory: "{0}"</source>
+        <target state="translated">항목이 대상 디렉터리 "{0}" 외부에 있습니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Vbc.EnumParameterHasInvalidValue">
         <source>MSB3401: "{1}" is an invalid value for the "{0}" parameter.  The valid values are: {2}</source>
         <target state="translated">MSB3401: "{1}"은(는) "{0}" 매개 변수에 사용할 수 없는 값입니다.  유효한 값은 {2}입니다.</target>
@@ -2610,6 +2749,11 @@
         <target state="translated">MSB3762: 참조가 작업에 전달되지 않았습니다. 적어도 mscorlib 및 Windows.Foundation에 대한 참조가 필요합니다.</target>
         <note>{StrBegin="MSB3762: "}</note>
       </trans-unit>
+      <trans-unit id="WriteLinesToFile.UnusedWriteOnlyWhenDifferent">
+        <source>'WriteOnlyWhenDifferent' attribute on "{0}" takes effect only when 'Overwrite="true"'.</source>
+        <target state="translated">"{0}"의 'WriteOnlyWhenDifferent' 특성은 'Overwrite="true"'인 경우에만 적용됩니다.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Xaml.DuplicatePropertyName">
         <source>MSB3724: Unable to create Xaml task.  Duplicate property name '{0}'.</source>
         <target state="translated">MSB3724: XAML 작업을 만들 수 없습니다. 속성 이름 '{0}'이(가) 중복되었습니다.</target>
@@ -2684,6 +2828,11 @@
         <source>MSB3705: XslCompiledDllPath is not supported when building with .NET Core.</source>
         <target state="translated">MSB3705: XslCompiledDllPath는 .NET Core로 빌드할 때 지원되지 않습니다.</target>
         <note>{StrBegin="MSB3705: "}</note>
+      </trans-unit>
+      <trans-unit id="XslTransform.SecuritySettingsViaUseTrustedSettings">
+        <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
+        <target state="translated">UseTrustedSettings 매개 변수를 통해 완화된 XSLT 보안 설정을 사용하도록 설정합니다. 이 설정의 보안 영향에 대한 자세한 내용은 https://aka.ms/msbuild/xsltransformation-task를 참조하세요.</target>
+        <note />
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
         <source>MSB3702: Unable to process the XsltParameters argument for the XslTransformation task. {0}</source>
@@ -3218,11 +3367,6 @@
       <trans-unit id="ResolveAssemblyReference.AssemblyFoldersConfigFileMalformed">
         <source>The AssemblyFolder config file ('{0}') specified in Microsoft.Common.CurrentVersion.targets was invalid. The error was: {1}</source>
         <target state="translated">Microsoft.Common.CurrentVersion.targets에 지정된 AssemblyFolder 구성 파일('{0}')이 잘못되었습니다. 오류: {1}</target>
-        <note />
-      </trans-unit>
-      <trans-unit id="Copy.ExactlyOneTypeOfLink">
-        <source>MSB3891: Both "{0}" and "{1}" were specified in the project file. Please choose one or the other.</source>
-        <target state="translated">MSB3891: 프로젝트 파일에서 "{0}" 및 "{1}"을(를) 모두 지정했습니다. 둘 중 하나만 선택하세요.</target>
         <note />
       </trans-unit>
       <trans-unit id="WriteLinesToFile.ErrorReadingFile">

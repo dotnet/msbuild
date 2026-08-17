@@ -55,6 +55,11 @@
       LOCALIZATION: Do not localize the following words: ProjectReference, ProjectReferenceTargets
     </note>
       </trans-unit>
+      <trans-unit id="CannotCopyFromElementOfThatType">
+        <source>MSB4277: Cannot copy from object of that type.</source>
+        <target state="translated">MSB4277: Nelze kopírovat z objektu tohoto typu.</target>
+        <note>{StrBegin="MSB4277: "}</note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: Nejde rozbalit metadata ve výrazu {0}. {1}</target>
@@ -63,13 +68,13 @@
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
-        <source>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="translated">MSB4271: Proměnná prostředí MSBuildDisableFeaturesFromVersion je nastavená na neplatný formát. Povolují se všechny verze vlny změn. Zadaná hodnota: {0}. Aktuální vlny změn: {1}</target>
+        <source>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
+        <target state="translated">MSB4271: Proměnná prostředí MSBUILDDISABLEFEATURESFROMVERSION je nastavena na neplatný formát. Povolování všech verzí Change Waves. Zadaná hodnota: {0}. Aktuální Change Waves: {1}</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
-        <source>MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="translated">MSB4272: Proměnná prostředí MSBuildDisableFeaturesFromVersion je nastavená na verzi, která je mimo rotaci. Nastavuje se výchozí verze vlny změn: {0}. Zadaná hodnota: {1}. Aktuální vlny změn: {2}</target>
+        <source>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
+        <target state="translated">MSB4272: Proměnná prostředí MSBUILDDISABLEFEATURESFROMVERSION je nastavena na verzi, která je mimo rotaci. Návrat k výchozí verzi Change Wave: {0}. Zadaná hodnota: {1}. Aktuální Change Waves: {2}</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -92,9 +97,24 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="DefaultSDKResolverError">
+        <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
+        <target state="translated">MSB4276: Výchozí překladač sady SDK nedokázal přeložit sadu SDK „{0}“, protože adresář „{1}“ neexistoval.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DuplicateOverrideUsingTaskElement">
+        <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
+        <target state="translated">MSB4275: Došlo k pokusu o vytvoření více přepsání stejné úlohy: {0}</target>
+        <note>{StrBegin="MSB4275: "}</note>
+      </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: Zadaný výstupní soubor mezipaměti pro výsledky je prázdný.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentDerivedPropertyRead">
+        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
+        <target state="translated">Vlastnost „{0}“ s hodnotou „{1}“ rozbalenou z prostředí.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -111,6 +131,18 @@
         <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4258: Při zápisu do výstupních souborů mezipaměti pro výsledky v cestě {0} byla zjištěna chyba: {1}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="FailedToResolveSDK">
+        <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+  {1}</source>
+        <target state="translated">Nepovedlo se přeložit sadu SDK „{0}“. Přesně jedna z níže uvedených zpráv o testování označuje, proč se nám nepovedlo přeložit sadu SDK. Prošetřete a vyřešte tuto zprávu, abyste správně určili sadu SDK.
+  {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.TwoVectorsMustHaveSameLength">
+        <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
+        <target state="translated">MSB3094: Položka {2} odkazuje na {0} položek a položka {3} odkazuje na {1} položek. Musí mít stejný počet položek.</target>
+        <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -132,16 +164,19 @@
         <target state="translated">Objekty EvaluationContext vytvořené pomocí SharingPolicy.Isolated nepodporují předávání souborového systému MSBuildFileSystemBase.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ItemReferencingSelfInTarget">
+        <source>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</source>
+        <target state="translated">MSB4120: Definice položky „{0}“ v rámci cíle odkazuje sama na sebe prostřednictvím metadat (kvalifikovaného nebo nekvalifikovaného) „{1}“. To může vést k nezamýšlenému rozšíření a křížovému použití již existujících položek. Další informace: https://aka.ms/msbuild/metadata-self-ref</target>
+        <note>{StrBegin="MSB4120: "}</note>
+      </trans-unit>
       <trans-unit id="KillingProcessWithPid">
         <source>Killing process with pid = {0}.</source>
         <target state="translated">Ukončuje se proces s pid = {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>Loading the following project cache plugin:
-    {0}</source>
-        <target state="translated">Načítá se následující modul plug-in mezipaměti projektu:
-    {0}</target>
+        <source>Loading the following project cache plugin: {0}</source>
+        <target state="translated">Načítá se následující modul plug-in mezipaměti projektu: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -171,9 +206,9 @@
         <target state="translated">MSB4270: V sestavení {0} se nenašly žádné moduly plug-in mezipaměti projektu. Modul plug-in se očekával.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NotAllNodesDefineACacheItem">
-        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="translated">MSB4269: Pokud jakýkoli uzel statického grafu definuje mezipaměť projektu, musí všechny uzly definovat stejnou mezipaměť projektu. Následující projekty neobsahují deklaraci položky {0}: {1}</target>
+      <trans-unit id="NodeReused">
+        <source>Reusing node {0} (PID: {1}).</source>
+        <target state="translated">Opakované použití {0} uzlu (PID: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -214,9 +249,14 @@
         <target state="translated">Metoda {0} se nedá zavolat s kolekcí, která obsahuje prázdné cílové názvy nebo názvy null.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
-        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="translated">MSB4265: Musí se zadat jeden modul plug-in mezipaměti projektu, ale našlo se jich více: {0}</target>
+      <trans-unit id="OverrideUsingTaskElementCreated">
+        <source>Created an override using task: {0} at {1}</source>
+        <target state="translated">Vytvořilo se přepsání pomocí úlohy: {0} v {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheEndBuild">
+        <source>Shutting down project cache plugin.</source>
+        <target state="translated">Vypíná se modul plug-in mezipaměti projektu.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheException">
@@ -224,15 +264,83 @@
         <target state="translated">MSB4273: Mezipaměť projektu vyvolala neošetřenou výjimku z metody {0}.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: Mezipaměť projektu selhala při zpracování výsledku sestavení pro následující projekt: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithDefaultTargets">
+        <source>Project cache hit for "{0}" (default targets).</source>
+        <target state="translated">Přístup do mezipaměti projektu pro „{0}“ (výchozí cíle).</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithOutputs">
+        <source>{0} -&gt; Cache Hit</source>
+        <target state="translated">{0} -&gt; Přístup do mezipaměti</target>
+        <note>
+      {StrBegin="{0} -&gt; "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithTargetNames">
+        <source>Project cache hit for "{0}" ({1} target(s)).</source>
+        <target state="translated">Přístup do mezipaměti projektu pro „{0}“ ({1} cíl(e/ů)).</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
         <source>MSB4266: Failed to initialize the project cache.</source>
         <target state="translated">MSB4266: Nepovedlo se inicializovat mezipaměť projektu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheMissWithDefaultTargets">
+        <source>Project cache miss for "{0}" (default targets).</source>
+        <target state="translated">Neúspěšný přístup do mezipaměti projektu pro „{0}“ (výchozí cíle).</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheMissWithTargetNames">
+        <source>Project cache miss for "{0}" ({1} target(s)).</source>
+        <target state="translated">Neúspěšný přístup do mezipaměti projektu pro „{0}“ ({1} cíl(e/ů)).</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithDefaultTargets">
+        <source>Project cache not applicable for "{0}" (default targets).</source>
+        <target state="translated">Přístup do mezipaměti nepoužitelný pro „{0}“ (výchozí cíle).</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithTargetNames">
+        <source>Project cache not applicable for "{0}" ({1} target(s)).</source>
+        <target state="translated">Přístup do mezipaměti nepoužitelný pro „{0}“ ({1} cíl(e/ů)).</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectCacheQueryFailed">
         <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
         <target state="translated">MSB4267: Při dotazování na následující projekt selhala jeho mezipaměť: {0}. Na mezipaměť se dotazy posílají paralelně pro několik projektů, takže tento konkrétní projekt nemusí být příčinou.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithDefaultTargets">
+        <source>Querying project cache for "{0}" (default targets):</source>
+        <target state="translated">Dotazování mezipaměti projektu pro „{0}“ (výchozí cíle):</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithTargetNames">
+        <source>Querying project cache for "{0}" (targets: {1}):</source>
+        <target state="translated">Dotazování mezipaměti projektu pro „{0}“ (cíle: {1}):</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
         <source>MSB4268: The project cache failed to shut down properly.</source>
@@ -257,9 +365,34 @@
         <target state="translated">Počáteční hodnota vlastnosti: $({0})={1} Zdroj: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="PropertyOutsidePropertyGroupInTarget">
+        <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
+        <target state="translated">MSB4067: Element &lt;{0}&gt; pod elementem &lt;{1}&gt; nebyl rozpoznán. Pokud jste chtěli, aby to byla vlastnost, uzavřete ji do elementu &lt;PropertyGroup&gt;.</target>
+        <note>{StrBegin="MSB4067: "}</note>
+      </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: Zakázání uzlu inproc způsobí snížení výkonu při používání modulů plug-in mezipaměti projektu, které vysílají žádosti o sestavení proxy serveru.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">Přístupy k souborům sestav se v současné době podporují jenom pomocí varianty x64 nástroje MSBuild.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverCriticalFailure">
+        <source>MSB4242: SDK Resolver Failure: "{0}"</source>
+        <target state="translated">MSB4242: Selhání překladače sady SDK: {0}</target>
+        <note>{StrBegin="MSB4242: "}</note>
+      </trans-unit>
+      <trans-unit id="SDKResolverFailed">
+        <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
+        <target state="translated">Překladač sady SDK {0} selhal při pokusu o překlad sady SDK {1}. Výjimka: {2}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverReturnedNull">
+        <source>SDK resolver "{0}" returned null.</source>
+        <target state="translated">Překladač sady SDK „{0}“ vrátil hodnotu null.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -313,6 +446,11 @@
         <target state="translated">Úloha {0} požadovala tento počet jader: {1}. Získala tento počet jader: {2}. Teď používá celkem tento počet jader: {3}</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoaded">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
+        <target state="translated">Sestavení načtené během {0}{1}: {2} (umístění: {3}, MVID: {4}, AppDomain: {5})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">Úloha {0} uvolnila tento počet jader: {1}. Teď používá celkem tento počet jader: {2}</target>
@@ -335,6 +473,13 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UnhandledMSBuildError">
+        <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
+    {0}</source>
+        <target state="translated">Jedná se o neošetřenou výjimku v MSBuildu – HLASUJTE PROSÍM PRO EXISTUJÍCÍ PROBLÉM NEBO VYTVOŘTE NOVÝ NA https://aka.ms/msbuild/unhandled.
+    {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
@@ -1340,7 +1485,7 @@
       </trans-unit>
       <trans-unit id="SolutionVenusProjectSkipped">
         <source>Skipping because the "$(AspNetConfiguration)" configuration is not supported for this web project.  You can use the AspNetConfiguration property to override the configuration used for building web projects, by adding /p:AspNetConfiguration=&lt;value&gt; to the command line. Currently web projects only support Debug and Release configurations.</source>
-        <target state="translated">Vynecháno, protože konfigurace $(AspNetConfiguration) není pro tento webový projekt podporována. Pomocí vlastnosti AspNetConfiguration můžete přepsat konfiguraci používanou k sestavování webových projektů, a to přidáním příkazu /p:AspNetConfiguration=&lt;hodnota&gt; do příkazového řádku. Webové projekty nyní podporují pouze konfigurace Debug a Release.</target>
+        <target state="translated">Vynecháno, protože konfigurace "$(AspNetConfiguration)" není pro tento webový projekt podporována. Pomocí vlastnosti AspNetConfiguration můžete přepsat konfiguraci používanou k sestavování webových projektů, a to přidáním příkazu /p:AspNetConfiguration=&lt;hodnota&gt; do příkazového řádku. Webové projekty nyní podporují pouze konfigurace Debug a Release.</target>
         <note>
     UE: This is not an error, so doesn't need an error code.
     LOCALIZATION: Do NOT localize "AspNetConfiguration", "Debug", "Release".
@@ -1790,8 +1935,8 @@
         <note>{StrBegin="MSB4209: "}</note>
       </trans-unit>
       <trans-unit id="AffinityConflict">
-        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</source>
-        <target state="translated">MSB4213: Určené spřažení požadavku {0} je v konfliktu s předchozím spřažením {1} určeným pro tento projekt.</target>
+        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for project {2} with global properties {3}</source>
+        <target state="translated">MSB4213: Určené spřažení požadavku {0} je v konfliktu s předchozím spřažením {1} určeným pro projekt {2} s globálními vlastnostmi {3}.</target>
         <note>{StrBegin="MSB4213: "}</note>
       </trans-unit>
       <trans-unit id="UnableToCreateNode">
@@ -2069,8 +2214,8 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
-        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</source>
-        <target state="translated">Projekt nebyl načten s příznakem ProjectLoadSettings.RecordDuplicateImports.</target>
+        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
+        <target state="translated">Projekt nebyl načten s příznakem ProjectLoadSettings.RecordDuplicateButNotCircularImports.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">
@@ -2379,15 +2524,10 @@ Využití:          Průměrné využití {0}: {1:###.0}</target>
         <target state="translated">MSB4244: Sestavení překladače sady SDK {0} nebylo možné načíst. {1}</target>
         <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
-      <trans-unit id="CouldNotRunSdkResolver">
-        <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="translated">MSB4242: Překladač sady SDK {0} se nepodařilo spustit. {1}</target>
-        <note>{StrBegin="MSB4242: "}</note>
-      </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
-        <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: Překladač sady SDK založený na NuGet se nepodařilo spustit, protože sestavení NuGet se nenašla. Zkontrolujte instalaci nástroje MSBuild nebo nastavte proměnnou prostředí {0} na složku, která obsahuje požadovaná sestavení NuGet. {1}</target>
-        <note>{StrBegin="MSB4243: "}</note>
+        <source>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
+        <target state="translated">Překladač sady SDK založený na NuGet se nepodařilo spustit, protože sestavení NuGet se nenašla. Zkontrolujte instalaci nástroje MSBuild nebo nastavte proměnnou prostředí {0} na složku, která obsahuje požadovaná sestavení NuGet. {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>

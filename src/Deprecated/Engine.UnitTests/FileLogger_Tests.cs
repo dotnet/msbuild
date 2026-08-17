@@ -1,6 +1,10 @@
 // Copyright (c) Microsoft. All rights reserved.
 // Licensed under the MIT license. See LICENSE file in the project root for full license information.
 
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
+
 using System;
 using System.IO;
 using System.Collections.Generic;
@@ -401,7 +405,7 @@ namespace Microsoft.Build.UnitTests
                 }
                 finally
                 {
-                    if(Directory.Exists(Path.Combine(Environment.CurrentDirectory, "tempura")))
+                    if (Directory.Exists(Path.Combine(Environment.CurrentDirectory, "tempura")))
                     {
                         File.Delete(Path.Combine(Environment.CurrentDirectory, "tempura\\mylogfile1.log"));
                         Directory.Delete(Path.Combine(Environment.CurrentDirectory, "tempura"));

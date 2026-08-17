@@ -1,13 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System.IO;
 using System.Xml;
-
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -24,7 +24,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         {
             ProjectRootElement project = ProjectRootElement.Create();
             Assert.Equal(0, Helpers.Count(project.Children));
-            Assert.Null(project.ItemDefinitionGroups.GetEnumerator().Current);
+            Assert.Empty(project.ItemDefinitionGroups);
         }
 
         /// <summary>
@@ -36,14 +36,13 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup X='Y'/>
                     </Project>
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read itemdefinitiongroup with no children
@@ -52,7 +51,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadNoChildren()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup/>
                     </Project>
                 ";
@@ -70,7 +69,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadBasic()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup Condition='c'>
                             <i1/>
                         </ItemDefinitionGroup>

@@ -1,13 +1,16 @@
-﻿// Copyright (c) Microsoft.  All Rights Reserved.  Licensed under the Apache License, Version 2.0.  See License.txt in the project root for license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Shared.FileSystem;
-using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Runtime.Loader;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared
 {
@@ -153,26 +156,23 @@ namespace Microsoft.Build.Shared
             {
                 foreach (var searchPath in searchPaths)
                 {
-                    foreach (var extension in MSBuildLoadContext.Extensions)
+                    var candidatePath = Path.Combine(searchPath,
+                        cultureSubfolder,
+                        $"{assemblyName.Name}.dll");
+
+                    if (IsAssemblyAlreadyLoaded(candidatePath) ||
+                        !FileSystems.Default.FileExists(candidatePath))
                     {
-                        var candidatePath = Path.Combine(searchPath,
-                            cultureSubfolder,
-                            $"{assemblyName.Name}.{extension}");
-
-                        if (IsAssemblyAlreadyLoaded(candidatePath) ||
-                            !FileSystems.Default.FileExists(candidatePath))
-                        {
-                            continue;
-                        }
-
-                        AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
-                        if (candidateAssemblyName.Version != assemblyName.Version)
-                        {
-                            continue;
-                        }
-
-                        return LoadAndCache(context, candidatePath);
+                        continue;
                     }
+
+                    AssemblyName candidateAssemblyName = AssemblyLoadContext.GetAssemblyName(candidatePath);
+                    if (candidateAssemblyName.Version != assemblyName.Version)
+                    {
+                        continue;
+                    }
+
+                    return LoadAndCache(context, candidatePath);
                 }
             }
 

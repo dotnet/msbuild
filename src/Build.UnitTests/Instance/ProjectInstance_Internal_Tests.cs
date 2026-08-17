@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -12,12 +12,15 @@ using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 using static Microsoft.Build.Engine.UnitTests.TestComparers.ProjectInstanceModelTestComparers;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
@@ -42,7 +45,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             try
             {
                 string projectFileContent = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <UsingTask TaskName='t0' AssemblyFile='af0'/>
                         <UsingTask TaskName='t1' AssemblyFile='af1a'/>
                         <ItemGroup>
@@ -52,7 +55,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     </Project>";
 
                 string importContent = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <UsingTask TaskName='t1' AssemblyName='an1' Condition=""'$(p)'=='v'""/>
                         <UsingTask TaskName='t2' AssemblyName='an2' Condition=""'@(i)'=='i0'""/>
                         <UsingTask TaskName='t3' AssemblyFile='af' Condition='false'/>
@@ -66,11 +69,11 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 ProjectInstance project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)))).CreateProjectInstance();
 
-                Assert.Equal(3, project.TaskRegistry.TaskRegistrations.Count);
-                Assert.Equal(Path.Combine(Directory.GetCurrentDirectory(), "af0"), project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t0", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyFile);
-                Assert.Equal(Path.Combine(Directory.GetCurrentDirectory(), "af1a"), project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t1", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyFile);
-                Assert.Equal("an1", project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t1", null)][1].TaskFactoryAssemblyLoadInfo.AssemblyName);
-                Assert.Equal("an2", project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t2", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyName);
+                project.TaskRegistry.TaskRegistrations.Count.ShouldBe(3);
+                project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t0", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyFile.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), "af0"));
+                project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t1", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyFile.ShouldBe(Path.Combine(Directory.GetCurrentDirectory(), "af1a"));
+                project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t1", null)][1].TaskFactoryAssemblyLoadInfo.AssemblyName.ShouldBe("an1");
+                project.TaskRegistry.TaskRegistrations[new TaskRegistry.RegisteredTaskIdentity("t2", null)][0].TaskFactoryAssemblyLoadInfo.AssemblyName.ShouldBe("an2");
             }
             finally
             {
@@ -89,19 +92,19 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             try
             {
                 string projectFileContent = @"
-                    <Project DefaultTargets='d0a;d0b' InitialTargets='i0a;i0b' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project DefaultTargets='d0a;d0b' InitialTargets='i0a;i0b'>
                         <Import Project='{0}'/>
                         <Import Project='{1}'/>
                     </Project>";
 
                 string import1Content = @"
-                    <Project DefaultTargets='d1a;d1b' InitialTargets='i1a;i1b' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project DefaultTargets='d1a;d1b' InitialTargets='i1a;i1b'>
                         <Import Project='{0}'/>
                     </Project>";
 
-                string import2Content = @"<Project DefaultTargets='d2a;2db' InitialTargets='i2a;i2b' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'/>";
+                string import2Content = @"<Project DefaultTargets='d2a;2db' InitialTargets='i2a;i2b'/>";
 
-                string import3Content = @"<Project DefaultTargets='d3a;d3b' InitialTargets='i3a;i3b' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'/>";
+                string import3Content = @"<Project DefaultTargets='d3a;d3b' InitialTargets='i3a;i3b'/>";
 
                 string import2Path = ObjectModelHelpers.CreateFileInTempProjectDirectory("import2.targets", import2Content);
                 string import3Path = ObjectModelHelpers.CreateFileInTempProjectDirectory("import3.targets", import3Content);
@@ -113,8 +116,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 ProjectInstance project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)))).CreateProjectInstance();
 
-                Helpers.AssertListsValueEqual(new string[] { "d0a", "d0b" }, project.DefaultTargets);
-                Helpers.AssertListsValueEqual(new string[] { "i0a", "i0b", "i1a", "i1b", "i3a", "i3b", "i2a", "i2b" }, project.InitialTargets);
+                project.DefaultTargets.ShouldBe(new string[] { "d0a", "d0b" });
+                project.InitialTargets.ShouldBe(new string[] { "i0a", "i0b", "i1a", "i1b", "i3a", "i3b", "i2a", "i2b" });
             }
             finally
             {
@@ -133,13 +136,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             try
             {
                 string projectFileContent = @"
-                    <Project DefaultTargets='d0a%3bd0b' InitialTargets='i0a%3bi0b' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project DefaultTargets='d0a%3bd0b' InitialTargets='i0a%3bi0b'>
                     </Project>";
 
                 ProjectInstance project = new Project(ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)))).CreateProjectInstance();
 
-                Helpers.AssertListsValueEqual(new string[] { "d0a;d0b" }, project.DefaultTargets);
-                Helpers.AssertListsValueEqual(new string[] { "i0a;i0b" }, project.InitialTargets);
+                project.DefaultTargets.ShouldBe(new string[] { "d0a;d0b" });
+                project.InitialTargets.ShouldBe(new string[] { "i0a;i0b" });
             }
             finally
             {
@@ -154,7 +157,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void GetPropertyGroupUnderTarget()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <Target Name='t'>
                             <PropertyGroup Condition='c1'>
                                 <p1 Condition='c2'>v1</p1>
@@ -167,16 +170,16 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance p = GetProjectInstance(content);
             ProjectPropertyGroupTaskInstance propertyGroup = (ProjectPropertyGroupTaskInstance)(p.Targets["t"].Children[0]);
 
-            Assert.Equal("c1", propertyGroup.Condition);
+            propertyGroup.Condition.ShouldBe("c1");
 
             List<ProjectPropertyGroupTaskPropertyInstance> properties = Helpers.MakeList(propertyGroup.Properties);
-            Assert.Equal(2, properties.Count);
+            properties.Count.ShouldBe(2);
 
-            Assert.Equal("c2", properties[0].Condition);
-            Assert.Equal("v1", properties[0].Value);
+            properties[0].Condition.ShouldBe("c2");
+            properties[0].Value.ShouldBe("v1");
 
-            Assert.Equal(String.Empty, properties[1].Condition);
-            Assert.Equal(String.Empty, properties[1].Value);
+            properties[1].Condition.ShouldBe(String.Empty);
+            properties[1].Value.ShouldBe(String.Empty);
         }
 
         /// <summary>
@@ -186,12 +189,12 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void GetItemGroupUnderTarget()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <Target Name='t'>
                             <ItemGroup Condition='c1'>
                                 <i Include='i1' Exclude='e1' Condition='c2'>
-                                    <m Condition='c3'>m1</m>    
-                                    <n>n1</n>                        
+                                    <m Condition='c3'>m1</m>
+                                    <n>n1</n>
                                 </i>
                                 <j Remove='r1'/>
                                 <k>
@@ -205,41 +208,41 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance p = GetProjectInstance(content);
             ProjectItemGroupTaskInstance itemGroup = (ProjectItemGroupTaskInstance)(p.Targets["t"].Children[0]);
 
-            Assert.Equal("c1", itemGroup.Condition);
+            itemGroup.Condition.ShouldBe("c1");
 
             List<ProjectItemGroupTaskItemInstance> items = Helpers.MakeList(itemGroup.Items);
-            Assert.Equal(3, items.Count);
+            items.Count.ShouldBe(3);
 
-            Assert.Equal("i1", items[0].Include);
-            Assert.Equal("e1", items[0].Exclude);
-            Assert.Equal(String.Empty, items[0].Remove);
-            Assert.Equal("c2", items[0].Condition);
+            items[0].Include.ShouldBe("i1");
+            items[0].Exclude.ShouldBe("e1");
+            items[0].Remove.ShouldBe(String.Empty);
+            items[0].Condition.ShouldBe("c2");
 
-            Assert.Equal(String.Empty, items[1].Include);
-            Assert.Equal(String.Empty, items[1].Exclude);
-            Assert.Equal("r1", items[1].Remove);
-            Assert.Equal(String.Empty, items[1].Condition);
+            items[1].Include.ShouldBe(String.Empty);
+            items[1].Exclude.ShouldBe(String.Empty);
+            items[1].Remove.ShouldBe("r1");
+            items[1].Condition.ShouldBe(String.Empty);
 
-            Assert.Equal(String.Empty, items[2].Include);
-            Assert.Equal(String.Empty, items[2].Exclude);
-            Assert.Equal(String.Empty, items[2].Remove);
-            Assert.Equal(String.Empty, items[2].Condition);
+            items[2].Include.ShouldBe(String.Empty);
+            items[2].Exclude.ShouldBe(String.Empty);
+            items[2].Remove.ShouldBe(String.Empty);
+            items[2].Condition.ShouldBe(String.Empty);
 
             List<ProjectItemGroupTaskMetadataInstance> metadata1 = Helpers.MakeList(items[0].Metadata);
             List<ProjectItemGroupTaskMetadataInstance> metadata2 = Helpers.MakeList(items[1].Metadata);
             List<ProjectItemGroupTaskMetadataInstance> metadata3 = Helpers.MakeList(items[2].Metadata);
 
-            Assert.Equal(2, metadata1.Count);
-            Assert.Empty(metadata2);
-            Assert.Single(metadata3);
+            metadata1.Count.ShouldBe(2);
+            metadata2.ShouldBeEmpty();
+            metadata3.ShouldHaveSingleItem();
 
-            Assert.Equal("c3", metadata1[0].Condition);
-            Assert.Equal("m1", metadata1[0].Value);
-            Assert.Equal(String.Empty, metadata1[1].Condition);
-            Assert.Equal("n1", metadata1[1].Value);
+            metadata1[0].Condition.ShouldBe("c3");
+            metadata1[0].Value.ShouldBe("m1");
+            metadata1[1].Condition.ShouldBe(String.Empty);
+            metadata1[1].Value.ShouldBe("n1");
 
-            Assert.Equal(String.Empty, metadata3[0].Condition);
-            Assert.Equal("o1", metadata3[0].Value);
+            metadata3[0].Condition.ShouldBe(String.Empty);
+            metadata3[0].Value.ShouldBe("o1");
         }
 
         /// <summary>
@@ -250,7 +253,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             ProjectInstance p = GetSampleProjectInstance();
 
-            Assert.True(p.TaskRegistry != null);
+            p.TaskRegistry.ShouldNotBeNull();
         }
 
         /// <summary>
@@ -261,8 +264,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             ProjectInstance p = GetSampleProjectInstance();
 
-            Assert.Equal("v1", p.GlobalPropertiesDictionary["g1"].EvaluatedValue);
-            Assert.Equal("v2", p.GlobalPropertiesDictionary["g2"].EvaluatedValue);
+            p.GlobalPropertiesDictionary["g1"].EvaluatedValue.ShouldBe("v1");
+            p.GlobalPropertiesDictionary["g2"].EvaluatedValue.ShouldBe("v2");
         }
 
         /// <summary>
@@ -273,7 +276,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             ProjectInstance p = GetSampleProjectInstance();
 
-            Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
+            p.Toolset.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
         }
 
         [Fact]
@@ -281,8 +284,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             var projectInstance = new ProjectInstance(
                 new ProjectRootElement(
-                    XmlReader.Create(new StringReader("<Project></Project>")), ProjectCollection.GlobalProjectCollection.ProjectRootElementCache, false, false)
-                );
+                    XmlReader.Create(new StringReader("<Project></Project>")), ProjectCollection.GlobalProjectCollection.ProjectRootElementCache, false, false));
 
             projectInstance.UsingDifferentToolsVersionFromProjectFile.ShouldBeFalse();
         }
@@ -297,9 +299,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             CreateMockToolsetIfNotExists("TESTTV", projectCollection);
             ProjectInstance first = GetSampleProjectInstance(null, null, projectCollection, toolsVersion: "TESTTV");
             ProjectInstance second = first.DeepCopy();
-            Assert.Equal(first.ToolsVersion, second.ToolsVersion);
-            Assert.Equal(first.ExplicitToolsVersion, second.ExplicitToolsVersion);
-            Assert.Equal(first.ExplicitToolsVersionSpecified, second.ExplicitToolsVersionSpecified);
+            second.ToolsVersion.ShouldBe(first.ToolsVersion);
+            second.ExplicitToolsVersion.ShouldBe(first.ExplicitToolsVersion);
+            second.ExplicitToolsVersionSpecified.ShouldBe(first.ExplicitToolsVersionSpecified);
         }
 
         /// <summary>
@@ -316,16 +318,16 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 ProjectInstance p = GetSampleProjectInstance(null, null, new ProjectCollection());
 
-                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
-                Assert.Equal(p.Toolset.DefaultSubToolsetVersion, p.SubToolsetVersion);
+                p.Toolset.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
+                p.SubToolsetVersion.ShouldBe(p.Toolset.DefaultSubToolsetVersion);
 
                 if (p.Toolset.DefaultSubToolsetVersion == null)
                 {
-                    Assert.Equal(MSBuildConstants.CurrentVisualStudioVersion, p.GetPropertyValue("VisualStudioVersion"));
+                    p.GetPropertyValue("VisualStudioVersion").ShouldBe(MSBuildConstants.CurrentVisualStudioVersion);
                 }
                 else
                 {
-                    Assert.Equal(p.Toolset.DefaultSubToolsetVersion, p.GetPropertyValue("VisualStudioVersion"));
+                    p.GetPropertyValue("VisualStudioVersion").ShouldBe(p.Toolset.DefaultSubToolsetVersion);
                 }
             }
             finally
@@ -335,11 +337,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Test ProjectInstance's surfacing of the sub-toolset version when it is overridden by a value in the 
-        /// environment 
+        /// Test ProjectInstance's surfacing of the sub-toolset version when it is overridden by a value in the
+        /// environment
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void GetSubToolsetVersion_FromEnvironment()
         {
             string originalVisualStudioVersion = Environment.GetEnvironmentVariable("VisualStudioVersion");
@@ -350,9 +351,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 ProjectInstance p = GetSampleProjectInstance(null, null, new ProjectCollection());
 
-                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
-                Assert.Equal("ABCD", p.SubToolsetVersion);
-                Assert.Equal("ABCD", p.GetPropertyValue("VisualStudioVersion"));
+                p.Toolset.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
+                p.SubToolsetVersion.ShouldBe("ABCD");
+                p.GetPropertyValue("VisualStudioVersion").ShouldBe("ABCD");
             }
             finally
             {
@@ -377,9 +378,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 ProjectInstance p = GetSampleProjectInstance(null, globalProperties, new ProjectCollection());
 
-                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
-                Assert.Equal("ABCDE", p.SubToolsetVersion);
-                Assert.Equal("ABCDE", p.GetPropertyValue("VisualStudioVersion"));
+                p.Toolset.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
+                p.SubToolsetVersion.ShouldBe("ABCDE");
+                p.GetPropertyValue("VisualStudioVersion").ShouldBe("ABCDE");
             }
             finally
             {
@@ -388,8 +389,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Verify that if a sub-toolset version is passed to the constructor, it all other heuristic methods for 
-        /// getting the sub-toolset version. 
+        /// Verify that if a sub-toolset version is passed to the constructor, it all other heuristic methods for
+        /// getting the sub-toolset version.
         /// </summary>
         [Fact]
         public void GetSubToolsetVersion_FromConstructor()
@@ -400,7 +401,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 Environment.SetEnvironmentVariable("VisualStudioVersion", "ABC");
 
-                string projectContent = @"<Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                string projectContent = @"<Project>
                         <Target Name='t'>
                             <Message Text='Hello'/>
                         </Target>
@@ -416,9 +417,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
                 ProjectInstance p = new ProjectInstance(xml, globalProperties, ObjectModelHelpers.MSBuildDefaultToolsVersion, "ABCDEF", new ProjectCollection(projectCollectionGlobalProperties));
 
-                Assert.Equal(ObjectModelHelpers.MSBuildDefaultToolsVersion, p.Toolset.ToolsVersion);
-                Assert.Equal("ABCDEF", p.SubToolsetVersion);
-                Assert.Equal("ABCDEF", p.GetPropertyValue("VisualStudioVersion"));
+                p.Toolset.ToolsVersion.ShouldBe(ObjectModelHelpers.MSBuildDefaultToolsVersion);
+                p.SubToolsetVersion.ShouldBe("ABCDEF");
+                p.GetPropertyValue("VisualStudioVersion").ShouldBe("ABCDEF");
             }
             finally
             {
@@ -434,7 +435,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             ProjectInstance p = GetSampleProjectInstance();
 
-            Helpers.AssertListsValueEqual(new string[] { "dt" }, p.DefaultTargets);
+            p.DefaultTargets.ShouldBe(new string[] { "dt" });
         }
 
         /// <summary>
@@ -445,7 +446,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             ProjectInstance p = GetSampleProjectInstance();
 
-            Helpers.AssertListsValueEqual(new string[] { "it" }, p.InitialTargets);
+            p.InitialTargets.ShouldBe(new string[] { "it" });
         }
 
         /// <summary>
@@ -460,13 +461,14 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance second = first.DeepCopy();
 
             // Targets, tasks are immutable so we can expect the same objects
-            Assert.True(Object.ReferenceEquals(first.Targets, second.Targets));
-            Assert.True(Object.ReferenceEquals(first.Targets["t"], second.Targets["t"]));
+            first.Targets.ShouldBeSameAs(second.Targets);
+
+            first.Targets["t"].ShouldBeSameAs(second.Targets["t"]);
 
             var firstTasks = first.Targets["t"];
             var secondTasks = second.Targets["t"];
 
-            Assert.True(Object.ReferenceEquals(firstTasks.Children[0], secondTasks.Children[0]));
+            firstTasks.Children[0].ShouldBeSameAs(secondTasks.Children[0]);
         }
 
         /// <summary>
@@ -479,7 +481,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance second = first.DeepCopy();
 
             // Task registry object should be immutable
-            Assert.Same(first.TaskRegistry, second.TaskRegistry);
+            first.TaskRegistry.ShouldBeSameAs(second.TaskRegistry);
         }
 
         /// <summary>
@@ -491,8 +493,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance first = GetSampleProjectInstance();
             ProjectInstance second = first.DeepCopy();
 
-            Assert.Equal("v1", second.GlobalPropertiesDictionary["g1"].EvaluatedValue);
-            Assert.Equal("v2", second.GlobalPropertiesDictionary["g2"].EvaluatedValue);
+            second.GlobalPropertiesDictionary["g1"].EvaluatedValue.ShouldBe("v1");
+            second.GlobalPropertiesDictionary["g2"].EvaluatedValue.ShouldBe("v2");
         }
 
         /// <summary>
@@ -504,7 +506,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance first = GetSampleProjectInstance();
             ProjectInstance second = first.DeepCopy();
 
-            Helpers.AssertListsValueEqual(new string[] { "dt" }, second.DefaultTargets);
+            second.DefaultTargets.ShouldBe(new string[] { "dt" });
         }
 
         /// <summary>
@@ -516,7 +518,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance first = GetSampleProjectInstance();
             ProjectInstance second = first.DeepCopy();
 
-            Helpers.AssertListsValueEqual(new string[] { "it" }, second.InitialTargets);
+            second.InitialTargets.ShouldBe(new string[] { "it" });
         }
 
         /// <summary>
@@ -528,9 +530,9 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectInstance first = GetSampleProjectInstance();
             ProjectInstance second = first.DeepCopy();
 
-            Assert.Equal(first.Toolset, second.Toolset);
+            second.Toolset.ShouldBe(first.Toolset);
         }
-        
+
         /// <summary>
         /// Cloning project copies toolsversion
         /// </summary>
@@ -542,7 +544,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectInstance second = first.DeepCopy();
 
-            Assert.True(second.TranslateEntireState);
+            second.TranslateEntireState.ShouldBeTrue();
         }
 
         /// <summary>
@@ -557,7 +559,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             Directory.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
 
             string projectFileContent = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+                    <Project>
                         <UsingTask TaskName='Microsoft.Build.Tasks.Message' AssemblyFile='Microsoft.Build.Tasks.Core.dll'/>
                         <ItemGroup>
                             <i Include='i0'/>
@@ -574,7 +576,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             loggers.Add(mockLogger);
             bool success = projectInstance.Build("Build", loggers);
 
-            Assert.True(success);
+            success.ShouldBeTrue();
             mockLogger.AssertLogContains(new string[] { "Building...", "Completed!" });
         }
 
@@ -681,10 +683,10 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             original.TranslateEntireState = true;
 
-            ((ITranslatable) original).Translate(TranslationHelpers.GetWriteTranslator());
+            ((ITranslatable)original).Translate(TranslationHelpers.GetWriteTranslator());
             var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
-            Assert.Equal(original, copy, new ProjectInstanceComparer());
+            new ProjectInstanceComparer().Equals(original, copy).ShouldBeTrue($"{nameof(copy)} and {original} should be equal according to the {nameof(ProjectInstanceComparer)}");
         }
 
         public delegate ProjectInstance ProjectInstanceFactory(string file, ProjectRootElement xml, ProjectCollection collection);
@@ -736,7 +738,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     pi.AddItem("foo", "bar");
                     pi.TranslateEntireState = true;
 
-                    ((ITranslatable) pi).Translate(TranslationHelpers.GetWriteTranslator());
+                    ((ITranslatable)pi).Translate(TranslationHelpers.GetWriteTranslator());
                     var copy = ProjectInstance.FactoryForDeserialization(TranslationHelpers.GetReadTranslator());
 
                     return copy;
@@ -757,7 +759,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 xml.Save(file);
 
                 var projectInstance = projectInstanceFactory.Invoke(file, xml, projectCollection);
-                Assert.NotEqual(BuildEventContext.InvalidEvaluationId, projectInstance.EvaluationId);
+                projectInstance.EvaluationId.ShouldNotBe(BuildEventContext.InvalidEvaluationId);
             }
         }
 
@@ -773,27 +775,27 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             ProjectTargetInstance targetInstance = projectInstance.AddTarget("b", "1==1", "inputs", "outputs", "returns", "keepDuplicateOutputs", "dependsOnTargets", "beforeTargets", "afterTargets", true);
 
-            Assert.Equal(2, projectInstance.Targets.Count);
-            Assert.Equal(targetInstance, projectInstance.Targets["b"]);
-            Assert.Equal("b", targetInstance.Name);
-            Assert.Equal("1==1", targetInstance.Condition);
-            Assert.Equal("inputs", targetInstance.Inputs);
-            Assert.Equal("outputs", targetInstance.Outputs);
-            Assert.Equal("returns", targetInstance.Returns);
-            Assert.Equal("keepDuplicateOutputs", targetInstance.KeepDuplicateOutputs);
-            Assert.Equal("dependsOnTargets", targetInstance.DependsOnTargets);
-            Assert.Equal("beforeTargets", targetInstance.BeforeTargets);
-            Assert.Equal("afterTargets", targetInstance.AfterTargets);
-            Assert.Equal(projectInstance.ProjectFileLocation, targetInstance.Location);
-            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.ConditionLocation);
-            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.InputsLocation);
-            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.OutputsLocation);
-            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.ReturnsLocation);
-            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.KeepDuplicateOutputsLocation);
-            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.DependsOnTargetsLocation);
-            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.BeforeTargetsLocation);
-            Assert.Equal(ElementLocation.EmptyLocation, targetInstance.AfterTargetsLocation);
-            Assert.True(targetInstance.ParentProjectSupportsReturnsAttribute);
+            projectInstance.Targets.Count.ShouldBe(2);
+            projectInstance.Targets["b"].ShouldBe(targetInstance);
+            targetInstance.Name.ShouldBe("b");
+            targetInstance.Condition.ShouldBe("1==1");
+            targetInstance.Inputs.ShouldBe("inputs");
+            targetInstance.Outputs.ShouldBe("outputs");
+            targetInstance.Returns.ShouldBe("returns");
+            targetInstance.KeepDuplicateOutputs.ShouldBe("keepDuplicateOutputs");
+            targetInstance.DependsOnTargets.ShouldBe("dependsOnTargets");
+            targetInstance.BeforeTargets.ShouldBe("beforeTargets");
+            targetInstance.AfterTargets.ShouldBe("afterTargets");
+            targetInstance.Location.ShouldBe(projectInstance.ProjectFileLocation);
+            targetInstance.ConditionLocation.ShouldBe(ElementLocation.EmptyLocation);
+            targetInstance.InputsLocation.ShouldBe(ElementLocation.EmptyLocation);
+            targetInstance.OutputsLocation.ShouldBe(ElementLocation.EmptyLocation);
+            targetInstance.ReturnsLocation.ShouldBe(ElementLocation.EmptyLocation);
+            targetInstance.KeepDuplicateOutputsLocation.ShouldBe(ElementLocation.EmptyLocation);
+            targetInstance.DependsOnTargetsLocation.ShouldBe(ElementLocation.EmptyLocation);
+            targetInstance.BeforeTargetsLocation.ShouldBe(ElementLocation.EmptyLocation);
+            targetInstance.AfterTargetsLocation.ShouldBe(ElementLocation.EmptyLocation);
+            targetInstance.ParentProjectSupportsReturnsAttribute.ShouldBeTrue();
         }
 
         [Fact]
@@ -806,7 +808,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             ProjectRootElement rootElement = ProjectRootElement.Create(XmlReader.Create(new StringReader(projectFileContent)));
             ProjectInstance projectInstance = new ProjectInstance(rootElement);
 
-            Assert.Throws<InternalErrorException>(() => projectInstance.AddTarget("a", "1==1", "inputs", "outputs", "returns", "keepDuplicateOutputs", "dependsOnTargets", "beforeTargets", "afterTargets", true));
+            Should.Throw<InternalErrorException>(() => projectInstance.AddTarget("a", "1==1", "inputs", "outputs", "returns", "keepDuplicateOutputs", "dependsOnTargets", "beforeTargets", "afterTargets", true));
         }
 
         [Theory]
@@ -856,12 +858,68 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                     ? new string[] { import1Path, import2Path, import3Path, import2Path, import1Path }
                     : expectedImportPaths;
 
-                Helpers.AssertListsValueEqual(expectedImportPaths, projectInstance.ImportPaths.ToList());
-                Helpers.AssertListsValueEqual(expectedImportPathsIncludingDuplicates, projectInstance.ImportPathsIncludingDuplicates.ToList());
+                projectInstance.ImportPaths.ToList().ShouldBe(expectedImportPaths);
+                projectInstance.ImportPathsIncludingDuplicates.ToList().ShouldBe(expectedImportPathsIncludingDuplicates);
             }
             finally
             {
                 ObjectModelHelpers.DeleteTempProjectDirectory();
+            }
+        }
+
+        /// <summary>
+        /// Verifies that when calling <see cref="ProjectInstance.FromFile(string, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <see langword="true" />, the built-in &quot;MSBuildInteractive&quot; property is set to <see langword="true" />, otherwise the property is <see cref="string.Empty" />.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ProjectInstanceFromFileInteractive(bool interactive)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                ProjectCollection projectCollection = testEnvironment.CreateProjectCollection().Collection;
+
+                ProjectRootElement projectRootElement = ProjectRootElement.Create(projectCollection);
+
+                projectRootElement.Save(testEnvironment.CreateFile().Path);
+
+                ProjectInstance projectInstance = ProjectInstance.FromFile(
+                    projectRootElement.FullPath,
+                    new ProjectOptions
+                    {
+                        Interactive = interactive,
+                        ProjectCollection = projectCollection,
+                    });
+
+                projectInstance.GetPropertyValue(ReservedPropertyNames.interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
+            }
+        }
+
+        /// <summary>
+        /// Verifies that when calling <see cref="ProjectInstance.FromProjectRootElement(ProjectRootElement, ProjectOptions)" /> with <see cref="ProjectOptions.Interactive" /> <see langword="true" />, the built-in &quot;MSBuildInteractive&quot; property is set to <see langword="true" />, otherwise the property is <see cref="string.Empty" />.
+        /// </summary>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ProjectInstanceFromProjectRootElementInteractive(bool interactive)
+        {
+            using (TestEnvironment testEnvironment = TestEnvironment.Create())
+            {
+                ProjectCollection projectCollection = testEnvironment.CreateProjectCollection().Collection;
+
+                ProjectRootElement projectRootElement = ProjectRootElement.Create(projectCollection);
+
+                projectRootElement.Save(testEnvironment.CreateFile().Path);
+
+                ProjectInstance projectInstance = ProjectInstance.FromProjectRootElement(
+                    projectRootElement,
+                    new ProjectOptions
+                    {
+                        Interactive = interactive,
+                        ProjectCollection = projectCollection,
+                    });
+
+                projectInstance.GetPropertyValue(ReservedPropertyNames.interactive).ShouldBe(interactive ? bool.TrueString : string.Empty, StringCompareShould.IgnoreCase);
             }
         }
 
@@ -890,7 +948,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
 
             if (globalProperties == null)
             {
-                // choose some interesting defaults if we weren't explicitly asked to use a set. 
+                // choose some interesting defaults if we weren't explicitly asked to use a set.
                 globalProperties = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 globalProperties.Add("g1", "v1");
                 globalProperties.Add("g2", "v2");
@@ -926,7 +984,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             string toolsVersionSubstring = toolsVersion != null ? "ToolsVersion=\"" + toolsVersion + "\" " : String.Empty;
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' InitialTargets='it' DefaultTargets='dt' " + toolsVersionSubstring + @">
+                    <Project InitialTargets='it' DefaultTargets='dt' " + toolsVersionSubstring + @">
                         <PropertyGroup>
                             <p1>v1</p1>
                             <p2>v2</p2>

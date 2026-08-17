@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.IO;
@@ -33,18 +37,18 @@ namespace Microsoft.Build.Conversion
     {
         // This is the underlying text file where we will be reading the raw text
         // from.
-        private StreamReader    oldVSProjectFile;
-        
+        private StreamReader oldVSProjectFile;
+
         // We will be reading one line at a time out of the text file, and caching
         // it here.
-        private StringBuilder   singleLine;
-        
+        private StringBuilder singleLine;
+
         // The "TextReader" interface that we are implementing only allows
         // forward access through the file.  You cannot seek to a random location
         // or read backwards.  This variable is the index into the "singleLine"
         // string above, which indicates how far the caller has read.  Once we
         // reach the end of "singleLine", we'll go read a new line from the file.
-        private int             currentReadPositionWithinSingleLine;
+        private int currentReadPositionWithinSingleLine;
 
         /// <summary>
         /// Constructor, initialized using the filename of an existing old format
@@ -58,7 +62,7 @@ namespace Microsoft.Build.Conversion
             )
         {
             this.oldVSProjectFile = new StreamReader(filename, Encoding.Default); // HIGHCHAR: Default means ANSI, ANSI is what VS .NET 2003 wrote. Without this, the project would be read as ASCII.
-            
+
             this.singleLine = new StringBuilder();
             this.currentReadPositionWithinSingleLine = 0;
         }
@@ -131,9 +135,9 @@ namespace Microsoft.Build.Conversion
         /// <owner>rgoel</owner>
         public override int Read
             (
-            char[]  bufferToReadInto,       // The buffer to read the data into.
-            int     startIndexIntoBuffer,   // The index into "bufferToReadInto"
-            int     charactersToRead        // The number of characters to read.
+            char[] bufferToReadInto,       // The buffer to read the data into.
+            int startIndexIntoBuffer,   // The index into "bufferToReadInto"
+            int charactersToRead        // The number of characters to read.
             )
         {
             // Make sure there's enough room in the caller's buffer for what he's
@@ -169,7 +173,7 @@ namespace Microsoft.Build.Conversion
                 }
 
                 // Copy characters from our cached "singleLine" to the caller's buffer.
-                this.singleLine.ToString().CopyTo(this.currentReadPositionWithinSingleLine, bufferToReadInto, 
+                this.singleLine.ToString().CopyTo(this.currentReadPositionWithinSingleLine, bufferToReadInto,
                     startIndexIntoBuffer, charactersToCopy);
 
                 // Update all counts and indices.
@@ -197,9 +201,9 @@ namespace Microsoft.Build.Conversion
         /// <owner>rgoel</owner>
         public override int ReadBlock
             (
-            char[]  bufferToReadInto, 
-            int     startIndexIntoBuffer, 
-            int     charactersToRead
+            char[] bufferToReadInto,
+            int startIndexIntoBuffer,
+            int charactersToRead
             )
         {
             throw new NotImplementedException();
@@ -235,7 +239,7 @@ namespace Microsoft.Build.Conversion
             this.currentReadPositionWithinSingleLine = this.singleLine.Length;
 
             // Strip off the line endings before returning to caller.
-            char[] lineEndingCharacters = new char[] {'\r', '\n'};
+            char[] lineEndingCharacters = new char[] { '\r', '\n' };
             return result.Trim(lineEndingCharacters);
         }
 
@@ -264,7 +268,7 @@ namespace Microsoft.Build.Conversion
                 }
 
                 // Append the line of text to the resulting output.
-                result.Append(this.singleLine.ToString(this.currentReadPositionWithinSingleLine, 
+                result.Append(this.singleLine.ToString(this.currentReadPositionWithinSingleLine,
                     this.singleLine.Length - this.currentReadPositionWithinSingleLine));
 
                 this.currentReadPositionWithinSingleLine = this.singleLine.Length;
@@ -314,11 +318,11 @@ namespace Microsoft.Build.Conversion
                 // Take the line of text just read, and replace all special characters
                 // with the escaped XML-friendly string equivalents.
                 this.singleLine = new StringBuilder(this.ReplaceSpecialCharacters(lineFromProjectFile));
-                
+
                 // The underlying StreamReader.ReadLine method doesn't give us the 
                 // trailing line endings, so add them back ourselves.
                 this.singleLine.Append(Environment.NewLine);
-                
+
                 // So now we have a new cached "singleLine".  Reset the read pointer
                 // to the beginning of the new line just read.
                 this.currentReadPositionWithinSingleLine = 0;
@@ -346,17 +350,17 @@ namespace Microsoft.Build.Conversion
             // the special characters.
             Regex attributeValueInsideDoubleQuotesPattern = new Regex("= *\"[^\"]*\"");
 
-            string replacedStuffInsideDoubleQuotes = attributeValueInsideDoubleQuotesPattern.Replace(originalLine, 
+            string replacedStuffInsideDoubleQuotes = attributeValueInsideDoubleQuotesPattern.Replace(originalLine,
                 new MatchEvaluator(this.ReplaceSpecialCharactersInXmlAttribute));
-                
+
             // Find the stuff within single-quotes, and send it off to the 
             // "ReplaceSpecialCharactersInXmlAttribute" for proper replacement of
             // the special characters.
             Regex attributeValueInsideSingleQuotesPattern = new Regex("= *'[^']*'");
 
-            string replacedStuffInsideSingleQuotes = attributeValueInsideSingleQuotesPattern.Replace(replacedStuffInsideDoubleQuotes, 
+            string replacedStuffInsideSingleQuotes = attributeValueInsideSingleQuotesPattern.Replace(replacedStuffInsideDoubleQuotes,
                 new MatchEvaluator(this.ReplaceSpecialCharactersInXmlAttribute));
-                
+
             return replacedStuffInsideSingleQuotes;
         }
 
@@ -400,7 +404,7 @@ namespace Microsoft.Build.Conversion
             xmlAttributeText = xmlAttributeText.Replace("<", "&lt;");
             xmlAttributeText = xmlAttributeText.Replace(">", "&gt;");
             xmlAttributeText = ReplaceNonEscapingAmpersands(xmlAttributeText);
-            
+
             return xmlAttributeText;
         }
 
@@ -429,7 +433,7 @@ namespace Microsoft.Build.Conversion
             //      aaa&bbb         should be replaced with         aaa&amp;bbb
             // But:
             //      aaa&lt;bbb      should not be touched.
-            
+
             // Loop through each instance of "&"
             int indexOfAmpersand = xmlAttributeText.IndexOf('&');
             while (indexOfAmpersand != -1)
@@ -448,7 +452,7 @@ namespace Microsoft.Build.Conversion
                 {
                     // We found the semicolon.  Capture the characters between (but not
                     // including) the "&" and ";".
-                    string entityName = xmlAttributeText.Substring(indexOfAmpersand + 1, 
+                    string entityName = xmlAttributeText.Substring(indexOfAmpersand + 1,
                         indexOfNextSemicolon - indexOfAmpersand - 1);
 
                     // Perf note: Here we are walking through the entire list of entities, and
@@ -456,7 +460,7 @@ namespace Microsoft.Build.Conversion
                     // should only get executed in fairly rare circumstances.  It's not very 
                     // common for people to have these embedded into their project files.
                     bool foundEntity = false;
-                    for (int i = 0 ; i < entities.Length ; i++)
+                    for (int i = 0; i < entities.Length; i++)
                     {
                         // Case-sensitive comparison to see if the entity name matches any of
                         // the well-known ones that were emitted by the XML writer in the VS.NET
@@ -478,7 +482,7 @@ namespace Microsoft.Build.Conversion
                     {
                         // At this point, we know entityName is something like "#1234" or "#x1234abcd"
                         bool isNumber = false;
-                        
+
                         // A lower-case "x" in the second position indicates a hexadecimal value.
                         if ((entityName.Length > 2) && (entityName[1] == 'x'))
                         {
@@ -562,7 +566,7 @@ namespace Microsoft.Build.Conversion
         // This is the complete list of well-known entity names that were written out
         // by the XML writer in the VS.NET 2002/2003 project system.  This list was
         // taken directly from the source code.
-        private static readonly string[] entities = 
+        private static readonly string[] entities =
         {
             "quot",          // 
             "amp",           // & - ampersand

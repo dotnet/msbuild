@@ -1,12 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System.Collections.Generic;
 using System;
-using Microsoft.Build.Construction;
+using System.Collections.Generic;
 using System.Reflection;
-using Xunit;
+using Microsoft.Build.Construction;
 using Shouldly;
+using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Construction
 {
@@ -16,7 +18,7 @@ namespace Microsoft.Build.UnitTests.Construction
     public class ElementLocationPublic_Tests
     {
         /// <summary>
-        /// Check that we can get the file name off an element and attribute, even if 
+        /// Check that we can get the file name off an element and attribute, even if
         /// it wouldn't normally have got one because the project wasn't
         /// loaded from disk, or has been edited since.
         /// This is really a test of our XmlDocumentWithLocation.
@@ -82,7 +84,7 @@ namespace Microsoft.Build.UnitTests.Construction
         public void LocationStringsMedley()
         {
             string content = @"
-            <Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`http://schemas.microsoft.com/developer/msbuild/2003`>
+            <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                     <UsingTask TaskName='t' AssemblyName='a' Condition='true'/>
                     <UsingTask TaskName='t' AssemblyFile='a' Condition='true'/>
                     <ItemDefinitionGroup Condition='true' Label='l'>

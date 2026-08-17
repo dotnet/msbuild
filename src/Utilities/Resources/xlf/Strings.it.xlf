@@ -2,6 +2,11 @@
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="it" original="../Strings.resx">
     <body>
+      <trans-unit id="DebugPathTooLong">
+        <source>MSB6012: The path "{0}" used for debug logs is too long. Set it to a shorter value using the MSBUILDDEBUGPATH environment variable or change your system configuration to allow long paths.</source>
+        <target state="translated">MSB6012: il percorso "{0}" usato per i log di debug è troppo lungo. Impostarlo su un valore più breve usando la variabile dell'ambiente MSBUILDDEBUGPATH o modificare la configurazione del sistema per consentire percorsi lunghi.</target>
+        <note>{StrBegin="MSB6012: "}</note>
+      </trans-unit>
       <trans-unit id="General.InvalidToolSwitch">
         <source>MSB6001: Invalid command line switch for "{0}". {1}</source>
         <target state="translated">MSB6001: opzione della riga di comando non valida per "{0}". {1}</target>
@@ -21,11 +26,6 @@
         <source>The command exited with code {0}.</source>
         <target state="translated">Uscita dal comando con codice {0}.</target>
         <note />
-      </trans-unit>
-      <trans-unit id="LoggingBeforeTaskInitialization">
-        <source>MSB6005: Task attempted to log before it was initialized. Message was: {0}</source>
-        <target state="translated">MSB6005: tentativo di registrazione prima dell'inizializzazione dell'attività. Messaggio: {0}</target>
-        <note>{StrBegin="MSB6005: "}UE: This occurs if the task attempts to log something in its own constructor.</note>
       </trans-unit>
       <trans-unit id="PlatformManifest.MissingPlatformXml">
         <source>MSB6010: Could not find platform manifest file at "{0}".</source>
@@ -56,6 +56,16 @@
         <source>MSB6003: The specified task executable "{0}" could not be run. {1}</source>
         <target state="translated">MSB6003: non è stato possibile eseguire il file eseguibile "{0}" dell'attività. {1}</target>
         <note>{StrBegin="MSB6003: "}</note>
+      </trans-unit>
+      <trans-unit id="ToolTask.InvalidTerminationTimeout">
+        <source>Specified termination timeout ({0}) is invalid - expecting value greater or equal to -1.</source>
+        <target state="translated">Il timeout di terminazione specificato ({0}) non è valido - è previsto un valore maggiore o uguale a -1.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ToolTask.NotUpToDate">
+        <source>Unable to skip task because it is not up-to-date.</source>
+        <target state="translated">Non è possibile ignorare l'attività perché non è aggiornata.</target>
+        <note />
       </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>

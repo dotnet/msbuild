@@ -1,17 +1,19 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Runtime.InteropServices;
 using System.Globalization;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Xml;
 using System.Xml.Serialization;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 using FrameworkNameVersioning = System.Runtime.Versioning.FrameworkName;
-using System.Collections.Generic;
-using Microsoft.Build.Shared.FileSystem;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
@@ -211,8 +213,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             try
             {
                 var doc = new XmlDocument();
-                var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
-                using (XmlReader xr = XmlReader.Create(redistListFilePath, xrSettings))
+                var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore, CloseInput = true };
+                FileStream fs = File.OpenRead(redistListFilePath);
+                using (XmlReader xr = XmlReader.Create(fs, xrSettings))
                 {
                     doc.Load(xr);
                     XmlNode fileListNode = doc.DocumentElement;
@@ -265,15 +268,15 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
             catch (ArgumentException)
             {
-                //continue
+                // continue
             }
             catch (FormatException)
             {
-                //continue
+                // continue
             }
             catch (OverflowException)
             {
-                //continue 
+                // continue 
             }
 
             return version;

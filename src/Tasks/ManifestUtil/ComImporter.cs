@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Win32;
 using System;
@@ -10,9 +10,13 @@ using System.Runtime.InteropServices;
 #if RUNTIME_TYPE_NETCORE
 using System.Runtime.InteropServices.ComTypes;
 #endif
+using System.Runtime.Versioning;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
+    [SupportedOSPlatform("windows")]
     internal class ComImporter
     {
         private readonly OutputMessageCollection _outputMessages;
@@ -22,8 +26,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         // These must be defined in sorted order!
         private static readonly string[] s_knownImplementedCategories =
         {
-            "{02496840-3AC4-11cf-87B9-00AA006C8166}", //CATID_VBFormat
-            "{02496841-3AC4-11cf-87B9-00AA006C8166}", //CATID_VBGetControl
+            "{02496840-3AC4-11cf-87B9-00AA006C8166}", // CATID_VBFormat
+            "{02496841-3AC4-11cf-87B9-00AA006C8166}", // CATID_VBGetControl
             "{40FC6ED5-2438-11CF-A3DB-080036F12502}",
         };
         private static readonly string[] s_knownSubKeys =
@@ -42,7 +46,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             _outputDisplayName = outputDisplayName;
 
             if (NativeMethods.SfcIsFileProtected(IntPtr.Zero, path) != 0)
+            {
                 outputMessages.AddWarningMessage("GenerateManifest.ComImport", outputDisplayName, _resources.GetString("ComImporter.ProtectedFile"));
+            }
 
             object obj = null;
             try { NativeMethods.LoadTypeLibEx(path, NativeMethods.RegKind.RegKind_None, out obj); }
@@ -63,7 +69,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 Guid tlbid = typeLibAttr.guid;
 
                 tlib.GetDocumentation(-1, out _, out string docString, out _, out string helpFile);
-                string helpdir = Util.FilterNonprintableChars(helpFile); //Path.GetDirectoryName(helpFile);
+                string helpdir = Util.FilterNonprintableChars(helpFile); // Path.GetDirectoryName(helpFile);
 
                 TypeLib = new TypeLib(tlbid, new Version(typeLibAttr.wMajorVerNum, typeLibAttr.wMinorVerNum), helpdir, typeLibAttr.lcid, Convert.ToInt32(typeLibAttr.wLibFlags, CultureInfo.InvariantCulture));
 
@@ -161,16 +167,38 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         private ClassInfo GetRegisteredClassInfo(Guid clsid)
         {
             ClassInfo info = null;
-            RegistryKey userKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\CLASSES\\CLSID");
-            if (GetRegisteredClassInfo(userKey, clsid, ref info))
+
+            using (RegistryKey userKey = Registry.CurrentUser.OpenSubKey("SOFTWARE\\CLASSES\\CLSID"))
             {
-                return info;
+                if (GetRegisteredClassInfo(userKey, clsid, ref info))
+                {
+                    return info;
+                }
             }
-            RegistryKey machineKey = Registry.ClassesRoot.OpenSubKey("CLSID");
-            if (GetRegisteredClassInfo(machineKey, clsid, ref info))
+
+            using (RegistryKey machineKey = Registry.ClassesRoot.OpenSubKey("CLSID"))
             {
-                return info;
+                if (GetRegisteredClassInfo(machineKey, clsid, ref info))
+                {
+                    return info;
+                }
             }
+
+            // Check Wow6432Node of HKCR incase the COM reference is to a 32-bit binary.
+            if (Environment.Is64BitProcess)
+            {
+                using (RegistryKey classesRootKey = RegistryKey.OpenBaseKey(RegistryHive.ClassesRoot, RegistryView.Registry32))
+                {
+                    using (RegistryKey clsidKey = classesRootKey.OpenSubKey("CLSID"))
+                    {
+                        if (GetRegisteredClassInfo(clsidKey, clsid, ref info))
+                        {
+                            return info;
+                        }
+                    }
+                }
+            }
+
             return null;
         }
 

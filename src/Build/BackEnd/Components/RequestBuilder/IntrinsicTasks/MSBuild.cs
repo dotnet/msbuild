@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -13,6 +13,8 @@ using Microsoft.Build.Shared.FileSystem;
 // NOTE: This is nearly identical to the MSBuild task in Microsoft.Build.Tasks.  We are deprecating that task,
 // so this is the governing implementation.
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <remarks>
@@ -23,8 +25,13 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Enum describing the behavior when a project doesn't exist on disk.
         /// </summary>
-        private enum SkipNonexistentProjectsBehavior
+        private enum SkipNonExistentProjectsBehavior
         {
+            /// <summary>
+            /// Default when unset by user.
+            /// </summary>
+            Undefined,
+
             /// <summary>
             /// Skip the project if there is no file on disk.
             /// </summary>
@@ -47,7 +54,7 @@ namespace Microsoft.Build.BackEnd
         private readonly List<ITaskItem> _targetOutputs = new List<ITaskItem>();
 
         // Whether to skip project files that don't exist on disk. By default we error for such projects.
-        private SkipNonexistentProjectsBehavior _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Error;
+        private SkipNonExistentProjectsBehavior _skipNonExistentProjects = SkipNonExistentProjectsBehavior.Undefined;
 
         private TaskLoggingHelper _logHelper;
 
@@ -160,19 +167,22 @@ namespace Microsoft.Build.BackEnd
         {
             get
             {
-                switch (_skipNonexistentProjects)
+                switch (_skipNonExistentProjects)
                 {
-                    case SkipNonexistentProjectsBehavior.Build:
+                    case SkipNonExistentProjectsBehavior.Undefined:
+                        return "Undefined";
+
+                    case SkipNonExistentProjectsBehavior.Build:
                         return "Build";
 
-                    case SkipNonexistentProjectsBehavior.Error:
+                    case SkipNonExistentProjectsBehavior.Error:
                         return "False";
 
-                    case SkipNonexistentProjectsBehavior.Skip:
+                    case SkipNonExistentProjectsBehavior.Skip:
                         return "True";
 
                     default:
-                        ErrorUtilities.ThrowInternalError("Unexpected case {0}", _skipNonexistentProjects);
+                        ErrorUtilities.ThrowInternalError("Unexpected case {0}", _skipNonExistentProjects);
                         break;
                 }
 
@@ -182,15 +192,9 @@ namespace Microsoft.Build.BackEnd
 
             set
             {
-                if (String.Equals("Build", value, StringComparison.OrdinalIgnoreCase))
+                if (TryParseSkipNonExistentProjects(value, out SkipNonExistentProjectsBehavior behavior))
                 {
-                    _skipNonexistentProjects = SkipNonexistentProjectsBehavior.Build;
-                }
-                else
-                {
-                    ErrorUtilities.VerifyThrowArgument(ConversionUtilities.CanConvertStringToBool(value), "MSBuild.InvalidSkipNonexistentProjectValue");
-                    bool originalSkipValue = ConversionUtilities.ConvertStringToBool(value);
-                    _skipNonexistentProjects = originalSkipValue ? SkipNonexistentProjectsBehavior.Skip : SkipNonexistentProjectsBehavior.Error;
+                    _skipNonExistentProjects = behavior;
                 }
             }
         }
@@ -322,7 +326,21 @@ namespace Microsoft.Build.BackEnd
                     break;
                 }
 
-                if (FileSystems.Default.FileExists(projectPath) || (_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Build))
+                // Try to get the behavior from metadata if it is undefined.
+                var skipNonExistProjects = _skipNonExistentProjects;
+                if (_skipNonExistentProjects == SkipNonExistentProjectsBehavior.Undefined)
+                {
+                    if (TryParseSkipNonExistentProjects(project.GetMetadata("SkipNonexistentProjects"), out SkipNonExistentProjectsBehavior behavior))
+                    {
+                        skipNonExistProjects = behavior;
+                    }
+                    else
+                    {
+                        skipNonExistProjects = SkipNonExistentProjectsBehavior.Error;
+                    }
+                }
+
+                if (FileSystems.Default.FileExists(projectPath) || (skipNonExistProjects == SkipNonExistentProjectsBehavior.Build))
                 {
                     if (FileUtilities.IsVCProjFilename(projectPath))
                     {
@@ -348,8 +366,7 @@ namespace Microsoft.Build.BackEnd
                                                 _targetOutputs,
                                                 UnloadProjectsOnCompletion,
                                                 ToolsVersion,
-                                                SkipNonexistentTargets
-                                                );
+                                                SkipNonexistentTargets);
 
                         if (!executeResult)
                         {
@@ -363,13 +380,13 @@ namespace Microsoft.Build.BackEnd
                 }
                 else
                 {
-                    if (_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Skip)
+                    if (skipNonExistProjects == SkipNonExistentProjectsBehavior.Skip)
                     {
                         Log.LogMessageFromResources(MessageImportance.High, "MSBuild.ProjectFileNotFoundMessage", project.ItemSpec);
                     }
                     else
                     {
-                        ErrorUtilities.VerifyThrow(_skipNonexistentProjects == SkipNonexistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", _skipNonexistentProjects);
+                        ErrorUtilities.VerifyThrow(skipNonExistProjects == SkipNonExistentProjectsBehavior.Error, "skipNonexistentProjects has unexpected value {0}", skipNonExistProjects);
                         Log.LogErrorWithCodeFromResources("MSBuild.ProjectFileNotFound", project.ItemSpec);
                         success = false;
                     }
@@ -403,10 +420,12 @@ namespace Microsoft.Build.BackEnd
             var projectToBuildInParallel = projectsToBuildList.ToArray();
 
             // Make the call to build the projects
-            if (projectToBuildInParallel.Length <= 0) return success;
+            if (projectToBuildInParallel.Length <= 0)
+            {
+                return success;
+            }
 
-            bool executeResult = await ExecuteTargets
-            (
+            bool executeResult = await ExecuteTargets(
                 projectToBuildInParallel,
                 propertiesTable,
                 undefinePropertiesArray,
@@ -418,8 +437,7 @@ namespace Microsoft.Build.BackEnd
                 _targetOutputs,
                 UnloadProjectsOnCompletion,
                 ToolsVersion,
-                SkipNonexistentTargets
-            );
+                SkipNonexistentTargets);
 
             if (!executeResult)
             {
@@ -472,11 +490,9 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-        internal static List<string[]> CreateTargetLists
-            (
+        internal static List<string[]> CreateTargetLists(
             string[] targets,
-            bool runEachTargetSeparately
-            )
+            bool runEachTargetSeparately)
         {
             // This is a list of string[].  That is, each element in the list is a string[].  Each
             // string[] represents a set of target names to build.  Depending on the value 
@@ -543,14 +559,12 @@ namespace Microsoft.Build.BackEnd
                     // parse the string containing the properties
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata(ItemMetadataNames.PropertiesMetadataName)))
                     {
-                        if (!PropertyParser.GetTableWithEscaping
-                            (
+                        if (!PropertyParser.GetTableWithEscaping(
                                 log,
                                 ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.OverridingProperties", projectNames[i]),
                                 ItemMetadataNames.PropertiesMetadataName,
                                 projects[i].GetMetadata(ItemMetadataNames.PropertiesMetadataName).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries),
-                                out Dictionary<string, string> preProjectPropertiesTable)
-                            )
+                                out Dictionary<string, string> preProjectPropertiesTable))
                         {
                             return false;
                         }
@@ -589,14 +603,12 @@ namespace Microsoft.Build.BackEnd
                     // parse the string containing the properties
                     if (!String.IsNullOrEmpty(projects[i].GetMetadata(ItemMetadataNames.AdditionalPropertiesMetadataName)))
                     {
-                        if (!PropertyParser.GetTableWithEscaping
-                            (
+                        if (!PropertyParser.GetTableWithEscaping(
                                 log,
                                 ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("General.AdditionalProperties", projectNames[i]),
                                 ItemMetadataNames.AdditionalPropertiesMetadataName,
                                 projects[i].GetMetadata(ItemMetadataNames.AdditionalPropertiesMetadataName).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries),
-                                out Dictionary<string, string> additionalProjectPropertiesTable)
-                           )
+                                out Dictionary<string, string> additionalProjectPropertiesTable))
                         {
                             return false;
                         }
@@ -710,6 +722,27 @@ namespace Microsoft.Build.BackEnd
             }
 
             return success;
+        }
+
+        private bool TryParseSkipNonExistentProjects(string value, out SkipNonExistentProjectsBehavior behavior)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                behavior = SkipNonExistentProjectsBehavior.Error;
+                return false;
+            }
+            else if (String.Equals("Build", value, StringComparison.OrdinalIgnoreCase))
+            {
+                behavior = SkipNonExistentProjectsBehavior.Build;
+            }
+            else
+            {
+                ErrorUtilities.VerifyThrowArgument(ConversionUtilities.CanConvertStringToBool(value), "MSBuild.InvalidSkipNonexistentProjectValue");
+                bool originalSkipValue = ConversionUtilities.ConvertStringToBool(value);
+                behavior = originalSkipValue ? SkipNonExistentProjectsBehavior.Skip : SkipNonExistentProjectsBehavior.Error;
+            }
+
+            return true;
         }
 
         #endregion

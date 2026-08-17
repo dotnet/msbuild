@@ -1,13 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -23,7 +24,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadNoParameters()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1/>
                         </Target>
@@ -45,7 +46,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadContinueOnError()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1 ContinueOnError='coe'/>
                         </Target>
@@ -64,7 +65,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadCondition()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1 Condition='c'/>
                         </Target>
@@ -85,7 +86,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <X/>
@@ -95,19 +96,18 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 GetTaskFromContent(content);
-            }
-           );
+            });
         }
         /// <summary>
         /// Read task with empty parameter.
-        /// Although MSBuild does not set these on tasks, they 
+        /// Although MSBuild does not set these on tasks, they
         /// are visible in the XML objects for editing purposes.
         /// </summary>
         [Fact]
         public void ReadEmptyParameter()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1 p1='' />
                         </Target>
@@ -128,7 +128,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadParameters()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1 p1='v1' p2='v2' />
                         </Target>
@@ -174,8 +174,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTaskElement task = GetBasicTask();
 
                 task.SetParameter("p1", null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Set a parameter with the reserved name 'continueonerror'
@@ -188,8 +187,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTaskElement task = GetBasicTask();
 
                 task.SetParameter("ContinueOnError", "v");
-            }
-           );
+            });
         }
         /// <summary>
         /// Set a parameter with the reserved name 'condition'
@@ -202,8 +200,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTaskElement task = GetBasicTask();
 
                 task.SetParameter("Condition", "c");
-            }
-           );
+            });
         }
         /// <summary>
         /// Set a parameter using a null name
@@ -216,8 +213,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectTaskElement task = GetBasicTask();
 
                 task.SetParameter(null, "v1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Add a parameter to the task
@@ -314,7 +310,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectTaskElement GetBasicTask()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1 p1='v1' />
                         </Target>

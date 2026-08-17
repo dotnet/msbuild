@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
@@ -7,6 +7,8 @@ using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -50,27 +52,6 @@ namespace Microsoft.Build.UnitTests
             GenericBuildEventArgs genericEventTest = new GenericBuildEventArgs();
         }
         #endregion
-
-        /// <summary>
-        /// Verify a whidbey project started event can be deserialized, the whidbey event is stored in a serialized base64 string.
-        /// </summary>
-        [Fact]
-        public void TestDeserialization()
-        {
-            string base64OldProjectStarted = "AAEAAAD/////AQAAAAAAAAAMAgAAAFxNaWNyb3NvZnQuQnVpbGQuRnJhbWV3b3JrLCBWZXJzaW9uPTIuMC4wLjAsIEN1bHR1cmU9bmV1dHJhbCwgUHVibGljS2V5VG9rZW49YjAzZjVmN2YxMWQ1MGEzYQUBAAAAMU1pY3Jvc29mdC5CdWlsZC5GcmFtZXdvcmsuUHJvamVjdFN0YXJ0ZWRFdmVudEFyZ3MHAAAAC3Byb2plY3RGaWxlC3RhcmdldE5hbWVzFkJ1aWxkRXZlbnRBcmdzK21lc3NhZ2UaQnVpbGRFdmVudEFyZ3MraGVscEtleXdvcmQZQnVpbGRFdmVudEFyZ3Mrc2VuZGVyTmFtZRhCdWlsZEV2ZW50QXJncyt0aW1lc3RhbXAXQnVpbGRFdmVudEFyZ3MrdGhyZWFkSWQBAQEBAQAADQgCAAAABgMAAAALcHJvamVjdEZpbGUGBAAAAAt0YXJnZXROYW1lcwYFAAAAB21lc3NhZ2UGBgAAAAtoZWxwS2V5d29yZAYHAAAAB01TQnVpbGQBl5vjTYvIiAsAAAAL";
-            BinaryFormatter bf = new BinaryFormatter();
-            MemoryStream ms = new MemoryStream();
-            byte[] binaryObject = Convert.FromBase64String(base64OldProjectStarted);
-            ms.Write(binaryObject, 0, binaryObject.Length);
-            ms.Position = 0;
-            ProjectStartedEventArgs pse = (ProjectStartedEventArgs)bf.Deserialize(ms);
-            pse.Message.ShouldBe("message", StringCompareShould.IgnoreCase);
-            pse.ProjectFile.ShouldBe("projectFile", StringCompareShould.IgnoreCase);
-            pse.ProjectId.ShouldBe(-1);
-            pse.TargetNames.ShouldBe("targetNames", StringCompareShould.IgnoreCase);
-            pse.BuildEventContext.ShouldBe(BuildEventContext.Invalid);
-            pse.ParentProjectBuildEventContext.ShouldBe(BuildEventContext.Invalid);
-        }
 
         /// <summary>
         /// Verify the BuildEventContext is exercised
@@ -145,7 +126,7 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A generic buildEvent arg to test the equals method
         /// </summary>
-        internal class GenericBuildEventArgs : BuildEventArgs
+        internal sealed class GenericBuildEventArgs : BuildEventArgs
         {
             /// <summary>
             /// Default constructor

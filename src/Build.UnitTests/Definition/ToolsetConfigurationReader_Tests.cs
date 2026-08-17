@@ -1,16 +1,17 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
+using System.Collections.Generic;
 using System.Configuration;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
-
-using ToolsetConfigurationSection = Microsoft.Build.Evaluation.ToolsetConfigurationSection;
 using Xunit;
-using System;
-using System.Collections.Generic;
+using ToolsetConfigurationSection = Microsoft.Build.Evaluation.ToolsetConfigurationSection;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Definition
 {
@@ -196,7 +197,6 @@ namespace Microsoft.Build.UnitTests.Definition
         /// name attribute is missing from toolset element 
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ToolsVersionTest_NameNotSpecified()
         {
             Assert.Throws<ConfigurationErrorsException>(() =>
@@ -219,8 +219,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         /// <summary>
         ///  More than 1 toolset element with the same name
@@ -248,14 +247,12 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         /// <summary>
         /// empty toolset element 
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ToolsVersionTest_EmptyElement()
         {
             Assert.Throws<ConfigurationErrorsException>(() =>
@@ -276,8 +273,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         #endregion
 
@@ -324,7 +320,6 @@ namespace Microsoft.Build.UnitTests.Definition
         ///  name attribute is missing
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyTest_NameNotSpecified()
         {
             Assert.Throws<ConfigurationErrorsException>(() =>
@@ -344,8 +339,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         /// <summary>
         /// value attribute is missing
@@ -370,8 +364,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         /// <summary>
         /// more than 1 property element with the same name
@@ -397,14 +390,12 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         /// <summary>
         ///  property element is an empty element
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void PropertyTest_EmptyElement()
         {
             Assert.Throws<ConfigurationErrorsException>(() =>
@@ -425,8 +416,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
         #endregion
 
@@ -565,7 +555,7 @@ namespace Microsoft.Build.UnitTests.Definition
 
             Assert.Equal("unix", allPaths.GetElement(2).OS);
             Assert.Single(allPaths.GetElement(2).PropertyElements);
-            Assert.Equal( @"/tmp/bar", allPaths.GetElement(2).PropertyElements.GetElement("MSBuildExtensionsPath").Value);
+            Assert.Equal(@"/tmp/bar", allPaths.GetElement(2).PropertyElements.GetElement("MSBuildExtensionsPath").Value);
 
             var reader = GetStandardConfigurationReader();
             Dictionary<string, Toolset> toolsets = new Dictionary<string, Toolset>(StringComparer.OrdinalIgnoreCase);
@@ -576,17 +566,17 @@ namespace Microsoft.Build.UnitTests.Definition
             Dictionary<string, ProjectImportPathMatch> pathsTable = toolsets["2.0"].ImportPropertySearchPathsTable;
             if (NativeMethodsShared.IsWindows)
             {
-                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] {"c:\\foo"});
-                CheckPathsTable(pathsTable, "MSBuildExtensionsPath64", new string[] {"c:\\foo64", "c:\\bar64"});
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] { "c:\\foo" });
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath64", new string[] { "c:\\foo64", "c:\\bar64" });
             }
             else if (NativeMethodsShared.IsOSX)
             {
-                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] {"/tmp/foo"});
-                CheckPathsTable(pathsTable, "MSBuildExtensionsPath32", new string[] {"/tmp/foo32", "/tmp/bar32"});
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] { "/tmp/foo" });
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath32", new string[] { "/tmp/foo32", "/tmp/bar32" });
             }
             else
             {
-                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] {"/tmp/bar"});
+                CheckPathsTable(pathsTable, "MSBuildExtensionsPath", new string[] { "/tmp/bar" });
             }
         }
 
@@ -596,7 +586,7 @@ namespace Microsoft.Build.UnitTests.Definition
             var paths = pathsTable[kind];
             Assert.Equal(paths.SearchPaths.Count, expectedPaths.Length);
 
-            for (int i = 0; i < paths.SearchPaths.Count; i ++)
+            for (int i = 0; i < paths.SearchPaths.Count; i++)
             {
                 Assert.Equal(paths.SearchPaths[i], expectedPaths[i]);
             }
@@ -634,8 +624,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -668,8 +657,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 Configuration config = ToolsetConfigurationReaderTestHelper.ReadApplicationConfigurationTest();
 
                 config.GetSection(s_msbuildToolsets);
-            }
-           );
+            });
         }
 
         private ToolsetConfigurationReader GetStandardConfigurationReader()

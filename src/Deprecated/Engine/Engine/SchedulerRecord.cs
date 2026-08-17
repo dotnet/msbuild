@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System.Collections.Generic;
 using System.Diagnostics; // For the debugger attribute
@@ -17,12 +21,12 @@ namespace Microsoft.Build.BuildEngine
         #region Constructors
         internal ScheduleRecord
         (
-            ScheduleRecordKey recordKey, 
-            ScheduleRecordKey parentKey, 
+            ScheduleRecordKey recordKey,
+            ScheduleRecordKey parentKey,
             int evaluationNode,
             string projectName,
             string toolsVersion,
-            string [] targetsBuild
+            string[] targetsBuild
         )
         {
             this.recordKey = recordKey;
@@ -175,7 +179,7 @@ namespace Microsoft.Build.BuildEngine
     /// This class is used as a key combining both HandleId and RequestId into a single class.
     /// </summary>
     [DebuggerDisplay("Key ({handleId},{requestId})")]
-    internal class ScheduleRecordKey 
+    internal class ScheduleRecordKey
     {
         #region Constructors
         internal ScheduleRecordKey(int handleId, int requestId)

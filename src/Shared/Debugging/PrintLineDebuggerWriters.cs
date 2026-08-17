@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using CommonWriterType = System.Action<string, string, System.Collections.Generic.IEnumerable<string>>;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.Debugging
 {
@@ -14,7 +16,7 @@ namespace Microsoft.Build.Shared.Debugging
     /// </summary>
     internal static class PrintLineDebuggerWriters
     {
-        public class IdBasedFilesWriter
+        public sealed class IdBasedFilesWriter
         {
             private string LogFileRoot { get; }
 
@@ -44,7 +46,7 @@ namespace Microsoft.Build.Shared.Debugging
             }
         }
 
-        public class CompositeWriter
+        public sealed class CompositeWriter
         {
             private IEnumerable<CommonWriterType> Writers { get; }
 

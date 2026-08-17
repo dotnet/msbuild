@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -12,8 +12,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
-
 using Microsoft.Build.Construction;
+using Microsoft.Build.Definition;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.FileSystem;
@@ -22,9 +22,13 @@ using Microsoft.Build.Graph;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -120,7 +124,7 @@ namespace Microsoft.Build.UnitTests
                 {
                     return new Project(p, new Dictionary<string, string>(), MSBuildConstants.CurrentToolsVersion, c)
                         .Items
-                        .Select(i => (TestItem) new ProjectItemTestItemAdapter(i))
+                        .Select(i => (ITestItem)new ProjectItemTestItemAdapter(i))
                         .ToList();
                 },
             projectContents,
@@ -131,7 +135,7 @@ namespace Microsoft.Build.UnitTests
             normalizeSlashes);
         }
 
-        internal static void AssertItemEvaluationFromGenericItemEvaluator(Func<string, ProjectCollection, IList<TestItem>> itemEvaluator, string projectContents, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
+        internal static void AssertItemEvaluationFromGenericItemEvaluator(Func<string, ProjectCollection, IList<ITestItem>> itemEvaluator, string projectContents, string[] inputFiles, string[] expectedInclude, bool makeExpectedIncludeAbsolute = false, Dictionary<string, string>[] expectedMetadataPerItem = null, bool normalizeSlashes = false)
         {
             using (var env = TestEnvironment.Create())
             using (var collection = new ProjectCollection())
@@ -155,20 +159,54 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        internal static void ShouldHaveSucceeded(this BuildResult result)
+        {
+            result.OverallResult.ShouldBe(
+                BuildResultCode.Success,
+                customMessage: result.Exception is not null ? result.Exception.ToString() : string.Empty);
+        }
+
+        internal static void ShouldHaveSucceeded(this GraphBuildResult result)
+        {
+            result.OverallResult.ShouldBe(
+                BuildResultCode.Success,
+                customMessage: result.Exception is not null ? result.Exception.ToString() : string.Empty);
+        }
+
+        internal static void ShouldHaveFailed(this BuildResult result, string exceptionMessageSubstring = null)
+        {
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+
+            if (exceptionMessageSubstring != null)
+            {
+                result.Exception.Message.ShouldContain(exceptionMessageSubstring);
+            }
+        }
+
+        internal static void ShouldHaveFailed(this GraphBuildResult result, string exceptionMessageSubstring = null)
+        {
+            result.OverallResult.ShouldBe(BuildResultCode.Failure);
+
+            if (exceptionMessageSubstring != null)
+            {
+                result.Exception.Message.ShouldContain(exceptionMessageSubstring);
+            }
+        }
+
         internal static string NormalizeSlashes(string path)
         {
             return path.Replace('/', Path.DirectorySeparatorChar).Replace('\\', Path.DirectorySeparatorChar);
         }
 
         // todo Make IItem<M> public and add these new members to it.
-        internal interface TestItem
+        internal interface ITestItem
         {
             string EvaluatedInclude { get; }
             int DirectMetadataCount { get; }
             string GetMetadataValue(string key);
         }
 
-        internal class ProjectItemTestItemAdapter : TestItem
+        internal sealed class ProjectItemTestItemAdapter : ITestItem
         {
             private readonly ProjectItem _projectInstance;
 
@@ -187,7 +225,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class ProjectItemInstanceTestItemAdapter : TestItem
+        internal sealed class ProjectItemInstanceTestItemAdapter : ITestItem
         {
             private readonly ProjectItemInstance _projectInstance;
 
@@ -208,14 +246,14 @@ namespace Microsoft.Build.UnitTests
 
         internal static void AssertItems(string[] expectedItems, ICollection<ProjectItem> items, Dictionary<string, string> expectedDirectMetadata = null, bool normalizeSlashes = false)
         {
-            var converteditems = items.Select(i => (TestItem) new ProjectItemTestItemAdapter(i)).ToList();
+            var converteditems = items.Select(i => (ITestItem)new ProjectItemTestItemAdapter(i)).ToList();
             AssertItems(expectedItems, converteditems, expectedDirectMetadata, normalizeSlashes);
         }
 
         /// <summary>
         /// Asserts that the list of items has the specified evaluated includes.
         /// </summary>
-        internal static void AssertItems(string[] expectedItems, IList<TestItem> items, Dictionary<string, string> expectedDirectMetadata = null, bool normalizeSlashes = false)
+        internal static void AssertItems(string[] expectedItems, IList<ITestItem> items, Dictionary<string, string> expectedDirectMetadata = null, bool normalizeSlashes = false)
         {
             if (expectedDirectMetadata == null)
             {
@@ -235,11 +273,11 @@ namespace Microsoft.Build.UnitTests
 
         public static void AssertItems(string[] expectedItems, IList<ProjectItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
         {
-            var convertedItems = items.Select(i => (TestItem) new ProjectItemTestItemAdapter(i)).ToList();
+            var convertedItems = items.Select(i => (ITestItem)new ProjectItemTestItemAdapter(i)).ToList();
             AssertItems(expectedItems, convertedItems, expectedDirectMetadataPerItem, normalizeSlashes);
         }
 
-        public static void AssertItems(string[] expectedItems, IList<TestItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
+        public static void AssertItems(string[] expectedItems, IList<ITestItem> items, Dictionary<string, string>[] expectedDirectMetadataPerItem, bool normalizeSlashes = false)
         {
             if (items.Count != 0 || expectedDirectMetadataPerItem.Length != 0)
             {
@@ -380,26 +418,22 @@ namespace Microsoft.Build.UnitTests
 
                         Assert.True(
                                 actualMetadataValue.Length > 0 || expectedMetadataValue.Length == 0,
-                                string.Format("Item '{0}' does not have expected metadata '{1}'.", actualItem.ItemSpec, metadataName)
-                            );
+                                string.Format("Item '{0}' does not have expected metadata '{1}'.", actualItem.ItemSpec, metadataName));
 
                         Assert.True(
                                 actualMetadataValue.Length == 0 || expectedMetadataValue.Length > 0,
-                                string.Format("Item '{0}' has unexpected metadata {1}={2}.", actualItem.ItemSpec, metadataName, actualMetadataValue)
-                            );
+                                string.Format("Item '{0}' has unexpected metadata {1}={2}.", actualItem.ItemSpec, metadataName, actualMetadataValue));
 
-                        Assert.Equal(
-                                expectedMetadataValue,
-                                actualMetadataValue
-                            //string.Format
-                            //    (
-                            //        "Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
-                            //        actualItem.ItemSpec,
-                            //        metadataName,
-                            //        actualMetadataValue,
-                            //        expectedMetadataValue
-                            //    )
-                            );
+                        Assert.Equal(expectedMetadataValue, actualMetadataValue);
+
+                        // string.Format
+                        //    (
+                        //        "Item '{0}' has metadata {1}={2} instead of expected {1}={3}.",
+                        //        actualItem.ItemSpec,
+                        //        metadataName,
+                        //        actualMetadataValue,
+                        //        expectedMetadataValue
+                        //    )
                     }
                 }
                 expectedItems.RemoveAt(expectedItemIndex);
@@ -431,7 +465,7 @@ namespace Microsoft.Build.UnitTests
             item.GetMetadataValue(key).ShouldBe(value);
         }
 
-        internal static void AssertItemHasMetadata(Dictionary<string, string> expected, TestItem item)
+        internal static void AssertItemHasMetadata(Dictionary<string, string> expected, ITestItem item)
         {
             expected ??= new Dictionary<string, string>();
 
@@ -465,7 +499,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// Parses the crazy string passed into AssertItemsMatch and returns a list of ITaskItems.
+        /// Parses the string passed into AssertItemsMatch and returns a list of ITaskItems.
         /// </summary>
         /// <param name="expectedItemsString"></param>
         /// <returns></returns>
@@ -637,8 +671,8 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Create a project in memory. Load up the given XML.
         /// </summary>
-        /// <param name="xml"></param>
-        /// <returns></returns>
+        /// <param name="xml">the project to be created in string format.</param>
+        /// <returns>Returns created <see cref="Project"/>.</returns>
         internal static Project CreateInMemoryProject(string xml)
         {
             return CreateInMemoryProject(xml, new ConsoleLogger());
@@ -647,57 +681,58 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// Create a project in memory. Load up the given XML.
         /// </summary>
-        /// <param name="xml"></param>
-        /// <param name="logger"></param>
-        /// <returns></returns>
-        internal static Project CreateInMemoryProject(string xml, ILogger logger /* May be null */)
+        /// <param name="xml">the project to be created in string format.</param>
+        /// <param name="loggers">The array of loggers to attach on project evaluation.</param>
+        /// <returns>Returns created <see cref="Project"/>.</returns>
+        internal static Project CreateInMemoryProject(string xml, params ILogger[] loggers)
         {
-            return CreateInMemoryProject(new ProjectCollection(), xml, logger);
+            return CreateInMemoryProject(new ProjectCollection(), xml, loggers);
         }
 
         /// <summary>
         /// Create an in-memory project and attach it to the passed-in engine.
         /// </summary>
-        /// <param name="engine"></param>
-        /// <param name="xml"></param>
-        /// <param name="logger">May be null</param>
-        /// <returns></returns>
-        internal static Project CreateInMemoryProject(ProjectCollection e, string xml, ILogger logger /* May be null */)
+        /// <param name="projectCollection"><see cref="ProjectCollection"/> to use for project creation.</param>
+        /// <param name="xml">the project to be created in string format.</param>
+        /// <param name="loggers">The array of loggers to attach on project evaluation. May be null.</param>
+        /// <returns>Returns created <see cref="Project"/>.</returns>
+        internal static Project CreateInMemoryProject(ProjectCollection projectCollection, string xml, params ILogger[] loggers)
         {
-            return CreateInMemoryProject(e, xml, logger, null);
+            return CreateInMemoryProject(projectCollection, xml, null, loggers);
         }
 
         /// <summary>
         /// Create an in-memory project and attach it to the passed-in engine.
         /// </summary>
-        /// <param name="logger">May be null</param>
-        /// <param name="toolsVersion">May be null</param>
-        internal static Project CreateInMemoryProject
-            (
+        /// <param name="projectCollection"><see cref="ProjectCollection"/> to use for project creation.</param>
+        /// <param name="xml">the project to be created in string format.</param>
+        /// <param name="toolsVersion">The tools version to use on project creation. May be null.</param>
+        /// <param name="loggers">The array of loggers to attach to project collection before evaluation. May be null.</param>
+        /// <returns>Returns created <see cref="Project"/>.</returns>
+        internal static Project CreateInMemoryProject(
             ProjectCollection projectCollection,
             string xml,
-            ILogger logger /* May be null */,
-            string toolsVersion /* may be null */
-            )
+            string toolsVersion /* may be null */,
+            params ILogger[] loggers)
         {
-            XmlReaderSettings readerSettings = new XmlReaderSettings {DtdProcessing = DtdProcessing.Ignore};
+            XmlReaderSettings readerSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
+            if (loggers != null)
+            {
+                foreach (ILogger logger in loggers)
+                {
+                    projectCollection.RegisterLogger(logger);
+                }
+            }
 
-            Project project = new Project
-                (
+            Project project = new Project(
                 XmlReader.Create(new StringReader(CleanupFileContents(xml)), readerSettings),
-                null,
+                globalProperties: null,
                 toolsVersion,
-                projectCollection
-                );
+                projectCollection);
 
             Guid guid = Guid.NewGuid();
             project.FullPath = Path.Combine(TempProjectDir, "Temporary" + guid.ToString("N") + ".csproj");
             project.ReevaluateIfNecessary();
-
-            if (logger != null)
-            {
-                project.ProjectCollection.RegisterLogger(logger);
-            }
 
             return project;
         }
@@ -706,56 +741,61 @@ namespace Microsoft.Build.UnitTests
         /// Creates a project in memory and builds the default targets.  The build is
         /// expected to succeed.
         /// </summary>
-        /// <param name="projectContents"></param>
-        /// <returns></returns>
-        internal static MockLogger BuildProjectExpectSuccess
-            (
+        /// <param name="projectContents">The project file content in string format.</param>
+        /// <param name="testOutputHelper"><see cref="ITestOutputHelper"/> to log to.</param>
+        /// <param name="loggerVerbosity">The required logging verbosity.</param>
+        /// <returns>The <see cref="MockLogger"/> that was used during evaluation and build.</returns>
+        internal static MockLogger BuildProjectExpectSuccess(
             string projectContents,
-            ITestOutputHelper testOutputHelper = null
-            )
+            ITestOutputHelper testOutputHelper = null,
+            LoggerVerbosity loggerVerbosity = LoggerVerbosity.Normal)
         {
-            MockLogger logger = new MockLogger(testOutputHelper);
+            MockLogger logger = new MockLogger(testOutputHelper, verbosity: loggerVerbosity);
             BuildProjectExpectSuccess(projectContents, logger);
             return logger;
         }
 
-        internal static void BuildProjectExpectSuccess
-            (
+        /// <summary>
+        /// Creates a project in memory and builds the default targets.  The build is
+        /// expected to succeed.
+        /// </summary>
+        /// <param name="projectContents">The project file content in string format.</param>
+        /// <param name="loggers">The array of loggers to use.</param>
+        internal static void BuildProjectExpectSuccess(
             string projectContents,
-            params ILogger[] loggers
-            )
+            params ILogger[] loggers)
         {
-            Project project = CreateInMemoryProject(projectContents, logger: null); // logger is null so we take care of loggers ourselves
-            project.Build(loggers).ShouldBeTrue();
+            using ProjectCollection collection = new();
+            Project project = CreateInMemoryProject(collection, projectContents, loggers);
+            project.Build().ShouldBeTrue();
         }
 
         /// <summary>
         /// Creates a project in memory and builds the default targets.  The build is
         /// expected to fail.
         /// </summary>
-        /// <param name="projectContents"></param>
-        /// <returns></returns>
-        internal static MockLogger BuildProjectExpectFailure
-            (
-            string projectContents
-            )
+        /// <param name="projectContents">The project file content in string format.</param>
+        /// <returns>The <see cref="MockLogger"/> that was used during evaluation and build.</returns>
+        internal static MockLogger BuildProjectExpectFailure(string projectContents)
         {
             MockLogger logger = new MockLogger();
             BuildProjectExpectFailure(projectContents, logger);
-
             return logger;
         }
 
-        internal static void BuildProjectExpectFailure
-            (
+        /// <summary>
+        /// Creates a project in memory and builds the default targets.  The build is
+        /// expected to fail.
+        /// </summary>
+        /// <param name="projectContents">The project file content in string format.</param>
+        /// <param name="loggers">The array of loggers to use.</param>
+        internal static void BuildProjectExpectFailure(
             string projectContents,
-            ILogger logger
-           )
+            params ILogger[] loggers)
         {
-            Project project = CreateInMemoryProject(projectContents, logger);
-
-            bool success = project.Build(logger);
-            Assert.False(success); // "Build succeeded, but shouldn't have.  See test output (Attachments in Azure Pipelines) for details"
+            using ProjectCollection collection = new();
+            Project project = CreateInMemoryProject(collection, projectContents, loggers);
+            project.Build().ShouldBeFalse("Build succeeded, but shouldn't have.  See test output (Attachments in Azure Pipelines) for details\"");
         }
 
         /// <summary>
@@ -764,11 +804,9 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         /// <param name="project"></param>
         /// <param name="newExpectedProjectContents"></param>
-        internal static void CompareProjectContents
-            (
+        internal static void CompareProjectContents(
             Project project,
-            string newExpectedProjectContents
-            )
+            string newExpectedProjectContents)
         {
             // Get the new XML for the project, normalizing the whitespace.
             string newActualProjectContents = project.Xml.RawXml;
@@ -843,19 +881,10 @@ namespace Microsoft.Build.UnitTests
 
                     break;
                 }
-                catch (Exception ex)
+                // After all the retries fail, we fail with the actual problem instead of some difficult-to-understand issue later.
+                catch (Exception ex) when (retries < 4)
                 {
-                    if (retries < 4)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
-                    else
-                    {
-                        // All the retries have failed. We will now fail with the
-                        // actual problem now instead of with some more difficult-to-understand
-                        // issue later.
-                        throw;
-                    }
+                    Console.WriteLine(ex.ToString());
                 }
             }
         }
@@ -890,19 +919,10 @@ namespace Microsoft.Build.UnitTests
                     }
                     break;
                 }
-                catch (Exception ex)
+                // After all the retries fail, we fail with the actual problem instead of some difficult-to-understand issue later.
+                catch (Exception ex) when (retries < 4)
                 {
-                    if (retries < 4)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
-                    else
-                    {
-                        // All the retries have failed. We will now fail with the
-                        // actual problem now instead of with some more difficult-to-understand
-                        // issue later.
-                        throw;
-                    }
+                    Console.WriteLine(ex.ToString());
                 }
             }
 
@@ -976,13 +996,11 @@ namespace Microsoft.Build.UnitTests
         /// <param name="additionalProperties">Can be null.</param>
         /// <param name="logger"></param>
         /// <returns></returns>
-        internal static bool BuildTempProjectFileWithTargets
-        (
+        internal static bool BuildTempProjectFileWithTargets(
             string projectFileRelativePath,
             string[] targets,
             IDictionary<string, string> globalProperties,
-            ILogger logger
-        )
+            ILogger logger)
         {
             // Build the default targets.
             List<ILogger> loggers = new List<ILogger>(1);
@@ -1022,7 +1040,10 @@ namespace Microsoft.Build.UnitTests
         {
             for (int i = 0; i < files.Length; i++)
             {
-                if (FileSystems.Default.FileExists(files[i])) File.Delete(files[i]);
+                if (FileSystems.Default.FileExists(files[i]))
+                {
+                    File.Delete(files[i]);
+                }
             }
         }
 
@@ -1084,7 +1105,7 @@ namespace Microsoft.Build.UnitTests
         {
             return
                 $@"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             {fragment}
                         </ItemGroup>
@@ -1134,6 +1155,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static int Count(IEnumerable enumerable)
         {
+            if (enumerable is ICollection c)
+            {
+                return c.Count;
+            }
+
             int i = 0;
             foreach (object _ in enumerable)
             {
@@ -1320,7 +1346,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         private static void BuildProjectWithNewOM(string content, ref MockLogger logger, out bool result, bool allowTaskCrash, Dictionary<string, string> globalProperties = null)
         {
-            // Replace the crazy quotes with real ones
+            // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
             Project project = new Project(XmlReader.Create(new StringReader(content)), globalProperties, toolsVersion: null);
@@ -1346,7 +1372,7 @@ namespace Microsoft.Build.UnitTests
 
         public static BuildResult BuildProjectContentUsingBuildManager(string content, MockLogger logger, BuildParameters parameters = null)
         {
-            // Replace the crazy quotes with real ones
+            // Replace the nonstandard quotes with real ones
             content = ObjectModelHelpers.CleanupFileContents(content);
 
             using (var env = TestEnvironment.Create())
@@ -1357,7 +1383,11 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        public static BuildResult BuildProjectFileUsingBuildManager(string projectFile, MockLogger logger = null, BuildParameters parameters = null)
+        public static BuildResult BuildProjectFileUsingBuildManager(
+            string projectFile,
+            MockLogger logger = null,
+            BuildParameters parameters = null,
+            IList<string> targetsToBuild = null)
         {
             using (var buildManager = new BuildManager())
             {
@@ -1366,15 +1396,15 @@ namespace Microsoft.Build.UnitTests
                 if (logger != null)
                 {
                     parameters.Loggers = parameters.Loggers == null
-                        ? new[] {logger}
-                        : parameters.Loggers.Concat(new[] {logger});
+                        ? new[] { logger }
+                        : parameters.Loggers.Concat(new[] { logger });
                 }
 
                 var request = new BuildRequestData(
                     projectFile,
                     new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
-                    new string[] {},
+                    targetsToBuild?.ToArray() ?? Array.Empty<string>(),
                     null);
 
                 var result = buildManager.Build(
@@ -1383,6 +1413,109 @@ namespace Microsoft.Build.UnitTests
 
                 return result;
             }
+        }
+
+        internal enum ExpectedBuildResult
+        {
+            // The build should fail with a logged error upon drive enumerationg wildcard detection and setting of environment variable.
+            FailWithError,
+            // The build should succeed with a logged warning upon drive enumerating wildcard detection (regardless of environment variable value).
+            SucceedWithWarning,
+            // The build should succeed with no logged warnings and errors, as there are no drive enumerating wildcards.
+            SucceedWithNoErrorsAndWarnings
+        }
+
+        /// <summary>
+        /// Verify that a drive enumerating wildcard warning is logged or exception is thrown.
+        /// </summary>
+        internal static void CleanContentsAndBuildTargetWithDriveEnumeratingWildcard(string content, string failOnDriveEnumerationEnvVar, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
+        {
+            using (var env = TestEnvironment.Create(testOutput))
+            {
+                // Clean file contents by replacing single quotes with double quotes, etc.
+                content = ObjectModelHelpers.CleanupFileContents(content);
+                var testProject = env.CreateTestProjectWithFiles(content.Cleanup());
+
+                // Reset state
+                ResetStateForDriveEnumeratingWildcardTests(env, failOnDriveEnumerationEnvVar);
+
+                // Setup and build test target
+                BuildTargetWithDriveEnumeratingWildcardUsingBuildManager(env, testProject.ProjectFile, targetName, expectedBuildResult, testOutput);
+            }
+        }
+
+        internal static void ResetStateForDriveEnumeratingWildcardTests(TestEnvironment env, string setEnvVar)
+        {
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDFAILONDRIVEENUMERATINGWILDCARD", setEnvVar);
+            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
+        }
+
+        internal static void BuildTargetWithDriveEnumeratingWildcardUsingBuildManager(TestEnvironment env, string testProjectFile, string targetName, ExpectedBuildResult expectedBuildResult, ITestOutputHelper testOutput = null)
+        {
+            try
+            {
+                // Setup build
+                MockLogger mockLogger = (testOutput == null) ? new MockLogger() : new MockLogger(testOutput);
+                var p = ProjectInstance.FromFile(testProjectFile, new ProjectOptions());
+                BuildManager buildManager = BuildManager.DefaultBuildManager;
+                BuildRequestData data = new BuildRequestData(p, new[] { targetName });
+                BuildParameters parameters = new BuildParameters()
+                {
+                    Loggers = new ILogger[] { mockLogger },
+                };
+
+                // Perform build using build manager
+                BuildResult buildResult = buildManager.Build(parameters, data);
+
+                // Verify result based on value of ExpectedBuildResult
+                if (expectedBuildResult == ExpectedBuildResult.FailWithError)
+                {
+                    VerifyErrorLoggedForDriveEnumeratingWildcard(buildResult, mockLogger, targetName, testProjectFile);
+                }
+                else if (expectedBuildResult == ExpectedBuildResult.SucceedWithWarning)
+                {
+                    VerifyWarningLoggedForDriveEnumeratingWildcard(buildResult, mockLogger, targetName, testProjectFile);
+                }
+                else if (expectedBuildResult == ExpectedBuildResult.SucceedWithNoErrorsAndWarnings)
+                {
+                    VerifyNoErrorsAndWarningsForDriveEnumeratingWildcard(buildResult, mockLogger, targetName);
+                }
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        private static void VerifyErrorLoggedForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName, string testProjectFile)
+        {
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Failure);
+            buildResult[targetName].ResultCode.ShouldBe(TargetResultCode.Failure);
+            mockLogger.ErrorCount.ShouldBe(1);
+            mockLogger.Errors[0].Code.ShouldBe("MSB5029");
+            mockLogger.Errors[0].Message.ShouldContain(testProjectFile);
+        }
+
+        private static void VerifyWarningLoggedForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName, string testProjectFile)
+        {
+            VerifySuccessOfBuildAndTargetResults(buildResult, targetName);
+            mockLogger.WarningCount.ShouldBe(1);
+            mockLogger.Warnings[0].Code.ShouldBe("MSB5029");
+            mockLogger.Warnings[0].Message.ShouldContain(testProjectFile);
+        }
+
+        private static void VerifyNoErrorsAndWarningsForDriveEnumeratingWildcard(BuildResult buildResult, MockLogger mockLogger, string targetName)
+        {
+            VerifySuccessOfBuildAndTargetResults(buildResult, targetName);
+            mockLogger.WarningCount.ShouldBe(0);
+            mockLogger.ErrorCount.ShouldBe(0);
+        }
+
+        private static void VerifySuccessOfBuildAndTargetResults(BuildResult buildResult, string targetName)
+        {
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+            buildResult[targetName].ResultCode.ShouldBe(TargetResultCode.Success);
         }
 
         /// <summary>
@@ -1537,8 +1670,7 @@ namespace Microsoft.Build.UnitTests
             int[] projectReferences = null,
             Dictionary<string, string[]> projectReferenceTargets = null,
             string defaultTargets = null,
-            string extraContent = null
-            )
+            string extraContent = null)
         {
             var sb = new StringBuilder(64);
 
@@ -1567,7 +1699,7 @@ namespace Microsoft.Build.UnitTests
 
             sb.Append("</ItemGroup>");
 
-            
+
             foreach (var defaultTarget in (defaultTargets ?? string.Empty).Split(MSBuildConstants.SemicolonChar, StringSplitOptions.RemoveEmptyEntries))
             {
                 sb.Append("<Target Name='").Append(defaultTarget).Append("'/>");
@@ -1582,40 +1714,14 @@ namespace Microsoft.Build.UnitTests
 
         internal static ProjectGraph CreateProjectGraph(
             TestEnvironment env,
-            IDictionary<int, int[]> dependencyEdges,
-            IDictionary<int, string> extraContentPerProjectNumber,
-            string extraContentForAllNodes = null)
-        {
-            return CreateProjectGraph(
-                env: env,
-                dependencyEdges: dependencyEdges,
-                globalProperties: null,
-                createProjectFile: (environment, projectNumber, references, projectReferenceTargets, defaultTargets, extraContent) =>
-                {
-                    extraContent = extraContentPerProjectNumber != null && extraContentPerProjectNumber.TryGetValue(projectNumber, out var content)
-                        ? content
-                        : string.Empty;
-
-                    extraContent += extraContentForAllNodes ?? string.Empty;
-
-                    return CreateProjectFile(
-                        environment,
-                        projectNumber,
-                        references,
-                        projectReferenceTargets,
-                        defaultTargets,
-                        extraContent.Cleanup());
-                });
-        }
-
-        internal static ProjectGraph CreateProjectGraph(
-            TestEnvironment env,
             // direct dependencies that the kvp.key node has on the nodes represented by kvp.value
             IDictionary<int, int[]> dependencyEdges,
             IDictionary<string, string> globalProperties = null,
             CreateProjectFileDelegate createProjectFile = null,
             IEnumerable<int> entryPoints = null,
-            ProjectCollection projectCollection = null)
+            ProjectCollection projectCollection = null,
+            IDictionary<int, string> extraContentPerProjectNumber = null,
+            string extraContentForAllNodes = null)
         {
             createProjectFile ??= CreateProjectFile;
 
@@ -1628,7 +1734,13 @@ namespace Microsoft.Build.UnitTests
 
                 if (!nodes.ContainsKey(parent))
                 {
-                    var file = createProjectFile(env, parent, nodeDependencies.Value);
+                    TransientTestFile file = createProjectFile(
+                        env,
+                        parent,
+                        nodeDependencies.Value,
+                        projectReferenceTargets: null,
+                        defaultTargets: null,
+                        extraContent: GetExtraContent(parent));
                     nodes[parent] = (IsRoot(parent), file.Path);
                 }
             }
@@ -1645,7 +1757,12 @@ namespace Microsoft.Build.UnitTests
                 {
                     if (!nodes.ContainsKey(reference))
                     {
-                        var file = createProjectFile(env, reference);
+                        TransientTestFile file = createProjectFile(
+                            env,
+                            reference,
+                            projectReferenceTargets: null,
+                            defaultTargets: null,
+                            extraContent: GetExtraContent(reference));
                         nodes[reference] = (false, file.Path);
                     }
                 }
@@ -1659,8 +1776,18 @@ namespace Microsoft.Build.UnitTests
                 entryProjectFiles,
                 globalProperties ?? new Dictionary<string, string>(),
                 projectCollection ?? env.CreateProjectCollection()
-                    .Collection
-                );
+                    .Collection);
+
+            string GetExtraContent(int projectNum)
+            {
+                string extraContent = extraContentPerProjectNumber != null && extraContentPerProjectNumber.TryGetValue(projectNum, out string extraContentForProject)
+                    ? extraContentForProject
+                    : string.Empty;
+
+                extraContent += extraContentForAllNodes ?? string.Empty;
+
+                return extraContent.Cleanup();
+            }
 
             bool IsRoot(int node)
             {
@@ -1698,7 +1825,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static void DeleteFiles(params string[] paths)
         {
-            foreach (string path in paths)
+            // When we delete the file directory which has the sub folder/file firstly, it will not be deleted since not empty.
+            // So sort paths descendingly by file directory length, it will delete sub folder/file at first.
+            var pathsSortedByDepth = paths.OrderByDescending(x => Path.GetDirectoryName(Path.GetFullPath(x)).Length);
+
+            foreach (string path in pathsSortedByDepth)
             {
                 if (FileSystems.Default.FileExists(path))
                 {
@@ -1765,7 +1896,7 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal static void VerifyAssertLineByLine(string expected, string actual, bool ignoreFirstLineOfActual, ITestOutputHelper testOutput = null)
         {
-            Action<string> LogLine = testOutput == null ? (Action<string>) Console.WriteLine : testOutput.WriteLine;
+            Action<string> LogLine = testOutput == null ? (Action<string>)Console.WriteLine : testOutput.WriteLine;
 
             string[] actualLines = SplitIntoLines(actual);
 
@@ -1871,7 +2002,7 @@ namespace Microsoft.Build.UnitTests
                 ? path
                 : path.ToSlash();
 
-        internal class ElementLocationComparerIgnoringType : IEqualityComparer<ElementLocation>
+        internal sealed class ElementLocationComparerIgnoringType : IEqualityComparer<ElementLocation>
         {
             public bool Equals(ElementLocation x, ElementLocation y)
             {
@@ -1899,7 +2030,7 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class BuildManagerSession : IDisposable
+        internal sealed class BuildManagerSession : IDisposable
         {
             private readonly TestEnvironment _env;
             private readonly BuildManager _buildManager;
@@ -1916,7 +2047,7 @@ namespace Microsoft.Build.UnitTests
                 _env = env;
 
                 Logger = new MockLogger(_env.Output);
-                var loggers = new[] {Logger};
+                var loggers = new[] { Logger };
 
                 var actualBuildParameters = buildParameters ?? new BuildParameters();
 
@@ -1945,15 +2076,20 @@ namespace Microsoft.Build.UnitTests
                 string[] entryTargets = null,
                 Dictionary<string, string> globalProperties = null)
             {
-                var buildRequestData = new BuildRequestData(projectFile,
+                var buildRequestData = new BuildRequestData(
+                    projectFile,
                     globalProperties ?? new Dictionary<string, string>(),
                     MSBuildConstants.CurrentToolsVersion,
-                    entryTargets ?? new string[0],
+                    entryTargets ?? Array.Empty<string>(),
                     null);
+                return await BuildAsync(buildRequestData);
+            }
 
+            public async Task<BuildResult> BuildAsync(BuildRequestData requestData)
+            {
                 var completion = new TaskCompletionSource<BuildResult>();
 
-                _buildManager.PendBuildRequest(buildRequestData).ExecuteAsync(submission =>
+                _buildManager.PendBuildRequest(requestData).ExecuteAsync(submission =>
                 {
                     completion.SetResult(submission.BuildResult);
                 }, null);
@@ -1961,15 +2097,12 @@ namespace Microsoft.Build.UnitTests
                 return await completion.Task;
             }
 
-            public GraphBuildResult BuildGraphSubmission(GraphBuildRequestData requestData)
-            {
-                return _buildManager.BuildRequest(requestData);
-            }
+            public BuildResult Build(BuildRequestData requestData) => _buildManager.BuildRequest(requestData);
+
+            public GraphBuildResult BuildGraphSubmission(GraphBuildRequestData requestData) => _buildManager.BuildRequest(requestData);
 
             public GraphBuildResult BuildGraph(ProjectGraph graph, string[] entryTargets = null)
-            {
-                return _buildManager.BuildRequest(new GraphBuildRequestData(graph, entryTargets ?? new string[0]));
-            }
+                => _buildManager.BuildRequest(new GraphBuildRequestData(graph, entryTargets ?? Array.Empty<string>()));
 
             public void Dispose()
             {
@@ -1985,93 +2118,143 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
-        internal class LoggingFileSystem : MSBuildFileSystemBase
+        internal sealed class LoggingDirectoryCacheFactory : IDirectoryCacheFactory
         {
-            private readonly IFileSystem _wrappingFileSystem;
+            public List<LoggingDirectoryCache> DirectoryCaches { get; } = new();
+
+            public IDirectoryCache GetDirectoryCacheForEvaluation(int evaluationId)
+            {
+                var directoryCache = new LoggingDirectoryCache(evaluationId);
+                DirectoryCaches.Add(directoryCache);
+                return directoryCache;
+            }
+        }
+
+        internal sealed class LoggingDirectoryCache : IDirectoryCache
+        {
+            internal int EvaluationId { get; }
+
+            public ConcurrentDictionary<string, int> ExistenceChecks { get; } = new();
+            public ConcurrentDictionary<string, int> Enumerations { get; } = new();
+
+            public LoggingDirectoryCache(int evaluationId)
+            {
+                EvaluationId = evaluationId;
+            }
+
+            public bool DirectoryExists(string path)
+            {
+                IncrementExistenceChecks(path);
+                return Directory.Exists(path);
+            }
+
+            public bool FileExists(string path)
+            {
+                IncrementExistenceChecks(path);
+                return File.Exists(path);
+            }
+
+            public IEnumerable<TResult> EnumerateDirectories<TResult>(string path, string pattern, FindPredicate predicate, FindTransform<TResult> transform)
+            {
+                IncrementEnumerations(path);
+                return Enumerable.Empty<TResult>();
+            }
+
+            public IEnumerable<TResult> EnumerateFiles<TResult>(string path, string pattern, FindPredicate predicate, FindTransform<TResult> transform)
+            {
+                IncrementEnumerations(path);
+                return Enumerable.Empty<TResult>();
+            }
+
+            private void IncrementExistenceChecks(string path)
+            {
+                ExistenceChecks.AddOrUpdate(path, p => 1, (p, c) => c + 1);
+            }
+
+            private void IncrementEnumerations(string path)
+            {
+                Enumerations.AddOrUpdate(path, p => 1, (p, c) => c + 1);
+            }
+        }
+
+        internal sealed class LoggingFileSystem : MSBuildFileSystemBase
+        {
             private int _fileSystemCalls;
 
             public int FileSystemCalls => _fileSystemCalls;
 
             public ConcurrentDictionary<string, int> ExistenceChecks { get; } = new ConcurrentDictionary<string, int>();
 
-            public LoggingFileSystem(IFileSystem wrappingFileSystem = null)
-            {
-                _wrappingFileSystem = wrappingFileSystem ?? FileSystems.Default;
-            }
-
             public override TextReader ReadFile(string path)
             {
                 IncrementCalls(ref _fileSystemCalls);
 
-                return _wrappingFileSystem.ReadFile(path);
+                return base.ReadFile(path);
             }
 
             public override Stream GetFileStream(string path, FileMode mode, FileAccess access, FileShare share)
             {
                 IncrementCalls(ref _fileSystemCalls);
 
-                return _wrappingFileSystem.GetFileStream(path, mode, access, share);
+                return base.GetFileStream(path, mode, access, share);
             }
 
             public override string ReadFileAllText(string path)
             {
                 IncrementCalls(ref _fileSystemCalls);
 
-                return _wrappingFileSystem.ReadFileAllText(path);
+                return base.ReadFileAllText(path);
             }
 
             public override byte[] ReadFileAllBytes(string path)
             {
                 IncrementCalls(ref _fileSystemCalls);
 
-                return _wrappingFileSystem.ReadFileAllBytes(path);
+                return base.ReadFileAllBytes(path);
             }
 
             public override IEnumerable<string> EnumerateFiles(
                 string path,
                 string searchPattern = "*",
-                SearchOption searchOption = SearchOption.TopDirectoryOnly
-            )
+                SearchOption searchOption = SearchOption.TopDirectoryOnly)
             {
                 IncrementCalls(ref _fileSystemCalls);
 
-                return _wrappingFileSystem.EnumerateFiles(path, searchPattern, searchOption);
+                return base.EnumerateFiles(path, searchPattern, searchOption);
             }
 
             public override IEnumerable<string> EnumerateDirectories(
                 string path,
                 string searchPattern = "*",
-                SearchOption searchOption = SearchOption.TopDirectoryOnly
-            )
+                SearchOption searchOption = SearchOption.TopDirectoryOnly)
             {
                 IncrementCalls(ref _fileSystemCalls);
 
-                return _wrappingFileSystem.EnumerateDirectories(path, searchPattern, searchOption);
+                return base.EnumerateDirectories(path, searchPattern, searchOption);
             }
 
             public override IEnumerable<string> EnumerateFileSystemEntries(
                 string path,
                 string searchPattern = "*",
-                SearchOption searchOption = SearchOption.TopDirectoryOnly
-            )
+                SearchOption searchOption = SearchOption.TopDirectoryOnly)
             {
                 IncrementCalls(ref _fileSystemCalls);
 
-                return _wrappingFileSystem.EnumerateFileSystemEntries(path, searchPattern, searchOption);
+                return base.EnumerateFileSystemEntries(path, searchPattern, searchOption);
             }
 
             public override FileAttributes GetAttributes(string path)
             {
                 IncrementCalls(ref _fileSystemCalls);
 
-                return _wrappingFileSystem.GetAttributes(path);
+                return base.GetAttributes(path);
             }
 
             public override DateTime GetLastWriteTimeUtc(string path)
             {
                 IncrementCalls(ref _fileSystemCalls);
 
-                return _wrappingFileSystem.GetLastWriteTimeUtc(path);
+                return base.GetLastWriteTimeUtc(path);
             }
 
             public override bool DirectoryExists(string path)
@@ -2079,7 +2262,7 @@ namespace Microsoft.Build.UnitTests
                 IncrementCalls(ref _fileSystemCalls);
                 IncrementExistenceChecks(path);
 
-                return _wrappingFileSystem.DirectoryExists(path);
+                return base.DirectoryExists(path);
             }
 
             public override bool FileExists(string path)
@@ -2087,19 +2270,19 @@ namespace Microsoft.Build.UnitTests
                 IncrementCalls(ref _fileSystemCalls);
                 IncrementExistenceChecks(path);
 
-                return _wrappingFileSystem.FileExists(path);
+                return base.FileExists(path);
             }
 
-            private int _directoryEntryExistsCalls;
-            public int DirectoryEntryExistsCalls => _directoryEntryExistsCalls;
+            private int _fileOrDirectoryExistsCalls;
+            public int FileOrDirectoryExistsCalls => _fileOrDirectoryExistsCalls;
 
             public override bool FileOrDirectoryExists(string path)
             {
                 IncrementCalls(ref _fileSystemCalls);
-                IncrementCalls(ref _directoryEntryExistsCalls);
+                IncrementCalls(ref _fileOrDirectoryExistsCalls);
                 IncrementExistenceChecks(path);
 
-                return _wrappingFileSystem.DirectoryEntryExists(path);
+                return base.FileOrDirectoryExists(path);
             }
 
             private void IncrementCalls(ref int incremented)

@@ -1,13 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Xml;
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -55,7 +56,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='p'/>
@@ -66,8 +67,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read an output property with reserved property name
@@ -78,7 +78,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='p' PropertyName='MSBuildProjectFile'/>
@@ -89,8 +89,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read an output property with missing taskparameter
@@ -101,7 +100,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output ItemName='i'/>
@@ -112,8 +111,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read an output property with missing taskparameter
@@ -124,7 +122,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskName='' ItemName='i'/>
@@ -135,8 +133,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read an output property with child element
@@ -147,7 +144,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output ItemName='i' TaskParameter='x'>
@@ -160,8 +157,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read an output property with propertyname but an empty itemname attribute
@@ -172,7 +168,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='t' PropertyName='p' ItemName=''/>
@@ -183,8 +179,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read an output property with an itemname but an empty propertyname attribute
@@ -195,7 +190,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='t' ItemName='i' PropertyName=''/>
@@ -206,8 +201,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Modify the condition
@@ -248,8 +242,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectOutputElement output = GetOutputProperty();
 
                 output.ItemType = "i1b";
-            }
-           );
+            });
         }
         /// <summary>
         /// Set the item name value
@@ -276,8 +269,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectOutputElement output = GetOutputItem();
 
                 output.PropertyName = "p1b";
-            }
-           );
+            });
         }
         /// <summary>
         /// Helper to get a ProjectOutputElement for an output item
@@ -285,7 +277,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectOutputElement GetOutputItem()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='p' ItemName='i1' />
@@ -307,7 +299,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectOutputElement GetOutputProperty()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1>
                                 <Output TaskParameter='p' PropertyName='p1' />

@@ -1,5 +1,8 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 {
     using System;
@@ -31,14 +34,14 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public void VerifyNotSame(LinkPair<T> other)
         {
-            Assert.NotSame((object)this.View, (object)other.View);
-            Assert.NotSame((object)this.Real, (object)other.Real);
+            Assert.NotEqual((object)this.View, (object)other.View);
+            Assert.NotEqual((object)this.Real, (object)other.Real);
         }
 
         public void VerifySame(LinkPair<T> other)
         {
-            Assert.Same((object)this.View, (object)other.View);
-            Assert.Same((object)this.Real, (object)other.Real);
+            Assert.Equal((object)this.View, (object)other.View);
+            Assert.Equal((object)this.Real, (object)other.Real);
         }
 
         public void VerifySetter(bool finalValue, Func<T, bool> getter, Action<T, bool> setter)
@@ -91,7 +94,7 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         }
     }
 
-    internal class ValidationContext
+    internal sealed class ValidationContext
     {
         public ValidationContext() { }
         public ValidationContext(ProjectPair pair) { this.Pair = pair; }
@@ -119,48 +122,165 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
         // "Slow" Verify, probing all known link types
         public static void VerifyFindType(object view, object real, ValidationContext context = null)
         {
-            if (view == null && real == null) return;
+            if (view == null && real == null)
+            {
+                return;
+            }
+
             VerifyLinkedNotNull(view);
             VerifyNotLinkedNotNull(real);
 
             // construction
-            if (VerifyCheckType<ProjectMetadataElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectChooseElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectWhenElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectOtherwiseElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectTaskElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectOutputElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectUsingTaskBodyElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectUsingTaskParameterElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<UsingTaskParameterGroupElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectUsingTaskElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectTargetElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectRootElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectExtensionsElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectImportElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectImportGroupElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectItemDefinitionElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectItemDefinitionGroupElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectItemElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectItemGroupElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectPropertyElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectPropertyGroupElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectSdkElement>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectOnErrorElement>(view, real, context, Verify)) return;
+            if (VerifyCheckType<ProjectMetadataElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectChooseElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectWhenElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectOtherwiseElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectTaskElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectOutputElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectUsingTaskBodyElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectUsingTaskParameterElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<UsingTaskParameterGroupElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectUsingTaskElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectTargetElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectRootElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectExtensionsElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectImportElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectImportGroupElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectItemDefinitionElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectItemDefinitionGroupElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectItemElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectItemGroupElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectPropertyElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectPropertyGroupElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectSdkElement>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectOnErrorElement>(view, real, context, Verify))
+            {
+                return;
+            }
 
             // evaluation
-            if (VerifyCheckType<ProjectProperty>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectMetadata>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectItemDefinition>(view, real, context, Verify)) return;
-            if (VerifyCheckType<ProjectItem>(view, real, context, Verify)) return;
-            if (VerifyCheckType<Project>(view, real, context, Verify)) return;
+            if (VerifyCheckType<ProjectProperty>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectMetadata>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectItemDefinition>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<ProjectItem>(view, real, context, Verify))
+            {
+                return;
+            }
+
+            if (VerifyCheckType<Project>(view, real, context, Verify))
+            {
+                return;
+            }
 
             throw new NotImplementedException($"Unknown type:{view.GetType().Name}");
         }
 
         public static void VerifyMetadata(IEnumerable<KeyValuePair<string, string>> expected, Func<string, string> getMetadata, Func<string, bool> hasMetadata = null)
         {
-            if (expected == null) return;
+            if (expected == null)
+            {
+                return;
+            }
 
             foreach (var md in expected)
             {
@@ -175,7 +295,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify<T>(IEnumerable<T> viewCollection, IEnumerable<T> realCollection, Action<T, T, ValidationContext> validator, ValidationContext context = null)
         {
-            if (viewCollection == null && realCollection == null) return;
+            if (viewCollection == null && realCollection == null)
+            {
+                return;
+            }
+
             Assert.NotNull(viewCollection);
             Assert.NotNull(realCollection);
 
@@ -190,7 +314,11 @@ namespace Microsoft.Build.UnitTests.OM.ObjectModelRemoting
 
         public static void Verify<T>(IDictionary<string, T> viewCollection, IDictionary<string, T> realCollection, Action<T, T, ValidationContext> validator, ValidationContext context = null)
         {
-            if (viewCollection == null && realCollection == null) return;
+            if (viewCollection == null && realCollection == null)
+            {
+                return;
+            }
+
             Assert.NotNull(viewCollection);
             Assert.NotNull(realCollection);
 

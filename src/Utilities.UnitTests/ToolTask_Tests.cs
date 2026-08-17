@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
@@ -12,6 +12,8 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     public sealed class ToolTask_Tests
@@ -23,7 +25,7 @@ namespace Microsoft.Build.UnitTests
             _output = testOutput;
         }
 
-        private class MyTool : ToolTask, IDisposable
+        private sealed class MyTool : ToolTask, IDisposable
         {
             private string _fullToolName;
             private string _responseFileCommands = string.Empty;
@@ -115,7 +117,7 @@ namespace Microsoft.Build.UnitTests
                 StartInfo = GetProcessStartInfo(GenerateFullPathToTool(), NativeMethodsShared.IsWindows ? "/x" : string.Empty, null);
                 return result;
             }
-        };
+        }
 
         [Fact]
         public void Regress_Mutation_UserSuppliedToolPathIsLogged()
@@ -189,7 +191,7 @@ namespace Microsoft.Build.UnitTests
 
                 // We just tried to run "cmd.exe /C garbagegarbagegarbagegarbage.exe".  This should fail,
                 // but since "cmd.exe" doesn't log its errors in canonical format, no errors got
-                // logged by the tool itself.  Therefore, ToolTask's default implementation of 
+                // logged by the tool itself.  Therefore, ToolTask's default implementation of
                 // HandleTaskExecutionErrors should have logged error MSB6006.
                 engine.AssertLogContains("MSB6006");
             }
@@ -201,7 +203,6 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
-        [Trait("Category", "mono-osx-failing")]
         public void HandleExecutionErrorsWhenToolLogsError()
         {
             using (MyTool t = new MyTool())
@@ -225,7 +226,7 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// ToolTask should never run String.Format on strings that are 
+        /// ToolTask should never run String.Format on strings that are
         /// not meant to be formatted.
         /// </summary>
         [Fact]
@@ -338,7 +339,6 @@ namespace Microsoft.Build.UnitTests
         /// of the regular tool name
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void ToolExeIsFoundOnToolPath()
         {
             string shellName = NativeMethodsShared.IsWindows ? "cmd.exe" : "sh";
@@ -388,7 +388,6 @@ namespace Microsoft.Build.UnitTests
         /// Task is found on path.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void TaskFoundOnPath()
         {
             using (MyTool t = new MyTool())
@@ -414,7 +413,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OverrideStdOutImportanceToLow()
         {
-            string tempFile = FileUtilities.GetTemporaryFile();
+            string tempFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(tempFile, @"hello world");
 
             using (MyTool t = new MyTool())
@@ -442,7 +441,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void OverrideStdOutImportanceToHigh()
         {
-            string tempFile = FileUtilities.GetTemporaryFile();
+            string tempFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(tempFile, @"hello world");
 
             using (MyTool t = new MyTool())
@@ -473,7 +472,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void ToolTaskCanChangeCanonicalErrorFormat()
         {
-            string tempFile = FileUtilities.GetTemporaryFile();
+            string tempFile = FileUtilities.GetTemporaryFileName();
             File.WriteAllText(tempFile, @"
                 Main.cs(17,20): warning CS0168: The variable 'foo' is declared but never used.
                 BADTHINGHAPPENED: This is my custom error format that's not in canonical error format.
@@ -508,7 +507,6 @@ namespace Microsoft.Build.UnitTests
         /// Passing env vars through the tooltask public property
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void EnvironmentVariablesToToolTask()
         {
             MyTool task = new MyTool();
@@ -522,27 +520,16 @@ namespace Microsoft.Build.UnitTests
 
             ProcessStartInfo startInfo = task.StartInfo;
 
-#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
             startInfo.Environment["a"].ShouldBe("b");
             startInfo.Environment["c"].ShouldBe("d");
             startInfo.Environment[userVarName].ShouldBe("x");
             startInfo.Environment["path"].ShouldBe(String.Empty);
-#else
-            startInfo.EnvironmentVariables["a"].ShouldBe("b");
-            startInfo.EnvironmentVariables["c"].ShouldBe("d");
-            startInfo.EnvironmentVariables[userVarName].ShouldBe("x");
-            startInfo.EnvironmentVariables["path"].ShouldBe(string.Empty);
-#endif
 
             if (NativeMethodsShared.IsWindows)
             {
                 Assert.Equal(
                         Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
                         startInfo.Environment["programfiles"],
-#else
-                        startInfo.EnvironmentVariables["programfiles"],
-#endif
                         true);
             }
         }
@@ -551,7 +538,6 @@ namespace Microsoft.Build.UnitTests
         /// Equals sign in value
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void EnvironmentVariablesToToolTaskEqualsSign()
         {
             MyTool task = new MyTool();
@@ -560,11 +546,7 @@ namespace Microsoft.Build.UnitTests
             bool result = task.Execute();
 
             result.ShouldBe(true);
-#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
             task.StartInfo.Environment["a"].ShouldBe("b=c");
-#else
-            task.StartInfo.EnvironmentVariables["a"].ShouldBe("b=c");
-#endif
         }
 
         /// <summary>
@@ -616,7 +598,6 @@ namespace Microsoft.Build.UnitTests
         /// Not set should not wipe out other env vars
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         public void EnvironmentVariablesToToolTaskNotSet()
         {
             MyTool task = new MyTool();
@@ -626,12 +607,7 @@ namespace Microsoft.Build.UnitTests
 
             result.ShouldBe(true);
             task.ExecuteCalled.ShouldBe(true);
-            Assert.True(
-#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
-                task.StartInfo.Environment["PATH"].Length > 0);
-#else
-                task.StartInfo.EnvironmentVariables["PATH"].Length > 0);
-#endif
+            Assert.True(task.StartInfo.Environment["PATH"].Length > 0);
         }
 
         /// <summary>
@@ -681,18 +657,19 @@ namespace Microsoft.Build.UnitTests
         {
             string[] expectedCmdPath;
             string shellName;
+            string cmdPath;
             if (NativeMethodsShared.IsWindows)
             {
-                expectedCmdPath = new[] { Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe") };
+                expectedCmdPath = new[] { Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "cmd.exe").ToUpperInvariant() };
                 shellName = "cmd.exe";
+                cmdPath = ToolTask.FindOnPath(shellName).ToUpperInvariant();
             }
             else
             {
                 expectedCmdPath = new[] { "/bin/sh", "/usr/bin/sh" };
                 shellName = "sh";
+                cmdPath = ToolTask.FindOnPath(shellName);
             }
-
-            string cmdPath = ToolTask.FindOnPath(shellName);
 
             cmdPath.ShouldBeOneOf(expectedCmdPath);
         }
@@ -704,22 +681,14 @@ namespace Microsoft.Build.UnitTests
         public void GetProcessStartInfoCanOverrideEnvironmentVariables()
         {
             MyTool task = new MyTool();
-#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
             task.DoProcessStartInfoMutation = (p) => p.Environment.Remove("a");
-#else
-            task.DoProcessStartInfoMutation = (p) => p.EnvironmentVariables.Remove("a");
-#endif
-            
+
             task.BuildEngine = new MockEngine();
             task.EnvironmentVariables = new[] { "a=b" };
             bool result = task.Execute();
 
             result.ShouldBe(true);
-#if FEATURE_PROCESSSTARTINFO_ENVIRONMENT
             task.StartInfo.Environment.ContainsKey("a").ShouldBe(false);
-#else
-            task.StartInfo.EnvironmentVariables.ContainsKey("a").ShouldBe(false);
-#endif
         }
 
         [Fact]
@@ -855,6 +824,214 @@ namespace Microsoft.Build.UnitTests
             {
                 return $"echo łoł > {OutputPath}";
             }
+        }
+
+        /// <summary>
+        /// Verifies the validation of the <see cref="ToolTask.TaskProcessTerminationTimeout" />.
+        /// </summary>
+        /// <param name="timeout">New value for <see cref="ToolTask.TaskProcessTerminationTimeout" />.</param>
+        /// <param name="isInvalidValid">Is a task expected to be valid or not.</param>
+        [Theory]
+        [InlineData(int.MaxValue, false)]
+        [InlineData(97, false)]
+        [InlineData(0, false)]
+        [InlineData(-1, false)]
+        [InlineData(-2, true)]
+        [InlineData(-101, true)]
+        [InlineData(int.MinValue, true)]
+        public void SetsTerminationTimeoutCorrectly(int timeout, bool isInvalidValid)
+        {
+            using var env = TestEnvironment.Create(_output);
+
+            // Task under test:
+            var task = new ToolTaskSetsTerminationTimeout
+            {
+                BuildEngine = new MockEngine()
+            };
+
+            task.TerminationTimeout = timeout;
+            task.ValidateParameters().ShouldBe(!isInvalidValid);
+            task.TerminationTimeout.ShouldBe(timeout);
+        }
+		
+		/// <summary>
+        /// Verifies that a ToolTask instance can return correct results when executed multiple times with timeout.
+        /// </summary>
+        /// <param name="repeats">Specifies the number of repeats for external command execution.</param>
+        /// <param name="initialDelay">Delay to generate on the first execution in milliseconds.</param>
+        /// <param name="followupDelay">Delay to generate on follow-up execution in milliseconds.</param>
+        /// <param name="timeout">Task timeout in milliseconds.</param>
+        /// <remarks>
+        /// These tests execute the same task instance multiple times, which will in turn run a shell command to sleep
+        /// predefined amount of time. The first execution may time out, but all following ones won't. It is expected
+        /// that all following executions return success.
+        /// </remarks>
+        [Theory]
+        [InlineData(1, 1, 1, -1)] // Normal case, no repeat.
+        [InlineData(3, 1, 1, -1)] // Repeat without timeout.
+        [InlineData(3, 10000, 1, 1000)] // Repeat with timeout.
+        public void ToolTaskThatTimeoutAndRetry(int repeats, int initialDelay, int followupDelay, int timeout)
+        {
+            using var env = TestEnvironment.Create(_output);
+
+            MockEngine engine = new();
+
+            // Task under test:
+            var task = new ToolTaskThatSleeps
+            {
+                BuildEngine = engine,
+                InitialDelay = initialDelay,
+                FollowupDelay = followupDelay,
+                Timeout = timeout
+            };
+
+            // Execute the same task instance multiple times. The index is one-based.
+            bool result;
+            for (int i = 1; i <= repeats; i++)
+            {
+                // Execute the task:
+                result = task.Execute();
+
+                _output.WriteLine(engine.Log);
+
+                task.RepeatCount.ShouldBe(i);
+
+                // The first execution may fail (timeout), but all following ones should succeed:
+                if (i > 1)
+                {
+                    result.ShouldBeTrue();
+                    task.ExitCode.ShouldBe(0);
+                }
+            }
+        }
+
+        /// <summary>
+        /// A simple implementation of <see cref="ToolTask"/> to sleep for a while.
+        /// </summary>
+        /// <remarks>
+        /// This task runs shell command to sleep for predefined, variable amount of time based on how many times the
+        /// instance has been executed.
+        /// </remarks>
+        private sealed class ToolTaskThatSleeps : ToolTask
+        {
+            // Windows prompt command to sleep:
+            private readonly string _windowsSleep = "/c start /wait timeout {0}";
+
+            // UNIX command to sleep:
+            private readonly string _unixSleep = "-c \"sleep {0}\"";
+
+            // Full path to shell:
+            private readonly string _pathToShell;
+
+            public ToolTaskThatSleeps()
+                : base()
+            {
+                // Determines shell to use: cmd for Windows, sh for UNIX-like systems:
+                _pathToShell = NativeMethodsShared.IsUnixLike ? "/bin/sh" : "cmd.exe";
+            }
+
+            /// <summary>
+            /// Gets or sets the delay for the first execution.
+            /// </summary>
+            /// <remarks>
+            /// Defaults to 10 seconds.
+            /// </remarks>
+            public Int32 InitialDelay { get; set; } = 10000;
+
+            /// <summary>
+            /// Gets or sets the delay for the follow-up executions.
+            /// </summary>
+            /// <remarks>
+            /// Defaults to 1 milliseconds.
+            /// </remarks>
+            public Int32 FollowupDelay { get; set; } = 1;
+
+            /// <summary>
+            /// Int32 output parameter for the repeat counter for test purpose.
+            /// </summary>
+            [Output]
+            public Int32 RepeatCount { get; private set; } = 0;
+
+            /// <summary>
+            /// Gets the tool name (shell).
+            /// </summary>
+            protected override string ToolName => Path.GetFileName(_pathToShell);
+
+            /// <summary>
+            /// Gets the full path to shell.
+            /// </summary>
+            protected override string GenerateFullPathToTool() => _pathToShell;
+
+            /// <summary>
+            /// Generates a shell command to sleep different amount of time based on repeat counter.
+            /// </summary>
+            protected override string GenerateCommandLineCommands() =>
+                NativeMethodsShared.IsUnixLike ?
+                string.Format(_unixSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0) :
+                string.Format(_windowsSleep, RepeatCount < 2 ? InitialDelay / 1000.0 : FollowupDelay / 1000.0);
+
+            /// <summary>
+            /// Ensures that test parameters make sense.
+            /// </summary>
+            protected internal override bool ValidateParameters() =>
+                (InitialDelay > 0) && (FollowupDelay > 0) && base.ValidateParameters();
+
+            /// <summary>
+            /// Runs shell command to sleep for a while.
+            /// </summary>
+            /// <returns>
+            /// true if the task runs successfully; false otherwise.
+            /// </returns>
+            public override bool Execute()
+            {
+                RepeatCount++;
+                return base.Execute();
+            }
+        }
+
+        /// <summary>
+        /// A simple implementation of <see cref="ToolTask"/> to excercise <see cref="ToolTask.TaskProcessTerminationTimeout" />.
+        /// </summary>
+        private sealed class ToolTaskSetsTerminationTimeout : ToolTask
+        {
+            public ToolTaskSetsTerminationTimeout()
+                : base()
+            {
+                base.TaskResources = AssemblyResources.PrimaryResources;
+            }
+
+            /// <summary>
+            /// Gets or sets <see cref="ToolTask.TaskProcessTerminationTimeout" />.
+            /// </summary>
+            /// <remarks>
+            /// This is just a proxy property to access <see cref="ToolTask.TaskProcessTerminationTimeout" />.
+            /// </remarks>
+            public int TerminationTimeout
+            {
+                get => TaskProcessTerminationTimeout;
+                set => TaskProcessTerminationTimeout = value;
+            }
+
+            /// <summary>
+            /// Gets the tool name (dummy).
+            /// </summary>
+            protected override string ToolName => string.Empty;
+
+            /// <summary>
+            /// Gets the full path to tool (dummy).
+            /// </summary>
+            protected override string GenerateFullPathToTool() => string.Empty;
+
+            /// <summary>
+            /// Does nothing.
+            /// </summary>
+            /// <returns>
+            /// Always returns true.
+            /// </returns>
+            /// <remarks>
+            /// This dummy tool task is not meant to run anything.
+            /// </remarks>
+            public override bool Execute() => true;
         }
     }
 }

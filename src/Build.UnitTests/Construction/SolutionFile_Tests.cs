@@ -1,16 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Construction;
-using Microsoft.Build.Exceptions;
-using Microsoft.Build.Shared;
-using Shouldly;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Shared;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Construction
 {
@@ -24,70 +26,6 @@ namespace Microsoft.Build.UnitTests.Construction
         }
 
         /// <summary>
-        /// Test that a solution filter file is parsed correctly, and it can accurately respond as to whether a project should be filtered out.
-        /// </summary>
-        [Fact]
-        public void ParseSolutionFilter()
-        {
-            using (TestEnvironment testEnvironment = TestEnvironment.Create())
-            {
-                TransientTestFolder folder = testEnvironment.CreateFolder(createFolder: true);
-                TransientTestFolder src = testEnvironment.CreateFolder(Path.Combine(folder.Path, "src"), createFolder: true);
-                TransientTestFile microsoftBuild = testEnvironment.CreateFile(src, "Microsoft.Build.csproj");
-                TransientTestFile msbuild = testEnvironment.CreateFile(src, "MSBuild.csproj");
-                TransientTestFile commandLineUnitTests = testEnvironment.CreateFile(src, "Microsoft.Build.CommandLine.UnitTests.csproj");
-                TransientTestFile tasksUnitTests = testEnvironment.CreateFile(src, "Microsoft.Build.Tasks.UnitTests.csproj");
-                // The important part of this .sln is that it has references to each of the four projects we just created.
-                TransientTestFile sln = testEnvironment.CreateFile(folder, "Microsoft.Build.Dev.sln",
-                    @"
-                    Microsoft Visual Studio Solution File, Format Version 12.00
-                    # Visual Studio 15
-                    VisualStudioVersion = 15.0.27004.2009
-                    MinimumVisualStudioVersion = 10.0.40219.1
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Microsoft.Build"", """ + Path.Combine("src", Path.GetFileName(microsoftBuild.Path)) + @""", ""{69BE05E2-CBDA-4D27-9733-44E12B0F5627}""
-                    EndProject
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""MSBuild"", """ + Path.Combine("src", Path.GetFileName(msbuild.Path)) + @""", ""{6F92CA55-1D15-4F34-B1FE-56C0B7EB455E}""
-                    EndProject
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Microsoft.Build.CommandLine.UnitTests"", """ + Path.Combine("src", Path.GetFileName(commandLineUnitTests.Path)) + @""", ""{0ADDBC02-0076-4159-B351-2BF33FAA46B2}""
-                    EndProject
-                    Project(""{9A19103F-16F7-4668-BE54-9A1E7A4F7556}"") = ""Microsoft.Build.Tasks.UnitTests"", """ + Path.Combine("src", Path.GetFileName(tasksUnitTests.Path)) + @""", ""{CF999BDE-02B3-431B-95E6-E88D621D9CBF}""
-                    EndProject
-                    Global
-                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
-                        EndGlobalSection
-                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
-                    EndGlobalSection
-                    GlobalSection(SolutionProperties) = preSolution
-                        HideSolutionNode = FALSE
-                    EndGlobalSection
-                    GlobalSection(ExtensibilityGlobals) = postSolution
-                    EndGlobalSection
-                    EndGlobal
-                    ");
-                TransientTestFile slnf = testEnvironment.CreateFile(folder, "Dev.slnf",
-                    @"
-                    {
-                      ""solution"": {
-                        ""path"": """ + sln.Path.Replace("\\", "\\\\") + @""",
-                        ""projects"": [
-                          """ + Path.Combine("src", Path.GetFileName(microsoftBuild.Path)!).Replace("\\", "\\\\") + @""",
-                          """ + Path.Combine("src", Path.GetFileName(tasksUnitTests.Path)!).Replace("\\", "\\\\") + @"""
-                        ]
-                        }
-                    }");
-                SolutionFile sp = SolutionFile.Parse(slnf.Path);
-                sp.ProjectShouldBuild(Path.Combine("src", Path.GetFileName(microsoftBuild.Path)!)).ShouldBeTrue();
-                sp.ProjectShouldBuild(Path.Combine("src", Path.GetFileName(tasksUnitTests.Path)!)).ShouldBeTrue();
-
-                
-                (sp.ProjectShouldBuild(Path.Combine("src", Path.GetFileName(commandLineUnitTests.Path)!))
-                 || sp.ProjectShouldBuild(Path.Combine("src", Path.GetFileName(msbuild.Path)!))
-                 || sp.ProjectShouldBuild(Path.Combine("src", "notAProject.csproj")))
-                    .ShouldBeFalse();
-            }
-        }
-
-        /// <summary>
         /// Test just the most basic, plain vanilla first project line.
         /// </summary>
         [Fact]
@@ -97,11 +35,9 @@ namespace Microsoft.Build.UnitTests.Construction
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
-            p.ParseFirstProjectLine
-            (
+            p.ParseFirstProjectLine(
                 "Project(\"{Project GUID}\") = \"Project name\", \"Relative path to project file\", \"Unique name-GUID\"",
-                 proj
-            );
+                 proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("Project name");
             proj.RelativePath.ShouldBe("Relative path to project file");
@@ -113,7 +49,6 @@ namespace Microsoft.Build.UnitTests.Construction
         /// extension of vcproj is seen as invalid.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void ParseFirstProjectLine_VC()
@@ -124,11 +59,9 @@ namespace Microsoft.Build.UnitTests.Construction
                 p.FullPath = "c:\\foo.sln";
                 ProjectInSolution proj = new ProjectInSolution(p);
 
-                p.ParseFirstProjectLine
-                (
+                p.ParseFirstProjectLine(
                     "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"Project name.vcproj\", \"Relative path\\to\\Project name.vcproj\", \"Unique name-GUID\"",
-                     proj
-                );
+                     proj);
             });
         }
         /// <summary>
@@ -143,11 +76,9 @@ namespace Microsoft.Build.UnitTests.Construction
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
-            p.ParseFirstProjectLine
-            (
+            p.ParseFirstProjectLine(
                 "Project(\"{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}\") = \"Project name.myvctype\", \"Relative path\\to\\Project name.myvctype\", \"Unique name-GUID\"",
-                 proj
-            );
+                 proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.KnownToBeMSBuildFormat);
             proj.ProjectName.ShouldBe("Project name.myvctype");
             proj.RelativePath.ShouldBe("Relative path\\to\\Project name.myvctype");
@@ -164,11 +95,9 @@ namespace Microsoft.Build.UnitTests.Construction
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
-            p.ParseFirstProjectLine
-            (
+            p.ParseFirstProjectLine(
                 "Project(\" {Project GUID} \")  = \" Project name \",  \" Relative path to project file \"    , \" Unique name-GUID \"",
-                 proj
-            );
+                 proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("Project name");
             proj.RelativePath.ShouldBe("Relative path to project file");
@@ -186,11 +115,9 @@ namespace Microsoft.Build.UnitTests.Construction
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
-            p.ParseFirstProjectLine
-            (
+            p.ParseFirstProjectLine(
                 "Project(\"{Project GUID}\") = \"\", \"src\\.proj\", \"Unique name-GUID\"",
-                 proj
-            );
+                 proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldStartWith("EmptyProjectName");
             proj.RelativePath.ShouldBe("src\\.proj");
@@ -203,7 +130,7 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void ParseEtpProject()
         {
-            string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
+            string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
             try
             {
                 // Create the first .etp project file
@@ -237,7 +164,7 @@ namespace Microsoft.Build.UnitTests.Construction
                             EndProjectSection
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
-                //Project should get added to the solution
+                // Project should get added to the solution
                 solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"someproj.etp");
                 solution.ProjectsInOrder[1].RelativePath.ShouldBe(@"ClassLibrary2.csproj");
             }
@@ -254,8 +181,8 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void CanBeMSBuildFile()
         {
-            string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
-            string proj2Path = Path.Combine(Path.GetTempPath(), "someproja.proj");
+            string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
+            string proj2Path = Path.Combine(FileUtilities.TempFileDirectory, "someproja.proj");
             try
             {
                 // Create the first .etp project file
@@ -355,7 +282,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 string solutionFileContents =
                     @"
                     Microsoft Visual Studio Solution File, Format Version 8.00
-                        Project('{F14B399A-7131-4C87-9E4B-1186C45EF12D}') = 'PrtProj', '" + Path.GetFileName(rptprojPath) + @"', '{CCCCCCCC-9925-4D57-9DAF-E0A9D936ABDB}'
+                        Project('{F14B399A-7131-4C87-9E4B-1186C45EF12D}') = 'RptProj', '" + Path.GetFileName(rptprojPath) + @"', '{CCCCCCCC-9925-4D57-9DAF-E0A9D936ABDB}'
                             ProjectSection(ProjectDependencies) = postProject
                             EndProjectSection
                         EndProject
@@ -379,8 +306,8 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void ParseNestedEtpProjectSingleLevel()
         {
-            string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
-            string proj2Path = Path.Combine(Path.GetTempPath(), "someproj2.etp");
+            string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
+            string proj2Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj2.etp");
             try
             {
                 // Create the first .etp project file
@@ -427,7 +354,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
-                //Project should get added to the solution
+                // Project should get added to the solution
                 solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"someproj.etp");
                 solution.ProjectsInOrder[1].RelativePath.ShouldBe(@"someproj2.etp");
                 solution.ProjectsInOrder[2].RelativePath.ShouldBe(@"ClassLibrary1.csproj");
@@ -570,14 +497,13 @@ namespace Microsoft.Build.UnitTests.Construction
         /// Test ParseEtpProject function.
         /// </summary>
         [Fact]
-        [Trait("Category", "mono-osx-failing")]
         [Trait("Category", "netcore-osx-failing")]
         [Trait("Category", "netcore-linux-failing")]
         public void ParseNestedEtpProjectMultipleLevel()
         {
-            string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
-            string proj2Path = Path.Combine(Path.GetTempPath(), "someproj2.etp");
-            string proj3Path = Path.Combine(Path.GetTempPath(), "ETPProjUpgradeTest", "someproj3.etp");
+            string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
+            string proj2Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj2.etp");
+            string proj3Path = Path.Combine(FileUtilities.TempFileDirectory, "ETPProjUpgradeTest", "someproj3.etp");
             try
             {
                 // Create the first .etp project file
@@ -628,8 +554,9 @@ namespace Microsoft.Build.UnitTests.Construction
                         </References>
                     </GENERAL>
                 </EFPROJECT>";
-                //Create the directory for the third project
-                Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), "ETPProjUpgradeTest"));
+
+                // Create the directory for the third project
+                Directory.CreateDirectory(Path.Combine(FileUtilities.TempFileDirectory, "ETPProjUpgradeTest"));
                 File.WriteAllText(proj3Path, etpProjContent);
 
                 // Create the SolutionFile object
@@ -642,7 +569,7 @@ namespace Microsoft.Build.UnitTests.Construction
                         EndProject";
                 SolutionFile solution = ParseSolutionHelper(solutionFileContents);
 
-                //Project should get added to the solution
+                // Project should get added to the solution
                 solution.ProjectsInOrder[0].RelativePath.ShouldBe(@"someproj.etp");
                 solution.ProjectsInOrder[1].RelativePath.ShouldBe(@"someproj2.etp");
                 solution.ProjectsInOrder[2].RelativePath.ShouldBe(@"ETPProjUpgradeTest\someproj3.etp");
@@ -664,7 +591,7 @@ namespace Microsoft.Build.UnitTests.Construction
         [Fact]
         public void MalformedEtpProjFile()
         {
-            string proj1Path = Path.Combine(Path.GetTempPath(), "someproj.etp");
+            string proj1Path = Path.Combine(FileUtilities.TempFileDirectory, "someproj.etp");
             try
             {
                 // Create the .etp project file
@@ -751,11 +678,9 @@ namespace Microsoft.Build.UnitTests.Construction
             p.FullPath = NativeMethodsShared.IsWindows ? "c:\\foo.sln" : "/foo.sln";
             ProjectInSolution proj = new ProjectInSolution(p);
 
-            p.ParseFirstProjectLine
-            (
+            p.ParseFirstProjectLine(
                 "Project(\"{Project GUID}\")  = \"MyProject,(=IsGreat)\",  \"Relative path to project file\"    , \"Unique name-GUID\"",
-                 proj
-            );
+                 proj);
             proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
             proj.ProjectName.ShouldBe("MyProject,(=IsGreat)");
             proj.RelativePath.ShouldBe("Relative path to project file");
@@ -779,11 +704,9 @@ namespace Microsoft.Build.UnitTests.Construction
                 p.SolutionFileDirectory = Path.GetFullPath(solutionFolder.Path);
                 ProjectInSolution proj = new ProjectInSolution(p);
 
-                p.ParseFirstProjectLine
-                (
+                p.ParseFirstProjectLine(
                     "Project(\"{Project GUID}\")  = \"ProjectInSubdirectory\",  \"RelativePath\\project file\"    , \"Unique name-GUID\"",
-                    proj
-                );
+                    proj);
                 proj.ProjectType.ShouldBe(SolutionProjectType.Unknown);
                 proj.ProjectName.ShouldBe("ProjectInSubdirectory");
                 proj.RelativePath.ShouldBe(Path.Combine("RelativePath", "project file"));
@@ -797,7 +720,7 @@ namespace Microsoft.Build.UnitTests.Construction
         /// </summary>
         /// <param name="solutionFileContents"></param>
         /// <returns></returns>
-        static internal SolutionFile ParseSolutionHelper(string solutionFileContents)
+        internal static SolutionFile ParseSolutionHelper(string solutionFileContents)
         {
             solutionFileContents = solutionFileContents.Replace('\'', '"');
             StreamReader sr = StreamHelpers.StringToStreamReader(solutionFileContents);
@@ -844,8 +767,7 @@ namespace Microsoft.Build.UnitTests.Construction
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Ensure that an unsupported version greater than the current maximum (10) in the .SLN file results in a
@@ -1797,8 +1719,7 @@ EndGlobal
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test some invalid cases for solution configuration parsing
@@ -1824,8 +1745,7 @@ EndGlobal
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
         /// <summary>
         /// Test some invalid cases for solution configuration parsing
@@ -1851,8 +1771,7 @@ EndGlobal
                 ";
 
                 ParseSolutionHelper(solutionFileContents);
-            }
-           );
+            });
         }
 
         /// <summary>

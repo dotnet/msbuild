@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -37,14 +39,12 @@ namespace Microsoft.Build.Framework
         /// <param name="projectFile">project file</param>
         /// <param name="taskFile">file in which the task is defined</param>
         /// <param name="taskName">task name</param>
-        public TaskStartedEventArgs
-        (
+        public TaskStartedEventArgs(
             string message,
             string helpKeyword,
             string projectFile,
             string taskFile,
-            string taskName
-        )
+            string taskName)
             : this(message, helpKeyword, projectFile, taskFile, taskName, DateTime.UtcNow)
         {
         }
@@ -59,15 +59,13 @@ namespace Microsoft.Build.Framework
         /// <param name="taskFile">file in which the task is defined</param>
         /// <param name="taskName">task name</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
-        public TaskStartedEventArgs
-        (
+        public TaskStartedEventArgs(
             string message,
             string helpKeyword,
             string projectFile,
             string taskFile,
             string taskName,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
             this.taskName = taskName;
@@ -91,6 +89,8 @@ namespace Microsoft.Build.Framework
             writer.WriteOptionalString(taskName);
             writer.WriteOptionalString(projectFile);
             writer.WriteOptionalString(taskFile);
+            writer.Write7BitEncodedInt(LineNumber);
+            writer.Write7BitEncodedInt(ColumnNumber);
         }
 
         /// <summary>
@@ -105,6 +105,8 @@ namespace Microsoft.Build.Framework
             taskName = reader.ReadByte() == 0 ? null : reader.ReadString();
             projectFile = reader.ReadByte() == 0 ? null : reader.ReadString();
             taskFile = reader.ReadByte() == 0 ? null : reader.ReadString();
+            LineNumber = reader.Read7BitEncodedInt();
+            ColumnNumber = reader.Read7BitEncodedInt();
         }
         #endregion
 
@@ -123,19 +125,23 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public string TaskFile => taskFile;
 
+        /// <summary>
+        /// Line number of the task invocation in the project file
+        /// </summary>
+        public int LineNumber { get; internal set; }
+
+        /// <summary>
+        /// Column number of the task invocation in the project file
+        /// </summary>
+        public int ColumnNumber { get; internal set; }
+
         public override string Message
         {
             get
             {
                 if (RawMessage == null)
                 {
-                    lock (locker)
-                    {
-                        if (RawMessage == null)
-                        {
-                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskStarted", TaskName);
-                        }
-                    }
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword("TaskStarted", TaskName);
                 }
 
                 return RawMessage;

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Globalization;
@@ -9,6 +9,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
 using Microsoft.Build.Utilities;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks
 {
     /// <summary>
@@ -16,8 +18,19 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public abstract class GenerateManifestBase : Task
     {
-        private enum AssemblyType { Unspecified, Managed, Native, Satellite };
-        private enum DependencyType { Install, Prerequisite };
+        private enum AssemblyType
+        {
+            Unspecified,
+            Managed,
+            Native,
+            Satellite,
+        }
+
+        private enum DependencyType
+        {
+            Install,
+            Prerequisite,
+        }
 
         private string _processorArchitecture;
         private int _startTime;
@@ -235,9 +248,8 @@ namespace Microsoft.Build.Tasks
             }
 
             // Fixup for non-ClickOnce case...
-            if (_manifest is ApplicationManifest)
+            if (_manifest is ApplicationManifest applicationManifest)
             {
-                var applicationManifest = _manifest as ApplicationManifest;
                 if (!applicationManifest.IsClickOnceManifest)
                 {
                     // Don't need publicKeyToken attribute for non-ClickOnce case
@@ -260,6 +272,12 @@ namespace Microsoft.Build.Tasks
 
         public override bool Execute()
         {
+            if (!NativeMethodsShared.IsWindows)
+            {
+                Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GenerateManifestBase));
+                return false;
+            }
+
             bool success = true;
 
             Type manifestType = GetObjectType();

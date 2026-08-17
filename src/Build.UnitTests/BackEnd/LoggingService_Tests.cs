@@ -1,23 +1,25 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
-using Microsoft.Build.Framework;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.BackEnd;
-using Microsoft.Build.Logging;
-using Microsoft.Build.Evaluation;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Exceptions;
-using Microsoft.Build.Shared;
-using Microsoft.Build.UnitTests.BackEnd;
-using System.Threading;
-using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation;
+using Microsoft.Build.Exceptions;
+using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Logging;
+using Microsoft.Build.Shared;
+using Microsoft.Build.UnitTests.BackEnd;
 using Shouldly;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.Logging
 {
@@ -116,8 +118,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 IBuildComponent logServiceComponent = (IBuildComponent)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 logServiceComponent.InitializeComponent(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify an exception is thrown if in initialized is called after the service has been shutdown
@@ -129,8 +130,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 _initializedService.ShutdownComponent();
                 _initializedService.InitializeComponent(new MockHost());
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify the correct exceptions are thrown if the loggers crash
@@ -190,8 +190,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 _initializedService.ShutdownComponent();
                 _initializedService.ShutdownComponent();
-            }
-           );
+            });
         }
         #endregion
 
@@ -205,8 +204,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 _initializedService.RegisterLogger(null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify we get an exception when we try and register a logger
@@ -220,8 +218,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 _initializedService.ShutdownComponent();
                 RegularILogger regularILogger = new RegularILogger();
                 _initializedService.RegisterLogger(regularILogger);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify a logger exception when initializing a logger is rethrown
@@ -234,8 +231,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 LoggerThrowException exceptionLogger = new LoggerThrowException(false, true, new LoggerException());
                 _initializedService.RegisterLogger(exceptionLogger);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify a general exception when initializing a logger is wrapped
@@ -248,8 +244,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 LoggerThrowException exceptionLogger = new LoggerThrowException(false, true, new Exception());
                 _initializedService.RegisterLogger(exceptionLogger);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -262,8 +257,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 LoggerThrowException exceptionLogger = new LoggerThrowException(false, true, new StackOverflowException());
                 _initializedService.RegisterLogger(exceptionLogger);
-            }
-           );
+            });
         }
 
         /// <summary>
@@ -325,8 +319,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 _initializedService.RegisterDistributedLogger(null, null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify we get an exception when we try and register a distributed logger
@@ -345,8 +338,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 LoggerDescription description = CreateLoggerDescription(className, typeof(ProjectCollection).GetTypeInfo().Assembly.FullName, true);
 #endif
                 _initializedService.RegisterDistributedLogger(null, description);
-            }
-           );
+            });
         }
         /// <summary>
         /// Register both a good central logger and a good forwarding logger
@@ -510,8 +502,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 _initializedService.InitializeNodeLoggers(null, new EventSourceSink(), 3);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify we get an exception when an empty description collection is passed in
@@ -522,8 +513,7 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Throws<InternalErrorException>(() =>
             {
                 _initializedService.InitializeNodeLoggers(new List<LoggerDescription>(), new EventSourceSink(), 3);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify we get an exception when we try and register a description and the component has already shutdown
@@ -543,8 +533,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 List<LoggerDescription> tempList = new List<LoggerDescription>();
                 tempList.Add(description);
                 _initializedService.InitializeNodeLoggers(tempList, new EventSourceSink(), 2);
-            }
-           );
+            });
         }
         /// <summary>
         /// Register both a good central logger and a good forwarding logger
@@ -665,6 +654,11 @@ namespace Microsoft.Build.UnitTests.Logging
             Assert.Equal(1, loggingService.MaxCPUCount);
             loggingService.MaxCPUCount = 5;
             Assert.Equal(5, loggingService.MaxCPUCount);
+
+            // Test MinimumRequiredMessageImportance
+            Assert.Equal(MessageImportance.Low, loggingService.MinimumRequiredMessageImportance);
+            loggingService.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Normal));
+            Assert.Equal(MessageImportance.Normal, loggingService.MinimumRequiredMessageImportance);
         }
 
         #endregion
@@ -680,8 +674,7 @@ namespace Microsoft.Build.UnitTests.Logging
             {
                 LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 loggingService.PacketReceived(1, null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify when a non logging packet is received.
@@ -695,8 +688,7 @@ namespace Microsoft.Build.UnitTests.Logging
                 LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
                 NonLoggingPacket packet = new NonLoggingPacket();
                 loggingService.PacketReceived(1, packet);
-            }
-           );
+            });
         }
         /// <summary>
         /// Verify when a logging packet is received the build event is
@@ -717,6 +709,8 @@ namespace Microsoft.Build.UnitTests.Logging
         }
 
         #endregion
+
+        #region WarningsAsErrors Tests
 
         private static readonly BuildWarningEventArgs BuildWarningEventForTreatAsErrorOrMessageTests = new BuildWarningEventArgs("subcategory", "C94A41A90FFB4EF592BF98BA59BEE8AF", "file", 1, 2, 3, 4, "message", "helpKeyword", "senderName");
 
@@ -790,6 +784,18 @@ namespace Microsoft.Build.UnitTests.Logging
             MockLogger logger = GetLoggedEventsWithWarningsAsErrorsOrMessages(BuildWarningEventForTreatAsErrorOrMessageTests, (LoggerMode)loggerMode, nodeId, warningsAsErrors);
 
             logger.Errors.ShouldHaveSingleItem();
+        }
+
+        [Fact]
+        public void VerifyWarningsPromotedToErrorsAreCounted()
+        {
+            ILoggingService ls = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            ls.WarningsAsErrors = new HashSet<string>();
+            ls.WarningsAsErrors.Add("FOR123");
+            BuildWarningEventArgs warningArgs = new("abc", "FOR123", "", 0, 0, 0, 0, "warning message", "keyword", "sender");
+            warningArgs.BuildEventContext = new BuildEventContext(1, 2, BuildEventContext.InvalidProjectContextId, BuildEventContext.InvalidProjectContextId, 5, 6);
+            ls.LogBuildEvent(warningArgs);
+            ls.HasBuildSubmissionLoggedErrors(1).ShouldBeTrue();
         }
 
         /// <summary>
@@ -1000,6 +1006,76 @@ namespace Microsoft.Build.UnitTests.Logging
             return logger;
         }
 
+        #endregion
+
+        #region MinimumRequiredMessageImportance Tests
+
+        [Fact]
+        public void ImportanceReflectsConsoleLoggerVerbosity()
+        {
+            _initializedService.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Quiet));
+            _initializedService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.High - 1);
+            _initializedService.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Minimal));
+            _initializedService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.High);
+            _initializedService.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Normal));
+            _initializedService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.Normal);
+            _initializedService.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Detailed));
+            _initializedService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.Low);
+            _initializedService.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Diagnostic));
+            _initializedService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.Low);
+        }
+
+        [Fact]
+        public void ImportanceReflectsConfigurableForwardingLoggerVerbosity()
+        {
+            _initializedService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Quiet));
+            _initializedService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.High - 1);
+            _initializedService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Minimal));
+            _initializedService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.High);
+            _initializedService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Normal));
+            _initializedService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.Normal);
+            _initializedService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Detailed));
+            _initializedService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.Low);
+            _initializedService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Diagnostic));
+            _initializedService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.Low);
+        }
+
+        [Fact]
+        public void ImportanceReflectsCentralForwardingLoggerVerbosity()
+        {
+            MockHost mockHost = new MockHost();
+            ILoggingService node1LoggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 1);
+            ((IBuildComponent)node1LoggingService).InitializeComponent(mockHost);
+            ILoggingService node2LoggingService = LoggingService.CreateLoggingService(LoggerMode.Synchronous, 2);
+            ((IBuildComponent)node2LoggingService).InitializeComponent(mockHost);
+
+            // CentralForwardingLogger is always registered in in-proc nodes and it does not affect minimum importance.
+            node1LoggingService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Minimal));
+            node1LoggingService.RegisterLogger(new CentralForwardingLogger());
+            node1LoggingService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.High);
+
+            // CentralForwardingLogger in out-of-proc nodes means that we are forwarding everything and the minimum importance
+            // is Low regardless of what other loggers are registered.
+            node2LoggingService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Minimal));
+            node2LoggingService.RegisterLogger(new CentralForwardingLogger());
+            node2LoggingService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.Low);
+            // Register another ConsoleLogger and verify that minimum importance hasn't changed.
+            node2LoggingService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Minimal));
+            node2LoggingService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.Low);
+        }
+
+        [Fact]
+        public void ImportanceReflectsUnknownLoggerVerbosity()
+        {
+            // Minimum message importance is Low (i.e. we're logging everything) even when all registered loggers have
+            // Normal verbosity if at least of one them is not on our allowlist.
+            _initializedService.RegisterLogger(new ConsoleLogger(LoggerVerbosity.Normal));
+            _initializedService.RegisterLogger(new MockLogger() { Verbosity = LoggerVerbosity.Normal });
+            _initializedService.RegisterLogger(CreateConfigurableForwardingLogger(LoggerVerbosity.Normal));
+            _initializedService.MinimumRequiredMessageImportance.ShouldBe(MessageImportance.Low);
+        }
+        #endregion
+
         #region PrivateMethods
 
         /// <summary>
@@ -1074,15 +1150,24 @@ namespace Microsoft.Build.UnitTests.Logging
                 eventsToForward = "BuildStartedEvent;BuildFinishedEvent;ProjectStartedEvent;ProjectFinishedEvent;TargetStartedEvent;TargetFinishedEvent;TaskStartedEvent;TaskFinishedEvent;ErrorEvent;WarningEvent;HighMessageEvent;NormalMessageEvent;LowMessageEvent;CustomEvent;CommandLine";
             }
 
-            LoggerDescription centralLoggerDescrption = new LoggerDescription
-                                                                             (
+            LoggerDescription centralLoggerDescrption = new LoggerDescription(
                                                                               loggerClassName,
                                                                               loggerAssemblyName,
                                                                               null /*Not needed as we are loading from current assembly*/,
                                                                               eventsToForward,
-                                                                              LoggerVerbosity.Diagnostic /*Not used, but the spirit of the logger is to forward everything so this is the most appropriate verbosity */
-                                                                             );
+                                                                              LoggerVerbosity.Diagnostic); /*Not used, but the spirit of the logger is to forward everything so this is the most appropriate verbosity */
             return centralLoggerDescrption;
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="ConfigurableForwardingLogger"/> with the given verbosity.
+        /// </summary>
+        private ConfigurableForwardingLogger CreateConfigurableForwardingLogger(LoggerVerbosity verbosity)
+        {
+            return new ConfigurableForwardingLogger()
+            {
+                Verbosity = verbosity
+            };
         }
         #endregion
 
@@ -1416,7 +1501,7 @@ namespace Microsoft.Build.UnitTests.Logging
         /// <summary>
         ///  Create a non logging packet to test the packet handling code
         /// </summary>
-        internal class NonLoggingPacket : INodePacket
+        internal sealed class NonLoggingPacket : INodePacket
         {
             #region Members
 

@@ -1,15 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
-
+using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
 using Xunit;
+using Xunit.NetCore.Extensions;
 
 
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -28,14 +31,10 @@ namespace Microsoft.Build.UnitTests
         /// Verify that getProcAddress works, bug previously was due to a bug in the attributes used to pinvoke the method
         /// when that bug was in play this test would fail.
         /// </summary>
-        [Fact]
+        [WindowsOnlyFact("No Kernel32.dll except on Windows.")]
+        [SupportedOSPlatform("windows")] // bypass CA1416: Validate platform compatibility
         public void TestGetProcAddress()
         {
-            if (!NativeMethodsShared.IsWindows)
-            {
-                return; // "No Kernel32.dll except on Windows"
-            }
-
             IntPtr kernel32Dll = NativeMethodsShared.LoadLibrary("kernel32.dll");
             try
             {
@@ -52,11 +51,11 @@ namespace Microsoft.Build.UnitTests
                 // Make sure the pointer passed back for the method is not null
                 Assert.NotEqual(processHandle, NativeMethodsShared.NullIntPtr);
 
-                //Actually call the method
+                // Actually call the method
                 GetProcessIdDelegate processIdDelegate = Marshal.GetDelegateForFunctionPointer<GetProcessIdDelegate>(processHandle);
                 uint processId = processIdDelegate();
 
-                //Make sure the return value is the same as retrieved from the .net methods to make sure everything works
+                // Make sure the return value is the same as retrieved from the .net methods to make sure everything works
                 Assert.Equal((uint)Process.GetCurrentProcess().Id, processId); // "Expected the .net processId to match the one from GetCurrentProcessId"
             }
             finally
@@ -75,9 +74,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void GetLastWriteFileUtcTimeReturnsMinValueForMissingFile()
         {
-            string nonexistentFile = FileUtilities.GetTemporaryFile();
-            // Make sure that the file does not, in fact, exist.
-            File.Delete(nonexistentFile);
+            string nonexistentFile = FileUtilities.GetTemporaryFileName();
 
             DateTime nonexistentFileTime = NativeMethodsShared.GetLastWriteFileUtcTime(nonexistentFile);
             Assert.Equal(DateTime.MinValue, nonexistentFileTime);

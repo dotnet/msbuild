@@ -1,12 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Reflection;
+using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
-using Microsoft.Build.Shared;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -16,14 +18,14 @@ namespace Microsoft.Build.UnitTests
      * Test the Csc task in various ways.
      *
      */
-    sealed internal class CommandLine
+    internal sealed class CommandLine
     {
         /// <summary>
         /// Invokes the ValidateParameters on the given ToolTask instance. We need to use reflection since
         /// ValidateParameters is inaccessible to Tasks unit tests.
         /// </summary>
         /// <returns></returns>
-        static internal bool CallValidateParameters(ToolTask task)
+        internal static bool CallValidateParameters(ToolTask task)
         {
             MethodInfo validateMethod = typeof(ToolTask).GetMethod("ValidateParameters", BindingFlags.Instance | BindingFlags.NonPublic);
             return (bool)validateMethod.Invoke(task, null);
@@ -66,9 +68,13 @@ namespace Microsoft.Build.UnitTests
             CommandLineBuilderExtension b = new CommandLineBuilderExtension();
 
             if (useResponseFile)
+            {
                 t.AddResponseFileCommands(b);
+            }
             else
+            {
                 t.AddCommandLineCommands(b);
+            }
 
             string cl = b.ToString();
             string msg = String.Format("Command-line = [{0}]\r\n", cl);
@@ -142,15 +148,18 @@ namespace Microsoft.Build.UnitTests
             ToolTaskExtension t,
             string startsWith,
             string except,
-            bool useResponseFile
-        )
+            bool useResponseFile)
         {
             CommandLineBuilderExtension b = new CommandLineBuilderExtension();
 
             if (useResponseFile)
+            {
                 t.AddResponseFileCommands(b);
+            }
             else
+            {
                 t.AddCommandLineCommands(b);
+            }
 
             string cl = b.ToString();
 
@@ -195,9 +204,13 @@ namespace Microsoft.Build.UnitTests
             CommandLineBuilderExtension b = new CommandLineBuilderExtension();
 
             if (useResponseFile)
+            {
                 t.AddResponseFileCommands(b);
+            }
             else
+            {
                 t.AddCommandLineCommands(b);
+            }
 
             string cl = b.ToString();
             string msg = String.Format("Command-line = [{0}]\r\n", cl);
@@ -224,9 +237,13 @@ namespace Microsoft.Build.UnitTests
             CommandLineBuilderExtension b = new CommandLineBuilderExtension();
 
             if (useResponseFile)
+            {
                 t.AddResponseFileCommands(b);
+            }
             else
+            {
                 t.AddCommandLineCommands(b);
+            }
 
             string cl = b.ToString();
             string msg = String.Format("Command-line = [{0}]\r\n", cl);
@@ -251,9 +268,13 @@ namespace Microsoft.Build.UnitTests
             CommandLineBuilderExtension b = new CommandLineBuilderExtension();
 
             if (useResponseFile)
+            {
                 t.AddResponseFileCommands(b);
+            }
             else
+            {
                 t.AddCommandLineCommands(b);
+            }
 
             string cl = b.ToString();
             string msg = String.Format("Command-line = [{0}]\r\n", cl);
@@ -272,9 +293,13 @@ namespace Microsoft.Build.UnitTests
             CommandLineBuilderExtension b = new CommandLineBuilderExtension();
 
             if (useResponseFile)
+            {
                 t.AddResponseFileCommands(b);
+            }
             else
+            {
                 t.AddCommandLineCommands(b);
+            }
 
             return b.ToString();
         }

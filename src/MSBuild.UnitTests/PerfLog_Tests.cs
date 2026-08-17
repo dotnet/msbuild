@@ -1,35 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Threading;
-
-using Microsoft.Build.CommandLine;
-using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
+using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
-using Shouldly;
-using System.IO.Compression;
-using System.Reflection;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
     public class PerfLogTests
     {
-#if USE_MSBUILD_DLL_EXTN
-        private const string MSBuildExeName = "MSBuild.dll";
-#else
-        private const string MSBuildExeName = "MSBuild.exe";
-#endif
-
         private readonly ITestOutputHelper _output;
 
         public PerfLogTests(ITestOutputHelper output)
@@ -38,7 +21,6 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Fact]
-        [Trait("Category", "mono-osx-failing")] // Disable on Mono OSX, since Mono doesn't implement EventSource.
         public void TestPerfLogEnabledProducedLogFile()
         {
             using (TestEnvironment testEnv = TestEnvironment.Create(_output))

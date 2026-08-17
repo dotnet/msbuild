@@ -1,7 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.IO;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -14,6 +18,8 @@ namespace Microsoft.Build.Framework
     // immutable; adding new fields in the next version of the type
     // without following certain special FX guidelines, can break both
     // forward and backward compatibility
+    // NOTE: Although this class has been modified and do not longer relay on [Serializable]
+    // and BinaryFormatter. We have left it [Serializable] for backward compatibility reasons.
     [Serializable]
     public class ExternalProjectFinishedEventArgs : CustomBuildEventArgs
     {
@@ -34,14 +40,12 @@ namespace Microsoft.Build.Framework
         /// <param name="senderName">name of the object sending this event</param>
         /// <param name="projectFile">project name</param>
         /// <param name="succeeded">true indicates project built successfully</param>
-        public ExternalProjectFinishedEventArgs
-        (
+        public ExternalProjectFinishedEventArgs(
             string message,
             string helpKeyword,
             string senderName,
             string projectFile,
-            bool succeeded
-        )
+            bool succeeded)
             : this(message, helpKeyword, senderName, projectFile, succeeded, DateTime.UtcNow)
         {
         }
@@ -55,15 +59,13 @@ namespace Microsoft.Build.Framework
         /// <param name="projectFile">project name</param>
         /// <param name="succeeded">true indicates project built successfully</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
-        public ExternalProjectFinishedEventArgs
-        (
+        public ExternalProjectFinishedEventArgs(
             string message,
             string helpKeyword,
             string senderName,
             string projectFile,
             bool succeeded,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : base(message, helpKeyword, senderName, eventTimestamp)
         {
             this.projectFile = projectFile;
@@ -94,6 +96,20 @@ namespace Microsoft.Build.Framework
             {
                 return succeeded;
             }
+        }
+
+        internal override void WriteToStream(BinaryWriter writer)
+        {
+            base.WriteToStream(writer);
+            writer.WriteOptionalString(projectFile);
+            writer.Write(succeeded);
+        }
+
+        internal override void CreateFromStream(BinaryReader reader, int version)
+        {
+            base.CreateFromStream(reader, version);
+            projectFile = reader.ReadOptionalString();
+            succeeded = reader.ReadBoolean();
         }
     }
 }

@@ -1,0 +1,7 @@
+<Project>
+  <!-- Import the repo root props -->
+  <Import Project="..\Directory.Build.props"/>
+  <PropertyGroup>
+    <ProjectIsDeprecated>true</ProjectIsDeprecated>
+  </PropertyGroup>
+</Project>

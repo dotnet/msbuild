@@ -55,6 +55,11 @@
       LOCALIZATION: Do not localize the following words: ProjectReference, ProjectReferenceTargets
     </note>
       </trans-unit>
+      <trans-unit id="CannotCopyFromElementOfThatType">
+        <source>MSB4277: Cannot copy from object of that type.</source>
+        <target state="translated">MSB4277: Bu türdeki nesneden kopyalanamadı.</target>
+        <note>{StrBegin="MSB4277: "}</note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: "{0}" ifadesindeki meta veriler genişletilemiyor. {1}</target>
@@ -63,13 +68,13 @@
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
-        <source>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="translated">MSB4271: MSBuildDisableFeaturesFromVersion ortam değişkeni geçersiz bir biçime ayarlandı. Tüm değişiklik dalgası sürümleri etkinleştiriliyor. Girilen değer: {0}. Geçerli Değişiklik Dalgaları: {1}.</target>
+        <source>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
+        <target state="translated">MSB4271: MSBUILDDISABLEFEATURESFROMVERSION ortam değişkeni geçersiz bir biçime ayarlandı. Tüm değişiklik dalgası sürümleri etkinleştiriliyor. Girilen değer: {0}. Geçerli Değişiklik Dalgaları: {1}.</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
-        <source>MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="translated">MSB4272: MSBuildDisableFeaturesFromVersion ortam değişkeni, düzenli değişiklik dışı bir sürüme ayarlandı. Varsayılan Değişiklik Dalgası sürümüne dönülüyor: {0}. Girilen değer: {1}. Geçerli Değişiklik Dalgaları: {2}.</target>
+        <source>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
+        <target state="translated">MSB4272: MSBUILDDISABLEFEATURESFROMVERSION ortam değişkeni, düzenli değişiklik dışı bir sürüme ayarlandı. Varsayılan Değişiklik Dalgası sürümüne dönülüyor: {0}. Girilen değer: {1}. Geçerli Değişiklik Dalgaları: {2}.</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -92,9 +97,24 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="DefaultSDKResolverError">
+        <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
+        <target state="translated">MSB4276: "{1}" dizini olmadığından, varsayılan SDK çözümleyicisi "{0}" SDK’sını çözümleyemedi.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DuplicateOverrideUsingTaskElement">
+        <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
+        <target state="translated">MSB4275: Aynı {0} görevi için birden çok geçersiz kılma işlemi oluşturulmaya çalışıldı</target>
+        <note>{StrBegin="MSB4275: "}</note>
+      </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: Belirtilen çıkış sonucu önbellek dosyası boş.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentDerivedPropertyRead">
+        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
+        <target state="translated">'{1}' değerine sahip '{0}' özelliği ortamdan genişletildi.</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -111,6 +131,18 @@
         <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4258: Çıkış sonucu önbellek dosyası "{0}" yoluna yazılırken bir hatayla karşılaşıldı: {1}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="FailedToResolveSDK">
+        <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+  {1}</source>
+        <target state="translated">SDK "{0}" çözümlenemedi. Aşağıdaki yoklama iletilerinden tam olarak biri, SDK'yı neden çözümleyemediğimizi gösterir. SDK'yı doğru şekilde belirtmek için bu iletiyi inceleyin ve çözümleyin.
+  {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.TwoVectorsMustHaveSameLength">
+        <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
+        <target state="translated">MSB3094: "{2}", {0} öğeye; "{3}", {1} öğeye başvuruyor. Aynı sayıda öğeye sahip olmaları gerekir.</target>
+        <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -132,16 +164,19 @@
         <target state="translated">SharingPolicy.Isolated ile oluşturulan EvaluationContext nesneleri bir MSBuildFileSystemBase dosya sisteminin geçirilmesini desteklemez.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ItemReferencingSelfInTarget">
+        <source>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</source>
+        <target state="translated">MSB4120: (Nitelikli veya niteliksiz) meta veri dosyası '{1}' aracılığıyla hedef içindeki '{0}' öğesinin tanımı kendi kendisine başvuruyor. Bu, önceden var olan öğelerin istenmeyen şekilde genişlemesine ve çapraz olarak uygulanmasına neden olabilir. Daha fazla bilgi: https://aka.ms/msbuild/metadata-self-ref</target>
+        <note>{StrBegin="MSB4120: "}</note>
+      </trans-unit>
       <trans-unit id="KillingProcessWithPid">
         <source>Killing process with pid = {0}.</source>
         <target state="translated">PID = {0} işlemi sonlandırılıyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>Loading the following project cache plugin:
-    {0}</source>
-        <target state="translated">Şu proje önbelleği eklentisi yükleniyor:
-    {0}</target>
+        <source>Loading the following project cache plugin: {0}</source>
+        <target state="translated">Şu proje önbelleği eklentisi yükleniyor:{0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -171,9 +206,9 @@
         <target state="translated">MSB4270: "{0}" bütünleştirilmiş kodunda proje önbelleği eklentisi bulunamadı. Bir eklenti bekleniyordu.</target>
         <note />
       </trans-unit>
-      <trans-unit id="NotAllNodesDefineACacheItem">
-        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="translated">MSB4269: Herhangi bir statik graf düğümünde proje önbelleği tanımlandığında tüm düğümler aynı proje önbelleğini tanımlamalıdır. Şu projeler "{0}" öğe bildirimini içermiyor: {1}</target>
+      <trans-unit id="NodeReused">
+        <source>Reusing node {0} (PID: {1}).</source>
+        <target state="translated">Düğüm {0} yeniden kullanılıyor (PID: {1}).</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -214,9 +249,14 @@
         <target state="translated">{0} metosu null veya boş hedef adları içeren bir koleksiyonla çağrılamaz.</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
-        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="translated">MSB4265: Tek bir proje önbellek eklentisi belirtilmelidir ancak birden çok eklenti bulundu: {0}</target>
+      <trans-unit id="OverrideUsingTaskElementCreated">
+        <source>Created an override using task: {0} at {1}</source>
+        <target state="translated">{0} görevi kullanılarak geçersiz kılma işlemi oluşturuldu, saat: {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheEndBuild">
+        <source>Shutting down project cache plugin.</source>
+        <target state="translated">Proje önbellek eklentisi kapatılıyor.</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheException">
@@ -224,15 +264,83 @@
         <target state="translated">MSB4273: Proje önbelleği {0} yönteminden yakalanamayan özel durum oluşturdu.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: Proje önbelleği şu proje için bir derleme sonucu işlenirken başarısız oldu: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithDefaultTargets">
+        <source>Project cache hit for "{0}" (default targets).</source>
+        <target state="translated">"{0}" (varsayılan hedefler) için proje önbelleği isabeti.</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithOutputs">
+        <source>{0} -&gt; Cache Hit</source>
+        <target state="translated">{0} -&gt; İsabetli Önbellek</target>
+        <note>
+      {StrBegin="{0} -&gt; "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithTargetNames">
+        <source>Project cache hit for "{0}" ({1} target(s)).</source>
+        <target state="translated">"{0}" ({1} hedefi) için proje önbelleği isabeti.</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
         <source>MSB4266: Failed to initialize the project cache.</source>
         <target state="translated">MSB4266: Proje önbelleği başlatılamadı.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheMissWithDefaultTargets">
+        <source>Project cache miss for "{0}" (default targets).</source>
+        <target state="translated">"{0}" (varsayılan hedefler) için proje önbelleği eksik.</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheMissWithTargetNames">
+        <source>Project cache miss for "{0}" ({1} target(s)).</source>
+        <target state="translated">"{0}" ({1} hedefi) için proje önbelleği eksik.</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithDefaultTargets">
+        <source>Project cache not applicable for "{0}" (default targets).</source>
+        <target state="translated">"{0}" (varsayılan hedefler) için proje önbelleği geçerli değil.</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithTargetNames">
+        <source>Project cache not applicable for "{0}" ({1} target(s)).</source>
+        <target state="translated">"{0}" ({1} hedefleri) için proje önbelleği geçerli değil.</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectCacheQueryFailed">
         <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
         <target state="translated">MSB4267: Proje önbelleği, {0} projesi için sorgulanırken başarısız oldu. Önbellek birden çok proje için paralel olarak sorgulandığından sorunun nedeni bu proje olmayabilir.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithDefaultTargets">
+        <source>Querying project cache for "{0}" (default targets):</source>
+        <target state="translated">"{0}" (varsayılan hedefler) için proje önbelleği sorgulanıyor:</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithTargetNames">
+        <source>Querying project cache for "{0}" (targets: {1}):</source>
+        <target state="translated">"{0}" (varsayılan hedefler: {1}) için proje önbelleği sorgulanıyor:</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
         <source>MSB4268: The project cache failed to shut down properly.</source>
@@ -257,9 +365,34 @@
         <target state="translated">Özellik başlangıç değeri: $({0})="{1}" Kaynak: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="PropertyOutsidePropertyGroupInTarget">
+        <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
+        <target state="translated">MSB4067: &lt;{1}&gt; altındaki &lt;{0}&gt; öğesi tanınmıyor. Bunun bir özellik olmasını amaçladıysanız, bir &lt;PropertyGroup&gt; öğesi içine ekleyin.</target>
+        <note>{StrBegin="MSB4067: "}</note>
+      </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: InProc düğümünün devre dışı bırakılması, ara sunucu oluşturma istekleri gönderen proje önbelleği eklentileri kullanılırken performans düşüşüne yol açar.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">Raporlama dosyası erişimleri şu anda yalnızca MSBuild x64 varyantı kullanıldığında destekleniyor.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverCriticalFailure">
+        <source>MSB4242: SDK Resolver Failure: "{0}"</source>
+        <target state="translated">MSB4242: SDK Çözümleyici Hatası: "{0}"</target>
+        <note>{StrBegin="MSB4242: "}</note>
+      </trans-unit>
+      <trans-unit id="SDKResolverFailed">
+        <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
+        <target state="translated">"{0}" SDK çözümleyicisi, "{1}" SDK'sını çözümlemeye çalışırken başarısız oldu. İstisna: "{2}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverReturnedNull">
+        <source>SDK resolver "{0}" returned null.</source>
+        <target state="translated">SDK çözümleyici "{0}" null döndürdü.</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -313,6 +446,11 @@
         <target state="translated">"{0}" görevi {1} çekirdek istedi, {2} çekirdek aldı ve şu anda toplam {3} çekirdek tutuyor.</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoaded">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
+        <target state="translated">Derleme {0}{1} sırasında yüklendi: {2} (konum: {3}, MVID: {4}, AppDomain: {5})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">"{0}" görevi {1} çekirdeği serbest bıraktı. Şu anda toplam {2} çekirdek tutuyor.</target>
@@ -335,6 +473,13 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UnhandledMSBuildError">
+        <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
+    {0}</source>
+        <target state="translated">Bu, MSBuild'de işlenmeyen bir istisnadır -- LÜTFEN MEVCUT BİR SORUNU OYLAYIN VEYA https://aka.ms/msbuild/unhandled ADRESİNDE YENİ BİR SORUN OLUŞTURUN
+    {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
@@ -1790,8 +1935,8 @@
         <note>{StrBegin="MSB4209: "}</note>
       </trans-unit>
       <trans-unit id="AffinityConflict">
-        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</source>
-        <target state="translated">MSB4213: Belirtilen istek benzeşimi {0} bu proje için daha önce belirtilen {1} benzeşimi ile çakışıyor.</target>
+        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for project {2} with global properties {3}</source>
+        <target state="translated">MSB4213: Belirtilen istek benzeşimi {0}, {3} genel özelliklerine sahip {2} projesi için belirtilen önceki bir {1} benzeşimiyle çakışıyor</target>
         <note>{StrBegin="MSB4213: "}</note>
       </trans-unit>
       <trans-unit id="UnableToCreateNode">
@@ -2069,8 +2214,8 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
-        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</source>
-        <target state="translated">Proje ProjectLoadSettings.RecordDuplicateImports bayrağıyla yüklenmedi.</target>
+        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
+        <target state="translated">Proje, ProjectLoadSettings.RecordDuplicateButNotCircularImports bayrağıyla yüklenmedi.</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">
@@ -2379,15 +2524,10 @@ Kullanım:             {0} Ortalama Kullanım: {1:###.0}</target>
         <target state="translated">MSB4244: "{0}" SDK çözümleyicisi bütünleştirilmiş kodu yüklenemedi. {1}</target>
         <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
-      <trans-unit id="CouldNotRunSdkResolver">
-        <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="translated">MSB4242: "{0}" SDK çözümleyicisi çalıştırılamadı. {1}</target>
-        <note>{StrBegin="MSB4242: "}</note>
-      </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
-        <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: NuGet bütünleştirilmiş kodları bulunamadığından NuGet tabanlı SDK çözümleyicisi çalıştırılamadı. MSBuild yüklemenizi denetleyin veya "{0}" ortam değişkenini gerekli NuGet bütünleştirilmiş kodlarını içeren klasör olarak ayarlayın. {1}</target>
-        <note>{StrBegin="MSB4243: "}</note>
+        <source>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
+        <target state="translated">NuGet derlemeleri bulunamadığından NuGet tabanlı SDK çözümleyicisi çalıştırılamadı. MSBuild yüklemenizi kontrol edin veya "{0}" ortam değişkenini gerekli NuGet derlemelerini içeren klasöre ayarlayın. {1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>

@@ -1,14 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
-using Microsoft.Build.Construction;
-using Microsoft.Build.Execution;
-using Microsoft.Build.Collections;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.Shared.FileSystem;
+using Microsoft.Build.Collections;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation.Context;
+using Microsoft.Build.Execution;
+
+#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -210,7 +212,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Prepares the data block for a new evaluation pass
         /// </summary>
-        void InitializeForEvaluation(IToolsetProvider toolsetProvider, IFileSystem fileSystem);
+        void InitializeForEvaluation(IToolsetProvider toolsetProvider, EvaluationContext evaluationContext);
 
         /// <summary>
         /// Indicates to the data block that evaluation has completed,
@@ -265,7 +267,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Sets a property which does not come from the Xml.
         /// </summary>
-        P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false);
+        P SetProperty(string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved, bool isEnvironmentVariable = false, BackEnd.Logging.LoggingContext loggingContext = null);
 
         /// <summary>
         /// Sets a property which comes from the Xml.

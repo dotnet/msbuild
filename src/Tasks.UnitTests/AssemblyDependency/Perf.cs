@@ -1,3 +1,6 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Framework;
@@ -7,6 +10,8 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
@@ -20,8 +25,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         }
 
         [Theory]
-        [Trait("Category", "mono-osx-failing")]
-        [Trait("Category", "mono-windows-failing")]
         [InlineData(RARSimulationMode.LoadProject, 1)]
         [InlineData(RARSimulationMode.BuildProject, 2)]
         public void AutoUnifyUsesMinimumIO(RARSimulationMode rarSimulationMode, int ioThreshold)
@@ -75,7 +78,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 bool succeeded = Execute(t);
 
                 Assert.True(succeeded);
-                
+
                 uniqueFileExists[s_dependsOnNuGet_NWinMdPath].ShouldBe(1);
                 uniqueFileExists[s_dependsOnNuGet_NDllPath].ShouldBe(1);
                 uniqueFileExists[s_dependsOnNuGet_NExePath].ShouldBe(1);
@@ -107,7 +110,7 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                         new Dictionary<string, string>
                         {
                             {"ExternallyResolved", "true"}
-                        }) 
+                        })
                 };
 
                 ResolveAssemblyReference t = new ResolveAssemblyReference();

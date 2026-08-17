@@ -1,29 +1,27 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Construction;
-using Microsoft.Build.Eventing;
-using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using Microsoft.Build.Construction;
+using Microsoft.Build.Eventing;
+using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
+using Microsoft.Build.Shared;
+using Microsoft.CodeAnalysis.Collections;
 
 namespace Microsoft.Build.Evaluation
 {
     internal partial class LazyItemEvaluator<P, I, M, D>
     {
-        class IncludeOperation : LazyItemOperation
+        private class IncludeOperation : LazyItemOperation
         {
-            readonly int _elementOrder;
-            
-            readonly string _rootDirectory;
-
-            readonly ImmutableList<string> _excludes;
-
-            readonly ImmutableList<ProjectMetadataElement> _metadata;
+            private readonly int _elementOrder;
+            private readonly string? _rootDirectory;
+            private readonly ImmutableSegmentedList<string> _excludes;
+            private readonly ImmutableArray<ProjectMetadataElement> _metadata;
 
             public IncludeOperation(IncludeOperationBuilder builder, LazyItemEvaluator<P, I, M, D> lazyEvaluator)
                 : base(builder, lazyEvaluator)
@@ -35,11 +33,11 @@ namespace Microsoft.Build.Evaluation
                 _metadata = builder.Metadata.ToImmutable();
             }
 
-            protected override ImmutableList<I> SelectItems(ImmutableList<ItemData>.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
+            protected override ImmutableArray<I> SelectItems(OrderedItemDataCollection.Builder listBuilder, ImmutableHashSet<string> globsToIgnore)
             {
-                var itemsToAdd = ImmutableList.CreateBuilder<I>();
+                ImmutableArray<I>.Builder? itemsToAdd = null;
 
-                Lazy<Func<string, bool>> excludeTester = null;
+                Lazy<Func<string, bool>>? excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
                 if (_excludes != null)
                 {
@@ -57,7 +55,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                ISet<string> excludePatternsForGlobs = null;
+                ISet<string>? excludePatternsForGlobs = null;
 
                 foreach (var fragment in _itemSpec.Fragments)
                 {
@@ -73,6 +71,7 @@ namespace Microsoft.Build.Evaluation
                             isTransformExpression: out _,
                             elementLocation: _itemElement.IncludeLocation);
 
+                        itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
                         itemsToAdd.AddRange(
                             excludeTester != null
                                 ? itemsFromExpression.Where(item => !excludeTester.Value(item.EvaluatedInclude))
@@ -84,15 +83,15 @@ namespace Microsoft.Build.Evaluation
 
                         if (excludeTester?.Value(EscapingUtilities.UnescapeAll(value)) != true)
                         {
-                            var item = _itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath);
-                            itemsToAdd.Add(item);
+                            itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
+                            itemsToAdd.Add(_itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath));
                         }
                     }
                     else if (fragment is GlobFragment globFragment)
                     {
                         // If this item is behind a false condition and represents a full drive/filesystem scan, expanding it is
                         // almost certainly undesired. It should be skipped to avoid evaluation taking an excessive amount of time.
-                        bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave16_8);
+                        bool skipGlob = !_conditionResult && globFragment.IsFullFileSystemScan && !Traits.Instance.EscapeHatches.AlwaysEvaluateDangerousGlobs;
                         if (!skipGlob)
                         {
                             string glob = globFragment.TextFragment;
@@ -107,14 +106,19 @@ namespace Microsoft.Build.Evaluation
                             {
                                 MSBuildEventSource.Log.ExpandGlobStart(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
                             }
+
                             using (_lazyEvaluator._evaluationProfiler.TrackGlob(_rootDirectory, glob, excludePatternsForGlobs))
                             {
                                 includeSplitFilesEscaped = EngineFileUtilities.GetFileListEscaped(
                                     _rootDirectory,
                                     glob,
-                                    excludePatternsForGlobs
-                                );
+                                    excludePatternsForGlobs,
+                                    fileMatcher: FileMatcher,
+                                    loggingMechanism: _lazyEvaluator._loggingContext,
+                                    includeLocation: _itemElement.IncludeLocation,
+                                    excludeLocation: _itemElement.ExcludeLocation);
                             }
+
                             if (MSBuildEventSource.Log.IsEnabled())
                             {
                                 MSBuildEventSource.Log.ExpandGlobStop(_rootDirectory, glob, string.Join(", ", excludePatternsForGlobs));
@@ -122,6 +126,7 @@ namespace Microsoft.Build.Evaluation
 
                             foreach (string includeSplitFileEscaped in includeSplitFilesEscaped)
                             {
+                                itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
                                 itemsToAdd.Add(_itemFactory.CreateItem(includeSplitFileEscaped, glob, _itemElement.ContainingProject.FullPath));
                             }
                         }
@@ -132,7 +137,7 @@ namespace Microsoft.Build.Evaluation
                     }
                 }
 
-                return itemsToAdd.ToImmutable();
+                return itemsToAdd?.ToImmutable() ?? ImmutableArray<I>.Empty;
             }
 
             private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableList<string>.Builder excludePatterns)
@@ -148,12 +153,12 @@ namespace Microsoft.Build.Evaluation
                 return anyExcludes ? excludePatterns.ToImmutableHashSet() : globsToIgnore;
             }
 
-            protected override void MutateItems(ImmutableList<I> items)
+            protected override void MutateItems(ImmutableArray<I> items)
             {
                 DecorateItemsWithMetadata(items.Select(i => new ItemBatchingContext(i)), _metadata);
             }
 
-            protected override void SaveItems(ImmutableList<I> items, ImmutableList<ItemData>.Builder listBuilder)
+            protected override void SaveItems(ImmutableArray<I> items, OrderedItemDataCollection.Builder listBuilder)
             {
                 foreach (var item in items)
                 {
@@ -162,12 +167,12 @@ namespace Microsoft.Build.Evaluation
             }
         }
 
-        class IncludeOperationBuilder : OperationBuilderWithMetadata
+        private class IncludeOperationBuilder : OperationBuilderWithMetadata
         {
             public int ElementOrder { get; set; }
-            public string RootDirectory { get; set; }
+            public string? RootDirectory { get; set; }
 
-            public ImmutableList<string>.Builder Excludes { get; } = ImmutableList.CreateBuilder<string>();
+            public ImmutableSegmentedList<string>.Builder Excludes { get; } = ImmutableSegmentedList.CreateBuilder<string>();
 
             public IncludeOperationBuilder(ProjectItemElement itemElement, bool conditionResult) : base(itemElement, conditionResult)
             {

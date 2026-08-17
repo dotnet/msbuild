@@ -1,27 +1,28 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Xml;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-using Microsoft.Build.Framework;
+using System.Threading.Tasks;
+using System.Xml;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Collections;
+using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
-
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
-using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
-using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
-using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
-using System.Threading.Tasks;
-using Microsoft.Build.BackEnd.SdkResolution;
-using Microsoft.Build.Engine.UnitTests.BackEnd;
 using Xunit;
+using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
+using LegacyThreadingData = Microsoft.Build.Execution.LegacyThreadingData;
+using NodeLoggingContext = Microsoft.Build.BackEnd.Logging.NodeLoggingContext;
+using ProjectLoggingContext = Microsoft.Build.BackEnd.Logging.ProjectLoggingContext;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.BackEnd
 {
@@ -46,7 +47,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         /// </summary>
         private int _nodeRequestId;
 
-        #pragma warning disable xUnit1013
+#pragma warning disable xUnit1013
 
         /// <summary>
         /// Callback used to receive exceptions from loggers.  Unused here.
@@ -56,7 +57,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
         }
 
-        #pragma warning restore xUnit1013
+#pragma warning restore xUnit1013
 
         /// <summary>
         /// Sets up to run tests.  Creates the host object.
@@ -225,13 +226,48 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 var expected = @"
 Skipping target ""Build"" because all output files are up-to-date with respect to the input files.
-Input files: 
+Input files:
     a.txt
     b.txt
 Output files: c.txt
 Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n");
 
                 logText.ShouldContainWithoutWhitespace(expected);
+            }
+        }
+
+        [Fact]
+        public void TestErrorForSkippedTargetInputsAndOutputs()
+        {
+            string projectContents = @"
+<Project>
+  <Target Name=""Build"" Inputs=""a.txt;b.txt"" Outputs=""c.txt"">
+    <Message Text=""test"" Importance=""High"" />
+  </Target>
+</Project>";
+
+            using (var env = TestEnvironment.Create())
+            {
+                var buildParameters = new BuildParameters()
+                {
+                    Question = true,
+                };
+
+                using (var buildSession = new Helpers.BuildManagerSession(env, buildParameters))
+                {
+                    var files = env.CreateTestProjectWithFiles(projectContents, new[] { "a.txt", "b.txt", "c.txt" });
+                    var fileA = new FileInfo(files.CreatedFiles[0]);
+                    var fileB = new FileInfo(files.CreatedFiles[1]);
+                    var fileC = new FileInfo(files.CreatedFiles[2]);
+
+                    var now = DateTime.UtcNow;
+                    fileA.LastWriteTimeUtc = now - TimeSpan.FromSeconds(10);
+                    fileB.LastWriteTimeUtc = now + TimeSpan.FromSeconds(10);
+                    fileC.LastWriteTimeUtc = now;
+
+                    var result = buildSession.BuildProjectFile(files.ProjectFile);
+                    result.OverallResult.ShouldBe(BuildResultCode.Failure);
+                }
             }
         }
 
@@ -247,10 +283,9 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 
             Thread.Sleep(100);
 
-            string content = String.Format
-                (
+            string content = String.Format(
 @"
-<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+<Project ToolsVersion='msbuilddefaulttoolsversion'>
 
   <Target Name='Build' DependsOnTargets='GFA;GFT;DFTA;GAFT'>
         <Message Text='Build: [@(Outs)]' />
@@ -283,8 +318,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
   </Target>
 </Project>
             ",
-             path
-             );
+             path);
 
             Project p = new Project(XmlReader.Create(new StringReader(content)));
             p.Build(new string[] { "Build" }, new ILogger[] { logger });
@@ -336,7 +370,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         public void TestBeforeTargetsMissing()
         {
             string content = @"
-<Project DefaultTargets='t' xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<Project DefaultTargets='t'>
 
     <Target Name='t' BeforeTargets='x'>
         <Message Text='[t]' />
@@ -359,7 +393,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         public void TestBeforeTargetsMissingRunsOthers()
         {
             string content = @"
-<Project DefaultTargets='a;c' xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<Project DefaultTargets='a;c'>
 
     <Target Name='t' BeforeTargets='a;b;c'>
         <Message Text='[t]' />
@@ -391,7 +425,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         public void TestAfterTargetsMissing()
         {
             string content = @"
-<Project DefaultTargets='t' xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<Project DefaultTargets='t'>
 
     <Target Name='t' AfterTargets='x'>
         <Message Text='[t]' />
@@ -414,7 +448,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         public void TestAfterTargetsMissingRunsOthers()
         {
             string content = @"
-<Project DefaultTargets='a;c' xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<Project DefaultTargets='a;c'>
 
     <Target Name='t' AfterTargets='a;b'>
         <Message Text='[t]' />
@@ -1271,7 +1305,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         public void TestCircularDependencyInCallTarget()
         {
             string projectContents = @"
-<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<Project>
     <Target Name=""t1"">
         <CallTarget Targets=""t3""/>
     </Target>
@@ -1294,7 +1328,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         public void TestCircularDependencyTarget()
         {
             string projectContents = @"
-<Project xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">
+<Project>
     <Target Name=""TargetA"" AfterTargets=""Build"" DependsOnTargets=""TargetB"">
         <Message Text=""TargetA""></Message>
     </Target>
@@ -1521,7 +1555,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
 
                     <ItemGroup>
                         <Reference Include='System' />
-                    </ItemGroup>                    
+                    </ItemGroup>
 
                     <Target Name='Empty' />
 
@@ -1589,7 +1623,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// </summary>
         private ProjectInstance CreateTestProject(string projectBodyContents, string initialTargets, string defaultTargets)
         {
-            string projectFileContents = String.Format("<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003' InitialTargets='{0}' DefaultTargets='{1}'>{2}</Project>", initialTargets, defaultTargets, projectBodyContents);
+            string projectFileContents = String.Format("<Project ToolsVersion='msbuilddefaulttoolsversion' InitialTargets='{0}' DefaultTargets='{1}'>{2}</Project>", initialTargets, defaultTargets, projectBodyContents);
 
             // retries to deal with occasional locking issues where the file can't be written to initially
             for (int retries = 0; retries < 5; retries++)
@@ -1599,24 +1633,15 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
                     File.Create("testProject.proj").Dispose();
                     break;
                 }
-                catch (Exception ex)
+                // If all the retries failed, fail with the actual problem instead of some difficult-to-understand issue later.
+                catch (Exception ex) when (retries < 4)
                 {
-                    if (retries < 4)
-                    {
-                        Console.WriteLine(ex.ToString());
-                    }
-                    else
-                    {
-                        // All the retries have failed. We will now fail with the
-                        // actual problem now instead of with some more difficult-to-understand
-                        // issue later.
-                        throw;
-                    }
+                    Console.WriteLine(ex.ToString());
                 }
             }
 
             IConfigCache cache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
-            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testFile", new Dictionary<string, string>(), "3.5", new string[0], null), "2.0");
+            BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("testFile", new Dictionary<string, string>(), "3.5", Array.Empty<string>(), null), "2.0");
             Project project = new Project(XmlReader.Create(new StringReader(projectFileContents)));
 
             config.Project = project.CreateProjectInstance();
@@ -1632,7 +1657,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <returns>The context</returns>
         private ProjectLoggingContext GetProjectLoggingContext(BuildRequestEntry entry)
         {
-            return new ProjectLoggingContext(new NodeLoggingContext(_host, 1, false), entry, null);
+            return new ProjectLoggingContext(new NodeLoggingContext(_host, 1, false), entry);
         }
 
         /// <summary>
@@ -1659,7 +1684,7 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
         /// <summary>
         /// The mock component host object.
         /// </summary>
-        private class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
+        private sealed class MockHost : MockLoggingService, IBuildComponentHost, IBuildComponent
         {
             #region IBuildComponentHost Members
 

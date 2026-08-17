@@ -1,22 +1,28 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if !RUNTIME_TYPE_NETCORE
 using System.Collections.Generic;
+#endif
+#if !NET7_0_OR_GREATER
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
 
 // TYPELIBATTR clashes with the one in InteropServices.
 using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
 using UtilitiesProcessorArchitecture = Microsoft.Build.Utilities.ProcessorArchitecture;
+#endif
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
-using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -135,6 +141,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public sealed partial class ResolveComReference : Microsoft.Build.Tasks.TaskExtension, IResolveComReferenceTaskContract
     {
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Properties
 
         public ITaskItem[] TypeLibNames { get; set; }
@@ -185,11 +192,12 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         public override bool Execute()
         {
-            Log.LogErrorFromResources("TaskRequiresFrameworkFailure", nameof(ResolveComReference));
+            Log.LogErrorWithCodeFromResources("TaskRequiresFrameworkFailure", nameof(ResolveComReference));
             return false;
         }
 
         #endregion
+#pragma warning restore format 
     }
 
 #else
@@ -199,6 +207,7 @@ namespace Microsoft.Build.Tasks
     /// </summary>
     public sealed partial class ResolveComReference : AppDomainIsolatedTaskExtension, IResolveComReferenceTaskContract, IComReferenceResolver
     {
+#pragma warning disable format // region formatting is different in net7.0 and net472, and cannot be fixed for both
         #region Properties
 
         public ITaskItem[] TypeLibNames { get; set; }
@@ -281,7 +290,7 @@ namespace Microsoft.Build.Tasks
         public string TargetFrameworkVersion { get; set; } = String.Empty;
 
         private Version _projectTargetFramework;
-        
+
         /// <summary>version 4.0</summary>
         private static readonly Version s_targetFrameworkVersion_40 = new Version("4.0");
 
@@ -324,7 +333,7 @@ namespace Microsoft.Build.Tasks
             allProjectRefs = new List<ComReferenceInfo>();
             allDependencyRefs = new List<ComReferenceInfo>();
 
-            _timestampCache = (ResolveComReferenceCache)StateFileBase.DeserializeCache(StateFile, Log, typeof(ResolveComReferenceCache));
+            _timestampCache = StateFileBase.DeserializeCache<ResolveComReferenceCache>(StateFile, Log);
 
             if (_timestampCache?.ToolPathsMatchCachePaths(_tlbimpPath, _aximpPath) != true)
             {
@@ -430,7 +439,7 @@ namespace Microsoft.Build.Tasks
                     }
                 }
 
-                SetCopyLocalToFalseOnGacOrNoPIAAssemblies(resolvedReferenceList, GlobalAssemblyCache.GetGacPath());
+                SetCopyLocalToFalseOnGacOrNoPIAAssemblies(resolvedReferenceList, GlobalAssemblyCache.GacPath);
 
                 ResolvedModules = moduleList.ToArray();
                 ResolvedFiles = resolvedReferenceList.ToArray();
@@ -844,13 +853,11 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Resolves the COM reference, and adds it to the appropriate item list.
         /// </summary>
-        private bool ResolveReferenceAndAddToList
-            (
+        private bool ResolveReferenceAndAddToList(
             ComDependencyWalker dependencyWalker,
             ComReferenceInfo projectRefInfo,
             List<ITaskItem> resolvedReferenceList,
-            List<ITaskItem> moduleList
-            )
+            List<ITaskItem> moduleList)
         {
             if (ResolveReference(dependencyWalker, projectRefInfo, WrapperOutputDirectory, out ITaskItem referencePath))
             {
@@ -1040,7 +1047,7 @@ namespace Microsoft.Build.Tasks
             }
             else
             {
-                ErrorUtilities.VerifyThrow(false, "Unknown wrapper type!");
+                ErrorUtilities.ThrowInternalError("Unknown wrapper type!");
             }
             referenceInfo.resolvedWrapper = wrapperInfo;
 
@@ -1158,7 +1165,9 @@ namespace Microsoft.Build.Tasks
 
             // if we have a strong name, strip off everything but the assembly name
             if (commaIndex != -1)
+            {
                 assemblyName = assemblyName.Substring(0, commaIndex);
+            }
 
             assemblyName += ".dll";
 
@@ -1297,7 +1306,7 @@ namespace Microsoft.Build.Tasks
         /// <returns></returns>
         internal IEnumerable<string> GetResolvedAssemblyReferenceItemSpecs()
         {
-            return (ResolvedAssemblyReferences == null) ? Array.Empty<string>(): ResolvedAssemblyReferences.Select(rar => rar.ItemSpec);
+            return (ResolvedAssemblyReferences == null) ? Array.Empty<string>() : ResolvedAssemblyReferences.Select(rar => rar.ItemSpec);
         }
 
         /// <summary>
@@ -1761,6 +1770,7 @@ namespace Microsoft.Build.Tasks
         }
 
         #endregion
+#pragma warning restore format 
     }
 
 #endif

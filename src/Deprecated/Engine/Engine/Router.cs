@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 namespace Microsoft.Build.BuildEngine
 {
@@ -121,12 +125,12 @@ namespace Microsoft.Build.BuildEngine
         /// </summary>
         internal void PostDoneNotice(int nodeId, BuildResult buildResult)
         {
-               
-            
-                // Notify the scheduler that a given node(nodeId) will be getting a buildResult.
-                // This method is a no-op if the router is on a child process
-                scheduler?.NotifyOfBuildResult(nodeId, buildResult);
-            
+
+
+            // Notify the scheduler that a given node(nodeId) will be getting a buildResult.
+            // This method is a no-op if the router is on a child process
+            scheduler?.NotifyOfBuildResult(nodeId, buildResult);
+
 
             if (nodeId == EngineCallback.inProcNode)
             {
@@ -169,13 +173,13 @@ namespace Microsoft.Build.BuildEngine
                                     (nodeIndex, currentRequest.HandleId, currentRequest.NodeIndex,
                                      currentRequest.RequestId, cacheScope, currentRequest, null);
 
-                       
-                    
-                        // Check to see if we need to change the traversal strategy of the system
-                        // parentHandleId and node index are not used in the function so it can be ignored
-                        scheduler?.NotifyOfBuildRequest(nodeIndex, currentRequest, parentHandleId);
-                    
-                    
+
+
+                    // Check to see if we need to change the traversal strategy of the system
+                    // parentHandleId and node index are not used in the function so it can be ignored
+                    scheduler?.NotifyOfBuildRequest(nodeIndex, currentRequest, parentHandleId);
+
+
                     nodeManager.PostBuildRequestToNode(nodeIndex, currentRequest);
                 }
             }
@@ -187,27 +191,27 @@ namespace Microsoft.Build.BuildEngine
         /// <summary>
         /// The node manager is used as a proxy for communication with child nodes
         /// </summary>
-        NodeManager nodeManager;
+        private NodeManager nodeManager;
 
         /// <summary>
         /// The parent engine who instantiated the router
         /// </summary>
-        Engine parentEngine;
+        private Engine parentEngine;
 
         /// <summary>
         /// Scheduler who is responsible for determining which nodes a build request should be sent to.
         /// </summary>
-        Scheduler scheduler;
+        private Scheduler scheduler;
 
         /// <summary>
         /// Is the router instantiated on a child process
         /// </summary>
-        bool childMode;
+        private bool childMode;
 
         /// <summary>
         /// What is the parent Node on which the engine is hosted if we are a child process
         /// </summary>
-        Node parentNode;
+        private Node parentNode;
         #endregion 
     }
 }

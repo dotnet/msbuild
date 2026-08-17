@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -15,6 +15,8 @@ using Xunit;
 using Xunit.Abstractions;
 using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests
 {
     /*
@@ -24,7 +26,7 @@ namespace Microsoft.Build.UnitTests
      * up a raw string (fullLog) that contains all messages, warnings, errors.
      * Thread-safe.
      */
-    internal sealed class MockLogger : ILogger
+    public sealed class MockLogger : ILogger
     {
         #region Properties
 
@@ -136,6 +138,11 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal List<BuildFinishedEventArgs> BuildFinishedEvents { get; } = new List<BuildFinishedEventArgs>();
 
+        /// <summary>
+        /// List of Telemetry events
+        /// </summary>
+        internal List<TelemetryEventArgs> TelemetryEvents { get; } = new();
+
         internal List<BuildEventArgs> AllBuildEvents { get; } = new List<BuildEventArgs>();
 
         /*
@@ -165,11 +172,7 @@ namespace Microsoft.Build.UnitTests
          * The level of detail to show in the event log.
          *
          */
-        public LoggerVerbosity Verbosity
-        {
-            get => LoggerVerbosity.Normal;
-            set {/* do nothing */}
-        }
+        public LoggerVerbosity Verbosity { get; set; } = LoggerVerbosity.Normal;
 
         /*
          * Property:    Parameters
@@ -177,11 +180,7 @@ namespace Microsoft.Build.UnitTests
          * The mock logger does not take parameters.
          * 
          */
-        public string Parameters
-        {
-            get => null;
-            set {/* do nothing */}
-        }
+        public string Parameters { get; set; }
 
         /*
          * Method:  Initialize
@@ -192,12 +191,22 @@ namespace Microsoft.Build.UnitTests
         public void Initialize(IEventSource eventSource)
         {
             eventSource.AnyEventRaised += LoggerEventHandler;
+            if (eventSource is IEventSource2 eventSource2)
+            {
+                eventSource2.TelemetryLogged += TelemetryEventHandler;
+            }
 
             if (_profileEvaluation)
             {
                 var eventSource3 = eventSource as IEventSource3;
                 eventSource3.ShouldNotBeNull();
                 eventSource3.IncludeEvaluationProfiles();
+            }
+
+            // Apply parameters
+            if (Parameters?.IndexOf("reporttelemetry", StringComparison.OrdinalIgnoreCase) >= 0)
+            {
+                _reportTelemetry = true;
             }
         }
 
@@ -224,11 +233,16 @@ namespace Microsoft.Build.UnitTests
         }
         #endregion
 
-        public MockLogger(ITestOutputHelper testOutputHelper = null, bool profileEvaluation = false, bool printEventsToStdout = true)
+        public MockLogger() : this(null)
+        {
+        }
+
+        public MockLogger(ITestOutputHelper testOutputHelper = null, bool profileEvaluation = false, bool printEventsToStdout = true, LoggerVerbosity verbosity = LoggerVerbosity.Normal)
         {
             _testOutputHelper = testOutputHelper;
             _profileEvaluation = profileEvaluation;
             _printEventsToStdout = printEventsToStdout;
+            Verbosity = verbosity;
         }
 
         public List<Action<object, BuildEventArgs>> AdditionalHandlers { get; set; } = new List<Action<object, BuildEventArgs>>();
@@ -268,112 +282,138 @@ namespace Microsoft.Build.UnitTests
                         }
                         break;
                     case BuildErrorEventArgs e:
-                    {
-                        string logMessage = $"{e.File}({e.LineNumber},{e.ColumnNumber}): {e.Subcategory} error {e.Code}: {e.Message}";
-                        _fullLog.AppendLine(logMessage);
-                        _testOutputHelper?.WriteLine(logMessage);
-
-                        ++ErrorCount;
-                        Errors.Add(e);
-                        break;
-                    }
-                    default:
-                    {
-                        // Log the message unless we are a build finished event and logBuildFinished is set to false.
-                        bool logMessage = !(eventArgs is BuildFinishedEventArgs) || LogBuildFinished;
-                        if (logMessage)
                         {
-                            _fullLog.AppendLine(eventArgs.Message);
-                            _testOutputHelper?.WriteLine(eventArgs.Message);
+                            string logMessage = $"{e.File}({e.LineNumber},{e.ColumnNumber}): {e.Subcategory} error {e.Code}: {e.Message}";
+                            _fullLog.AppendLine(logMessage);
+                            _testOutputHelper?.WriteLine(logMessage);
+
+                            ++ErrorCount;
+                            Errors.Add(e);
+                            break;
                         }
-                        break;
-                    }
+                    default:
+                        {
+                            // Log the message unless we are a build finished event and logBuildFinished is set to false.
+                            bool logMessage = !(eventArgs is BuildFinishedEventArgs) || LogBuildFinished;
+                            if (logMessage)
+                            {
+                                string msg = eventArgs.Message;
+                                if (eventArgs is BuildMessageEventArgs m && m.LineNumber != 0)
+                                {
+                                    msg = $"{m.File}({m.LineNumber},{m.ColumnNumber}): {msg}";
+                                }
+                                _fullLog.AppendLine(msg);
+                                _testOutputHelper?.WriteLine(msg);
+                            }
+                            break;
+                        }
                 }
 
                 // Log the specific type of event it was
                 switch (eventArgs)
                 {
                     case ExternalProjectStartedEventArgs args:
-                    {
-                        ExternalProjectStartedEvents.Add(args);
-                        break;
-                    }
-                    case ExternalProjectFinishedEventArgs finishedEventArgs:
-                    {
-                        ExternalProjectFinishedEvents.Add(finishedEventArgs);
-                        break;
-                    }
-                    case ProjectEvaluationStartedEventArgs evaluationStartedEventArgs:
-                    {
-                        EvaluationStartedEvents.Add(evaluationStartedEventArgs);
-                        break;
-                    }
-                    case ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs:
-                    {
-                        EvaluationFinishedEvents.Add(evaluationFinishedEventArgs);
-                        break;
-                    }
-                    case ProjectStartedEventArgs startedEventArgs:
-                    {
-                        ProjectStartedEvents.Add(startedEventArgs);
-                        break;
-                    }
-                    case ProjectFinishedEventArgs finishedEventArgs:
-                    {
-                        ProjectFinishedEvents.Add(finishedEventArgs);
-                        break;
-                    }
-                    case TargetStartedEventArgs targetStartedEventArgs:
-                    {
-                        TargetStartedEvents.Add(targetStartedEventArgs);
-                        break;
-                    }
-                    case TargetFinishedEventArgs targetFinishedEventArgs:
-                    {
-                        TargetFinishedEvents.Add(targetFinishedEventArgs);
-                        break;
-                    }
-                    case TaskStartedEventArgs taskStartedEventArgs:
-                    {
-                        TaskStartedEvents.Add(taskStartedEventArgs);
-                        break;
-                    }
-                    case TaskFinishedEventArgs taskFinishedEventArgs:
-                    {
-                        TaskFinishedEvents.Add(taskFinishedEventArgs);
-                        break;
-                    }
-                    case BuildMessageEventArgs buildMessageEventArgs:
-                    {
-                        BuildMessageEvents.Add(buildMessageEventArgs);
-                        break;
-                    }
-                    case BuildStartedEventArgs buildStartedEventArgs:
-                    {
-                        BuildStartedEvents.Add(buildStartedEventArgs);
-                        break;
-                    }
-                    case BuildFinishedEventArgs buildFinishedEventArgs:
-                    {
-                        BuildFinishedEvents.Add(buildFinishedEventArgs);
-
-                        if (!AllowTaskCrashes)
                         {
-                            // We should not have any task crashes. Sometimes a test will validate that their expected error
-                            // code appeared, but not realize it then crashed.
-                            AssertLogDoesntContain("MSB4018");
+                            ExternalProjectStartedEvents.Add(args);
+                            break;
                         }
+                    case ExternalProjectFinishedEventArgs finishedEventArgs:
+                        {
+                            ExternalProjectFinishedEvents.Add(finishedEventArgs);
+                            break;
+                        }
+                    case ProjectEvaluationStartedEventArgs evaluationStartedEventArgs:
+                        {
+                            EvaluationStartedEvents.Add(evaluationStartedEventArgs);
+                            break;
+                        }
+                    case ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs:
+                        {
+                            EvaluationFinishedEvents.Add(evaluationFinishedEventArgs);
+                            break;
+                        }
+                    case ProjectStartedEventArgs startedEventArgs:
+                        {
+                            ProjectStartedEvents.Add(startedEventArgs);
+                            break;
+                        }
+                    case ProjectFinishedEventArgs finishedEventArgs:
+                        {
+                            ProjectFinishedEvents.Add(finishedEventArgs);
+                            break;
+                        }
+                    case TargetStartedEventArgs targetStartedEventArgs:
+                        {
+                            TargetStartedEvents.Add(targetStartedEventArgs);
+                            break;
+                        }
+                    case TargetFinishedEventArgs targetFinishedEventArgs:
+                        {
+                            TargetFinishedEvents.Add(targetFinishedEventArgs);
+                            break;
+                        }
+                    case TaskStartedEventArgs taskStartedEventArgs:
+                        {
+                            TaskStartedEvents.Add(taskStartedEventArgs);
+                            break;
+                        }
+                    case TaskFinishedEventArgs taskFinishedEventArgs:
+                        {
+                            TaskFinishedEvents.Add(taskFinishedEventArgs);
+                            break;
+                        }
+                    case BuildMessageEventArgs buildMessageEventArgs:
+                        {
+                            BuildMessageEvents.Add(buildMessageEventArgs);
+                            break;
+                        }
+                    case BuildStartedEventArgs buildStartedEventArgs:
+                        {
+                            BuildStartedEvents.Add(buildStartedEventArgs);
+                            break;
+                        }
+                    case BuildFinishedEventArgs buildFinishedEventArgs:
+                        {
+                            BuildFinishedEvents.Add(buildFinishedEventArgs);
 
-                        // We should not have any Engine crashes.
-                        AssertLogDoesntContain("MSB0001");
+                            if (!AllowTaskCrashes)
+                            {
+                                // We should not have any task crashes. Sometimes a test will validate that their expected error
+                                // code appeared, but not realize it then crashed.
+                                AssertLogDoesntContain("MSB4018");
+                            }
 
-                        // Console.Write in the context of a unit test is very expensive.  A hundred
-                        // calls to Console.Write can easily take two seconds on a fast machine.  Therefore, only
-                        // do the Console.Write once at the end of the build.
+                            // We should not have any Engine crashes.
+                            AssertLogDoesntContain("MSB0001");
 
-                        PrintFullLog();
+                            // Console.Write in the context of a unit test is very expensive.  A hundred
+                            // calls to Console.Write can easily take two seconds on a fast machine.  Therefore, only
+                            // do the Console.Write once at the end of the build.
 
-                        break;
+                            PrintFullLog();
+
+                            break;
+                        }
+                }
+            }
+        }
+
+        internal void TelemetryEventHandler(object sender, BuildEventArgs eventArgs)
+        {
+            lock (_lockObj)
+            {
+                if (eventArgs is TelemetryEventArgs telemetryEventArgs)
+                {
+                    TelemetryEvents.Add(telemetryEventArgs);
+
+                    if (_reportTelemetry)
+                    {
+                        // Log telemetry events to the full log so we can verify them in end-to-end tests by captured outputs.
+                        _fullLog.AppendLine($"Telemetry:{telemetryEventArgs.EventName}");
+                        foreach (KeyValuePair<string, string> pair in telemetryEventArgs.Properties)
+                        {
+                            _fullLog.AppendLine($"    {telemetryEventArgs.EventName}:{pair.Key}={pair.Value}");
+                        }
                     }
                 }
             }
@@ -393,6 +433,7 @@ namespace Microsoft.Build.UnitTests
             typeof(ProjectCollection).GetTypeInfo().Assembly));
 
         private static ResourceManager s_engineResourceManager;
+        private bool _reportTelemetry;
 
         // Gets the resource string given the resource ID
         public static string GetString(string stringId) => EngineResourceManager.GetString(stringId, CultureInfo.CurrentUICulture);
@@ -432,7 +473,10 @@ namespace Microsoft.Build.UnitTests
                     if (currentLine.Contains(comparer))
                     {
                         index++;
-                        if (index == contains.Length) break;
+                        if (index == contains.Length)
+                        {
+                            break;
+                        }
                     }
 
                     currentLine = reader.ReadLine();
@@ -494,9 +538,9 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         internal void AssertNoWarnings() => Assert.Equal(0, WarningCount);
 
-        internal void AssertMessageCount(string message, int expectedCount)
+        internal void AssertMessageCount(string message, int expectedCount, bool regexSearch = true)
         {
-            var matches = Regex.Matches(FullLog, message);
+            var matches = Regex.Matches(FullLog, regexSearch ? message : Regex.Escape(message));
             matches.Count.ShouldBe(expectedCount);
         }
     }

@@ -8,12 +8,19 @@ parameters:
   CeapexPat: $(dn-bot-ceapex-package-r) # PAT for the loc AzDO instance https://dev.azure.com/ceapex
   GithubPat: $(BotAccount-dotnet-bot-repo-PAT)
 
-  SourcesDirectory: $(Build.SourcesDirectory)
+  # Service connection for WIF-based Entra authentication to ceapex feeds (replaces CeapexPat).
+  # When set, dnceng/internal builds acquire a federated Entra token instead of using a PAT.
+  # All other projects (e.g. DevDiv, public), where this dnceng-scoped service connection does not
+  # exist, and any pipeline that sets this to '' fall back to PAT-based auth via the CeapexPat parameter.
+  CeapexServiceConnection: 'dnceng-onelocbuild-ceapex'
+
+  SourcesDirectory: $(System.DefaultWorkingDirectory)
   CreatePr: true
   AutoCompletePr: false
   ReusePr: true
   UseLfLineEndings: true
   UseCheckedInLocProjectJson: false
+  SkipLocProjectJsonGeneration: false
   LanguageSet: VS_Main_Languages
   LclSource: lclFilesInRepo
   LclPackageId: ''
@@ -22,13 +29,25 @@ parameters:
   MirrorRepo: ''
   MirrorBranch: main
   condition: ''
+  JobNameSuffix: ''
 
 jobs:
-- job: OneLocBuild
+- job: OneLocBuild${{ parameters.JobNameSuffix }}
   
   dependsOn: ${{ parameters.dependsOn }}
 
-  displayName: OneLocBuild
+  displayName: OneLocBuild${{ parameters.JobNameSuffix }}
+
+  variables:
+    - group: OneLocBuildVariables # Contains the CeapexPat and GithubPat
+    - name: _GenerateLocProjectArguments
+      value: -SourcesDirectory ${{ parameters.SourcesDirectory }}
+        -LanguageSet "${{ parameters.LanguageSet }}"
+        -CreateNeutralXlfs
+    - ${{ if eq(parameters.UseCheckedInLocProjectJson, 'true') }}:
+      - name: _GenerateLocProjectArguments
+        value: ${{ variables._GenerateLocProjectArguments }} -UseCheckedInLocProjectJson
+    - template: /eng/common/templates-official/variables/pool-providers.yml
 
   ${{ if ne(parameters.pool, '') }}:
     pool: ${{ parameters.pool }}
@@ -42,28 +61,27 @@ jobs:
         os: windows
       # If it's not devdiv, it's dnceng
       ${{ if ne(variables['System.TeamProject'], 'DevDiv') }}:
-        name: NetCore1ESPool-Svc-Internal
+        name: $(DncEngInternalBuildPool)
         image: 1es-windows-2022
         os: windows
 
-  variables:
-    - group: OneLocBuildVariables # Contains the CeapexPat and GithubPat
-    - name: _GenerateLocProjectArguments
-      value: -SourcesDirectory ${{ parameters.SourcesDirectory }}
-        -LanguageSet "${{ parameters.LanguageSet }}"
-        -CreateNeutralXlfs
-    - ${{ if eq(parameters.UseCheckedInLocProjectJson, 'true') }}:
-      - name: _GenerateLocProjectArguments
-        value: ${{ variables._GenerateLocProjectArguments }} -UseCheckedInLocProjectJson
-      
-
   steps:
-    - task: Powershell@2
-      inputs:
-        filePath: $(Build.SourcesDirectory)/eng/common/generate-locproject.ps1
-        arguments: $(_GenerateLocProjectArguments)
-      displayName: Generate LocProject.json
-      condition: ${{ parameters.condition }}
+    - ${{ if ne(parameters.SkipLocProjectJsonGeneration, 'true') }}:
+      - task: Powershell@2
+        inputs:
+          filePath: $(System.DefaultWorkingDirectory)/eng/common/generate-locproject.ps1
+          arguments: $(_GenerateLocProjectArguments)
+        displayName: Generate LocProject.json
+        condition: ${{ parameters.condition }}
+
+    # Acquire an Entra token for ceapex feed access via WIF (dnceng/internal only).
+    # All other projects use PAT-based auth, since the ceapex service connection is scoped to dnceng/internal.
+    - ${{ if and(ne(parameters.CeapexServiceConnection, ''), eq(variables['System.TeamProject'], 'internal')) }}:
+      - template: /eng/common/templates-official/steps/get-federated-access-token.yml
+        parameters:
+          federatedServiceConnection: ${{ parameters.CeapexServiceConnection }}
+          outputVariableName: 'CeapexEntraToken'
+          condition: ${{ parameters.condition }}
 
     - task: OneLocBuild@2
       displayName: OneLocBuild
@@ -75,13 +93,16 @@ jobs:
         lclSource: ${{ parameters.LclSource }}
         lclPackageId: ${{ parameters.LclPackageId }}
         isCreatePrSelected: ${{ parameters.CreatePr }}
+        isAutoCompletePrSelected: ${{ parameters.AutoCompletePr }}
         ${{ if eq(parameters.CreatePr, true) }}:
-          isAutoCompletePrSelected: ${{ parameters.AutoCompletePr }}
           isUseLfLineEndingsSelected: ${{ parameters.UseLfLineEndings }}
           ${{ if eq(parameters.RepoType, 'gitHub') }}:
             isShouldReusePrSelected: ${{ parameters.ReusePr }}
         packageSourceAuth: patAuth
-        patVariable: ${{ parameters.CeapexPat }}
+        ${{ if and(ne(parameters.CeapexServiceConnection, ''), eq(variables['System.TeamProject'], 'internal')) }}:
+          patVariable: $(CeapexEntraToken)
+        ${{ if or(eq(parameters.CeapexServiceConnection, ''), ne(variables['System.TeamProject'], 'internal')) }}:
+          patVariable: ${{ parameters.CeapexPat }}
         ${{ if eq(parameters.RepoType, 'gitHub') }}:
           repoType: ${{ parameters.RepoType }}
           gitHubPatVariable: "${{ parameters.GithubPat }}"
@@ -103,7 +124,7 @@ jobs:
     - task: 1ES.PublishBuildArtifacts@1
       displayName: Publish LocProject.json
       inputs:
-        PathtoPublish: '$(Build.SourcesDirectory)/eng/Localize/'
+        PathtoPublish: '$(System.DefaultWorkingDirectory)/eng/Localize/'
         PublishLocation: Container
         ArtifactName: Loc
       condition: ${{ parameters.condition }}

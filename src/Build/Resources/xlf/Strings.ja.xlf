@@ -55,6 +55,11 @@
       LOCALIZATION: Do not localize the following words: ProjectReference, ProjectReferenceTargets
     </note>
       </trans-unit>
+      <trans-unit id="CannotCopyFromElementOfThatType">
+        <source>MSB4277: Cannot copy from object of that type.</source>
+        <target state="translated">MSB4277: その型のオブジェクトからコピーできません。</target>
+        <note>{StrBegin="MSB4277: "}</note>
+      </trans-unit>
       <trans-unit id="CannotExpandItemMetadata">
         <source>MSB4248: Cannot expand metadata in expression "{0}". {1}</source>
         <target state="translated">MSB4248: 式 "{0}" の中のメタデータを展開できません。 {1}</target>
@@ -63,13 +68,13 @@
     LOCALIZATION: "{1}" is a localized message explaining the problem.</note>
       </trans-unit>
       <trans-unit id="ChangeWave_InvalidFormat">
-        <source>MSB4271: Environment variable MSBuildDisableFeaturesFromVersion is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
-        <target state="translated">MSB4271: 環境変数 MSBuildDisableFeaturesFromVersion が無効な形式に設定されています。すべての変更ウェーブ バージョンを有効にしています。入力された値: {0}。現在の変更ウェーブ: {1}。</target>
+        <source>MSB4271: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to an invalid format. Enabling all change wave versions. Entered value: {0}. Current Change Waves: {1}.</source>
+        <target state="translated">MSB4271: 環境変数 MSBUILDDISABLEFEATURESFROMVERSION が無効な形式に設定されています。すべての変更ウェーブ バージョンを有効にしています。入力された値: {0}。現在の変更ウェーブ: {1}。</target>
         <note>{StrBegin="MSB4271: "}UE: Value should be of the format: xx.yy</note>
       </trans-unit>
       <trans-unit id="ChangeWave_OutOfRotation">
-        <source>MSB4272: Environment variable MSBuildDisableFeaturesFromVersion is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
-        <target state="translated">MSB4272: 環境変数 MSBuildDisableFeaturesFromVersion が、ローテーションから外れているバージョンに設定されています。変更ウェーブ バージョンを既定値にしています: {0}。入力された値: {1}。現在の変更ウェーブ: {2}。</target>
+        <source>MSB4272: Environment variable MSBUILDDISABLEFEATURESFROMVERSION is set to a version that is out of rotation. Defaulting to Change Wave version: {0}. Entered value: {1}. Current Change Waves: {2}.</source>
+        <target state="translated">MSB4272: 環境変数 MSBUILDDISABLEFEATURESFROMVERSION が、ローテーションから外れているバージョンに設定されています。変更ウェーブ バージョンを既定値にしています: {0}。入力された値: {1}。現在の変更ウェーブ: {2}。</target>
         <note>{StrBegin="MSB4272: "}</note>
       </trans-unit>
       <trans-unit id="CircularDependency">
@@ -92,9 +97,24 @@
         <note>{StrBegin="MSB4006: "}UE: This message is shown when the build engine detects a target referenced in a circular manner -- a project cannot
     request a target to build itself (perhaps via a chain of other targets).</note>
       </trans-unit>
+      <trans-unit id="DefaultSDKResolverError">
+        <source>MSB4276: The default SDK resolver failed to resolve SDK "{0}" because directory "{1}" did not exist.</source>
+        <target state="translated">MSB4276: ディレクトリ "{0}" が存在しなかったため、既定の SDK リゾルバーは SDK "{1}" を解決できませんでした。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="DuplicateOverrideUsingTaskElement">
+        <source>MSB4275: Attempted to create multiple overrides of the same task: {0}</source>
+        <target state="translated">MSB4275: 同じタスクの複数のオーバーライドを作成しようとしました: {0}</target>
+        <note>{StrBegin="MSB4275: "}</note>
+      </trans-unit>
       <trans-unit id="EmptyOutputCacheFile">
         <source>MSB4257: The specified output result cache file is empty.</source>
         <target state="translated">MSB4257: 指定された出力結果キャッシュ ファイルは空です。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="EnvironmentDerivedPropertyRead">
+        <source>Property '{0}' with value '{1}' expanded from the environment.</source>
+        <target state="translated">環境から展開された '{1}' 値を持つプロパティ '{0}'。</target>
         <note />
       </trans-unit>
       <trans-unit id="EnvironmentVariableRead">
@@ -111,6 +131,18 @@
         <source>MSB4258: Writing output result cache file in path "{0}" encountered an error: {1}</source>
         <target state="translated">MSB4258: パス "{0}" の出力結果キャッシュ ファイルに書き込む処理でエラーが発生しました: {1}</target>
         <note />
+      </trans-unit>
+      <trans-unit id="FailedToResolveSDK">
+        <source>Could not resolve SDK "{0}". Exactly one of the probing messages below indicates why we could not resolve the SDK. Investigate and resolve that message to correctly specify the SDK.
+  {1}</source>
+        <target state="translated">SDK "{0}" を解決できませんでした。以下のプローブ メッセージの 1 つは、SDK を解決できなかった理由を示しています。SDK を正しく指定するには、そのメッセージを調査して解決してください。
+  {1}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="General.TwoVectorsMustHaveSameLength">
+        <source>MSB3094: "{2}" refers to {0} item(s), and "{3}" refers to {1} item(s). They must have the same number of items.</source>
+        <target state="translated">MSB3094: "{2}" は {0} 項目を参照し、"{3}" は {1} 項目を参照します。これらは同じ項目数を持たなければなりません。</target>
+        <note>{StrBegin="MSB3094: "}</note>
       </trans-unit>
       <trans-unit id="IllFormedPropertySpaceInCondition">
         <source>MSB4259: Unexpected space at position "{1}" of condition "{0}". Did you forget to remove a space?</source>
@@ -132,16 +164,19 @@
         <target state="translated">SharingPolicy.Isolated を指定して作成された EvaluationContext オブジェクトに MSBuildFileSystemBase ファイル システムを渡すことはサポートされていません。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ItemReferencingSelfInTarget">
+        <source>MSB4120: Item '{0}' definition within target references itself via (qualified or unqualified) metadatum '{1}'. This can lead to unintended expansion and cross-applying of pre-existing items. More info: https://aka.ms/msbuild/metadata-self-ref</source>
+        <target state="translated">MSB4120: ターゲット内の項目 '{0}' 定義は、メタダタム '{1}' を介して (修飾または非修飾) 参照自体を参照しています。これにより、意図しない展開や既存のアイテムのクロス適用が発生する可能性があります。詳細情報: https://aka.ms/msbuild/metadata-self-ref</target>
+        <note>{StrBegin="MSB4120: "}</note>
+      </trans-unit>
       <trans-unit id="KillingProcessWithPid">
         <source>Killing process with pid = {0}.</source>
         <target state="translated">PID = {0} のプロセスを中止しています。</target>
         <note />
       </trans-unit>
       <trans-unit id="LoadingProjectCachePlugin">
-        <source>Loading the following project cache plugin:
-    {0}</source>
-        <target state="translated">次のプロジェクト キャッシュ プラグインを読み込んでいます。
-    {0}</target>
+        <source>Loading the following project cache plugin: {0}</source>
+        <target state="translated">次のプロジェクト キャッシュ プラグインを読み込んでいます: {0}</target>
         <note />
       </trans-unit>
       <trans-unit id="LogLoggerVerbosity">
@@ -171,9 +206,9 @@
         <target state="translated">MSB4270: プロジェクト キャッシュのプラグインがアセンブリ "{0}" に見つかりませんでした。プラグインが 1 つ必要です。</target>
         <note />
       </trans-unit>
-      <trans-unit id="NotAllNodesDefineACacheItem">
-        <source>MSB4269: When any static graph node defines a project cache, all nodes must define the same project cache. The following project(s) do not contain a "{0}" item declaration: {1}</source>
-        <target state="translated">MSB4269: 静的グラフ ノードでプロジェクト キャッシュが定義されている場合、すべてのノードで同じプロジェクト キャッシュを定義する必要があります。プロジェクト {1} には、"{0}" 項目宣言が含まれていません</target>
+      <trans-unit id="NodeReused">
+        <source>Reusing node {0} (PID: {1}).</source>
+        <target state="translated">ノード {0} を再利用しています (PID: {1})。</target>
         <note />
       </trans-unit>
       <trans-unit id="NuGetAssemblyNotFound">
@@ -214,9 +249,14 @@
         <target state="translated">Null または空のターゲット名を含むコレクションを指定してメソッド {0} を呼び出すことはできません。</target>
         <note />
       </trans-unit>
-      <trans-unit id="OnlyOneCachePluginMustBeSpecified">
-        <source>MSB4265: A single project cache plugin must be specified but multiple where found: {0}</source>
-        <target state="translated">MSB4265: 単一のプロジェクト キャッシュ プラグインを指定する必要がありますが、複数指定されています。{0}</target>
+      <trans-unit id="OverrideUsingTaskElementCreated">
+        <source>Created an override using task: {0} at {1}</source>
+        <target state="translated">タスクを使用してオーバーライドを作成しました: {1} の {0}</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheEndBuild">
+        <source>Shutting down project cache plugin.</source>
+        <target state="translated">プロジェクト キャッシュ プラグインをシャットダウンしています。</target>
         <note />
       </trans-unit>
       <trans-unit id="ProjectCacheException">
@@ -224,15 +264,83 @@
         <target state="translated">MSB4273: プロジェクト キャッシュが {0} メソッドで処理されていない例外が返されました。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheHandleBuildResultFailed">
+        <source>MSB4269: The project cache failed while handling a build result for the following project: {0}.</source>
+        <target state="translated">MSB4269: 次のプロジェクトのビルド結果を処理中にプロジェクト キャッシュが失敗しました: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithDefaultTargets">
+        <source>Project cache hit for "{0}" (default targets).</source>
+        <target state="translated">"{0}" のプロジェクト キャッシュ ヒット (既定のターゲット)。</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithOutputs">
+        <source>{0} -&gt; Cache Hit</source>
+        <target state="translated">{0} -&gt; キャッシュ ヒット</target>
+        <note>
+      {StrBegin="{0} -&gt; "}LOCALIZATION: This string is used to indicate progress and matches the format for a log message from Microsoft.Common.CurrentVersion.targets. {0} is a project name.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheHitWithTargetNames">
+        <source>Project cache hit for "{0}" ({1} target(s)).</source>
+        <target state="translated">"{0}" (ターゲット{1}) のプロジェクト キャッシュ ヒット。</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectCacheInitializationFailed">
         <source>MSB4266: Failed to initialize the project cache.</source>
         <target state="translated">MSB4266: プロジェクト キャッシュを初期化できませんでした。</target>
         <note />
       </trans-unit>
+      <trans-unit id="ProjectCacheMissWithDefaultTargets">
+        <source>Project cache miss for "{0}" (default targets).</source>
+        <target state="translated">"{0}" のプロジェクト キャッシュ ミス (既定のターゲット)。</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheMissWithTargetNames">
+        <source>Project cache miss for "{0}" ({1} target(s)).</source>
+        <target state="translated">"{0}" (ターゲット{1} ) のプロジェクト キャッシュ ミス。</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithDefaultTargets">
+        <source>Project cache not applicable for "{0}" (default targets).</source>
+        <target state="translated">プロジェクト キャッシュは "{0}" (既定のターゲット) には適用されません。</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheNotApplicableWithTargetNames">
+        <source>Project cache not applicable for "{0}" ({1} target(s)).</source>
+        <target state="translated">プロジェクト キャッシュは"{0}" ({1} ターゲット) には適用されません。</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
+      </trans-unit>
       <trans-unit id="ProjectCacheQueryFailed">
         <source>MSB4267: The project cache failed while being queried for the following project: {0}. The cache is queried in parallel for multiple projects so this specific project might not be the cause.</source>
         <target state="translated">MSB4267: プロジェクト キャッシュは、プロジェクト {0} に対してクエリを実行しているときに失敗しました。このキャッシュでは複数のプロジェクトについて並列でクエリが実行されるため、この特定のプロジェクトが原因ではない可能性があります。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithDefaultTargets">
+        <source>Querying project cache for "{0}" (default targets):</source>
+        <target state="translated">"{0}" のプロジェクト キャッシュを照会しています (既定のターゲット):</target>
+        <note>
+      LOCALIZATION: {0} is a file path.
+    </note>
+      </trans-unit>
+      <trans-unit id="ProjectCacheQueryStartedWithTargetNames">
+        <source>Querying project cache for "{0}" (targets: {1}):</source>
+        <target state="translated">"{0}" のプロジェクト キャッシュを照会しています (ターゲット: {1}):</target>
+        <note>
+      LOCALIZATION: {0} is a file path. {1} is a comma-separated list of target names
+    </note>
       </trans-unit>
       <trans-unit id="ProjectCacheShutdownFailed">
         <source>MSB4268: The project cache failed to shut down properly.</source>
@@ -257,9 +365,34 @@
         <target state="translated">プロパティの初期値: $({0})="{1}" ソース: {2}</target>
         <note />
       </trans-unit>
+      <trans-unit id="PropertyOutsidePropertyGroupInTarget">
+        <source>MSB4067: The element &lt;{0}&gt; beneath element &lt;{1}&gt; is unrecognized. If you intended this to be a property, enclose it within a &lt;PropertyGroup&gt; element.</source>
+        <target state="translated">MSB4067: 要素 &lt;{0}&gt; の下 &lt;{1}&gt; 要素を認識できません。これをプロパティにする場合は、&lt;PropertyGroup&gt; 要素内で囲んでください。</target>
+        <note>{StrBegin="MSB4067: "}</note>
+      </trans-unit>
       <trans-unit id="ProxyRequestNotScheduledOnInprocNode">
         <source>MSB4274: Disabling the inproc node leads to performance degradation when using project cache plugins that emit proxy build requests.</source>
         <target state="translated">MSB4274: プロキシ・ビルド要求を出すプロジェクト キャッシュ プラグインを使用する場合、InProc ノードを無効にするとパフォーマンスが低下します。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ReportFileAccessesX64Only">
+        <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
+        <target state="translated">ファイル アクセスのレポートは、現在、MSBuild の x64 フレーバーを使用してのみサポートされています。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverCriticalFailure">
+        <source>MSB4242: SDK Resolver Failure: "{0}"</source>
+        <target state="translated">MSB4242: SDK リゾルバー エラー: "{0}"</target>
+        <note>{StrBegin="MSB4242: "}</note>
+      </trans-unit>
+      <trans-unit id="SDKResolverFailed">
+        <source>The SDK resolver "{0}" failed while attempting to resolve the SDK "{1}". Exception: "{2}"</source>
+        <target state="translated">SDK "{1}" を解決しようとしているときに、SDK リゾルバー "{0}" に失敗しました。例外: "{2}"</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="SDKResolverReturnedNull">
+        <source>SDK resolver "{0}" returned null.</source>
+        <target state="translated">SDK リゾルバー "{0}" が null を返しました。</target>
         <note />
       </trans-unit>
       <trans-unit id="SkippedConstraintsOnRequest">
@@ -313,6 +446,11 @@
         <target state="translated">タスク "{0}" では、{1} 個のコアを要求し、{2} 個のコアを取得したため、現在合計 {3} 個のコアを保持しています。</target>
         <note />
       </trans-unit>
+      <trans-unit id="TaskAssemblyLoaded">
+        <source>Assembly loaded during {0}{1}: {2} (location: {3}, MVID: {4}, AppDomain: {5})</source>
+        <target state="translated">{0}{1} 中にアセンブリが読み込まれました: {2} (場所: {3}、MVID: {4}、AppDomain: {5})</target>
+        <note />
+      </trans-unit>
       <trans-unit id="TaskReleasedCores">
         <source>Task "{0}" released {1} cores and now holds {2} cores total.</source>
         <target state="translated">タスク "{0}" では、{1} 個のコアを解放したため、現在合計 {2} 個のコアを保持しています。</target>
@@ -335,6 +473,13 @@
       {StrBegin="MSB4254:"}
       LOCALIZATION: Do not localize the following words: ProjectReference, MSBuild, task.
     </note>
+      </trans-unit>
+      <trans-unit id="UnhandledMSBuildError">
+        <source>This is an unhandled exception in MSBuild -- PLEASE UPVOTE AN EXISTING ISSUE OR FILE A NEW ONE AT https://aka.ms/msbuild/unhandled
+    {0}</source>
+        <target state="translated">これは MSBuild でハンドルされない例外です -- 既存の問題に賛成票を投じるか、https://aka.ms/msbuild/unhandled で新しい問題を提起してください。
+    {0}</target>
+        <note />
       </trans-unit>
       <trans-unit id="UninitializedPropertyRead">
         <source>Read uninitialized property "{0}"</source>
@@ -1790,8 +1935,8 @@
         <note>{StrBegin="MSB4209: "}</note>
       </trans-unit>
       <trans-unit id="AffinityConflict">
-        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for this project.</source>
-        <target state="translated">MSB4213: 指定された要求の関係 {0} は、このプロジェクトに対して以前に指定された関係 {1} と競合しています。</target>
+        <source>MSB4213: The specified request affinity {0} conflicts with a previous affinity {1} specified for project {2} with global properties {3}</source>
+        <target state="translated">MSB4213: 指定された要求の関係 {0} は、グローバル プロパティ {3} を持つプロジェクト {2} に対して以前に指定された関係 {1} と競合しています。</target>
         <note>{StrBegin="MSB4213: "}</note>
       </trans-unit>
       <trans-unit id="UnableToCreateNode">
@@ -2069,8 +2214,8 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <note />
       </trans-unit>
       <trans-unit id="OM_MustSetRecordDuplicateInputs">
-        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateImports flag.</source>
-        <target state="translated">プロジェクトが ProjectLoadSettings.RecordDuplicateImports フラグで読み込まれていません。</target>
+        <source>Project was not loaded with the ProjectLoadSettings.RecordDuplicateButNotCircularImports flag.</source>
+        <target state="translated">プロジェクトが ProjectLoadSettings.RecordDuplicateButNotCircularImports フラグで読み込まれていません。</target>
         <note />
       </trans-unit>
       <trans-unit id="OM_CannotSaveFileLoadedAsReadOnly">
@@ -2379,15 +2524,10 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
         <target state="translated">MSB4244: SDK 競合回避モジュールのアセンブリ "{0}" を読み込めませんでした。{1}</target>
         <note>{StrBegin="MSB4244: "}</note>
       </trans-unit>
-      <trans-unit id="CouldNotRunSdkResolver">
-        <source>MSB4242: The SDK resolver "{0}" failed to run. {1}</source>
-        <target state="translated">MSB4242: SDK 競合回避モジュール "{0}" を実行できませんでした。{1}</target>
-        <note>{StrBegin="MSB4242: "}</note>
-      </trans-unit>
       <trans-unit id="CouldNotRunNuGetSdkResolver">
-        <source>MSB4243: The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
-        <target state="translated">MSB4243: NuGet アセンブリを見つけることができなかったため、NuGet ベースの SDK 競合回避モジュールを実行できませんでした。MSBuild のインストールを確認するか、環境変数 "{0}" を、必要な NuGet アセンブリが含まれているフォルダーに設定してください。{1}</target>
-        <note>{StrBegin="MSB4243: "}</note>
+        <source>The NuGet-based SDK resolver failed to run because NuGet assemblies could not be located.  Check your installation of MSBuild or set the environment variable "{0}" to the folder that contains the required NuGet assemblies. {1}</source>
+        <target state="translated">NuGet アセンブリを見つけることができなかったため、NuGet ベースの SDK 競合回避モジュールを実行できませんでした。MSBuild のインストールを確認するか、環境変数 "{0}" を、必要な NuGet アセンブリが含まれているフォルダーに設定してください。{1}</target>
+        <note />
       </trans-unit>
       <trans-unit id="ProjectImportSkippedInvalidFile">
         <source>Project "{0}" was not imported by "{1}" at ({2},{3}), due to the file being invalid.</source>

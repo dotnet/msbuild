@@ -1,0 +1,7 @@
+M:System.Globalization.CompareInfo.IndexOf(System.String,System.Char);CompareInfo.IndexOf can unexpectedly allocate strings--use string.IndexOf
+P:Microsoft.Build.Construction.ProjectElementContainer.Children;Use ChildrenEnumerable instead to avoid boxing
+M:System.Xml.XmlReader.Create(System.String);Do not pass paths to XmlReader.Create--use the Stream overload
+M:System.Xml.XmlReader.Create(System.String,System.Xml.XmlReaderSettings);Do not pass paths to XmlReader.Create--use the Stream overload
+M:System.Xml.XmlReader.Create(System.String,System.Xml.XmlReaderSettings,System.Xml.XmlParserContext);Do not pass paths to XmlReader.Create--use the Stream overload
+M:System.Xml.XPath.XPathDocument.#ctor(System.String);Do not pass string paths to XPathDocument ctor--use the Stream overload
+M:System.Xml.XPath.XPathDocument.#ctor(System.String,System.Xml.XmlSpace);Do not pass string paths to XPathDocument ctor--use the Stream overload

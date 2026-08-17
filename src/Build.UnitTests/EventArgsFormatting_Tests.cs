@@ -1,11 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Xunit;
 
 
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -133,7 +135,6 @@ namespace Microsoft.Build.UnitTests
             EventArgsFormatting.FormatEventMessage("error", "CS",
                       null, "312", "source.cs", 233, 236, 4, 8, 0);
             // No exception was thrown
-
         }
     }
 }

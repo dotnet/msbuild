@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections.Generic;
 using System.Text;
-using System.Collections;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -17,7 +19,7 @@ namespace Microsoft.Build.Tasks
         private int _openConditionalDirectives;
 
         // A stack of namespaces so that nested namespaces can be supported.
-        private readonly Stack _namespaceStack = new Stack();
+        private readonly Stack<string> _namespaceStack = new Stack<string>();
 
         internal ParseState()
         {
@@ -88,7 +90,7 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
 
-            return (string)_namespaceStack.Pop();
+            return _namespaceStack.Pop();
         }
 
         /// <summary>

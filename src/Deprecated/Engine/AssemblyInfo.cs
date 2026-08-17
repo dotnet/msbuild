@@ -1,5 +1,9 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Resources;
@@ -17,11 +21,4 @@ using System.Runtime.CompilerServices;
 
 [assembly: CLSCompliant(true)]
 
-// Needed for the "hub-and-spoke model to locate and retrieve localized resources": https://msdn.microsoft.com/en-us/library/21a15yht(v=vs.110).aspx
-// We want "en" to require a satellite assembly for debug builds in order to flush out localization
-// issues, but we want release builds to work without it. Also, .net core does not have resource fallbacks
-#if (DEBUG && !RUNTIME_TYPE_NETCORE)
-[assembly: NeutralResourcesLanguage("en", UltimateResourceFallbackLocation.Satellite)]
-#else
 [assembly: NeutralResourcesLanguage("en")]
-#endif

@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -9,12 +9,13 @@ using System.Xml;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
-
 using Microsoft.Build.Framework;
-using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
 using Microsoft.Build.Shared;
 using Xunit;
 using Xunit.Abstractions;
+using ForwardingLoggerRecord = Microsoft.Build.Logging.ForwardingLoggerRecord;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Instance
 {
@@ -155,8 +156,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance p = GetEmptyProjectInstance();
                 p.AddItem(null, "i1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Add item empty item type
@@ -168,8 +168,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance p = GetEmptyProjectInstance();
                 p.AddItem(String.Empty, "i1");
-            }
-           );
+            });
         }
         /// <summary>
         /// Add item null include
@@ -181,8 +180,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance p = GetEmptyProjectInstance();
                 p.AddItem("i", null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Add item null metadata
@@ -252,7 +250,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         public void ItemEvaluationCopiesMetadata()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemGroup>
                             <i Include='i1'>
                                 <m>m1</m>
@@ -297,7 +295,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
                 string path = Path.Combine(directory, "*.exe");
 
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                           <ItemGroup>
                             <i Include='" + path + @"'/>
@@ -347,8 +345,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance instance = new ProjectInstance(ProjectRootElement.Create());
                 instance.Build(new string[] { null }, null);
-            }
-           );
+            });
         }
         /// <summary>
         /// Null logger in array should give ArgumentNullException
@@ -360,8 +357,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance instance = new ProjectInstance(ProjectRootElement.Create());
                 instance.Build("t", new ILogger[] { null });
-            }
-           );
+            });
         }
         /// <summary>
         /// Null remote logger in array should give ArgumentNullException
@@ -373,8 +369,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
             {
                 ProjectInstance instance = new ProjectInstance(ProjectRootElement.Create());
                 instance.Build("t", null, new ForwardingLoggerRecord[] { null });
-            }
-           );
+            });
         }
         /// <summary>
         /// Null target name should imply the default target
@@ -402,13 +397,13 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         {
             ProjectInstance instance1 = new Project().CreateProjectInstance();
 
-            BuildRequestData buildRequestData1 = new BuildRequestData(instance1, new string[] { });
+            BuildRequestData buildRequestData1 = new BuildRequestData(instance1, Array.Empty<string>());
 
             BuildManager.DefaultBuildManager.Build(new BuildParameters(), buildRequestData1);
 
             new Project().CreateProjectInstance();
 
-            BuildRequestData buildRequestData2 = new BuildRequestData(instance1, new string[] { });
+            BuildRequestData buildRequestData2 = new BuildRequestData(instance1, Array.Empty<string>());
 
             BuildManager.DefaultBuildManager.Build(new BuildParameters(), buildRequestData2);
         }
@@ -527,8 +522,8 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Validate that the DefiningProject* metadata is set to the correct project based on a variety 
-        /// of means of item creation. 
+        /// Validate that the DefiningProject* metadata is set to the correct project based on a variety
+        /// of means of item creation.
         /// </summary>
         [Fact]
         public void TestDefiningProjectMetadata()
@@ -572,7 +567,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
   </Target>
 
   <Target Name=`Validate` DependsOnTargets=`AddFromMainProject;AddFromImport`>
-    <Warning Text=`A is wrong: EXPECTED: [a] ACTUAL: [%(A.DefiningProjectName)]` Condition=`'%(A.DefiningProjectName)' != 'a'` />    
+    <Warning Text=`A is wrong: EXPECTED: [a] ACTUAL: [%(A.DefiningProjectName)]` Condition=`'%(A.DefiningProjectName)' != 'a'` />
     <Warning Text=`B is wrong: EXPECTED: [a] ACTUAL: [%(B.DefiningProjectName)]` Condition=`'%(B.DefiningProjectName)' != 'a'` />
     <Warning Text=`C is wrong: EXPECTED: [b] ACTUAL: [%(C.DefiningProjectName)]` Condition=`'%(C.DefiningProjectName)' != 'b'` />
     <Warning Text=`D is wrong: EXPECTED: [b] ACTUAL: [%(D.DefiningProjectName)]` Condition=`'%(D.DefiningProjectName)' != 'b'` />
@@ -831,7 +826,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
-        /// Test operation fails on immutable project instance 
+        /// Test operation fails on immutable project instance
         /// </summary>
         [Fact]
         public void ImmutableProjectInstance_SetNewProperty()
@@ -993,7 +988,7 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         private static ProjectInstance GetSampleProjectInstance(bool isImmutable = false)
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <ItemDefinitionGroup>
                             <i>
                               <n>n1</n>

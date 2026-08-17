@@ -1,8 +1,13 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.Shared;
+
+using Shouldly;
 using Xunit;
+using Xunit.NetCore.Extensions;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -47,41 +52,84 @@ namespace Microsoft.Build.UnitTests
         public void TestRuntimeValuesMatch()
         {
             Assert.True(XMakeAttributes.RuntimeValuesMatch(XMakeAttributes.MSBuildRuntimeValues.any, XMakeAttributes.MSBuildRuntimeValues.currentRuntime));
+            Assert.True(XMakeAttributes.RuntimeValuesMatch(XMakeAttributes.MSBuildRuntimeValues.any, XMakeAttributes.MSBuildRuntimeValues.net));
             Assert.True(XMakeAttributes.RuntimeValuesMatch(XMakeAttributes.MSBuildRuntimeValues.any, XMakeAttributes.MSBuildRuntimeValues.clr4));
             Assert.True(XMakeAttributes.RuntimeValuesMatch(XMakeAttributes.MSBuildRuntimeValues.clr2, XMakeAttributes.MSBuildRuntimeValues.any));
+#if NET5_0_OR_GREATER
+            Assert.True(XMakeAttributes.RuntimeValuesMatch(XMakeAttributes.MSBuildRuntimeValues.currentRuntime, XMakeAttributes.MSBuildRuntimeValues.net));
+#else
             Assert.True(XMakeAttributes.RuntimeValuesMatch(XMakeAttributes.MSBuildRuntimeValues.currentRuntime, XMakeAttributes.MSBuildRuntimeValues.clr4));
+#endif
 
+            // Never true
             Assert.False(XMakeAttributes.RuntimeValuesMatch(XMakeAttributes.MSBuildRuntimeValues.currentRuntime, XMakeAttributes.MSBuildRuntimeValues.clr2));
+
             Assert.False(XMakeAttributes.RuntimeValuesMatch(XMakeAttributes.MSBuildRuntimeValues.clr4, XMakeAttributes.MSBuildRuntimeValues.clr2));
+            Assert.False(XMakeAttributes.RuntimeValuesMatch(XMakeAttributes.MSBuildRuntimeValues.clr4, XMakeAttributes.MSBuildRuntimeValues.net));
+            Assert.False(XMakeAttributes.RuntimeValuesMatch(XMakeAttributes.MSBuildRuntimeValues.clr2, XMakeAttributes.MSBuildRuntimeValues.net));
+        }
+
+        [Theory]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.any, XMakeAttributes.MSBuildRuntimeValues.clr4, true, XMakeAttributes.MSBuildRuntimeValues.clr4)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr4, XMakeAttributes.MSBuildRuntimeValues.any, true, XMakeAttributes.MSBuildRuntimeValues.clr4)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr2, XMakeAttributes.MSBuildRuntimeValues.any, true, XMakeAttributes.MSBuildRuntimeValues.clr2)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.currentRuntime, XMakeAttributes.MSBuildRuntimeValues.clr2, false, null)]
+        [InlineData(XMakeAttributes.MSBuildRuntimeValues.clr4, XMakeAttributes.MSBuildRuntimeValues.clr2, false, null)]
+        public void TestMergeRuntimeValues(string left, string right, bool success, string expected)
+        {
+            XMakeAttributes.TryMergeRuntimeValues(left, right, out string mergedRuntime)
+                .ShouldBe(success);
+
+            mergedRuntime.ShouldBe(expected);
         }
 
         [Fact]
-        public void TestMergeRuntimeValues()
+        public void TestMergeRuntimeValuesAnyAcceptsCurrent()
         {
-            string mergedRuntime;
-            Assert.True(XMakeAttributes.TryMergeRuntimeValues(XMakeAttributes.MSBuildRuntimeValues.any, XMakeAttributes.MSBuildRuntimeValues.currentRuntime, out mergedRuntime));
-            Assert.Equal(XMakeAttributes.MSBuildRuntimeValues.clr4, mergedRuntime);
+            XMakeAttributes.TryMergeRuntimeValues(XMakeAttributes.MSBuildRuntimeValues.any,
+                XMakeAttributes.MSBuildRuntimeValues.currentRuntime,
+                out string mergedRuntime)
+                .ShouldBeTrue();
 
-            Assert.True(XMakeAttributes.TryMergeRuntimeValues(XMakeAttributes.MSBuildRuntimeValues.any, XMakeAttributes.MSBuildRuntimeValues.clr4, out mergedRuntime));
-            Assert.Equal(XMakeAttributes.MSBuildRuntimeValues.clr4, mergedRuntime);
+            mergedRuntime.ShouldBe(XMakeAttributes.GetCurrentMSBuildRuntime());
+        }
 
-            Assert.True(XMakeAttributes.TryMergeRuntimeValues(XMakeAttributes.MSBuildRuntimeValues.clr2, XMakeAttributes.MSBuildRuntimeValues.any, out mergedRuntime));
-            Assert.Equal(XMakeAttributes.MSBuildRuntimeValues.clr2, mergedRuntime);
+        [WindowsFullFrameworkOnlyFact(additionalMessage: "Tests whether 'current' merges with 'clr4' which is true only on Framework.")]
+        public void TestMergeRuntimeValuesCurrentToClr4()
+        {
+            XMakeAttributes.TryMergeRuntimeValues(
+                XMakeAttributes.MSBuildRuntimeValues.currentRuntime,
+                XMakeAttributes.MSBuildRuntimeValues.clr4,
+                out string mergedRuntime).ShouldBeTrue();
+            mergedRuntime.ShouldBe(XMakeAttributes.MSBuildRuntimeValues.clr4);
 
-            Assert.True(XMakeAttributes.TryMergeRuntimeValues(XMakeAttributes.MSBuildRuntimeValues.currentRuntime, XMakeAttributes.MSBuildRuntimeValues.clr4, out mergedRuntime));
-            Assert.Equal(XMakeAttributes.MSBuildRuntimeValues.clr4, mergedRuntime);
+            XMakeAttributes.TryMergeRuntimeValues(
+                XMakeAttributes.MSBuildRuntimeValues.currentRuntime,
+                XMakeAttributes.MSBuildRuntimeValues.net,
+                out mergedRuntime).ShouldBeFalse();
+            mergedRuntime.ShouldBeNull();
+        }
 
-            Assert.False(XMakeAttributes.TryMergeRuntimeValues(XMakeAttributes.MSBuildRuntimeValues.currentRuntime, XMakeAttributes.MSBuildRuntimeValues.clr2, out mergedRuntime));
-            Assert.Null(mergedRuntime);
+        [DotNetOnlyFact(additionalMessage: "Tests whether 'current' merges with 'net' which is true only on core.")]
+        public void TestMergeRuntimeValuesCurrentToCore()
+        {
+            XMakeAttributes.TryMergeRuntimeValues(
+                XMakeAttributes.MSBuildRuntimeValues.currentRuntime,
+                XMakeAttributes.MSBuildRuntimeValues.net,
+                out string mergedRuntime).ShouldBeTrue();
+            mergedRuntime.ShouldBe(XMakeAttributes.MSBuildRuntimeValues.net);
 
-            Assert.False(XMakeAttributes.TryMergeRuntimeValues(XMakeAttributes.MSBuildRuntimeValues.clr4, XMakeAttributes.MSBuildRuntimeValues.clr2, out mergedRuntime));
-            Assert.Null(mergedRuntime);
+            XMakeAttributes.TryMergeRuntimeValues(
+                XMakeAttributes.MSBuildRuntimeValues.currentRuntime,
+                XMakeAttributes.MSBuildRuntimeValues.clr4,
+                out mergedRuntime).ShouldBeFalse();
+            mergedRuntime.ShouldBeNull();
         }
 
         [Fact]
         public void TestArchitectureValuesMatch()
         {
-            string currentArchitecture = EnvironmentUtilities.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x64 : XMakeAttributes.MSBuildArchitectureValues.x86;
+            string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
             string notCurrentArchitecture = EnvironmentUtilities.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x86 : XMakeAttributes.MSBuildArchitectureValues.x64;
 
             Assert.True(XMakeAttributes.ArchitectureValuesMatch(XMakeAttributes.MSBuildArchitectureValues.any, XMakeAttributes.MSBuildArchitectureValues.currentArchitecture));
@@ -96,7 +144,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TestMergeArchitectureValues()
         {
-            string currentArchitecture = EnvironmentUtilities.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x64 : XMakeAttributes.MSBuildArchitectureValues.x86;
+            string currentArchitecture = XMakeAttributes.GetCurrentMSBuildArchitecture();
             string notCurrentArchitecture = EnvironmentUtilities.Is64BitProcess ? XMakeAttributes.MSBuildArchitectureValues.x86 : XMakeAttributes.MSBuildArchitectureValues.x64;
 
             string mergedArchitecture;

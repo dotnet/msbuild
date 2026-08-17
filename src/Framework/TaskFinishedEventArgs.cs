@@ -1,9 +1,11 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
@@ -38,15 +40,13 @@ namespace Microsoft.Build.Framework
         /// <param name="taskFile">file in which the task is defined</param>
         /// <param name="taskName">task name</param> 
         /// <param name="succeeded">true indicates task succeed</param>
-        public TaskFinishedEventArgs
-        (
+        public TaskFinishedEventArgs(
             string message,
             string helpKeyword,
             string projectFile,
             string taskFile,
             string taskName,
-            bool succeeded
-        )
+            bool succeeded)
             : this(message, helpKeyword, projectFile, taskFile, taskName, succeeded, DateTime.UtcNow)
         {
         }
@@ -62,16 +62,14 @@ namespace Microsoft.Build.Framework
         /// <param name="taskName">task name</param> 
         /// <param name="succeeded">true indicates task succeed</param>
         /// <param name="eventTimestamp">Timestamp when event was created</param>
-        public TaskFinishedEventArgs
-        (
+        public TaskFinishedEventArgs(
             string message,
             string helpKeyword,
             string projectFile,
             string taskFile,
             string taskName,
             bool succeeded,
-            DateTime eventTimestamp
-        )
+            DateTime eventTimestamp)
             : base(message, helpKeyword, "MSBuild", eventTimestamp)
         {
             this.taskName = taskName;
@@ -144,13 +142,7 @@ namespace Microsoft.Build.Framework
             {
                 if (RawMessage == null)
                 {
-                    lock (locker)
-                    {
-                        if (RawMessage == null)
-                        {
-                            RawMessage = FormatResourceStringIgnoreCodeAndKeyword(Succeeded ? "TaskFinishedSuccess" : "TaskFinishedFailure", TaskName);
-                        }
-                    }
+                    RawMessage = FormatResourceStringIgnoreCodeAndKeyword(Succeeded ? "TaskFinishedSuccess" : "TaskFinishedFailure", TaskName);
                 }
 
                 return RawMessage;

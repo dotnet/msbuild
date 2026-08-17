@@ -1,6 +1,9 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks;
@@ -8,16 +11,16 @@ using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
+#nullable disable
+
 namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
 {
     public class ResolveAssemblyReferenceCacheSerialization : IDisposable
     {
-        // Maintain this two in sync with the constant in SystemState
-        private static readonly byte[] TranslateContractSignature = { (byte)'M', (byte)'B', (byte)'R', (byte)'S', (byte)'C' }; // Microsoft Build RAR State Cache
-        private static readonly byte TranslateContractVersion = 0x01;
-
         private readonly string _rarCacheFile;
         private readonly TaskLoggingHelper _taskLoggingHelper;
+
+        private static readonly DateTime s_now = DateTime.Now;
 
         public ResolveAssemblyReferenceCacheSerialization()
         {
@@ -37,76 +40,24 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             }
         }
 
+        private static DateTime GetLastWriteTime(string path) => path switch
+        {
+            "path1" => s_now,
+            "path2" => s_now,
+            "dllName" => s_now.AddSeconds(-10),
+            _ => throw new ArgumentException(),
+        };
+
         [Fact]
         public void RoundTripEmptyState()
         {
             SystemState systemState = new();
 
-            systemState.SerializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
+            systemState.SerializeCache(_rarCacheFile, _taskLoggingHelper, serializeEmptyState: true);
 
-            var deserialized = SystemState.DeserializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
+            var deserialized = StateFileBase.DeserializeCache<SystemState>(_rarCacheFile, _taskLoggingHelper);
 
             deserialized.ShouldNotBeNull();
-        }
-
-        [Fact]
-        public void WrongFileSignature()
-        {
-            SystemState systemState = new();
-
-            for (int i = 0; i < TranslateContractSignature.Length; i++)
-            {
-                systemState.SerializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
-                using (var cacheStream = new FileStream(_rarCacheFile, FileMode.Open, FileAccess.ReadWrite))
-                {
-                    cacheStream.Seek(i, SeekOrigin.Begin);
-                    cacheStream.WriteByte(0);
-                    cacheStream.Close();
-                }
-
-                var deserialized = SystemState.DeserializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
-
-                deserialized.ShouldBeNull();
-            }
-        }
-
-        [Fact]
-        public void WrongFileVersion()
-        {
-            SystemState systemState = new();
-
-            systemState.SerializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
-            using (var cacheStream = new FileStream(_rarCacheFile, FileMode.Open, FileAccess.ReadWrite))
-            {
-                cacheStream.Seek(TranslateContractSignature.Length, SeekOrigin.Begin);
-                cacheStream.WriteByte((byte) (TranslateContractVersion + 1));
-                cacheStream.Close();
-            }
-
-            var deserialized = SystemState.DeserializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
-
-            deserialized.ShouldBeNull();
-        }
-
-        [Fact]
-        public void CorrectFileSignature()
-        {
-            SystemState systemState = new();
-
-            for (int i = 0; i < TranslateContractSignature.Length; i++)
-            {
-                systemState.SerializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
-                using (var cacheStream = new FileStream(_rarCacheFile, FileMode.Open, FileAccess.ReadWrite))
-                {
-                    cacheStream.Seek(i, SeekOrigin.Begin);
-                    cacheStream.WriteByte(TranslateContractSignature[i]);
-                    cacheStream.Close();
-                }
-
-                var deserialized = SystemState.DeserializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
-
-                deserialized.ShouldNotBeNull();
-            }
         }
 
         [Fact]
@@ -114,106 +65,131 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
         {
             SystemState systemState = new();
 
-            systemState.SerializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
+            systemState.SerializeCache(_rarCacheFile, _taskLoggingHelper, serializeEmptyState: true);
             using (var cacheStream = new FileStream(_rarCacheFile, FileMode.Open, FileAccess.ReadWrite))
             {
-                cacheStream.Seek(TranslateContractSignature.Length, SeekOrigin.Begin);
-                cacheStream.WriteByte(TranslateContractVersion);
+                cacheStream.Seek(0, SeekOrigin.Begin);
+                cacheStream.WriteByte(StateFileBase.CurrentSerializationVersion);
                 cacheStream.Close();
             }
 
-            var deserialized = SystemState.DeserializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
+            var deserialized = StateFileBase.DeserializeCache<SystemState>(_rarCacheFile, _taskLoggingHelper);
 
             deserialized.ShouldNotBeNull();
         }
 
         [Fact]
-        public void VerifySampleStateDeserialization()
+        public void WrongFileVersion()
         {
-            // This test might also fail when binary format is modified.
-            // Any change in SystemState and child class ITranslatable implementation will most probably make this fail.
-            // To fix it, file referred by 'sampleName' needs to be recaptured and constant bellow modified to reflect
-            // the content of that cache.
-            // This sample was captured by compiling https://github.com/dotnet/roslyn/commit/f8107de2a94a01e96ac3d7c1f225acbb61e18830
-            const string sampleName = "Microsoft.VisualStudio.LanguageServices.Implementation.csprojAssemblyReference.cache";
-            const string expectedAssemblyPath = @"C:\Users\rokon\.nuget\packages\microsoft.visualstudio.codeanalysis.sdk.ui\15.8.27812-alpha\lib\net46\Microsoft.VisualStudio.CodeAnalysis.Sdk.UI.dll";
-            const long expectedAssemblyLastWriteTimeTicks = 636644382480000000;
-            const string expectedAssemblyName = "Microsoft.VisualStudio.CodeAnalysis.Sdk.UI, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a";
-            const string expectedFrameworkName = ".NETFramework,Version=v4.5";
-            var expectedDependencies = new[]
+            SystemState systemState = new();
+
+            systemState.SerializeCache(_rarCacheFile, _taskLoggingHelper, serializeEmptyState: true);
+            using (var cacheStream = new FileStream(_rarCacheFile, FileMode.Open, FileAccess.ReadWrite))
             {
-                "mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
-                "System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
-                "System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.CodeAnalysis, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.DeveloperTools, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
-                "Microsoft.VisualStudio.Shell.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "EnvDTE, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.CodeAnalysis.Sdk, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.Build.Framework, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.Text.Logic, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.Text.UI, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.Text.Data, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.Text.UI.Wpf, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.ComponentModelHost, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.VSHelp, Version=7.0.3300.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.Shell.Interop.11.0, Version=11.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.VCProjectEngine, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.Shell.15.0, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.OLE.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "System.Xml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
-                "Microsoft.VisualStudio.TextManager.Interop, Version=7.1.40304.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "EnvDTE80, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "System.Core, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089",
-                "Microsoft.VisualStudio.VirtualTreeGrid, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.Shell.Interop.8.0, Version=8.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-                "Microsoft.VisualStudio.Editor, Version=15.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
-            };
+                cacheStream.Seek(0, SeekOrigin.Begin);
+                cacheStream.WriteByte(StateFileBase.CurrentSerializationVersion - 1);
+                cacheStream.Close();
+            }
 
+            var deserialized = StateFileBase.DeserializeCache<SystemState>(_rarCacheFile, _taskLoggingHelper);
 
-            CopyResourceSampleFileIntoRarCacheFile($@"AssemblyDependency\CacheFileSamples\{sampleName}");
-
-            var deserializedByTranslator = SystemState.DeserializeCacheByTranslator(_rarCacheFile, _taskLoggingHelper);
-            deserializedByTranslator.ShouldNotBeNull();
-
-            deserializedByTranslator.SetGetLastWriteTime(path =>
-            {
-                if (path != expectedAssemblyPath)
-                    throw new InvalidOperationException("Unexpected file name for this test case");
-
-                return new DateTime(expectedAssemblyLastWriteTimeTicks, DateTimeKind.Utc);
-            });
-
-            GetAssemblyName getAssemblyName = deserializedByTranslator.CacheDelegate((GetAssemblyName)null);
-            GetAssemblyMetadata getAssemblyMetadata = deserializedByTranslator.CacheDelegate((GetAssemblyMetadata)null);
-
-            var assemblyName = getAssemblyName(expectedAssemblyPath);
-            getAssemblyMetadata(expectedAssemblyPath, null,
-                out AssemblyNameExtension[] dependencies,
-                out string[] scatterFiles,
-                out FrameworkName frameworkNameAttribute);
-
-
-            assemblyName.ShouldNotBeNull();
-            assemblyName.ShouldBe(new AssemblyNameExtension(expectedAssemblyName, false));
-            scatterFiles.ShouldBeEmpty();
-            frameworkNameAttribute.ShouldBe(new FrameworkName(expectedFrameworkName));
-            dependencies.ShouldNotBeNull();
-            expectedDependencies.ShouldBe(expectedDependencies, ignoreOrder: true);
+            deserialized.ShouldBeNull();
         }
 
-        private void CopyResourceSampleFileIntoRarCacheFile(string name)
+        [Fact]
+        public void ValidateSerializationAndDeserialization()
         {
-            Assembly asm = this.GetType().Assembly;
-            var resource = string.Format($"{asm.GetName().Name}.{name.Replace("\\", ".")}");
-            using Stream resourceStream = asm.GetManifestResourceStream(resource);
-            if (resourceStream == null)
-                throw new InvalidOperationException($"Resource '{resource}' has not been found.");
+            Dictionary<string, SystemState.FileState> cache = new() {
+                    { "path1", new SystemState.FileState(GetLastWriteTime("path1")) },
+                    { "path2", new SystemState.FileState(GetLastWriteTime("path2")) { Assembly = new AssemblyNameExtension("hi") } },
+                    { "dllName", new SystemState.FileState(GetLastWriteTime("dllName")) {
+                        Assembly = null,
+                        RuntimeVersion = "v4.0.30319",
+                        FrameworkNameAttribute = new FrameworkName(".NETFramework", Version.Parse("4.7.2"), "Profile"),
+                        scatterFiles = new string[] { "first", "second" } } } };
+            SystemState sysState = new();
+            sysState.SetGetLastWriteTime(GetLastWriteTime);
+            sysState.instanceLocalFileStateCache = cache;
 
-            using FileStream rarCacheFile = new FileStream(_rarCacheFile, FileMode.CreateNew);
+            // Get all FileState entries to make sure they are marked as having been used.
+            _ = sysState.GetFileState("path1");
+            _ = sysState.GetFileState("path2");
+            _ = sysState.GetFileState("dllName");
 
-            resourceStream.CopyTo(rarCacheFile);
+            sysState.HasStateToSave.ShouldBe(true);
+
+            SystemState sysState2 = null;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFile file = env.CreateFile();
+                sysState.SerializeCache(file.Path, null);
+                sysState2 = StateFileBase.DeserializeCache<SystemState>(file.Path, null);
+            }
+
+            Dictionary<string, SystemState.FileState> cache2 = sysState2.instanceLocalFileStateCache;
+            cache2.Count.ShouldBe(cache.Count);
+            cache2["path2"].Assembly.Name.ShouldBe(cache["path2"].Assembly.Name);
+            SystemState.FileState dll = cache["dllName"];
+            SystemState.FileState dll2 = cache2["dllName"];
+            dll2.Assembly.ShouldBe(dll.Assembly);
+            dll2.FrameworkNameAttribute.FullName.ShouldBe(dll.FrameworkNameAttribute.FullName);
+            dll2.LastModified.ShouldBe(dll.LastModified);
+            dll2.RuntimeVersion.ShouldBe(dll.RuntimeVersion);
+            dll2.scatterFiles.Length.ShouldBe(dll.scatterFiles.Length);
+            dll2.scatterFiles[1].ShouldBe(dll.scatterFiles[1]);
+        }
+
+        [Fact]
+        public void OutgoingCacheIsSmallerThanIncomingCache()
+        {
+            Dictionary<string, SystemState.FileState> cache = new() {
+                    { "path1", new SystemState.FileState(GetLastWriteTime("path1")) },
+                    { "path2", new SystemState.FileState(GetLastWriteTime("path2")) } };
+            SystemState sysState = new();
+            sysState.SetGetLastWriteTime(GetLastWriteTime);
+            sysState.instanceLocalFileStateCache = cache;
+
+            // Get only the first FileState entry.
+            _ = sysState.GetFileState("path1");
+
+            sysState.HasStateToSave.ShouldBe(true);
+
+            SystemState sysState2 = null;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFile file = env.CreateFile();
+                sysState.SerializeCache(file.Path, null);
+                sysState2 = StateFileBase.DeserializeCache<SystemState>(file.Path, null);
+            }
+
+            // The new cache has only the entry that was actually used.
+            Dictionary<string, SystemState.FileState> cache2 = sysState2.instanceLocalFileStateCache;
+            cache2.Count.ShouldBe(1);
+            cache2.ShouldContainKey("path1");
+        }
+
+        [Fact]
+        public void OutgoingCacheIsEmpty()
+        {
+            Dictionary<string, SystemState.FileState> cache = new() {
+                    { "path1", new SystemState.FileState(GetLastWriteTime("path1")) },
+                    { "path2", new SystemState.FileState(GetLastWriteTime("path2")) } };
+            SystemState sysState = new();
+            sysState.SetGetLastWriteTime(GetLastWriteTime);
+            sysState.instanceLocalFileStateCache = cache;
+
+            sysState.HasStateToSave.ShouldBe(false);
+
+            SystemState sysState2 = null;
+            using (TestEnvironment env = TestEnvironment.Create())
+            {
+                TransientTestFile file = env.CreateFile();
+                sysState.SerializeCache(file.Path, null);
+                sysState2 = StateFileBase.DeserializeCache<SystemState>(file.Path, null);
+            }
+
+            // The new cache was not written to disk at all because none of the entries were actually used.
+            sysState2.ShouldBeNull();
         }
     }
 }

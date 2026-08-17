@@ -1,9 +1,15 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Logging
 {
@@ -15,30 +21,10 @@ namespace Microsoft.Build.Logging
     /// </summary>
     internal class ProjectImportsCollector
     {
-        private Stream _stream;
-        public byte[] GetAllBytes()
-        {
-            if (_stream == null)
-            {
-                return Array.Empty<byte>();
-            }
-            else if (ArchiveFilePath == null)
-            {
-                var stream = _stream as MemoryStream;
-                // Before we can use the zip archive, it must be closed.
-                Close(false);
-                return stream.ToArray();
-            }
-            else
-            {
-                Close();
-                return File.ReadAllBytes(ArchiveFilePath);
-            }
-        }
-
+        private Stream _fileStream;
         private ZipArchive _zipArchive;
 
-        private string ArchiveFilePath { get; set; }
+        public string ArchiveFilePath { get; }
 
         /// <summary>
         /// Avoid visiting each file more than once.
@@ -50,33 +36,46 @@ namespace Microsoft.Build.Logging
 
         public ProjectImportsCollector(string logFilePath, bool createFile, string sourcesArchiveExtension = ".ProjectImports.zip")
         {
+            if (createFile)
+            {
+                // Archive file will be stored alongside the binlog
+                ArchiveFilePath = Path.ChangeExtension(logFilePath, sourcesArchiveExtension);
+            }
+            else
+            {
+                string cacheDirectory = FileUtilities.GetCacheDirectory();
+                if (!Directory.Exists(cacheDirectory))
+                {
+                    Directory.CreateDirectory(cacheDirectory);
+                }
+
+                // Archive file will be temporarily stored in MSBuild cache folder and deleted when no longer needed
+                ArchiveFilePath = Path.Combine(
+                    cacheDirectory,
+                    Path.ChangeExtension(
+                        Path.GetFileName(logFilePath),
+                        sourcesArchiveExtension));
+            }
+
             try
             {
-                if (createFile)
-                {
-                    ArchiveFilePath = Path.ChangeExtension(logFilePath, sourcesArchiveExtension);
-                    _stream = new FileStream(ArchiveFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Delete);
-                }
-                else
-                {
-                    _stream = new MemoryStream();
-                }
-                _zipArchive = new ZipArchive(_stream, ZipArchiveMode.Create, true);
+                _fileStream = new FileStream(ArchiveFilePath, FileMode.Create, FileAccess.ReadWrite, FileShare.Delete);
+                _zipArchive = new ZipArchive(_fileStream, ZipArchiveMode.Create);
             }
             catch
             {
                 // For some reason we weren't able to create a file for the archive.
                 // Disable the file collector.
-                _stream = null;
+                _fileStream = null;
                 _zipArchive = null;
             }
         }
 
         public void AddFile(string filePath)
         {
-            if (filePath != null && _stream != null)
+            if (filePath != null && _fileStream != null)
             {
-                lock (_stream)
+                lock (_fileStream)
                 {
                     // enqueue the task to add a file and return quickly
                     // to avoid holding up the current thread
@@ -96,9 +95,9 @@ namespace Microsoft.Build.Logging
 
         public void AddFileFromMemory(string filePath, string data)
         {
-            if (filePath != null && data != null && _stream != null)
+            if (filePath != null && data != null && _fileStream != null)
             {
-                lock (_stream)
+                lock (_fileStream)
                 {
                     // enqueue the task to add a file and return quickly
                     // to avoid holding up the current thread
@@ -128,8 +127,7 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            var fileInfo = new FileInfo(filePath);
-            if (!fileInfo.Exists || fileInfo.Length == 0)
+            if (!File.Exists(filePath))
             {
                 _processedFiles.Add(filePath);
                 return;
@@ -143,11 +141,9 @@ namespace Microsoft.Build.Logging
                 return;
             }
 
-            using (Stream entryStream = OpenArchiveEntry(filePath))
-            using (FileStream content = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete))
-            {
-                content.CopyTo(entryStream);
-            }
+            using FileStream content = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
+            using Stream entryStream = OpenArchiveEntry(filePath);
+            content.CopyTo(entryStream);
         }
 
         /// <remarks>
@@ -195,7 +191,7 @@ namespace Microsoft.Build.Logging
             return archivePath;
         }
 
-        public void Close(bool closeStream = true)
+        public void Close()
         {
             // wait for all pending file writes to complete
             _currentTask.Wait();
@@ -206,10 +202,10 @@ namespace Microsoft.Build.Logging
                 _zipArchive = null;
             }
 
-            if (closeStream && (_stream != null))
+            if (_fileStream != null)
             {
-                _stream.Dispose();
-                _stream = null;
+                _fileStream.Dispose();
+                _fileStream = null;
             }
         }
     }

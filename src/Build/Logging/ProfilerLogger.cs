@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Concurrent;
@@ -12,6 +12,8 @@ using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
 using Microsoft.Build.Shared;
+
+#nullable disable
 
 namespace Microsoft.Build.Logging
 {
@@ -51,12 +53,15 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
-        /// Verbosity is ignored by this logger
+        /// Gets or sets the verbosity level.
         /// </summary>
+        /// <remarks>
+        /// Verbosity is ignored by this logger.
+        /// </remarks>
         public LoggerVerbosity Verbosity { get; set; }
 
         /// <summary>
-        /// No specific parameters are used by this logger
+        /// No specific parameters are used by this logger.
         /// </summary>
         public string Parameters { get; set; }
 
@@ -74,7 +79,7 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
-        /// On shutdown, the profiler report is written to disk
+        /// On shutdown, the profiler report is written to disk.
         /// </summary>
         public void Shutdown()
         {
@@ -103,13 +108,13 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
-        /// Returns the result of aggregating all profiled projects across a build
+        /// Returns the result of aggregating all profiled projects across a build.
         /// </summary>
         /// <param name="pruneSmallItems">Whether small items should be pruned. This is called with false on some tests since the result may vary depending on the evaluator speed</param>
         /// <remarks>
         /// Not thread safe. After this method is called, the assumption is that no new ProjectEvaluationFinishedEventArgs will arrive.
         /// In the regular code path, this method is called only once per build. But some test cases may call it multiple times to validate 
-        /// the aggregated data
+        /// the aggregated data.
         /// </remarks>
         internal ProfilerResult GetAggregatedResult(bool pruneSmallItems = true)
         {
@@ -129,7 +134,7 @@ namespace Microsoft.Build.Logging
             // So keeping that map here
             var originalLocations = new Dictionary<EvaluationLocation, EvaluationLocation>(EvaluationLocationIdAgnosticComparer.Singleton);
 
-            while (!_profiledResults.IsEmpty)
+            while (_profiledResults.Any())
             {
                 ProfilerResult profiledResult;
                 var result = _profiledResults.TryDequeue(out profiledResult);
@@ -230,7 +235,7 @@ namespace Microsoft.Build.Logging
         }
 
         /// <summary>
-        /// Finds the first ancestor of parentId (which could be itself) that is either an evaluation pass location or a big enough profiled data
+        /// Finds the first ancestor of parentId (which could be itself) that is either an evaluation pass location or a big enough profiled data.
         /// </summary>
         private static long? FindBigEnoughParentId(IDictionary<long, Pair<EvaluationLocation, ProfiledLocation>> idTable,
             long? parentId)
@@ -266,16 +271,15 @@ namespace Microsoft.Build.Logging
             return new ProfiledLocation(
                 location.InclusiveTime + otherLocation.InclusiveTime,
                 location.ExclusiveTime + otherLocation.ExclusiveTime,
-                location.NumberOfHits + 1
-            );
+                location.NumberOfHits + 1);
         }
 
         /// <summary>
-        /// Pretty prints the aggregated results and saves it to disk
+        /// Pretty prints the aggregated results and saves it to disk.
         /// </summary>
         /// <remarks>
         /// If the extension of the file to log is 'md', markdown content is generated. Otherwise, it falls 
-        /// back to a tab separated format
+        /// back to a tab separated format.
         /// </remarks>
         private void GenerateProfilerReport()
         {

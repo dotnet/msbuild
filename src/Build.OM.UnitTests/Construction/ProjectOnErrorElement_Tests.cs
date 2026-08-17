@@ -1,14 +1,14 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
 using System.Xml;
-
 using Microsoft.Build.Construction;
-
-using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using Xunit;
+using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Construction
 {
@@ -36,7 +36,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         public void ReadTargetTwoOnErrors()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <t1/>
                             <t2/>
@@ -69,7 +69,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <OnError/>
                         </Target>
@@ -81,8 +81,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectOnErrorElement onError = (ProjectOnErrorElement)Helpers.GetFirst(target.Children);
 
                 Assert.Equal(String.Empty, onError.ExecuteTargetsAttribute);
-            }
-           );
+            });
         }
         /// <summary>
         /// Read onerror with empty executetargets attribute
@@ -96,7 +95,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <OnError ExecuteTargets=''/>
                         </Target>
@@ -108,8 +107,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectOnErrorElement onError = (ProjectOnErrorElement)Helpers.GetFirst(target.Children);
 
                 Assert.Equal(String.Empty, onError.ExecuteTargetsAttribute);
-            }
-           );
+            });
         }
         /// <summary>
         /// Read onerror with invalid attribute
@@ -120,7 +118,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <OnError ExecuteTargets='t' XX='YY'/>
                         </Target>
@@ -128,8 +126,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read onerror with invalid child element
@@ -140,7 +137,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <OnError ExecuteTargets='t'>
                                 <X/>
@@ -150,8 +147,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read onerror before task
@@ -162,7 +158,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <OnError ExecuteTargets='t'/>
                             <t/>
@@ -171,8 +167,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read onerror before task
@@ -183,7 +178,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <OnError ExecuteTargets='t'/>
                             <PropertyGroup/>
@@ -192,8 +187,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Read onerror before task
@@ -204,7 +198,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
             Assert.Throws<InvalidProjectFileException>(() =>
             {
                 string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <OnError ExecuteTargets='t'/>
                             <ItemGroup/>
@@ -213,8 +207,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ";
 
                 ProjectRootElement.Create(XmlReader.Create(new StringReader(content)));
-            }
-           );
+            });
         }
         /// <summary>
         /// Set ExecuteTargets
@@ -240,8 +233,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectOnErrorElement onError = GetOnError();
 
                 onError.ExecuteTargetsAttribute = null;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set ExecuteTargets to empty string
@@ -254,8 +246,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
                 ProjectOnErrorElement onError = GetOnError();
 
                 onError.ExecuteTargetsAttribute = String.Empty;
-            }
-           );
+            });
         }
         /// <summary>
         /// Set on error condition
@@ -299,7 +290,7 @@ namespace Microsoft.Build.UnitTests.OM.Construction
         private static ProjectOnErrorElement GetOnError()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <Target Name='t'>
                             <OnError ExecuteTargets='t' Condition='c'/>
                         </Target>

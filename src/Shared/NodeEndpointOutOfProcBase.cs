@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 #if CLR2COMPATIBILITY
@@ -22,6 +22,8 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 #endif
 
+#nullable disable
+
 namespace Microsoft.Build.BackEnd
 {
     /// <summary>
@@ -29,7 +31,7 @@ namespace Microsoft.Build.BackEnd
     /// </summary>
     internal abstract class NodeEndpointOutOfProcBase : INodeEndpoint
     {
-#region Private Data
+        #region Private Data
 
 #if NETCOREAPP2_1_OR_GREATER || MONO
         /// <summary>
@@ -42,11 +44,6 @@ namespace Microsoft.Build.BackEnd
         /// The size of the buffers to use for named pipes
         /// </summary>
         private const int PipeBufferSize = 131072;
-
-        /// <summary>
-        /// Flag indicating if we should debug communications or not.
-        /// </summary>
-        private bool _debugCommunications = false;
 
         /// <summary>
         /// The current communication status of the node.
@@ -76,6 +73,13 @@ namespace Microsoft.Build.BackEnd
         private AutoResetEvent _terminatePacketPump;
 
         /// <summary>
+        /// True if this side is gracefully disconnecting.
+        /// In such case we have sent last packet to client side and we expect
+        /// client will soon broke pipe connection - unless server do it first.
+        /// </summary>
+        private bool _isClientDisconnecting;
+
+        /// <summary>
         /// The thread which runs the asynchronous packet pump
         /// </summary>
         private Thread _packetPump;
@@ -97,7 +101,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Per-node shared read buffer.
         /// </summary>
-        private SharedReadBuffer _sharedReadBuffer;
+        private BinaryReaderFactory _sharedReadBuffer;
 
         /// <summary>
         /// A way to cache a byte array when writing out packets
@@ -109,18 +113,18 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private BinaryWriter _binaryWriter;
 
-#endregion
+        #endregion
 
-#region INodeEndpoint Events
+        #region INodeEndpoint Events
 
         /// <summary>
         /// Raised when the link status has changed.
         /// </summary>
         public event LinkStatusChangedDelegate OnLinkStatusChanged;
 
-#endregion
+        #endregion
 
-#region INodeEndpoint Properties
+        #region INodeEndpoint Properties
 
         /// <summary>
         /// Returns the link status of this node.
@@ -130,13 +134,13 @@ namespace Microsoft.Build.BackEnd
             get { return _status; }
         }
 
-#endregion
+        #endregion
 
-#region Properties
+        #region Properties
 
-#endregion
+        #endregion
 
-#region INodeEndpoint Methods
+        #region INodeEndpoint Methods
 
         /// <summary>
         /// Causes this endpoint to wait for the remote endpoint to connect
@@ -181,26 +185,31 @@ namespace Microsoft.Build.BackEnd
             }
         }
 
-#endregion
+        /// <summary>
+        /// Called when we are about to send last packet to finalize graceful disconnection with client.
+        /// </summary>
+        public void ClientWillDisconnect()
+        {
+            _isClientDisconnecting = true;
+        }
 
-#region Construction
+        #endregion
+
+        #region Construction
 
         /// <summary>
         /// Instantiates an endpoint to act as a client
         /// </summary>
-        /// <param name="pipeName">The name of the pipe to which we should connect.</param>
-        internal void InternalConstruct(string pipeName)
+        internal void InternalConstruct(string pipeName = null)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(pipeName, nameof(pipeName));
-
-            _debugCommunications = (Environment.GetEnvironmentVariable("MSBUILDDEBUGCOMM") == "1");
-
             _status = LinkStatus.Inactive;
             _asyncDataMonitor = new object();
             _sharedReadBuffer = InterningBinaryReader.CreateSharedBuffer();
 
             _packetStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetStream);
+
+            pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
 #if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
             if (!NativeMethodsShared.IsMono)
@@ -217,36 +226,40 @@ namespace Microsoft.Build.BackEnd
                 security.AddAccessRule(rule);
                 security.SetOwner(identifier);
 
-                _pipeServer = new NamedPipeServerStream
-                    (
+                _pipeServer = new NamedPipeServerStream(
                     pipeName,
                     PipeDirection.InOut,
                     1, // Only allow one connection at a time.
                     PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    PipeOptions.Asynchronous | PipeOptions.WriteThrough
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                    | PipeOptions.CurrentUserOnly
+#endif
+                    ,
                     PipeBufferSize, // Default input buffer
                     PipeBufferSize,  // Default output buffer
                     security,
-                    HandleInheritability.None
-                );
+                    HandleInheritability.None);
             }
             else
 #endif
             {
-                _pipeServer = new NamedPipeServerStream
-                    (
+                _pipeServer = new NamedPipeServerStream(
                     pipeName,
                     PipeDirection.InOut,
                     1, // Only allow one connection at a time.
                     PipeTransmissionMode.Byte,
-                    PipeOptions.Asynchronous | PipeOptions.WriteThrough,
+                    PipeOptions.Asynchronous | PipeOptions.WriteThrough
+#if FEATURE_PIPEOPTIONS_CURRENTUSERONLY
+                    | PipeOptions.CurrentUserOnly
+#endif
+                    ,
                     PipeBufferSize, // Default input buffer
-                    PipeBufferSize  // Default output buffer
-                );
-             }
+                    PipeBufferSize);  // Default output buffer
+            }
         }
 
-#endregion
+        #endregion
 
         /// <summary>
         /// Returns the host handshake for this node endpoint
@@ -274,7 +287,7 @@ namespace Microsoft.Build.BackEnd
             OnLinkStatusChanged?.Invoke(this, newStatus);
         }
 
-#region Private Methods
+        #region Private Methods
 
         /// <summary>
         /// This does the actual work of changing the status and shutting down any threads we may have for
@@ -295,7 +308,7 @@ namespace Microsoft.Build.BackEnd
             ChangeLinkStatus(LinkStatus.Inactive);
         }
 
-#region Asynchronous Mode Methods
+        #region Asynchronous Mode Methods
 
         /// <summary>
         /// Adds a packet to the packet queue when asynchronous mode is enabled.
@@ -317,6 +330,7 @@ namespace Microsoft.Build.BackEnd
         {
             lock (_asyncDataMonitor)
             {
+                _isClientDisconnecting = false;
                 _packetPump = new Thread(PacketPumpProc);
                 _packetPump.IsBackground = true;
                 _packetPump.Name = "OutOfProc Endpoint Packet Pump";
@@ -385,11 +399,14 @@ namespace Microsoft.Build.BackEnd
                         int[] handshakeComponents = handshake.RetrieveHandshakeComponents();
                         for (int i = 0; i < handshakeComponents.Length; i++)
                         {
-                            int handshakePart = _pipeServer.ReadIntForHandshake(i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
+#pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
+                            int handshakePart = _pipeServer.ReadIntForHandshake(
+                                byteToAccept: i == 0 ? (byte?)CommunicationsUtilities.handshakeVersion : null /* this will disconnect a < 16.8 host; it expects leading 00 or F5 or 06. 0x00 is a wildcard */
 #if NETCOREAPP2_1_OR_GREATER || MONO
                             , ClientConnectTimeout /* wait a long time for the handshake from this side */
 #endif
                             );
+#pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
 
                             if (handshakePart != handshakeComponents[i])
                             {
@@ -436,7 +453,7 @@ namespace Microsoft.Build.BackEnd
                         // 2. The host is too old sending us bits we automatically reject in the handshake
                         // 3. We expected to read the EndOfHandshake signal, but we received something else
                         CommunicationsUtilities.Trace("Client connection failed but we will wait for another connection. Exception: {0}", e.Message);
-                        
+
                         gotValidConnection = false;
                     }
                     catch (InvalidOperationException)
@@ -455,13 +472,8 @@ namespace Microsoft.Build.BackEnd
 
                     ChangeLinkStatus(LinkStatus.Active);
                 }
-                catch (Exception e)
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
                 {
-                    if (ExceptionHandling.IsCriticalException(e))
-                    {
-                        throw;
-                    }
-
                     CommunicationsUtilities.Trace("Client connection failed.  Exiting comm thread. {0}", e);
                     if (localPipeServer.IsConnected)
                     {
@@ -558,14 +570,25 @@ namespace Microsoft.Build.BackEnd
                                 // Incomplete read.  Abort.
                                 if (bytesRead == 0)
                                 {
-                                    CommunicationsUtilities.Trace("Parent disconnected abruptly");
+                                    if (_isClientDisconnecting)
+                                    {
+                                        CommunicationsUtilities.Trace("Parent disconnected gracefully.");
+                                        // Do not change link status to failed as this could make node think connection has failed
+                                        // and recycle node, while this is perfectly expected and handled race condition
+                                        // (both client and node is about to close pipe and client can be faster).
+                                    }
+                                    else
+                                    {
+                                        CommunicationsUtilities.Trace("Parent disconnected abruptly.");
+                                        ChangeLinkStatus(LinkStatus.Failed);
+                                    }
                                 }
                                 else
                                 {
                                     CommunicationsUtilities.Trace("Incomplete header read from server.  {0} of {1} bytes read", bytesRead, headerByte.Length);
+                                    ChangeLinkStatus(LinkStatus.Failed);
                                 }
 
-                                ChangeLinkStatus(LinkStatus.Failed);
                                 exitLoop = true;
                                 break;
                             }
@@ -652,8 +675,8 @@ namespace Microsoft.Build.BackEnd
             while (!exitLoop);
         }
 
-#endregion
+        #endregion
 
-#endregion
+        #endregion
     }
 }

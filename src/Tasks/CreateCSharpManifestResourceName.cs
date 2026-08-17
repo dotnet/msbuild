@@ -1,13 +1,14 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
-using System.Text;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Utilities;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Utilities;
+
+#nullable disable
 
 namespace Microsoft.Build.Tasks
 {
@@ -29,14 +30,12 @@ namespace Microsoft.Build.Tasks
         /// <param name="dependentUponFileName">The file name of the parent of this dependency (usually a .cs file). May be null</param>
         /// <param name="binaryStream">File contents binary stream, may be null</param>
         /// <returns>Returns the manifest name</returns>
-        protected override string CreateManifestName
-        (
+        protected override string CreateManifestName(
             string fileName,
             string linkFileName,
             string rootNamespace,
             string dependentUponFileName,
-            Stream binaryStream
-        )
+            Stream binaryStream)
         {
             string culture = null;
             bool treatAsCultureNeutral = false;
@@ -45,7 +44,7 @@ namespace Microsoft.Build.Tasks
                 culture = item.GetMetadata("Culture");
                 // If 'WithCulture' is explicitly set to false, treat as 'culture-neutral' and keep the original name of the resource.
                 // https://github.com/dotnet/msbuild/issues/3064
-                treatAsCultureNeutral = item.GetMetadata("WithCulture").Equals("false", StringComparison.OrdinalIgnoreCase);
+                treatAsCultureNeutral = ConversionUtilities.ValidBooleanFalse(item.GetMetadata("WithCulture"));
             }
 
             /*
@@ -54,8 +53,7 @@ namespace Microsoft.Build.Tasks
                 override of a method declared in the base class, but its convenient 
                 to expose a static version anyway for unittesting purposes.
             */
-            return CreateManifestNameImpl
-            (
+            return CreateManifestNameImpl(
                 fileName,
                 linkFileName,
                 PrependCultureAsDirectory,
@@ -64,8 +62,7 @@ namespace Microsoft.Build.Tasks
                 culture,
                 binaryStream,
                 Log,
-                treatAsCultureNeutral
-            );
+                treatAsCultureNeutral);
         }
 
         /// <summary>
@@ -85,8 +82,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="log">Task's TaskLoggingHelper, for logging warnings or errors</param>
         /// <param name="treatAsCultureNeutral">Whether to treat the current file as 'culture-neutral' and retain the culture in the name.</param>
         /// <returns>Returns the manifest name</returns>
-        internal static string CreateManifestNameImpl
-        (
+        internal static string CreateManifestNameImpl(
             string fileName,
             string linkFileName,
             bool prependCultureAsDirectory, // true by default
@@ -95,8 +91,7 @@ namespace Microsoft.Build.Tasks
             string culture, // may be null 
             Stream binaryStream, // File contents binary stream, may be null
             TaskLoggingHelper log,
-            bool treatAsCultureNeutral = false
-        )
+            bool treatAsCultureNeutral = false)
         {
             // Use the link file name if there is one, otherwise, fall back to file name.
             string embeddedFileName = FileUtilities.FixFilePath(linkFileName);
@@ -114,7 +109,7 @@ namespace Microsoft.Build.Tasks
                 info.culture = culture;
             }
 
-            var manifestName = new StringBuilder();
+            var manifestName = StringBuilderCache.Acquire();
             if (binaryStream != null)
             {
                 // Resource depends on a form. Now, get the form's class name fully 
@@ -160,8 +155,7 @@ namespace Microsoft.Build.Tasks
                         ||
                         string.Equals(sourceExtension, restextFileExtension, StringComparison.OrdinalIgnoreCase)
                         ||
-                        string.Equals(sourceExtension, resourcesFileExtension, StringComparison.OrdinalIgnoreCase)
-                    )
+                        string.Equals(sourceExtension, resourcesFileExtension, StringComparison.OrdinalIgnoreCase))
                 {
                     if (!string.IsNullOrEmpty(directoryName))
                     {
@@ -212,7 +206,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return manifestName.ToString();
+            return StringBuilderCache.GetStringAndRelease(manifestName);
         }
 
         /// <summary>

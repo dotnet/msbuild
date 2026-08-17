@@ -1,8 +1,10 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.IO;
+
+#nullable disable
 
 namespace Microsoft.Build.Shared.LanguageParser
 {
@@ -13,7 +15,7 @@ namespace Microsoft.Build.Shared.LanguageParser
      * Provides utility functions for dealing with VB-specific tokens.
      *
      */
-    sealed internal class VisualBasicTokenCharReader : TokenCharReader
+    internal sealed class VisualBasicTokenCharReader : TokenCharReader
     {
         /*
          * Method:  VisualBasicTokenCharReader
@@ -42,8 +44,7 @@ namespace Microsoft.Build.Shared.LanguageParser
                 || CurrentCharacter == '.'
                 || CurrentCharacter == ':'
                 || CurrentCharacter == '{'
-                || CurrentCharacter == '}'
-            )
+                || CurrentCharacter == '}')
             {
                 Skip();
                 return true;
@@ -61,8 +62,7 @@ namespace Microsoft.Build.Shared.LanguageParser
         {
             if
             (
-                CurrentCharacter == '_'
-            )
+                CurrentCharacter == '_')
             {
                 Skip();
                 return true;
@@ -253,4 +253,3 @@ namespace Microsoft.Build.Shared.LanguageParser
         }
     }
 }
-

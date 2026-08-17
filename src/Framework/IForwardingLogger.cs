@@ -1,11 +1,13 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+#nullable disable
 
 namespace Microsoft.Build.Framework
 {
     /// <summary>
     /// This interface extends the ILogger interface to provide a property which can be used to forward events
-    /// to a logger running in a different process. It can also be used create filtering loggers.
+    /// to a logger running in a different process. It can also be used to create filtering loggers.
     /// </summary>
     public interface IForwardingLogger : INodeLogger
     {

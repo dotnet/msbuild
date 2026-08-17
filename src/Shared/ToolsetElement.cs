@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,8 @@ using System.IO;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 
+#nullable disable
+
 namespace Microsoft.Build.Evaluation
 {
     /// <summary>
@@ -15,11 +17,46 @@ namespace Microsoft.Build.Evaluation
     /// </summary>
     internal static class ToolsetConfigurationReaderHelpers
     {
+        /// <summary>
+        /// Lock for process wide ToolsetConfigurationSection section cache
+        /// </summary>
+        private static readonly object s_syncLock = new();
+
+        /// <summary>
+        /// Process wide ToolsetConfigurationSection section cache
+        /// </summary>
+        private static ToolsetConfigurationSection s_toolsetConfigurationSectionCache;
+        private static Configuration s_configurationOfCachedSection;
+
         internal static ToolsetConfigurationSection ReadToolsetConfigurationSection(Configuration configuration)
+        {
+            if (configuration == null)
+            {
+                return null;
+            }
+
+            lock (s_syncLock)
+            {
+                // Cache 1st requested configuration section. In unit tests, different Configuration is provided for particular test cases.
+                // During runtime, however, only MSBuild exe configuration file is provided to read toolset configuration from,
+                //   and modifying MSBuild exe configuration during lifetime of msbuild nodes is neither expected nor supported.
+                if (s_toolsetConfigurationSectionCache == null)
+                {
+                    s_toolsetConfigurationSectionCache = GetToolsetConfigurationSection(configuration);
+                    s_configurationOfCachedSection = configuration;
+                }
+
+                return s_configurationOfCachedSection == configuration ?
+                    s_toolsetConfigurationSectionCache :
+                    GetToolsetConfigurationSection(configuration);
+            }
+        }
+
+        private static ToolsetConfigurationSection GetToolsetConfigurationSection(Configuration configuration)
         {
             ToolsetConfigurationSection configurationSection = null;
 
-            // This will be null if the application config file does not have the following section 
+            // This will be null if the application config file does not have the following section
             // definition for the msbuildToolsets section as the first child element.
             //   <configSections>
             //     <section name=""msbuildToolsets"" type=""Microsoft.Build.Evaluation.ToolsetConfigurationSection, Microsoft.Build"" />
@@ -88,7 +125,7 @@ namespace Microsoft.Build.Evaluation
         {
             get
             {
-                return (string)base["toolsVersion"];
+                return (string)base[nameof(toolsVersion)];
             }
 
             set
@@ -694,7 +731,7 @@ namespace Microsoft.Build.Evaluation
                 // whenever the base class gives us an empty string.
                 // Note this means we can't distinguish between the attribute being present but containing
                 // an empty string for its value and the attribute not being present at all.
-                string defaultValue = (string)base["DefaultOverrideToolsVersion"];
+                string defaultValue = (string)base[nameof(DefaultOverrideToolsVersion)];
                 return String.IsNullOrEmpty(defaultValue) ? null : defaultValue;
             }
 

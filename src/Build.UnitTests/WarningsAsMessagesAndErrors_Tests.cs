@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Framework;
@@ -7,14 +10,15 @@ using Shouldly;
 using Xunit;
 using Xunit.Abstractions;
 
+#nullable disable
+
 namespace Microsoft.Build.Engine.UnitTests
 {
     public sealed class WarningsAsMessagesAndErrorsTests
     {
         private const string ExpectedEventMessage = "03767942CDB147B98D0ECDBDE1436DA3";
         private const string ExpectedEventCode = "0BF68998";
-
-        ITestOutputHelper _output;
+        private ITestOutputHelper _output;
 
         public WarningsAsMessagesAndErrorsTests(ITestOutputHelper output)
         {
@@ -32,7 +36,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// https://github.com/Microsoft/msbuild/issues/2667
+        /// https://github.com/dotnet/msbuild/issues/2667
         /// </summary>
         [Fact]
         public void TreatWarningsAsErrorsWhenBuildingSameProjectMultipleTimes()
@@ -126,7 +130,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         /// <summary>
-        /// https://github.com/Microsoft/msbuild/issues/2667
+        /// https://github.com/dotnet/msbuild/issues/2667
         /// </summary>
         [Fact]
         public void TreatWarningsAsMessagesWhenBuildingSameProjectMultipleTimes()
@@ -168,9 +172,7 @@ namespace Microsoft.Build.Engine.UnitTests
                     {
                         {"Foo", ExpectedEventCode},
                     },
-                    warningsAsMessages: "$(Foo)"
-                )
-            );
+                    warningsAsMessages: "$(Foo)"));
 
             VerifyBuildMessageEvent(logger);
         }
@@ -211,8 +213,7 @@ namespace Microsoft.Build.Engine.UnitTests
             MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(
                 GetTestProject(
                     warningsAsMessages: ExpectedEventCode,
-                    warningsAsErrors: ExpectedEventCode
-                    ));
+                    warningsAsErrors: ExpectedEventCode));
 
             VerifyBuildMessageEvent(logger);
         }
@@ -273,7 +274,7 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [Theory]
-        
+
         [InlineData("MSB1235", "MSB1234", "MSB1234", "MSB1234", false)] // Log MSB1234, treat as error via MSBuildWarningsAsErrors
         [InlineData("MSB1235", "", "MSB1234", "MSB1234", true)] // Log MSB1234, expect MSB1234 as error via MSBuildTreatWarningsAsErrors
         [InlineData("MSB1234", "MSB1234", "MSB1234", "MSB4181", true)]// Log MSB1234, MSBuildWarningsAsMessages takes priority
@@ -417,6 +418,9 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
+        /// <summary>
+        /// Test that a task that returns false without logging anything reports MSB4181 as a warning.
+        /// </summary>
         [Fact]
         public void TaskReturnsFailureButDoesNotLogError_ContinueOnError_WarnAndContinue()
         {
@@ -436,6 +440,31 @@ namespace Microsoft.Build.Engine.UnitTests
                 logger.WarningCount.ShouldBe(1);
 
                 logger.AssertLogContains("MSB4181");
+            }
+        }
+
+        /// <summary>
+        /// Test that a task that returns false after logging an error->warning does NOT also log MSB4181
+        /// </summary>
+        [Fact]
+        public void TaskReturnsFailureAndLogsError_ContinueOnError_WarnAndContinue()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName = ""CustomLogAndReturnTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <UsingTask TaskName = ""ReturnFailureWithoutLoggingErrorTask"" AssemblyName=""Microsoft.Build.Engine.UnitTests""/>
+                    <Target Name='Build'>
+                        <CustomLogAndReturnTask Return=""false"" ErrorCode=""MSB1234"" ContinueOnError=""WarnAndContinue""/>
+                    </Target>
+                </Project>");
+
+                MockLogger logger = proj.BuildProjectExpectSuccess();
+
+                // The only warning should be the error->warning logged by the task.
+                logger.WarningCount.ShouldBe(1);
+                logger.AssertLogContains("MSB1234");
             }
         }
 

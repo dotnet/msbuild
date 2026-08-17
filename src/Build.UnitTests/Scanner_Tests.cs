@@ -1,16 +1,18 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
 
 
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
@@ -39,9 +41,9 @@ namespace Microsoft.Build.UnitTests
                 { " $(",                    "2",    "AllowAll"},              // Position of $
                 { " $",                     "2",    "AllowAll"},              // Position of $
                 { " @(foo)",                "2",    "AllowProperties"},       // Position of @
-                { " '@(foo)'",              "3",    "AllowProperties"},       // Position of @    
+                { " '@(foo)'",              "3",    "AllowProperties"},       // Position of @
                 /* test escaped chars: message shows them escaped so count should include them */
-                { "'%24%28x' == '%24(x''",   "21",  "AllowAll"}               // Position of extra quote 
+                { "'%24%28x' == '%24(x''",   "21",  "AllowAll"}               // Position of extra quote
             };
 
             // Some errors are caught by the Parser, not merely by the Lexer/Scanner. So we have to do a full Parse,
@@ -69,7 +71,10 @@ namespace Microsoft.Build.UnitTests
         /// <param name="lexer"></param>
         private void AdvanceToScannerError(Scanner lexer)
         {
-            while (lexer.Advance() && !lexer.IsNext(Token.TokenType.EndOfInput));
+            while (lexer.Advance() && !lexer.IsNext(Token.TokenType.EndOfInput))
+            {
+                ;
+            }
         }
 
         /// <summary>
@@ -128,24 +133,6 @@ namespace Microsoft.Build.UnitTests
             Scanner lexer = new Scanner(pattern, ParserOptions.AllowProperties);
             AdvanceToScannerError(lexer);
             lexer._errorState.ShouldBeFalse();
-        }
-
-        [Fact]
-        public void SpacePropertyOptOutWave16_10()
-        {
-            using TestEnvironment env = TestEnvironment.Create();
-            ChangeWaves.ResetStateForTests();
-            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave16_10.ToString());
-            BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly();
-
-            Scanner lexer = new Scanner("$(x )", ParserOptions.AllowProperties);
-            AdvanceToScannerError(lexer);
-            Assert.Null(lexer.UnexpectedlyFound);
-
-            lexer = new Scanner("$( x)", ParserOptions.AllowProperties);
-            AdvanceToScannerError(lexer);
-            Assert.Null(lexer.UnexpectedlyFound);
-            ChangeWaves.ResetStateForTests();
         }
 
         /// <summary>
@@ -445,7 +432,7 @@ namespace Microsoft.Build.UnitTests
 
             lexer = new Scanner("'String with an embedded \\' in it'", ParserOptions.AllowAll);
             Assert.True(lexer.Advance() && lexer.IsNext(Token.TokenType.String));
-            //          Assert.AreEqual(String.Compare("String with an embedded ' in it", lexer.IsNextString()), 0);
+            // Assert.AreEqual(String.Compare("String with an embedded ' in it", lexer.IsNextString()), 0);
 
             lexer = new Scanner("'String with a $(Property) inside'", ParserOptions.AllowAll);
             Assert.True(lexer.Advance() && lexer.IsNext(Token.TokenType.String));

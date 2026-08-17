@@ -1,15 +1,17 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
-using Microsoft.Build.Tasks;
-using Microsoft.Build.Utilities;
 using System;
 using System.IO;
+using Microsoft.Build.Tasks;
+using Microsoft.Build.Utilities;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests
 {
-    sealed public class XmlPeek_Tests
+    public sealed class XmlPeek_Tests
     {
         private string _xmlFileWithNs = @"<?xml version='1.0' encoding='utf-8'?>
 
@@ -34,7 +36,7 @@ namespace Microsoft.Build.UnitTests
 ";
 
         private string _xmlFileNoNsNoDtd = @"<?xml version='1.0' encoding='utf-8'?>
-        
+
 <class AccessModifier='public' Name='test'>
   <variable Type='String' Name='a'></variable>
   <variable Type='String' Name='b'></variable>
@@ -301,7 +303,7 @@ namespace Microsoft.Build.UnitTests
         public void PeekWithoutUsingTask()
         {
             string projectContents = @"
-<Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='http://schemas.microsoft.com/developer/msbuild/2003'>
+<Project ToolsVersion='msbuilddefaulttoolsversion'>
   <Target Name='x'>
     <XmlPeek Query='abc' ContinueOnError='true' />
   </Target>

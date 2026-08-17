@@ -1,5 +1,9 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// THE ASSEMBLY BUILT FROM THIS SOURCE FILE HAS BEEN DEPRECATED FOR YEARS. IT IS BUILT ONLY TO PROVIDE
+// BACKWARD COMPATIBILITY FOR API USERS WHO HAVE NOT YET MOVED TO UPDATED APIS. PLEASE DO NOT SEND PULL
+// REQUESTS THAT CHANGE THIS FILE WITHOUT FIRST CHECKING WITH THE MAINTAINERS THAT THE FIX IS REQUIRED.
 
 using System;
 using System.Diagnostics;
@@ -32,7 +36,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         /// Puts up an assertion dialog in debug builds, and throws an exception in
         /// both debug and release builds. Since this is not a no-op in release builds,
         /// it should not be called repeatedly in performance-critical scenarios.
-        /// 
+        ///
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
@@ -48,7 +52,7 @@ namespace Microsoft.Build.BuildEngine.Shared
             params object[] args
         )
         {
-            // We ignore showAssert:  we don't want to show the assert dialog no matter what. 
+            // We ignore showAssert:  we don't want to show the assert dialog no matter what.
             throw new InternalErrorException(ResourceUtilities.FormatString(unformattedMessage, args));
         }
 
@@ -243,7 +247,7 @@ namespace Microsoft.Build.BuildEngine.Shared
 
         /// <summary>
         /// Throws an InvalidOperationException.
-        /// 
+        ///
         /// PERF WARNING: calling a method that takes a variable number of arguments
         /// is expensive, because memory is allocated for the array of arguments -- do
         /// not call this method repeatedly in performance-critical scenarios
@@ -597,7 +601,7 @@ namespace Microsoft.Build.BuildEngine.Shared
         {
             if (parameter == null)
             {
-                // Most ArgumentNullException overloads append its own rather clunky multi-line message. 
+                // Most ArgumentNullException overloads append its own rather clunky multi-line message.
                 // So use the one overload that doesn't.
                 throw new ArgumentNullException(
                     ResourceUtilities.FormatResourceString(resourceName, parameterName),

@@ -1,5 +1,5 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections;
@@ -13,6 +13,8 @@ using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 
+#nullable disable
+
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {
     internal static class XmlUtil
@@ -23,12 +25,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             string prefix = !String.IsNullOrEmpty(r.Prefix) ? r.Prefix : nsmgr.LookupPrefix(r.NamespaceURI);
             if (!String.IsNullOrEmpty(prefix))
+            {
                 return prefix + ":" + r.LocalName;
+            }
             else
+            {
                 return r.LocalName;
+            }
         }
 
-        //NOTE: XmlDocument.ImportNode munges "xmlns:asmv2" to "xmlns:d1p1" for some reason, use XmlUtil.CloneElementToDocument instead
+        // NOTE: XmlDocument.ImportNode munges "xmlns:asmv2" to "xmlns:d1p1" for some reason, use XmlUtil.CloneElementToDocument instead
         public static XmlElement CloneElementToDocument(XmlElement element, XmlDocument document, string namespaceURI)
         {
             XmlElement newElement = document.CreateElement(element.Name, namespaceURI);
@@ -58,7 +64,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             int i = s.IndexOf(':');
             if (i < 0)
+            {
                 return s;
+            }
+
             return s.Substring(i + 1);
         }
 
@@ -88,36 +97,38 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             Util.CopyStream(input, clonedInput);
 
             int t4 = Environment.TickCount;
-            XmlReader xml = XmlReader.Create(clonedInput);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "new XmlReader(2) t={0}", Environment.TickCount - t4));
-
-            XsltArgumentList args = null;
-            if (entries.Length > 0)
+            using (XmlReader reader = XmlReader.Create(clonedInput))
             {
-                args = new XsltArgumentList();
-                foreach (DictionaryEntry entry in entries)
+                Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "new XmlReader(2) t={0}", Environment.TickCount - t4));
+
+                XsltArgumentList args = null;
+                if (entries.Length > 0)
                 {
-                    string key = entry.Key.ToString();
-                    object val = entry.Value.ToString();
-                    args.AddParam(key, "", val);
-                    Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "arg: key='{0}' value='{1}'", key, val.ToString()));
+                    args = new XsltArgumentList();
+                    foreach (DictionaryEntry entry in entries)
+                    {
+                        string key = entry.Key.ToString();
+                        object val = entry.Value.ToString();
+                        args.AddParam(key, "", val);
+                        Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "arg: key='{0}' value='{1}'", key, val.ToString()));
+                    }
                 }
+
+                var m = new MemoryStream();
+                var w = new XmlTextWriter(m, Encoding.UTF8);
+                w.WriteStartDocument();
+
+                int t5 = Environment.TickCount;
+                xslc.Transform(reader, args, w, s_resolver);
+                Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform.Transform t={0}", Environment.TickCount - t4));
+
+                w.WriteEndDocument();
+                w.Flush();
+                m.Position = 0;
+
+                Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform(\"{0}\") t={1}", resource, Environment.TickCount - t1));
+                return m;
             }
-
-            var m = new MemoryStream();
-            var w = new XmlTextWriter(m, Encoding.UTF8);
-            w.WriteStartDocument();
-
-            int t5 = Environment.TickCount;
-            xslc.Transform(xml, args, w, s_resolver);
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform.Transform t={0}", Environment.TickCount - t4));
-
-            w.WriteEndDocument();
-            w.Flush();
-            m.Position = 0;
-
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "XslCompiledTransform(\"{0}\") t={1}", resource, Environment.TickCount - t1));
-            return m;
         }
 
         private class ResourceResolver : XmlUrlResolver
@@ -142,7 +153,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     s = a.GetManifestResourceStream(String.Format(CultureInfo.InvariantCulture, "{0}.{1}", typeof(Util).Namespace, filename));
 
                     if (s != null)
+                    {
                         return s;
+                    }
 
                     // Next look in current directory...
                     try
@@ -153,7 +166,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     {
                     }
                     if (s != null)
+                    {
                         return s;
+                    }
                 }
 
                 // Lastly, look at full specified uri path...
@@ -168,7 +183,9 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 {
                 }
                 if (s != null)
+                {
                     return s;
+                }
 
                 // Didn't find the resource...
                 Debug.Fail(String.Format(CultureInfo.CurrentCulture, "ResourceResolver could not find file '{0}'", filename));

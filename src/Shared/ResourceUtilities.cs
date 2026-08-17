@@ -1,12 +1,16 @@
-﻿// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if !BUILDINGAPPXTASKS
 using System.Resources;
 using System.Diagnostics;
+#endif
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.ComponentModel;
+
+#nullable disable
 
 #if BUILDINGAPPXTASKS
 namespace Microsoft.Build.AppxPackage.Shared
@@ -58,8 +62,7 @@ namespace Microsoft.Build.Shared
                     message[i + 4] < '0' || message[i + 4] > '9' ||
                     message[i + 5] < '0' || message[i + 5] > '9' ||
                     message[i + 6] < '0' || message[i + 6] > '9' ||
-                    message[i + 7] != ':'
-                    )
+                    message[i + 7] != ':')
                 {
                     return message;
                 }
@@ -231,12 +234,14 @@ namespace Microsoft.Build.Shared
                 // FormatResourceString calls ToString() which returns the full name of the type!
                 foreach (object param in args)
                 {
-                    // Check it has a real implementation of ToString()
+                    // Check it has a real implementation of ToString() and the type is not actually System.String
                     if (param != null)
                     {
-                        if (String.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal))
+                        if (string.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal) &&
+                            param.GetType() != typeof(string))
                         {
-                            ErrorUtilities.ThrowInternalError("Invalid resource parameter type, was {0}", param.GetType().FullName);
+                            ErrorUtilities.ThrowInternalError("Invalid resource parameter type, was {0}",
+                                param.GetType().FullName);
                         }
                     }
                 }
@@ -256,9 +261,9 @@ namespace Microsoft.Build.Shared
         /// </summary>
         /// <remarks>This method is thread-safe.</remarks>
         /// <param name="resourceName">Resource string to check.</param>
+        [Conditional("DEBUG")]
         internal static void VerifyResourceStringExists(string resourceName)
         {
-#if DEBUG
             try
             {
                 // Look up the resource string in the engine's string table.
@@ -293,6 +298,5 @@ namespace Microsoft.Build.Shared
             }
 #endif
         }
-#endif
     }
 }

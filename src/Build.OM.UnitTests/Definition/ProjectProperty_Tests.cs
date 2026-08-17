@@ -1,5 +1,5 @@
-// Copyright (c) Microsoft. All rights reserved.
-// Licensed under the MIT license. See LICENSE file in the project root for full license information.
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,8 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Shared;
 using Xunit;
+
+#nullable disable
 
 namespace Microsoft.Build.UnitTests.OM.Definition
 {
@@ -37,7 +39,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void NoExpansion()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <p>v1</p>
                         </PropertyGroup>
@@ -59,7 +61,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         public void ExpandProperty()
         {
             string content = @"
-                    <Project xmlns='http://schemas.microsoft.com/developer/msbuild/2003' >
+                    <Project>
                         <PropertyGroup>
                             <o>v1</o>
                             <p>$(o)</p>
@@ -137,8 +139,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 ProjectProperty property = project.GetProperty("MSBuildProjectDirectory");
 
                 property.UnevaluatedValue = "v";
-            }
-           );
+            });
         }
         /// <summary>
         /// Set the value of a property originating in the environment.
@@ -233,7 +234,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
         /// <summary>
         /// Verify item expressions are not expanded in new property values.
         /// NOTE: They aren't expanded to "blank". It just seems like that, because
-        /// when you output them, item expansion happens after property expansion, and 
+        /// when you output them, item expansion happens after property expansion, and
         /// they may evaluate to blank then. (Unless items do exist at that point.)
         /// </summary>
         [Fact]
@@ -261,7 +262,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
 
                 try
                 {
-                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFile();
+                    file = Microsoft.Build.Shared.FileUtilities.GetTemporaryFileName();
                     Project import = new Project();
                     import.SetProperty("p", "v0");
                     import.Save(file);
@@ -277,8 +278,7 @@ namespace Microsoft.Build.UnitTests.OM.Definition
                 {
                     File.Delete(file);
                 }
-            }
-           );
+            });
         }
         /// <summary>
         /// Get the property named "p" in the project provided
