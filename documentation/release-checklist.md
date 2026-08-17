@@ -217,7 +217,7 @@ Steps are **mostly parallel** unless noted.
   > **How publishing works:** We don't push packages ourselves. We hand a link to the **Release** artifacts of the official build to the _.NET Release Team_, and they push to nuget.org. Search past mail for the subject _"Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org"_ for the template.
 
   - [ ] **5.1a** Determine the exact MSBuild version that actually shipped to customers. \
-  ⚠️ **VS and the SDK routinely ship _different_ patch versions off the same `vs{{THIS_RELEASE_VERSION}}` branch, and the branch keeps advancing after GA — so this must be looked up, never inferred from `eng/Versions.props` at branch HEAD or from the Phase 4.4 insertion PR.**
+  ⚠️ **VS and the SDK might ship _different_ patch versions off the same `vs{{THIS_RELEASE_VERSION}}` branch during servicing — so this must be looked up, never inferred from `eng/Versions.props` at branch HEAD or from the Phase 4.4 insertion PR.**
     - **First, decide whether this release is coupled with an SDK release:** \
     `darc get-subscriptions --target-repo https://github.com/dotnet/msbuild --target-branch vs{{THIS_RELEASE_VERSION}} --source-repo https://github.com/dotnet/dotnet` \
     If that returns a source-enabled subscription from a `.NET <X.Y.Zxx> SDK` channel, the release **is** SDK-coupled.
