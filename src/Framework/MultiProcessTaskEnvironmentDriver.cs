@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Framework
@@ -40,6 +41,12 @@ namespace Microsoft.Build.Framework
         public AbsolutePath GetAbsolutePath(string path)
         {
             return new AbsolutePath(path, ProjectDirectory);
+        }
+
+        /// <inheritdoc/>
+        public string GetTempPath()
+        {
+            return Path.GetTempPath();
         }
 
         /// <inheritdoc/>

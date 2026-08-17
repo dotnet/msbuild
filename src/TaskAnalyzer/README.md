@@ -57,10 +57,12 @@ These APIs access process-global state that varies per task in multithreaded mod
 | `Environment.ExpandEnvironmentVariables()` | Use `TaskEnvironment.GetEnvironmentVariable()` per variable |
 | `Environment.GetFolderPath()` | Use `TaskEnvironment.GetEnvironmentVariable()` |
 | `Path.GetFullPath()` | `TaskEnvironment.GetAbsolutePath()` |
-| `Path.GetTempPath()` | `TaskEnvironment.GetEnvironmentVariable("TMP")` |
+| `Path.GetTempPath()` | `TaskEnvironment.GetTempPath()` |
 | `Path.GetTempFileName()` | `TaskEnvironment.GetEnvironmentVariable("TMP")` |
 | `Process.Start()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 | `new ProcessStartInfo()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
+
+`TaskEnvironment.GetTempPath()` resolves the temporary folder from the task environment. It does not read the shared process environment.
 
 ### MSBuildTask0003 — File Paths Must Be Absolute
 

@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Framework
@@ -70,6 +71,45 @@ namespace Microsoft.Build.Framework
         public AbsolutePath GetAbsolutePath(string path)
         {
             return new AbsolutePath(path, ProjectDirectory);
+        }
+
+        /// <inheritdoc/>
+        public string GetTempPath()
+        {
+            if (!NativeMethods.IsWindows)
+            {
+                string? tempDirectory = GetEnvironmentVariable("TMPDIR");
+                return FileUtilities.EnsureTrailingSlash(
+                    string.IsNullOrEmpty(tempDirectory) ? "/tmp" : tempDirectory!);
+            }
+
+            string? tempDirectoryWindows = GetEnvironmentVariable("TMP");
+            if (string.IsNullOrEmpty(tempDirectoryWindows))
+            {
+                tempDirectoryWindows = GetEnvironmentVariable("TEMP");
+            }
+
+            if (string.IsNullOrEmpty(tempDirectoryWindows))
+            {
+                string? userProfile = GetEnvironmentVariable("USERPROFILE");
+                if (Path.IsPathRooted(userProfile))
+                {
+                    tempDirectoryWindows = userProfile;
+                }
+            }
+
+            if (string.IsNullOrEmpty(tempDirectoryWindows))
+            {
+                tempDirectoryWindows = GetEnvironmentVariable("SYSTEMROOT");
+            }
+
+            if (string.IsNullOrEmpty(tempDirectoryWindows))
+            {
+                tempDirectoryWindows = Path.GetDirectoryName(Environment.SystemDirectory)!;
+            }
+
+            return FileUtilities.EnsureTrailingSlash(
+                GetAbsolutePath(tempDirectoryWindows!).GetCanonicalForm().Value);
         }
 
         /// <inheritdoc/>
