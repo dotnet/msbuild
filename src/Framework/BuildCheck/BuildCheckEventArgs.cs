@@ -46,12 +46,7 @@ internal sealed class BuildCheckTracingEventArgs(
     {
         base.WriteToStream(writer);
 
-        writer.Write7BitEncodedInt(TracingData.InfrastructureTracingData.Count);
-        foreach (KeyValuePair<string, TimeSpan> kvp in TracingData.InfrastructureTracingData)
-        {
-            writer.Write(kvp.Key);
-            writer.Write(kvp.Value.Ticks);
-        }
+        writer.WriteDurationsDictionary(TracingData.InfrastructureTracingData);
 
         writer.Write7BitEncodedInt(TracingData.TelemetryData.Count);
         foreach (BuildCheckRuleTelemetryData data in TracingData.TelemetryData.Values)
@@ -82,17 +77,9 @@ internal sealed class BuildCheckTracingEventArgs(
     {
         base.CreateFromStream(reader, version);
 
+        var infrastructureTracingData = reader.ReadDurationDictionary();
+
         int count = reader.Read7BitEncodedInt();
-        var infrastructureTracingData = new Dictionary<string, TimeSpan>(count);
-        for (int i = 0; i < count; i++)
-        {
-            string key = reader.ReadString();
-            TimeSpan value = TimeSpan.FromTicks(reader.ReadInt64());
-
-            infrastructureTracingData.Add(key, value);
-        }
-
-        count = reader.Read7BitEncodedInt();
         List<BuildCheckRuleTelemetryData> tracingData = new List<BuildCheckRuleTelemetryData>(count);
         for (int i = 0; i < count; i++)
         {
@@ -172,13 +159,9 @@ internal sealed class BuildCheckAcquisitionEventArgs(string acquisitionPath, str
 
 internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
 {
-    public BuildCheckResultWarning(IBuildCheckResult result, string code)
-        : base(code: code, file: result.Location.File, lineNumber: result.Location.Line, columnNumber: result.Location.Column, message: result.FormatMessage()) =>
+    public BuildCheckResultWarning(IBuildCheckResult result)
+        : base(code: result.Code, file: result.Location.File, lineNumber: result.Location.Line, columnNumber: result.Location.Column, message: result.FormatMessage()) =>
         RawMessage = result.FormatMessage();
-
-    internal BuildCheckResultWarning(string formattedMessage, string code)
-        : base(code: code, file: null, lineNumber: 0, columnNumber: 0, message: formattedMessage) =>
-        RawMessage = formattedMessage;
 
     internal BuildCheckResultWarning() { }
 
@@ -199,13 +182,9 @@ internal sealed class BuildCheckResultWarning : BuildWarningEventArgs
 
 internal sealed class BuildCheckResultError : BuildErrorEventArgs
 {
-    public BuildCheckResultError(IBuildCheckResult result, string code)
-        : base(code: code, file: result.Location.File, lineNumber: result.Location.Line, columnNumber: result.Location.Column, message: result.FormatMessage())
+    public BuildCheckResultError(IBuildCheckResult result)
+        : base(code: result.Code, file: result.Location.File, lineNumber: result.Location.Line, columnNumber: result.Location.Column, message: result.FormatMessage())
         => RawMessage = result.FormatMessage();
-
-    internal BuildCheckResultError(string formattedMessage, string code)
-        : base(code: code, file: null, lineNumber: 0, columnNumber: 0, message: formattedMessage)
-        => RawMessage = formattedMessage;
 
     internal BuildCheckResultError() { }
 
@@ -227,9 +206,8 @@ internal sealed class BuildCheckResultError : BuildErrorEventArgs
 internal sealed class BuildCheckResultMessage : BuildMessageEventArgs
 {
     public BuildCheckResultMessage(IBuildCheckResult result)
-        : base(message: result.FormatMessage(), file: result.Location.File, lineNumber: result.Location.Line, columnNumber: result.Location.Column, MessageImportance.High)
+        : base(code: result.Code, file: result.Location.File, lineNumber: result.Location.Line, columnNumber: result.Location.Column, message: result.FormatMessage())
         => RawMessage = result.FormatMessage();
-    
 
     internal BuildCheckResultMessage(string formattedMessage) => RawMessage = formattedMessage;
 

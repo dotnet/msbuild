@@ -284,14 +284,14 @@ namespace Microsoft.Build.Utilities
         /// Construct a rooting marker string from the ITaskItem array of primary sources.
         /// </summary>
         /// <param name="source">An <see cref="ITaskItem"/> containing information about the primary source.</param>
-        public static string FormatRootingMarker(ITaskItem source) => FormatRootingMarker(new[] { source }, null);
+        public static string FormatRootingMarker(ITaskItem source) => FormatRootingMarker([source], null);
 
         /// <summary>
         /// Construct a rooting marker string from the ITaskItem array of primary sources.
         /// </summary>
         /// <param name="source">An <see cref="ITaskItem"/> containing information about the primary source.</param>
         /// <param name="output">An <see cref="ITaskItem"/> containing information about the output.</param>
-        public static string FormatRootingMarker(ITaskItem source, ITaskItem output) => FormatRootingMarker(new[] { source }, new[] { output });
+        public static string FormatRootingMarker(ITaskItem source, ITaskItem output) => FormatRootingMarker([source], [output]);
 
         /// <summary>
         /// Construct a rooting marker string from the ITaskItem array of primary sources.
@@ -310,7 +310,7 @@ namespace Microsoft.Build.Utilities
         /// <param name="outputs">ITaskItem array of outputs.</param>
         public static string FormatRootingMarker(ITaskItem[] sources, ITaskItem[] outputs)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(sources, nameof(sources));
+            ErrorUtilities.VerifyThrowArgumentNull(sources);
 
             // So we don't have to deal with null checks.
             outputs ??= Array.Empty<ITaskItem>();
@@ -729,7 +729,7 @@ namespace Microsoft.Build.Utilities
             // Only log when we have been passed a TaskLoggingHelper
             if (Log != null)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(messageResourceName, nameof(messageResourceName));
+                ErrorUtilities.VerifyThrowArgumentNull(messageResourceName);
 
                 Log.LogMessage(importance, AssemblyResources.GetString(messageResourceName), messageArgs);
             }

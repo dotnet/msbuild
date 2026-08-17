@@ -44,11 +44,18 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     /// </summary>
     private readonly Dictionary<TaskKey, ExecutingTaskData> _tasksBeingExecuted = [];
 
-    internal static Dictionary<string, string> ExtractPropertiesLookup(ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
+    internal static Dictionary<string, string> ExtractEvaluatedPropertiesLookup(
+        ProjectEvaluationFinishedEventArgs evaluationFinishedEventArgs)
+        => ExtractPropertiesLookup(evaluationFinishedEventArgs.Properties);
+
+    private static Dictionary<string, string> ExtractPropertiesLookup(System.Collections.IEnumerable? propertiesFromEventArgs)
     {
         Dictionary<string, string> propertiesLookup = new Dictionary<string, string>();
-        Internal.Utilities.EnumerateProperties(evaluationFinishedEventArgs.Properties, propertiesLookup,
-            static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
+        if (propertiesFromEventArgs != null)
+        {
+            Internal.Utilities.EnumerateProperties(propertiesFromEventArgs, propertiesLookup,
+                static (dict, kvp) => dict.Add(kvp.Key, kvp.Value));
+        }
 
         return propertiesLookup;
     }
@@ -61,12 +68,14 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
     {
         if (_buildCheckCentralContext.HasEvaluatedPropertiesActions)
         {
-            propertiesLookup ??= ExtractPropertiesLookup(evaluationFinishedEventArgs);
+            propertiesLookup ??= ExtractEvaluatedPropertiesLookup(evaluationFinishedEventArgs);
+            var globalPropertiesLookup = ExtractPropertiesLookup(evaluationFinishedEventArgs.GlobalProperties);
 
             EvaluatedPropertiesCheckData checkData =
                 new(evaluationFinishedEventArgs.ProjectFile!,
                     evaluationFinishedEventArgs.BuildEventContext?.ProjectInstanceId,
-                    propertiesLookup!);
+                    propertiesLookup!,
+                    globalPropertiesLookup);
 
             _buildCheckCentralContext.RunEvaluatedPropertiesActions(checkData, checkContext, ReportResult);
         }
@@ -77,13 +86,17 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
                 evaluationFinishedEventArgs.ProjectFile!, /*unused*/
                 null, /*unused*/null, _cache, false /*Not explicitly loaded - unused*/);
 
+#pragma warning disable CS0618 // Type or member is obsolete
             ParsedItemsCheckData itemsCheckData = new(
+#pragma warning restore CS0618 // Type or member is obsolete
                 evaluationFinishedEventArgs.ProjectFile!,
                 evaluationFinishedEventArgs.BuildEventContext?.ProjectInstanceId,
                 new ItemsHolder(xml.Items, xml.ItemGroups));
 
             _buildCheckCentralContext.RunParsedItemsActions(itemsCheckData, checkContext, ReportResult);
         }
+
+        _buildCheckCentralContext.RunEvaluatedItemsActions(new EvaluatedItemsCheckData(evaluationFinishedEventArgs), checkContext, ReportResult);
     }
 
     /// <summary>
@@ -94,6 +107,16 @@ internal class BuildEventsProcessor(BuildCheckCentralContext buildCheckCentralCo
         EnvironmentVariableCheckData checkData = new(projectPath, checkContext.BuildEventContext?.ProjectInstanceId, envVarKey, envVarValue, elementLocation);
 
         _buildCheckCentralContext.RunEnvironmentVariableActions(checkData, checkContext, ReportResult);
+    }
+
+    /// <summary>
+    /// The method handles events associated with the ProjectImportedEventArgs.
+    /// </summary>
+    internal void ProcessProjectImportedEventArgs(ICheckContext checkContext, string projectPath, string importedProjectPath)
+    {
+        ProjectImportedCheckData checkData = new(importedProjectPath, projectPath, checkContext.BuildEventContext?.ProjectInstanceId);
+
+        _buildCheckCentralContext.RunProjectImportedActions(checkData, checkContext, ReportResult);
     }
 
     internal void ProcessBuildDone(ICheckContext checkContext)

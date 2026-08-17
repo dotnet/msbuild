@@ -835,7 +835,7 @@ namespace System.Deployment.Internal.CodeSigning
                     // To ensure this does not happen, ensure that the most significant byte in the little
                     // endian byte sequence is in the 0x01-0x7F range; clear that byte's most significant bit
                     // and set that byte's least significant bit.
- 
+
                     nonce[nonce.Length - 1] &= 0x7f;
                     nonce[nonce.Length - 1] |= 0x01;
 

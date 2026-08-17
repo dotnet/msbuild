@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Framework
 {
@@ -36,7 +37,7 @@ namespace Microsoft.Build.Framework
         /// </summary>
         /// <param name="parameter">The value of the argument.</param>
         /// <param name="parameterName">Parameter that should not be null.</param>
-        internal static void VerifyThrowInternalNull([NotNull] object? parameter, string parameterName)
+        internal static void VerifyThrowInternalNull([NotNull] object? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
         {
             if (parameter is null)
             {

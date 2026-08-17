@@ -166,9 +166,10 @@ namespace Microsoft.Build.Shared
 
             var allCulturesEnumValue = Enum.Parse(cultureTypesType, "AllCultures", true);
 
-            var cultures = s_cultureInfoGetCultureMethod.Invoke(null, new[] { allCulturesEnumValue }) as CultureInfo[];
+            var cultures = s_cultureInfoGetCultureMethod.Invoke(null, [allCulturesEnumValue]) as CultureInfo[];
 
-            FrameworkErrorUtilities.VerifyThrowInternalNull(cultures, "CultureInfo.GetCultures should work if all reflection checks pass");
+            // CultureInfo.GetCultures should work if all reflection checks pass
+            FrameworkErrorUtilities.VerifyThrowInternalNull(cultures);
 
             return cultures;
         }

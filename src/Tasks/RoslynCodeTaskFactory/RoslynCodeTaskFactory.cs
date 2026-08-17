@@ -350,7 +350,7 @@ namespace Microsoft.Build.Tasks
                             if (String.IsNullOrWhiteSpace(includeAttribute?.Value))
                             {
                                 // A <Reference Include="" /> is not allowed.
-                                log.LogErrorWithCodeFromResources("CodeTaskFactory.AttributeEmptyWithElement", "Include", "Reference");
+                                log.LogErrorWithCodeFromResources("CodeTaskFactory.AttributeEmptyWithTaskElement", "Include", "Reference", taskName);
                                 return false;
                             }
 
@@ -737,7 +737,7 @@ namespace Microsoft.Build.Tasks
                     managedCompiler.Optimize = false;
                     managedCompiler.OutputAssembly = new TaskItem(assemblyPath);
                     managedCompiler.References = references;
-                    managedCompiler.Sources = new ITaskItem[] { new TaskItem(sourceCodePath) };
+                    managedCompiler.Sources = [new TaskItem(sourceCodePath)];
                     managedCompiler.TargetType = "Library";
                     managedCompiler.UseSharedCompilation = false;
 

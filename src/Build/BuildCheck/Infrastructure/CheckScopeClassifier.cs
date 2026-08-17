@@ -8,12 +8,9 @@ using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.BuildCheck.Infrastructure;
 
-internal static class CheckScopeClassifier
+public static class CheckScopeClassifier
 {
-    static CheckScopeClassifier()
-    {
-        FileClassifier.Shared.OnImmutablePathsInitialized += SubscribeImmutablePathsInitialized;
-    }
+    static CheckScopeClassifier() => FileClassifier.Shared.OnImmutablePathsInitialized += SubscribeImmutablePathsInitialized;
 
     internal static event Action? NotifyOnScopingReadiness;
 
@@ -22,7 +19,7 @@ internal static class CheckScopeClassifier
     /// <summary>
     /// Notifies the subscribers that the scoping is ready.
     /// </summary>
-    internal static Func<EvaluationCheckScope, bool> IsScopingReady => (scope) => (scope is EvaluationCheckScope.ProjectFileOnly or EvaluationCheckScope.All) || IsScopingInitialized;
+    public static Func<EvaluationCheckScope, bool> IsScopingReady => (scope) => (scope is EvaluationCheckScope.ProjectFileOnly or EvaluationCheckScope.All) || IsScopingInitialized;
 
     /// <summary>
     /// Indicates whether given location is in the observed scope, based on currently built project path.
@@ -32,7 +29,7 @@ internal static class CheckScopeClassifier
     /// <param name="projectFileFullPath"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    internal static bool IsActionInObservedScope(
+    public static bool IsActionInObservedScope(
         EvaluationCheckScope scope,
         IMSBuildElementLocation? location,
         string projectFileFullPath)
@@ -46,26 +43,18 @@ internal static class CheckScopeClassifier
     /// <param name="projectFileFullPath"></param>
     /// <returns></returns>
     /// <exception cref="ArgumentOutOfRangeException"></exception>
-    internal static bool IsActionInObservedScope(
+    public static bool IsActionInObservedScope(
         EvaluationCheckScope scope,
         string? filePathOfEvent,
-        string projectFileFullPath)
-    {
-        switch (scope)
+        string projectFileFullPath) => scope switch
         {
-            case EvaluationCheckScope.ProjectFileOnly:
-                return filePathOfEvent == projectFileFullPath;
-            case EvaluationCheckScope.WorkTreeImports:
-                return
-                    filePathOfEvent != null &&
-                    !FileClassifier.Shared.IsNonModifiable(filePathOfEvent) &&
-                    !IsGeneratedNugetImport(filePathOfEvent);
-            case EvaluationCheckScope.All:
-                return true;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(scope), scope, null);
-        }
-    }
+            EvaluationCheckScope.ProjectFileOnly => filePathOfEvent == projectFileFullPath,
+            EvaluationCheckScope.WorkTreeImports => filePathOfEvent != null
+                                && !FileClassifier.Shared.IsNonModifiable(filePathOfEvent)
+                                && !IsGeneratedNugetImport(filePathOfEvent),
+            EvaluationCheckScope.All => true,
+            _ => throw new ArgumentOutOfRangeException(nameof(scope), scope, null),
+        };
 
     private static bool IsGeneratedNugetImport(string file) =>
         file.EndsWith("nuget.g.props", StringComparison.OrdinalIgnoreCase)

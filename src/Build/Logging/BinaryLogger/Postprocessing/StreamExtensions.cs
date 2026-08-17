@@ -59,30 +59,28 @@ namespace Microsoft.Build.Logging
 
         public static byte[] ReadToEnd(this Stream stream)
         {
-            if (stream.TryGetLength(out long length))
-            {
-                using BinaryReader reader = new(stream, Encoding.UTF8, leaveOpen: true);
-
-                return reader.ReadBytes((int)length);
-            }
-
-            using var ms = new MemoryStream();
+            MemoryStream ms = stream.TryGetLength(out long length) && length <= int.MaxValue ? new((int)length) : new();
             stream.CopyTo(ms);
-            return ms.ToArray();
+            byte[] buffer = ms.GetBuffer();
+            return buffer.Length == ms.Length ? buffer : ms.ToArray();
         }
 
         public static bool TryGetLength(this Stream stream, out long length)
         {
             try
             {
-                length = stream.Length;
-                return true;
+                if (stream.CanSeek)
+                {
+                    length = stream.Length;
+                    return true;
+                }
             }
             catch (NotSupportedException)
             {
-                length = 0;
-                return false;
             }
+
+            length = 0;
+            return false;
         }
 
         public static Stream ToReadableSeekableStream(this Stream stream)

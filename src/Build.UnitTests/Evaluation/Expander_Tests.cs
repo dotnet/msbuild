@@ -1292,6 +1292,55 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             Assert.Fail();
         }
+
+        [Fact]
+        public void StaticMethodWithThrowawayParameterSupported()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+<Project>
+  <PropertyGroup>
+    <MyProperty>Value is $([System.Int32]::TryParse(""3"", out _))</MyProperty>
+  </PropertyGroup>
+  <Target Name='Build'>
+    <Message Text='$(MyProperty)' />
+  </Target>
+</Project>");
+
+            logger.FullLog.ShouldContain("Value is True");
+        }
+
+        [Fact]
+        public void StaticMethodWithThrowawayParameterSupported2()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+<Project>
+  <PropertyGroup>
+    <MyProperty>Value is $([System.Int32]::TryParse(""notANumber"", out _))</MyProperty>
+  </PropertyGroup>
+  <Target Name='Build'>
+    <Message Text='$(MyProperty)' />
+  </Target>
+</Project>");
+
+            logger.FullLog.ShouldContain("Value is False");
+        }
+
+        [Fact]
+        public void StaticMethodWithUnderscoreNotConfusedWithThrowaway()
+        {
+            MockLogger logger = Helpers.BuildProjectWithNewOMExpectSuccess(@"
+<Project>
+  <PropertyGroup>
+    <MyProperty>Value is $([System.String]::Join('_', 'asdf', 'jkl'))</MyProperty>
+  </PropertyGroup>
+  <Target Name='Build'>
+    <Message Text='$(MyProperty)' />
+  </Target>
+</Project>");
+
+            logger.FullLog.ShouldContain("Value is asdf_jkl");
+        }
+
         /// <summary>
         /// Creates a set of complicated item metadata and properties, and items to exercise
         /// the Expander class.  The data here contains escaped characters, metadata that
@@ -4088,7 +4137,10 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 new string[] {"A$(Reg:AA)", "A"},
                 new string[] {"$(Reg:AA)", ""},
                 new string[] {"$(Reg:AAAA)", ""},
-                new string[] {"$(Reg:AAA)", ""}
+                new string[] {"$(Reg:AAA)", ""},
+                // Following two are comparison between non-numeric and numeric properties. More details: #10583
+                new string[] {"$(a.Equals($(c)))","False"},
+                new string[] {"$(a.CompareTo($(c)))","1"},
                                    };
 
             var errorTests = new List<string> {
@@ -5074,7 +5126,7 @@ $(
         {
             using (var env = TestEnvironment.Create())
             {
-                // Setting this env variable allows to track if expander was using reflection for a function invocation. 
+                // Setting this env variable allows to track if expander was using reflection for a function invocation.
                 env.SetEnvironmentVariable("MSBuildLogPropertyFunctionsRequiringReflection", "1");
 
                 var logger = new MockLogger();

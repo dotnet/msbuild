@@ -2,13 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Threading;
-using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Checks;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 
-internal sealed class CheckRegistrationContext(CheckWrapper checkWrapper, BuildCheckCentralContext buildCheckCentralContext) : IInternalCheckRegistrationContext
+internal sealed class CheckRegistrationContext(CheckWrapper checkWrapper, BuildCheckCentralContext buildCheckCentralContext)
+    : IInternalCheckRegistrationContext
 {
     public void RegisterEnvironmentVariableReadAction(Action<BuildCheckDataContext<EnvironmentVariableCheckData>> environmentVariableAction) =>
         buildCheckCentralContext.RegisterEnvironmentVariableReadAction(checkWrapper, environmentVariableAction);
@@ -16,8 +15,13 @@ internal sealed class CheckRegistrationContext(CheckWrapper checkWrapper, BuildC
     public void RegisterEvaluatedPropertiesAction(Action<BuildCheckDataContext<EvaluatedPropertiesCheckData>> evaluatedPropertiesAction) =>
         buildCheckCentralContext.RegisterEvaluatedPropertiesAction(checkWrapper, evaluatedPropertiesAction);
 
+#pragma warning disable CS0618 // Type or member is obsolete
     public void RegisterParsedItemsAction(Action<BuildCheckDataContext<ParsedItemsCheckData>> parsedItemsAction) =>
+#pragma warning restore CS0618 // Type or member is obsolete
         buildCheckCentralContext.RegisterParsedItemsAction(checkWrapper, parsedItemsAction);
+
+    public void RegisterEvaluatedItemsAction(Action<BuildCheckDataContext<EvaluatedItemsCheckData>> evaluatedItemsAction) =>
+        buildCheckCentralContext.RegisterEvaluatedItemsAction(checkWrapper, evaluatedItemsAction);
 
     public void RegisterTaskInvocationAction(Action<BuildCheckDataContext<TaskInvocationCheckData>> taskInvocationAction) =>
         buildCheckCentralContext.RegisterTaskInvocationAction(checkWrapper, taskInvocationAction);
@@ -33,4 +37,7 @@ internal sealed class CheckRegistrationContext(CheckWrapper checkWrapper, BuildC
 
     public void RegisterBuildFinishedAction(Action<BuildCheckDataContext<BuildFinishedCheckData>> buildFinishedAction)
         => buildCheckCentralContext.RegisterBuildFinishedAction(checkWrapper, buildFinishedAction);
+
+    public void RegisterProjectImportedAction(Action<BuildCheckDataContext<ProjectImportedCheckData>> projectImportedAction) =>
+        buildCheckCentralContext.RegisterProjectImportedAction(checkWrapper, projectImportedAction);
 }

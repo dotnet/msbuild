@@ -264,7 +264,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         {
             using (TestEnvironment env = TestEnvironment.Create())
             {
-                TransientTestFolder rootTestFolder = env.CreateFolder(); 
+                TransientTestFolder rootTestFolder = env.CreateFolder();
                 TransientTestFolder testFolder = env.CreateFolder(Path.Combine(rootTestFolder.Path, "\uD873\uDD02\u9FA8\u82D8\u722B\u9EA4\u03C5\u33D1\uE038\u486B\u0033"));
                 string appConfigContents = WriteAppConfigRuntimeSection(string.Empty, testFolder);
                 string outputAppConfigFile = env.ExpectFile(".config").Path;

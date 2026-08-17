@@ -10,6 +10,39 @@ namespace Microsoft.Build.Experimental.BuildCheck;
 /// </summary>
 public class CheckRule
 {
+    /// <summary>
+    /// Creates the descriptor of the BuildCheck rule
+    /// </summary>
+    /// <param name="id">The id of the rule - used to denote the violation in the outputs</param>
+    /// <param name="title">The title of the rule - currently unused</param>
+    /// <param name="description">The detailed description of the rule - currently unused</param>
+    /// <param name="messageFormat">The message format to be used during reporting the violation.</param>
+    /// <param name="defaultConfiguration">The default config of this rule - applicable if user doesn't specify custom values in .editorconfig.</param>
+    /// <param name="helpLinkUri">Optional link to more detailed help for the violation.</param>
+    public CheckRule(
+        string id,
+        string title,
+        string description,
+        string messageFormat,
+        CheckConfiguration defaultConfiguration,
+        string helpLinkUri)
+    {
+        Id = id;
+        Title = title;
+        Description = description;
+        MessageFormat = messageFormat;
+        DefaultConfiguration = defaultConfiguration;
+        HelpLinkUri = helpLinkUri;
+    }
+
+    /// <summary>
+    /// Creates the descriptor of the BuildCheck rule
+    /// </summary>
+    /// <param name="id">The id of the rule - used to denote the violation in the outputs</param>
+    /// <param name="title">The title of the rule - currently unused</param>
+    /// <param name="description">The detailed description of the rule - currently unused</param>
+    /// <param name="messageFormat">The message format to be used during reporting the violation.</param>
+    /// <param name="defaultConfiguration">The default config of this rule - applicable if user doesn't specify custom values in .editorconfig.</param>
     public CheckRule(
         string id,
         string title,
@@ -50,6 +83,8 @@ public class CheckRule
     /// Message format that will be used by the actual reports (<see cref="BuildCheckResult"/>) - those will just supply the actual arguments.
     /// </summary>
     public string MessageFormat { get; }
+
+    public string HelpLinkUri { get; } = string.Empty;
 
     /// <summary>
     /// The default configuration - overridable by the user via .editorconfig.

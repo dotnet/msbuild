@@ -30,6 +30,7 @@ namespace Microsoft.Build.Shared
         internal const string UseUtf8Never = "NEVER";
         internal const string UseUtf8Detect = "DETECT";
         internal const string UseUtf8System = "SYSTEM";
+        internal const string UseUtf8True = "TRUE";
 
         /// <summary>
         /// Get the current system locale code page, OEM version. OEM code pages are used for console-based input/output
@@ -241,6 +242,7 @@ namespace Microsoft.Build.Shared
             switch (useUtf8.ToUpperInvariant())
             {
                 case EncodingUtilities.UseUtf8Always:
+                case EncodingUtilities.UseUtf8True:
                     return EncodingUtilities.Utf8WithoutBom;
                 case EncodingUtilities.UseUtf8Never:
                 case EncodingUtilities.UseUtf8System:

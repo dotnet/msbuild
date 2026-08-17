@@ -38,7 +38,7 @@ public static class ArchiveFileEventArgsExtensions
             var contentArgs = new StringReadEventArgs(archiveFile.Content);
             stringHandler(contentArgs);
 
-            if(pathArgs.StringToBeUsed != pathArgs.OriginalString ||
+            if (pathArgs.StringToBeUsed != pathArgs.OriginalString ||
                contentArgs.StringToBeUsed != contentArgs.OriginalString)
             {
                 args.ArchiveData = new ArchiveFile(pathArgs.StringToBeUsed, contentArgs.StringToBeUsed);

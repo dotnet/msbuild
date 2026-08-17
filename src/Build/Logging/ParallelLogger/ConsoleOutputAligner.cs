@@ -56,7 +56,7 @@ namespace Microsoft.Build.BackEnd.Logging
             // Empiric value of average line length in console output. Used to estimate number of lines in message for StringBuilder capacity.
             // Wrongly estimated capacity is not a problem as StringBuilder will grow as needed. It is just optimization to avoid multiple reallocations.
             const int averageLineLength = 40;
-            int estimatedCapacity = message.Length + ((prefixAlreadyWritten ? 0 : prefixWidth)  + Environment.NewLine.Length) * (message.Length / averageLineLength + 1);
+            int estimatedCapacity = message.Length + ((prefixAlreadyWritten ? 0 : prefixWidth) + Environment.NewLine.Length) * (message.Length / averageLineLength + 1);
             StringBuilder sb = _stringBuilderProvider.Acquire(estimatedCapacity);
 
             // The string contains new lines, treat each new line as a different string to format and send to the console

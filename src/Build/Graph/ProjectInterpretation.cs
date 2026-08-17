@@ -44,11 +44,7 @@ namespace Microsoft.Build.Graph
 
         public static ProjectInterpretation Instance = new ProjectInterpretation();
 
-        private ProjectInterpretation()
-        {
-        }
-
-        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonMultitargetingNodes = new[] { (GlobalPropertiesModifier)ProjectReferenceGlobalPropertiesModifier }.ToImmutableList();
+        private static readonly ImmutableList<GlobalPropertiesModifier> ModifierForNonMultitargetingNodes = [(GlobalPropertiesModifier)ProjectReferenceGlobalPropertiesModifier];
 
         internal enum ProjectType
         {
@@ -298,7 +294,7 @@ namespace Microsoft.Build.Graph
                     project: outerBuild,
                     itemType: InnerBuildReferenceItemName,
                     includeEscaped: outerBuild.FullPath,
-                    directMetadata: new[] { new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}") },
+                    directMetadata: [new KeyValuePair<string, string>(ItemMetadataNames.PropertiesMetadataName, $"{globalPropertyName}={globalPropertyValue}")],
                     definingFileEscaped: outerBuild.FullPath);
             }
         }
@@ -386,8 +382,8 @@ namespace Microsoft.Build.Graph
             bool allowCollectionReuse,
             IEnumerable<GlobalPropertiesModifier> globalPropertyModifiers)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectReference, nameof(projectReference));
-            ErrorUtilities.VerifyThrowArgumentNull(requesterGlobalProperties, nameof(requesterGlobalProperties));
+            ErrorUtilities.VerifyThrowInternalNull(projectReference);
+            ErrorUtilities.VerifyThrowArgumentNull(requesterGlobalProperties);
 
             var properties = SplitPropertyNameValuePairs(ItemMetadataNames.PropertiesMetadataName, projectReference.GetMetadataValue(ItemMetadataNames.PropertiesMetadataName));
             var additionalProperties = SplitPropertyNameValuePairs(ItemMetadataNames.AdditionalPropertiesMetadataName, projectReference.GetMetadataValue(ItemMetadataNames.AdditionalPropertiesMetadataName));
@@ -560,7 +556,7 @@ namespace Microsoft.Build.Graph
             // special case for Quickbuild which updates msbuild binaries independent of props/targets. Remove this when all QB repos will have
             // migrated to new enough Visual Studio versions whose Microsoft.Managed.After.Targets enable transitive references.
             if (string.IsNullOrWhiteSpace(projectInstance.GetEngineRequiredPropertyValue(AddTransitiveProjectReferencesInStaticGraphPropertyName)) &&
-                MSBuildStringIsTrue(projectInstance.GetEngineRequiredPropertyValue("UsingMicrosoftNETSdk")) &&
+                MSBuildStringIsTrue(projectInstance.GetEngineRequiredPropertyValue(PropertyNames.UsingMicrosoftNETSdk)) &&
                 MSBuildStringIsFalse(projectInstance.GetEngineRequiredPropertyValue("DisableTransitiveProjectReferences")))
             {
                 return true;

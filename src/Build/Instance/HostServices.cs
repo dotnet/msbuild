@@ -66,9 +66,9 @@ namespace Microsoft.Build.Execution
         /// </summary>
         public ITaskHost GetHostObject(string projectFile, string targetName, string taskName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
-            ErrorUtilities.VerifyThrowArgumentNull(targetName, nameof(targetName));
-            ErrorUtilities.VerifyThrowArgumentNull(taskName, nameof(taskName));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile);
+            ErrorUtilities.VerifyThrowArgumentNull(targetName);
+            ErrorUtilities.VerifyThrowArgumentNull(taskName);
 
             HostObjects hostObjects;
             if (_hostObjectMap == null || !_hostObjectMap.TryGetValue(projectFile, out hostObjects))
@@ -131,9 +131,9 @@ namespace Microsoft.Build.Execution
                         ErrorUtilities.VerifyThrowArgumentNull(projectFile, "projectFile));
                         ErrorUtilities.VerifyThrowArgumentNull(targetName, "targetName));
             */
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
-            ErrorUtilities.VerifyThrowArgumentNull(targetName, nameof(targetName));
-            ErrorUtilities.VerifyThrowArgumentNull(taskName, nameof(taskName));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile);
+            ErrorUtilities.VerifyThrowArgumentNull(targetName);
+            ErrorUtilities.VerifyThrowArgumentNull(taskName);
 
             // We can only set the host object to a non-null value if the affinity for the project is not out of proc, or if it is, it is only implicitly
             // out of proc, in which case it will become in-proc after this call completes.  See GetNodeAffinity.
@@ -164,10 +164,10 @@ namespace Microsoft.Build.Execution
         [SupportedOSPlatform("windows")]
         public void RegisterHostObject(string projectFile, string targetName, string taskName, string monikerName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectFile, nameof(projectFile));
-            ErrorUtilities.VerifyThrowArgumentNull(targetName, nameof(targetName));
-            ErrorUtilities.VerifyThrowArgumentNull(taskName, nameof(taskName));
-            ErrorUtilities.VerifyThrowArgumentNull(monikerName, nameof(monikerName));
+            ErrorUtilities.VerifyThrowArgumentNull(projectFile);
+            ErrorUtilities.VerifyThrowArgumentNull(targetName);
+            ErrorUtilities.VerifyThrowArgumentNull(taskName);
+            ErrorUtilities.VerifyThrowArgumentNull(monikerName);
 
             _hostObjectMap ??= new Dictionary<string, HostObjects>(StringComparer.OrdinalIgnoreCase);
 

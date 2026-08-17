@@ -352,7 +352,7 @@ namespace Microsoft.Build.Shared
                         // because we're a child node with no console to log to, so die
                         Directory.CreateDirectory(DebugDumpPath);
 
-                        var pid = Process.GetCurrentProcess().Id;
+                        var pid = EnvironmentUtilities.CurrentProcessId;
                         // This naming pattern is assumed in ReadAnyExceptionFromFile
                         s_dumpFileName = Path.Combine(DebugDumpPath, $"MSBuild_pid-{pid}_{guid:n}.failure.txt");
 
@@ -372,7 +372,7 @@ namespace Microsoft.Build.Shared
                     }
                 }
             }
-            
+
             // Some customers experience exceptions such as 'OutOfMemory' errors when msbuild attempts to log errors to a local file.
             // This catch helps to prevent the application from crashing in this best-effort dump-diagnostics path,
             // but doesn't prevent the overall crash from going to Watson.

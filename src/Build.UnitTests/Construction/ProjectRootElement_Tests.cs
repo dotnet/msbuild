@@ -5,6 +5,7 @@
 using System;
 using System.Text;
 using Microsoft.Build.Construction;
+using Microsoft.Build.Evaluation;
 using Xunit;
 
 #nullable disable
@@ -115,6 +116,17 @@ bar", false)]
                 Assert.Equal(string.Empty, children[0].ChildNodes[0].Value);
                 Assert.Equal(string.Empty, children[0].ChildNodes[1].Value);
             }
+        }
+
+        [Fact]
+        public void CreateEphemeralCannotBeDirtied()
+        {
+            var projectRootElement = ProjectRootElement.CreateEphemeral(ProjectCollection.GlobalProjectCollection.ProjectRootElementCache);
+            var versionBeforeMarkDirty = projectRootElement.Version;
+
+            projectRootElement.MarkDirty("test", "test");
+
+            Assert.Equal(projectRootElement.Version, versionBeforeMarkDirty);
         }
     }
 }

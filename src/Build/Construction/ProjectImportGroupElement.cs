@@ -31,7 +31,7 @@ namespace Microsoft.Build.Construction
         internal ProjectImportGroupElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent, nameof(parent));
+            ErrorUtilities.VerifyThrowArgumentNull(parent);
         }
 
         /// <summary>
@@ -61,7 +61,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectImportElement AddImport(string project)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(project, nameof(project));
+            ErrorUtilities.VerifyThrowArgumentLength(project);
 
             ProjectImportElement newImport = ContainingProject.CreateImportElement(project);
             AppendChild(newImport);

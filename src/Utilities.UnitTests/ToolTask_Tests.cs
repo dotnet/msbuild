@@ -922,7 +922,7 @@ namespace Microsoft.Build.UnitTests
             task.TerminationTimeout.ShouldBe(timeout);
         }
 
-		/// <summary>
+        /// <summary>
         /// Verifies that a ToolTask instance can return correct results when executed multiple times with timeout.
         /// </summary>
         /// <param name="repeats">Specifies the number of repeats for external command execution.</param>

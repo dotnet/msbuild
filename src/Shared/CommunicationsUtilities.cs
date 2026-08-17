@@ -108,7 +108,8 @@ namespace Microsoft.Build.Internal
             fileVersionMinor = fileVersion.Minor;
             fileVersionBuild = fileVersion.Build;
             fileVersionPrivate = fileVersion.Revision;
-            sessionId = Process.GetCurrentProcess().SessionId;
+            using Process currentProcess = Process.GetCurrentProcess();
+            sessionId = currentProcess.SessionId;
         }
 
         // This is used as a key, so it does not need to be human readable.
@@ -119,8 +120,8 @@ namespace Microsoft.Build.Internal
 
         public virtual int[] RetrieveHandshakeComponents()
         {
-            return new int[]
-            {
+            return
+            [
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(options),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor),
@@ -128,7 +129,7 @@ namespace Microsoft.Build.Internal
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(sessionId)
-            };
+            ];
         }
 
         public virtual string GetKey() => $"{options} {salt} {fileVersionMajor} {fileVersionMinor} {fileVersionBuild} {fileVersionPrivate} {sessionId}".ToString(CultureInfo.InvariantCulture);
@@ -152,15 +153,15 @@ namespace Microsoft.Build.Internal
 
         public override int[] RetrieveHandshakeComponents()
         {
-            return new int[]
-            {
+            return
+            [
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(options),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(salt),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMajor),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionMinor),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionBuild),
                 CommunicationsUtilities.AvoidEndOfHandshakeSignal(fileVersionPrivate),
-            };
+            ];
         }
 
         public override string GetKey()
@@ -539,26 +540,21 @@ namespace Microsoft.Build.Internal
             else
 #endif
             {
-                // Legacy approach with an early-abort for connection attempts from ancient MSBuild.exes
-                for (int i = 0; i < bytes.Length; i++)
+                int bytesRead = stream.Read(bytes, 0, bytes.Length);
+
+                // Abort for connection attempts from ancient MSBuild.exes
+                if (byteToAccept != null && bytesRead > 0 && byteToAccept != bytes[0])
                 {
-                    int read = stream.ReadByte();
+                    stream.WriteIntForHandshake(0x0F0F0F0F);
+                    stream.WriteIntForHandshake(0x0F0F0F0F);
+                    throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
+                }
 
-                    if (read == -1)
-                    {
-                        // We've unexpectly reached end of stream.
-                        // We are now in a bad state, disconnect on our end
-                        throw new IOException(String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
-                    }
-
-                    bytes[i] = Convert.ToByte(read);
-
-                    if (i == 0 && byteToAccept != null && byteToAccept != bytes[0])
-                    {
-                        stream.WriteIntForHandshake(0x0F0F0F0F);
-                        stream.WriteIntForHandshake(0x0F0F0F0F);
-                        throw new InvalidOperationException(String.Format(CultureInfo.InvariantCulture, "Client: rejected old host. Received byte {0} instead of {1}.", bytes[0], byteToAccept));
-                    }
+                if (bytesRead != bytes.Length)
+                {
+                    // We've unexpectly reached end of stream.
+                    // We are now in a bad state, disconnect on our end
+                    throw new IOException(String.Format(CultureInfo.InvariantCulture, "Unexpected end of stream while reading for handshake"));
                 }
             }
 
@@ -836,7 +832,7 @@ namespace Microsoft.Build.Internal
                     fileName += ".txt";
 
                     using (StreamWriter file = FileUtilities.OpenWrite(
-                        String.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), Process.GetCurrentProcess().Id, nodeId), append: true))
+                        string.Format(CultureInfo.CurrentCulture, Path.Combine(s_debugDumpPath, fileName), EnvironmentUtilities.CurrentProcessId, nodeId), append: true))
                     {
                         long now = DateTime.UtcNow.Ticks;
                         float millisecondsSinceLastLog = (float)(now - s_lastLoggedTicks) / 10000L;

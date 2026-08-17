@@ -28,6 +28,8 @@ namespace Microsoft.Build.Tasks
 
         private ITaskItem[] _resourceFiles;
 
+        private bool _enableCustomCulture;
+
         [SuppressMessage("Microsoft.Design", "CA1051:DoNotDeclareVisibleInstanceFields", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         [SuppressMessage("Microsoft.Naming", "CA1704:IdentifiersShouldBeSpelledCorrectly", MessageId = "Taskitem", Justification = "Shipped this way in Dev11 Beta (go-live)")]
         protected Dictionary<string, ITaskItem> itemSpecToTaskitem = new Dictionary<string, ITaskItem>(StringComparer.OrdinalIgnoreCase);
@@ -54,6 +56,15 @@ namespace Microsoft.Build.Tasks
                 return _resourceFiles;
             }
             set => _resourceFiles = value;
+        }
+
+        /// <summary>
+        /// Contains the information if custom culture is enabled.
+        /// </summary>
+        public bool EnableCustomCulture
+        {
+            get { return _enableCustomCulture; }
+            set { _enableCustomCulture = value; }
         }
 
         /// <summary>
@@ -295,7 +306,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         private static void MakeValidEverettSubFolderIdentifier(StringBuilder builder, string subName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(subName, nameof(subName));
+            ErrorUtilities.VerifyThrowArgumentNull(subName);
 
             if (string.IsNullOrEmpty(subName)) { return; }
 
@@ -333,7 +344,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal static void MakeValidEverettFolderIdentifier(StringBuilder builder, string name)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentNull(name);
 
             if (string.IsNullOrEmpty(name)) { return; }
 
@@ -365,7 +376,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public static string MakeValidEverettIdentifier(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(name, nameof(name));
+            ErrorUtilities.VerifyThrowArgumentNull(name);
             if (string.IsNullOrEmpty(name)) { return name; }
 
             var everettId = new StringBuilder(name.Length);

@@ -45,7 +45,7 @@ namespace Microsoft.Build.UnitTests
             testInfoType = frameworkAssembly.GetType("Microsoft.Build.Framework.BuildEnvironmentState");
             runningTestsField = testInfoType.GetField("s_runningTests", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
             runningTestsField.SetValue(null, true);
-            
+
 
             // Note: build error files will be initialized in test environments for particular tests, also we don't have output to report error files into anyway...
             _testEnvironment = TestEnvironment.Create(output: null, ignoreBuildErrorFiles: true);

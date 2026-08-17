@@ -63,7 +63,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
             }
             else if (CheckScopeClassifier.IsActionInObservedScope(_scope, context.Data.EnvironmentVariableLocation.File, context.Data.ProjectFilePath))
             {
-                context.ReportResult(BuildCheckResult.Create(
+                context.ReportResult(BuildCheckResult.CreateBuiltIn(
                     SupportedRule,
                     context.Data.EnvironmentVariableLocation,
                     GetFormattedMessage(context.Data.EnvironmentVariableName, context.Data.EnvironmentVariableValue)));
@@ -88,7 +88,7 @@ internal sealed class NoEnvironmentVariablePropertyCheck : Check
                 continue;
             }
 
-            context.ReportResult(BuildCheckResult.Create(
+            context.ReportResult(BuildCheckResult.CreateBuiltIn(
                 SupportedRule,
                 context.Data.EnvironmentVariableLocation,
                 GetFormattedMessage(context.Data.EnvironmentVariableName, context.Data.EnvironmentVariableValue)));

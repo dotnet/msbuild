@@ -7,6 +7,7 @@ using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.FileAccesses;
 using Microsoft.Build.Shared;
+using Microsoft.Build.TelemetryInfra;
 
 #nullable disable
 
@@ -77,8 +78,9 @@ namespace Microsoft.Build.BackEnd
             // NodeEndpoint,
             _componentEntriesByType[BuildComponentType.LoggingService] = new BuildComponentEntry(BuildComponentType.LoggingService, null);
             _componentEntriesByType[BuildComponentType.RequestBuilder] = new BuildComponentEntry(BuildComponentType.RequestBuilder, RequestBuilder.CreateComponent, CreationPattern.CreateAlways);
-            // This conditionally registers real or no-op implementation based on BuildParameters
+            // Following two conditionally registers real or no-op implementation based on BuildParameters
             _componentEntriesByType[BuildComponentType.BuildCheckManagerProvider] = new BuildComponentEntry(BuildComponentType.BuildCheckManagerProvider, BuildCheckManagerProvider.CreateComponent, CreationPattern.Singleton);
+            _componentEntriesByType[BuildComponentType.TelemetryForwarder] = new BuildComponentEntry(BuildComponentType.TelemetryForwarder, TelemetryForwarderProvider.CreateComponent, CreationPattern.Singleton);
             _componentEntriesByType[BuildComponentType.TargetBuilder] = new BuildComponentEntry(BuildComponentType.TargetBuilder, TargetBuilder.CreateComponent, CreationPattern.CreateAlways);
             _componentEntriesByType[BuildComponentType.TaskBuilder] = new BuildComponentEntry(BuildComponentType.TaskBuilder, TaskBuilder.CreateComponent, CreationPattern.CreateAlways);
             _componentEntriesByType[BuildComponentType.RegisteredTaskObjectCache] = new BuildComponentEntry(BuildComponentType.RegisteredTaskObjectCache, RegisteredTaskObjectCache.CreateComponent, CreationPattern.Singleton);

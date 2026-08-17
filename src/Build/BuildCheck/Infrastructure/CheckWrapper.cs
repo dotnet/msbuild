@@ -5,8 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using Microsoft.Build.BackEnd.Logging;
-using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Framework;
 
 namespace Microsoft.Build.Experimental.BuildCheck.Infrastructure;
@@ -131,7 +129,6 @@ internal sealed class CheckWrapper
 
         switch (configurationEffective.Severity)
         {
-            
             case CheckResultSeverity.Suggestion:
                 telemetryData.IncrementMessagesCount();
                 break;

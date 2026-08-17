@@ -60,7 +60,11 @@ namespace Microsoft.Build.Shared.FileSystem
 
         public override bool FileExists(string path)
         {
-            return NativeMethodsShared.FileExistsWindows(path);
+#if NETFRAMEWORK
+            return Microsoft.IO.File.Exists(path);
+#else
+            return File.Exists(path);
+#endif
         }
 
         public override bool FileOrDirectoryExists(string path)

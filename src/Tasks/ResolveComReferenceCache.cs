@@ -41,8 +41,8 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal ResolveComReferenceCache(string tlbImpPath, string axImpPath)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(tlbImpPath, nameof(tlbImpPath));
-            ErrorUtilities.VerifyThrowArgumentNull(axImpPath, nameof(axImpPath));
+            ErrorUtilities.VerifyThrowArgumentNull(tlbImpPath);
+            ErrorUtilities.VerifyThrowArgumentNull(axImpPath);
 
             tlbImpLocation = tlbImpPath;
             axImpLocation = axImpPath;

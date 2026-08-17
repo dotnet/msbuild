@@ -79,11 +79,6 @@ namespace Microsoft.Build.UnitTests
             */
         };
 
-        private const int NoParallelismThreadCount = 1;
-        private const int DefaultParallelismThreadCount = int.MaxValue;
-
-        private int GetParallelismThreadCount(bool isUseSingleThreadedCopy) => isUseSingleThreadedCopy ? NoParallelismThreadCount : DefaultParallelismThreadCount;
-
         /// <summary>
         /// Temporarily save off the value of MSBUILDALWAYSOVERWRITEREADONLYFILES, so that we can run
         /// the tests isolated from the current state of the environment, but put it back how it belongs
@@ -509,7 +504,7 @@ namespace Microsoft.Build.UnitTests
                     UseSymboliclinksIfPossible = isUseSymbolicLinks,
                 };
 
-                t.Execute(m.CopyFile, GetParallelismThreadCount(isUseSingleThreadedCopy));
+                t.Execute(m.CopyFile, !isUseSingleThreadedCopy);
 
                 // Expect for there to have been no copies.
                 Assert.Equal(0, m.copyCount);
@@ -557,7 +552,7 @@ namespace Microsoft.Build.UnitTests
                     FailIfNotIncremental = true,
                 };
 
-                Assert.False(t.Execute(m.CopyFile, GetParallelismThreadCount(isUseSingleThreadedCopy)));
+                Assert.False(t.Execute(m.CopyFile, !isUseSingleThreadedCopy));
 
                 // Expect for there to have been no copies.
                 Assert.Equal(0, m.copyCount);
@@ -617,7 +612,7 @@ namespace Microsoft.Build.UnitTests
                     SkipUnchangedFiles = true,
                     FailIfNotIncremental = true,
                 };
-                Assert.True(t.Execute(m.CopyFile, GetParallelismThreadCount(isUseSingleThreadedCopy)));
+                Assert.True(t.Execute(m.CopyFile, !isUseSingleThreadedCopy));
 
                 // Expect for there to have been no copies.
                 Assert.Equal(0, m.copyCount);
@@ -670,7 +665,7 @@ namespace Microsoft.Build.UnitTests
                     FailIfNotIncremental = true,
                 };
 
-                Assert.False(t.Execute(m.CopyFile, GetParallelismThreadCount(isUseSingleThreadedCopy)));
+                Assert.False(t.Execute(m.CopyFile, !isUseSingleThreadedCopy));
 
                 // Expect for there to have been no copies.
                 Assert.Equal(0, m.copyCount);
@@ -2015,7 +2010,7 @@ namespace Microsoft.Build.UnitTests
                     filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
                 }
                 return true;
-            }, GetParallelismThreadCount(isUseSingleThreadedCopy));
+            }, !isUseSingleThreadedCopy);
 
             Assert.True(success);
             Assert.Equal(2, filesActuallyCopied.Count);
@@ -2082,7 +2077,7 @@ namespace Microsoft.Build.UnitTests
                     filesActuallyCopied.Add(new KeyValuePair<FileState, FileState>(source, dest));
                 }
                 return true;
-            }, GetParallelismThreadCount(isUseSingleThreadedCopy));
+            }, !isUseSingleThreadedCopy);
 
             Assert.True(success);
             Assert.Equal(4, filesActuallyCopied.Count);
@@ -2352,7 +2347,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy, GetParallelismThreadCount(isUseSingleThreadedCopy));
+            bool result = t.Execute(copyFunctor.Copy, !isUseSingleThreadedCopy);
 
             Assert.False(result);
             engine.AssertLogDoesntContain("MSB3026");
@@ -2419,7 +2414,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy, GetParallelismThreadCount(isUseSingleThreadedCopy));
+            bool result = t.Execute(copyFunctor.Copy, !isUseSingleThreadedCopy);
 
             Assert.True(result);
             engine.AssertLogContains("MSB3026");
@@ -2446,7 +2441,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             var copyFunctor = new CopyFunctor(2, false /* do not throw on failure */);
-            bool result = t.Execute(copyFunctor.Copy, GetParallelismThreadCount(isUseSingleThreadedCopy));
+            bool result = t.Execute(copyFunctor.Copy, !isUseSingleThreadedCopy);
 
             Assert.True(result);
             engine.AssertLogContains("MSB3026");
@@ -2478,7 +2473,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             var copyFunctor = new CopyFunctor(4, false /* do not throw */);
-            bool result = t.Execute(copyFunctor.Copy, GetParallelismThreadCount(isUseSingleThreadedCopy));
+            bool result = t.Execute(copyFunctor.Copy, !isUseSingleThreadedCopy);
 
             Assert.False(result);
             engine.AssertLogContains("MSB3026");
@@ -2507,7 +2502,7 @@ namespace Microsoft.Build.UnitTests
             };
 
             var copyFunctor = new CopyFunctor(3, true /* throw */);
-            bool result = t.Execute(copyFunctor.Copy, GetParallelismThreadCount(isUseSingleThreadedCopy));
+            bool result = t.Execute(copyFunctor.Copy, !isUseSingleThreadedCopy);
 
             Assert.False(result);
             engine.AssertLogContains("MSB3026");

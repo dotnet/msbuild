@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -90,8 +91,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal Lookup(IItemDictionary<ProjectItemInstance> projectItems, PropertyDictionary<ProjectPropertyInstance> properties)
         {
-            ErrorUtilities.VerifyThrowInternalNull(projectItems, nameof(projectItems));
-            ErrorUtilities.VerifyThrowInternalNull(properties, nameof(properties));
+            ErrorUtilities.VerifyThrowInternalNull(projectItems);
+            ErrorUtilities.VerifyThrowInternalNull(properties);
 
             Lookup.Scope scope = new Lookup.Scope(this, "Lookup()", projectItems, properties);
             _lookupScopes.AddFirst(scope);
@@ -636,7 +637,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Implements a true add, an item that has been created in a batch.
         /// </summary>
-        internal void AddNewItemsOfItemType(string itemType, ICollection<ProjectItemInstance> group, bool doNotAddDuplicates = false)
+        internal void AddNewItemsOfItemType(string itemType, ICollection<ProjectItemInstance> group, bool doNotAddDuplicates = false, Action<IList> logFunction = null)
         {
             // Adding to outer scope could be easily implemented, but our code does not do it at present
             MustNotBeOuterScope();
@@ -658,14 +659,32 @@ namespace Microsoft.Build.BackEnd
             IEnumerable<ProjectItemInstance> itemsToAdd = group;
             if (doNotAddDuplicates)
             {
-                // Remove duplicates from the inputs.
-                itemsToAdd = itemsToAdd.Distinct(ProjectItemInstance.EqualityComparer);
-
                 // Ensure we don't also add any that already exist.
                 var existingItems = GetItems(itemType);
-                if (existingItems.Count > 0)
+                var existingItemsHashSet = existingItems.ToHashSet(ProjectItemInstance.EqualityComparer);
+
+                var deduplicatedItemsToAdd = new List<ProjectItemInstance>();
+                foreach (var item in itemsToAdd)
                 {
-                    itemsToAdd = itemsToAdd.Where(item => !existingItems.Contains(item, ProjectItemInstance.EqualityComparer));
+                    if (existingItemsHashSet.Add(item))
+                    {
+                        deduplicatedItemsToAdd.Add(item);
+                    }
+                }
+                itemsToAdd = deduplicatedItemsToAdd;
+            }
+
+            if (logFunction != null)
+            {
+                if (doNotAddDuplicates)
+                {
+                    // itemsToAdd is guaranteed to be a List if we're doing the doNotAddDuplicates part.
+                    logFunction.Invoke(itemsToAdd as List<ProjectItemInstance>);
+                }
+                else
+                {
+                    var groupAsList = group as List<ProjectItemInstance>;
+                    logFunction.Invoke(groupAsList ?? group.ToList());
                 }
             }
 

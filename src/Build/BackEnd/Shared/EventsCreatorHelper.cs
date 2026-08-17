@@ -15,8 +15,8 @@ internal static class EventsCreatorHelper
 {
     public static BuildMessageEventArgs CreateMessageEventFromText(BuildEventContext buildEventContext, MessageImportance importance, string message, params object?[]? messageArgs)
     {
-        ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
-        ErrorUtilities.VerifyThrowInternalNull(message, nameof(message));
+        ErrorUtilities.VerifyThrowInternalNull(buildEventContext);
+        ErrorUtilities.VerifyThrowInternalNull(message);
 
         BuildMessageEventArgs buildEvent = new BuildMessageEventArgs(
                 message,
@@ -32,9 +32,9 @@ internal static class EventsCreatorHelper
 
     public static BuildErrorEventArgs CreateErrorEventFromText(BuildEventContext buildEventContext, string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
     {
-        ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
-        ErrorUtilities.VerifyThrowInternalNull(file, nameof(file));
-        ErrorUtilities.VerifyThrowInternalNull(message, nameof(message));
+        ErrorUtilities.VerifyThrowInternalNull(buildEventContext);
+        ErrorUtilities.VerifyThrowInternalNull(file);
+        ErrorUtilities.VerifyThrowInternalNull(message);
 
         string? subcategory = null;
 
@@ -63,9 +63,9 @@ internal static class EventsCreatorHelper
 
     public static BuildWarningEventArgs CreateWarningEventFromText(BuildEventContext buildEventContext, string? subcategoryResourceName, string? errorCode, string? helpKeyword, BuildEventFileInfo file, string message)
     {
-        ErrorUtilities.VerifyThrowInternalNull(buildEventContext, nameof(buildEventContext));
-        ErrorUtilities.VerifyThrowInternalNull(file, nameof(file));
-        ErrorUtilities.VerifyThrowInternalNull(message, nameof(message));
+        ErrorUtilities.VerifyThrowInternalNull(buildEventContext);
+        ErrorUtilities.VerifyThrowInternalNull(file);
+        ErrorUtilities.VerifyThrowInternalNull(message);
 
         string? subcategory = null;
 

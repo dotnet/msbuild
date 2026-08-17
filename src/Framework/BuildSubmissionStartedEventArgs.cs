@@ -19,8 +19,8 @@ namespace Microsoft.Build.Framework
         public BuildSubmissionStartedEventArgs()
         {
             GlobalProperties = new Dictionary<string, string?>();
-            EntryProjectsFullPath = Enumerable.Empty<string>();
-            TargetNames = Enumerable.Empty<string>();
+            EntryProjectsFullPath = [];
+            TargetNames = [];
             Flags = BuildRequestDataFlags.None;
             SubmissionId = 0;
         }
@@ -62,7 +62,7 @@ namespace Microsoft.Build.Framework
             }
 
             writer.Write(EntryProjectsFullPath.Count());
-            foreach(var entry in EntryProjectsFullPath)
+            foreach (var entry in EntryProjectsFullPath)
             {
                 writer.Write((string)entry);
             }

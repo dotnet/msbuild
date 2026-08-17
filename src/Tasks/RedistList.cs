@@ -215,7 +215,7 @@ namespace Microsoft.Build.Tasks
         public static RedistList GetFrameworkList20()
         {
             string frameworkVersion20Path = ToolLocationHelper.GetPathToDotNetFramework(TargetDotNetFrameworkVersion.Version20);
-            string[] redistListPaths = Array.Empty<string>();
+            string[] redistListPaths = [];
             if (frameworkVersion20Path != null)
             {
                 redistListPaths = RedistList.GetRedistListPathsFromDisk(frameworkVersion20Path);
@@ -255,7 +255,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public static RedistList GetRedistListFromPath(string path)
         {
-            string[] redistListPaths = (path == null) ? Array.Empty<string>() : GetRedistListPathsFromDisk(path);
+            string[] redistListPaths = (path == null) ? [] : GetRedistListPathsFromDisk(path);
 
             var assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
             for (int i = 0; i < redistListPaths.Length; ++i)
@@ -272,7 +272,7 @@ namespace Microsoft.Build.Tasks
 
             // On dogfood build machines, v3.5 is not formally installed, so this returns null.
             // We don't use redist lists in this case.
-            string[] redistListPaths = (referenceAssembliesPath == null) ? Array.Empty<string>() : GetRedistListPathsFromDisk(referenceAssembliesPath);
+            string[] redistListPaths = (referenceAssembliesPath == null) ? [] : GetRedistListPathsFromDisk(referenceAssembliesPath);
 
             var assemblyTableInfos = new AssemblyTableInfo[redistListPaths.Length];
             for (int i = 0; i < redistListPaths.Length; ++i)
@@ -291,7 +291,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Array of paths to redist lists under given framework directory.</returns>
         public static string[] GetRedistListPathsFromDisk(string frameworkDirectory)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory, nameof(frameworkDirectory));
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory);
 
             lock (s_locker)
             {
@@ -317,7 +317,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return Array.Empty<string>();
+            return [];
         }
 
         /// <summary>
@@ -429,7 +429,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         public bool FrameworkAssemblyEntryInRedist(AssemblyNameExtension assemblyName)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(assemblyName, nameof(assemblyName));
+            ErrorUtilities.VerifyThrowArgumentNull(assemblyName);
 
             if (!_assemblyNameInRedist.TryGetValue(assemblyName, out bool isAssemblyNameInRedist))
             {
@@ -991,7 +991,7 @@ namespace Microsoft.Build.Tasks
         /// found in the target framework directories. This can happen if the subsets are instead passed in as InstalledDefaultSubsetTables</param>
         internal SubsetListFinder(string[] subsetToSearchFor)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor, nameof(subsetToSearchFor));
+            ErrorUtilities.VerifyThrowArgumentNull(subsetToSearchFor);
             _subsetToSearchFor = subsetToSearchFor;
         }
 
@@ -1015,7 +1015,7 @@ namespace Microsoft.Build.Tasks
         /// <returns>Array of paths locations to subset lists under the given framework directory.</returns>
         public string[] GetSubsetListPathsFromDisk(string frameworkDirectory)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory, nameof(frameworkDirectory));
+            ErrorUtilities.VerifyThrowArgumentNull(frameworkDirectory);
 
             // Make sure we have some subset names to search for it is possible that no subsets are asked for
             // so we should return as quickly as possible in that case.
@@ -1067,7 +1067,7 @@ namespace Microsoft.Build.Tasks
                 }
             }
 
-            return Array.Empty<string>();
+            return [];
         }
         #endregion
     }

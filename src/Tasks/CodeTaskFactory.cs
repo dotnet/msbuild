@@ -344,7 +344,7 @@ namespace Microsoft.Build.Tasks
         /// </remarks>
         public void CleanupTask(ITask task)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(task, nameof(task));
+            ErrorUtilities.VerifyThrowArgumentNull(task);
         }
 
         /// <summary>
@@ -429,16 +429,16 @@ namespace Microsoft.Build.Tasks
             {
                 XmlAttribute attribute = referenceNodes[i].Attributes["Include"];
 
-                bool hasInvalidChildNodes = HasInvalidChildNodes(referenceNodes[i], new[] { XmlNodeType.Comment, XmlNodeType.Whitespace });
+                bool hasInvalidChildNodes = HasInvalidChildNodes(referenceNodes[i], [XmlNodeType.Comment, XmlNodeType.Whitespace]);
 
                 if (hasInvalidChildNodes)
                 {
                     return null;
                 }
 
-                if (attribute == null || attribute.Value.Length == 0)
+                if (string.IsNullOrWhiteSpace(attribute?.Value))
                 {
-                    _log.LogErrorWithCodeFromResources("CodeTaskFactory.AttributeEmpty", "Include");
+                    _log.LogErrorWithCodeFromResources("CodeTaskFactory.AttributeEmptyWithTaskElement", "Include", "Reference", _nameOfTask);
                     return null;
                 }
 
@@ -459,7 +459,7 @@ namespace Microsoft.Build.Tasks
             var usings = new List<string>();
             for (int i = 0; i < usingNodes.Count; i++)
             {
-                bool hasInvalidChildNodes = HasInvalidChildNodes(usingNodes[i], new[] { XmlNodeType.Comment, XmlNodeType.Whitespace });
+                bool hasInvalidChildNodes = HasInvalidChildNodes(usingNodes[i], [XmlNodeType.Comment, XmlNodeType.Whitespace]);
 
                 if (hasInvalidChildNodes)
                 {
@@ -509,7 +509,7 @@ namespace Microsoft.Build.Tasks
                 return null;
             }
 
-            bool hasInvalidChildNodes = HasInvalidChildNodes(codeNodes[0], new[] { XmlNodeType.Comment, XmlNodeType.Whitespace, XmlNodeType.Text, XmlNodeType.CDATA });
+            bool hasInvalidChildNodes = HasInvalidChildNodes(codeNodes[0], [XmlNodeType.Comment, XmlNodeType.Whitespace, XmlNodeType.Text, XmlNodeType.CDATA]);
 
             if (hasInvalidChildNodes)
             {
