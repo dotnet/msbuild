@@ -5,7 +5,9 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+#if !NET
 using System.Globalization;
+#endif
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -107,6 +109,7 @@ namespace Microsoft.Build.Tasks
             public static string SearchPath;
             public static string SearchPathAddedByParentAssembly;
             public static string TargetedProcessorArchitectureDoesNotMatch;
+            public static AssemblyResolutionSearchTraceMessageFormats SearchTraceMessageFormats;
             public static string UnificationByAppConfig;
             public static string UnificationByAutoUnify;
             public static string UnificationByFrameworkRetarget;
@@ -171,26 +174,20 @@ namespace Microsoft.Build.Tasks
                     UnifiedDependency = GetResource("ResolveAssemblyReference.UnifiedDependency");
                     UnifiedPrimaryReference = GetResource("ResolveAssemblyReference.UnifiedPrimaryReference");
 
+                    SearchTraceMessageFormats = new(
+                        SearchPath,
+                        SearchPathAddedByParentAssembly,
+                        SearchedAssemblyFoldersEx,
+                        ConsideredAndRejectedBecauseNoFile,
+                        ConsideredAndRejectedBecauseFusionNamesDidntMatch,
+                        ConsideredAndRejectedBecauseTargetDidntHaveFusionName,
+                        ConsideredAndRejectedBecauseNotInGac,
+                        ConsideredAndRejectedBecauseNotAFileNameOnDisk,
+                        TargetedProcessorArchitectureDoesNotMatch);
+
                     initialized = true;
                 }
             }
-        }
-
-        private static class InvariantAssemblyResolutionSearchMessageFormats
-        {
-            internal static readonly AssemblyResolutionSearchTraceMessageFormats Instance = new(
-                GetResourceEightSpaces("ResolveAssemblyReference.SearchPath"),
-                GetResourceEightSpaces("ResolveAssemblyReference.SearchPathAddedByParentAssembly"),
-                GetResourceEightSpaces("ResolveAssemblyReference.SearchedAssemblyFoldersEx"),
-                GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNoFile"),
-                GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseFusionNamesDidntMatch"),
-                GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseTargetDidntHaveFusionName"),
-                GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotInGac"),
-                GetResourceEightSpaces("ResolveAssemblyReference.ConsideredAndRejectedBecauseNotAFileNameOnDisk"),
-                GetResourceEightSpaces("ResolveAssemblyReference.TargetedProcessorArchitectureDoesNotMatch"));
-
-            private static string GetResourceEightSpaces(string name)
-                => Strings.EightSpaces + AssemblyResources.PrimaryResources.GetString(name, CultureInfo.InvariantCulture);
         }
 
         #region Properties
@@ -1990,7 +1987,7 @@ namespace Microsoft.Build.Tasks
                         fusionName,
                         _targetProcessorArchitecture,
                         attempts,
-                        InvariantAssemblyResolutionSearchMessageFormats.Instance,
+                        Strings.SearchTraceMessageFormats,
                         GetType().Name,
                         importance,
                         DateTime.UtcNow));
