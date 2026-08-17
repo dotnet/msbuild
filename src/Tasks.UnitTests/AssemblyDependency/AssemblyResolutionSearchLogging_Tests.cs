@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 using Microsoft.Build.Framework;
@@ -38,8 +37,7 @@ public sealed class AssemblyResolutionSearchLogging_Tests
         searchEvent.SearchAttempts[2].IsAssemblyFoldersExSearch.ShouldBeTrue();
         searchEvent.MessageFormats.ShouldNotBeNull().SearchPath.ShouldBe(
             "        " + AssemblyResources.PrimaryResources.GetString(
-                "ResolveAssemblyReference.SearchPath",
-                CultureInfo.InvariantCulture));
+                "ResolveAssemblyReference.SearchPath"));
         searchEvent.Message.ShouldNotBeNull().ShouldContain("first.dll");
         searchEvent.Message.ShouldNotBeNull().ShouldContain("Candidate, Version=2.0.0.0");
         searchEvent.Message.ShouldNotBeNull().ShouldNotContain("assembly-folder-candidate.dll");
