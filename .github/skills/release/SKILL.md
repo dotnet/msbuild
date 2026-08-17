@@ -113,7 +113,7 @@ When asked to execute a specific phase:
 4. For DARC commands: batch writes into one configuration PR per phase
 5. Record all output URLs in the tracking issue's artifact table
 6. Mark checkboxes as completed in the tracking issue
-7. In **Phase 4** (step 4.7): if `documentation/wiki/ChangeWaves.md` is changed for this release, update the public Learn page at `https://learn.microsoft.com/en-us/visualstudio/msbuild/change-waves?view=visualstudio. Sync the Change Waves Learn page from `documentation/wiki/ChangeWaves.md` on the `vsXX.Y` branch that is live in VS Insiders / the latest preview SDK. PR goes to `MicrosoftDocs/visualstudio-docs-pr` (`docs/msbuild/change-waves.md`); example: https://github.com/MicrosoftDocs/visualstudio-docs-pr/pull/15662.
+7. In **Phase 4** (step 4.7): if `documentation/wiki/ChangeWaves.md` is changed for this release, update the public Learn page at https://learn.microsoft.com/visualstudio/msbuild/change-waves. Sync the Change Waves Learn page from `documentation/wiki/ChangeWaves.md` on the `vsXX.Y` branch that is live in VS Insiders / the latest preview SDK. PR goes to `MicrosoftDocs/visualstudio-docs-pr` (`docs/msbuild/change-waves.md`); example: https://github.com/MicrosoftDocs/visualstudio-docs-pr/pull/15662.
 
 ## Key Files
 
