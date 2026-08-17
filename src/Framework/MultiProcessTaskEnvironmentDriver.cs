@@ -44,9 +44,11 @@ namespace Microsoft.Build.Framework
         }
 
         /// <inheritdoc/>
-        public string GetTempPath()
+        public AbsolutePath GetTempPath()
         {
-            return Path.GetTempPath();
+            AbsolutePath absoluteTempDirectory = GetAbsolutePath(Path.GetTempPath());
+            return new AbsolutePath(
+                FileUtilities.EnsureTrailingSlash(absoluteTempDirectory.GetCanonicalForm().Value));
         }
 
         /// <inheritdoc/>

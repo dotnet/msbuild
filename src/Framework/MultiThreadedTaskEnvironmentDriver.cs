@@ -74,13 +74,15 @@ namespace Microsoft.Build.Framework
         }
 
         /// <inheritdoc/>
-        public string GetTempPath()
+        public AbsolutePath GetTempPath()
         {
             if (!NativeMethods.IsWindows)
             {
                 string? tempDirectory = GetEnvironmentVariable("TMPDIR");
-                return FileUtilities.EnsureTrailingSlash(
+                AbsolutePath absoluteTempDirectory = GetAbsolutePath(
                     string.IsNullOrEmpty(tempDirectory) ? "/tmp" : tempDirectory!);
+                return new AbsolutePath(
+                    FileUtilities.EnsureTrailingSlash(absoluteTempDirectory.GetCanonicalForm().Value));
             }
 
             string? tempDirectoryWindows = GetEnvironmentVariable("TMP");
@@ -108,8 +110,9 @@ namespace Microsoft.Build.Framework
                 tempDirectoryWindows = Path.GetDirectoryName(Environment.SystemDirectory)!;
             }
 
-            return FileUtilities.EnsureTrailingSlash(
-                GetAbsolutePath(tempDirectoryWindows!).GetCanonicalForm().Value);
+            return new AbsolutePath(
+                FileUtilities.EnsureTrailingSlash(
+                    GetAbsolutePath(tempDirectoryWindows!).GetCanonicalForm().Value));
         }
 
         /// <inheritdoc/>

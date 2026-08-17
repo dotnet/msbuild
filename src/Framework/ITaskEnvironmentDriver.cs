@@ -30,8 +30,8 @@ namespace Microsoft.Build.Framework
         /// <summary>
         /// Gets the path of the temporary folder for this task environment.
         /// </summary>
-        /// <returns>The temporary folder path, ending with a directory separator.</returns>
-        string GetTempPath();
+        /// <returns>The absolute temporary folder path, ending with a directory separator.</returns>
+        AbsolutePath GetTempPath();
 
         /// <summary>
         /// Gets the value of the specified environment variable.

@@ -47,7 +47,7 @@ namespace Microsoft.Build.UnitTests
         {
             try
             {
-                taskEnvironment.GetTempPath().ShouldBe(expected);
+                taskEnvironment.GetTempPath().Value.ShouldBe(expected);
             }
             finally
             {
@@ -309,7 +309,7 @@ namespace Microsoft.Build.UnitTests
         [Fact]
         public void TaskEnvironment_Fallback_GetTempPath_MatchesPathGetTempPath()
         {
-            TaskEnvironment.Fallback.GetTempPath().ShouldBe(Path.GetTempPath());
+            TaskEnvironment.Fallback.GetTempPath().Value.ShouldBe(Path.GetTempPath());
         }
 
         [WindowsOnlyFact]
@@ -427,8 +427,8 @@ namespace Microsoft.Build.UnitTests
 
             try
             {
-                first.GetTempPath().ShouldBe(firstTempDirectory + Path.DirectorySeparatorChar);
-                second.GetTempPath().ShouldBe(secondTempDirectory + Path.DirectorySeparatorChar);
+                first.GetTempPath().Value.ShouldBe(firstTempDirectory + Path.DirectorySeparatorChar);
+                second.GetTempPath().Value.ShouldBe(secondTempDirectory + Path.DirectorySeparatorChar);
             }
             finally
             {
@@ -451,6 +451,24 @@ namespace Microsoft.Build.UnitTests
                 TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory, environmentVariables);
 
             AssertTempPathAndDispose(taskEnvironment, tempDirectory + Path.DirectorySeparatorChar);
+        }
+
+        [UnixOnlyFact]
+        public void TaskEnvironment_GetTempPath_OnUnix_ResolvesRelativeTmpDirAgainstProjectDirectory()
+        {
+            string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
+            const string relativeTempDirectory = "task-temp";
+            var environmentVariables = new Dictionary<string, string>
+            {
+                ["TMPDIR"] = relativeTempDirectory,
+            };
+
+            TaskEnvironment taskEnvironment =
+                TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory, environmentVariables);
+
+            string expected =
+                Path.GetFullPath(Path.Combine(projectDirectory, relativeTempDirectory)) + Path.DirectorySeparatorChar;
+            AssertTempPathAndDispose(taskEnvironment, expected);
         }
 
         [UnixOnlyFact]

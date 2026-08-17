@@ -84,8 +84,8 @@ namespace Microsoft.Build.Framework
         /// variables from this instance rather than from the process environment.
         /// </summary>
         /// <remarks>This method does not verify that the path exists or that it is accessible.</remarks>
-        /// <returns>The temporary folder path, ending with a directory separator.</returns>
-        public string GetTempPath() => _driver.GetTempPath();
+        /// <returns>The absolute temporary folder path, ending with a directory separator.</returns>
+        public AbsolutePath GetTempPath() => _driver.GetTempPath();
 
         /// <summary>
         /// Gets the value of an environment variable.
