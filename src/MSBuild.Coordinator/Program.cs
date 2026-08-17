@@ -34,9 +34,9 @@ Console.WriteLine($"  Node budget: {settings.TotalNodeBudget}");
 Console.WriteLine($"  High-priority reserved nodes: {FormatHighPriorityReservedNodes(settings.HighPriorityReservedNodes)}");
 Console.WriteLine($"  Max nodes per build: {FormatMaxNodesPerBuild(settings.MaxNodesPerBuild)}");
 Console.WriteLine($"  Max nodes per build when idle: {FormatMaxNodesPerBuildWhenIdle(settings.MaxNodesPerBuildWhenIdle)}");
-if (settings.AutoStrictPolicyOptOutMessage is { } autoStrictPolicyOptOutMessage)
+if (settings.ComputedNodeSettingsOptOutMessage is { } computedNodeSettingsOptOutMessage)
 {
-    Console.WriteLine($"  Computed reservation or per-build cap active. {autoStrictPolicyOptOutMessage}");
+    Console.WriteLine($"  Computed reservation or per-build cap active. {computedNodeSettingsOptOutMessage}");
 }
 
 Console.WriteLine($"  Heartbeat interval: {settings.HeartbeatIntervalMs}ms");

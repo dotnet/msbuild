@@ -56,7 +56,7 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     }
 
     [Fact]
-    public async Task RunAsync_DebugOutputUsesEffectiveNodePolicyValues()
+    public async Task RunAsync_DebugOutputUsesResolvedReservationAndMaxNodes()
     {
         CoordinatorSettings settings = DefaultSettings with
         {
@@ -418,13 +418,13 @@ public class CoordinatorServer_Tests(ITestOutputHelper testOutput) : IDisposable
     }
 
     [Fact]
-    public async Task AutoStrictPolicy_BurstsOnlyFirstIdleGrantAndReservesHighPriorityCapacity()
+    public async Task ComputedDefaults_GrantEightOnlyWhenCoordinatorIsIdleAndReserveHighPriorityCapacity()
     {
         using CoordinatorServer server = CreateServer(DefaultSettings with
         {
             TotalNodeBudget = 16,
-            HighPriorityReservedNodes = CoordinatorSettings.AutoNodeConfiguration,
-            MaxNodesPerBuild = CoordinatorSettings.AutoNodeConfiguration,
+            HighPriorityReservedNodes = CoordinatorSettings.ComputedNodeConfiguration,
+            MaxNodesPerBuild = CoordinatorSettings.ComputedNodeConfiguration,
         });
         Task serverTask = server.RunAsync(_cts.Token);
 

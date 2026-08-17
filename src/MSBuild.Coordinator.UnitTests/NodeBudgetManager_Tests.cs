@@ -16,9 +16,9 @@ public class NodeBudgetManager_Tests
     private static NodeBudgetManager NewManagerWithComputedDefaults(int totalBudget)
         => new(
             totalBudget,
-            highPriorityReservedNodes: totalBudget >= 8 ? CoordinatorSettings.DefaultAutoNodeSlice : 0,
-            maxNodesPerBuild: totalBudget >= 8 ? CoordinatorSettings.DefaultAutoNodeSlice : 0,
-            maxNodesPerBuildWhenIdle: totalBudget >= 8 ? CoordinatorSettings.DefaultAutoMaxNodesPerBuildWhenIdle : 0);
+            highPriorityReservedNodes: totalBudget >= 8 ? CoordinatorSettings.DefaultComputedHighPriorityReservedNodes : 0,
+            maxNodesPerBuild: totalBudget >= 8 ? CoordinatorSettings.DefaultComputedMaxNodesPerBuild : 0,
+            maxNodesPerBuildWhenIdle: totalBudget >= 8 ? CoordinatorSettings.DefaultComputedMaxNodesPerBuildWhenIdle : 0);
 
     private static void AssertSingleGrant(ImmutableArray<BuildGrant> grants, BuildGrant expected)
     {

@@ -23,11 +23,12 @@ internal sealed record class CoordinatorSettings()
     public const int DefaultInitialConnectionTimeoutMs = 200;
     public const int DefaultConnectionTimeoutMs = 5_000;
     public const int DefaultShutdownTimeoutMs = 60_000;
-    public const int DefaultAutoNodeSlice = 4;
-    public const int DefaultAutoMaxNodesPerBuildWhenIdle = DefaultAutoNodeSlice * 2;
-    public const int AutoNodeConfiguration = -1;
-    public const int DefaultHighPriorityReservedNodes = AutoNodeConfiguration;
-    public const int DefaultMaxNodesPerBuild = AutoNodeConfiguration;
+    public const int DefaultComputedHighPriorityReservedNodes = 4;
+    public const int DefaultComputedMaxNodesPerBuild = 4;
+    public const int DefaultComputedMaxNodesPerBuildWhenIdle = DefaultComputedMaxNodesPerBuild * 2;
+    public const int ComputedNodeConfiguration = -1;
+    public const int DefaultHighPriorityReservedNodes = ComputedNodeConfiguration;
+    public const int DefaultMaxNodesPerBuild = ComputedNodeConfiguration;
     public const int DefaultPriorityAgingThreshold = 3;
     public const int MaxHeartbeatIntervalMs = 300_000;
 
@@ -77,25 +78,25 @@ internal sealed record class CoordinatorSettings()
 
     public int HighPriorityReservedNodes
     {
-        get => ClampHighPriorityReservedNodes(_highPriorityReservedNodes ?? ComputeAutoHighPriorityReservedNodes(TotalNodeBudget), TotalNodeBudget);
+        get => ClampHighPriorityReservedNodes(_highPriorityReservedNodes ?? ComputeHighPriorityReservedNodes(TotalNodeBudget), TotalNodeBudget);
         init => _highPriorityReservedNodes = value < 0 ? null : value;
     }
 
     public int MaxNodesPerBuild
     {
-        get => ClampMaxNodesPerBuild(_maxNodesPerBuild ?? ComputeAutoMaxNodesPerBuild(TotalNodeBudget), TotalNodeBudget);
+        get => ClampMaxNodesPerBuild(_maxNodesPerBuild ?? ComputeMaxNodesPerBuild(TotalNodeBudget), TotalNodeBudget);
         init => _maxNodesPerBuild = value < 0 ? null : value;
     }
 
-    public bool HighPriorityReservedNodesIsAuto
+    public bool HighPriorityReservedNodesIsComputed
         => !_highPriorityReservedNodes.HasValue;
 
-    public bool MaxNodesPerBuildIsAuto
+    public bool MaxNodesPerBuildIsComputed
         => !_maxNodesPerBuild.HasValue;
 
     public int MaxNodesPerBuildWhenIdle
-        => MaxNodesPerBuildIsAuto && MaxNodesPerBuild > 0
-            ? Math.Min(DefaultAutoMaxNodesPerBuildWhenIdle, TotalNodeBudget)
+        => MaxNodesPerBuildIsComputed && MaxNodesPerBuild > 0
+            ? Math.Min(DefaultComputedMaxNodesPerBuildWhenIdle, TotalNodeBudget)
             : 0;
 
     public int PriorityAgingThreshold
@@ -104,18 +105,14 @@ internal sealed record class CoordinatorSettings()
         init => _priorityAgingThreshold = value > 0 ? value : DefaultPriorityAgingThreshold;
     }
 
-    public bool IsAutoStrictPolicyActive
-        => (HighPriorityReservedNodesIsAuto && HighPriorityReservedNodes > 0)
-            || (MaxNodesPerBuildIsAuto && MaxNodesPerBuild > 0);
-
-    public string? AutoStrictPolicyOptOutMessage
+    public string? ComputedNodeSettingsOptOutMessage
     {
         get
         {
-            bool autoReservedNodes = HighPriorityReservedNodesIsAuto && HighPriorityReservedNodes > 0;
-            bool autoMaxNodesPerBuild = MaxNodesPerBuildIsAuto && MaxNodesPerBuild > 0;
+            bool computedReservedNodes = HighPriorityReservedNodesIsComputed && HighPriorityReservedNodes > 0;
+            bool computedMaxNodesPerBuild = MaxNodesPerBuildIsComputed && MaxNodesPerBuild > 0;
 
-            return (autoReservedNodes, autoMaxNodesPerBuild) switch
+            return (computedReservedNodes, computedMaxNodesPerBuild) switch
             {
                 (true, true) => $"Set {Constants.HighPriorityReservedNodesEnvVarName}=0 and {Constants.MaxNodesPerBuildEnvVarName}=0 to disable reservation and per-build caps.",
                 (true, false) => $"Set {Constants.HighPriorityReservedNodesEnvVarName}=0 to disable reservation.",
@@ -206,11 +203,11 @@ internal sealed record class CoordinatorSettings()
         };
     }
 
-    private static int ComputeAutoHighPriorityReservedNodes(int totalNodeBudget)
-        => totalNodeBudget >= 8 ? Math.Min(DefaultAutoNodeSlice, Math.Max(0, totalNodeBudget - 1)) : 0;
+    private static int ComputeHighPriorityReservedNodes(int totalNodeBudget)
+        => totalNodeBudget >= 8 ? Math.Min(DefaultComputedHighPriorityReservedNodes, Math.Max(0, totalNodeBudget - 1)) : 0;
 
-    private static int ComputeAutoMaxNodesPerBuild(int totalNodeBudget)
-        => totalNodeBudget >= 8 ? Math.Min(DefaultAutoNodeSlice, totalNodeBudget) : 0;
+    private static int ComputeMaxNodesPerBuild(int totalNodeBudget)
+        => totalNodeBudget >= 8 ? Math.Min(DefaultComputedMaxNodesPerBuild, totalNodeBudget) : 0;
 
     private static int ClampHighPriorityReservedNodes(int highPriorityReservedNodes, int totalNodeBudget)
         => Math.Min(highPriorityReservedNodes, Math.Max(0, totalNodeBudget - 1));
