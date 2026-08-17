@@ -3,7 +3,7 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.6.17</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind><!-- Keep next to VersionPrefix to create a conflict in forward-flow -->
+    <VersionPrefix>18.6.18</VersionPrefix><DotNetFinalVersionKind>release</DotNetFinalVersionKind><!-- Keep next to VersionPrefix to create a conflict in forward-flow -->
     <PreReleaseVersionLabel>servicing</PreReleaseVersionLabel>
     <PackageValidationBaselineVersion>18.5.0-preview-26126-01</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
@@ -84,7 +84,7 @@
     <!-- BootstrapSdkVersion MUST match the dotnet version in global.json. The bootstrap SDK provides the
          runtime under artifacts/bin/bootstrap/core that tests use as DOTNET_ROOT; if it lags behind the
          SDK in global.json, tools from that SDK (such as Roslyn's csc) fail to find a compatible runtime. -->
-    <BootstrapSdkVersion>10.0.110</BootstrapSdkVersion>
+    <BootstrapSdkVersion>10.0.111</BootstrapSdkVersion>
   </PropertyGroup>
 
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
