@@ -253,18 +253,18 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="new">  -multithreaded[:true|false]
-                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
-                     This means that MSBuild will use multiple threads
-                     to build projects in parallel,
-                     instead of multiple processes.
-                     This option is not supported.
-                     The maximum number of threads used is determined by the
-                     -maxCpuCount switch.
-                     In case of multi-threaded mode on
-                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount cannot be greater than 256.
-                     (Short form: -mt)
+        <target state="translated">  -multithreaded[:true|false]
+                     Habilita o modo multithread EXPERIMENTAL no MSBuild.
+                     Isso significa que o MSBuild usará vários threads
+                     para criar projetos em paralelo,
+                     em vez de vários processos.
+                     Essa opção não tem suporte.
+                     O número máximo de threads usados é determinado pela
+                     opção de linha de comando -maxCpuCount.
+                     No caso do modo multithread em
+                     e MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     maxCpuCount não pode ser maior que 256.
+                     (Forma abreviada: -mt)
     </target>
         <note />
       </trans-unit>
@@ -316,7 +316,7 @@
       </trans-unit>
       <trans-unit id="InvalidMultiThreadedValue">
         <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1072: o valor do modo multithread não é válido. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1072: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.

@@ -253,18 +253,18 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="new">  -multithreaded[:true|false]
-                     Enables EXPERIMENTAL multi-threaded mode in MSBuild.
-                     This means that MSBuild will use multiple threads
-                     to build projects in parallel,
-                     instead of multiple processes.
-                     This option is not supported.
-                     The maximum number of threads used is determined by the
-                     -maxCpuCount switch.
-                     In case of multi-threaded mode on
-                     and MSBUILDFORCEALLTASKSOUTOFPROC=1
-                     maxCpuCount cannot be greater than 256.
-                     (Short form: -mt)
+        <target state="translated">  -wielowątkowy[:true|false]
+                     Włącza tryb EKSPERYMENTALNY wielowątkowości w programie MSBuild.
+                     Oznacza to, że program MSBuild będzie używać wielu wątków
+                     do równoległego kompilowania projektów,
+                     zamiast wielu procesów.
+                     Ta opcja nie jest obsługiwana.
+                     Maksymalna liczba używanych wątków jest określana przez
+                     przełącznik -maxCpuCount.
+                     W przypadku trybu wielowątkowego włączonego
+                     i MSBUILDFORCEALLTASKSOUTOFPROC=1
+                     Wartość maxCpuCount nie może być większa niż 256.
+                     (Krótka forma: -mt)
     </target>
         <note />
       </trans-unit>
@@ -316,7 +316,7 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
       </trans-unit>
       <trans-unit id="InvalidMultiThreadedValue">
         <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
-        <target state="new">MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</target>
+        <target state="translated">MSBUILD : error MSB1072: wartość trybu wielowątkowego jest nieprawidłowa. {0}</target>
         <note>
       {StrBegin="MSBUILD : error MSB1072: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
