@@ -90,7 +90,7 @@ public sealed class AssemblyResolutionSearchAttempt
     public string? ParentAssembly { get; }
 
     /// <summary>
-    /// Gets the identity read from the candidate assembly, when available.
+    /// Gets the identity read from the candidate assembly when its fusion name did not match.
     /// </summary>
     public string? AssemblyName { get; }
 
