@@ -2674,42 +2674,42 @@
       </trans-unit>
       <trans-unit id="TarDirectory.Comment">
         <source>Creating tar archive from directory "{0}" to "{1}".</source>
-        <target state="new">Creating tar archive from directory "{0}" to "{1}".</target>
+        <target state="translated">Ein tar-Archiv wird aus dem Verzeichnis „{0}“ in „{1}“ erstellt.</target>
         <note />
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorDirectoryDoesNotExist">
         <source>MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</source>
-        <target state="new">MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</target>
+        <target state="translated">MSB4321: Das Verzeichnis „{0}“ konnte nicht in eine tar-Datei umgewandelt werden, weil es nicht vorhanden ist oder nicht darauf zugegriffen werden kann.</target>
         <note>{StrBegin="MSB4321: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFailIfNotIncremental">
         <source>MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</source>
-        <target state="new">MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</target>
+        <target state="translated">MSB4325: Das Verzeichnis „{0}“ konnte nicht in die Datei „{1}“ als tar-Archiv geschrieben werden, da das Archiv veraltet ist und ein inkrementeller Build angefordert wurde.</target>
         <note>{StrBegin="MSB4325: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFailed">
         <source>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</source>
-        <target state="new">MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</target>
+        <target state="translated">MSB4323: Fehler beim Erstellen der tar-Datei für das Verzeichnis „{0}“ in die Datei „{1}“.  {2} {3}</target>
         <note>{StrBegin="MSB4323: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFileExists">
         <source>MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
-        <target state="new">MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
+        <target state="translated">MSB4322: Fehler beim Erstellen der tar-Datei „{0}“, weil sie bereits vorhanden ist.  Löschen Sie die Datei, oder benennen Sie sie um, und versuchen Sie es dann erneut.</target>
         <note>{StrBegin="MSB4322: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidCompression">
         <source>MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</source>
-        <target state="new">MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</target>
+        <target state="translated">MSB4327: Der Komprimierungswert „{0}“ ist ungültig. Geben Sie „None“, „GZip“ oder „ZStandard“ an.</target>
         <note>{StrBegin="MSB4327: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidDeterministicTimestamp">
         <source>MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</source>
-        <target state="new">MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</target>
+        <target state="translated">MSB4324: Der DeterministicTimestamp-Wert „{0}“ ist ungültig. Geben Sie ein RFC-3339-Datum und eine Uhrzeit (z. B. „2024-01-01T00:00:00Z“) oder eine ganze Zahl von Sekunden seit der Unix-Epoche an.</target>
         <note>{StrBegin="MSB4324: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidFormat">
         <source>MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</source>
-        <target state="new">MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</target>
+        <target state="translated">MSB4326: Der Formatwert „{0}“ ist ungültig. Geben Sie „Pax“, „Ustar“, „V7“ oder „Gnu“ an.</target>
         <note>{StrBegin="MSB4326: "}</note>
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
@@ -2819,67 +2819,67 @@
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfEntryType">
         <source>Did not untar entry "{0}" because its entry type "{1}" is not supported.</source>
-        <target state="new">Did not untar entry "{0}" because its entry type "{1}" is not supported.</target>
+        <target state="translated">Der Eintrag „{0}“ wurde nicht entpackt, da der Eintragstyp „{1}“ nicht unterstützt wird.</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfFileMatch">
         <source>Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
-        <target state="new">Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</target>
+        <target state="translated">Die Datei „{0}“ konnte nicht von Datei „{1}“ entpackt werden, da der Parameter „{2}“ im Projekt auf „{3}“ festgelegt wurde und die Größen und Zeitstempel der Dateien übereinstimmen.</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfFilter">
         <source>Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
-        <target state="new">Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</target>
+        <target state="translated">Die Datei „{0}“ konnte nicht entpackt werden, weil sie nicht dem Einschlussfilter entsprach oder weil sie dem Ausschlussfilter entsprach.</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</source>
-        <target state="new">MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</target>
+        <target state="translated">MSB4331: Fehler beim Entpacken in Verzeichnis „{0}“, da es nicht erstellt werden konnte.  {1}</target>
         <note>{StrBegin="MSB4331: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotExtractFile">
         <source>MSB4336: Failed to untar file "{0}" to "{1}".  {2}</source>
-        <target state="new">MSB4336: Failed to untar file "{0}" to "{1}".  {2}</target>
+        <target state="translated">MSB4336: Fehler beim Entpacken der Datei „{0}“ nach „{1}“.  {2}</target>
         <note>{StrBegin="MSB4336: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotMakeFileWriteable">
         <source>MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
-        <target state="new">MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</target>
+        <target state="translated">MSB4335: Fehler beim Entpacken der Datei „{0}“, da die Zieldatei „{1}“ schreibgeschützt ist und nicht schreibbar gemacht werden konnte.  {2} {3}</target>
         <note>{StrBegin="MSB4335: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotOpenFile">
         <source>MSB4333: Failed to open tar file "{0}".  {1}</source>
-        <target state="new">MSB4333: Failed to open tar file "{0}".  {1}</target>
+        <target state="translated">MSB4333: Die tar-Datei „{0}“ konnte nicht geöffnet werden.  {1}</target>
         <note>{StrBegin="MSB4333: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorExtractingResultsInFilesOutsideDestination">
         <source>MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</source>
-        <target state="new">MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</target>
+        <target state="translated">MSB4334: Fehler beim Entpacken der Datei „{0}“ nach „{1}“, weil sie sich außerhalb des Zielverzeichnisses befindet.</target>
         <note>{StrBegin="MSB4334: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorFileDoesNotExist">
         <source>MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</source>
-        <target state="new">MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</target>
+        <target state="translated">MSB4332: Fehler beim Entpacken der Datei „{0}“, weil die Datei nicht vorhanden ist oder nicht darauf zugegriffen werden kann.</target>
         <note>{StrBegin="MSB4332: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorParsingPatternInvalidPath">
         <source>MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</source>
-        <target state="new">MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</target>
+        <target state="translated">MSB4337: Fehler beim Analysieren des Musters „{0}“, weil es ein ungültiges Pfadzeichen enthält.</target>
         <note>{StrBegin="MSB4337: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorParsingPatternPropertyReferences">
         <source>MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
-        <target state="new">MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</target>
+        <target state="translated">MSB4338: Fehler beim Analysieren des Musters „{0}“, weil es einen Eigenschaftsverweis enthält, der nicht unterstützt wird.</target>
         <note>{StrBegin="MSB4338: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorFailIfNotIncremental">
         <source>MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</source>
-        <target state="new">MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</target>
+        <target state="translated">MSB4339: Fehler beim Entpacken der Datei „{0}“ nach „{1}“, da das Ziel veraltet ist und ein inkrementeller Build angefordert wurde.</target>
         <note>{StrBegin="MSB4339: "}</note>
       </trans-unit>
       <trans-unit id="Untar.FileComment">
         <source>Untarring file "{0}" to "{1}".</source>
-        <target state="new">Untarring file "{0}" to "{1}".</target>
+        <target state="translated">Datei „{0}“ wird nach „{1}“ entpackt.</target>
         <note />
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">

@@ -2674,42 +2674,42 @@
       </trans-unit>
       <trans-unit id="TarDirectory.Comment">
         <source>Creating tar archive from directory "{0}" to "{1}".</source>
-        <target state="new">Creating tar archive from directory "{0}" to "{1}".</target>
+        <target state="translated">Создание TAR-архива из каталога "{0}" в "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorDirectoryDoesNotExist">
         <source>MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</source>
-        <target state="new">MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</target>
+        <target state="translated">MSB4321: не удалось упаковать каталог "{0}", так как он не существует или недоступен.</target>
         <note>{StrBegin="MSB4321: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFailIfNotIncremental">
         <source>MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</source>
-        <target state="new">MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</target>
+        <target state="translated">MSB4325: не удалось упаковать каталог "{0}" в файл "{1}", так как архив устарел и была запрошена добавочная сборка.</target>
         <note>{StrBegin="MSB4325: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFailed">
         <source>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</source>
-        <target state="new">MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</target>
+        <target state="translated">MSB4323: не удалось упаковать каталог "{0}" в файл "{1}".  {2} {3}</target>
         <note>{StrBegin="MSB4323: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.ErrorFileExists">
         <source>MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
-        <target state="new">MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</target>
+        <target state="translated">MSB4322: не удалось создать TAR-файл "{0}", так как он уже существует.  Удалите или переименуйте файл и повторите попытку.</target>
         <note>{StrBegin="MSB4322: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidCompression">
         <source>MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</source>
-        <target state="new">MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</target>
+        <target state="translated">MSB4327: значение сжатия "{0}" недопустимо. Укажите одно из значений: "None", "GZip" или "ZStandard".</target>
         <note>{StrBegin="MSB4327: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidDeterministicTimestamp">
         <source>MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</source>
-        <target state="new">MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</target>
+        <target state="translated">MSB4324: значение DeterministicTimestamp "{0}" недопустимо. Укажите дату и время в формате RFC 3339, например "2024-01-01T00:00:00Z", или целое число секунд с начала эпохи Unix.</target>
         <note>{StrBegin="MSB4324: "}</note>
       </trans-unit>
       <trans-unit id="TarDirectory.InvalidFormat">
         <source>MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</source>
-        <target state="new">MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</target>
+        <target state="translated">MSB4326: значение формата "{0}" недопустимо. Укажите одно из значений: "Pax", "Ustar", "V7" или "Gnu".</target>
         <note>{StrBegin="MSB4326: "}</note>
       </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
@@ -2819,67 +2819,67 @@
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfEntryType">
         <source>Did not untar entry "{0}" because its entry type "{1}" is not supported.</source>
-        <target state="new">Did not untar entry "{0}" because its entry type "{1}" is not supported.</target>
+        <target state="translated">Не удалось распаковать запись "{0}", так как тип записи "{1}" не поддерживается.</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfFileMatch">
         <source>Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
-        <target state="new">Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</target>
+        <target state="translated">Не удалось выполнить распаковку из файла "{0}" в файл "{1}", так как для параметра "{2}" в проекте было задано значение "{3}", а размеры файлов и отметки времени совпадают.</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.DidNotUntarBecauseOfFilter">
         <source>Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
-        <target state="new">Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</target>
+        <target state="translated">Файл "{0}" не был распакован, так как он не соответствует фильтру включения или соответствует фильтру исключения.</target>
         <note />
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotCreateDestinationDirectory">
         <source>MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</source>
-        <target state="new">MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</target>
+        <target state="translated">MSB4331: не удалось выполнить распаковку в каталог "{0}", так как создать его не удалось.  {1}</target>
         <note>{StrBegin="MSB4331: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotExtractFile">
         <source>MSB4336: Failed to untar file "{0}" to "{1}".  {2}</source>
-        <target state="new">MSB4336: Failed to untar file "{0}" to "{1}".  {2}</target>
+        <target state="translated">MSB4336: не удалось распаковать файл "{0}" в "{1}".  {2}</target>
         <note>{StrBegin="MSB4336: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotMakeFileWriteable">
         <source>MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
-        <target state="new">MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</target>
+        <target state="translated">MSB4335: не удалось распаковать файл "{0}", так как конечный файл "{1}" доступен только для чтения и его нельзя сделать доступным для записи.  {2} {3}</target>
         <note>{StrBegin="MSB4335: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorCouldNotOpenFile">
         <source>MSB4333: Failed to open tar file "{0}".  {1}</source>
-        <target state="new">MSB4333: Failed to open tar file "{0}".  {1}</target>
+        <target state="translated">MSB4333: не удалось открыть TAR-файл "{0}".  {1}</target>
         <note>{StrBegin="MSB4333: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorExtractingResultsInFilesOutsideDestination">
         <source>MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</source>
-        <target state="new">MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</target>
+        <target state="translated">MSB4334: не удалось распаковать файл "{0}" в каталог "{1}", так как этот каталог не входит в целевой каталог.</target>
         <note>{StrBegin="MSB4334: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorFileDoesNotExist">
         <source>MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</source>
-        <target state="new">MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</target>
+        <target state="translated">MSB4332: не удалось распаковать файл "{0}", так как он не существует или недоступен.</target>
         <note>{StrBegin="MSB4332: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorParsingPatternInvalidPath">
         <source>MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</source>
-        <target state="new">MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</target>
+        <target state="translated">MSB4337: не удалось проанализировать шаблон "{0}", так как он содержит недопустимый символ пути.</target>
         <note>{StrBegin="MSB4337: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorParsingPatternPropertyReferences">
         <source>MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
-        <target state="new">MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</target>
+        <target state="translated">MSB4338: не удалось проанализировать шаблон "{0}", так как он содержит ссылку на свойство, которое не поддерживается.</target>
         <note>{StrBegin="MSB4338: "}</note>
       </trans-unit>
       <trans-unit id="Untar.ErrorFailIfNotIncremental">
         <source>MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</source>
-        <target state="new">MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</target>
+        <target state="translated">MSB4339: не удалось распаковать файл "{0}" в "{1}", так как назначение устарело и была запрошена добавочная сборка.</target>
         <note>{StrBegin="MSB4339: "}</note>
       </trans-unit>
       <trans-unit id="Untar.FileComment">
         <source>Untarring file "{0}" to "{1}".</source>
-        <target state="new">Untarring file "{0}" to "{1}".</target>
+        <target state="translated">Распаковка файла "{0}" в "{1}".</target>
         <note />
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
