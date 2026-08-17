@@ -14,6 +14,7 @@ Artifacts produced over the course of the release. Record each URL here as the c
 | Phase 2.3j — maestro-configuration PR (`main`-targeting subs + VMR backflow retargeted, retired-branch cleanup) | {{URL_OF_PHASE2_DARC_PR}} |
 | Phase 3.5 — `main` next-version main-bump PR | {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}} |
 | Phase 4.4 — VS insertion PR | {{URL_OF_VS_INSERTION}} |
+| Phase 5.1b — official build that produced `{{THIS_RELEASE_EXACT_VERSION}}` | {{URL_OF_SHIPPED_OFFICIAL_BUILD}} |
 | Phase 4.7 — Change Waves Learn page sync PR (visualstudio-docs-pr) | {{URL_OF_CHANGE_WAVES_DOCS_PR}} |
 | Phase 5.3 — GitHub release tag | https://github.com/dotnet/msbuild/releases/tag/v{{THIS_RELEASE_EXACT_VERSION}} |
 
@@ -26,8 +27,9 @@ Fill in these values before starting. Version increments are irregular — they 
 | Placeholder | Description | Value |
 |---|---|---|
 | `{{PREVIOUS_RELEASE_VERSION}}` | Version being replaced as latest | |
+| `{{PREVIOUS_RELEASE_EXACT_VERSION}}` | The `VersionPrefix` the **previous** release actually shipped as — used by Phase 5.3a to look up its tag. Read it from the previous release's tracking issue, or from `git tag --list 'v{{PREVIOUS_RELEASE_VERSION}}.*'`. | |
 | `{{THIS_RELEASE_VERSION}}` | Version being released now | |
-| `{{THIS_RELEASE_EXACT_VERSION}}` | The `VersionPrefix` that **actually shipped** to customers — read it from VS `rel/stable` (see Phase 5.1a), **not** assumed. It is usually `{{THIS_RELEASE_VERSION}}.0`, but an OptProf-driven insertion bump can make the shipped version `{{THIS_RELEASE_VERSION}}.1` or higher (e.g. 18.7 shipped as `18.7.1`). **Not known when first instantiating this checklist — leave blank until Phase 5.1a confirms it.** | |
+| `{{THIS_RELEASE_EXACT_VERSION}}` | The `VersionPrefix` that **actually shipped** to customers — determined in Phase 5.1a, **not** assumed. It is usually `{{THIS_RELEASE_VERSION}}.0`, but servicing insertions routinely ship a higher patch. **Not known when first instantiating this checklist — leave blank until Phase 5.1a confirms it.** | |
 | `{{NEXT_VERSION}}` | Version that main will be bumped to | |
 | `{{BRANCH_SNAP_DATE}}` | Date we create `vs{{THIS_RELEASE_VERSION}}` from `main`. | |
 | `{{INSIDERS_SNAP_DATE}}` | Date VS snaps `main` → `rel/insiders`. Final-branded MSBuild must be in VS `main` **before** this date. From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) | |
@@ -212,12 +214,17 @@ Steps are **mostly parallel** unless noted.
 
 - [ ] **5.1** Push packages to nuget.org.
 
-  > **How publishing works:** We don't push packages ourselves. We hand a link to the **Release** artifacts of the official build to the _.NET Release Team_, and they push to nuget.org. Searching past mail for the subject _"Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org" for the template.
+  > **How publishing works:** We don't push packages ourselves. We hand a link to the **Release** artifacts of the official build to the _.NET Release Team_, and they push to nuget.org. Search past mail for the subject _"Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org"_ for the template.
 
-  - [ ] **5.1a** Determine the exact MSBuild version that actually shipped to customers.
-    - **If this release is coupled with an SDK release: use the SDK as the source of truth**. Look up the MSBuild version baked into the shipped SDK build.
-    - Otherwise, read the **authoritative GA'd value from VS `rel/stable`**: the `Microsoft.Build` component version in [`.corext/Configs/msbuild-components.json`](https://devdiv.visualstudio.com/DevDiv/_git/VS?path=/.corext/Configs/msbuild-components.json&version=GBrel/stable) (e.g. `18.7.1-servicing-NNNNN-NN+<sha>`). Extract just the **numeric `VersionPrefix`** from that string — drop the `-servicing-NNNNN-NN+<sha>` suffix — and use it as `{{THIS_RELEASE_EXACT_VERSION}}` (e.g. `18.7.1`). **Do not** rely solely on the VS insertion PR — that PR targets VS `main` and can be superseded by a later servicing insertion before GA, whereas `rel/stable` reflects what actually shipped.
-  - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`).
+  - [ ] **5.1a** Determine the exact MSBuild version that actually shipped to customers. \
+  ⚠️ **VS and the SDK might ship _different_ patch versions off the same `vs{{THIS_RELEASE_VERSION}}` branch during servicing — so this must be looked up, never inferred from `eng/Versions.props` at branch HEAD or from the Phase 4.4 insertion PR.**
+    - **First, decide whether this release is coupled with an SDK release:** \
+    `darc get-subscriptions --target-repo https://github.com/dotnet/msbuild --target-branch vs{{THIS_RELEASE_VERSION}} --source-repo https://github.com/dotnet/dotnet` \
+    If that returns a source-enabled subscription from a `.NET <X.Y.Zxx> SDK` channel, the release **is** SDK-coupled.
+    - **If SDK-coupled: the SDK is the source of truth** — look up the MSBuild version baked into the shipped SDK build of that band. It wins over VS `rel/stable`.
+    - **Otherwise**, read the **authoritative GA'd value from VS `rel/stable`**: the `Microsoft.Build` component version in [`.corext/Configs/msbuild-components.json`](https://devdiv.visualstudio.com/DevDiv/_git/VS?path=/.corext/Configs/msbuild-components.json&version=GBrel/stable) (e.g. `18.7.1-servicing-NNNNN-NN+<sha>`). Extract just the **numeric `VersionPrefix`** from that string — drop the `-servicing-NNNNN-NN+<sha>` suffix — and use it as `{{THIS_RELEASE_EXACT_VERSION}}` (e.g. `18.7.1`). **Do not** rely solely on the VS insertion PR — that PR targets VS `main` and can be superseded by a later servicing insertion before GA, whereas `rel/stable` reflects what actually shipped.
+    - _Worked example (18.9): the Phase 4.4 insertion PR said `18.9.0`, VS `rel/stable` said `18.9.1`, branch HEAD was already `18.9.8` — and the correct answer was `18.9.6`, from the coupled .NET 10.0.4xx SDK._
+  - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`). Take the latest build that produced the matching versioned artifacts.
   - [ ] **5.1c** From that build, open the **Publish Artifacts** step and grab the link to the **`PackageArtifacts/Release`** drop. Verify the **Release** folder contains all of:
     - `Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
@@ -246,7 +253,7 @@ Steps are **mostly parallel** unless noted.
     git tag v{{THIS_RELEASE_EXACT_VERSION}}
     git push upstream v{{THIS_RELEASE_EXACT_VERSION}}
     ```
-  - [ ] **5.3d** Create release at https://github.com/dotnet/msbuild/releases/new — use `Generate Release Notes` to prepopulate.
+  - [ ] **5.3d** Create release at https://github.com/dotnet/msbuild/releases/new — use `Generate Release Notes` to prepopulate, with `v{{PREVIOUS_RELEASE_EXACT_VERSION}}` as the previous tag.
 - [ ] **5.4** Update `BootstrapSdkVersion` in [`eng/Versions.props`](https://github.com/dotnet/msbuild/blob/main/eng/Versions.props) if a fresh SDK was released. Check https://dotnet.microsoft.com/download/visual-studio-sdks — always verify the details for the targeted .NET version.
 - [ ] **5.4b** Update `tools.dotnet` in [`global.json`](https://github.com/dotnet/msbuild/blob/main/global.json) to the latest released SDK in the targeted band.
 - [ ] **5.5** Verify the overall subscription map across **every still-supported branch** — each `vsXX.Y` branch has an Arcade subscription matching its targeted .NET band, and each supported branch's outbound subscriptions land in the right downstream (e.g. SDK band, VMR). \
