@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -278,7 +278,7 @@ namespace Microsoft.Build.Logging
 
             parameter = parameter.Trim('"');
 
-            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
+            bool isWildcard = parameter.Contains("{}");
             bool hasProperExtension = parameter.EndsWith(BinlogFileExtension, StringComparison.OrdinalIgnoreCase);
 
             filePath = parameter;
@@ -511,6 +511,14 @@ namespace Microsoft.Build.Logging
                     projectImportsCollector.AddFile(filePath);
                 }
                 EditorConfigParser.ClearEditorConfigFilePaths();
+
+                // Write the Directory.Parse.config file paths to the log
+                foreach (var filePath in Evaluation.ParserIgnoreConfiguration.BinlogEmbedPaths)
+                {
+                    projectImportsCollector.AddFile(filePath);
+                }
+                Evaluation.ParserIgnoreConfiguration.ClearBinlogEmbedPaths();
+
                 projectImportsCollector.Close();
 
                 if (CollectProjectImports == ProjectImportsCollectionMode.Embed)
@@ -779,7 +787,7 @@ namespace Microsoft.Build.Logging
 
             parameter = parameter.Trim('"');
 
-            bool isWildcard = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12) && parameter.Contains("{}");
+            bool isWildcard = parameter.Contains("{}");
             bool hasProperExtension = parameter.EndsWith(BinlogFileExtension, StringComparison.OrdinalIgnoreCase);
             filePath = parameter;
 

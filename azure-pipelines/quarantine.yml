@@ -69,7 +69,7 @@ jobs:
     displayName: Build (quarantined tests only)
     inputs:
       filename: 'build.cmd'
-      arguments: "-ci -test -stage2Arguments '/p:RunQuarantinedTests=true'"
+      arguments: "-ci -test -stage2Argument '/p:RunQuarantinedTests=true'"
     condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
   - task: PublishTestResults@2
     displayName: Publish .NET Framework Test Results
@@ -118,7 +118,7 @@ jobs:
   - template: azure-pipelines/check-documentation-only-change.yml
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
-  - bash: . 'build.sh' --ci --test --stage2Arguments '/p:RunQuarantinedTests=true'
+  - bash: . 'build.sh' --ci --test --stage2Argument '/p:RunQuarantinedTests=true'
     displayName: Build (quarantined tests only)
     condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
     env:
@@ -157,7 +157,7 @@ jobs:
   timeoutInMinutes: 120
   steps:
   - template: azure-pipelines/check-documentation-only-change.yml
-  - bash: . 'build.sh' --ci --test --stage2Arguments '/p:RunQuarantinedTests=true'
+  - bash: . 'build.sh' --ci --test --stage2Argument '/p:RunQuarantinedTests=true'
     displayName: Build (quarantined tests only)
     condition: or(ne(variables['Build.Reason'], 'PullRequest'), eq(variables.onlyDocChanged, 0))
     env:

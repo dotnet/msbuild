@@ -1,0 +1,48 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
+  </PropertyGroup>
+
+  <!--
+    There is deliberately no <UsingTask> for TarDirectory/Untar here. The point of this asset is to exercise the
+    *inbox* registrations in Microsoft.Common.tasks. On .NET Framework MSBuild those rows resolve the tasks out of
+    the .NET SDK's .NETCoreApp tasks assembly via AssemblyFile="$(NetCoreSdkRoot)Microsoft.Build.Tasks.Core.dll"
+    and dispatch them into the .NET TaskHost via Runtime="NET". A malformed registration (for example using
+    AssemblyName for a file path) only fails when the task is actually instantiated, which is what this target does.
+  -->
+  <Target Name="TarRoundTrip">
+    <Error Condition="'$(WorkDir)' == ''" Text="The WorkDir property must be supplied." />
+
+    <PropertyGroup>
+      <_WorkDir>$([MSBuild]::EnsureTrailingSlash('$(WorkDir)'))</_WorkDir>
+      <_SourceDirectory>$(_WorkDir)source\</_SourceDirectory>
+      <_TarFile>$(_WorkDir)archive.tar</_TarFile>
+      <_ExtractDirectory>$(_WorkDir)extracted\</_ExtractDirectory>
+    </PropertyGroup>
+
+    <MakeDir Directories="$(_SourceDirectory)" />
+    <WriteLinesToFile File="$(_SourceDirectory)hello.txt" Lines="hello from the inbox tar tasks" Overwrite="true" />
+
+    <!-- Emitted so the test can assert the registration resolved through the SDK layout under test. -->
+    <Message Importance="High" Text="NETCORESDKROOT=$(NetCoreSdkRoot)" />
+
+    <!--
+      Format and Compression are passed explicitly to prove that both a string parameter and an enum parameter
+      marshal correctly across the .NET Framework -> .NET TaskHost boundary. Format is deliberately typed as a
+      string on the task because System.Formats.Tar cannot be resolved by the parent process when it reflects
+      over the task's parameters.
+    -->
+    <TarDirectory SourceDirectory="$(_SourceDirectory)" DestinationFile="$(_TarFile)" Format="Gnu" Compression="GZip" Overwrite="true" />
+
+    <Error Condition="!Exists('$(_TarFile)')" Text="TarDirectory did not produce '$(_TarFile)'." />
+
+    <Untar SourceFiles="$(_TarFile)" DestinationFolder="$(_ExtractDirectory)" />
+
+    <Error Condition="!Exists('$(_ExtractDirectory)hello.txt')"
+           Text="Untar did not extract 'hello.txt' into '$(_ExtractDirectory)'." />
+
+    <Message Importance="High" Text="TAR_ROUND_TRIP_OK" />
+  </Target>
+
+</Project>

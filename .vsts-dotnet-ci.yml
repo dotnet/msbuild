@@ -10,8 +10,6 @@ trigger:
     - .github/**
 
 variables:
-- ${{ if eq(variables['System.TeamProject'], 'DevDiv') }}:
-  - group: AzureDevOps-Artifact-Feeds-Pats
 - name: cfsNugetWarnLevel
   value: warn
 - name: nugetMultiFeedWarnLevel
@@ -47,7 +45,7 @@ jobs:
     displayName: Build (with -mt in stage2)
     inputs:
       filename: 'build.cmd'
-      arguments: '-ci -test -stage2Arguments /mt'
+      arguments: '-ci -test -stage2Argument /mt'
     condition: eq(variables.onlyDocChanged, 0)
 # Task to collect code coverage on Windows. Disabled by default due to being unstable and sometimes it stucks forever
 #   - task: PowerShell@2
@@ -158,7 +156,7 @@ jobs:
     displayName: Build (with -mt in stage2)
     inputs:
       filename: 'build.cmd'
-      arguments: '-msbuildEngine dotnet -ci -test -stage2Arguments /mt'
+      arguments: '-msbuildEngine dotnet -ci -test -stage2Argument /mt'
     condition: eq(variables.onlyDocChanged, 0)
     env:
       MSBUILDUSESERVER: "1"
@@ -237,7 +235,7 @@ jobs:
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
   # Intentionally not running tests
-  - bash: . 'build.sh' --ci --stage2Arguments '/mt /p:BuildAnalyzer=true'
+  - bash: . 'build.sh' --ci --stage2Argument '/mt' --stage2Argument '/p:BuildAnalyzer=true'
     displayName: Build (with -mt in stage2)
     condition: eq(variables.onlyDocChanged, 0)
     env:
@@ -353,7 +351,7 @@ jobs:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
   - bash: sudo apt-get update
   - bash: sudo apt-get install -y libxml2
-  - bash: . 'build.sh' --ci --test --stage2Arguments '/mt'
+  - bash: . 'build.sh' --ci --test --stage2Argument '/mt'
     displayName: Build (with -mt in stage2)
     condition: eq(variables.onlyDocChanged, 0)
     env:
@@ -371,7 +369,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
-      artifact: 'LinuxCoreCoverage'
+      artifact: 'LinuxCoreCoverage_Attempt$(System.JobAttempt)'
       publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
@@ -442,7 +440,7 @@ jobs:
         arguments: $(Build.SourcesDirectory)/NuGet.config $Token
       env:
         Token: $(dn-bot-dnceng-artifact-feeds-rw)
-  - bash: . 'build.sh' --ci --test --stage2Arguments '/mt'
+  - bash: . 'build.sh' --ci --test --stage2Argument '/mt'
     displayName: Build (with -mt in stage2)
     condition: eq(variables.onlyDocChanged, 0)
     env:
@@ -460,7 +458,7 @@ jobs:
     condition: eq(variables.onlyDocChanged, 0)
     inputs:
       targetPath: '$(Build.SourcesDirectory)/artifacts/CoverageResults/merged.coverage'
-      artifact: 'MacCoreCoverage'
+      artifact: 'MacCoreCoverage_Attempt$(System.JobAttempt)'
       publishLocation: 'pipeline'
   - task: PublishTestResults@2
     displayName: Publish .NET Test Results
@@ -551,16 +549,50 @@ jobs:
 #       buildType: 'current'
 #       artifactName: 'WindowsFullReleaseCoverage'
 #       targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/WindowsFullRelease'
+  - task: PowerShell@2
+    displayName: Select latest coverage artifacts
+    inputs:
+      targetType: inline
+      pwsh: true
+      script: |
+        $headers = @{ Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN" }
+        $uri = "$(System.CollectionUri)$(System.TeamProjectId)/_apis/build/builds/$(Build.BuildId)/artifacts?api-version=7.1"
+        $artifacts = (Invoke-RestMethod -Uri $uri -Headers $headers).value
+
+        foreach ($coverage in @(
+          @{ Prefix = 'LinuxCoreCoverage'; Variable = 'LinuxCoreCoverageArtifact' },
+          @{ Prefix = 'MacCoreCoverage'; Variable = 'MacCoreCoverageArtifact' }
+        )) {
+          $pattern = "^$([regex]::Escape($coverage.Prefix))_Attempt(?<attempt>\d+)$"
+          $artifact = $artifacts |
+            ForEach-Object {
+              if ($_.name -match $pattern) {
+                [pscustomobject]@{ Name = $_.name; Attempt = [int]$Matches.attempt }
+              }
+            } |
+            Sort-Object Attempt -Descending |
+            Select-Object -First 1
+
+          if ($null -eq $artifact) {
+            throw "No $($coverage.Prefix) artifact found for build $(Build.BuildId)."
+          }
+
+          Write-Host "Using $($artifact.Name)."
+          Write-Host "##vso[task.setvariable variable=$($coverage.Variable)]$($artifact.Name)"
+        }
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+    condition: eq(variables.onlyDocChanged, 0)
   - task: DownloadPipelineArtifact@2
     inputs:
       buildType: 'current'
-      artifactName: 'LinuxCoreCoverage'
+      artifactName: '$(LinuxCoreCoverageArtifact)'
       targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/LinuxCore'
     condition: eq(variables.onlyDocChanged, 0)
   - task: DownloadPipelineArtifact@2
     inputs:
       buildType: 'current'
-      artifactName: 'MacCoreCoverage'
+      artifactName: '$(MacCoreCoverageArtifact)'
       targetPath: '$(Build.SourcesDirectory)/artifacts/TestResults/CoverageResults/MacCore'
     condition: eq(variables.onlyDocChanged, 0)
 
