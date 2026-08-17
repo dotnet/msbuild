@@ -46,7 +46,7 @@ Change wave checks around features will be removed in the release that accompani
 - [Isolated (`-graph -isolate`) builds fail deterministically with MSB4252 on a cross-project reference to a target that is not declared via `ProjectReferenceTargets`, instead of passing if the referenced project happened to build on that node previously.](https://github.com/dotnet/msbuild/pull/14280)
 - RAR now logs structured events for version-conflict dependency details. These events replace large text messages for MSB3277 warnings and low-importance diagnostics.
   - The events contain victor and victim identities, dependency chains, and source items.
-  - Invariant-English builds produce the same text. Localized builds now use invariant-English templates to make binary-log replay culture-stable.
+  - Events capture the producer's localized templates so replay preserves the text from the original build regardless of the reader's culture.
   - Strict readers older than binary-log format 29 reject the newer format. Forward-compatible readers skip the structured conflict records.
   - Set `MSBUILDDISABLEFEATURESFROMVERSION=18.11` to restore the legacy localized plain-text events.
 

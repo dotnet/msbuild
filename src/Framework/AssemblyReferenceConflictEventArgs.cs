@@ -98,7 +98,6 @@ public sealed class AssemblyConflictReferenceDetails
     internal AssemblyConflictReferenceDetails(
         string fusionName,
         string? fullPath,
-        bool useUnifiedHeader,
         bool isPrimary,
         bool isResolved,
         string? unresolvedPrimaryItemSpec,
@@ -106,7 +105,6 @@ public sealed class AssemblyConflictReferenceDetails
     {
         FusionName = fusionName;
         FullPath = fullPath;
-        UseUnifiedHeader = useUnifiedHeader;
         IsPrimary = isPrimary;
         IsResolved = isResolved;
         UnresolvedPrimaryItemSpec = unresolvedPrimaryItemSpec;
@@ -122,12 +120,6 @@ public sealed class AssemblyConflictReferenceDetails
     /// Gets the resolved full path of this reference, when known.
     /// </summary>
     public string? FullPath { get; }
-
-    /// <summary>
-    /// Gets a value that indicates whether the rendered header uses the "unified" text.
-    /// The victim uses this text when MSBuild unifies it to the victor.
-    /// </summary>
-    public bool UseUnifiedHeader { get; }
 
     /// <summary>
     /// Gets a value that indicates whether the project directly specified this primary reference.
@@ -159,7 +151,6 @@ public sealed class AssemblyConflictReferenceDetails
     {
         writer.WriteOptionalString(FusionName);
         writer.WriteOptionalString(FullPath);
-        writer.Write(UseUnifiedHeader);
         writer.Write(IsPrimary);
         writer.Write(IsResolved);
         writer.WriteOptionalString(UnresolvedPrimaryItemSpec);
@@ -174,7 +165,6 @@ public sealed class AssemblyConflictReferenceDetails
     {
         string? fusionName = reader.ReadOptionalString();
         string? fullPath = reader.ReadOptionalString();
-        bool useUnifiedHeader = reader.ReadBoolean();
         bool isPrimary = reader.ReadBoolean();
         bool isResolved = reader.ReadBoolean();
         string? unresolvedPrimaryItemSpec = reader.ReadOptionalString();
@@ -189,7 +179,6 @@ public sealed class AssemblyConflictReferenceDetails
         return new AssemblyConflictReferenceDetails(
             fusionName ?? string.Empty,
             fullPath,
-            useUnifiedHeader,
             isPrimary,
             isResolved,
             unresolvedPrimaryItemSpec,
@@ -198,8 +187,8 @@ public sealed class AssemblyConflictReferenceDetails
 }
 
 /// <summary>
-/// Contains invariant templates that reconstruct assembly conflict messages only when a reader requests the messages.
-/// The templates produce stable text when a reader replays a binary log with a different culture.
+/// Contains localized templates that reconstruct assembly conflict messages only when a reader requests the messages.
+/// Capturing the producer's templates preserves the original text when a reader replays a binary log with a different culture.
 /// </summary>
 [Serializable]
 internal sealed class AssemblyConflictMessageFormats
@@ -236,30 +225,55 @@ internal sealed class AssemblyConflictMessageFormats
     internal string PrimarySourceItemsForReference { get; }
     internal string FoundConflicts { get; }
 
-    internal void WriteToStream(BinaryWriter writer)
+    internal void WriteToStream(BinaryWriter writer, bool includeWarningFormats)
     {
-        writer.Write(ConflictFound);
-        writer.Write(ConflictHigherVersionChosen);
-        writer.Write(ConflictPrimaryChosen);
-        writer.Write(ConflictUnsolvable);
         writer.Write(ReferenceDependsOn);
         writer.Write(UnifiedReferenceDependsOn);
         writer.Write(UnresolvedPrimaryItemSpec);
         writer.Write(PrimarySourceItemsForReference);
-        writer.Write(FoundConflicts);
+
+        if (includeWarningFormats)
+        {
+            writer.Write(ConflictFound);
+            writer.Write(ConflictHigherVersionChosen);
+            writer.Write(ConflictPrimaryChosen);
+            writer.Write(ConflictUnsolvable);
+            writer.Write(FoundConflicts);
+        }
     }
 
-    internal static AssemblyConflictMessageFormats CreateFromStream(BinaryReader reader)
-        => new(
-            reader.ReadString(),
-            reader.ReadString(),
-            reader.ReadString(),
-            reader.ReadString(),
-            reader.ReadString(),
-            reader.ReadString(),
-            reader.ReadString(),
-            reader.ReadString(),
-            reader.ReadString());
+    internal static AssemblyConflictMessageFormats CreateFromStream(BinaryReader reader, bool includeWarningFormats)
+    {
+        string referenceDependsOn = reader.ReadString();
+        string unifiedReferenceDependsOn = reader.ReadString();
+        string unresolvedPrimaryItemSpec = reader.ReadString();
+        string primarySourceItemsForReference = reader.ReadString();
+
+        string conflictFound = string.Empty;
+        string conflictHigherVersionChosen = string.Empty;
+        string conflictPrimaryChosen = string.Empty;
+        string conflictUnsolvable = string.Empty;
+        string foundConflicts = string.Empty;
+        if (includeWarningFormats)
+        {
+            conflictFound = reader.ReadString();
+            conflictHigherVersionChosen = reader.ReadString();
+            conflictPrimaryChosen = reader.ReadString();
+            conflictUnsolvable = reader.ReadString();
+            foundConflicts = reader.ReadString();
+        }
+
+        return new(
+            conflictFound,
+            conflictHigherVersionChosen,
+            conflictPrimaryChosen,
+            conflictUnsolvable,
+            referenceDependsOn,
+            unifiedReferenceDependsOn,
+            unresolvedPrimaryItemSpec,
+            primarySourceItemsForReference,
+            foundConflicts);
+    }
 }
 
 /// <summary>
@@ -279,25 +293,15 @@ internal static class AssemblyConflictMessageFormatter
         AssemblyConflictMessageFormats formats)
     {
         var log = new StringBuilder();
-        AppendReferenceDetails(log, victor, formats);
-        log.AppendLine();
-        AppendReferenceDetails(log, victim, formats);
+        AppendDependencyDetails(log, victor, victim, formats);
         return log.ToString();
     }
 
     internal static string FormatWarningMessage(
         string simpleAssemblyName,
-        string victorFusionName,
-        string victimFusionName,
-        AssemblyConflictLossReason lossReason,
-        bool victimIsPrimary,
-        AssemblyConflictReferenceDetails victor,
-        AssemblyConflictReferenceDetails victim,
+        string body,
         AssemblyConflictMessageFormats formats)
-        => Format(
-            formats.FoundConflicts,
-            simpleAssemblyName,
-            FormatWarningBody(victorFusionName, victimFusionName, lossReason, victimIsPrimary, victor, victim, formats));
+        => Format(formats.FoundConflicts, simpleAssemblyName, body);
 
     /// <summary>
     /// Formats the conflict header and dependency details without the outer MSB3277 wrapper.
@@ -306,20 +310,15 @@ internal static class AssemblyConflictMessageFormatter
     /// The warning <see cref="BuildEventArgs.Message"/> adds the outer wrapper.
     /// </summary>
     internal static string FormatWarningBody(
-        string victorFusionName,
-        string victimFusionName,
         AssemblyConflictLossReason lossReason,
-        bool victimIsPrimary,
         AssemblyConflictReferenceDetails victor,
         AssemblyConflictReferenceDetails victim,
         AssemblyConflictMessageFormats formats)
     {
         var log = new StringBuilder();
-        AppendHeader(log, victorFusionName, victimFusionName, lossReason, victimIsPrimary, formats);
+        log.Append(FormatHeaderOnly(victor.FusionName, victim.FusionName, lossReason, victim.IsPrimary, formats));
         log.AppendLine();
-        AppendReferenceDetails(log, victor, formats);
-        log.AppendLine();
-        AppendReferenceDetails(log, victim, formats);
+        AppendDependencyDetails(log, victor, victim, formats);
         return log.ToString();
     }
 
@@ -334,54 +333,38 @@ internal static class AssemblyConflictMessageFormatter
         bool victimIsPrimary,
         AssemblyConflictMessageFormats formats)
     {
-        var log = new StringBuilder();
-        AppendHeader(log, victorFusionName, victimFusionName, lossReason, victimIsPrimary, formats);
-        return log.ToString();
+        string header = Format(formats.ConflictFound, victorFusionName, victimFusionName);
+        return lossReason switch
+        {
+            AssemblyConflictLossReason.HadLowerVersion
+                => string.Concat(header, Environment.NewLine, FourSpaces, Format(formats.ConflictHigherVersionChosen, victorFusionName)),
+            AssemblyConflictLossReason.WasNotPrimary
+                => string.Concat(header, Environment.NewLine, FourSpaces, Format(formats.ConflictPrimaryChosen, victorFusionName, victimFusionName)),
+            AssemblyConflictLossReason.InsolubleConflict when !victimIsPrimary
+                => string.Concat(header, Environment.NewLine, Format(formats.ConflictUnsolvable, victorFusionName, victimFusionName)),
+            _ => header,
+        };
     }
 
-    private static void AppendHeader(
+    private static void AppendDependencyDetails(
         StringBuilder log,
-        string victorFusionName,
-        string victimFusionName,
-        AssemblyConflictLossReason lossReason,
-        bool victimIsPrimary,
+        AssemblyConflictReferenceDetails victor,
+        AssemblyConflictReferenceDetails victim,
         AssemblyConflictMessageFormats formats)
     {
-        log.Append(Format(formats.ConflictFound, victorFusionName, victimFusionName));
-        switch (lossReason)
-        {
-            case AssemblyConflictLossReason.HadLowerVersion:
-                log.AppendLine().Append(FourSpaces).Append(Format(formats.ConflictHigherVersionChosen, victorFusionName));
-                break;
-
-            case AssemblyConflictLossReason.WasNotPrimary:
-                log.AppendLine().Append(FourSpaces).Append(Format(formats.ConflictPrimaryChosen, victorFusionName, victimFusionName));
-                break;
-
-            case AssemblyConflictLossReason.InsolubleConflict:
-                // A primary victim produces a separate warning, so this header must not contain more text.
-                if (!victimIsPrimary)
-                {
-                    log.AppendLine().Append(Format(formats.ConflictUnsolvable, victorFusionName, victimFusionName));
-                }
-
-                break;
-
-            case AssemblyConflictLossReason.FusionEquivalentWithSameVersion:
-                // Legacy messages do not contain more text for this reason.
-                break;
-
-            default:
-                break;
-        }
+        AppendReferenceDetails(log, victor, formats.ReferenceDependsOn, formats);
+        log.AppendLine();
+        AppendReferenceDetails(log, victim, formats.UnifiedReferenceDependsOn, formats);
     }
 
-    private static void AppendReferenceDetails(StringBuilder log, AssemblyConflictReferenceDetails details, AssemblyConflictMessageFormats formats)
+    private static void AppendReferenceDetails(
+        StringBuilder log,
+        AssemblyConflictReferenceDetails details,
+        string headerFormat,
+        AssemblyConflictMessageFormats formats)
     {
         log.Append(FourSpaces);
-
-        string resource = details.UseUnifiedHeader ? formats.UnifiedReferenceDependsOn : formats.ReferenceDependsOn;
-        log.Append(Format(resource, details.FusionName, details.FullPath));
+        log.Append(Format(headerFormat, details.FusionName, details.FullPath));
 
         if (details.IsPrimary && !details.IsResolved)
         {
@@ -469,7 +452,7 @@ public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMes
         base.WriteToStream(writer);
         Victor.WriteToStream(writer);
         Victim.WriteToStream(writer);
-        _messageFormats!.WriteToStream(writer);
+        _messageFormats!.WriteToStream(writer, includeWarningFormats: false);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
@@ -477,7 +460,7 @@ public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMes
         base.CreateFromStream(reader, version);
         Victor = AssemblyConflictReferenceDetails.CreateFromStream(reader);
         Victim = AssemblyConflictReferenceDetails.CreateFromStream(reader);
-        _messageFormats = AssemblyConflictMessageFormats.CreateFromStream(reader);
+        _messageFormats = AssemblyConflictMessageFormats.CreateFromStream(reader, includeWarningFormats: false);
     }
 }
 
@@ -489,6 +472,7 @@ public sealed class AssemblyConflictDependencyDetailsMessageEventArgs : BuildMes
 public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
 {
     private AssemblyConflictMessageFormats? _messageFormats;
+    private string? _formattedBody;
     private string? _formattedMessage;
 
     internal AssemblyConflictWarningEventArgs()
@@ -497,8 +481,6 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
 
     internal AssemblyConflictWarningEventArgs(
         string simpleAssemblyName,
-        string victorFusionName,
-        string victimFusionName,
         AssemblyConflictLossReason lossReason,
         AssemblyConflictReferenceDetails victor,
         AssemblyConflictReferenceDetails victim,
@@ -509,7 +491,8 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
         int columnNumber,
         string? helpKeyword,
         string senderName,
-        DateTime eventTimestamp)
+        DateTime eventTimestamp,
+        string? formattedBody = null)
         : base(
             subcategory: null,
             code: code,
@@ -524,28 +507,17 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
             eventTimestamp: eventTimestamp)
     {
         SimpleAssemblyName = simpleAssemblyName;
-        VictorFusionName = victorFusionName;
-        VictimFusionName = victimFusionName;
         LossReason = lossReason;
         Victor = victor;
         Victim = victim;
         _messageFormats = messageFormats;
+        _formattedBody = formattedBody;
     }
 
     /// <summary>
     /// Gets the simple (short) name of the assembly for which conflicting versions were found.
     /// </summary>
     public string SimpleAssemblyName { get; private set; } = string.Empty;
-
-    /// <summary>
-    /// Gets the fusion name of the reference that won the conflict.
-    /// </summary>
-    public string VictorFusionName { get; private set; } = string.Empty;
-
-    /// <summary>
-    /// Gets the fusion name of the reference that lost the conflict.
-    /// </summary>
-    public string VictimFusionName { get; private set; } = string.Empty;
 
     /// <summary>
     /// Gets the reason the victim lost the conflict.
@@ -569,15 +541,9 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
         {
             if (_formattedMessage is null && _messageFormats is not null)
             {
-                _formattedMessage = AssemblyConflictMessageFormatter.FormatWarningMessage(
-                    SimpleAssemblyName,
-                    VictorFusionName,
-                    VictimFusionName,
-                    LossReason,
-                    Victim.IsPrimary,
-                    Victor,
-                    Victim,
-                    _messageFormats);
+                string body = _formattedBody ?? AssemblyConflictMessageFormatter.FormatWarningBody(LossReason, Victor, Victim, _messageFormats);
+                _formattedMessage = AssemblyConflictMessageFormatter.FormatWarningMessage(SimpleAssemblyName, body, _messageFormats);
+                _formattedBody = null;
             }
 
             return _formattedMessage ?? base.Message;
@@ -593,23 +559,19 @@ public sealed class AssemblyConflictWarningEventArgs : BuildWarningEventArgs
         // The receiving node reconstructs the message from the structured fields.
         base.WriteToStream(writer);
         writer.Write(SimpleAssemblyName);
-        writer.Write(VictorFusionName);
-        writer.Write(VictimFusionName);
         writer.Write7BitEncodedInt((int)LossReason);
         Victor.WriteToStream(writer);
         Victim.WriteToStream(writer);
-        _messageFormats!.WriteToStream(writer);
+        _messageFormats!.WriteToStream(writer, includeWarningFormats: true);
     }
 
     internal override void CreateFromStream(BinaryReader reader, int version)
     {
         base.CreateFromStream(reader, version);
         SimpleAssemblyName = reader.ReadString();
-        VictorFusionName = reader.ReadString();
-        VictimFusionName = reader.ReadString();
         LossReason = (AssemblyConflictLossReason)reader.Read7BitEncodedInt();
         Victor = AssemblyConflictReferenceDetails.CreateFromStream(reader);
         Victim = AssemblyConflictReferenceDetails.CreateFromStream(reader);
-        _messageFormats = AssemblyConflictMessageFormats.CreateFromStream(reader);
+        _messageFormats = AssemblyConflictMessageFormats.CreateFromStream(reader, includeWarningFormats: true);
     }
 }

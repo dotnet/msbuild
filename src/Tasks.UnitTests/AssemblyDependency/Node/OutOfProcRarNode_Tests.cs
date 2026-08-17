@@ -127,7 +127,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             var victor = new AssemblyConflictReferenceDetails(
                 "D, Version=1.0.0.0",
                 "/libs/v1/D.dll",
-                useUnifiedHeader: false,
                 isPrimary: true,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
@@ -135,7 +134,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
             var victim = new AssemblyConflictReferenceDetails(
                 "D, Version=2.0.0.0",
                 "/libs/v2/D.dll",
-                useUnifiedHeader: true,
                 isPrimary: false,
                 isResolved: true,
                 unresolvedPrimaryItemSpec: null,
@@ -159,8 +157,6 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 DateTime.UtcNow);
             var warningEvent = new AssemblyConflictWarningEventArgs(
                 "D",
-                victor.FusionName,
-                victim.FusionName,
                 AssemblyConflictLossReason.WasNotPrimary,
                 victor,
                 victim,
@@ -173,14 +169,8 @@ namespace Microsoft.Build.UnitTests.ResolveAssemblyReference_Tests
                 "ResolveAssemblyReference",
                 DateTime.UtcNow);
 
-            OutOfProcRarClient.DispatchBuildEvent(
-                rar,
-                LoggingEventType.AssemblyConflictDependencyDetailsEvent,
-                detailsEvent);
-            OutOfProcRarClient.DispatchBuildEvent(
-                rar,
-                LoggingEventType.AssemblyConflictWarningEvent,
-                warningEvent);
+            OutOfProcRarClient.DispatchBuildEvent(rar, detailsEvent);
+            OutOfProcRarClient.DispatchBuildEvent(rar, warningEvent);
 
             engine.MessageEvents.ShouldHaveSingleItem().ShouldBeOfType<AssemblyConflictDependencyDetailsMessageEventArgs>();
             engine.WarningEvents.ShouldHaveSingleItem().ShouldBeOfType<AssemblyConflictWarningEventArgs>();
