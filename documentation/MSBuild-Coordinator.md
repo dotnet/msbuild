@@ -238,7 +238,7 @@ When multiple builds compete for limited nodes, the coordinator either computes 
 
 The coordinator first resolves the high-priority reservation and the per-build cap. By default, total node budgets below 8 use no reservation and no per-build cap. At budgets 8 and above, the computed defaults reserve 4 nodes for high-priority requests and set the per-build cap to 4.
 
-One exception avoids limiting a build when the coordinator has no other work. If no root grants are active and no requests are waiting, the first `Normal` or `High` request may receive up to 8 nodes. A `Normal` request can receive 8 only when 8 nodes remain available after the high-priority reservation; a `High` request can use any 8 available nodes. `Low` requests and requests for fewer than 8 nodes use the regular per-build cap.
+One exception avoids limiting a build when the coordinator has no other work. If no root grants are active and no requests are waiting, an arriving `Normal` or `High` request may receive up to 8 nodes. A `Normal` request can receive 8 only when 8 nodes remain available after the high-priority reservation; a `High` request can use any 8 available nodes. `Low` requests and requests for fewer than 8 nodes use the regular per-build cap.
 
 Queued requests never use this exception; they use the regular capped or fair-share calculation even when a queued request becomes the only remaining build. Grants do not change during a build, so an existing 8-node grant is not reduced when another request arrives.
 
@@ -276,7 +276,7 @@ This ensures:
 - Each grant is capped by what the build requested and by the configured per-build cap
 - Uncapped mode divides available nodes across wait-queue contenders in the current drain phase
 - Capped mode grants up to the per-build cap and may leave partial capacity idle to preserve FIFO ordering
-- Only an eligible first request to an otherwise idle coordinator can exceed the computed 4-node cap
+- Only an eligible request arriving while the coordinator is idle can exceed the computed 4-node cap
 - Wait-queue entries are processed FIFO within the same effective priority and capacity pool
 - Higher-priority queued builds are drained before lower-priority queued builds
 - Lower-priority builds age as higher-priority builds bypass them, preventing starvation
@@ -296,7 +296,7 @@ By default these settings are computed from the coordinator node budget:
 | Total node budget | High-priority reservation | Max nodes per build |
 | ---: | ---: | ---: |
 | 1-7 | 0 | 0 (uncapped) |
-| 8+ | 4 | 4 (the first eligible request may receive 8 while idle) |
+| 8+ | 4 | 4 (an eligible request arriving while the coordinator is idle may receive 8) |
 
 Set either variable to `0` to disable that setting. Set a positive integer to force a specific value; values larger than the node budget are clamped to the effective range. Missing, empty, negative, or non-integer values use the computed value.
 
@@ -397,10 +397,10 @@ Overflow capacity does not need a separate setting. Users who intentionally want
 | `MSBUILDCOORDINATORGRANTID` | (empty) | Internal token used by child processes to join an active root grant |
 | `MSBUILDCOORDINATORBUILDREQUESTPRIORITY` | `Normal` | Request coordinator queue priority for this build. Valid values are `Low`, `Normal`, and `High`; missing, empty, or invalid values use `Normal`. |
 | `MSBUILDCOORDINATORHIGHPRIORITYRESERVEDNODES` | Computed default: 0 for budgets below 8; otherwise 4 | Reserve nodes from low/normal-priority grants for high-priority requests. Set to 0 to disable. Missing, empty, negative, or non-integer values use the computed default. |
-| `MSBUILDCOORDINATORMAXNODESPERBUILD` | Computed default: uncapped for budgets below 8; otherwise 4, with the first eligible request allowed up to 8 while idle | Limit the number of nodes granted to one build. An explicit positive value is always a hard cap; set to 0 to disable the cap. Missing, empty, negative, or non-integer values use the computed default. |
+| `MSBUILDCOORDINATORMAXNODESPERBUILD` | Computed default: uncapped for budgets below 8; otherwise 4, with an eligible request allowed up to 8 when the coordinator is idle | Limit the number of nodes granted to one build. An explicit positive value is always a hard cap; set to 0 to disable the cap. Missing, empty, negative, or non-integer values use the computed default. |
 | `MSBUILDCOORDINATORPRIORITYAGINGTHRESHOLD` | 3 | Number of bypasses required before a queued request ages upward by one effective priority level. Missing, empty, non-positive, or non-integer values use 3. |
 
-*Note*: `MSBUILDCOORDINATORNODEBUDGET` controls the total machine budget. Set it higher than the processor count to intentionally experiment with oversubscription. For example, on a 16-core machine, `MSBUILDCOORDINATORNODEBUDGET=20` with computed defaults allows the first eligible request to receive 8 nodes, limits later grants to 4 nodes, and retains 4 nodes for high-priority work. Coordinator startup/debug output includes the resolved values and the relevant opt-out environment variables.
+*Note*: `MSBUILDCOORDINATORNODEBUDGET` controls the total machine budget. Set it higher than the processor count to intentionally experiment with oversubscription. For example, on a 16-core machine, `MSBUILDCOORDINATORNODEBUDGET=20` with computed defaults allows an eligible request arriving while the coordinator is idle to receive 8 nodes, limits later grants to 4 nodes, and retains 4 nodes for high-priority work. Coordinator startup/debug output includes the resolved values and the relevant opt-out environment variables.
 
 ---
 
