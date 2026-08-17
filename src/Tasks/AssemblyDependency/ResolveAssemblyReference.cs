@@ -1972,12 +1972,15 @@ namespace Microsoft.Build.Tasks
                         string processorArchitecture = location.Reason == NoMatchReason.ProcessorArchitectureDoesNotMatch
                             ? location.AssemblyName.AssemblyName.ProcessorArchitecture.ToString()
                             : null;
+                        string assemblyName = location.Reason == NoMatchReason.FusionNamesDidNotMatch
+                            ? location.AssemblyName?.FullName
+                            : null;
 
                         attempts[i] = new AssemblyResolutionSearchAttempt(
                             location.FileNameAttempted,
                             location.SearchPath,
                             location.ParentAssembly,
-                            location.AssemblyName?.FullName,
+                            assemblyName,
                             GetAssemblyResolutionSearchResult(location.Reason),
                             processorArchitecture,
                             logAssemblyFoldersMinimal);
