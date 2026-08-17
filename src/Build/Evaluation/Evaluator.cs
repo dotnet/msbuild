@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -307,6 +307,7 @@ namespace Microsoft.Build.Evaluation
             _streamImports.Add(string.Empty);
         }
 
+
         /// <summary>
         /// Delegate passed to methods to provide basic expression evaluation
         /// ability, without having a language service.
@@ -390,6 +391,12 @@ namespace Microsoft.Build.Evaluation
                     globalProperties = evaluator._data.GlobalPropertiesDictionary;
                     properties = Traits.LogAllEnvironmentVariables ? evaluator._data.Properties : evaluator.FilterOutEnvironmentDerivedProperties(evaluator._data.Properties);
                     items = evaluator._data.Items;
+                }
+
+                string skippedMessage = evaluator._projectRootElementCache.ParserIgnoreConfiguration?.GetSkippedSummaryMessage();
+                if (skippedMessage is not null)
+                {
+                    evaluator._evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, skippedMessage);
                 }
 
                 evaluator._evaluationLoggingContext.LogProjectEvaluationFinished(globalProperties, properties, items, evaluator._evaluationProfiler.ProfiledResult);
@@ -661,6 +668,12 @@ namespace Microsoft.Build.Evaluation
                 Assumed.Equal(_data.EvaluationId, BuildEventContext.InvalidEvaluationId, "There is no prior evaluation ID. The evaluator data needs to be reset at this point");
                 _data.EvaluationId = _evaluationLoggingContext.BuildEventContext.EvaluationId;
                 _evaluationLoggingContext.LogProjectEvaluationStarted();
+
+                string configMessage = _projectRootElementCache.ParserIgnoreConfiguration?.GetLoadedConfigsMessage();
+                if (configMessage is not null)
+                {
+                    _evaluationLoggingContext.LogCommentFromText(MessageImportance.Low, configMessage);
+                }
 
                 // Track loads only after start of evaluation was actually logged
                 using var assemblyLoadsTracker =

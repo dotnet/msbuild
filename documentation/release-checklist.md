@@ -15,6 +15,7 @@ Artifacts produced over the course of the release. Record each URL here as the c
 | Phase 3.5 — `main` next-version main-bump PR | {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}} |
 | Phase 4.4 — VS insertion PR | {{URL_OF_VS_INSERTION}} |
 | Phase 5.1b — official build that produced `{{THIS_RELEASE_EXACT_VERSION}}` | {{URL_OF_SHIPPED_OFFICIAL_BUILD}} |
+| Phase 4.7 — Change Waves Learn page sync PR (visualstudio-docs-pr) | {{URL_OF_CHANGE_WAVES_DOCS_PR}} |
 | Phase 5.3 — GitHub release tag | https://github.com/dotnet/msbuild/releases/tag/v{{THIS_RELEASE_EXACT_VERSION}} |
 
 ---
@@ -194,6 +195,14 @@ The insertion PR contains the inserted package versions — useful for the nuget
 **After stable snap** (only if a backport to stable is needed):
 
 - [ ] **4.6** Update [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml): retarget `AutoInsertTargetBranch` for `vs{{THIS_RELEASE_VERSION}}` → `rel/stable`. This enables direct insertion of hotfix commits into the stable branch.
+
+**Change waves documentation sync**:
+
+- [ ] **4.7** Sync the public [Change Waves Learn page](https://learn.microsoft.com/visualstudio/msbuild/change-waves) with `documentation/wiki/ChangeWaves.md`. \
+The page must list the waves live in **VS Insiders** — the same set that ships in the **latest released preview SDK**.
+  - [ ] **4.7a** Confirm the version in Insiders — normally `{{THIS_RELEASE_VERSION}}` right after the snap: the `Microsoft.Build` version in [`msbuild-components.json` on VS `rel/insiders`](https://devdiv.visualstudio.com/DevDiv/_git/VS?path=/.corext/Configs/msbuild-components.json&version=GBrel/insiders), cross-checked with `dotnet msbuild -version` from the latest preview SDK (https://dotnet.microsoft.com/download/dotnet). If they disagree, pick latest.
+  - [ ] **4.7b** Port the wave lists and their section grouping from [`documentation/wiki/ChangeWaves.md` on `vs{{THIS_RELEASE_VERSION}}`](https://github.com/dotnet/msbuild/blob/vs{{THIS_RELEASE_VERSION}}/documentation/wiki/ChangeWaves.md). Bump `ms.date`.
+  - [ ] **4.7c** Open the PR against [MicrosoftDocs/visualstudio-docs-pr](https://github.com/MicrosoftDocs/visualstudio-docs-pr) (**not** the public `visualstudio-docs` mirror), file `docs/msbuild/change-waves.md`. Example: [visualstudio-docs-pr#15662](https://github.com/MicrosoftDocs/visualstudio-docs-pr/pull/15662).
 
 ---
 
