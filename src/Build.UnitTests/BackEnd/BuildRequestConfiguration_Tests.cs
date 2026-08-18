@@ -781,7 +781,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         public void TestRequestedTargetsPreservedAcrossTranslateForFutureUse()
         {
             string projectBody = """
-                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                <Project>
                     <Target Name='EntryTarget' />
                     <Target Name='OtherTarget' />
                 </Project>
