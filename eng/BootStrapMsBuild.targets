@@ -238,9 +238,13 @@
 
     <PropertyGroup>
       <InstallDir>$(ArtifactsBinDir)bootstrap\core\</InstallDir>
+      <!-- The dotnet-install script is just a build tool, so keep it repo-local instead of writing it into
+           $(DotNetRoot), which can resolve to a machine-global, possibly non-writable path such as
+           "C:\Program Files\dotnet\" (see https://github.com/dotnet/msbuild/issues/13962). -->
+      <DotNetInstallScriptRootPath>$(ArtifactsObjDir)bootstrap\</DotNetInstallScriptRootPath>
     </PropertyGroup>
 
-    <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetRoot)" InstallDir="$(InstallDir)" Version="$(BootstrapSdkVersion)"/>
+    <InstallDotNetCoreTask DotNetInstallScriptRootPath="$(DotNetInstallScriptRootPath)" InstallDir="$(InstallDir)" Version="$(BootstrapSdkVersion)"/>
   </Target>
 
   <Target Name="BootstrapNetCore" DependsOnTargets="AcquireSdk">
