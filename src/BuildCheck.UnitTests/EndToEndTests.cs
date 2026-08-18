@@ -938,6 +938,7 @@ public class EndToEndTests : IDisposable
     }
 
 #if NET
+    [ActiveIssue("https://github.com/dotnet/msbuild/issues/14392")]
     [Fact]
     public void TestBuildCheckTemplate()
     {

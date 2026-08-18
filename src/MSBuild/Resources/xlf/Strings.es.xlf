@@ -381,22 +381,62 @@ Esta marca es experimental y puede que no funcione según lo previsto.
       </trans-unit>
       <trans-unit id="MSBuildServerConnectFailed">
         <source>could not connect to the server within the timeout window; the server may have failed to start</source>
-        <target state="translated">no se pudo conectar con el servidor dentro de la ventana de tiempo de espera; es posible que el servidor no se haya iniciado</target>
+        <target state="needs-review-translation">no se pudo conectar con el servidor dentro de la ventana de tiempo de espera; es posible que el servidor no se haya iniciado</target>
         <note>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known — covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerCrashedOnLaunch">
         <source>the server process exited with code {0} immediately after launch</source>
-        <target state="translated">el proceso de servidor se cerró con código {0} inmediatamente después del inicio</target>
+        <target state="needs-review-translation">el proceso de servidor se cerró con código {0} inmediatamente después del inicio</target>
         <note>LOCALIZATION: {0} is the integer process exit code; rendered with InvariantCulture as a decimal integer, do not localize the digits. This message is concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerLaunchError">
         <source>the server process could not be launched</source>
-        <target state="translated">no se pudo iniciar el proceso del servidor</target>
+        <target state="needs-review-translation">no se pudo iniciar el proceso del servidor</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeReused">
+        <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
+        <target state="new">Reusing the running MSBuild Server node for this build (process ID {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawned">
+        <source>MSBuild Server node started for this build (process ID {0}).</source>
+        <target state="new">MSBuild Server node started for this build (process ID {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawnedShortLived">
+        <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
+        <target state="new">MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNotUsedForBuild">
+        <source>MSBuild Server was requested but not used for this build: {0}.</source>
+        <target state="new">MSBuild Server was requested but not used for this build: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonBusy">
+        <source>the server was busy with another build</source>
+        <target state="new">the server was busy with another build</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
+        <source>this invocation is not compatible with MSBuild Server</source>
+        <target state="new">this invocation is not compatible with MSBuild Server</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
+        <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
+        <target state="new">node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
+        <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
+        <target state="new">the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</target>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
         <source>the current server state could not be determined</source>
-        <target state="translated">no se pudo determinar el estado actual del servidor</target>
+        <target state="needs-review-translation">no se pudo determinar el estado actual del servidor</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerUnavailable">
@@ -2324,6 +2364,36 @@ Esta marca es experimental y puede que no funcione según lo previsto.
         <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
         <target state="translated">MSBUILD : error MSB4192: El formato de archivo del proyecto "{0}" es ".vcproj" o ".dsp", que MSBuild no puede compilar directamente. Convierta el proyecto abriéndolo en el IDE de Visual Studio o ejecutando la herramienta de conversión; o bien, para ".vcproj", use MSBuild para compilar el archivo de solución que contiene el proyecto.</target>
         <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
+        <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
+        <target state="translated">MSB5022: El host de tareas de MSBuild no admite la ejecución de tareas que realizan devoluciones de llamadas de IBuildEngine. Si desea realizar estas operaciones, ejecute la tarea en el proceso de MSBuild principal en su lugar.  Se ejecutará una tarea automáticamente en el host de tareas si a UsingTask se le ha agregado un atributo con un valor "Runtime" o "Arquitectura", o bien a la invocación de tareas se le ha agregado un atributo con un valor "MSBuildRuntime" o "MSBuildArchitecture", que no coincide con el runtime o la arquitectura actual de MSBuild.</target>
+        <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="InvalidLogFileFormat">
+        <source>MSB4233: There was an exception while reading the log file: {0}</source>
+        <target state="translated">MSB4233: Excepción al leer el archivo de registro: {0}</target>
+        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentHeader">
+        <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
+        <target state="translated">Se están realizando las siguientes modificaciones en el entorno recibido del nodo primario antes de aplicarlo al host de tareas:</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentVariable">
+        <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
+        <target state="translated">  Estableciendo '{0}' en '{1}' en lugar del valor del entorno primario, '{2}'.</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="SubCategoryForSchemaValidationErrors">
+        <source>Schema validation</source>
+        <target state="translated">Validación de esquemas</target>
+        <note>
+      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
+      "MSBUILD : Schema validation error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.
+    </note>
       </trans-unit>
     </body>
   </file>

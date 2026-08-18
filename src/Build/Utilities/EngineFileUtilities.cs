@@ -207,7 +207,7 @@ namespace Microsoft.Build.Internal
             {
                 if (Traits.Instance.LogExpandedWildcards)
                 {
-                    ErrorUtilities.DebugTraceMessage("EngineFileUtilities", $"Expanding wildcard for file spec {filespecEscaped}");
+                    DebugTrace.WriteLine($"Expanding wildcard for file spec {filespecEscaped}", category: nameof(EngineFileUtilities));
                 }
 
                 // Unescape before handing it to the filesystem.

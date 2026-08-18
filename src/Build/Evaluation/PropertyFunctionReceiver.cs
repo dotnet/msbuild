@@ -13,9 +13,9 @@ namespace Microsoft.Build.Evaluation;
 /// </summary>
 /// <remarks>
 /// <para>
-/// Used when <see cref="Internal.FeatureSwitches.RestrictPropertyFunctionReceivers"/> is enabled. It
-/// limits dotting to a curated, bounded set of receiver types so the members reachable by reflection are
-/// predictable and statically known, which keeps the property-function path trim compatible.
+/// Used when the <c>RestrictPropertyFunctionReceivers</c> feature switch (in Microsoft.Build.Framework) is
+/// enabled. It limits dotting to a curated, bounded set of receiver types so the members reachable by
+/// reflection are predictable and statically known, which keeps the property-function path trim compatible.
 /// </para>
 /// <para>
 /// Common read-only navigation such as <c>$([System.IO.Directory]::GetParent(x).Parent.FullName)</c>

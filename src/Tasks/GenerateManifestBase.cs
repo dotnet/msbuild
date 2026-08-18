@@ -4,6 +4,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
@@ -276,8 +279,6 @@ namespace Microsoft.Build.Tasks
 
         [UnconditionalSuppressMessage("TrimAnalysis", "IL2026:RequiresUnreferencedCode",
             Justification = "ClickOnce manifest generation reads and writes manifests with XmlSerializer; this task is inherently incompatible with trimming.")]
-        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
-            Justification = "ClickOnce manifest generation uses XmlSerializer and XslCompiledTransform; this task is inherently incompatible with Native AOT.")]
         public override bool Execute()
         {
             if (!NativeMethodsShared.IsWindows)
@@ -285,6 +286,14 @@ namespace Microsoft.Build.Tasks
                 Log.LogErrorWithCodeFromResources("General.TaskRequiresWindows", nameof(GenerateManifestBase));
                 return false;
             }
+
+#if NET
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                Log.LogErrorWithCodeFromResources("GenerateManifest.General", "Dynamic code generation is not supported in this runtime environment.");
+                return false;
+            }
+#endif
 
             bool success = true;
 

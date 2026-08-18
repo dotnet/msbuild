@@ -1,0 +1,65 @@
+[
+  {
+    "Key": "StringTools",
+    "CsProj": "src/StringTools.UnitTests/StringTools.UnitTests.VSTest.csproj",
+    "Dll": "Microsoft.NET.StringTools.UnitTests.dll",
+    "BinDir": "StringTools.UnitTests.VSTest",
+    "DemoFiles": {
+      "Broad":     "src/StringTools/StringTools.cs",
+      "Narrow":    "src/StringTools/WeakStringCache.cs",
+      "Unrelated": "src/Tasks/AssemblyDependency/Resolver.cs"
+    }
+  },
+  {
+    "Key": "Framework",
+    "CsProj": "src/Framework.UnitTests/Microsoft.Build.Framework.UnitTests.VSTest.csproj",
+    "Dll": "Microsoft.Build.Framework.UnitTests.dll",
+    "BinDir": "Microsoft.Build.Framework.UnitTests.VSTest",
+    "DemoFiles": {
+      "Broad":     "src/Framework/BuildEventArgs.cs",
+      "Narrow":    "src/Framework/ProjectStartedEventArgs.cs",
+      "Unrelated": "src/Tasks/AssemblyDependency/Resolver.cs"
+    }
+  },
+  {
+    "Key": "Utilities",
+    "CsProj": "src/Utilities.UnitTests/Microsoft.Build.Utilities.UnitTests.VSTest.csproj",
+    "Dll": "Microsoft.Build.Utilities.UnitTests.dll",
+    "BinDir": "Microsoft.Build.Utilities.UnitTests.VSTest",
+    "DemoFiles": {
+      "Broad":     "src/Utilities/Logger.cs",
+      "Narrow":    "src/Utilities/CommandLineBuilder.cs",
+      "Unrelated": "src/Tasks/AssemblyDependency/Resolver.cs"
+    }
+  },
+  {
+    "Key": "EngineOM",
+    "CsProj": "src/Build.OM.UnitTests/Microsoft.Build.Engine.OM.UnitTests.VSTest.csproj",
+    "Dll": "Microsoft.Build.Engine.OM.UnitTests.dll",
+    "BinDir": "Microsoft.Build.Engine.OM.UnitTests.VSTest"
+  },
+  {
+    "Key": "CommandLine",
+    "CsProj": "src/MSBuild.UnitTests/Microsoft.Build.CommandLine.UnitTests.VSTest.csproj",
+    "Dll": "Microsoft.Build.CommandLine.UnitTests.dll",
+    "BinDir": "Microsoft.Build.CommandLine.UnitTests.VSTest"
+  },
+  {
+    "Key": "Engine",
+    "CsProj": "src/Build.UnitTests/Microsoft.Build.Engine.UnitTests.VSTest.csproj",
+    "Dll": "Microsoft.Build.Engine.UnitTests.dll",
+    "BinDir": "Microsoft.Build.Engine.UnitTests.VSTest"
+  },
+  {
+    "Key": "Tasks",
+    "CsProj": "src/Tasks.UnitTests/Microsoft.Build.Tasks.UnitTests.VSTest.csproj",
+    "Dll": "Microsoft.Build.Tasks.UnitTests.dll",
+    "BinDir": "Microsoft.Build.Tasks.UnitTests.VSTest"
+  },
+  {
+    "Key": "BuildCheck",
+    "CsProj": "src/BuildCheck.UnitTests/Microsoft.Build.BuildCheck.UnitTests.VSTest.csproj",
+    "Dll": "Microsoft.Build.BuildCheck.UnitTests.dll",
+    "BinDir": "Microsoft.Build.BuildCheck.UnitTests.VSTest"
+  }
+]

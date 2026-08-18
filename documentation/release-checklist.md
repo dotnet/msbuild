@@ -11,10 +11,9 @@ Artifacts produced over the course of the release. Record each URL here as the c
 | Artifact | URL |
 |---|---|
 | Phase 1.2d — maestro-configuration PR (channels for `{{THIS_RELEASE_VERSION}}` / `{{NEXT_VERSION}}`) | {{URL_OF_PHASE1_DARC_PR}} |
-| Phase 2.3h — maestro-configuration PR (main subscriptions retargeted to `VS {{NEXT_VERSION}}`, retired-branch cleanup) | {{URL_OF_PHASE2_DARC_PR}} |
-| Phase 3.4 — `main` next-version main-bump PR | {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}} |
-| Phase 4.3 — `vs{{THIS_RELEASE_VERSION}}` final branding PR | {{URL_OF_FINAL_BRANDING_PR}} |
-| Phase 4.6 — VS insertion PR | {{URL_OF_VS_INSERTION}} |
+| Phase 2.3j — maestro-configuration PR (`main`-targeting subs + VMR backflow retargeted, retired-branch cleanup) | {{URL_OF_PHASE2_DARC_PR}} |
+| Phase 3.5 — `main` next-version main-bump PR | {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}} |
+| Phase 4.4 — VS insertion PR | {{URL_OF_VS_INSERTION}} |
 | Phase 5.3 — GitHub release tag | https://github.com/dotnet/msbuild/releases/tag/v{{THIS_RELEASE_EXACT_VERSION}} |
 
 ---
@@ -76,8 +75,8 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
   - [ ] **1.2b** Create DARC channel for **next** release: \
   `darc add-channel --name "VS {{NEXT_VERSION}}" --configuration-branch msbuild-{{THIS_RELEASE_VERSION}} --no-pr` \
   _(If channel already exists, this is a no-op.)_
-  - [ ] **1.2c** Pre-create default channel mapping for the **next** release branch (**last command — omit `--no-pr` to create the PR**): \
-  `darc add-default-channel --channel "VS {{NEXT_VERSION}}" --branch vs{{NEXT_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}`
+  - [ ] **1.2c** Pre-create default channel mapping for the **next** release branch (**last command — omit `--no-pr` to create the PR**). The `vs{{NEXT_VERSION}}` branch does not exist yet, so pass `-q` (non-interactive) to skip the "branch doesn't exist" prompt — otherwise the command blocks/aborts: \
+  `darc add-default-channel --channel "VS {{NEXT_VERSION}}" --branch vs{{NEXT_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}} -q`
   - [ ] **1.2d** Get the maestro-configuration PR reviewed and merged: {{URL_OF_PHASE1_DARC_PR}}
 - [ ] **1.3** Update `.config/git-merge-flow-config.jsonc`:
   - [ ] **1.3a** Insert `vs{{THIS_RELEASE_VERSION}}` as the last entry before `main` in the merge chain. Add a comment noting the VS/SDK version context.
@@ -97,31 +96,41 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
 
 First, **gather information** (read-only queries — no PR needed):
 
-- [ ] **2.1** Find the SDK main subscription ID to update: \
+- [ ] **2.1** Identify the **forward-flow** subscriptions to retarget: \
 `darc get-subscriptions --exact --source-repo https://github.com/dotnet/msbuild --channel "VS {{THIS_RELEASE_VERSION}}"` \
-Note the subscription ID for the SDK `main` branch entry.
+This lists every `msbuild → downstream` subscription currently on the outgoing channel. **Retarget ONLY the subscriptions whose _target branch_ is `main`** — normally `dotnet/dotnet @ main` (the VMR/SDK main) and `dotnet/fsharp @ main` (fsharp tracks the channel msbuild `main` publishes to). Record their IDs. \
+🛑 **Do NOT touch subscriptions that target a VMR servicing/release branch** (`dotnet/dotnet @ release/*`). That includes the SDK band now paired with `vs{{THIS_RELEASE_VERSION}}` (it is now fed by `vs{{THIS_RELEASE_VERSION}}` via the `VS {{THIS_RELEASE_VERSION}}` channel) **and** any `.NET-next` preview band (`release/*-preview*`). Leaving them on `VS {{THIS_RELEASE_VERSION}}` is what lets the new release branch own its downstream flow; moving them would steal it. The single rule: **retarget a forward sub only if its target branch is `main`.**
 - [ ] **2.2** Verify release branch channel association: \
 `darc get-default-channels --source-repo https://github.com/dotnet/msbuild --branch vs{{THIS_RELEASE_VERSION}}` \
 Note whether the association exists (needed for step 2.3d).
+- [ ] **2.2b** **(VMR backflow — do this only if `vs{{THIS_RELEASE_VERSION}}` is paired with an SDK band that `main` was feeding; skip entirely for a VS-only release with no SDK band.)** Identify the backflow subscriptions (VMR → msbuild, source-enabled) and the band channels: \
+`darc get-subscriptions --target-repo https://github.com/dotnet/msbuild --target-branch main --source-repo https://github.com/dotnet/dotnet` → record the source-enabled `→ main` backflow **ID** (for 2.3f). \
+`darc get-default-channels --source-repo https://github.com/dotnet/dotnet --branch main` → the **next** SDK band channel `main` now publishes to, e.g. `.NET <NEXT_BAND> SDK`. Compare to the current `→ main` backflow channel — if unchanged, 2.3f is a no-op (for 2.3f). \
+`darc get-default-channels --source-repo https://github.com/dotnet/dotnet --branch release/<outgoing-band>` → the **outgoing** band channel that `vs{{THIS_RELEASE_VERSION}}` now owns, e.g. `.NET <OUTGOING_BAND> SDK` (for 2.3g).
 
 Then, **batch all write operations into one PR** on the [maestro-configuration](https://dev.azure.com/dnceng/internal/_git/maestro-configuration) repo. \
-Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump` and `--no-pr` on all but the last command:
+Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump` (distinct from the Phase 1 channel branch) and `--no-pr` on all but the last command. \
+_Tip: `darc add-default-channel` / `add-subscription` prompt interactively when the target branch does not exist yet; pass `-q` (non-interactive) to skip that prompt._
 
 - [ ] **2.3** DARC channel/subscription updates:
   - [ ] **2.3a** Remove main → old channel mapping: \
-  `darc delete-default-channel --repo https://github.com/dotnet/msbuild --branch main --channel "VS {{THIS_RELEASE_VERSION}}" --configuration-branch msbuild-{{THIS_RELEASE_VERSION}} --no-pr`
+  `darc delete-default-channel --repo https://github.com/dotnet/msbuild --branch main --channel "VS {{THIS_RELEASE_VERSION}}" --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
   - [ ] **2.3b** Associate main with next channel: \
-  `darc add-default-channel --channel "VS {{NEXT_VERSION}}" --branch main --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}} --no-pr`
-  - [ ] **2.3c** Update SDK main subscription to new channel: \
-  `darc update-subscription --id <subscription_id_from_2.1> --channel "VS {{NEXT_VERSION}}" --configuration-branch msbuild-{{THIS_RELEASE_VERSION}} --no-pr`
+  `darc add-default-channel --channel "VS {{NEXT_VERSION}}" --branch main --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
+  - [ ] **2.3c** Retarget **each** `main`-targeting forward subscription from 2.1 to the next channel — run once per ID (typically `dotnet/dotnet @ main` and `dotnet/fsharp @ main`): \
+  `darc update-subscription --id <main_targeting_sub_id> --channel "VS {{NEXT_VERSION}}" --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
   - [ ] **2.3d** If release branch association was missing in 2.2, add it: \
-  `darc add-default-channel --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}} --no-pr`
+  `darc add-default-channel --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
   - [ ] **2.3e** **Delete subscriptions for retired branches.** For each branch identified as retired in step 1.3b (apply the same combined SDK+VS rule — do **not** delete subscriptions for a branch that's retired on only one side, since fixes must keep flowing into the still-supported lifecycle), remove its inbound subscriptions and any default channel associations.
   List them: `darc get-subscriptions --target-repo https://github.com/dotnet/msbuild --target-branch <retired_branch>` \
-  Delete each: `darc delete-subscription --id <subscription_id> --configuration-branch msbuild-{{THIS_RELEASE_VERSION}} --no-pr`
-  - [ ] **2.3f** _If the Arcade subscription from 2.4 below is missing or pointed at the wrong channel, include the fix-up here with `--no-pr`._
-  - [ ] **2.3g** **Create the PR** — re-run the final write command without `--no-pr` to open the PR on the configuration branch.
-  - [ ] **2.3h** Get the maestro-configuration PR reviewed and merged: {{URL_OF_PHASE2_DARC_PR}}
+  Delete each: `darc delete-subscription --id <subscription_id> --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
+  - [ ] **2.3f** **(VMR backflow — skip for a VS-only release, or if 2.2b found the channel unchanged.)** Repoint the `→ main` backflow (ID from 2.2b) to the **next** SDK band channel so the bumped `main` pulls next-version VMR dependencies: \
+  `darc update-subscription --id <main_backflow_id> --channel ".NET <NEXT_BAND> SDK" --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
+  - [ ] **2.3g** **(VMR backflow — skip for a VS-only release.)** Add a backflow from the **outgoing** SDK band into the new release branch so that band keeps flowing into `vs{{THIS_RELEASE_VERSION}}` (mirrors the previous release branch's backflow: source-enabled, source dir `msbuild`, everyDay, Standard merge, excluded assets `*`; the branch is brand-new so pass `-q`): \
+  `darc add-subscription --channel ".NET <OUTGOING_BAND> SDK" --source-repo https://github.com/dotnet/dotnet --target-repo https://github.com/dotnet/msbuild --target-branch vs{{THIS_RELEASE_VERSION}} --update-frequency everyDay --source-enabled --source-directory msbuild --excluded-assets '*' --standard-automerge --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr -q`
+  - [ ] **2.3h** **Arcade fix-up (run 2.4 first if you haven't).** _If the Arcade subscription from 2.4 below is missing or pointed at the wrong channel, include the fix-up here with `--no-pr` before creating the PR._
+  - [ ] **2.3i** **Create the PR** — re-run the final write command without `--no-pr` to open the PR on the configuration branch.
+  - [ ] **2.3j** Get the maestro-configuration PR reviewed and merged: {{URL_OF_PHASE2_DARC_PR}}
 
 Verifications (**parallel** — read-only, no ordering dependency):
 
@@ -141,11 +150,15 @@ Verifications (**parallel** — read-only, no ordering dependency):
 Create **one PR in `main`** containing all of the following changes:
 
 - [ ] **3.1** `eng/Versions.props`: Update `VersionPrefix` to `{{NEXT_VERSION}}.0`
-- [ ] **3.2** `eng/Versions.props`: Update `PackageValidationBaselineVersion` to `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` (see [How to determine `PACKAGE_VALIDATION_BASELINE_VERSION`](https://github.com/dotnet/msbuild/blob/main/.github/skills/release/SKILL.md#how-to-determine-package_validation_baseline_version) in the release skill).
-- [ ] **3.3** If the build pipeline fails on API-compat (only then — this step is a fix-up, not a routine action), update `CompatibilitySuppressions.xml` files. Run: \
+- [ ] **3.2** `eng/Versions.props`: Update `PackageValidationBaselineVersion` to `{{PACKAGE_VALIDATION_BASELINE_VERSION}}`. \
+Resolve it deterministically with `pwsh ./scripts/Get-PackageValidationBaseline.ps1 -ThisReleaseVersion {{THIS_RELEASE_VERSION}}` (requires `az login` with devdiv access). See [How to determine `PACKAGE_VALIDATION_BASELINE_VERSION`](https://github.com/dotnet/msbuild/blob/main/.github/skills/release/SKILL.md#how-to-determine-package_validation_baseline_version) in the release skill for the manual fallback.
+- [ ] **3.3** `.vsts-dotnet.yml`: Refresh the hardcoded OptProf baseline so the **next** `vs*` branch cut from `main` inherits valid OptProf data (this is what lets that branch's first official build succeed without the manual Phase 4.4 rerun). \
+Resolve the current value with `pwsh ./scripts/Get-LatestOptProfDrop.ps1` (requires `az login` with devdiv access), then set it as `OptProfBaselineDrop`: \
+`<name: OptProfBaselineDrop` → `value: 'OptimizationData/DotNet-msbuild-Trusted/main/<NNNNNNNN.N>/<buildId>/1'`.
+- [ ] **3.4** If the build pipeline fails on API-compat (only then — this step is a fix-up, not a routine action), update `CompatibilitySuppressions.xml` files. Run: \
 `dotnet pack MSBuild.Dev.slnf /p:ApiCompatGenerateSuppressionFile=true` \
 See [API compat documentation](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/overview) for details.
-- [ ] **3.4** Merge main-bump PR: {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}}
+- [ ] **3.5** Merge main-bump PR: {{URL_OF_NEXT_VERSION_MAIN_BUMP_PR}}
 
 ---
 
@@ -159,30 +172,26 @@ Steps are **sequential**.
 
 - [ ] **4.1** Promote public API on `vs{{THIS_RELEASE_VERSION}}` branch: \
 Move contents of `PublicAPI.Unshipped.txt` → `PublicAPI.Shipped.txt` for all projects with API changes. See [release.md](./release.md) for details.
-- [ ] **4.2** Run `scripts/Stabilize-Release.ps1` on `vs{{THIS_RELEASE_VERSION}}` branch: \
-Use `-DryRun` first to preview. The script adds `<DotNetFinalVersionKind>release</DotNetFinalVersionKind>` on the same line as `VersionPrefix` (creates merge conflict for forward-flow) and changes `PreReleaseVersionLabel` from `preview` to `servicing`. \
-_If the script says "already stabilized" — skip (idempotent)._
-- [ ] **4.3** Create and merge final branding PR to `vs{{THIS_RELEASE_VERSION}}`: {{URL_OF_FINAL_BRANDING_PR}}
-- [ ] **4.4** Bootstrap OptProf for `vs{{THIS_RELEASE_VERSION}}`. After the final-branding commit (4.3) merges, the [official build](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434) is auto-triggered without OptProf data for the new branch and will fail. To work around:
-  - [ ] **4.4a** **Cancel** the auto-triggered official build for `vs{{THIS_RELEASE_VERSION}}`.
-  - [ ] **4.4b** **Re-run the official build manually** for `vs{{THIS_RELEASE_VERSION}}` with the OptProf override from `main` — set `Optional OptProfDrop Override` to `main`'s latest OptProf drop path. _(Find the path in main CI logs: Windows_NT → Build → search for `OptimizationData`.)_
-- [ ] **4.5** Get M2 or QB approval as necessary per the VS schedule. \
-_**Only required if we are behind the VS schedule** — i.e. the insertion didn't land in VS `main` before `{{INSIDERS_SNAP_DATE}}` (4.6 was missed) and a milestone-gate approval is now needed. If the insertion made the schedule, **skip this step**._
-- [ ] **4.6** Babysit the VS insertion PR from `vs{{THIS_RELEASE_VERSION}}` into VS `main` (auto-generated at https://devdiv.visualstudio.com/DevDiv/_git/VS/pullrequests). The final-branded bits must be in VS `main` **before** `{{INSIDERS_SNAP_DATE}}` so they are included when VS snaps to `rel/insiders`: {{URL_OF_VS_INSERTION}} \
+- [ ] **4.2** Bootstrap OptProf for `vs{{THIS_RELEASE_VERSION}}`. **If the Phase 3.3 hardcoded `OptProfBaselineDrop` was kept current, the auto-triggered build should already pick it up (`.vsts-dotnet.yml` seeds `OptProfDrop` from it on `vs*` branches) and this step is a no-op.** Only if the official build still fails for lack of OptProf data (e.g. the baseline was stale/empty at branch-cut):
+  - [ ] **4.2a** **Cancel** the auto-triggered official build for `vs{{THIS_RELEASE_VERSION}}`.
+  - [ ] **4.2b** **Re-run the official build manually** for `vs{{THIS_RELEASE_VERSION}}` with the OptProf override from `main` — set `Optional OptProfDrop Override` to `main`'s latest OptProf drop path (`pwsh ./scripts/Get-LatestOptProfDrop.ps1`).
+- [ ] **4.3** Get M2 or QB approval as necessary per the VS schedule. \
+_**Only required if we are behind the VS schedule** — i.e. the insertion didn't land in VS `main` before `{{INSIDERS_SNAP_DATE}}` (4.4 was missed) and a milestone-gate approval is now needed. If the insertion made the schedule, **skip this step**._
+- [ ] **4.4** Babysit the VS insertion PR from `vs{{THIS_RELEASE_VERSION}}` into VS `main` (auto-generated at https://devdiv.visualstudio.com/DevDiv/_git/VS/pullrequests). The inserted bits must be in VS `main` **before** `{{INSIDERS_SNAP_DATE}}` so they are included when VS snaps to `rel/insiders`: {{URL_OF_VS_INSERTION}} \
 The insertion PR contains the inserted package versions — useful for the nuget.org publishing step.
 
 **After insiders snap** (only if a backport to insiders is needed):
 
-> 🛑 **4.7 and 4.8 are NOT part of the regular release flow — skip them entirely on a normal release.** \
+> 🛑 **4.5 and 4.6 are NOT part of the regular release flow — skip them entirely on a normal release.** \
 > They only apply when **servicing** a previously-shipped release (i.e. you actually have a hotfix commit on `vs{{THIS_RELEASE_VERSION}}` that needs to be inserted into VS's already-snapped `rel/insiders` or `rel/stable` branch). If you have no such commit to service, leave `AutoInsertTargetBranch` untouched and move on to Phase 5.
 >
 > ⚠️ When you *do* need to service: re-confirm which VS branch you actually want to insert into before flipping `AutoInsertTargetBranch`. The default is `main`, so forgetting to retarget after the snap silently lands your fix in the next VS instead of the one you're servicing.
 
-- [ ] **4.7** Update [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml): retarget `AutoInsertTargetBranch` for `vs{{THIS_RELEASE_VERSION}}` from VS `main` → `rel/insiders`. This enables direct insertion of hotfix commits into the insiders branch.
+- [ ] **4.5** Update [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml): retarget `AutoInsertTargetBranch` for `vs{{THIS_RELEASE_VERSION}}` from VS `main` → `rel/insiders`. This enables direct insertion of hotfix commits into the insiders branch.
 
 **After stable snap** (only if a backport to stable is needed):
 
-- [ ] **4.8** Update [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml): retarget `AutoInsertTargetBranch` for `vs{{THIS_RELEASE_VERSION}}` → `rel/stable`. This enables direct insertion of hotfix commits into the stable branch.
+- [ ] **4.6** Update [`azure-pipelines/vs-insertion.yml`](../azure-pipelines/vs-insertion.yml): retarget `AutoInsertTargetBranch` for `vs{{THIS_RELEASE_VERSION}}` → `rel/stable`. This enables direct insertion of hotfix commits into the stable branch.
 
 ---
 
@@ -194,13 +203,13 @@ Steps are **mostly parallel** unless noted.
 
 - [ ] **5.1** Push packages to nuget.org.
 
-  > **How publishing works:** We don't push packages ourselves. We hand a link to the **Shipping** artifacts of the official build to the dnceng release team, and they push to nuget.org. Searching past mail for the subject _"Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org" for the template.
+  > **How publishing works:** We don't push packages ourselves. We hand a link to the **Release** artifacts of the official build to the _.NET Release Team_, and they push to nuget.org. Searching past mail for the subject _"Publish MSBuild {{THIS_RELEASE_VERSION}} to NuGet.org" for the template.
 
   - [ ] **5.1a** Determine the exact MSBuild version that actually shipped to customers.
     - **If this release is coupled with an SDK release: use the SDK as the source of truth**. Look up the MSBuild version baked into the shipped SDK build.
     - Otherwise, read the **authoritative GA'd value from VS `rel/stable`**: the `Microsoft.Build` component version in [`.corext/Configs/msbuild-components.json`](https://devdiv.visualstudio.com/DevDiv/_git/VS?path=/.corext/Configs/msbuild-components.json&version=GBrel/stable) (e.g. `18.7.1-servicing-NNNNN-NN+<sha>`). Extract just the **numeric `VersionPrefix`** from that string — drop the `-servicing-NNNNN-NN+<sha>` suffix — and use it as `{{THIS_RELEASE_EXACT_VERSION}}` (e.g. `18.7.1`). **Do not** rely solely on the VS insertion PR — that PR targets VS `main` and can be superseded by a later servicing insertion before GA, whereas `rel/stable` reflects what actually shipped.
   - [ ] **5.1b** In the [MSBuild official build pipeline](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=9434), filter to the `vs{{THIS_RELEASE_VERSION}}` branch and locate the build whose output version matches the one identified in 5.1a (e.g. `{{THIS_RELEASE_EXACT_VERSION}}`, such as `18.6.3`).
-  - [ ] **5.1c** From that build, open the **Publish Artifacts** step and grab the link to the **`artifacts-shipping`** drop. Verify the Shipping folder contains all of:
+  - [ ] **5.1c** From that build, open the **Publish Artifacts** step and grab the link to the **`PackageArtifacts/Release`** drop. Verify the **Release** folder contains all of:
     - `Microsoft.Build.Utilities.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.Framework.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
@@ -208,7 +217,7 @@ Steps are **mostly parallel** unless noted.
     - `Microsoft.Build.Tasks.Core.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.NET.StringTools.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
     - `Microsoft.Build.Templates.{{THIS_RELEASE_EXACT_VERSION}}.nupkg`
-  - [ ] **5.1d** Email the dnceng release team with the `artifacts-shipping` link from 5.1c and ask them to publish to nuget.org.
+  - [ ] **5.1d** Email the _.NET Release Team_ with the `Release` link from 5.1c and ask them to publish to nuget.org.
 
 - [ ] **5.2** Publish docs
 

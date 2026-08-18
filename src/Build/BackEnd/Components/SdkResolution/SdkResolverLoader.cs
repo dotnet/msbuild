@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -39,9 +40,22 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             var resolvers = !string.Equals(IncludeDefaultResolver, "false", StringComparison.OrdinalIgnoreCase) ?
                 new List<SdkResolver> { new DefaultSdkResolver() }
                 : new List<SdkResolver>();
+
+            // Fold in any resolvers the host registered in-process via SdkResolver.Register. These run on
+            // this reflection-free path (no Assembly.LoadFrom), so they work in a trimmed / Native AOT host
+            // and never reach the dynamic-loading failure (MSB4282). They are ordered with the built-in
+            // resolver by Priority, matching how disk-discovered resolvers are ordered.
+            IReadOnlyList<SdkResolver> registeredResolvers = SdkResolver.RegisteredResolvers;
+            if (registeredResolvers.Count > 0)
+            {
+                resolvers.AddRange(registeredResolvers);
+                resolvers.Sort((left, right) => left.Priority.CompareTo(right.Priority));
+            }
+
             return resolvers;
         }
 
+        [RequiresUnreferencedCode("Loads SDK resolver assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         internal virtual IReadOnlyList<SdkResolver> LoadAllResolvers(ElementLocation location)
         {
             MSBuildEventSource.Log.SdkResolverLoadAllResolversStart();
@@ -220,12 +234,14 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return true;
         }
 
+        [RequiresUnreferencedCode("Reflects over an SDK resolver assembly's exported types, which is incompatible with trimming.")]
         protected virtual IEnumerable<Type> GetResolverTypes(Assembly assembly)
         {
             return assembly.ExportedTypes
                 .Where(t => t.IsClass && t.IsPublic && !t.IsAbstract && typeof(SdkResolver).IsAssignableFrom(t));
         }
 
+        [RequiresUnreferencedCode("Loads an SDK resolver assembly from disk, which is incompatible with trimming.")]
         protected virtual Assembly LoadResolverAssembly(string resolverPath)
         {
 #if !FEATURE_ASSEMBLYLOADCONTEXT
@@ -276,6 +292,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
         }
 #endif
 
+        [RequiresUnreferencedCode("Loads SDK resolver assemblies from disk and reflects over their types, which is incompatible with trimming.")]
         protected internal virtual IReadOnlyList<SdkResolver> LoadResolversFromManifest(SdkResolverManifest manifest, ElementLocation location)
         {
             MSBuildEventSource.Log.SdkResolverLoadResolversStart();
@@ -291,6 +308,7 @@ namespace Microsoft.Build.BackEnd.SdkResolution
             return resolvers;
         }
 
+        [RequiresUnreferencedCode("Loads an SDK resolver assembly from disk and instantiates its resolver types, which is incompatible with trimming.")]
         protected virtual void LoadResolvers(string resolverPath, ElementLocation location, List<SdkResolver> resolvers)
         {
             Assembly assembly;

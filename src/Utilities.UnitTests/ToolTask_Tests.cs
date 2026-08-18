@@ -554,7 +554,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData(false, "InvalidLevel")]
         public void FailToEnumerateStandardLoggingImportance(bool isErr, string invalidLevel)
         {
-            using (MyTool t = new MyTool(AssemblyResources.SharedResources))
+            using (MyTool t = new MyTool())
             {
                 MockEngine3 engine = new MockEngine3();
                 t.BuildEngine = engine;
@@ -572,6 +572,7 @@ namespace Microsoft.Build.UnitTests
                 t.Execute().ShouldBeFalse();
                 t.ExitCode.ShouldBe(0);
                 engine.Errors.ShouldBe(1);
+                engine.AssertLogContains("MSB3511");
                 engine.AssertLogContains(invalidLevel);
             }
         }

@@ -2,12 +2,6 @@ trigger:
 - exp/*
 - perf/*
 
-# If defined here, these values are not overrideable
-# Once they exist, we should define these as "runtime parameters"
-# https://github.com/Microsoft/azure-pipelines-yaml/pull/129
-# variables:
-#   SkipApplyOptimizationData: false
-
 parameters:
 - name: OptProfDropName
   displayName: Optional OptProfDrop Override

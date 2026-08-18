@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="de" original="../Strings.resx">
     <body>
@@ -140,6 +140,11 @@
         <source>Writing is not supported.</source>
         <target state="translated">Schreibvorgänge werden nicht unterstützt.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="BuildCheckCustomCheckNotSupportedInTrimmedHost">
+        <source>MSB4284: The custom build check "{0}" could not be loaded because this MSBuild host has custom plugin probing disabled, for example in a trimmed or Native AOT build, and cannot load check assemblies by reflection. Build with a JIT-based MSBuild to run custom checks.</source>
+        <target state="translated">MSB4284: Die benutzerdefinierte Buildprüfung „{0}“ konnte nicht geladen werden, da für diesen MSBuild-Host die Prüfung benutzerdefinierter Plug-Ins deaktiviert ist, zum Beispiel in einem gekürzten oder nativen AOT-Build, und Prüfasemblies nicht per Reflexion geladen werden können. Verwenden Sie ein JIT-basiertes MSBuild, um benutzerdefinierte Prüfungen auszuführen.</target>
+        <note>{StrBegin="MSB4284: "}{0} is the path to the custom build check assembly.</note>
       </trans-unit>
       <trans-unit id="BuildCheckEnabled">
         <source>The BuildCheck is enabled for this build.</source>
@@ -283,7 +288,7 @@
       </trans-unit>
       <trans-unit id="BuildFinished">
         <source>Build {0} in {1}s</source>
-        <target state="translated">Erstellen von {0} in {1}s</target>
+        <target state="translated">Build {0} in {1} Sek.</target>
         <note>
       Overall build summary
       {0}: BuildResult_X (below)
@@ -423,34 +428,34 @@
       </trans-unit>
       <trans-unit id="CoordinatorFailedToConnect">
         <source>Failed to connect to the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to connect to the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Verbindung mit dem Buildkoordinator konnte nicht hergestellt werden. Der Build wird ohne Knotenkoordination fortgesetzt.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToLaunch">
         <source>Failed to launch the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to launch the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Der Buildkoordinator konnte nicht gestartet werden. Der Build wird ohne Knotenkoordination fortgesetzt.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorFailedToNegotiate">
         <source>Failed to negotiate with the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Failed to negotiate with the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Die Aushandlung mit dem Buildkoordinator ist fehlgeschlagen. Der Build wird ohne Knotenkoordination fortgesetzt.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorLaunchTimedOut">
         <source>Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</source>
-        <target state="new">Timed out waiting to launch the build coordinator. The build will proceed without node coordination.</target>
+        <target state="translated">Zeitüberschreitung beim Warten auf den Start des Buildkoordinators. Der Build wird ohne Knotenkoordination fortgesetzt.</target>
         <note />
       </trans-unit>
       <trans-unit id="CoordinatorNodeGrantReceived">
         <source>Coordinator granted {0} node(s) for this build.</source>
-        <target state="new">Coordinator granted {0} node(s) for this build.</target>
+        <target state="translated">Der Koordinator hat für diesen Build {0} Knoten zugewiesen.</target>
         <note>
       LOCALIZATION: {0} is the number of nodes granted by the coordinator.
     </note>
       </trans-unit>
       <trans-unit id="CoordinatorWaitingForNodes">
         <source>Waiting for coordinator to grant build resources...</source>
-        <target state="new">Waiting for coordinator to grant build resources...</target>
+        <target state="translated">Es wird darauf gewartet, dass der Koordinator Buildressourcen bereitstellt...</target>
         <note />
       </trans-unit>
       <trans-unit id="CustomCheckAssemblyNotExist">
@@ -689,6 +694,11 @@
       LOCALIZATION:  Do not localize the following words: ProjectInstanceFactoryFunc.
     </note>
       </trans-unit>
+      <trans-unit id="OM_ConfigurationFileToolsetsNotSupported">
+        <source>Reading toolset definitions from the application configuration file (ToolsetDefinitionLocations.ConfigurationFile) is not supported in this trimmed or Native AOT host. Remove ConfigurationFile from the requested toolset locations, or run a JIT-based MSBuild.</source>
+        <target state="translated">Das Lesen von Toolsetdefinitionen aus der Anwendungskonfigurationsdatei (ToolsetDefinitionLocations.ConfigurationFile) wird in diesem gekürzten oder nativen AOT-Host nicht unterstützt. Entfernen Sie ConfigurationFile aus den angeforderten Toolset-Speicherorten, oder führen Sie ein JIT-basiertes MSBuild aus.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="OM_MatchOnMetadataIsRestrictedToReferencedItems">
         <source>Only item types may be referenced when removing with MatchOnMetadata.</source>
         <target state="translated">Beim Entfernen mit "MatchOnMetadata" können nur Elementtypen referenziert werden.</target>
@@ -708,6 +718,21 @@
         <source>MatchOnMetadata cannot be used outside of a &lt;Target&gt;.</source>
         <target state="translated">MatchOnMetadata kann nicht außerhalb eines &lt;Ziels&gt; verwendet werden.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="OM_PartialEvaluationCannotBuild">
+        <source>The project instance cannot be built because it was only partially evaluated (evaluation stopped after the "{0}" stage). A full evaluation is required to build a project.</source>
+        <target state="translated">Die Projektinstanz kann nicht erstellt werden, da sie nur teilweise ausgewertet wurde (die Auswertung wurde nach der Phase „{0}“ beendet). Für das Erstellen eines Projekts ist eine vollständige Auswertung erforderlich.</target>
+        <note>UE: This message is shown when the user tries to build a ProjectInstance produced by a partial evaluation. {0} is the ProjectEvaluationStage the instance was evaluated to.</note>
+      </trans-unit>
+      <trans-unit id="OM_PartialEvaluationMemberUnavailable">
+        <source>The "{0}" member is not available because the project was only partially evaluated (evaluation stopped after the "{1}" stage). Re-evaluate the project with at least the "{2}" evaluation stage to access this member.</source>
+        <target state="translated">Das Mitglied „{0}“ ist nicht verfügbar, da das Projekt nur teilweise ausgewertet wurde (die Auswertung wurde nach der Phase „{1}“ beendet). Werten Sie das Projekt mit mindestens der Auswertungsphase „{2}“ erneut aus, um auf dieses Mitglied zuzugreifen.</target>
+        <note>UE: This message is shown when the user reads a member (for example items or targets) that a partial evaluation did not compute. {0} is the member name, {1} is the ProjectEvaluationStage the project was evaluated to, {2} is the minimum ProjectEvaluationStage required to access the member.</note>
+      </trans-unit>
+      <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
+        <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
+        <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
+        <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
         <source>Method {0} cannot be called with a collection containing null or empty target names.</source>
@@ -908,6 +933,16 @@
         <target state="translated">MSB4274: Das Deaktivieren des In-Process-Knotens führt zu Leistungseinbußen bei der Verwendung von Projektcache-Plug-Ins, die Proxybuildanforderungen ausgeben.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ReflectiveLoggerLoadingNotSupported">
+        <source>MSB4285: A logger could not be created from its assembly and class name because loading loggers by reflection is not supported in this trimmed or Native AOT host. Provide the logger to the engine as a constructed ILogger instance, or build with a JIT-based MSBuild.</source>
+        <target state="translated">MSB4285: Ein Protokollierer konnte nicht aus Assembly- und Klassennamen erstellt werden, da das Laden von Protokollierern per Reflexion in diesem gekürzten oder nativen AOT-Host nicht unterstützt wird. Stellen Sie der Engine den Protokollierer als erstellte ILogger-Instanz bereit, oder verwenden Sie ein JIT-basiertes MSBuild.</target>
+        <note>{StrBegin="MSB4285: "}</note>
+      </trans-unit>
+      <trans-unit id="ReflectiveTaskExecutionNotSupported">
+        <source>MSB4283: The "{0}" task could not be run because executing tasks requires loading task assemblies and types by reflection, which is not supported in this trimmed or Native AOT host. Build with a JIT-based MSBuild to run tasks.</source>
+        <target state="translated">MSB4283: Die Aufgabe „{0}“ konnte nicht ausgeführt werden, da für das Ausführen von Aufgaben das Laden von Taskassemblys und -typen per Reflexion erforderlich ist, was in diesem gekürzten oder nativen AOT-Host nicht unterstützt wird. Erstellen Sie mit einem JIT-basierten MSBuild, um Aufgaben auszuführen.</target>
+        <note>{StrBegin="MSB4283: "}{0} is the task name.</note>
+      </trans-unit>
       <trans-unit id="ReportFileAccessesX64Only">
         <source>Reporting file accesses is only currently supported using the x64 flavor of MSBuild.</source>
         <target state="translated">Das Melden von Dateizugriffen wird derzeit nur mit der x64-Variante von MSBuild unterstützt.</target>
@@ -923,7 +958,7 @@
       </trans-unit>
       <trans-unit id="RestoreCompleteWithMessage">
         <source>Restore {0} in {1}s</source>
-        <target state="translated">Wiederherstellen von {0} in {1}s</target>
+        <target state="translated">Wiederherstellung {0} in {1} Sek.</target>
         <note>
       Restore summary when finished with warning or error
       {0}: BuildResult_X (below)
@@ -988,6 +1023,11 @@ Fehler: {3}</target>
         <source>An SDK set the environment variable "{0}" to "{1}", overriding the value "{2}" inherited from the process.</source>
         <target state="translated">Ein SDK legte die Umgebungsvariable „{0}“ auf „{1}“ fest und überschrieb den Wert „{2}“, der vom Prozess geerbt wurde.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="SdkResolverDynamicLoadingNotSupported">
+        <source>MSB4282: The SDK "{0}" could not be resolved because it requires an SDK resolver ("{1}") that must be loaded dynamically, which is not supported in this trimmed or Native AOT host. SDKs available in the SDK installation are supported; build with a JIT-based MSBuild to use NuGet, workload, or custom SDK resolvers.</source>
+        <target state="translated">MSB4282: Das SDK „{0}“ konnte nicht aufgelöst werden, da es einen SDK-Resolver („{1}“) erfordert, der dynamisch geladen werden muss. Dies wird in diesem gekürzten oder nativen AOT-Host nicht unterstützt. Unterstützt werden nur SDKs, die in der SDK-Installation verfügbar sind. Verwenden Sie ein JIT-basiertes MSBuild, um NuGet-, Workload- oder benutzerdefinierte SDK-Resolver zu verwenden.</target>
+        <note>{StrBegin="MSB4282: "}{0} is the SDK name; {1} is the SDK resolver manifest display name.</note>
       </trans-unit>
       <trans-unit id="SingleResolverFailedToResolveSDK">
         <source>SDK '{0}' could not be resolved by the SDK resolver '{1}'. {2}</source>
@@ -3278,6 +3318,142 @@ Auslastung:          {0} Durchschnittliche Auslastung: {1:###.0}</target>
         <source>MSB4247: Could not load SDK Resolver. A manifest file exists, but the path to the SDK Resolver DLL file could not be found. Manifest file path '{0}'. SDK resolver path: {1}</source>
         <target state="translated">MSB4247: Der SDK-Resolver konnte nicht geladen werden. Eine Manifestdatei ist vorhanden, aber der Pfad zur SDK-Resolver-DLL-Datei wurde nicht gefunden. Manifestdateipfad: {0}. SDK-Resolverpfad: {1}</target>
         <note>{StrBegin="MSB4247: "}</note>
+      </trans-unit>
+      <trans-unit id="BuildAborted">
+        <source>MSB4188: Build was canceled.</source>
+        <target state="translated">MSB4188: Der Buildvorgang wurde abgebrochen.</target>
+        <note>{StrBegin="MSB4188: "} Error when the build stops suddenly for some reason. For example, because a child node died.</note>
+      </trans-unit>
+      <trans-unit id="DeprecatedEventSerialization">
+        <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
+        <target state="translated">Der benutzerdefinierte Ereignistyp '{0}' wird nicht unterstützt, weil alle benutzerdefinierten Ereignistypen veraltet waren. Verwenden Sie stattdessen Extended*EventArgs. Weitere Informationen: https://aka.ms/msbuild/eventargs</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="InvalidProjectFile">
+        <source>MSB4025: The project file could not be loaded. {0}</source>
+        <target state="translated">MSB4025: Die Projektdatei konnte nicht geladen werden. {0}</target>
+        <note>{StrBegin="MSB4025: "}UE: This message is shown when the project file given to the engine cannot be loaded because the filename/path is
+    invalid, or due to lack of permissions, or incorrect XML. The project filename is not part of the message because it is
+    provided separately to loggers.
+    LOCALIZATION: {0} is a localized message from the CLR/FX explaining why the project is invalid.</note>
+      </trans-unit>
+      <trans-unit id="InvalidVerbosity">
+        <source>MSB4103: "{0}" is not a valid logger verbosity level.</source>
+        <target state="translated">MSB4103: "{0}" ist kein gültiger Ausführlichkeitsgrad für die Protokollierung.</target>
+        <note>{StrBegin="MSB4103: "}</note>
+      </trans-unit>
+      <trans-unit id="OM_NotSupportedReadOnlyCollection">
+        <source>This collection is read-only.</source>
+        <target state="translated">Diese Sammlung ist schreibgeschützt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="ProjectFileIsMalformed">
+        <source>MSB5019: The project file is malformed: "{0}". {1}</source>
+        <target state="translated">MSB5019: Die Projektdatei ist falsch formatiert: "{0}". {1}</target>
+        <note>{StrBegin="MSB5019: "}</note>
+      </trans-unit>
+      <trans-unit id="ProjectFileCouldNotBeLoaded">
+        <source>MSB5020: Could not load the project file: "{0}". {1}</source>
+        <target state="translated">MSB5020: Die Projektdatei konnte nicht geladen werden: "{0}". {1}</target>
+        <note>{StrBegin="MSB5020: "}</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterFilterContainsProjectNotInSolution">
+        <source>MSB5028: Solution filter file at "{0}" includes project "{1}" that is not in the solution file at "{2}".</source>
+        <target state="translated">MSB5028: Die Projektmappenfilter-Datei unter "{0}" enthält das Projekt "{1}", das in der Projektmappendatei unter "{2}" nicht enthalten ist.</target>
+        <note>{StrBegin="MSB5028: "}UE: The project filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterJsonParsingError">
+        <source>MSB5025: Json in solution filter file "{0}" is incorrectly formatted.</source>
+        <target state="translated">MSB5025: JSON in der Projektmappenfilter-Datei "{0}" ist falsch formatiert.</target>
+        <note>{StrBegin="MSB5025: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionFilterMissingSolutionError">
+        <source>MSB5026: The solution filter file at "{0}" specifies there will be a solution file at "{1}", but that file does not exist.</source>
+        <target state="translated">MSB5026: Die Projektmappenfilter-Datei unter "{0}" gibt an, dass eine Projektmappendatei unter "{1}" vorhanden ist. Diese Datei ist jedoch nicht vorhanden.</target>
+        <note>{StrBegin="MSB5026: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseDuplicateProject">
+        <source>MSB5004: The solution file has two projects named "{0}".</source>
+        <target state="translated">MSB5004: Die Projektmappendatei enthält zwei Projekte mit dem Namen "{0}".</target>
+        <note>{StrBegin="MSB5004: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectFileNameCharacters">
+        <source>MSB5005: Error parsing project section for project "{0}". The project file name "{1}" contains invalid characters.</source>
+        <target state="translated">MSB5005: Fehler beim Analysieren des Projektabschnitts für das Projekt "{0}". Der Projektdateiname "{1}" enthält ungültige Zeichen.</target>
+        <note>{StrBegin="MSB5005: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectFileNameEmpty">
+        <source>MSB5006: Error parsing project section for project "{0}". The project file name is empty.</source>
+        <target state="translated">MSB5006: Fehler beim Analysieren des Projektabschnitts für das Projekt "{0}". Der Projektdateiname ist leer.</target>
+        <note>{StrBegin="MSB5006: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidProjectSolutionConfigurationEntry">
+        <source>MSB5007: Error parsing the project configuration section in solution file. The entry "{0}" is invalid.</source>
+        <target state="translated">MSB5007: Fehler beim Analysieren des Projektkonfigurationsabschnitts in der Projektmappendatei. Der Eintrag "{0}" ist ungültig.</target>
+        <note>{StrBegin="MSB5007: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseInvalidSolutionConfigurationEntry">
+        <source>MSB5008: Error parsing the solution configuration section in solution file. The entry "{0}" is invalid.</source>
+        <target state="translated">MSB5008: Fehler beim Analysieren des Projektmappen-Konfigurationsabschnitts in der Projektmappendatei. Der Eintrag "{0}" ist ungültig.</target>
+        <note>{StrBegin="MSB5008: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectError">
+        <source>MSB5009: Error parsing the nested project section in solution file.</source>
+        <target state="translated">MSB5009: Fehler beim Analysieren des geschachtelten Projektabschnitts in der Projektmappendatei.</target>
+        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectErrorWithNameAndGuid">
+        <source>MSB5009: Error parsing the project "{0}" section with GUID: "{1}". It is nested under "{2}" but that project is not found in the solution.</source>
+        <target state="translated">MSB5009: Fehler beim Analysieren des Projektabschnitts "{0}". GUID: {1}. Er ist unter "{2}" geschachtelt, aber dieses Projekt wurde in der Projektmappe nicht gefunden.</target>
+        <note>{StrBegin="MSB5009: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNestedProjectUndefinedError">
+        <source>MSB5023: Error parsing the nested project section in solution file. A project with the GUID "{0}" is listed as being nested under project "{1}", but does not exist in the solution.</source>
+        <target state="translated">MSB5023: Fehler beim Analysieren des geschachtelten Projektabschnitts in der Projektmappendatei. Ein Projekt mit GUID "{0}" ist als unter Projekt "{1}" geschachtelt aufgeführt, in der Projektmappe jedoch nicht vorhanden.</target>
+        <note>{StrBegin="MSB5023: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseNoHeaderError">
+        <source>MSB5010: No file format header found.</source>
+        <target state="translated">MSB5010: Es wurde kein Dateiformatheader gefunden.</target>
+        <note>{StrBegin="MSB5010: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectDepGuidError">
+        <source>MSB5011: Parent project GUID not found in "{0}" project dependency section.</source>
+        <target state="translated">MSB5011: Die GUID des übergeordneten Projekts wurde im Projektabhängigkeitsabschnitt "{0}" nicht gefunden.</target>
+        <note>{StrBegin="MSB5011: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectEofError">
+        <source>MSB5012: Unexpected end-of-file reached inside "{0}" project section.</source>
+        <target state="translated">MSB5012: Unerwartetes Dateiende innerhalb des Projektabschnitts "{0}" erreicht.</target>
+        <note>{StrBegin="MSB5012: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseProjectError">
+        <source>MSB5013: Error parsing a project section.</source>
+        <target state="translated">MSB5013: Fehler beim Analysieren eines Projektabschnitts.</target>
+        <note>{StrBegin="MSB5013: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseVersionMismatchError">
+        <source>MSB5014: File format version is not recognized.  MSBuild can only read solution files between versions {0}.0 and {1}.0, inclusive.</source>
+        <target state="translated">MSB5014: Die Dateiformatversion wird nicht erkannt.  MSBuild kann nur Projektmappendateien der Versionen {0}.0 bis einschließlich {1}.0 lesen.</target>
+        <note>{StrBegin="MSB5014: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SolutionParseWebProjectPropertiesError">
+        <source>MSB5015: The properties could not be read from the WebsiteProperties section of the "{0}" project.</source>
+        <target state="translated">MSB5015: Die Eigenschaften konnten nicht aus dem Abschnitt "WebsiteProperties" des Projekts "{0}" gelesen werden.</target>
+        <note>{StrBegin="MSB5015: "}UE: The solution filename is provided separately to loggers.</note>
+      </trans-unit>
+      <trans-unit id="SubCategoryForSolutionParsingErrors">
+        <source>Solution file</source>
+        <target state="translated">Projektmappendatei</target>
+        <note>UE: this fragment is used to describe errors found while parsing solution files. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from solution parsing would look like this:
+      "MSBUILD : Solution file error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.</note>
+      </trans-unit>
+      <trans-unit id="UnrecognizedSolutionComment">
+        <source>Unrecognized solution version "{0}", attempting to continue.</source>
+        <target state="translated">Unbekannte Projektmappenversion {0}. Es wird versucht, den Vorgang fortzusetzen.</target>
+        <note />
       </trans-unit>
     </body>
   </file>

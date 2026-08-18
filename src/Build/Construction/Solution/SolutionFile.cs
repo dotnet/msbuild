@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -1106,7 +1106,7 @@ namespace Microsoft.Build.Construction
                 else if (line.StartsWith("Project(", StringComparison.Ordinal))
                 {
                     // Another Project spotted instead of EndProject for the current one - solution file is malformed
-                    string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out _, out _, "Shared.InvalidProjectFile",
+                    string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out _, out _, "ProjectFileIsMalformed",
                         _solutionFile, proj.ProjectName);
                     SolutionParserWarnings.Add(warning);
 
@@ -1227,7 +1227,7 @@ namespace Microsoft.Build.Construction
             catch (SecurityException e)
             {
                 // Log a warning
-                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);
@@ -1236,7 +1236,7 @@ namespace Microsoft.Build.Construction
             catch (NotSupportedException e)
             {
                 // Log a warning
-                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);
@@ -1245,7 +1245,7 @@ namespace Microsoft.Build.Construction
             catch (IOException e)
             {
                 // Log a warning
-                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);
@@ -1254,7 +1254,7 @@ namespace Microsoft.Build.Construction
             catch (UnauthorizedAccessException e)
             {
                 // Log a warning
-                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.ProjectFileCouldNotBeLoaded",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "ProjectFileCouldNotBeLoaded",
                     etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);
@@ -1263,7 +1263,7 @@ namespace Microsoft.Build.Construction
             catch (XmlException e)
             {
                 // Log a warning
-                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "Shared.InvalidProjectFile",
+                string warning = ResourceUtilities.FormatResourceStringStripCodeAndKeyword(out string errorCode, out _, "ProjectFileIsMalformed",
                    etpProj.RelativePath, e.Message);
                 SolutionParserWarnings.Add(warning);
                 SolutionParserErrorCodes.Add(errorCode);

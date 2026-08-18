@@ -4931,6 +4931,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
       <Output TaskParameter="DestinationFiles" ItemName="MainAssembly"/>
       <Output TaskParameter="DestinationFiles" ItemName="FileWrites"/>
+      <Output TaskParameter="WroteAtLeastOneFile" PropertyName="_WroteMainAssemblyToOutputDirectory"/>
 
     </Copy>
 
@@ -4947,6 +4948,25 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </CopyRefAssembly>
 
     <Message Importance="High" Text="$(MSBuildProjectName) -&gt; @(MainAssembly->'%(FullPath)')" Condition="'$(CopyBuildOutputToOutputDirectory)' == 'true' and '$(SkipCopyBuildProduct)'!='true'" />
+
+    <!--
+      Advance the marker considered by projects that reference this one during their up-to-date
+      checks. It must move forward when either:
+        * this project produces reference assemblies and its implementation assembly changed on
+          this build (referencing projects may need to copy the updated implementation), or
+        * copy-local (possibly transitive) references were actually copied on this build, as
+          captured by _CopyFilesMarkedCopyLocal in $(_CopyLocalReferencesCopiedInThisBuild).
+      Both signals are OR'd into this single Touch so the marker is written at most once per
+      build. _CopyFilesMarkedCopyLocal is a DependsOnTargets dependency of this target, so its
+      capture always runs before this Touch.
+    -->
+    <Touch Files="@(CopyUpToDateMarker)"
+      AlwaysCreate="true"
+      Condition="('$(ProduceReferenceAssembly)' == 'true' and '$(_WroteMainAssemblyToOutputDirectory)' == 'true') or '$(_CopyLocalReferencesCopiedInThisBuild)' == 'true'" />
+
+    <ItemGroup Condition="'$(ProduceReferenceAssembly)' == 'true'">
+      <FileWrites Include="@(CopyUpToDateMarker)" />
+    </ItemGroup>
 
     <!-- Copy the additional modules. -->
     <Copy
@@ -5111,13 +5131,13 @@ Copyright (C) Microsoft Corporation. All rights reserved.
 
     </Copy>
 
-    <!-- If this project produces reference assemblies *and* copied (possibly transitive)
-         references on this build, subsequent builds of projects that depend on it must
-         not be considered up to date, so touch this marker file that is considered an
-         input to projects that reference this one. -->
-    <Touch Files="@(CopyUpToDateMarker)"
-      AlwaysCreate="true"
-      Condition="'@(ReferencesCopiedInThisBuild)' != '' and '$(WroteAtLeastOneFile)' == 'true'" />
+    <!-- Record whether copy-local (possibly transitive) references were actually copied on this
+         build. When they were, projects that depend on this one must not be considered up to date.
+         The marker file that carries that signal is touched once, later, in CopyFilesToOutputDirectory
+         (which depends on this target), so the same file isn't written twice in a normal build. -->
+    <PropertyGroup>
+      <_CopyLocalReferencesCopiedInThisBuild Condition="'@(ReferencesCopiedInThisBuild)' != '' and '$(WroteAtLeastOneFile)' == 'true'">true</_CopyLocalReferencesCopiedInThisBuild>
+    </PropertyGroup>
 
     <ItemGroup>
       <FileWrites Include="@(CopyUpToDateMarker)" />

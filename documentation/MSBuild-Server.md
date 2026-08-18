@@ -11,6 +11,20 @@ To re-enable MSBuild Server, remove the variable or set its value to `0`.
 
 When a build is multithreaded (`/mt`), the server node is launched with [Server GC](https://learn.microsoft.com/dotnet/standard/garbage-collection/workstation-server-gc) enabled. Under `/mt` the server runs all project work on threads in this single process, so Server GC's higher throughput is beneficial; without `/mt` the server only orchestrates and delegates project work to separate worker nodes, so it keeps the default Workstation GC. GC mode is fixed at CLR startup, so it is set via the `DOTNET_gcServer` environment variable in the server's launch environment (decided from the launching invocation's command line). An explicit user-set `DOTNET_gcServer` is honored (e.g. set `DOTNET_gcServer=0` to keep Workstation GC in a memory-constrained environment). This is scoped to the server process only: sidecar TaskHosts and worker nodes keep the default Workstation GC.
 
+## Node reuse and server lifetime
+
+MSBuild Server is a form of node reuse: the whole point of the server is to stay resident between builds so later builds reuse its warmed-up process and caches. Consequently:
+
+- **Node reuse on (the default).** The server is eligible and, after a build, returns to listening so the next compatible client reuses it.
+- **Node reuse off (`-nodeReuse:false` / `-nr:false`) without `/mt`.** Keeping a process resident contradicts the no-reuse intent, so the build does not use the server at all (it runs entirely in the launching process). See `ServerShouldNotRunWhenNodeReuseEqualsFalse`.
+- **Node reuse off *with* `/mt`.** A `/mt` build needs the server for a different reason: multithreaded project execution runs inside the server process, which is where Server GC is applied (see [Garbage collection](#garbage-collection)). So a `/mt` build still engages the server even when node reuse is off - but it must honor the no-reuse request by **not** leaving the server resident afterwards. This is a *short-lived* server: a fresh process that tears itself down after the build.
+
+The client makes a single, response-file-aware determination and sets the `ShutdownAfterBuild` flag on the `ServerNodeBuildCommand` packet if server needs shutdown.
+
+## Diagnostics: server lifecycle messages
+
+Every build where MSBuild Server is *requested* now records what happened to the server — whether it started a new one, reused a running one, or ran the build in-process instead (and why). This is emitted as a dedicated, structured `MSBuildServerLifecycleEventArgs` (its own binary-log record kind), so it appears in binary logs and at diagnostic verbosity and server behavior is easy to see when troubleshooting. Ordinary builds that never request the server record nothing.
+
 ## Communication protocol
 
 The server node uses same IPC approach as current worker nodes - named pipes. This solution allows to reuse existing code. When process starts, pipe with deterministic name is opened and waiting for commands. Client has following worfklow:

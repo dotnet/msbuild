@@ -4,6 +4,9 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
@@ -101,13 +104,19 @@ namespace Microsoft.Build.Tasks
         /// Executes the XslTransform task.
         /// </summary>
         /// <returns>true if transformation succeeds.</returns>
-        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
-            Justification = "The XslTransformation task compiles the user-supplied stylesheet with XslCompiledTransform, which generates IL at runtime and is inherently incompatible with Native AOT.")]
         public override bool Execute()
         {
             XmlInput xmlinput;
             XsltInput xsltinput;
             ArgumentNullException.ThrowIfNull(_outputPaths, "OutputPath");
+
+#if NET
+            if (!RuntimeFeature.IsDynamicCodeSupported)
+            {
+                Log.LogErrorWithCodeFromResources("XslTransform.XsltLoadError", "Dynamic code generation is not supported in this runtime environment.");
+                return false;
+            }
+#endif
 
             // Load XmlInput, XsltInput parameters
             try
