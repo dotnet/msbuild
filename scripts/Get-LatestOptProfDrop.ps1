@@ -32,7 +32,7 @@
 
 .PARAMETER MaximumRunsToInspect
     How many recent successful runs to walk back through while looking for a drop with clean
-    provenance. Default: 10.
+    provenance. Must be between 1 and 100. Default: 10.
 
 .PARAMETER AllowDegradedProvenance
     Accept the newest drop even if the run that produced it did not collect a full set of profiles.
@@ -47,6 +47,7 @@
 param(
     [string]$SourceBranch = 'main',
     [int]$OptProfPipelineId = 17389,
+    [ValidateRange(1, 100)]
     [int]$MaximumRunsToInspect = 10,
     [switch]$AllowDegradedProvenance
 )
@@ -63,8 +64,8 @@ function Write-Info($msg) { Write-Host $msg -ForegroundColor Cyan }
 #   OptimizationData/DotNet-msbuild-Trusted/main/<componentBuildRunName>/<optProfBuildId>/<stageAttempt>
 # so the producing run id is the second-to-last segment.
 function Get-ProducingBuildId([string]$dropPath) {
-    $segments = $dropPath.Split('/')
-    if ($segments.Length -lt 2) { return $null }
+    $segments = $dropPath.Trim().Split('/', [System.StringSplitOptions]::RemoveEmptyEntries)
+    if ($segments.Length -lt 6) { return $null }
 
     $parsed = 0
     if ([int]::TryParse($segments[$segments.Length - 2], [ref]$parsed)) { return $parsed }
@@ -74,9 +75,16 @@ function Get-ProducingBuildId([string]$dropPath) {
 # Returns a description of why the producing run is unfit to seed a release branch, or $null if it
 # is clean. The finalization phase publishes a drop even when the profiling tests failed, so the
 # run's own result is not enough -- the test steps have to be green too.
-function Get-ProvenanceIssue([int]$buildId) {
-    $timeline = Invoke-RestMethod -Uri "$DevDivOrg/_apis/build/builds/$buildId/timeline?api-version=7.0" -Headers $headers
+function Get-ProvenanceIssue([int]$buildId, [hashtable]$requestHeaders) {
+    try {
+        $timeline = Invoke-RestMethod -Uri "$DevDivOrg/_apis/build/builds/$buildId/timeline?api-version=7.0" -Headers $requestHeaders
+    }
+    catch {
+        return "could not inspect producing run ${buildId}: $($_.Exception.Message)"
+    }
 
+    # These exact names are a contract with the MSBuild-OptProf pipeline. A missing or renamed step
+    # intentionally rejects the drop rather than silently weakening provenance validation.
     foreach ($stepName in @('Run Tests', 'Validate Test Results')) {
         $record = $timeline.records | Where-Object { $_.name -eq $stepName } | Select-Object -First 1
         if (-not $record) { return "producing run $buildId has no '$stepName' step" }
@@ -101,14 +109,28 @@ foreach ($run in $runs) {
     Write-Info "Inspecting MSBuild-OptProf run $($run.id) ($($run.buildNumber)), finished $($run.finishTime)"
 
     # Find the 'Set PreviousOptimizationInputsDropName' step and read its log.
-    $tl = Invoke-RestMethod -Uri "$DevDivOrg/_apis/build/builds/$($run.id)/timeline?api-version=7.0" -Headers $headers
+    try {
+        $tl = Invoke-RestMethod -Uri "$DevDivOrg/_apis/build/builds/$($run.id)/timeline?api-version=7.0" -Headers $headers
+    }
+    catch {
+        $rejected += "  run $($run.id) ($($run.buildNumber)): could not read timeline: $($_.Exception.Message)"
+        continue
+    }
+
     $step = $tl.records | Where-Object { $_.name -like '*PreviousOptimizationInputsDropName*' } | Select-Object -First 1
     if (-not $step -or -not $step.log -or -not $step.log.id) {
         $rejected += "  run $($run.id) ($($run.buildNumber)): no 'Set PreviousOptimizationInputsDropName' step with a log"
         continue
     }
 
-    $log = Invoke-RestMethod -Uri "$DevDivOrg/_apis/build/builds/$($run.id)/logs/$($step.log.id)?api-version=7.0" -Headers $headers
+    try {
+        $log = Invoke-RestMethod -Uri "$DevDivOrg/_apis/build/builds/$($run.id)/logs/$($step.log.id)?api-version=7.0" -Headers $headers
+    }
+    catch {
+        $rejected += "  run $($run.id) ($($run.buildNumber)): could not read drop-selection log: $($_.Exception.Message)"
+        continue
+    }
+
     $match = [regex]::Match(($log -join "`n"), 'PreviousOptimizationInputsDropName:\s*(OptimizationData/\S+)')
     if (-not $match.Success) {
         $rejected += "  run $($run.id) ($($run.buildNumber)): no OptimizationData drop path in the step log"
@@ -122,7 +144,7 @@ foreach ($run in $runs) {
         continue
     }
 
-    $issue = Get-ProvenanceIssue $producingBuildId
+    $issue = Get-ProvenanceIssue $producingBuildId $headers
     if ($issue) {
         if (-not $AllowDegradedProvenance) {
             Write-Warning "Skipping '$drop': $issue."
