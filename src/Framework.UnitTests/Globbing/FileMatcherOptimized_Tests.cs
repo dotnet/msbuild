@@ -918,6 +918,32 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
     }
 
     [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void AncestorGlobstarExcludeMatchesIncludeFixedDirectory(bool useEntryCache)
+    {
+        TransientTestFolder root = _environment.CreateFolder();
+        string outputDirectory = Path.Combine(root.Path, "bin", "Debug", "net9.0");
+        Directory.CreateDirectory(outputDirectory);
+        File.WriteAllText(Path.Combine(outputDirectory, "x.cs"), string.Empty);
+        string include = ToPlatformPath("bin/Debug/**/*.cs");
+        List<string> excludes = [ToPlatformPath("**/bin/Debug/**")];
+        FileMatcher legacy = new(
+            FileSystems.Default,
+            useEntryCache ? new ConcurrentDictionary<string, IReadOnlyList<string>>() : null,
+            FileMatcherImplementation.Legacy);
+        FileMatcher optimized = new(
+            FileSystems.Default,
+            useEntryCache ? new ConcurrentDictionary<string, IReadOnlyList<string>>() : null,
+            FileMatcherImplementation.Optimized);
+
+        var optimizedResult = optimized.GetFiles(root.Path, include, excludes);
+
+        AssertEquivalent(legacy.GetFiles(root.Path, include, excludes), optimizedResult);
+        optimizedResult.FileList.ShouldBeEmpty();
+    }
+
+    [Theory]
     [InlineData("src/*/*.cs", false)]
     [InlineData("src/*/*.cs", true)]
     [InlineData("src/F*/**/*.cs", false)]
@@ -1105,14 +1131,15 @@ public sealed class FileMatcherOptimized_Tests : IDisposable
     }
 
     [Fact]
-    public void LegacyCultureEscapeHatchReadsCurrentEnvironment()
+    public void LegacyCultureEscapeHatchIsCapturedByTraits()
     {
         _environment.SetEnvironmentVariable("MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS", null);
         Traits traits = new();
         traits.UseLegacyCultureSensitiveFileGlobs.ShouldBeFalse();
 
         _environment.SetEnvironmentVariable("MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS", "1");
-        traits.UseLegacyCultureSensitiveFileGlobs.ShouldBeTrue();
+        traits.UseLegacyCultureSensitiveFileGlobs.ShouldBeFalse();
+        new Traits().UseLegacyCultureSensitiveFileGlobs.ShouldBeTrue();
     }
 
     [Fact]

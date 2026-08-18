@@ -32,10 +32,18 @@ using Microsoft.Build.Utilities;
 
 namespace Microsoft.Build.Shared
 {
+    /// <summary>
+    /// Controls which wildcard-matching implementation is preferred.
+    /// </summary>
     internal enum FileMatcherImplementation
     {
+        /// <summary>Use the optimized implementation when Wave 18.11 is enabled; otherwise use legacy.</summary>
         Auto,
+
+        /// <summary>Use legacy regex-backed wildcard enumeration.</summary>
         Legacy,
+
+        /// <summary>Prefer optimized matching and enumeration, falling back to legacy for unsupported requests.</summary>
         Optimized,
     }
 
@@ -3297,7 +3305,11 @@ namespace Microsoft.Build.Shared
                             return;
                         }
 
-                        excludeState.BaseDirectory = includeBaseDirectory;
+                        if (IsRecursiveDirectoryMatch(excludeState.RemainingWildcardDirectory)
+                            || excludeState.SearchData.DirectoryPattern is not null)
+                        {
+                            excludeState.BaseDirectory = includeBaseDirectory;
+                        }
                     }
                 }
 
