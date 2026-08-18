@@ -13,12 +13,12 @@ public class NodeBudgetManager_Tests
     private static BuildGrant NewGrant(int processId, int requestedNodes, CoordinatorBuildPriority priority = CoordinatorBuildPriority.Normal)
         => new(Guid.NewGuid(), processId, requestedNodes, priority);
 
-    private static NodeBudgetManager NewManagerWithComputedDefaults(int totalBudget)
+    private static NodeBudgetManager NewManagerWithDefaultNodeSettings(int totalBudget)
         => new(
             totalBudget,
-            highPriorityReservedNodes: totalBudget >= 8 ? CoordinatorSettings.DefaultComputedHighPriorityReservedNodes : 0,
-            maxNodesPerBuild: totalBudget >= 8 ? CoordinatorSettings.DefaultComputedMaxNodesPerBuild : 0,
-            maxNodesPerBuildWhenIdle: totalBudget >= 8 ? CoordinatorSettings.DefaultComputedMaxNodesPerBuildWhenIdle : 0);
+            highPriorityReservedNodes: totalBudget >= CoordinatorSettings.DefaultNodeSettingsMinimumBudget ? CoordinatorSettings.DefaultHighPriorityReservedNodes : 0,
+            maxNodesPerBuild: totalBudget >= CoordinatorSettings.DefaultNodeSettingsMinimumBudget ? CoordinatorSettings.DefaultMaxNodesPerBuild : 0,
+            maxNodesPerBuildWhenIdle: totalBudget >= CoordinatorSettings.DefaultNodeSettingsMinimumBudget ? CoordinatorSettings.DefaultMaxNodesPerBuildWhenIdle : 0);
 
     private static void AssertSingleGrant(ImmutableArray<BuildGrant> grants, BuildGrant expected)
     {
@@ -139,9 +139,9 @@ public class NodeBudgetManager_Tests
     [InlineData(12, 8)]
     [InlineData(15, 8)]
     [InlineData(16, 8)]
-    public void TryGrant_ComputedDefaults_IdleNormalUsesAvailableCapacity(int totalBudget, int expectedGrant)
+    public void TryGrant_DefaultNodeSettings_IdleNormalUsesAvailableCapacity(int totalBudget, int expectedGrant)
     {
-        NodeBudgetManager manager = NewManagerWithComputedDefaults(totalBudget);
+        NodeBudgetManager manager = NewManagerWithDefaultNodeSettings(totalBudget);
         BuildGrant normal = NewGrant(processId: 1, requestedNodes: 16);
 
         manager.TryGrant(normal).ShouldBe(expectedGrant);
@@ -152,9 +152,9 @@ public class NodeBudgetManager_Tests
     [InlineData(10)]
     [InlineData(12)]
     [InlineData(16)]
-    public void TryGrant_ComputedDefaults_IdleHighMayReceiveEightNodes(int totalBudget)
+    public void TryGrant_DefaultNodeSettings_IdleHighMayReceiveEightNodes(int totalBudget)
     {
-        NodeBudgetManager manager = NewManagerWithComputedDefaults(totalBudget);
+        NodeBudgetManager manager = NewManagerWithDefaultNodeSettings(totalBudget);
         BuildGrant high = NewGrant(processId: 1, requestedNodes: 16, CoordinatorBuildPriority.High);
 
         manager.TryGrant(high).ShouldBe(8);
@@ -163,9 +163,9 @@ public class NodeBudgetManager_Tests
     [Theory]
     [InlineData(8)]
     [InlineData(16)]
-    public void TryGrant_ComputedDefaults_IdleLowUsesRegularCap(int totalBudget)
+    public void TryGrant_DefaultNodeSettings_IdleLowUsesRegularCap(int totalBudget)
     {
-        NodeBudgetManager manager = NewManagerWithComputedDefaults(totalBudget);
+        NodeBudgetManager manager = NewManagerWithDefaultNodeSettings(totalBudget);
         BuildGrant low = NewGrant(processId: 1, requestedNodes: 16, CoordinatorBuildPriority.Low);
 
         manager.TryGrant(low).ShouldBe(4);
@@ -176,9 +176,9 @@ public class NodeBudgetManager_Tests
     [InlineData(4, 4)]
     [InlineData(6, 4)]
     [InlineData(8, 8)]
-    public void TryGrant_ComputedDefaults_DoesNotRoundRequestsUp(int requestedNodes, int expectedGrant)
+    public void TryGrant_DefaultNodeSettings_DoNotRoundRequestsUp(int requestedNodes, int expectedGrant)
     {
-        NodeBudgetManager manager = NewManagerWithComputedDefaults(totalBudget: 16);
+        NodeBudgetManager manager = NewManagerWithDefaultNodeSettings(totalBudget: 16);
         BuildGrant normal = NewGrant(processId: 1, requestedNodes);
 
         manager.TryGrant(normal).ShouldBe(expectedGrant);
@@ -214,9 +214,9 @@ public class NodeBudgetManager_Tests
     }
 
     [Fact]
-    public void Release_ComputedDefaults_QueuedNormalReceivesFourNodes()
+    public void Release_DefaultNodeSettings_QueuedNormalReceivesFourNodes()
     {
-        NodeBudgetManager manager = NewManagerWithComputedDefaults(totalBudget: 15);
+        NodeBudgetManager manager = NewManagerWithDefaultNodeSettings(totalBudget: 15);
         BuildGrant first = NewGrant(processId: 1, requestedNodes: 15);
         BuildGrant waiting = NewGrant(processId: 2, requestedNodes: 15);
 
@@ -228,9 +228,9 @@ public class NodeBudgetManager_Tests
     }
 
     [Fact]
-    public void TryGrant_ComputedDefaults_FirstNormalReceivesEightNodesAndPreservesHighReservation()
+    public void TryGrant_DefaultNodeSettings_IdleNormalReceivesEightNodesAndPreservesHighReservation()
     {
-        NodeBudgetManager manager = NewManagerWithComputedDefaults(totalBudget: 16);
+        NodeBudgetManager manager = NewManagerWithDefaultNodeSettings(totalBudget: 16);
         BuildGrant normal1 = NewGrant(processId: 1, requestedNodes: 16);
         BuildGrant normal2 = NewGrant(processId: 2, requestedNodes: 16);
         BuildGrant normal3 = NewGrant(processId: 3, requestedNodes: 16);
@@ -247,9 +247,9 @@ public class NodeBudgetManager_Tests
     }
 
     [Fact]
-    public void Release_ComputedDefaults_QueuedHighReceivesFourNodes()
+    public void Release_DefaultNodeSettings_QueuedHighReceivesFourNodes()
     {
-        NodeBudgetManager manager = NewManagerWithComputedDefaults(totalBudget: 8);
+        NodeBudgetManager manager = NewManagerWithDefaultNodeSettings(totalBudget: 8);
         BuildGrant first = NewGrant(processId: 1, requestedNodes: 8, CoordinatorBuildPriority.High);
         BuildGrant waiting = NewGrant(processId: 2, requestedNodes: 8, CoordinatorBuildPriority.High);
 

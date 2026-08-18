@@ -23,12 +23,11 @@ internal sealed record class CoordinatorSettings()
     public const int DefaultInitialConnectionTimeoutMs = 200;
     public const int DefaultConnectionTimeoutMs = 5_000;
     public const int DefaultShutdownTimeoutMs = 60_000;
-    public const int DefaultComputedHighPriorityReservedNodes = 4;
-    public const int DefaultComputedMaxNodesPerBuild = 4;
-    public const int DefaultComputedMaxNodesPerBuildWhenIdle = DefaultComputedMaxNodesPerBuild * 2;
-    public const int ComputedNodeConfiguration = -1;
-    public const int DefaultHighPriorityReservedNodes = ComputedNodeConfiguration;
-    public const int DefaultMaxNodesPerBuild = ComputedNodeConfiguration;
+    public const int DefaultNodeSettingsMinimumBudget = 8;
+    public const int DefaultHighPriorityReservedNodes = 4;
+    public const int DefaultMaxNodesPerBuild = 4;
+    public const int DefaultMaxNodesPerBuildWhenIdle = DefaultMaxNodesPerBuild * 2;
+    public const int UseDefaultNodeSetting = -1;
     public const int DefaultPriorityAgingThreshold = 3;
     public const int MaxHeartbeatIntervalMs = 300_000;
 
@@ -78,25 +77,25 @@ internal sealed record class CoordinatorSettings()
 
     public int HighPriorityReservedNodes
     {
-        get => ClampHighPriorityReservedNodes(_highPriorityReservedNodes ?? ComputeHighPriorityReservedNodes(TotalNodeBudget), TotalNodeBudget);
+        get => ResolveHighPriorityReservedNodes(_highPriorityReservedNodes, TotalNodeBudget);
         init => _highPriorityReservedNodes = value < 0 ? null : value;
     }
 
     public int MaxNodesPerBuild
     {
-        get => ClampMaxNodesPerBuild(_maxNodesPerBuild ?? ComputeMaxNodesPerBuild(TotalNodeBudget), TotalNodeBudget);
+        get => ResolveMaxNodesPerBuild(_maxNodesPerBuild, TotalNodeBudget);
         init => _maxNodesPerBuild = value < 0 ? null : value;
     }
 
-    public bool HighPriorityReservedNodesIsComputed
+    public bool UsesDefaultHighPriorityReservedNodes
         => !_highPriorityReservedNodes.HasValue;
 
-    public bool MaxNodesPerBuildIsComputed
+    public bool UsesDefaultMaxNodesPerBuild
         => !_maxNodesPerBuild.HasValue;
 
     public int MaxNodesPerBuildWhenIdle
-        => MaxNodesPerBuildIsComputed && MaxNodesPerBuild > 0
-            ? Math.Min(DefaultComputedMaxNodesPerBuildWhenIdle, TotalNodeBudget)
+        => UsesDefaultMaxNodesPerBuild && MaxNodesPerBuild > 0
+            ? Math.Min(DefaultMaxNodesPerBuildWhenIdle, TotalNodeBudget)
             : 0;
 
     public int PriorityAgingThreshold
@@ -105,14 +104,14 @@ internal sealed record class CoordinatorSettings()
         init => _priorityAgingThreshold = value > 0 ? value : DefaultPriorityAgingThreshold;
     }
 
-    public string? ComputedNodeSettingsOptOutMessage
+    public string? DefaultNodeSettingsOptOutMessage
     {
         get
         {
-            bool computedReservedNodes = HighPriorityReservedNodesIsComputed && HighPriorityReservedNodes > 0;
-            bool computedMaxNodesPerBuild = MaxNodesPerBuildIsComputed && MaxNodesPerBuild > 0;
+            bool usesDefaultReservation = UsesDefaultHighPriorityReservedNodes && HighPriorityReservedNodes > 0;
+            bool usesDefaultMaxNodesPerBuild = UsesDefaultMaxNodesPerBuild && MaxNodesPerBuild > 0;
 
-            return (computedReservedNodes, computedMaxNodesPerBuild) switch
+            return (usesDefaultReservation, usesDefaultMaxNodesPerBuild) switch
             {
                 (true, true) => $"Set {Constants.HighPriorityReservedNodesEnvVarName}=0 and {Constants.MaxNodesPerBuildEnvVarName}=0 to disable reservation and per-build caps.",
                 (true, false) => $"Set {Constants.HighPriorityReservedNodesEnvVarName}=0 to disable reservation.",
@@ -176,10 +175,10 @@ internal sealed record class CoordinatorSettings()
             Environment.ProcessorCount);
         int highPriorityReservedNodes = EnvironmentUtilities.GetValueAsInt32OrDefault(
             Constants.HighPriorityReservedNodesEnvVarName,
-            DefaultHighPriorityReservedNodes);
+            UseDefaultNodeSetting);
         int maxNodesPerBuild = EnvironmentUtilities.GetValueAsInt32OrDefault(
             Constants.MaxNodesPerBuildEnvVarName,
-            DefaultMaxNodesPerBuild);
+            UseDefaultNodeSetting);
         int priorityAgingThreshold = EnvironmentUtilities.GetValueAsInt32OrDefault(
             Constants.PriorityAgingThresholdEnvVarName,
             DefaultPriorityAgingThreshold);
@@ -203,11 +202,15 @@ internal sealed record class CoordinatorSettings()
         };
     }
 
-    private static int ComputeHighPriorityReservedNodes(int totalNodeBudget)
-        => totalNodeBudget >= 8 ? Math.Min(DefaultComputedHighPriorityReservedNodes, Math.Max(0, totalNodeBudget - 1)) : 0;
+    private static int ResolveHighPriorityReservedNodes(int? configuredValue, int totalNodeBudget)
+        => ClampHighPriorityReservedNodes(
+            configuredValue ?? (totalNodeBudget >= DefaultNodeSettingsMinimumBudget ? DefaultHighPriorityReservedNodes : 0),
+            totalNodeBudget);
 
-    private static int ComputeMaxNodesPerBuild(int totalNodeBudget)
-        => totalNodeBudget >= 8 ? Math.Min(DefaultComputedMaxNodesPerBuild, totalNodeBudget) : 0;
+    private static int ResolveMaxNodesPerBuild(int? configuredValue, int totalNodeBudget)
+        => ClampMaxNodesPerBuild(
+            configuredValue ?? (totalNodeBudget >= DefaultNodeSettingsMinimumBudget ? DefaultMaxNodesPerBuild : 0),
+            totalNodeBudget);
 
     private static int ClampHighPriorityReservedNodes(int highPriorityReservedNodes, int totalNodeBudget)
         => Math.Min(highPriorityReservedNodes, Math.Max(0, totalNodeBudget - 1));

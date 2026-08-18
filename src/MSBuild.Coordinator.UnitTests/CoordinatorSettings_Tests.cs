@@ -36,8 +36,8 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.HighPriorityReservedNodes.ShouldBe(2);
         settings.MaxNodesPerBuild.ShouldBe(3);
         settings.PriorityAgingThreshold.ShouldBe(5);
-        settings.HighPriorityReservedNodesIsComputed.ShouldBeFalse();
-        settings.MaxNodesPerBuildIsComputed.ShouldBeFalse();
+        settings.UsesDefaultHighPriorityReservedNodes.ShouldBeFalse();
+        settings.UsesDefaultMaxNodesPerBuild.ShouldBeFalse();
         settings.MaxNodesPerBuildWhenIdle.ShouldBe(0);
         settings.ShutdownTimeoutMs.ShouldBe(456);
         settings.ConnectionTimeoutMs.ShouldBe(654);
@@ -56,8 +56,8 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
 
         settings.HighPriorityReservedNodes.ShouldBe(7);
         settings.MaxNodesPerBuild.ShouldBe(8);
-        settings.HighPriorityReservedNodesIsComputed.ShouldBeFalse();
-        settings.MaxNodesPerBuildIsComputed.ShouldBeFalse();
+        settings.UsesDefaultHighPriorityReservedNodes.ShouldBeFalse();
+        settings.UsesDefaultMaxNodesPerBuild.ShouldBeFalse();
         settings.MaxNodesPerBuildWhenIdle.ShouldBe(0);
     }
 
@@ -183,13 +183,13 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.HighPriorityReservedNodes.ShouldBe(expectedReservedNodes);
         settings.MaxNodesPerBuild.ShouldBe(expectedMaxNodesPerBuild);
         settings.MaxNodesPerBuildWhenIdle.ShouldBe(expectedMaxNodesPerBuildWhenIdle);
-        settings.HighPriorityReservedNodesIsComputed.ShouldBeTrue();
-        settings.MaxNodesPerBuildIsComputed.ShouldBeTrue();
-        (settings.ComputedNodeSettingsOptOutMessage is not null).ShouldBe(expectedReservedNodes > 0 || expectedMaxNodesPerBuild > 0);
-        if (settings.ComputedNodeSettingsOptOutMessage is { } computedNodeSettingsOptOutMessage)
+        settings.UsesDefaultHighPriorityReservedNodes.ShouldBeTrue();
+        settings.UsesDefaultMaxNodesPerBuild.ShouldBeTrue();
+        (settings.DefaultNodeSettingsOptOutMessage is not null).ShouldBe(expectedReservedNodes > 0 || expectedMaxNodesPerBuild > 0);
+        if (settings.DefaultNodeSettingsOptOutMessage is { } defaultNodeSettingsOptOutMessage)
         {
-            computedNodeSettingsOptOutMessage.ShouldContain(Constants.HighPriorityReservedNodesEnvVarName);
-            computedNodeSettingsOptOutMessage.ShouldContain(Constants.MaxNodesPerBuildEnvVarName);
+            defaultNodeSettingsOptOutMessage.ShouldContain(Constants.HighPriorityReservedNodesEnvVarName);
+            defaultNodeSettingsOptOutMessage.ShouldContain(Constants.MaxNodesPerBuildEnvVarName);
         }
     }
 
@@ -198,13 +198,13 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
     [InlineData("-1", 7, 0, 0, 0, false)]
     [InlineData("-1", 8, 4, 4, 8, true)]
     [InlineData("-42", 16, 4, 4, 8, true)]
-    public void CoordinatorSettings_FromEnvironment_NegativeReservationAndMaxNodesUseComputedDefaults(
+    public void CoordinatorSettings_FromEnvironment_NegativeReservationAndMaxNodesUseDefaults(
         string envValue,
         int totalBudget,
         int expectedReservedNodes,
         int expectedMaxNodesPerBuild,
         int expectedMaxNodesPerBuildWhenIdle,
-        bool expectedComputedNodeSettings)
+        bool expectsDefaultNodeSettingsOptOutMessage)
     {
         using TestEnvironment env = TestEnvironment.Create(output);
 
@@ -217,13 +217,13 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.HighPriorityReservedNodes.ShouldBe(expectedReservedNodes);
         settings.MaxNodesPerBuild.ShouldBe(expectedMaxNodesPerBuild);
         settings.MaxNodesPerBuildWhenIdle.ShouldBe(expectedMaxNodesPerBuildWhenIdle);
-        settings.HighPriorityReservedNodesIsComputed.ShouldBeTrue();
-        settings.MaxNodesPerBuildIsComputed.ShouldBeTrue();
-        (settings.ComputedNodeSettingsOptOutMessage is not null).ShouldBe(expectedComputedNodeSettings);
+        settings.UsesDefaultHighPriorityReservedNodes.ShouldBeTrue();
+        settings.UsesDefaultMaxNodesPerBuild.ShouldBeTrue();
+        (settings.DefaultNodeSettingsOptOutMessage is not null).ShouldBe(expectsDefaultNodeSettingsOptOutMessage);
     }
 
     [Fact]
-    public void CoordinatorSettings_FromEnvironment_InvalidReservationAndMaxNodesUseComputedDefaults()
+    public void CoordinatorSettings_FromEnvironment_InvalidReservationAndMaxNodesUseDefaults()
     {
         using TestEnvironment env = TestEnvironment.Create(output);
 
@@ -236,8 +236,8 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.HighPriorityReservedNodes.ShouldBe(4);
         settings.MaxNodesPerBuild.ShouldBe(4);
         settings.MaxNodesPerBuildWhenIdle.ShouldBe(8);
-        settings.HighPriorityReservedNodesIsComputed.ShouldBeTrue();
-        settings.MaxNodesPerBuildIsComputed.ShouldBeTrue();
+        settings.UsesDefaultHighPriorityReservedNodes.ShouldBeTrue();
+        settings.UsesDefaultMaxNodesPerBuild.ShouldBeTrue();
     }
 
     [Fact]
@@ -254,12 +254,12 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.HighPriorityReservedNodes.ShouldBe(7);
         settings.MaxNodesPerBuild.ShouldBe(8);
         settings.MaxNodesPerBuildWhenIdle.ShouldBe(0);
-        settings.HighPriorityReservedNodesIsComputed.ShouldBeFalse();
-        settings.MaxNodesPerBuildIsComputed.ShouldBeFalse();
+        settings.UsesDefaultHighPriorityReservedNodes.ShouldBeFalse();
+        settings.UsesDefaultMaxNodesPerBuild.ShouldBeFalse();
     }
 
     [Fact]
-    public void CoordinatorSettings_FromEnvironment_ExplicitReservationPreservesComputedMaxNodesPerBuild()
+    public void CoordinatorSettings_FromEnvironment_ExplicitReservationPreservesDefaultMaxNodesPerBuild()
     {
         using TestEnvironment env = TestEnvironment.Create(output);
 
@@ -272,15 +272,15 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.HighPriorityReservedNodes.ShouldBe(2);
         settings.MaxNodesPerBuild.ShouldBe(4);
         settings.MaxNodesPerBuildWhenIdle.ShouldBe(8);
-        settings.HighPriorityReservedNodesIsComputed.ShouldBeFalse();
-        settings.MaxNodesPerBuildIsComputed.ShouldBeTrue();
-        settings.ComputedNodeSettingsOptOutMessage.ShouldNotBeNull();
-        settings.ComputedNodeSettingsOptOutMessage.ShouldNotContain(Constants.HighPriorityReservedNodesEnvVarName);
-        settings.ComputedNodeSettingsOptOutMessage.ShouldContain(Constants.MaxNodesPerBuildEnvVarName);
+        settings.UsesDefaultHighPriorityReservedNodes.ShouldBeFalse();
+        settings.UsesDefaultMaxNodesPerBuild.ShouldBeTrue();
+        settings.DefaultNodeSettingsOptOutMessage.ShouldNotBeNull();
+        settings.DefaultNodeSettingsOptOutMessage.ShouldNotContain(Constants.HighPriorityReservedNodesEnvVarName);
+        settings.DefaultNodeSettingsOptOutMessage.ShouldContain(Constants.MaxNodesPerBuildEnvVarName);
     }
 
     [Fact]
-    public void CoordinatorSettings_FromEnvironment_ExplicitMaxNodesPerBuildPreservesComputedReservation()
+    public void CoordinatorSettings_FromEnvironment_ExplicitMaxNodesPerBuildPreservesDefaultReservation()
     {
         using TestEnvironment env = TestEnvironment.Create(output);
 
@@ -293,15 +293,15 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.HighPriorityReservedNodes.ShouldBe(4);
         settings.MaxNodesPerBuild.ShouldBe(2);
         settings.MaxNodesPerBuildWhenIdle.ShouldBe(0);
-        settings.HighPriorityReservedNodesIsComputed.ShouldBeTrue();
-        settings.MaxNodesPerBuildIsComputed.ShouldBeFalse();
-        settings.ComputedNodeSettingsOptOutMessage.ShouldNotBeNull();
-        settings.ComputedNodeSettingsOptOutMessage.ShouldContain(Constants.HighPriorityReservedNodesEnvVarName);
-        settings.ComputedNodeSettingsOptOutMessage.ShouldNotContain(Constants.MaxNodesPerBuildEnvVarName);
+        settings.UsesDefaultHighPriorityReservedNodes.ShouldBeTrue();
+        settings.UsesDefaultMaxNodesPerBuild.ShouldBeFalse();
+        settings.DefaultNodeSettingsOptOutMessage.ShouldNotBeNull();
+        settings.DefaultNodeSettingsOptOutMessage.ShouldContain(Constants.HighPriorityReservedNodesEnvVarName);
+        settings.DefaultNodeSettingsOptOutMessage.ShouldNotContain(Constants.MaxNodesPerBuildEnvVarName);
     }
 
     [Fact]
-    public void CoordinatorSettings_FromEnvironment_NegativeReservationPreservesComputedMaxNodesPerBuild()
+    public void CoordinatorSettings_FromEnvironment_NegativeReservationPreservesDefaultMaxNodesPerBuild()
     {
         using TestEnvironment env = TestEnvironment.Create(output);
 
@@ -314,15 +314,15 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.HighPriorityReservedNodes.ShouldBe(4);
         settings.MaxNodesPerBuild.ShouldBe(4);
         settings.MaxNodesPerBuildWhenIdle.ShouldBe(8);
-        settings.HighPriorityReservedNodesIsComputed.ShouldBeTrue();
-        settings.MaxNodesPerBuildIsComputed.ShouldBeTrue();
-        settings.ComputedNodeSettingsOptOutMessage.ShouldNotBeNull();
-        settings.ComputedNodeSettingsOptOutMessage.ShouldContain(Constants.HighPriorityReservedNodesEnvVarName);
-        settings.ComputedNodeSettingsOptOutMessage.ShouldContain(Constants.MaxNodesPerBuildEnvVarName);
+        settings.UsesDefaultHighPriorityReservedNodes.ShouldBeTrue();
+        settings.UsesDefaultMaxNodesPerBuild.ShouldBeTrue();
+        settings.DefaultNodeSettingsOptOutMessage.ShouldNotBeNull();
+        settings.DefaultNodeSettingsOptOutMessage.ShouldContain(Constants.HighPriorityReservedNodesEnvVarName);
+        settings.DefaultNodeSettingsOptOutMessage.ShouldContain(Constants.MaxNodesPerBuildEnvVarName);
     }
 
     [Fact]
-    public void CoordinatorSettings_FromEnvironment_NegativeMaxNodesPerBuildPreservesComputedReservation()
+    public void CoordinatorSettings_FromEnvironment_NegativeMaxNodesPerBuildPreservesDefaultReservation()
     {
         using TestEnvironment env = TestEnvironment.Create(output);
 
@@ -335,11 +335,11 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.HighPriorityReservedNodes.ShouldBe(4);
         settings.MaxNodesPerBuild.ShouldBe(4);
         settings.MaxNodesPerBuildWhenIdle.ShouldBe(8);
-        settings.HighPriorityReservedNodesIsComputed.ShouldBeTrue();
-        settings.MaxNodesPerBuildIsComputed.ShouldBeTrue();
-        settings.ComputedNodeSettingsOptOutMessage.ShouldNotBeNull();
-        settings.ComputedNodeSettingsOptOutMessage.ShouldContain(Constants.HighPriorityReservedNodesEnvVarName);
-        settings.ComputedNodeSettingsOptOutMessage.ShouldContain(Constants.MaxNodesPerBuildEnvVarName);
+        settings.UsesDefaultHighPriorityReservedNodes.ShouldBeTrue();
+        settings.UsesDefaultMaxNodesPerBuild.ShouldBeTrue();
+        settings.DefaultNodeSettingsOptOutMessage.ShouldNotBeNull();
+        settings.DefaultNodeSettingsOptOutMessage.ShouldContain(Constants.HighPriorityReservedNodesEnvVarName);
+        settings.DefaultNodeSettingsOptOutMessage.ShouldContain(Constants.MaxNodesPerBuildEnvVarName);
     }
 
     [Fact]
@@ -356,13 +356,13 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.HighPriorityReservedNodes.ShouldBe(0);
         settings.MaxNodesPerBuild.ShouldBe(0);
         settings.MaxNodesPerBuildWhenIdle.ShouldBe(0);
-        settings.HighPriorityReservedNodesIsComputed.ShouldBeFalse();
-        settings.MaxNodesPerBuildIsComputed.ShouldBeFalse();
-        settings.ComputedNodeSettingsOptOutMessage.ShouldBeNull();
+        settings.UsesDefaultHighPriorityReservedNodes.ShouldBeFalse();
+        settings.UsesDefaultMaxNodesPerBuild.ShouldBeFalse();
+        settings.DefaultNodeSettingsOptOutMessage.ShouldBeNull();
     }
 
     [Fact]
-    public void CoordinatorSettings_FromEnvironment_ZeroReservationPreservesComputedMaxNodesPerBuild()
+    public void CoordinatorSettings_FromEnvironment_ZeroReservationPreservesDefaultMaxNodesPerBuild()
     {
         using TestEnvironment env = TestEnvironment.Create(output);
 
@@ -375,15 +375,15 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.HighPriorityReservedNodes.ShouldBe(0);
         settings.MaxNodesPerBuild.ShouldBe(4);
         settings.MaxNodesPerBuildWhenIdle.ShouldBe(8);
-        settings.HighPriorityReservedNodesIsComputed.ShouldBeFalse();
-        settings.MaxNodesPerBuildIsComputed.ShouldBeTrue();
-        settings.ComputedNodeSettingsOptOutMessage.ShouldNotBeNull();
-        settings.ComputedNodeSettingsOptOutMessage.ShouldNotContain(Constants.HighPriorityReservedNodesEnvVarName);
-        settings.ComputedNodeSettingsOptOutMessage.ShouldContain(Constants.MaxNodesPerBuildEnvVarName);
+        settings.UsesDefaultHighPriorityReservedNodes.ShouldBeFalse();
+        settings.UsesDefaultMaxNodesPerBuild.ShouldBeTrue();
+        settings.DefaultNodeSettingsOptOutMessage.ShouldNotBeNull();
+        settings.DefaultNodeSettingsOptOutMessage.ShouldNotContain(Constants.HighPriorityReservedNodesEnvVarName);
+        settings.DefaultNodeSettingsOptOutMessage.ShouldContain(Constants.MaxNodesPerBuildEnvVarName);
     }
 
     [Fact]
-    public void CoordinatorSettings_FromEnvironment_ZeroMaxNodesPerBuildPreservesComputedReservation()
+    public void CoordinatorSettings_FromEnvironment_ZeroMaxNodesPerBuildPreservesDefaultReservation()
     {
         using TestEnvironment env = TestEnvironment.Create(output);
 
@@ -396,10 +396,10 @@ public class CoordinatorSettings_Tests(ITestOutputHelper output)
         settings.HighPriorityReservedNodes.ShouldBe(4);
         settings.MaxNodesPerBuild.ShouldBe(0);
         settings.MaxNodesPerBuildWhenIdle.ShouldBe(0);
-        settings.HighPriorityReservedNodesIsComputed.ShouldBeTrue();
-        settings.MaxNodesPerBuildIsComputed.ShouldBeFalse();
-        settings.ComputedNodeSettingsOptOutMessage.ShouldNotBeNull();
-        settings.ComputedNodeSettingsOptOutMessage.ShouldContain(Constants.HighPriorityReservedNodesEnvVarName);
-        settings.ComputedNodeSettingsOptOutMessage.ShouldNotContain(Constants.MaxNodesPerBuildEnvVarName);
+        settings.UsesDefaultHighPriorityReservedNodes.ShouldBeTrue();
+        settings.UsesDefaultMaxNodesPerBuild.ShouldBeFalse();
+        settings.DefaultNodeSettingsOptOutMessage.ShouldNotBeNull();
+        settings.DefaultNodeSettingsOptOutMessage.ShouldContain(Constants.HighPriorityReservedNodesEnvVarName);
+        settings.DefaultNodeSettingsOptOutMessage.ShouldNotContain(Constants.MaxNodesPerBuildEnvVarName);
     }
 }
