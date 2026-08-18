@@ -7,6 +7,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using COMException = System.Runtime.InteropServices.COMException;
 using Marshal = System.Runtime.InteropServices.Marshal;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 
 #nullable disable
 
@@ -380,8 +382,8 @@ namespace Microsoft.Build.Tasks
             // so the old code would fail to find them on disk using the simplistic checks above.
             if (lastChance)
             {
-                IntPtr libraryHandle = NativeMethodsShared.LoadLibrary(typeLibPath);
-                if (IntPtr.Zero != libraryHandle)
+                HMODULE libraryHandle = PInvoke.LoadLibrary(typeLibPath);
+                if (!libraryHandle.IsNull)
                 {
                     try
                     {
@@ -389,7 +391,7 @@ namespace Microsoft.Build.Tasks
                     }
                     finally
                     {
-                        NativeMethodsShared.FreeLibrary(libraryHandle);
+                        PInvoke.FreeLibrary(libraryHandle);
                     }
                 }
                 else
@@ -401,28 +403,21 @@ namespace Microsoft.Build.Tasks
             return typeLibPath;
         }
 
-        private static string GetModuleFileName(IntPtr handle)
+        private static string GetModuleFileName(HMODULE handle)
         {
-            char[] buffer = null;
+            using BufferScope<char> buffer = new(stackalloc char[(int)PInvoke.MAX_PATH]);
 
             // Try increased buffer sizes if on longpath-enabled Windows
-            for (int bufferSize = NativeMethodsShared.MAX_PATH; bufferSize <= NativeMethodsShared.MaxPath; bufferSize *= 2)
+            for (int bufferSize = (int)PInvoke.MAX_PATH; bufferSize <= NativeMethodsShared.MaxPath; bufferSize *= 2)
             {
-                buffer = System.Buffers.ArrayPool<char>.Shared.Rent(bufferSize);
-                try
-                {
-                    var handleRef = new System.Runtime.InteropServices.HandleRef(buffer, handle);
-                    int pathLength = NativeMethodsShared.GetModuleFileName(handleRef, buffer, bufferSize);
+                buffer.EnsureCapacity(bufferSize);
 
-                    bool isBufferTooSmall = (uint)Marshal.GetLastWin32Error() == NativeMethodsShared.ERROR_INSUFFICIENT_BUFFER;
-                    if (pathLength != 0 && !isBufferTooSmall)
-                    {
-                        return new string(buffer, 0, pathLength);
-                    }
-                }
-                finally
+                int pathLength = (int)PInvoke.GetModuleFileName(handle, buffer.AsSpan());
+
+                // GetModuleFileName returns bufferSize when truncated; treat that as "buffer too small".
+                if (pathLength != 0 && pathLength < bufferSize)
                 {
-                    System.Buffers.ArrayPool<char>.Shared.Return(buffer);
+                    return buffer.Slice(0, pathLength).ToString();
                 }
 
                 // Double check that the buffer is not insanely big

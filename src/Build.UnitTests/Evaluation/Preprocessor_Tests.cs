@@ -992,7 +992,7 @@ namespace Microsoft.Build.UnitTests.Preprocessor
                 // File names for the projects including the properties and items from the SDK resolvers are based on a hash of
                 //  the values, so look up the filename here.
                 //  Sample filename: projectPath + ".SdkResolver.-171948414.proj"
-                var virtualImport = project.Imports.First(i => i.ImportedProject.FullPath.StartsWith(projectPath + ".SdkResolver"));
+                var virtualImport = project.Imports.First(i => i.ImportedProject.FullPath.StartsWith(projectPath + ".SdkResolver", StringComparison.Ordinal));
                 string virtualProjectPath = virtualImport.ImportedProject.FullPath;
 
                 string expected = ObjectModelHelpers.CleanupFileContents(

@@ -16,6 +16,7 @@ using System.Runtime.InteropServices.ComTypes;
 
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+using Windows.Win32.Foundation;
 #endif
 
 using Microsoft.Build.Framework;
@@ -256,12 +257,12 @@ namespace Microsoft.Build.Tasks
                 catch (COMException ex)
                 {
                     // if the typelib to be unregistered is not registered, then we don't have anything left to do
-                    if (ex.ErrorCode == NativeMethods.TYPE_E_REGISTRYACCESS)
+                    if (ex.ErrorCode == HRESULT.TYPE_E_REGISTRYACCESS)
                     {
                         Log.LogWarningWithCodeFromResources("UnregisterAssembly.UnregisterTlbFileNotRegistered", typeLibPath);
                     }
                     // if the typelib can't be loaded (say because it's not a valid typelib file) we should report an error
-                    else if (ex.ErrorCode == NativeMethods.TYPE_E_CANTLOADLIBRARY)
+                    else if (ex.ErrorCode == HRESULT.TYPE_E_CANTLOADLIBRARY)
                     {
                         Log.LogErrorWithCodeFromResources("UnregisterAssembly.UnregisterTlbCantLoadFile", typeLibPath);
                         return false;

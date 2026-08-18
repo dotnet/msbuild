@@ -5165,6 +5165,7 @@ Copyright (C) Microsoft Corporation. All rights reserved.
     </_TargetsThatPrepareProjectReferences>
 
     <GetCopyToOutputDirectoryItemsDependsOn>
+      $(GetCopyToOutputDirectoryItemsDependsOn);
       AssignTargetPaths;
       $(_TargetsThatPrepareProjectReferences);
       _GetProjectReferenceTargetFrameworkProperties;

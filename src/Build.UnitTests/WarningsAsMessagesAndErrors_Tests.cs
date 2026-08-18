@@ -9,7 +9,6 @@ using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -19,9 +18,11 @@ namespace Microsoft.Build.Engine.UnitTests
     {
         private const string ExpectedEventMessage = "03767942CDB147B98D0ECDBDE1436DA3";
         private const string ExpectedEventCode = "0BF68998";
-        private static string TestAssemblyLocation { get; } = Path.Combine(
-            Path.GetDirectoryName(typeof(WarningsAsMessagesAndErrorsTests).Assembly.Location) ?? AppContext.BaseDirectory,
-            "Microsoft.Build.Engine.UnitTests.dll");
+
+        private static string TestAssemblyLocation { get; } =
+            typeof(WarningsAsMessagesAndErrorsTests).Assembly.Location
+            ?? Path.Combine(AppContext.BaseDirectory, $"Microsoft.Build.Engine.UnitTests.dll");
+
         private ITestOutputHelper _output;
 
         public WarningsAsMessagesAndErrorsTests(ITestOutputHelper output)

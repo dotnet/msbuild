@@ -115,9 +115,8 @@ namespace Microsoft.Build.BackEnd
 
             // It's not null or invalid, so it should be a valid parameter type.
             ErrorUtilities.VerifyThrow(
-                    TaskParameterTypeVerifier.IsValidInputParameter(wrappedParameterType) || TaskParameterTypeVerifier.IsValidOutputParameter(wrappedParameterType),
-                    "How did we manage to get a task parameter of type {0} that isn't a valid parameter type?",
-                    wrappedParameterType);
+                TaskParameterTypeVerifier.IsValidInputParameter(wrappedParameterType) || TaskParameterTypeVerifier.IsValidOutputParameter(wrappedParameterType),
+                $"How did we manage to get a task parameter of type {wrappedParameterType} that isn't a valid parameter type?");
 
             if (wrappedParameterType.IsArray)
             {
@@ -593,7 +592,7 @@ namespace Microsoft.Build.BackEnd
                     // TaskParameterTaskItem's constructor expects escaped values, so escaping them all
                     // is the closest approximation to correct we can get.
                     _escapedItemSpec = EscapingUtilities.Escape(copyFrom.ItemSpec);
-                    _escapedDefiningProject = EscapingUtilities.EscapeWithCaching(copyFrom.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath));
+                    _escapedDefiningProject = EscapingUtilities.Escape(copyFrom.GetMetadata(ItemSpecModifiers.DefiningProjectFullPath), cache: true);
 
                     IDictionary customMetadata = copyFrom.CloneCustomMetadata();
                     _customEscapedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);

@@ -12,7 +12,6 @@ using Microsoft.Build.Exceptions;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared.FileSystem;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 

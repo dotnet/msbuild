@@ -53,9 +53,14 @@ namespace Microsoft.Build.Tasks
         protected bool compareProcessorArchitecture;
 
         /// <summary>
+        /// TaskEnvironment for thread-safe environment variable access and path resolution.
+        /// </summary>
+        protected TaskEnvironment taskEnvironment;
+
+        /// <summary>
         /// Construct.
         /// </summary>
-        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture)
+        protected Resolver(string searchPathElement, GetAssemblyName getAssemblyName, FileExists fileExists, GetAssemblyRuntimeVersion getRuntimeVersion, Version targetedRuntimeVersion, ProcessorArchitecture targetedProcessorArchitecture, bool compareProcessorArchitecture, TaskEnvironment taskEnvironment)
         {
             this.searchPathElement = searchPathElement;
             this.getAssemblyName = getAssemblyName;
@@ -64,6 +69,7 @@ namespace Microsoft.Build.Tasks
             this.targetedRuntimeVersion = targetedRuntimeVersion;
             this.targetProcessorArchitecture = targetedProcessorArchitecture;
             this.compareProcessorArchitecture = compareProcessorArchitecture;
+            this.taskEnvironment = taskEnvironment;
         }
 
         /// <summary>
@@ -141,25 +147,25 @@ namespace Microsoft.Build.Tasks
         /// <param name="isPrimaryProjectReference">True if this is a primary reference directly from the project file.</param>
         /// <param name="wantSpecificVersion">Whether the version needs to match exactly or loosely.</param>
         /// <param name="allowMismatchBetweenFusionNameAndFileName">Whether to allow naming mismatch.</param>
-        /// <param name="pathToCandidateAssembly">Path to a possible file.</param>
+        /// <param name="fullPathToCandidateAssembly">Full path to a possible file.</param>
         /// <param name="searchLocation">Information about why the candidate file didn't match</param>
         protected bool FileMatchesAssemblyName(
             AssemblyNameExtension assemblyName,
             bool isPrimaryProjectReference,
             bool wantSpecificVersion,
             bool allowMismatchBetweenFusionNameAndFileName,
-            string pathToCandidateAssembly,
+            string fullPathToCandidateAssembly,
             ResolutionSearchLocation searchLocation)
         {
             if (searchLocation != null)
             {
-                searchLocation.FileNameAttempted = pathToCandidateAssembly;
+                searchLocation.FileNameAttempted = fullPathToCandidateAssembly;
             }
 
             // Base name of the target file has to match the Name from the assemblyName
             if (!allowMismatchBetweenFusionNameAndFileName)
             {
-                string candidateBaseName = Path.GetFileNameWithoutExtension(pathToCandidateAssembly);
+                string candidateBaseName = Path.GetFileNameWithoutExtension(fullPathToCandidateAssembly);
                 if (!String.Equals(assemblyName?.Name, candidateBaseName, StringComparison.CurrentCultureIgnoreCase))
                 {
                     if (searchLocation != null)
@@ -180,7 +186,7 @@ namespace Microsoft.Build.Tasks
 
             bool isSimpleAssemblyName = assemblyName?.IsSimpleName == true;
 
-            if (fileExists(pathToCandidateAssembly))
+            if (fileExists(fullPathToCandidateAssembly))
             {
                 // If the resolver we are using is targeting a given processor architecture then we must crack open the assembly and make sure the architecture is compatible
                 // We cannot do these simple name matches.
@@ -203,7 +209,7 @@ namespace Microsoft.Build.Tasks
                 AssemblyNameExtension targetAssemblyName = null;
                 try
                 {
-                    targetAssemblyName = getAssemblyName(pathToCandidateAssembly);
+                    targetAssemblyName = getAssemblyName(fullPathToCandidateAssembly);
                 }
                 catch (FileLoadException)
                 {
@@ -293,7 +299,7 @@ namespace Microsoft.Build.Tasks
         /// <param name="isPrimaryProjectReference">True if this is a primary reference directly from the project file.</param>
         /// <param name="wantSpecificVersion">Whether an exact version match is requested.</param>
         /// <param name="executableExtensions">The possible filename extensions of the assembly. Must be one of these or its no match.</param>
-        /// <param name="directory">the directory to look in</param>
+        /// <param name="fullPathToDirectory">Absolute path to the directory to look in. May not be in canonical form.</param>
         /// <param name="assembliesConsideredAndRejected">Receives the list of locations that this function tried to find the assembly. May be "null".</param>
         /// <returns>'null' if the assembly wasn't found.</returns>
         protected string ResolveFromDirectory(
@@ -301,7 +307,7 @@ namespace Microsoft.Build.Tasks
             bool isPrimaryProjectReference,
             bool wantSpecificVersion,
             string[] executableExtensions,
-            string directory,
+            string fullPathToDirectory,
             List<ResolutionSearchLocation> assembliesConsideredAndRejected)
         {
             if (assemblyName == null)
@@ -313,7 +319,7 @@ namespace Microsoft.Build.Tasks
             // used for the case when we are targeting MSIL and need to return that if it exists. This is different from targeting other architectures where returning an MSIL or target architecture are ok.
             string candidateFullPath = null;
 
-            if (directory != null)
+            if (fullPathToDirectory != null)
             {
                 string weakNameBase = assemblyName.Name;
                 foreach (string executableExtension in executableExtensions)
@@ -323,12 +329,12 @@ namespace Microsoft.Build.Tasks
 
                     try
                     {
-                        fullPath = Path.Combine(directory, baseName);
+                        fullPath = Path.Combine(fullPathToDirectory, baseName);
                     }
                     catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
                     {
                         // Assuming it's the search path that's bad. But combine them both so the error is visible if it's the reference itself.
-                        throw new InvalidParameterValueException("SearchPaths", directory + (directory.EndsWith("\\", StringComparison.OrdinalIgnoreCase) ? String.Empty : "\\") + baseName, e.Message);
+                        throw new InvalidParameterValueException("SearchPaths", fullPathToDirectory + (fullPathToDirectory.EndsWith("\\", StringComparison.OrdinalIgnoreCase) ? String.Empty : "\\") + baseName, e.Message);
                     }
 
                     // We have a full path returned
@@ -379,7 +385,7 @@ namespace Microsoft.Build.Tasks
                         {
                             if (String.Equals(executableExtension, weakNameBaseExtension, StringComparison.CurrentCultureIgnoreCase))
                             {
-                                string fullPath = Path.Combine(directory, weakNameBase);
+                                string fullPath = Path.Combine(fullPathToDirectory, weakNameBase);
                                 var extensionlessAssemblyName = new AssemblyNameExtension(weakNameBaseFileName);
 
                                 if (ResolveAsFile(fullPath, extensionlessAssemblyName, isPrimaryProjectReference, wantSpecificVersion, false, assembliesConsideredAndRejected))

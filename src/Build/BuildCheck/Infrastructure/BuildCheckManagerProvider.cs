@@ -33,7 +33,7 @@ internal sealed class BuildCheckManagerProvider : IBuildCheckManagerProvider
 
     internal static IBuildComponent CreateComponent(BuildComponentType type)
     {
-        ErrorUtilities.VerifyThrow(type == BuildComponentType.BuildCheckManagerProvider, "Cannot create components of type {0}", type);
+        ErrorUtilities.VerifyThrow(type == BuildComponentType.BuildCheckManagerProvider, $"Cannot create components of type {type}");
         return new BuildCheckManagerProvider();
     }
 

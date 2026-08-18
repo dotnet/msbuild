@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -643,7 +643,7 @@ namespace Microsoft.Build.CommandLine.Experimental
         /// <returns>Whether envVar is an environment variable</returns>
         private static bool IsEnvironmentVariable(string envVar)
         {
-            return envVar.StartsWith("%") && envVar.EndsWith("%") && envVar.Length > 1;
+            return envVar.StartsWith("%", StringComparison.Ordinal) && envVar.EndsWith("%", StringComparison.Ordinal) && envVar.Length > 1;
         }
 
         /// <summary>

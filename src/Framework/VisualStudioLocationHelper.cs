@@ -6,6 +6,7 @@ using System.Collections.Generic;
 #if FEATURE_VISUALSTUDIOSETUP
 using System.Runtime.InteropServices;
 using Microsoft.VisualStudio.Setup.Configuration;
+using Windows.Win32.Foundation;
 #endif
 
 namespace Microsoft.Build.Shared
@@ -17,10 +18,6 @@ namespace Microsoft.Build.Shared
     /// </summary>
     internal class VisualStudioLocationHelper
     {
-#if FEATURE_VISUALSTUDIOSETUP
-        private const int REGDB_E_CLASSNOTREG = unchecked((int)0x80040154);
-#endif // FEATURE_VISUALSTUDIOSETUP
-
         /// <summary>
         /// Query the Visual Studio setup API to get instances of Visual Studio installed
         /// on the machine. Will not include anything before Visual Studio "15".
@@ -89,7 +86,7 @@ namespace Microsoft.Build.Shared
                 // Try to CoCreate the class object.
                 return new SetupConfiguration();
             }
-            catch (COMException ex) when (ex.ErrorCode == REGDB_E_CLASSNOTREG)
+            catch (COMException ex) when (ex.ErrorCode == HRESULT.REGDB_E_CLASSNOTREG)
             {
                 // Try to get the class object using app-local call.
                 ISetupConfiguration query;

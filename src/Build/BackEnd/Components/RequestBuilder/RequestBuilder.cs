@@ -231,7 +231,7 @@ namespace Microsoft.Build.BackEnd
             VerifyEntryInReadyState();
 
             _continueResults = _requestEntry.Continue();
-            ErrorUtilities.VerifyThrow(_blockType == BlockType.BlockedOnTargetInProgress || _blockType == BlockType.Yielded || (_continueResults != null), "Unexpected null results for request {0} (nr {1})", _requestEntry.Request.GlobalRequestId, _requestEntry.Request.NodeRequestId);
+            ErrorUtilities.VerifyThrow(_blockType == BlockType.BlockedOnTargetInProgress || _blockType == BlockType.Yielded || (_continueResults != null), $"Unexpected null results for request {_requestEntry.Request.GlobalRequestId} (nr {_requestEntry.Request.NodeRequestId})");
 
             // Setting the continue event will wake up the build thread, which is suspended in StartNewBuildRequests.
             _continueEvent.Set();
@@ -371,6 +371,7 @@ namespace Microsoft.Build.BackEnd
                 ProjectIsolationMode isolateProjects = _componentHost.BuildParameters.ProjectIsolationMode;
                 bool skipStaticGraphIsolationConstraints = (isolateProjects != ProjectIsolationMode.False && _requestEntry.RequestConfiguration.ShouldSkipIsolationConstraintsForReference(config.ProjectFullPath))
                     || isolateProjects == ProjectIsolationMode.MessageUponIsolationViolation;
+
                 requests[i] = new FullyQualifiedBuildRequest(
                     config: config,
                     targets: targets,
@@ -630,7 +631,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         internal static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrow(type == BuildComponentType.RequestBuilder, "Cannot create components of type {0}", type);
+            ErrorUtilities.VerifyThrow(type == BuildComponentType.RequestBuilder, $"Cannot create components of type {type}");
             return new RequestBuilder();
         }
 
@@ -746,7 +747,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void VerifyEntryInReadyState()
         {
-            ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Ready, "Entry is not in the Ready state, it is in the {0} state.", _requestEntry.State);
+            ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Ready, $"Entry is not in the Ready state, it is in the {_requestEntry.State} state.");
         }
 
         /// <summary>
@@ -754,7 +755,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void VerifyEntryInActiveState()
         {
-            ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Active, "Entry is not in the Active state, it is in the {0} state.", _requestEntry.State);
+            ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Active, $"Entry is not in the Active state, it is in the {_requestEntry.State} state.");
         }
 
         /// <summary>
@@ -763,7 +764,7 @@ namespace Microsoft.Build.BackEnd
         private void VerifyEntryInActiveOrWaitingState()
         {
             ErrorUtilities.VerifyThrow(_requestEntry.State == BuildRequestEntryState.Active || _requestEntry.State == BuildRequestEntryState.Waiting,
-                "Entry is not in the Active or Waiting state, it is in the {0} state.", _requestEntry.State);
+                $"Entry is not in the Active or Waiting state, it is in the {_requestEntry.State} state.");
         }
 
         /// <summary>
@@ -867,6 +868,8 @@ namespace Microsoft.Build.BackEnd
                 {
                     ErrorUtilities.VerifyThrow(result == null, "Result already set when exception was thrown.");
                     result = new BuildResult(_requestEntry.Request, thrownException);
+                    // Populate the evaluation ID from the configuration for sending to the central node.
+                    result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
                 }
 
                 ReportResultAndCleanUp(result);
@@ -1021,7 +1024,10 @@ namespace Microsoft.Build.BackEnd
                 results = new Dictionary<int, BuildResult>();
                 for (int i = 0; i < requests.Length; i++)
                 {
-                    results[i] = new BuildResult(new BuildRequest(), new BuildAbortedException());
+                    var abortResult = new BuildResult(new BuildRequest(), new BuildAbortedException());
+                    // Populate the evaluation ID from the configuration for sending to the central node.
+                    abortResult.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
+                    results[i] = abortResult;
                 }
             }
 
@@ -1235,14 +1241,15 @@ namespace Microsoft.Build.BackEnd
                     // All of the results should now be on this node.
                     ErrorUtilities.VerifyThrow(
                         _requestEntry.RequestConfiguration.ResultsNodeId == _componentHost.BuildParameters.NodeId,
-                        "Results for configuration {0} were not retrieved from node {1}",
-                        _requestEntry.RequestConfiguration.ConfigurationId,
-                        _requestEntry.RequestConfiguration.ResultsNodeId);
+                        $"Results for configuration {_requestEntry.RequestConfiguration.ConfigurationId} were not retrieved from node {_requestEntry.RequestConfiguration.ResultsNodeId}");
                 }
 
                 // Build the targets
                 BuildResult result = await _targetBuilder.BuildTargets(_projectLoggingContext, _requestEntry, this,
                     allTargets, _requestEntry.RequestConfiguration.BaseLookup, _cancellationTokenSource.Token);
+
+                // Populate the evaluation ID from the configuration for sending to the central node.
+                result.EvaluationId = _requestEntry.RequestConfiguration.ProjectEvaluationId;
 
                 UpdateStatisticsPostBuild();
 
@@ -1329,7 +1336,7 @@ namespace Microsoft.Build.BackEnd
 
                 bool isFromNuget, isMetaprojTarget, isCustom;
 
-                if (IsMetaprojTargetPath(projectTargetInstance.Value.FullPath))
+                if (FileUtilities.IsMetaprojectFilename(projectTargetInstance.Value.FullPath))
                 {
                     isMetaprojTarget = true;
                     isFromNuget = false;
@@ -1380,8 +1387,6 @@ namespace Microsoft.Build.BackEnd
                 taskRegistry.Toolset?.InspectInternalTaskRegistry(CollectTasksStats);
             }
         }
-
-        private static bool IsMetaprojTargetPath(string targetPath) => targetPath.EndsWith(".metaproj", StringComparison.OrdinalIgnoreCase);
 
         /// <summary>
         /// Saves the current operating environment (working directory and environment variables)

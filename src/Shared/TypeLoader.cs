@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -625,7 +625,7 @@ namespace Microsoft.Build.Shared
                         {
                             // the final value looks like: ".NETFramework,Version=v3.5"
                             targetFramework = targetFrameworkAttr.ConstructorArguments[0].Value as string ?? string.Empty;
-                            _runtime = targetFramework.StartsWith(DotNetCoreIdentifier) ? MSBuildRuntimeValues.net : MSBuildRuntimeValues.clr4;
+                            _runtime = targetFramework.StartsWith(DotNetCoreIdentifier, StringComparison.Ordinal) ? MSBuildRuntimeValues.net : MSBuildRuntimeValues.clr4;
                         }
                     }
                     catch

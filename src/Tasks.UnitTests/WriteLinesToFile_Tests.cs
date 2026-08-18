@@ -14,7 +14,6 @@ using Microsoft.Build.UnitTests;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -453,7 +452,7 @@ namespace Microsoft.Build.Tasks.UnitTests
         }
 
         [Fact]
-        public void TransactionalModePreservesAllData()
+        public void TransactionalModeSucceedsWithConcurrentOverwrites()
         {
             using (var testEnv = TestEnvironment.Create(_output))
             {

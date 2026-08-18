@@ -25,7 +25,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -514,7 +513,7 @@ namespace Microsoft.Build.UnitTests
                 string singleExpectedItemStringTrimmed = singleExpectedItemString.Trim();
                 if (singleExpectedItemStringTrimmed.Length > 0)
                 {
-                    int indexOfColon = singleExpectedItemStringTrimmed.IndexOf(": ");
+                    int indexOfColon = singleExpectedItemStringTrimmed.IndexOf(": ", StringComparison.Ordinal);
                     if (indexOfColon == -1)
                     {
                         expectedItems.Add(new Utilities.TaskItem(singleExpectedItemStringTrimmed));
@@ -612,8 +611,12 @@ namespace Microsoft.Build.UnitTests
         /// </summary>
         public static string NormalizeXmlWhitespace(string xml)
         {
-            XmlDocument xmldoc = new XmlDocument();
-            xmldoc.LoadXml(xml);
+            XmlDocument xmldoc = new XmlDocument { XmlResolver = null };
+            using (var sr = new StringReader(xml))
+            using (var reader = XmlReader.Create(sr, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, XmlResolver = null }))
+            {
+                xmldoc.Load(reader);
+            }
 
             // Normalize all the whitespace by writing the Xml document out to a
             // string, with PreserveWhitespace=false.

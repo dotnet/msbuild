@@ -549,11 +549,14 @@ public class FileUtilities_Tests
     }
 
 #if FEATURE_ENVIRONMENT_SYSTEMDIRECTORY
-    // These tests will need to be redesigned for Linux
-
-    [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
+    [Fact]
     public void FileOrDirectoryExistsNoThrowTooLongWithDots()
     {
+        if (!RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241())
+        {
+            Assert.Skip("These tests will need to be redesigned for Linux");
+        }
+
         int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
 
         string longPart = new string('x', 260 - length); // We want the shortest that is > max path.
@@ -566,9 +569,14 @@ public class FileUtilities_Tests
         Assert.False(FileUtilities.FileOrDirectoryExistsNoThrow(inputPath.Replace('\\', 'X')));
     }
 
-    [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
+    [Fact]
     public void FileOrDirectoryExistsNoThrowTooLongWithDotsRelative()
     {
+        if (!RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241())
+        {
+            Assert.Skip("These tests will need to be redesigned for Linux");
+        }
+
         int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
 
         string longPart = new string('x', 260 - length); // We want the shortest that is > max path.
@@ -619,9 +627,14 @@ public class FileUtilities_Tests
         Assert.True(FileUtilities.DirectoryExistsNoThrow(inputPath));
     }
 
-    [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
+    [Fact]
     public void DirectoryExistsNoThrowTooLongWithDotsRelative()
     {
+        if (!RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241())
+        {
+            Assert.Skip("These tests will need to be redesigned for Linux");
+        }
+
         int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3)).Length;
 
         string longPart = new string('x', 260 - length); // We want the shortest that is > max path.
@@ -655,9 +668,14 @@ public class FileUtilities_Tests
                NativeMethodsShared.IsMaxPathLegacyWindows();
     }
 
-    [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
+    [Fact]
     public void FileExistsNoThrowTooLongWithDots()
     {
+        if (!RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241())
+        {
+            Assert.Skip("These tests will need to be redesigned for Linux");
+        }
+
         int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
 
         string longPart = new string('x', 260 - length); // We want the shortest that is > max path.
@@ -670,9 +688,14 @@ public class FileUtilities_Tests
         Assert.True(FileUtilities.FileExistsNoThrow(inputPath));
     }
 
-    [ConditionalFact(nameof(RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241))]
+    [Fact]
     public void FileExistsNoThrowTooLongWithDotsRelative()
     {
+        if (!RunTestsThatDependOnWindowsShortPathBehavior_Workaround4241())
+        {
+            Assert.Skip("These tests will need to be redesigned for Linux");
+        }
+
         int length = (Environment.SystemDirectory + @"\" + @"\..\..\..\" + Environment.SystemDirectory.Substring(3) + @"\..\explorer.exe").Length;
 
         string longPart = new string('x', 260 - length); // We want the shortest that is > max path.

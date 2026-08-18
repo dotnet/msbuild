@@ -5,7 +5,6 @@ using Microsoft.Build.Execution;
 
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 

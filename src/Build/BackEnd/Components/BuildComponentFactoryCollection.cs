@@ -136,7 +136,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="instance">The instance to be registered.</param>
         public void ReplaceFactory(BuildComponentType componentType, IBuildComponent instance)
         {
-            ErrorUtilities.VerifyThrow(_componentEntriesByType[componentType].Pattern == CreationPattern.Singleton, "Previously existing factory for type {0} was not a singleton factory.", componentType);
+            ErrorUtilities.VerifyThrow(_componentEntriesByType[componentType].Pattern == CreationPattern.Singleton, $"Previously existing factory for type {componentType} was not a singleton factory.");
             _componentEntriesByType[componentType] = new BuildComponentEntry(componentType, instance);
         }
 
@@ -160,7 +160,7 @@ namespace Microsoft.Build.BackEnd
         {
             if (!_componentEntriesByType.TryGetValue(type, out BuildComponentEntry componentEntry))
             {
-                ErrorUtilities.ThrowInternalError("No factory registered for component type {0}", type);
+                ErrorUtilities.ThrowInternalError($"No factory registered for component type {type}");
             }
 
             return componentEntry.GetInstance(_host);

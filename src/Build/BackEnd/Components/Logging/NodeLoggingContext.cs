@@ -86,10 +86,8 @@ namespace Microsoft.Build.BackEnd.Logging
         {
             ErrorUtilities.VerifyThrow(this.IsValid, "Build not started.");
 
-            // If we can retrieve the evaluationId from the project, do so. Don't if it's not available or
-            // if we'd have to retrieve it from the cache in order to access it.
-            // Order is important here because the Project getter will throw if IsCached.
-            int evaluationId = (configuration != null && !configuration.IsCached && configuration.Project != null) ? configuration.Project.EvaluationId : BuildEventContext.InvalidEvaluationId;
+            // Use the persisted ProjectEvaluationId which remains available even when the project is cached.
+            int evaluationId = configuration?.ProjectEvaluationId ?? BuildEventContext.InvalidEvaluationId;
 
             return new ProjectLoggingContext(this, request, configuration.ProjectFullPath, configuration.ToolsVersion, evaluationId);
         }

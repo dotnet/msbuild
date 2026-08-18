@@ -12,10 +12,10 @@ The main thread runs `OutOfProcTaskHostNode.Run()`, a `WaitHandle.WaitAny` loop 
 
 | Index | Event | Handler |
 |-------|-------|---------|
-| 0 | `_shutdownEvent` | `HandleShutdown()` — joins the task thread, cleans up, exits |
-| 1 | `_packetReceivedEvent` | `HandlePacket()` — dispatches incoming IPC packets |
-| 2 | `_taskCompleteEvent` | `CompleteTask()` — sends `TaskHostTaskComplete` to owning worker node |
-| 3 | `_taskCancelledEvent` | `CancelTask()` — calls `ICancelableTask.Cancel()` on the task |
+| 0 | `_shutdownEvent` | `HandleShutdown()` -- joins the task thread, cleans up, exits |
+| 1 | `_packetReceivedEvent` | `HandlePacket()` -- dispatches incoming IPC packets |
+| 2 | `_taskCompleteEvent` | `CompleteTask()` -- sends `TaskHostTaskComplete` to owning worker node |
+| 3 | `_taskCancelledEvent` | `CancelTask()` -- calls `ICancelableTask.Cancel()` on the task |
 
 This thread is responsible for all IPC: receiving packets from the owning worker node (task configuration, cancellation, callback responses) and sending packets back (log messages, task completion, callback requests).
 
@@ -26,7 +26,7 @@ When the main thread receives a `TaskHostConfiguration` packet, it spawns the ta
 1. Sets up the environment (working directory, env vars, culture)
 2. Loads the task assembly and instantiates the task
 3. Sets task parameters via reflection
-4. Calls `task.Execute()` — for tasks implementing `IMultiThreadableTask`, the default `TaskEnvironment` (backed by `MultiProcessTaskEnvironmentDriver`) is available, providing safe access to the task host process's working directory and environment variables
+4. Calls `task.Execute()` -- for tasks implementing `IMultiThreadableTask`, the default `TaskEnvironment` (backed by `MultiProcessTaskEnvironmentDriver`) is available, providing safe access to the task host process's working directory and environment variables
 5. Collects output parameters
 6. Packages the result into `TaskHostTaskComplete` and signals `_taskCompleteEvent`
 
@@ -34,9 +34,9 @@ The task runner thread is where user task code runs. Any `IBuildEngine` calls fr
 
 ## IBuildEngine Callback Flow (added in Stage 1)
 
-Before callback support, the two threads had a simple lifecycle: the main thread spawned the task thread, waited for completion, and sent the result. Communication was one-directional (worker node → TaskHost for configuration/cancellation, TaskHost → worker node for logs/completion).
+Before callback support, the two threads had a simple lifecycle: the main thread spawned the task thread, waited for completion, and sent the result. Communication was one-directional (worker node -> TaskHost for configuration/cancellation, TaskHost -> worker node for logs/completion).
 
-With callback support, the task can query the owning worker node for information it doesn't have locally (e.g., `IsRunningMultipleNodes`, and in future stages: `RequestCores`, `BuildProjectFile`). This introduces **bidirectional IPC** between the threads:
+With callback support, the task can query the owning worker node for information it doesn't have locally (e.g., `IsRunningMultipleNodes`, `RequestCores`, `BuildProjectFile`). This introduces **bidirectional IPC** between the threads:
 
 ```mermaid
 sequenceDiagram
@@ -77,7 +77,7 @@ The callback wait intentionally does **not** check `_taskCancelledEvent`. This a
 
 Cancellation is handled cooperatively: after the callback returns, the task checks its cancellation state (set by `ICancelableTask.Cancel()`) and exits.
 
-> **Future opportunity:** Unlike in-process mode where callbacks are direct method calls that cannot be interrupted, the IPC-based callback mechanism *could* support cancellation-aware callbacks — for example, by failing the pending `TaskCompletionSource` when `_taskCancelledEvent` is signaled. This would let long-running callbacks like `BuildProjectFile` abort immediately on cancellation rather than waiting for the worker node to process and respond. This is not implemented today for consistency with in-process behavior, but the mechanism is in place if needed.
+> **Future opportunity:** Unlike in-process mode where callbacks are direct method calls that cannot be interrupted, the IPC-based callback mechanism *could* support cancellation-aware callbacks -- for example, by failing the pending `TaskCompletionSource` when `_taskCancelledEvent` is signaled. This would let long-running callbacks like `BuildProjectFile` abort immediately on cancellation rather than waiting for the worker node to process and respond. This is not implemented today for consistency with in-process behavior, but the mechanism is in place if needed.
 
 The only exception path is connection loss (owning worker node killed), detected by `OnLinkStatusChanged` which fails all pending `TaskCompletionSource` entries with `InvalidOperationException`. This unblocks task threads immediately.
 
@@ -87,17 +87,73 @@ There is a causal dependency chain that prevents deadlock:
 
 ```
 Worker node sends callback response
-  → TaskHost callback returns
-    → task finishes Execute()
-      → TaskHost sends TaskHostTaskComplete
-        → worker node exits packet loop
+  -> TaskHost callback returns
+    -> task finishes Execute()
+      -> TaskHost sends TaskHostTaskComplete
+        -> worker node exits packet loop
 ```
 
 The worker node cannot exit its packet loop without first receiving `TaskHostTaskComplete`. But `TaskHostTaskComplete` cannot be sent until the task finishes. And the task cannot finish while it is blocked waiting for a callback response. Therefore, the worker node **must** process the callback request and send the response before it can ever stop.
 
+## BuildProjectFile Callback Flow (added in Stage 3)
+
+Tasks running in the TaskHost can call `BuildProjectFile` to build other projects. All four overloads normalize to the canonical 6-param form and send a `TaskHostBuildRequest` packet to the owning worker node, which forwards the call to the in-process `IBuildEngine3.BuildProjectFilesInParallel`.
+
+### Block-for-Callback Pattern
+
+When a task calls `BuildProjectFile`, the TaskHost blocks so the scheduler can reuse the process for nested tasks:
+
+```mermaid
+sequenceDiagram
+    participant TR as Task Runner Thread
+    participant MT as Main Thread
+    participant PP as Owning Worker Node
+    participant SC as Scheduler
+
+    TR->>TR: BlockForCallback()<br/>(blocked++, active--)
+    TR->>MT: TaskHostBuildRequest<br/>(blocks on TCS)
+    activate TR
+
+    MT->>PP: TaskHostBuildRequest packet
+    PP->>SC: BuildProjectFilesInParallel()
+
+    Note over SC: Child project needs same TaskHost runtime
+    SC->>PP: Schedule nested task to same TaskHost
+    PP->>MT: TaskHostConfiguration (nested)
+    MT->>MT: HandleTaskHostConfiguration()<br/>(starts Thread-B)
+
+    Note over MT: Thread-B executes nested task
+    MT-->>PP: TaskHostTaskComplete (nested)
+    PP-->>SC: Nested task done
+
+    SC-->>PP: BuildProjectFile result
+    PP-->>MT: TaskHostBuildResponse
+    MT->>MT: HandleCallbackResponse()<br/>(sets TCS result)
+    MT-->>TR: TCS unblocks
+    deactivate TR
+    TR->>TR: ResumeAfterCallback()<br/>(active++, blocked--)
+```
+
+### Counter Management
+
+Two counters track the TaskHost's availability:
+
+- `_activeTaskCount`: Number of tasks actively executing. A non-zero count prevents new tasks from being scheduled.
+- `_blockedTaskCount`: Number of tasks blocked on a callback. A blocked task does NOT prevent new tasks from being scheduled.
+
+**Transition ordering**: When blocking, increment `_blockedTaskCount` BEFORE decrementing `_activeTaskCount`. When resuming, the reverse. This ensures the sum is never zero during transition.
+
+### Handler Stack (Process Reuse)
+
+`NodeProviderOutOfProcTaskHost` uses a `Stack<INodePacketHandler>` to manage multiple `TaskHostTask` handlers on the same node. Push on nested task dispatch, peek for packet routing, pop on nested task completion.
+
+### Per-Task Isolation (TaskExecutionContext)
+
+Each task gets a `TaskExecutionContext` stored in `_taskContexts` (ConcurrentDictionary) and accessed via `_currentTaskContext` (AsyncLocal). The context holds configuration, saved environment (CWD, env vars, warning settings), pending callback requests, and execution state. `EffectiveConfiguration` reads from the per-task context first, falling back to `_currentConfiguration`.
+
 ## TaskHost Lifecycle
 
-The TaskHost process can execute multiple tasks sequentially. After finishing one task, it returns to an idle state and waits for either a new task or a shutdown signal.
+The TaskHost process can execute multiple tasks, both sequentially and concurrently. After finishing one task, it returns to an idle state and waits for either a new task or a shutdown signal. When a task calls `BuildProjectFile`, the TaskHost blocks (incrementing `_blockedTaskCount`, then decrementing `_activeTaskCount`), allowing the scheduler to dispatch a nested task to the same process while the outer task is blocked waiting for the callback response.
 
 ### Event Loop Cycle
 
@@ -112,21 +168,21 @@ stateDiagram-v2
 ```
 
 1. **Idle**: `WaitAny()` blocks on the four wait handles. No task thread exists. `_currentConfiguration` is null.
-2. **TaskHostConfiguration arrives**: `HandleTaskHostConfiguration()` stores the config and spawns `_taskRunnerThread` to call `RunTask()`. The main thread immediately returns to `WaitAny()`.
-3. **Task executes**: `RunTask()` sets up the environment, loads the task assembly, calls `task.Execute()`, collects output parameters, and packages the result into `_taskCompletePacket`. On completion (success or failure), it signals `_taskCompleteEvent`.
-4. **CompleteTask()**: The main thread wakes on index 2, sends `_taskCompletePacket` to the owning worker node, and sets `_currentConfiguration = null`. The node is now idle again.
+2. **TaskHostConfiguration arrives**: `HandleTaskHostConfiguration()` stores the config and spawns a task runner thread (stored in `TaskExecutionContext.ExecutingThread`) to call `RunTask()`. The main thread immediately returns to `WaitAny()`.
+3. **Task executes**: `RunTask()` sets up the environment, loads the task assembly, calls `task.Execute()`, collects output parameters, and stores the result in `_taskCompletePacket`. On completion (success or failure), it signals `_taskCompleteEvent`.
+4. **CompleteTask()**: The main thread wakes on index 2, sends `_taskCompletePacket` as a `TaskHostTaskComplete` packet to the owning worker node. When no tasks remain active or blocked, it clears `_currentConfiguration`. The node is now idle again.
 5. **Back to step 1**: The main thread loops back to `WaitAny()`, ready for another `TaskHostConfiguration` or a `NodeBuildComplete`.
 
 ### State Between Tasks
 
 Each new `TaskHostConfiguration` carries a full environment snapshot, task parameters, and warning settings. The task runner thread resets per-task state at the start of `RunTask()`:
 
-**Reset per task:** `_isTaskExecuting`, `_currentConfiguration`, `_debugCommunications`, `_updateEnvironment`, `WarningsAsErrors`/`WarningsNotAsErrors`/`WarningsAsMessages`, `_fileAccessData`
+**Reset per task:** `_currentConfiguration`, `_debugCommunications`, `_updateEnvironment`, `_warningsAsErrors`/`_warningsNotAsErrors`/`_warningsAsMessages`, `_fileAccessData`, per-task `TaskExecutionContext`
 
 **Persists across tasks (within a single build):**
-- `s_mismatchedEnvironmentValues` (static) — environment variable fixups for bitness differences, computed once per process
-- `_registeredTaskObjectCache` — task object cache with `Build` lifetime scope, disposed at end of each build (in `HandleShutdown()`), recreated fresh on the next `Run()` call
-- `_pendingCallbackRequests` / `_nextCallbackRequestId` — callback tracking (should be empty between tasks)
+- `s_mismatchedEnvironmentValues` (static) -- environment variable fixups for bitness differences, computed once per process
+- `_registeredTaskObjectCache` -- task object cache with `Build` lifetime scope, disposed at end of each build (in `HandleShutdown()`), recreated fresh on the next `Run()` call
+- `_pendingCallbackRequests` / `_nextCallbackRequestId` -- callback tracking (should be empty between tasks)
 
 ### Shutdown vs. Reuse
 
@@ -135,4 +191,4 @@ When the owning worker node sends `NodeBuildComplete`, `HandleNodeBuildComplete(
 - **Sidecar TaskHost** (`_nodeReuse = true`): Always sets `BuildCompleteReuse`. The sidecar process persists across builds, re-entering the `Run()` outer loop to accept new connections.
 - **Regular TaskHost** (`_nodeReuse = false`): Sets `BuildCompleteReuse` only if `buildComplete.PrepareForReuse` is true **and** `Traits.Instance.EscapeHatches.ReuseTaskHostNodes` is enabled. Otherwise sets `BuildComplete` and the process exits. This avoids holding assembly locks on custom task DLLs between builds.
 
-There is **no idle timeout**. The `WaitAny()` call has no timeout parameter — the TaskHost waits indefinitely until it receives a shutdown signal or the connection drops.
+There is **no idle timeout**. The `WaitAny()` call has no timeout parameter -- the TaskHost waits indefinitely until it receives a shutdown signal or the connection drops.

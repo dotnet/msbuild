@@ -643,7 +643,7 @@ namespace Microsoft.Build.UnitTests.Definition
                 project =>
                 {
                     var projectName = Path.GetFileNameWithoutExtension(project.FullPath);
-                    var globFixedDirectoryPart = projectName.EndsWith("1")
+                    var globFixedDirectoryPart = projectName.EndsWith("1", StringComparison.Ordinal)
                         ? Path.Combine("..", "..", "glob")
                         : Path.Combine("..", "..", "..", "glob");
 

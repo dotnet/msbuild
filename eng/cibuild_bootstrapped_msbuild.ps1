@@ -5,6 +5,8 @@ Param(
   [switch] $prepareMachine,
   [bool] $buildStage1 = $True,
   [bool] $onlyDocChanged = 0,
+  [switch] $skipTests,
+  [string] $stage2Properties = "",
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
 )
 
@@ -117,14 +119,37 @@ try {
   # Opt into performance logging. https://github.com/dotnet/msbuild/issues/5900
   $env:DOTNET_PERFLOG_DIR=$PerfLogDir
 
+  # Mirrors cibuild_bootstrapped_msbuild.sh:96. Required for some test scenarios that spawn
+  # MSBuild grandchildren which need to launch .NET task hosts (notably net472 x86 testhosts
+  # invoking .NET Core MSBuild → /mt → sidecar TaskHost). The SDK CLI `dotnet msbuild` sets
+  # DOTNET_HOST_PATH for the MSBuild process it spawns, but does not propagate it into the
+  # parent script's environment, so we set it here for child processes (tests, their MSBuild
+  # grandchildren) to inherit.
+  $env:DOTNET_HOST_PATH=$dotnetExePath
+
   # When using bootstrapped MSBuild:
   # - Turn off node reuse (so that bootstrapped MSBuild processes don't stay running and lock files)
   # - Create bootstrap environment as it's required when also running tests
+  # - $stage2Properties are appended to the stage 2 build only (matching cibuild_bootstrapped_msbuild.sh).
+  #   Use this for switches like /mt that should not be passed to the stable MSBuild used in stage 1
+  #   until a stable version of MT is available in the images.
+  # Branches mirror cibuild_bootstrapped_msbuild.sh exactly:
+  #   onlyDocChanged=1 → bootstrap not created (artifacts not needed downstream)
+  #   skipTests        → bootstrap IS created (downstream MAY consume it), tests omitted
+  #   default          → bootstrap created, tests run
+  # The @(...) wrapper is important: when -split returns exactly one element PowerShell
+  # gives back a string, and `& cmd @stringVar` splats its characters one-per-argument
+  # (so "/mt" becomes "/", "m", "t"). Wrapping with @() forces an array even for a
+  # single token.
+  $stage2Args = @(if ($stage2Properties) { $stage2Properties -split '\s+' | Where-Object { $_ } } else { @() })
   if ($onlyDocChanged) {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /p:CreateBootstrap=false /nr:false @properties @stage2Args
+  }
+  elseif ($skipTests) {
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -ci /nr:false @properties @stage2Args
   }
   else {
-    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties
+    & $PSScriptRoot\Common\Build.ps1 -restore -build -test -ci /nr:false @properties @stage2Args
   }
 
   exit $lastExitCode

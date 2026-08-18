@@ -9,6 +9,7 @@ using System.Threading;
 using System.Reflection;
 
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -388,11 +389,16 @@ namespace Microsoft.Build.CommandLine
                 }
 
                 // If it didn't crash and return before now, we're clear to go ahead and execute here.
+                MSBuildEventSource.Log.TaskExecuteInHostStart(taskName);
                 success = wrappedTask.Execute();
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
                 return new OutOfProcTaskHostTaskResult(TaskCompleteType.CrashedDuringExecution, e);
+            }
+            finally
+            {
+                MSBuildEventSource.Log.TaskExecuteInHostStop(taskName, success);
             }
 
             PropertyInfo[] finalPropertyValues = wrappedTask.GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public);

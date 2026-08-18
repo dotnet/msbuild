@@ -4,8 +4,9 @@
 using System.Threading.Tasks;
 using Shouldly;
 using Xunit;
-using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
 using System.Linq;
+
+using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests
 {

@@ -37,7 +37,7 @@ namespace Microsoft.Build.Internal
 
         internal bool ConnectToServer(int timeout)
         {
-            CommunicationsUtilities.Trace("Attempting connect to pipe {0} with timeout {1} ms", PipeName, timeout);
+            CommunicationsUtilities.Trace($"Attempting connect to pipe {PipeName} with timeout {timeout} ms");
             _pipeClient.Connect(timeout);
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
             // Verify that the owner of the pipe is us.  This prevents a security hole where a remote node has
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Internal
 #endif
             if (PerformHandshake(s_useHandhakeTimeout ? timeout : 0))
             {
-                CommunicationsUtilities.Trace("Successfully connected to pipe {0}...!", PipeName);
+                CommunicationsUtilities.Trace($"Successfully connected to pipe {PipeName}...!");
                 return true;
             }
             return false;
@@ -67,7 +67,7 @@ namespace Microsoft.Build.Internal
 
             if (remoteOwner != identifier)
             {
-                CommunicationsUtilities.Trace("The remote pipe owner {0} does not match {1}", remoteOwner.Value, identifier.Value);
+                CommunicationsUtilities.Trace($"The remote pipe owner {remoteOwner.Value} does not match {identifier.Value}");
                 throw new UnauthorizedAccessException();
             }
         }
@@ -80,14 +80,14 @@ namespace Microsoft.Build.Internal
         {
             foreach (var component in HandshakeComponents.EnumerateComponents())
             {
-                CommunicationsUtilities.Trace("Writing handshake part {0} ({1}) to pipe {2}", component.Key, component.Value, PipeName);
+                CommunicationsUtilities.Trace($"Writing handshake part {component.Key} ({component.Value}) to pipe {PipeName}");
                 _pipeClient.WriteIntForHandshake(component.Value);
             }
 
             // This indicates that we have finished all the parts of our handshake; hopefully the endpoint has as well.
             _pipeClient.WriteEndOfHandshakeSignal();
 
-            CommunicationsUtilities.Trace("Reading handshake from pipe {0}", PipeName);
+            CommunicationsUtilities.Trace($"Reading handshake from pipe {PipeName}");
 #if NET
             return _pipeClient.TryReadEndOfHandshakeSignal(true, timeout, out HandshakeResult _);
 #else

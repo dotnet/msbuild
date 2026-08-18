@@ -217,7 +217,7 @@ namespace Microsoft.Build.UnitTests
 
             msg += String.Format(" Searching for [{0}]\r\n", lookFor);
 
-            if (cl.IndexOf(lookFor) == -1)
+            if (cl.IndexOf(lookFor, StringComparison.Ordinal) == -1)
             {
                 msg += "Not found!\r\n";
                 Console.WriteLine(msg);
@@ -249,7 +249,7 @@ namespace Microsoft.Build.UnitTests
             string msg = String.Format("Command-line = [{0}]\r\n", cl);
 
             msg += String.Format(" Searching for [{0}]\r\n", lookFor);
-            if (cl.IndexOf(lookFor) != -1)
+            if (cl.IndexOf(lookFor, StringComparison.Ordinal) != -1)
             {
                 msg += "Found!\r\n";
                 Console.WriteLine(msg);

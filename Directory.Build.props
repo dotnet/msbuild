@@ -13,6 +13,20 @@
   </PropertyGroup>
 
   <PropertyGroup>
+    <TestRunnerName>XUnitV3</TestRunnerName>
+
+    <!-- Pin xunit.v3 / MTP up only when Arcade's default sits below our pin. -->
+    <_MSBuildXUnitV3Pin>3.2.2</_MSBuildXUnitV3Pin>
+    <_MSBuildMTPPin>1.9.1</_MSBuildMTPPin>
+
+    <XUnitV3Version Condition="'$(XUnitV3Version)' == '' or $([MSBuild]::VersionLessThan($(XUnitV3Version), $(_MSBuildXUnitV3Pin)))">$(_MSBuildXUnitV3Pin)</XUnitV3Version>
+    <MicrosoftTestingPlatformVersion Condition="'$(MicrosoftTestingPlatformVersion)' == '' or $([MSBuild]::VersionLessThan($(MicrosoftTestingPlatformVersion), $(_MSBuildMTPPin)))">$(_MSBuildMTPPin)</MicrosoftTestingPlatformVersion>
+    <OutputType Condition="$(MSBuildProjectName.EndsWith('.UnitTests')) or $(MSBuildProjectName.EndsWith('.Tests'))">Exe</OutputType>
+
+    <!-- xUnit1051: Calls to methods which accept CancellationToken should use TestContext.Current.CancellationToken to allow test cancellation to be more responsive. -->
+    <!-- Consider fixing this later. -->
+    <NoWarn>$(NoWarn);xUnit1051</NoWarn>
+
     <FullFrameworkTFM>net472</FullFrameworkTFM>
 
     <!--

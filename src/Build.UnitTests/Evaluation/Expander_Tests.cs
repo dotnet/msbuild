@@ -26,7 +26,6 @@ using Microsoft.Build.Utilities;
 using Microsoft.Win32;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using Xunit.NetCore.Extensions;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectHelpers = Microsoft.Build.UnitTests.BackEnd.ProjectHelpers;
@@ -4388,7 +4387,7 @@ $(
                 try
                 {
                     result = expander.ExpandIntoStringLeaveEscaped(errorTests[i], ExpanderOptions.ExpandProperties, MockElementLocation.Instance);
-                    if (String.Compare(result, errorTests[i]) == 0)
+                    if (String.Compare(result, errorTests[i], StringComparison.Ordinal) == 0)
                     {
                         Console.WriteLine(errorTests[i] + " did not expand.");
                         success = false;
@@ -5133,6 +5132,7 @@ $(
                 using (var env = TestEnvironment.Create())
                 {
                     env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_12.ToString());
+                    ChangeWaves.ResetStateForTests();
                     currentThread.CurrentCulture = svSECultureInfo;
                     currentThread.CurrentUICulture = svSECultureInfo;
                     var root = env.CreateFolder();

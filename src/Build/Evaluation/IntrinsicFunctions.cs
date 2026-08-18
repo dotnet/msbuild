@@ -500,7 +500,7 @@ namespace Microsoft.Build.Evaluation
             }
 
             runtime = XMakeAttributes.GetExplicitMSBuildRuntime(runtime);
-            architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(architecture);
+            architecture = XMakeAttributes.GetExplicitMSBuildArchitecture(architecture, runtime);
 
             TaskHostParameters parameters = new(runtime, architecture);
 

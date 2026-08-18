@@ -73,7 +73,9 @@ namespace Microsoft.Build.Tasks
                 {
                     conePath =
                         Strings.WeakIntern(
+#pragma warning disable MSBuildTask0002 // Path is already absolute from TaskEnvironment.GetAbsolutePath; GetFullPath only canonicalizes. Guarded by ChangeWave.
                             System.IO.Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(Path.ItemSpec))));
+#pragma warning restore MSBuildTask0002
                 }
 
                 conePath = FileUtilities.EnsureTrailingSlash(conePath);
@@ -104,7 +106,9 @@ namespace Microsoft.Build.Tasks
                     {
                         fullPath =
                             Strings.WeakIntern(
+#pragma warning disable MSBuildTask0002 // Path is already absolute from TaskEnvironment.GetAbsolutePath; GetFullPath only canonicalizes. Guarded by ChangeWave.
                                 System.IO.Path.GetFullPath(TaskEnvironment.GetAbsolutePath(FileUtilities.FixFilePath(item.ItemSpec))));
+#pragma warning restore MSBuildTask0002
                     }
                 }
                 catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))

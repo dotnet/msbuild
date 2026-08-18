@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.IO;
 using System.Xml;
 
 using Microsoft.Build.Tasks;
@@ -22,7 +23,7 @@ namespace Microsoft.Build.UnitTests
 
             string xml = "<assemblyIdentity name='ClassLibrary1'/>";
 
-            using var xmlReader = new XmlTextReader(xml, XmlNodeType.Document, null);
+            using var xmlReader = XmlReader.Create(new StringReader(xml));
             dependentAssembly.Read(xmlReader);
 
             Assert.NotNull(dependentAssembly.PartialAssemblyName);

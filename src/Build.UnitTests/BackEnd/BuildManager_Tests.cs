@@ -24,7 +24,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 using static Microsoft.Build.UnitTests.ObjectModelHelpers;
 using Constants = Microsoft.Build.Framework.Constants;
 
@@ -267,7 +266,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             propertyValue.ShouldBe("InitialProperty3", StringCompareShould.IgnoreCase);
         }
 
-#if FEATURE_CODETASKFACTORY
         /// <summary>
         /// Verify that the environment between two msbuild calls to the same project are stored
         /// so that on the next call we get access to them
@@ -277,7 +275,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             string contents1 = CleanupFileContents(@"
 <Project xmlns='msbuildnamespace' ToolsVersion='msbuilddefaulttoolsversion'>
- <UsingTask TaskName='SetEnvv' TaskFactory='CodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
+ <UsingTask TaskName='SetEnvv' TaskFactory='RoslynCodeTaskFactory' AssemblyFile='$(MSBuildToolsPath)\Microsoft.Build.Tasks.Core.dll' >
                             <Task>
                                 <Code Language='cs'>
                                     System.Environment.SetEnvironmentVariable(""MOO"", ""When the dawn comes, tonight will be a memory too"");
@@ -315,7 +313,6 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Equal(BuildResultCode.Success, result.OverallResult);
             _logger.AssertLogContains("What does a cat say : When the dawn comes, tonight will be a memory too");
         }
-#endif
 
         /// <summary>
         /// Verify if idle nodes are shutdown when BuildManager.ShutdownAllNodes is evoked.
@@ -1001,7 +998,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogContains(normalMessage);
             logger.AssertLogContains(lowMessage);
 
-            var deferredMessages = logger.BuildMessageEvents.Where(e => e.Message.StartsWith("deferred")).ToArray();
+            var deferredMessages = logger.BuildMessageEvents.Where(e => e.Message.StartsWith("deferred", StringComparison.Ordinal)).ToArray();
 
             deferredMessages.Length.ShouldBe(3);
 
@@ -4621,6 +4618,91 @@ $@"<Project InitialTargets=`Sleep`>
             {
                 _logger.AssertLogContains($"Child{i} built");
             }
+        }
+
+        /// <summary>
+        /// Regression test: when MSBUILDDEBUGSCHEDULER is enabled in multithreaded (-mt) mode,
+        /// multiple in-proc node engines write trace output to the same EngineTrace_{PID}.txt file.
+        /// Previously, each engine used lock(this) which only serialized within one instance,
+        /// allowing concurrent FileStream opens with FileShare.Read. The IOException fatally crashed
+        /// the ActionBlock work queue, silently dropping subsequent request completions and causing
+        /// a deadlock.
+        ///
+        /// The fix uses a static lock across all engine instances so a single trace file is safe,
+        /// and catches non-critical exceptions so trace failures can never crash the build engine.
+        /// </summary>
+        [Fact(Timeout = 30_000)]
+        public async System.Threading.Tasks.Task MultiThreadedBuild_WithDebugSchedulerTracing_DoesNotDeadlock()
+        {
+            await System.Threading.Tasks.Task.Run(() =>
+            {
+                string debugPath = _env.CreateFolder().Path;
+                _env.SetEnvironmentVariable("MSBUILDDEBUGSCHEDULER", "1");
+                _env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath);
+                FrameworkDebugUtils.SetDebugPath();
+
+                // Create a root project that builds several independent child projects in parallel.
+                // This forces multiple in-proc nodes to run concurrently, which triggers
+                // concurrent TraceEngine() calls.
+                const int childCount = 4;
+                string[] childPaths = new string[childCount];
+
+                string childContent = CleanupFileContents("""
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                      <Target Name="Build">
+                        <Message Text="Child built" Importance="High" />
+                      </Target>
+                    </Project>
+                    """);
+
+                for (int i = 0; i < childCount; i++)
+                {
+                    childPaths[i] = _env.CreateFile(".proj").Path;
+                    File.WriteAllText(childPaths[i], childContent);
+                }
+
+                string rootContent = CleanupFileContents($"""
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                      <Target Name="Build">
+                        <MSBuild Projects="{string.Join(";", childPaths)}" BuildInParallel="true" />
+                        <Message Text="Root completed" Importance="High" />
+                      </Target>
+                    </Project>
+                    """);
+
+                string rootPath = _env.CreateFile(".proj").Path;
+                File.WriteAllText(rootPath, rootContent);
+
+                var buildParameters = new BuildParameters
+                {
+                    MaxNodeCount = childCount + 1,
+                    EnableNodeReuse = false,
+                    MultiThreaded = true,
+                    DisableInProcNode = false,
+                    SaveOperatingEnvironment = false,
+                    Loggers = [_logger],
+                };
+
+                var data = new BuildRequestData(rootPath, new Dictionary<string, string>(), null,
+                    ["Build"], null);
+
+                BuildManager.DefaultBuildManager.Dispose();
+                BuildResult result = BuildManager.DefaultBuildManager.Build(buildParameters, data);
+
+                result.OverallResult.ShouldBe(BuildResultCode.Success);
+                _logger.AssertLogContains("Root completed");
+
+                // Verify that scheduler tracing actually produced at least one non-empty trace file
+                // in the configured debug directory.
+                string[] traceFiles = Directory.GetFiles(debugPath, "EngineTrace_*.txt");
+                traceFiles.ShouldNotBeEmpty("Expected at least one EngineTrace_*.txt file to be created in the debug directory.");
+
+                bool hasNonEmptyTraceFile = traceFiles
+                    .Select(path => new FileInfo(path))
+                    .Any(info => info.Length > 0);
+
+                hasNonEmptyTraceFile.ShouldBeTrue("Expected at least one EngineTrace_*.txt file to contain trace data.");
+            });
         }
     }
 }

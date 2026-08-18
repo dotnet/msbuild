@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.Build.Internal;
 
 namespace Microsoft.Build.Framework
 {
@@ -31,7 +32,7 @@ namespace Microsoft.Build.Framework
             string currentDirectoryFullPath,
             IDictionary<string, string> environmentVariables)
         {
-            _environmentVariables = new Dictionary<string, string>(environmentVariables, FrameworkCommunicationsUtilities.EnvironmentVariableComparer);
+            _environmentVariables = new Dictionary<string, string>(environmentVariables, CommunicationsUtilities.EnvironmentVariableComparer);
             ProjectDirectory = new AbsolutePath(currentDirectoryFullPath, ignoreRootedCheck: true);
         }
 
@@ -43,7 +44,7 @@ namespace Microsoft.Build.Framework
         public MultiThreadedTaskEnvironmentDriver(string currentDirectoryFullPath)
         {
             IDictionary variables = Environment.GetEnvironmentVariables();
-            _environmentVariables = new Dictionary<string, string>(variables.Count, FrameworkCommunicationsUtilities.EnvironmentVariableComparer);
+            _environmentVariables = new Dictionary<string, string>(variables.Count, CommunicationsUtilities.EnvironmentVariableComparer);
             foreach (DictionaryEntry entry in variables)
             {
                 _environmentVariables[(string)entry.Key] = (string)entry.Value!;

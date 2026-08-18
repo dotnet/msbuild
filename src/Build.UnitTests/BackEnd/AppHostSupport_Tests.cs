@@ -11,7 +11,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -91,6 +90,12 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 // Arrange - set DOTNET_ROOT variants that simulate app host bootstrap
                 env.SetEnvironmentVariable("DOTNET_ROOT", @"C:\TestDotnet");
                 env.SetEnvironmentVariable("DOTNET_ROOT_X64", @"C:\TestDotnetX64");
+
+                // This might seem redundant, but it's not.
+                // ClearBootstrapDotnetRootEnvironment is a production method that alters env variables directly via Environment class.
+                // This clears DOTNET_ROOT_X86 which might have been originally set.
+                // To ensure that DOTNET_ROOT_X86 is restored, we set it to itself so that TestEnvironment.Dispose restores it back.
+                env.SetEnvironmentVariable("DOTNET_ROOT_X86", Environment.GetEnvironmentVariable("DOTNET_ROOT_X86"));
 
                 // Original environment does NOT have these variables
                 var originalEnvironment = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);

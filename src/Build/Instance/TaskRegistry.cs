@@ -285,7 +285,7 @@ namespace Microsoft.Build.Execution
         {
             ErrorUtilities.VerifyThrowInternalNull(directoryOfImportingFile);
 #if DEBUG
-            ErrorUtilities.VerifyThrowInternalError(!taskRegistry._isInitialized, "Attempt to modify TaskRegistry after it was initialized.");
+            ErrorUtilities.VerifyThrow(!taskRegistry._isInitialized, "Attempt to modify TaskRegistry after it was initialized.");
 #endif
 
             if (!ConditionEvaluator.EvaluateCondition(
@@ -455,7 +455,7 @@ namespace Microsoft.Build.Execution
             bool isMultiThreadedBuild)
         {
 #if DEBUG
-            ErrorUtilities.VerifyThrowInternalError(_isInitialized, "Attempt to read from TaskRegistry before its initialization was finished.");
+            ErrorUtilities.VerifyThrow(_isInitialized, "Attempt to read from TaskRegistry before its initialization was finished.");
 #endif
             TaskFactoryWrapper taskFactory = null;
 

@@ -12,6 +12,9 @@ using System.Text;
 
 using Microsoft.Build.Framework;
 using Microsoft.Win32;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+#endif
 
 #nullable disable
 
@@ -55,14 +58,16 @@ namespace Microsoft.Build.Shared
 
                 try
                 {
+#if FEATURE_WINDOWSINTEROP
                     if (NativeMethods.IsWindows)
                     {
 #if RUNTIME_TYPE_NETCORE
                         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 #endif
                         // get the current OEM code page
-                        s_currentOemEncoding = Encoding.GetEncoding(NativeMethods.GetOEMCP());
+                        s_currentOemEncoding = Encoding.GetEncoding((int)PInvoke.GetOEMCP());
                     }
+#endif
                 }
                 // theoretically, GetEncoding may throw an ArgumentException or a NotSupportedException. This should never
                 // really happen, since the code page we pass in has just been returned from the "underlying platform",

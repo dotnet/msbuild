@@ -1,0 +1,34 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>$(LatestDotNetCoreForMSBuild)</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TestProjectFolder>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine('$(MSBuildThisFileDirectory)', '..', '..', '..', '..'))'))</TestProjectFolder>
+    <ExampleTaskPath>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTask.dll'))</ExampleTaskPath>
+    <ChildProjectPath>$([System.IO.Path]::Combine('$(MSBuildThisFileDirectory)', 'ChildProject.proj'))</ChildProjectPath>
+  </PropertyGroup>
+
+  <!-- Parent task: reports its PID and calls BuildProjectFile on child project -->
+  <UsingTask
+      TaskName="Microsoft.Build.UnitTests.BackEnd.BuildProjectFileAndReportPidTask"
+      AssemblyFile="$(ExampleTaskPath)"
+      TaskFactory="TaskHostFactory"
+      Runtime="NET"/>
+
+  <Target Name="TestTaskHostReuse" BeforeTargets="Build">
+    <!-- This task runs in an OOP TaskHost, reports its PID, and calls BuildProjectFile on ChildProject.
+         The child project also uses a task via TaskHostFactory with the same runtime, so the same
+         OOP TaskHost process should be reused (while the parent task is blocked on BuildProjectFile callback). -->
+    <Microsoft.Build.UnitTests.BackEnd.BuildProjectFileAndReportPidTask
+        ProjectFile="$(ChildProjectPath)"
+        Properties="ExampleTaskPath=$(ExampleTaskPath)">
+      <Output PropertyName="ParentPid" TaskParameter="ProcessId" />
+      <Output PropertyName="ParentBuildResult" TaskParameter="BuildSucceeded" />
+    </Microsoft.Build.UnitTests.BackEnd.BuildProjectFileAndReportPidTask>
+    <Message Text="PARENT_TASKHOST_PID=$(ParentPid)" Importance="high" />
+    <Message Text="ParentBuildResult=$(ParentBuildResult)" Importance="high" />
+  </Target>
+
+</Project>

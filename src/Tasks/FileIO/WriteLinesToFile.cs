@@ -22,6 +22,25 @@ namespace Microsoft.Build.Tasks
         // Default encoding taken from System.IO.WriteAllText()
         private static readonly Encoding s_defaultEncoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
+        /// <summary>
+        /// Moves <paramref name="source"/> to <paramref name="destination"/>, overwriting it if it exists.
+        /// Uses <c>Microsoft.IO.File</c> on .NET Framework to access the overwrite overload,
+        /// which is available natively in <c>System.IO.File</c> on .NET 6+.
+        /// </summary>
+        private static void MoveFileWithOverwrite(string source, string destination)
+        {
+#if NETFRAMEWORK
+            // Microsoft.IO.Redist backports File.Move(overwrite) to .NET Framework.
+            Microsoft.IO.File.Move(source, destination, overwrite: true);
+#elif NET
+            // File.Move(overwrite) is available natively on .NET 5+.
+            System.IO.File.Move(source, destination, overwrite: true);
+#else
+            // netstandard2.0 output is ref asm only and never executed at runtime.
+            throw new PlatformNotSupportedException();
+#endif
+        }
+
         /// <inheritdoc />
         public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
@@ -181,8 +200,10 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Saves content to file atomically using a temporary file, following the Visual Studio editor pattern.
-        /// This is for overwrite mode where we write the entire content.
+        /// Saves content to file atomically using a temporary file.
+        /// Writes to a temp file first, then moves it to the target with overwrite,
+        /// which handles both the "target exists" and "target doesn't exist" cases in a
+        /// single call and eliminates the race window present in a check-then-act pattern.
         /// </summary>
         private bool SaveAtomically(AbsolutePath filePath, string contentsAsString, Encoding encoding)
         {
@@ -197,63 +218,33 @@ namespace Microsoft.Build.Tasks
                 // Write content to temporary file
                 System.IO.File.WriteAllText(temporaryFilePath, contentsAsString, encoding);
 
-                // Attempt to atomically replace target file with temporary file
-                try
+                // Atomically move temp file to target, overwriting if it already exists.
+                // Using overwrite: true handles concurrent writes without a race condition —
+                // both "target doesn't exist" and "target already exists" cases are covered
+                // by a single operation, with no window between them.
+                const int maxAttempts = 3;
+                Exception lastException = null;
+                for (int attempt = 1; attempt <= maxAttempts; attempt++)
                 {
-                    // Replace the contents of filePath with the contents of the temporary using File.Replace
-                    // to preserve the various attributes of the original file.
-                    System.IO.File.Replace(temporaryFilePath, filePath, null, true);
-                    temporaryFilePath = null; // Mark as successfully replaced
-                    return !Log.HasLoggedErrors;
-                }
-                catch (FileNotFoundException)
-                {
-                    // The target file doesn't exist, which is fine. Move the temp file to target.
-                    try
+                    if (attempt > 1)
                     {
-                        System.IO.File.Move(temporaryFilePath, filePath);
-                        temporaryFilePath = null; // Mark as successfully moved
-                        return !Log.HasLoggedErrors;
-                    }
-                    catch (IOException moveEx)
-                    {
-                        // Move failed, log and return
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
-                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, moveEx.Message, lockedFileMessage);
-                        return !Log.HasLoggedErrors;
-                    }
-                }
-                catch (IOException)
-                {
-                    // Replace failed (likely file is locked). Retry a few times with small delay.
-                    for (int retry = 1; retry < 3; retry++)
-                    {
-                        try
-                        {
-                            System.Threading.Thread.Sleep(10);
-                            System.IO.File.Replace(temporaryFilePath, filePath, null, true);
-                            temporaryFilePath = null; // Mark as successfully replaced
-                            return !Log.HasLoggedErrors;
-                        }
-                        catch (IOException)
-                        {
-                            // Continue to next retry
-                        }
+                        // Log the retry so concurrency issues are visible when diagnosing builds.
+                        Log.LogMessageFromResources(MessageImportance.High, "WriteLinesToFile.Retry",
+                            filePath.OriginalValue, attempt, maxAttempts, lastException.Message);
+                        System.Threading.Thread.Sleep(10);
                     }
 
-                    // Retries exhausted. Try simple write as fallback.
                     try
                     {
-                        System.IO.File.WriteAllText(filePath, contentsAsString, encoding);
-                        temporaryFilePath = null; // Mark temp as not needed
+                        MoveFileWithOverwrite(temporaryFilePath, filePath);
+                        temporaryFilePath = null;
                         return !Log.HasLoggedErrors;
                     }
-                    catch (Exception fallbackEx) when (ExceptionHandling.IsIoRelatedException(fallbackEx))
+                    catch (Exception ex) when (attempt < maxAttempts && ExceptionHandling.IsIoRelatedException(ex))
                     {
-                        string lockedFileMessage = LockCheck.GetLockedFileMessage(filePath);
-                        Log.LogErrorWithCodeFromResources("WriteLinesToFile.ErrorOrWarning", filePath.OriginalValue, fallbackEx.Message, lockedFileMessage);
-                        return !Log.HasLoggedErrors;
+                        lastException = ex;
                     }
+                    // On the last attempt, the exception propagates to the outer handler.
                 }
             }
             catch (Exception e) when (ExceptionHandling.IsIoRelatedException(e))
@@ -280,6 +271,8 @@ namespace Microsoft.Build.Tasks
                     }
                 }
             }
+
+            return !Log.HasLoggedErrors;
         }
 
         /// <summary>

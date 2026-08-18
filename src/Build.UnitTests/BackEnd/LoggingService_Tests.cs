@@ -1153,7 +1153,12 @@ namespace Microsoft.Build.UnitTests.Logging
 
             LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Asynchronous, 1);
             ((IBuildComponent)loggingService).InitializeComponent(mockHost);
-            loggingService.RegisterLogger(new ConsoleLogger());
+
+            loggingService.RegisterLogger(new MockLogger());
+
+            Exception loggingThreadException = null;
+            loggingService.OnLoggingThreadException += ex =>
+                Interlocked.CompareExchange(ref loggingThreadException, ex, null);
 
             using ManualResetEvent startSignal = new ManualResetEvent(false);
             Exception caughtException = null;
@@ -1166,7 +1171,10 @@ namespace Microsoft.Build.UnitTests.Logging
                 {
                     try
                     {
-                        BuildMessageEventArgs msg = new BuildMessageEventArgs($"Message {i}", null, null, MessageImportance.Low);
+                        BuildMessageEventArgs msg = new BuildMessageEventArgs($"Message {i}", null, null, MessageImportance.Low)
+                        {
+                            BuildEventContext = new BuildEventContext(0, 0, 0, 0),
+                        };
                         loggingService.ProcessLoggingEvent(msg);
                     }
                     catch (Exception ex)
@@ -1186,6 +1194,7 @@ namespace Microsoft.Build.UnitTests.Logging
             bool joined = logThread.Join(TimeSpan.FromSeconds(10));
             joined.ShouldBeTrue("Logging thread did not terminate within the allotted time.");
             caughtException.ShouldBeNull();
+            loggingThreadException.ShouldBeNull();
         }
 
         #endregion

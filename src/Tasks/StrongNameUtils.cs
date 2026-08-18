@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Runtime.InteropServices;
+using System.Reflection.PortableExecutable;
 using System.Security;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
@@ -128,167 +127,47 @@ namespace Microsoft.Build.Tasks
         }
 
         /// <summary>
-        /// Given an assembly path, determine if the assembly is [delay] signed or not. This code is based on similar unmanaged
-        /// routines in vsproject and sn.exe (ndp tools) codebases.
+        /// Given an assembly path, determine if the assembly is [delay] signed or not.
         /// </summary>
-        /// <param name="assemblyPath"></param>
-        /// <returns></returns>
         internal static StrongNameLevel GetAssemblyStrongNameLevel(string assemblyPath)
         {
             ErrorUtilities.VerifyThrowArgumentNull(assemblyPath);
 
-            StrongNameLevel snLevel = StrongNameLevel.Unknown;
-            IntPtr fileHandle = NativeMethods.InvalidIntPtr;
-
             try
             {
-                // open the assembly
-                fileHandle = NativeMethods.CreateFile(assemblyPath, NativeMethods.GENERIC_READ, FileShare.Read, IntPtr.Zero, FileMode.Open, 0, IntPtr.Zero);
-                if (fileHandle == NativeMethods.InvalidIntPtr)
+                using FileStream stream = File.OpenRead(assemblyPath);
+                using PEReader peReader = new PEReader(stream);
+                CorHeader corHeader = peReader.PEHeaders.CorHeader;
+
+                // No COR20 header means this isn't a managed PE; preserve the historical
+                // "we don't know" answer rather than claiming the image is unsigned.
+                if (corHeader is null)
                 {
-                    return snLevel;
+                    return StrongNameLevel.Unknown;
                 }
 
-                // if it's not a disk file, exit
-                if (NativeMethods.GetFileType(fileHandle) != NativeMethods.FILE_TYPE_DISK)
+                DirectoryEntry signature = corHeader.StrongNameSignatureDirectory;
+                if (signature.RelativeVirtualAddress == 0 || signature.Size == 0)
                 {
-                    return snLevel;
+                    return StrongNameLevel.None;
                 }
 
-                IntPtr fileMappingHandle = IntPtr.Zero;
-
-                try
-                {
-                    fileMappingHandle = NativeMethods.CreateFileMapping(fileHandle, IntPtr.Zero, NativeMethods.PAGE_READONLY, 0, 0, null);
-                    if (fileMappingHandle == IntPtr.Zero)
-                    {
-                        return snLevel;
-                    }
-
-                    IntPtr fileMappingBase = IntPtr.Zero;
-
-                    try
-                    {
-                        fileMappingBase = NativeMethods.MapViewOfFile(fileMappingHandle, NativeMethods.FILE_MAP_READ, 0, 0, IntPtr.Zero);
-                        if (fileMappingBase == IntPtr.Zero)
-                        {
-                            return snLevel;
-                        }
-
-                        // retrieve NT headers pointer from the file
-                        IntPtr ntHeader = NativeMethods.ImageNtHeader(fileMappingBase);
-                        if (ntHeader == IntPtr.Zero)
-                        {
-                            return snLevel;
-                        }
-
-                        // get relative virtual address of the COR20 header
-                        uint cor20HeaderRva = GetCor20HeaderRva(ntHeader);
-                        if (cor20HeaderRva == 0)
-                        {
-                            return snLevel;
-                        }
-
-                        // get the pointer to the COR20 header structure
-                        IntPtr cor20HeaderPtr = NativeMethods.ImageRvaToVa(ntHeader, fileMappingBase, cor20HeaderRva, out _);
-                        if (cor20HeaderPtr == IntPtr.Zero)
-                        {
-                            return snLevel;
-                        }
-
-                        // get the COR20 structure itself
-                        NativeMethods.IMAGE_COR20_HEADER cor20Header = (NativeMethods.IMAGE_COR20_HEADER)Marshal.PtrToStructure(cor20HeaderPtr, typeof(NativeMethods.IMAGE_COR20_HEADER));
-
-                        // and finally, examine it. If no space is allocated for strong name signature, assembly is not signed.
-                        if ((cor20Header.StrongNameSignature.VirtualAddress == 0) || (cor20Header.StrongNameSignature.Size == 0))
-                        {
-                            snLevel = StrongNameLevel.None;
-                        }
-                        else
-                        {
-                            // if there's allocated space and strong name flag is set, assembly is fully signed, or delay signed otherwise
-                            if ((cor20Header.Flags & NativeMethods.COMIMAGE_FLAGS_STRONGNAMESIGNED) != 0)
-                            {
-                                snLevel = StrongNameLevel.FullySigned;
-                            }
-                            else
-                            {
-                                snLevel = StrongNameLevel.DelaySigned;
-                            }
-                        }
-                    }
-                    finally
-                    {
-                        if (fileMappingBase != IntPtr.Zero)
-                        {
-                            NativeMethods.UnmapViewOfFile(fileMappingBase);
-                            fileMappingBase = IntPtr.Zero;
-                        }
-                    }
-                }
-                finally
-                {
-                    if (fileMappingHandle != IntPtr.Zero)
-                    {
-                        NativeMethods.CloseHandle(fileMappingHandle);
-                        fileMappingHandle = IntPtr.Zero;
-                    }
-                }
+                return (corHeader.Flags & CorFlags.StrongNameSigned) != 0
+                    ? StrongNameLevel.FullySigned
+                    : StrongNameLevel.DelaySigned;
             }
-            finally
+            catch (IOException)
             {
-                if (fileHandle != NativeMethods.InvalidIntPtr)
-                {
-                    NativeMethods.CloseHandle(fileHandle);
-                }
+                return StrongNameLevel.Unknown;
             }
-
-            return snLevel;
-        }
-
-        /// <summary>
-        /// Retrieves the relative virtual address of the COR20 header, given the address of the NT headers structure. The catch
-        /// here is that the NT headers struct can be either 32 or 64 bit version, and some fields have different sizes there. We
-        /// need to see if we're dealing with a 32bit header or a 64bit one first.
-        /// </summary>
-        /// <param name="ntHeadersPtr"></param>
-        /// <returns></returns>
-        private static uint GetCor20HeaderRva(IntPtr ntHeadersPtr)
-        {
-            // read the first ushort in the optional header - we have an uint and IMAGE_FILE_HEADER preceding it
-            ushort optionalHeaderMagic = (ushort)Marshal.ReadInt16(ntHeadersPtr, Marshal.SizeOf<uint>() + Marshal.SizeOf<NativeMethods.IMAGE_FILE_HEADER>());
-
-            // this should really be a structure, but NDP can't marshal fixed size struct arrays in a struct... ugh.
-            // this ulong corresponds to a IMAGE_DATA_DIRECTORY structure
-            ulong cor20DataDirectoryLong;
-
-            // see if we have a 32bit header or a 64bit header
-            if (optionalHeaderMagic == NativeMethods.IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+            catch (BadImageFormatException)
             {
-                // marshal data into the appropriate structure
-                NativeMethods.IMAGE_NT_HEADERS32 ntHeader32 = (NativeMethods.IMAGE_NT_HEADERS32)Marshal.PtrToStructure(ntHeadersPtr, typeof(NativeMethods.IMAGE_NT_HEADERS32));
-                cor20DataDirectoryLong = ntHeader32.optionalHeader.DataDirectory[NativeMethods.IMAGE_DIRECTORY_ENTRY_COMHEADER];
+                return StrongNameLevel.Unknown;
             }
-            else if (optionalHeaderMagic == NativeMethods.IMAGE_NT_OPTIONAL_HDR64_MAGIC)
+            catch (UnauthorizedAccessException)
             {
-                // marshal data into the appropriate structure
-                NativeMethods.IMAGE_NT_HEADERS64 ntHeader64 = (NativeMethods.IMAGE_NT_HEADERS64)Marshal.PtrToStructure(ntHeadersPtr, typeof(NativeMethods.IMAGE_NT_HEADERS64));
-                cor20DataDirectoryLong = ntHeader64.optionalHeader.DataDirectory[NativeMethods.IMAGE_DIRECTORY_ENTRY_COMHEADER];
+                return StrongNameLevel.Unknown;
             }
-            else
-            {
-                Debug.Assert(false, "invalid file type!");
-                return 0;
-            }
-
-            // cor20DataDirectoryLong is really a IMAGE_DATA_DIRECTORY structure which I had to pack into an ulong
-            // (see comments for IMAGE_OPTIONAL_HEADER32/64 in NativeMethods.cs)
-            // this code extracts the virtualAddress (uint) and size (uint) fields from the ulong by doing simple
-            // bit masking/shifting ops
-            uint virtualAddress = (uint)(cor20DataDirectoryLong & 0x00000000ffffffff);
-            // uint size = (uint)(cor20DataDirectoryLong >> 32);
-
-            return virtualAddress;
         }
     }
 }

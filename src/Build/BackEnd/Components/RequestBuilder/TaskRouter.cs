@@ -85,6 +85,37 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
+        /// Full name of a task whose static singleton state makes it unsafe to run in a
+        /// long-lived sidecar TaskHost (which persists across invocations). Such tasks must
+        /// instead run in an explicit (transient) TaskHost that terminates after execution,
+        /// ensuring static state is cleaned up.
+        /// This is a temporary workaround until the task authors fix their static state issues.
+        /// See https://github.com/dotnet/msbuild/issues/13315
+        /// </summary>
+        private const string TaskRequiringTransientTaskHostFullName = "NuGet.Build.Tasks.RestoreTask";
+
+        /// <summary>
+        /// Determines if a task must be routed to an explicit (transient) TaskHost rather than
+        /// a reusable sidecar, because its static singleton state would leak across invocations.
+        /// Such tasks should run in a TaskHost that terminates after execution so all static
+        /// state is cleaned up.
+        /// </summary>
+        /// <param name="taskType">The type of the task to evaluate.</param>
+        /// <returns>True if the task requires a transient TaskHost; false otherwise.</returns>
+        public static bool RequiresTransientTaskHost(Type taskType)
+        {
+            ErrorUtilities.VerifyThrowArgumentNull(taskType, nameof(taskType));
+
+            string? fullName = taskType.FullName;
+            if (fullName is null)
+            {
+                return false;
+            }
+
+            return string.Equals(fullName, TaskRequiringTransientTaskHostFullName, StringComparison.Ordinal);
+        }
+
+        /// <summary>
         /// Clears the thread-safety cache. Used primarily for testing.
         /// </summary>
         internal static void ClearCache()

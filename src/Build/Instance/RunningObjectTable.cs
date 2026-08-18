@@ -1,12 +1,17 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
+
 using System;
+#if FEATURE_WINDOWSINTEROP
 using System.Runtime.InteropServices;
-using System.Runtime.InteropServices.ComTypes;
 using System.Runtime.Versioning;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Windows.Win32;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
+#endif
 
 #nullable disable
 
@@ -20,10 +25,15 @@ namespace Microsoft.Build.Execution
     /// </remarks>
     internal class RunningObjectTable : IRunningObjectTableWrapper
     {
-        private readonly Task<IRunningObjectTable> _rotTask;
+#if FEATURE_WINDOWSINTEROP
+        // Cached pointer to the IRunningObjectTable obtained on an MTA thread. Stored as nint
+        // because ComScope<T> is a ref struct and cannot be a field. Released by the finalizer.
+        private readonly Task<nint> _rotTask;
+#endif
 
         public RunningObjectTable()
         {
+#if FEATURE_WINDOWSINTEROP
             if (!NativeMethodsShared.IsWindows)
             {
                 return;
@@ -31,80 +41,142 @@ namespace Microsoft.Build.Execution
 
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
             {
-                Ole32.GetRunningObjectTable(0, out var rot);
-                _rotTask = Task.FromResult(rot);
+                _rotTask = Task.FromResult(GetRunningObjectTablePointer());
             }
             else
             {
-                // To avoid deadlock, create ROT in a threadpool threads which guarantees to be MTA. And the
-                // object will be MTA
-                _rotTask =
-                Task.Run(() =>
-                {
-#pragma warning disable CA1416 // Validate platform compatibility: we checked above but the analyzer misses it
-                    Ole32.GetRunningObjectTable(0, out var rot);
-#pragma warning restore CA1416 // Validate platform compatibility
-                    return rot;
-                });
+                // To avoid deadlock, create ROT on a threadpool thread which guarantees MTA.
+                _rotTask = Task.Run(GetRunningObjectTablePointer);
+            }
+#endif
+        }
+
+#if FEATURE_WINDOWSINTEROP
+        ~RunningObjectTable()
+        {
+            if (_rotTask is not null && _rotTask.Status == TaskStatus.RanToCompletion)
+            {
+                ReleasePointer(_rotTask.Result);
             }
         }
+
+        [SupportedOSPlatform("windows5.0")]
+        private static unsafe nint GetRunningObjectTablePointer()
+        {
+            IRunningObjectTable* rot;
+            HRESULT hr = PInvoke.GetRunningObjectTable(0, &rot);
+            return hr.Succeeded ? (nint)rot : 0;
+        }
+
+        private static unsafe void ReleasePointer(nint p)
+        {
+            if (p != 0)
+            {
+                ((IUnknown*)p)->Release();
+            }
+        }
+#endif
 
         /// <summary>
         /// Attempts to retrieve an item from the ROT.
         /// </summary>
-        [SupportedOSPlatform("windows")]
+#if FEATURE_WINDOWSINTEROP
+        [SupportedOSPlatform("windows5.0")]
+#endif
         public object GetObject(string itemName)
         {
-            var rot = _rotTask.GetAwaiter().GetResult();
-            IMoniker moniker;
+#if FEATURE_WINDOWSINTEROP
+            return GetObjectWindows(itemName);
+#else
+            throw new PlatformNotSupportedException();
+#endif
+        }
+
+#if FEATURE_WINDOWSINTEROP
+        [SupportedOSPlatform("windows5.0")]
+        private unsafe object GetObjectWindows(string itemName)
+        {
+            nint rotPtr = _rotTask.GetAwaiter().GetResult();
+            if (rotPtr == 0)
+            {
+                throw new COMException("Failed to obtain the Running Object Table.");
+            }
+
+            // The IRunningObjectTable pointer was obtained on an MTA thread; calling through
+            // it from an STA caller would bypass COM apartment marshalling. Run all ROT calls
+            // on an MTA thread so the moniker creation and GetObject invocation happen in the
+            // same apartment as the pointer's owner.
             if (Thread.CurrentThread.GetApartmentState() == ApartmentState.MTA)
             {
-                Ole32.CreateItemMoniker("!", itemName, out moniker);
+                return GetObjectCore(rotPtr, itemName);
             }
-            else
+
+            return Task.Run(() => GetObjectCore(rotPtr, itemName)).GetAwaiter().GetResult();
+        }
+
+        [SupportedOSPlatform("windows5.0")]
+        private static unsafe object GetObjectCore(nint rotPtr, string itemName)
+        {
+            IRunningObjectTable* rot = (IRunningObjectTable*)rotPtr;
+
+            IMoniker* monikerRaw;
+            HRESULT hr = PInvoke.CreateItemMoniker("!", itemName, &monikerRaw);
+            if (hr.Failed)
             {
-                // To avoid deadlock, create Moniker in a threadpool threads which guarantees to be MTA. And the
-                // object will be MTA
-                var task = Task.Run(() =>
-                {
-                    Ole32.CreateItemMoniker("!", itemName, out var mk);
-                    return mk;
-                });
-
-                moniker = task.GetAwaiter().GetResult();
+                throw new COMException("CreateItemMoniker failed", hr);
             }
 
-            int hr = rot.GetObject(moniker, out object obj);
-            if (hr != 0)
+            using ComScope<IMoniker> moniker = new(monikerRaw);
+
+            IUnknown* pUnk = null;
+            hr = rot->GetObject(moniker.Pointer, &pUnk);
+            if (hr.Failed)
             {
                 ThrowComExceptionWithDetails(hr, itemName);
             }
 
-            return obj;
+            try
+            {
+                return Marshal.GetObjectForIUnknown((IntPtr)pUnk);
+            }
+            finally
+            {
+                if (pUnk is not null)
+                {
+                    pUnk->Release();
+                }
+            }
         }
 
         /// <summary>
         /// Throws an exception with detailed COM error information if available.
         /// </summary>
-        private static void ThrowComExceptionWithDetails(int hr, string itemName)
+        [SupportedOSPlatform("windows5.0")]
+        private static unsafe void ThrowComExceptionWithDetails(int hr, string itemName)
         {
-            StringBuilder errorMessage = new StringBuilder();
+            StringBuilder errorMessage = new();
             errorMessage.AppendLine($"Failed to get object '{itemName}' from Running Object Table.");
             errorMessage.AppendLine($"HRESULT: 0x{hr:X8} ({hr})");
 
-            if (NativeMethodsShared.IsWindows && Ole32.GetErrorInfo(0, out IErrorInfo errorInfo) == 0 && errorInfo != null)
+            IErrorInfo* pErrorInfo = null;
+            HRESULT errInfoHr = PInvoke.GetErrorInfo(0, &pErrorInfo);
+            if (errInfoHr == HRESULT.S_OK && pErrorInfo is not null)
             {
-                // Try to get IErrorInfo for detailed error information
+                BSTR description = default;
+                BSTR source = default;
+                BSTR helpFile = default;
+                uint helpContext = 0;
+
                 try
                 {
-                    errorInfo.GetDescription(out string description);
-                    errorInfo.GetSource(out string source);
-                    errorInfo.GetHelpFile(out string helpFile);
-                    errorInfo.GetHelpContext(out int helpContext);
-                    
-                    AppendIfNotEmpty(nameof(description), description);
-                    AppendIfNotEmpty(nameof(source), source);
-                    AppendIfNotEmpty("help file", helpFile);
+                    pErrorInfo->GetDescription(&description);
+                    pErrorInfo->GetSource(&source);
+                    pErrorInfo->GetHelpFile(&helpFile);
+                    pErrorInfo->GetHelpContext(out helpContext);
+
+                    AppendIfNotEmpty("description", description.ToString());
+                    AppendIfNotEmpty("source", source.ToString());
+                    AppendIfNotEmpty("help file", helpFile.ToString());
                     if (helpContext != 0)
                     {
                         errorMessage.AppendLine($"help context: {helpContext}");
@@ -116,7 +188,19 @@ namespace Microsoft.Build.Execution
                 }
                 finally
                 {
-                    Marshal.ReleaseComObject(errorInfo);
+                    if (description.Value is not null)
+                    {
+                        PInvoke.SysFreeString(description);
+                    }
+                    if (source.Value is not null)
+                    {
+                        PInvoke.SysFreeString(source);
+                    }
+                    if (helpFile.Value is not null)
+                    {
+                        PInvoke.SysFreeString(helpFile);
+                    }
+                    pErrorInfo->Release();
                 }
             }
 
@@ -130,42 +214,6 @@ namespace Microsoft.Build.Execution
                 }
             }
         }
-
-        [SupportedOSPlatform("windows")]
-        private static class Ole32
-        {
-            [DllImport(nameof(Ole32))]
-            public static extern void CreateItemMoniker(
-                [MarshalAs(UnmanagedType.LPWStr)] string lpszDelim,
-                [MarshalAs(UnmanagedType.LPWStr)] string lpszItem,
-                out IMoniker ppmk);
-
-            [DllImport(nameof(Ole32))]
-            public static extern void GetRunningObjectTable(
-                int reserved,
-                out IRunningObjectTable pprot);
-
-            [DllImport(nameof(Ole32))]
-            public static extern int GetErrorInfo(
-                int dwReserved,
-                out IErrorInfo ppIErrorInfo);
-        }
-
-        /// <summary>
-        /// COM IErrorInfo interface for retrieving detailed error information.
-        /// </summary>
-        [ComImport]
-        [Guid("1CF2B120-547D-101B-8E65-08002B2BD119")]
-        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        private interface IErrorInfo
-        {
-            void GetSource([MarshalAs(UnmanagedType.BStr)] out string pBstrSource);
-
-            void GetDescription([MarshalAs(UnmanagedType.BStr)] out string pBstrDescription);
-
-            void GetHelpFile([MarshalAs(UnmanagedType.BStr)] out string pBstrHelpFile);
-
-            void GetHelpContext(out int pdwHelpContext);
-        }
+#endif
     }
 }

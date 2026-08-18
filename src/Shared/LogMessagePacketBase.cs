@@ -243,6 +243,11 @@ namespace Microsoft.Build.Shared
         /// Event is <see cref="WorkerNodeTelemetryEventArgs"/>
         /// </summary>
         WorkerNodeTelemetryEvent = 42,
+
+        /// <summary>
+        /// Event is <see cref="LoggersRegisteredEventArgs"/>
+        /// </summary>
+        LoggersRegisteredEvent = 43,
     }
     #endregion
 
@@ -440,7 +445,7 @@ namespace Microsoft.Build.Shared
             else
             {
                 _buildEvent = ReadEventFromStream(_eventType, translator);
-                ErrorUtilities.VerifyThrow(_buildEvent is not null, "Not Supported LoggingEventType {0}", _eventType.ToString());
+                ErrorUtilities.VerifyThrow(_buildEvent is not null, $"Not Supported LoggingEventType {_eventType}");
             }
 
             _eventType = GetLoggingEventId(_buildEvent);
@@ -543,6 +548,7 @@ namespace Microsoft.Build.Shared
                 LoggingEventType.BuildSubmissionStartedEvent => new BuildSubmissionStartedEventArgs(),
                 LoggingEventType.BuildCanceledEvent => new BuildCanceledEventArgs("Build canceled."),
                 LoggingEventType.WorkerNodeTelemetryEvent => new WorkerNodeTelemetryEventArgs(),
+                LoggingEventType.LoggersRegisteredEvent => new LoggersRegisteredEventArgs(),
 
                 _ => throw new InternalErrorException("Should not get to the default of GetBuildEventArgFromId ID: " + _eventType)
             };
@@ -690,6 +696,10 @@ namespace Microsoft.Build.Shared
             {
                 return LoggingEventType.WorkerNodeTelemetryEvent;
             }
+            else if (eventType == typeof(LoggersRegisteredEventArgs))
+            {
+                return LoggingEventType.LoggersRegisteredEvent;
+            }
             else if (eventType == typeof(TargetStartedEventArgs))
             {
                 return LoggingEventType.TargetStartedEvent;
@@ -768,7 +778,7 @@ namespace Microsoft.Build.Shared
                     WriteBuildWarningEventToStream((BuildWarningEventArgs)buildEvent, translator);
                     break;
                 default:
-                    ErrorUtilities.ThrowInternalError("Not Supported LoggingEventType {0}", eventType.ToString());
+                    ErrorUtilities.ThrowInternalError($"Not Supported LoggingEventType {eventType}");
                     break;
             }
         }

@@ -15,7 +15,6 @@ using Microsoft.Build.Tasks;
 using Microsoft.Build.Utilities;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -1068,6 +1067,116 @@ echo line 3"" />
                 exec.ConsoleOutput.Length.ShouldBe(1);
                 exec.ConsoleOutput[0].ItemSpec.ShouldBe(lineWithLeadingWhitespace);
             }
+        }
+
+        /// <summary>
+        /// Runs an Exec task that lists directory contents and asserts expected/unexpected files in the output.
+        /// </summary>
+        /// <param name="taskEnvironment">The TaskEnvironment to configure on the Exec task.</param>
+        /// <param name="workingDirectory">The WorkingDirectory to set, or null to use the default.</param>
+        /// <param name="expectedFile">A filename that must appear in the output.</param>
+        /// <param name="notExpectedFile">A filename that must NOT appear in the output, or null to skip.</param>
+        private void ExecuteListCommandInDirectory(
+            TaskEnvironment taskEnvironment,
+            string workingDirectory,
+            string expectedFile,
+            string notExpectedFile = null)
+        {
+            Exec exec = new Exec();
+            exec.TaskEnvironment = taskEnvironment;
+            exec.BuildEngine = new MockEngine(_output);
+            exec.Command = NativeMethodsShared.IsWindows ? "dir /b" : "ls";
+            exec.ConsoleToMSBuild = true;
+
+            if (workingDirectory != null)
+            {
+                exec.WorkingDirectory = workingDirectory;
+            }
+
+            bool result = exec.Execute();
+
+            result.ShouldBeTrue();
+            string[] outputLines = exec.ConsoleOutput.Select(item => item.ItemSpec).ToArray();
+            outputLines.ShouldContain(expectedFile);
+            if (notExpectedFile != null)
+            {
+                outputLines.ShouldNotContain(notExpectedFile);
+            }
+        }
+
+        [Fact]
+        public void ExecUsesProjectDirectoryAsDefaultWorkingDirectory()
+        {
+            using (var testEnv = TestEnvironment.Create(_output))
+            {
+                var projectDir = testEnv.CreateFolder();
+                File.WriteAllText(Path.Combine(projectDir.Path, "projectfile.txt"), "project content");
+
+                var differentCwd = testEnv.CreateFolder();
+                File.WriteAllText(Path.Combine(differentCwd.Path, "decoyfile.txt"), "decoy content");
+
+                string originalDirectory = Directory.GetCurrentDirectory();
+                TaskEnvironment taskEnvironment = null;
+                try
+                {
+                    Directory.SetCurrentDirectory(differentCwd.Path);
+
+                    taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path);
+                    ExecuteListCommandInDirectory(
+                        taskEnvironment,
+                        workingDirectory: null,
+                        expectedFile: "projectfile.txt",
+                        notExpectedFile: "decoyfile.txt");
+                }
+                finally
+                {
+                    taskEnvironment?.Dispose();
+                    Directory.SetCurrentDirectory(originalDirectory);
+                }
+            }
+        }
+
+        [Fact]
+        public void InvalidRelativeWorkingDirectory_LogsOriginalPathNotAbsolutized()
+        {
+            using var testEnv = TestEnvironment.Create(_output);
+            var projectDir = testEnv.CreateFolder();
+            const string relativeDir = "testDir";
+            string absolutePath = Path.Combine(projectDir.Path, relativeDir);
+
+            var exec = new Exec
+            {
+                BuildEngine = new MockEngine(_output),
+                Command = "echo hi",
+                WorkingDirectory = relativeDir,
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            exec.Execute().ShouldBeFalse();
+
+            var engine = (MockEngine)exec.BuildEngine;
+            engine.AssertLogContains("MSB6003");
+            engine.AssertLogContains(relativeDir);
+            engine.AssertLogDoesntContain(absolutePath);
+        }
+
+        [Fact]
+        public void Exec_RelativeWorkingDirectory_ResolvedAgainstProjectDirectory()
+        {
+            using var testEnv = TestEnvironment.Create(_output);
+            var projectDir = testEnv.CreateFolder();
+            Directory.CreateDirectory(Path.Combine(projectDir.Path, "builddir"));
+
+            var exec = new Exec
+            {
+                BuildEngine = new MockEngine(_output),
+                Command = "echo hi",
+                WorkingDirectory = "builddir",
+                TaskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDir.Path),
+            };
+
+            exec.ValidateParametersAccessor().ShouldBeTrue();
+            exec.GetWorkingDirectoryAccessor().ShouldBe(Path.Combine(projectDir.Path, "builddir"));
         }
     }
 

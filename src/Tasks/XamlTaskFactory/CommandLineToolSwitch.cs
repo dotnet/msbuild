@@ -240,13 +240,13 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             get
             {
-                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.Boolean, "InvalidType", TypeBoolean);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.Boolean, $"InvalidType: {TypeBoolean}");
                 return _booleanValue;
             }
 
             set
             {
-                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.Boolean, "InvalidType", TypeBoolean);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.Boolean, $"InvalidType: {TypeBoolean}");
                 _booleanValue = value;
             }
         }
@@ -258,13 +258,13 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             get
             {
-                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.Integer, "InvalidType", TypeInteger);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.Integer, $"InvalidType: {TypeInteger}");
                 return _number;
             }
 
             set
             {
-                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.Integer, "InvalidType", TypeInteger);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.Integer, $"InvalidType: {TypeInteger}");
                 _number = value;
             }
         }
@@ -277,13 +277,13 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             get
             {
-                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.StringArray, "InvalidType", TypeStringArray);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.StringArray, $"InvalidType: {TypeStringArray}");
                 return _stringList;
             }
 
             set
             {
-                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.StringArray, "InvalidType", TypeStringArray);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.StringArray, $"InvalidType: {TypeStringArray}");
                 _stringList = value;
             }
         }
@@ -296,13 +296,13 @@ namespace Microsoft.Build.Tasks.Xaml
         {
             get
             {
-                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.ITaskItemArray, "InvalidType", TypeITaskItemArray);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.ITaskItemArray, $"InvalidType: {TypeITaskItemArray}");
                 return _taskItemArray;
             }
 
             set
             {
-                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.ITaskItemArray, "InvalidType", TypeITaskItemArray);
+                ErrorUtilities.VerifyThrow(Type == CommandLineToolSwitchType.ITaskItemArray, $"InvalidType: {TypeITaskItemArray}");
                 _taskItemArray = value;
             }
         }

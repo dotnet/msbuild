@@ -9,6 +9,10 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
+#if FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+using Windows.Win32.Foundation;
+#endif
 
 namespace Microsoft.Build.Experimental.BuildCheck.Checks;
 internal sealed class UntrustedLocationCheck : Check
@@ -64,13 +68,23 @@ internal sealed class UntrustedLocationCheck : Check
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 // Unsupported on pre-vista
+#if NET
+                if (OperatingSystem.IsWindowsVersionAtLeast(6, 0, 6000))
+#else
                 if (Environment.OSVersion.Version.Major >= 6)
+#endif
                 {
                     try
                     {
+#if FEATURE_WINDOWSINTEROP
                         // based on doc (https://learn.microsoft.com/en-us/windows/win32/api/shlobj_core/nf-shlobj_core-shgetknownfolderpath)
                         //  - a final slash is not added
-                        return SHGetKnownFolderPath(new Guid("374DE290-123F-4565-9164-39C4925E467B"), 0, IntPtr.Zero);
+                        string? downloads = GetDownloadsPathWindows();
+                        if (downloads is not null)
+                        {
+                            return downloads;
+                        }
+#endif
                     }
                     catch
                     {
@@ -90,10 +104,27 @@ internal sealed class UntrustedLocationCheck : Check
             return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
         }
 
-        [DllImport("shell32",
-            CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = false)]
-        private static extern string SHGetKnownFolderPath(
-            [MarshalAs(UnmanagedType.LPStruct)] Guid rfid, uint dwFlags,
-            IntPtr hToken);
+#if FEATURE_WINDOWSINTEROP
+        [System.Runtime.Versioning.SupportedOSPlatform("windows6.0.6000")]
+        private static unsafe string? GetDownloadsPathWindows()
+        {
+            // FOLDERID_Downloads
+            Guid folderId = new("374DE290-123F-4565-9164-39C4925E467B");
+            HRESULT hr = PInvoke.SHGetKnownFolderPath(folderId, default, HANDLE.Null, out PWSTR path);
+            try
+            {
+                if (hr.Succeeded && path.Value is not null)
+                {
+                    return path.ToString();
+                }
+            }
+            finally
+            {
+                PInvoke.CoTaskMemFree(path.Value);
+            }
+
+            return null;
+        }
+#endif
     }
 }

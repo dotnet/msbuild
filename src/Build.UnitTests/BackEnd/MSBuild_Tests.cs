@@ -13,7 +13,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
 
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 

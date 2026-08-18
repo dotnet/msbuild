@@ -120,74 +120,28 @@ namespace Microsoft.Build.Framework
         public static implicit operator string(AbsolutePath path) => path.Value;
 
         /// <summary>
-        /// Returns the canonical form of this path.
+        /// Returns the canonical form of this path, equivalent to calling <see cref="System.IO.Path.GetFullPath(string)"/>.
         /// </summary>
         /// <returns>
         /// An <see cref="AbsolutePath"/> representing the canonical form of the path.
         /// </returns>
         /// <remarks>
         /// <para>
-        /// The canonical form of a path is exactly what <see cref="Path.GetFullPath(string)"/> would produce,
+        /// The canonical form of a path is exactly what <see cref="System.IO.Path.GetFullPath(string)"/> would produce,
         /// with the following properties:
         /// <list type="bullet">
         ///   <item>All relative path segments ("." and "..") are resolved.</item>
         ///   <item>Directory separators are normalized to the platform convention (backslash on Windows).</item>
+        ///   <item>Invalid path characters are rejected.</item>
         /// </list>
         /// </para>
         /// <para>
-        /// If the path is already in canonical form, returns the current instance to avoid unnecessary allocations.
         /// Preserves the OriginalValue of the current instance.
         /// </para>
         /// </remarks>
         internal AbsolutePath GetCanonicalForm()
         {
-            if (string.IsNullOrEmpty(Value))
-            {
-                return this;
-            }
-
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_6))
-            {
-                // Note: this is a quick check to avoid calling Path.GetFullPath when it's not necessary, since it can be expensive. 
-                // It should cover the most common cases and avoid the overhead of Path.GetFullPath in those cases.
-
-                // Check for relative path segments "." and ".."
-                // In absolute path those segments can not appear in the beginning of the path, only after a path separator.
-                // This is not a precise full detection of relative segments. There is no false negatives as this might affect correctenes, but it may have false positives:
-                // like when there is a hidden file or directory starting with a dot, or on linux the backslash and dot can be part of the file name.
-                // In case of false positives we would call Path.GetFullPath and the result would still be correct.
-
-                bool hasRelativeSegment = Value.Contains("/.") || Value.Contains("\\.");
-
-                // Check if directory separator normalization is required (only on Windows: "/" to "\")
-                // On unix "\" is not a valid path separator, but is a part of the file/directory name, so no normalization is needed. 
-                bool needsSeparatorNormalization = NativeMethods.IsWindows && Value.IndexOf(Path.AltDirectorySeparatorChar) >= 0;
-
-                // Check for consecutive directory separators (e.g., "\\") which Path.GetFullPath would collapse.
-                // On Windows, consecutive backslashes in the middle of a path (not at the start for UNC) should be collapsed.
-                // On Unix, consecutive forward slashes should be collapsed.
-                bool hasConsecutiveSeparators;
-                if (NativeMethods.IsWindows)
-                {
-                    // On Windows, search from offset 1 to skip position 0 where UNC paths legitimately start with "\\".
-                    // This still catches cases like "C:\\foo" (positions 2-3) or "D:\foo\\bar".
-                    // Length > 3 guard: searching for 2-char match from offset 1 needs at least 4 chars.
-                    hasConsecutiveSeparators = Value.Length > 3 && Value.IndexOf("\\\\", 1, StringComparison.Ordinal) >= 0;
-                }
-                else
-                {
-                    hasConsecutiveSeparators = Value.Contains("//");
-                }
-
-                if (!hasRelativeSegment && !needsSeparatorNormalization && !hasConsecutiveSeparators)
-                {
-                    return this;
-                }
-            }
-
-            // Use Path.GetFullPath to resolve relative segments and normalize separators.
-            // Skip validation since Path.GetFullPath already ensures the result is absolute.
-            return new AbsolutePath(Path.GetFullPath(Value), OriginalValue, ignoreRootedCheck: true);
+            return new AbsolutePath(System.IO.Path.GetFullPath(Value), OriginalValue, ignoreRootedCheck: true);
         }
 
         /// <summary>

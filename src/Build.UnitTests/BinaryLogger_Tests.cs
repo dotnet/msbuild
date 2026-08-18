@@ -7,6 +7,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using FakeItEasy;
 using FluentAssertions;
 using Microsoft.Build.BackEnd.Logging;
@@ -18,7 +19,6 @@ using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using Xunit;
-using Xunit.Abstractions;
 
 #nullable disable
 
@@ -102,6 +102,17 @@ namespace Microsoft.Build.UnitTests
         [InlineData(s_testProject2, BinlogRoundtripTestReplayMode.RawEvents)]
         public void TestBinaryLoggerRoundtrip(string projectText, BinlogRoundtripTestReplayMode replayMode)
         {
+            // NOTE:
+            // We want both loggers to see the same value of EnableTargetOutputLogging, otherwise, the last assertion will fail.
+            // See logic around showTargetOutputs.
+            // In short, this controls whether or not the "Target output items:" part is shown.
+            // Traits.Instance is weird, it's not always a singleton, depending on whether or not BuildEnvironmentState.s_runningTests is true.
+            // In this case s_runningTests is true.
+            // When s_runningTests is true, we don't use a singleton, and in this case, what matters is the env variable value.
+            // So we set the env variable to 1 and clear at the end of test.
+            using var env = TestEnvironment.Create();
+            env.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "1");
+
             var binaryLogger = new BinaryLogger();
 
             binaryLogger.Parameters = _logFile;
@@ -953,6 +964,122 @@ namespace Microsoft.Build.UnitTests
 
             // Create the expected log file to satisfy test environment expectations
             File.Create(_logFile).Dispose();
+        }
+
+        #endregion
+
+        #region Forward Compatibility Replay Tests
+        // These tests exercise in-memory streams rather than .binlog files,
+        // but the fixture's _logFile must exist at Dispose time.
+
+        [Fact]
+        public void OpenBuildEventsReader_ThrowsForIncompatibleVersion()
+        {
+            // fileFormatVersion > current AND minimumReaderVersion > current => fatal
+            var stream = new MemoryStream();
+            using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+            writer.Write(BinaryLogger.FileFormatVersion + 10); // fileFormatVersion
+            writer.Write(BinaryLogger.FileFormatVersion + 5);  // minimumReaderVersion (too high)
+            writer.Flush();
+            stream.Position = 0;
+
+            using var reader = new BinaryReader(stream);
+            Should.Throw<NotSupportedException>(() =>
+                BinaryLogReplayEventSource.OpenBuildEventsReader(reader, closeInput: false, allowForwardCompatibility: true));
+
+            CreateExpectedLogFile();
+        }
+
+        [Fact]
+        public void OpenBuildEventsReader_SucceedsForForwardCompatibleVersion()
+        {
+            // fileFormatVersion > current but minimumReaderVersion <= current => should succeed
+            var stream = new MemoryStream();
+            using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+            writer.Write(BinaryLogger.FileFormatVersion + 5);         // fileFormatVersion (newer)
+            writer.Write(BinaryLogger.ForwardCompatibilityMinimalVersion); // minimumReaderVersion (compatible)
+            writer.Flush();
+            stream.Position = 0;
+
+            using var reader = new BinaryReader(stream);
+            using var eventsReader = BinaryLogReplayEventSource.OpenBuildEventsReader(reader, closeInput: false, allowForwardCompatibility: true);
+            eventsReader.ShouldNotBeNull();
+            eventsReader.FileFormatVersion.ShouldBe(BinaryLogger.FileFormatVersion + 5);
+
+            CreateExpectedLogFile();
+        }
+
+        [Fact]
+        public void OpenBuildEventsReader_ThrowsWithoutForwardCompatibility()
+        {
+            // fileFormatVersion > current, allowForwardCompatibility = false => fatal even if minimumReaderVersion is ok
+            var stream = new MemoryStream();
+            using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+            writer.Write(BinaryLogger.FileFormatVersion + 5);         // fileFormatVersion (newer)
+            writer.Write(BinaryLogger.ForwardCompatibilityMinimalVersion); // minimumReaderVersion (compatible)
+            writer.Flush();
+            stream.Position = 0;
+
+            using var reader = new BinaryReader(stream);
+            Should.Throw<NotSupportedException>(() =>
+                BinaryLogReplayEventSource.OpenBuildEventsReader(reader, closeInput: false, allowForwardCompatibility: false));
+
+            CreateExpectedLogFile();
+        }
+
+        /// <summary>
+        /// Creates an empty placeholder so the fixture's Dispose doesn't fail
+        /// when the test didn't produce a real .binlog file.
+        /// </summary>
+        private void CreateExpectedLogFile() => File.Create(_logFile).Dispose();
+
+        [Fact]
+        public void FormatVersionMismatchWarning_NullForCurrentVersion()
+        {
+            _env.SetEnvironmentVariable("MSBUILDTARGETOUTPUTLOGGING", "1");
+
+            var binaryLogger = new BinaryLogger { Parameters = _logFile };
+
+            using (ProjectCollection collection = new())
+            {
+                Project project = ObjectModelHelpers.CreateInMemoryProject(collection, s_testProject);
+                project.Build(new ILogger[] { binaryLogger }).ShouldBeTrue();
+            }
+
+            var replayEventSource = new BinaryLogReplayEventSource();
+            replayEventSource.RecoverableReadError += _ => { };
+            replayEventSource.BuildFinished += (_, _) => { };
+            replayEventSource.Replay(_logFile);
+
+            replayEventSource.FormatVersionMismatchWarning.ShouldBeNull();
+        }
+
+        [Fact]
+        public void FormatVersionMismatchWarning_NonNullForNewerVersion()
+        {
+            int newerVersion = BinaryLogger.FileFormatVersion + 5;
+
+            var stream = new MemoryStream();
+            using var writer = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true);
+            writer.Write(newerVersion);                                     // fileFormatVersion
+            writer.Write(BinaryLogger.ForwardCompatibilityMinimalVersion);  // minimumReaderVersion
+            stream.WriteByte(0);                                            // EndOfFile record
+            writer.Flush();
+            stream.Position = 0;
+
+            using var binaryReader = new BinaryReader(stream);
+            using var eventsReader = BinaryLogReplayEventSource.OpenBuildEventsReader(binaryReader, closeInput: false, allowForwardCompatibility: true);
+
+            var replayEventSource = new BinaryLogReplayEventSource();
+            replayEventSource.RecoverableReadError += _ => { };
+            replayEventSource.BuildFinished += (_, _) => { };
+            replayEventSource.Replay(eventsReader, CancellationToken.None);
+
+            replayEventSource.FormatVersionMismatchWarning.ShouldNotBeNull();
+            replayEventSource.FormatVersionMismatchWarning.ShouldContain(newerVersion.ToString());
+            replayEventSource.FormatVersionMismatchWarning.ShouldContain(BinaryLogger.FileFormatVersion.ToString());
+
+            CreateExpectedLogFile();
         }
 
         #endregion

@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -9,6 +9,7 @@ using Microsoft.Build.Experimental.BuildCheck;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Profiler;
+using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
 
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
@@ -135,7 +136,7 @@ namespace Microsoft.Build.BackEnd.Logging
             if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
                 _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
-                ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
+                ErrorUtilities.VerifyThrow(projectFile != null, $"ContextID {buildEventContext.ProjectContextId} should have been in the ID-to-project file mapping but wasn't!");
                 buildEvent.ProjectFile = projectFile;
             }
 
@@ -175,7 +176,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
                 {
                     _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
-                    ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
+                    ErrorUtilities.VerifyThrow(projectFile != null, $"ContextID {buildEventContext.ProjectContextId} should have been in the ID-to-project file mapping but wasn't!");
                     buildEvent.ProjectFile = projectFile;
                 }
 
@@ -327,7 +328,7 @@ namespace Microsoft.Build.BackEnd.Logging
             if (buildEvent.ProjectFile == null && buildEventContext.ProjectContextId != BuildEventContext.InvalidProjectContextId)
             {
                 _projectFileMap.TryGetValue(buildEventContext.ProjectContextId, out string projectFile);
-                ErrorUtilities.VerifyThrow(projectFile != null, "ContextID {0} should have been in the ID-to-project file mapping but wasn't!", buildEventContext.ProjectContextId);
+                ErrorUtilities.VerifyThrow(projectFile != null, $"ContextID {buildEventContext.ProjectContextId} should have been in the ID-to-project file mapping but wasn't!");
                 buildEvent.ProjectFile = projectFile;
             }
 
@@ -360,6 +361,15 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Make sure we process this event before going any further
             WaitForLoggingToProcessEvents();
+
+            // Register Loggers and print out all the enabled loggers.
+            // Gated behind ChangeWaves.Wave18_8 so that disabling the wave fully suppresses
+            // the new "Enabled loggers" message and the new LoggersRegisteredEventArgs,
+            // not just their rendering in the console/terminal loggers.
+            if (!OnlyLogCriticalEvents && ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_8))
+            {
+                LogAndRegisterLoggers();
+            }
         }
 
         /// <summary>
@@ -389,6 +399,63 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Make sure we process this event before going any further
             WaitForLoggingToProcessEvents();
+        }
+
+        /// <summary>
+        /// Emits a message listing the enabled logger
+        /// type names and a <see cref="LoggersRegisteredEventArgs"/> describing each logger (including
+        /// any output file paths for <see cref="IFileOutputLogger"/> implementations).
+        /// </summary>
+        private void LogAndRegisterLoggers()
+        {
+            List<string> listOfLoggers = new();
+            var loggerDescriptions = new List<RegisteredLoggerInfo>();
+
+            foreach (ILogger logger in Loggers)
+            {
+                ILogger actualLogger = UnwrapLogger(logger);
+                Type loggerType = actualLogger.GetType();
+
+                listOfLoggers.Add(loggerType.Name);
+
+                var outputFilePaths = new List<string>();
+                if (actualLogger is IFileOutputLogger fileLogger)
+                {
+                    foreach (string outputFilePath in fileLogger.OutputFilePaths)
+                    {
+                        if (!string.IsNullOrEmpty(outputFilePath))
+                        {
+                            outputFilePaths.Add(outputFilePath);
+                        }
+                    }
+                }
+
+                loggerDescriptions.Add(new RegisteredLoggerInfo(
+                    loggerName: loggerType.Name,
+                    outputFilePaths: outputFilePaths.Count > 0 ? outputFilePaths : null,
+                    verbosity: actualLogger.Verbosity,
+                    parameters: actualLogger.Parameters));
+            }
+
+            if (listOfLoggers.Count != 0)
+            {
+                var msgEvent = new BuildMessageEventArgs(
+                    ResourceUtilities.FormatResourceStringIgnoreCodeAndKeyword("LogEnabledLogs", string.Join(", ", listOfLoggers)),
+                    null, null, MessageImportance.Low);
+                msgEvent.BuildEventContext = BuildEventContext.Invalid;
+                ProcessLoggingEvent(msgEvent);
+            }
+
+            if (loggerDescriptions.Count > 0)
+            {
+                var registerEvent = new LoggersRegisteredEventArgs(loggerDescriptions);
+                registerEvent.BuildEventContext = BuildEventContext.Invalid;
+                ProcessLoggingEvent(registerEvent);
+            }
+        }
+        private ILogger UnwrapLogger(ILogger logger)
+        {
+            return logger is ReusableLogger reusable ? reusable.OriginalLogger : logger;
         }
 
         /// <inheritdoc />
@@ -537,11 +604,9 @@ namespace Microsoft.Build.BackEnd.Logging
             {
                 projectContextId = NextProjectId;
 
-                // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
-                if (_projectFileMap.ContainsKey(projectContextId))
-                {
-                    ErrorUtilities.ThrowInternalError("ContextID {0} for project {1} should not already be in the ID-to-file mapping!", projectContextId, projectFile);
-                }
+                ErrorUtilities.VerifyThrow(
+                    !_projectFileMap.ContainsKey(projectContextId),
+                    $"ContextID {projectContextId} for project {projectFile} should not already be in the ID-to-file mapping!");
 
                 _projectFileMap[projectContextId] = projectFile;
             }
@@ -552,7 +617,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 {
                     if (!projectFile.Equals(existingProjectFile, StringComparison.OrdinalIgnoreCase))
                     {
-                        ErrorUtilities.ThrowInternalError("ContextID {0} was already in the ID-to-project file mapping but the project file {1} did not match the provided one {2}!", projectContextId, existingProjectFile, projectFile);
+                        ErrorUtilities.ThrowInternalError($"ContextID {projectContextId} was already in the ID-to-project file mapping but the project file {existingProjectFile} did not match the provided one {projectFile}!");
                     }
                 }
                 else
@@ -562,7 +627,7 @@ namespace Microsoft.Build.BackEnd.Logging
                     // So we only need this sanity check for the in-proc node.
                     if (nodeBuildEventContext.NodeId == Scheduler.InProcNodeId)
                     {
-                        ErrorUtilities.ThrowInternalError("ContextID {0} should have been in the ID-to-project file mapping but wasn't!", projectContextId);
+                        ErrorUtilities.ThrowInternalError($"ContextID {projectContextId} should have been in the ID-to-project file mapping but wasn't!");
                     }
 
                     _projectFileMap[projectContextId] = projectFile;
@@ -619,11 +684,9 @@ namespace Microsoft.Build.BackEnd.Logging
             // Due to GetAndVerifyProjectFileFromContext validation, these checks break the build.
             if (!_buildCheckEnabled)
             {
-                // PERF: Not using VerifyThrow to avoid boxing of projectBuildEventContext.ProjectContextId in the non-error case.
-                if (!_projectFileMap.TryRemove(projectBuildEventContext.ProjectContextId, out _))
-                {
-                    ErrorUtilities.ThrowInternalError("ContextID {0} for project {1} should be in the ID-to-file mapping!", projectBuildEventContext.ProjectContextId, projectFile);
-                }
+                ErrorUtilities.VerifyThrow(
+                    _projectFileMap.TryRemove(projectBuildEventContext.ProjectContextId, out _),
+                    $"ContextID {projectBuildEventContext.ProjectContextId} for project {projectFile} should be in the ID-to-file mapping!");
             }
         }
 
