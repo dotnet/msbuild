@@ -119,6 +119,8 @@ public class ExpressionShredderBenchmark
     {
         yield return s_plain;
         yield return s_singleItem;
+        yield return s_functionTransform;
+        yield return s_functionTransformWithArguments;
         yield return s_multipleTransforms;
         yield return s_transformWithSeparator;
         yield return s_unqualifiedMetadata;
