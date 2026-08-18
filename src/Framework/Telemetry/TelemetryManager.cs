@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.Telemetry;
 #endif
 
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace Microsoft.Build.Framework.Telemetry
@@ -21,6 +22,8 @@ namespace Microsoft.Build.Framework.Telemetry
     /// </remarks>
     internal class TelemetryManager
     {
+        internal const string ReleaseCanaryEnvironmentVariable = "MSBUILD_TELEMETRY_CANARY_ID";
+
         /// <summary>
         /// Lock object for thread-safe initialization and disposal.
         /// </summary>
@@ -115,6 +118,36 @@ namespace Microsoft.Build.Framework.Telemetry
                 DefaultActivitySource = null;
             }
         }
+
+        internal void EmitReleaseCanary(string? canaryId, string buildEngineVersion)
+        {
+#if NETFRAMEWORK
+            lock (s_lock)
+            {
+                if (s_disposed)
+                {
+                    return;
+                }
+
+                try
+                {
+                    VsTelemetryInitializer.PostReleaseCanary(canaryId, buildEngineVersion);
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    // The release pipeline verifies ingestion externally. Telemetry must remain best effort
+                    // inside MSBuild even when the canary cannot be posted.
+                }
+            }
+#endif
+        }
+
+        internal static Dictionary<string, object> CreateReleaseCanaryProperties(Guid canaryId, string buildEngineVersion) =>
+            new()
+            {
+                [$"{TelemetryConstants.PropertyPrefix}CanaryId"] = canaryId.ToString("N"),
+                [$"{TelemetryConstants.PropertyPrefix}BuildEngineVersion"] = buildEngineVersion,
+            };
 
         public void Dispose()
         {
@@ -217,6 +250,29 @@ namespace Microsoft.Build.Framework.Telemetry
             {
                 session.Dispose();
             }
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void PostReleaseCanary(string? canaryId, string buildEngineVersion)
+        {
+            if (s_telemetrySession is not TelemetrySession session ||
+                !Guid.TryParseExact(canaryId, "N", out Guid parsedCanaryId))
+            {
+                return;
+            }
+
+            session.PostEvent(CreateReleaseCanaryEvent(parsedCanaryId, buildEngineVersion));
+        }
+
+        internal static TelemetryEvent CreateReleaseCanaryEvent(Guid canaryId, string buildEngineVersion)
+        {
+            TelemetryEvent telemetryEvent = new($"{TelemetryConstants.EventPrefix}{TelemetryConstants.ReleaseCanary}");
+            foreach (KeyValuePair<string, object> property in TelemetryManager.CreateReleaseCanaryProperties(canaryId, buildEngineVersion))
+            {
+                telemetryEvent.Properties[property.Key] = property.Value;
+            }
+
+            return telemetryEvent;
         }
     }
 #endif
