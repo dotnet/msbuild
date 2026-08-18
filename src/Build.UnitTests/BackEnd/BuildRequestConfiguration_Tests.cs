@@ -776,5 +776,41 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             deserialized.ProjectEvaluationId.ShouldBe(expectedEvalId);
         }
+
+        /// <summary>
+        /// Verifies that <see cref="BuildRequestConfiguration.RemoveActivelyBuildingTargetIfOwnedBy"/> only removes the
+        /// entry when it is still owned by the specified request id. This protects against a stale request (e.g. one
+        /// whose cancellation timed out but which is still executing) resuming and erroneously clearing a different,
+        /// newer request's still-active entry for the same target name and configuration.
+        /// </summary>
+        [Fact]
+        public void RemoveActivelyBuildingTargetIfOwnedByOnlyRemovesMatchingOwner()
+        {
+            BuildRequestData data = new BuildRequestData("file", new Dictionary<string, string>(), "toolsVersion", Array.Empty<string>(), null);
+            BuildRequestConfiguration configuration = new BuildRequestConfiguration(1, data, "2.0");
+
+            const int staleRequestId = 1;
+            const int newRequestId = 2;
+
+            // The stale request originally recorded that it is building "Build".
+            configuration.ActivelyBuildingTargets["Build"] = staleRequestId;
+
+            // A newer request reused this retained configuration and is now building "Build" instead.
+            configuration.ActivelyBuildingTargets["Build"] = newRequestId;
+
+            // The stale request finally resumes (e.g. after a cancellation timeout) and tries to mark its target as
+            // no longer building. Since it no longer owns the entry, this must be a no-op.
+            configuration.RemoveActivelyBuildingTargetIfOwnedBy("Build", staleRequestId);
+
+            configuration.ActivelyBuildingTargets.ShouldContainKey("Build");
+            configuration.ActivelyBuildingTargets["Build"].ShouldBe(newRequestId);
+            configuration.IsActivelyBuilding.ShouldBeTrue();
+
+            // The owning (new) request completes normally and removes its own entry.
+            configuration.RemoveActivelyBuildingTargetIfOwnedBy("Build", newRequestId);
+
+            configuration.ActivelyBuildingTargets.ShouldNotContainKey("Build");
+            configuration.IsActivelyBuilding.ShouldBeFalse();
+        }
     }
 }
