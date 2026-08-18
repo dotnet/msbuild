@@ -62,7 +62,7 @@ These APIs access process-global state that varies per task in multithreaded mod
 | `Process.Start()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 | `new ProcessStartInfo()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 
-`TaskEnvironment.GetTempPath()` resolves the temporary folder from the task environment. It does not read the shared process environment.
+In multithreaded mode, `TaskEnvironment.GetTempPath()` resolves the temporary folder from the isolated task environment. In multi-process mode, it matches `Path.GetTempPath()`.
 
 ### MSBuildTask0003 — File Paths Must Be Absolute
 
@@ -419,7 +419,7 @@ public class CopyFiles : Task, IMultiThreadableTask
     public override bool Execute()
     {
         Log.LogMessage("Copying files...");              // ✅ Use build logging
-        var tmp = TaskEnvironment.GetEnvironmentVariable("TMP"); // ✅ Per-task env
+        var tmp = TaskEnvironment.GetTempPath();                  // ✅ Per-task temp path
         var envVar = TaskEnvironment.GetEnvironmentVariable("MY_VAR"); // ✅ Per-task env
         File.Copy(                                       // ✅ Absolute paths
             TaskEnvironment.GetAbsolutePath(Source),

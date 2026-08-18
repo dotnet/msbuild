@@ -313,7 +313,16 @@ namespace Microsoft.Build.UnitTests
         }
 
         [WindowsOnlyFact]
-        public void TaskEnvironment_GetTempPath_OnWindows_UsesRootedTmpFirst()
+        public void TaskEnvironment_MultiThreaded_GetTempPath_MatchesPathGetTempPath()
+        {
+            TaskEnvironment taskEnvironment =
+                TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(GetResolvedTempPath());
+
+            AssertTempPathAndDispose(taskEnvironment, Path.GetTempPath());
+        }
+
+        [WindowsOnlyFact]
+        public void TaskEnvironment_GetTempPath_OnWindows_PrefersTmpOverTemp()
         {
             string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
             string tmpDirectory = Path.Combine(GetResolvedTempPath(), "tmp");
@@ -366,15 +375,13 @@ namespace Microsoft.Build.UnitTests
         }
 
         [WindowsOnlyFact]
-        public void TaskEnvironment_GetTempPath_OnWindows_UsesRootedUserProfileBeforeSystemRoot()
+        public void TaskEnvironment_GetTempPath_OnWindows_UsesUserProfile()
         {
             string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
             string userProfile = Path.Combine(GetResolvedTempPath(), "user-profile");
-            string systemRoot = Path.Combine(GetResolvedTempPath(), "system-root");
             var environmentVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 ["USERPROFILE"] = userProfile,
-                ["SYSTEMROOT"] = systemRoot,
             };
 
             TaskEnvironment taskEnvironment =
@@ -384,31 +391,68 @@ namespace Microsoft.Build.UnitTests
         }
 
         [WindowsOnlyFact]
-        public void TaskEnvironment_GetTempPath_OnWindows_UsesSystemRootWhenOtherVariablesAreUnavailable()
+        public void TaskEnvironment_GetTempPath_OnWindows_ResolvesRelativeUserProfileAgainstProjectDirectory()
         {
             string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
-            string systemRoot = Path.Combine(GetResolvedTempPath(), "system-root");
+            const string relativeUserProfile = "user-profile";
             var environmentVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
-                ["SYSTEMROOT"] = systemRoot,
+                ["USERPROFILE"] = relativeUserProfile,
             };
 
             TaskEnvironment taskEnvironment =
                 TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory, environmentVariables);
 
-            AssertTempPathAndDispose(taskEnvironment, systemRoot + Path.DirectorySeparatorChar);
+            string expected =
+                Path.GetFullPath(Path.Combine(projectDirectory, relativeUserProfile)) + Path.DirectorySeparatorChar;
+            AssertTempPathAndDispose(taskEnvironment, expected);
         }
 
         [WindowsOnlyFact]
-        public void TaskEnvironment_GetTempPath_OnWindows_UsesWindowsDirectoryWhenEnvironmentIsEmpty()
+        public void TaskEnvironment_GetTempPath_OnWindows_IgnoresSystemRootAndUsesWindowsDirectory()
         {
             string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
+            var environmentVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["SYSTEMROOT"] = Path.Combine(GetResolvedTempPath(), "system-root"),
+            };
             TaskEnvironment taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(
                 projectDirectory,
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase));
+                environmentVariables);
 
             string windowsDirectory = Path.GetDirectoryName(Environment.SystemDirectory)!;
             AssertTempPathAndDispose(taskEnvironment, windowsDirectory + Path.DirectorySeparatorChar);
+        }
+
+        [WindowsOnlyFact]
+        public void TaskEnvironment_GetTempPath_OnWindows_ForSystemProcessUsesSystemTemp()
+        {
+            string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
+            string systemTempDirectory = Path.Combine(GetResolvedTempPath(), "system-temp");
+            var environmentVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["TMP"] = Path.Combine(GetResolvedTempPath(), "tmp"),
+                ["SystemTemp"] = systemTempDirectory,
+            };
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDirectory, environmentVariables);
+
+            driver.GetTempPath(isSystemProcess: true).Value.ShouldBe(
+                systemTempDirectory + Path.DirectorySeparatorChar);
+        }
+
+        [WindowsOnlyFact]
+        public void TaskEnvironment_GetTempPath_OnWindows_ForSystemProcessUsesDefaultSystemTemp()
+        {
+            string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
+            var environmentVariables = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+            {
+                ["TMP"] = Path.Combine(GetResolvedTempPath(), "tmp"),
+            };
+            using var driver = new MultiThreadedTaskEnvironmentDriver(projectDirectory, environmentVariables);
+
+            string windowsDirectory = Path.GetDirectoryName(Environment.SystemDirectory)!;
+            driver.GetTempPath(isSystemProcess: true).Value.ShouldBe(
+                Path.Combine(windowsDirectory, "SystemTemp") + Path.DirectorySeparatorChar);
         }
 
         [WindowsOnlyFact]
@@ -469,6 +513,53 @@ namespace Microsoft.Build.UnitTests
             string expected =
                 Path.GetFullPath(Path.Combine(projectDirectory, relativeTempDirectory)) + Path.DirectorySeparatorChar;
             AssertTempPathAndDispose(taskEnvironment, expected);
+        }
+
+        [UnixOnlyFact]
+        public void TaskEnvironment_GetTempPath_OnUnix_PreservesBackslashInTmpDir()
+        {
+            string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
+            const string tempDirectory = "/tmp/task\\temp";
+            var environmentVariables = new Dictionary<string, string>
+            {
+                ["TMPDIR"] = tempDirectory,
+            };
+
+            TaskEnvironment taskEnvironment =
+                TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory, environmentVariables);
+
+            AssertTempPathAndDispose(taskEnvironment, tempDirectory + Path.DirectorySeparatorChar);
+        }
+
+        [UnixOnlyFact]
+        public void TaskEnvironment_GetTempPath_OnUnix_UsesDefaultWhenTmpDirIsEmpty()
+        {
+            string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
+            var environmentVariables = new Dictionary<string, string>
+            {
+                ["TMPDIR"] = string.Empty,
+            };
+
+            TaskEnvironment taskEnvironment =
+                TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory, environmentVariables);
+
+            AssertTempPathAndDispose(taskEnvironment, "/tmp/");
+        }
+
+        [UnixOnlyFact]
+        public void TaskEnvironment_GetTempPath_OnUnix_IgnoresTmpAndTemp()
+        {
+            string projectDirectory = Path.Combine(GetResolvedTempPath(), "project");
+            var environmentVariables = new Dictionary<string, string>
+            {
+                ["TMP"] = "/tmp/from-tmp",
+                ["TEMP"] = "/tmp/from-temp",
+            };
+
+            TaskEnvironment taskEnvironment =
+                TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectory, environmentVariables);
+
+            AssertTempPathAndDispose(taskEnvironment, "/tmp/");
         }
 
         [UnixOnlyFact]
