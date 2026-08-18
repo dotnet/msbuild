@@ -134,7 +134,7 @@ namespace Microsoft.Build.Logging
             // So keeping that map here
             var originalLocations = new Dictionary<EvaluationLocation, EvaluationLocation>(EvaluationLocationIdAgnosticComparer.Singleton);
 
-            while (_profiledResults.Any())
+            while (!_profiledResults.IsEmpty)
             {
                 ProfilerResult profiledResult;
                 var result = _profiledResults.TryDequeue(out profiledResult);

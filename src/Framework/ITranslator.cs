@@ -26,6 +26,14 @@ namespace Microsoft.Build.BackEnd
     internal delegate void ObjectTranslator<T>(ITranslator translator, ref T objectToTranslate);
 
     /// <summary>
+    /// Delegate for users that want to translate an arbitrary structure that doesn't implement <see cref="ITranslatable"/> (e.g. translating a complex collection)
+    /// </summary>
+    /// <param name="translator">the translator</param>
+    /// <param name="valueFactory">The factory to use to create the value.</param>
+    /// <param name="objectToTranslate">the object to translate</param>
+    internal delegate void ObjectTranslatorWithValueFactory<T>(ITranslator translator, NodePacketValueFactory<T> valueFactory, ref T objectToTranslate);
+
+    /// <summary>
     /// This delegate is used to create arbitrary collection types for serialization.
     /// </summary>
     /// <typeparam name="T">The type of dictionary to be created.</typeparam>
@@ -66,6 +74,13 @@ namespace Microsoft.Build.BackEnd
     /// </remarks>
     internal interface ITranslator : IDisposable
     {
+        /// <summary>
+        /// Gets or sets the packet version associated with the stream.
+        /// This can be used to exclude various fields from translation for backwards compatibility,
+        /// e.g. when Writer introduces information that should be skipped in the Reader stream.
+        /// </summary>
+        byte PacketVersion { get; set; }
+
         /// <summary>
         /// Returns the current serialization mode.
         /// </summary>
@@ -191,6 +206,15 @@ namespace Microsoft.Build.BackEnd
         void Translate<T>(ref List<T> list, ObjectTranslator<T> objectTranslator);
 
         /// <summary>
+        /// Translates a list of T using an <see cref="ObjectTranslator{T}"/>
+        /// </summary>
+        /// <param name="list">The list to be translated.</param>
+        /// <param name="objectTranslator">The translator to use for the items in the list</param>
+        /// <param name="valueFactory">The factory to use to create the value.</param>
+        /// <typeparam name="T">A TaskItemType</typeparam>
+        void Translate<T>(ref List<T> list, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory);
+
+        /// <summary>
         /// Translates a list of T using an <see cref="ObjectTranslator{T}"/> anda collection factory
         /// </summary>
         /// <param name="list">The list to be translated.</param>
@@ -199,6 +223,17 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="L">An IList subtype</typeparam>
         /// <param name="collectionFactory">factory to create a collection</param>
         void Translate<T, L>(ref IList<T> list, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>;
+
+        /// <summary>
+        /// Translates a list of T using an <see cref="ObjectTranslator{T}"/> and a collection factory
+        /// </summary>
+        /// <param name="list">The list to be translated.</param>
+        /// <param name="objectTranslator">The translator to use for the items in the list</param>
+        /// <param name="valueFactory">The factory to use to create the value.</param>
+        /// <typeparam name="T">An ITranslatable subtype</typeparam>
+        /// <typeparam name="L">An IList subtype</typeparam>
+        /// <param name="collectionFactory">factory to create a collection</param>
+        void Translate<T, L>(ref IList<T> list, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<L> collectionFactory) where L : IList<T>;
 
         /// <summary>
         /// Translates a collection of T into the specified type using an <see cref="ObjectTranslator{T}"/> and <see cref="NodePacketCollectionCreator{L}"/>
@@ -298,7 +333,8 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The reference type.</typeparam>
         /// <param name="array">The array to be translated.</param>
         /// <param name="objectTranslator">The translator to use for the elements in the array.</param>
-        void TranslateArray<T>(ref T[] array, ObjectTranslator<T> objectTranslator);
+        /// <param name="valueFactory">The factory to use to create the value.</param>
+        void TranslateArray<T>(ref T[] array, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory);
 
         /// <summary>
         /// Translates a dictionary of { string, string }.
@@ -318,13 +354,15 @@ namespace Microsoft.Build.BackEnd
         /// This overload is needed for a workaround concerning serializing BuildResult with a version.
         /// It serializes/deserializes additional entries together with the main dictionary.
         /// </remarks>
-        void TranslateDictionary(ref Dictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys);
+        void TranslateDictionary(ref IDictionary<string, string> dictionary, IEqualityComparer<string> comparer, ref Dictionary<string, string> additionalEntries, HashSet<string> additionalEntriesKeys);
 
         void TranslateDictionary(ref IDictionary<string, string> dictionary, NodePacketCollectionCreator<IDictionary<string, string>> collectionCreator);
 
         void TranslateDictionary(ref Dictionary<string, DateTime> dictionary, StringComparer comparer);
 
         void TranslateDictionary<K, V>(ref IDictionary<K, V> dictionary, ObjectTranslator<K> keyTranslator, ObjectTranslator<V> valueTranslator, NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator);
+
+        void TranslateDictionary<K, V>(ref IDictionary<K, V> dictionary, ObjectTranslator<K> keyTranslator, ObjectTranslatorWithValueFactory<V> valueTranslator, NodePacketValueFactory<V> valueFactory, NodePacketCollectionCreator<IDictionary<K, V>> dictionaryCreator);
 
         /// <summary>
         /// Translates a dictionary of { string, T }.
@@ -333,7 +371,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="dictionary">The dictionary to be translated.</param>
         /// <param name="comparer">The comparer used to instantiate the dictionary.</param>
         /// <param name="objectTranslator">The translator to use for the values in the dictionary</param>
-        void TranslateDictionary<T>(ref Dictionary<string, T> dictionary, IEqualityComparer<string> comparer, ObjectTranslator<T> objectTranslator)
+        /// /// <param name="valueFactory">The factory to use to create the value.</param>
+        void TranslateDictionary<T>(ref Dictionary<string, T> dictionary, IEqualityComparer<string> comparer, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory)
             where T : class;
 
         /// <summary>
@@ -343,7 +382,8 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
         /// <param name="dictionary">The dictionary to be translated.</param>
         /// <param name="objectTranslator">The translator to use for the values in the dictionary.</param>
-        void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslator<T> objectTranslator)
+        /// <param name="valueFactory">The factory to use to create the value.</param>
+        void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory)
             where D : IDictionary<string, T>, new()
             where T : class;
 
@@ -354,8 +394,9 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The reference type for values in the dictionary.</typeparam>
         /// <param name="dictionary">The dictionary to be translated.</param>
         /// <param name="objectTranslator">The translator to use for the values in the dictionary</param>
+        /// /// <param name="valueFactory">The factory to use to create the value.</param>
         /// <param name="collectionCreator">A factory used to create the dictionary.</param>
-        void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslator<T> objectTranslator, NodePacketCollectionCreator<D> collectionCreator)
+        void TranslateDictionary<D, T>(ref D dictionary, ObjectTranslatorWithValueFactory<T> objectTranslator, NodePacketValueFactory<T> valueFactory, NodePacketCollectionCreator<D> collectionCreator)
             where D : IDictionary<string, T>
             where T : class;
 
@@ -366,5 +407,59 @@ namespace Microsoft.Build.BackEnd
         /// <typeparam name="T">The type of object to test.</typeparam>
         /// <returns>True if the object should be written, false otherwise.</returns>
         bool TranslateNullable<T>(T value);
+
+        /// <summary>
+        /// Creates a scope which activates string interning / deduplication for any Intern_xx method.
+        /// This should generally be called from the root level packet.
+        /// </summary>
+        /// <param name="comparer">The string comparer to use when populating the intern cache.</param>
+        /// <param name="initialCapacity">The initial capacity of the intern cache.</param>
+        /// <param name="internBlock">A delegate providing a translator, in which all Intern_xx calls will go through the intern cache.</param>
+        /// <remarks>
+        /// Packet interning is implemented via a header with an array of all interned strings, followed by the body in
+        /// which any interned / duplicated strings are replaced by their ID.
+        /// <see cref="TranslationDirection"/> modes have different ordering requirements, so it would not be
+        /// possible to implement direction-agnostic serialization via the Intern_xx methods alone:
+        /// - Write: Because we don't know the full list of strings ahead of time, we need to create a temporary buffer
+        ///   for the packet body, which we can later offset when flushing to the real stream.
+        /// - Read: The intern header needs to be deserialized before the packet body, otherwise we won't know what
+        ///   string each ID maps to.
+        /// This method abstracts these requirements to the caller, such that the underlying translator will
+        /// automatically handle the appropriate IO ordering when entering / exiting the delegate scope.
+        /// </remarks>
+        void WithInterning(IEqualityComparer<string> comparer, int initialCapacity, Action<ITranslator> internBlock);
+
+        /// <summary>
+        /// Interns the string if the translator is currently within an intern block.
+        /// Otherwise, this forwards to the regular Translate method.
+        /// </summary>
+        /// <param name="str">The value to be translated.</param>
+        /// <param name="nullable">
+        /// Whether to null check and translate the nullable marker.
+        /// Setting this to false can reduce packet sizes when interning large numbers of strings
+        /// which are validated to always be non-null, such as dictionary keys.
+        /// </param>
+        void Intern(ref string str, bool nullable = true);
+
+        /// <summary>
+        /// Interns each string in the array if the translator is currently within an intern block.
+        /// Otherwise, this forwards to the regular Translate method. To match behavior, all strings
+        /// assumed to be non-null.
+        /// </summary>
+        /// <param name="array">The array to be translated.</param>
+        void Intern(ref string[] array);
+
+        /// <summary>
+        /// Interns the string if the translator is currently within an intern block.
+        /// Otherwise, this forwards to the regular Translate method.
+        /// If the string is determined to be path-like, the path components will be interned separately.
+        /// </summary>
+        /// <param name="str">The value to be translated.</param>
+        /// <param name="nullable">
+        /// Whether to null check and translate the nullable marker.
+        /// Setting this to false can reduce packet sizes when interning large numbers of strings
+        /// which are validated to always be non-null, such as dictionary keys.
+        /// </param>
+        void InternPath(ref string str, bool nullable = true);
     }
 }

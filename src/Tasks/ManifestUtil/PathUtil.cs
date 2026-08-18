@@ -3,7 +3,11 @@
 
 using System;
 using System.IO;
+#if !NET
 using System.Linq;
+#else
+using System.Text;
+#endif
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -162,9 +166,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             byte[] buffer = new byte[2];
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
-#pragma warning disable CA2022 // Avoid inexact read with 'Stream.Read'
-                s.Read(buffer, 0, 2);
-#pragma warning restore CA2022 // Avoid inexact read with 'Stream.Read'
+                s.ReadExactly(buffer, 0, 2);
             }
 
             // if first two bytes are "MZ" then we're looking at an .exe or a .dll not a .manifest
@@ -222,7 +224,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 {
                     // Unfortunately Uri.Host is read-only, so we need to reconstruct it manually...
                     int i = path.IndexOf(localHost, StringComparison.OrdinalIgnoreCase);
-                    return i >= 0 ? path.Substring(0, i) + Environment.MachineName.ToLowerInvariant() + path.Substring(i + localHost.Length) : path;
+                    return i >= 0 ?
+#if NET
+                        $"{path.AsSpan(0, i)}{Environment.MachineName.ToLowerInvariant()}{path.AsSpan(i + localHost.Length)}" :
+#else
+                        $"{path.Substring(0, i)}{Environment.MachineName.ToLowerInvariant()}{path.Substring(i + localHost.Length)}" :
+#endif
+                        path;
                 }
                 return path;
             }
@@ -231,7 +239,11 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return Path.GetFullPath(path); // make sure it's a full path
         }
 
-        private static bool IsAsciiString(string str)
-            => str.All(c => c <= 127);
+        private static bool IsAsciiString(string str) =>
+#if NET
+            Ascii.IsValid(str);
+#else
+            str.All(c => c <= 127);
+#endif
     }
 }

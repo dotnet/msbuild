@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Build.Shared;
+using static Microsoft.Build.Tasks.RedistList;
 
 #nullable disable
 
@@ -136,11 +135,11 @@ namespace Microsoft.Build.Tasks
         /// Find every assembly full name in the redist list that matches the given simple name.
         /// </summary>
         /// <returns>The array of assembly names.</returns>
-        internal IEnumerable<AssemblyEntry> FindAssemblyNameFromSimpleName(string simpleName)
+        internal AssemblyNameFromSimpleNameEnumerator FindAssemblyNameFromSimpleName(string simpleName)
         {
             if (_redistList == null)
             {
-                return [];
+                return new AssemblyNameFromSimpleNameEnumerator();
             }
 
             return _redistList.FindAssemblyNameFromSimpleName(simpleName);

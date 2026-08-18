@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <TestProjectFolder>$([System.IO.Path]::GetFullPath('$([System.IO.Path]::Combine('$(AssemblyLocation)', '..'))'))</TestProjectFolder>
+    <ExampleTaskPath>$([System.IO.Path]::Combine('$(TestProjectFolder)', '$(TargetFramework)', 'ExampleTask.dll'))</ExampleTaskPath>
+  </PropertyGroup>
+
+  <UsingTask TaskName="ExampleTask" AssemblyFile="$(ExampleTaskPath)" Runtime="NET"/>
+
+  <Target Name="TestTask" BeforeTargets="Build">
+    <ExampleTask />
+  </Target>
+
+</Project>

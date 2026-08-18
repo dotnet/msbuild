@@ -54,9 +54,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 byte[] buffer = new byte[2];
-#pragma warning disable CA2022 // Avoid inexact read with 'Stream.Read' The check of bytes happens later in the code. In case of invalid documents the code will throw an exception during xml loading.
-                s.Read(buffer, 0, 2);
-#pragma warning restore CA2022 // Avoid inexact read with 'Stream.Read'
+                s.ReadExactly(buffer, 0, 2);
                 s.Position = 0;
                 var document = new XmlDocument();
                 var xrSettings = new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore };
@@ -140,9 +138,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             using (Stream s = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.Read))
             {
                 byte[] buffer = new byte[2];
-#pragma warning disable CA2022 // Avoid inexact read with 'Stream.Read' The check of bytes happens later in the code. In case of invalid document the exception is expected later
-                s.Read(buffer, 0, 2);
-#pragma warning restore CA2022 // Avoid inexact read with 'Stream.Read'
+                s.ReadExactly(buffer, 0, 2);
                 s.Position = 0;
                 // if first two bytes are "MZ" then we're looking at an .exe or a .dll not a .manifest
                 if ((buffer[0] == 0x4D) && (buffer[1] == 0x5A))
@@ -246,7 +242,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             using (XmlReader xr = XmlReader.Create(s, xrSettings))
             {
                 var m = (Manifest)xs.Deserialize(xr);
-                Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "ManifestReader.Deserialize t={0}", Environment.TickCount - t1));
+                Util.WriteLog($"ManifestReader.Deserialize t={Environment.TickCount - t1}");
                 return m;
             }
         }

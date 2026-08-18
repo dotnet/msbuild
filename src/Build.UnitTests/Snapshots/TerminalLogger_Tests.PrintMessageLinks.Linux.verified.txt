@@ -1,0 +1,8 @@
+﻿]9;4;3;\  project [32;1msucceeded[m (0.2s)
+    ]8;;https://go.microsoft.com/fwlink/?LinkId=keyword\1234]8;;\: this message has a link because it has a code and a keyword
+    1234: this message has no link because it only has a code
+    this message has no link because it only has a keyword
+[?25l[1F
+[?25h
+Build [32;1msucceeded[m in 5.0s
+]9;4;0;\

@@ -5,7 +5,9 @@ using System.Collections.Generic;
 using Microsoft.Build.BackEnd.Components.Caching;
 using Microsoft.Build.BackEnd.SdkResolution;
 using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
+#if FEATURE_REPORTFILEACCESSES
 using Microsoft.Build.FileAccesses;
+#endif
 using Microsoft.Build.Shared;
 using Microsoft.Build.TelemetryInfra;
 

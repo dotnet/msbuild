@@ -12,10 +12,14 @@ namespace Microsoft.NET.StringTools
     internal sealed partial class WeakStringCache : IDisposable
     {
         private readonly Dictionary<int, StringWeakHandle> _stringsByHashCode;
+        private readonly Dictionary<int, StringWeakHandle> _weakHandlesByHashCode;
 
         public WeakStringCache()
         {
-            _stringsByHashCode = new Dictionary<int, StringWeakHandle>(_initialCapacity);
+            _weakHandlesByHashCode = new Dictionary<int, StringWeakHandle>(_initialCapacity);
+
+            // Unused since we need to take a coarse lock anyways - here because we share a partial class.
+            _stringsByHashCode = new Dictionary<int, StringWeakHandle>();
         }
 
         /// <summary>
@@ -34,9 +38,9 @@ namespace Microsoft.NET.StringTools
             string? result;
             bool addingNewHandle = false;
 
-            lock (_stringsByHashCode)
+            lock (_weakHandlesByHashCode)
             {
-                if (_stringsByHashCode.TryGetValue(hashCode, out handle))
+                if (_weakHandlesByHashCode.TryGetValue(hashCode, out handle))
                 {
                     result = handle.GetString(ref internable);
                     if (result != null)
@@ -60,15 +64,15 @@ namespace Microsoft.NET.StringTools
                 if (addingNewHandle)
                 {
                     // Prevent the dictionary from growing forever with GC handles that don't reference live strings anymore.
-                    if (_stringsByHashCode.Count >= _scavengeThreshold)
+                    if (_weakHandlesByHashCode.Count >= _scavengeThreshold)
                     {
                         // Get rid of unused handles.
                         ScavengeNoLock();
                         // And do this again when the number of handles reaches double the current after-scavenge number.
-                        _scavengeThreshold = _stringsByHashCode.Count * 2;
+                        _scavengeThreshold = _weakHandlesByHashCode.Count * 2;
                     }
                 }
-                _stringsByHashCode[hashCode] = handle;
+                _weakHandlesByHashCode[hashCode] = handle;
             }
 
             cacheHit = false;
@@ -83,7 +87,7 @@ namespace Microsoft.NET.StringTools
         private void ScavengeNoLock()
         {
             List<int>? keysToRemove = null;
-            foreach (KeyValuePair<int, StringWeakHandle> entry in _stringsByHashCode)
+            foreach (KeyValuePair<int, StringWeakHandle> entry in _weakHandlesByHashCode)
             {
                 if (!entry.Value.IsUsed)
                 {
@@ -96,7 +100,7 @@ namespace Microsoft.NET.StringTools
             {
                 for (int i = 0; i < keysToRemove.Count; i++)
                 {
-                    _stringsByHashCode.Remove(keysToRemove[i]);
+                    _weakHandlesByHashCode.Remove(keysToRemove[i]);
                 }
             }
         }
@@ -106,7 +110,7 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         public void Scavenge()
         {
-            lock (_stringsByHashCode)
+            lock (_weakHandlesByHashCode)
             {
                 ScavengeNoLock();
             }
@@ -117,7 +121,7 @@ namespace Microsoft.NET.StringTools
         /// </summary>
         public DebugInfo GetDebugInfo()
         {
-            lock (_stringsByHashCode)
+            lock (_weakHandlesByHashCode)
             {
                 return GetDebugInfoImpl();
             }

@@ -502,7 +502,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         [SupportedOSPlatform("windows")]
         public static void SignFile(string certThumbprint, Uri timestampUrl, string path)
         {
-            SignFile(certThumbprint, timestampUrl, path, null, null);
+            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion: null, targetFrameworkIdentifier: null);
         }
 
         /// <summary>
@@ -518,7 +518,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                     string path,
                                     string targetFrameworkVersion)
         {
-            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion, null);
+            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion, targetFrameworkIdentifier: null);
         }
 
         /// <summary>
@@ -536,7 +536,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                                     string targetFrameworkVersion,
                                     string targetFrameworkIdentifier)
         {
-            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion, targetFrameworkIdentifier, false);
+            SignFile(certThumbprint, timestampUrl, path, targetFrameworkVersion, targetFrameworkIdentifier, disallowMansignTimestampFallback: false);
         }
 
         /// <summary>
@@ -637,7 +637,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         {
             // setup resources
             System.Resources.ResourceManager resources = new System.Resources.ResourceManager("Microsoft.Build.Tasks.Core.Strings.ManifestUtilities", typeof(SecurityUtilities).Module.Assembly);
-            SignFileInternal(cert, timestampUrl, path, true, resources);
+            SignFileInternal(cert, timestampUrl, path, targetFrameworkSupportsSha256: true, resources);
         }
 
         [SupportedOSPlatform("windows")]
@@ -701,6 +701,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                         {
                             doc.Load(xr);
                         }
+
                         var manifest = new SignedCmiManifest2(doc, useSha256);
                         CmiManifestSigner2 signer;
                         if (useSha256 && rsa is RSACryptoServiceProvider rsacsp)

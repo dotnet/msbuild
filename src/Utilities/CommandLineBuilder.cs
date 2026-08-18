@@ -154,14 +154,14 @@ namespace Microsoft.Build.Utilities
         /// <summary>
         /// Use a private property so that we can lazy initialize the regex
         /// </summary>
-        private Regex DefinitelyNeedQuotes => _definitelyNeedQuotes
-            ?? (_definitelyNeedQuotes = new Regex(_quoteHyphens ? s_definitelyNeedQuotesRegexWithHyphen : s_definitelyNeedQuotesRegexNoHyphen, RegexOptions.CultureInvariant));
+        private Regex DefinitelyNeedQuotes => _definitelyNeedQuotes ??=
+            new Regex(_quoteHyphens ? s_definitelyNeedQuotesRegexWithHyphen : s_definitelyNeedQuotesRegexNoHyphen, RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Use a private getter property to we can lazy initialize the regex
         /// </summary>
-        private Regex AllowedUnquoted => _allowedUnquoted
-            ?? (_allowedUnquoted = new Regex(_quoteHyphens ? s_allowedUnquotedRegexNoHyphen : s_allowedUnquotedRegexWithHyphen, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
+        private Regex AllowedUnquoted => _allowedUnquoted ??=
+            new Regex(_quoteHyphens ? s_allowedUnquotedRegexNoHyphen : s_allowedUnquotedRegexWithHyphen, RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         /// <summary>
         /// Checks the given switch parameter to see if it must/can be quoted.
@@ -259,6 +259,9 @@ namespace Microsoft.Build.Utilities
                 }
 
                 // Count the number of quotes
+#if NET
+                int literalQuotes = unquotedTextToAppend.AsSpan().Count('"');
+#else
                 int literalQuotes = 0;
                 for (int i = 0; i < unquotedTextToAppend.Length; i++)
                 {
@@ -267,6 +270,8 @@ namespace Microsoft.Build.Utilities
                         literalQuotes++;
                     }
                 }
+#endif
+
                 if (literalQuotes > 0)
                 {
                     // Replace any \" sequences with \\"

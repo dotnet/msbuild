@@ -36,31 +36,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private readonly BuildManager _buildManager;
 
         /// <summary>
-        /// The build parameters.
-        /// </summary>
-        private readonly BuildParameters _parameters;
-
-        /// <summary>
         /// The project collection used.
         /// </summary>
         private readonly ProjectCollection _projectCollection;
 
         private readonly TestEnvironment _env;
-        private readonly ITestOutputHelper _output;
 
         public SdkResultOutOfProc_Tests(ITestOutputHelper output)
         {
-            _output = output;
             // Ensure that any previous tests which may have been using the default BuildManager do not conflict with us.
             BuildManager.DefaultBuildManager.Dispose();
 
             _logger = new MockLogger(output);
-            _parameters = new BuildParameters
-            {
-                ShutdownInProcNodeOnBuildFinish = true,
-                Loggers = new ILogger[] { _logger },
-                EnableNodeReuse = false
-            };
             _buildManager = new BuildManager();
             _projectCollection = new ProjectCollection();
 

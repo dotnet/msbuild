@@ -62,6 +62,7 @@ namespace Microsoft.Build.Tasks
             return ResolveAssemblyKey() && ResolveManifestKey();
         }
 
+#if FEATURE_PFX_SIGNING
         // We we use hash the contens of .pfx file so we can establish relationship file <-> container name, whithout
         // need to prompt for password. Note this is not used for any security reasons. With the departure from standard MD5 algoritm
         // we need as simple hash function for replacement. The data blobs we use (.pfx files)  are
@@ -87,6 +88,7 @@ namespace Microsoft.Build.Tasks
             result |= dw2;
             return result;
         }
+#endif
 
         private bool ResolveAssemblyKey()
         {

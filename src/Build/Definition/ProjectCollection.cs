@@ -176,6 +176,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         private bool _onlyLogCriticalEvents;
 
+        private bool _enableTargetOutputLogging;
+
         /// <summary>
         /// Whether reevaluation is temporarily disabled on projects in this collection.
         /// This is useful when the host expects to make a number of reads and writes
@@ -279,10 +281,9 @@ namespace Microsoft.Build.Evaluation
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
         /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
         public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly)
-            : this(globalProperties, loggers, remoteLoggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging: false, reuseProjectRootElementCache: false)
+            : this(globalProperties, loggers, remoteLoggers, toolsetDefinitionLocations, maxNodeCount, onlyLogCriticalEvents, loadProjectsReadOnly, useAsynchronousLogging: false, reuseProjectRootElementCache: false, enableTargetOutputLogging: false)
         {
         }
-
 
         /// <summary>
         /// Instantiates a project collection with specified global properties and loggers and using the
@@ -298,9 +299,34 @@ namespace Microsoft.Build.Evaluation
         /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
         /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
         /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
-        /// <param name="useAsynchronousLogging">If set to true, asynchronous logging will be used. <see cref="ProjectCollection.Dispose()"/> has to called to clear resources used by async logging.</param>
+        /// <param name="useAsynchronousLogging">If set to true, asynchronous logging will be used. <see cref="Dispose()"/> has to called to clear resources used by async logging.</param>
         /// <param name="reuseProjectRootElementCache">If set to true, it will try to reuse <see cref="ProjectRootElementCacheBase"/> singleton.</param>
-        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache)
+        /// <remarks>
+        /// This constructor disables target output logging, so TerminalLogger and other loggers may not work well. Prefer <see cref="ProjectCollection(IDictionary{string, string}, IEnumerable{ILogger}, IEnumerable{ForwardingLoggerRecord}, ToolsetDefinitionLocations, int, bool, bool, bool, bool, bool)"/> instead to control this behavior.
+        /// </remarks>
+        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache) :
+            this(globalProperties: globalProperties, loggers: loggers, remoteLoggers: remoteLoggers, toolsetDefinitionLocations: toolsetDefinitionLocations, maxNodeCount: maxNodeCount, onlyLogCriticalEvents: onlyLogCriticalEvents, loadProjectsReadOnly: loadProjectsReadOnly, useAsynchronousLogging: useAsynchronousLogging, reuseProjectRootElementCache: reuseProjectRootElementCache, enableTargetOutputLogging: false)
+        {
+        }
+
+        /// <summary>
+        /// Instantiates a project collection with specified global properties and loggers and using the
+        /// specified toolset locations, node count, and setting of onlyLogCriticalEvents.
+        /// Global properties and loggers may be null.
+        /// Throws InvalidProjectFileException if any of the global properties are reserved.
+        /// May throw InvalidToolsetDefinitionException.
+        /// </summary>
+        /// <param name="globalProperties">The default global properties to use. May be null.</param>
+        /// <param name="loggers">The loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="remoteLoggers">Any remote loggers to register. May be null and specified to any build instead.</param>
+        /// <param name="toolsetDefinitionLocations">The locations from which to load toolsets.</param>
+        /// <param name="maxNodeCount">The maximum number of nodes to use for building.</param>
+        /// <param name="onlyLogCriticalEvents">If set to true, only critical events will be logged.</param>
+        /// <param name="loadProjectsReadOnly">If set to true, load all projects as read-only.</param>
+        /// <param name="useAsynchronousLogging">If set to true, asynchronous logging will be used. <see cref="Dispose()"/> has to called to clear resources used by async logging.</param>
+        /// <param name="reuseProjectRootElementCache">If set to true, it will try to reuse <see cref="ProjectRootElementCacheBase"/> singleton.</param>
+        /// <param name="enableTargetOutputLogging">If set to true, loggers will collect and send Target outputs when targets are finished executing.</param>
+        public ProjectCollection(IDictionary<string, string> globalProperties, IEnumerable<ILogger> loggers, IEnumerable<ForwardingLoggerRecord> remoteLoggers, ToolsetDefinitionLocations toolsetDefinitionLocations, int maxNodeCount, bool onlyLogCriticalEvents, bool loadProjectsReadOnly, bool useAsynchronousLogging, bool reuseProjectRootElementCache, bool enableTargetOutputLogging)
         {
             _loadedProjects = new LoadedProjectCollection();
             ToolsetLocations = toolsetDefinitionLocations;
@@ -328,11 +354,12 @@ namespace Microsoft.Build.Evaluation
             }
 
             OnlyLogCriticalEvents = onlyLogCriticalEvents;
+            EnableTargetOutputLogging = enableTargetOutputLogging;
 
             try
             {
                 _loggerMode = useAsynchronousLogging ? LoggerMode.Asynchronous : LoggerMode.Synchronous;
-                CreateLoggingService(maxNodeCount, onlyLogCriticalEvents);
+                CreateLoggingService(maxNodeCount, onlyLogCriticalEvents, enableTargetOutputLogging);
 
                 RegisterLoggers(loggers);
                 RegisterForwardingLoggers(remoteLoggers);
@@ -432,7 +459,7 @@ namespace Microsoft.Build.Evaluation
                     // Take care to ensure that there is never more than one value observed
                     // from this property even in the case of race conditions while lazily initializing.
                     var local = new ProjectCollection(null, null, null, ToolsetDefinitionLocations.Default,
-                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true, reuseProjectRootElementCache: false);
+                        maxNodeCount: 1, onlyLogCriticalEvents: false, loadProjectsReadOnly: false, useAsynchronousLogging: true, reuseProjectRootElementCache: false, enableTargetOutputLogging: false);
 
                     if (Interlocked.CompareExchange(ref s_globalProjectCollection, local, null) != null)
                     {
@@ -711,6 +738,35 @@ namespace Microsoft.Build.Evaluation
                 {
                     OnProjectCollectionChanged(
                         new ProjectCollectionChangedEventArgs(ProjectCollectionChangedState.OnlyLogCriticalEvents));
+                }
+            }
+        }
+
+        public bool EnableTargetOutputLogging
+        {
+            get
+            {
+                using (_locker.EnterDisposableReadLock())
+                {
+                    return _enableTargetOutputLogging;
+                }
+            }
+            set
+            {
+                bool sendEvent = false;
+                using (_locker.EnterDisposableWriteLock())
+                {
+                    if (_enableTargetOutputLogging != value)
+                    {
+                        _enableTargetOutputLogging = value;
+                        sendEvent = true;
+                    }
+                }
+
+                if (sendEvent)
+                {
+                    OnProjectCollectionChanged(
+                        new ProjectCollectionChangedEventArgs(ProjectCollectionChangedState.EnableTargetOutputLogging));
                 }
             }
         }
@@ -1312,7 +1368,7 @@ namespace Microsoft.Build.Evaluation
                 {
                     foreach (ForwardingLoggerRecord remoteLoggerRecord in remoteLoggers)
                     {
-                        _loggingService.RegisterDistributedLogger(new ReusableLogger(remoteLoggerRecord.CentralLogger), remoteLoggerRecord.ForwardingLoggerDescription);
+                        _loggingService.RegisterDistributedLogger(new Logging.ReusableLogger(remoteLoggerRecord.CentralLogger), remoteLoggerRecord.ForwardingLoggerDescription);
                     }
                 }
             }
@@ -1331,7 +1387,7 @@ namespace Microsoft.Build.Evaluation
 
                 // UNDONE: Logging service should not shut down when all loggers are unregistered.
                 // VS unregisters all loggers on the same project collection often. To workaround this, we have to create it again now!
-                CreateLoggingService(MaxNodeCount, OnlyLogCriticalEvents);
+                CreateLoggingService(MaxNodeCount, OnlyLogCriticalEvents, EnableTargetOutputLogging);
             }
 
             OnProjectCollectionChanged(new ProjectCollectionChangedEventArgs(ProjectCollectionChangedState.Loggers));
@@ -1675,7 +1731,7 @@ namespace Microsoft.Build.Evaluation
         {
             ErrorUtilities.VerifyThrowArgumentNull(logger);
             Debug.Assert(_locker.IsWriteLockHeld);
-            _loggingService.RegisterLogger(new ReusableLogger(logger));
+            _loggingService.RegisterLogger(new Logging.ReusableLogger(logger));
         }
 
         /// <summary>
@@ -1765,11 +1821,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Create a new logging service
         /// </summary>
-        private void CreateLoggingService(int maxCPUCount, bool onlyLogCriticalEvents)
+        private void CreateLoggingService(int maxCPUCount, bool onlyLogCriticalEvents, bool enableTargetOutputLogging)
         {
             _loggingService = BackEnd.Logging.LoggingService.CreateLoggingService(_loggerMode, 0 /*Evaluation can be done as if it was on node "0"*/);
             _loggingService.MaxCPUCount = maxCPUCount;
             _loggingService.OnlyLogCriticalEvents = onlyLogCriticalEvents;
+            _loggingService.EnableTargetOutputLogging = enableTargetOutputLogging;
         }
 
         /// <summary>
@@ -1831,601 +1888,6 @@ namespace Microsoft.Build.Evaluation
             /// Root element which was added to the project collection.
             /// </summary>
             public ProjectRootElement ProjectRootElement { get; }
-        }
-
-        /// <summary>
-        /// The ReusableLogger wraps a logger and allows it to be used for both design-time and build-time.  It internally swaps
-        /// between the design-time and build-time event sources in response to Initialize and Shutdown events.
-        /// </summary>
-        internal class ReusableLogger : INodeLogger, IEventSource4
-        {
-            /// <summary>
-            /// The logger we are wrapping.
-            /// </summary>
-            private readonly ILogger _originalLogger;
-
-            /// <summary>
-            /// Returns the logger we are wrapping.
-            /// </summary>
-            internal ILogger OriginalLogger => _originalLogger;
-
-            /// <summary>
-            /// The design-time event source
-            /// </summary>
-            private IEventSource _designTimeEventSource;
-
-            /// <summary>
-            /// The build-time event source
-            /// </summary>
-            private IEventSource _buildTimeEventSource;
-
-            /// <summary>
-            /// The Any event handler
-            /// </summary>
-            private AnyEventHandler _anyEventHandler;
-
-            /// <summary>
-            /// The BuildFinished event handler
-            /// </summary>
-            private BuildFinishedEventHandler _buildFinishedEventHandler;
-
-            /// <summary>
-            /// The BuildStarted event handler
-            /// </summary>
-            private BuildStartedEventHandler _buildStartedEventHandler;
-
-            /// <summary>
-            /// The Custom event handler
-            /// </summary>
-            private CustomBuildEventHandler _customBuildEventHandler;
-
-            /// <summary>
-            /// The Error event handler
-            /// </summary>
-            private BuildErrorEventHandler _buildErrorEventHandler;
-
-            /// <summary>
-            /// The Message event handler
-            /// </summary>
-            private BuildMessageEventHandler _buildMessageEventHandler;
-
-            /// <summary>
-            /// The ProjectFinished event handler
-            /// </summary>
-            private ProjectFinishedEventHandler _projectFinishedEventHandler;
-
-            /// <summary>
-            /// The ProjectStarted event handler
-            /// </summary>
-            private ProjectStartedEventHandler _projectStartedEventHandler;
-
-            /// <summary>
-            /// The Status event handler
-            /// </summary>
-            private BuildStatusEventHandler _buildStatusEventHandler;
-
-            /// <summary>
-            /// The TargetFinished event handler
-            /// </summary>
-            private TargetFinishedEventHandler _targetFinishedEventHandler;
-
-            /// <summary>
-            /// The TargetStarted event handler
-            /// </summary>
-            private TargetStartedEventHandler _targetStartedEventHandler;
-
-            /// <summary>
-            /// The TaskFinished event handler
-            /// </summary>
-            private TaskFinishedEventHandler _taskFinishedEventHandler;
-
-            /// <summary>
-            /// The TaskStarted event handler
-            /// </summary>
-            private TaskStartedEventHandler _taskStartedEventHandler;
-
-            /// <summary>
-            /// The Warning event handler
-            /// </summary>
-            private BuildWarningEventHandler _buildWarningEventHandler;
-
-            /// <summary>
-            ///  The telemetry event handler.
-            /// </summary>
-            private TelemetryEventHandler _telemetryEventHandler;
-
-            private bool _includeEvaluationMetaprojects;
-
-            private bool _includeEvaluationProfiles;
-
-            private bool _includeTaskInputs;
-
-            private bool _includeEvaluationPropertiesAndItems;
-
-            /// <summary>
-            /// Constructor.
-            /// </summary>
-            public ReusableLogger(ILogger originalLogger)
-            {
-                ErrorUtilities.VerifyThrowArgumentNull(originalLogger);
-                _originalLogger = originalLogger;
-            }
-
-            #region IEventSource Members
-
-            /// <summary>
-            /// The Message logging event
-            /// </summary>
-            public event BuildMessageEventHandler MessageRaised;
-
-            /// <summary>
-            /// The Error logging event
-            /// </summary>
-            public event BuildErrorEventHandler ErrorRaised;
-
-            /// <summary>
-            /// The Warning logging event
-            /// </summary>
-            public event BuildWarningEventHandler WarningRaised;
-
-            /// <summary>
-            /// The BuildStarted logging event
-            /// </summary>
-            public event BuildStartedEventHandler BuildStarted;
-
-            /// <summary>
-            /// The BuildFinished logging event
-            /// </summary>
-            public event BuildFinishedEventHandler BuildFinished;
-
-            /// <summary>
-            /// The BuildCanceled logging event
-            /// </summary>
-            public event BuildCanceledEventHandler BuildCanceled;
-
-            /// <summary>
-            /// The ProjectStarted logging event
-            /// </summary>
-            public event ProjectStartedEventHandler ProjectStarted;
-
-            /// <summary>
-            /// The ProjectFinished logging event
-            /// </summary>
-            public event ProjectFinishedEventHandler ProjectFinished;
-
-            /// <summary>
-            /// The TargetStarted logging event
-            /// </summary>
-            public event TargetStartedEventHandler TargetStarted;
-
-            /// <summary>
-            /// The TargetFinished logging event
-            /// </summary>
-            public event TargetFinishedEventHandler TargetFinished;
-
-            /// <summary>
-            /// The TashStarted logging event
-            /// </summary>
-            public event TaskStartedEventHandler TaskStarted;
-
-            /// <summary>
-            /// The TaskFinished logging event
-            /// </summary>
-            public event TaskFinishedEventHandler TaskFinished;
-
-            /// <summary>
-            /// The Custom logging event
-            /// </summary>
-            public event CustomBuildEventHandler CustomEventRaised;
-
-            /// <summary>
-            /// The Status logging event
-            /// </summary>
-            public event BuildStatusEventHandler StatusEventRaised;
-
-            /// <summary>
-            /// The Any logging event
-            /// </summary>
-            public event AnyEventHandler AnyEventRaised;
-
-            /// <summary>
-            /// The telemetry sent event.
-            /// </summary>
-            public event TelemetryEventHandler TelemetryLogged;
-
-            /// <summary>
-            /// Should evaluation events include generated metaprojects?
-            /// </summary>
-            public void IncludeEvaluationMetaprojects()
-            {
-                if (_buildTimeEventSource is IEventSource3 buildEventSource3)
-                {
-                    buildEventSource3.IncludeEvaluationMetaprojects();
-                }
-
-                if (_designTimeEventSource is IEventSource3 designTimeEventSource3)
-                {
-                    designTimeEventSource3.IncludeEvaluationMetaprojects();
-                }
-
-                _includeEvaluationMetaprojects = true;
-            }
-
-            /// <summary>
-            /// Should evaluation events include profiling information?
-            /// </summary>
-            public void IncludeEvaluationProfiles()
-            {
-                if (_buildTimeEventSource is IEventSource3 buildEventSource3)
-                {
-                    buildEventSource3.IncludeEvaluationProfiles();
-                }
-
-                if (_designTimeEventSource is IEventSource3 designTimeEventSource3)
-                {
-                    designTimeEventSource3.IncludeEvaluationProfiles();
-                }
-
-                _includeEvaluationProfiles = true;
-            }
-
-            /// <summary>
-            /// Should task events include task inputs?
-            /// </summary>
-            public void IncludeTaskInputs()
-            {
-                if (_buildTimeEventSource is IEventSource3 buildEventSource3)
-                {
-                    buildEventSource3.IncludeTaskInputs();
-                }
-
-                if (_designTimeEventSource is IEventSource3 designTimeEventSource3)
-                {
-                    designTimeEventSource3.IncludeTaskInputs();
-                }
-
-                _includeTaskInputs = true;
-            }
-
-            public void IncludeEvaluationPropertiesAndItems()
-            {
-                if (_buildTimeEventSource is IEventSource4 buildEventSource4)
-                {
-                    buildEventSource4.IncludeEvaluationPropertiesAndItems();
-                }
-
-                if (_designTimeEventSource is IEventSource4 designTimeEventSource4)
-                {
-                    designTimeEventSource4.IncludeEvaluationPropertiesAndItems();
-                }
-
-                _includeEvaluationPropertiesAndItems = true;
-            }
-
-            #endregion
-
-            #region ILogger Members
-
-            /// <summary>
-            /// The logger verbosity
-            /// </summary>
-            public LoggerVerbosity Verbosity
-            {
-                get => _originalLogger.Verbosity;
-                set => _originalLogger.Verbosity = value;
-            }
-
-            /// <summary>
-            /// The logger parameters
-            /// </summary>
-            public string Parameters
-            {
-                get => _originalLogger.Parameters;
-
-                set => _originalLogger.Parameters = value;
-            }
-
-            /// <summary>
-            /// If we haven't yet been initialized, we register for design time events and initialize the logger we are holding.
-            /// If we are in design-time mode
-            /// </summary>
-            public void Initialize(IEventSource eventSource, int nodeCount)
-            {
-                if (_designTimeEventSource == null)
-                {
-                    _designTimeEventSource = eventSource;
-                    RegisterForEvents(_designTimeEventSource);
-
-                    if (_originalLogger is INodeLogger logger)
-                    {
-                        logger.Initialize(this, nodeCount);
-                    }
-                    else
-                    {
-                        _originalLogger.Initialize(this);
-                    }
-                }
-                else
-                {
-                    ErrorUtilities.VerifyThrow(_buildTimeEventSource == null, "Already registered for build-time.");
-                    _buildTimeEventSource = eventSource;
-                    UnregisterForEvents(_designTimeEventSource);
-                    RegisterForEvents(_buildTimeEventSource);
-                }
-            }
-
-            /// <summary>
-            /// If we haven't yet been initialized, we register for design time events and initialize the logger we are holding.
-            /// If we are in design-time mode
-            /// </summary>
-            public void Initialize(IEventSource eventSource)
-            {
-                Initialize(eventSource, 1);
-            }
-
-            /// <summary>
-            /// If we are in build-time mode, we unregister for build-time events and re-register for design-time events.
-            /// If we are in design-time mode, we unregister for design-time events and shut down the logger we are holding.
-            /// </summary>
-            public void Shutdown()
-            {
-                if (_buildTimeEventSource != null)
-                {
-                    UnregisterForEvents(_buildTimeEventSource);
-                    RegisterForEvents(_designTimeEventSource);
-                    _buildTimeEventSource = null;
-                }
-                else
-                {
-                    ErrorUtilities.VerifyThrow(_designTimeEventSource != null, "Already unregistered for design-time.");
-                    UnregisterForEvents(_designTimeEventSource);
-                    _originalLogger.Shutdown();
-                }
-            }
-
-            #endregion
-
-            /// <summary>
-            /// Registers for all of the events on the specified event source.
-            /// </summary>
-            private void RegisterForEvents(IEventSource eventSource)
-            {
-                // Create the handlers.
-                _anyEventHandler = AnyEventRaisedHandler;
-                _buildFinishedEventHandler = BuildFinishedHandler;
-                _buildStartedEventHandler = BuildStartedHandler;
-                _customBuildEventHandler = CustomEventRaisedHandler;
-                _buildErrorEventHandler = ErrorRaisedHandler;
-                _buildMessageEventHandler = MessageRaisedHandler;
-                _projectFinishedEventHandler = ProjectFinishedHandler;
-                _projectStartedEventHandler = ProjectStartedHandler;
-                _buildStatusEventHandler = StatusEventRaisedHandler;
-                _targetFinishedEventHandler = TargetFinishedHandler;
-                _targetStartedEventHandler = TargetStartedHandler;
-                _taskFinishedEventHandler = TaskFinishedHandler;
-                _taskStartedEventHandler = TaskStartedHandler;
-                _buildWarningEventHandler = WarningRaisedHandler;
-                _telemetryEventHandler = TelemetryLoggedHandler;
-
-                // Register for the events.
-                eventSource.AnyEventRaised += _anyEventHandler;
-                eventSource.BuildFinished += _buildFinishedEventHandler;
-                eventSource.BuildStarted += _buildStartedEventHandler;
-                eventSource.CustomEventRaised += _customBuildEventHandler;
-                eventSource.ErrorRaised += _buildErrorEventHandler;
-                eventSource.MessageRaised += _buildMessageEventHandler;
-                eventSource.ProjectFinished += _projectFinishedEventHandler;
-                eventSource.ProjectStarted += _projectStartedEventHandler;
-                eventSource.StatusEventRaised += _buildStatusEventHandler;
-                eventSource.TargetFinished += _targetFinishedEventHandler;
-                eventSource.TargetStarted += _targetStartedEventHandler;
-                eventSource.TaskFinished += _taskFinishedEventHandler;
-                eventSource.TaskStarted += _taskStartedEventHandler;
-                eventSource.WarningRaised += _buildWarningEventHandler;
-
-                if (eventSource is IEventSource2 eventSource2)
-                {
-                    eventSource2.TelemetryLogged += _telemetryEventHandler;
-                }
-
-                if (eventSource is IEventSource3 eventSource3)
-                {
-                    if (_includeEvaluationMetaprojects)
-                    {
-                        eventSource3.IncludeEvaluationMetaprojects();
-                    }
-
-                    if (_includeEvaluationProfiles)
-                    {
-                        eventSource3.IncludeEvaluationProfiles();
-                    }
-
-                    if (_includeTaskInputs)
-                    {
-                        eventSource3.IncludeTaskInputs();
-                    }
-                }
-
-                if (eventSource is IEventSource4 eventSource4)
-                {
-                    if (_includeEvaluationPropertiesAndItems)
-                    {
-                        eventSource4.IncludeEvaluationPropertiesAndItems();
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Unregisters for all events on the specified event source.
-            /// </summary>
-            private void UnregisterForEvents(IEventSource eventSource)
-            {
-                // Unregister for the events.
-                eventSource.AnyEventRaised -= _anyEventHandler;
-                eventSource.BuildFinished -= _buildFinishedEventHandler;
-                eventSource.BuildStarted -= _buildStartedEventHandler;
-                eventSource.CustomEventRaised -= _customBuildEventHandler;
-                eventSource.ErrorRaised -= _buildErrorEventHandler;
-                eventSource.MessageRaised -= _buildMessageEventHandler;
-                eventSource.ProjectFinished -= _projectFinishedEventHandler;
-                eventSource.ProjectStarted -= _projectStartedEventHandler;
-                eventSource.StatusEventRaised -= _buildStatusEventHandler;
-                eventSource.TargetFinished -= _targetFinishedEventHandler;
-                eventSource.TargetStarted -= _targetStartedEventHandler;
-                eventSource.TaskFinished -= _taskFinishedEventHandler;
-                eventSource.TaskStarted -= _taskStartedEventHandler;
-                eventSource.WarningRaised -= _buildWarningEventHandler;
-
-                if (eventSource is IEventSource2 eventSource2)
-                {
-                    eventSource2.TelemetryLogged -= _telemetryEventHandler;
-                }
-
-                // Null out the handlers.
-                _anyEventHandler = null;
-                _buildFinishedEventHandler = null;
-                _buildStartedEventHandler = null;
-                _customBuildEventHandler = null;
-                _buildErrorEventHandler = null;
-                _buildMessageEventHandler = null;
-                _projectFinishedEventHandler = null;
-                _projectStartedEventHandler = null;
-                _buildStatusEventHandler = null;
-                _targetFinishedEventHandler = null;
-                _targetStartedEventHandler = null;
-                _taskFinishedEventHandler = null;
-                _taskStartedEventHandler = null;
-                _buildWarningEventHandler = null;
-                _telemetryEventHandler = null;
-            }
-
-            /// <summary>
-            /// Handler for Warning events.
-            /// </summary>
-            private void WarningRaisedHandler(object sender, BuildWarningEventArgs e)
-            {
-                WarningRaised?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for TaskStarted events.
-            /// </summary>
-            private void TaskStartedHandler(object sender, TaskStartedEventArgs e)
-            {
-                TaskStarted?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for TaskFinished events.
-            /// </summary>
-            private void TaskFinishedHandler(object sender, TaskFinishedEventArgs e)
-            {
-                TaskFinished?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for TargetStarted events.
-            /// </summary>
-            private void TargetStartedHandler(object sender, TargetStartedEventArgs e)
-            {
-                TargetStarted?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for TargetFinished events.
-            /// </summary>
-            private void TargetFinishedHandler(object sender, TargetFinishedEventArgs e)
-            {
-                TargetFinished?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for Status events.
-            /// </summary>
-            private void StatusEventRaisedHandler(object sender, BuildStatusEventArgs e)
-            {
-                StatusEventRaised?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for ProjectStarted events.
-            /// </summary>
-            private void ProjectStartedHandler(object sender, ProjectStartedEventArgs e)
-            {
-                ProjectStarted?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for ProjectFinished events.
-            /// </summary>
-            private void ProjectFinishedHandler(object sender, ProjectFinishedEventArgs e)
-            {
-                ProjectFinished?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for Message events.
-            /// </summary>
-            private void MessageRaisedHandler(object sender, BuildMessageEventArgs e)
-            {
-                MessageRaised?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for Error events.
-            /// </summary>
-            private void ErrorRaisedHandler(object sender, BuildErrorEventArgs e)
-            {
-                ErrorRaised?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for Custom events.
-            /// </summary>
-            private void CustomEventRaisedHandler(object sender, CustomBuildEventArgs e)
-            {
-                CustomEventRaised?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for BuildStarted events.
-            /// </summary>
-            private void BuildStartedHandler(object sender, BuildStartedEventArgs e)
-            {
-                BuildStarted?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for BuildFinished events.
-            /// </summary>
-            private void BuildFinishedHandler(object sender, BuildFinishedEventArgs e)
-            {
-                BuildFinished?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for BuildCanceled events.
-            /// </summary>
-            private void BuildCanceledHandler(object sender, BuildCanceledEventArgs e)
-            {
-                BuildCanceled?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for Any events.
-            /// </summary>
-            private void AnyEventRaisedHandler(object sender, BuildEventArgs e)
-            {
-                AnyEventRaised?.Invoke(sender, e);
-            }
-
-            /// <summary>
-            /// Handler for telemetry events.
-            /// </summary>
-            private void TelemetryLoggedHandler(object sender, TelemetryEventArgs e)
-            {
-                TelemetryLogged?.Invoke(sender, e);
-            }
         }
 
         /// <summary>

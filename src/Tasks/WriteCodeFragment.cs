@@ -210,7 +210,13 @@ namespace Microsoft.Build.Tasks
 
                         if (name.StartsWith("_Parameter", StringComparison.OrdinalIgnoreCase))
                         {
-                            if (!Int32.TryParse(name.Substring("_Parameter".Length), out int index))
+                            if (!Int32.TryParse(
+#if NET
+                                name.AsSpan("_Parameter".Length),
+#else
+                                name.Substring("_Parameter".Length),
+#endif
+                                out int index))
                             {
                                 Log.LogErrorWithCodeFromResources("General.InvalidValue", name, "WriteCodeFragment");
                                 return null;
@@ -223,7 +229,7 @@ namespace Microsoft.Build.Tasks
                             }
 
                             // "_Parameter01" and "_Parameter1" would overwrite each other
-                            orderedParameters[index - 1] = new AttributeParameter { Type = type, Value = value };
+                            orderedParameters[index - 1] = new AttributeParameter { Type = type, Value = value, PositionalParameterName = name };
                         }
                         else
                         {
@@ -443,7 +449,8 @@ namespace Microsoft.Build.Tasks
                             value = ConvertParameterValueToInferredType(
                                 constructorParameterTypes[i],
                                 parameter.Value,
-                                $"#{i + 1}"); /* back to 1 based */
+                                parameter.PositionalParameterName,
+                                attribute.Name);
                         }
                         else
                         {
@@ -451,7 +458,8 @@ namespace Microsoft.Build.Tasks
                             value = ConvertParameterValueToInferredType(
                                 attributeType.Value?.GetProperty(parameter.Name)?.PropertyType,
                                 parameter.Value,
-                                parameter.Name);
+                                parameter.Name,
+                                attribute.Name);
                         }
 
                         break;
@@ -559,13 +567,13 @@ namespace Microsoft.Build.Tasks
         /// Returns the converted value as a CodeExpression if successful, or the raw value
         /// as a CodeExpression if conversion fails. No errors are logged if the conversion fails.
         /// </summary>
-        private CodeExpression ConvertParameterValueToInferredType(Type inferredType, string rawValue, string parameterName)
+        private CodeExpression ConvertParameterValueToInferredType(Type inferredType, string rawValue, string parameterName, string attributeTypeName)
         {
             // If we don't know what type the parameter should be, then we
             // can't convert the type. We'll just treat is as a string.
             if (inferredType is null)
             {
-                Log.LogMessageFromResources("WriteCodeFragment.CouldNotInferParameterType", parameterName);
+                Log.LogMessageFromResources("WriteCodeFragment.CouldNotInferParameterType", parameterName, attributeTypeName);
                 return new CodePrimitiveExpression(rawValue);
             }
 
@@ -618,6 +626,7 @@ namespace Microsoft.Build.Tasks
         {
             public ParameterType Type { get; init; }
             public string Name { get; init; }
+            public string PositionalParameterName { get; init; }
             public string Value { get; init; }
         }
     }

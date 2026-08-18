@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if DEBUG
 using System.Diagnostics;
+#endif
 using System.Linq;
 
 #nullable disable
@@ -138,7 +140,7 @@ namespace Microsoft.Build.Framework
                 ConversionState = ChangeWaveConversionState.InvalidFormat;
                 _cachedWave = ChangeWaves.EnableAllFeatures;
             }
-            else if (_cachedWave == EnableAllFeatures || AllWaves.Contains(_cachedWave))
+            else if (_cachedWave == EnableAllFeatures || Array.IndexOf(AllWaves, _cachedWave) >= 0)
             {
                 ConversionState = ChangeWaveConversionState.Valid;
             }
@@ -170,7 +172,7 @@ namespace Microsoft.Build.Framework
             ApplyChangeWave();
 
 #if DEBUG
-            Debug.Assert(_runningTests || AllWaves.Contains(wave), $"Change wave version {wave} is invalid");
+            Debug.Assert(_runningTests || Array.IndexOf(AllWaves, wave) >= 0, $"Change wave version {wave} is invalid");
 #endif
 
             return wave < _cachedWave;

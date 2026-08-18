@@ -17,7 +17,7 @@ namespace Microsoft.Build.CommandLine
     /// This exception is used to flag (syntax) errors in command line switches passed to the application.
     /// </summary>
     [Serializable]
-    internal sealed class CommandLineSwitchException : Exception
+    internal sealed class CommandLineSwitchException : Exception // CodeQL [SM02227] The dangerous method is called only in debug build. It's safe for release build.
     {
         /// <summary>
         /// This constructor initializes the exception message.

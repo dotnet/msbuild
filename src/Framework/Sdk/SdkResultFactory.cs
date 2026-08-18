@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -54,13 +54,73 @@ namespace Microsoft.Build.Framework
         /// <param name="version">SDK version which should be imported</param>
         /// <param name="propertiesToAdd">Properties to set in the evaluation</param>
         /// <param name="itemsToAdd">Items to add to the evaluation</param>
+        /// <param name="warnings">Warnings to display during resolution.</param>
+        /// <returns></returns>
+        public virtual SdkResult IndicateSuccess(IEnumerable<string> paths,
+            string version,
+            IDictionary<string, string> propertiesToAdd,
+            IDictionary<string, SdkResultItem> itemsToAdd,
+            IEnumerable<string> warnings)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///     Create an <see cref="SdkResolver" /> object indicating success.
+        /// </summary>
+        /// <remarks>
+        /// This overload allows any number (zero, one, or many) of SDK paths to be returned.  This means a "successful" result
+        /// may not resolve to any SDKs.  The resolver can also supply properties or items to communicate information to the build.  This
+        /// can allow resolvers to report SDKs that could not be resolved without hard-failing the evaluation, which can allow other
+        /// components to take more appropriate action (for example installing optional workloads or downloading NuGet SDKs).
+        /// </remarks>
+        /// <param name="path">Path to the SDK.</param>
+        /// <param name="version">SDK version which should be imported</param>
+        /// <param name="propertiesToAdd">Properties to set in the evaluation</param>
+        /// <param name="itemsToAdd">Items to add to the evaluation</param>
         /// <param name="warnings">Optional warnings to display during resolution.</param>
+        /// <param name="environmentVariablesToAdd">
+        /// Environment variables to add to the project.
+        /// Environment variables set in this way are available as properties during evaluation, and
+        /// additionally set as environment variables during execution, including to tasks and launched processes.
+        /// </param>
+        /// <returns></returns>
+        public virtual SdkResult IndicateSuccess(string path,
+            string version,
+            IDictionary<string, string> propertiesToAdd,
+            IDictionary<string, SdkResultItem> itemsToAdd,
+            IEnumerable<string> warnings = null,
+            IDictionary<string, string> environmentVariablesToAdd = null)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        ///     Create an <see cref="SdkResolver" /> object indicating success.
+        /// </summary>
+        /// <remarks>
+        /// This overload allows any number (zero, one, or many) of SDK paths to be returned.  This means a "successful" result
+        /// may not resolve to any SDKs.  The resolver can also supply properties or items to communicate information to the build.  This
+        /// can allow resolvers to report SDKs that could not be resolved without hard-failing the evaluation, which can allow other
+        /// components to take more appropriate action (for example installing optional workloads or downloading NuGet SDKs).
+        /// </remarks>
+        /// <param name="paths">SDK paths which should be imported</param>
+        /// <param name="version">SDK version which should be imported</param>
+        /// <param name="propertiesToAdd">Properties to set in the evaluation</param>
+        /// <param name="itemsToAdd">Items to add to the evaluation</param>
+        /// <param name="warnings">Optional warnings to display during resolution.</param>
+        /// <param name="environmentVariablesToAdd">
+        /// Environment variables to add to the project.
+        /// Environment variables set in this way are available as properties during evaluation, and
+        /// additionally set as environment variables during execution, including to tasks and launched processes.
+        /// </param>
         /// <returns></returns>
         public virtual SdkResult IndicateSuccess(IEnumerable<string> paths,
             string version,
             IDictionary<string, string> propertiesToAdd = null,
             IDictionary<string, SdkResultItem> itemsToAdd = null,
-            IEnumerable<string> warnings = null)
+            IEnumerable<string> warnings = null,
+            IDictionary<string, string> environmentVariablesToAdd = null)
         {
             throw new NotImplementedException();
         }

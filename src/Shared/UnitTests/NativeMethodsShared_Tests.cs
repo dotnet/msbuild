@@ -8,7 +8,6 @@ using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.Shared;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 
 
@@ -123,7 +122,7 @@ namespace Microsoft.Build.UnitTests
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    nonexistentDirectory = Path.Combine(currentDirectory, "foo", "bar", "baz") + Guid.NewGuid();
+                    nonexistentDirectory = $"{Path.Combine(currentDirectory, "foo", "bar", "baz")}{Guid.NewGuid()}";
 
                     if (!Directory.Exists(nonexistentDirectory))
                     {

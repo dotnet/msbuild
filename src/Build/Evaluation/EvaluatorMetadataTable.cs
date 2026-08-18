@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
-using EscapingUtilities = Microsoft.Build.Shared.EscapingUtilities;
 
 namespace Microsoft.Build.Evaluation
 {
@@ -20,7 +18,7 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// The actual metadata dictionary.
         /// </summary>
-        private Dictionary<string, EvaluatorMetadata>? _metadata;
+        private Dictionary<string, string>? _metadata;
 
         /// <summary>
         /// The type of item the metadata should be considered to apply to.
@@ -40,11 +38,6 @@ namespace Microsoft.Build.Evaluation
             _implicitItemType = implicitItemType;
             _capacity = capacity;
         }
-
-        /// <summary>
-        /// Enumerator over the entries in this table
-        /// </summary>
-        internal IEnumerable<EvaluatorMetadata> Entries => _metadata?.Values ?? Enumerable.Empty<EvaluatorMetadata>();
 
         /// <summary>
         /// Retrieves any value we have in our metadata table for the metadata name specified,
@@ -80,9 +73,9 @@ namespace Microsoft.Build.Evaluation
 
             if (itemType == null || String.Equals(_implicitItemType, itemType, StringComparison.OrdinalIgnoreCase))
             {
-                if (_metadata.TryGetValue(name, out EvaluatorMetadata? metadatum))
+                if (_metadata.TryGetValue(name, out string? evaluatedValueEscaped))
                 {
-                    value = metadatum.EvaluatedValueEscaped;
+                    value = evaluatedValueEscaped;
                 }
             }
 
@@ -96,54 +89,10 @@ namespace Microsoft.Build.Evaluation
         {
             if (_metadata == null)
             {
-                _metadata = new Dictionary<string, EvaluatorMetadata>(_capacity, MSBuildNameIgnoreCaseComparer.Default);
+                _metadata = new Dictionary<string, string>(_capacity, MSBuildNameIgnoreCaseComparer.Default);
             }
 
-            _metadata[xml.Name] = new EvaluatorMetadata(xml, evaluatedValueEscaped);
-        }
-
-        /// <summary>
-        /// An entry in the evaluator's metadata table.
-        /// </summary>
-        public class EvaluatorMetadata
-        {
-            /// <summary>
-            /// Construct a new EvaluatorMetadata
-            /// </summary>
-            public EvaluatorMetadata(ProjectMetadataElement xml, string evaluatedValueEscaped)
-            {
-                this.Xml = xml;
-                this.EvaluatedValueEscaped = evaluatedValueEscaped;
-            }
-
-            /// <summary>
-            /// Gets or sets the metadata Xml
-            /// </summary>
-            public ProjectMetadataElement Xml
-            {
-                get;
-                private set;
-            }
-
-            /// <summary>
-            /// Gets or sets the evaluated value, unescaped
-            /// </summary>
-            public string EvaluatedValue
-            {
-                get
-                {
-                    return EscapingUtilities.UnescapeAll(EvaluatedValueEscaped);
-                }
-            }
-
-            /// <summary>
-            /// Gets or sets the evaluated value, escaped as necessary
-            /// </summary>
-            internal string EvaluatedValueEscaped
-            {
-                get;
-                private set;
-            }
+            _metadata[xml.Name] = evaluatedValueEscaped;
         }
     }
 }

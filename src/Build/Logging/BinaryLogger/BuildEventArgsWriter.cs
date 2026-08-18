@@ -756,7 +756,30 @@ namespace Microsoft.Build.Logging
             Write(count);
             for (int i = 0; i < count; i++)
             {
-                string argument = Convert.ToString(arguments[i], CultureInfo.CurrentCulture);
+                string argument;
+                try
+                {
+                    argument = Convert.ToString(arguments[i], CultureInfo.CurrentCulture);
+                }
+                catch (Exception ex) when (ex is ArgumentOutOfRangeException or InvalidOperationException)
+                {
+                    // Handle cases where the object's ToString() method fails due to internal state corruption.
+                    // This commonly occurs with StringBuilder when:
+                    // 1. Race conditions: Multiple threads modify StringBuilder without synchronization, causing
+                    //    internal fields (m_ChunkLength, m_ChunkOffset) to become inconsistent with the actual
+                    //    character array, leading to range exceptions in ToString()
+                    // 2. Memory corruption: Unsafe code or interop operations corrupt StringBuilder's internal state
+                    // 3. Reflection abuse: Direct modification of private fields creates invalid object state
+                    // 4. Serialization issues: Deserialized objects with inconsistent internal field values
+                    //
+                    // Adding synchronization would be prohibitively expensive here since:
+                    // - This is called frequently during build logging (performance critical path)
+                    // - We can't control the threading behavior of the objects passed to us
+                    // - The corruption typically happens before objects reach this method
+                    // - Defensive exception handling is more efficient than preemptive locking
+                    argument = $"Exception encountered writing an object of type {arguments[i]?.GetType()?.Name ?? "<null>"}";
+                }
+
                 WriteDeduplicatedString(argument);
             }
         }

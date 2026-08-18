@@ -619,13 +619,16 @@ namespace Microsoft.Build.Experimental
             while (tryAgain && sw.ElapsedMilliseconds < timeoutMilliseconds)
             {
                 tryAgain = false;
-                try
+
+
+                if (NodeProviderOutOfProcBase.TryConnectToPipeStream(
+                    _nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds), out HandshakeResult result))
                 {
-                    NodeProviderOutOfProcBase.ConnectToPipeStream(_nodeStream, _pipeName, _handshake, Math.Max(1, timeoutMilliseconds - (int)sw.ElapsedMilliseconds));
+                    return true;
                 }
-                catch (Exception ex)
+                else
                 {
-                    if (ex is not TimeoutException && sw.ElapsedMilliseconds < timeoutMilliseconds)
+                    if (result.Status is not HandshakeStatus.Timeout && sw.ElapsedMilliseconds < timeoutMilliseconds)
                     {
                         CommunicationsUtilities.Trace("Retrying to connect to server after {0} ms", sw.ElapsedMilliseconds);
                         // This solves race condition for time in which server started but have not yet listen on pipe or
@@ -635,14 +638,14 @@ namespace Microsoft.Build.Experimental
                     }
                     else
                     {
-                        CommunicationsUtilities.Trace("Failed to connect to server: {0}", ex);
+                        CommunicationsUtilities.Trace("Failed to connect to server: {0}", result.ErrorMessage);
                         _exitResult.MSBuildClientExitType = MSBuildClientExitType.UnableToConnect;
                         return false;
                     }
                 }
             }
 
-            return true;
+            return false;
         }
 
         private void WritePacket(Stream nodeStream, INodePacket packet)

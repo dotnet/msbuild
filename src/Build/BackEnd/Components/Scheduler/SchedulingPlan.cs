@@ -111,7 +111,7 @@ namespace Microsoft.Build.BackEnd
                     RecursiveAccumulateConfigurationTimes(rootRequest, accumulatedTimeByConfiguration);
 
                     List<KeyValuePair<int, double>> configurationsInOrder = new(accumulatedTimeByConfiguration);
-                    configurationsInOrder.Sort((KeyValuePair<int, double> l, KeyValuePair<int, double> r) => Comparer<int>.Default.Compare(l.Key, r.Key));
+                    configurationsInOrder.Sort((l, r) => Comparer<int>.Default.Compare(l.Key, r.Key));
                     foreach (KeyValuePair<int, double> configuration in configurationsInOrder)
                     {
                         file.WriteLine(String.Format(CultureInfo.InvariantCulture, "{0} {1} {2}", configuration.Key, configuration.Value, _configCache[configuration.Key].ProjectFullPath));
@@ -363,9 +363,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void ReadHierarchy(StreamReader file)
         {
-            while (!file.EndOfStream)
+            while (file.ReadLine() is string line)
             {
-                string line = file.ReadLine();
                 if (line.Length == 0)
                 {
                     return;
@@ -394,15 +393,14 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void ReadTimes(StreamReader file)
         {
-            while (!file.EndOfStream)
+            while (file.ReadLine() is string line)
             {
-                string line = file.ReadLine();
                 if (line.Length == 0)
                 {
                     return;
                 }
 
-                string[] values = line.Split(MSBuildConstants.SemicolonChar);
+                string[] values = line.Split(MSBuildConstants.SpaceChar);
                 if (values.Length < 3)
                 {
                     throw new InvalidDataException("Too few values in build plan.");

@@ -4,9 +4,11 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+#if NETFRAMEWORK
 using Microsoft.Build.Shared;
+#endif
 
-namespace Microsoft.Build.Framework;
+namespace Microsoft.Build.Framework.Telemetry;
 
 internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData workerNodeTelemetryData) : BuildEventArgs
 {
@@ -24,7 +26,7 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
             WriteToStream(writer, entry.Key);
             writer.Write(entry.Value.CumulativeExecutionTime.Ticks);
             writer.Write(entry.Value.ExecutionsCount);
-            writer.Write(entry.Value.TotalMemoryConsumption);
+            writer.Write(entry.Value.TotalMemoryBytes);
         }
 
         writer.Write7BitEncodedInt(WorkerNodeTelemetryData.TargetsExecutionData.Count);
@@ -62,8 +64,8 @@ internal sealed class WorkerNodeTelemetryEventArgs(IWorkerNodeTelemetryData work
     {
         writer.Write(key.Name);
         writer.Write(key.IsCustom);
-        writer.Write(key.IsFromNugetCache);
-        writer.Write(key.IsFromMetaProject);
+        writer.Write(key.IsNuget);
+        writer.Write(key.IsMetaProj);
     }
 
     private static TaskOrTargetTelemetryKey ReadFromStream(BinaryReader reader)

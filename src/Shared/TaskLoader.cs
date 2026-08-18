@@ -5,8 +5,6 @@ using System;
 using System.Reflection;
 using Microsoft.Build.Framework;
 
-#nullable disable
-
 namespace Microsoft.Build.Shared
 {
     /// <summary>
@@ -19,7 +17,7 @@ namespace Microsoft.Build.Shared
         /// For saving the assembly that was loaded by the TypeLoader
         /// We only use this when the assembly failed to load properly into the appdomain
         /// </summary>
-        private static LoadedType s_resolverLoadedType;
+        private static LoadedType? s_resolverLoadedType;
 #endif
 
         /// <summary>
@@ -42,7 +40,7 @@ namespace Microsoft.Build.Shared
         /// Creates an ITask instance and returns it.
         /// </summary>
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
-        internal static ITask CreateTask(
+        internal static ITask? CreateTask(
             LoadedType loadedType,
             string taskName,
             string taskLocation,
@@ -55,7 +53,7 @@ namespace Microsoft.Build.Shared
 #endif
             bool isOutOfProc
 #if FEATURE_APPDOMAIN
-            , out AppDomain taskAppDomain
+            , out AppDomain? taskAppDomain
 #endif
             )
 #pragma warning restore SA1111, SA1009 // Closing parenthesis should be on line of last parameter
@@ -64,7 +62,7 @@ namespace Microsoft.Build.Shared
             bool separateAppDomain = loadedType.HasLoadInSeparateAppDomainAttribute;
             s_resolverLoadedType = null;
             taskAppDomain = null;
-            ITask taskInstanceInOtherAppDomain = null;
+            ITask? taskInstanceInOtherAppDomain = null;
 #endif
 
             try
@@ -126,7 +124,7 @@ namespace Microsoft.Build.Shared
                 {
                     // perf improvement for the same appdomain case - we already have the type object
                     // and don't want to go through reflection to recreate it from the name.
-                    return (ITask)Activator.CreateInstance(loadedType.Type);
+                    return (ITask?)Activator.CreateInstance(loadedType.Type);
                 }
 
 #if FEATURE_APPDOMAIN
@@ -158,7 +156,7 @@ namespace Microsoft.Build.Shared
                     taskInstanceInOtherAppDomain = (ITask)taskAppDomain.CreateInstanceAndUnwrap(loadedType.Type.GetTypeInfo().Assembly.FullName, loadedType.Type.FullName);
                 }
 
-                return taskInstanceInOtherAppDomain;
+                return  taskInstanceInOtherAppDomain;
 #endif
             }
             finally
@@ -179,10 +177,14 @@ namespace Microsoft.Build.Shared
         /// This is a resolver to help created AppDomains when they are unable to load an assembly into their domain we will help
         /// them succeed by providing the already loaded one in the currentdomain so that they can derive AssemblyName info from it
         /// </summary>
-        internal static Assembly AssemblyResolver(object sender, ResolveEventArgs args)
+        internal static Assembly? AssemblyResolver(object sender, ResolveEventArgs args)
         {
-            if (args.Name.Equals(s_resolverLoadedType.LoadedAssemblyName.FullName, StringComparison.OrdinalIgnoreCase))
+            if (args.Name.Equals(s_resolverLoadedType?.LoadedAssemblyName?.FullName, StringComparison.OrdinalIgnoreCase))
             {
+                if (s_resolverLoadedType == null || s_resolverLoadedType.Path == null)
+                {
+                    return null;
+                }
                 return s_resolverLoadedType.LoadedAssembly ?? Assembly.Load(s_resolverLoadedType.Path);
             }
 

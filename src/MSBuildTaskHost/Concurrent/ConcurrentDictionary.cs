@@ -472,22 +472,6 @@ namespace Microsoft.Build.Shared.Concurrent
         }
 
         /// <summary>
-        /// Acquires all locks for this hash table, and increments locksAcquired by the number
-        /// of locks that were successfully acquired. The locks are acquired in an increasing
-        /// order.
-        /// </summary>
-        private void AcquireAllLocks(ref int locksAcquired)
-        {
-            // First, acquire lock 0
-            AcquireLocks(0, 1, ref locksAcquired);
-
-            // Now that we have lock 0, the _locks array will not change (i.e., grow),
-            // and so we can safely read _locks.Length.
-            AcquireLocks(1, _tables._locks.Length, ref locksAcquired);
-            Debug.Assert(locksAcquired == _tables._locks.Length);
-        }
-
-        /// <summary>
         /// Acquires a contiguous range of locks for this hash table, and increments locksAcquired
         /// by the number of locks that were successfully acquired. The locks are acquired in an
         /// increasing order.

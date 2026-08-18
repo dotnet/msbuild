@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Xml;
@@ -97,7 +96,7 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             w.WriteEndDocument();
             w.Flush();
             m.Position = 0;
-            Util.WriteLog(String.Format(CultureInfo.CurrentCulture, "ManifestWriter.Format t={0}", Environment.TickCount - t1));
+            Util.WriteLog($"ManifestWriter.Format t={Environment.TickCount - t1}");
             return m;
         }
     }

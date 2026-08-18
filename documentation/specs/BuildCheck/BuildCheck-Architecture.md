@@ -9,12 +9,12 @@ This is an internal engineering document. For general overview and user point of
 |----------|:-------------|
 | PM                  | @baronfel |
 | Advisory/Leadership | @rainersigwald |
-| Infrastructure      | @jankrivanek |
-| Configuration       | @f-alizada   |
+| Infrastructure      | @SimaTian |
+| Configuration       | @JanProvaznik   |
 | Custom Checks       | @YuliiaKovalova |
-| Inbox Checks        | @ladipro |
+| Inbox Checks        | @YuliiaKovalova |
 | Replay Mode         | @surayya-MS |
-| Tracing             | @maridematte |
+| Tracing             | @surayya-MS |
 | Perf Advisory       | @AR-May |
 
 

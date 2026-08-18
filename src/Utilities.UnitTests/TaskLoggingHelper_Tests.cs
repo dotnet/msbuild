@@ -3,7 +3,6 @@
 
 using System;
 using System.IO;
-using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;

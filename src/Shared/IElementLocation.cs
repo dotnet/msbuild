@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Framework;
 
 #nullable disable
 

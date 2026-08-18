@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using Microsoft.Build.Framework;
 using Shouldly;
 using Xunit;

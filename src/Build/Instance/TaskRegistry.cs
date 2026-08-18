@@ -11,16 +11,15 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.BackEnd.Components.RequestBuilder;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Collections;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.NET.StringTools;
-using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 using InvalidProjectFileException = Microsoft.Build.Exceptions.InvalidProjectFileException;
 using ProjectXmlUtilities = Microsoft.Build.Internal.ProjectXmlUtilities;
 using TargetLoggingContext = Microsoft.Build.BackEnd.Logging.TargetLoggingContext;
@@ -63,69 +62,61 @@ namespace Microsoft.Build.Execution
         private Toolset _toolset;
 
         /// <summary>
-        /// If true, we will force all tasks to run in the MSBuild task host EXCEPT
-        /// a small well-known set of tasks that are known to depend on IBuildEngine
-        /// callbacks; as forcing those out of proc would be just setting them up for
-        /// known failure.
-        /// </summary>
-        private static bool s_forceTaskHostLaunch = (Environment.GetEnvironmentVariable("MSBUILDFORCEALLTASKSOUTOFPROC") == "1");
-
-        /// <summary>
         /// Simple name for the MSBuild tasks (v4), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksV4SimpleName = "Microsoft.Build.Tasks.v4.0";
+        private const string s_tasksV4SimpleName = "Microsoft.Build.Tasks.v4.0";
 
         /// <summary>
         /// Filename for the MSBuild tasks (v4), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksV4Filename = s_tasksV4SimpleName + ".dll";
+        private const string s_tasksV4Filename = $"{s_tasksV4SimpleName}.dll";
 
         /// <summary>
         /// Expected location that MSBuild tasks (v4) is picked up from if the user
         /// references it with just a simple name, used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_potentialTasksV4Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV4Filename);
+        private static readonly string s_potentialTasksV4Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV4Filename);
 
         /// <summary>
         /// Simple name for the MSBuild tasks (v12), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksV12SimpleName = "Microsoft.Build.Tasks.v12.0";
+        private const string s_tasksV12SimpleName = "Microsoft.Build.Tasks.v12.0";
 
         /// <summary>
         /// Filename for the MSBuild tasks (v12), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksV12Filename = s_tasksV12SimpleName + ".dll";
+        private const string s_tasksV12Filename = $"{s_tasksV12SimpleName}.dll";
 
         /// <summary>
         /// Expected location that MSBuild tasks (v12) is picked up from if the user
         /// references it with just a simple name, used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_potentialTasksV12Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV12Filename);
+        private static readonly string s_potentialTasksV12Location = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksV12Filename);
 
         /// <summary>
         /// Simple name for the MSBuild tasks (v14+), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksCoreSimpleName = "Microsoft.Build.Tasks.Core";
+        private const string s_tasksCoreSimpleName = "Microsoft.Build.Tasks.Core";
 
         /// <summary>
         /// Filename for the MSBuild tasks (v14+), used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_tasksCoreFilename = s_tasksCoreSimpleName + ".dll";
+        private const string s_tasksCoreFilename = $"{s_tasksCoreSimpleName}.dll";
 
         /// <summary>
         /// Expected location that MSBuild tasks (v14+) is picked up from if the user
         /// references it with just a simple name, used for shimming in loading
         /// task factory UsingTasks
         /// </summary>
-        private static string s_potentialTasksCoreLocation = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksCoreFilename);
+        private static readonly string s_potentialTasksCoreLocation = Path.Combine(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory, s_tasksCoreFilename);
 
         /// <summary>
         /// Monotonically increasing counter for registered tasks.
@@ -853,13 +844,13 @@ namespace Microsoft.Build.Execution
                 /// <summary>
                 /// The singleton comparer to use when an exact match is desired
                 /// </summary>
-                private static RegisteredTaskIdentityComparer s_exact = new RegisteredTaskIdentityComparer(true /* exact match */);
+                private static readonly RegisteredTaskIdentityComparer s_exact = new RegisteredTaskIdentityComparer(true /* exact match */);
 
                 /// <summary>
                 /// The singleton comparer to use when a fuzzy match is desired.  Note that this still does an exact match on the
                 /// name, but does a fuzzy match on the task identity parameters.
                 /// </summary>
-                private static RegisteredTaskIdentityComparer s_fuzzy = new RegisteredTaskIdentityComparer(false /* fuzzy match */);
+                private static readonly RegisteredTaskIdentityComparer s_fuzzy = new RegisteredTaskIdentityComparer(false /* fuzzy match */);
 
                 /// <summary>
                 /// Keeps track of whether we're doing exact or fuzzy equivalency
@@ -1101,7 +1092,7 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Lock for the taskFactoryTypeLoader
             /// </summary>
-            private static readonly Object s_taskFactoryTypeLoaderLock = new Object();
+            private static readonly LockType s_taskFactoryTypeLoaderLock = new();
 
 #if DEBUG
             /// <summary>
@@ -1114,6 +1105,11 @@ namespace Microsoft.Build.Execution
             /// Type filter to make sure we only look for taskFactoryClasses
             /// </summary>
             private static readonly Func<Type, object, bool> s_taskFactoryTypeFilter = IsTaskFactoryClass;
+
+            /// <summary>
+            /// Lock object to ensure that only one thread can access the task factory type loader at a time.
+            /// </summary>
+            private readonly LockType _lockObject = new();
 
             /// <summary>
             /// Identity of this task.
@@ -1149,7 +1145,9 @@ namespace Microsoft.Build.Execution
             /// <summary>
             /// Cache of task names which can be created by the factory.
             /// When ever a taskName is checked against the factory we cache the result so we do not have to
-            /// make possibly expensive calls over and over again.
+            /// make possibly expensive calls over and over again. We intentionally do not use a ConcurrentDictionary here
+            /// for performance reasons, since a concurrent dictionary is much larger than a regular dictionary. The usage
+            /// scope is limited, so we can just lock on a regular dictionary.
             /// </summary>
             private Dictionary<RegisteredTaskIdentity, object> _taskNamesCreatableByFactory;
 
@@ -1190,7 +1188,7 @@ namespace Microsoft.Build.Execution
 
                 public void ExecutionStarted()
                 {
-                    _memoryConsumptionOnStart = GC.GetTotalMemory(false);
+                    _memoryConsumptionOnStart = GetMemoryAllocated();
                     _executedSw.Start();
                     ExecutedCount++;
                 }
@@ -1198,7 +1196,16 @@ namespace Microsoft.Build.Execution
                 public void ExecutionStopped()
                 {
                     _executedSw.Stop();
-                    TotalMemoryConsumption += GC.GetTotalMemory(false) - _memoryConsumptionOnStart;
+                    TotalMemoryConsumption += GetMemoryAllocated() - _memoryConsumptionOnStart;
+                }
+
+                private static long GetMemoryAllocated()
+                {
+#if NET
+                    return GC.GetTotalAllocatedBytes(false);
+#else
+                    return GC.GetTotalMemory(false);
+#endif
                 }
 
                 public void Reset()
@@ -1350,82 +1357,100 @@ namespace Microsoft.Build.Execution
             /// <returns>true if the task can be created by the factory, false if it cannot be created</returns>
             internal bool CanTaskBeCreatedByFactory(string taskName, string taskProjectFile, IDictionary<string, string> taskIdentityParameters, TargetLoggingContext targetLoggingContext, ElementLocation elementLocation)
             {
-                // Keep a cache of task identities which have been checked against the factory, this is useful because we ask this question everytime we get a registered task record or a taskFactory wrapper.
+                // First check (fast path - no locking)
                 if (_taskNamesCreatableByFactory == null)
                 {
-                    _taskNamesCreatableByFactory = new Dictionary<RegisteredTaskIdentity, object>(RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                    lock (_lockObject)
+                    {
+                        // Second check (inside lock - ensure only one thread initializes)
+
+                        // Initialize the cache dictionary only when first needed.
+                        // This approach ensures the dictionary is available regardless of how the RegisteredTaskRecord
+                        // instance was created (constructor, deserialization, factory methods, etc.).
+                        _taskNamesCreatableByFactory ??= new Dictionary<RegisteredTaskIdentity, object>(
+                                RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Exact);
+                    }
                 }
 
                 RegisteredTaskIdentity taskIdentity = new RegisteredTaskIdentity(taskName, taskIdentityParameters);
 
                 // See if the task name as already been checked against the factory, return the value if it has
                 object creatableByFactory = null;
-                if (!_taskNamesCreatableByFactory.TryGetValue(taskIdentity, out creatableByFactory))
+                lock (_lockObject)
                 {
-                    try
+                    // If we already have a value for this task identity, return it
+                    if (_taskNamesCreatableByFactory.TryGetValue(taskIdentity, out creatableByFactory))
                     {
-                        bool haveTaskFactory = GetTaskFactory(targetLoggingContext, elementLocation, taskProjectFile);
+                        return creatableByFactory != null;
+                    }
+                }
 
-                        // Create task Factory will only actually create a factory once.
-                        if (haveTaskFactory)
+                try
+                {
+                    bool haveTaskFactory = GetTaskFactory(targetLoggingContext, elementLocation, taskProjectFile);
+
+                    // Create task Factory will only actually create a factory once.
+                    if (haveTaskFactory)
+                    {
+                        // If we are an AssemblyTaskFactory we can use the fact we are internal to the engine assembly to do some logging / exception throwing that regular factories cannot do,
+                        // this is requried to remain compatible with orcas in terms of exceptions thrown / messages logged when a task cannot be found in an assembly.
+                        if (TaskFactoryAttributeName == AssemblyTaskFactory || TaskFactoryAttributeName == TaskHostFactory)
                         {
-                            // If we are an AssemblyTaskFactory we can use the fact we are internal to the engine assembly to do some logging / exception throwing that regular factories cannot do,
-                            // this is requried to remain compatible with orcas in terms of exceptions thrown / messages logged when a task cannot be found in an assembly.
-                            if (TaskFactoryAttributeName == AssemblyTaskFactory || TaskFactoryAttributeName == TaskHostFactory)
+                            // Also we only need to check to see if the task name can be created by the factory if the taskName does not equal the Registered name
+                            // and the identity parameters don't match the factory's declared parameters.
+                            // This is because when the task factory is instantiated we try and load the Registered name from the task factory and fail it it cannot be loaded
+                            // therefore the fact that we have a factory means the Registered type and parameters can be created by the factory.
+                            if (RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Fuzzy.Equals(this.TaskIdentity, taskIdentity))
                             {
-                                // Also we only need to check to see if the task name can be created by the factory if the taskName does not equal the Registered name
-                                // and the identity parameters don't match the factory's declared parameters.
-                                // This is because when the task factory is instantiated we try and load the Registered name from the task factory and fail it it cannot be loaded
-                                // therefore the fact that we have a factory means the Registered type and parameters can be created by the factory.
-                                if (RegisteredTaskIdentity.RegisteredTaskIdentityComparer.Fuzzy.Equals(this.TaskIdentity, taskIdentity))
+                                creatableByFactory = this;
+                            }
+                            else
+                            {
+                                // The method will handle exceptions related to asking if a task can be created and will throw an Invalid project file exception if there is a problem
+                                bool createable = ((AssemblyTaskFactory)_taskFactoryWrapperInstance.TaskFactory).TaskNameCreatableByFactory(taskName, taskIdentityParameters, taskProjectFile, targetLoggingContext, elementLocation);
+
+                                if (createable)
                                 {
                                     creatableByFactory = this;
                                 }
                                 else
                                 {
-                                    // The method will handle exceptions related to asking if a task can be created and will throw an Invalid project file exception if there is a problem
-                                    bool createable = ((AssemblyTaskFactory)_taskFactoryWrapperInstance.TaskFactory).TaskNameCreatableByFactory(taskName, taskIdentityParameters, taskProjectFile, targetLoggingContext, elementLocation);
-
-                                    if (createable)
-                                    {
-                                        creatableByFactory = this;
-                                    }
-                                    else
-                                    {
-                                        creatableByFactory = null;
-                                    }
-                                }
-                            }
-                            else
-                            {
-                                // Wrap arbitrary task factory calls because we do not know what kind of error handling they are doing.
-                                try
-                                {
-                                    bool createable = _taskFactoryWrapperInstance.IsCreatableByFactory(taskName);
-
-                                    if (createable)
-                                    {
-                                        creatableByFactory = this;
-                                    }
-                                    else
-                                    {
-                                        creatableByFactory = null;
-                                    }
-                                }
-                                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
-                                {
-                                    // Log e.ToString to give as much information about the failure of a "third party" call as possible.
-                                    string message =
-#if DEBUG
-                                    UnhandledFactoryError +
-#endif
-                                    e.ToString();
-                                    ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _taskFactoryWrapperInstance.Name, message);
+                                    creatableByFactory = null;
                                 }
                             }
                         }
+                        else
+                        {
+                            // Wrap arbitrary task factory calls because we do not know what kind of error handling they are doing.
+                            try
+                            {
+                                bool createable = _taskFactoryWrapperInstance.IsCreatableByFactory(taskName);
+
+                                if (createable)
+                                {
+                                    creatableByFactory = this;
+                                }
+                                else
+                                {
+                                    creatableByFactory = null;
+                                }
+                            }
+                            catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                            {
+                                // Log e.ToString to give as much information about the failure of a "third party" call as possible.
+                                string message =
+#if DEBUG
+                                UnhandledFactoryError +
+#endif
+                                e.ToString();
+                                ProjectErrorUtilities.ThrowInvalidProject(elementLocation, "TaskLoadFailure", taskName, _taskFactoryWrapperInstance.Name, message);
+                            }
+                        }
                     }
-                    finally
+                }
+                finally
+                {
+                    lock (_lockObject)
                     {
                         _taskNamesCreatableByFactory[taskIdentity] = creatableByFactory;
                     }
@@ -1464,19 +1489,29 @@ namespace Microsoft.Build.Execution
 
                     bool isAssemblyTaskFactory = String.Equals(TaskFactoryAttributeName, AssemblyTaskFactory, StringComparison.OrdinalIgnoreCase);
                     bool isTaskHostFactory = String.Equals(TaskFactoryAttributeName, TaskHostFactory, StringComparison.OrdinalIgnoreCase);
+                    _taskFactoryParameters ??= [];
+
+                    if (isTaskHostFactory)
+                    {
+                        TaskFactoryParameters.Add(Constants.TaskHostExplicitlyRequested, isTaskHostFactory.ToString());
+                    }
 
                     if (isAssemblyTaskFactory || isTaskHostFactory)
                     {
-                        bool explicitlyLaunchTaskHost =
+                        // If ForceAllTasksOutOfProc is true, we will force all tasks to run in the MSBuild task host
+                        // "EXCEPT a small well-known set of tasks that are known to depend on IBuildEngine callbacks
+                        // as forcing those out of proc would be just setting them up for known failure"
+
+                        bool launchTaskHost =
                             isTaskHostFactory ||
                             (
-                                s_forceTaskHostLaunch &&
+                                Traits.Instance.ForceAllTasksOutOfProcToTaskHost &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "MSBuild") &&
                                 !TypeLoader.IsPartialTypeNameMatch(RegisteredName, "CallTarget"));
 
                         // Create an instance of the internal assembly task factory, it has the error handling built into its methods.
                         AssemblyTaskFactory taskFactory = new AssemblyTaskFactory();
-                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, explicitlyLaunchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
+                        loadedType = taskFactory.InitializeFactory(taskFactoryLoadInfo, RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, TaskFactoryParameters, launchTaskHost, targetLoggingContext, elementLocation, taskProjectFile);
                         factory = taskFactory;
                     }
                     else
@@ -1561,7 +1596,11 @@ namespace Microsoft.Build.Execution
                                         initialized = factory.Initialize(RegisteredName, ParameterGroupAndTaskBody.UsingTaskParameters, ParameterGroupAndTaskBody.InlineTaskXmlBody, taskFactoryLoggingHost);
 
                                         // TaskFactoryParameters will always be null unless specifically created to have runtime and architecture parameters.
-                                        if (initialized && TaskFactoryParameters != null)
+                                        // In case TaskHostFactory is explicitly requested, we will now have a parameter for that.
+                                        bool containsArchOrRuntimeParam = TaskFactoryParameters?.TryGetValue(XMakeAttributes.runtime, out _) == true
+                                                                          || TaskFactoryParameters?.TryGetValue(XMakeAttributes.architecture, out _) == true;
+
+                                        if (initialized && containsArchOrRuntimeParam)
                                         {
                                             targetLoggingContext.LogWarning(
                                                 null,

@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared.FileSystem;
-using System.Threading;
 
 #nullable disable
 

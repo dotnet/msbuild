@@ -11,6 +11,6 @@ namespace Microsoft.Build.Framework
     /// </summary>
     public interface IBuildEngine7 : IBuildEngine6
     {
-        public bool AllowFailureWithoutError { get; set; }
+        bool AllowFailureWithoutError { get; set; }
     }
 }

@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+#if NET
 using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Globalization;
 using System.IO;
 
@@ -193,7 +195,7 @@ namespace Microsoft.Build.Framework
                     // another one, add it here.
                     if (param != null && param.ToString() == param.GetType().FullName)
                     {
-                        throw new InvalidOperationException(string.Format("Invalid type for message formatting argument, was {0}", param.GetType().FullName));
+                        throw new InvalidOperationException($"Invalid type for message formatting argument, was {param.GetType().FullName}");
                     }
                 }
 #endif
@@ -218,7 +220,7 @@ namespace Microsoft.Build.Framework
                     //          Done executing task "Crash".
                     //
                     // T
-                    formatted = string.Format("\"{0}\"\n{1}", unformatted, ex.ToString());
+                    formatted = $"\"{unformatted}\"\n{ex}";
                 }
             }
 

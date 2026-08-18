@@ -12,12 +12,14 @@ namespace Microsoft.Build.BackEnd
         private bool _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
         private bool _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
         private bool _includeTaskInputs;
+        private bool _includeTargetOutputs;
 
         public bool IncludeEvaluationMetaprojects => _includeEvaluationMetaprojects;
         public bool IncludeEvaluationProfiles => _includeEvaluationProfiles;
         public bool IncludeEvaluationPropertiesAndItemsInProjectStartedEvent => _includeEvaluationPropertiesAndItemsInProjectStartedEvent;
         public bool IncludeEvaluationPropertiesAndItemsInEvaluationFinishedEvent => _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
         public bool IncludeTaskInputs => _includeTaskInputs;
+        public bool IncludeTargetOutputs => _includeTargetOutputs;
 
         public LoggingNodeConfiguration()
         {
@@ -28,13 +30,15 @@ namespace Microsoft.Build.BackEnd
             bool includeEvaluationProfiles,
             bool includeEvaluationPropertiesAndItemsInProjectStartedEvent,
             bool includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent,
-            bool includeTaskInputs)
+            bool includeTaskInputs,
+            bool includeTargetOutputs)
         {
             _includeEvaluationMetaprojects = includeEvaluationMetaprojects;
             _includeEvaluationProfiles = includeEvaluationProfiles;
             _includeEvaluationPropertiesAndItemsInProjectStartedEvent = includeEvaluationPropertiesAndItemsInProjectStartedEvent;
             _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent = includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent;
             _includeTaskInputs = includeTaskInputs;
+            _includeTargetOutputs = includeTargetOutputs;
         }
 
         void ITranslatable.Translate(ITranslator translator)
@@ -44,6 +48,7 @@ namespace Microsoft.Build.BackEnd
             translator.Translate(ref _includeEvaluationPropertiesAndItemsInProjectStartedEvent);
             translator.Translate(ref _includeEvaluationPropertiesAndItemsInEvaluationFinishedEvent);
             translator.Translate(ref _includeTaskInputs);
+            translator.Translate(ref _includeTargetOutputs);
         }
     }
 }

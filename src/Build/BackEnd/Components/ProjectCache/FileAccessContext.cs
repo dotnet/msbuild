@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Build.Experimental.ProjectCache
+namespace Microsoft.Build.ProjectCache
 {
     public readonly struct FileAccessContext
     {

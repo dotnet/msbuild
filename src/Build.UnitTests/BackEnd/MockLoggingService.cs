@@ -101,6 +101,19 @@ namespace Microsoft.Build.UnitTests.BackEnd
             }
         }
 
+        /// <inheritdoc/>
+        public bool EnableTargetOutputLogging
+        {
+            get
+            {
+                return false;
+            }
+
+            set
+            {
+            }
+        }
+
         /// <summary>
         /// Returns the number of initial nodes.
         /// </summary>

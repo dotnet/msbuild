@@ -30,7 +30,7 @@ internal static class TelemetryConstants
     /// <summary>
     /// For VS OpenTelemetry Collector to apply the correct privacy policy.
     /// </summary>
-    public const string VSMajorVersion = "17.0";
+    public const string VSMajorVersion = "18.0";
 
     /// <summary>
     /// Sample rate for the default namespace.
@@ -47,4 +47,13 @@ internal static class TelemetryConstants
     /// Name of the property for inner build duration.
     /// </summary>
     public const string InnerBuildDurationPropertyName = "InnerBuildDurationInMilliseconds";
+}
+
+internal static class NodeTelemetryTags
+{
+    // These properties can't use nameof since they're not tied to a specific class property
+    public const string Tasks = "Tasks";
+    public const string Targets = "Targets";
+    public const string TargetsSummary = "TargetsSummary";
+    public const string TasksSummary = "TasksSummary";
 }

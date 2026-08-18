@@ -2,15 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
 using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Utilities;
+
+#if FEATURE_COMPILED_XSL
+using System.Collections.Generic;
+using System.Reflection;
+#endif
 
 #nullable disable
 
@@ -179,9 +182,7 @@ namespace Microsoft.Build.Tasks
             }
             catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
             {
-                string flattenedMessage = TaskLoggingHelper.GetInnerExceptionMessageString(e);
-                Log.LogErrorWithCodeFromResources("XslTransform.TransformError", flattenedMessage);
-                Log.LogMessage(MessageImportance.Low, e.ToString());
+                Log.LogErrorWithCodeAndExceptionFromResources(e, true, true, "XslTransform.TransformError", [e.Message]);
                 return false;
             }
 
@@ -495,6 +496,7 @@ namespace Microsoft.Build.Tasks
                 return xslct;
             }
 
+#if FEATURE_COMPILED_XSL
             /// <summary>
             /// Find the type from an assembly and loads it.
             /// </summary>
@@ -528,6 +530,7 @@ namespace Microsoft.Build.Tasks
                     throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("XslTransform.MustSpecifyType", assemblyPath));
                 }
             }
+#endif
         }
         #endregion
     }

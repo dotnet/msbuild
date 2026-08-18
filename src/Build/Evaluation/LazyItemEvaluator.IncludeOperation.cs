@@ -39,7 +39,6 @@ namespace Microsoft.Build.Evaluation
             {
                 ImmutableArray<I>.Builder? itemsToAdd = null;
 
-                Lazy<Func<string, bool>>? excludeTester = null;
                 ImmutableList<string>.Builder excludePatterns = ImmutableList.CreateBuilder<string>();
                 if (_excludes != null)
                 {
@@ -50,14 +49,10 @@ namespace Microsoft.Build.Evaluation
                         var excludeSplits = ExpressionShredder.SplitSemiColonSeparatedList(excludeExpanded);
                         excludePatterns.AddRange(excludeSplits);
                     }
-
-                    if (excludePatterns.Count > 0)
-                    {
-                        excludeTester = new Lazy<Func<string, bool>>(() => EngineFileUtilities.GetFileSpecMatchTester(excludePatterns, _rootDirectory));
-                    }
                 }
 
                 ISet<string>? excludePatternsForGlobs = null;
+                FileSpecMatcherTester?[]? matchers = null;
 
                 foreach (var fragment in _itemSpec.Fragments)
                 {
@@ -74,16 +69,30 @@ namespace Microsoft.Build.Evaluation
                             elementLocation: _itemElement.IncludeLocation);
 
                         itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
-                        itemsToAdd.AddRange(
-                            excludeTester != null
-                                ? itemsFromExpression.Where(item => !excludeTester.Value(item.EvaluatedInclude))
-                                : itemsFromExpression);
+
+                        if (excludePatterns.Count > 0)
+                        {
+                            matchers ??= new FileSpecMatcherTester?[excludePatterns.Count];
+
+                            foreach (var item in itemsFromExpression)
+                            {
+                                if (!ExcludeTester(_rootDirectory, excludePatterns, matchers, item.EvaluatedInclude))
+                                {
+                                    itemsToAdd.Add(item);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            itemsToAdd.AddRange(itemsFromExpression);
+                        }
                     }
                     else if (fragment is ValueFragment valueFragment)
                     {
                         string value = valueFragment.TextFragment;
+                        matchers ??= new FileSpecMatcherTester?[excludePatterns.Count];
 
-                        if (excludeTester?.Value(EscapingUtilities.UnescapeAll(value)) != true)
+                        if (excludePatterns.Count == 0 || !ExcludeTester(_rootDirectory, excludePatterns, matchers, EscapingUtilities.UnescapeAll(value)))
                         {
                             itemsToAdd ??= ImmutableArray.CreateBuilder<I>();
                             itemsToAdd.Add(_itemFactory.CreateItem(value, value, _itemElement.ContainingProject.FullPath));
@@ -140,6 +149,33 @@ namespace Microsoft.Build.Evaluation
                 }
 
                 return itemsToAdd?.ToImmutable() ?? ImmutableArray<I>.Empty;
+
+                static bool ExcludeTester(string? directory, ImmutableList<string>.Builder excludePatterns, FileSpecMatcherTester?[] matchers, string item)
+                {
+                    if (excludePatterns.Count == 0)
+                    {
+                        return false;
+                    }
+
+                    bool found = false;
+                    for (int i = 0; i < matchers.Length; ++i)
+                    {
+                        FileSpecMatcherTester? matcher = matchers[i];
+                        if (!matcher.HasValue)
+                        {
+                            matcher = FileSpecMatcherTester.Parse(directory, excludePatterns[i]);
+                            matchers[i] = matcher;
+                        }
+
+                        if (matcher.Value.IsMatch(item))
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    return found;
+                }
             }
 
             private static ISet<string> BuildExcludePatternsForGlobs(ImmutableHashSet<string> globsToIgnore, ImmutableList<string>.Builder excludePatterns)

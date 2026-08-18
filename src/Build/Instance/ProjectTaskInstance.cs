@@ -299,7 +299,7 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Retrieves the parameters dictionary as used during the build.
         /// </summary>
-        internal IDictionary<string, (string, ElementLocation)> ParametersForBuild
+        internal CopyOnWriteDictionary<(string, ElementLocation)> ParametersForBuild
         {
             get { return _parameters; }
         }

@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.FileAccess;
 
-namespace Microsoft.Build.Experimental.ProjectCache
+namespace Microsoft.Build.ProjectCache
 {
     /// <summary>
     ///     Only one plugin instance can exist for a given BuildManager BeginBuild / EndBuild session.
     ///     Any exceptions thrown by the plugin will cause MSBuild to fail the build.
     /// </summary>
-    public abstract class ProjectCachePluginBase
+    public abstract class ProjectCachePluginBase : IProjectCachePluginBase
     {
         /// <summary>
         ///     Called once before the build, to have the plugin instantiate its state.

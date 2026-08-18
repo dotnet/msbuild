@@ -29,7 +29,7 @@
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
         <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">Niestandardowy typ zdarzenia „{0}” nie jest obsługiwany, ponieważ wszystkie typy zdarzeń niestandardowych były przestarzałe. Zamiast tego użyj elementu Extended*EventArgs. Więcej informacji: https://aka.ms/msbuild/eventargs</target>
+        <target state="translated">Niestandardowy typ zdarzenia '{0}' nie jest obsługiwany, ponieważ wszystkie typy zdarzeń niestandardowych były przestarzałe. Zamiast tego użyj elementu Extended*EventArgs. Więcej informacji: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="ExpectedEventToBeSerializable">

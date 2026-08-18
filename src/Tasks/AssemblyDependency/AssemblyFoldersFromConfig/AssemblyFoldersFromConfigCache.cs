@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Immutable;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Shared;
@@ -19,7 +19,7 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
         /// <summary>
         /// Set of files in ALL AssemblyFolderFromConfig directories
         /// </summary>
-        private readonly ImmutableHashSet<string> _filesInDirectories = ImmutableHashSet<string>.Empty;
+        private readonly HashSet<string> _filesInDirectories;
 
         /// <summary>
         /// File exists delegate we are replacing
@@ -45,12 +45,12 @@ namespace Microsoft.Build.Tasks.AssemblyFoldersFromConfig
             }
             else
             {
-                _filesInDirectories = assemblyFoldersFromConfig.AsParallel()
+                _filesInDirectories = new(assemblyFoldersFromConfig.AsParallel()
                     .Where(assemblyFolder => FileUtilities.DirectoryExistsNoThrow(assemblyFolder.DirectoryPath))
                     .SelectMany(
                         assemblyFolder =>
-                            Directory.GetFiles(assemblyFolder.DirectoryPath, "*.*", SearchOption.TopDirectoryOnly))
-                    .ToImmutableHashSet(StringComparer.OrdinalIgnoreCase);
+                            Directory.GetFiles(assemblyFolder.DirectoryPath, "*.*", SearchOption.TopDirectoryOnly)),
+                    StringComparer.OrdinalIgnoreCase);
             }
         }
 

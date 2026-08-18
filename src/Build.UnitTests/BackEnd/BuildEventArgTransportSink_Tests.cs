@@ -5,9 +5,7 @@ using System;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Xunit;
-using Xunit.NetCore.Extensions;
 
 #nullable disable
 

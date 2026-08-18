@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 
-namespace Microsoft.Build.Framework;
+namespace Microsoft.Build.Framework.Telemetry;
 
 internal interface IWorkerNodeTelemetryData
 {

@@ -6,7 +6,6 @@
 // and from the supports-ansi project by Qingrong Ke
 // https://github.com/keqingrong/supports-ansi/blob/master/index.js
 
-using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 
