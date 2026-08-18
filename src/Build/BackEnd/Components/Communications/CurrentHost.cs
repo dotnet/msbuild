@@ -51,14 +51,9 @@ internal static class CurrentHost
                     dotnetExe = Path.Combine(
                         FileUtilities.GetFolderAbove(System.Runtime.InteropServices.RuntimeEnvironment.GetRuntimeDirectory(), 4),
                         Constants.DotnetProcessName);
-                    if (FileSystems.Default.FileExists(dotnetExe))
-                    {
-                        host = dotnetExe;
-                    }
-                    else
-                    {
-                        ErrorUtilities.ThrowInternalErrorUnreachable();
-                    }
+                    host = FileSystems.Default.FileExists(dotnetExe)
+                        ? dotnetExe
+                        : Assumed.Unreachable<string>();
                 }
             }
 

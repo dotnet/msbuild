@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -348,7 +348,7 @@ namespace Microsoft.Build.Construction
         /// <param name="solutionModel"></param>
         private void ReadSolutionModel(SolutionModel solutionModel)
         {
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(_solutionFile), "ReadSolutionModel() got a null or empty solution file.");
+            Assumed.NotNullOrEmpty(_solutionFile, "ReadSolutionModel() got a null or empty solution file.");
             ErrorUtilities.VerifyThrowInternalRooted(_solutionFile);
 
             _projectsByGuid = new Dictionary<string, ProjectInSolution>(StringComparer.OrdinalIgnoreCase);
@@ -535,7 +535,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal static void GetSolutionFileAndVisualStudioMajorVersions(string solutionFile, out int solutionVersion, out int visualStudioMajorVersion)
         {
-            ErrorUtilities.VerifyThrow(!String.IsNullOrEmpty(solutionFile), "null solution file passed to GetSolutionFileMajorVersion!");
+            Assumed.NotNullOrEmpty(solutionFile, "null solution file passed to GetSolutionFileMajorVersion!");
             ErrorUtilities.VerifyThrowInternalRooted(solutionFile);
 
             const string slnFileHeaderNoVersion = "Microsoft Visual Studio Solution File, Format Version ";
@@ -706,7 +706,7 @@ namespace Microsoft.Build.Construction
         /// <returns></returns>
         private string ReadLine()
         {
-            ErrorUtilities.VerifyThrow(SolutionReader != null, "ParseFileHeader(): reader is null!");
+            Assumed.NotNull(SolutionReader, "ParseFileHeader(): reader is null!");
 
             string line = SolutionReader.ReadLine();
             _currentLineNumber++;
@@ -732,7 +732,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         internal void ParseSolutionFile()
         {
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(_solutionFile), "ParseSolutionFile() got a null solution file!");
+            Assumed.NotNullOrEmpty(_solutionFile, "ParseSolutionFile() got a null solution file!");
             ErrorUtilities.VerifyThrowInternalRooted(_solutionFile);
 
             FileStream fileStream = null;
@@ -936,7 +936,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void ParseFileHeader()
         {
-            ErrorUtilities.VerifyThrow(SolutionReader != null, "ParseFileHeader(): reader is null!");
+            Assumed.NotNull(SolutionReader, "ParseFileHeader(): reader is null!");
 
             const string slnFileHeaderNoVersion = "Microsoft Visual Studio Solution File, Format Version ";
 
@@ -1001,7 +1001,7 @@ namespace Microsoft.Build.Construction
         /// <param name="versionString"></param>
         private void ValidateSolutionFileVersion(string versionString)
         {
-            ErrorUtilities.VerifyThrow(versionString != null, "ValidateSolutionFileVersion() got a null line!");
+            Assumed.NotNull(versionString, "ValidateSolutionFileVersion() got a null line!");
 
             if (!System.Version.TryParse(versionString, out Version version))
             {
@@ -1045,8 +1045,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         private void ParseProject(string firstLine)
         {
-            ErrorUtilities.VerifyThrow(!string.IsNullOrEmpty(firstLine), "ParseProject() got a null firstLine!");
-            ErrorUtilities.VerifyThrow(SolutionReader != null, "ParseProject() got a null reader!");
+            Assumed.NotNullOrEmpty(firstLine, "ParseProject() got a null firstLine!");
+            Assumed.NotNull(SolutionReader, "ParseProject() got a null reader!");
 
             var proj = new ProjectInSolution(this);
 
@@ -1299,7 +1299,7 @@ namespace Microsoft.Build.Construction
         private void ValidateProjectRelativePath(ProjectInSolution proj)
         {
             // Verify the relative path is not null
-            ErrorUtilities.VerifyThrow(proj.RelativePath != null, "Project relative path cannot be null.");
+            Assumed.NotNull(proj.RelativePath, "Project relative path cannot be null.");
 
             // Verify the relative path does not contain invalid characters
             ProjectFileErrorUtilities.VerifyThrowInvalidProjectFile(proj.RelativePath.AsSpan().IndexOfAny(MSBuildConstants.InvalidPathChars) < 0,

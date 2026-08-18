@@ -74,7 +74,7 @@
       </trans-unit>
       <trans-unit id="ToolTask.PipeEOFTimeout">
         <source>Pipe EOF not received within {0} seconds. A grandchild process may still be holding the pipe open. Output already delivered has been logged.</source>
-        <target state="new">Pipe EOF not received within {0} seconds. A grandchild process may still be holding the pipe open. Output already delivered has been logged.</target>
+        <target state="translated">파이프 EOF가 {0}초 내에 수신되지 않았습니다. 손자 프로세스가 여전히 파이프를 열어 둔 상태일 수 있습니다. 이미 전달된 출력은 기록되었습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">

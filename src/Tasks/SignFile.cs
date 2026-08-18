@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Runtime.Versioning;
 using System.Security.Cryptography;
@@ -42,6 +43,10 @@ namespace Microsoft.Build.Tasks
         public string TimestampUrl { get; set; }
         public bool DisallowMansignTimestampFallback { get; set; } = false;
 
+        [UnconditionalSuppressMessage("TrimAnalysis", "IL2026:RequiresUnreferencedCode",
+            Justification = "Signing a ClickOnce manifest reads and writes it with XmlSerializer; this task is inherently incompatible with trimming.")]
+        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
+            Justification = "Signing a ClickOnce manifest uses XmlSerializer, XslCompiledTransform, and SignedXml; this task is inherently incompatible with Native AOT.")]
         public override bool Execute()
         {
             if (!NativeMethodsShared.IsWindows)

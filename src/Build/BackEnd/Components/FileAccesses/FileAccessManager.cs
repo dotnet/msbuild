@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 #if FEATURE_REPORTFILEACCESSES
@@ -10,7 +10,6 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Experimental.FileAccess;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 
 namespace Microsoft.Build.FileAccesses
@@ -37,7 +36,7 @@ namespace Microsoft.Build.FileAccesses
 
         public static IBuildComponent CreateComponent(BuildComponentType type)
         {
-            ErrorUtilities.VerifyThrowArgumentOutOfRange(type == BuildComponentType.FileAccessManager, nameof(type));
+            ArgumentOutOfRangeException.ThrowIfNotEqual(type, BuildComponentType.FileAccessManager);
             return new FileAccessManager();
         }
 
@@ -162,9 +161,7 @@ namespace Microsoft.Build.FileAccesses
 
         private BuildRequest? GetBuildRequest(int nodeId)
         {
-            ErrorUtilities.VerifyThrow(
-                _scheduler != null && _configCache != null,
-                "Component has not been initialized");
+            Assumed.True(_scheduler != null && _configCache != null, "Component has not been initialized");
 
             // Note: If the node isn't executing anything it may be accessing binaries required to run, eg. the MSBuild binaries
             return _scheduler!.GetExecutingRequestByNode(nodeId);

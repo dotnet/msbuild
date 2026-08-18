@@ -46,7 +46,7 @@ namespace Microsoft.Build.Construction
         internal ProjectTaskElement(XmlElementWithLocation xmlElement, ProjectTargetElement parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent);
+            ArgumentNullException.ThrowIfNull(parent);
         }
 
         /// <summary>
@@ -212,7 +212,7 @@ namespace Microsoft.Build.Construction
         {
             get
             {
-                ErrorUtilities.VerifyThrow(Link == null, "Attempt to edit a document that is not backed by a local xml is disallowed.");
+                Assumed.Null(Link, "Attempt to edit a document that is not backed by a local xml is disallowed.");
 
                 lock (_locker)
                 {
@@ -229,8 +229,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectOutputElement AddOutputItem(string taskParameter, string itemType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskParameter);
-            ErrorUtilities.VerifyThrowArgumentLength(itemType);
+            ArgumentException.ThrowIfNullOrEmpty(taskParameter);
+            ArgumentException.ThrowIfNullOrEmpty(itemType);
 
             return AddOutputItem(taskParameter, itemType, null);
         }
@@ -259,8 +259,8 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectOutputElement AddOutputProperty(string taskParameter, string propertyName)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(taskParameter);
-            ErrorUtilities.VerifyThrowArgumentLength(propertyName);
+            ArgumentException.ThrowIfNullOrEmpty(taskParameter);
+            ArgumentException.ThrowIfNullOrEmpty(propertyName);
 
             return AddOutputProperty(taskParameter, propertyName, null);
         }
@@ -296,7 +296,7 @@ namespace Microsoft.Build.Construction
 
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name);
+                ArgumentException.ThrowIfNullOrEmpty(name);
 
                 EnsureParametersInitialized();
 
@@ -322,8 +322,8 @@ namespace Microsoft.Build.Construction
 
             lock (_locker)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name);
-                ErrorUtilities.VerifyThrowArgumentNull(unevaluatedValue);
+                ArgumentException.ThrowIfNullOrEmpty(name);
+                ArgumentNullException.ThrowIfNull(unevaluatedValue);
                 ErrorUtilities.VerifyThrowArgument(!XMakeAttributes.IsSpecialTaskAttribute(name), "CannotAccessKnownAttributes", name);
 
                 _parameters = null;
@@ -411,7 +411,7 @@ namespace Microsoft.Build.Construction
         /// </remarks>
         internal static ProjectTaskElement CreateDisconnected(string name, ProjectRootElement containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
 
             XmlElementWithLocation element = containingProject.CreateElement(name);
 

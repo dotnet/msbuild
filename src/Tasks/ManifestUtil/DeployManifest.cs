@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -547,6 +548,10 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             set => _updateUnit = value.ToString();
         }
 
+        [UnconditionalSuppressMessage("TrimAnalysis", "IL2026:RequiresUnreferencedCode",
+            Justification = "Validation reads the entry-point ClickOnce manifest with XmlSerializer; the manifest model is inherently incompatible with trimming.")]
+        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
+            Justification = "Validation reads the entry-point ClickOnce manifest with XmlSerializer and XslCompiledTransform; the manifest model is inherently incompatible with Native AOT.")]
         public override void Validate()
         {
             base.Validate();
@@ -564,6 +569,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             }
         }
 
+        [RequiresUnreferencedCode("Reads the entry-point ClickOnce manifest with XmlSerializer; members may be trimmed.")]
+        [RequiresDynamicCode("Reads the entry-point ClickOnce manifest with XmlSerializer and XslCompiledTransform; both require runtime code generation not supported with Native AOT.")]
         private void ValidateEntryPoint()
         {
             if (_entryPoint != null)

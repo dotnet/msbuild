@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -184,8 +183,8 @@ namespace Microsoft.Build.BackEnd
             ICollection<string> warningsNotAsErrors,
             ICollection<string> warningsAsMessages)
         {
-            ErrorUtilities.VerifyThrowInternalLength(taskName, nameof(taskName));
-            ErrorUtilities.VerifyThrowInternalLength(taskLocation, nameof(taskLocation));
+            Assumed.NotNullOrEmpty(taskName);
+            Assumed.NotNullOrEmpty(taskLocation);
 
             _nodeId = nodeId;
             _startupDirectory = startupDirectory;

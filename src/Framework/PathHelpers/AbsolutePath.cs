@@ -109,9 +109,56 @@ namespace Microsoft.Build.Framework
             // This function should not throw when path has illegal characters.
             // For .NET Framework, Microsoft.IO.Path.Combine should be used instead of System.IO.Path.Combine to achieve it.
             // For .NET Core, System.IO.Path.Combine already does not throw in this case.
-            Value = Path.Combine(basePath.Value, path);
+            string combined = Path.Combine(basePath.Value, path);
+
+// Path.IsPathFullyQualified is not available in .NET Standard 2.0
+// in .NET Framework it's provided by package and in .NET it's built-in
+// The netstandard2.0 build of Microsoft.Build.Framework exists only as a compatibility surface
+#if NETFRAMEWORK || NET
+            combined = MakeFullyQualifiedRelativeToBasePath(combined, basePath.Value);
+#endif
+
+            Value = combined;
             OriginalValue = path;
         }
+
+#if NETFRAMEWORK || NET
+        /// <summary>
+        /// Anchors Windows rooted-but-not-fully-qualified paths (<c>"\foo"</c>, <c>"X:foo"</c>) to
+        /// <paramref name="basePath"/> so the result is independent of the current drive and per-drive cwd.
+        /// </summary>
+        /// <remarks>
+        /// Uses string operations instead of <c>Path.GetFullPath(path, basePath)</c> to preserve the
+        /// un-normalized form; <see cref="GetCanonicalForm"/> is the single normalization step.
+        /// </remarks>
+        private static string MakeFullyQualifiedRelativeToBasePath(string combined, string basePath)
+        {
+            if (!NativeMethods.IsWindows
+                || string.IsNullOrEmpty(combined)
+                || Path.IsPathFullyQualified(combined))
+            {
+                return combined;
+            }
+
+            char first = combined[0];
+            // Root-relative ("\foo"): re-root under basePath's root.
+            if (first == '\\' || first == '/')
+            {
+                string? root = Path.GetPathRoot(basePath);
+                return root is { Length: > 0 } baseRoot
+                    ? baseRoot.TrimEnd('\\', '/') + combined
+                    : combined;
+            }
+
+            // Drive-relative ("X:foo"): drop the unrelated drive and anchor the remainder to basePath.
+            if (combined.Length >= 2 && combined[1] == ':')
+            {
+                 return Path.Combine(basePath, combined.Substring(2));
+            }
+
+            return combined;
+        }
+#endif
 
         /// <summary>
         /// Implicitly converts an AbsolutePath to a string.

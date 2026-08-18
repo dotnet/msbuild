@@ -57,8 +57,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectMetadata(object parent, ProjectMetadataElement xml)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent);
-            ErrorUtilities.VerifyThrowArgumentNull(xml);
+            ArgumentNullException.ThrowIfNull(parent);
+            ArgumentNullException.ThrowIfNull(xml);
 
             _parent = (IProjectMetadataParent)parent;
             _xml = xml;
@@ -70,9 +70,9 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectMetadata(IProjectMetadataParent parent, ProjectMetadataElement xml, string evaluatedValueEscaped, ProjectMetadata predecessor)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent);
-            ErrorUtilities.VerifyThrowArgumentNull(xml);
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedValueEscaped);
+            ArgumentNullException.ThrowIfNull(parent);
+            ArgumentNullException.ThrowIfNull(xml);
+            ArgumentNullException.ThrowIfNull(evaluatedValueEscaped);
 
             _parent = parent;
             _xml = xml;
@@ -131,7 +131,7 @@ namespace Microsoft.Build.Evaluation
             [DebuggerStepThrough]
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, "value");
+                ArgumentNullException.ThrowIfNull(value);
                 Project.VerifyThrowInvalidOperationNotImported(_xml.ContainingProject);
                 ErrorUtilities.VerifyThrowInvalidOperation(_xml.Parent?.Parent?.Parent != null, "OM_ObjectIsNoLongerActive");
 

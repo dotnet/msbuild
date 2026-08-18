@@ -4,7 +4,6 @@
 using System;
 using System.Threading;
 using Microsoft.Build.Execution;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Graph
 {
@@ -54,16 +53,14 @@ namespace Microsoft.Build.Graph
             ExecuteAsync(null, null);
             WaitHandle.WaitOne();
 
-            ErrorUtilities.VerifyThrow(BuildResult != null,
-                "BuildResult is not populated after Execute is done.");
+            Assumed.NotNull(BuildResult, "BuildResult is not populated after Execute is done.");
 
             return BuildResult!;
         }
 
         protected internal override void CheckResultValidForCompletion(GraphBuildResult result)
         {
-            ErrorUtilities.VerifyThrow(result.SubmissionId == SubmissionId,
-                "GraphBuildResult's submission id doesn't match GraphBuildSubmission's");
+            Assumed.Equal(result.SubmissionId, SubmissionId, "GraphBuildResult's submission id doesn't match GraphBuildSubmission's");
         }
 
         protected internal override GraphBuildResult CreateFailedResult(Exception exception)

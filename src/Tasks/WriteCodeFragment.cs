@@ -79,6 +79,8 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Main entry point.
         /// </summary>
+        [UnconditionalSuppressMessage("TrimAnalysis", "IL2026:RequiresUnreferencedCode",
+            Justification = "WriteCodeFragment resolves user-specified attribute types by name and reflects over their members to infer parameter types; this is inherently incompatible with trimming.")]
         public override bool Execute()
         {
             if (String.IsNullOrEmpty(Language))
@@ -149,7 +151,9 @@ namespace Microsoft.Build.Tasks
         /// If no meaningful code is generated, returns empty string.
         /// Returns the default language extension as an out parameter.
         /// </summary>
+        /// <returns>The generated source code as a string, or null if an error occurred.</returns>
         [SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.IO.StringWriter.#ctor(System.Text.StringBuilder)", Justification = "Reads fine to me")]
+        [RequiresUnreferencedCode("Resolves user-specified attribute types by name via Type.GetType, which the trimmer cannot statically analyze.")]
         private string GenerateCode(out string extension)
         {
             extension = null;
@@ -407,6 +411,7 @@ namespace Microsoft.Build.Tasks
         /// Returns true if the arguments could be defined, or false if the values could
         /// not be converted to the required type. An error is also logged for failures.
         /// </summary>
+        [RequiresUnreferencedCode("Reflects over the attribute type's properties to infer parameter types, which the trimmer cannot statically analyze.")]
         private bool AddArguments(
             CodeAttributeDeclaration attribute,
             Lazy<Type> attributeType,
@@ -490,6 +495,7 @@ namespace Microsoft.Build.Tasks
         /// Returns an array of types with a length equal to the number of positional parameters.
         /// If no suitable constructor is found, the array will contain null types.
         /// </summary>
+        [RequiresUnreferencedCode("Reflects over the attribute type's constructors to infer parameter types, which the trimmer cannot statically analyze.")]
         private Type[] FindPositionalParameterTypes(Type attributeType, IReadOnlyList<AttributeParameter> positionalParameters)
         {
             // The attribute type might not be known.
@@ -550,6 +556,7 @@ namespace Microsoft.Build.Tasks
         /// Attempts to convert the raw value provided in the metadata to the type with the specified name.
         /// Returns true if conversion is successful. An error is logged and false is returned if the conversion fails.
         /// </summary>
+        [RequiresUnreferencedCode("Resolves the parameter type by name via Type.GetType, which the trimmer cannot statically analyze.")]
         private bool TryConvertParameterValue(string typeName, string rawValue, out CodeExpression value)
         {
             var parameterType = Type.GetType(typeName, throwOnError: false);

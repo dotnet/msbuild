@@ -7,6 +7,10 @@ MSBuild Server nodes accept build requests from clients and use worker nodes in 
 The primary ways to use MSBuild are via Visual Studio and via the CLI using the `dotnet build`/`dotnet msbuild` commands. MSBuild Server is not supported in Visual Studio because Visual Studio itself works like MSBuild Server. For the CLI, the server functionality is enabled by default and can be disabled by setting the `DOTNET_CLI_DO_NOT_USE_MSBUILD_SERVER` environment variable to value `1`.
 To re-enable MSBuild Server, remove the variable or set its value to `0`.
 
+## Garbage collection
+
+When a build is multithreaded (`/mt`), the server node is launched with [Server GC](https://learn.microsoft.com/dotnet/standard/garbage-collection/workstation-server-gc) enabled. Under `/mt` the server runs all project work on threads in this single process, so Server GC's higher throughput is beneficial; without `/mt` the server only orchestrates and delegates project work to separate worker nodes, so it keeps the default Workstation GC. GC mode is fixed at CLR startup, so it is set via the `DOTNET_gcServer` environment variable in the server's launch environment (decided from the launching invocation's command line). An explicit user-set `DOTNET_gcServer` is honored (e.g. set `DOTNET_gcServer=0` to keep Workstation GC in a memory-constrained environment). This is scoped to the server process only: sidecar TaskHosts and worker nodes keep the default Workstation GC.
+
 ## Communication protocol
 
 The server node uses same IPC approach as current worker nodes - named pipes. This solution allows to reuse existing code. When process starts, pipe with deterministic name is opened and waiting for commands. Client has following worfklow:

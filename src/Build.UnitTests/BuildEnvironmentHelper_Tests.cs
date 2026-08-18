@@ -354,7 +354,6 @@ namespace Microsoft.Build.Engine.UnitTests
             }
         }
 
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7552", TargetFrameworkMonikers.Any)]
         [WindowsOnlyFact]
         public void BuildEnvironmentFindsAmd64RunningInAmd64NoVS()
         {
@@ -372,7 +371,6 @@ namespace Microsoft.Build.Engine.UnitTests
         }
 
         [WindowsOnlyFact]
-        [ActiveIssue("https://github.com/dotnet/msbuild/issues/7552", TargetFrameworkMonikers.Any)]
         public void BuildEnvironmentFindsAmd64NoVS()
         {
             using (var env = new EmptyStandaloneEnviroment(Constants.MSBuildExecutableName, writeFakeFiles: true, includeAmd64Folder: true))

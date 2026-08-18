@@ -40,7 +40,7 @@ namespace Microsoft.Build.Evaluation
 
         internal ProjectProperty(Project project)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project);
+            ArgumentNullException.ThrowIfNull(project);
             _project = project;
         }
 
@@ -49,8 +49,8 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         internal ProjectProperty(Project project, string evaluatedValueEscaped)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(project);
-            ErrorUtilities.VerifyThrowArgumentNull(evaluatedValueEscaped);
+            ArgumentNullException.ThrowIfNull(project);
+            ArgumentNullException.ThrowIfNull(evaluatedValueEscaped);
 
             _project = project;
             _evaluatedValueEscaped = evaluatedValueEscaped;
@@ -359,7 +359,7 @@ namespace Microsoft.Build.Evaluation
             internal ProjectPropertyXmlBacked(Project project, ProjectPropertyElement xml, string evaluatedValueEscaped)
                 : base(project, evaluatedValueEscaped)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(xml);
+                ArgumentNullException.ThrowIfNull(xml);
                 ErrorUtilities.VerifyThrowInvalidOperation(!ProjectHasMatchingGlobalProperty(project, xml.Name), "OM_GlobalProperty", xml.Name);
 
                 _xml = xml;
@@ -504,7 +504,7 @@ namespace Microsoft.Build.Evaluation
             internal ProjectPropertyXmlBackedWithPredecessor(Project project, ProjectPropertyElement xml, string evaluatedValueEscaped, ProjectProperty predecessor)
                 : base(project, xml, evaluatedValueEscaped)
             {
-                ErrorUtilities.VerifyThrowArgumentNull(predecessor);
+                ArgumentNullException.ThrowIfNull(predecessor);
 
                 _predecessor = predecessor;
             }
@@ -544,7 +544,7 @@ namespace Microsoft.Build.Evaluation
             internal ProjectPropertyNotXmlBacked(Project project, string name, string evaluatedValueEscaped, bool isGlobalProperty, bool mayBeReserved)
                 : base(project, evaluatedValueEscaped)
             {
-                ErrorUtilities.VerifyThrowArgumentLength(name);
+                ArgumentException.ThrowIfNullOrEmpty(name);
                 ErrorUtilities.VerifyThrowInvalidOperation(isGlobalProperty || !ProjectHasMatchingGlobalProperty(project, name), "OM_GlobalProperty", name);
                 ErrorUtilities.VerifyThrowArgument(!XMakeElements.ReservedItemNames.Contains(name), "OM_ReservedName", name);
                 ErrorUtilities.VerifyThrowArgument(mayBeReserved || !ReservedPropertyNames.IsReservedProperty(name), "OM_ReservedName", name);
@@ -603,7 +603,7 @@ namespace Microsoft.Build.Evaluation
                         return;
                     }
 
-                    ErrorUtilities.ThrowInternalErrorUnreachable();
+                    Assumed.Unreachable();
                 }
             }
 

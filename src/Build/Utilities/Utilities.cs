@@ -82,7 +82,7 @@ namespace Microsoft.Build.Internal
         /// <param name="s">Can be empty string, but not null.</param>
         internal static void SetXmlNodeInnerContents(XmlElementWithLocation node, string s)
         {
-            ErrorUtilities.VerifyThrow(s != null, "Need value to set.");
+            Assumed.NotNull(s, "Need value to set.");
 
             if (s.Contains('<'))
             {
@@ -463,7 +463,7 @@ namespace Microsoft.Build.Internal
                 }
             }
 
-            ErrorUtilities.VerifyThrow(!String.IsNullOrEmpty(toolsVersionToUse), "Should always return a ToolsVersion");
+            Assumed.NotNullOrEmpty(toolsVersionToUse, "Should always return a ToolsVersion");
 
             var explicitToolsVersionSpecified = explicitToolsVersion != null;
             usingDifferentToolsVersionFromProjectFile = UsingDifferentToolsVersionFromProjectFile(toolsVersionFromProject, toolsVersionToUse, explicitToolsVersionSpecified);

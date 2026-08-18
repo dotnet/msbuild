@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -35,7 +34,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal ReadOnlyCollection(IEnumerable<T> backing)
         {
-            FrameworkErrorUtilities.VerifyThrow(backing != null, "Need backing collection");
+            Assumed.NotNull(backing, "Need backing collection");
 
             _backing = backing;
         }

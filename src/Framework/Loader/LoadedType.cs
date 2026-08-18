@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 
@@ -27,6 +28,7 @@ namespace Microsoft.Build.Shared
         /// <param name="architecture">Assembly architecture extracted from PE flags</param>
         /// <param name="loadedViaMetadataLoadContext">Whether this type was loaded via MetadataLoadContext</param>
         internal LoadedType(
+            [DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicProperties)]
             Type type,
             AssemblyLoadInfo assemblyLoadInfo,
             Assembly loadedAssembly,
@@ -35,9 +37,9 @@ namespace Microsoft.Build.Shared
             string? architecture = null,
             bool loadedViaMetadataLoadContext = false)
         {
-            FrameworkErrorUtilities.VerifyThrow(type != null, "We must have the type.");
-            FrameworkErrorUtilities.VerifyThrow(assemblyLoadInfo != null, "We must have the assembly the type was loaded from.");
-            FrameworkErrorUtilities.VerifyThrow(loadedAssembly is not null, "The assembly should always be loaded even if only by MetadataLoadContext.");
+            Assumed.NotNull(type, "We must have the type.");
+            Assumed.NotNull(assemblyLoadInfo, "We must have the assembly the type was loaded from.");
+            Assumed.NotNull(loadedAssembly, "The assembly should always be loaded even if only by MetadataLoadContext.");
 
             Type = type;
             Assembly = assemblyLoadInfo;
@@ -192,7 +194,7 @@ namespace Microsoft.Build.Shared
             // we changed to running all tasks in MTA.
             if (String.Equals("Microsoft.Build.Tasks.Xaml.PartialClassGenerationTask", Type.FullName, StringComparison.OrdinalIgnoreCase))
             {
-                AssemblyName assemblyName = Type.GetTypeInfo().Assembly.GetName();
+                AssemblyName assemblyName = Type.Assembly.GetName();
                 Version lastVersionToForce = new Version(3, 5);
                 if (assemblyName.Version?.CompareTo(lastVersionToForce) > 0)
                 {

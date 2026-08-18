@@ -1,0 +1,186 @@
+# Quarantined-test re-validation pipeline.
+#
+# Tests quarantined as flaky are marked with [ActiveIssue("<issue-url>", ...)] (from
+# Microsoft.DotNet.XUnitV3Extensions), which stamps the `Category=failing` trait. Normal CI runs
+# EXCLUDE that trait (see src/Directory.Build.targets), so a quarantined test never executes there and
+# therefore stops producing any pass/fail signal.
+#
+# This pipeline runs ONLY the quarantined tests (RunQuarantinedTests=true flips the filter to
+# --filter-trait Category=failing) on `main`'s rolling (batched) builds and once a day on a schedule,
+# so we keep collecting fresh data on quarantined tests as main moves (and even during quiet periods).
+# A quarantined test that has become consistently green across these runs is a candidate to
+# un-quarantine; one that still fails intermittently should stay quarantined.
+#
+# The build is intentionally NOT failed by quarantined-test outcomes: when RunQuarantinedTests=true,
+# src/Directory.Build.targets passes `--ignore-exit-code 8;2` to the test runner, which treats exit
+# code 8 (zero tests ran -- e.g. nothing is currently quarantined) and exit code 2 (test failures --
+# expected for still-flaky tests) as success. The per-test signal lives in the published test results
+# (the Tests tab / TestResults artifact), not in the overall pipeline status, so a red run means an
+# actual infrastructure problem.
+#
+# This pipeline runs on Windows, Linux and macOS, closely mirroring the per-OS test legs of
+# .vsts-dotnet-ci.yml, so quarantines scoped to a specific platform (e.g.
+# [ActiveIssue("...", TestPlatforms.Linux)]) are re-validated on that platform. The Windows leg
+# covers .NET Framework (net472) and .NET; the Linux/macOS legs cover .NET only (matching CI).
+
+# Runs on `main`'s rolling (batched) builds -- each batch of commits to main produces one quarantine
+# run, so the quarantined-test pass/fail signal tracks main as it moves. It ALSO runs once a day on a
+# schedule, so quiet periods with no commits to main still get a fresh data point. Plus pull requests
+# targeting `main` (so a fix PR's effect on the quarantined tests is validated on the PR itself), and
+# manual queue. Consumers that aggregate this data treat rolling and scheduled `main` runs the same
+# (reasons batchedCI/individualCI/schedule), so the mix of triggers is transparent to them.
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+
+pr:
+  branches:
+    include:
+    - main
+
+schedules:
+- cron: "0 8 * * *"
+  displayName: Daily quarantined-test re-validation
+  branches:
+    include:
+    - main
+  # Run even when there have been no commits since the last scheduled run -- during quiet periods
+  # there are no rolling builds, and we still want at least one fresh data point per day.
+  always: true
+
+variables:
+- name: skipComponentGovernanceDetection
+  value: true
+- name: Codeql.Enabled
+  value: false
+
+jobs:
+- job: RunQuarantinedTestsWindows
+  displayName: "Run quarantined tests (Windows)"
+  pool:
+    name: NetCore-Public
+    demands: ImageOverride -equals windows.vs2026preview.scout.amd64.open
+  timeoutInMinutes: 120
+  steps:
+  - task: BatchScript@1
+    displayName: cibuild_bootstrapped_msbuild.cmd (quarantined tests only)
+    inputs:
+      filename: 'eng/cibuild_bootstrapped_msbuild.cmd'
+      arguments: "-onlyDocChanged 0 -stage2Properties '/mt /p:RunQuarantinedTests=true'"
+    env:
+      ForceUseXCopyMSBuild: 1
+  - task: PublishTestResults@2
+    displayName: Publish .NET Framework Test Results
+    inputs:
+      testRunTitle: 'Quarantined Full Framework'
+      testRunner: VSTest
+      testResultsFiles: 'artifacts/TestResults/Debug/*UnitTests_net472*.trx'
+      publishRunAttachments: true
+      mergeTestResults: true
+    continueOnError: true
+    condition: always()
+  - task: PublishTestResults@2
+    displayName: Publish .NET Test Results
+    inputs:
+      testRunTitle: 'Quarantined .NET'
+      testRunner: VSTest
+      testResultsFiles: |
+        artifacts/TestResults/**/*.trx
+        !**/*UnitTests_net472*.trx
+      publishRunAttachments: true
+      mergeTestResults: true
+    continueOnError: true
+    condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'Quarantine build logs'
+    continueOnError: true
+    condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'Quarantine test logs'
+    continueOnError: true
+    condition: always()
+
+- job: RunQuarantinedTestsLinux
+  displayName: "Run quarantined tests (Linux)"
+  pool:
+    name: NetCore-Public
+    demands: ImageOverride -equals Build.Ubuntu.2204.Amd64.Open
+  timeoutInMinutes: 120
+  steps:
+  - bash: sudo apt-get update
+  - bash: sudo apt-get install -y libxml2
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged 0 --stage2Properties '/mt /p:RunQuarantinedTests=true'
+    displayName: CI Build (quarantined tests only)
+    env:
+      MSBUILDUSESERVER: "1"
+  - task: PublishTestResults@2
+    displayName: Publish .NET Test Results
+    inputs:
+      testRunTitle: 'Quarantined Linux .NET'
+      testRunner: VSTest
+      testResultsFiles: |
+        artifacts/TestResults/**/*.trx
+        !**/*UnitTests_net472*.trx
+      publishRunAttachments: true
+      mergeTestResults: true
+    continueOnError: true
+    condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'Quarantine build logs (Linux)'
+    continueOnError: true
+    condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'Quarantine test logs (Linux)'
+    continueOnError: true
+    condition: always()
+
+- job: RunQuarantinedTestsMac
+  displayName: "Run quarantined tests (macOS)"
+  pool:
+    vmImage: 'macOS-latest'
+  timeoutInMinutes: 120
+  steps:
+  - bash: . 'eng/cibuild_bootstrapped_msbuild.sh' --onlyDocChanged 0 --stage2Properties '/mt /p:RunQuarantinedTests=true'
+    displayName: CI Build (quarantined tests only)
+    env:
+      MSBUILDUSESERVER: "1"
+  - task: PublishTestResults@2
+    displayName: Publish .NET Test Results
+    inputs:
+      testRunTitle: 'Quarantined macOS .NET'
+      testRunner: VSTest
+      testResultsFiles: |
+        artifacts/TestResults/**/*.trx
+        !**/*UnitTests_net472*.trx
+      publishRunAttachments: true
+      mergeTestResults: true
+    continueOnError: true
+    condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: logs'
+    inputs:
+      PathtoPublish: 'artifacts/log/Debug'
+      ArtifactName: 'Quarantine build logs (macOS)'
+    continueOnError: true
+    condition: always()
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: TestResults'
+    inputs:
+      PathtoPublish: 'artifacts/TestResults'
+      ArtifactName: 'Quarantine test logs (macOS)'
+    continueOnError: true
+    condition: always()

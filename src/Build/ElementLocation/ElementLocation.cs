@@ -140,7 +140,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         void ITranslatable.Translate(ITranslator translator)
         {
-            ErrorUtilities.VerifyThrow(translator.Mode == TranslationDirection.WriteToStream, "write only");
+            Assumed.Equal(translator.Mode, TranslationDirection.WriteToStream, "write only");
 
             string file = File;
             int line = Line;
@@ -252,7 +252,8 @@ namespace Microsoft.Build.Construction
             internal RegularElementLocation(string file, int line, int column)
             {
                 ErrorUtilities.VerifyThrowArgumentLengthIfNotNull(file, nameof(file));
-                ErrorUtilities.VerifyThrow(line > -1 && column > -1, "Use zero for unknown");
+                Assumed.PositiveOrZero(line, "Use zero for unknown");
+                Assumed.PositiveOrZero(column, "Use zero for unknown");
 
                 this.file = file ?? String.Empty;
                 this.line = line;
@@ -327,8 +328,10 @@ namespace Microsoft.Build.Construction
             /// </summary>
             internal SmallElementLocation(string file, int line, int column)
             {
-                ErrorUtilities.VerifyThrow(line > -1 && column > -1, "Use zero for unknown");
-                ErrorUtilities.VerifyThrow(line <= 65535 && column <= 65535, "Use ElementLocation instead");
+                Assumed.PositiveOrZero(line, "Use zero for unknown");
+                Assumed.PositiveOrZero(column, "Use zero for unknown");
+                Assumed.LessThanOrEqual(line, 65535, "Use ElementLocation instead");
+                Assumed.LessThanOrEqual(column, 65535, "Use ElementLocation instead");
 
                 this.file = file ?? String.Empty;
                 this.line = Convert.ToUInt16(line);

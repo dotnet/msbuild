@@ -10,8 +10,10 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Reflection.PortableExecutable;
 #else
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
+using Microsoft.Build.Tasks.Metadata;
+using Windows.Win32.Foundation;
+using Windows.Win32.System.Com;
 #endif
 
 #nullable disable
@@ -59,6 +61,21 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public bool HasAssemblyAttribute(string name)
         {
+            EnsureCustomAttributes();
+            return _customAttributes.Contains(name);
+        }
+
+        public void HasAssemblyAttributes(string[] names, bool[] results)
+        {
+            EnsureCustomAttributes();
+            for (int i = 0; i < names.Length; i++)
+            {
+                results[i] = _customAttributes.Contains(names[i]);
+            }
+        }
+
+        private void EnsureCustomAttributes()
+        {
             if (_customAttributes == null)
             {
                 lock (this)
@@ -69,8 +86,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                     }
                 }
             }
-
-            return _customAttributes.Contains(name);
         }
 
         public string Name => Attributes[nameof(Name)];
@@ -269,43 +284,136 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
     }
 #else
-    internal class MetadataReader : IDisposable
+    internal unsafe class MetadataReader : IDisposable
     {
         private readonly string _path;
         private StringDictionary _attributes;
 
-        private IMetaDataDispenser _metaDispenser;
-        private IMetaDataAssemblyImport _assemblyImport;
+        // COM pointers stored thread-agile via the GIT. Disposed in Close().
+        // The CLR metadata object returned by IMetaDataDispenser::OpenScope implements
+        // all three of IMetaDataImport, IMetaDataImport2, and IMetaDataAssemblyImport;
+        // we QueryInterface for the two we actually call. The dispenser itself is only
+        // needed during construction.
+        private AgileComPointer<IMetaDataAssemblyImport> _assemblyImport;
+        private AgileComPointer<IMetaDataImport2> _import2;
 
-        private static Guid s_importerGuid = GetGuidOfType(typeof(IMetaDataImport));
         private static Guid s_refidGuid = GetGuidOfType(typeof(IReferenceIdentity));
 
         private MetadataReader(string path)
         {
             _path = path;
-            // Create the metadata dispenser and open scope on the source file.
-            _metaDispenser = (IMetaDataDispenser)new CorMetaDataDispenser();
-            int hr = _metaDispenser.OpenScope(path, 0, ref s_importerGuid, out object obj);
-            if (hr == 0)
+            // OpenScope failure is per-file (the path isn't a valid PE / assembly); we leave
+            // _assemblyImport null so that Create(...) returns null, matching the .NET Core
+            // branch's catch-all.
+            //
+            // IMPORTANT — do NOT call PInvoke.CoCreateInstance(CLSID_CorMetaDataDispenser, ...)
+            // here, and do NOT use Activator.CreateInstance(Type.GetTypeFromCLSID(...)) if
+            // we want this code to AOT-compile. See the matching comment in
+            // AssemblyDependency/AssemblyInformation.cs for the full mechanism (regression
+            // dotnet/msbuild #13853 / VC P2PReferences.08, HRESULT 0x80131700
+            // CLR_E_SHIM_RUNTIMELOAD when raw CoCreateInstance hits the mscoree shim in a
+            // host where the shim's bound-runtime state is not set up).
+            //
+            // ComClassFactory.TryCreateFromModule calls clr.dll's exported DllGetClassObject
+            // directly, which routes to MetaDataDllGetClassObject and bypasses the shim.
+            //
+            // OpenScope is asked directly for IMetaDataImport2 — the underlying CLR RegMeta
+            // coclass implements every IMetaData* interface, so this saves a QueryInterface
+            // round-trip vs. asking for the base IMetaDataImport.
+            if (!ComClassFactory.TryCreateFromModule(
+                    "clr.dll",
+                    CorMetadata.CLSID_CorMetaDataDispenser,
+                    ComClassFactory.ClrDllGetClassObjectInternalExportName,
+                    out ComClassFactory factory,
+                    out HRESULT activationHr))
             {
-                _assemblyImport = (IMetaDataAssemblyImport)obj;
+                activationHr.ThrowOnFailure();
+            }
+            using (factory)
+            {
+                using ComScope<IMetaDataDispenser> dispenser = factory.TryCreateInstance<IMetaDataDispenser>(out HRESULT createHr);
+                createHr.ThrowOnFailure();
+
+                Guid import2Iid = IMetaDataImport2.IID_IMetaDataImport2;
+                using ComScope<IMetaDataImport2> import2 = new();
+                HRESULT hr;
+                fixed (char* pPath = path)
+                {
+                    hr = dispenser.Pointer->OpenScope(pPath, CorOpenFlags.ofRead, &import2Iid, import2);
+                }
+                if (hr.Failed || import2.IsNull)
+                {
+                    return;
+                }
+                _import2 = new AgileComPointer<IMetaDataImport2>(import2.Pointer, takeOwnership: false);
+
+                Guid asmIid = IMetaDataAssemblyImport.IID_IMetaDataAssemblyImport;
+                using ComScope<IMetaDataAssemblyImport> asmImport = new();
+                import2.Pointer->QueryInterface(&asmIid, asmImport).ThrowOnFailure();
+                _assemblyImport = new AgileComPointer<IMetaDataAssemblyImport>(asmImport.Pointer, takeOwnership: false);
             }
         }
 
         public static MetadataReader Create(string path)
         {
             var r = new MetadataReader(path);
-            return r._assemblyImport != null ? r : null;
+            return r._assemblyImport is not null ? r : null;
         }
 
-        [SuppressMessage("Microsoft.Usage", "CA1806:DoNotIgnoreMethodResults", MessageId = "Microsoft.Build.Tasks.IMetaDataImport2.GetCustomAttributeByName(System.UInt32,System.String,System.IntPtr@,System.UInt32@)", Justification = "We verify the valueLen, we don't care what the return value is in this case")]
         public bool HasAssemblyAttribute(string name)
         {
-            _assemblyImport.GetAssemblyFromScope(out uint assemblyScope);
-            IMetaDataImport2 import2 = (IMetaDataImport2)_assemblyImport;
-            IntPtr valuePtr;
-            import2.GetCustomAttributeByName(assemblyScope, name, out valuePtr, out uint valueLen);
-            return valueLen != 0;
+            using ComScope<IMetaDataAssemblyImport> asmImport = _assemblyImport.GetInterface();
+            using ComScope<IMetaDataImport2> import2 = _import2.GetInterface();
+            MdAssembly assemblyScope;
+            // Tolerate failure: a scope with no mdAssembly token returns CLDB_E_RECORD_NOTFOUND.
+            // The legacy [PreserveSig] RCW code ignored the HR; preserve that contract by
+            // treating any non-S_OK as "attribute not present".
+            if (asmImport.Pointer->GetAssemblyFromScope(&assemblyScope).Failed || assemblyScope.IsNil)
+            {
+                return false;
+            }
+            return HasAssemblyAttribute(import2.Pointer, assemblyScope, name);
+        }
+
+        // Batch variant: callers (e.g. AssemblyAttributeFlags) that probe several attributes on
+        // the same reader pay a single GIT round-trip and a single GetAssemblyFromScope call
+        // instead of one per attribute.
+        public void HasAssemblyAttributes(string[] names, bool[] results)
+        {
+            using ComScope<IMetaDataAssemblyImport> asmImport = _assemblyImport.GetInterface();
+            using ComScope<IMetaDataImport2> import2 = _import2.GetInterface();
+            MdAssembly assemblyScope;
+            if (asmImport.Pointer->GetAssemblyFromScope(&assemblyScope).Failed || assemblyScope.IsNil)
+            {
+                for (int i = 0; i < results.Length; i++)
+                {
+                    results[i] = false;
+                }
+                return;
+            }
+
+            for (int i = 0; i < names.Length; i++)
+            {
+                results[i] = HasAssemblyAttribute(import2.Pointer, assemblyScope, names[i]);
+            }
+        }
+
+        // Takes a borrowed IMetaDataImport2* so callers in a hot path can reuse a single GIT
+        // round-trip instead of paying one per call.
+        //
+        // The CLR returns S_OK with pcbData=size when the attribute is present, S_FALSE with
+        // pcbData=0 when it is absent, and an error HRESULT otherwise. Treat anything that is
+        // not S_OK as "not present" so failure paths cannot leave valueLen indeterminate.
+        private static bool HasAssemblyAttribute(IMetaDataImport2* import2, MdAssembly assemblyScope, string name)
+        {
+            void* valuePtr = null;
+            uint valueLen = 0;
+            HRESULT hr;
+            fixed (char* pName = name)
+            {
+                hr = import2->GetCustomAttributeByName(assemblyScope, pName, &valuePtr, &valueLen);
+            }
+            return hr == HRESULT.S_OK && valueLen != 0;
         }
 
         public string Name => Attributes[nameof(Name)];
@@ -335,23 +443,16 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 
         public void Close()
         {
-            if (_assemblyImport != null)
-            {
-                Marshal.ReleaseComObject(_assemblyImport);
-            }
-
-            if (_metaDispenser != null)
-            {
-                Marshal.ReleaseComObject(_metaDispenser);
-            }
-            _attributes = null;
-            _metaDispenser = null;
+            _import2?.Dispose();
+            _import2 = null;
+            _assemblyImport?.Dispose();
             _assemblyImport = null;
+            _attributes = null;
         }
 
         private void ImportAttributes()
         {
-            IReferenceIdentity refid = (IReferenceIdentity)NativeMethods.GetAssemblyIdentityFromFile(_path, ref s_refidGuid);
+            IReferenceIdentity refid = (IReferenceIdentity)GetAssemblyIdentityFromFile(_path, ref s_refidGuid);
 
             string name = refid.GetAttribute(null, "name");
             string version = refid.GetAttribute(null, "version");
@@ -393,6 +494,12 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             return new Guid(guidAttr.Value);
         }
 
+        // GetAssemblyIdentityFromFile is a CLR fusion API exported from mscorwks.dll. It is not part of the
+        // Win32 metadata, so it cannot be generated by CsWin32 and is declared directly here at its sole call site.
+        [DllImport("mscorwks.dll", CharSet = CharSet.Unicode, ExactSpelling = true, PreserveSig = false)]
+        [return: MarshalAs(UnmanagedType.IUnknown)]
+        private static extern object GetAssemblyIdentityFromFile([In, MarshalAs(UnmanagedType.LPWStr)] string filePath, [In] ref Guid riid);
+
         [ComImport]
         [Guid("6eaf5ace-7917-4f3c-b129-e046a9704766")]
         [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -403,18 +510,6 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
             void SetAttribute();
             void EnumAttributes();
             void Clone();
-        }
-
-        [ComImport]
-        [Guid("809c652e-7396-11d2-9771-00a0c9b4d50c")]
-        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
-        [TypeLibType(TypeLibTypeFlags.FRestricted)]
-        private interface IMetaDataDispenser
-        {
-            int DefineScope();
-            [PreserveSig]
-            int OpenScope([In][MarshalAs(UnmanagedType.LPWStr)] string szScope, [In] UInt32 dwOpenFlags, [In] ref Guid riid, [Out][MarshalAs(UnmanagedType.Interface)] out object obj);
-            int OpenScopeOnMemory();
         }
     }
 #endif
