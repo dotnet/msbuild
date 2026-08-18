@@ -23,6 +23,10 @@ parameters:
   displayName: Allow release telemetry canary failure
   type: boolean
   default: false
+- name: telemetryCanaryAzureServiceConnection
+  displayName: Telemetry canary Azure service connection
+  type: string
+  default: 'Darc: Maestro Production'
 
 variables:
   # if OptProfDrop is not set, string '$(OptProfDrop)' will be passed to the build script.
@@ -177,40 +181,47 @@ extends:
           displayName: Validate candidate telemetry ingestion
           timeoutInMinutes: 90
           steps:
+          - powershell: eng\validate-telemetry-canary.Tests.ps1
+            displayName: Test telemetry canary validator
+
           - powershell: |
               if ("${{ parameters.allowTelemetryCanaryFailure }}" -eq "True" -and "$(Build.Reason)" -ne "Manual") {
                 throw "The telemetry canary override is allowed only on manually queued builds."
               }
             displayName: Validate override
 
-          - task: DownloadBuildArtifacts@0
-            displayName: Download candidate packages
-            inputs:
-              buildType: current
-              downloadType: single
-              artifactName: PackageArtifacts
-              downloadPath: $(Build.ArtifactStagingDirectory)
-              checkDownloadedFiles: true
+          - ${{ if eq(parameters.allowTelemetryCanaryFailure, false) }}:
+            - task: DownloadBuildArtifacts@0
+              displayName: Download candidate packages
+              inputs:
+                buildType: current
+                downloadType: single
+                artifactName: PackageArtifacts
+                downloadPath: $(Build.ArtifactStagingDirectory)
+                checkDownloadedFiles: true
 
-          # These settings are supplied by the official pipeline:
-          # TelemetryCanaryAzureServiceConnection, TelemetryCanaryClusterUri,
-          # TelemetryCanaryDatabase, and TelemetryCanaryQueryFunction.
-          # The Kusto function accepts (canaryId, buildEngineVersion, windowStart, windowEnd)
-          # and returns the matching release-canary rows. The backend event must be configured
-          # for 100% collection so this gate does not depend on normal telemetry sampling.
-          - task: AzureCLI@2
-            displayName: Emit and verify telemetry canary
-            inputs:
-              azureSubscription: $(TelemetryCanaryAzureServiceConnection)
-              scriptType: ps
-              scriptLocation: scriptPath
-              scriptPath: $(Build.SourcesDirectory)\eng\validate-telemetry-canary.ps1
-              arguments: >
-                -PackagesPath "$(Build.ArtifactStagingDirectory)\PackageArtifacts"
-                -ClusterUri "$(TelemetryCanaryClusterUri)"
-                -Database "$(TelemetryCanaryDatabase)"
-                -QueryFunction "$(TelemetryCanaryQueryFunction)"
-                -AllowFailure ${{ parameters.allowTelemetryCanaryFailure }}
+            # TelemetryCanaryClusterUri, TelemetryCanaryDatabase, and
+            # TelemetryCanaryQueryFunction are supplied by the official pipeline.
+            # The Kusto function accepts (canaryId, buildEngineVersion, windowStart, windowEnd)
+            # and returns the matching release-canary rows. The backend event must be configured
+            # for 100% collection so this gate does not depend on normal telemetry sampling.
+            - task: AzureCLI@2
+              displayName: Emit and verify telemetry canary
+              inputs:
+                azureSubscription: ${{ parameters.telemetryCanaryAzureServiceConnection }}
+                scriptType: ps
+                scriptLocation: scriptPath
+                scriptPath: $(Build.SourcesDirectory)\eng\validate-telemetry-canary.ps1
+                arguments: >
+                  -PackagesPath "$(Build.ArtifactStagingDirectory)\PackageArtifacts"
+                  -ClusterUri "$(TelemetryCanaryClusterUri)"
+                  -Database "$(TelemetryCanaryDatabase)"
+                  -QueryFunction "$(TelemetryCanaryQueryFunction)"
+
+          - ${{ if eq(parameters.allowTelemetryCanaryFailure, true) }}:
+            - powershell: |
+                Write-Warning "Release telemetry canary validation was explicitly overridden for this manual pipeline run."
+              displayName: Record telemetry canary override
 
     - template: /eng/common/templates-official/post-build/post-build.yml@self
       parameters:

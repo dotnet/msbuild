@@ -15,8 +15,7 @@ param(
     [int] $TimeoutMinutes = 60,
     [ValidateRange(5, 300)]
     [int] $PollIntervalSeconds = 30,
-    [ValidateSet('true', 'false')]
-    [string] $AllowFailure = 'false'
+    [switch] $ImportFunctions
 )
 
 Set-StrictMode -Version 2.0
@@ -30,6 +29,47 @@ function Get-KustoToken {
     }
 
     return $token.Trim()
+}
+
+function Get-MSBuildReportedVersion([string[]] $VersionOutput) {
+    foreach ($line in $VersionOutput) {
+        $candidate = $line.Trim()
+        $parsedVersion = $null
+        if ([Version]::TryParse($candidate, [ref]$parsedVersion)) {
+            return $candidate
+        }
+    }
+
+    throw "Candidate MSBuild did not report a recognizable version.`n$($VersionOutput -join [Environment]::NewLine)"
+}
+
+function Get-CanaryCount($Response) {
+    if ($null -eq $Response -or
+        $null -eq $Response.Tables -or
+        $Response.Tables.Count -eq 0 -or
+        $Response.Tables[0].Rows.Count -eq 0) {
+        throw 'The telemetry query response did not contain a count.'
+    }
+
+    return [long]$Response.Tables[0].Rows[0][0]
+}
+
+function Wait-ForCanary([DateTime] $DeadlineUtc, [int] $PollIntervalSeconds, [scriptblock] $Query) {
+    while ([DateTime]::UtcNow -lt $DeadlineUtc) {
+        if (& $Query) {
+            return $true
+        }
+
+        if ($PollIntervalSeconds -gt 0) {
+            Start-Sleep -Seconds $PollIntervalSeconds
+        }
+    }
+
+    return $false
+}
+
+if ($ImportFunctions) {
+    return
 }
 
 foreach ($setting in @{
@@ -91,19 +131,15 @@ try {
         throw "Candidate MSBuild exited with code $candidateExitCode.`n$($versionOutput -join [Environment]::NewLine)"
     }
 
-    $reportedVersion = $versionOutput |
-        Where-Object { $_ -match '^\s*\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.-]+)?\s*$' } |
-        Select-Object -Last 1
-    if ([string]::IsNullOrWhiteSpace($reportedVersion)) {
-        throw "Candidate MSBuild did not report a recognizable version.`n$($versionOutput -join [Environment]::NewLine)"
-    }
-    $reportedVersion = $reportedVersion.Trim()
+    $reportedVersion = Get-MSBuildReportedVersion $versionOutput
 
     $deadline = [DateTime]::UtcNow.AddMinutes($TimeoutMinutes)
-    $token = Get-KustoToken
-    $tokenAcquiredAt = [DateTime]::UtcNow
-    $lastQueryError = $null
-    $attempt = 0
+    $pollState = @{
+        Token = Get-KustoToken
+        TokenAcquiredAt = [DateTime]::UtcNow
+        LastQueryError = $null
+        Attempt = 0
+    }
 
     Write-Host "Candidate package: $($runtimePackages[0].Name)"
     Write-Host "Candidate version: $reportedVersion"
@@ -111,11 +147,11 @@ try {
     Write-Host "Canary id: $canaryId"
     Write-Host "Query window: $($windowStart.ToString('o')) through $($deadline.ToString('o'))"
 
-    while ([DateTime]::UtcNow -lt $deadline) {
-        $attempt++
-        if (([DateTime]::UtcNow - $tokenAcquiredAt).TotalMinutes -ge 40) {
-            $token = Get-KustoToken
-            $tokenAcquiredAt = [DateTime]::UtcNow
+    $observed = Wait-ForCanary -DeadlineUtc $deadline -PollIntervalSeconds $PollIntervalSeconds -Query {
+        $pollState.Attempt++
+        if (([DateTime]::UtcNow - $pollState.TokenAcquiredAt).TotalMinutes -ge 40) {
+            $pollState.Token = Get-KustoToken
+            $pollState.TokenAcquiredAt = [DateTime]::UtcNow
         }
 
         $escapedVersion = $reportedVersion.Replace("'", "''")
@@ -125,36 +161,32 @@ try {
             $response = Invoke-RestMethod -Method Post `
                 -Uri "$($ClusterUri.TrimEnd('/'))/v1/rest/query" `
                 -Headers @{
-                    Authorization = "Bearer $token"
+                    Authorization = "Bearer $($pollState.Token)"
                     'x-ms-app' = 'MSBuild release telemetry canary'
-                    'x-ms-client-request-id' = "MSBuildReleaseCanary;$canaryId;$attempt"
+                    'x-ms-client-request-id' = "MSBuildReleaseCanary;$canaryId;$($pollState.Attempt)"
                 } `
                 -ContentType 'application/json; charset=utf-8' `
                 -Body (@{ db = $Database; csl = $query } | ConvertTo-Json -Compress)
 
-            $lastQueryError = $null
-            if ([long]$response.Tables[0].Rows[0][0] -gt 0) {
-                Write-Host "Observed release telemetry canary after $attempt query attempt(s)."
-                return
-            }
+            $pollState.LastQueryError = $null
+            return (Get-CanaryCount $response) -gt 0
         }
         catch {
-            $lastQueryError = $_.Exception.Message
-            Write-Warning "Telemetry query attempt $attempt failed: $lastQueryError"
+            $pollState.LastQueryError = $_.Exception.Message
+            Write-Warning "Telemetry query attempt $($pollState.Attempt) failed: $($pollState.LastQueryError)"
+            return $false
         }
+    }
 
-        Start-Sleep -Seconds $PollIntervalSeconds
+    if ($observed) {
+        Write-Host "Observed release telemetry canary after $($pollState.Attempt) query attempt(s)."
+        return
     }
 
     $failureMessage = "MSBuild release telemetry canary was not observed.`n" +
         "Candidate version: $reportedVersion`nExpected event: VS/MSBuild/ReleaseCanary`n" +
         "Canary id: $canaryId`nQuery window: $($windowStart.ToString('o')) through $([DateTime]::UtcNow.ToString('o'))`n" +
-        "Last query error: $lastQueryError"
-    if ($AllowFailure -eq 'true') {
-        Write-Warning $failureMessage
-        Write-Warning 'Telemetry canary failure was explicitly overridden for this manual pipeline run.'
-        return
-    }
+        "Last query error: $($pollState.LastQueryError)"
 
     throw $failureMessage
 }
