@@ -526,8 +526,6 @@ namespace Microsoft.Build.BackEnd
                             targetResult.TargetLocation = currentTargetEntry.Target.Location;
                         }
 
-                        TargetResult resultForDependencyProcessing = targetResult;
-
                         // This target is no longer actively building.
                         _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);
 
@@ -536,17 +534,8 @@ namespace Microsoft.Build.BackEnd
                         // this request's isolated lookup - and we may have been blocked since then, giving another request the
                         // chance to actually run the target. In that case the real result wins; overwriting it with our skip
                         // would both lose data and trip the assert in AddResultsForTarget.
-                        if (targetResult.ResultCode != TargetResultCode.Skipped ||
-                            !_buildResult.TryGetResultsForTarget(currentTargetEntry.Name, out TargetResult resultFromOtherRequest) ||
-                            resultFromOtherRequest.ResultCode == TargetResultCode.Skipped)
-                        {
-                            _buildResult.AddResultsForTarget(currentTargetEntry.Name, targetResult);
-                        }
-                        else
-                        {
-                            // Failure propagation must also follow the result that won the race.
-                            resultForDependencyProcessing = resultFromOtherRequest;
-                        }
+                        TargetResult resultForDependencyProcessing =
+                            _buildResult.AddResultsForTargetOrPreserveExistingNonSkippedResult(currentTargetEntry.Name, targetResult);
 
                         TargetEntry topEntry = _targetsToBuild.Pop();
                         if (topEntry.StopProcessingOnCompletion)

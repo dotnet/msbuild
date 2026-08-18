@@ -541,6 +541,21 @@ namespace Microsoft.Build.Execution
         /// <param name="result">The results for the target.</param>
         public void AddResultsForTarget(string target, TargetResult result)
         {
+            AddResultsForTarget(target, result, preserveExistingNonSkippedResult: false);
+        }
+
+        /// <summary>
+        /// Atomically adds the results for the specified target, unless a non-skipped result already exists and the
+        /// incoming result is skipped.
+        /// </summary>
+        /// <returns>The result stored for the target.</returns>
+        internal TargetResult AddResultsForTargetOrPreserveExistingNonSkippedResult(string target, TargetResult result)
+        {
+            return AddResultsForTarget(target, result, preserveExistingNonSkippedResult: true);
+        }
+
+        private TargetResult AddResultsForTarget(string target, TargetResult result, bool preserveExistingNonSkippedResult)
+        {
             ArgumentNullException.ThrowIfNull(target);
             ArgumentNullException.ThrowIfNull(result);
 
@@ -549,12 +564,29 @@ namespace Microsoft.Build.Execution
                 _resultsByTarget ??= CreateTargetResultDictionary(1);
             }
 
-            if (_resultsByTarget.TryGetValue(target, out TargetResult? targetResult))
+            while (true)
             {
-                Assumed.Equal(targetResult.ResultCode, TargetResultCode.Skipped, $"Items already exist for target {target}.");
-            }
+                if (_resultsByTarget.TryGetValue(target, out TargetResult? existingResult))
+                {
+                    if (preserveExistingNonSkippedResult &&
+                        result.ResultCode == TargetResultCode.Skipped &&
+                        existingResult.ResultCode != TargetResultCode.Skipped)
+                    {
+                        return existingResult;
+                    }
 
-            _resultsByTarget[target] = result;
+                    Assumed.Equal(existingResult.ResultCode, TargetResultCode.Skipped, $"Items already exist for target {target}.");
+
+                    if (_resultsByTarget.TryUpdate(target, result, existingResult))
+                    {
+                        return result;
+                    }
+                }
+                else if (_resultsByTarget.TryAdd(target, result))
+                {
+                    return result;
+                }
+            }
         }
 
         /// <summary>
