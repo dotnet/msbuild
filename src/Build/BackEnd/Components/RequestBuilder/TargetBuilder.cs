@@ -526,6 +526,8 @@ namespace Microsoft.Build.BackEnd
                             targetResult.TargetLocation = currentTargetEntry.Target.Location;
                         }
 
+                        TargetResult resultForDependencyProcessing = targetResult;
+
                         // This target is no longer actively building.
                         _requestEntry.RequestConfiguration.ActivelyBuildingTargets.Remove(currentTargetEntry.Name);
 
@@ -540,6 +542,11 @@ namespace Microsoft.Build.BackEnd
                         {
                             _buildResult.AddResultsForTarget(currentTargetEntry.Name, targetResult);
                         }
+                        else
+                        {
+                            // Failure propagation must also follow the result that won the race.
+                            resultForDependencyProcessing = resultFromOtherRequest;
+                        }
 
                         TargetEntry topEntry = _targetsToBuild.Pop();
                         if (topEntry.StopProcessingOnCompletion)
@@ -547,7 +554,7 @@ namespace Microsoft.Build.BackEnd
                             stopProcessingStack = true;
                         }
 
-                        PopDependencyTargetsOnTargetFailure(topEntry, targetResult, ref stopProcessingStack);
+                        PopDependencyTargetsOnTargetFailure(topEntry, resultForDependencyProcessing, ref stopProcessingStack);
 
                         break;
 

@@ -1525,6 +1525,40 @@ Done building target ""Build"" in project ""build.proj"".".Replace("\r\n", "\n")
             resultsCache.GetResultForRequest(entry.Request)["Victim"].ResultCode.ShouldBe(TargetResultCode.Success);
         }
 
+        [Fact]
+        public void FailedTargetFromReentrantRequestStopsDependentTarget()
+        {
+            string projectContents = @"
+  <Target Name='Build' DependsOnTargets='Victim' />
+  <Target Name='Victim' Condition=""'$(RunVictim)' == 'true'"" />
+  <Target Name='BeforeVictim' BeforeTargets='Victim' />
+";
+
+            ProjectInstance project = CreateTestProject(projectContents, string.Empty, "Build");
+            TargetBuilder builder = (TargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
+            IConfigCache configCache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+            IResultsCache resultsCache = (IResultsCache)_host.GetComponent(BuildComponentType.ResultsCache);
+
+            (string name, TargetBuiltReason reason)[] target = [("Build", TargetBuiltReason.None)];
+            BuildRequestEntry entry = new BuildRequestEntry(CreateNewBuildRequest(1, target), configCache[1], CreateStubTaskEnvironment());
+
+            const int OtherRequestId = 12345;
+            entry.RequestConfiguration.ActivelyBuildingTargets["BeforeVictim"] = OtherRequestId;
+
+            _blockOnTargetInProgress = (blockingRequestId, blockingTarget, partialBuildResult) =>
+            {
+                entry.RequestConfiguration.ActivelyBuildingTargets.Remove(blockingTarget);
+                resultsCache.GetResultsForConfiguration(entry.Request.ConfigurationId)
+                    .AddResultsForTarget("Victim", BuildResultUtilities.GetEmptyFailingTargetResult());
+                return Task.CompletedTask;
+            };
+
+            BuildResult result = builder.BuildTargets(GetProjectLoggingContext(entry), entry, this, target, CreateStandardLookup(project), CancellationToken.None).Result;
+
+            result["Build"].ResultCode.ShouldBe(TargetResultCode.Failure);
+            resultsCache.GetResultForRequest(entry.Request)["Victim"].ResultCode.ShouldBe(TargetResultCode.Failure);
+        }
+
         #region IRequestBuilderCallback Members
 
         /// <summary>
