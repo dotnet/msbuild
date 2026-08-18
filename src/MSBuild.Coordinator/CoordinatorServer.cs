@@ -366,7 +366,7 @@ internal sealed partial class CoordinatorServer(CoordinatorSettings settings, IC
                         rootGrant.Priority,
                         grantId,
                         isNested: true);
-                    grant.Activate(Math.Min(requestedNodes, rootGrant.GrantedNodes));
+                    grant.GrantedNodes = Math.Min(requestedNodes, rootGrant.GrantedNodes);
 
                     _output.WriteLine($"CoordinatorServer: Nested client joined grant {grantId} with {grant.GrantedNodes} node(s)");
 

@@ -194,7 +194,7 @@ internal sealed class NodeBudgetManager
                 if (grant.IsNested)
                 {
                     CoordinatorTelemetry.RecordGrantReleased(grant, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
-                    grant.Release();
+                    grant.GrantedNodes = 0;
                 }
                 else
                 {
@@ -205,7 +205,7 @@ internal sealed class NodeBudgetManager
                     }
 
                     CoordinatorTelemetry.RecordGrantReleased(grant, WaitingBuildCount, ActiveBuildCount, AllocatedNodes);
-                    grant.Release();
+                    grant.GrantedNodes = 0;
                     _activeGrants.Remove(grant);
                 }
             }
@@ -377,7 +377,7 @@ internal sealed class NodeBudgetManager
 
     private void AddActiveGrant_NoLock(BuildGrant grant, int grantedNodes)
     {
-        grant.Activate(grantedNodes);
+        grant.GrantedNodes = grantedNodes;
         AllocatedNodes += grantedNodes;
         if (grant.Priority != CoordinatorBuildPriority.High)
         {

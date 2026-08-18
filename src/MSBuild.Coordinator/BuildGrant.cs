@@ -38,7 +38,7 @@ internal sealed class BuildGrant
     /// <summary>
     ///  Gets the number of nodes granted to the build. Zero if the build is still waiting.
     /// </summary>
-    public int GrantedNodes { get; private set; }
+    public int GrantedNodes { get; set; }
 
     /// <summary>
     ///  Gets or sets the number of older lower-priority queue bypasses this build has observed.
@@ -91,27 +91,5 @@ internal sealed class BuildGrant
         BypassCount = 0;
         IsNested = isNested;
         LastHeartbeat = DateTime.UtcNow;
-    }
-
-    /// <summary>
-    ///  Marks the build as active with its fixed node grant.
-    /// </summary>
-    public void Activate(int grantedNodes)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(grantedNodes);
-        if (IsActive)
-        {
-            throw new InvalidOperationException("Cannot change an active build grant.");
-        }
-
-        GrantedNodes = grantedNodes;
-    }
-
-    /// <summary>
-    ///  Releases the fixed node grant.
-    /// </summary>
-    public void Release()
-    {
-        GrantedNodes = 0;
     }
 }
