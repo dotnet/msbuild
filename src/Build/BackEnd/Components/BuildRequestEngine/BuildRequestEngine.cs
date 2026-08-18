@@ -131,7 +131,7 @@ namespace Microsoft.Build.BackEnd
         internal BuildRequestEngine()
         {
             _debugDumpState = Traits.Instance.DebugScheduler;
-            _debugDumpPath = DebugUtils.DebugPath;
+            _debugDumpPath = FrameworkDebugUtils.DebugPath;
             _debugForceCaching = Environment.GetEnvironmentVariable("MSBUILDDEBUGFORCECACHING") == "1";
 
             if (String.IsNullOrEmpty(_debugDumpPath))
@@ -201,6 +201,11 @@ namespace Microsoft.Build.BackEnd
             ErrorUtilities.VerifyThrow(_status == BuildRequestEngineStatus.Uninitialized, "Engine must be in the Uninitiailzed state, but is {0}", _status);
 
             _nodeLoggingContext = loggingContext;
+
+            // Create a per-BuildRequestEngine telemetry collector via the provider.
+            // Each BuildRequestEngine owns its collector — no cross-engine sharing, no singleton contention.
+            var telemetryProvider = (TelemetryCollectorProvider)_componentHost.GetComponent(BuildComponentType.TelemetryCollector);
+            _nodeLoggingContext.TelemetryCollector = telemetryProvider.CreateCollector();
 
             // Create a work queue that will take an action and invoke it.  The generic parameter is the type which ActionBlock.Post() will
             // take (an Action in this case) and the parameter to this constructor is a function which takes that parameter of type Action
@@ -296,9 +301,8 @@ namespace Microsoft.Build.BackEnd
                     IBuildCheckManagerProvider buildCheckProvider = (_componentHost.GetComponent(BuildComponentType.BuildCheckManagerProvider) as IBuildCheckManagerProvider);
                     var buildCheckManager = buildCheckProvider!.Instance;
                     buildCheckManager.FinalizeProcessing(_nodeLoggingContext);
-                    // Flush and send the final telemetry data if they are being collected
-                    ITelemetryForwarder telemetryForwarder = (_componentHost.GetComponent(BuildComponentType.TelemetryForwarder) as TelemetryForwarderProvider)!.Instance;
-                    telemetryForwarder.FinalizeProcessing(_nodeLoggingContext);
+                    // Flush and send the per-BuildRequestEngine telemetry data if any was collected.
+                    _nodeLoggingContext.TelemetryCollector?.FinalizeProcessing(_nodeLoggingContext);
                     // Clears the instance so that next call (on node reuse) to 'GetComponent' leads to reinitialization.
                     buildCheckProvider.ShutdownComponent();
                 },
@@ -387,7 +391,21 @@ namespace Microsoft.Build.BackEnd
                     }
                     else
                     {
-                        BuildRequestEntry entry = new BuildRequestEntry(request, _configCache[request.ConfigurationId]);
+                        BuildRequestConfiguration config = _configCache[request.ConfigurationId];
+
+                        TaskEnvironment taskEnvironment;
+                        if (_componentHost.BuildParameters.MultiThreaded)
+                        {
+                            string projectDirectoryFullPath = Path.GetDirectoryName(config.ProjectFullPath);
+                            var environmentVariables = new Dictionary<string, string>(_componentHost.BuildParameters.BuildProcessEnvironmentInternal);
+                            taskEnvironment = TaskEnvironment.CreateWithProjectDirectoryAndEnvironment(projectDirectoryFullPath, environmentVariables);
+                        }
+                        else
+                        {
+                            taskEnvironment = TaskEnvironment.Fallback;
+                        }
+
+                        BuildRequestEntry entry = new BuildRequestEntry(request, config, taskEnvironment);
 
                         entry.OnStateChanged += BuildRequestEntry_StateChanged;
 
@@ -1425,7 +1443,7 @@ namespace Microsoft.Build.BackEnd
                                 // Dump all engine exceptions to a temp file
                                 // so that we have something to go on in the
                                 // event of a failure
-                                ExceptionHandling.DumpExceptionToFile(e);
+                                DebugUtils.DumpExceptionToFile(e);
 
                                 // Raise the exception to the host, so that it can signal termination of the build.
                                 RaiseEngineException(e);

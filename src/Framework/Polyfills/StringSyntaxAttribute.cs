@@ -1,9 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-#if !NET
+#if NET7_0_OR_GREATER
 
-using System;
+using System.Runtime.CompilerServices;
+
+// This is a supporting forwarder for an internal polyfill API
+[assembly: TypeForwardedTo(typeof(System.Diagnostics.CodeAnalysis.StringSyntaxAttribute))]
+
+#else
+
+namespace System.Diagnostics.CodeAnalysis;
 
 [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.Property, AllowMultiple = false, Inherited = false)]
 internal sealed class StringSyntaxAttribute : Attribute
@@ -67,4 +74,5 @@ internal sealed class StringSyntaxAttribute : Attribute
     /// <summary>The syntax identifier for strings containing XML.</summary>
     public const string Xml = nameof(Xml);
 }
+
 #endif

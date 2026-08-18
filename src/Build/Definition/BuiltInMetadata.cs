@@ -2,11 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
-
-#nullable disable
 
 namespace Microsoft.Build.Evaluation
 {
@@ -20,22 +19,12 @@ namespace Microsoft.Build.Evaluation
         /// <summary>
         /// Retrieves the count of built-in metadata.
         /// </summary>
-        internal static int MetadataCount
-        {
-            [DebuggerStepThrough]
-            get
-            { return FileUtilities.ItemSpecModifiers.All.Length; }
-        }
+        internal static int MetadataCount => ItemSpecModifiers.All.Length;
 
         /// <summary>
         /// Retrieves the list of metadata names.
         /// </summary>
-        internal static ICollection<string> MetadataNames
-        {
-            [DebuggerStepThrough]
-            get
-            { return FileUtilities.ItemSpecModifiers.All; }
-        }
+        internal static ImmutableArray<string> MetadataNames => ItemSpecModifiers.All;
 
         /// <summary>
         /// Retrieves a built-in metadata value and caches it.
@@ -49,44 +38,52 @@ namespace Microsoft.Build.Evaluation
         /// <param name="evaluatedIncludeEscaped">The evaluated include for the item.</param>
         /// <param name="definingProjectEscaped">The path to the project that defined this item</param>
         /// <param name="name">The name of the metadata.</param>
-        /// <param name="fullPath">The generated full path, for caching</param>
+        /// <param name="cache">The generated full path, for caching</param>
         /// <returns>The unescaped metadata value.</returns>
-        internal static string GetMetadataValue(string currentDirectory, string evaluatedIncludeBeforeWildcardExpansionEscaped, string evaluatedIncludeEscaped, string definingProjectEscaped, string name, ref string fullPath)
+        internal static string GetMetadataValue(
+            string currentDirectory,
+            string evaluatedIncludeBeforeWildcardExpansionEscaped,
+            string evaluatedIncludeEscaped,
+            string definingProjectEscaped,
+            string name,
+            ref ItemSpecModifiers.Cache cache)
+            => EscapingUtilities.UnescapeAll(GetMetadataValueEscaped(currentDirectory, evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped, definingProjectEscaped, name, ref cache));
+
+        /// <summary>
+        /// Retrieves a built-in metadata value, caching derivable results in the provided per-item cache.
+        /// If value is not available, returns empty string.
+        /// </summary>
+        internal static string GetMetadataValueEscaped(
+            string currentDirectory,
+            string evaluatedIncludeBeforeWildcardExpansionEscaped,
+            string evaluatedIncludeEscaped,
+            string definingProjectEscaped,
+            string name,
+            ref ItemSpecModifiers.Cache cache)
         {
-            return EscapingUtilities.UnescapeAll(GetMetadataValueEscaped(currentDirectory, evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped, definingProjectEscaped, name, ref fullPath));
+            if (ItemSpecModifiers.TryGetModifierKind(name, out ItemSpecModifierKind modifierKind))
+            {
+                return GetMetadataValueEscaped(currentDirectory, evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped, definingProjectEscaped, modifierKind, ref cache);
+            }
+
+            Debug.Fail($"Expected a valid item-spec modifier, got \"{name}\".");
+            return string.Empty;
         }
 
         /// <summary>
-        /// Retrieves a built-in metadata value and caches it.
+        /// Retrieves a built-in metadata value, caching derivable results in the provided per-item cache.
         /// If value is not available, returns empty string.
         /// </summary>
-        /// <param name="currentDirectory">
-        /// The current directory for evaluation.  Null if this is being called from a task, otherwise
-        /// it should be the project's directory.
-        /// </param>
-        /// <param name="evaluatedIncludeBeforeWildcardExpansionEscaped">The evaluated include prior to wildcard expansion.</param>
-        /// <param name="evaluatedIncludeEscaped">The evaluated include for the item.</param>
-        /// <param name="definingProjectEscaped">The path to the project that defined this item</param>
-        /// <param name="name">The name of the metadata.</param>
-        /// <param name="fullPath">The generated full path, for caching</param>
-        /// <returns>The escaped as necessary metadata value.</returns>
-        internal static string GetMetadataValueEscaped(string currentDirectory, string evaluatedIncludeBeforeWildcardExpansionEscaped, string evaluatedIncludeEscaped, string definingProjectEscaped, string name, ref string fullPath)
-        {
-            // This is an assert, not a VerifyThrow, because the caller should already have done this check, and it's slow/hot.
-            Debug.Assert(FileUtilities.ItemSpecModifiers.IsItemSpecModifier(name));
-
-            string value;
-            if (String.Equals(name, FileUtilities.ItemSpecModifiers.RecursiveDir, StringComparison.OrdinalIgnoreCase))
-            {
-                value = GetRecursiveDirValue(evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped);
-            }
-            else
-            {
-                value = FileUtilities.ItemSpecModifiers.GetItemSpecModifier(currentDirectory, evaluatedIncludeEscaped, definingProjectEscaped, name, ref fullPath);
-            }
-
-            return value;
-        }
+        internal static string GetMetadataValueEscaped(
+            string currentDirectory,
+            string evaluatedIncludeBeforeWildcardExpansionEscaped,
+            string evaluatedIncludeEscaped,
+            string definingProjectEscaped,
+            ItemSpecModifierKind modifierKind,
+            ref ItemSpecModifiers.Cache cache)
+            => modifierKind is ItemSpecModifierKind.RecursiveDir
+                ? GetRecursiveDirValue(evaluatedIncludeBeforeWildcardExpansionEscaped, evaluatedIncludeEscaped)
+                : ItemSpecModifiers.GetItemSpecModifier(evaluatedIncludeEscaped, modifierKind, currentDirectory, definingProjectEscaped, ref cache);
 
         /// <summary>
         /// Extract the value for "RecursiveDir", if any, from the Include.

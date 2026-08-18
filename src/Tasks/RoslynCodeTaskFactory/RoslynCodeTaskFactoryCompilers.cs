@@ -5,10 +5,11 @@ using System;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 #if RUNTIME_TYPE_NETCORE
 using System.Runtime.InteropServices;
-using Microsoft.Build.Shared;
+using Constants = Microsoft.Build.Framework.Constants;
 #endif
 
 #nullable disable
@@ -43,7 +44,7 @@ namespace Microsoft.Build.Tasks
 #endif
                 };
 
-                return possibleLocations.Select(possibleLocation => possibleLocation()).FirstOrDefault(File.Exists);
+                return possibleLocations.Select(possibleLocation => possibleLocation()).FirstOrDefault(FileSystems.Default.FileExists);
             }, isThreadSafe: true);
 
             StandardOutputImportance = MessageImportance.Low.ToString("G");
@@ -51,7 +52,7 @@ namespace Microsoft.Build.Tasks
 #if RUNTIME_TYPE_NETCORE
             // Tools and MSBuild Tasks within the SDK that invoke binaries via the dotnet host are expected
             // to honor the environment variable DOTNET_HOST_PATH to ensure a consistent experience.
-            _dotnetCliPath = Environment.GetEnvironmentVariable("DOTNET_HOST_PATH");
+            _dotnetCliPath = Environment.GetEnvironmentVariable(Constants.DotnetHostPathEnvVarName);
             if (string.IsNullOrEmpty(_dotnetCliPath))
             {
                 // Fallback to get dotnet path from current process which might be dotnet executable.

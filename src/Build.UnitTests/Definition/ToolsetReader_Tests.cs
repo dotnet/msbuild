@@ -12,6 +12,7 @@ using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
+using Constants = Microsoft.Build.Framework.Constants;
 
 #if FEATURE_WIN32_REGISTRY
 using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;
@@ -20,6 +21,7 @@ using RegistryException = Microsoft.Build.Exceptions.RegistryException;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using InternalUtilities = Microsoft.Build.Internal.Utilities;
 using Xunit;
+using Microsoft.Build.Framework;
 
 #nullable disable
 

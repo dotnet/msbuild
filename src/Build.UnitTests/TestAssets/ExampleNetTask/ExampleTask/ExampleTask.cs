@@ -20,7 +20,7 @@ namespace NetTask
                 var executingProcess = currentProcess.ProcessName;
                 var processPath = currentProcess.MainModule?.FileName ?? "Unknown";
 
-                Log.LogMessage(MessageImportance.High, $"The task is executed in process: {executingProcess}");
+                Log.LogMessage(MessageImportance.High, $"The task is executed in process: {executingProcess} with id {currentProcess.Id}");
                 Log.LogMessage(MessageImportance.High, $"Process path: {processPath}");
 
                 string[] args = Environment.GetCommandLineArgs();

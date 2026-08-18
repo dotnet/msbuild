@@ -12,8 +12,6 @@ using Microsoft.Build.Shared.FileSystem;
 using Path = Microsoft.IO.Path;
 #endif
 
-#nullable disable
-
 namespace Microsoft.Build.FileSystem
 {
     internal class DirectoryCacheFileSystemWrapper : IFileSystem

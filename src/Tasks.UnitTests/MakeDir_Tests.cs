@@ -29,6 +29,7 @@ namespace Microsoft.Build.UnitTests
                 MakeDir t = new MakeDir();
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
                 t.Directories = new ITaskItem[]
                 {
@@ -76,6 +77,7 @@ namespace Microsoft.Build.UnitTests
                 MakeDir t = new MakeDir();
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
                 t.Directories = new ITaskItem[]
                 {
@@ -133,6 +135,7 @@ namespace Microsoft.Build.UnitTests
                 MakeDir t = new MakeDir();
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
                 t.Directories = new ITaskItem[]
                 {
@@ -183,6 +186,7 @@ namespace Microsoft.Build.UnitTests
                 MakeDir t = new MakeDir();
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.FailIfNotIncremental = true;
                 t.Directories = dirList;
 
@@ -199,6 +203,7 @@ namespace Microsoft.Build.UnitTests
                 engine.Log = "";
                 t = new MakeDir();
                 t.BuildEngine = engine;
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
                 t.Directories = dirList;
                 success = t.Execute();
                 Assert.True(success);
@@ -241,6 +246,7 @@ namespace Microsoft.Build.UnitTests
                 MakeDir t = new MakeDir();
                 MockEngine engine = new MockEngine();
                 t.BuildEngine = engine;
+                t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
                 t.Directories = new ITaskItem[]
                 {

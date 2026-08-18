@@ -6,7 +6,6 @@ using System.IO;
 using System.Text;
 using System.Xml;
 
-#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
 {

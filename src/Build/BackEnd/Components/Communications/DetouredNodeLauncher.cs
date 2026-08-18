@@ -14,6 +14,9 @@ using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using static BuildXL.Processes.FileAccessManifest;
+#if RUNTIME_TYPE_NETCORE
+using Constants = Microsoft.Build.Framework.Constants;
+#endif
 
 #nullable disable
 
@@ -22,8 +25,6 @@ namespace Microsoft.Build.BackEnd
     internal sealed class DetouredNodeLauncher : INodeLauncher, IBuildComponent
     {
         private readonly List<ISandboxedProcess> _sandboxedProcesses = new();
-
-        private readonly BuildParameters.IBuildParameters _environmentVariables = CreateEnvironmentVariables();
 
         private IFileAccessManager _fileAccessManager;
 
@@ -51,27 +52,27 @@ namespace Microsoft.Build.BackEnd
         }
 
         /// <summary>
-        /// Creates a new MSBuild process
+        /// Creates a new MSBuild process using the specified launch configuration.
         /// </summary>
-        public Process Start(string msbuildLocation, string commandLineArgs, int nodeId)
+        public Process Start(NodeLaunchData launchData, int nodeId)
         {
             // Should always have been set already.
-            ErrorUtilities.VerifyThrowInternalLength(msbuildLocation, nameof(msbuildLocation));
+            ErrorUtilities.VerifyThrowInternalLength(launchData.MSBuildLocation, nameof(launchData.MSBuildLocation));
 
             ErrorUtilities.VerifyThrowInternalNull(_fileAccessManager, nameof(_fileAccessManager));
 
-            if (!FileSystems.Default.FileExists(msbuildLocation))
+            if (!FileSystems.Default.FileExists(launchData.MSBuildLocation))
             {
-                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", msbuildLocation));
+                throw new BuildAbortedException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("CouldNotFindMSBuildExe", launchData.MSBuildLocation));
             }
 
             // Repeat the executable name as the first token of the command line because the command line
             // parser logic expects it and will otherwise skip the first argument
-            commandLineArgs = $"\"{msbuildLocation}\" {commandLineArgs}";
+            var commandLineArgs = $"\"{launchData.MSBuildLocation}\" {launchData.CommandLineArgs}";
 
-            CommunicationsUtilities.Trace("Launching node from {0}", msbuildLocation);
+            CommunicationsUtilities.Trace("Launching node from {0}", launchData.MSBuildLocation);
 
-            string exeName = msbuildLocation;
+            string exeName = launchData.MSBuildLocation;
 
 #if RUNTIME_TYPE_NETCORE
             // Run the child process with the same host as the currently-running process.
@@ -92,7 +93,7 @@ namespace Microsoft.Build.BackEnd
                 PipDescription = "MSBuild",
                 PipSemiStableHash = 0,
                 Arguments = commandLineArgs,
-                EnvironmentVariables = _environmentVariables,
+                EnvironmentVariables = CreateEnvironmentVariables(launchData.EnvironmentOverrides),
                 MaxLengthInMemory = 0, // Don't buffer any output
             };
 
@@ -140,13 +141,18 @@ namespace Microsoft.Build.BackEnd
             return Process.GetProcessById(sp.ProcessId);
         }
 
-        private static BuildParameters.IBuildParameters CreateEnvironmentVariables()
+        /// <summary>
+        /// Creates environment variables with optional overrides for app host bootstrap.
+        /// </summary>
+        private static BuildParameters.IBuildParameters CreateEnvironmentVariables(IDictionary<string, string> environmentOverrides)
         {
             var envVars = new Dictionary<string, string>();
             foreach (DictionaryEntry baseVar in Environment.GetEnvironmentVariables())
             {
                 envVars.Add((string)baseVar.Key, (string)baseVar.Value);
             }
+
+            DotnetHostEnvironmentHelper.ApplyEnvironmentOverrides(envVars, environmentOverrides);
 
             return BuildParameters.GetFactory().PopulateFromDictionary(envVars);
         }

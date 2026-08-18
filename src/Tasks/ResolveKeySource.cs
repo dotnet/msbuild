@@ -10,7 +10,6 @@ using Microsoft.Build.Framework;
 using System.Globalization;
 using System.Security.Cryptography;
 using Microsoft.Runtime.Hosting;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 #endif
 

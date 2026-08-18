@@ -1075,6 +1075,121 @@ namespace Microsoft.Build.UnitTests.Logging
         }
         #endregion
 
+        #region ProcessLoggingEvent After Shutdown Tests
+
+        /// <summary>
+        /// Verify that ProcessLoggingEvent does not crash when called after the
+        /// LoggingService has been shut down (asynchronous mode). This reproduces
+        /// the race condition where an external callback (e.g., Process.Exited)
+        /// tries to log after ShutdownComponent has nullified internal state.
+        /// </summary>
+        [Fact]
+        public void ProcessLoggingEventAfterShutdown_Asynchronous_DoesNotThrow()
+        {
+            BuildParameters parameters = new BuildParameters();
+            parameters.MaxNodeCount = 2;
+            MockHost mockHost = new MockHost(parameters);
+
+            LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Asynchronous, 1);
+            ((IBuildComponent)loggingService).InitializeComponent(mockHost);
+            loggingService.RegisterLogger(new ConsoleLogger());
+
+            // Shut down the service, which will null out _eventQueue, _dequeueEvent, _enqueueEvent.
+            ((IBuildComponent)loggingService).ShutdownComponent();
+            loggingService.ServiceState.ShouldBe(LoggingServiceState.Shutdown);
+
+            // Simulate a late callback (e.g., Process.Exited) trying to log after shutdown.
+            // This must not throw a NullReferenceException.
+            BuildMessageEventArgs lateEvent = new BuildMessageEventArgs("Project cache service process exited", null, null, MessageImportance.Low);
+            loggingService.ProcessLoggingEvent(lateEvent);
+        }
+
+        /// <summary>
+        /// Verify that ProcessLoggingEvent does not crash when called after the
+        /// LoggingService has been shut down (synchronous mode).
+        /// </summary>
+        [Fact]
+        public void ProcessLoggingEventAfterShutdown_Synchronous_DoesNotThrow()
+        {
+            // _initializedService was created in synchronous mode by InitializeLoggingService().
+            _initializedService.RegisterLogger(new ConsoleLogger());
+
+            ((IBuildComponent)_initializedService).ShutdownComponent();
+            _initializedService.ServiceState.ShouldBe(LoggingServiceState.Shutdown);
+
+            // Late log after shutdown - must not crash.
+            BuildMessageEventArgs lateEvent = new BuildMessageEventArgs("Late message after shutdown", null, null, MessageImportance.Low);
+            _initializedService.ProcessLoggingEvent(lateEvent);
+        }
+
+        /// <summary>
+        /// Verify that ProcessLoggingEvent still works normally during an active build
+        /// (before shutdown). This ensures the fix does not break regular logging.
+        /// </summary>
+        [Fact]
+        public void ProcessLoggingEventDuringActiveBuild_StillWorks()
+        {
+            MockLogger mockLogger = new MockLogger();
+            _initializedService.RegisterLogger(mockLogger);
+
+            BuildMessageEventArgs messageEvent = new BuildMessageEventArgs("Test message during active build", null, null, MessageImportance.High);
+            _initializedService.ProcessLoggingEvent(messageEvent);
+
+            // In synchronous mode, the event is routed immediately.
+            mockLogger.BuildMessageEvents.Count.ShouldBe(1);
+            mockLogger.BuildMessageEvents[0].Message.ShouldBe("Test message during active build");
+        }
+
+        /// <summary>
+        /// Verify that concurrent shutdown and ProcessLoggingEvent calls from multiple
+        /// threads do not cause a crash (simulates the race condition scenario).
+        /// </summary>
+        [Fact]
+        public void ProcessLoggingEventConcurrentWithShutdown_DoesNotThrow()
+        {
+            BuildParameters parameters = new BuildParameters();
+            parameters.MaxNodeCount = 2;
+            MockHost mockHost = new MockHost(parameters);
+
+            LoggingService loggingService = (LoggingService)LoggingService.CreateLoggingService(LoggerMode.Asynchronous, 1);
+            ((IBuildComponent)loggingService).InitializeComponent(mockHost);
+            loggingService.RegisterLogger(new ConsoleLogger());
+
+            using ManualResetEvent startSignal = new ManualResetEvent(false);
+            Exception caughtException = null;
+
+            // Start a thread that will log events repeatedly.
+            Thread logThread = new Thread(() =>
+            {
+                startSignal.WaitOne();
+                for (int i = 0; i < 100; i++)
+                {
+                    try
+                    {
+                        BuildMessageEventArgs msg = new BuildMessageEventArgs($"Message {i}", null, null, MessageImportance.Low);
+                        loggingService.ProcessLoggingEvent(msg);
+                    }
+                    catch (Exception ex)
+                    {
+                        Interlocked.CompareExchange(ref caughtException, ex, null);
+                        break;
+                    }
+                }
+            });
+
+            logThread.Start();
+
+            // Signal both threads and immediately shut down from main thread.
+            startSignal.Set();
+            ((IBuildComponent)loggingService).ShutdownComponent();
+
+            bool joined = logThread.Join(TimeSpan.FromSeconds(10));
+            joined.ShouldBeTrue("Logging thread did not terminate within the allotted time.");
+            caughtException.ShouldBeNull();
+        }
+
+        #endregion
+
         #region PrivateMethods
 
         /// <summary>

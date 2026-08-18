@@ -86,6 +86,11 @@ internal sealed class TerminalProjectInfo
     private readonly EvalProjectInfo _evalInfo;
 
     /// <summary>
+    /// The name of the target currently being executed.
+    /// </summary>
+    public string? CurrentTarget { get; set; }
+
+    /// <summary>
     /// True when the project has run target with name "_TestRunStart" defined in <see cref="TerminalLogger._testStartTarget"/>.
     /// </summary>
     public bool IsTestProject { get; set; }

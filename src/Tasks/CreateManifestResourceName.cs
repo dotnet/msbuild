@@ -9,6 +9,7 @@ using System.IO;
 using System.Text;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 
 #nullable disable
@@ -189,7 +190,7 @@ namespace Microsoft.Build.Tasks
                             }
                         }
 
-                        if (File.Exists(Path.Combine(Path.GetDirectoryName(fileName), conventionDependentUpon)))
+                        if (FileSystems.Default.FileExists(Path.Combine(Path.GetDirectoryName(fileName), conventionDependentUpon)))
                         {
                             dependentUpon = conventionDependentUpon;
                         }

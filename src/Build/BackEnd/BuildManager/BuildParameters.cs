@@ -118,11 +118,7 @@ namespace Microsoft.Build.Execution
         /// Flag indicating whether node reuse should be enabled.
         /// By default, it is enabled.
         /// </summary>
-#if FEATURE_NODE_REUSE
         private bool _enableNodeReuse = true;
-#else
-        private bool _enableNodeReuse = false;
-#endif
 
         private bool _enableRarNode;
 
@@ -227,6 +223,11 @@ namespace Microsoft.Build.Execution
 
         private bool _interactive;
 
+        /// <summary>
+        /// When true, enables running build in multiple in-proc nodes.
+        /// </summary>
+        private bool _multiThreaded;
+
         private ProjectIsolationMode _projectIsolationMode;
 
         private string[] _inputResultsCacheFiles;
@@ -284,7 +285,7 @@ namespace Microsoft.Build.Execution
             _enableNodeReuse = other._enableNodeReuse;
             _enableRarNode = other._enableRarNode;
             _buildProcessEnvironment = resetEnvironment
-                ? CommunicationsUtilities.GetEnvironmentVariables()
+                ? FrameworkCommunicationsUtilities.GetEnvironmentVariables()
                 : other._buildProcessEnvironment;
             _environmentProperties = other._environmentProperties != null ? new PropertyDictionary<ProjectPropertyInstance>(other._environmentProperties) : null;
             _forwardingLoggers = other._forwardingLoggers != null ? new List<ForwardingLoggerRecord>(other._forwardingLoggers) : null;
@@ -552,7 +553,11 @@ namespace Microsoft.Build.Execution
         /// <summary>
         /// Enables running build in multiple in-proc nodes.
         /// </summary>
-        public bool MultiThreaded { get; set; }
+        public bool MultiThreaded
+        {
+            get => _multiThreaded;
+            set => _multiThreaded = value;
+        }
 
         /// <summary>
         /// The amount of memory the build should limit itself to using, in megabytes.
@@ -974,6 +979,7 @@ namespace Microsoft.Build.Execution
             translator.TranslateEnum(ref _projectIsolationMode, (int)_projectIsolationMode);
             translator.Translate(ref _reportFileAccesses);
             translator.Translate(ref _enableTargetOutputLogging);
+            translator.Translate(ref _multiThreaded);
 
             // ProjectRootElementCache is not transmitted.
             // ResetCaches is not transmitted.
@@ -1034,7 +1040,7 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void Initialize(PropertyDictionary<ProjectPropertyInstance> environmentProperties, ProjectRootElementCacheBase projectRootElementCache, ToolsetProvider toolsetProvider)
         {
-            _buildProcessEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+            _buildProcessEnvironment = FrameworkCommunicationsUtilities.GetEnvironmentVariables();
             _environmentProperties = environmentProperties;
             ProjectRootElementCache = projectRootElementCache;
             ResetCaches = true;

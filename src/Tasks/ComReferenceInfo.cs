@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Runtime.InteropServices.ComTypes;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Utilities;
 // TYPELIBATTR clashes with the one in InteropServices.
 using TYPELIBATTR = System.Runtime.InteropServices.ComTypes.TYPELIBATTR;
@@ -146,7 +146,7 @@ namespace Microsoft.Build.Tasks
             // we're using tlbimp.exe, we need to pass the full path w/ type lib number to it, or it won't generate the interop
             // assembly correctly.
             this.fullTypeLibPath = path;
-            this.strippedTypeLibPath = ComReference.StripTypeLibNumberFromPath(path, File.Exists);
+            this.strippedTypeLibPath = ComReference.StripTypeLibNumberFromPath(path, FileSystems.Default.FileExists);
 
             // use the unstripped path to actually load the library
             switch (targetProcessorArchitecture)

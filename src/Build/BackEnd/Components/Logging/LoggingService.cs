@@ -14,6 +14,7 @@ using Microsoft.Build.Experimental.BuildCheck.Infrastructure;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.Debugging;
 using InternalLoggerException = Microsoft.Build.Exceptions.InternalLoggerException;
 using LoggerDescription = Microsoft.Build.Logging.LoggerDescription;
 
@@ -220,6 +221,11 @@ namespace Microsoft.Build.BackEnd.Logging
         /// A list of build submission IDs that have logged errors through buildcheck.  If an error is logged outside of a submission, the submission ID is <see cref="BuildEventContext.InvalidSubmissionId"/>.
         /// </summary>
         private readonly ISet<int> _buildSubmissionIdsThatHaveLoggedBuildcheckErrors = new HashSet<int>();
+
+        /// <summary>
+        /// Tracker for build error telemetry.
+        /// </summary>
+        private readonly BuildErrorTelemetryTracker _errorTelemetryTracker = new BuildErrorTelemetryTracker();
 
         /// <summary>
         /// A list of warnings to treat as errors for an associated <see cref="BuildEventContext"/>.  If an empty set, all warnings are treated as errors.
@@ -508,6 +514,13 @@ namespace Microsoft.Build.BackEnd.Logging
         public LoggerMode LoggingMode => _logMode;
 
         /// <summary>
+        /// Returns the number of events currently queued for processing.
+        /// Used for hang diagnostics to determine if the logging pipeline is backed up.
+        /// Returns 0 for synchronous logging or when the queue is not available.
+        /// </summary>
+        public int EventQueueCount => _eventQueue?.Count ?? 0;
+
+        /// <summary>
         /// Get of warnings to treat as errors.  An empty non-null set will treat all warnings as errors.
         /// </summary>
         public ISet<string> WarningsAsErrors
@@ -654,6 +667,15 @@ namespace Microsoft.Build.BackEnd.Logging
 
             // Determine if any of the event sinks have logged an error with this submission ID
             return _buildSubmissionIdsThatHaveLoggedErrors?.Contains(submissionId) == true;
+        }
+
+        /// <summary>
+        /// Populates build telemetry with error categorization data.
+        /// </summary>
+        /// <param name="buildTelemetry">The BuildTelemetry object to populate with error data.</param>
+        public void PopulateBuildTelemetryWithErrors(Framework.Telemetry.BuildTelemetry buildTelemetry)
+        {
+            _errorTelemetryTracker.PopulateBuildTelemetry(buildTelemetry);
         }
 
         /// <summary>
@@ -1272,18 +1294,48 @@ namespace Microsoft.Build.BackEnd.Logging
         /// <exception cref="InternalErrorException">buildEvent is null</exception>
         protected internal virtual void ProcessLoggingEvent(object buildEvent)
         {
+            // Avoid processing events after shutdown has cleaned up resources.
+            // External code (e.g., plugin adapters) may hold references to LoggingService
+            // and attempt to log after shutdown has nullified internal state.
+            if (_serviceState == LoggingServiceState.Shutdown)
+            {
+                return;
+            }
+
             ErrorUtilities.VerifyThrow(buildEvent != null, "buildEvent is null");
             if (_logMode == LoggerMode.Asynchronous)
             {
-                // Block until queue is not full.
-                while (_eventQueue.Count >= _queueCapacity)
+                // Capture local references to prevent race with CleanLoggingEventProcessing
+                // which sets these fields to null during shutdown.
+                ConcurrentQueue<object> eventQueue = _eventQueue;
+                AutoResetEvent dequeueEvent = _dequeueEvent;
+                AutoResetEvent enqueueEvent = _enqueueEvent;
+
+                // Double-check after capturing references in case shutdown raced between
+                // the _serviceState check above and the field reads.
+                if (eventQueue == null || dequeueEvent == null || enqueueEvent == null)
                 {
-                    // Block and wait for dequeue event.
-                    _dequeueEvent.WaitOne();
+                    return;
                 }
 
-                _eventQueue.Enqueue(buildEvent);
-                _enqueueEvent.Set();
+                try
+                {
+                    // Block until queue is not full.
+                    while (eventQueue.Count >= _queueCapacity)
+                    {
+                        // Block and wait for dequeue event.
+                        dequeueEvent.WaitOne();
+                    }
+
+                    eventQueue.Enqueue(buildEvent);
+                    enqueueEvent.Set();
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Shutdown disposed the wait handles after we captured them;
+                    // silently drop the event.
+                    return;
+                }
             }
             else
             {
@@ -1516,7 +1568,7 @@ namespace Microsoft.Build.BackEnd.Logging
                 // Dump all engine exceptions to a temp file
                 // so that we have something to go on in the
                 // event of a failure
-                ExceptionHandling.DumpExceptionToFile(e);
+                DebugUtils.DumpExceptionToFile(e);
 
                 // Catch all exceptions in order to pass them over to the engine thread. Due to
                 // hosts expecting to get logger exceptions on the same thread the engine was called from.
@@ -1656,6 +1708,8 @@ namespace Microsoft.Build.BackEnd.Logging
                     // Keep track of build submissions that have logged errors.  If there is no build context, add BuildEventContext.InvalidSubmissionId.
                     _buildSubmissionIdsThatHaveLoggedErrors.Add(submissionId);
                 }
+
+                _errorTelemetryTracker.TrackError(errorEvent.Code, errorEvent.Subcategory);
             }
 
             // Respect warning-promotion properties from the remote project
@@ -1847,6 +1901,11 @@ namespace Microsoft.Build.BackEnd.Logging
 
                 // The null logger has no effect on minimum verbosity.
                 Execution.BuildManager.NullLogger => null,
+
+                // Telemetry loggers only consume WorkerNodeTelemetryLogged events, not message events.
+                // They have no effect on minimum message verbosity.
+                TelemetryInfra.InternalTelemetryConsumingLogger => null,
+                Framework.Telemetry.InternalTelemetryForwardingLogger => null,
 
                 TerminalLogger terminalLogger => terminalLogger.GetMinimumMessageImportance(),
                 _ =>

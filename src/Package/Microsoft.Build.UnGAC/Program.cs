@@ -32,8 +32,6 @@ namespace Microsoft.Build.UnGAC
                     "BuildXL.Utilities.Core, Version=1.0.0.0",
                     "BuildXL.Native, Version=1.0.0.0",
                     "Microsoft.VisualStudio.SolutionPersistence, Version=1.0.0.0",
-                    "Microsoft.VisualStudio.OpenTelemetry.ClientExtensions, Version=0.1.0.0",
-                    "Microsoft.VisualStudio.OpenTelemetry.Collector, Version=0.1.0.0",
                 };
 
                 uint hresult = NativeMethods.CreateAssemblyCache(out IAssemblyCache assemblyCache, 0);

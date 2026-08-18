@@ -6,7 +6,7 @@ using System.Diagnostics.Tracing;
 using System.IO;
 using System.Text;
 using Microsoft.Build.Eventing;
-using Microsoft.Build.Shared;
+using Microsoft.Build.Framework;
 
 #nullable disable
 

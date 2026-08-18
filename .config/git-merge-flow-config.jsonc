@@ -2,16 +2,12 @@
 {
     "merge-flow-configurations": {
         // MSBuild servicing chain from oldest supported through currently-supported to main
-        // Automate opening PRs to merge msbuild's vs16.11 (VS until 4/2029) into vs17.8 (SDK 8.0.1xx, VS until 7/2025)
+        // Automate opening PRs to merge msbuild's vs16.11 (VS until 4/2029) into vs17.8 (SDK 8.0.1xx)
         "vs16.11": {
             "MergeToBranch": "vs17.8"
         },
-        // Automate opening PRs to merge msbuild's vs17.8 (SDK 8.0.1xx) into vs17.10 (SDK 8.0.3xx, VS until 1/2026)
+        // Automate opening PRs to merge msbuild's vs17.8 (SDK 8.0.1xx) into vs17.11 (SDK 8.0.4xx)
         "vs17.8": {
-            "MergeToBranch": "vs17.10"
-        },
-        // Automate opening PRs to merge msbuild's vs17.10 (SDK 8.0.3xx) into vs17.11 (SDK 8.0.4xx)
-        "vs17.10": {
             "MergeToBranch": "vs17.11"
         },
         // Automate opening PRs to merge msbuild's vs17.11 (SDK 8.0.4xx) into vs17.12 (SDK 9.0.1xx, VS until 7/2026)
@@ -22,8 +18,24 @@
         "vs17.12": {
             "MergeToBranch": "vs17.14"
         },
-        // MSBuild latest release to main
+        // Automate opening PRs to merge msbuild's vs17.14 (SDK 9.0.3xx) into vs18.0 (SDK 10.0.1xx, VS)
         "vs17.14": {
+            "MergeToBranch": "vs18.0"
+        },
+        // Automate opening PRs to merge msbuild's vs18.0 (SDK 10.0.1xx) into vs18.3 (SDK 10.0.2xx, VS)
+        "vs18.0": {
+            "MergeToBranch": "vs18.3"
+        },
+        // Automate opening PRs to merge msbuild's vs18.3 (SDK 10.0.2xx) into vs18.4 (VS)
+        "vs18.3": {
+            "MergeToBranch": "vs18.4"
+        },
+        // Automate opening PRs to merge msbuild's vs18.4 (VS) into vs18.5 (VS)
+        "vs18.4": {
+            "MergeToBranch": "vs18.5"
+        },
+        // Automate opening PRs to merge msbuild's vs18.5 (VS) into main (VS canary, SDK main & next-feature-band)
+        "vs18.5": {
             "MergeToBranch": "main"
         }
     }

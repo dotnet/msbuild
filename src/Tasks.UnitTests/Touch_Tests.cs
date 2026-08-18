@@ -187,6 +187,7 @@ namespace Microsoft.Build.UnitTests
             Touch t = new Touch();
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Files = new ITaskItem[]
             {
@@ -210,6 +211,7 @@ namespace Microsoft.Build.UnitTests
             Touch t = new Touch();
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
 
             t.Files = new ITaskItem[]
             {
@@ -232,6 +234,7 @@ namespace Microsoft.Build.UnitTests
             Touch t = new Touch();
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AlwaysCreate = true;
 
             t.Files = new ITaskItem[]
@@ -255,6 +258,7 @@ namespace Microsoft.Build.UnitTests
             Touch t = new Touch();
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AlwaysCreate = true;
             t.ForceTouch = false;
             t.Time = "Badly formed time String.";
@@ -278,6 +282,7 @@ namespace Microsoft.Build.UnitTests
             Touch t = new Touch();
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AlwaysCreate = true;
 
             t.Files = new ITaskItem[]
@@ -300,6 +305,7 @@ namespace Microsoft.Build.UnitTests
             Touch t = new Touch();
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.ForceTouch = true;
             t.AlwaysCreate = true;
 
@@ -317,6 +323,7 @@ namespace Microsoft.Build.UnitTests
             Touch t = new Touch();
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.AlwaysCreate = true;
 
             t.Files = new ITaskItem[]
@@ -342,6 +349,7 @@ namespace Microsoft.Build.UnitTests
             Touch t = new Touch();
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.FailIfNotIncremental = true;
 
             t.Files = new ITaskItem[]
@@ -368,6 +376,7 @@ namespace Microsoft.Build.UnitTests
             Touch t = new Touch();
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.FailIfNotIncremental = true;
             t.AlwaysCreate = true;
             t.Files = new ITaskItem[]
@@ -393,6 +402,7 @@ namespace Microsoft.Build.UnitTests
             Touch t = new Touch();
             MockEngine engine = new MockEngine();
             t.BuildEngine = engine;
+            t.TaskEnvironment = TaskEnvironmentHelper.CreateForTest();
             t.FailIfNotIncremental = true;
             t.Files = new ITaskItem[]
             {

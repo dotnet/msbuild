@@ -3,10 +3,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
+using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
 
@@ -39,7 +39,7 @@ namespace Microsoft.Build.Tasks
             foreach (string assemblyPath in AssemblyPaths)
             {
                 // During DTB the referenced project may not has been built yet, so we need to check if the assembly already exists.
-                if (File.Exists(assemblyPath))
+                if (FileSystems.Default.FileExists(assemblyPath))
                 {
                     using (AssemblyInformation assemblyInformation = new(assemblyPath))
                     {

@@ -7,8 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Windows.Markup;
 
-#nullable disable
-
 namespace Microsoft.Build.Framework.XamlTypes
 {
     /// <summary>

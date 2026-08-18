@@ -65,7 +65,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
         private IBuildCheckManagerProvider _buildCheckManagerProvider;
 
-        private TelemetryForwarderProvider _telemetryForwarder;
+        private TelemetryCollectorProvider _telemetryCollector;
 
         #region SystemParameterFields
 
@@ -136,8 +136,8 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _buildCheckManagerProvider = new NullBuildCheckManagerProvider();
             ((IBuildComponent)_buildCheckManagerProvider).InitializeComponent(this);
 
-            _telemetryForwarder = new TelemetryForwarderProvider();
-            ((IBuildComponent)_telemetryForwarder).InitializeComponent(this);
+            _telemetryCollector = new TelemetryCollectorProvider();
+            ((IBuildComponent)_telemetryCollector).InitializeComponent(this);
         }
 
         /// <summary>
@@ -207,7 +207,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildComponentType.RequestBuilder => (IBuildComponent)_requestBuilder,
                 BuildComponentType.SdkResolverService => (IBuildComponent)_sdkResolverService,
                 BuildComponentType.BuildCheckManagerProvider => (IBuildComponent)_buildCheckManagerProvider,
-                BuildComponentType.TelemetryForwarder => (IBuildComponent)_telemetryForwarder,
+                BuildComponentType.TelemetryCollector => (IBuildComponent)_telemetryCollector,
                 _ => throw new ArgumentException("Unexpected type " + type),
             };
         }

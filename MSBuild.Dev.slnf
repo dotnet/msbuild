@@ -1,6 +1,6 @@
 {
   "solution": {
-    "path": "MSBuild.sln",
+    "path": "MSBuild.slnx",
     "projects": [
       "src\\Build.OM.UnitTests\\Microsoft.Build.Engine.OM.UnitTests.csproj",
       "src\\Build.UnitTests\\Microsoft.Build.Engine.UnitTests.csproj",
@@ -10,6 +10,7 @@
       "src\\Framework\\Microsoft.Build.Framework.csproj",
       "src\\MSBuild.UnitTests\\Microsoft.Build.CommandLine.UnitTests.csproj",
       "src\\MSBuild\\MSBuild.csproj",
+      "src\\MSBuild.Benchmarks\\MSBuild.Benchmarks.csproj",
       "src\\StringTools\\StringTools.csproj",
       "src\\Tasks.UnitTests\\Microsoft.Build.Tasks.UnitTests.csproj",
       "src\\Tasks\\Microsoft.Build.Tasks.csproj",

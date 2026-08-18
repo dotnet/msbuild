@@ -662,6 +662,33 @@ namespace Microsoft.Build.UnitTests.BackEnd
             logger.AssertLogDoesntContain("MSB4018");
         }
 
+#if FEATURE_ASSEMBLYLOADCONTEXT
+        /// <summary>
+        /// Regression test for https://github.com/dotnet/msbuild/issues/12370
+        /// Verifies that MSBuildLoadContext accepts newer assembly versions when older versions are requested (version roll-forward).
+        /// </summary>
+        [Fact]
+        public void MSBuildLoadContext_AcceptsNewerAssemblyVersions()
+        {
+            string realTaskPath = Assembly.GetExecutingAssembly().Location;
+
+            // Use System.Collections.Immutable as test assembly - it's available in modern .NET runtime
+            // Request an older version (1.0.0.0) which should roll forward to whatever version is available
+            string projectContents = @"<Project ToolsVersion=`msbuilddefaulttoolsversion` xmlns=`msbuildnamespace`>
+  <UsingTask TaskName=`ValidateAssemblyVersionRollForward` AssemblyFile=`" + realTaskPath + @"` />
+
+  <Target Name=`Build`>
+    <ValidateAssemblyVersionRollForward AssemblyName=`System.Collections.Immutable` MinimumVersion=`1.0.0.0` />
+  </Target>
+</Project>";
+
+            MockLogger logger = ObjectModelHelpers.BuildProjectExpectSuccess(projectContents, _testOutput);
+
+            // Verify that the task logged success message
+            logger.AssertLogContains("Assembly version roll-forward succeeded");
+        }
+#endif
+
 
 #if FEATURE_CODETASKFACTORY
         /// <summary>

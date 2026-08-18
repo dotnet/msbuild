@@ -13,6 +13,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Returns the reference assembly paths to the various frameworks
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public partial class FindInvalidProjectReferences : TaskExtension
     {
         #region Fields

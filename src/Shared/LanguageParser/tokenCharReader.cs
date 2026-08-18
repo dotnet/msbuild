@@ -4,7 +4,6 @@
 using System;
 using System.IO;
 
-#nullable disable
 
 namespace Microsoft.Build.Shared.LanguageParser
 {

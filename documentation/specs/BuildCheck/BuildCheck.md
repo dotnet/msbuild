@@ -248,7 +248,7 @@ To author custom check, user will need to implement given contract (delivered in
 Simplified proposal:
 
 ```csharp
-public abstract class BuildExecutionCheck : IDisposable
+public abstract class Check : IDisposable
 {
     /// <summary>
     /// Friendly name of the check.
@@ -259,7 +259,7 @@ public abstract class BuildExecutionCheck : IDisposable
     /// <summary>
     /// Single or multiple rules supported by the check.
     /// </summary>
-    public abstract IReadOnlyList<BuildExecutionCheckRule> SupportedRules { get; }
+    public abstract IReadOnlyList<CheckRule> SupportedRules { get; }
 
     /// <summary>
     /// Optional initialization of the check.

@@ -7,8 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Build.Shared;
 
-#nullable disable
-
 namespace Microsoft.Build.Collections
 {
     /// <summary>
@@ -71,6 +69,10 @@ namespace Microsoft.Build.Collections
                 int count = backingCollection.Count;
 #endif
                 list = new List<TResult>(count);
+            }
+            else if (_backingEnumerable is ICollection<TSource> collection)
+            {
+                list = new List<TResult>(collection.Count);
             }
             else if (_backingEnumerable is IReadOnlyCollection<TSource> readOnlyCollection)
             {

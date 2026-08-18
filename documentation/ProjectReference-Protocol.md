@@ -61,7 +61,7 @@ If implementing a project with an “outer” (determine what properties to pass
     * `Platforms` indicating what platforms are available for the project to build as, and boolean metadata `IsVcxOrNativeProj` (used for [SetPlatform Negotiation](#setplatform-negotiation))
   * The `GetReferenceNearestTargetFrameworkTask` (provided by NuGet) is responsible for selecting the best matching `TargetFramework` of the referenced project
   * This target is _optional_. If not present, the reference will be built with no additional properties.
-  * **New** in MSBuild 15.5.  (`TargetFrameworkMonikers` and `TargetPlatformMonikers` metadata is new in MSBuild 16.8)
+  * **New** in MSBuild 15.5.  (`TargetFrameworkMonikers` and `TargetPlatformMonikers` metadata is new in MSBuild 16.8, `TargetFramework` metadata is new in MSBuild 18.3)
   * It is possible to gather additional information from referenced projects.  See the below section on "Getting additional properties from referenced projects" for more information
 * `GetTargetFrameworkProperties` determines what properties should be passed to the “main” target for a given `ReferringTargetFramework`.
   * **Deprecated** in MSBuild 15.5.

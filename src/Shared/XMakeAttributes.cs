@@ -3,9 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-#if !CLR2COMPATIBILITY
 using System.Runtime.InteropServices;
-#endif
 
 #nullable disable
 
@@ -149,18 +147,12 @@ namespace Microsoft.Build.Shared
         /// <summary>
         /// Returns true if the given string is a valid member of the MSBuildRuntimeValues set
         /// </summary>
-        internal static bool IsValidMSBuildRuntimeValue(string runtime)
-        {
-            return runtime == null || ValidMSBuildRuntimeValues.Contains(runtime);
-        }
+        internal static bool IsValidMSBuildRuntimeValue(string runtime) => runtime == null || ValidMSBuildRuntimeValues.Contains(runtime);
 
         /// <summary>
         /// Returns true if the given string is a valid member of the MSBuildArchitectureValues set
         /// </summary>
-        internal static bool IsValidMSBuildArchitectureValue(string architecture)
-        {
-            return architecture == null || ValidMSBuildArchitectureValues.Contains(architecture);
-        }
+        internal static bool IsValidMSBuildArchitectureValue(string architecture) => architecture == null || ValidMSBuildArchitectureValues.Contains(architecture);
 
         /// <summary>
         /// Compares two members of MSBuildRuntimeValues, returning true if they count as a match, and false otherwise.
@@ -426,7 +418,6 @@ namespace Microsoft.Build.Shared
         /// </comments>
         internal static string GetCurrentMSBuildArchitecture()
         {
-#if !CLR2COMPATIBILITY
             string currentArchitecture = string.Empty;
             switch (RuntimeInformation.ProcessArchitecture)
             {
@@ -446,9 +437,7 @@ namespace Microsoft.Build.Shared
                     currentArchitecture = (IntPtr.Size == sizeof(Int64)) ? MSBuildArchitectureValues.x64 : MSBuildArchitectureValues.x86;
                     break;
             }
-#else
-            string currentArchitecture = (IntPtr.Size == sizeof(Int64)) ? MSBuildArchitectureValues.x64 : MSBuildArchitectureValues.x86;
-#endif
+
             return currentArchitecture;
         }
 

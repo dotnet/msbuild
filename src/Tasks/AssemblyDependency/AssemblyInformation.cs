@@ -16,8 +16,10 @@ using System.Text;
 using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 #if FEATURE_ASSEMBLYLOADCONTEXT
-using System.Reflection.PortableExecutable;
 using System.Reflection.Metadata;
+using System.Reflection.PortableExecutable;
+#else
+using Microsoft.Build.Framework;
 #endif
 using Microsoft.Build.Tasks.AssemblyDependency;
 

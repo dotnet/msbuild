@@ -16,13 +16,18 @@ namespace Microsoft.Build.UnitTests.BackEnd
     {
         private int _nodeRequestId;
 
+        /// <summary>
+        /// Creates a stub TaskEnvironment for testing purposes.
+        /// </summary>
+        private static TaskEnvironment CreateStubTaskEnvironment() => TaskEnvironmentHelper.CreateForTest();
+
         [Fact]
         public void TestConstructorGood()
         {
             BuildRequest request = CreateNewBuildRequest(1, Array.Empty<string>());
             BuildRequestData data = new BuildRequestData("foo", new Dictionary<string, string?>(), "foo", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data, "2.0");
-            BuildRequestEntry entry = new BuildRequestEntry(request, config);
+            BuildRequestEntry entry = new BuildRequestEntry(request, config, CreateStubTaskEnvironment());
 
             Assert.Equal(BuildRequestEntryState.Ready, entry.State);
             Assert.Equal(entry.Request, request);
@@ -33,7 +38,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             Assert.Throws<ArgumentNullException>(() =>
             {
-                BuildRequestEntry entry = new BuildRequestEntry(null!, null!);
+                BuildRequestEntry entry = new BuildRequestEntry(null!, null!, null!);
             });
         }
         [Fact]
@@ -42,7 +47,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Start in Ready
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string?>(), "foo", Array.Empty<string>(), null), "2.0");
-            BuildRequestEntry entry = new BuildRequestEntry(request, config);
+            BuildRequestEntry entry = new BuildRequestEntry(request, config, CreateStubTaskEnvironment());
             Assert.Equal(BuildRequestEntryState.Ready, entry.State);
             Assert.Equal(entry.Request, request);
             Assert.Null(entry.Result);
@@ -91,7 +96,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
             BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string?>(), "foo", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data1, "2.0");
-            BuildRequestEntry entry = new BuildRequestEntry(request, config);
+            BuildRequestEntry entry = new BuildRequestEntry(request, config, CreateStubTaskEnvironment());
 
             entry.Continue();
             Assert.Equal(BuildRequestEntryState.Active, entry.State);
@@ -113,7 +118,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
             BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string?>(), "foo", Array.Empty<string>(), null);
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, data1, "2.0");
-            BuildRequestEntry entry = new BuildRequestEntry(request, config);
+            BuildRequestEntry entry = new BuildRequestEntry(request, config, CreateStubTaskEnvironment());
 
             entry.Continue();
             Assert.Equal(BuildRequestEntryState.Active, entry.State);
@@ -142,7 +147,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string?>(), "foo", Array.Empty<string>(), null), "2.0");
-            BuildRequestEntry entry = new BuildRequestEntry(request, config);
+            BuildRequestEntry entry = new BuildRequestEntry(request, config, CreateStubTaskEnvironment());
             Assert.Equal(BuildRequestEntryState.Ready, entry.State);
 
             entry.Continue();
@@ -180,7 +185,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
                 BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string?>(), "foo", Array.Empty<string>(), null);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, data1, "2.0");
-                BuildRequestEntry entry = new BuildRequestEntry(request, config);
+                BuildRequestEntry entry = new BuildRequestEntry(request, config, CreateStubTaskEnvironment());
                 Assert.Equal(BuildRequestEntryState.Ready, entry.State);
 
                 BuildRequest waitingRequest1 = CreateNewBuildRequest(2, new string[1] { "bar" });
@@ -196,7 +201,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
                 BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string?>(), "foo", Array.Empty<string>(), null);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, data1, "2.0");
-                BuildRequestEntry entry = new BuildRequestEntry(request, config);
+                BuildRequestEntry entry = new BuildRequestEntry(request, config, CreateStubTaskEnvironment());
                 Assert.Equal(BuildRequestEntryState.Ready, entry.State);
 
                 BuildResult requiredResult = new BuildResult(request);
@@ -213,7 +218,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
                 BuildRequestData data1 = new BuildRequestData("foo", new Dictionary<string, string?>(), "foo", Array.Empty<string>(), null);
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, data1, "2.0");
-                BuildRequestEntry entry = new BuildRequestEntry(request, config);
+                BuildRequestEntry entry = new BuildRequestEntry(request, config, CreateStubTaskEnvironment());
                 Assert.Equal(BuildRequestEntryState.Ready, entry.State);
 
                 entry.Continue();
@@ -236,7 +241,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             {
                 BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
                 BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string?>(), "foo", Array.Empty<string>(), null), "2.0");
-                BuildRequestEntry entry = new BuildRequestEntry(request, config);
+                BuildRequestEntry entry = new BuildRequestEntry(request, config, CreateStubTaskEnvironment());
                 Assert.Equal(BuildRequestEntryState.Ready, entry.State);
 
                 entry.Continue();
@@ -256,7 +261,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
         {
             BuildRequest request = CreateNewBuildRequest(1, new string[1] { "foo" });
             BuildRequestConfiguration config = new BuildRequestConfiguration(1, new BuildRequestData("foo", new Dictionary<string, string?>(), "foo", Array.Empty<string>(), null), "2.0");
-            BuildRequestEntry entry = new BuildRequestEntry(request, config);
+            BuildRequestEntry entry = new BuildRequestEntry(request, config, CreateStubTaskEnvironment());
             Assert.Equal(BuildRequestEntryState.Ready, entry.State);
 
             entry.Continue();

@@ -23,7 +23,7 @@ using ProjectCollection = Microsoft.Build.Evaluation.ProjectCollection;
 using ProjectItem = Microsoft.Build.Evaluation.ProjectItem;
 using IProperty = Microsoft.Build.Evaluation.IProperty;
 
-using Constants = Microsoft.Build.Internal.Constants;
+using Constants = Microsoft.Build.Framework.Constants;
 using ILoggingService = Microsoft.Build.BackEnd.Logging.ILoggingService;
 
 #if FEATURE_ASPNET_COMPILER

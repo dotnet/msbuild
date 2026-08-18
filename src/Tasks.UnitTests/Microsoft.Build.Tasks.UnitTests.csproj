@@ -44,15 +44,12 @@
 
   <ItemGroup>
     <Compile Include="..\Shared\UnitTests\AssemblyNameEx_Tests.cs" />
-    <Compile Include="..\Shared\UnitTests\EscapingUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\ErrorUtilities_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\PrintLineDebugger_Tests.cs" />
     <Compile Include="..\Shared\UnitTests\NativeMethodsShared_Tests.cs">
       <Link>NativeMethodsShared_Tests.cs</Link>
     </Compile>
     <Compile Include="..\Shared\UnitTests\ResourceUtilities_Tests.cs" />
-    <Compile Include="..\Shared\QuotingUtilities.cs" />
-    <Compile Include="..\Shared\ProcessExtensions.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
 
     <EmbeddedResource Include="SampleResx" />

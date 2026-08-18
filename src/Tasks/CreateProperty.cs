@@ -10,6 +10,7 @@ namespace Microsoft.Build.Tasks
     /// <summary>
     /// Just a straight pass-through of the inputs through to the outputs.
     /// </summary>
+    [MSBuildMultiThreadableTask]
     public class CreateProperty : TaskExtension
     {
         /// <summary>

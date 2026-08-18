@@ -25,7 +25,7 @@ To get started on **Visual Studio 2022**:
 4. Clone the source code: `git clone https://github.com/dotnet/msbuild`
    - You may have to [download Git](https://git-scm.com/downloads) first.
 5. Run `.\build.cmd` from the root of the repo to build the code. This also restores packages needed to open the projects in Visual Studio.
-6. Open `MSBuild.sln` or `MSBuild.Dev.slnf` in Visual Studio 2022.
+6. Open `MSBuild.slnx` or `MSBuild.Dev.slnf` in Visual Studio 2022.
 
 This newly-built MSBuild will be located at `artifacts\bin\bootstrap\net472\MSBuild\Current\Bin\MSBuild.exe`. It may not work for all scenarios, including C++ builds.
 

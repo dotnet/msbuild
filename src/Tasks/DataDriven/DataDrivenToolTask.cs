@@ -13,7 +13,6 @@ using Microsoft.Build.Shared;
 using System.Reflection;
 using System.Diagnostics;
 
-#nullable disable
 
 namespace Microsoft.Build.Tasks.DataDriven
 {

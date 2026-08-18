@@ -264,14 +264,14 @@ namespace Microsoft.Build.UnitTests.BackEnd
             lookup.AddNewItem(item2);
 
             // Remove one item
-            lookup.RemoveItem(item1);
+            lookup.RemoveItems("i1", [item1]);
 
             // We see one item
             Assert.Single(lookup.GetItems("i1"));
             Assert.Equal("a2", lookup.GetItems("i1").First().EvaluatedInclude);
 
             // Remove the other item
-            lookup.RemoveItem(item2);
+            lookup.RemoveItems("i1", [item2]);
 
             // We see no items
             Assert.Empty(lookup.GetItems("i1"));
@@ -326,7 +326,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Single(lookup.GetItems("i1"));
 
             // Remove that item
-            lookup.RemoveItem(item1);
+            lookup.RemoveItems("i1", [item1]);
 
             // We see no items
             Assert.Empty(lookup.GetItems("i1"));
@@ -372,7 +372,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             Assert.Single(lookup.GetItems("i1"));
 
             // Remove that item
-            lookup.RemoveItem(item1);
+            lookup.RemoveItems("i1", [item1]);
 
             // We see no items
             Assert.Empty(lookup.GetItems("i1"));
@@ -824,7 +824,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Add an item with m=m1 and n=n1
             ProjectItemInstance item1 = new ProjectItemInstance(project, "i1", "a2", project.FullPath);
             item1.SetMetadata("m", "m1");
-            lookup.PopulateWithItem(item1);
+            table1.Add(item1);
 
             lookup.EnterScope("x");
 
@@ -865,7 +865,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Add an item with m=m1 and n=n1
             ProjectItemInstance item1 = new ProjectItemInstance(project, "i1", "a2", project.FullPath);
             item1.SetMetadata("m", "m1");
-            lookup.PopulateWithItem(item1);
+            table1.Add(item1);
 
             lookup.EnterScope("x");
 
@@ -902,7 +902,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             item1.SetMetadata("m", "m1");
             item1.SetMetadata("n", "n1");
             item1.SetMetadata("o", "o1");
-            lookup.PopulateWithItem(item1);
+            table1.Add(item1);
 
             Lookup.Scope enteredScope = lookup.EnterScope("x");
 
@@ -1028,7 +1028,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Add an item with m=m1 and n=n1
             ProjectItemInstance item1 = new ProjectItemInstance(project, "i1", "a2", project.FullPath);
             item1.SetMetadata("m", "m1");
-            lookup.PopulateWithItem(item1);
+            table1.Add(item1);
 
             Lookup.Scope enteredScope = lookup.EnterScope("x");
 
@@ -1132,7 +1132,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             // Add an item with m=m1 and n=n1
             ProjectItemInstance item1 = new ProjectItemInstance(project, "i1", "a2", project.FullPath);
             item1.SetMetadata("m", "m1");
-            lookup.PopulateWithItem(item1);
+            table1.Add(item1);
 
             lookup.EnterScope("x");
 
@@ -1149,7 +1149,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectItemInstance item1b = group2.First();
 
             // Remove the item
-            lookup.RemoveItem(item1b);
+            lookup.RemoveItems(item1.ItemType, [item1b]);
 
             // There's now no items at all
             ICollection<ProjectItemInstance> group3 = lookup.GetItems(item1.ItemType);
@@ -1186,7 +1186,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             ProjectItemInstance item1b = group2.First();
 
             // Remove the item
-            lookup.RemoveItem(item1b);
+            lookup.RemoveItems(item1.ItemType, [item1b]);
 
             // There's now no items at all
             ICollection<ProjectItemInstance> group3 = lookup.GetItems(item1.ItemType);

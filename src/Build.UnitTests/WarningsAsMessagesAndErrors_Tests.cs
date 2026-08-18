@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
@@ -18,6 +19,9 @@ namespace Microsoft.Build.Engine.UnitTests
     {
         private const string ExpectedEventMessage = "03767942CDB147B98D0ECDBDE1436DA3";
         private const string ExpectedEventCode = "0BF68998";
+        private static string TestAssemblyLocation { get; } = Path.Combine(
+            Path.GetDirectoryName(typeof(WarningsAsMessagesAndErrorsTests).Assembly.Location) ?? AppContext.BaseDirectory,
+            "Microsoft.Build.Engine.UnitTests.dll");
         private ITestOutputHelper _output;
 
         public WarningsAsMessagesAndErrorsTests(ITestOutputHelper output)
@@ -554,6 +558,205 @@ namespace Microsoft.Build.Engine.UnitTests
                 logger.WarningCount.ShouldBe(0);
                 logger.ErrorCount.ShouldBe(0);
             }
+        }
+
+        /// <summary>
+        /// NoWarn should be honored in addition to MSBuildWarningsAsMessages when both are set.
+        /// This tests the fix in Microsoft.Common.CurrentVersion.targets where NoWarn was ignored
+        /// if MSBuildWarningsAsMessages was already set.
+        /// See: https://github.com/dotnet/msbuild/issues/12808
+        /// </summary>
+        [Fact]
+        public void NoWarnHonoredWhenMSBuildWarningsAsMessagesIsSetViaTargets()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                // NoWarn sets NAT013, MSBuildWarningsAsMessages sets NAT011 and NAT012
+                // Both should be treated as messages (not warnings) when Common targets are imported
+                var content = """
+                <Project DefaultTargets="Build" xmlns="msbuildnamespace" ToolsVersion="msbuilddefaulttoolsversion">
+                    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.props"/>
+
+                    <PropertyGroup>
+                        <Platform>AnyCPU</Platform>
+                        <Configuration>Debug</Configuration>
+                        <OutputPath>bin\Debug</OutputPath>
+                        <NoWarn>NAT013</NoWarn>
+                        <MSBuildWarningsAsMessages>NAT011;NAT012</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+
+                    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets"/>
+
+                    <Target Name="Build">
+                        <Warning Code="NAT011" Text="Warning from MSBuildWarningsAsMessages 1" />
+                        <Warning Code="NAT012" Text="Warning from MSBuildWarningsAsMessages 2" />
+                        <Warning Code="NAT013" Text="Warning from NoWarn" />
+                    </Target>
+                </Project>
+                """;
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(content);
+
+                MockLogger logger = proj.BuildProjectExpectSuccess();
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(0);
+            }
+        }
+
+        /// <summary>
+        /// NoWarn should work when MSBuildWarningsAsMessages is NOT set via targets (original behavior).
+        /// </summary>
+        [Fact]
+        public void NoWarnWorksWhenMSBuildWarningsAsMessagesIsNotSetViaTargets()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                // NoWarn sets NAT013, MSBuildWarningsAsMessages is not set
+                // NAT013 should be treated as a message (not a warning) when Common targets are imported
+                var content = """
+                <Project DefaultTargets="Build" xmlns="msbuildnamespace" ToolsVersion="msbuilddefaulttoolsversion">
+                    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.props"/>
+
+                    <PropertyGroup>
+                        <Platform>AnyCPU</Platform>
+                        <Configuration>Debug</Configuration>
+                        <OutputPath>bin\Debug</OutputPath>
+                        <NoWarn>NAT013</NoWarn>
+                    </PropertyGroup>
+
+                    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets"/>
+
+                    <Target Name="Build">
+                        <Warning Code="NAT013" Text="Warning from NoWarn" />
+                    </Target>
+                </Project>
+                """;
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(content);
+
+                MockLogger logger = proj.BuildProjectExpectSuccess();
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(0);
+            }
+        }
+
+        /// <summary>
+        /// Duplicate diagnostic codes in both NoWarn and MSBuildWarningsAsMessages should be handled correctly.
+        /// When the same code appears in both properties, the warning should still be treated as a message.
+        /// </summary>
+        [Fact]
+        public void DuplicateDiagnosticCodesInNoWarnAndMSBuildWarningsAsMessagesAreHandled()
+        {
+            using (TestEnvironment env = TestEnvironment.Create(_output))
+            {
+                // NAT012 is in both NoWarn and MSBuildWarningsAsMessages
+                // This tests that duplicate codes are handled correctly
+                var content = """
+                <Project DefaultTargets="Build" xmlns="msbuildnamespace" ToolsVersion="msbuilddefaulttoolsversion">
+                    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.props"/>
+
+                    <PropertyGroup>
+                        <Platform>AnyCPU</Platform>
+                        <Configuration>Debug</Configuration>
+                        <OutputPath>bin\Debug</OutputPath>
+                        <NoWarn>NAT012;NAT013</NoWarn>
+                        <MSBuildWarningsAsMessages>NAT011;NAT012</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+
+                    <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets"/>
+
+                    <Target Name="Build">
+                        <Warning Code="NAT011" Text="Warning from MSBuildWarningsAsMessages only" />
+                        <Warning Code="NAT012" Text="Warning from both NoWarn and MSBuildWarningsAsMessages" />
+                        <Warning Code="NAT013" Text="Warning from NoWarn only" />
+                    </Target>
+                </Project>
+                """;
+                TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles(content);
+
+                MockLogger logger = proj.BuildProjectExpectSuccess();
+                logger.WarningCount.ShouldBe(0);
+                logger.ErrorCount.ShouldBe(0);
+            }
+        }
+        /// <summary>
+        /// Verifies that when a task runs out-of-proc via TaskHostFactory and logs a warning
+        /// whose code is in MSBuildWarningsAsErrors, the warning is promoted to an error.
+        /// This was broken before ChangeWave 18.6 (the OOP code checked WarningsAsMessages
+        /// instead of WarningsAsErrors).
+        /// </summary>
+        [Fact]
+        public void TreatWarningsAsErrorsWhenSpecified_TaskHostFactory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName=""CustomLogAndReturnTask"" AssemblyFile=""{TestAssemblyLocation}"" TaskFactory=""TaskHostFactory"" />
+                    <PropertyGroup>
+                        <MSBuildWarningsAsErrors>{ExpectedEventCode}</MSBuildWarningsAsErrors>
+                    </PropertyGroup>
+                    <Target Name='Build'>
+                        <CustomLogAndReturnTask Return=""true"" WarningCode=""{ExpectedEventCode}""/>
+                    </Target>
+                </Project>");
+
+            MockLogger logger = proj.BuildProjectExpectFailure();
+
+            logger.ErrorCount.ShouldBe(1);
+            logger.WarningCount.ShouldBe(0);
+            logger.AssertLogContains(ExpectedEventCode);
+        }
+
+        /// <summary>
+        /// Verifies that when a task runs out-of-proc via TaskHostFactory and
+        /// MSBuildTreatWarningsAsErrors is true, all warnings are promoted to errors.
+        /// </summary>
+        [Fact]
+        public void TreatAllWarningsAsErrors_TaskHostFactory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName=""CustomLogAndReturnTask"" AssemblyFile=""{TestAssemblyLocation}"" TaskFactory=""TaskHostFactory"" />
+                    <PropertyGroup>
+                        <MSBuildTreatWarningsAsErrors>true</MSBuildTreatWarningsAsErrors>
+                    </PropertyGroup>
+                    <Target Name='Build'>
+                        <CustomLogAndReturnTask Return=""true"" WarningCode=""{ExpectedEventCode}""/>
+                    </Target>
+                </Project>");
+
+            MockLogger logger = proj.BuildProjectExpectFailure();
+
+            logger.ErrorCount.ShouldBe(1);
+            logger.WarningCount.ShouldBe(0);
+        }
+
+        /// <summary>
+        /// Verifies that WarningsAsMessages takes priority over WarningsAsErrors
+        /// when a task runs out-of-proc via TaskHostFactory.
+        /// </summary>
+        [Fact]
+        public void TreatWarningAsMessageOverridesTreatingItAsError_TaskHostFactory()
+        {
+            using TestEnvironment env = TestEnvironment.Create(_output);
+
+            TransientTestProjectWithFiles proj = env.CreateTestProjectWithFiles($@"
+                <Project>
+                    <UsingTask TaskName=""CustomLogAndReturnTask"" AssemblyFile=""{TestAssemblyLocation}"" TaskFactory=""TaskHostFactory"" />
+                    <PropertyGroup>
+                        <MSBuildWarningsAsErrors>{ExpectedEventCode}</MSBuildWarningsAsErrors>
+                        <MSBuildWarningsAsMessages>{ExpectedEventCode}</MSBuildWarningsAsMessages>
+                    </PropertyGroup>
+                    <Target Name='Build'>
+                        <CustomLogAndReturnTask Return=""true"" WarningCode=""{ExpectedEventCode}""/>
+                    </Target>
+                </Project>");
+
+            MockLogger logger = proj.BuildProjectExpectSuccess();
+
+            logger.ErrorCount.ShouldBe(0);
+            logger.WarningCount.ShouldBe(0);
         }
     }
 }

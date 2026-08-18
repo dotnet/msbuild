@@ -15,7 +15,6 @@ using System.Security;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Win32;
 

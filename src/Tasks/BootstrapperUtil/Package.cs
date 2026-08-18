@@ -4,7 +4,6 @@
 using System.Runtime.InteropServices;
 using System.Xml;
 
-#nullable disable
 
 namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
 {

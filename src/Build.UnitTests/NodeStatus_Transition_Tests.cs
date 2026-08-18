@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -10,13 +11,14 @@ using Microsoft.Build.Logging;
 using Shouldly;
 using VerifyXunit;
 using Xunit;
-
+using Xunit.NetCore.Extensions;
 using static VerifyXunit.Verifier;
 
 
 namespace Microsoft.Build.CommandLine.UnitTests;
 
 [UsesVerify]
+[UseInvariantCulture]
 public class NodeStatus_Transition_Tests
 {
     public NodeStatus_Transition_Tests()

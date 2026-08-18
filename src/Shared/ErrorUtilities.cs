@@ -132,12 +132,10 @@ namespace Microsoft.Build.Shared
         /// <param name="locker">The object that should already have been used as a lock.</param>
         internal static void VerifyThrowInternalLockHeld(object locker)
         {
-#if !CLR2COMPATIBILITY
             if (!Monitor.IsEntered(locker))
             {
                 ThrowInternalError("Lock should already have been taken");
             }
-#endif
         }
 
         /// <summary>
@@ -521,7 +519,6 @@ namespace Microsoft.Build.Shared
             }
         }
 
-#if !CLR2COMPATIBILITY
         /// <summary>
         /// Throws an ArgumentNullException if the given collection is null
         /// and ArgumentException if it has zero length.
@@ -546,7 +543,6 @@ namespace Microsoft.Build.Shared
                 ThrowArgumentLength(parameterName);
             }
         }
-#endif
 
         [DoesNotReturn]
         private static void ThrowArgumentLength(string? parameterName)

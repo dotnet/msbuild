@@ -924,7 +924,7 @@ namespace Microsoft.Build.Tasks
             /// </summary>
             internal SDKInfo LoadAssemblyListFromCacheFile(string sdkIdentity, string sdkRoot)
             {
-                string cacheFile = Directory.EnumerateFiles(_cacheFileDirectory, GetCacheFileName(sdkIdentity, sdkRoot, "*")).FirstOrDefault();
+                string cacheFile = FileSystems.Default.EnumerateFiles(_cacheFileDirectory, GetCacheFileName(sdkIdentity, sdkRoot, "*")).FirstOrDefault();
 
                 try
                 {
@@ -1085,7 +1085,7 @@ namespace Microsoft.Build.Tasks
                 string referencesCacheFile = Path.Combine(cacheFileFolder, GetCacheFileName(sdkIdentity, sdkRoot, hash.ToString("X", CultureInfo.InvariantCulture)));
 
                 bool upToDate = false;
-                DateTime referencesCacheFileLastWriteTimeUtc = File.GetLastWriteTimeUtc(referencesCacheFile);
+                DateTime referencesCacheFileLastWriteTimeUtc = FileSystems.Default.GetLastWriteTimeUtc(referencesCacheFile);
 
                 string currentAssembly = String.Empty;
                 try
@@ -1096,7 +1096,7 @@ namespace Microsoft.Build.Tasks
                     currentAssembly = Assembly.GetExecutingAssembly().CodeBase;
 #endif
                     var codeBase = new Uri(currentAssembly);
-                    DateTime currentCodeLastWriteTime = File.GetLastWriteTimeUtc(codeBase.LocalPath);
+                    DateTime currentCodeLastWriteTime = FileSystems.Default.GetLastWriteTimeUtc(codeBase.LocalPath);
                     if (FileSystems.Default.FileExists(referencesCacheFile) && currentCodeLastWriteTime < referencesCacheFileLastWriteTimeUtc)
                     {
                         return true;

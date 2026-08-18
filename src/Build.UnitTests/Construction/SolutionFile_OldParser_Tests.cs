@@ -8,6 +8,7 @@ using System.IO;
 using System.Text;
 using Microsoft.Build.Construction;
 using Microsoft.Build.Exceptions;
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -2555,7 +2556,7 @@ EndGlobal
         
         /// <summary>
         /// Test to verify that the fix for issue #1769 works by directly testing
-        /// FileUtilities.FixFilePath integration in AbsolutePath.
+        /// FrameworkFileUtilities.FixFilePath integration in AbsolutePath.
         /// This test simulates scenarios where intermediate path processing might
         /// leave backslashes in the AbsolutePath on Unix systems.
         /// </summary>

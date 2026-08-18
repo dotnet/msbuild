@@ -4,7 +4,7 @@
 #if FEATURE_WIN32_REGISTRY
 
 using System;
-
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 using Microsoft.Win32;
 using RegistryException = Microsoft.Build.Exceptions.RegistryException;

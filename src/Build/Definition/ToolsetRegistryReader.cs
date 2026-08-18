@@ -9,7 +9,7 @@ using Microsoft.Build.Construction;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
-using Constants = Microsoft.Build.Internal.Constants;
+using Constants = Microsoft.Build.Framework.Constants;
 using InvalidToolsetDefinitionException = Microsoft.Build.Exceptions.InvalidToolsetDefinitionException;
 using RegistryException = Microsoft.Build.Exceptions.RegistryException;
 using RegistryKeyWrapper = Microsoft.Build.Internal.RegistryKeyWrapper;

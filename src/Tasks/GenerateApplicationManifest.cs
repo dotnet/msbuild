@@ -9,6 +9,7 @@ using System.Xml;
 
 using Microsoft.Build.Framework;
 using Microsoft.Build.Tasks.Deployment.ManifestUtilities;
+using Constants = Microsoft.Build.Tasks.Deployment.ManifestUtilities.Constants;
 
 #nullable disable
 
