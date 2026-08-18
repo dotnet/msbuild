@@ -66,12 +66,11 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -reportFileAccesses[:True|Falsch]
-                     Führt dazu, dass MSBuild Dateizugriffe an alle konfigurierten
- meldet
-                     Projektcache-Plug-Ins.
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     Führt dazu, dass MSBuild Dateizugriffe auf ein beliebiges konfiguriertes
+                     Projektcache-Plug-In meldet.
 
-                     Dieses Kennzeichen ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
+                     Dieses Flag ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.

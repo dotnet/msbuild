@@ -48,8 +48,7 @@
     </source>
         <target state="translated">  -question
                      (experimentální) Dotaz, jestli je dochází k práci na sestavení.
-                     MSBuild zobrazí chybu při zjištění cíle nebo úkolu
-,
+                     MSBuild zobrazí chybu při zjištění cíle nebo úkolu,
                      který může být přírůstkový (obsahuje vstupy a výstupy),
                      ale není aktuální.
                      (Krátký tvar: -q)
@@ -580,19 +579,16 @@
         <target state="translated">  -isolateProjects[:True| MessageUponIsolationViolation| Nepravda]
                      Způsobí, že MSBuild sestaví každý projekt v izolaci.
 
-Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
-                     tvar „Zpráva“), jsou serializovány pouze výsledky z cílů nejvyšší úrovně
-                     pokud je dodán přepínač -outputResultsCache
-.
-                     Tímto se zmírní pravděpodobnost
+                     Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
+                     tvar Zpráva), pouze výsledky z cílů nejvyšší úrovně
+                     jsou serializovány, pokud je přepínač -outputResultsCache
+                     zadán. Tímto se zmírní pravděpodobnost
                      cíle porušujícího izolaci v projektu závislosti pomocí
-                     nesprávného stavu kvůli své závislosti na cíli uloženém v mezipaměti
-,
+                     nesprávného stavu kvůli své závislosti na cíli uloženém v mezipaměti,
                      jehož vedlejší účinky by se nezohlednily.
                      (Například definice vlastnosti.)
 
-                    Toto je přísnější režim MSBuildu, protože vyžaduje
-,
+                     Toto je přísnější režim MSBuildu, protože vyžaduje,
                      aby byl graf projektu staticky zjistitelný v
                      období vyhodnocování, ale může zlepšit plánování a snížit
                      režie paměti při sestavování velké sady projektů.
@@ -715,8 +711,7 @@ Když se nastaví na MessageUponIsolationViolation (nebo jeho krátký
     </source>
         <target state="translated">  -warnNotAsError[:code[;code2]]
                      Seznam kódů upozornění, které se nemají považovat za chyby.
-                     K oddělení
- více kódů upozornění použijte středník 
+                     K oddělení více kódů upozornění použijte středník 
                      nebo čárku. Nemá žádný vliv, pokud přepínač -warnaserror
                      není nastavený.
 
