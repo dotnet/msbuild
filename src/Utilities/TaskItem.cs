@@ -38,7 +38,7 @@ namespace Microsoft.Build.Utilities
 #if FEATURE_APPDOMAIN
         MarshalByRefObject,
 #endif
-        ITaskItem2,
+        ITaskItem3,
         IMetadataContainer // expose direct underlying metadata for fast access in binary logger
     {
         #region Member Data
@@ -60,6 +60,10 @@ namespace Microsoft.Build.Utilities
         /// we simply don't know enough to set it properly, so it will stay null.
         /// </summary>
         private readonly string _definingProject;
+
+        private readonly int _sourceLineNumber;
+
+        private readonly int _sourceColumnNumber;
 
         #endregion
 
@@ -162,6 +166,12 @@ namespace Microsoft.Build.Utilities
                 _definingProject = sourceItemAsITaskItem2.GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath);
             }
 
+            if (sourceItem is ITaskItem3 taskItemWithLocation && taskItemWithLocation.Location is TaskItemLocation location)
+            {
+                _sourceLineNumber = location.Line;
+                _sourceColumnNumber = location.Column;
+            }
+
             sourceItem.CopyMetadataTo(this);
         }
 
@@ -243,6 +253,11 @@ namespace Microsoft.Build.Utilities
                 _cachedModifiers.Clear();
             }
         }
+
+        /// <inheritdoc/>
+        public TaskItemLocation? Location => _sourceLineNumber == 0
+            ? null
+            : new TaskItemLocation(EscapingUtilities.UnescapeAll(_definingProject), _sourceLineNumber, _sourceColumnNumber);
 
         /// <summary>
         /// Gets or sets the escaped include, or "name", for the item.
