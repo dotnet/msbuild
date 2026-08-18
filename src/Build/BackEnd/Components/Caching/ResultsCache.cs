@@ -162,7 +162,7 @@ namespace Microsoft.Build.BackEnd
         /// requested targets (or the configuration's default targets when no targets are specified) are contained in this set.
         /// Used to enforce isolation constraints deterministically for cross-project references in isolated builds.</param>
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
-        public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss, IReadOnlyCollection<string> allowedTopLevelTargets = null)
+        public ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss, IReadOnlyCollection<string> allowedTopLevelTargets)
         {
             Assumed.True(request.IsConfigurationResolved, "UnresolvedConfigurationInRequest");
             ResultsCacheResponse response = new(ResultsCacheResponseType.NotSatisfied);

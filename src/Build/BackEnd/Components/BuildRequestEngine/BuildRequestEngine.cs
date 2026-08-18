@@ -604,7 +604,12 @@ namespace Microsoft.Build.BackEnd
                                         request: request,
                                         configInitialTargets: config.ProjectInitialTargets,
                                         configDefaultTargets: config.ProjectDefaultTargets,
-                                        skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss());
+                                        skippedResultsDoNotCauseCacheMiss: _componentHost.BuildParameters.SkippedResultsDoNotCauseCacheMiss(),
+                                        allowedTopLevelTargets: BuildRequestConfiguration.GetIsolationAllowedTopLevelTargets(
+                                            _componentHost.BuildParameters.ProjectIsolationMode,
+                                            currentEntry.RequestConfiguration,
+                                            config,
+                                            request));
 
                                     if (cacheResponse.Type == ResultsCacheResponseType.Satisfied)
                                     {

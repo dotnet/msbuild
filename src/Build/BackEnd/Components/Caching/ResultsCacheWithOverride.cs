@@ -74,7 +74,7 @@ namespace Microsoft.Build.Execution
             List<string> configInitialTargets,
             List<string> configDefaultTargets,
             bool skippedResultsDoNotCauseCacheMiss,
-            IReadOnlyCollection<string>? allowedTopLevelTargets = null)
+            IReadOnlyCollection<string>? allowedTopLevelTargets)
         {
             var overrideRequest = _override.SatisfyRequest(
                 request,

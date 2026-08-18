@@ -59,7 +59,7 @@ namespace Microsoft.Build.BackEnd
         /// satisfied from the cache for targets that were explicitly requested (declared via ProjectReferenceTargets and built by
         /// the static graph), not for targets that merely happen to have results because they ran as a dependency of another target.</param>
         /// <returns>A response indicating the results, if any, and the targets needing to be built, if any.</returns>
-        ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss, IReadOnlyCollection<string> allowedTopLevelTargets = null);
+        ResultsCacheResponse SatisfyRequest(BuildRequest request, List<string> configInitialTargets, List<string> configDefaultTargets, bool skippedResultsDoNotCauseCacheMiss, IReadOnlyCollection<string> allowedTopLevelTargets);
 
         /// <summary>
         /// Clears the results for a specific configuration.
