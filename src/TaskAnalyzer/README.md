@@ -19,9 +19,9 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0003** | Warning | All `ITask` implementations | File system API requires absolute path |
 | **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
 | **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
-| **MSBuildTask0006** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer typed path parameter over string |
-| **MSBuildTask0007** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
-| **MSBuildTask0008** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
+| **MSBuildTask0006** | Warning | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer typed path parameter over string |
+| **MSBuildTask0007** | Warning | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
+| **MSBuildTask0008** | Warning | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
 | **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
 | **MSBuildTask0010** | Error | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
 | **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
@@ -309,8 +309,8 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
 - **MSBuildTask0010** is always **Error** — task item conversions must not rely on `Convert.ChangeType`.
-- **MSBuildTask0002–MSBuildTask0005 and MSBuildTask0009** report as **Warning** for all task types.
-- **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** report as **Info** — these are modernization suggestions, not correctness issues.
+- **MSBuildTask0002–MSBuildTask0009** report as **Warning**, with MSBuildTask0006–MSBuildTask0008 limited to tasks directly marked with `[MSBuildMultiThreadableTask]`.
+- **MSBuildTask0011** reports as **Info** — it is a modernization suggestion rather than a correctness issue.
 
 ## Code Fixes
 
