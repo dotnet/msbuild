@@ -400,7 +400,7 @@ Overflow capacity does not need a separate setting. Users who intentionally want
 | `MSBUILDCOORDINATORMAXNODESPERBUILD` | Budget-based default: uncapped for budgets below 8; otherwise 4, with an eligible request allowed up to 8 when the coordinator is idle | Limit the number of nodes granted to one build. An explicit positive value is always a hard cap; set to 0 to disable the cap. Missing, empty, negative, or non-integer values use the default. |
 | `MSBUILDCOORDINATORPRIORITYAGINGTHRESHOLD` | 3 | Number of bypasses required before a queued request ages upward by one effective priority level. Missing, empty, non-positive, or non-integer values use 3. |
 
-*Note*: `MSBUILDCOORDINATORNODEBUDGET` controls the total machine budget. Set it higher than the processor count to intentionally experiment with oversubscription. For example, on a 16-core machine, `MSBUILDCOORDINATORNODEBUDGET=20` with default node settings allows an eligible request arriving while the coordinator is idle to receive 8 nodes, limits later grants to 4 nodes, and retains 4 nodes for high-priority work. Coordinator startup/debug output includes the resolved values and the relevant opt-out environment variables.
+*Note*: `MSBUILDCOORDINATORNODEBUDGET` is the primary knob for throughput experiments, including testing moderate oversubscription factors above 1x processor count.
 
 ---
 
