@@ -27,7 +27,7 @@ The coordinator solves this by:
 6. **Monitoring build health** via periodic heartbeats
 7. **Auto-shutting down** after a timeout period
 
-*Note*: The current default budget is intentionally conservative for V1. As we gather real-world usage data, we should experiment with alternative defaults, including moderate oversubscription above 1x processor count, and tune this value for better throughput without destabilizing interactive machine workloads.
+*Note*: The current default budget is intentionally conservative for V1. As we gather real-world usage data, we should experiment with alternative defaults (including moderate oversubscription above 1x processor count) and tune this value for better throughput without destabilizing interactive machine workloads.
 
 ---
 
