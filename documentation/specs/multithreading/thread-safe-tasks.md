@@ -124,6 +124,7 @@ public class TaskEnvironment
 
     // This function resolves paths relative to ProjectDirectory.
     public AbsolutePath GetAbsolutePath(string path);
+    public AbsolutePath GetTempPath();
     
     public string? GetEnvironmentVariable(string name);
     public IReadOnlyDictionary<string, string> GetEnvironmentVariables();
