@@ -172,7 +172,7 @@ namespace Microsoft.Build.BackEnd
             // by the static graph). A target that merely has a cached result because it ran as a dependency of another
             // target must not satisfy the reference, otherwise the build result would depend on node scheduling (whether
             // the dependency happened to run on the same node). Treat such requests as a cache miss so the isolation
-            // constraint check runs and deterministically reports the incomplete graph protocol.
+            // constraint check runs and deterministically reports the incomplete graph.
             if (allowedTopLevelTargets != null)
             {
                 List<string> targetsToCheck = request.Targets.Count > 0 ? request.Targets : configDefaultTargets;
