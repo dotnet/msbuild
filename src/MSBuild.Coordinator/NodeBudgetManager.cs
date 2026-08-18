@@ -417,7 +417,7 @@ internal sealed class NodeBudgetManager
             // Aged Low/Normal waiters can have High effective priority, but they still cannot
             // consume high-priority reserved capacity. Let real High arrivals bypass only when
             // they can use capacity that is unavailable to those aged waiters.
-            return !CanUseCapacityUnavailableToNonHighPriorityWaiters_NoLock(grant);
+            return !CanUseReservedCapacity_NoLock(grant);
         }
 
         return grant.Priority <= GetHighestEffectivePriority_NoLock();
@@ -492,7 +492,7 @@ internal sealed class NodeBudgetManager
             }
 
             int available = GetAvailableForGrant(candidate);
-            if (available <= 0 || !CanUseCapacityUnavailableToNonHighPriorityWaiters_NoLock(candidate, available))
+            if (available <= 0 || !CanUseReservedCapacity_NoLock(candidate, available))
             {
                 return false;
             }
@@ -511,10 +511,10 @@ internal sealed class NodeBudgetManager
         return false;
     }
 
-    private bool CanUseCapacityUnavailableToNonHighPriorityWaiters_NoLock(BuildGrant highPriorityGrant)
-        => CanUseCapacityUnavailableToNonHighPriorityWaiters_NoLock(highPriorityGrant, GetAvailableForGrant(highPriorityGrant));
+    private bool CanUseReservedCapacity_NoLock(BuildGrant highPriorityGrant)
+        => CanUseReservedCapacity_NoLock(highPriorityGrant, GetAvailableForGrant(highPriorityGrant));
 
-    private bool CanUseCapacityUnavailableToNonHighPriorityWaiters_NoLock(BuildGrant highPriorityGrant, int available)
+    private bool CanUseReservedCapacity_NoLock(BuildGrant highPriorityGrant, int available)
     {
         if (highPriorityGrant.Priority != CoordinatorBuildPriority.High || available <= 0)
         {
