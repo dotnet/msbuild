@@ -215,25 +215,24 @@
                       Example:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
-        <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                    終端機記錄器的參數。(簡短形式: -tlp)
-                    可用的參數。
-                       default -- 指定終端機記錄器的預設值。
-                       其需要下列其中一值: 
-。
-                          - 'on'、'true' 會強制使用 TerminalLogger，即使
-                           其之後可能會停用。
-                          - 'off'、'false' 會強制使用 TerminalLogger，即使
-                           其之後可能會啟用。
-                          - `auto` 會啟用 terminalLogger，但終端機必須能夠
-                           提供支援，且工作階段未經重新導向
-                           stdout/stderr
-                       verbosity -- 覆寫上記錄器的
-                       -verbosity
-                       showCommandLine -- 顯示 TaskCommandLineEvent 訊息
+        <target state="translated">  -terminalLoggerParameters: &lt;參數&gt;
+                     終端機記錄器的參數。(簡短形式: -tlp)
+                     可用的參數。
+                        default -- 指定終端機記錄器的預設值
+                        。其需要下列其中一值:
+                           - `on`、`true` 會強制使用 TerminalLogger，即使
+                            其之後可能會停用。
+                           - `off`、`false` 會強制使用 TerminalLogger，即使
+                            其之後可能會啟用。
+                           - `auto` 會啟用 terminalLogger，但終端機必須能夠
+                            提供支援，且工作階段未經重新導向
+                            stdout/stderr
+                        verbosity -- 覆寫上記錄器的
+                        -verbosity
+                        showCommandLine -- 顯示 TaskCommandLineEvent 訊息
 
-                     範例: 
-                       -tlp:default=auto;verbosity=diag;shownCommandLine
+                      範例:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
       LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.

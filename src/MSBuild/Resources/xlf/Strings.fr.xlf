@@ -185,8 +185,7 @@
                      les informations exploitables. Spécifier automatiquement (ou utiliser l’option
                      sans arguments) pour utiliser l’enregistreur d’événements de terminal uniquement si le
                      la sortie standard n’est pas redirigée. N’analysez pas la sortie
-                     ou reposez-vous sur le fait qu’il reste inchangé dans les
-futures
+                     et ne vous attendez pas à ce qu’elle reste inchangée dans les futures
                      versions. Cette option est disponible dans MSBuild 17.8 et
                      ultérieures.
                      (Forme abrégée : -tl)

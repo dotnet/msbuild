@@ -578,25 +578,24 @@ Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
                      This flag is experimental and may not work as intended.
     </source>
         <target state="translated">  -isolateProjects[:True|MessageUponIsolationViolation|False]
-                     Powoduje, że program MSBuild kompiluje każdy projekt osobno.
+                     Powoduje, że program MSBuild kompiluje każdy projekt w izolacji.
 
                      Po ustawieniu na wartość „MessageUponIsolationViolation” (lub jej skróconą
                      formę „Message”), serializowane są tylko wyniki z celów najwyższego poziomu
                      , jeśli przełącznik -outputResultsCache jest
                      dostarczony. Ma to na celu zmniejszenie szans na to, że cel 
-                     naruszy izolację w projekcie zależnym przy użyciu
-                     nieprawidłowego stanu z powodu jego zależności od buforowanego celu
+                     naruszy izolację w projekcie zależności przy użyciu
+                     nieprawidłowego stanu z powodu jego zależności od buforowanego celu,
                      którego efekty uboczne nie byłyby brane pod uwagę.
                      (Na przykład definicja właściwości).
 
-                     Jest to bardziej restrykcyjny tryb MSBuild, ponieważ wymaga
-,
+                     Jest to bardziej restrykcyjny tryb programu MSBuild, ponieważ wymaga,
                      aby graf projektu był statycznie wykrywalny w
-                     czasie ewaluacji, ale może też poprawiać planowanie i zmniejszyć
-                     pamięć podczas budowania dużego zestawu projektów.
+                     czasie oceny, ale może też poprawiać planowanie i zmniejszać
+                     zapas pamięci podczas budowania dużego zestawu projektów.
                      (Skrócona forma: -isolate)
 
-                     Ta flaga jest eksperymentalna i może nie działać zgodnie z przeznaczeniem.
+                     Ta flaga jest eksperymentalna i może nie działać zgodnie z oczekiwaniami.
     </target>
         <note>
       LOCALIZATION: "MSBuild" should not be localized.

@@ -216,25 +216,24 @@
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                    ターミナル ロガーへのパラメーター。(短い形式: -tlp) 
-                    使用可能なパラメーター。
-                       default -- ターミナル 
- の既定の動作を指定します
-                       ロガー。次のいずれかの値が必要です:
-                          - `on`、`true` は TerminalLogger を強制的に使用します
-                           無効である場合も同様です。
-                          - `off`、`false` は TerminalLogger を使用しないように強制します
-                           有効である場合も同様です。
-                          - `auto` は、次の場合にターミナルで TerminalLogger を有効にします
-                           サポートされており、セッションがリダイレクトされていない場合です
-                           stdout/stderr
-                       verbosity-- 下記の verbosity 設定をオーバーライドします
-                       logger
-                       showCommandLine -- TaskCommandLineEvent メッセージを表示します
+                     ターミナル ロガーへのパラメーター。(短い形式: -tlp) 
+                     使用可能なパラメーター。
+                        default -- ターミナル ロガーの既定の動作を
+                        ロガー。次のいずれかの値が必要です:
+                           - `on`、`true` は TerminalLogger を強制的に使用します
+                            無効である場合も同様です。
+                           - `off`、`false` は TerminalLogger を使用しないように強制します
+                            有効である場合も同様です。
+                           - `auto` は、次の場合にターミナルで TerminalLogger を有効にします
+                            サポートされており、セッションがリダイレクトされていない場合です
+                            stdout/stderr
+                        verbosity-- 下記の verbosity 設定をオーバーライドします
+                        logger
+                        showCommandLine -- TaskCommandLineEvent メッセージを表示します
 
-                     例: 
-                       -tlp:default=auto;verbosity=diag;shownCommandLine
-   </target>
+                      例:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
+    </target>
         <note>
       LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
       LOCALIZATION: None of the lines should be longer than a standard width console window, eg 80 chars.

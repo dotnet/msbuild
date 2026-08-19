@@ -218,17 +218,16 @@
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
                      터미널 로거에 대한 매개 변수입니다. (약식: -tlp)
                      사용 가능한 매개 변수입니다.
-                        default--터미널의 기본 동작을 지정합니다.
-                        로거입니다. 다음 값 중 하나가 필요합니다.
-                           - 'on', 'true'는 terminalLogger를 사용하도록 강제하며,
-                            이는 사용하지 않도록 설정된 경우에도 마찬가지입니다.
-                           - 'off', 'false'는 terminalLogger를 사용하지 않도록 강제하며,
-                            이는 사용하도록 설정된 경우에도 마찬가지입니다.
-                           - 'auto'는 터미널이
-                            지원하고 세션이 리디렉션되지 않을 때 TerminalLogger를 사용하도록 설정합니다.
+                        default--터미널 로거의 기본 동작을
+                        지정합니다. 다음 값 중 하나가 필요합니다.
+                           - `on`, `true`는 비활성화된 경우에도 terminalLogger를
+                            사용하도록 강제합니다.
+                           - `off`, `false`는 활성화된 경우에도 terminalLogger를
+                            사용하지 않도록 강제합니다.
+                           - `auto`는 터미널이 지원하고 세션이
+                            리디렉션되지 않을 때 TerminalLogger를 활성화합니다.
                             stdout/stderr
-                        verbosity--이
-로거에 대한 -verbosity 설정을
+                        verbosity--이 로거에 대한 -verbosity 설정을
                         재정의합니다.
                         showCommandLine--TaskCommandLineEvent 메시지를 표시합니다.
 
