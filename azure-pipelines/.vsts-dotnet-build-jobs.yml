@@ -20,7 +20,6 @@ jobs:
   timeoutInMinutes: 180
 
   variables:
-  - group: Publish-Build-Assets
   - name: TeamName
     value: MSBuild
   - name: VisualStudio.MajorVersion
