@@ -30,7 +30,8 @@ namespace Microsoft.Build.UnitTests
         {
             using TestEnvironment env = TestEnvironment.Create();
             TransientTestFolder debugPath = env.CreateFolder();
-            var transientDebugPath = env.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath.Path);
+            string previousDebugPath = Environment.GetEnvironmentVariable("MSBUILDDEBUGPATH");
+            Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", debugPath.Path);
 
             try
             {
@@ -48,7 +49,7 @@ namespace Microsoft.Build.UnitTests
             }
             finally
             {
-                transientDebugPath.Revert();
+                Environment.SetEnvironmentVariable("MSBUILDDEBUGPATH", previousDebugPath);
                 FrameworkDebugUtils.SetDebugPath();
 
                 DebugUtils.ResetDebugDumpPathInRunningTests = true;
