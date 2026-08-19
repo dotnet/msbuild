@@ -5190,53 +5190,6 @@ $(
             }
         }
 
-        [Fact]
-        public void ExpandItem_ConvertToStringUsingInvariantCultureForNumberData_RespectingChangeWave()
-        {
-            // Note: Skipping the test since it is not a valid scenario when ICU mode is not used.
-            if (!ICUModeAvailable())
-            {
-                return;
-            }
-
-            var currentThread = Thread.CurrentThread;
-            var originalCulture = currentThread.CurrentCulture;
-            var originalUICulture = currentThread.CurrentUICulture;
-
-            try
-            {
-                var svSECultureInfo = new CultureInfo("sv-SE");
-                using (var env = TestEnvironment.Create())
-                {
-                    env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave17_12.ToString());
-                    ChangeWaves.ResetStateForTests();
-                    currentThread.CurrentCulture = svSECultureInfo;
-                    currentThread.CurrentUICulture = svSECultureInfo;
-                    var root = env.CreateFolder();
-
-                    var projectFile = env.CreateFile(root, ".proj",
-                        @"<Project>
-
-  <PropertyGroup>
-    <_value>$([MSBuild]::Subtract(0, 1))</_value>
-    <_otherValue Condition=""'$(_value)' &gt;= -1"">test-value</_otherValue>
-  </PropertyGroup>
-  <Target Name=""Build"" />
-</Project>");
-                    var exception = Should.Throw<InvalidProjectFileException>(() =>
-                    {
-                        new ProjectInstance(projectFile.Path);
-                    });
-                    exception.BaseMessage.ShouldContain("A numeric comparison was attempted on \"$(_value)\"");
-                }
-            }
-            finally
-            {
-                currentThread.CurrentCulture = originalCulture;
-                currentThread.CurrentUICulture = originalUICulture;
-            }
-        }
-
         [Theory]
         [InlineData("getType")]
         [InlineData("GetType")]
@@ -5344,18 +5297,6 @@ $(
                 // the fast path was successfully resolved without reflection.
                 File.Exists(reflectionInfoPath).ShouldBeFalse();
             }
-        }
-
-        /// <summary>
-        /// Determines if ICU mode is enabled.
-        /// Copied from: https://learn.microsoft.com/en-us/dotnet/core/extensions/globalization-icu#determine-if-your-app-is-using-icu
-        /// </summary>
-        private static bool ICUModeAvailable()
-        {
-            SortVersion sortVersion = CultureInfo.InvariantCulture.CompareInfo.Version;
-            byte[] bytes = sortVersion.SortId.ToByteArray();
-            int version = bytes[3] << 24 | bytes[2] << 16 | bytes[1] << 8 | bytes[0];
-            return version != 0 && version == sortVersion.FullVersion;
         }
 
         [Fact]

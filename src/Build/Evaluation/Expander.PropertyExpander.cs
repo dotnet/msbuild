@@ -438,14 +438,7 @@ internal partial class Expander<P, I>
             {
                 // The fall back is always to just convert to a string directly.
                 // Issue: https://github.com/dotnet/msbuild/issues/9757
-                if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_12))
-                {
-                    convertedString = Convert.ToString(valueToConvert, CultureInfo.InvariantCulture);
-                }
-                else
-                {
-                    convertedString = valueToConvert.ToString();
-                }
+                convertedString = Convert.ToString(valueToConvert, CultureInfo.InvariantCulture);
             }
 
             return convertedString;
