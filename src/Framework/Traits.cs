@@ -46,6 +46,12 @@ namespace Microsoft.Build.Framework
         public readonly bool ForceMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDFORCEMULTITHREADED") == "1";
 
         /// <summary>
+        /// Enable MSBuild multi-threaded mode by default while allowing an explicit
+        /// -multiThreaded:false / -mt:false command-line switch to disable it.
+        /// </summary>
+        public readonly bool EnableMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDENABLEMULTITHREADED") == "1";
+
+        /// <summary>
         /// Do not expand wildcards that match a certain pattern
         /// </summary>
         public readonly bool UseLazyWildCardEvaluation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes"));
@@ -197,7 +203,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public readonly bool EmitLogsAsMessage = string.Equals(Environment.GetEnvironmentVariable(MSBuildLoggingArgsLevelEnvVarName), "message", StringComparison.OrdinalIgnoreCase);
 
-        public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
+        public readonly bool DebugEngine =
+            !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine")) ||
+            // some CI systems force env vars to uppercase and that's also the standard in MSBuild, so allow it here
+            (!NativeMethods.IsWindows && // Windows env vars are case-insensitive so no need to explicitly check
+             !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGENGINE"))); 
         public readonly bool DebugScheduler;
         public readonly bool DebugNodeCommunication;
         public readonly bool DebugUnitTests = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugUnitTests"));
@@ -232,10 +242,7 @@ namespace Microsoft.Build.Framework
         public static void UpdateFromEnvironment()
         {
             // Re-create Traits instance to update values in Traits according to current environment.
-            if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10))
-            {
-                _instance = new Traits();
-            }
+            _instance = new Traits();
         }
     }
 
@@ -277,6 +284,13 @@ namespace Microsoft.Build.Framework
         /// Disables skipping full drive/filesystem globs that are behind a false condition.
         /// </summary>
         public readonly bool AlwaysEvaluateDangerousGlobs = Environment.GetEnvironmentVariable("MSBuildAlwaysEvaluateDangerousGlobs") == "1";
+
+        /// <summary>
+        /// Disables automatic loading of Directory.Parse.config from global locations
+        /// (MSBuild exe directory, user profile, MSBUILD_PARSE_CONFIG env var).
+        /// When set, configuration must be explicitly provided via ProjectCollection or BuildParameters.
+        /// </summary>
+        public readonly bool DisableParseConfig = Environment.GetEnvironmentVariable("MSBUILD_DISABLE_PARSE_CONFIG") == "1";
 
         /// <summary>
         /// Disables skipping full up to date check for immutable files. See FileClassifier class.
@@ -484,14 +498,6 @@ namespace Microsoft.Build.Framework
                 }
 
                 return _sdkReferencePropertyExpansionValue;
-            }
-        }
-
-        public bool UnquoteTargetSwitchParameters
-        {
-            get
-            {
-                return ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave17_10);
             }
         }
 
