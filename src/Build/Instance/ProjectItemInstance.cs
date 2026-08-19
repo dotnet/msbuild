@@ -1630,11 +1630,17 @@ namespace Microsoft.Build.Execution
             public IDictionary CloneCustomMetadata()
             {
                 var metadata = MetadataCollection;
+
+                // Item definition metadata may contain expressions such as %(Filename) which are expanded lazily
+                // on read. Cloning the backing values directly would hand out the unexpanded text, so fully
+                // evaluate each entry when any item definition could contain such an expression.
+                bool expandItemDefinitionMetadata = HasAnyExpandableExpressions();
                 Dictionary<string, string> clonedMetadata = new Dictionary<string, string>(metadata.Count, MSBuildNameIgnoreCaseComparer.Default);
 
                 foreach (KeyValuePair<string, string> metadatum in metadata)
                 {
-                    clonedMetadata[metadatum.Key] = EscapingUtilities.UnescapeAll(metadatum.Value);
+                    string escapedValue = expandItemDefinitionMetadata ? GetMetadataEscaped(metadatum.Key) : metadatum.Value;
+                    clonedMetadata[metadatum.Key] = EscapingUtilities.UnescapeAll(escapedValue);
                 }
 
                 return clonedMetadata;
@@ -1647,11 +1653,14 @@ namespace Microsoft.Build.Execution
             /// <returns>The cloned metadata.</returns>
             IDictionary ITaskItem2.CloneCustomMetadataEscaped()
             {
+                // See the comment in CloneCustomMetadata: item definition metadata is expanded lazily on read,
+                // so it has to be fully evaluated here rather than copied straight out of the backing store.
+                bool expandItemDefinitionMetadata = HasAnyExpandableExpressions();
                 Dictionary<string, string> clonedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
 
                 foreach (KeyValuePair<string, string> metadatum in MetadataCollection)
                 {
-                    clonedMetadata[metadatum.Key] = metadatum.Value;
+                    clonedMetadata[metadatum.Key] = expandItemDefinitionMetadata ? GetMetadataEscaped(metadatum.Key) : metadatum.Value;
                 }
 
                 return clonedMetadata;

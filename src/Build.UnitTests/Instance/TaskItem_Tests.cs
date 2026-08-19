@@ -235,6 +235,74 @@ namespace Microsoft.Build.UnitTests.OM.Instance
         }
 
         /// <summary>
+        /// Item definition metadata referencing built-in metadata (e.g. %(Filename)) is expanded lazily when read.
+        /// The CloneCustomMetadata* methods are used when handing items to out-of-proc task hosts, so they must
+        /// return the expanded values rather than the raw item definition text.
+        /// </summary>
+        [Fact]
+        public void CloneCustomMetadataExpandsItemDefinitionMetadata()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                  <ItemDefinitionGroup>
+                    <i>
+                      <OutputName>%(Filename)</OutputName>
+                      <Literal>unchanged</Literal>
+                    </i>
+                  </ItemDefinitionGroup>
+                  <ItemGroup>
+                    <i Include='hello.txt' />
+                  </ItemGroup>
+                </Project>");
+
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectInstance instance = new Project(projectRootElementFromString.Project).CreateProjectInstance();
+            ProjectItemInstance item = instance.GetItems("i").Single();
+
+            // Reading a single value expands the expression.
+            ((ITaskItem)item).GetMetadata("OutputName").ShouldBe("hello");
+
+            var cloned = (Dictionary<string, string>)((ITaskItem)item).CloneCustomMetadata();
+            cloned["OutputName"].ShouldBe("hello");
+            cloned["Literal"].ShouldBe("unchanged");
+
+            var clonedEscaped = (Dictionary<string, string>)((ITaskItem2)item).CloneCustomMetadataEscaped();
+            clonedEscaped["OutputName"].ShouldBe("hello");
+            clonedEscaped["Literal"].ShouldBe("unchanged");
+        }
+
+        /// <summary>
+        /// Direct metadata takes precedence over item definition metadata, including when the item definition
+        /// value contains a lazily expanded expression.
+        /// </summary>
+        [Fact]
+        public void CloneCustomMetadataPrefersDirectMetadataOverItemDefinitionExpression()
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                  <ItemDefinitionGroup>
+                    <i>
+                      <OutputName>%(Filename)</OutputName>
+                      <OutputExtension>%(Extension)</OutputExtension>
+                    </i>
+                  </ItemDefinitionGroup>
+                  <ItemGroup>
+                    <i Include='hello.txt'>
+                      <OutputName>explicit</OutputName>
+                    </i>
+                  </ItemGroup>
+                </Project>");
+
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectInstance instance = new Project(projectRootElementFromString.Project).CreateProjectInstance();
+            ProjectItemInstance item = instance.GetItems("i").Single();
+
+            var cloned = (Dictionary<string, string>)((ITaskItem)item).CloneCustomMetadata();
+            cloned["OutputName"].ShouldBe("explicit");
+            cloned["OutputExtension"].ShouldBe(".txt");
+        }
+
+        /// <summary>
         /// Flushing an item through a task should not mess up special characters on the metadata.
         /// </summary>
         [Fact]
