@@ -1639,7 +1639,9 @@ namespace Microsoft.Build.Execution
 
                 foreach (KeyValuePair<string, string> metadatum in metadata)
                 {
-                    string escapedValue = expandItemDefinitionMetadata ? GetMetadataEscaped(metadatum.Key) : metadatum.Value;
+                    string escapedValue = expandItemDefinitionMetadata && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.Value)
+                        ? GetMetadataEscaped(metadatum.Key)
+                        : metadatum.Value;
                     clonedMetadata[metadatum.Key] = EscapingUtilities.UnescapeAll(escapedValue);
                 }
 
@@ -1660,7 +1662,9 @@ namespace Microsoft.Build.Execution
 
                 foreach (KeyValuePair<string, string> metadatum in MetadataCollection)
                 {
-                    clonedMetadata[metadatum.Key] = expandItemDefinitionMetadata ? GetMetadataEscaped(metadatum.Key) : metadatum.Value;
+                    clonedMetadata[metadatum.Key] = expandItemDefinitionMetadata && Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.Value)
+                        ? GetMetadataEscaped(metadatum.Key)
+                        : metadatum.Value;
                 }
 
                 return clonedMetadata;

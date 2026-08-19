@@ -37,6 +37,51 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// An item definition metadata value that references built-in metadata (e.g. %(Filename)) is expanded
+        /// lazily on read. Verifies the expansion survives the trip to an out-of-proc task host, so a task sees
+        /// the same value it would see in-proc rather than the literal "%(Filename)".
+        /// </summary>
+        [Fact]
+        public void ItemDefinitionMetadataIsExpandedForTaskRunningInTaskHost()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""MetadataEchoTask"" AssemblyFile=""{AssemblyLocation}"" TaskFactory=""TaskHostFactory"" />
+    <ItemDefinitionGroup>
+        <Thing>
+            <OutputName>%(Filename)</OutputName>
+        </Thing>
+    </ItemDefinitionGroup>
+    <ItemGroup>
+        <Thing Include=""hello.txt"" />
+    </ItemGroup>
+    <Target Name='Echo'>
+        <MetadataEchoTask Items=""@(Thing)"" MetadataName=""OutputName"">
+            <Output PropertyName=""Echoed"" TaskParameter=""MetadataValue"" />
+            <Output PropertyName=""TaskPid"" TaskParameter=""Pid"" />
+        </MetadataEchoTask>
+    </Target>
+</Project>";
+
+            TransientTestFile project = env.CreateFile("testProject.csproj", projectContents);
+            ProjectInstance projectInstance = new(project.Path);
+
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters(),
+                new BuildRequestData(projectInstance, targetsToBuild: ["Echo"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            // Guard the guard: if the task did not actually run out-of-proc this test would pass vacuously.
+            int taskPid = int.Parse(projectInstance.GetPropertyValue("TaskPid"), CultureInfo.InvariantCulture);
+            taskPid.ShouldNotBe(Process.GetCurrentProcess().Id, "Task must run in a task host for this test to be meaningful.");
+
+            projectInstance.GetPropertyValue("Echoed").ShouldBe("hello");
+        }
+
+        /// <summary>
         /// Verifies that task host nodes properly terminate after a build completes.
         /// Tests both transient (TaskHostFactory) and sidecar (AssemblyTaskFactory) task hosts
         /// with different configuration combinations.
