@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
+using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
@@ -330,6 +333,114 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             logger.FullLog.ShouldContain("TaskWithAttribute executed");
         }
 
+        [Theory]
+        [InlineData("worker", true, true, true, false, false)]
+        [InlineData("devenv", true, false, true, true, false)]
+        [InlineData("off", false, false, false, true, true)]
+        public void VisualStudioModeSelectsBuildParametersAndTaskTopology(
+            string mode,
+            bool expectedMultiThreaded,
+            bool expectedDisableInProcNode,
+            bool expectedTaskHost,
+            bool expectedAttributeTaskInCurrentProcess,
+            bool expectedLegacyTaskInCurrentProcess)
+        {
+            string projectContent = $"""
+                <Project>
+                  <UsingTask TaskName="NonEnlightenedTestTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
+                  <UsingTask TaskName="AttributeTestTask" AssemblyFile="{Assembly.GetExecutingAssembly().Location}" />
+                  <Target Name="DesignTimeTarget">
+                    <NonEnlightenedTestTask />
+                    <AttributeTestTask />
+                  </Target>
+                </Project>
+                """;
+
+            string projectFile = Path.Combine(_testProjectsDir, $"VisualStudioDesignTime_{mode}.proj");
+            File.WriteAllText(projectFile, projectContent);
+
+            var logger = new MockLogger(_output);
+            var callerParameters = new BuildParameters
+            {
+                DisableInProcNode = false,
+                EnableNodeReuse = false,
+                Loggers = [logger],
+                MaxNodeCount = 2,
+                MultiThreaded = false,
+                SaveOperatingEnvironment = true,
+            };
+            var buildRequestData = new BuildRequestData(
+                projectFile,
+                new Dictionary<string, string>
+                {
+                    [DesignTimeProperties.DesignTimeBuild] = "true",
+                },
+                null,
+                ["DesignTimeTarget"],
+                null);
+
+            BuildEnvironment currentBuildEnvironment = BuildEnvironmentHelper.Instance;
+            _env.SetEnvironmentVariable(Traits.VisualStudioMultiThreadedModeEnvVarName, mode);
+            _env.SetEnvironmentVariable(Traits.DisableVisualStudioMultiThreadedEnvVarName, null);
+
+            try
+            {
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(
+                    new BuildEnvironment(
+                        currentBuildEnvironment.Mode,
+                        currentBuildEnvironment.CurrentMSBuildExePath,
+                        currentBuildEnvironment.RunningTests,
+                        currentBuildEnvironment.RunningInMSBuildExe,
+                        runningInVisualStudio: true,
+                        visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
+
+                using var buildManager = new BuildManager();
+                buildManager.BeginBuild(callerParameters);
+                BuildResult result;
+                try
+                {
+                    BuildParameters effectiveParameters = ((IBuildComponentHost)buildManager).BuildParameters;
+                    effectiveParameters.MultiThreaded.ShouldBe(expectedMultiThreaded);
+                    effectiveParameters.DisableInProcNode.ShouldBe(expectedDisableInProcNode);
+                    effectiveParameters.EnableNodeReuse.ShouldBeFalse();
+                    effectiveParameters.SaveOperatingEnvironment.ShouldBe(mode != "devenv");
+
+                    callerParameters.MultiThreaded.ShouldBeFalse();
+                    callerParameters.DisableInProcNode.ShouldBeFalse();
+                    callerParameters.EnableNodeReuse.ShouldBeFalse();
+                    callerParameters.SaveOperatingEnvironment.ShouldBeTrue();
+
+                    result = buildManager.BuildRequest(buildRequestData);
+                }
+                finally
+                {
+                    buildManager.EndBuild();
+                }
+
+                result.ShouldHaveSucceeded();
+            }
+            finally
+            {
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(currentBuildEnvironment);
+            }
+
+            if (expectedTaskHost)
+            {
+                TaskRouterTestHelper.AssertTaskUsedTaskHost(logger, "NonEnlightenedTestTask");
+            }
+            else
+            {
+                TaskRouterTestHelper.AssertTaskRanInProcess(logger, "NonEnlightenedTestTask");
+            }
+
+            int currentProcessId = Process.GetCurrentProcess().Id;
+            (GetLoggedProcessId(logger, "ROUTING_MT_TASK_PID") == currentProcessId)
+                .ShouldBe(expectedAttributeTaskInCurrentProcess);
+            (GetLoggedProcessId(logger, "ROUTING_LEGACY_TASK_PID") == currentProcessId)
+                .ShouldBe(expectedLegacyTaskInCurrentProcess);
+            logger.WarningCount.ShouldBe(0);
+        }
+
         /// <summary>
         /// Verifies that explicit TaskHostFactory request overrides routing logic,
         /// forcing tasks to run in TaskHost even if they have the MSBuildMultiThreadableTaskAttribute.
@@ -460,6 +571,13 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
     </Target>
 </Project>";
         }
+
+        private static int GetLoggedProcessId(MockLogger logger, string prefix)
+        {
+            Match match = Regex.Match(logger.FullLog, $@"{prefix}=(\d+)");
+            match.Success.ShouldBeTrue($"Expected {prefix} in the build log.");
+            return int.Parse(match.Groups[1].Value);
+        }
     }
 
     /// <summary>
@@ -505,6 +623,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         public override bool Execute()
         {
             Log.LogMessage(MessageImportance.High, "NonEnlightenedTask executed");
+            Log.LogMessage(MessageImportance.High, $"ROUTING_LEGACY_TASK_PID={Process.GetCurrentProcess().Id}");
             return true;
         }
     }
@@ -539,9 +658,14 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 #pragma warning restore CS0436
     public class AttributeTestTask : Task
     {
+        [Output]
+        public int ProcessId { get; set; }
+
         public override bool Execute()
         {
+            ProcessId = Process.GetCurrentProcess().Id;
             Log.LogMessage(MessageImportance.High, "TaskWithAttribute executed");
+            Log.LogMessage(MessageImportance.High, $"ROUTING_MT_TASK_PID={ProcessId}");
             return true;
         }
     }

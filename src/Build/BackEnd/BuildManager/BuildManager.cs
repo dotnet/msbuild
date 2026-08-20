@@ -669,7 +669,7 @@ namespace Microsoft.Build.Execution
                 ApplyVisualStudioMultithreadedDefaults(
                     _buildParameters,
                     BuildEnvironmentHelper.Instance.RunningInVisualStudio,
-                    Traits.Instance.DisableVisualStudioMultiThreaded);
+                    Traits.Instance.VisualStudioMultiThreadedMode);
 
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
@@ -908,20 +908,27 @@ namespace Microsoft.Build.Execution
         internal static void ApplyVisualStudioMultithreadedDefaults(
             BuildParameters parameters,
             bool runningInVisualStudio,
-            bool disableVisualStudioMultiThreaded)
+            VisualStudioMultiThreadedMode mode)
         {
-            if (!runningInVisualStudio)
+            parameters.VisualStudioMtMode = runningInVisualStudio
+                ? mode
+                : VisualStudioMultiThreadedMode.Off;
+
+            if (!runningInVisualStudio || mode == VisualStudioMultiThreadedMode.Off)
             {
                 return;
             }
 
-            if (disableVisualStudioMultiThreaded)
+            parameters.MultiThreaded = true;
+
+            if (mode == VisualStudioMultiThreadedMode.Devenv)
             {
+                parameters.DisableInProcNode = false;
+                parameters.SaveOperatingEnvironment = false;
                 return;
             }
 
             parameters.DisableInProcNode = true;
-            parameters.MultiThreaded = true;
 
             // The clustered worker process is scoped to this BuildManager build/session prototype.
             parameters.EnableNodeReuse = false;

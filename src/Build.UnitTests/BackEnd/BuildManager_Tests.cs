@@ -488,35 +488,128 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData(false, false, false, false, true, false, false, true)]
-        [InlineData(true, false, false, false, true, true, true, false)]
-        [InlineData(true, true, true, false, true, true, false, true)]
-        [InlineData(true, true, false, true, false, false, true, false)]
+        [InlineData(null, null, (int)VisualStudioMultiThreadedMode.Worker)]
+        [InlineData("", null, (int)VisualStudioMultiThreadedMode.Worker)]
+        [InlineData("unknown", null, (int)VisualStudioMultiThreadedMode.Worker)]
+        [InlineData("WoRkEr", null, (int)VisualStudioMultiThreadedMode.Worker)]
+        [InlineData("DeVeNv", null, (int)VisualStudioMultiThreadedMode.Devenv)]
+        [InlineData("OfF", null, (int)VisualStudioMultiThreadedMode.Off)]
+        [InlineData("devenv", "1", (int)VisualStudioMultiThreadedMode.Off)]
+        public void VisualStudioMultithreadedModeTrait(
+            string mode,
+            string legacyDisable,
+            int expectedMode)
+        {
+            _env.SetEnvironmentVariable(Traits.VisualStudioMultiThreadedModeEnvVarName, mode);
+            _env.SetEnvironmentVariable(Traits.DisableVisualStudioMultiThreadedEnvVarName, legacyDisable);
+
+            Traits.Instance.VisualStudioMultiThreadedMode.ShouldBe((VisualStudioMultiThreadedMode)expectedMode);
+        }
+
+        [Theory]
+        [InlineData(false, (int)VisualStudioMultiThreadedMode.Worker, false, false, true, true, false, false, true, true, (int)VisualStudioMultiThreadedMode.Off)]
+        [InlineData(true, (int)VisualStudioMultiThreadedMode.Worker, false, false, true, true, true, true, false, true, (int)VisualStudioMultiThreadedMode.Worker)]
+        [InlineData(true, (int)VisualStudioMultiThreadedMode.Devenv, false, true, true, true, true, false, true, false, (int)VisualStudioMultiThreadedMode.Devenv)]
+        [InlineData(true, (int)VisualStudioMultiThreadedMode.Off, false, true, false, true, false, true, false, true, (int)VisualStudioMultiThreadedMode.Off)]
         public void VisualStudioMultithreadedDefaults(
             bool runningInVisualStudio,
-            bool disableVisualStudioMultiThreaded,
+            int mode,
             bool initialMultiThreaded,
             bool initialDisableInProcNode,
             bool initialEnableNodeReuse,
+            bool initialSaveOperatingEnvironment,
             bool expectedMultiThreaded,
             bool expectedDisableInProcNode,
-            bool expectedEnableNodeReuse)
+            bool expectedEnableNodeReuse,
+            bool expectedSaveOperatingEnvironment,
+            int expectedMode)
         {
             var parameters = new BuildParameters
             {
                 MultiThreaded = initialMultiThreaded,
                 DisableInProcNode = initialDisableInProcNode,
                 EnableNodeReuse = initialEnableNodeReuse,
+                SaveOperatingEnvironment = initialSaveOperatingEnvironment,
             };
 
             BuildManager.ApplyVisualStudioMultithreadedDefaults(
                 parameters,
                 runningInVisualStudio,
-                disableVisualStudioMultiThreaded);
+                (VisualStudioMultiThreadedMode)mode);
 
             parameters.MultiThreaded.ShouldBe(expectedMultiThreaded);
             parameters.DisableInProcNode.ShouldBe(expectedDisableInProcNode);
             parameters.EnableNodeReuse.ShouldBe(expectedEnableNodeReuse);
+            parameters.SaveOperatingEnvironment.ShouldBe(expectedSaveOperatingEnvironment);
+            parameters.VisualStudioMtMode.ShouldBe((VisualStudioMultiThreadedMode)expectedMode);
+        }
+
+        [Fact]
+        public void VisualStudioDevenvModeHonorsExplicitOutOfProcAffinity()
+        {
+            string contents = CleanupFileContents($"""
+                <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                  <UsingTask TaskName="AttributeTestTask" AssemblyFile="{typeof(Microsoft.Build.Engine.UnitTests.BackEnd.AttributeTestTask).Assembly.Location}" />
+                  <Target Name="GetCurrentProcessId" Returns="@(CurrentProcessId)">
+                    <AttributeTestTask>
+                      <Output TaskParameter="ProcessId" PropertyName="ProcessId" />
+                    </AttributeTestTask>
+                    <ItemGroup>
+                      <CurrentProcessId Include="$(ProcessId)" />
+                    </ItemGroup>
+                  </Target>
+                </Project>
+                """);
+
+            string projectPath = _env.CreateFile(".proj").Path;
+            File.WriteAllText(projectPath, contents);
+
+            var hostServices = new HostServices();
+            hostServices.SetNodeAffinity(projectPath, NodeAffinity.OutOfProc);
+
+            var parameters = new BuildParameters
+            {
+                DisableInProcNode = false,
+                EnableNodeReuse = false,
+                Loggers = [_logger],
+                MaxNodeCount = 2,
+                MultiThreaded = false,
+                SaveOperatingEnvironment = true,
+            };
+            var data = new BuildRequestData(
+                projectPath,
+                new Dictionary<string, string>(),
+                MSBuildDefaultToolsVersion,
+                ["GetCurrentProcessId"],
+                hostServices);
+
+            BuildEnvironment currentBuildEnvironment = BuildEnvironmentHelper.Instance;
+            _env.SetEnvironmentVariable(Traits.VisualStudioMultiThreadedModeEnvVarName, "devenv");
+            _env.SetEnvironmentVariable(Traits.DisableVisualStudioMultiThreadedEnvVarName, null);
+
+            BuildResult result;
+            try
+            {
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(
+                    new BuildEnvironment(
+                        currentBuildEnvironment.Mode,
+                        currentBuildEnvironment.CurrentMSBuildExePath,
+                        currentBuildEnvironment.RunningTests,
+                        currentBuildEnvironment.RunningInMSBuildExe,
+                        runningInVisualStudio: true,
+                        visualStudioPath: currentBuildEnvironment.VisualStudioInstallRootDirectory));
+
+                result = _buildManager.Build(parameters, data);
+            }
+            finally
+            {
+                BuildEnvironmentHelper.ResetInstance_ForUnitTestsOnly(currentBuildEnvironment);
+            }
+
+            result.ShouldHaveSucceeded();
+            ITaskItem processIdItem = result.ResultsByTarget["GetCurrentProcessId"].Items.ShouldHaveSingleItem();
+            int.TryParse(processIdItem.ItemSpec, out int processId).ShouldBeTrue();
+            processId.ShouldNotBe(Process.GetCurrentProcess().Id);
         }
 
         [Fact]

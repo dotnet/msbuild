@@ -5,6 +5,13 @@ using System;
 
 namespace Microsoft.Build.Framework
 {
+    internal enum VisualStudioMultiThreadedMode
+    {
+        Worker,
+        Devenv,
+        Off,
+    }
+
     /// <summary>
     ///     Represents toggleable features of the MSBuild engine.
     /// </summary>
@@ -52,14 +59,40 @@ namespace Microsoft.Build.Framework
         public readonly bool EnableMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDENABLEMULTITHREADED") == "1";
 
         /// <summary>
-        /// Disable the Visual Studio-hosted multi-threaded worker prototype.
+        /// Select the topology for the Visual Studio-hosted multi-threaded prototype.
         /// </summary>
-        public readonly bool DisableVisualStudioMultiThreaded = Environment.GetEnvironmentVariable(DisableVisualStudioMultiThreadedEnvVarName) == "1";
+        public readonly VisualStudioMultiThreadedMode VisualStudioMultiThreadedMode = GetVisualStudioMultiThreadedMode();
 
         /// <summary>
-        /// Name of the environment variable that disables the Visual Studio-hosted multi-threaded worker prototype.
+        /// Name of the environment variable that selects the Visual Studio-hosted multi-threaded topology.
+        /// </summary>
+        public const string VisualStudioMultiThreadedModeEnvVarName = "MSBUILDVSMTMODE";
+
+        /// <summary>
+        /// Name of the legacy environment variable that disables the Visual Studio-hosted multi-threaded prototype.
         /// </summary>
         public const string DisableVisualStudioMultiThreadedEnvVarName = "MSBUILDDISABLEVSMULTITHREADED";
+
+        private static VisualStudioMultiThreadedMode GetVisualStudioMultiThreadedMode()
+        {
+            if (Environment.GetEnvironmentVariable(DisableVisualStudioMultiThreadedEnvVarName) == "1")
+            {
+                return VisualStudioMultiThreadedMode.Off;
+            }
+
+            string? mode = Environment.GetEnvironmentVariable(VisualStudioMultiThreadedModeEnvVarName);
+            if (string.Equals(mode, "devenv", StringComparison.OrdinalIgnoreCase))
+            {
+                return VisualStudioMultiThreadedMode.Devenv;
+            }
+
+            if (string.Equals(mode, "off", StringComparison.OrdinalIgnoreCase))
+            {
+                return VisualStudioMultiThreadedMode.Off;
+            }
+
+            return VisualStudioMultiThreadedMode.Worker;
+        }
 
         /// <summary>
         /// Do not expand wildcards that match a certain pattern

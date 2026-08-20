@@ -1589,7 +1589,7 @@ namespace Microsoft.Build.BackEnd
                             inProcNodesToCreate++;
                             requestsWithAnyAffinityOnInProcNodes++;
                         }
-                        else
+                        else if (!_componentHost.BuildParameters.MultiThreaded || _componentHost.BuildParameters.DisableInProcNode)
                         {
                             outOfProcNodesToCreate++;
 
@@ -1680,7 +1680,9 @@ namespace Microsoft.Build.BackEnd
                     ? parameters.MaxNodeCount
                     : 1;
 
-            int maxOutOfProcNodeCount = parameters.MultiThreaded && !parameters.DisableInProcNode
+            int maxOutOfProcNodeCount = parameters.MultiThreaded &&
+                !parameters.DisableInProcNode &&
+                parameters.VisualStudioMtMode != VisualStudioMultiThreadedMode.Devenv
                 ? 0
                 : parameters.MaxNodeCount;
 

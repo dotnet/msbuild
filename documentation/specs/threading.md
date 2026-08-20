@@ -15,3 +15,18 @@ When a project is _yielded_, the node is also yielded. The scheduler may then de
 The scheduler limits the amount of total work being done, including both executing and yielded nodes, to attempt to avoid starting too much parallel work and bogging down the operating system. As a result, it's rare for a single node to have more than two or three RequestBuilder threads, though there is no hard bound on the number of threads in a single node.
 
 If multiple RequestBuilder threads have been started and are idle in a single worker node, any of them may be used when a request is assigned to that node (or unblocked).
+
+## Prototype: multi-threaded Visual Studio-hosted builds
+
+> [!IMPORTANT]
+> This is prototype behavior for local Visual Studio validation, not a committed product contract.
+
+Visual Studio-hosted `BuildManager` sessions use `MSBUILDVSMTMODE` to select one of three modes. Values are case-insensitive.
+
+* `worker` is the default, including for an empty or unrecognized value. The cloned build parameters use `MultiThreaded=true`, `DisableInProcNode=true`, and `EnableNodeReuse=false`; one child MSBuild process hosts the logical worker slots.
+* `devenv` uses `MultiThreaded=true`, `DisableInProcNode=false`, and `SaveOperatingEnvironment=false` on the clone, placing thread nodes inside `devenv`. Explicit `NodeAffinity.OutOfProc` requests retain out-of-process capacity, while `NodeAffinity.Any` requests stay in-process.
+* `off` leaves the supplied build parameter values unchanged and preserves baseline Visual Studio behavior.
+
+`MSBUILDDISABLEVSMULTITHREADED=1` takes precedence and is equivalent to `off`. The policy is applied after cloning, so the caller-owned `BuildParameters` instance is never modified.
+
+Tasks without the multi-threadable marker remain isolated in TaskHost processes in either MT topology. Marked tasks run in the process that hosts their project node: the clustered worker in `worker` mode or Visual Studio in `devenv` mode.

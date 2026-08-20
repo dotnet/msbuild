@@ -138,7 +138,7 @@ The scheduler is already capable of juggling multiple projects, and there's alre
 
 The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multithreaded, CLI or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode creating all the thread nodes in the entry process for simplicity--in final production these will be in an [MSBuild Server process](#msbuild-server-integration).
 
-In the CLI implementation, enabling multithreaded mode places all worker nodes in the entry process. The Visual Studio prototype described below instead places logical worker nodes in one out-of-process worker.
+In the CLI implementation, enabling multithreaded mode places all worker nodes in the entry process. The Visual Studio prototype described below can place thread nodes either in `devenv` or in one out-of-process worker.
 
 ```mermaid
 sequenceDiagram
@@ -290,25 +290,36 @@ Thread1_Project1 ->> Scheduler: results
 deactivate Thread1_Project1
 ```
 
-### Visual Studio clustered-worker prototype
+### Visual Studio topology-switch prototype
 
-The local prototype implements the topology above for `BuildManager` sessions hosted by Visual Studio:
+The local prototype ships both Visual Studio topologies in one deployment. `MSBUILDVSMTMODE` selects the topology for `BuildManager` sessions hosted by Visual Studio:
 
-* Visual Studio-hosted sessions enable `BuildParameters.MultiThreaded` by default and keep `DisableInProcNode=true`.
-* `MSBUILDDISABLEVSMULTITHREADED=1` leaves the caller's `BuildParameters` unchanged, preserving the existing Visual Studio host configuration.
-* The scheduler and logging service remain in `devenv`.
-* One child MSBuild process starts `MaxNodeCount` logical worker slots. Each slot uses a PID-and-slot-qualified named pipe and an independent `OutOfProcNode`, configuration cache, results cache, request engine, and TaskHost manager.
+| Value | Effective cloned `BuildParameters` | Topology |
+|---|---|---|
+| `worker` (default) | `MultiThreaded=true`, `DisableInProcNode=true`, `EnableNodeReuse=false` | Scheduler and logging remain in `devenv`; one child MSBuild process hosts `MaxNodeCount` logical worker slots. |
+| `devenv` | `MultiThreaded=true`, `DisableInProcNode=false`, `SaveOperatingEnvironment=false` | `MaxNodeCount` thread nodes execute inside `devenv`. Explicit `NodeAffinity.OutOfProc` requests can still create normal worker processes. |
+| `off` | Caller values are unchanged. | Baseline Visual Studio behavior. |
+
+Values are case-insensitive. Empty and unrecognized values select `worker`. The legacy `MSBUILDDISABLEVSMULTITHREADED=1` setting takes precedence and is equivalent to `off`. The policy is applied only after cloning caller-owned parameters, so opt-out and non-Visual-Studio builds do not mutate the caller's instance.
+
+In `worker` mode:
+
+* Each logical slot uses a PID-and-slot-qualified named pipe and an independent `OutOfProcNode`, configuration cache, results cache, request engine, and TaskHost manager.
 * Existing worker-node packets carry configurations, requests, results, cancellation, and shutdown. Sharing an operating-system process does not imply sharing logical-node configuration or results caches, so normal out-of-process result transfer remains enabled.
-* Tasks without `MSBuildMultiThreadableTaskAttribute` continue to run in TaskHosts created and owned by their logical worker node.
-* Node reuse is disabled. The clustered process is scoped to the build/session. Shutdown packets are sent to every connected slot, while process waiting and forced termination, including cancellation, run outside the BuildManager synchronization lock so sibling shutdown packets can continue to flow. Delayed unexpected-node shutdown work is scoped to its build generation and cannot affect a later build or a disposed BuildManager.
-* An unexpected logical-slot failure is captured and triggers coordinated sibling shutdown before the child process reports the failure.
+* Node reuse is disabled. Shutdown packets are sent to every connected slot, while process waiting and forced termination, including cancellation, run outside the BuildManager synchronization lock so sibling shutdown packets can continue to flow.
+* An unexpected logical-slot failure triggers coordinated sibling shutdown before the child process reports the failure.
+
+In `devenv` mode, `NodeAffinity.Any` requests stay on in-process thread nodes and do not spill to out-of-process nodes. Out-of-process capacity remains available for explicit `NodeAffinity.OutOfProc` requests so host affinity cannot starve or deadlock.
+
+In both MT modes, tasks without `MSBuildMultiThreadableTaskAttribute` run in TaskHosts, while marked tasks run in the process hosting their project node.
 
 Prototype limitations:
 
-* All logical slots are created eagerly and must connect successfully; there is no fallback to one process per node.
+* `worker` mode creates all logical slots eagerly and has no fallback to one process per node.
 * Process-global worker state (environment, current directory, toolsets, parser configuration, and XML cache) is initialized once under a process-wide lock. The prototype assumes all slot configurations in a session carry equivalent process-global settings.
 * The project XML cache is shared by logical slots, while configuration and results caches remain per-slot.
-* Cross-build worker reuse and MSBuild Server integration are not implemented for this topology.
+* `devenv` mode runs marked task code in the Visual Studio process; only explicitly multi-threadable tasks are eligible.
+* Cross-build clustered-worker reuse and MSBuild Server integration are not implemented.
 * `OutOfProcMultiNode` is an implementation entry point exposed only so the MSBuild executable assembly can start the clustered worker; it is not intended as a supported API.
 
 ## MSBuild Server integration

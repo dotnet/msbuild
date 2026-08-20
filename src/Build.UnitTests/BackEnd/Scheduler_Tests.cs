@@ -513,14 +513,60 @@ namespace Microsoft.Build.UnitTests.BackEnd
             s.ForceAffinityOutOfProc.ShouldBeTrue();
         }
 
+        [Fact]
+        public void VisualStudioDevenvModeCreatesNodesForExplicitOutOfProcAffinity()
+        {
+            _host.BuildParameters.MaxNodeCount = 4;
+            _host.BuildParameters.MultiThreaded = true;
+            _host.BuildParameters.VisualStudioMtMode = VisualStudioMultiThreadedMode.Devenv;
+
+            CreateConfiguration(1, "foo.proj");
+            CreateConfiguration(2, "bar.proj");
+            BuildRequest request1 = CreateBuildRequest(1, 1, ["foo"], NodeAffinity.OutOfProc, _defaultParentRequest);
+            BuildRequest request2 = CreateBuildRequest(2, 2, ["bar"], NodeAffinity.OutOfProc, _defaultParentRequest);
+
+            BuildRequestBlocker blocker = new(request1.ParentGlobalRequestId, [], [request1, request2]);
+            List<ScheduleResponse> response = [.. _scheduler.ReportRequestBlocked(1, blocker)];
+
+            response.ShouldHaveSingleItem();
+            response[0].Action.ShouldBe(ScheduleActionType.CreateNode);
+            response[0].RequiredNodeType.ShouldBe(NodeAffinity.OutOfProc);
+            response[0].NumberOfNodesToCreate.ShouldBe(2);
+        }
+
+        [Fact]
+        public void VisualStudioDevenvModeKeepsAnyAffinityOnInProcNodes()
+        {
+            _host.BuildParameters.MaxNodeCount = 3;
+            _host.BuildParameters.MultiThreaded = true;
+            _host.BuildParameters.VisualStudioMtMode = VisualStudioMultiThreadedMode.Devenv;
+
+            CreateConfiguration(1, "foo.proj");
+            CreateConfiguration(2, "bar.proj");
+            CreateConfiguration(3, "baz.proj");
+            BuildRequest request1 = CreateBuildRequest(1, 1, ["foo"], NodeAffinity.Any, _defaultParentRequest);
+            BuildRequest request2 = CreateBuildRequest(2, 2, ["bar"], NodeAffinity.Any, _defaultParentRequest);
+            BuildRequest request3 = CreateBuildRequest(3, 3, ["baz"], NodeAffinity.Any, _defaultParentRequest);
+
+            BuildRequestBlocker blocker = new(request1.ParentGlobalRequestId, [], [request1, request2, request3]);
+            List<ScheduleResponse> response = [.. _scheduler.ReportRequestBlocked(1, blocker)];
+
+            response.ShouldNotContain(r => r.Action == ScheduleActionType.CreateNode && r.RequiredNodeType == NodeAffinity.OutOfProc);
+            ScheduleResponse createResponse = response.Single(r => r.Action == ScheduleActionType.CreateNode);
+            createResponse.RequiredNodeType.ShouldBe(NodeAffinity.InProc);
+            createResponse.NumberOfNodesToCreate.ShouldBe(2);
+        }
+
         [Theory]
-        [InlineData(false, false, 1, 4)]
-        [InlineData(false, true, 0, 4)]
-        [InlineData(true, false, 4, 0)]
-        [InlineData(true, true, 0, 4)]
-        public void NodeLimitsAccountForMultiThreadedOutOfProcNodes(
+        [InlineData(false, false, (int)VisualStudioMultiThreadedMode.Off, 1, 4)]
+        [InlineData(false, true, (int)VisualStudioMultiThreadedMode.Off, 0, 4)]
+        [InlineData(true, false, (int)VisualStudioMultiThreadedMode.Off, 4, 0)]
+        [InlineData(true, true, (int)VisualStudioMultiThreadedMode.Worker, 0, 4)]
+        [InlineData(true, false, (int)VisualStudioMultiThreadedMode.Devenv, 4, 4)]
+        public void NodeLimitsAccountForVisualStudioMultiThreadedMode(
             bool multiThreaded,
             bool disableInProcNode,
+            int visualStudioMode,
             int expectedInProcNodeCount,
             int expectedOutOfProcNodeCount)
         {
@@ -529,6 +575,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 MaxNodeCount = 4,
                 MultiThreaded = multiThreaded,
                 DisableInProcNode = disableInProcNode,
+                VisualStudioMtMode = (VisualStudioMultiThreadedMode)visualStudioMode,
             };
 
             (int maxInProcNodeCount, int maxOutOfProcNodeCount) = Scheduler.GetNodeLimits(parameters);
