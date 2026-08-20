@@ -786,7 +786,8 @@ namespace Microsoft.Build.Execution
             IItem<ProjectMetadataInstance>,
             ITranslatable,
             IEquatable<TaskItem>,
-            IMetadataContainer
+            IMetadataContainer,
+            IItemDefinitionMetadataProvider
         {
             /// <summary>
             /// The source file that defined this item.
@@ -2118,6 +2119,51 @@ namespace Microsoft.Build.Execution
 
                 return null;
             }
+
+            #region IItemDefinitionMetadataProvider Members
+
+            bool IItemDefinitionMetadataProvider.HasExpandableItemDefinitionMetadata => HasAnyExpandableExpressions();
+
+            IEnumerable<KeyValuePair<string, string>> IItemDefinitionMetadataProvider.EnumerateDirectMetadataEscaped()
+            {
+                if (_directMetadata != null)
+                {
+                    foreach (KeyValuePair<string, string> metadatum in _directMetadata)
+                    {
+                        yield return metadatum;
+                    }
+                }
+            }
+
+            IEnumerable<KeyValuePair<string, string>> IItemDefinitionMetadataProvider.EnumerateItemDefinitionMetadataEscaped()
+            {
+                if (_itemDefinitions == null)
+                {
+                    yield break;
+                }
+
+                // Later definitions are lower precedence, and direct metadata masks all of them.
+                // Walk in precedence order and emit the first occurrence of each name.
+                HashSet<string> seen = new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
+
+                for (int i = 0; i < _itemDefinitions.Count; i++)
+                {
+                    foreach (KeyValuePair<string, string> metadatum in _itemDefinitions[i].BackingMetadata)
+                    {
+                        if (_directMetadata?.ContainsKey(metadatum.Key) == true)
+                        {
+                            continue;
+                        }
+
+                        if (seen.Add(metadatum.Key))
+                        {
+                            yield return metadatum;
+                        }
+                    }
+                }
+            }
+
+            #endregion
 
             /// <summary>
             /// Checks if any of the item definitions may have expandable expressions.

@@ -571,6 +571,17 @@ namespace Microsoft.Build.BackEnd
             private Dictionary<string, string> _customEscapedMetadata = null;
 
             /// <summary>
+            /// Metadata inherited from item definitions, in escaped and <em>unexpanded</em> form.
+            /// </summary>
+            /// <remarks>
+            /// Kept separate from <see cref="_customEscapedMetadata"/> so that values referencing built-in
+            /// metadata (for example <c>%(Filename)</c>) are expanded on read against this item's current
+            /// item spec, matching what the same task would observe when running in-proc. Flattening the two
+            /// together would freeze the value at the point it crossed the process boundary.
+            /// </remarks>
+            private Dictionary<string, string> _itemDefinitionEscapedMetadata = null;
+
+            /// <summary>
             /// Cache for derivable modifier values
             /// </summary>
             private ItemSpecModifiers.Cache _cachedModifiers;
@@ -585,15 +596,35 @@ namespace Microsoft.Build.BackEnd
                     _escapedItemSpec = copyFromAsITaskItem2.EvaluatedIncludeEscaped;
                     _escapedDefiningProject = copyFromAsITaskItem2.GetMetadataValueEscaped(ItemSpecModifiers.DefiningProjectFullPath);
 
-                    IDictionary nonGenericEscapedMetadata = copyFromAsITaskItem2.CloneCustomMetadataEscaped();
-                    _customEscapedMetadata = nonGenericEscapedMetadata as Dictionary<string, string>;
-
-                    if (_customEscapedMetadata is null)
+                    // If the source keeps item definition metadata separate and some of it is expandable,
+                    // preserve that split so the values stay bound to the item spec on the other side.
+                    if (copyFrom is IItemDefinitionMetadataProvider itemDefinitionSource
+                        && itemDefinitionSource.HasExpandableItemDefinitionMetadata)
                     {
                         _customEscapedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
-                        foreach (DictionaryEntry entry in nonGenericEscapedMetadata)
+                        foreach (KeyValuePair<string, string> metadatum in itemDefinitionSource.EnumerateDirectMetadataEscaped())
                         {
-                            _customEscapedMetadata[(string)entry.Key] = (string)entry.Value ?? string.Empty;
+                            _customEscapedMetadata[metadatum.Key] = metadatum.Value ?? string.Empty;
+                        }
+
+                        _itemDefinitionEscapedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                        foreach (KeyValuePair<string, string> metadatum in itemDefinitionSource.EnumerateItemDefinitionMetadataEscaped())
+                        {
+                            _itemDefinitionEscapedMetadata[metadatum.Key] = metadatum.Value ?? string.Empty;
+                        }
+                    }
+                    else
+                    {
+                        IDictionary nonGenericEscapedMetadata = copyFromAsITaskItem2.CloneCustomMetadataEscaped();
+                        _customEscapedMetadata = nonGenericEscapedMetadata as Dictionary<string, string>;
+
+                        if (_customEscapedMetadata is null)
+                        {
+                            _customEscapedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+                            foreach (DictionaryEntry entry in nonGenericEscapedMetadata)
+                            {
+                                _customEscapedMetadata[(string)entry.Key] = (string)entry.Value ?? string.Empty;
+                            }
                         }
                     }
                 }
@@ -684,7 +715,23 @@ namespace Microsoft.Build.BackEnd
             {
                 get
                 {
-                    List<string> metadataNames = (_customEscapedMetadata == null) ? new List<string>() : new List<string>(_customEscapedMetadata.Keys);
+                    List<string> metadataNames = new List<string>();
+
+                    if (_itemDefinitionEscapedMetadata != null)
+                    {
+                        foreach (string name in _itemDefinitionEscapedMetadata.Keys)
+                        {
+                            if (_customEscapedMetadata?.ContainsKey(name) != true)
+                            {
+                                metadataNames.Add(name);
+                            }
+                        }
+                    }
+
+                    if (_customEscapedMetadata != null)
+                    {
+                        metadataNames.AddRange(_customEscapedMetadata.Keys);
+                    }
 
                     foreach (string name in ItemSpecModifiers.All)
                     {
@@ -704,7 +751,7 @@ namespace Microsoft.Build.BackEnd
             {
                 get
                 {
-                    int count = (_customEscapedMetadata == null) ? 0 : _customEscapedMetadata.Count;
+                    int count = ((ITaskItem2)this).CloneCustomMetadataEscaped().Count;
                     return count + ItemSpecModifiers.All.Length;
                 }
             }
@@ -727,7 +774,7 @@ namespace Microsoft.Build.BackEnd
 
             public SerializableMetadata BackingMetadata => default;
 
-            public bool HasCustomMetadata => _customEscapedMetadata?.Count > 0;
+            public bool HasCustomMetadata => _customEscapedMetadata?.Count > 0 || _itemDefinitionEscapedMetadata?.Count > 0;
 
             /// <summary>
             /// Allows the values of metadata on the item to be queried.
@@ -767,12 +814,8 @@ namespace Microsoft.Build.BackEnd
                 ArgumentNullException.ThrowIfNull(metadataName);
                 ErrorUtilities.VerifyThrowArgument(!ItemSpecModifiers.IsItemSpecModifier(metadataName), "CannotChangeItemSpecModifiers", metadataName);
 
-                if (_customEscapedMetadata == null)
-                {
-                    return;
-                }
-
-                _customEscapedMetadata.Remove(metadataName);
+                _customEscapedMetadata?.Remove(metadataName);
+                _itemDefinitionEscapedMetadata?.Remove(metadataName);
             }
 
             /// <summary>
@@ -880,9 +923,65 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 string metadataValue = null;
-                _customEscapedMetadata?.TryGetValue(metadataName, out metadataValue);
+                if (_customEscapedMetadata?.TryGetValue(metadataName, out metadataValue) == true)
+                {
+                    return metadataValue ?? string.Empty;
+                }
 
-                return metadataValue ?? string.Empty;
+                // Item definition metadata is stored unexpanded so that built-in metadata references stay
+                // bound to the current item spec. Expand on read, exactly as the in-proc item does.
+                if (_itemDefinitionEscapedMetadata?.TryGetValue(metadataName, out metadataValue) == true)
+                {
+                    return ExpandBuiltInMetadata(metadataValue) ?? string.Empty;
+                }
+
+                return string.Empty;
+            }
+
+            /// <summary>
+            /// Expands unqualified built-in metadata references (for example <c>%(Filename)</c>) against this
+            /// item's own item spec. Anything else, including custom metadata references, is left alone —
+            /// those are already expanded during evaluation and never reach this point unexpanded.
+            /// </summary>
+            private string ExpandBuiltInMetadata(string escapedValue)
+            {
+                if (string.IsNullOrEmpty(escapedValue) || escapedValue.IndexOf("%(", StringComparison.Ordinal) < 0)
+                {
+                    return escapedValue;
+                }
+
+                System.Text.StringBuilder builder = null;
+                int lastCopied = 0;
+                int index = escapedValue.IndexOf("%(", StringComparison.Ordinal);
+
+                while (index >= 0)
+                {
+                    int close = escapedValue.IndexOf(')', index + 2);
+                    if (close < 0)
+                    {
+                        break;
+                    }
+
+                    string name = escapedValue.Substring(index + 2, close - index - 2).Trim();
+
+                    if (ItemSpecModifiers.TryGetDerivableModifierKind(name, out ItemSpecModifierKind modifierKind))
+                    {
+                        builder ??= new System.Text.StringBuilder(escapedValue.Length);
+                        builder.Append(escapedValue, lastCopied, index - lastCopied);
+                        builder.Append(ItemSpecModifiers.GetItemSpecModifier(_escapedItemSpec, modifierKind, null, _escapedDefiningProject, ref _cachedModifiers));
+                        lastCopied = close + 1;
+                    }
+
+                    index = escapedValue.IndexOf("%(", close + 1, StringComparison.Ordinal);
+                }
+
+                if (builder == null)
+                {
+                    return escapedValue;
+                }
+
+                builder.Append(escapedValue, lastCopied, escapedValue.Length - lastCopied);
+                return builder.ToString();
             }
 
             /// <summary>
@@ -898,7 +997,27 @@ namespace Microsoft.Build.BackEnd
             /// </summary>
             IDictionary ITaskItem2.CloneCustomMetadataEscaped()
             {
-                IDictionary clonedDictionary = new Dictionary<string, string>(_customEscapedMetadata);
+                // Return the unexpanded form. The engine flattens task outputs by copying these values
+                // straight into direct metadata, and it does the same for in-proc items, so expanding here
+                // would make out-of-proc task outputs differ from in-proc ones.
+                Dictionary<string, string> clonedDictionary = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+
+                if (_itemDefinitionEscapedMetadata != null)
+                {
+                    foreach (KeyValuePair<string, string> metadatum in _itemDefinitionEscapedMetadata)
+                    {
+                        clonedDictionary[metadatum.Key] = metadatum.Value;
+                    }
+                }
+
+                if (_customEscapedMetadata != null)
+                {
+                    foreach (KeyValuePair<string, string> metadatum in _customEscapedMetadata)
+                    {
+                        clonedDictionary[metadatum.Key] = metadatum.Value;
+                    }
+                }
+
                 return clonedDictionary;
             }
 
@@ -917,17 +1036,17 @@ namespace Microsoft.Build.BackEnd
 #if FEATURE_APPDOMAIN
             private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataEager()
             {
-                if (_customEscapedMetadata == null || _customEscapedMetadata.Count == 0)
+                IDictionary merged = ((ITaskItem2)this).CloneCustomMetadataEscaped();
+                if (merged.Count == 0)
                 {
                     return [];
                 }
 
-                var result = new KeyValuePair<string, string>[_customEscapedMetadata.Count];
+                var result = new KeyValuePair<string, string>[merged.Count];
                 int index = 0;
-                foreach (var kvp in _customEscapedMetadata)
+                foreach (KeyValuePair<string, string> kvp in (Dictionary<string, string>)merged)
                 {
-                    var unescaped = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
-                    result[index++] = unescaped;
+                    result[index++] = new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
                 }
 
                 return result;
@@ -936,6 +1055,17 @@ namespace Microsoft.Build.BackEnd
 
             private IEnumerable<KeyValuePair<string, string>> EnumerateMetadataLazy()
             {
+                if (_itemDefinitionEscapedMetadata != null)
+                {
+                    foreach (KeyValuePair<string, string> kvp in _itemDefinitionEscapedMetadata)
+                    {
+                        if (_customEscapedMetadata?.ContainsKey(kvp.Key) != true)
+                        {
+                            yield return new KeyValuePair<string, string>(kvp.Key, EscapingUtilities.UnescapeAll(kvp.Value));
+                        }
+                    }
+                }
+
                 if (_customEscapedMetadata == null)
                 {
                     yield break;
@@ -969,6 +1099,7 @@ namespace Microsoft.Build.BackEnd
                 translator.Translate(ref _escapedItemSpec);
                 translator.Translate(ref _escapedDefiningProject);
                 translator.TranslateDictionary(ref _customEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
+                translator.TranslateDictionary(ref _itemDefinitionEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
 
                 Assumed.NotNull(_escapedItemSpec);
                 Assumed.NotNull(_customEscapedMetadata);
