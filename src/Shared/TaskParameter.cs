@@ -1125,10 +1125,16 @@ namespace Microsoft.Build.BackEnd
             }
 
             /// <summary>
-            /// Merges item definition metadata into the direct metadata dictionary, expanding it first so that
-            /// the receiver sees resolved values rather than raw expressions. Used when the peer predates
-            /// <see cref="NodePacketTypeExtensions.LazyItemDefinitionMetadataMinVersion"/>.
+            /// Merges item definition metadata into the direct metadata dictionary, leaving values unexpanded.
+            /// Used when the peer predates <see cref="NodePacketTypeExtensions.LazyItemDefinitionMetadataMinVersion"/>
+            /// and only understands a single flattened dictionary.
             /// </summary>
+            /// <remarks>
+            /// Deliberately does not expand. An older peer cannot reproduce in-proc semantics no matter what it is
+            /// sent, and expanding here would hand it resolved values that it then returns as task outputs, making
+            /// those outputs differ from the in-proc ones. Sending the raw values keeps such a peer behaving exactly
+            /// as it does today.
+            /// </remarks>
             private void FlattenItemDefinitionMetadata()
             {
                 if (_itemDefinitionEscapedMetadata == null || _itemDefinitionEscapedMetadata.Count == 0)
@@ -1142,7 +1148,7 @@ namespace Microsoft.Build.BackEnd
                 {
                     if (!_customEscapedMetadata.ContainsKey(metadatum.Key))
                     {
-                        _customEscapedMetadata[metadatum.Key] = ExpandBuiltInMetadata(metadatum.Value);
+                        _customEscapedMetadata[metadatum.Key] = metadatum.Value;
                     }
                 }
 
