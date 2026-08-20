@@ -45,7 +45,6 @@ variables:
   - name: Codeql.Enabled
     value: false
   - group: DotNet-MSBuild-SDLValidation-Params
-  - group: AzureDevOps-Artifact-Feeds-Pats
   - name: cfsNugetWarnLevel
     value: warn
   - name: nugetMultiFeedWarnLevel
