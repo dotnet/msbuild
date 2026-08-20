@@ -154,6 +154,16 @@ namespace Microsoft.Build.Execution
         private BuildManagerState _buildManagerState;
 
         /// <summary>
+        /// Identifies the current build lifetime so delayed shutdown work cannot affect a later build.
+        /// </summary>
+        private long _buildGeneration;
+
+        /// <summary>
+        /// Tracks unexpected-node shutdown work so its completion can be observed deterministically.
+        /// </summary>
+        private Task _nodeShutdownTask = Task.CompletedTask;
+
+        /// <summary>
         /// The name given to this BuildManager as the component host.
         /// </summary>
         private readonly string _hostName;
@@ -353,6 +363,33 @@ namespace Microsoft.Build.Execution
             /// This is the state the BuildManager is in after <see cref="EndBuild()"/> has been called but before all existing submissions have completed.
             /// </summary>
             WaitingForBuildToComplete
+        }
+
+        private readonly struct NodeShutdownRequest
+        {
+            internal NodeShutdownRequest(
+                long buildGeneration,
+                INodeManager? nodeManager,
+                INodeManager? taskHostNodeManager,
+                bool enableReuse,
+                bool shutdownTaskHosts)
+            {
+                BuildGeneration = buildGeneration;
+                NodeManager = nodeManager;
+                TaskHostNodeManager = taskHostNodeManager;
+                EnableReuse = enableReuse;
+                ShutdownTaskHosts = shutdownTaskHosts;
+            }
+
+            internal long BuildGeneration { get; }
+
+            internal INodeManager? NodeManager { get; }
+
+            internal INodeManager? TaskHostNodeManager { get; }
+
+            internal bool EnableReuse { get; }
+
+            internal bool ShutdownTaskHosts { get; }
         }
 
         /// <summary>
@@ -579,12 +616,21 @@ namespace Microsoft.Build.Execution
                 parameters.LogTaskInputs = true;
             }
 
-            lock (_syncLock)
+            lock (_nodeShutdownLock)
+            {
+                lock (_syncLock)
+                {
+                    InitializeBuild();
+                }
+            }
+
+            void InitializeBuild()
             {
                 AttachDebugger();
 
                 // Check for build in progress.
                 RequireState(BuildManagerState.Idle, "BuildInProgress");
+                _buildGeneration++;
 
                 MSBuildEventSource.Log.BuildStart();
 
@@ -944,6 +990,12 @@ namespace Microsoft.Build.Execution
 
         private void CancelAllSubmissions(bool async)
         {
+            long buildGeneration;
+            lock (_syncLock)
+            {
+                buildGeneration = _buildGeneration;
+            }
+
             ILoggingService loggingService = ((IBuildComponentHost)this).LoggingService;
             loggingService.LogBuildCanceled();
 
@@ -956,12 +1008,13 @@ namespace Microsoft.Build.Execution
 
             void Callback(object? state)
             {
+                NodeShutdownRequest shutdownRequest;
                 lock (_syncLock)
                 {
                     // If the state is Idle - then there is yet or already nothing to cancel
                     // If state is WaitingForBuildToComplete - we might be already waiting gracefully - but CancelAllSubmissions
                     //  is a request for quick abort - so it's fine to resubmit the request
-                    if (_buildManagerState == BuildManagerState.Idle)
+                    if (_buildManagerState == BuildManagerState.Idle || buildGeneration != _buildGeneration)
                     {
                         return;
                     }
@@ -980,7 +1033,27 @@ namespace Microsoft.Build.Execution
                         }
                     }
 
-                    ShutdownConnectedNodes(true /* abort */);
+                    shutdownRequest = PrepareNodeShutdown(
+                        enableReuse: false,
+                        shutdownTaskHosts: false);
+                }
+
+                try
+                {
+                    ExecuteNodeShutdown(shutdownRequest);
+                }
+                catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                {
+                    ReportNodeShutdownException(shutdownRequest, e);
+                }
+
+                lock (_syncLock)
+                {
+                    if (_disposed || buildGeneration != _buildGeneration)
+                    {
+                        return;
+                    }
+
                     CheckForActiveNodesAndCleanUpSubmissions();
                 }
             }
@@ -2469,31 +2542,67 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void ShutdownConnectedNodes(bool abort)
         {
-            INodeManager? nodeManager;
-            INodeManager? taskHostNodeManager;
-            bool enableNodeReuse;
+            NodeShutdownRequest shutdownRequest;
 
             lock (_syncLock)
             {
-                _shuttingDown = true;
-                _executionCancellationTokenSource?.Cancel();
-
-                nodeManager = _nodeManager;
-                taskHostNodeManager = _taskHostNodeManager;
-                enableNodeReuse = _buildParameters!.EnableNodeReuse;
+                shutdownRequest = PrepareNodeShutdown(
+                    enableReuse: !abort && _buildParameters!.EnableNodeReuse,
+                    shutdownTaskHosts: !abort);
             }
 
+            ExecuteNodeShutdown(shutdownRequest);
+        }
+
+        private NodeShutdownRequest PrepareNodeShutdown(bool enableReuse, bool shutdownTaskHosts)
+        {
+            Debug.Assert(Monitor.IsEntered(_syncLock));
+
+            _shuttingDown = true;
+            _executionCancellationTokenSource?.Cancel();
+
+            return new NodeShutdownRequest(
+                _buildGeneration,
+                _nodeManager,
+                _taskHostNodeManager,
+                enableReuse,
+                shutdownTaskHosts);
+        }
+
+        private bool ExecuteNodeShutdown(NodeShutdownRequest shutdownRequest)
+        {
             lock (_nodeShutdownLock)
             {
-                // If we are aborting, we will NOT reuse the nodes because their state may be compromised by attempts to shut down while the build is in-progress.
-                nodeManager?.ShutdownConnectedNodes(!abort && enableNodeReuse);
-
-                // If we are aborting, the task host will hear about it in time through the task building infrastructure;
-                // so only shut down the task host nodes if we're shutting down tidily (in which case, it is assumed that all
-                // tasks are finished building and thus that there's no risk of a race between the two shutdown pathways).
-                if (!abort)
+                lock (_syncLock)
                 {
-                    taskHostNodeManager?.ShutdownConnectedNodes(enableNodeReuse);
+                    if (_disposed
+                        || shutdownRequest.BuildGeneration != _buildGeneration
+                        || !ReferenceEquals(shutdownRequest.NodeManager, _nodeManager)
+                        || !ReferenceEquals(shutdownRequest.TaskHostNodeManager, _taskHostNodeManager))
+                    {
+                        return false;
+                    }
+                }
+
+                // Shutdown can wait for or terminate processes, so it must not run while _syncLock is held.
+                shutdownRequest.NodeManager?.ShutdownConnectedNodes(shutdownRequest.EnableReuse);
+
+                if (shutdownRequest.ShutdownTaskHosts)
+                {
+                    shutdownRequest.TaskHostNodeManager?.ShutdownConnectedNodes(shutdownRequest.EnableReuse);
+                }
+
+                return true;
+            }
+        }
+
+        private void ReportNodeShutdownException(NodeShutdownRequest shutdownRequest, Exception exception)
+        {
+            lock (_syncLock)
+            {
+                if (!_disposed && shutdownRequest.BuildGeneration == _buildGeneration)
+                {
+                    OnThreadException(exception);
                 }
             }
         }
@@ -2906,22 +3015,27 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                INodeManager nodeManager = _nodeManager!;
-                INodeManager taskHostNodeManager = _taskHostNodeManager!;
-                bool enableNodeReuse = _buildParameters!.EnableNodeReuse;
-                CultureInfo culture = CultureInfo.CurrentCulture;
-                CultureInfo uiCulture = CultureInfo.CurrentUICulture;
-                ThreadPoolExtensions.QueueThreadPoolWorkItemWithCulture(
+                NodeShutdownRequest shutdownRequest = new(
+                    _buildGeneration,
+                    _nodeManager,
+                    _taskHostNodeManager,
+                    _buildParameters!.EnableNodeReuse,
+                    shutdownTaskHosts: true);
+                _nodeShutdownTask = _nodeShutdownTask.ContinueWith(
                     _ =>
                     {
-                        lock (_nodeShutdownLock)
+                        try
                         {
-                            nodeManager.ShutdownConnectedNodes(enableNodeReuse);
-                            taskHostNodeManager.ShutdownConnectedNodes(enableNodeReuse);
+                            ExecuteNodeShutdown(shutdownRequest);
+                        }
+                        catch (Exception e) when (!ExceptionHandling.IsCriticalException(e))
+                        {
+                            ReportNodeShutdownException(shutdownRequest, e);
                         }
                     },
-                    culture,
-                    uiCulture);
+                    CancellationToken.None,
+                    TaskContinuationOptions.None,
+                    TaskScheduler.Default);
 
                 foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                 {
@@ -3584,51 +3698,54 @@ namespace Microsoft.Build.Execution
         {
             if (disposing && !_disposed)
             {
-                lock (_syncLock)
+                lock (_nodeShutdownLock)
                 {
-                    if (_disposed)
+                    lock (_syncLock)
                     {
-                        // Multiple caller raced for enter into the lock
-                        return;
+                        if (_disposed)
+                        {
+                            // Multiple caller raced for enter into the lock
+                            return;
+                        }
+
+                        // We should always have finished cleaning up before calling Dispose.
+                        RequireState(BuildManagerState.Idle, "ShouldNotDisposeWhenBuildManagerActive");
+
+                        _componentFactories?.ShutdownComponents();
+
+                        if (_workQueue != null)
+                        {
+                            _workQueue.Complete();
+                            _workQueue = null;
+                        }
+
+                        if (_executionCancellationTokenSource != null)
+                        {
+                            _executionCancellationTokenSource.Cancel();
+                            _executionCancellationTokenSource = null;
+                        }
+
+                        if (_noActiveSubmissionsEvent != null)
+                        {
+                            _noActiveSubmissionsEvent.Dispose();
+                            _noActiveSubmissionsEvent = null;
+                        }
+
+                        if (_noNodesActiveEvent != null)
+                        {
+                            _noNodesActiveEvent.Dispose();
+                            _noNodesActiveEvent = null;
+                        }
+
+                        if (ReferenceEquals(this, s_singletonInstance))
+                        {
+                            s_singletonInstance = null;
+                        }
+
+                        TelemetryManager.Instance.Dispose();
+
+                        _disposed = true;
                     }
-
-                    // We should always have finished cleaning up before calling Dispose.
-                    RequireState(BuildManagerState.Idle, "ShouldNotDisposeWhenBuildManagerActive");
-
-                    _componentFactories?.ShutdownComponents();
-
-                    if (_workQueue != null)
-                    {
-                        _workQueue.Complete();
-                        _workQueue = null;
-                    }
-
-                    if (_executionCancellationTokenSource != null)
-                    {
-                        _executionCancellationTokenSource.Cancel();
-                        _executionCancellationTokenSource = null;
-                    }
-
-                    if (_noActiveSubmissionsEvent != null)
-                    {
-                        _noActiveSubmissionsEvent.Dispose();
-                        _noActiveSubmissionsEvent = null;
-                    }
-
-                    if (_noNodesActiveEvent != null)
-                    {
-                        _noNodesActiveEvent.Dispose();
-                        _noNodesActiveEvent = null;
-                    }
-
-                    if (ReferenceEquals(this, s_singletonInstance))
-                    {
-                        s_singletonInstance = null;
-                    }
-
-                    TelemetryManager.Instance.Dispose();
-
-                    _disposed = true;
                 }
             }
         }

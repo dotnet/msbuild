@@ -300,7 +300,7 @@ The local prototype implements the topology above for `BuildManager` sessions ho
 * One child MSBuild process starts `MaxNodeCount` logical worker slots. Each slot uses a PID-and-slot-qualified named pipe and an independent `OutOfProcNode`, configuration cache, results cache, request engine, and TaskHost manager.
 * Existing worker-node packets carry configurations, requests, results, cancellation, and shutdown. Sharing an operating-system process does not imply sharing logical-node configuration or results caches, so normal out-of-process result transfer remains enabled.
 * Tasks without `MSBuildMultiThreadableTaskAttribute` continue to run in TaskHosts created and owned by their logical worker node.
-* Node reuse is disabled. The clustered process is scoped to the build/session. Shutdown packets are sent to every connected slot, while process waiting and forced termination run outside the BuildManager synchronization lock so sibling shutdown packets can continue to flow.
+* Node reuse is disabled. The clustered process is scoped to the build/session. Shutdown packets are sent to every connected slot, while process waiting and forced termination, including cancellation, run outside the BuildManager synchronization lock so sibling shutdown packets can continue to flow. Delayed unexpected-node shutdown work is scoped to its build generation and cannot affect a later build or a disposed BuildManager.
 * An unexpected logical-slot failure is captured and triggers coordinated sibling shutdown before the child process reports the failure.
 
 Prototype limitations:

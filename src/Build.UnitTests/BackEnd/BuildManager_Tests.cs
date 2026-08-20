@@ -39,18 +39,34 @@ namespace Microsoft.Build.UnitTests.BackEnd
         private sealed class DelayedShutdownNodeManager : INodeManager
         {
             private readonly object _buildManagerSyncLock;
+            private readonly ManualResetEventSlim _shutdownStarted;
+            private readonly ManualResetEventSlim _continueShutdown;
+            private readonly ManualResetEventSlim _shutdownCompleted;
+            private int _shutdownCount;
 
-            internal DelayedShutdownNodeManager(object buildManagerSyncLock)
+            internal DelayedShutdownNodeManager(
+                object buildManagerSyncLock,
+                ManualResetEventSlim shutdownStarted = null,
+                ManualResetEventSlim continueShutdown = null,
+                ManualResetEventSlim shutdownCompleted = null)
             {
                 _buildManagerSyncLock = buildManagerSyncLock;
+                _shutdownStarted = shutdownStarted;
+                _continueShutdown = continueShutdown;
+                _shutdownCompleted = shutdownCompleted;
             }
 
             internal bool BuildManagerSyncLockHeldDuringShutdown { get; private set; }
 
+            internal int ShutdownCount => Volatile.Read(ref _shutdownCount);
+
             public void ShutdownConnectedNodes(bool enableReuse)
             {
+                Interlocked.Increment(ref _shutdownCount);
                 BuildManagerSyncLockHeldDuringShutdown = Monitor.IsEntered(_buildManagerSyncLock);
-                Thread.Sleep(100);
+                _shutdownStarted?.Set();
+                _continueShutdown?.Wait(TimeSpan.FromSeconds(10));
+                _shutdownCompleted?.Set();
             }
 
             public IList<NodeInfo> CreateNodes(NodeConfiguration configuration, NodeAffinity affinity, int numberOfNodesToCreate) => [];
@@ -525,6 +541,109 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 .Invoke(buildManager, [false]);
 
             nodeManager.BuildManagerSyncLockHeldDuringShutdown.ShouldBeFalse();
+        }
+
+        [Fact]
+        public void CancelAllSubmissionsDoesNotHoldBuildManagerSyncLockWhileProviderWaits()
+        {
+            using var shutdownStarted = new ManualResetEventSlim();
+            using var continueShutdown = new ManualResetEventSlim();
+            using var shutdownCompleted = new ManualResetEventSlim();
+            using var buildManager = new BuildManager();
+            Type buildManagerType = typeof(BuildManager);
+            object syncLock = buildManagerType
+                .GetField("_syncLock", BindingFlags.Instance | BindingFlags.NonPublic)
+                .GetValue(buildManager);
+            var nodeManager = new DelayedShutdownNodeManager(
+                syncLock,
+                shutdownStarted,
+                continueShutdown,
+                shutdownCompleted);
+            ((IBuildComponentHost)buildManager).RegisterFactory(BuildComponentType.NodeManager, _ => nodeManager);
+
+            buildManager.BeginBuild(new BuildParameters
+            {
+                EnableNodeReuse = false,
+                Loggers = [new MockLogger(_output)],
+            });
+
+            try
+            {
+                buildManager.CancelAllSubmissions();
+                shutdownStarted.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+
+                bool lockTaken = Monitor.TryEnter(syncLock, TimeSpan.FromSeconds(5));
+                try
+                {
+                    lockTaken.ShouldBeTrue();
+                }
+                finally
+                {
+                    if (lockTaken)
+                    {
+                        Monitor.Exit(syncLock);
+                    }
+                }
+
+                nodeManager.BuildManagerSyncLockHeldDuringShutdown.ShouldBeFalse();
+            }
+            finally
+            {
+                continueShutdown.Set();
+            }
+
+            shutdownCompleted.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            buildManager.EndBuild();
+        }
+
+        [Fact]
+        public void UnexpectedNodeShutdownFromPreviousBuildDoesNotShutdownNextBuild()
+        {
+            using var buildManager = new BuildManager();
+            Type buildManagerType = typeof(BuildManager);
+            object syncLock = buildManagerType
+                .GetField("_syncLock", BindingFlags.Instance | BindingFlags.NonPublic)
+                .GetValue(buildManager);
+            object nodeShutdownLock = buildManagerType
+                .GetField("_nodeShutdownLock", BindingFlags.Instance | BindingFlags.NonPublic)
+                .GetValue(buildManager);
+            var nodeManager = new DelayedShutdownNodeManager(syncLock);
+            ((IBuildComponentHost)buildManager).RegisterFactory(BuildComponentType.NodeManager, _ => nodeManager);
+            var parameters = new BuildParameters
+            {
+                EnableNodeReuse = false,
+                Loggers = [new MockLogger(_output)],
+            };
+
+            buildManager.BeginBuild(parameters);
+
+            System.Threading.Tasks.Task nodeShutdownTask;
+            lock (nodeShutdownLock)
+            {
+                lock (syncLock)
+                {
+                    var activeNodes = (HashSet<int>)buildManagerType
+                        .GetField("_activeNodes", BindingFlags.Instance | BindingFlags.NonPublic)
+                        .GetValue(buildManager);
+                    activeNodes.Add(1);
+
+                    buildManagerType
+                        .GetMethod("HandleNodeShutdown", BindingFlags.Instance | BindingFlags.NonPublic)
+                        .Invoke(buildManager, [1, new NodeShutdown(NodeShutdownReason.Error)]);
+                    nodeShutdownTask = (System.Threading.Tasks.Task)buildManagerType
+                        .GetField("_nodeShutdownTask", BindingFlags.Instance | BindingFlags.NonPublic)
+                        .GetValue(buildManager);
+                }
+
+                buildManager.EndBuild();
+                nodeManager.ShutdownCount.ShouldBe(1);
+                buildManager.BeginBuild(parameters);
+            }
+
+            nodeShutdownTask.Wait(TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            nodeManager.ShutdownCount.ShouldBe(1);
+
+            buildManager.EndBuild();
         }
 
         [Theory]
