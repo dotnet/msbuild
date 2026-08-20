@@ -1099,17 +1099,25 @@ namespace Microsoft.Build.BackEnd
             {
                 translator.Translate(ref _escapedItemSpec);
                 translator.Translate(ref _escapedDefiningProject);
-                translator.TranslateDictionary(ref _customEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
 
-                // Older task hosts do not understand the separate item definition metadata dictionary.
-                // When talking to one, fall back to sending everything flattened, as before.
-                if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.LazyItemDefinitionMetadataMinVersion)
-                {
-                    translator.TranslateDictionary(ref _itemDefinitionEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
-                }
-                else if (translator.Mode == TranslationDirection.WriteToStream)
+                // null = CLR2 (NET35) task host, which does not have this field compiled in.
+                // 0 = CLR4 (NET472) task host, which is the same build and understands the split.
+                // >= LazyItemDefinitionMetadataMinVersion = negotiated .NET task host.
+                bool peerUnderstandsItemDefinitionSplit =
+                    translator.NegotiatedPacketVersion is 0 or >= NodePacketTypeExtensions.LazyItemDefinitionMetadataMinVersion;
+
+                // An older peer only understands a single flattened dictionary. Fold item definition metadata
+                // into it, expanding first so the peer still observes resolved values, before anything is written.
+                if (!peerUnderstandsItemDefinitionSplit && translator.Mode == TranslationDirection.WriteToStream)
                 {
                     FlattenItemDefinitionMetadata();
+                }
+
+                translator.TranslateDictionary(ref _customEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
+
+                if (peerUnderstandsItemDefinitionSplit)
+                {
+                    translator.TranslateDictionary(ref _itemDefinitionEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
                 }
 
                 Assumed.NotNull(_escapedItemSpec);
