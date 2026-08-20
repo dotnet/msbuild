@@ -6,12 +6,14 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading;
+using Microsoft.Build.BackEnd;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.UnitTests;
 using Microsoft.Build.UnitTests.BackEnd;
-
 using Shouldly;
 using Xunit;
 
@@ -123,6 +125,71 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             taskProcessId = int.Parse(projectInstance.GetPropertyValue("TaskPid"), CultureInfo.InvariantCulture);
             return projectInstance.GetPropertyValue("Observed");
+        }
+
+        /// <summary>
+        /// Item definition metadata is only carried separately when the peer understands it. Round-trips an item
+        /// through <see cref="TaskParameter"/> at each negotiated packet version and pins what the far side sees.
+        /// </summary>
+        /// <remarks>
+        /// A CLR2 task host negotiates <see langword="null"/> and only ever reads a single flattened metadata
+        /// dictionary, so nothing extra may be written for it and the values must arrive exactly as they do today.
+        /// A CLR4 task host negotiates 0 and is always the same build. A .NET task host is loaded from the SDK, so
+        /// it may be an older MSBuild and negotiate a version below the one that understands the split.
+        /// </remarks>
+        /// <param name="negotiatedPacketVersion">The negotiated packet version, or null for a CLR2 task host.</param>
+        /// <param name="expectsLazyExpansion">Whether the far side should expand metadata on read.</param>
+        [Theory]
+        [InlineData(null, false)]                                                              // CLR2 task host
+        [InlineData((byte)0, true)]                                                            // CLR4 task host
+        [InlineData((byte)5, false)]                                                           // older .NET task host
+        [InlineData(NodePacketTypeExtensions.LazyItemDefinitionMetadataMinVersion, true)]      // current .NET task host
+        public void ItemDefinitionMetadataRoundTripsAccordingToNegotiatedPacketVersion(byte? negotiatedPacketVersion, bool expectsLazyExpansion)
+        {
+            string content = ObjectModelHelpers.CleanupFileContents(@"
+                <Project ToolsVersion='msbuilddefaulttoolsversion' xmlns='msbuildnamespace'>
+                  <ItemDefinitionGroup>
+                    <i>
+                      <OutputName>%(Filename)</OutputName>
+                    </i>
+                  </ItemDefinitionGroup>
+                  <ItemGroup>
+                    <i Include='folder\hello.txt' />
+                  </ItemGroup>
+                </Project>");
+
+            using ProjectRootElementFromString projectRootElementFromString = new(content);
+            ProjectInstance instance = new Project(projectRootElementFromString.Project).CreateProjectInstance();
+            ITaskItem sourceItem = instance.GetItems("i").Single();
+
+            // In-proc, the item expands on read. This is the reference behaviour.
+            sourceItem.GetMetadata("OutputName").ShouldBe("hello");
+
+            TaskParameter parameter = new(sourceItem);
+
+            ITranslator writeTranslator = TranslationHelpers.GetWriteTranslator();
+            writeTranslator.NegotiatedPacketVersion = negotiatedPacketVersion;
+            ((ITranslatable)parameter).Translate(writeTranslator);
+
+            ITranslator readTranslator = TranslationHelpers.GetReadTranslator();
+            readTranslator.NegotiatedPacketVersion = negotiatedPacketVersion;
+            TaskParameter deserialized = TaskParameter.FactoryForDeserialization(readTranslator);
+
+            ITaskItem receivedItem = (ITaskItem)deserialized.WrappedParameter;
+
+            if (expectsLazyExpansion)
+            {
+                receivedItem.GetMetadata("OutputName").ShouldBe("hello");
+
+                // The value is still bound to the item spec, so reassigning it re-derives, as it does in-proc.
+                receivedItem.ItemSpec = @"other\renamed.txt";
+                receivedItem.GetMetadata("OutputName").ShouldBe("renamed");
+            }
+            else
+            {
+                // Older peers receive exactly what they receive today: the raw, unexpanded value.
+                receivedItem.GetMetadata("OutputName").ShouldBe("%(Filename)");
+            }
         }
 
         /// <summary>

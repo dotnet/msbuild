@@ -40,7 +40,8 @@ namespace Microsoft.Build.Execution
         ITranslatable,
         IMetadataContainer,
         IItemTypeDefinition,
-        IItemData
+        IItemData,
+        IItemDefinitionMetadataProvider
     {
         /// <summary>
         /// The project instance to which this item belongs.
@@ -313,6 +314,15 @@ namespace Microsoft.Build.Execution
 
         /// <inheritdoc cref="IItemData.EnumerateMetadata"/>
         IEnumerable<KeyValuePair<string, string>> IItemData.EnumerateMetadata() => ((IMetadataContainer)this).EnumerateMetadata();
+
+        bool IItemDefinitionMetadataProvider.HasExpandableItemDefinitionMetadata
+            => ((IItemDefinitionMetadataProvider)_taskItem).HasExpandableItemDefinitionMetadata;
+
+        IEnumerable<KeyValuePair<string, string>> IItemDefinitionMetadataProvider.EnumerateDirectMetadataEscaped()
+            => ((IItemDefinitionMetadataProvider)_taskItem).EnumerateDirectMetadataEscaped();
+
+        IEnumerable<KeyValuePair<string, string>> IItemDefinitionMetadataProvider.EnumerateItemDefinitionMetadataEscaped()
+            => ((IItemDefinitionMetadataProvider)_taskItem).EnumerateItemDefinitionMetadataEscaped();
 
         /// <summary>
         /// ITaskItem implementation
