@@ -37,6 +37,95 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         }
 
         /// <summary>
+        /// Item definition metadata that references built-in metadata (e.g. %(Filename)) is expanded on read so
+        /// it tracks the item spec it derives from. These tests pin the behaviour a task observes to be the same
+        /// whether or not it runs in a task host.
+        /// </summary>
+        /// <param name="useTaskHost">Whether the task runs out-of-proc.</param>
+        /// <param name="newItemSpec">If set, the task reassigns ItemSpec before reading the metadata.</param>
+        /// <param name="expected">The value the task is expected to observe.</param>
+        [Theory]
+        [InlineData(false, null, "hello")]
+        [InlineData(true, null, "hello")]
+        [InlineData(false, @"other\renamed.txt", "renamed")]
+        [InlineData(true, @"other\renamed.txt", "renamed")]
+        public void ItemDefinitionMetadataIsObservedIdenticallyInProcAndInTaskHost(bool useTaskHost, string newItemSpec, string expected)
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+
+            string observed = RunMetadataObservation(env, useTaskHost, newItemSpec, out int taskProcessId);
+
+            if (useTaskHost)
+            {
+                taskProcessId.ShouldNotBe(
+                    Process.GetCurrentProcess().Id,
+                    "Task must actually run out-of-proc for this test to be meaningful.");
+            }
+
+            observed.ShouldBe(expected);
+        }
+
+        /// <summary>
+        /// Opting out of the change wave restores the previous behaviour, where item definition metadata was
+        /// flattened when the item crossed into a task host and the task saw the unexpanded expression.
+        /// </summary>
+        [Fact]
+        public void ItemDefinitionMetadataIsNotExpandedInTaskHostWhenChangeWaveDisabled()
+        {
+            using TestEnvironment env = TestEnvironment.Create();
+            ChangeWaves.ResetStateForTests();
+            env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+
+            try
+            {
+                string observed = RunMetadataObservation(env, useTaskHost: true, newItemSpec: null, out _);
+
+                observed.ShouldBe("%(Filename)");
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        private static string RunMetadataObservation(TestEnvironment env, bool useTaskHost, string newItemSpec, out int taskProcessId)
+        {
+            string taskFactory = useTaskHost ? @" TaskFactory=""TaskHostFactory""" : string.Empty;
+            string newItemSpecAttribute = string.IsNullOrEmpty(newItemSpec) ? string.Empty : $@" NewItemSpec=""{newItemSpec}""";
+
+            string projectContents = $@"
+<Project>
+    <UsingTask TaskName=""MetadataObservationTask"" AssemblyFile=""{AssemblyLocation}""{taskFactory} />
+    <ItemDefinitionGroup>
+        <Thing>
+            <OutputName>%(Filename)</OutputName>
+        </Thing>
+    </ItemDefinitionGroup>
+    <ItemGroup>
+        <Thing Include=""folder\hello.txt"" />
+    </ItemGroup>
+    <Target Name='Observe'>
+        <MetadataObservationTask Items=""@(Thing)"" MetadataName=""OutputName""{newItemSpecAttribute}>
+            <Output PropertyName=""Observed"" TaskParameter=""ObservedValue"" />
+            <Output PropertyName=""TaskPid"" TaskParameter=""TaskProcessId"" />
+        </MetadataObservationTask>
+    </Target>
+</Project>";
+
+            TransientTestFile project = env.CreateFile("testProject.csproj", projectContents);
+            ProjectInstance projectInstance = new(project.Path);
+
+            BuildResult buildResult = BuildManager.DefaultBuildManager.Build(
+                new BuildParameters(),
+                new BuildRequestData(projectInstance, targetsToBuild: ["Observe"]));
+
+            buildResult.OverallResult.ShouldBe(BuildResultCode.Success);
+
+            taskProcessId = int.Parse(projectInstance.GetPropertyValue("TaskPid"), CultureInfo.InvariantCulture);
+            return projectInstance.GetPropertyValue("Observed");
+        }
+
+        /// <summary>
         /// Verifies that task host nodes properly terminate after a build completes.
         /// Tests both transient (TaskHostFactory) and sidecar (AssemblyTaskFactory) task hosts
         /// with different configuration combinations.

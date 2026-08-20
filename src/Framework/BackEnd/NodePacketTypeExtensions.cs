@@ -32,18 +32,27 @@ internal static class NodePacketTypeExtensions
     /// 5: Added delta transfer for the invariant payloads in TaskHostConfiguration / TaskHostTaskComplete:
     ///    the build process environment and the CurrentSolutionConfigurationContents solution-level configuration
     ///    blob are each sent once per connection, then only an "unchanged" marker per task.
+    /// 6: Item definition metadata that references built-in metadata (e.g. %(Filename)) is sent unexpanded
+    ///    in a separate dictionary, so it stays bound to the item spec and expands on read in the task host.
     /// 
     /// When incrementing this version, ensure compatibility with existing
     /// task hosts and update the corresponding deserialization logic.
     /// </summary>
-    public const byte PacketVersion = 5;
+    public const byte PacketVersion = 6;
 
     /// <summary>
-    /// The minimum negotiated packet version that supports delta transfer of the invariant
+    /// The minimum negotiated packet version that supports the invariant
     /// <see cref="NodePacketType.TaskHostConfiguration"/> / <see cref="NodePacketType.TaskHostTaskComplete"/>
     /// payloads (the build process environment and the CurrentSolutionConfigurationContents blob).
     /// </summary>
     public const byte EnvironmentDeltaMinVersion = 5;
+
+    /// <summary>
+    /// The minimum negotiated packet version that carries item definition metadata separately from
+    /// metadata set directly on the item, allowing built-in metadata references to be expanded on read
+    /// in the task host rather than frozen when the item crosses the process boundary.
+    /// </summary>
+    public const byte LazyItemDefinitionMetadataMinVersion = 6;
 
     // Flag bits in upper 2 bits
     private const byte ExtendedHeaderFlag = 0x40;  // Bit 6: 01000000

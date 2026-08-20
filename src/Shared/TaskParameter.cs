@@ -598,7 +598,8 @@ namespace Microsoft.Build.BackEnd
 
                     // If the source keeps item definition metadata separate and some of it is expandable,
                     // preserve that split so the values stay bound to the item spec on the other side.
-                    if (copyFrom is IItemDefinitionMetadataProvider itemDefinitionSource
+                    if (ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11)
+                        && copyFrom is IItemDefinitionMetadataProvider itemDefinitionSource
                         && itemDefinitionSource.HasExpandableItemDefinitionMetadata)
                     {
                         _customEscapedMetadata = new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
@@ -1099,10 +1100,45 @@ namespace Microsoft.Build.BackEnd
                 translator.Translate(ref _escapedItemSpec);
                 translator.Translate(ref _escapedDefiningProject);
                 translator.TranslateDictionary(ref _customEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
-                translator.TranslateDictionary(ref _itemDefinitionEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
+
+                // Older task hosts do not understand the separate item definition metadata dictionary.
+                // When talking to one, fall back to sending everything flattened, as before.
+                if (translator.NegotiatedPacketVersion >= NodePacketTypeExtensions.LazyItemDefinitionMetadataMinVersion)
+                {
+                    translator.TranslateDictionary(ref _itemDefinitionEscapedMetadata, MSBuildNameIgnoreCaseComparer.Default);
+                }
+                else if (translator.Mode == TranslationDirection.WriteToStream)
+                {
+                    FlattenItemDefinitionMetadata();
+                }
 
                 Assumed.NotNull(_escapedItemSpec);
                 Assumed.NotNull(_customEscapedMetadata);
+            }
+
+            /// <summary>
+            /// Merges item definition metadata into the direct metadata dictionary, expanding it first so that
+            /// the receiver sees resolved values rather than raw expressions. Used when the peer predates
+            /// <see cref="NodePacketTypeExtensions.LazyItemDefinitionMetadataMinVersion"/>.
+            /// </summary>
+            private void FlattenItemDefinitionMetadata()
+            {
+                if (_itemDefinitionEscapedMetadata == null || _itemDefinitionEscapedMetadata.Count == 0)
+                {
+                    return;
+                }
+
+                _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
+
+                foreach (KeyValuePair<string, string> metadatum in _itemDefinitionEscapedMetadata)
+                {
+                    if (!_customEscapedMetadata.ContainsKey(metadatum.Key))
+                    {
+                        _customEscapedMetadata[metadatum.Key] = ExpandBuiltInMetadata(metadatum.Value);
+                    }
+                }
+
+                _itemDefinitionEscapedMetadata = null;
             }
 
             internal static TaskParameterTaskItem FactoryForDeserialization(ITranslator translator)
