@@ -668,6 +668,21 @@ namespace Microsoft.Build.BackEnd
                     hostProcessId = -1;
                 }
 
+                string processName;
+                try
+                {
+                    processName = context.Process?.ProcessName ?? "unknown";
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    processName = "unknown";
+                }
+
+                ComponentHost.LoggingService.LogCommentFromText(
+                    BuildEventContext.Invalid,
+                    MessageImportance.Low,
+                    $"MTDIAG: component=NodeProviderOutOfProcTaskHost action=host-acquired nodeId={nodeKey.NodeId} communicationNodeId={context.NodeId} taskHostPid={hostProcessId} process={processName} newTaskHost={wasNewlyCreated}");
+
                 // Configure the node.
                 context.SendData(configuration);
                 return true;

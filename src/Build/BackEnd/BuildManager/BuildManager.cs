@@ -721,6 +721,21 @@ namespace Microsoft.Build.Execution
 
                 var loggingService = InitializeLoggingService();
 
+                using (Process currentProcess = Process.GetCurrentProcess())
+                {
+                    string visualStudioMode = _buildParameters.VisualStudioMtMode switch
+                    {
+                        VisualStudioMultiThreadedMode.Worker => "worker",
+                        VisualStudioMultiThreadedMode.Devenv => "devenv",
+                        _ => "off",
+                    };
+
+                    loggingService.LogCommentFromText(
+                        BuildEventContext.Invalid,
+                        MessageImportance.Low,
+                        $"MTDIAG: component=BuildManager action=BeginBuild vsMode={visualStudioMode} multiThreaded={_buildParameters.MultiThreaded} disableInProcNode={_buildParameters.DisableInProcNode} saveOperatingEnvironment={_buildParameters.SaveOperatingEnvironment} enableNodeReuse={_buildParameters.EnableNodeReuse} maxNodeCount={_buildParameters.MaxNodeCount} pid={currentProcess.Id} process={currentProcess.ProcessName}");
+                }
+
                 // Log deferred messages and response files
                 LogDeferredMessages(loggingService, _deferredBuildMessages);
 

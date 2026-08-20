@@ -438,6 +438,20 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
                 .ShouldBe(expectedAttributeTaskInCurrentProcess);
             (GetLoggedProcessId(logger, "ROUTING_LEGACY_TASK_PID") == currentProcessId)
                 .ShouldBe(expectedLegacyTaskInCurrentProcess);
+            logger.FullLog.ShouldContain($"MTDIAG: component=BuildManager action=BeginBuild vsMode={mode}");
+
+            if (expectedMultiThreaded)
+            {
+                logger.FullLog.ShouldContain("MTDIAG: component=Scheduler action=node-limits");
+                logger.FullLog.ShouldContain("MTDIAG: component=TaskHostTask action=task-route routing=sidecar");
+                logger.FullLog.ShouldContain("MTDIAG: component=TaskHost action=task-execute routing=taskhost");
+                logger.FullLog.ShouldContain("MTDIAG: component=TaskExecutionHost action=task-execute routing=in-proc task=AttributeTestTask");
+                logger.FullLog.ShouldContain(
+                    mode == "worker"
+                        ? "MTDIAG: component=OutOfProcNode action=node-started topology=process"
+                        : "MTDIAG: component=InProcNode action=node-started topology=thread");
+            }
+
             logger.WarningCount.ShouldBe(0);
         }
 

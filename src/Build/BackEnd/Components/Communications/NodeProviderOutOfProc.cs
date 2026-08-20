@@ -44,11 +44,14 @@ namespace Microsoft.Build.BackEnd
 
         private sealed class MultiNodeProcessSlot
         {
-            internal MultiNodeProcessSlot(Stream stream, byte negotiatedPacketVersion)
+            internal MultiNodeProcessSlot(int slotId, Stream stream, byte negotiatedPacketVersion)
             {
+                SlotId = slotId;
                 Stream = stream;
                 NegotiatedPacketVersion = negotiatedPacketVersion;
             }
+
+            internal int SlotId { get; }
 
             internal Stream Stream { get; }
 
@@ -152,6 +155,15 @@ namespace Microsoft.Build.BackEnd
                 NodeInfo nodeInfo = new NodeInfo(context.NodeId, ProviderType);
 
                 _nodeContexts[context.NodeId] = context;
+
+                if (ComponentHost.BuildParameters.MultiThreaded)
+                {
+                    GetProcessDetails(context.Process, out int processId, out string processName);
+                    ComponentHost.LoggingService.LogCommentFromText(
+                        BuildEventContext.Invalid,
+                        MessageImportance.Low,
+                        $"MTDIAG: component=NodeProviderOutOfProc action=node-created topology=process nodeId={context.NodeId} pid={processId} process={processName}");
+                }
 
                 // Start the asynchronous read.
                 context.BeginAsyncPacketRead();
@@ -328,6 +340,11 @@ namespace Microsoft.Build.BackEnd
 
                         CommunicationsUtilities.Trace(
                             $"Assigned logical node {nodeId} to multi-node worker PID {_multiNodeProcess.Id}.");
+                        GetProcessDetails(_multiNodeProcess, out int processId, out string processName);
+                        ComponentHost.LoggingService.LogCommentFromText(
+                            BuildEventContext.Invalid,
+                            MessageImportance.Low,
+                            $"MTDIAG: component=NodeProviderOutOfProc action=node-created topology=clustered-worker nodeId={nodeId} slotId={slot.SlotId} pid={processId} process={processName}");
                     }
 
                     return nodes;
@@ -382,6 +399,11 @@ namespace Microsoft.Build.BackEnd
 
             CommunicationsUtilities.Trace(
                 $"Started multi-node worker PID {process.Id} with {slotCount} logical slot(s).");
+            GetProcessDetails(process, out int processId, out string processName);
+            ComponentHost.LoggingService.LogCommentFromText(
+                BuildEventContext.Invalid,
+                MessageImportance.Low,
+                $"MTDIAG: component=NodeProviderOutOfProc action=worker-started topology=clustered-worker pid={processId} process={processName} slotCount={slotCount}");
 
             Parallel.For(0, slotCount, slot =>
             {
@@ -400,7 +422,7 @@ namespace Microsoft.Build.BackEnd
                         throw new IOException($"Could not connect to logical slot {slot} on worker PID {process.Id}.");
                     }
 
-                    slots[slot] = new MultiNodeProcessSlot(stream, result.NegotiatedPacketVersion);
+                    slots[slot] = new MultiNodeProcessSlot(slot, stream, result.NegotiatedPacketVersion);
                 }
                 catch (Exception ex)
                 {
@@ -425,6 +447,20 @@ namespace Microsoft.Build.BackEnd
             foreach (MultiNodeProcessSlot slot in slots)
             {
                 _availableMultiNodeProcessSlots.Enqueue(slot);
+            }
+        }
+
+        private static void GetProcessDetails(Process process, out int processId, out string processName)
+        {
+            try
+            {
+                processId = process.Id;
+                processName = process.ProcessName;
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                processId = -1;
+                processName = "unknown";
             }
         }
 
