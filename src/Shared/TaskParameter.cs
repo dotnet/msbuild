@@ -576,6 +576,12 @@ namespace Microsoft.Build.BackEnd
             private ItemSpecModifiers.Cache _cachedModifiers;
 
             /// <summary>
+            /// Names of metadata written on this item after it was received. Their values are literal, so they are
+            /// never expanded on read.
+            /// </summary>
+            private HashSet<string> _locallySetMetadata = null;
+
+            /// <summary>
             /// Constructor for serialization
             /// </summary>
             internal TaskParameterTaskItem(ITaskItem copyFrom)
@@ -756,6 +762,9 @@ namespace Microsoft.Build.BackEnd
                 _customEscapedMetadata ??= new Dictionary<string, string>(MSBuildNameIgnoreCaseComparer.Default);
 
                 _customEscapedMetadata[metadataName] = metadataValue ?? String.Empty;
+
+                _locallySetMetadata ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
+                _locallySetMetadata.Add(metadataName);
             }
 
             /// <summary>
@@ -773,6 +782,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 _customEscapedMetadata.Remove(metadataName);
+                _locallySetMetadata?.Remove(metadataName);
             }
 
             /// <summary>
@@ -882,7 +892,24 @@ namespace Microsoft.Build.BackEnd
                 string metadataValue = null;
                 _customEscapedMetadata?.TryGetValue(metadataName, out metadataValue);
 
-                return metadataValue ?? string.Empty;
+                if (metadataValue is null)
+                {
+                    return string.Empty;
+                }
+
+                // Item definition metadata referencing built-in metadata is stored unexpanded and substituted on read
+                // so that it tracks the item it is read from. Definition and directly set metadata arrive here
+                // flattened into a single dictionary, so the distinction is instead carried by the value itself:
+                // anything expanded during evaluation has no reference left to substitute. Metadata a task sets is
+                // literal, so it is excluded.
+                if (metadataValue.IndexOf("%(", StringComparison.Ordinal) < 0 || _locallySetMetadata?.Contains(metadataName) == true)
+                {
+                    return metadataValue;
+                }
+
+                _customEscapedMetadata.TryGetValue(ItemSpecModifiers.RecursiveDir, out string escapedRecursiveDir);
+
+                return BuiltInMetadataExpander.Expand(metadataValue, _escapedItemSpec, _escapedDefiningProject, escapedRecursiveDir, ref _cachedModifiers);
             }
 
             /// <summary>
