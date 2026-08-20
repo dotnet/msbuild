@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Collections;
@@ -81,6 +82,92 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             TranslationHelpers.GetReadTranslator().TranslateDictionary<PropertyDictionary<ProjectPropertyInstance>, ProjectPropertyInstance>(ref deserializedProperties, ProjectPropertyInstance.FactoryForDeserialization);
 
             Assert.Equal(properties, deserializedProperties);
+        }
+
+        [Fact]
+        public void PropertyDictionarySpecializedSerializationUsesSingleSnapshot()
+        {
+            var properties = new PropertyDictionary<ProjectPropertyInstance>();
+            properties.Set(GetPropertyInstance("p1", "v1"));
+            properties.Set(GetPropertyInstance("p2", "v2"));
+
+            using var stream = new MutatingMemoryStream(() => properties.Set(GetPropertyInstance("p3", "v3")));
+            ITranslator writeTranslator = BinaryTranslator.GetWriteTranslator(stream);
+            writeTranslator.TranslateProjectPropertyInstanceDictionary(ref properties);
+            int marker = 0x12345678;
+            writeTranslator.Translate(ref marker);
+
+            stream.Position = 0;
+            PropertyDictionary<ProjectPropertyInstance> deserializedProperties = null;
+            ITranslator readTranslator = BinaryTranslator.GetReadTranslator(stream, InterningBinaryReader.PoolingBuffer);
+            readTranslator.TranslateProjectPropertyInstanceDictionary(ref deserializedProperties);
+            int deserializedMarker = 0;
+            readTranslator.Translate(ref deserializedMarker);
+
+            Assert.Equal(3, properties.Count);
+            Assert.Equal(2, deserializedProperties.Count);
+            Assert.Equal(marker, deserializedMarker);
+        }
+
+        [Fact]
+        public void PropertyDictionarySnapshotRemainsStableAfterMutation()
+        {
+            var properties = new PropertyDictionary<ProjectPropertyInstance>();
+            ProjectPropertyInstance p1 = GetPropertyInstance("p1", "v1");
+            ProjectPropertyInstance p2 = GetPropertyInstance("p2", "v2");
+            properties.Set(p1);
+            properties.Set(p2);
+
+            ProjectPropertyInstance[] snapshot = properties.GetSnapshot();
+
+            properties.Remove(p1.Name);
+            properties.Set(GetPropertyInstance("p3", "v3"));
+
+            Assert.Equal(2, snapshot.Length);
+            Assert.Contains(p1, snapshot);
+            Assert.Contains(p2, snapshot);
+        }
+
+        [Fact]
+        public void PropertyDictionaryProjectedSnapshotsAllowMutation()
+        {
+            PropertyDictionary<ProjectPropertyInstance> properties = CreateProperties();
+            List<ProjectPropertyInstance> copied = properties.GetCopyOnReadEnumerable(property =>
+            {
+                properties.Set(GetPropertyInstance("p3", "v3"));
+                return property;
+            }).ToList();
+
+            Assert.Equal(2, copied.Count);
+
+            properties = CreateProperties();
+            ProjectPropertyInstance p1 = properties["p1"];
+            IEnumerable<string> filtered = properties.Filter(_ => true, property =>
+            {
+                properties.Set(GetPropertyInstance("p3", "v3"));
+                return property.EvaluatedValue;
+            });
+            p1.EvaluatedValue = "changed";
+
+            Assert.Contains("v1", filtered);
+
+            properties = CreateProperties();
+            List<PropertyData> enumerated = [];
+            foreach (PropertyData property in properties.Enumerate())
+            {
+                enumerated.Add(property);
+                properties.Set(GetPropertyInstance("p3", "v3"));
+            }
+
+            Assert.Equal(2, enumerated.Count);
+
+            static PropertyDictionary<ProjectPropertyInstance> CreateProperties()
+            {
+                var result = new PropertyDictionary<ProjectPropertyInstance>();
+                result.Set(GetPropertyInstance("p1", "v1"));
+                result.Set(GetPropertyInstance("p2", "v2"));
+                return result;
+            }
         }
 
         /// <summary>
@@ -324,6 +411,34 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             ProjectItemInstance item = projectInstance.AddItem(itemType, evaluatedInclude);
 
             return item;
+        }
+
+        private sealed class MutatingMemoryStream(Action mutation) : MemoryStream
+        {
+            private bool _mutated;
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                MutateBeforeWritingPropertyCount(count);
+                base.Write(buffer, offset, count);
+            }
+
+#if NET
+            public override void Write(ReadOnlySpan<byte> buffer)
+            {
+                MutateBeforeWritingPropertyCount(buffer.Length);
+                base.Write(buffer);
+            }
+#endif
+
+            private void MutateBeforeWritingPropertyCount(int byteCount)
+            {
+                if (!_mutated && byteCount == sizeof(int))
+                {
+                    _mutated = true;
+                    mutation();
+                }
+            }
         }
 
         /// <summary>
