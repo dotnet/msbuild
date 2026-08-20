@@ -860,11 +860,11 @@ namespace Microsoft.Build.Graph.UnitTests
                 project8Xml.Save(project8Path);
 
                 var projectGraph = new ProjectGraph(slnFile.Path);
-                projectGraph.EntryPointNodes.Count.ShouldBe(5);
-                projectGraph.EntryPointNodes.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project1Path, project2Path, project3Path, project6Path, project8Path }, ignoreOrder: true);
-                projectGraph.GraphRoots.Count.ShouldBe(2);
-                projectGraph.GraphRoots.Select(node => node.ProjectInstance.FullPath).ShouldBe(new[] { project1Path, project6Path }, ignoreOrder: true);
-                projectGraph.ProjectNodes.Count.ShouldBe(7);
+                projectGraph.EntryPointNodes.Count.ShouldBe(1);
+                projectGraph.EntryPointNodes.Single().ProjectInstance.FullPath.ShouldBe(slnFile.Path);
+                projectGraph.GraphRoots.Count.ShouldBe(1);
+                projectGraph.GraphRoots.Single().ProjectInstance.FullPath.ShouldBe(slnFile.Path);
+                projectGraph.ProjectNodes.Count.ShouldBe(8);
 
                 ProjectGraphNode project1Node = projectGraph.ProjectNodes.Single(node => node.ProjectInstance.FullPath == project1Path);
                 project1Node.ProjectInstance.GlobalProperties["Configuration"].ShouldBe("Debug");
@@ -2835,6 +2835,7 @@ $@"
         [InlineData(new[] { "Rebuild" }, new[] { "Rebuild" }, new[] { "Rebuild" })]
         [InlineData(new[] { "Clean" }, new[] { "Clean" }, new[] { "Clean" })]
         [InlineData(new[] { "Publish" }, new[] { "Publish" }, new[] { "Publish" })]
+        [InlineData(new[] { "Pack" }, new[] { "Pack" }, new[] { "Pack" })]
         // Traversal targets
         [InlineData(new[] { "Project1" }, new[] { "Project1Default" }, new string[0])]
         [InlineData(new[] { "Project2" }, new string[0], new[] { "Project2Default" })]
@@ -2896,6 +2897,287 @@ $@"
                 targetLists.Count.ShouldBe(projectGraph.ProjectNodes.Count);
                 targetLists[project1Node].ShouldBe(expectedProject1Targets);
                 targetLists[project2Node].ShouldBe(expectedProject2Targets);
+            }
+        }
+
+        [Fact]
+        public void SyntheticSolutionNodeIsIncludedInTopologicalSort()
+        {
+            TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
+            TransientTestFile solutionFile = _env.CreateFile(
+                "Solution.sln",
+                $$"""
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 17
+                VisualStudioVersion = 17.0.31903.59
+                MinimumVisualStudioVersion = 17.0.31903.59
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "{{projectFile.Path}}", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|x64 = Debug|x64
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                        {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                    EndGlobalSection
+                EndGlobal
+                """);
+
+            ProjectGraph graph = new(solutionFile.Path);
+            ProjectGraphNode syntheticSolutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+            ProjectGraphNode[] sortedNodes = graph.ProjectNodesTopologicallySorted.ToArray();
+
+            graph.ProjectNodes.ShouldContain(syntheticSolutionNode);
+            graph.TestOnly_Edges.Count.ShouldBe(1);
+            sortedNodes.Length.ShouldBe(graph.ProjectNodes.Count);
+            sortedNodes.Distinct().Count().ShouldBe(sortedNodes.Length);
+            sortedNodes.Last().ShouldBe(syntheticSolutionNode);
+            syntheticSolutionNode.ProjectInstance.FullPath.ShouldBe(solutionFile.Path);
+        }
+
+        [Fact]
+        public void BuildApiUsesGeneratedSolutionTraversalInstance()
+        {
+            TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
+            TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "GeneratedSolution.sln");
+            ProjectCollection projectCollection = _env.CreateProjectCollection().Collection;
+
+            ProjectGraph graph = ProjectGraph.CreateForBuild(
+                new ProjectGraphBuildOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
+                    ProjectCollection = projectCollection,
+                    Targets = ["CustomTarget"]
+                });
+
+            ProjectGraphNode solutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+
+            solutionNode.ProjectInstance.FullPath.ShouldBe($"{solutionFile.Path}.metaproj");
+            solutionNode.ProjectInstance.Targets.ContainsKey("CustomTarget").ShouldBeTrue();
+        }
+
+        [Fact]
+        public void BuildApiRejectsTargetNotSpecifiedDuringConstruction()
+        {
+            TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
+            TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "TargetBoundSolution.sln");
+
+            ProjectGraph graph = ProjectGraph.CreateForBuild(
+                new ProjectGraphBuildOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
+                    ProjectCollection = _env.CreateProjectCollection().Collection,
+                    Targets = ["CustomTarget"]
+                });
+
+            graph.GetTargetLists(["CustomTarget"]);
+
+            ArgumentException exception = Should.Throw<ArgumentException>(
+                () => graph.GetTargetLists(["AnotherTarget"]));
+
+            exception.ParamName.ShouldBe("entryProjectTargets");
+            exception.Message.ShouldContain("AnotherTarget");
+        }
+
+        [Fact]
+        public void BuildApiSolutionImportedTargetRunsOnlyOnSolutionNode()
+        {
+            TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
+            TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "SolutionOnlyTarget.sln");
+            _env.CreateFile(
+                "Directory.Solution.targets",
+                """
+                <Project>
+                  <Target Name="SolutionOnly" />
+                </Project>
+                """);
+
+            ProjectGraph graph = ProjectGraph.CreateForBuild(
+                new ProjectGraphBuildOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
+                    ProjectCollection = _env.CreateProjectCollection().Collection,
+                    Targets = ["SolutionOnly"]
+                });
+
+            ProjectGraphNode solutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+            ProjectGraphNode projectNode = graph.ProjectNodes.Single(node => node != solutionNode);
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(["SolutionOnly"]);
+
+            targetLists[solutionNode].ShouldBe(["SolutionOnly"]);
+            targetLists[projectNode].ShouldBeEmpty();
+        }
+
+        [Fact]
+        public void BuildApiProjectTraversalTargetAlsoRunsOnSolutionNode()
+        {
+            TransientTestFile projectFile = CreateProjectFile(
+                env: _env,
+                projectNumber: 1,
+                extraContent: """
+                    <Target Name="CustomTarget" />
+                    """);
+            TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "ProjectTraversalTarget.sln");
+
+            ProjectGraph graph = ProjectGraph.CreateForBuild(
+                new ProjectGraphBuildOptions
+                {
+                    EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
+                    ProjectCollection = _env.CreateProjectCollection().Collection,
+                    Targets = ["Project1:CustomTarget"]
+                });
+
+            ProjectGraphNode solutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+            ProjectGraphNode projectNode = graph.ProjectNodes.Single(node => node != solutionNode);
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(["Project1:CustomTarget"]);
+
+            targetLists[solutionNode].ShouldBe(["Project1:CustomTarget"]);
+            targetLists[projectNode].ShouldBe(["CustomTarget"]);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData(" ")]
+        public void BuildApiRejectsInvalidTargetNames(string targetName)
+        {
+            ArgumentException exception = Should.Throw<ArgumentException>(
+                () => ProjectGraph.CreateForBuild(
+                    new ProjectGraphBuildOptions
+                    {
+                        EntryPoints = [],
+                        ProjectCollection = _env.CreateProjectCollection().Collection,
+                        Targets = [targetName]
+                    }));
+
+            exception.ParamName.ShouldBe("Targets");
+        }
+
+        [Fact]
+        public void SolutionTraversalTargetSelectsMultitargetingOuterBuild()
+        {
+            TransientTestFile projectFile = _env.CreateFile(
+                "Project1.csproj",
+                """
+                <Project>
+                  <PropertyGroup>
+                    <TargetFrameworks>net472;net10.0</TargetFrameworks>
+                    <InnerBuildProperty>TargetFramework</InnerBuildProperty>
+                    <InnerBuildPropertyValues>TargetFrameworks</InnerBuildPropertyValues>
+                  </PropertyGroup>
+                  <Target Name="CustomTarget" />
+                </Project>
+                """);
+            TransientTestFile solutionFile = _env.CreateFile(
+                "Solution.sln",
+                $$"""
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 17
+                VisualStudioVersion = 17.0.31903.59
+                MinimumVisualStudioVersion = 17.0.31903.59
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "{{projectFile.Path}}", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|x64 = Debug|x64
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                        {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                    EndGlobalSection
+                EndGlobal
+                """);
+
+            ProjectGraph graph = new(solutionFile.Path);
+            ProjectGraphNode outerBuild = graph.ProjectNodes.Single(
+                node => node.ProjectInstance.FullPath == projectFile.Path
+                    && !node.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework"));
+            ProjectGraphNode[] innerBuilds = graph.ProjectNodes.Where(
+                node => node.ProjectInstance.FullPath == projectFile.Path
+                    && node.ProjectInstance.GlobalProperties.ContainsKey("TargetFramework")).ToArray();
+
+            IReadOnlyDictionary<ProjectGraphNode, ImmutableList<string>> targetLists = graph.GetTargetLists(["Project1:CustomTarget"]);
+
+            outerBuild.ProjectType.ShouldBe(ProjectInterpretation.ProjectType.OuterBuild);
+            innerBuilds.Length.ShouldBe(2);
+            targetLists[outerBuild].ShouldBe(["CustomTarget"]);
+            foreach (ProjectGraphNode innerBuild in innerBuilds)
+            {
+                targetLists[innerBuild].ShouldBeEmpty();
+            }
+        }
+
+        [Fact]
+        public void SyntheticSolutionNodeCanBeDisabledByChangeWave()
+        {
+            try
+            {
+                ChangeWaves.ResetStateForTests();
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+
+                TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
+                TransientTestFile solutionFile = _env.CreateFile(
+                    "Solution.sln",
+                    $$"""
+                    Microsoft Visual Studio Solution File, Format Version 12.00
+                    # Visual Studio Version 17
+                    VisualStudioVersion = 17.0.31903.59
+                    MinimumVisualStudioVersion = 17.0.31903.59
+                    Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "{{projectFile.Path}}", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                    EndProject
+                    Global
+                        GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                            Debug|x64 = Debug|x64
+                        EndGlobalSection
+                        GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                            {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                        EndGlobalSection
+                    EndGlobal
+                    """);
+
+                ProjectGraph graph = new(solutionFile.Path);
+
+                graph.EntryPointNodes.ShouldHaveSingleItem();
+                graph.ProjectNodes.ShouldContain(graph.EntryPointNodes.Single());
+                graph.GraphRoots.ShouldHaveSingleItem();
+                graph.ProjectNodes.ShouldContain(graph.GraphRoots.Single());
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
+            }
+        }
+
+        [Fact]
+        public void BuildApiGeneratedSolutionNodeIsNotDisabledByLegacyChangeWave()
+        {
+            try
+            {
+                ChangeWaves.ResetStateForTests();
+                _env.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", ChangeWaves.Wave18_11.ToString());
+
+                TransientTestFile projectFile = CreateProjectFile(env: _env, projectNumber: 1);
+                TransientTestFile solutionFile = CreateSingleProjectSolution(projectFile, "GeneratedSolution.sln");
+
+                ProjectGraph graph = ProjectGraph.CreateForBuild(
+                    new ProjectGraphBuildOptions
+                    {
+                        EntryPoints = [new ProjectGraphEntryPoint(solutionFile.Path)],
+                        ProjectCollection = _env.CreateProjectCollection().Collection,
+                        Targets = ["Build"]
+                    });
+
+                ProjectGraphNode solutionNode = graph.EntryPointNodes.ShouldHaveSingleItem();
+
+                solutionNode.ProjectInstance.FullPath.ShouldBe($"{solutionFile.Path}.metaproj");
+                graph.ProjectNodes.ShouldContain(solutionNode);
+                graph.GraphRoots.ShouldBe([solutionNode]);
+            }
+            finally
+            {
+                ChangeWaves.ResetStateForTests();
             }
         }
 
@@ -3155,6 +3437,31 @@ $@"
                 }));
 
             exception.ParamName.ShouldBe("DegreeOfParallelism");
+        }
+
+        private TransientTestFile CreateSingleProjectSolution(
+            TransientTestFile projectFile,
+            string solutionFileName)
+        {
+            return _env.CreateFile(
+                solutionFileName,
+                $$"""
+                Microsoft Visual Studio Solution File, Format Version 12.00
+                # Visual Studio Version 17
+                VisualStudioVersion = 17.0.31903.59
+                MinimumVisualStudioVersion = 17.0.31903.59
+                Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Project1", "{{projectFile.Path}}", "{8761499A-7280-43C4-A32F-7F41C47CA6DF}"
+                EndProject
+                Global
+                    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+                        Debug|x64 = Debug|x64
+                    EndGlobalSection
+                    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+                        {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.ActiveCfg = Debug|x64
+                        {8761499A-7280-43C4-A32F-7F41C47CA6DF}.Debug|x64.Build.0 = Debug|x64
+                    EndGlobalSection
+                EndGlobal
+                """);
         }
 
         public void Dispose()
