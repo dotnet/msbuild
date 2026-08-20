@@ -13,6 +13,7 @@ using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.CommandLine.UnitTests;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Logging;
+using Microsoft.Build.Shared;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
 using VerifyTests;
@@ -565,6 +566,145 @@ namespace Microsoft.Build.UnitTests
             InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
             {
                 _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("--anycustomarg", MessageImportance.High));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public void PrintGlobalMessage_NullContext_HighImportance_Rendered()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Detailed;
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                var args = MakeMessageEventArgs("Global diagnostic message.", MessageImportance.High);
+                args.BuildEventContext = null;
+                _centralNodeEventSource.InvokeMessageRaised(args);
+            });
+
+            _outputWriter.ToString().ShouldContain("Global diagnostic message.");
+        }
+
+        [Fact]
+        public void PrintGlobalMessage_NullContext_HighImportance_SkippedAtNormalVerbosity()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Normal;
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                var args = MakeMessageEventArgs("Global diagnostic message.", MessageImportance.High);
+                args.BuildEventContext = null;
+                _centralNodeEventSource.InvokeMessageRaised(args);
+            });
+
+            _outputWriter.ToString().ShouldNotContain("Global diagnostic message.");
+        }
+
+        [Fact]
+        public Task PrintGlobalMessage_NullContext_NormalImportance_Skipped()
+        {
+            // Null-context messages below High importance should still be swallowed.
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                var args = MakeMessageEventArgs("Global diagnostic message.", MessageImportance.Normal);
+                args.BuildEventContext = null;
+                _centralNodeEventSource.InvokeMessageRaised(args);
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintCoordinatorMessage_InvalidContext_Rendered()
+        {
+            // The build coordinator logs its "waiting for nodes" diagnostic with BuildEventContext.Invalid
+            // because it runs outside the context of any particular project. Its stable ExtendedType identifies
+            // it before and after node transport.
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(new Microsoft.Build.Framework.Coordinator.CoordinatorWaitingForNodesEventArgs(
+                    AssemblyResources.GetString("CoordinatorWaitingForNodes"),
+                    senderName: null,
+                    MessageImportance.High)
+                {
+                    BuildEventContext = BuildEventContext.Invalid,
+                });
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public void PrintCoordinatorMessage_InvalidContext_SkippedAtQuietVerbosity()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Quiet;
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(new Microsoft.Build.Framework.Coordinator.CoordinatorWaitingForNodesEventArgs(
+                    AssemblyResources.GetString("CoordinatorWaitingForNodes"),
+                    senderName: null,
+                    MessageImportance.High)
+                {
+                    BuildEventContext = BuildEventContext.Invalid,
+                });
+            });
+
+            _outputWriter.ToString().ShouldNotContain(AssemblyResources.GetString("CoordinatorWaitingForNodes"));
+        }
+
+        [Fact]
+        public Task PrintCoordinatorMessage_InvalidContext_ReconstructedAsExtendedBuildMessage_Rendered()
+        {
+            // If the coordinator's diagnostic ever crossed a node boundary or were round-tripped through a binary
+            // log, it would be reconstructed generically as ExtendedBuildMessageEventArgs (since neither the
+            // node-IPC packet format nor the binary log format preserve concrete BuildMessageEventArgs subtypes
+            // that aren't explicitly registered with them) -- but it would still carry the same ExtendedType, and
+            // must still be recognized and rendered via that fallback.
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(MakeExtendedMessageEventArgs(
+                    AssemblyResources.GetString("CoordinatorWaitingForNodes"),
+                    MessageImportance.High,
+                    Microsoft.Build.Framework.Coordinator.Constants.WaitingForNodesEventType,
+                    extendedMetadata: null,
+                    buildEventContext: BuildEventContext.Invalid));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public Task PrintMessage_InvalidContext_HighImportance_UnrecognizedMessage_Skipped()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("Some unrelated Invalid-context message.", MessageImportance.High, buildEventContext: BuildEventContext.Invalid));
+            });
+
+            return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
+        }
+
+        [Fact]
+        public void PrintMessage_InvalidContext_HighImportance_RenderedAtDetailedVerbosity()
+        {
+            _terminallogger.Verbosity = LoggerVerbosity.Detailed;
+
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs("Some unrelated Invalid-context message.", MessageImportance.High, buildEventContext: BuildEventContext.Invalid));
+            });
+
+            _outputWriter.ToString().ShouldContain("Some unrelated Invalid-context message.");
+        }
+
+        [Fact]
+        public Task PrintMessage_InvalidContext_HighImportance_MatchingTextButNotExtendedType_Skipped()
+        {
+            InvokeLoggerCallbacksForSimpleProject(succeeded: true, () =>
+            {
+                _centralNodeEventSource.InvokeMessageRaised(MakeMessageEventArgs(AssemblyResources.GetString("CoordinatorWaitingForNodes"), MessageImportance.High, buildEventContext: BuildEventContext.Invalid));
             });
 
             return Verify(_outputWriter.ToString(), _settings).UniqueForOSPlatform();
