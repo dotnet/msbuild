@@ -37,6 +37,17 @@ namespace Microsoft.Build.Execution
         private ImmutableDictionary<string, string> _metadata;
 
         /// <summary>
+        /// Metadata on this definition whose value may contain an expression that is expanded on read, or an empty
+        /// collection if there is none. Computed once per definition rather than per item: a definition is shared by
+        /// every item of its type, so scanning it for each of them would repeat identical work on a hot path.
+        /// </summary>
+        /// <remarks>
+        /// Invalidated by <see cref="IItemDefinition{T}.SetMetadata"/>, which is only used while the definition is
+        /// being built during evaluation.
+        /// </remarks>
+        private ImmutableDictionary<string, string> _expandableMetadata;
+
+        /// <summary>
         /// Constructs an empty project item definition instance.
         /// </summary>
         /// <param name="itemType">The type of item this definition object represents.</param>
@@ -141,6 +152,38 @@ namespace Microsoft.Build.Execution
         internal ImmutableDictionary<string, string> BackingMetadata => _metadata ?? ImmutableDictionaryExtensions.EmptyMetadata;
 
         /// <summary>
+        /// The subset of <see cref="BackingMetadata"/> whose values may contain an expression expanded on read.
+        /// Empty for the overwhelming majority of definitions.
+        /// </summary>
+        internal ImmutableDictionary<string, string> ExpandableMetadata
+        {
+            get
+            {
+                ImmutableDictionary<string, string> expandable = _expandableMetadata;
+
+                if (expandable == null)
+                {
+                    expandable = ImmutableDictionaryExtensions.EmptyMetadata;
+
+                    if (_metadata != null)
+                    {
+                        foreach (KeyValuePair<string, string> metadatum in _metadata)
+                        {
+                            if (Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(metadatum.Value))
+                            {
+                                expandable = expandable.SetItem(metadatum.Key, metadatum.Value);
+                            }
+                        }
+                    }
+
+                    _expandableMetadata = expandable;
+                }
+
+                return expandable;
+            }
+        }
+
+        /// <summary>
         /// Get any metadata in the item that has the specified name,
         /// otherwise returns null
         /// </summary>
@@ -207,6 +250,7 @@ namespace Microsoft.Build.Execution
 
             ProjectMetadataInstance metadatum = new ProjectMetadataInstance(xml.Name, evaluatedValue);
             _metadata = _metadata.SetItem(xml.Name, metadatum.EvaluatedValueEscaped);
+            _expandableMetadata = null;
 
             return metadatum;
         }

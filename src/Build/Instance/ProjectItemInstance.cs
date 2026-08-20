@@ -318,11 +318,8 @@ namespace Microsoft.Build.Execution
         bool IItemDefinitionMetadataProvider.HasExpandableItemDefinitionMetadata
             => ((IItemDefinitionMetadataProvider)_taskItem).HasExpandableItemDefinitionMetadata;
 
-        IEnumerable<KeyValuePair<string, string>> IItemDefinitionMetadataProvider.EnumerateDirectMetadataEscaped()
-            => ((IItemDefinitionMetadataProvider)_taskItem).EnumerateDirectMetadataEscaped();
-
-        IEnumerable<KeyValuePair<string, string>> IItemDefinitionMetadataProvider.EnumerateItemDefinitionMetadataEscaped()
-            => ((IItemDefinitionMetadataProvider)_taskItem).EnumerateItemDefinitionMetadataEscaped();
+        IEnumerable<KeyValuePair<string, string>> IItemDefinitionMetadataProvider.EnumerateExpandableItemDefinitionMetadataEscaped()
+            => ((IItemDefinitionMetadataProvider)_taskItem).EnumerateExpandableItemDefinitionMetadataEscaped();
 
         /// <summary>
         /// ITaskItem implementation
@@ -2134,43 +2131,47 @@ namespace Microsoft.Build.Execution
 
             bool IItemDefinitionMetadataProvider.HasExpandableItemDefinitionMetadata => HasAnyExpandableExpressions();
 
-            IEnumerable<KeyValuePair<string, string>> IItemDefinitionMetadataProvider.EnumerateDirectMetadataEscaped()
-            {
-                if (_directMetadata != null)
-                {
-                    foreach (KeyValuePair<string, string> metadatum in _directMetadata)
-                    {
-                        yield return metadatum;
-                    }
-                }
-            }
-
-            IEnumerable<KeyValuePair<string, string>> IItemDefinitionMetadataProvider.EnumerateItemDefinitionMetadataEscaped()
+            IEnumerable<KeyValuePair<string, string>> IItemDefinitionMetadataProvider.EnumerateExpandableItemDefinitionMetadataEscaped()
             {
                 if (_itemDefinitions == null)
                 {
                     yield break;
                 }
 
-                // Later definitions are lower precedence, and direct metadata masks all of them.
-                // Walk in precedence order and emit the first occurrence of each name.
-                HashSet<string> seen = new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
-
+                // Each definition already knows which of its values are expandable, so this walks a small
+                // precomputed set rather than rescanning every value for every item.
                 for (int i = 0; i < _itemDefinitions.Count; i++)
                 {
-                    foreach (KeyValuePair<string, string> metadatum in _itemDefinitions[i].BackingMetadata)
+                    foreach (KeyValuePair<string, string> metadatum in _itemDefinitions[i].ExpandableMetadata)
                     {
+                        // Metadata set directly on the item wins and is never expanded.
                         if (_directMetadata?.ContainsKey(metadatum.Key) == true)
                         {
                             continue;
                         }
 
-                        if (seen.Add(metadatum.Key))
+                        // Definitions are in decreasing precedence, so an earlier one already supplied this name.
+                        if (i > 0 && IsSuppliedByHigherPrecedenceDefinition(metadatum.Key, i))
                         {
-                            yield return metadatum;
+                            continue;
                         }
+
+                        yield return metadatum;
                     }
                 }
+            }
+
+            private bool IsSuppliedByHigherPrecedenceDefinition(string name, int index)
+            {
+                for (int i = 0; i < index; i++)
+                {
+                    if (_itemDefinitions[i].BackingMetadata.ContainsKey(name))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
             }
 
             #endregion
@@ -2190,14 +2191,11 @@ namespace Microsoft.Build.Execution
                     return false;
                 }
 
-                foreach (ProjectItemDefinitionInstance item in _itemDefinitions)
+                for (int i = 0; i < _itemDefinitions.Count; i++)
                 {
-                    foreach (KeyValuePair<string, string> kvp in item.BackingMetadata)
+                    if (!_itemDefinitions[i].ExpandableMetadata.IsEmpty)
                     {
-                        if (Expander<ProjectProperty, ProjectItem>.ExpressionMayContainExpandableExpressions(kvp.Value))
-                        {
-                            return true;
-                        }
+                        return true;
                     }
                 }
 
