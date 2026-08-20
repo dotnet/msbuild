@@ -87,7 +87,7 @@ internal sealed partial class CoordinatorServer
                     return false;
                 }
 
-                WriteServerMessage(new ServerHandshakeMessage([Capabilities.NestedGrants]));
+                WriteServerMessage(new ServerHandshakeMessage([Capabilities.NestedGrants, Capabilities.Priority]));
 
                 return true;
             }
