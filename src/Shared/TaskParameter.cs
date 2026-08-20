@@ -678,6 +678,7 @@ namespace Microsoft.Build.BackEnd
                 set
                 {
                     _escapedItemSpec = value;
+                    _cachedModifiers.Clear();
                 }
             }
 
@@ -728,6 +729,7 @@ namespace Microsoft.Build.BackEnd
                 set
                 {
                     _escapedItemSpec = value;
+                    _cachedModifiers.Clear();
                 }
             }
 
@@ -763,8 +765,12 @@ namespace Microsoft.Build.BackEnd
 
                 _customEscapedMetadata[metadataName] = metadataValue ?? String.Empty;
 
-                _locallySetMetadata ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
-                _locallySetMetadata.Add(metadataName);
+                // Only a value that would otherwise be substituted on read has to be remembered as literal.
+                if (metadataValue?.IndexOf("%(", StringComparison.Ordinal) >= 0)
+                {
+                    _locallySetMetadata ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
+                    _locallySetMetadata.Add(metadataName);
+                }
             }
 
             /// <summary>
@@ -809,6 +815,14 @@ namespace Microsoft.Build.BackEnd
                     IEnumerable<KeyValuePair<string, string>> metadataToImport = _customEscapedMetadata
                         .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Key)));
 
+                    // The destination has no notion of a value awaiting substitution, so hand it finished values,
+                    // as an engine item does when copying onto an item a task can reach.
+                    if (HasAnyExpandableExpressions())
+                    {
+                        metadataToImport = metadataToImport
+                            .Select(metadatum => new KeyValuePair<string, string>(metadatum.Key, Substitute(metadatum.Key, metadatum.Value)));
+                    }
+
 #if FEATURE_APPDOMAIN
                     if (RemotingServices.IsTransparentProxy(destinationItem))
                     {
@@ -827,7 +841,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (String.IsNullOrEmpty(value))
                         {
-                            destinationItem.SetMetadata(entry.Key, entry.Value);
+                            destinationItem.SetMetadata(entry.Key, Substitute(entry.Key, entry.Value));
                         }
                     }
                 }
@@ -902,14 +916,42 @@ namespace Microsoft.Build.BackEnd
                 // flattened into a single dictionary, so the distinction is instead carried by the value itself:
                 // anything expanded during evaluation has no reference left to substitute. Metadata a task sets is
                 // literal, so it is excluded.
-                if (metadataValue.IndexOf("%(", StringComparison.Ordinal) < 0 || _locallySetMetadata?.Contains(metadataName) == true)
+                return Substitute(metadataName, metadataValue);
+            }
+
+            /// <summary>
+            /// Substitutes any built-in metadata references in a stored metadata value, unless the value was
+            /// written by the task and is therefore literal.
+            /// </summary>
+            private string Substitute(string metadataName, string escapedValue)
+            {
+                if (escapedValue.IndexOf("%(", StringComparison.Ordinal) < 0 || _locallySetMetadata?.Contains(metadataName) == true)
                 {
-                    return metadataValue;
+                    return escapedValue;
                 }
 
                 _customEscapedMetadata.TryGetValue(ItemSpecModifiers.RecursiveDir, out string escapedRecursiveDir);
 
-                return BuiltInMetadataExpander.Expand(metadataValue, _escapedItemSpec, _escapedDefiningProject, escapedRecursiveDir, ref _cachedModifiers);
+                return BuiltInMetadataExpander.Expand(escapedValue, _escapedItemSpec, _escapedDefiningProject, escapedRecursiveDir, ref _cachedModifiers);
+            }
+
+            /// <summary>
+            /// Indicates whether any stored value may contain a built-in metadata reference awaiting substitution.
+            /// </summary>
+            private bool HasAnyExpandableExpressions()
+            {
+                if (_customEscapedMetadata is not null)
+                {
+                    foreach (KeyValuePair<string, string> metadatum in _customEscapedMetadata)
+                    {
+                        if (metadatum.Value.IndexOf("%(", StringComparison.Ordinal) >= 0)
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
             }
 
             /// <summary>
