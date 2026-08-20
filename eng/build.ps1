@@ -27,6 +27,10 @@ Param(
 $pwshPath = (Get-Process -Id $PID).Path
 $buildScript = Join-Path $PSScriptRoot 'common\build.ps1'
 
+# The build script path is single-quoted for the `pwsh -Command` re-parse below, so any single quote
+# in the repo path has to be doubled to stay inside the quoted string.
+$quotedBuildScript = "'" + ($buildScript -replace "'", "''") + "'"
+
 # The stage builds run out-of-proc so that stage 2 doesn't inherit stage 1's state variables, but
 # they are invoked through `pwsh -Command` rather than `pwsh -File`. `-File` passes every argument
 # as a literal string, which typed parameters such as `[bool] $nodeReuse` and `[bool] $msbuildMultiThreaded`
@@ -43,16 +47,17 @@ function Get-QuotedArguments([string[]] $arguments) {
 function Get-BuildCommand([string[]] $arguments) {
   # Default to a failure exit code so that an error which prevents the script from running at all
   # (e.g. a parameter binding failure) isn't reported as success by the trailing `exit`.
-  "`$global:LASTEXITCODE = 1`n& '$($buildScript -replace "'", "''")' $(Get-QuotedArguments $arguments)`nexit `$LASTEXITCODE"
+  "`$global:LASTEXITCODE = 1`n& $quotedBuildScript $(Get-QuotedArguments $arguments)`nexit `$LASTEXITCODE"
 }
 
 # The command as it's displayed to the user: just the invocation, without the exit code plumbing
 # that Get-BuildCommand wraps around it.
 function Get-BuildCommandForDisplay([string[]] $arguments) {
-  "& '$buildScript' $(Get-QuotedArguments $arguments)"
+  "& $quotedBuildScript $(Get-QuotedArguments $arguments)"
 }
 
-# Forward every explicitly supplied parameter to the Arcade build. Only bound parameters are forwarded,
+# Forward every explicitly supplied parameter to the Arcade build. Apart from -configuration, which is
+# always passed on because this script uses it for its own paths, only bound parameters are forwarded,
 # so parameters the caller didn't pass keep their Arcade defaults instead of being pinned to this
 # script's. Parameters listed here are handled by this script and must not be forwarded verbatim.
 $locallyHandledParameters = @('configuration', 'test', 'stage2', 'stage2Argument', 'binaryLogName', 'properties')
@@ -117,9 +122,7 @@ if ($test -and -not $stage2) {
 
 # Log the stage 1 build command so that it's clear which arguments flow to it.
 $stage1Command = Get-BuildCommand $buildArgs
-# if ($stage2) {
-  Write-Host "Stage 1 build: $(Get-BuildCommandForDisplay $buildArgs)"
-# }
+Write-Host "Stage 1 build: $(Get-BuildCommandForDisplay $buildArgs)"
 
 & $pwshPath -NoLogo -NoProfile -ExecutionPolicy ByPass -Command $stage1Command
 
