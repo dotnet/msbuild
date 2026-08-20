@@ -12,12 +12,6 @@ namespace Microsoft.Build.UnitTests;
 public class Assumed_Tests
 {
     [Fact]
-    public void AzureDevOpsResultUploadProbe()
-    {
-        true.ShouldBeFalse("Intentional failure to verify Azure DevOps test result uploads");
-    }
-
-    [Fact]
     public void Null_DoesNotThrow_WhenNull()
     {
         Assumed.Null<string>(null);

@@ -6,6 +6,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Build.Tasks;
+using Shouldly;
 using Xunit;
 using Windows.Win32.System.Com;
 using Windows.Win32.System.Ole;
@@ -183,6 +184,8 @@ namespace Microsoft.Build.UnitTests
 
             dependencyTypeLib2.AssertAllHandlesReleased();
             dependencyTypeLib3.AssertAllHandlesReleased();
+
+            true.ShouldBeFalse("Intentional failure to verify Azure DevOps result details for ComReferenceWalker_Tests.DefinedFunction");
         }
 
         [Fact]
