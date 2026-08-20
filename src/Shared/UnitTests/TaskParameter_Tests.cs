@@ -711,6 +711,67 @@ namespace Microsoft.Build.UnitTests
             RoundTrip(item).GetMetadata("NameMeta").ShouldBe(expected);
         }
 
+        /// <summary>
+        /// A task that clones its input, whether through <c>CopyMetadataTo</c> or the copy constructor that calls
+        /// it, must get the same values the engine item hands out. The destination has no notion of a value
+        /// awaiting substitution, so the copy has to be made with finished values.
+        /// </summary>
+        [Fact]
+        public void CopyingMetadataSubstitutesReferencesAcrossTaskHostBoundary()
+        {
+            ProjectItemInstanceTaskItem item = CreateItemWithDefinitionMetadata("NameMeta", "%(Filename)");
+            ITaskItem marshalled = RoundTrip(item);
+
+            new TaskItem(item).GetMetadata("NameMeta").ShouldBe("hello");
+            new TaskItem(marshalled).GetMetadata("NameMeta").ShouldBe("hello");
+
+            TaskItem viaCopyFromEngineItem = new("dest");
+            TaskItem viaCopyFromMarshalledItem = new("dest");
+
+            item.CopyMetadataTo(viaCopyFromEngineItem);
+            marshalled.CopyMetadataTo(viaCopyFromMarshalledItem);
+
+            viaCopyFromEngineItem.GetMetadata("NameMeta").ShouldBe("hello");
+            viaCopyFromMarshalledItem.GetMetadata("NameMeta").ShouldBe("hello");
+        }
+
+        /// <summary>
+        /// A value the task wrote is literal, so cloning has to carry it across as written.
+        /// </summary>
+        [Fact]
+        public void MetadataSetByTheTaskIsCopiedLiterally()
+        {
+            ProjectItemInstanceTaskItem item = CreateItemWithDefinitionMetadata("NameMeta", "%(Filename)");
+            ITaskItem marshalled = RoundTrip(item);
+
+            item.SetMetadata("Local", "%(Filename)");
+            marshalled.SetMetadata("Local", "%(Filename)");
+
+            new TaskItem(marshalled).GetMetadata("Local").ShouldBe(new TaskItem(item).GetMetadata("Local"));
+        }
+
+        /// <summary>
+        /// Metadata derived from the item's path is cached, so reassigning ItemSpec has to invalidate it. Otherwise
+        /// a value read before the move leaks into one read after it.
+        /// </summary>
+        [Fact]
+        public void ReassigningItemSpecInvalidatesCachedPathMetadataAcrossTaskHostBoundary()
+        {
+            ProjectItemInstanceTaskItem item = CreateItemWithDefinitionMetadata("PathMeta", "%(Directory)");
+            ITaskItem marshalled = RoundTrip(item);
+
+            // Read first so that anything derived from the original path is cached.
+            item.GetMetadata("FullPath").ShouldBe(marshalled.GetMetadata("FullPath"));
+
+            string renamed = $"other{Path.DirectorySeparatorChar}renamed.txt";
+            item.ItemSpec = renamed;
+            marshalled.ItemSpec = renamed;
+
+            marshalled.GetMetadata("FullPath").ShouldBe(item.GetMetadata("FullPath"));
+            marshalled.GetMetadata("Directory").ShouldBe(item.GetMetadata("Directory"));
+            marshalled.GetMetadata("PathMeta").ShouldBe(item.GetMetadata("PathMeta"));
+        }
+
         private static ProjectItemInstanceTaskItem CreateItemWithDefinitionMetadata(string name, string escapedValue)
         {
             string itemSpec = $"folder{Path.DirectorySeparatorChar}hello.txt";
