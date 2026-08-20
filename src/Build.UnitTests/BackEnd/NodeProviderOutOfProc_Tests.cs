@@ -3,6 +3,7 @@
 
 using System;
 using Microsoft.Build.BackEnd;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
 using Shouldly;
 using Xunit;
@@ -145,6 +146,36 @@ namespace Microsoft.Build.UnitTests.BackEnd
             
             result.Length.ShouldBe(1);
             result[0].ShouldBeFalse();
+        }
+
+        [Theory]
+        [InlineData(false, false, false)]
+        [InlineData(false, true, false)]
+        [InlineData(true, false, false)]
+        [InlineData(true, true, true)]
+        public void SingleProcessWorkerRequiresMultiThreadedOutOfProcMode(
+            bool multiThreaded,
+            bool disableInProcNode,
+            bool expected)
+        {
+            var parameters = new BuildParameters
+            {
+                MultiThreaded = multiThreaded,
+                DisableInProcNode = disableInProcNode,
+            };
+
+            NodeProviderOutOfProc.ShouldUseSingleProcessForMultiThreadedNodes(parameters).ShouldBe(expected);
+        }
+
+        [Fact]
+        public void LogicalSlotsUseDistinctProcessQualifiedPipeNames()
+        {
+            string firstPipe = NamedPipeUtil.GetPlatformSpecificPipeName(1234, 0);
+            string secondPipe = NamedPipeUtil.GetPlatformSpecificPipeName(1234, 1);
+
+            firstPipe.ShouldEndWith("MSBuild1234-0");
+            secondPipe.ShouldEndWith("MSBuild1234-1");
+            firstPipe.ShouldNotBe(secondPipe);
         }
     }
 }

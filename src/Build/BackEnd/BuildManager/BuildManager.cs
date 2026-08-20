@@ -615,6 +615,11 @@ namespace Microsoft.Build.Execution
                 // Clone off the build parameters.
                 _buildParameters = parameters?.Clone() ?? new BuildParameters();
 
+                ApplyVisualStudioMultithreadedDefaults(
+                    _buildParameters,
+                    BuildEnvironmentHelper.Instance.RunningInVisualStudio,
+                    Traits.Instance.DisableVisualStudioMultiThreaded);
+
                 // Initialize additional build parameters.
                 _buildParameters.BuildId = GetNextBuildId();
 
@@ -847,6 +852,30 @@ namespace Microsoft.Build.Execution
                     _buildParameters.ProjectRootElementCache.DiscardImplicitReferences();
                 }
             }
+        }
+
+        internal static void ApplyVisualStudioMultithreadedDefaults(
+            BuildParameters parameters,
+            bool runningInVisualStudio,
+            bool disableVisualStudioMultiThreaded)
+        {
+            if (!runningInVisualStudio)
+            {
+                return;
+            }
+
+            parameters.DisableInProcNode = true;
+
+            if (disableVisualStudioMultiThreaded)
+            {
+                parameters.MultiThreaded = false;
+                return;
+            }
+
+            parameters.MultiThreaded = true;
+
+            // The clustered worker process is scoped to this BuildManager build/session prototype.
+            parameters.EnableNodeReuse = false;
         }
 
 

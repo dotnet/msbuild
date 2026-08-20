@@ -48,8 +48,10 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
         /// Verifies that a NonEnlightened task (no interface, no attribute) runs in TaskHost
         /// when MultiThreaded mode is enabled.
         /// </summary>
-        [Fact]
-        public void NonEnlightenedTask_RunsInTaskHost_InMultiThreadedMode()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void NonEnlightenedTask_RunsInTaskHost_InMultiThreadedMode(bool disableInProcNode)
         {
             // Arrange
             string projectContent = CreateTestProject(
@@ -64,7 +66,7 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             {
                 MultiThreaded = true,
                 Loggers = new[] { logger },
-                DisableInProcNode = false,
+                DisableInProcNode = disableInProcNode,
                 EnableNodeReuse = false
             };
 

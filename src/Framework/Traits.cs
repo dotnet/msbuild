@@ -52,6 +52,16 @@ namespace Microsoft.Build.Framework
         public readonly bool EnableMultiThreaded = Environment.GetEnvironmentVariable("MSBUILDENABLEMULTITHREADED") == "1";
 
         /// <summary>
+        /// Disable the Visual Studio-hosted multi-threaded worker prototype.
+        /// </summary>
+        public readonly bool DisableVisualStudioMultiThreaded = Environment.GetEnvironmentVariable(DisableVisualStudioMultiThreadedEnvVarName) == "1";
+
+        /// <summary>
+        /// Name of the environment variable that disables the Visual Studio-hosted multi-threaded worker prototype.
+        /// </summary>
+        public const string DisableVisualStudioMultiThreadedEnvVarName = "MSBUILDDISABLEVSMULTITHREADED";
+
+        /// <summary>
         /// Do not expand wildcards that match a certain pattern
         /// </summary>
         public readonly bool UseLazyWildCardEvaluation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes"));

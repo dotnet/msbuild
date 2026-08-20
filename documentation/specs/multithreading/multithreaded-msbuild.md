@@ -138,7 +138,7 @@ The scheduler is already capable of juggling multiple projects, and there's alre
 
 The scheduler should  be responsible for creating the appropriate combination of nodes (in-proc, out-of-proc, and thread nodes) based on the execution mode (multi-proc or multithreaded, CLI or Visual Studio scenarios). It will then coordinate projects execution through the node abstraction. Below is the diagram for cli multi-threaded mode creating all the thread nodes in the entry process for simplicity--in final production these will be in an [MSBuild Server process](#msbuild-server-integration).
 
-In the current implementation, enabling multithreaded mode implies that all worker nodes are in-proc. Out-of-proc worker-node topologies for multithreaded execution remain future work.
+In the CLI implementation, enabling multithreaded mode places all worker nodes in the entry process. The Visual Studio prototype described below instead places logical worker nodes in one out-of-process worker.
 
 ```mermaid
 sequenceDiagram
@@ -248,7 +248,7 @@ To ease task authoring, we will provide a Roslyn analyzer that will check for kn
 
 We need to ensure the support for multithreaded mode in Visual Studio builds. Currently, the entry node for MSBuild runs entirely within the devenv process, but the majority of the build operation are run in the MSBuild worker processes, because project systems set `BuildParameters.DisableInProcNode=true`. In multithreaded mode, all of the task execution must continue to be out of process. To address this, unlike the CLI scenario, we will move all thread nodes to the out-of-process MSBuild process, keeping only the scheduler in devenv.
 
-This section describes the intended Visual Studio topology, not the current implementation invariant that multithreaded mode implies all worker nodes are in-proc.
+The local Visual Studio prototype implements this topology as described below.
 
 ```mermaid
 sequenceDiagram
@@ -289,6 +289,26 @@ deactivate Thread1_Tasks
 Thread1_Project1 ->> Scheduler: results
 deactivate Thread1_Project1
 ```
+
+### Visual Studio clustered-worker prototype
+
+The local prototype implements the topology above for `BuildManager` sessions hosted by Visual Studio:
+
+* Visual Studio-hosted sessions enable `BuildParameters.MultiThreaded` by default and keep `DisableInProcNode=true`.
+* `MSBUILDDISABLEVSMULTITHREADED=1` disables multithreaded scheduling while retaining `DisableInProcNode=true`.
+* The scheduler and logging service remain in `devenv`.
+* One child MSBuild process starts `MaxNodeCount` logical worker slots. Each slot uses a PID-and-slot-qualified named pipe and an independent `OutOfProcNode`, configuration cache, results cache, request engine, and TaskHost manager.
+* Existing worker-node packets carry configurations, requests, results, cancellation, and shutdown. Sharing an operating-system process does not imply sharing logical-node configuration or results caches, so normal out-of-process result transfer remains enabled.
+* Tasks without `MSBuildMultiThreadableTaskAttribute` continue to run in TaskHosts created and owned by their logical worker node.
+* Node reuse is disabled. The clustered process is scoped to the build/session and is terminated deterministically if startup is partial or shutdown exceeds the node-exit timeout.
+
+Prototype limitations:
+
+* All logical slots are created eagerly and must connect successfully; there is no fallback to one process per node.
+* Process-global worker state (environment, current directory, toolsets, parser configuration, and XML cache) is initialized once under a process-wide lock. The prototype assumes all slot configurations in a session carry equivalent process-global settings.
+* The project XML cache is shared by logical slots, while configuration and results caches remain per-slot.
+* Cross-build worker reuse and MSBuild Server integration are not implemented for this topology.
+* `OutOfProcMultiNode` is an implementation entry point exposed only so the MSBuild executable assembly can start the clustered worker; it is not intended as a supported API.
 
 ## MSBuild Server integration
 

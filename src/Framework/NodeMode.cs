@@ -31,6 +31,11 @@ namespace Microsoft.Build.Framework
         /// Out-of-process server node.
         /// </summary>
         OutOfProcServerNode = 8,
+
+        /// <summary>
+        /// Out-of-process worker hosting multiple logical nodes in one process.
+        /// </summary>
+        OutOfProcMultiNode = 9,
     }
 
     /// <summary>

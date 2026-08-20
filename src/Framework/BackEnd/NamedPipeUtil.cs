@@ -18,6 +18,9 @@ internal static class NamedPipeUtil
         return GetPlatformSpecificPipeName(pipeName);
     }
 
+    internal static string GetPlatformSpecificPipeName(int processId, int nodeSlot)
+        => GetPlatformSpecificPipeName($"MSBuild{processId}-{nodeSlot}");
+
     internal static string GetPlatformSpecificPipeName(string pipeName)
     {
         if (NativeMethods.IsUnixLike)

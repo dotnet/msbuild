@@ -41,10 +41,23 @@ namespace Microsoft.Build.Execution
         private static bool s_isOutOfProcNode;
 
         /// <summary>
+        /// Synchronizes process-global state when multiple logical nodes share this process.
+        /// </summary>
+        private static readonly object s_processGlobalLock = new();
+
+        /// <summary>
         /// The one and only project root element cache to be used for the build
         /// on this out of proc node.
         /// </summary>
         private static ProjectRootElementCacheBase s_projectRootElementCacheBase;
+
+        private static FrozenDictionary<string, string> s_sharedProcessSavedEnvironment;
+
+        private static int s_sharedProcessConfiguredNodeCount;
+
+        private readonly bool _usesSharedProcess;
+
+        private bool _configuredSharedProcess;
 
         /// <summary>
         /// The endpoint used to talk to the host.
@@ -140,8 +153,14 @@ namespace Microsoft.Build.Execution
         /// Constructor.
         /// </summary>
         public OutOfProcNode()
+            : this(usesSharedProcess: false)
+        {
+        }
+
+        internal OutOfProcNode(bool usesSharedProcess)
         {
             s_isOutOfProcNode = true;
+            _usesSharedProcess = usesSharedProcess;
 
             _receivedPackets = new ConcurrentQueue<INodePacket>();
             _packetReceivedEvent = new AutoResetEvent(false);
@@ -150,7 +169,11 @@ namespace Microsoft.Build.Execution
 
             _componentFactories = new BuildComponentFactoryCollection(this);
             _componentFactories.RegisterDefaultFactories();
-            SerializationContractInitializer.Initialize();
+            lock (s_processGlobalLock)
+            {
+                SerializationContractInitializer.Initialize();
+                s_projectRootElementCacheBase ??= new ProjectRootElementCache(true /* automatically reload any changes from disk */);
+            }
             _packetFactory = new NodePacketFactory();
 
             _buildRequestEngine = (this as IBuildComponentHost).GetComponent(BuildComponentType.RequestEngine) as IBuildRequestEngine;
@@ -167,11 +190,6 @@ namespace Microsoft.Build.Execution
                 BuildComponentType.FileAccessManager,
                 (componentType) => OutOfProcNodeFileAccessManager.CreateComponent(componentType, SendPacket));
 #endif
-
-            if (s_projectRootElementCacheBase == null)
-            {
-                s_projectRootElementCacheBase = new ProjectRootElementCache(true /* automatically reload any changes from disk */);
-            }
 
             _buildRequestEngine.OnEngineException += OnEngineException;
             _buildRequestEngine.OnNewConfigurationRequest += OnNewConfigurationRequest;
@@ -250,8 +268,16 @@ namespace Microsoft.Build.Execution
         /// <param name="shutdownException">The exception which caused shutdown, if any.</param>
         /// <returns>The reason for shutting down.</returns>
         public NodeEngineShutdownReason Run(bool enableReuse, bool lowPriority, out Exception shutdownException)
+            => RunCore(enableReuse, lowPriority, nodeSlot: null, out shutdownException);
+
+        internal NodeEngineShutdownReason Run(bool lowPriority, int nodeSlot, out Exception shutdownException)
+            => RunCore(enableReuse: false, lowPriority, nodeSlot, out shutdownException);
+
+        private NodeEngineShutdownReason RunCore(bool enableReuse, bool lowPriority, int? nodeSlot, out Exception shutdownException)
         {
-            _nodeEndpoint = new NodeEndpointOutOfProc(enableReuse, lowPriority);
+            _nodeEndpoint = nodeSlot.HasValue
+                ? new NodeEndpointOutOfProc(enableReuse, lowPriority, nodeSlot.Value)
+                : new NodeEndpointOutOfProc(enableReuse, lowPriority);
             _nodeEndpoint.OnLinkStatusChanged += OnLinkStatusChanged;
             _nodeEndpoint.Listen(this);
 
@@ -491,24 +517,7 @@ namespace Microsoft.Build.Execution
             // Shutdown any Out Of Proc Nodes Created
             _taskHostNodeManager.ShutdownConnectedNodes(_shutdownReason == NodeEngineShutdownReason.BuildCompleteReuse);
 
-            // On Windows, a process holds a handle to the current directory,
-            // so reset it away from a user-requested folder that may get deleted.
-            NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
-
-            // Restore the original environment, best effort.
-            // If the node was never configured, this will be null.
-            if (_savedEnvironment != null)
-            {
-                try
-                {
-                    CommunicationsUtilities.SetEnvironment(_savedEnvironment);
-                }
-                catch (Exception ex)
-                {
-                    CommunicationsUtilities.Trace($"Failed to restore the original environment: {ex}.");
-                }
-                Traits.UpdateFromEnvironment();
-            }
+            RestoreProcessGlobalState();
             try
             {
                 // Shut down logging, which will cause all queued logging messages to be sent.
@@ -564,7 +573,7 @@ namespace Microsoft.Build.Execution
                 resultsCache.ClearResults();
             }
 
-            if (Environment.GetEnvironmentVariable("MSBUILDCLEARXMLCACHEONCHILDNODES") == "1")
+            if (!_usesSharedProcess && Environment.GetEnvironmentVariable("MSBUILDCLEARXMLCACHEONCHILDNODES") == "1")
             {
                 // Optionally clear out the cache. This has the advantage of releasing memory,
                 // but the disadvantage of causing the next build to repeat the load and parse.
@@ -715,55 +724,7 @@ namespace Microsoft.Build.Execution
             // Grab the system parameters.
             _buildParameters = configuration.BuildParameters;
 
-            s_projectRootElementCacheBase.SetParserIgnoreConfiguration(configuration.BuildParameters.ParserIgnoreConfiguration);
-
-            _buildParameters.ProjectRootElementCache = s_projectRootElementCacheBase;
-
-            // Snapshot the current environment
-            _savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
-
-            // Change to the startup directory
-            try
-            {
-                NativeMethodsShared.SetCurrentDirectory(BuildParameters.StartupDirectory);
-            }
-            catch (DirectoryNotFoundException)
-            {
-                // Somehow the startup directory vanished. This can happen if build was started from a USB Key and it was removed.
-                NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
-            }
-
-            // Replicate the environment.  First, unset any environment variables set by the previous configuration.
-            if (_currentConfiguration != null)
-            {
-                foreach (string key in _currentConfiguration.BuildParameters.BuildProcessEnvironment.Keys)
-                {
-                    Environment.SetEnvironmentVariable(key, null);
-                }
-            }
-
-            // Now set the new environment and update Traits class accordingly
-            foreach (KeyValuePair<string, string> environmentPair in _buildParameters.BuildProcessEnvironment)
-            {
-                Environment.SetEnvironmentVariable(environmentPair.Key, environmentPair.Value);
-            }
-
-            Traits.UpdateFromEnvironment();
-            DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(_buildParameters.BuildProcessEnvironment);
-
-            // We want to make sure the global project collection has the toolsets which were defined on the parent
-            // so that any custom toolsets defined can be picked up by tasks who may use the global project collection but are
-            // executed on the child node.
-            ICollection<Toolset> parentToolSets = _buildParameters.ToolsetProvider.Toolsets;
-            if (parentToolSets != null)
-            {
-                ProjectCollection.GlobalProjectCollection.RemoveAllToolsets();
-
-                foreach (Toolset toolSet in parentToolSets)
-                {
-                    ProjectCollection.GlobalProjectCollection.AddToolset(toolSet);
-                }
-            }
+            ConfigureProcessGlobalState(configuration);
 
             // Set the culture.
             CultureInfo.CurrentCulture = _buildParameters.Culture;
@@ -865,6 +826,115 @@ namespace Microsoft.Build.Execution
 
             // Finally store off this configuration packet.
             _currentConfiguration = configuration;
+        }
+
+        private void ConfigureProcessGlobalState(NodeConfiguration configuration)
+        {
+            lock (s_processGlobalLock)
+            {
+                s_projectRootElementCacheBase.SetParserIgnoreConfiguration(configuration.BuildParameters.ParserIgnoreConfiguration);
+                _buildParameters.ProjectRootElementCache = s_projectRootElementCacheBase;
+
+                if (_usesSharedProcess && s_sharedProcessConfiguredNodeCount > 0)
+                {
+                    s_sharedProcessConfiguredNodeCount++;
+                    _configuredSharedProcess = true;
+                    return;
+                }
+
+                FrozenDictionary<string, string> savedEnvironment = CommunicationsUtilities.GetEnvironmentVariables();
+                if (_usesSharedProcess)
+                {
+                    s_sharedProcessSavedEnvironment = savedEnvironment;
+                    s_sharedProcessConfiguredNodeCount = 1;
+                    _configuredSharedProcess = true;
+                }
+                else
+                {
+                    _savedEnvironment = savedEnvironment;
+                }
+
+                try
+                {
+                    NativeMethodsShared.SetCurrentDirectory(BuildParameters.StartupDirectory);
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+                }
+
+                if (_currentConfiguration != null)
+                {
+                    foreach (string key in _currentConfiguration.BuildParameters.BuildProcessEnvironment.Keys)
+                    {
+                        Environment.SetEnvironmentVariable(key, null);
+                    }
+                }
+
+                foreach (KeyValuePair<string, string> environmentPair in _buildParameters.BuildProcessEnvironment)
+                {
+                    Environment.SetEnvironmentVariable(environmentPair.Key, environmentPair.Value);
+                }
+
+                Traits.UpdateFromEnvironment();
+                DotnetHostEnvironmentHelper.ClearBootstrapDotnetRootEnvironment(_buildParameters.BuildProcessEnvironment);
+
+                ICollection<Toolset> parentToolSets = _buildParameters.ToolsetProvider.Toolsets;
+                if (parentToolSets != null)
+                {
+                    ProjectCollection.GlobalProjectCollection.RemoveAllToolsets();
+
+                    foreach (Toolset toolSet in parentToolSets)
+                    {
+                        ProjectCollection.GlobalProjectCollection.AddToolset(toolSet);
+                    }
+                }
+            }
+        }
+
+        private void RestoreProcessGlobalState()
+        {
+            lock (s_processGlobalLock)
+            {
+                FrozenDictionary<string, string> environmentToRestore;
+                if (_usesSharedProcess)
+                {
+                    if (!_configuredSharedProcess)
+                    {
+                        return;
+                    }
+
+                    _configuredSharedProcess = false;
+                    s_sharedProcessConfiguredNodeCount--;
+                    if (s_sharedProcessConfiguredNodeCount > 0)
+                    {
+                        return;
+                    }
+
+                    environmentToRestore = s_sharedProcessSavedEnvironment;
+                    s_sharedProcessSavedEnvironment = null;
+                }
+                else
+                {
+                    environmentToRestore = _savedEnvironment;
+                }
+
+                NativeMethodsShared.SetCurrentDirectory(BuildEnvironmentHelper.Instance.CurrentMSBuildToolsDirectory);
+
+                if (environmentToRestore != null)
+                {
+                    try
+                    {
+                        CommunicationsUtilities.SetEnvironment(environmentToRestore);
+                    }
+                    catch (Exception ex)
+                    {
+                        CommunicationsUtilities.Trace($"Failed to restore the original environment: {ex}.");
+                    }
+
+                    Traits.UpdateFromEnvironment();
+                }
+            }
         }
 
         /// <summary>

@@ -5,7 +5,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
+using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
@@ -25,6 +28,29 @@ namespace Microsoft.Build.BackEnd
         /// A mapping of all the nodes managed by this provider.
         /// </summary>
         private ConcurrentDictionary<int, NodeContext> _nodeContexts;
+
+        private readonly object _multiNodeProcessLock = new();
+
+        private Queue<MultiNodeProcessSlot> _availableMultiNodeProcessSlots;
+
+        private Process _multiNodeProcess;
+
+        private bool _multiNodeProcessShuttingDown;
+
+        private HandshakeOptions _multiNodeProcessHandshakeOptions;
+
+        private sealed class MultiNodeProcessSlot
+        {
+            internal MultiNodeProcessSlot(Stream stream, byte negotiatedPacketVersion)
+            {
+                Stream = stream;
+                NegotiatedPacketVersion = negotiatedPacketVersion;
+            }
+
+            internal Stream Stream { get; }
+
+            internal byte NegotiatedPacketVersion { get; }
+        }
 
         /// <summary>
         /// Constructor.
@@ -79,6 +105,11 @@ namespace Microsoft.Build.BackEnd
         public IList<NodeInfo> CreateNodes(int nextNodeId, INodePacketFactory factory, Func<NodeInfo, NodeConfiguration> configurationFactory, int numberOfNodesToCreate)
         {
             ArgumentNullException.ThrowIfNull(factory);
+
+            if (ShouldUseSingleProcessForMultiThreadedNodes(ComponentHost.BuildParameters))
+            {
+                return CreateNodesInSingleProcess(nextNodeId, factory, configurationFactory, numberOfNodesToCreate);
+            }
 
             // This can run concurrently. To be properly detect internal bug when we create more nodes than allowed
             //   we add into _nodeContexts premise of future node and verify that it will not cross limits.
@@ -145,6 +176,11 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableReuse">Flag indicating if nodes should prepare for reuse.</param>
         public void ShutdownConnectedNodes(bool enableReuse)
         {
+            if (ShutdownMultiNodeProcess())
+            {
+                return;
+            }
+
             // Send the build completion message to the nodes, causing them to shutdown or reset.
             var contextsToShutDown = new List<NodeContext>(_nodeContexts.Values);
 
@@ -156,6 +192,11 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownAllNodes()
         {
+            if (ShutdownMultiNodeProcess())
+            {
+                return;
+            }
+
             // If no BuildParameters were specified for this build,
             // we must be trying to shut down idle nodes from some
             // other, completed build. If they're still around,
@@ -181,6 +222,7 @@ namespace Microsoft.Build.BackEnd
         {
             this.ComponentHost = host;
             _nodeContexts = new ConcurrentDictionary<int, NodeContext>();
+            _availableMultiNodeProcessSlots = new Queue<MultiNodeProcessSlot>();
         }
 
         /// <summary>
@@ -188,6 +230,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         public void ShutdownComponent()
         {
+            ShutdownMultiNodeProcess();
         }
 
         #endregion
@@ -211,7 +254,252 @@ namespace Microsoft.Build.BackEnd
 
         public IEnumerable<Process> GetProcesses()
         {
-            return _nodeContexts.Values.Select(context => context.Process);
+            if (_multiNodeProcess != null)
+            {
+                return [_multiNodeProcess];
+            }
+
+            return _nodeContexts.Values
+                .Select(context => context.Process)
+                .GroupBy(process => process.Id)
+                .Select(group => group.First());
+        }
+
+        internal static bool ShouldUseSingleProcessForMultiThreadedNodes(BuildParameters parameters)
+            => parameters.MultiThreaded && parameters.DisableInProcNode;
+
+        private IList<NodeInfo> CreateNodesInSingleProcess(
+            int nextNodeId,
+            INodePacketFactory factory,
+            Func<NodeInfo, NodeConfiguration> configurationFactory,
+            int numberOfNodesToCreate)
+        {
+            lock (_multiNodeProcessLock)
+            {
+                if (_multiNodeProcessShuttingDown)
+                {
+                    throw new BuildAbortedException("The multi-node worker is shutting down.");
+                }
+
+                if (_nodeContexts.Count + numberOfNodesToCreate > ComponentHost.BuildParameters.MaxNodeCount)
+                {
+                    return InternalError.Throw<IList<NodeInfo>>(
+                        $"Exceeded max node count of '{ComponentHost.BuildParameters.MaxNodeCount}', current count is '{_nodeContexts.Count}'.");
+                }
+
+                EnsureMultiNodeProcess(nextNodeId);
+
+                if (_availableMultiNodeProcessSlots.Count < numberOfNodesToCreate)
+                {
+                    throw new BuildAbortedException(
+                        $"The multi-node worker has {_availableMultiNodeProcessSlots.Count} available logical slots, but {numberOfNodesToCreate} were requested.");
+                }
+
+                try
+                {
+                    var nodes = new List<NodeInfo>(numberOfNodesToCreate);
+                    for (int i = 0; i < numberOfNodesToCreate; i++)
+                    {
+                        int nodeId = nextNodeId + i;
+                        NodeInfo nodeInfo = new(nodeId, ProviderType);
+                        MultiNodeProcessSlot slot = _availableMultiNodeProcessSlots.Dequeue();
+                        NodeContext context = new(
+                            nodeId,
+                            _multiNodeProcess,
+                            slot.Stream,
+                            factory,
+                            NodeContextTerminated,
+                            slot.NegotiatedPacketVersion,
+                            _multiNodeProcessHandshakeOptions);
+
+                        _nodeContexts[nodeId] = context;
+                        context.BeginAsyncPacketRead();
+                        context.SendData(configurationFactory(nodeInfo));
+                        nodes.Add(nodeInfo);
+
+                        CommunicationsUtilities.Trace(
+                            $"Assigned logical node {nodeId} to multi-node worker PID {_multiNodeProcess.Id}.");
+                    }
+
+                    return nodes;
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    Process process = _multiNodeProcess;
+                    CommunicationsUtilities.Trace(
+                        $"Failed while assigning logical nodes in multi-node worker PID {process.Id}: {ex}.");
+                    TerminateMultiNodeProcess(process);
+                    _nodeContexts.Clear();
+                    _multiNodeProcess = null;
+                    _availableMultiNodeProcessSlots.Clear();
+                    throw new BuildAbortedException(
+                        $"Could not configure logical nodes in multi-node worker PID {process.Id}.",
+                        ex);
+                }
+            }
+        }
+
+        private void EnsureMultiNodeProcess(int firstNodeId)
+        {
+            if (_multiNodeProcess != null && !_multiNodeProcess.HasExited)
+            {
+                return;
+            }
+
+            _availableMultiNodeProcessSlots.Clear();
+            int slotCount = ComponentHost.BuildParameters.MaxNodeCount;
+            Handshake handshake = new(CommunicationsUtilities.GetHandshakeOptions(
+                taskHost: false,
+                taskHostParameters: TaskHostParameters.Empty,
+                architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture(),
+                nodeReuse: false,
+                lowPriority: ComponentHost.BuildParameters.LowPriority));
+            _multiNodeProcessHandshakeOptions = handshake.HandshakeOptions;
+
+            string msbuildLocation = ComponentHost.BuildParameters.NodeExeLocation;
+#if RUNTIME_TYPE_NETCORE
+            msbuildLocation = RemapAppHostToManagedDllIfHostedByDotnet(msbuildLocation);
+#endif
+            NodeLaunchData launchData = new(
+                MSBuildLocation: msbuildLocation,
+                CommandLineArgs: $"/noautoresponse /nologo {NodeModeHelper.ToCommandLineArgument(NodeMode.OutOfProcMultiNode)} /nodeReuse:false /low:{ComponentHost.BuildParameters.LowPriority.ToString().ToLower()} /m:{slotCount}",
+                Handshake: handshake,
+                EnvironmentOverrides: DotnetHostEnvironmentHelper.CreateDotnetRootEnvironmentOverrides());
+
+            INodeLauncher nodeLauncher = (INodeLauncher)ComponentHost.GetComponent(BuildComponentType.NodeLauncher);
+            Process process = nodeLauncher.Start(launchData, firstNodeId);
+            var slots = new MultiNodeProcessSlot[slotCount];
+            ConcurrentQueue<Exception> exceptions = new();
+
+            CommunicationsUtilities.Trace(
+                $"Started multi-node worker PID {process.Id} with {slotCount} logical slot(s).");
+
+            Parallel.For(0, slotCount, slot =>
+            {
+                try
+                {
+                    string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(process.Id, slot);
+                    Stream stream = TryConnectToProcess(
+                        process.Id,
+                        TimeoutForNewNodeCreation,
+                        handshake,
+                        out HandshakeResult result,
+                        pipeName);
+
+                    if (stream is null)
+                    {
+                        throw new IOException($"Could not connect to logical slot {slot} on worker PID {process.Id}.");
+                    }
+
+                    slots[slot] = new MultiNodeProcessSlot(stream, result.NegotiatedPacketVersion);
+                }
+                catch (Exception ex)
+                {
+                    exceptions.Enqueue(ex);
+                }
+            });
+
+            if (!exceptions.IsEmpty || slots.Any(slot => slot is null))
+            {
+                foreach (MultiNodeProcessSlot slot in slots)
+                {
+                    slot?.Stream.Dispose();
+                }
+
+                TerminateMultiNodeProcess(process);
+                throw new BuildAbortedException(
+                    $"Could not initialize all {slotCount} logical slots in multi-node worker PID {process.Id}.",
+                    new AggregateException(exceptions));
+            }
+
+            _multiNodeProcess = process;
+            foreach (MultiNodeProcessSlot slot in slots)
+            {
+                _availableMultiNodeProcessSlots.Enqueue(slot);
+            }
+        }
+
+        private bool ShutdownMultiNodeProcess()
+        {
+            Process process;
+            List<NodeContext> contexts;
+            lock (_multiNodeProcessLock)
+            {
+                process = _multiNodeProcess;
+                if (process is null)
+                {
+                    return false;
+                }
+
+                if (_multiNodeProcessShuttingDown)
+                {
+                    return true;
+                }
+
+                _multiNodeProcessShuttingDown = true;
+
+                while (_availableMultiNodeProcessSlots.Count > 0)
+                {
+                    MultiNodeProcessSlot slot = _availableMultiNodeProcessSlots.Dequeue();
+                    slot.Stream.Dispose();
+                }
+
+                contexts = new List<NodeContext>(_nodeContexts.Values);
+            }
+
+            try
+            {
+                bool shutdownPacketsSent = true;
+                try
+                {
+                    ShutdownConnectedNodes(contexts, enableReuse: false);
+                }
+                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                {
+                    shutdownPacketsSent = false;
+                    CommunicationsUtilities.Trace(
+                        $"Failed to send shutdown packets to multi-node worker PID {process.Id}: {ex}.");
+                }
+
+                if (!shutdownPacketsSent || !process.WaitForExit(TimeoutForWaitForExit))
+                {
+                    CommunicationsUtilities.Trace(
+                        $"Multi-node worker PID {process.Id} did not exit cleanly; terminating it.");
+                    TerminateMultiNodeProcess(process);
+                }
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                CommunicationsUtilities.Trace($"Failed while shutting down multi-node worker PID {process.Id}: {ex}.");
+                TerminateMultiNodeProcess(process);
+            }
+            finally
+            {
+                lock (_multiNodeProcessLock)
+                {
+                    _nodeContexts.Clear();
+                    _multiNodeProcess = null;
+                    _multiNodeProcessShuttingDown = false;
+                    _availableMultiNodeProcessSlots.Clear();
+                }
+            }
+
+            return true;
+        }
+
+        private static void TerminateMultiNodeProcess(Process process)
+        {
+            try
+            {
+                if (!process.HasExited)
+                {
+                    process.KillTree(timeoutMilliseconds: 5000);
+                }
+            }
+            catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+            {
+                CommunicationsUtilities.Trace($"Failed to terminate multi-node worker PID {process.Id}: {ex}.");
+            }
         }
     }
 }

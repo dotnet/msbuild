@@ -3404,6 +3404,14 @@ namespace Microsoft.Build.CommandLine
                         FileUtilities.ClearCacheDirectory();
                         break;
 
+                    case NodeMode.OutOfProcMultiNode:
+                        int nodeCount = ProcessMaxCPUCountSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.MaxCPUCount]);
+                        OutOfProcMultiNode multiNode = new(nodeCount);
+                        shutdownReason = multiNode.Run(lowpriority, out nodeException);
+
+                        FileUtilities.ClearCacheDirectory();
+                        break;
+
                     case NodeMode.OutOfProcTaskHostNode:
                         // We now have an option to run a long-lived sidecar TaskHost so we have to handle the NodeReuse switch.
                         bool taskHostNodeReuse = ProcessNodeReuseSwitch(commandLineSwitches[CommandLineSwitches.ParameterizedSwitch.NodeReuse]);

@@ -47,12 +47,12 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// The amount of time to wait for an out-of-proc node to spool up before we give up.
         /// </summary>
-        private const int TimeoutForNewNodeCreation = 30000;
+        protected const int TimeoutForNewNodeCreation = 30000;
 
         /// <summary>
         /// The amount of time to wait for an out-of-proc node to exit.
         /// </summary>
-        private const int TimeoutForWaitForExit = 30000;
+        protected const int TimeoutForWaitForExit = 30000;
 
 #if !FEATURE_PIPEOPTIONS_CURRENTUSERONLY
         private static readonly WindowsIdentity s_currentWindowsIdentity = WindowsIdentity.GetCurrent();
@@ -556,7 +556,7 @@ namespace Microsoft.Build.BackEnd
         /// remap (along with its callers) should be removed. Tracked by
         /// https://github.com/dotnet/msbuild/issues/13464.
         /// </remarks>
-        private static string RemapAppHostToManagedDllIfHostedByDotnet(string msbuildLocation)
+        protected static string RemapAppHostToManagedDllIfHostedByDotnet(string msbuildLocation)
         {
             if (string.IsNullOrEmpty(msbuildLocation)
                 || !Path.GetFileName(msbuildLocation).Equals(Constants.MSBuildExecutableName, StringComparison.OrdinalIgnoreCase)
@@ -809,10 +809,15 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Attempts to connect to the specified process.
         /// </summary>
-        private Stream TryConnectToProcess(int nodeProcessId, int timeout, Handshake handshake, out HandshakeResult result)
+        protected Stream TryConnectToProcess(
+            int nodeProcessId,
+            int timeout,
+            Handshake handshake,
+            out HandshakeResult result,
+            string pipeName = null)
         {
             // Try and connect to the process.
-            string pipeName = NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
+            pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName(nodeProcessId);
 
 #pragma warning disable SA1111, SA1009 // Closing parenthesis should be on line of last parameter
             NamedPipeClientStream nodeStream = new NamedPipeClientStream(

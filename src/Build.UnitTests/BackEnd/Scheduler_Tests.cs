@@ -513,6 +513,30 @@ namespace Microsoft.Build.UnitTests.BackEnd
             s.ForceAffinityOutOfProc.ShouldBeTrue();
         }
 
+        [Theory]
+        [InlineData(false, false, 1, 4)]
+        [InlineData(false, true, 0, 4)]
+        [InlineData(true, false, 4, 0)]
+        [InlineData(true, true, 0, 4)]
+        public void NodeLimitsAccountForMultiThreadedOutOfProcNodes(
+            bool multiThreaded,
+            bool disableInProcNode,
+            int expectedInProcNodeCount,
+            int expectedOutOfProcNodeCount)
+        {
+            var parameters = new BuildParameters
+            {
+                MaxNodeCount = 4,
+                MultiThreaded = multiThreaded,
+                DisableInProcNode = disableInProcNode,
+            };
+
+            (int maxInProcNodeCount, int maxOutOfProcNodeCount) = Scheduler.GetNodeLimits(parameters);
+
+            maxInProcNodeCount.ShouldBe(expectedInProcNodeCount);
+            maxOutOfProcNodeCount.ShouldBe(expectedOutOfProcNodeCount);
+        }
+
         /// <summary>
         /// Make sure that traversal projects are marked with an affinity of "InProc", which means that
         /// even if multiple are available, we should still only have the single inproc node.

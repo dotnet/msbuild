@@ -22,11 +22,27 @@ namespace Microsoft.Build.BackEnd
         /// <param name="enableReuse">Whether this node may be reused for a later build.</param>
         /// <param name="lowPriority">Whether this node is low priority.</param>
         internal NodeEndpointOutOfProc(bool enableReuse, bool lowPriority)
+            : this(enableReuse, lowPriority, nodeSlot: null)
+        {
+        }
+
+        /// <summary>
+        /// Instantiates an endpoint for one logical slot in a multi-node worker process.
+        /// </summary>
+        internal NodeEndpointOutOfProc(bool enableReuse, bool lowPriority, int nodeSlot)
+            : this(enableReuse, lowPriority, (int?)nodeSlot)
+        {
+        }
+
+        private NodeEndpointOutOfProc(bool enableReuse, bool lowPriority, int? nodeSlot)
         {
             _enableReuse = enableReuse;
             LowPriority = lowPriority;
 
-            InternalConstruct();
+            InternalConstruct(
+                nodeSlot.HasValue
+                    ? NamedPipeUtil.GetPlatformSpecificPipeName(EnvironmentUtilities.CurrentProcessId, nodeSlot.Value)
+                    : null);
         }
 
         /// <summary>

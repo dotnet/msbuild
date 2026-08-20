@@ -1086,20 +1086,19 @@ namespace Microsoft.Build.BackEnd
         /// moved from their original node to this one.
         /// </para>
         /// <para>
-        /// In MT mode, all worker nodes share the same process and caches, so transfer is unnecessary
-        /// and would race on the shared ResultsNodeId field (see #13188). This relies on the invariant
-        /// that <c>MultiThreaded == true</c> implies all worker nodes share caches (see
-        /// multithreaded-msbuild.md). If a future mode mixes in-proc and out-of-proc worker nodes,
-        /// revisit this check — see https://github.com/dotnet/msbuild/issues/11939.
+        /// In in-process MT mode, worker nodes share caches, so transfer is unnecessary and would race
+        /// on the shared ResultsNodeId field (see #13188). Out-of-process logical MT nodes have separate
+        /// configuration and results caches even when they share one operating-system process, so they
+        /// must use the normal result-transfer protocol.
         /// </para>
         /// </summary>
         /// <param name="resultsNodeId">The node ID where results currently reside.</param>
         /// <param name="currentNodeId">The node ID of the current node.</param>
-        /// <param name="isMultiThreaded">Whether MT mode is active.</param>
+        /// <param name="workerNodesShareResultsCache">Whether logical worker nodes share the results cache.</param>
         /// <returns>True if results must be transferred from another node before building.</returns>
-        internal static bool NeedsResultsTransfer(int resultsNodeId, int currentNodeId, bool isMultiThreaded)
+        internal static bool NeedsResultsTransfer(int resultsNodeId, int currentNodeId, bool workerNodesShareResultsCache)
         {
-            if (isMultiThreaded)
+            if (workerNodesShareResultsCache)
             {
                 return false;
             }
@@ -1244,7 +1243,7 @@ namespace Microsoft.Build.BackEnd
                 if (NeedsResultsTransfer(
                     _requestEntry.RequestConfiguration.ResultsNodeId,
                     _componentHost.BuildParameters.NodeId,
-                    _componentHost.BuildParameters.MultiThreaded))
+                    _componentHost.BuildParameters.MultiThreaded && !_componentHost.BuildParameters.IsOutOfProc))
                 {
                     // This indicates to the system that we will block waiting for a results transfer.  We will block here until those results become available.
                     await BlockOnTargetInProgress(Microsoft.Build.BackEnd.BuildRequest.InvalidGlobalRequestId, null);

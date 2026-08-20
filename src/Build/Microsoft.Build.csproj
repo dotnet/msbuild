@@ -162,6 +162,7 @@
     <Compile Include="BackEnd\BuildManager\EnvironmentVariableValidator.cs" />
     <Compile Include="BackEnd\BuildManager\GlobalPropertiesLookup.cs" />
     <Compile Include="BackEnd\BuildManager\ProjectIsolationMode.cs" />
+    <Compile Include="BackEnd\Node\OutOfProcMultiNode.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientPacketPump.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientExitType.cs" />
     <Compile Include="BackEnd\Client\MSBuildClientExitResult.cs" />

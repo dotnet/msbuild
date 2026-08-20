@@ -1538,12 +1538,10 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private bool CreateNewNodeIfPossible(List<ScheduleResponse> responses, IEnumerable<SchedulableRequest> requests)
         {
-            // We allow up to MaxNodeCount in-proc nodes when running multi-threaded.
-            // TODO: Take VS scenarios into account _componentHost.BuildParameters.DisableInProcNode https://github.com/dotnet/msbuild/issues/11939
-            int maxInProcNodeCount = _componentHost.BuildParameters.MultiThreaded ? _componentHost.BuildParameters.MaxNodeCount : 1;
+            (int maxInProcNodeCount, int maxOutOfProcNodeCount) = GetNodeLimits(_componentHost.BuildParameters);
             int availableNodesWithInProcAffinity = maxInProcNodeCount - _currentInProcNodeCount;
 
-            int availableNodesWithOutOfProcAffinity = _componentHost.BuildParameters.MultiThreaded ? 0 : _componentHost.BuildParameters.MaxNodeCount - _currentOutOfProcNodeCount;
+            int availableNodesWithOutOfProcAffinity = maxOutOfProcNodeCount - _currentOutOfProcNodeCount;
 
             int requestsWithOutOfProcAffinity = 0;
             int requestsWithAnyAffinityOnInProcNodes = 0;
@@ -1672,6 +1670,21 @@ namespace Microsoft.Build.BackEnd
 
             // If we haven't returned before now, we haven't asked that any new nodes be created.
             return false;
+        }
+
+        internal static (int MaxInProcNodeCount, int MaxOutOfProcNodeCount) GetNodeLimits(BuildParameters parameters)
+        {
+            int maxInProcNodeCount = parameters.DisableInProcNode
+                ? 0
+                : parameters.MultiThreaded
+                    ? parameters.MaxNodeCount
+                    : 1;
+
+            int maxOutOfProcNodeCount = parameters.MultiThreaded && !parameters.DisableInProcNode
+                ? 0
+                : parameters.MaxNodeCount;
+
+            return (maxInProcNodeCount, maxOutOfProcNodeCount);
         }
 
         /// <summary>

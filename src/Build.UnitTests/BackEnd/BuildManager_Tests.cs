@@ -411,6 +411,168 @@ namespace Microsoft.Build.UnitTests.BackEnd
             RunOutOfProcBuild(buildParameters => buildParameters.DisableInProcNode = true);
         }
 
+        [Theory]
+        [InlineData(false, false, false, false, true)]
+        [InlineData(true, false, true, true, false)]
+        [InlineData(true, true, false, true, true)]
+        public void VisualStudioMultithreadedDefaults(
+            bool runningInVisualStudio,
+            bool disableVisualStudioMultiThreaded,
+            bool expectedMultiThreaded,
+            bool expectedDisableInProcNode,
+            bool expectedEnableNodeReuse)
+        {
+            var parameters = new BuildParameters
+            {
+                EnableNodeReuse = true,
+            };
+
+            BuildManager.ApplyVisualStudioMultithreadedDefaults(
+                parameters,
+                runningInVisualStudio,
+                disableVisualStudioMultiThreaded);
+
+            parameters.MultiThreaded.ShouldBe(expectedMultiThreaded);
+            parameters.DisableInProcNode.ShouldBe(expectedDisableInProcNode);
+            parameters.EnableNodeReuse.ShouldBe(expectedEnableNodeReuse);
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MultiThreadedOutOfProcBuildUsesSingleWorkerProcess(bool designTimeBuild)
+        {
+            _env.SetEnvironmentVariable("MSBUILDENABLEALLPROPERTYFUNCTIONS", "1");
+
+            const int childCount = 4;
+            string projectDirectory = _env.CreateFolder().Path;
+            var childProjects = new string[childCount];
+            for (int i = 0; i < childCount; i++)
+            {
+                childProjects[i] = Path.Combine(projectDirectory, $"child{i}.proj");
+                File.WriteAllText(
+                    childProjects[i],
+                    CleanupFileContents("""
+                        <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                          <Target Name="Build" Returns="@(WorkerPid)">
+                            <ItemGroup>
+                              <WorkerPid Include="$(DesignTimeBuild)|$([System.Diagnostics.Process]::GetCurrentProcess().Id)" />
+                            </ItemGroup>
+                          </Target>
+                        </Project>
+                        """));
+            }
+
+            string rootProject = Path.Combine(projectDirectory, "root.proj");
+            string projectItems = string.Join(
+                Environment.NewLine,
+                childProjects.Select(path => $"<ProjectToBuild Include=\"{System.Security.SecurityElement.Escape(path)}\" />"));
+            File.WriteAllText(
+                rootProject,
+                CleanupFileContents($"""
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                      <ItemGroup>
+                        {projectItems}
+                      </ItemGroup>
+                      <Target Name="Build" Returns="@(WorkerPid)">
+                        <MSBuild Projects="@(ProjectToBuild)" Targets="Build" BuildInParallel="true">
+                          <Output TaskParameter="TargetOutputs" ItemName="WorkerPid" />
+                        </MSBuild>
+                      </Target>
+                    </Project>
+                    """));
+
+            var parameters = new BuildParameters
+            {
+                MaxNodeCount = childCount,
+                MultiThreaded = true,
+                DisableInProcNode = true,
+                EnableNodeReuse = false,
+                SaveOperatingEnvironment = false,
+                Loggers = [_logger],
+            };
+            var globalProperties = new Dictionary<string, string>
+            {
+                ["DesignTimeBuild"] = designTimeBuild.ToString(),
+            };
+            var request = new BuildRequestData(
+                rootProject,
+                globalProperties,
+                toolsVersion: null,
+                targetsToBuild: ["Build"],
+                hostServices: null);
+
+            BuildResult result = _buildManager.Build(parameters, request);
+
+            result.OverallResult.ShouldBe(BuildResultCode.Success);
+            string[] workerOutputs = result.ResultsByTarget["Build"].Items
+                .Select(item => item.ItemSpec)
+                .ToArray();
+            workerOutputs.Length.ShouldBe(childCount);
+            workerOutputs.ShouldAllBe(output => output.StartsWith($"{designTimeBuild}|", StringComparison.OrdinalIgnoreCase));
+
+            int[] workerProcessIds = workerOutputs
+                .Select(output => int.Parse(output[(output.IndexOf('|') + 1)..], CultureInfo.InvariantCulture))
+                .ToArray();
+            workerProcessIds.Distinct().ShouldHaveSingleItem();
+            workerProcessIds[0].ShouldNotBe(Process.GetCurrentProcess().Id);
+        }
+
+#pragma warning disable xUnit1069 // This cancellation test has its own completion timeout assertion.
+        [Fact(Timeout = 30_000)]
+        public void MultiThreadedOutOfProcBuildCancelsAndShutsDown()
+#pragma warning restore xUnit1069
+        {
+            string projectPath = _env.CreateFile(".proj").Path;
+            string sleepCommand = System.Security.SecurityElement.Escape(
+                Helpers.GetSleepCommand(TimeSpan.FromSeconds(60)));
+            File.WriteAllText(
+                projectPath,
+                CleanupFileContents($"""
+                    <Project ToolsVersion=`msbuilddefaulttoolsversion`>
+                      <Target Name="Build">
+                        <Message Text="Worker started" Importance="High" />
+                        <Exec Command="{sleepCommand}" />
+                        <Message Text="Unexpected completion" />
+                      </Target>
+                    </Project>
+                    """));
+
+            var parameters = new BuildParameters
+            {
+                MaxNodeCount = 4,
+                MultiThreaded = true,
+                DisableInProcNode = true,
+                EnableNodeReuse = false,
+                SaveOperatingEnvironment = false,
+                Loggers = [_logger],
+            };
+            var request = new BuildRequestData(
+                projectPath,
+                new Dictionary<string, string>(),
+                toolsVersion: null,
+                targetsToBuild: ["Build"],
+                hostServices: null);
+
+            _buildManager.BeginBuild(parameters);
+            BuildSubmission submission = _buildManager.PendBuildRequest(request);
+            submission.ExecuteAsync(callback: null, context: null);
+            SpinWait.SpinUntil(
+                () => _logger.FullLog.Contains("Task \"Exec\"", StringComparison.Ordinal),
+                TimeSpan.FromSeconds(10)).ShouldBeTrue();
+            _buildManager.CancelAllSubmissions();
+
+            bool completed = submission.WaitHandle.WaitOne(TimeSpan.FromSeconds(10));
+            BuildResultCode overallResult = completed
+                ? submission.BuildResult.OverallResult
+                : BuildResultCode.Success;
+            _buildManager.EndBuild();
+
+            completed.ShouldBeTrue();
+            overallResult.ShouldBe(BuildResultCode.Failure);
+            _logger.AssertLogDoesntContain("Unexpected completion");
+        }
+
         /// <summary>
         /// Runs a build and verifies it happens out of proc by checking the process ID.
         /// </summary>
@@ -4734,8 +4896,10 @@ $@"<Project InitialTargets=`Sleep`>
         /// dependency with DIFFERENT target sets, causing cache misses that force the scheduler
         /// to assign the same config to different nodes.
         /// </summary>
-        [Fact]
-        public void MultiThreadedBuild_SharedConfiguration_DoesNotCrash()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void MultiThreadedBuild_SharedConfiguration_DoesNotCrash(bool disableInProcNode)
         {
             // Shared dependency project with multiple targets.
             // Different parent projects will request different target combinations,
@@ -4823,7 +4987,7 @@ $@"<Project InitialTargets=`Sleep`>
                 MaxNodeCount = 8,
                 EnableNodeReuse = false,
                 MultiThreaded = true,
-                DisableInProcNode = false,
+                DisableInProcNode = disableInProcNode,
                 // MT mode needs SaveOperatingEnvironment=false to allow multiple in-proc nodes.
                 // With it enabled, the operating environment semaphore limits to one in-proc node.
                 SaveOperatingEnvironment = false,
