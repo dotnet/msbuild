@@ -4,6 +4,7 @@
 using System;
 using System.ComponentModel;
 using System.Threading;
+using Microsoft.Build.Framework;
 
 #nullable disable
 
@@ -15,6 +16,8 @@ namespace Microsoft.Build.Execution
     [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class OutOfProcMultiNode
     {
+        internal delegate NodeEngineShutdownReason SlotRunner(int slot, out Exception shutdownException);
+
         private readonly int _nodeCount;
 
         public OutOfProcMultiNode(int nodeCount)
@@ -30,17 +33,67 @@ namespace Microsoft.Build.Execution
         public NodeEngineShutdownReason Run(bool lowPriority, out Exception shutdownException)
         {
             var nodes = new OutOfProcNode[_nodeCount];
-            var threads = new Thread[_nodeCount];
-            var shutdownReasons = new NodeEngineShutdownReason[_nodeCount];
-            var shutdownExceptions = new Exception[_nodeCount];
 
             for (int i = 0; i < _nodeCount; i++)
             {
+                nodes[i] = new OutOfProcNode(usesSharedProcess: true);
+            }
+
+            return RunSlots(
+                _nodeCount,
+                (int slot, out Exception exception) => nodes[slot].Run(lowPriority, slot, out exception),
+                slot => nodes[slot].RequestCoordinatedShutdown(),
+                out shutdownException);
+        }
+
+        internal static NodeEngineShutdownReason RunSlots(
+            int nodeCount,
+            SlotRunner runSlot,
+            Action<int> requestSlotShutdown,
+            out Exception shutdownException)
+        {
+            var threads = new Thread[nodeCount];
+            var shutdownReasons = new NodeEngineShutdownReason[nodeCount];
+            var shutdownExceptions = new Exception[nodeCount];
+            int coordinatedShutdownRequested = 0;
+
+            for (int i = 0; i < nodeCount; i++)
+            {
                 int slot = i;
-                nodes[slot] = new OutOfProcNode(usesSharedProcess: true);
                 threads[slot] = new Thread(() =>
                 {
-                    shutdownReasons[slot] = nodes[slot].Run(lowPriority, slot, out shutdownExceptions[slot]);
+                    try
+                    {
+                        shutdownReasons[slot] = runSlot(slot, out shutdownExceptions[slot]);
+                    }
+                    catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                    {
+                        shutdownReasons[slot] = NodeEngineShutdownReason.Error;
+                        shutdownExceptions[slot] = ex;
+                    }
+
+                    if ((shutdownReasons[slot] == NodeEngineShutdownReason.Error
+                            || shutdownReasons[slot] == NodeEngineShutdownReason.ConnectionFailed)
+                        && Interlocked.CompareExchange(ref coordinatedShutdownRequested, 1, 0) == 0)
+                    {
+                        for (int siblingSlot = 0; siblingSlot < nodeCount; siblingSlot++)
+                        {
+                            if (siblingSlot != slot)
+                            {
+                                try
+                                {
+                                    requestSlotShutdown(siblingSlot);
+                                }
+                                catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
+                                {
+                                    shutdownReasons[slot] = NodeEngineShutdownReason.Error;
+                                    shutdownExceptions[slot] = shutdownExceptions[slot] is null
+                                        ? ex
+                                        : new AggregateException(shutdownExceptions[slot], ex);
+                                }
+                            }
+                        }
+                    }
                 })
                 {
                     IsBackground = true,
@@ -60,7 +113,7 @@ namespace Microsoft.Build.Execution
 
             shutdownException = null;
             NodeEngineShutdownReason aggregateReason = NodeEngineShutdownReason.BuildComplete;
-            for (int i = 0; i < _nodeCount; i++)
+            for (int i = 0; i < nodeCount; i++)
             {
                 if (shutdownExceptions[i] != null)
                 {

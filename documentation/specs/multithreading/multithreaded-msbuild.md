@@ -295,12 +295,13 @@ deactivate Thread1_Project1
 The local prototype implements the topology above for `BuildManager` sessions hosted by Visual Studio:
 
 * Visual Studio-hosted sessions enable `BuildParameters.MultiThreaded` by default and keep `DisableInProcNode=true`.
-* `MSBUILDDISABLEVSMULTITHREADED=1` disables multithreaded scheduling while retaining `DisableInProcNode=true`.
+* `MSBUILDDISABLEVSMULTITHREADED=1` leaves the caller's `BuildParameters` unchanged, preserving the existing Visual Studio host configuration.
 * The scheduler and logging service remain in `devenv`.
 * One child MSBuild process starts `MaxNodeCount` logical worker slots. Each slot uses a PID-and-slot-qualified named pipe and an independent `OutOfProcNode`, configuration cache, results cache, request engine, and TaskHost manager.
 * Existing worker-node packets carry configurations, requests, results, cancellation, and shutdown. Sharing an operating-system process does not imply sharing logical-node configuration or results caches, so normal out-of-process result transfer remains enabled.
 * Tasks without `MSBuildMultiThreadableTaskAttribute` continue to run in TaskHosts created and owned by their logical worker node.
-* Node reuse is disabled. The clustered process is scoped to the build/session and is terminated deterministically if startup is partial or shutdown exceeds the node-exit timeout.
+* Node reuse is disabled. The clustered process is scoped to the build/session. Shutdown packets are sent to every connected slot, while process waiting and forced termination run outside the BuildManager synchronization lock so sibling shutdown packets can continue to flow.
+* An unexpected logical-slot failure is captured and triggers coordinated sibling shutdown before the child process reports the failure.
 
 Prototype limitations:
 

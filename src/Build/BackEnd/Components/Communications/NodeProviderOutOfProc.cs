@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Exceptions;
@@ -30,6 +31,8 @@ namespace Microsoft.Build.BackEnd
         private ConcurrentDictionary<int, NodeContext> _nodeContexts;
 
         private readonly object _multiNodeProcessLock = new();
+
+        private readonly ManualResetEventSlim _multiNodeProcessShutdownComplete = new(initialState: true);
 
         private Queue<MultiNodeProcessSlot> _availableMultiNodeProcessSlots;
 
@@ -254,9 +257,15 @@ namespace Microsoft.Build.BackEnd
 
         public IEnumerable<Process> GetProcesses()
         {
-            if (_multiNodeProcess != null)
+            Process multiNodeProcess;
+            lock (_multiNodeProcessLock)
             {
-                return [_multiNodeProcess];
+                multiNodeProcess = _multiNodeProcess;
+            }
+
+            if (multiNodeProcess != null)
+            {
+                return [multiNodeProcess];
             }
 
             return _nodeContexts.Values
@@ -423,6 +432,7 @@ namespace Microsoft.Build.BackEnd
         {
             Process process;
             List<NodeContext> contexts;
+            bool waitForInProgressShutdown;
             lock (_multiNodeProcessLock)
             {
                 process = _multiNodeProcess;
@@ -433,39 +443,67 @@ namespace Microsoft.Build.BackEnd
 
                 if (_multiNodeProcessShuttingDown)
                 {
-                    return true;
+                    waitForInProgressShutdown = true;
+                    contexts = null;
                 }
-
-                _multiNodeProcessShuttingDown = true;
-
-                while (_availableMultiNodeProcessSlots.Count > 0)
+                else
                 {
-                    MultiNodeProcessSlot slot = _availableMultiNodeProcessSlots.Dequeue();
-                    slot.Stream.Dispose();
-                }
+                    waitForInProgressShutdown = false;
+                    _multiNodeProcessShuttingDown = true;
+                    _multiNodeProcessShutdownComplete.Reset();
 
-                contexts = new List<NodeContext>(_nodeContexts.Values);
+                    while (_availableMultiNodeProcessSlots.Count > 0)
+                    {
+                        MultiNodeProcessSlot slot = _availableMultiNodeProcessSlots.Dequeue();
+                        slot.Stream.Dispose();
+                    }
+
+                    contexts = new List<NodeContext>(_nodeContexts.Values);
+                }
             }
 
-            try
+            if (waitForInProgressShutdown)
             {
-                bool shutdownPacketsSent = true;
+                _multiNodeProcessShutdownComplete.Wait();
+                return true;
+            }
+
+            bool shutdownPacketsSent = true;
+            foreach (NodeContext context in contexts)
+            {
                 try
                 {
-                    ShutdownConnectedNodes(contexts, enableReuse: false);
+                    SendData(context, new NodeBuildComplete(prepareForReuse: false));
                 }
                 catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
                 {
                     shutdownPacketsSent = false;
                     CommunicationsUtilities.Trace(
-                        $"Failed to send shutdown packets to multi-node worker PID {process.Id}: {ex}.");
+                        $"Failed to send a shutdown packet to multi-node worker PID {process.Id}: {ex}.");
                 }
+            }
 
-                if (!shutdownPacketsSent || !process.WaitForExit(TimeoutForWaitForExit))
+            if (!shutdownPacketsSent)
+            {
+                CommunicationsUtilities.Trace(
+                    $"Not all logical slots in multi-node worker PID {process.Id} accepted shutdown; waiting before forced termination.");
+            }
+
+            CompleteMultiNodeProcessShutdown(process);
+            return true;
+        }
+
+        private void CompleteMultiNodeProcessShutdown(Process process)
+        {
+            try
+            {
+                if (!WaitForMultiNodeProcessExit(
+                    process.WaitForExit,
+                    () => TerminateMultiNodeProcess(process),
+                    TimeoutForWaitForExit))
                 {
                     CommunicationsUtilities.Trace(
-                        $"Multi-node worker PID {process.Id} did not exit cleanly; terminating it.");
-                    TerminateMultiNodeProcess(process);
+                        $"Multi-node worker PID {process.Id} did not exit cleanly and was terminated.");
                 }
             }
             catch (Exception ex) when (!ExceptionHandling.IsCriticalException(ex))
@@ -477,14 +515,31 @@ namespace Microsoft.Build.BackEnd
             {
                 lock (_multiNodeProcessLock)
                 {
-                    _nodeContexts.Clear();
-                    _multiNodeProcess = null;
-                    _multiNodeProcessShuttingDown = false;
-                    _availableMultiNodeProcessSlots.Clear();
+                    if (ReferenceEquals(_multiNodeProcess, process))
+                    {
+                        _nodeContexts.Clear();
+                        _multiNodeProcess = null;
+                        _multiNodeProcessShuttingDown = false;
+                        _availableMultiNodeProcessSlots.Clear();
+                    }
                 }
+
+                _multiNodeProcessShutdownComplete.Set();
+            }
+        }
+
+        internal static bool WaitForMultiNodeProcessExit(
+            Func<int, bool> waitForExit,
+            Action terminate,
+            int timeoutMilliseconds)
+        {
+            if (waitForExit(timeoutMilliseconds))
+            {
+                return true;
             }
 
-            return true;
+            terminate();
+            return false;
         }
 
         private static void TerminateMultiNodeProcess(Process process)

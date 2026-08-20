@@ -67,6 +67,11 @@ namespace Microsoft.Build.Execution
         private readonly Object _syncLock = new();
 
         /// <summary>
+        /// Serializes node shutdown without blocking node packet processing under <see cref="_syncLock"/>.
+        /// </summary>
+        private readonly object _nodeShutdownLock = new();
+
+        /// <summary>
         /// The singleton instance for the BuildManager.
         /// </summary>
         private static BuildManager? s_singletonInstance;
@@ -864,14 +869,12 @@ namespace Microsoft.Build.Execution
                 return;
             }
 
-            parameters.DisableInProcNode = true;
-
             if (disableVisualStudioMultiThreaded)
             {
-                parameters.MultiThreaded = false;
                 return;
             }
 
+            parameters.DisableInProcNode = true;
             parameters.MultiThreaded = true;
 
             // The clustered worker process is scoped to this BuildManager build/session prototype.
@@ -2466,20 +2469,31 @@ namespace Microsoft.Build.Execution
         /// </summary>
         private void ShutdownConnectedNodes(bool abort)
         {
+            INodeManager? nodeManager;
+            INodeManager? taskHostNodeManager;
+            bool enableNodeReuse;
+
             lock (_syncLock)
             {
                 _shuttingDown = true;
                 _executionCancellationTokenSource?.Cancel();
 
-                // If we are aborting, we will NOT reuse the nodes because their state may be compromised by attempts to shut down while the build is in-progress.
-                _nodeManager?.ShutdownConnectedNodes(!abort && _buildParameters!.EnableNodeReuse);
+                nodeManager = _nodeManager;
+                taskHostNodeManager = _taskHostNodeManager;
+                enableNodeReuse = _buildParameters!.EnableNodeReuse;
+            }
 
-                // if we are aborting, the task host will hear about it in time through the task building infrastructure;
+            lock (_nodeShutdownLock)
+            {
+                // If we are aborting, we will NOT reuse the nodes because their state may be compromised by attempts to shut down while the build is in-progress.
+                nodeManager?.ShutdownConnectedNodes(!abort && enableNodeReuse);
+
+                // If we are aborting, the task host will hear about it in time through the task building infrastructure;
                 // so only shut down the task host nodes if we're shutting down tidily (in which case, it is assumed that all
                 // tasks are finished building and thus that there's no risk of a race between the two shutdown pathways).
                 if (!abort)
                 {
-                    _taskHostNodeManager?.ShutdownConnectedNodes(_buildParameters!.EnableNodeReuse);
+                    taskHostNodeManager?.ShutdownConnectedNodes(enableNodeReuse);
                 }
             }
         }
@@ -2892,8 +2906,22 @@ namespace Microsoft.Build.Execution
                     }
                 }
 
-                _nodeManager!.ShutdownConnectedNodes(_buildParameters!.EnableNodeReuse);
-                _taskHostNodeManager!.ShutdownConnectedNodes(_buildParameters.EnableNodeReuse);
+                INodeManager nodeManager = _nodeManager!;
+                INodeManager taskHostNodeManager = _taskHostNodeManager!;
+                bool enableNodeReuse = _buildParameters!.EnableNodeReuse;
+                CultureInfo culture = CultureInfo.CurrentCulture;
+                CultureInfo uiCulture = CultureInfo.CurrentUICulture;
+                ThreadPoolExtensions.QueueThreadPoolWorkItemWithCulture(
+                    _ =>
+                    {
+                        lock (_nodeShutdownLock)
+                        {
+                            nodeManager.ShutdownConnectedNodes(enableNodeReuse);
+                            taskHostNodeManager.ShutdownConnectedNodes(enableNodeReuse);
+                        }
+                    },
+                    culture,
+                    uiCulture);
 
                 foreach (BuildSubmissionBase submission in _buildSubmissions.Values)
                 {

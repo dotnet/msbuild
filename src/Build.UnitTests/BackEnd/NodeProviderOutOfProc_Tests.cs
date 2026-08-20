@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Threading;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Shared;
@@ -176,6 +177,71 @@ namespace Microsoft.Build.UnitTests.BackEnd
             firstPipe.ShouldEndWith("MSBuild1234-0");
             secondPipe.ShouldEndWith("MSBuild1234-1");
             firstPipe.ShouldNotBe(secondPipe);
+        }
+
+        [Fact]
+        public void ClusteredShutdownWaitsForDelayedSlotAndForcesNonresponsiveSlot()
+        {
+            using var delayedExit = new ManualResetEventSlim(false);
+            ThreadPool.QueueUserWorkItem(_ =>
+            {
+                Thread.Sleep(50);
+                delayedExit.Set();
+            });
+
+            bool delayedProcessTerminated = false;
+            bool delayedProcessExited = NodeProviderOutOfProc.WaitForMultiNodeProcessExit(
+                timeout => delayedExit.Wait(timeout),
+                () => delayedProcessTerminated = true,
+                timeoutMilliseconds: 5_000);
+
+            delayedProcessExited.ShouldBeTrue();
+            delayedProcessTerminated.ShouldBeFalse();
+
+            bool nonresponsiveProcessTerminated = false;
+            bool nonresponsiveProcessExited = NodeProviderOutOfProc.WaitForMultiNodeProcessExit(
+                _ => false,
+                () => nonresponsiveProcessTerminated = true,
+                timeoutMilliseconds: 1);
+
+            nonresponsiveProcessExited.ShouldBeFalse();
+            nonresponsiveProcessTerminated.ShouldBeTrue();
+        }
+
+        [Fact]
+        public void MultiNodeSlotFailureRequestsSiblingShutdownAndReturnsError()
+        {
+            using var siblingShutdownRequested = new ManualResetEventSlim(false);
+            var expectedException = new InvalidOperationException("Injected logical slot failure.");
+            int siblingShutdownRequestCount = 0;
+
+            NodeEngineShutdownReason reason = OutOfProcMultiNode.RunSlots(
+                nodeCount: 3,
+                (int slot, out Exception shutdownException) =>
+                {
+                    shutdownException = null;
+                    if (slot == 0)
+                    {
+                        throw expectedException;
+                    }
+
+                    if (!siblingShutdownRequested.Wait(TimeSpan.FromSeconds(5)))
+                    {
+                        throw new TimeoutException("Sibling shutdown was not coordinated.");
+                    }
+
+                    return NodeEngineShutdownReason.BuildComplete;
+                },
+                _ =>
+                {
+                    Interlocked.Increment(ref siblingShutdownRequestCount);
+                    siblingShutdownRequested.Set();
+                },
+                out Exception shutdownException);
+
+            reason.ShouldBe(NodeEngineShutdownReason.Error);
+            shutdownException.ShouldBeSameAs(expectedException);
+            siblingShutdownRequestCount.ShouldBe(2);
         }
     }
 }

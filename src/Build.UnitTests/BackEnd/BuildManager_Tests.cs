@@ -36,6 +36,66 @@ namespace Microsoft.Build.UnitTests.BackEnd
     /// </summary>
     public class BuildManager_Tests : IDisposable
     {
+        private sealed class DelayedShutdownNodeManager : INodeManager
+        {
+            private readonly object _buildManagerSyncLock;
+
+            internal DelayedShutdownNodeManager(object buildManagerSyncLock)
+            {
+                _buildManagerSyncLock = buildManagerSyncLock;
+            }
+
+            internal bool BuildManagerSyncLockHeldDuringShutdown { get; private set; }
+
+            public void ShutdownConnectedNodes(bool enableReuse)
+            {
+                BuildManagerSyncLockHeldDuringShutdown = Monitor.IsEntered(_buildManagerSyncLock);
+                Thread.Sleep(100);
+            }
+
+            public IList<NodeInfo> CreateNodes(NodeConfiguration configuration, NodeAffinity affinity, int numberOfNodesToCreate) => [];
+
+            public void SendData(int node, INodePacket packet)
+            {
+            }
+
+            public void ShutdownAllNodes()
+            {
+            }
+
+            public void ClearPerBuildState()
+            {
+            }
+
+            public IEnumerable<Process> GetProcesses() => [];
+
+            public void InitializeComponent(IBuildComponentHost host)
+            {
+            }
+
+            public void ShutdownComponent()
+            {
+            }
+
+            public void RegisterPacketHandler(NodePacketType packetType, NodePacketFactoryMethod factory, INodePacketHandler handler)
+            {
+            }
+
+            public void UnregisterPacketHandler(NodePacketType packetType)
+            {
+            }
+
+            public void DeserializeAndRoutePacket(int nodeId, NodePacketType packetType, ITranslator translator)
+            {
+            }
+
+            public INodePacket DeserializePacket(NodePacketType packetType, ITranslator translator) => null;
+
+            public void RoutePacket(int nodeId, INodePacket packet)
+            {
+            }
+        }
+
         /// <summary>
         /// The mock logger for testing.
         /// </summary>
@@ -412,19 +472,25 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData(false, false, false, false, true)]
-        [InlineData(true, false, true, true, false)]
-        [InlineData(true, true, false, true, true)]
+        [InlineData(false, false, false, false, true, false, false, true)]
+        [InlineData(true, false, false, false, true, true, true, false)]
+        [InlineData(true, true, true, false, true, true, false, true)]
+        [InlineData(true, true, false, true, false, false, true, false)]
         public void VisualStudioMultithreadedDefaults(
             bool runningInVisualStudio,
             bool disableVisualStudioMultiThreaded,
+            bool initialMultiThreaded,
+            bool initialDisableInProcNode,
+            bool initialEnableNodeReuse,
             bool expectedMultiThreaded,
             bool expectedDisableInProcNode,
             bool expectedEnableNodeReuse)
         {
             var parameters = new BuildParameters
             {
-                EnableNodeReuse = true,
+                MultiThreaded = initialMultiThreaded,
+                DisableInProcNode = initialDisableInProcNode,
+                EnableNodeReuse = initialEnableNodeReuse,
             };
 
             BuildManager.ApplyVisualStudioMultithreadedDefaults(
@@ -435,6 +501,30 @@ namespace Microsoft.Build.UnitTests.BackEnd
             parameters.MultiThreaded.ShouldBe(expectedMultiThreaded);
             parameters.DisableInProcNode.ShouldBe(expectedDisableInProcNode);
             parameters.EnableNodeReuse.ShouldBe(expectedEnableNodeReuse);
+        }
+
+        [Fact]
+        public void ClusteredNodeShutdownDoesNotHoldBuildManagerSyncLockWhileProviderWaits()
+        {
+            using var buildManager = new BuildManager();
+            Type buildManagerType = typeof(BuildManager);
+            object syncLock = buildManagerType
+                .GetField("_syncLock", BindingFlags.Instance | BindingFlags.NonPublic)
+                .GetValue(buildManager);
+            var nodeManager = new DelayedShutdownNodeManager(syncLock);
+
+            buildManagerType
+                .GetField("_nodeManager", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(buildManager, nodeManager);
+            buildManagerType
+                .GetField("_buildParameters", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(buildManager, new BuildParameters { EnableNodeReuse = false });
+
+            buildManagerType
+                .GetMethod("ShutdownConnectedNodes", BindingFlags.Instance | BindingFlags.NonPublic)
+                .Invoke(buildManager, [false]);
+
+            nodeManager.BuildManagerSyncLockHeldDuringShutdown.ShouldBeFalse();
         }
 
         [Theory]
@@ -455,6 +545,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     CleanupFileContents("""
                         <Project ToolsVersion=`msbuilddefaulttoolsversion`>
                           <Target Name="Build" Returns="@(WorkerPid)">
+                            <PropertyGroup>
+                              <Sleep>$([System.Threading.Thread]::Sleep(1000))</Sleep>
+                            </PropertyGroup>
                             <ItemGroup>
                               <WorkerPid Include="$(DesignTimeBuild)|$([System.Diagnostics.Process]::GetCurrentProcess().Id)" />
                             </ItemGroup>
@@ -516,6 +609,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 .ToArray();
             workerProcessIds.Distinct().ShouldHaveSingleItem();
             workerProcessIds[0].ShouldNotBe(Process.GetCurrentProcess().Id);
+
+            int[] logicalNodeIds = _logger.ProjectStartedEvents
+                .Where(projectStarted => childProjects.Contains(projectStarted.ProjectFile, StringComparer.OrdinalIgnoreCase))
+                .Select(projectStarted => projectStarted.BuildEventContext.NodeId)
+                .Distinct()
+                .ToArray();
+            logicalNodeIds.Length.ShouldBeGreaterThan(1);
         }
 
 #pragma warning disable xUnit1069 // This cancellation test has its own completion timeout assertion.

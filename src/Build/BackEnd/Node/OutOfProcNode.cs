@@ -273,6 +273,11 @@ namespace Microsoft.Build.Execution
         internal NodeEngineShutdownReason Run(bool lowPriority, int nodeSlot, out Exception shutdownException)
             => RunCore(enableReuse: false, lowPriority, nodeSlot, out shutdownException);
 
+        internal void RequestCoordinatedShutdown()
+        {
+            _shutdownEvent.Set();
+        }
+
         private NodeEngineShutdownReason RunCore(bool enableReuse, bool lowPriority, int? nodeSlot, out Exception shutdownException)
         {
             _nodeEndpoint = nodeSlot.HasValue
