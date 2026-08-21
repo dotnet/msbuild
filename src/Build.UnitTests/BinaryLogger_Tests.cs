@@ -1134,6 +1134,184 @@ namespace Microsoft.Build.UnitTests
 
         #endregion
 
+        #region Event Filter Replay Tests
+
+        [Fact]
+        public void Replay_EventFilter_SkipsRejectedEventsWithoutDeserializingThem()
+        {
+            var metadataSeen = new List<BinaryLogEventMetadata>();
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                EventFilter = metadata =>
+                {
+                    metadataSeen.Add(metadata);
+                    return metadata.BuildEventContext?.ProjectContextId != ExcludedProjectContextId;
+                }
+            };
+
+            var replayed = new List<BuildEventArgs>();
+            replayEventSource.AnyEventRaised += (_, e) => replayed.Add(e);
+
+            using var stream = CreateEventFilterTestStream();
+            using var binaryReader = new BinaryReader(stream);
+            replayEventSource.Replay(binaryReader, CancellationToken.None);
+
+            // The rejected record is still offered to the filter, with its common metadata already read.
+            metadataSeen.ShouldContain(metadata =>
+                metadata.RecordKind == BinaryLogRecordKind.Warning &&
+                metadata.BuildEventContext != null &&
+                metadata.BuildEventContext.ProjectContextId == ExcludedProjectContextId);
+
+            replayed.ShouldNotContain(e => e is BuildWarningEventArgs);
+            BuildMessageEventArgs message = replayed
+                .Where(e => e.GetType() == typeof(BuildMessageEventArgs))
+                .Cast<BuildMessageEventArgs>()
+                .ShouldHaveSingleItem();
+            message.Message.ShouldBe("selected message");
+            message.BuildEventContext.ProjectContextId.ShouldBe(SelectedProjectContextId);
+
+            CreateExpectedLogFile();
+        }
+
+        [Fact]
+        public void Replay_EventFilter_AppliesToTargetSkippedAfterDeserialization()
+        {
+            // TargetSkipped carries the context the filter cares about in its type specific payload,
+            // so it can only be judged once deserialized.
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                EventFilter = metadata =>
+                    metadata.RecordKind != BinaryLogRecordKind.TargetSkipped ||
+                    metadata.OriginalBuildEventContext?.ProjectContextId == SelectedProjectContextId
+            };
+
+            var replayed = new List<BuildEventArgs>();
+            replayEventSource.AnyEventRaised += (_, e) => replayed.Add(e);
+
+            using var stream = CreateEventFilterTestStream();
+            using var binaryReader = new BinaryReader(stream);
+            replayEventSource.Replay(binaryReader, CancellationToken.None);
+
+            TargetSkippedEventArgs targetSkipped = replayed.OfType<TargetSkippedEventArgs>().ShouldHaveSingleItem();
+            targetSkipped.OriginalBuildEventContext.ProjectContextId.ShouldBe(SelectedProjectContextId);
+            replayed.ShouldContain(e => e is BuildWarningEventArgs);
+
+            CreateExpectedLogFile();
+        }
+
+        [Fact]
+        public void Replay_EventFilter_ProducesReplayableCompactBinlog()
+        {
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                EventFilter = metadata =>
+                    metadata.BuildEventContext == null ||
+                    metadata.BuildEventContext.ProjectContextId != ExcludedProjectContextId
+            };
+
+            var binaryLogger = new BinaryLogger
+            {
+                Parameters = $"LogFile={_logFile};OmitInitialInfo",
+                CollectProjectImports = BinaryLogger.ProjectImportsCollectionMode.None,
+            };
+
+            binaryLogger.Initialize(replayEventSource);
+            using (var stream = CreateEventFilterTestStream())
+            using (var binaryReader = new BinaryReader(stream))
+            {
+                replayEventSource.Replay(binaryReader, CancellationToken.None);
+            }
+
+            binaryLogger.Shutdown();
+
+            var replayed = new List<BuildEventArgs>();
+            var verifyingSource = new BinaryLogReplayEventSource();
+            verifyingSource.AnyEventRaised += (_, e) => replayed.Add(e);
+            verifyingSource.Replay(_logFile);
+
+            replayed.ShouldContain(e => e is BuildStartedEventArgs);
+            replayed.ShouldContain(e => e is BuildFinishedEventArgs);
+            replayed
+                .Where(e => e.GetType() == typeof(BuildMessageEventArgs))
+                .Cast<BuildMessageEventArgs>()
+                .ShouldHaveSingleItem()
+                .Message.ShouldBe("selected message");
+            replayed.ShouldNotContain(e => e is BuildWarningEventArgs);
+        }
+
+        [Fact]
+        public void Replay_EventFilter_WrapsExceptionsThrownByTheFilter()
+        {
+            var expected = new InvalidOperationException("filter failed");
+            var replayEventSource = new BinaryLogReplayEventSource
+            {
+                EventFilter = _ => throw expected
+            };
+            replayEventSource.AnyEventRaised += (_, _) => { };
+
+            using var stream = CreateEventFilterTestStream();
+            using var binaryReader = new BinaryReader(stream);
+
+            BinaryLogEventFilterException exception = Should.Throw<BinaryLogEventFilterException>(
+                () => replayEventSource.Replay(binaryReader, CancellationToken.None));
+            exception.InnerException.ShouldBeSameAs(expected);
+
+            CreateExpectedLogFile();
+        }
+
+        private const int SelectedProjectContextId = 101;
+        private const int ExcludedProjectContextId = 202;
+
+        /// <summary>
+        /// Creates an uncompressed, length framed binlog stream holding a build started event, a message and
+        /// a warning in distinct project contexts, a target skipped event referring back to the selected
+        /// context, and a build finished event.
+        /// </summary>
+        private static Stream CreateEventFilterTestStream()
+        {
+            var selectedContext = new BuildEventContext(1, 1, 1, 1, SelectedProjectContextId, 11, 111);
+            var excludedContext = new BuildEventContext(1, 1, 2, 2, ExcludedProjectContextId, 22, 222);
+            var skippedContext = new BuildEventContext(1, 1, 3, 3, 303, 33, 333);
+
+            var stream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(stream, Encoding.UTF8, leaveOpen: true))
+            {
+                binaryWriter.Write(BinaryLogger.FileFormatVersion);
+                binaryWriter.Write(BinaryLogger.FileFormatVersion);
+
+                var writer = new BuildEventArgsWriter(binaryWriter);
+                writer.Write(new BuildStartedEventArgs("Build started", helpKeyword: null));
+                writer.Write(new BuildMessageEventArgs("selected message", "Help", "Sender", MessageImportance.Normal)
+                {
+                    BuildEventContext = selectedContext,
+                });
+                writer.Write(new BuildWarningEventArgs(
+                    "Subcategory", "WARN", "File.cs", 1, 2, 3, 4, "excluded warning", "Help", "Sender")
+                {
+                    BuildEventContext = excludedContext,
+                });
+                writer.Write(new TargetSkippedEventArgs("target skipped")
+                {
+                    BuildEventContext = skippedContext,
+                    OriginalBuildEventContext = selectedContext,
+                    TargetName = "SkippedTarget",
+                    TargetFile = "Targets.targets",
+                    ProjectFile = "Project.csproj",
+                    BuildReason = TargetBuiltReason.DependsOn,
+                    SkipReason = TargetSkipReason.PreviouslyBuiltSuccessfully,
+                    OriginallySucceeded = true,
+                });
+                writer.Write(new BuildFinishedEventArgs("Build finished", helpKeyword: null, succeeded: true));
+                binaryWriter.Flush();
+            }
+
+            stream.WriteByte((byte)BinaryLogRecordKind.EndOfFile);
+            stream.Position = 0;
+            return stream;
+        }
+
+        #endregion
+
         [Fact]
         public void DeferredMSBuildServerLifecycleEventIsWrittenToBinlog()
         {

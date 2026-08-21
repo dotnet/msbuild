@@ -56,6 +56,11 @@
         <target state="translated">ArchiveFile a été obtenu, mais la version modifiée finale n’a pas été définie.</target>
         <note />
       </trans-unit>
+      <trans-unit id="Binlog_EventFilterThrew">
+        <source>The binary log event filter threw an exception.</source>
+        <target state="new">The binary log event filter threw an exception.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="Binlog_FwdCompatUnsupported">
         <source>Forward compatible reading is not supported for file format version {0} (needs &gt;= 18).</source>
         <target state="translated">La lecture compatible avec le transfert n’est pas prise en charge pour la version de format de fichier {0} (nécessite &gt;= 18).</target>
