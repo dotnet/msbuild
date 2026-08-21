@@ -57,6 +57,7 @@ GetLongPathName
 GetModuleFileName
 GetModuleHandle
 GetNativeSystemInfo
+GetACP
 GetOEMCP
 GetProcAddress
 GetRunningObjectTable

@@ -132,9 +132,24 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         protected override Encoding StandardErrorEncoding => _standardErrorEncoding;
 
+        /// <inheritdoc />
+        public override string StandardOutputEncodingName
+        {
+            get => StandardOutputEncoding.EncodingName;
+            set => _standardOutputEncoding = EncodingUtilities.GetEncodingFromName(value);
+        }
+
+        /// <inheritdoc />
+        public override string StandardErrorEncodingName
+        {
+            get => StandardErrorEncoding.EncodingName;
+            set => _standardErrorEncoding = EncodingUtilities.GetEncodingFromName(value);
+        }
+
         /// <summary>
         /// Project visible property specifying the encoding of the captured task standard output stream
         /// </summary>
+        /// <remarks>The special value "ansi" selects the current system ANSI code page (GetACP).</remarks>
         [Output]
         public string StdOutEncoding
         {
@@ -143,7 +158,7 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    _standardOutputEncoding = Encoding.GetEncoding(value);
+                    StandardOutputEncodingName = value;
                 }
                 catch (ArgumentException)
                 {
@@ -156,6 +171,7 @@ namespace Microsoft.Build.Tasks
         /// <summary>
         /// Project visible property specifying the encoding of the captured task standard error stream
         /// </summary>
+        /// <remarks>The special value "ansi" selects the current system ANSI code page (GetACP).</remarks>
         [Output]
         public string StdErrEncoding
         {
@@ -164,7 +180,7 @@ namespace Microsoft.Build.Tasks
             {
                 try
                 {
-                    _standardErrorEncoding = Encoding.GetEncoding(value);
+                    StandardErrorEncodingName = value;
                 }
                 catch (ArgumentException)
                 {
@@ -192,6 +208,7 @@ namespace Microsoft.Build.Tasks
         #endregion
 
         #region Methods
+
         /// <summary>
         /// Write out a temporary batch file with the user-specified command in it.
         /// </summary>
