@@ -119,6 +119,7 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <param name="sourceFilePath"></param>
         /// <returns>BinaryReader of the given binlog file.</returns>
+        /// <exception cref="InvalidDataException">The file does not use the supported GZip compression format.</exception>
         public static BinaryReader OpenReader(string sourceFilePath)
         {
             Stream? stream = null;
@@ -141,8 +142,20 @@ namespace Microsoft.Build.Logging
         /// </summary>
         /// <param name="sourceFileStream">Stream over the binlog file</param>
         /// <returns>BinaryReader of the given binlog file.</returns>
+        /// <exception cref="InvalidDataException">The stream is seekable and does not use the supported GZip compression format.</exception>
         public static BinaryReader OpenReader(Stream sourceFileStream)
         {
+            ArgumentNullException.ThrowIfNull(sourceFileStream);
+            try
+            {
+                ValidateGZipHeader(sourceFileStream);
+            }
+            catch
+            {
+                sourceFileStream.Dispose();
+                throw;
+            }
+
             var gzipStream = new GZipStream(sourceFileStream, CompressionMode.Decompress, leaveOpen: false);
 
             // wrapping the GZipStream in a buffered stream significantly improves performance
@@ -150,6 +163,37 @@ namespace Microsoft.Build.Logging
             // https://github.com/dotnet/runtime/issues/39233#issuecomment-745598847
             var bufferedStream = new BufferedStream(gzipStream, 32768);
             return new BinaryReader(bufferedStream);
+        }
+
+        private static void ValidateGZipHeader(Stream sourceFileStream)
+        {
+            // Avoid buffering a potentially large, non-seekable stream solely to inspect its header.
+            // File streams and the common in-memory stream scenarios are seekable and can be validated early.
+            if (!sourceFileStream.CanSeek)
+            {
+                return;
+            }
+
+            long initialPosition = sourceFileStream.Position;
+            int id1;
+            int id2;
+            int compressionMethod;
+            try
+            {
+                id1 = sourceFileStream.ReadByte();
+                id2 = sourceFileStream.ReadByte();
+                compressionMethod = sourceFileStream.ReadByte();
+            }
+            finally
+            {
+                sourceFileStream.Position = initialPosition;
+            }
+
+            // RFC 1952 identifies GZip streams with ID1=1F, ID2=8B, and CM=08 (DEFLATE).
+            if (id1 != 0x1F || id2 != 0x8B || compressionMethod != 0x08)
+            {
+                throw new InvalidDataException(ResourceUtilities.GetResourceString("Binlog_InvalidGZipHeader"));
+            }
         }
 
         /// <summary>

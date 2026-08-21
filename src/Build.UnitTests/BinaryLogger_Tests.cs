@@ -262,6 +262,39 @@ namespace Microsoft.Build.UnitTests
             br2.ReadBytes(bufferSize).Length.ShouldBe(0, "Second buffer contains bytes after first file end");
         }
 
+        [Fact]
+        public void OpenReaderRejectsInvalidGZipHeaderAndDisposesSourceStream()
+        {
+            using var stream = new MemoryStream([0x1F, 0x8B, 0x00]);
+
+            InvalidDataException exception = Should.Throw<InvalidDataException>(() =>
+            {
+                using BinaryReader _ = BinaryLogReplayEventSource.OpenReader(stream);
+            });
+
+            exception.Message.ShouldBe(ResourceUtilities.GetResourceString("Binlog_InvalidGZipHeader"));
+            stream.CanRead.ShouldBeFalse();
+            CreateExpectedLogFile();
+        }
+
+        [Fact]
+        public void OpenReaderAcceptsValidGZipHeaderAtCurrentPosition()
+        {
+            byte[] expected = [1, 2, 3];
+            using var stream = new MemoryStream();
+            stream.WriteByte(0xFF);
+            using (var gzipStream = new GZipStream(stream, CompressionMode.Compress, leaveOpen: true))
+            {
+                gzipStream.Write(expected, 0, expected.Length);
+            }
+
+            stream.Position = 1;
+            using BinaryReader reader = BinaryLogReplayEventSource.OpenReader(stream);
+
+            reader.ReadBytes(expected.Length).ShouldBe(expected);
+            CreateExpectedLogFile();
+        }
+
         private static void AssertBinlogsHaveEqualContent(string firstPath, string secondPath)
         {
             using var reader1 = BinaryLogReplayEventSource.OpenBuildEventsReader(firstPath);
