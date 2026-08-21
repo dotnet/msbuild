@@ -1151,10 +1151,15 @@ namespace Microsoft.Build.BackEnd
 
             buildCheckManager?.SetDataSource(BuildCheckDataSource.BuildExecution);
 
-            // Make sure it is null before loading the configuration into the request, because if there is a problem
-            // we do not wand to have an invalid projectLoggingContext floating around. Also if this is null the error will be
-            // logged with the node logging context
+            // Make sure it is null before loading or restoring the configuration so an invalid context is not reused.
+            // The failure paths below create a temporary project logging context before propagating the error.
             _projectLoggingContext = null;
+
+            // The configuration cache is shared across the node and may be swept for memory pressure on a
+            // BuildRequestEngine thread. A configuration becomes cacheable after its last target, but post-build
+            // telemetry still accesses its ProjectInstance, so keep the project in memory for this entire operation.
+            using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
+                AcquireProjectInstanceUsageWithProjectLoggingContext();
 
             try
             {
@@ -1191,11 +1196,7 @@ namespace Microsoft.Build.BackEnd
             catch
             {
                 // make sure that any errors thrown by a child project are logged in the context of their parent project: create a temporary projectLoggingContext
-                _projectLoggingContext = new ProjectLoggingContext(
-                    _nodeLoggingContext,
-                    _requestEntry.Request,
-                    _requestEntry.RequestConfiguration.ProjectFullPath,
-                    _requestEntry.RequestConfiguration.ToolsVersion);
+                CreateTemporaryProjectLoggingContext();
 
                 throw;
             }
@@ -1210,7 +1211,7 @@ namespace Microsoft.Build.BackEnd
             {
                 // Determine the set of targets we need to build
                 (string name, TargetBuiltReason reason)[] allTargets = _requestEntry.RequestConfiguration
-   .GetTargetsUsedToBuildRequest(_requestEntry.Request).ToArray();
+                    .GetTargetsUsedToBuildRequest(_requestEntry.Request).ToArray();
                 if (MSBuildEventSource.Log.IsEnabled())
                 {
                     MSBuildEventSource.Log.BuildProjectStart(_requestEntry.RequestConfiguration.ProjectFullPath, string.Join(", ", allTargets));
@@ -1220,8 +1221,6 @@ namespace Microsoft.Build.BackEnd
                 // Make sure to extract known immutable folders from properties and register them for fast up-to-date check
                 ConfigureKnownImmutableFolders();
 
-                // See comment on Microsoft.Build.Internal.Utilities.GenerateToolsVersionToUse
-                _requestEntry.RequestConfiguration.RetrieveFromCache();
                 if (_requestEntry.RequestConfiguration.Project.UsingDifferentToolsVersionFromProjectFile)
                 {
                     _projectLoggingContext.LogComment(MessageImportance.Low,
@@ -1311,6 +1310,28 @@ namespace Microsoft.Build.BackEnd
 
                 return resultFromTargetBuilder;
             }
+        }
+
+        private BuildRequestConfiguration.ProjectInstanceUsageScope AcquireProjectInstanceUsageWithProjectLoggingContext()
+        {
+            try
+            {
+                return _requestEntry.RequestConfiguration.AcquireProjectInstanceUsage();
+            }
+            catch
+            {
+                CreateTemporaryProjectLoggingContext();
+                throw;
+            }
+        }
+
+        private void CreateTemporaryProjectLoggingContext()
+        {
+            _projectLoggingContext = new ProjectLoggingContext(
+                _nodeLoggingContext,
+                _requestEntry.Request,
+                _requestEntry.RequestConfiguration.ProjectFullPath,
+                _requestEntry.RequestConfiguration.ToolsVersion);
         }
 
         private void UpdateStatisticsPostBuild()

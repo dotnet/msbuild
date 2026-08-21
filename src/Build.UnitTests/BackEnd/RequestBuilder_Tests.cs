@@ -247,6 +247,48 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Fact]
+        public void BuildProject_ConfigurationCacheSweepDuringBuild_DoesNotCacheConfiguration()
+        {
+            BuildRequestConfiguration configuration = CreateTestProject(1);
+            try
+            {
+                TestTargetBuilder targetBuilder = (TestTargetBuilder)_host.GetComponent(BuildComponentType.TargetBuilder);
+                IConfigCache configCache = (IConfigCache)_host.GetComponent(BuildComponentType.ConfigCache);
+
+                configCache.AddConfiguration(configuration);
+
+                BuildRequest request = CreateNewBuildRequest(1, new string[1] { "target1" });
+                BuildRequestEntry entry = new BuildRequestEntry(request, configuration, CreateStubTaskEnvironment());
+                BuildResult result = new BuildResult(request);
+                result.AddResultsForTarget("target1", GetEmptySuccessfulTargetResult());
+                targetBuilder.SetResultsToReturn(result);
+
+                bool? cachedDuringBuild = null;
+
+                // Simulate the BuildRequestEngine memory pressure sweep running on another thread while
+                // the request builder is still using the project instance of the configuration it builds.
+                targetBuilder.ActionBeforeReturningResult = () =>
+                {
+                    Task.Run(() => configCache.WriteConfigurationsToDisk()).GetAwaiter().GetResult();
+                    cachedDuringBuild = configuration.IsCached;
+                };
+
+                _requestBuilder.BuildRequest(GetNodeLoggingContext(), entry);
+
+                WaitForEvent(_buildRequestCompletedEvent, "Build Request Completed");
+
+                cachedDuringBuild.ShouldBe(false);
+                _buildRequestCompleted_Entry.Result.Exception.ShouldBeNull();
+                Assert.Equal(BuildResultCode.Success, _buildRequestCompleted_Entry.Result.OverallResult);
+            }
+            finally
+            {
+                configuration.ClearCacheFile();
+                DeleteTestProject(configuration);
+            }
+        }
+
+        [Fact]
         public void RequestThreadProcEventsIncludeRequestContext()
         {
             using TestEnvironment env = TestEnvironment.Create(_output);
@@ -506,6 +548,12 @@ namespace Microsoft.Build.UnitTests.BackEnd
             _cache.AddResult(result);
         }
 
+        /// <summary>
+        /// Invoked right before the cached result is returned, allowing tests to observe the state
+        /// of the build while the request builder is still building the project.
+        /// </summary>
+        internal Action ActionBeforeReturningResult { get; set; }
+
         internal void SetNewBuildRequests(FullyQualifiedBuildRequest[] requests)
         {
             _newRequests = requests;
@@ -553,8 +601,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 }
             }
 
-            return Task<BuildResult>.FromResult(_cache.GetResultForRequest(entry.Request));
-        }
+            ActionBeforeReturningResult?.Invoke();
+
+            return Task<BuildResult>.FromResult(_cache.GetResultForRequest(entry.Request));        }
 
         #endregion
 
