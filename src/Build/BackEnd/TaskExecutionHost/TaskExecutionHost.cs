@@ -803,15 +803,6 @@ namespace Microsoft.Build.BackEnd
             try
             {
                 Debug.Assert(TaskInstance is not IMultiThreadableTask multiThreadableTask || multiThreadableTask.TaskEnvironment != null, "task environment missing for multi-threadable task");
-
-                if (_buildComponentHost.BuildParameters.MultiThreaded && TaskInstance is not TaskHostTask)
-                {
-                    using Process currentProcess = Process.GetCurrentProcess();
-                    _taskLoggingContext.LogCommentFromText(
-                        MessageImportance.Low,
-                        $"MTDIAG: component=TaskExecutionHost action=task-execute routing=in-proc task={_taskName} project=\"{_projectFile}\" nodeId={_buildComponentHost.BuildParameters.NodeId} pid={currentProcess.Id} process={currentProcess.ProcessName} managedThreadId={Environment.CurrentManagedThreadId}");
-                }
-
                 taskReturnValue = TaskInstance.Execute();
             }
             finally

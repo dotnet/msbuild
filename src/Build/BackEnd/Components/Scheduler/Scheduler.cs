@@ -564,12 +564,6 @@ namespace Microsoft.Build.BackEnd
                         Assumed.Unreachable();
                         break;
                 }
-
-                if (_componentHost.BuildParameters.MultiThreaded)
-                {
-                    LogMtDiag(
-                        $"action=node-created nodeId={nodeInfo.NodeId} provider={nodeInfo.ProviderType} currentInProc={_currentInProcNodeCount} currentOutOfProc={_currentOutOfProcNodeCount}");
-                }
             }
 
             List<ScheduleResponse> responses = new List<ScheduleResponse>();
@@ -1449,12 +1443,6 @@ namespace Microsoft.Build.BackEnd
             responses.Add(ScheduleResponse.CreateScheduleResponse(nodeId, request.BuildRequest, mustSendConfigurationToNode));
             TraceScheduler($"Executing request {request.BuildRequest.GlobalRequestId} on node {nodeId} with parent {(request.Parent == null ? -1 : request.Parent.BuildRequest.GlobalRequestId)}");
 
-            if (_componentHost.BuildParameters.MultiThreaded)
-            {
-                LogMtDiag(
-                    $"action=request-assigned requestId={request.BuildRequest.GlobalRequestId} configurationId={request.BuildRequest.ConfigurationId} project=\"{config.ProjectFullPath}\" affinity={GetNodeAffinityForRequest(request.BuildRequest)} nodeId={nodeId} sendConfiguration={mustSendConfigurationToNode}");
-            }
-
             WarnWhenProxyBuildsGetScheduledOnOutOfProcNode();
 
             request.ResumeExecution(nodeId);
@@ -1555,12 +1543,6 @@ namespace Microsoft.Build.BackEnd
 
             int availableNodesWithOutOfProcAffinity = maxOutOfProcNodeCount - _currentOutOfProcNodeCount;
 
-            if (_componentHost.BuildParameters.MultiThreaded)
-            {
-                LogMtDiag(
-                    $"action=node-limits vsMode={_componentHost.BuildParameters.VisualStudioMtMode} maxNodeCount={_componentHost.BuildParameters.MaxNodeCount} maxInProc={maxInProcNodeCount} maxOutOfProc={maxOutOfProcNodeCount} currentInProc={_currentInProcNodeCount} currentOutOfProc={_currentOutOfProcNodeCount}");
-            }
-
             int requestsWithOutOfProcAffinity = 0;
             int requestsWithAnyAffinityOnInProcNodes = 0;
 
@@ -1647,7 +1629,6 @@ namespace Microsoft.Build.BackEnd
                     }
 
                     TraceScheduler($"Requesting creation of new node satisfying affinity {NodeAffinity.InProc}");
-                    LogMtDiag($"action=node-create affinity={NodeAffinity.InProc} count={inProcNodesToCreate}");
                     responses.Add(ScheduleResponse.CreateNewNodeResponse(NodeAffinity.InProc, inProcNodesToCreate));
 
                     // We only want to submit one node creation request at a time -- as part of node creation we recursively re-request the scheduler
@@ -1679,7 +1660,6 @@ namespace Microsoft.Build.BackEnd
                 if (outOfProcNodesToCreate > 0)
                 {
                     TraceScheduler($"Requesting creation of {outOfProcNodesToCreate} new node(s) satisfying affinity {NodeAffinity.OutOfProc}");
-                    LogMtDiag($"action=node-create affinity={NodeAffinity.OutOfProc} count={outOfProcNodesToCreate}");
                     responses.Add(ScheduleResponse.CreateNewNodeResponse(NodeAffinity.OutOfProc, outOfProcNodesToCreate));
                 }
 
@@ -2699,17 +2679,6 @@ namespace Microsoft.Build.BackEnd
             {
                 SchedulableRequest childRequest = childRequests[i];
                 WriteRecursiveSummary(loggingService, context, submissionId, childRequest, level + 1, useConfigurations, i == childRequests.Count - 1);
-            }
-        }
-
-        private void LogMtDiag(string details)
-        {
-            if (_componentHost.BuildParameters.MultiThreaded)
-            {
-                _componentHost.LoggingService.LogCommentFromText(
-                    BuildEventContext.Invalid,
-                    MessageImportance.Low,
-                    $"MTDIAG: component=Scheduler {details}");
             }
         }
 

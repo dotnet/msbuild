@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Frozen;
-using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using Microsoft.Build.BackEnd.Components.Caching;
@@ -500,14 +499,6 @@ namespace Microsoft.Build.BackEnd
 
             // Now prep the buildRequestEngine for the build.
             _loggingContext = new NodeLoggingContext(loggingService, configuration.NodeId, true /* inProcNode */);
-
-            if (_componentHost.BuildParameters.MultiThreaded)
-            {
-                using Process currentProcess = Process.GetCurrentProcess();
-                _loggingContext.LogCommentFromText(
-                    MessageImportance.Low,
-                    $"MTDIAG: component=InProcNode action=node-started topology=thread nodeId={configuration.NodeId} pid={currentProcess.Id} process={currentProcess.ProcessName} managedThreadId={Environment.CurrentManagedThreadId}");
-            }
 
             _buildRequestEngine.OnEngineException += _engineExceptionEventHandler;
             _buildRequestEngine.OnNewConfigurationRequest += _newConfigurationRequestEventHandler;

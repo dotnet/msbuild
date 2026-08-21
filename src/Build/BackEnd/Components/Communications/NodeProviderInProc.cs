@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
-using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
 
 #if FEATURE_THREAD_CULTURE
@@ -376,15 +375,6 @@ namespace Microsoft.Build.BackEnd
             nodeContext._inProcNodeThread.CurrentUICulture = _componentHost.BuildParameters.UICulture;
 #endif
             nodeContext._inProcNodeThread.Start();
-
-            if (_componentHost.BuildParameters.MultiThreaded)
-            {
-                using Process currentProcess = Process.GetCurrentProcess();
-                _componentHost.LoggingService.LogCommentFromText(
-                    BuildEventContext.Invalid,
-                    MessageImportance.Low,
-                    $"MTDIAG: component=NodeProviderInProc action=node-created topology=thread nodeId={nodeId} pid={currentProcess.Id} process={currentProcess.ProcessName} managedThreadId={nodeContext._inProcNodeThread.ManagedThreadId}");
-            }
 
             nodeContext._inProcNodeEndpoint.Connect(this);
 

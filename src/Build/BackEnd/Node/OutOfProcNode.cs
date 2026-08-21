@@ -821,14 +821,6 @@ namespace Microsoft.Build.Execution
             // Now prep the buildRequestEngine for the build.
             _loggingContext = new NodeLoggingContext(_loggingService, configuration.NodeId, false /* inProcNode */);
 
-            if (_buildParameters.MultiThreaded)
-            {
-                using Process currentProcess = Process.GetCurrentProcess();
-                _loggingContext.LogCommentFromText(
-                    MessageImportance.Low,
-                    $"MTDIAG: component=OutOfProcNode action=node-started topology=process nodeId={configuration.NodeId} pid={currentProcess.Id} process={currentProcess.ProcessName} managedThreadId={Environment.CurrentManagedThreadId}");
-            }
-
             if (_shutdownException != null)
             {
                 HandleShutdown(out Exception exception);

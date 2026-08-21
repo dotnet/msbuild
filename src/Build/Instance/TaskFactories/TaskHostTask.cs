@@ -386,12 +386,6 @@ namespace Microsoft.Build.BackEnd
                             _useSidecarTaskHost,
                             effectiveNodeReuse);
 
-                        using Process currentProcess = Process.GetCurrentProcess();
-                        string routing = _useSidecarTaskHost ? "sidecar" : "taskhost";
-                        _taskLoggingContext.LogCommentFromText(
-                            MessageImportance.Low,
-                            $"MTDIAG: component=TaskHostTask action=task-route routing={routing} task={_taskType.Type.Name} project=\"{_projectFile}\" nodeId={_scheduledNodeId} pid={currentProcess.Id} process={currentProcess.ProcessName} managedThreadId={Environment.CurrentManagedThreadId} taskHostPid={hostProcessId} newTaskHost={wasNewlyCreated} nodeReuse={effectiveNodeReuse}");
-
                         try
                         {
                             bool taskFinished = false;

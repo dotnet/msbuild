@@ -5,7 +5,6 @@ using System;
 using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -1519,16 +1518,6 @@ namespace Microsoft.Build.CommandLine
 
                 string taskName = taskConfiguration.TaskName;
                 string taskLocation = taskConfiguration.TaskLocation;
-
-                using (Process currentProcess = Process.GetCurrentProcess())
-                {
-                    LogMessageEvent(
-                        new BuildMessageEventArgs(
-                            $"MTDIAG: component=TaskHost action=task-execute routing=taskhost task={taskName} project=\"{taskConfiguration.ProjectFile}\" nodeId={taskConfiguration.NodeId} pid={currentProcess.Id} process={currentProcess.ProcessName} managedThreadId={Environment.CurrentManagedThreadId}",
-                            helpKeyword: null,
-                            senderName: taskName,
-                            MessageImportance.Low));
-                }
 
                 TaskFactoryUtilities.RegisterAssemblyResolveHandlersFromManifest(taskLocation);
 
