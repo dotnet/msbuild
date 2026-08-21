@@ -488,9 +488,9 @@ namespace Microsoft.Build.UnitTests.BackEnd
         }
 
         [Theory]
-        [InlineData(null, null, (int)VisualStudioMultiThreadedMode.Worker)]
-        [InlineData("", null, (int)VisualStudioMultiThreadedMode.Worker)]
-        [InlineData("unknown", null, (int)VisualStudioMultiThreadedMode.Worker)]
+        [InlineData(null, null, (int)VisualStudioMultiThreadedMode.Off)]
+        [InlineData("", null, (int)VisualStudioMultiThreadedMode.Off)]
+        [InlineData("unknown", null, (int)VisualStudioMultiThreadedMode.Off)]
         [InlineData("WoRkEr", null, (int)VisualStudioMultiThreadedMode.Worker)]
         [InlineData("DeVeNv", null, (int)VisualStudioMultiThreadedMode.Devenv)]
         [InlineData("OfF", null, (int)VisualStudioMultiThreadedMode.Off)]
