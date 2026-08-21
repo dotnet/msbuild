@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd.Logging;
 using Microsoft.Build.CommandLine.UnitTests;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Logging;
 using Microsoft.Build.Logging;
 using Microsoft.Build.UnitTests.Shared;
 using Shouldly;
@@ -134,6 +135,40 @@ namespace Microsoft.Build.UnitTests
     [UseInvariantCulture]
     public class TerminalLogger_Tests
     {
+        private sealed class ResizableTerminal(TextWriter output, int width, int height) : ITerminal
+        {
+            private readonly Terminal _terminal = new(output);
+
+            public int Width { get; set; } = width;
+
+            public int Height { get; set; } = height;
+
+            /// <summary>
+            /// Number of times the logger asked for the terminal dimensions.
+            /// </summary>
+            public int SizeQueryCount { get; private set; }
+
+            public (int Width, int Height) GetSize()
+            {
+                SizeQueryCount++;
+                return (Width, Height);
+            }
+
+            public bool SupportsProgressReporting => false;
+
+            public void BeginUpdate() => _terminal.BeginUpdate();
+            public void EndUpdate() => _terminal.EndUpdate();
+            public void Write(string text) => _terminal.Write(text);
+            public void Write(ReadOnlySpan<char> text) => _terminal.Write(text);
+            public void WriteLine(string text) => _terminal.WriteLine(text);
+            public void WriteLineFitToWidth(ReadOnlySpan<char> text) => _terminal.WriteLineFitToWidth(text);
+            public void WriteColor(TerminalColor color, string text) => _terminal.WriteColor(color, text);
+            public void WriteColorLine(TerminalColor color, string text) => _terminal.WriteColorLine(color, text);
+            public void Dispose()
+            {
+            }
+        }
+
         private const int _nodeCount = 8;
 
         private const string _immediateMessageString =
@@ -895,6 +930,114 @@ namespace Microsoft.Build.UnitTests
             }
         }
 
+        [Fact]
+        public void RefreshRendersEveryFrameWithASingleSizeQuery()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 120, height: 40);
+
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
+                eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
+                eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build"));
+                eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "Task"));
+
+                terminalLogger.Refresh();
+                int queriesAfterFirstFrame = terminal.SizeQueryCount;
+                output.GetStringBuilder().Clear();
+
+                for (int i = 0; i < 10; i++)
+                {
+                    terminalLogger.Refresh();
+                    output.ToString().ShouldNotBeEmpty($"Frame {i} was not rendered.");
+                    output.GetStringBuilder().Clear();
+                }
+
+                // Both dimensions have to come from a single console round-trip per frame.
+                (terminal.SizeQueryCount - queriesAfterFirstFrame).ShouldBe(10);
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void RefreshRedrawsImmediatelyAfterTerminalResize()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 120, height: 40);
+
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(_projectFile));
+                eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(_projectFile));
+                eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(_projectFile, "Build"));
+                eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(_projectFile, "Task"));
+
+                terminalLogger.Refresh();
+                output.GetStringBuilder().Clear();
+
+                // Unchanged dimensions keep the cheap delta render.
+                terminalLogger.Refresh();
+                output.ToString().ShouldNotContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+                output.GetStringBuilder().Clear();
+
+                // The node line was laid out 119 columns wide, so at 40 columns the terminal reflows it
+                // into 3 physical rows and the cursor has to move up by 4 before erasing.
+                terminal.Width = 40;
+                terminalLogger.Refresh();
+
+                output.ToString().ShouldStartWith($"{AnsiCodes.CSI}4{AnsiCodes.MoveUpToLineStart}");
+                output.ToString().ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
+
+        [Fact]
+        public void RefreshUsesUncappedWidthForReflow()
+        {
+            using StringWriter output = new();
+            using ResizableTerminal terminal = new(output, width: 140, height: 40);
+            string projectFile = $"{new string('a', 130)}.proj";
+
+            MockBuildEventSink eventSource = new(0);
+            TerminalLogger terminalLogger = new(terminal);
+            try
+            {
+                terminalLogger.Initialize(eventSource, _nodeCount);
+                eventSource.InvokeBuildStarted(MakeBuildStartedEventArgs());
+                eventSource.InvokeStatusEventRaised(MakeProjectEvalFinishedArgs(projectFile));
+                eventSource.InvokeProjectStarted(MakeProjectStartedEventArgs(projectFile));
+                eventSource.InvokeTargetStarted(MakeTargetStartedEventArgs(projectFile, "Build"));
+                eventSource.InvokeTaskStarted(MakeTaskStartedEventArgs(projectFile, "Task"));
+
+                terminalLogger.Refresh();
+                output.GetStringBuilder().Clear();
+
+                terminal.Width = 130;
+                terminalLogger.Refresh();
+
+                output.ToString().ShouldStartWith($"{AnsiCodes.CSI}2{AnsiCodes.MoveUpToLineStart}");
+                output.ToString().ShouldContain($"{AnsiCodes.CSI}{AnsiCodes.EraseInDisplay}");
+            }
+            finally
+            {
+                terminalLogger.Shutdown();
+            }
+        }
 
         [Fact]
         public async Task DisplayNodesOverwritesWithNewTargetFramework()
