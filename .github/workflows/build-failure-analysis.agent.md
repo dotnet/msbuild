@@ -259,11 +259,9 @@ jobs:
           fi
 
           # Require the build's analyzed revision to equal the PR's CURRENT
-          # head. gh-aw safe-output review comments carry no `commit_id` — they
-          # target the current PR diff — so analyzing a stale revision would
-          # produce inline suggestions that get rejected or land on the wrong
-          # lines. If the PR has advanced since this build ran, skip: a newer
-          # build/check for the current head will cover it.
+          # head. Inline safe outputs are pinned to the verified head, and all
+          # queued writes are revision-gated again before application. Skip a
+          # stale revision rather than report obsolete results.
           BUILD_PR_SHA=$(printf '%s' "${build_json}" | jq -r '.triggerInfo["pr.sourceSha"] // empty')
           CURRENT_HEAD=$(printf '%s' "${PR_JSON}" | jq -r '.head.sha // empty')
           # ADO builds GitHub's `refs/pull/<n>/merge` ref, so build_json.sourceVersion
@@ -636,8 +634,8 @@ jobs:
           # The download/extract loop above can take minutes. Re-read the PR
           # head right before activating and fail CLOSED if it moved or can't
           # be resolved: a force-push during that window would otherwise leave
-          # the analyzed binlog stale relative to the current diff (inline
-          # comments carry no commit_id and target the current diff).
+          # the analyzed binlog stale relative to the current diff (queued
+          # writes are gated again and inline comments pin this head).
           LATEST_PR=$(gh api "repos/${GH_AW_REPO}/pulls/${PR_NUMBER}" 2>/dev/null)
           LATEST_HEAD=$(printf '%s' "${LATEST_PR}" | jq -r '.head.sha // empty')
           LATEST_MERGE=$(printf '%s' "${LATEST_PR}" | jq -r '.merge_commit_sha // empty')

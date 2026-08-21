@@ -324,12 +324,12 @@ jobs:
           fi
 
           # Require the build's analyzed revision to equal the PR's CURRENT
-          # head. gh-aw safe-output review comments carry no `commit_id` (they
-          # target the current PR diff), so analyzing a stale revision would
-          # misplace/reject inline suggestions. The PR can advance between
-          # selecting the build and downloading artifacts, and right after a
-          # force-push this query can still return the previous failed build —
-          # so re-read the head here and skip if it moved.
+          # head. Inline safe outputs are pinned to the verified head, and all
+          # queued writes are revision-gated again before application. The PR
+          # can advance between selecting the build and downloading artifacts,
+          # and right after a force-push this query can still return the
+          # previous failed build — so re-read the head here and skip if it
+          # moved.
           build_json=$(curl -sSL --retry 3 "${ADO_API}/build/builds/${BUILD_ID}?api-version=7.1")
           BUILD_PR_SHA=$(printf '%s' "${build_json}" | jq -r '.triggerInfo["pr.sourceSha"] // empty')
           BUILD_MERGE_SHA=$(printf '%s' "${build_json}" | jq -r '.sourceVersion // empty')
@@ -699,8 +699,8 @@ jobs:
           # The download/extract loop above can take minutes. Re-read the PR
           # head right before activating and fail CLOSED if it moved or can't
           # be resolved: a force-push during that window would otherwise leave
-          # the analyzed binlog stale relative to the current diff (inline
-          # comments carry no commit_id and target the current diff).
+          # the analyzed binlog stale relative to the current diff (queued
+          # writes are gated again and inline comments pin this head).
           LATEST_PR=$(gh api "repos/${GH_AW_REPO}/pulls/${PR_NUMBER}" 2>/dev/null)
           LATEST_HEAD=$(printf '%s' "${LATEST_PR}" | jq -r '.head.sha // empty')
           LATEST_MERGE=$(printf '%s' "${LATEST_PR}" | jq -r '.merge_commit_sha // empty')
