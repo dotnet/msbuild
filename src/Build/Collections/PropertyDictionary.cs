@@ -2,13 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading;
 using Microsoft.Build.Evaluation;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -28,9 +27,9 @@ namespace Microsoft.Build.Collections
     /// Really a Dictionary&lt;string, T&gt; where the key (the name) is obtained from IKeyed.Key.
     /// Is not observable, so if clients wish to observe modifications they must mediate them themselves and
     /// either not expose this collection or expose it through a readonly wrapper.
-    /// Uses ReaderWriterLockSlim to allow multiple concurrent readers while preventing deadlocks that can occur
-    /// with exclusive locks during enumeration.
-    /// 
+    /// Access to the mutable backing collection is synchronized on the collection itself. Callers that need to
+    /// enumerate concurrently with mutation must use a snapshot.
+    ///
     /// Since we use the mutable ignore case comparer we need to make sure that we lock our self before we call the comparer since the comparer can call back
     /// into this dictionary which could cause a deadlock if another thread is also accessing another method in the dictionary.
     /// </remarks>
@@ -44,11 +43,6 @@ namespace Microsoft.Build.Collections
         /// </summary>
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
         private readonly IRetrievableValuedEntryHashSet<T> _properties;
-
-        /// <summary>
-        /// Reader-writer lock to prevent deadlocks during enumeration.
-        /// </summary>
-        private readonly ReaderWriterLockSlim _lock = new(LockRecursionPolicy.SupportsRecursion);
 
         /// <summary>
         /// Creates empty dictionary.
@@ -122,7 +116,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                using (_lock.EnterDisposableReadLock())
+                lock (_properties)
                 {
                     return _properties.Values;
                 }
@@ -148,7 +142,7 @@ namespace Microsoft.Build.Collections
         {
             get
             {
-                using (_lock.EnterDisposableReadLock())
+                lock (_properties)
                 {
                     return ((ICollection<T>)_properties).Count;
                 }
@@ -188,7 +182,7 @@ namespace Microsoft.Build.Collections
                 // We don't want to check for a zero length name here, since that is a valid name
                 // and should return a null instance which will be interpreted as blank
                 T projectProperty;
-                using (_lock.EnterDisposableReadLock())
+                lock (_properties)
                 {
                     _properties.TryGetValue(name, out projectProperty);
                 }
@@ -209,7 +203,15 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public IEnumerable<TResult> GetCopyOnReadEnumerable<TResult>(Func<T, TResult> selector)
         {
-            return new CopyOnReadEnumerable<T, TResult>(this, _properties, selector);
+            return EnumerateSnapshot(selector);
+        }
+
+        private IEnumerable<TResult> EnumerateSnapshot<TResult>(Func<T, TResult> selector)
+        {
+            foreach (TResult result in GetProjectedSnapshot(null, selector))
+            {
+                yield return result;
+            }
         }
 
         /// <summary>
@@ -226,7 +228,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Clear()
         {
-            using (_lock.EnterDisposableWriteLock())
+            lock (_properties)
             {
                 ((ICollection<T>)_properties).Clear();
             }
@@ -238,27 +240,24 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public IEnumerator<T> GetEnumerator()
         {
-            using (_lock.EnterDisposableReadLock())
+            // PERF: Prefer the struct enumerator from the concrete hash set to avoid the allocation
+            // caused by boxing when iterating _properties.Values through the ICollection<T> interface.
+            // This fast path is the common case and hot (e.g. per-item metadata enumeration during
+            // ProjectInstance creation): all metadata and normally-constructed property dictionaries
+            // are backed by RetrievableValuedEntryHashSet<T>. The else branch only covers the rare
+            // linked/immutable-project converter types that also implement IRetrievableValuedEntryHashSet<T>.
+            if (_properties is RetrievableValuedEntryHashSet<T> hashSet)
             {
-                // PERF: Prefer the struct enumerator from the concrete hash set to avoid the allocation
-                // caused by boxing when iterating _properties.Values through the ICollection<T> interface.
-                // This fast path is the common case and hot (e.g. per-item metadata enumeration during
-                // ProjectInstance creation): all metadata and normally-constructed property dictionaries
-                // are backed by RetrievableValuedEntryHashSet<T>. The else branch only covers the rare
-                // linked/immutable-project converter types that also implement IRetrievableValuedEntryHashSet<T>.
-                if (_properties is RetrievableValuedEntryHashSet<T> hashSet)
+                foreach (T item in hashSet)
                 {
-                    foreach (T item in hashSet)
-                    {
-                        yield return item;
-                    }
+                    yield return item;
                 }
-                else
+            }
+            else
+            {
+                foreach (T item in _properties.Values)
                 {
-                    foreach (T item in _properties.Values)
-                    {
-                        yield return item;
-                    }
+                    yield return item;
                 }
             }
         }
@@ -288,20 +287,18 @@ namespace Microsoft.Build.Collections
                 return true;
             }
 
-            if (Count != other.Count)
+            T[] properties = GetSnapshot();
+            if (properties.Length != other.Count)
             {
                 return false;
             }
 
-            using (_lock.EnterDisposableReadLock())
+            foreach (T leftProp in properties)
             {
-                foreach (T leftProp in _properties.Values)
+                T rightProp = other[leftProp.Key];
+                if (rightProp?.Equals(leftProp) != true)
                 {
-                    T rightProp = other[leftProp.Key];
-                    if (rightProp?.Equals(leftProp) != true)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
             }
 
@@ -325,7 +322,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public T GetProperty(string name, int startIndex, int endIndex)
         {
-            using (_lock.EnterDisposableReadLock())
+            lock (_properties)
             {
                 return _properties.Get(name, startIndex, endIndex - startIndex + 1);
             }
@@ -378,7 +375,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         bool IDictionary<string, T>.ContainsKey(string key)
         {
-            using (_lock.EnterDisposableReadLock())
+            lock (_properties)
             {
                 return _properties.ContainsKey(key);
             }
@@ -427,7 +424,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         bool ICollection<KeyValuePair<string, T>>.Contains(KeyValuePair<string, T> item)
         {
-            using (_lock.EnterDisposableReadLock())
+            lock (_properties)
             {
                 if (_properties.TryGetValue(item.Key, out T value))
                 {
@@ -468,7 +465,7 @@ namespace Microsoft.Build.Collections
         /// <inheritdoc/>
         void ICollection<T>.CopyTo(T[] array, int arrayIndex)
         {
-            using (_lock.EnterDisposableWriteLock())
+            lock (_properties)
             {
                 _properties.CopyTo(array, arrayIndex);
             }
@@ -486,13 +483,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         IEnumerator<KeyValuePair<string, T>> IEnumerable<KeyValuePair<string, T>>.GetEnumerator()
         {
-            using (_lock.EnterDisposableReadLock())
-            {
-                foreach (KeyValuePair<string, T> kvp in (IEnumerable<KeyValuePair<string, T>>)_properties)
-                {
-                    yield return kvp;
-                }
-            }
+            return ((IEnumerable<KeyValuePair<string, T>>)_properties).GetEnumerator();
         }
 
         #endregion
@@ -506,7 +497,7 @@ namespace Microsoft.Build.Collections
         {
             ArgumentException.ThrowIfNullOrEmpty(name);
 
-            using (_lock.EnterDisposableWriteLock())
+            lock (_properties)
             {
                 bool result = _properties.Remove(name);
                 return result;
@@ -522,7 +513,7 @@ namespace Microsoft.Build.Collections
         {
             ArgumentNullException.ThrowIfNull(projectProperty);
 
-            using (_lock.EnterDisposableWriteLock())
+            lock (_properties)
             {
                 _properties[projectProperty.Key] = projectProperty;
             }
@@ -561,7 +552,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         internal Dictionary<string, string> ToDictionary()
         {
-            using (_lock.EnterDisposableReadLock())
+            lock (_properties)
             {
                 var dictionary = new Dictionary<string, string>(((ICollection<T>)_properties).Count, MSBuildNameIgnoreCaseComparer.Default);
 
@@ -574,6 +565,25 @@ namespace Microsoft.Build.Collections
             }
         }
 
+        /// <summary>
+        /// Returns a stable snapshot for callers that enumerate concurrently with mutation.
+        /// </summary>
+        internal T[] GetSnapshot()
+        {
+            lock (_properties)
+            {
+                int count = ((ICollection<T>)_properties).Count;
+                if (count == 0)
+                {
+                    return [];
+                }
+
+                var snapshot = new T[count];
+                _properties.CopyTo(snapshot);
+                return snapshot;
+            }
+        }
+
         internal IDictionary<string, string> ToReadOnlyDictionary()
         {
             return _properties is IValueDictionaryConverter converter
@@ -583,13 +593,7 @@ namespace Microsoft.Build.Collections
 
         internal IEnumerable<PropertyData> Enumerate()
         {
-            using (_lock.EnterDisposableReadLock())
-            {
-                foreach (var kvp in (ICollection<T>)_properties)
-                {
-                    yield return new(kvp.Key, EscapingUtilities.UnescapeAll(kvp.EscapedValue));
-                }
-            }
+            return EnumerateSnapshot(static property => new PropertyData(property.Key, EscapingUtilities.UnescapeAll(property.EscapedValue)));
         }
 
         internal void Enumerate(Action<string, string> keyValueCallback)
@@ -602,36 +606,40 @@ namespace Microsoft.Build.Collections
 
         internal IEnumerable<TResult> Filter<TResult>(Func<T, bool> filter, Func<T, TResult> selector)
         {
-            using (_lock.EnterDisposableReadLock())
+            return GetProjectedSnapshot(filter, selector);
+        }
+
+        private List<TResult> GetProjectedSnapshot<TResult>(Func<T, bool> filter, Func<T, TResult> selector)
+        {
+            T[] properties = null;
+            int count = 0;
+            try
             {
-                // PERF: Prefer using struct enumerators from the concrete types to avoid allocations.
-                // RetrievableValuedEntryHashSet implements a struct enumerator.
-                if (_properties is RetrievableValuedEntryHashSet<T> hashSet)
+                lock (_properties)
                 {
-                    List<TResult> result = new(hashSet.Count);
-                    foreach (T property in hashSet)
-                    {
-                        if (filter(property))
-                        {
-                            result.Add(selector(property));
-                        }
-                    }
-
-                    return result;
+                    count = ((ICollection<T>)_properties).Count;
+                    properties = ArrayPool<T>.Shared.Rent(count);
+                    _properties.CopyTo(properties);
                 }
-                else
-                {
-                    ICollection<T> propertiesCollection = _properties;
-                    List<TResult> result = new(propertiesCollection.Count);
-                    foreach (T property in propertiesCollection)
-                    {
-                        if (filter(property))
-                        {
-                            result.Add(selector(property));
-                        }
-                    }
 
-                    return result;
+                List<TResult> result = new(count);
+                for (int i = 0; i < count; i++)
+                {
+                    T property = properties[i];
+                    if (filter is null || filter(property))
+                    {
+                        result.Add(selector(property));
+                    }
+                }
+
+                return result;
+            }
+            finally
+            {
+                if (properties is not null)
+                {
+                    Array.Clear(properties, 0, count);
+                    ArrayPool<T>.Shared.Return(properties, clearArray: false);
                 }
             }
         }
