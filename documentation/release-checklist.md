@@ -157,7 +157,8 @@ Create **one PR in `main`** containing all of the following changes:
 Resolve it deterministically with `pwsh ./scripts/Get-PackageValidationBaseline.ps1 -ThisReleaseVersion {{THIS_RELEASE_VERSION}}` (requires `az login` with devdiv access). See [How to determine `PACKAGE_VALIDATION_BASELINE_VERSION`](https://github.com/dotnet/msbuild/blob/main/.github/skills/release/SKILL.md#how-to-determine-package_validation_baseline_version) in the release skill for the manual fallback.
 - [ ] **3.3** `.vsts-dotnet.yml`: Refresh the hardcoded OptProf baseline so the **next** `vs*` branch cut from `main` inherits valid OptProf data (this is what lets that branch's first official build succeed without the manual Phase 4.4 rerun). \
 Resolve the current value with `pwsh ./scripts/Get-LatestOptProfDrop.ps1` (requires `az login` with devdiv access), then set it as `OptProfBaselineDrop`: \
-`<name: OptProfBaselineDrop` → `value: 'OptimizationData/DotNet-msbuild-Trusted/main/<NNNNNNNN.N>/<buildId>/1'`.
+`<name: OptProfBaselineDrop` → `value: 'OptimizationData/DotNet-msbuild-Trusted/main/<NNNNNNNN.N>/<buildId>/1'`. \
+The script only returns a drop produced by an OptProf run that collected a full set of profiles, so its output is safe to paste as-is. If it **throws** instead, the recent OptProf runs are unhealthy — investigate [MSBuild-OptProf](https://devdiv.visualstudio.com/DevDiv/_build?definitionId=17389) rather than reaching for `-AllowDegradedProvenance`, which seeds the next release branch with partial profile data.
 - [ ] **3.4** If the build pipeline fails on API-compat (only then — this step is a fix-up, not a routine action), update `CompatibilitySuppressions.xml` files. Run: \
 `dotnet pack MSBuild.Dev.slnf /p:ApiCompatGenerateSuppressionFile=true` \
 See [API compat documentation](https://learn.microsoft.com/en-us/dotnet/fundamentals/apicompat/overview) for details.
