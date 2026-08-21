@@ -58,7 +58,7 @@ internal class PropertiesUsageCheck : WorkerNodeCheck
         _unusedPropertyEnabled = config.IsEnabled;
         _unusedPropertyScope = config.EvaluationCheckScope;
 
-        config = configurationContext.CheckConfig.FirstOrDefault(c => c.RuleId == _usedBeforeInitializedRule.Id)
+        config = configurationContext.CheckConfig.FirstOrDefault(c => c.RuleId == _initializedAfterUsedRule.Id)
                  ?? CheckConfigurationEffective.Default;
 
         _initializedAfterUseEnabled = config.IsEnabled;
