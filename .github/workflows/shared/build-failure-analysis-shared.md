@@ -49,8 +49,11 @@ of read-only `shell` commands (including `cat`).
      `binlog-mcp` server: prefer calling them **directly as MCP tools** (with a
      `binlog_file` argument). A CLI wrapper is also mounted and allowlisted, so
      you may alternatively run `binlog-mcp <tool> --binlog_file <path>` via the
-     shell. If no leg shows errors **and**
-     no failed-target/process evidence, the build compiled cleanly — the
+     shell. Take the clean-build branch only after every required query
+     completed successfully for every listed binlog; if a query failed, report
+     the analysis gap as directed by the analyst playbook instead. If all
+     queries succeeded, no leg shows errors, and there is no
+     failed-target/process evidence, the build compiled cleanly — the
      pipeline failure is then a **non-build** (test/packaging/publishing) failure,
      which is **out of scope**. This workflow analyses build failures only, so
      **post nothing**: call `noop` with a short reason and stop. Do **not**
@@ -61,6 +64,9 @@ of read-only `shell` commands (including `cat`).
      `suggestion` blocks via `create_pull_request_review_comment`. Both
      workflows bind safe outputs deterministically to `GH_AW_PR_NUMBER`; do
      not attempt to choose or override the target in a safe-output call.
+     Safe-output calls are irreversible queued writes, not previews: fully
+     construct the final body before the first call, and never send a test,
+     placeholder, or draft safe output.
    - `submit_pull_request_review` is **not** a safe output for this workflow;
      inline comments stand alone.
 

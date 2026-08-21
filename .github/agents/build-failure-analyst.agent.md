@@ -42,15 +42,7 @@ If a `binlog-mcp` call fails, fall back to the Azure DevOps build referenced by 
 
 1. Read `GH_AW_BUILD_OUTCOME`.
 2. If the value is `success`, post a `noop` with the message `Build succeeded — no analysis required.` and stop. (The workflow should have skipped you in this case, but be defensive.)
-3. If the value is `failure` but `GH_AW_BINLOG_LIST` is empty, post a single comment via `add_comment` with the body:
-
-   > 🔍 **Build Failure Analysis** — the build failed but no binary log was produced. See the originating [Azure DevOps build](${GH_AW_BINLOG_HOST_PATH}) for the authoritative build logs (this workflow reuses that build's binlogs and does not build locally). The [GitHub Actions run](${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}) has the fetch-step diagnostics.
-
-   Attach the structured data object
-   `{"workflow_artifact":"build-failure-analysis","artifact_kind":"no-binlog"}`
-   to this `add_comment` call.
-
-   Then stop.
+3. If the value is `failure` but `GH_AW_BINLOG_LIST` is empty, call `noop` with a short reason and stop. The callers normally prevent activation in this state, so treat it as an internal data-transfer gap rather than posting a speculative diagnosis.
 
 ### Step 2 — Gather data from the binlogs
 
@@ -112,7 +104,7 @@ If the source line at the reported `file:line` does not look like a plausible ca
 
 This step applies **only when you have confirmed a genuine build failure** (at least one leg has build errors or failed-target/process evidence). If every leg compiled cleanly, do not reach this step — `noop` silently per Step 2 instead.
 
-When there is a build failure, first re-verify the target revision: read PR `GH_AW_PR_NUMBER` with the GitHub `pull_requests` read tool exposed by the github MCP server (the pull-request "get"/read operation) and take `head.sha` and `merge_commit_sha`. If `head.sha` cannot be read or no longer equals `GH_AW_PR_HEAD_SHA` — or `GH_AW_PR_MERGE_SHA` is non-empty and `merge_commit_sha` is non-empty but differs from it (the base branch advanced) — the PR moved while you were downloading/analyzing, so `noop` with a short reason and stop: your inline suggestions carry no `commit_id` and would land on the wrong lines of the new diff/merge. Otherwise post **exactly one** summary comment via `add_comment` with structured data `{"workflow_artifact":"build-failure-analysis","artifact_kind":"analysis"}`. The workflow binds this output to `GH_AW_PR_NUMBER`, and the gh-aw `add-comment` config has `hide-older-comments: true`, which collapses prior runs from the same workflow.
+When there is a build failure, first re-verify the target revision: read PR `GH_AW_PR_NUMBER` with the GitHub `pull_requests` read tool exposed by the github MCP server (the pull-request "get"/read operation) and take `head.sha` and `merge_commit_sha`. If either value cannot be read, `GH_AW_PR_MERGE_SHA` is empty, `head.sha` no longer equals `GH_AW_PR_HEAD_SHA`, or `merge_commit_sha` no longer equals `GH_AW_PR_MERGE_SHA` (the base branch advanced), the PR moved or cannot be verified while you were downloading/analyzing. Call `noop` with a short reason and stop. Otherwise post **exactly one** summary comment via `add_comment` with structured data `{"workflow_artifact":"build-failure-analysis","artifact_kind":"analysis"}`. The workflow binds this output to `GH_AW_PR_NUMBER`, pins inline suggestions to `GH_AW_PR_HEAD_SHA`, and rechecks both revisions immediately before applying queued writes. The gh-aw `add-comment` config has `hide-older-comments: true`, which collapses prior runs from the same workflow. Safe-output calls are queued writes, not previews: fully construct the final body before calling `add_comment`, and never send a test, placeholder, or draft comment.
 
 Template:
 

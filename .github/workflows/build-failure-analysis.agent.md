@@ -273,21 +273,19 @@ jobs:
           # changes, so this catches base-advance staleness the head check misses.
           BUILD_MERGE_SHA=$(printf '%s' "${build_json}" | jq -r '.sourceVersion // empty')
           CURRENT_MERGE=$(printf '%s' "${PR_JSON}" | jq -r '.merge_commit_sha // empty')
-          # Fail CLOSED: if either the build's analyzed revision or the current
-          # PR head can't be resolved, skip — we must not analyze a possibly
-          # stale binlog against the current diff (inline comments have no
-          # commit_id and target the current PR diff).
-          if [ -z "${BUILD_PR_SHA}" ] || [ -z "${CURRENT_HEAD}" ]; then
-            echo "::warning::Could not resolve build revision ('${BUILD_PR_SHA}') and/or current PR head ('${CURRENT_HEAD}'); skipping to avoid analyzing a stale binlog against the current diff."
+          # Fail CLOSED unless both head and merge revisions are known. The
+          # merge revision is required to detect a moved base branch even when
+          # the PR head itself is unchanged.
+          if [ -z "${BUILD_PR_SHA}" ] || [ -z "${CURRENT_HEAD}" ] || [ -z "${BUILD_MERGE_SHA}" ] || [ -z "${CURRENT_MERGE}" ]; then
+            echo "::warning::Could not resolve all build/current head and merge revisions; skipping to avoid analyzing a stale binlog against the current diff."
             emit_none
           fi
           if [ "${BUILD_PR_SHA}" != "${CURRENT_HEAD}" ]; then
             echo "::warning::Build ${BUILD_ID} analyzed revision '${BUILD_PR_SHA}' but PR #${PR_NUMBER} head is now '${CURRENT_HEAD}'; skipping stale build (a newer build/check will cover the current revision)."
             emit_none
           fi
-          # When both merge revisions are known and differ, the base branch moved
-          # since the build — the binlog reflects an obsolete merge. Skip.
-          if [ -n "${BUILD_MERGE_SHA}" ] && [ -n "${CURRENT_MERGE}" ] && [ "${BUILD_MERGE_SHA}" != "${CURRENT_MERGE}" ]; then
+          # A difference means the base branch moved since the build.
+          if [ "${BUILD_MERGE_SHA}" != "${CURRENT_MERGE}" ]; then
             echo "::warning::Build ${BUILD_ID} merge revision '${BUILD_MERGE_SHA}' but PR #${PR_NUMBER} current merge is '${CURRENT_MERGE}' (base branch advanced); skipping stale merge."
             emit_none
           fi
@@ -432,30 +430,175 @@ jobs:
             if [ $((TOTAL_BYTES + UNCOMP)) -gt "${MAX_TOTAL_BYTES}" ]; then
               echo "::warning::Cumulative uncompressed budget ${MAX_TOTAL_BYTES} reached at ${safe_name}; stopping extraction."; break
             fi
-            # Refuse the archive if any entry path is absolute or has a `..`
-            # component (defense-in-depth over unzip's own traversal guard),
-            # then extract `*.binlog` entries *preserving* their in-archive
-            # paths (no `-j`) under a fresh dir + timeout, so two binlogs that
-            # share a basename in different folders don't overwrite each other.
-            # The listing is streamed through `grep` (no full in-memory buffer
-            # of entry names) and PIPESTATUS separates the failure modes: a
-            # non-zero listing exit (error/timeout) FAILS CLOSED; a grep match
-            # means a suspicious absolute/`..` path.
-            timeout 60 unzip -Z1 /tmp/a.zip 2>/dev/null | grep -qE '(^/|(^|/)\.\.(/|$))'
-            zscan_rc=("${PIPESTATUS[@]}")
-            if [ "${zscan_rc[0]}" -ne 0 ]; then
-              echo "::warning::Skipping ${safe_name}: could not list archive entries (unzip -Z1 rc=${zscan_rc[0]})."; continue
+            # Inspect every central-directory entry before reading any payload.
+            # Selected binlogs are copied as bytes into fresh, generated regular
+            # files; archive paths and file-type metadata are never materialized.
+            # This rejects traversal and link/device entries and prevents a
+            # symlink or hardlink entry from redirecting a later write.
+            EXTRACTED=$(
+              timeout 120 env ARCHIVE=/tmp/a.zip DESTINATION=/tmp/ax MAX_UNZIP_BYTES="${MAX_UNZIP_BYTES}" python3 -c '
+          import os
+          from pathlib import PurePosixPath
+          import resource
+          import stat
+          import struct
+          import zipfile
+
+          archive = os.environ["ARCHIVE"]
+          destination = os.environ["DESTINATION"]
+          max_unzip_bytes = int(os.environ["MAX_UNZIP_BYTES"])
+
+          # Limit address space before parsing attacker-controlled ZIP metadata.
+          resource.setrlimit(resource.RLIMIT_AS, (1024 * 1024 * 1024,) * 2)
+
+          def preflight_central_directory(path):
+              eocd_struct = struct.Struct("<4s4H2LH")
+              zip64_locator_struct = struct.Struct("<4sLQL")
+              zip64_eocd_struct = struct.Struct("<4sQ2H2L4Q")
+              file_size = os.path.getsize(path)
+              if file_size < eocd_struct.size:
+                  raise ValueError("archive is too short")
+
+              with open(path, "rb") as archive_file:
+                  tail_size = min(file_size, eocd_struct.size + 65_535)
+                  archive_file.seek(file_size - tail_size)
+                  tail = archive_file.read(tail_size)
+                  relative_eocd = tail.rfind(b"PK\x05\x06")
+                  if relative_eocd < 0:
+                      raise ValueError("archive has no end-of-central-directory record")
+                  eocd_offset = file_size - tail_size + relative_eocd
+                  eocd = eocd_struct.unpack_from(tail, relative_eocd)
+                  (
+                      _,
+                      disk_number,
+                      central_directory_disk,
+                      entries_on_disk,
+                      entry_count,
+                      central_directory_size,
+                      central_directory_offset,
+                      comment_length,
+                  ) = eocd
+                  if eocd_offset + eocd_struct.size + comment_length != file_size:
+                      raise ValueError("archive has a malformed end record")
+
+                  central_directory_end = eocd_offset
+                  if (
+                      entries_on_disk == 0xFFFF
+                      or entry_count == 0xFFFF
+                      or central_directory_size == 0xFFFFFFFF
+                      or central_directory_offset == 0xFFFFFFFF
+                  ):
+                      locator_offset = eocd_offset - zip64_locator_struct.size
+                      if locator_offset < 0:
+                          raise ValueError("ZIP64 locator is missing")
+                      archive_file.seek(locator_offset)
+                      locator = archive_file.read(zip64_locator_struct.size)
+                      signature, zip64_disk, zip64_offset, disk_count = zip64_locator_struct.unpack(locator)
+                      if signature != b"PK\x06\x07" or zip64_disk != 0 or disk_count != 1:
+                          raise ValueError("multi-disk ZIP64 archives are unsupported")
+                      archive_file.seek(zip64_offset)
+                      record = archive_file.read(zip64_eocd_struct.size)
+                      (
+                          signature,
+                          record_size,
+                          _,
+                          _,
+                          disk_number,
+                          central_directory_disk,
+                          entries_on_disk,
+                          entry_count,
+                          central_directory_size,
+                          central_directory_offset,
+                      ) = zip64_eocd_struct.unpack(record)
+                      if (
+                          signature != b"PK\x06\x06"
+                          or record_size < 44
+                          or zip64_offset + 12 + record_size != locator_offset
+                      ):
+                          raise ValueError("ZIP64 end record is malformed")
+                      central_directory_end = zip64_offset
+
+                  if disk_number != 0 or central_directory_disk != 0 or entries_on_disk != entry_count:
+                      raise ValueError("multi-disk ZIP archives are unsupported")
+                  if entry_count > 100_000:
+                      raise ValueError("archive has too many entries")
+                  if central_directory_offset + central_directory_size > central_directory_end:
+                      raise ValueError("central directory extends beyond its end record")
+
+                  archive_file.seek(central_directory_offset)
+                  remaining = central_directory_size
+                  for entry_index in range(entry_count):
+                      if remaining < 46:
+                          raise ValueError(f"central-directory entry {entry_index} is truncated")
+                      header = archive_file.read(46)
+                      if len(header) != 46 or header[:4] != b"PK\x01\x02":
+                          raise ValueError(f"central-directory entry {entry_index} is malformed")
+                      name_length, extra_length, entry_comment_length = struct.unpack_from("<3H", header, 28)
+                      variable_length = name_length + extra_length + entry_comment_length
+                      if variable_length > remaining - 46:
+                          raise ValueError(f"central-directory entry {entry_index} is truncated")
+                      archive_file.seek(variable_length, os.SEEK_CUR)
+                      remaining -= 46 + variable_length
+                  if remaining != 0:
+                      raise ValueError("central-directory entry count is inconsistent")
+              return entry_count
+
+          expected_entry_count = preflight_central_directory(archive)
+          with zipfile.ZipFile(archive) as zip_file:
+              entries = zip_file.infolist()
+              if len(entries) != expected_entry_count:
+                  raise ValueError("central-directory entry count changed during parsing")
+
+              selected = []
+              for entry_index, entry in enumerate(entries):
+                  raw_name = entry.filename
+                  normalized_name = raw_name.replace("\\", "/")
+                  path = PurePosixPath(normalized_name)
+                  if (
+                      "\0" in raw_name
+                      or path.is_absolute()
+                      or ".." in path.parts
+                      or (path.parts and len(path.parts[0]) == 2 and path.parts[0][1] == ":")
+                  ):
+                      raise ValueError(f"archive entry {entry_index} has an unsafe path")
+
+                  mode = (entry.external_attr >> 16) & 0xFFFF
+                  file_type = stat.S_IFMT(mode)
+                  if file_type not in (0, stat.S_IFREG, stat.S_IFDIR):
+                      raise ValueError(f"archive entry {entry_index} has an unsupported type")
+
+                  if not entry.is_dir() and normalized_name.lower().endswith(".binlog"):
+                      selected.append(entry)
+
+              os.makedirs(destination, exist_ok=True)
+              extracted_bytes = 0
+              for index, entry in enumerate(selected):
+                  target = os.path.join(destination, f"{index}.binlog")
+                  with zip_file.open(entry, "r") as source, open(target, "xb") as output:
+                      while chunk := source.read(1024 * 1024):
+                          extracted_bytes += len(chunk)
+                          if extracted_bytes > max_unzip_bytes:
+                              raise ValueError("extracted binlogs exceed the per-artifact limit")
+                          output.write(chunk)
+
+          print(len(selected))
+          '
+            )
+            extract_rc=$?
+            if [ "${extract_rc}" -ne 0 ]; then
+              rm -rf /tmp/ax
+              echo "::warning::Skipping ${safe_name}: secure extraction failed or timed out (exit ${extract_rc})."; continue
             fi
-            if [ "${zscan_rc[1]}" -eq 0 ]; then
-              echo "::warning::Skipping ${safe_name}: archive has a suspicious (absolute or ..) entry path."; continue
+            if ! printf '%s' "${EXTRACTED}" | grep -qE '^[0-9]+$' || [ "${EXTRACTED}" -eq 0 ]; then
+              rm -rf /tmp/ax
+              echo "::warning::Skipping ${safe_name}: secure extraction produced no binlogs."; continue
             fi
-            timeout 120 unzip -o /tmp/a.zip '*.binlog' -d /tmp/ax >/dev/null 2>&1 \
-              || { echo "::warning::Skipping ${safe_name}: extraction failed or timed out."; continue; }
             # Consume the budget only once the archive actually extracted, so a
             # skipped leg can't exhaust it and force later legs to be dropped.
             TOTAL_BYTES=$((TOTAL_BYTES + UNCOMP))
             i=0
             leg_staged=0
+            count_before_leg="${count}"
             while IFS= read -r bl; do
               [ -f "${bl}" ] || continue
               # Prefixing with the artifact index (`ai`) and per-file counter
@@ -468,13 +611,17 @@ jobs:
               if cp "${bl}" "${dest}"; then
                 count=$((count + 1))
                 i=$((i + 1))
-                leg_staged=1
+                leg_staged=$((leg_staged + 1))
               else
                 echo "::warning::Failed to stage ${bl}; skipping."
               fi
             done < <(find /tmp/ax -type f -name '*.binlog')
-            # This leg produced at least one usable binlog.
-            [ "${leg_staged}" -eq 1 ] && staged_legs=$((staged_legs + 1))
+            if [ "${leg_staged}" -ne "${EXTRACTED}" ]; then
+              find /tmp/binlogs -maxdepth 1 -type f -name "${ai}_*_${safe_name}.binlog" -delete
+              count="${count_before_leg}"
+              echo "::warning::Skipping ${safe_name}: staged ${leg_staged} of ${EXTRACTED} extracted binlogs."; continue
+            fi
+            staged_legs=$((staged_legs + 1))
           done
           echo "Extracted ${count} binlog(s) from ${staged_legs}/${#names[@]} selected artifacts into /tmp/binlogs:"
           ls -la /tmp/binlogs || true
@@ -498,9 +645,12 @@ jobs:
             echo "::warning::PR #${PR_NUMBER} head changed during artifact download ('${HEAD_SHA}' -> '${LATEST_HEAD}') or could not be re-resolved; skipping to avoid posting stale-build suggestions against the new diff."
             emit_none
           fi
-          # The base branch may also have advanced during the download; if the
-          # merge revision moved from what the build analyzed, skip (stale merge).
-          if [ -n "${BUILD_MERGE_SHA}" ] && [ -n "${LATEST_MERGE}" ] && [ "${LATEST_MERGE}" != "${BUILD_MERGE_SHA}" ]; then
+          if [ -z "${LATEST_MERGE}" ]; then
+            echo "::warning::Could not re-resolve PR #${PR_NUMBER}'s merge revision after artifact download; skipping."
+            emit_none
+          fi
+          # The base branch may also have advanced during the download.
+          if [ "${LATEST_MERGE}" != "${BUILD_MERGE_SHA}" ]; then
             echo "::warning::PR #${PR_NUMBER} merge revision changed during artifact download ('${BUILD_MERGE_SHA}' -> '${LATEST_MERGE}'); skipping stale merge."
             emit_none
           fi
@@ -592,6 +742,25 @@ tools:
     - "binlog-mcp:*"
 
 safe-outputs:
+  needs: [fetch-binlog]
+  steps:
+    - name: Revalidate PR revision before applying queued outputs
+      shell: bash
+      env:
+        GH_TOKEN: ${{ github.token }}
+        GH_AW_REPO: ${{ github.repository }}
+        PR_NUMBER: ${{ needs.fetch-binlog.outputs.pr-number }}
+        EXPECTED_HEAD: ${{ needs.fetch-binlog.outputs.pr-head-sha }}
+        EXPECTED_MERGE: ${{ needs.fetch-binlog.outputs.pr-merge-sha }}
+      run: |
+        set -euo pipefail
+        if [ -z "${EXPECTED_HEAD}" ] || [ -z "${EXPECTED_MERGE}" ] ||
+           ! gh api "repos/${GH_AW_REPO}/pulls/${PR_NUMBER}" |
+             jq -e --arg head "${EXPECTED_HEAD}" --arg merge "${EXPECTED_MERGE}" \
+               '.head.sha == $head and .merge_commit_sha == $merge' >/dev/null; then
+          echo "::error::PR #${PR_NUMBER} moved or could not be verified before applying queued build-analysis outputs."
+          exit 1
+        fi
   messages:
     footer: "> 🤖 **Automated content by GitHub Copilot.** Generated by the [{workflow_name}]({agentic_workflow_url}) workflow.{ai_credits_suffix} · [◷]({history_link})"
   data:
@@ -602,7 +771,7 @@ safe-outputs:
         enum: [build-failure-analysis]
       artifact_kind:
         type: string
-        enum: [analysis, no-binlog]
+        enum: [analysis]
     required: [workflow_artifact, artifact_kind]
     additionalProperties: false
   # Bind writes to the PR number in the trusted trigger rather than allowing
@@ -611,14 +780,15 @@ safe-outputs:
   # sourceBranch belongs to it before the agent can run.
   report-failure-as-issue: false
   add-comment:
-    max: 5
+    max: 1
     target: ${{ github.event.check_run.pull_requests[0].number || inputs['pr-number'] }}
     hide-older-comments: true
   create-pull-request-review-comment:
     max: 25
     target: ${{ github.event.check_run.pull_requests[0].number || inputs['pr-number'] }}
+    commit-id: ${{ needs.fetch-binlog.outputs.pr-head-sha }}
   noop:
-    max: 5
+    max: 1
     report-as-issue: false
 ---
 
