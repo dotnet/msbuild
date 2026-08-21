@@ -73,6 +73,12 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public const string DisableVisualStudioMultiThreadedEnvVarName = "MSBUILDDISABLEVSMULTITHREADED";
 
+        /// <summary>
+        /// Topology used when <see cref="VisualStudioMultiThreadedModeEnvVarName"/> is unset or
+        /// unrecognized. Experiment branches differ only in this value.
+        /// </summary>
+        private const VisualStudioMultiThreadedMode DefaultVisualStudioMultiThreadedMode = VisualStudioMultiThreadedMode.Worker;
+
         private static VisualStudioMultiThreadedMode GetVisualStudioMultiThreadedMode()
         {
             if (Environment.GetEnvironmentVariable(DisableVisualStudioMultiThreadedEnvVarName) == "1")
@@ -81,6 +87,11 @@ namespace Microsoft.Build.Framework
             }
 
             string? mode = Environment.GetEnvironmentVariable(VisualStudioMultiThreadedModeEnvVarName);
+            if (string.Equals(mode, "worker", StringComparison.OrdinalIgnoreCase))
+            {
+                return VisualStudioMultiThreadedMode.Worker;
+            }
+
             if (string.Equals(mode, "devenv", StringComparison.OrdinalIgnoreCase))
             {
                 return VisualStudioMultiThreadedMode.Devenv;
@@ -91,7 +102,7 @@ namespace Microsoft.Build.Framework
                 return VisualStudioMultiThreadedMode.Off;
             }
 
-            return VisualStudioMultiThreadedMode.Worker;
+            return DefaultVisualStudioMultiThreadedMode;
         }
 
         /// <summary>
