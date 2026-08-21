@@ -645,6 +645,27 @@ namespace Microsoft.Build.BackEnd
                                                                       new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase));
 
         /// <summary>
+        /// Removes <paramref name="targetName"/> from <see cref="ActivelyBuildingTargets"/>, but only if it is still
+        /// recorded as being built by <paramref name="globalRequestId"/>. This guards against a stale request (for
+        /// instance one whose cancellation timed out but which is still executing) resuming after its entry was
+        /// overwritten -- or the table was cleared and repopulated -- by a newer request reusing this retained
+        /// configuration. Without this check, the stale request could erroneously remove the newer request's
+        /// still-active entry, which could in turn cause the configuration's <see cref="ProjectInstance"/> to be
+        /// cached while the newer request is still using it.
+        /// </summary>
+        /// <param name="targetName">The name of the target that is no longer actively building for the calling request.</param>
+        /// <param name="globalRequestId">The global request id of the request which believes it owns the target entry.</param>
+        internal void RemoveActivelyBuildingTargetIfOwnedBy(string targetName, int globalRequestId)
+        {
+            if (_activelyBuildingTargets is not null &&
+                _activelyBuildingTargets.TryGetValue(targetName, out int owningRequestId) &&
+                owningRequestId == globalRequestId)
+            {
+                _activelyBuildingTargets.Remove(targetName);
+            }
+        }
+
+        /// <summary>
         /// Keeps the <see cref="ProjectInstance"/> in memory while the caller uses it, preventing a concurrent
         /// memory-pressure cache sweep. Retrieves the project first if it was already cached.
         /// </summary>
