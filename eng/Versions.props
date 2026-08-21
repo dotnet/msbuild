@@ -71,7 +71,7 @@
     <MicrosoftCodeAnalysisContractsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisContractsVersion>
     <MicrosoftCodeAnalysisPooledObjectsVersion>5.0.0-1.25277.114</MicrosoftCodeAnalysisPooledObjectsVersion>
 
-    <BootstrapSdkVersion>11.0.100-preview.7.26360.111</BootstrapSdkVersion>
+    <BootstrapSdkVersion>11.0.100-preview.7.26381.103</BootstrapSdkVersion>
   </PropertyGroup>
 
   <Target Name="OverrideArcadeFileVersion" AfterTargets="_InitializeAssemblyVersion">
