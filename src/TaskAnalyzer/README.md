@@ -15,10 +15,10 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | ID | Severity | Scope | Title |
 |---|---|---|---|
 | **MSBuildTask0001** | Error | All `ITask` implementations | API is never safe in MSBuild tasks |
-| **MSBuildTask0002** | Warning | All `ITask` implementations | API requires `TaskEnvironment` alternative |
-| **MSBuildTask0003** | Warning | All `ITask` implementations | File system API requires absolute path |
+| **MSBuildTask0002** | Warning | MT tasks by default; all tasks in migration mode | API requires `TaskEnvironment` alternative |
+| **MSBuildTask0003** | Warning | MT tasks by default; all tasks in migration mode | File system API requires absolute path |
 | **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
-| **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
+| **MSBuildTask0005** | Warning | MT tasks by default; all tasks in migration mode | Transitive unsafe API usage in task call chain |
 | **MSBuildTask0006** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer typed path parameter over string |
 | **MSBuildTask0007** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
 | **MSBuildTask0008** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
@@ -289,15 +289,24 @@ The engine prefers this constructor when it is present. A public parameterless c
 
 ## Analysis Scope
 
-The analyzer determines what to check based on the type declaration:
+The default `multithreadable_only` scope prevents MT-specific warnings from affecting regular tasks. It recognizes `IMultiThreadableTask`, `[MSBuildMultiThreadableTask]`, and `[MSBuildMultiThreadableTaskAnalyzed]` as MT opt-ins.
 
 | Type | Rules Applied |
 |---|---|
-| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009–MSBuildTask0010 |
+| Regular class implementing `ITask` | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0010 |
 | Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
 | Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
 | Regular class (no task interface or attribute) | Not analyzed |
+
+Set the scope to `all` to analyze regular tasks for MSBuildTask0002, MSBuildTask0003, and MSBuildTask0005 before MT migration:
+
+```ini
+[*.cs]
+msbuild_task_analyzer.scope = all
+```
+
+Missing and unrecognized values use the safe `multithreadable_only` default.
 
 MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTask]` attribute is applied **directly** to the task class. The attribute is `Inherited = false`, so a task that merely derives from a base class implementing `IMultiThreadableTask` (or carrying the attribute) has not itself opted into multithreaded support and is not subject to these three rules. Input properties are collected from the task class **and its base classes**, so an `ITaskItem`/`string` input declared on a shared base task is still analyzed.
 
@@ -309,7 +318,7 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
 - **MSBuildTask0010** is always **Error** — task item conversions must not rely on `Convert.ChangeType`.
-- **MSBuildTask0002–MSBuildTask0005 and MSBuildTask0009** report as **Warning** for all task types.
+- **MSBuildTask0002–MSBuildTask0005 and MSBuildTask0009** report as **Warning** when their scope applies.
 - **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** report as **Info** — these are modernization suggestions, not correctness issues.
 
 ## Code Fixes
