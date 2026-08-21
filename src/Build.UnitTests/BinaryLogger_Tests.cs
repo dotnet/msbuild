@@ -146,6 +146,8 @@ namespace Microsoft.Build.UnitTests
             projectCount.ShouldBe(1);
             targetCount.ShouldBe(2);
             buildSucceeded.ShouldBeTrue();
+
+            CreateExpectedLogFile();
         }
 
         [Theory]
