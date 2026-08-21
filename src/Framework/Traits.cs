@@ -77,7 +77,7 @@ namespace Microsoft.Build.Framework
         /// Topology used when <see cref="VisualStudioMultiThreadedModeEnvVarName"/> is unset or
         /// unrecognized. Experiment branches differ only in this value.
         /// </summary>
-        private const VisualStudioMultiThreadedMode DefaultVisualStudioMultiThreadedMode = VisualStudioMultiThreadedMode.Worker;
+        private const VisualStudioMultiThreadedMode DefaultVisualStudioMultiThreadedMode = VisualStudioMultiThreadedMode.Devenv;
 
         private static VisualStudioMultiThreadedMode GetVisualStudioMultiThreadedMode()
         {
