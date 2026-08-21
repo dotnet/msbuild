@@ -2823,6 +2823,7 @@ $@"<Project>
             output.ShouldContain($"Cannot create an instance of the logger {expectedLoggerName}.", customMessage: output);
         }
 
+        [ActiveIssue("https://github.com/dotnet/msbuild/issues/14627")]
         [Theory]
         [InlineData("MemberAccessException", "-logger:,", "CustomLogger.dll")]
         [InlineData("MemberAccessException", "-distributedlogger:,", "CustomLogger.dll")]
