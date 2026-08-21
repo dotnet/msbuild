@@ -111,6 +111,7 @@ namespace Microsoft.Build.Framework
         public readonly bool UseLazyWildCardEvaluation = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MsBuildSkipEagerWildCardEvaluationRegexes"));
         public readonly bool LogExpandedWildcards = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDLOGEXPANDEDWILDCARDS"));
         public readonly bool ThrowOnDriveEnumeratingWildcard = Environment.GetEnvironmentVariable("MSBUILDFAILONDRIVEENUMERATINGWILDCARD") == "1";
+        public readonly bool UseLegacyCultureSensitiveFileGlobs = Environment.GetEnvironmentVariable("MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS") == "1";
 
         /// <summary>
         /// Cache file existence for the entire process
@@ -257,7 +258,11 @@ namespace Microsoft.Build.Framework
         /// </summary>
         public readonly bool EmitLogsAsMessage = string.Equals(Environment.GetEnvironmentVariable(MSBuildLoggingArgsLevelEnvVarName), "message", StringComparison.OrdinalIgnoreCase);
 
-        public readonly bool DebugEngine = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine"));
+        public readonly bool DebugEngine =
+            !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugEngine")) ||
+            // some CI systems force env vars to uppercase and that's also the standard in MSBuild, so allow it here
+            (!NativeMethods.IsWindows && // Windows env vars are case-insensitive so no need to explicitly check
+             !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBUILDDEBUGENGINE"))); 
         public readonly bool DebugScheduler;
         public readonly bool DebugNodeCommunication;
         public readonly bool DebugUnitTests = !string.IsNullOrEmpty(Environment.GetEnvironmentVariable("MSBuildDebugUnitTests"));

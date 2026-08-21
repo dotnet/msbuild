@@ -490,11 +490,9 @@ namespace Microsoft.Build.ProjectCache
                 return false;
             }
 
-            // We need to retrieve the configuration if it's already loaded in order to access the Project property below.
-            if (buildRequestConfiguration.IsCached)
-            {
-                buildRequestConfiguration.RetrieveFromCache();
-            }
+            // Retrieve the project if it is cached and keep it in memory while checking its cache descriptors.
+            using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
+                buildRequestConfiguration.AcquireProjectInstanceUsage();
 
             // Check if there are any project cache items defined in the project
             return GetProjectCacheDescriptors(buildRequestConfiguration.Project).Any();
@@ -530,6 +528,12 @@ namespace Microsoft.Build.ProjectCache
 
             async ValueTask<(CacheResult Result, int ProjectContextId)> ProcessCacheRequestAsync()
             {
+                // The configuration cache is shared with the in-proc node's BuildRequestEngine, which may run a
+                // memory-pressure sweep on its own thread. Keep the project in memory for this entire operation:
+                // the ProjectInstance below is handed to the plugin and is used until the query completes.
+                using BuildRequestConfiguration.ProjectInstanceUsageScope projectInstanceUsage =
+                    cacheRequest.Configuration.AcquireProjectInstanceUsage();
+
                 EvaluateProjectIfNecessary(cacheRequest.Submission, cacheRequest.Configuration);
 
                 BuildRequestData buildRequest = new BuildRequestData(
@@ -839,15 +843,13 @@ namespace Microsoft.Build.ProjectCache
                 return;
             }
 
-            // If the ProjectInstance was evicted to disk to save memory, restore it before accessing
-            // the Project property below (whose getter asserts !IsCached).
-            if (requestConfiguration.IsCached)
+            List<ProjectCacheDescriptor> projectCacheDescriptors;
+            // Retrieve the project if it is cached and keep it in memory while determining which plugins apply.
+            using (requestConfiguration.AcquireProjectInstanceUsage())
             {
-                requestConfiguration.RetrieveFromCache();
+                projectCacheDescriptors = GetProjectCacheDescriptors(requestConfiguration.Project).ToList();
             }
 
-            // Filter to plugins which apply to the project, if any
-            List<ProjectCacheDescriptor> projectCacheDescriptors = GetProjectCacheDescriptors(requestConfiguration.Project).ToList();
             if (projectCacheDescriptors.Count == 0)
             {
                 return;
