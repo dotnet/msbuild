@@ -2206,7 +2206,19 @@ namespace Microsoft.Build.BackEnd
         private void LogRequestHandledFromCache(BuildRequest request, BuildResult result)
         {
             BuildRequestConfiguration configuration = _configCache[request.ConfigurationId];
-            int nodeId = _schedulingData.GetAssignedNodeForRequestConfiguration(request.ConfigurationId);
+
+            // Use ResultsNodeId (the node that originally built this project) rather than
+            // GetAssignedNodeForRequestConfiguration (the scheduling assignment, which may be invalid
+            // or stale for cache-served requests). This ensures the logged ProjectStartedEventArgs
+            // has the correct NodeId matching where the project was actually evaluated/built.
+            // See https://github.com/dotnet/msbuild/issues/12953
+            int nodeId = configuration.ResultsNodeId;
+            if (nodeId == Scheduler.InvalidNodeId)
+            {
+                // Fallback: if ResultsNodeId isn't set (e.g. never built), use the scheduling assignment.
+                nodeId = _schedulingData.GetAssignedNodeForRequestConfiguration(request.ConfigurationId);
+            }
+
             NodeLoggingContext nodeContext = new NodeLoggingContext(_componentHost.LoggingService, nodeId, true);
             nodeContext.LogRequestHandledFromCache(request, configuration, result);
 
