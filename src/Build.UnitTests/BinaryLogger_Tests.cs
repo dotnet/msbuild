@@ -94,6 +94,61 @@ namespace Microsoft.Build.UnitTests
         }
 
         [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        [InlineData(4)]
+        [InlineData(5)]
+        [InlineData(6)]
+        [InlineData(7)]
+        [InlineData(8)]
+        [InlineData(9)]
+        [InlineData(10)]
+        [InlineData(11)]
+        [InlineData(12)]
+        [InlineData(13)]
+        [InlineData(14)]
+        public void CanReplayHistoricalBinaryLogFormats(int formatVersion)
+        {
+            string path = Path.Combine(
+                AppContext.BaseDirectory,
+                "TestAssets",
+                "BinaryLogger",
+                $"version{formatVersion}.binlog");
+
+            int eventCount = 0;
+            int projectCount = 0;
+            int targetCount = 0;
+            bool buildSucceeded = false;
+            var replay = new BinaryLogReplayEventSource();
+            replay.AnyEventRaised += (_, args) =>
+            {
+                eventCount++;
+
+                if (args is ProjectStartedEventArgs)
+                {
+                    projectCount++;
+                }
+                else if (args is TargetStartedEventArgs)
+                {
+                    targetCount++;
+                }
+                else if (args is BuildFinishedEventArgs finished)
+                {
+                    buildSucceeded = finished.Succeeded;
+                }
+            };
+
+            replay.Replay(path);
+
+            replay.FileFormatVersion.ShouldBe(formatVersion);
+            eventCount.ShouldBeGreaterThan(0);
+            projectCount.ShouldBe(1);
+            targetCount.ShouldBe(2);
+            buildSucceeded.ShouldBeTrue();
+        }
+
+        [Theory]
         [InlineData(s_testProject, BinlogRoundtripTestReplayMode.NoReplay)]
         [InlineData(s_testProject, BinlogRoundtripTestReplayMode.Structured)]
         [InlineData(s_testProject, BinlogRoundtripTestReplayMode.RawEvents)]
