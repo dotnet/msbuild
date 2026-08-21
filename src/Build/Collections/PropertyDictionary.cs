@@ -638,7 +638,8 @@ namespace Microsoft.Build.Collections
             {
                 if (properties is not null)
                 {
-                    ArrayPool<T>.Shared.Return(properties, clearArray: true);
+                    Array.Clear(properties, 0, count);
+                    ArrayPool<T>.Shared.Return(properties, clearArray: false);
                 }
             }
         }

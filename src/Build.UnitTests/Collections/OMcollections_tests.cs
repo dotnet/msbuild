@@ -104,9 +104,9 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             int deserializedMarker = 0;
             readTranslator.Translate(ref deserializedMarker);
 
-            Assert.Equal(3, properties.Count);
-            Assert.Equal(2, deserializedProperties.Count);
-            Assert.Equal(marker, deserializedMarker);
+            properties.Count.ShouldBe(3);
+            deserializedProperties.Count.ShouldBe(2);
+            deserializedMarker.ShouldBe(marker);
         }
 
         [Fact]
@@ -123,9 +123,9 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             properties.Remove(p1.Name);
             properties.Set(GetPropertyInstance("p3", "v3"));
 
-            Assert.Equal(2, snapshot.Length);
-            Assert.Contains(p1, snapshot);
-            Assert.Contains(p2, snapshot);
+            snapshot.Length.ShouldBe(2);
+            snapshot.ShouldContain(p1);
+            snapshot.ShouldContain(p2);
         }
 
         [Fact]
@@ -138,7 +138,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 return property;
             }).ToList();
 
-            Assert.Equal(2, copied.Count);
+            copied.Count.ShouldBe(2);
 
             properties = CreateProperties();
             ProjectPropertyInstance p1 = properties["p1"];
@@ -149,7 +149,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
             });
             p1.EvaluatedValue = "changed";
 
-            Assert.Contains("v1", filtered);
+            filtered.ShouldContain("v1");
 
             properties = CreateProperties();
             List<PropertyData> enumerated = [];
@@ -159,7 +159,7 @@ namespace Microsoft.Build.UnitTests.OM.Collections
                 properties.Set(GetPropertyInstance("p3", "v3"));
             }
 
-            Assert.Equal(2, enumerated.Count);
+            enumerated.Count.ShouldBe(2);
 
             static PropertyDictionary<ProjectPropertyInstance> CreateProperties()
             {
