@@ -288,6 +288,26 @@ internal static class TestHelpers
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
     }
 
+    /// <summary>
+    /// Runs both direct and transitive analyzers with a configured action for one diagnostic ID.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsWithDiagnosticActionAsync(
+        string source,
+        string diagnosticId,
+        ReportDiagnostic action)
+    {
+        var compilation = CreateCompilation(source);
+        var options = ((CSharpCompilationOptions)compilation.Options).WithSpecificDiagnosticOptions(
+            compilation.Options.SpecificDiagnosticOptions.SetItem(diagnosticId, action));
+        compilation = compilation.WithOptions(options);
+
+        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(
+            new MultiThreadableTaskAnalyzer(),
+            new TransitiveCallChainAnalyzer());
+        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
+        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+    }
+
     private static MetadataReference[] CreateCoreReferences()
     {
         // Reference the core runtime assemblies needed

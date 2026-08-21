@@ -42,7 +42,6 @@ public class MultiThreadableTaskCodeFixProviderTests
         DiagnosticIds.TaskEnvironmentRequired => new DiagnosticResult(DiagnosticDescriptors.TaskEnvironmentRequired),
         DiagnosticIds.FilePathRequiresAbsolute => new DiagnosticResult(DiagnosticDescriptors.FilePathRequiresAbsolute),
         DiagnosticIds.PotentialIssue => new DiagnosticResult(DiagnosticDescriptors.PotentialIssue),
-        DiagnosticIds.TransitiveUnsafeCall => new DiagnosticResult(DiagnosticDescriptors.TransitiveUnsafeCall),
         _ => new DiagnosticResult(id, DiagnosticSeverity.Warning),
     };
 

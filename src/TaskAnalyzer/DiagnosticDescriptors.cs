@@ -48,14 +48,44 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             isEnabledByDefault: true,
             description: "This API may cause threading issues or version conflicts. Review usage carefully.");
 
-        public static readonly DiagnosticDescriptor TransitiveUnsafeCall = new(
-            id: DiagnosticIds.TransitiveUnsafeCall,
-            title: "Transitive unsafe API usage in task call chain",
-            messageFormat: "'{0}' transitively calls unsafe API '{1}' via: {2}",
+        public static readonly DiagnosticDescriptor TransitiveCriticalError = new(
+            id: DiagnosticIds.CriticalError,
+            title: "API is never safe in MSBuild task implementations",
+            messageFormat: "'{0}' must not be used in MSBuild tasks: {1}. It is reachable from task method '{2}' via: {3}.",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Error,
+            isEnabledByDefault: true,
+            description: "This API has no safe alternative in MSBuild tasks. It is called by a helper reachable from an MSBuild task.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+        public static readonly DiagnosticDescriptor TransitiveTaskEnvironmentRequired = new(
+            id: DiagnosticIds.TaskEnvironmentRequired,
+            title: "API requires TaskEnvironment alternative in MSBuild tasks",
+            messageFormat: "'{0}' should use TaskEnvironment alternative: {1}. It is reachable from task method '{2}' via: {3}.",
             category: "MSBuild.TaskAuthoring",
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "A method called from this task transitively uses an API that is unsafe in multithreaded task execution. Review the call chain and migrate the callee.",
+            description: "This API accesses process-global state. It is called by a helper reachable from an MSBuild task.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+        public static readonly DiagnosticDescriptor TransitiveFilePathRequiresAbsolute = new(
+            id: DiagnosticIds.FilePathRequiresAbsolute,
+            title: "File system API requires absolute path in MSBuild tasks",
+            messageFormat: "'{0}' may resolve a relative path against the shared working directory: {1}. It is reachable from task method '{2}' via: {3}.",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "This file system API receives a path that may be relative. It is called by a helper reachable from an MSBuild task.",
+            customTags: WellKnownDiagnosticTags.CompilationEnd);
+
+        public static readonly DiagnosticDescriptor TransitivePotentialIssue = new(
+            id: DiagnosticIds.PotentialIssue,
+            title: "API may cause issues in multithreaded MSBuild tasks",
+            messageFormat: "'{0}' may cause issues in multithreaded tasks: {1}. It is reachable from task method '{2}' via: {3}.",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "This API may cause threading issues or version conflicts. It is called by a helper reachable from an MSBuild task.",
             customTags: WellKnownDiagnosticTags.CompilationEnd);
 
         public static readonly DiagnosticDescriptor PreferTypedPathParameter = new(
@@ -117,7 +147,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             TaskEnvironmentRequired,
             FilePathRequiresAbsolute,
             PotentialIssue,
-            TransitiveUnsafeCall,
             PreferTypedPathParameter,
             PreferTypedTaskItem,
             InitializeRelativeDefaultInExecute,

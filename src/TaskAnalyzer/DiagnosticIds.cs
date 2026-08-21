@@ -9,6 +9,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// </summary>
     public static class DiagnosticIds
     {
+        internal const string IsTransitiveProperty = "MSBuildTask.IsTransitive";
+
         /// <summary>Critical APIs with no safe alternative (Environment.Exit, Console.*, ThreadPool).</summary>
         public const string CriticalError = "MSBuildTask0001";
 
@@ -20,9 +22,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>Potentially problematic APIs (Assembly.Load*, Activator.CreateInstance*).</summary>
         public const string PotentialIssue = "MSBuildTask0004";
-
-        /// <summary>Transitive unsafe API usage detected in task call chain.</summary>
-        public const string TransitiveUnsafeCall = "MSBuildTask0005";
 
         /// <summary>Task input property should use AbsolutePath, FileInfo, or DirectoryInfo instead of string.</summary>
         public const string PreferTypedPathParameter = "MSBuildTask0006";

@@ -41,8 +41,8 @@ namespace Microsoft.Build.Tasks
         public ITaskItem OutputEntryPoint { get; set; }
         #endregion
 
-        // MSBuildTask0005 (transitive unsafe API) warnings are currently emitted here due to
-        // an analyzer limitation around data-flow reachability. See https://github.com/dotnet/msbuild/issues/13867.
+        // Transitive task-analyzer diagnostics are currently emitted here due to an analyzer
+        // limitation around data-flow reachability. See https://github.com/dotnet/msbuild/issues/13867.
         public override bool Execute()
         {
             if (!NativeMethodsShared.IsWindows)

@@ -1,12 +1,17 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CodeActions;
+using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Text;
 using Shouldly;
 using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
@@ -20,11 +25,16 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 public class TransitiveCallChainAnalyzerTests
 {
     [Theory]
-    [InlineData("using System;", "Console.WriteLine(\"test\");", "Console.WriteLine")]
-    [InlineData("using System.IO;", "File.Exists(\"test.txt\");", "File.Exists")]
-    [InlineData("using System;", "Environment.GetEnvironmentVariable(\"KEY\");", "GetEnvironmentVariable")]
-    public async Task HelperCallingBannedApi_TransitivelyFromTask_ProducesDiagnostic(
-        string usingDirective, string helperBody, string expectedApiName)
+    [InlineData("using System;", "Console.WriteLine(\"test\");", "Console.WriteLine", DiagnosticIds.CriticalError, DiagnosticSeverity.Error)]
+    [InlineData("using System.IO;", "File.Exists(\"test.txt\");", "File.Exists", DiagnosticIds.FilePathRequiresAbsolute, DiagnosticSeverity.Warning)]
+    [InlineData("using System;", "Environment.GetEnvironmentVariable(\"KEY\");", "GetEnvironmentVariable", DiagnosticIds.TaskEnvironmentRequired, DiagnosticSeverity.Warning)]
+    [InlineData("using System.Reflection;", "Assembly.Load(\"Test\");", "Assembly.Load", DiagnosticIds.PotentialIssue, DiagnosticSeverity.Warning)]
+    public async Task HelperCallingBannedApi_ReportsUnderlyingDiagnostic(
+        string usingDirective,
+        string helperBody,
+        string expectedApiName,
+        string expectedDiagnosticId,
+        DiagnosticSeverity expectedSeverity)
     {
         var source = $$"""
             {{usingDirective}}
@@ -45,9 +55,17 @@ public class TransitiveCallChainAnalyzerTests
 
         var diags = await GetAllDiagnosticsAsync(source);
 
-        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
-        transitive.ShouldNotBeEmpty();
-        transitive[0].GetMessage().ShouldContain(expectedApiName);
+        var transitive = diags.Where(d =>
+            d.Id == expectedDiagnosticId &&
+            d.GetMessage().Contains("reachable from task method")).ShouldHaveSingleItem();
+
+        transitive.Severity.ShouldBe(expectedSeverity);
+        transitive.GetMessage().ShouldContain(expectedApiName);
+        transitive.GetMessage().ShouldContain("MyTask.Execute");
+        transitive.Properties[DiagnosticIds.IsTransitiveProperty].ShouldBe(bool.TrueString);
+        transitive.Location.SourceTree!.GetText().ToString(transitive.Location.SourceSpan).ShouldContain(expectedApiName);
+        transitive.AdditionalLocations.ShouldHaveSingleItem()
+            .SourceTree!.GetText().ToString(transitive.AdditionalLocations[0].SourceSpan).ShouldBe("Execute");
     }
 
     [Fact]
@@ -74,9 +92,10 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
-        transitive.ShouldNotBeEmpty();
-        var msg = transitive[0].GetMessage();
+        var transitive = diags.Where(d =>
+            d.Id == DiagnosticIds.CriticalError &&
+            d.GetMessage().Contains("reachable from task method")).ShouldHaveSingleItem();
+        var msg = transitive.GetMessage();
         msg.ShouldContain("Environment.Exit");
         // Chain should show: MyTask.Execute → OuterHelper.Process → InnerHelper.DoExit → Environment.Exit
         msg.ShouldContain("OuterHelper.Process");
@@ -99,11 +118,8 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall);
-        transitive.ShouldBeEmpty();
-
-        var direct = diags.Where(d => d.Id == DiagnosticIds.CriticalError);
-        direct.ShouldNotBeEmpty();
+        var direct = diags.Where(d => d.Id == DiagnosticIds.CriticalError).ShouldHaveSingleItem();
+        direct.GetMessage().ShouldNotContain("reachable from task method");
     }
 
     [Fact]
@@ -125,8 +141,11 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall);
-        transitive.ShouldBeEmpty();
+        diags.Where(d => d.Id is
+            DiagnosticIds.CriticalError or
+            DiagnosticIds.TaskEnvironmentRequired or
+            DiagnosticIds.FilePathRequiresAbsolute or
+            DiagnosticIds.PotentialIssue).ShouldBeEmpty();
     }
 
     [Fact]
@@ -151,9 +170,10 @@ public class TransitiveCallChainAnalyzerTests
             """);
 
         // Should still detect the violation without infinite loop
-        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
-        transitive.ShouldNotBeEmpty();
-        transitive[0].GetMessage().ShouldContain("Console.WriteLine");
+        var transitive = diags.Where(d =>
+            d.Id == DiagnosticIds.CriticalError &&
+            d.GetMessage().Contains("reachable from task method")).ShouldHaveSingleItem();
+        transitive.GetMessage().ShouldContain("Console.WriteLine");
     }
 
     [Fact]
@@ -177,9 +197,10 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
-        transitive.ShouldNotBeEmpty();
-        transitive[0].GetMessage().ShouldContain("Console.Write");
+        var transitive = diags.Where(d =>
+            d.Id == DiagnosticIds.CriticalError &&
+            d.GetMessage().Contains("reachable from task method")).ShouldHaveSingleItem();
+        transitive.GetMessage().ShouldContain("Console.Write");
     }
 
     [Fact]
@@ -208,8 +229,10 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
-        transitive.Length.ShouldBeGreaterThanOrEqualTo(3);
+        var transitive = diags.Where(d => d.GetMessage().Contains("reachable from task method")).ToArray();
+        transitive.Length.ShouldBe(3);
+        transitive.Count(d => d.Id == DiagnosticIds.CriticalError).ShouldBe(2);
+        transitive.Count(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldBe(1);
     }
 
     [Fact]
@@ -236,9 +259,10 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
-        transitive.ShouldNotBeEmpty();
-        var msg = transitive[0].GetMessage();
+        var transitive = diags.Where(d =>
+            d.Id == DiagnosticIds.CriticalError &&
+            d.GetMessage().Contains("reachable from task method")).ShouldHaveSingleItem();
+        var msg = transitive.GetMessage();
         // Should contain arrow-separated chain
         msg.ShouldContain("→");
         msg.ShouldContain("A.Step1");
@@ -264,7 +288,7 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBeEmpty();
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
     }
 
     [Fact]
@@ -288,7 +312,8 @@ public class TransitiveCallChainAnalyzerTests
             }
             """);
 
-        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem()
+            .GetMessage().ShouldContain("reachable from task method");
     }
 
     [Fact]
@@ -310,6 +335,128 @@ public class TransitiveCallChainAnalyzerTests
             }
             """, SharedAnalyzerHelpers.ScopeAll);
 
-        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem()
+            .GetMessage().ShouldContain("reachable from task method");
+    }
+
+    [Theory]
+    [InlineData("Console.WriteLine(\"test\");", DiagnosticIds.CriticalError, DiagnosticSeverity.Error)]
+    [InlineData("System.Reflection.Assembly.Load(\"Test\");", DiagnosticIds.PotentialIssue, DiagnosticSeverity.Warning)]
+    public async Task Scope_Default_PlainTask_GetsRulesThatApplyToAllTasks(
+        string helperBody,
+        string expectedDiagnosticId,
+        DiagnosticSeverity expectedSeverity)
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync($$"""
+            using System;
+            public static class Helper
+            {
+                public static void Run() { {{helperBody}} }
+            }
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+
+        var diagnostic = diags.Where(d =>
+            d.Id == expectedDiagnosticId &&
+            d.GetMessage().Contains("reachable from task method")).ShouldHaveSingleItem();
+        diagnostic.Severity.ShouldBe(expectedSeverity);
+    }
+
+    [Fact]
+    public async Task UnderlyingDiagnosticConfiguration_SuppressesTransitiveDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithDiagnosticActionAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public static class Helper
+            {
+                public static void Run() => Environment.GetEnvironmentVariable("KEY");
+            }
+            public class MtTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """, DiagnosticIds.TaskEnvironmentRequired, ReportDiagnostic.Suppress);
+
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task DirectlyAnalyzedHelper_DoesNotGetDuplicateTransitiveDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            [MSBuildMultiThreadableTaskAnalyzed]
+            public static class Helper
+            {
+                public static void Run() => Environment.GetEnvironmentVariable("KEY");
+            }
+            public class MtTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+
+        var diagnostic = diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldHaveSingleItem();
+        diagnostic.Properties.ContainsKey(DiagnosticIds.IsTransitiveProperty).ShouldBeFalse();
+    }
+
+    [Fact]
+    public async Task TransitiveDiagnostic_DoesNotOfferCodeFix()
+    {
+        const string source = """
+            using System;
+            using Microsoft.Build.Framework;
+            public static class Helper
+            {
+                public static void Run() => Environment.GetEnvironmentVariable("KEY");
+            }
+            public class MtTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """;
+
+        var diagnostics = await GetAllDiagnosticsWithDefaultScopeAsync(source);
+        var diagnostic = diagnostics.Where(d =>
+            d.Id == DiagnosticIds.TaskEnvironmentRequired &&
+            d.Properties.ContainsKey(DiagnosticIds.IsTransitiveProperty)).ShouldHaveSingleItem();
+
+        using var workspace = new AdhocWorkspace();
+        var project = workspace.AddProject("TestProject", LanguageNames.CSharp);
+        var document = workspace.AddDocument(project.Id, "Test.cs", SourceText.From(source));
+        var actions = new List<CodeAction>();
+        var context = new CodeFixContext(
+            document,
+            diagnostic,
+            (action, _) => actions.Add(action),
+            CancellationToken.None);
+
+        await new MultiThreadableTaskCodeFixProvider().RegisterCodeFixesAsync(context);
+
+        actions.ShouldBeEmpty();
     }
 }

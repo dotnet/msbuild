@@ -40,6 +40,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             foreach (var diagnostic in context.Diagnostics)
             {
+                if (diagnostic.Properties.ContainsKey(DiagnosticIds.IsTransitiveProperty))
+                {
+                    continue;
+                }
+
                 var node = root.FindNode(diagnostic.Location.SourceSpan);
 
                 if (diagnostic.Id == DiagnosticIds.FilePathRequiresAbsolute)

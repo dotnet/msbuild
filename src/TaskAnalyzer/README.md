@@ -18,13 +18,14 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0002** | Warning | MT tasks by default; all tasks in migration mode | API requires `TaskEnvironment` alternative |
 | **MSBuildTask0003** | Warning | MT tasks by default; all tasks in migration mode | File system API requires absolute path |
 | **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
-| **MSBuildTask0005** | Warning | MT tasks by default; all tasks in migration mode | Transitive unsafe API usage in task call chain |
 | **MSBuildTask0006** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer typed path parameter over string |
 | **MSBuildTask0007** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
 | **MSBuildTask0008** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
 | **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
 | **MSBuildTask0010** | Error | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
 | **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
+
+Unsafe API calls in helper methods use the corresponding MSBuildTask0001–MSBuildTask0004 diagnostic rather than a separate rule. The diagnostic is reported at the unsafe call and includes the task method and call chain that make the helper reachable.
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -294,12 +295,12 @@ The default `multithreadable_only` scope prevents MT-specific warnings from affe
 | Type | Rules Applied |
 |---|---|
 | Regular class implementing `ITask` | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0010 |
-| Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
-| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
-| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
+| Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–MSBuildTask0004) |
+| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0004 and MSBuildTask0009–MSBuildTask0011 |
+| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | Direct MSBuildTask0001–MSBuildTask0004 analysis |
 | Regular class (no task interface or attribute) | Not analyzed |
 
-Set the scope to `all` to analyze regular tasks for MSBuildTask0002, MSBuildTask0003, and MSBuildTask0005 before MT migration:
+Set the scope to `all` to analyze regular tasks for direct and transitive MSBuildTask0002 and MSBuildTask0003 violations before MT migration:
 
 ```ini
 [*.cs]
@@ -310,7 +311,7 @@ Missing and unrecognized values use the safe `multithreadable_only` default.
 
 MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTask]` attribute is applied **directly** to the task class. The attribute is `Inherited = false`, so a task that merely derives from a base class implementing `IMultiThreadableTask` (or carrying the attribute) has not itself opted into multithreaded support and is not subject to these three rules. Input properties are collected from the task class **and its base classes**, so an `ITaskItem`/`string` input declared on a shared base task is still analyzed.
 
-The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis, but it reports only at the task entry point. Adding this attribute to a helper class gives you inline diagnostics and code fixes directly in the helper's source.
+The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, helpers receive a diagnostic only when call graph analysis finds that they are reachable from a task. A transitive diagnostic is reported at the unsafe call and includes the task method and call chain for context. Adding the attribute enables direct analysis and applicable code fixes without requiring task reachability; the transitive analyzer then skips that helper to avoid duplicate diagnostics.
 
 **When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles and code fixes) on unsafe APIs within those helpers.
 
@@ -318,7 +319,7 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
 - **MSBuildTask0010** is always **Error** — task item conversions must not rely on `Convert.ChangeType`.
-- **MSBuildTask0002–MSBuildTask0005 and MSBuildTask0009** report as **Warning** when their scope applies.
+- **MSBuildTask0002–MSBuildTask0004 and MSBuildTask0009** report as **Warning** when their scope applies.
 - **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** report as **Info** — these are modernization suggestions, not correctness issues.
 
 ## Code Fixes
@@ -344,6 +345,8 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 | MSBuildTask0008: relative default `= "obj"` on a path property | → Retype the property (unset default) and move the default into `Execute()` as a guarded, `TaskEnvironment`-rooted assignment |
 
 The MSBuildTask0003 fixer intelligently finds the first **unwrapped** path argument rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument.
+
+Transitive diagnostics do not offer code fixes because a helper method does not necessarily have access to the task's `TaskEnvironment`. Apply the migration in the helper's API and pass the required task-specific state from its caller.
 
 The MSBuildTask0006/MSBuildTask0007 fixer is conservative by design: it only offers a fix when every reference to the property — across all partial declarations of the task type, in the current document — can be safely rewritten as part of the same change, so the resulting code keeps compiling after the property type is updated. If the property is referenced from another file (a partial class spread across documents) in a way this single-document fix can't rewrite, no fix is offered.
 
@@ -454,7 +457,7 @@ dotnet test
 | `BannedApiDefinitions.cs` | ~50 banned API entries resolved via `DocumentationCommentId` for O(1) symbol lookup |
 | `SharedAnalyzerHelpers.cs` | Shared path safety analysis, banned API resolution, and interface checking helpers |
 | `DiagnosticDescriptors.cs` | Eight diagnostic descriptors in category `MSBuild.TaskAuthoring` |
-| `DiagnosticIds.cs` | Public constants: `MSBuildTask0001`–`MSBuildTask0008` |
+| `DiagnosticIds.cs` | Public constants for active MSBuildTask diagnostics (`MSBuildTask0005` is reserved) |
 | `PreferTypedParameterAnalyzer.cs` | Analyzer for MSBuildTask0006, MSBuildTask0007, and MSBuildTask0008 — detects manual path construction, ItemSpec parsing, Path.Combine usage (first argument only), helper method wrapping, FileInfo/DirectoryInfo construction through AbsolutePath intermediaries, System.IO consumption sites (`File.*`/`Directory.*`/`FileStream`/`StreamReader`/`StreamWriter`) that bias suggestions toward `FileInfo`/`DirectoryInfo`, and relative default paths that must be initialized in `Execute()` |
 | `PathDefaultClassifier.cs` | Shared classification of string path defaults as fully-qualified vs relative (host-independent, netstandard2.0-safe) |
 
