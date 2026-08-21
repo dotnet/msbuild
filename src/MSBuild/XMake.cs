@@ -371,6 +371,9 @@ namespace Microsoft.Build.CommandLine
                 DumpCounters(false /* log to console */);
             }
 
+            TelemetryManager.Instance.EmitReleaseCanary(
+                Environment.GetEnvironmentVariable(TelemetryManager.ReleaseCanaryEnvironmentVariable),
+                ProjectCollection.Version.ToString());
             TelemetryManager.Instance.Dispose();
 
             return exitCode;
