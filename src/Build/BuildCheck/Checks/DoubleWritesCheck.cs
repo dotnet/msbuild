@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 #endif
 using System.Linq;
+using Microsoft.Build.Collections;
 using Microsoft.Build.Shared;
 using static Microsoft.Build.Experimental.BuildCheck.TaskInvocationCheckData;
 
@@ -49,14 +50,22 @@ internal sealed class DoubleWritesCheck : Check
     private void TaskInvocationAction(BuildCheckDataContext<TaskInvocationCheckData> context)
     {
         // This check uses a hard-coded list of tasks known to write files.
-        switch (context.Data.TaskName)
+        // Task names are matched case-insensitively - MSBuild resolves task names without regard to casing,
+        // so the logged name carries whatever casing the project author used.
+        string taskName = context.Data.TaskName;
+
+        if (IsTask(taskName, "Csc") || IsTask(taskName, "Vbc") || IsTask(taskName, "Fsc"))
         {
-            case "Csc":
-            case "Vbc":
-            case "Fsc": CheckCompilerTask(context); break;
-            case "Copy": CheckCopyTask(context); break;
+            CheckCompilerTask(context);
+        }
+        else if (IsTask(taskName, "Copy"))
+        {
+            CheckCopyTask(context);
         }
     }
+
+    private static bool IsTask(string taskName, string expectedTaskName)
+        => MSBuildNameIgnoreCaseComparer.Default.Equals(taskName, expectedTaskName);
 
     private void CheckCompilerTask(BuildCheckDataContext<TaskInvocationCheckData> context)
     {
