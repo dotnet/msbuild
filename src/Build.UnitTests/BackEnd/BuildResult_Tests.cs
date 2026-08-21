@@ -3,6 +3,8 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Engine.UnitTests.TestComparers;
@@ -129,6 +131,78 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
             Assert.Equal(TargetResultCode.Success, result["foo"].ResultCode);
             Assert.Equal(TargetResultCode.Failure, result["bar"].ResultCode);
+        }
+
+        [Fact]
+        public void AddResultsForTargetOrPreserveExistingNonSkippedResult_ExistingNonSkippedResult_PreservesExistingResult()
+        {
+            TargetResult[] existingResults =
+            [
+                BuildResultUtilities.GetEmptySucceedingTargetResult(),
+                BuildResultUtilities.GetEmptyFailingTargetResult()
+            ];
+
+            foreach (TargetResult existingResult in existingResults)
+            {
+                BuildResult result = new BuildResult(CreateNewBuildRequest(1, Array.Empty<string>()));
+                result.AddResultsForTarget("foo", existingResult);
+
+                TargetResult skippedResult = new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetSkippedResult());
+                TargetResult storedResult = result.AddResultsForTargetOrPreserveExistingNonSkippedResult("foo", skippedResult);
+
+                storedResult.ShouldBeSameAs(existingResult);
+                result["foo"].ShouldBeSameAs(existingResult);
+            }
+        }
+
+        [Fact]
+        public void AddResultsForTarget_ExistingSkippedResult_ReplacesSkippedResult()
+        {
+            BuildResult result = new BuildResult(CreateNewBuildRequest(1, Array.Empty<string>()));
+            result.AddResultsForTarget("foo", new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetSkippedResult()));
+            TargetResult successResult = BuildResultUtilities.GetEmptySucceedingTargetResult();
+
+            result.AddResultsForTarget("foo", successResult);
+
+            result["foo"].ShouldBeSameAs(successResult);
+        }
+
+        [Fact]
+        public void AddResultsForTarget_ExistingNonSkippedResult_Throws()
+        {
+            BuildResult result = new BuildResult(CreateNewBuildRequest(1, Array.Empty<string>()));
+            result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptySucceedingTargetResult());
+
+            Should.Throw<InternalErrorException>(() =>
+                result.AddResultsForTarget("foo", BuildResultUtilities.GetEmptyFailingTargetResult()));
+        }
+
+        [Fact]
+        public async Task AddResultsForTargetOrPreserveExistingNonSkippedResult_ConcurrentRealAndSkippedResults_PreservesRealResult()
+        {
+            for (int i = 0; i < 100; i++)
+            {
+                BuildResult result = new BuildResult(CreateNewBuildRequest(1, Array.Empty<string>()));
+                TargetResult successResult = BuildResultUtilities.GetEmptySucceedingTargetResult();
+                TargetResult skippedResult = new TargetResult(Array.Empty<TaskItem>(), BuildResultUtilities.GetSkippedResult());
+                using var barrier = new Barrier(2);
+
+                Task preserveSkippedResult = Task.Run(() =>
+                {
+                    barrier.SignalAndWait();
+                    result.AddResultsForTargetOrPreserveExistingNonSkippedResult("foo", skippedResult);
+                });
+
+                Task addSuccessResult = Task.Run(() =>
+                {
+                    barrier.SignalAndWait();
+                    result.AddResultsForTarget("foo", successResult);
+                });
+
+                await Task.WhenAll(preserveSkippedResult, addSuccessResult);
+
+                result["foo"].ShouldBeSameAs(successResult);
+            }
         }
 
         [Fact]
