@@ -47,7 +47,8 @@ flowchart TD
         step2["2. Invoke-MtBuildTimeRegressionScan.ps1<br/>write bounded JSON + Markdown stats"]
         step3["3. Add-MtBuildTimeRegressionEvidence.ps1<br/>resolve current/healthy SHAs, download<br/>candidate artifacts, allowlist + delete raw"]
         step4["4. Add-MtBuildTimeDiagnosticEvidence.ps1<br/>match diagnostics by SHA, query task/target/<br/>eval/migration deltas"]
-        oidc --> step1 --> step2 --> step3 --> step4
+        step5["5. Add-MtBuildTimeExistingWork.ps1<br/>validate bot-authored open items by markers;<br/>emit metadata only, never comments"]
+        oidc --> step1 --> step2 --> step3 --> step4 --> step5
     end
 
     kusto --> step1
@@ -57,7 +58,7 @@ flowchart TD
     azdoDiag --> step4
     kusto --> step4
 
-    step4 --> artifact[["Derived evidence artifact<br/>mt-regressions.json / -context.md<br/>mt-regression-evidence.json / .md<br/>mt-regression-diagnostics.json / .md<br/>(bounded, no raw logs/binlogs)"]]
+    step5 --> artifact[["Derived evidence artifact<br/>mt-regressions.json / -context.md<br/>mt-regression-evidence.json / .md<br/>mt-regression-diagnostics.json / .md<br/>mt-regression-existing-work.json<br/>(bounded, no raw logs/binlogs/discussion prose)"]]
 
     artifact --> agent
 
@@ -88,10 +89,13 @@ flowchart TD
 6. `workflows/Add-MtBuildTimeDiagnosticEvidence.ps1` finds scheduled diagnostic runs from definition 28394
    that use the exact current or last-healthy MSBuild source SHA, then queries Kusto task, target,
    evaluation-pass, and task-migration data.
-7. The complete derived evidence is uploaded as a workflow artifact.
-8. The Agentic Workflow downloads only the derived evidence into its sandbox, which has no Azure,
+7. `workflows/Add-MtBuildTimeExistingWork.ps1` lists only open items authored by
+   `github-actions[bot]`, validates the workflow and candidate-set markers in their descriptions,
+   and writes only item type, number, and URL. It does not request comments or reviews.
+8. The complete derived evidence is uploaded as a workflow artifact.
+9. The Agentic Workflow downloads only the derived evidence into its sandbox, which has no Azure,
    Kusto, or Azure DevOps credentials.
-9. The agent investigates every candidate and:
+10. The agent investigates every candidate and:
    - creates one aggregate issue when new candidates need tracking;
    - opens one draft PR only when it can safely address every actionable regression; or
    - emits a no-op when the complete candidate set is already tracked.
@@ -106,8 +110,8 @@ The implementation follows the same thin-workflow/module structure as the branch
 ```text
 .github/mt-build-regression/
 ├── components/
-│   ├── clients/       # Azure DevOps and Kusto REST boundaries
-│   ├── evidence/      # Detection, artifact sanitization, and diagnostic selection
+│   ├── clients/       # Azure DevOps, GitHub, and Kusto REST boundaries
+│   ├── evidence/      # Detection, sanitization, diagnostics, and trusted-item validation
 │   └── reporting/     # JSON and Markdown evidence contracts
 ├── queries/           # Executable Kusto detector
 ├── tests/             # Pure component and evidence-contract tests
@@ -181,13 +185,13 @@ mechanism used by the other Agentic Workflows.
 ## Issue deduplication
 
 The deterministic scan hashes the sorted unique `Backend/Os/ScenarioPair` candidate set into a
-stable `candidateSetKey`. The agent accepts an existing issue or pull request as coverage only when
-it was authored by `github-actions[bot]` and contains both the hidden
-`gh-aw-workflow-id: mt-build-regression.agent` marker and the exact visible candidate-set marker.
-Issue and pull-request safe outputs explicitly use `GITHUB_TOKEN`, making that author check stable.
-Title-only safe-output deduplication is deliberately disabled because a public issue could copy the
-deterministic title and suppress a legitimate report. The separate workflow run ID remains an audit
-marker, not a deduplication key.
+stable `candidateSetKey`. Before the AI runs, deterministic code lists open items created by
+`github-actions[bot]` with the workflow's title prefix and labels, then accepts coverage only when
+the description contains both the hidden `gh-aw-workflow-id: mt-build-regression.agent` marker and
+the exact visible candidate-set marker.
+The AI receives only `alreadyTracked`, item type, number, URL, and the candidate-set key. Item
+descriptions, comments, reviews, and review comments never enter the AI evidence. Issue and
+pull-request safe outputs explicitly use `GITHUB_TOKEN`, making the author check stable.
 
 ## Dispatch and checkout boundary
 
