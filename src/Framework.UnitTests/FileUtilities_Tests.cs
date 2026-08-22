@@ -507,6 +507,34 @@ public class FileUtilities_Tests
     }
 
     [Fact]
+    public void PathIsInvalid_RejectsInvalidPathCharacters()
+    {
+        FileUtilities.PathIsInvalid(@"c:\foo\|||").ShouldBeTrue();
+    }
+
+    [Fact]
+    public void PathIsInvalid_DoesNotRejectLongPaths()
+    {
+        string longSegment = new string('a', 300);
+        FileUtilities.PathIsInvalid($@"c:\{longSegment}\file.txt").ShouldBeFalse();
+    }
+
+    [Fact]
+    public void PathIsInvalid_DoesNotRejectLeadingOrTrailingWhitespace()
+    {
+        FileUtilities.PathIsInvalid("  c:\\temp\\file.txt  ").ShouldBeFalse();
+    }
+
+#if NETFRAMEWORK
+    [WindowsOnlyFact]
+    public void NormalizePath_InvalidCharactersOnNetFramework_MatchesMicrosoftIoGetFullPath()
+    {
+        string path = @"c:\aardvark\|||";
+        FileUtilities.NormalizePath(path).ShouldBe(Microsoft.IO.Path.GetFullPath(path));
+    }
+#endif
+
+    [Fact]
     public void FileOrDirectoryExistsNoThrow()
     {
         var isWindows = NativeMethodsShared.IsWindows;
