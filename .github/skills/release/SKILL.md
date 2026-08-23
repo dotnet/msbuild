@@ -36,7 +36,7 @@ Before starting any phase, ensure you have these values (the user must provide t
 
 | Input | Example | How to determine |
 |---|---|---|
-| `PREVIOUS_RELEASE_VERSION` | `18.9` | Version being replaced as latest — the previous release branch (`git branch -r --list 'origin/vs*'`) |
+| `PREVIOUS_RELEASE_VERSION` | `18.9` | Previous release branch version: the highest `vs*` version lower than `THIS_RELEASE_VERSION` (list candidates with `git branch -r --list 'origin/vs*'`). |
 | `PREVIOUS_RELEASE_EXACT_VERSION` | `18.9.6` | The version the previous release actually shipped as. From the previous release's tracking issue, or `git tag --list 'v18.9.*'`. Used by Phase 5.3a. |
 | `THIS_RELEASE_VERSION` | `18.10` | Current `VersionPrefix` in `eng/Versions.props` (drop `.0`) |
 | `NEXT_VERSION` | `18.11` | User-provided — not computable from current version |
