@@ -72,22 +72,19 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
+            // A partial type can be declared in several files, and .editorconfig can enable the rule for some of
+            // them only, so the first declaration the rule is enabled for is the one reported.
             foreach (Location location in taskType.Locations)
             {
-                if (!location.IsInSource)
-                {
-                    continue;
-                }
-
-                if (optedIn || IsEnabledForTree(context.Compilation, location.SourceTree, context.CancellationToken))
+                if (location.IsInSource &&
+                    (optedIn || IsEnabledForTree(context.Compilation, location.SourceTree, context.CancellationToken)))
                 {
                     context.ReportDiagnostic(Diagnostic.Create(
                         DiagnosticDescriptors.RequireMultiThreadableTask,
                         location,
                         taskType.Name));
+                    return;
                 }
-
-                return;
             }
         }
 

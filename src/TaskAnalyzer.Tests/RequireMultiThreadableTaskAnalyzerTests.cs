@@ -107,6 +107,31 @@ public class RequireMultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
+    public async Task EditorConfigSeverityOnOneFileOfPartialTask_ProducesDiagnosticThere()
+    {
+        var test = CreateAnalyzerTest(
+            """
+            public partial class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute() => true;
+            }
+            """,
+            analyzerConfig: ("/.editorconfig", $"""
+                root = true
+                [Other.cs]
+                {SeverityOptionKey} = warning
+                """),
+            new DiagnosticResult(DiagnosticDescriptors.RequireMultiThreadableTask).WithLocation(0).WithArguments("MyTask"));
+        test.TestState.Sources.Add(("/0/Other.cs", """
+            public partial class {|#0:MyTask|}
+            {
+            }
+            """));
+
+        await test.RunAsync();
+    }
+
+    [Fact]
     public async Task RulesetSeverity_WithoutScope_ProducesDiagnostic()
     {
         // A ruleset or <WarningsAsErrors> entry surfaces as a compilation-wide specific diagnostic option.
