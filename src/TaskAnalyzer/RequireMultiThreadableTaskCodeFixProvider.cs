@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Immutable;
 using System.Composition;
 using System.Linq;
@@ -71,29 +72,48 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var multiThreadableTaskType = compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
             var taskEnvironmentType = compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
 
-            // A task can also opt in with the attribute alone, which is the only option when the compilation
-            // targets an MSBuild version without IMultiThreadableTask. Add the interface only when the task does
-            // not already have it — the attribute is what the engine's routing looks at, and it is not inherited.
+            // A task can also opt in with the attribute alone, which is what the engine's routing looks at, so the
+            // interface and the property are added only when doing so is guaranteed to keep the task compiling:
+            // when the framework types are available, the task does not already implement the interface, and it does
+            // not already declare a conflicting TaskEnvironment member.
             if (taskType is not null &&
                 multiThreadableTaskType is not null &&
                 taskEnvironmentType is not null &&
                 !SharedAnalyzerHelpers.ImplementsInterface(taskType, multiThreadableTaskType))
             {
-                if (!SharedAnalyzerHelpers.GetPropertiesIncludingBaseTypes(taskType)
-                        .Any(property => property.Name == TaskEnvironmentPropertyName))
+                IPropertySymbol? existingProperty = SharedAnalyzerHelpers.GetPropertiesIncludingBaseTypes(taskType)
+                    .FirstOrDefault(property => string.Equals(property.Name, TaskEnvironmentPropertyName, StringComparison.Ordinal));
+
+                if (existingProperty is null)
                 {
                     editor.InsertMembers(classDeclaration, 0, [CreateTaskEnvironmentProperty(editor.Generator, taskEnvironmentType)]);
+                    AddMultiThreadableTaskInterface(editor, classDeclaration, multiThreadableTaskType);
                 }
-
-                editor.AddInterfaceType(
-                    classDeclaration,
-                    editor.Generator.TypeExpression(multiThreadableTaskType).WithAdditionalAnnotations(Simplifier.Annotation));
+                else if (CanImplementTaskEnvironmentProperty(existingProperty, taskEnvironmentType))
+                {
+                    AddMultiThreadableTaskInterface(editor, classDeclaration, multiThreadableTaskType);
+                }
             }
 
             editor.AddAttribute(classDeclaration, CreateMultiThreadableTaskAttribute(editor.Generator));
 
             return editor.GetChangedDocument();
         }
+
+        /// <summary>
+        /// Returns true when an existing <c>TaskEnvironment</c> property already satisfies
+        /// <c>IMultiThreadableTask</c>, so declaring the interface does not break the build.
+        /// </summary>
+        private static bool CanImplementTaskEnvironmentProperty(IPropertySymbol property, INamedTypeSymbol taskEnvironmentType) =>
+            property.DeclaredAccessibility == Accessibility.Public &&
+            property.SetMethod is not null &&
+            SymbolEqualityComparer.Default.Equals(property.Type, taskEnvironmentType);
+
+        private static void AddMultiThreadableTaskInterface(
+            DocumentEditor editor, ClassDeclarationSyntax classDeclaration, INamedTypeSymbol multiThreadableTaskType) =>
+            editor.AddInterfaceType(
+                classDeclaration,
+                editor.Generator.TypeExpression(multiThreadableTaskType).WithAdditionalAnnotations(Simplifier.Annotation));
 
         /// <summary>
         /// Builds <c>public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;</c>. The

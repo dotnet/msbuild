@@ -2,9 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Testing;
+using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Testing;
 using Shouldly;
 using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
@@ -14,6 +18,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 public class RequireMultiThreadableTaskAnalyzerTests
 {
     private const string SeverityOptionKey = "dotnet_diagnostic." + DiagnosticIds.RequireMultiThreadableTask + ".severity";
+
+    private const string MarkedUpTaskWithoutOptIn = """
+        public class {|#0:MyTask|} : Microsoft.Build.Utilities.Task
+        {
+            public override bool Execute() => true;
+        }
+        """;
 
     private const string ConcreteTaskWithoutOptIn = """
         public class MyTask : Microsoft.Build.Utilities.Task
@@ -64,29 +75,52 @@ public class RequireMultiThreadableTaskAnalyzerTests
         diagnostics.ShouldBeEmpty();
     }
 
-    [Theory]
-    [InlineData("warning")]
-    [InlineData("error")]
-    [InlineData("suggestion")]
-    public async Task ExplicitSeverity_WithoutScope_ProducesDiagnostic(string severity)
+    [Fact]
+    public async Task NoConfiguration_ProducesNoDiagnostic()
     {
-        var diagnostics = await GetDiagnosticsAsync(
-            ConcreteTaskWithoutOptIn,
-            new Dictionary<string, string> { { SeverityOptionKey, severity } });
-
-        diagnostics.Single().Id.ShouldBe(DiagnosticIds.RequireMultiThreadableTask);
+        await CreateAnalyzerTest(ConcreteTaskWithoutOptIn, analyzerConfig: null).RunAsync();
     }
 
-    [Theory]
-    [InlineData("none")]
-    [InlineData("default")]
-    public async Task SeverityConfiguredOff_WithoutScope_ProducesNoDiagnostic(string severity)
+    [Fact]
+    public async Task EditorConfigSeverity_WithoutScope_ProducesDiagnostic()
     {
-        var diagnostics = await GetDiagnosticsAsync(
-            ConcreteTaskWithoutOptIn,
-            new Dictionary<string, string> { { SeverityOptionKey, severity } });
+        await CreateAnalyzerTest(
+            MarkedUpTaskWithoutOptIn,
+            analyzerConfig: ("/.editorconfig", $"""
+                root = true
+                [*.cs]
+                {SeverityOptionKey} = warning
+                """),
+            new DiagnosticResult(DiagnosticDescriptors.RequireMultiThreadableTask).WithLocation(0).WithArguments("MyTask")).RunAsync();
+    }
 
-        diagnostics.ShouldBeEmpty();
+    [Fact]
+    public async Task EditorConfigSeverityNone_WithoutScope_ProducesNoDiagnostic()
+    {
+        await CreateAnalyzerTest(
+            ConcreteTaskWithoutOptIn,
+            analyzerConfig: ("/.editorconfig", $"""
+                root = true
+                [*.cs]
+                {SeverityOptionKey} = none
+                """)).RunAsync();
+    }
+
+    [Fact]
+    public async Task RulesetSeverity_WithoutScope_ProducesDiagnostic()
+    {
+        // A ruleset or <WarningsAsErrors> entry surfaces as a compilation-wide specific diagnostic option.
+        Compilation compilation = CreateCompilation(ConcreteTaskWithoutOptIn);
+        compilation = compilation.WithOptions(compilation.Options.WithSpecificDiagnosticOptions(
+            ImmutableDictionary<string, ReportDiagnostic>.Empty.Add(DiagnosticIds.RequireMultiThreadableTask, ReportDiagnostic.Error)));
+
+        var diagnostics = await compilation
+            .WithAnalyzers(ImmutableArray.Create<DiagnosticAnalyzer>(new RequireMultiThreadableTaskAnalyzer()))
+            .GetAnalyzerDiagnosticsAsync();
+
+        Diagnostic diagnostic = diagnostics.Single();
+        diagnostic.Id.ShouldBe(DiagnosticIds.RequireMultiThreadableTask);
+        diagnostic.Severity.ShouldBe(DiagnosticSeverity.Error);
     }
 
     [Fact]
@@ -207,6 +241,24 @@ public class RequireMultiThreadableTaskAnalyzerTests
             """);
 
         diagnostics.Single().GetMessage().ShouldContain("MyTask");
+    }
+
+    private static CSharpAnalyzerTest<RequireMultiThreadableTaskAnalyzer, DefaultVerifier> CreateAnalyzerTest(
+        string source, (string Path, string Content)? analyzerConfig, params DiagnosticResult[] expected)
+    {
+        var test = new CSharpAnalyzerTest<RequireMultiThreadableTaskAnalyzer, DefaultVerifier>
+        {
+            TestCode = source,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        if (analyzerConfig is (string path, string content))
+        {
+            test.TestState.AnalyzerConfigFiles.Add((path, content));
+        }
+
+        test.ExpectedDiagnostics.AddRange(expected);
+        return test;
     }
 
     private static Task<Diagnostic[]> GetRequiredDiagnosticsAsync(string source) =>

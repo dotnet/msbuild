@@ -151,6 +151,30 @@ public class RequireMultiThreadableTaskCodeFixProviderTests
     }
 
     [Fact]
+    public async Task Fix_TaskWithConflictingTaskEnvironmentMember_AddsAttributeOnly()
+    {
+        // Declaring the interface would not compile against an unrelated member of the same name, so only the
+        // attribute is applied — which is on its own a valid opt-in as far as the engine's routing is concerned.
+        await CreateFixTest(
+            testCode: """
+                public class {|#0:MyTask|} : Microsoft.Build.Utilities.Task
+                {
+                    public string TaskEnvironment { get; set; } = "";
+                    public override bool Execute() => true;
+                }
+                """,
+            fixedCode: """
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public string TaskEnvironment { get; set; } = "";
+                    public override bool Execute() => true;
+                }
+                """,
+            Diag("MyTask")).RunAsync();
+    }
+
+    [Fact]
     public async Task Fix_TaskImplementingITaskDirectly_AddsAttributeInterfaceAndProperty()
     {
         await CreateFixTest(
