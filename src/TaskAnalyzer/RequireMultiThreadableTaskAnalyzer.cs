@@ -37,8 +37,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         private static void OnCompilationStart(CompilationStartAnalysisContext context)
         {
             // The scope option, a ruleset / <WarningsAsErrors> entry, and a .globalconfig severity are
-            // compilation-wide, so they are read once here. A severity set through .editorconfig can vary per file
-            // and is read only for a type that would otherwise be reported.
+            // compilation-wide, so they are read once here. A severity set through .editorconfig can vary per file,
+            // so when nothing opted in compilation-wide the trees are scanned once for a per-file opt-in, and the
+            // tree of a type that would otherwise be reported is then checked individually.
             bool optedIn = SharedAnalyzerHelpers.ReadRequireMultiThreadableOption(context.Options.AnalyzerConfigOptionsProvider) ||
                 IsEnabledForCompilation(context.Compilation, context.CancellationToken);
 

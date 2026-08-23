@@ -175,6 +175,30 @@ public class RequireMultiThreadableTaskCodeFixProviderTests
     }
 
     [Fact]
+    public async Task Fix_TaskWithNonPublicTaskEnvironmentSetter_AddsAttributeOnly()
+    {
+        // The property is of the right type but its setter is private, so it does not implement the interface
+        // member; declaring the interface would not compile and only the attribute is applied.
+        await CreateFixTest(
+            testCode: """
+                public class {|#0:MyTask|} : Microsoft.Build.Utilities.Task
+                {
+                    public Microsoft.Build.Framework.TaskEnvironment TaskEnvironment { get; private set; } = Microsoft.Build.Framework.TaskEnvironment.Fallback;
+                    public override bool Execute() => true;
+                }
+                """,
+            fixedCode: """
+                [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+                public class MyTask : Microsoft.Build.Utilities.Task
+                {
+                    public Microsoft.Build.Framework.TaskEnvironment TaskEnvironment { get; private set; } = Microsoft.Build.Framework.TaskEnvironment.Fallback;
+                    public override bool Execute() => true;
+                }
+                """,
+            Diag("MyTask")).RunAsync();
+    }
+
+    [Fact]
     public async Task Fix_TaskImplementingITaskDirectly_AddsAttributeInterfaceAndProperty()
     {
         await CreateFixTest(

@@ -102,11 +102,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>
         /// Returns true when an existing <c>TaskEnvironment</c> property already satisfies
-        /// <c>IMultiThreadableTask</c>, so declaring the interface does not break the build.
+        /// <c>IMultiThreadableTask</c>, so declaring the interface does not break the build. Both accessors have to
+        /// be public in their own right: a <c>public TaskEnvironment TaskEnvironment { get; private set; }</c> does
+        /// not implement the interface member.
         /// </summary>
         private static bool CanImplementTaskEnvironmentProperty(IPropertySymbol property, INamedTypeSymbol taskEnvironmentType) =>
+            !property.IsStatic &&
             property.DeclaredAccessibility == Accessibility.Public &&
-            property.SetMethod is not null &&
+            property.GetMethod is { DeclaredAccessibility: Accessibility.Public } &&
+            property.SetMethod is { DeclaredAccessibility: Accessibility.Public } &&
             SymbolEqualityComparer.Default.Equals(property.Type, taskEnvironmentType);
 
         private static void AddMultiThreadableTaskInterface(
