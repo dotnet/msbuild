@@ -41,5 +41,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>Task should receive TaskEnvironment through constructor injection.</summary>
         public const string PreferTaskEnvironmentConstructorInjection = "MSBuildTask0011";
+
+        /// <summary>Concrete task type does not declare multithreading support and is routed to an out-of-proc TaskHost.</summary>
+        public const string RequireMultiThreadableTask = "MSBuildTask0012";
     }
 }

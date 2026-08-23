@@ -40,6 +40,7 @@ internal static class TestHelpers
 
             public class TaskEnvironment
             {
+                public static TaskEnvironment Fallback { get; } = new TaskEnvironment();
                 public AbsolutePath ProjectDirectory => default;
                 public string? GetEnvironmentVariable(string name) => null;
                 public void SetEnvironmentVariable(string name, string? value) { }
@@ -243,20 +244,27 @@ internal static class TestHelpers
     /// <summary>
     /// Runs the MultiThreadableTaskAnalyzer with a specific scope option and returns analyzer diagnostics.
     /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithScopeAsync(string source, string scope)
+    public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithScopeAsync(string source, string scope) =>
+        GetDiagnosticsWithGlobalOptionsAsync(
+            source,
+            new MultiThreadableTaskAnalyzer(),
+            new Dictionary<string, string> { { $"build_property.{SharedAnalyzerHelpers.ScopeOptionKey}", scope } });
+
+    /// <summary>
+    /// Runs the given analyzer with the supplied global analyzer config options (the options a
+    /// .globalconfig or an MSBuild property surfaces to analyzers) and returns analyzer diagnostics.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithGlobalOptionsAsync(
+        string source,
+        DiagnosticAnalyzer analyzer,
+        Dictionary<string, string> globalOptions)
     {
         var compilation = CreateCompilation(source);
-        var analyzer = new MultiThreadableTaskAnalyzer();
-
-        var globalOptions = new Dictionary<string, string>
-        {
-            { $"build_property.{SharedAnalyzerHelpers.ScopeOptionKey}", scope }
-        };
         var optionsProvider = new TestAnalyzerConfigOptionsProvider(globalOptions);
         var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
 
         var compilationWithAnalyzers = compilation.WithAnalyzers(
-            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer), options);
+            ImmutableArray.Create(analyzer), options);
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
     }
 

@@ -18,26 +18,46 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     {
         /// <summary>
         /// The .editorconfig key controlling analysis scope.
-        /// Values: "all" (default) | "multithreadable_only"
+        /// Values: "all" (default) | "multithreadable_only" | "require_multithreadable"
         /// </summary>
         internal const string ScopeOptionKey = "msbuild_task_analyzer.scope";
         internal const string ScopeAll = "all";
         internal const string ScopeMultiThreadableOnly = "multithreadable_only";
 
         /// <summary>
+        /// Analyze every task type, and additionally require each concrete task type to declare
+        /// multithreading support (MSBuildTask0012). Repositories that have finished migrating their
+        /// tasks set this so a newly added task cannot silently regress the migration.
+        /// </summary>
+        internal const string ScopeRequireMultiThreadable = "require_multithreadable";
+
+        /// <summary>
         /// Reads the scope option from the analyzer config options provider.
         /// Returns true if all tasks should be analyzed; false if only multithreadable tasks.
         /// </summary>
-        internal static bool ReadAnalyzeAllTasksOption(AnalyzerConfigOptionsProvider optionsProvider)
+        internal static bool ReadAnalyzeAllTasksOption(AnalyzerConfigOptionsProvider optionsProvider) =>
+            !string.Equals(ReadScopeOption(optionsProvider), ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Returns true when the scope option requires every concrete task type to declare multithreading support.
+        /// </summary>
+        internal static bool ReadRequireMultiThreadableOption(AnalyzerConfigOptionsProvider optionsProvider) =>
+            string.Equals(ReadScopeOption(optionsProvider), ScopeRequireMultiThreadable, StringComparison.OrdinalIgnoreCase);
+
+        /// <summary>
+        /// Reads the raw scope option value, or null when it is not configured.
+        /// </summary>
+        private static string? ReadScopeOption(AnalyzerConfigOptionsProvider optionsProvider)
         {
             if (optionsProvider.GlobalOptions.TryGetValue($"build_property.{ScopeOptionKey}", out var scopeValue) ||
                 optionsProvider.GlobalOptions.TryGetValue(ScopeOptionKey, out scopeValue))
             {
-                return !string.Equals(scopeValue, ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
+                return scopeValue;
             }
 
-            return true; // default: analyze all tasks
+            return null;
         }
+
         /// <summary>
         /// Represents a resolved banned API entry for O(1) lookup during analysis.
         /// </summary>

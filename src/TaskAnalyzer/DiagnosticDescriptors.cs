@@ -112,6 +112,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             isEnabledByDefault: true,
             description: "Constructor injection makes TaskEnvironment available to constructor logic and environment-dependent default initialization. The MSBuild engine prefers a public constructor with a single TaskEnvironment parameter when one is available.");
 
+        public static readonly DiagnosticDescriptor RequireMultiThreadableTask = new(
+            id: DiagnosticIds.RequireMultiThreadableTask,
+            title: "Concrete MSBuild task type does not opt into multithreaded execution",
+            messageFormat: "Task '{0}' does not declare multithreading support; apply [MSBuildMultiThreadableTask] so it is not routed to an out-of-proc TaskHost",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "In multithreaded builds, a task without the [MSBuildMultiThreadableTask] attribute runs in an out-of-proc TaskHost, which succeeds but is slow. The attribute is not inherited, so deriving from a migrated base class is not enough. This rule reports nothing unless it is opted into, either with 'msbuild_task_analyzer.scope = require_multithreadable' or by configuring its severity explicitly; a repository that has finished migrating its tasks opts in to keep new tasks from silently regressing.");
+
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
             TaskEnvironmentRequired,
@@ -123,6 +132,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             InitializeRelativeDefaultInExecute,
             UnsupportedTaskItemType,
             CultureSensitiveTaskItemType,
-            PreferTaskEnvironmentConstructorInjection);
+            PreferTaskEnvironmentConstructorInjection,
+            RequireMultiThreadableTask);
     }
 }

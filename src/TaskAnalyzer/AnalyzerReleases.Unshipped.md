@@ -13,3 +13,4 @@ MSBuildTask0008 | MSBuild.TaskAuthoring | Warning | Initialize a relative defaul
 MSBuildTask0009 | MSBuild.TaskAuthoring | Warning | ITaskItem<T> used with a type argument T that MSBuild cannot bind as a task parameter
 MSBuildTask0010 | MSBuild.TaskAuthoring | Error | ITaskItem<T> used with a type argument T that MSBuild parses through Convert.ChangeType
 MSBuildTask0011 | MSBuild.TaskAuthoring | Info | Prefer constructor injection for TaskEnvironment
+MSBuildTask0012 | MSBuild.TaskAuthoring | Warning | Concrete task type does not declare multithreading support; reports only when opted into with `msbuild_task_analyzer.scope = require_multithreadable` or an explicit severity (code fix available)
