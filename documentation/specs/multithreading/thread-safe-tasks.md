@@ -107,6 +107,10 @@ For tasks to be eligible for multithreaded execution using this approach, they m
 public class MyTask : Task {...}
 ```
 
+#### Keeping a Migrated Repository Migrated
+
+The attribute is not inherited, and a task that lacks it is routed to an out-of-proc task host rather than failing, so a task added after a migration regresses the repository silently. The task-authoring analyzer reports `MSBuildTask0012` for concrete task types that do not declare multithreading support, with a code fix that applies the attribute, implements `IMultiThreadableTask`, and adds the `TaskEnvironment` property. The rule reports nothing until a repository opts into it, either with `msbuild_task_analyzer.scope = require_multithreadable` or by configuring `dotnet_diagnostic.MSBuildTask0012.severity` explicitly.
+
 ## TaskEnvironment API
 
 The `TaskEnvironment` provides thread-safe alternatives to APIs that use global process state, enabling tasks to execute safely in a multithreaded environment.

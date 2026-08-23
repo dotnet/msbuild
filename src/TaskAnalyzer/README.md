@@ -25,6 +25,7 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
 | **MSBuildTask0010** | Error | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
 | **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
+| **MSBuildTask0012** | Warning (opt-in) | Concrete `ITask` implementations, only when opted in | Concrete task type does not opt into multithreaded execution |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -287,6 +288,39 @@ The engine prefers this constructor when it is present. A public parameterless c
 
 **Scope:** Concrete classes implementing `IMultiThreadableTask`. Abstract base classes and tasks that already declare a public single-`TaskEnvironment` constructor do not produce the diagnostic.
 
+### MSBuildTask0012 — Require Multithreading Opt-In
+
+In multithreaded builds the engine routes every task without a directly applied `[MSBuildMultiThreadableTask]` attribute to an out-of-proc TaskHost. That build still succeeds, just more slowly, so a task added after a repository finished migrating gives back part of the benefit of the migration without any diagnostic. This rule turns that silent regression into a warning:
+
+```csharp
+public class MyTask : Task            // ⚠️ MSBuildTask0012 — no opt-in, runs in a TaskHost
+{
+    public override bool Execute() => true;
+}
+```
+
+The rule reports nothing unless it is opted into, because it would otherwise fire on every task in a repository that has not migrated yet. Repositories that have completed a migration opt in through the analysis scope:
+
+```ini
+# .globalconfig
+is_global = true
+msbuild_task_analyzer.scope = require_multithreadable
+```
+
+Configuring the severity explicitly is also an opt-in, for finer control (for example, downgrading the rule for a directory of test tasks):
+
+```ini
+[*.cs]
+dotnet_diagnostic.MSBuildTask0012.severity = error
+
+[test/**/*.cs]
+dotnet_diagnostic.MSBuildTask0012.severity = none
+```
+
+The attribute is `Inherited = false`, so **a concrete task deriving from an already-migrated base class is still reported** — the leaf type is what the engine's routing looks at. Abstract base classes and interfaces are not reported, since they cannot opt in on behalf of the types deriving from them.
+
+**Scope:** Concrete (non-abstract) classes implementing `ITask` that do not carry `[MSBuildMultiThreadableTask]` directly, when the rule is opted into.
+
 ## Analysis Scope
 
 The analyzer determines what to check based on the type declaration:
@@ -297,6 +331,7 @@ The analyzer determines what to check based on the type declaration:
 | Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
 | Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
+| Concrete class implementing `ITask` without the attribute, when opted in | MSBuildTask0012 (in addition to the rules above) |
 | Regular class (no task interface or attribute) | Not analyzed |
 
 MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTask]` attribute is applied **directly** to the task class. The attribute is `Inherited = false`, so a task that merely derives from a base class implementing `IMultiThreadableTask` (or carrying the attribute) has not itself opted into multithreaded support and is not subject to these three rules. Input properties are collected from the task class **and its base classes**, so an `ITaskItem`/`string` input declared on a shared base task is still analyzed.
@@ -305,12 +340,23 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 **When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles and code fixes) on unsafe APIs within those helpers.
 
+### Configuring the Scope
+
+The `msbuild_task_analyzer.scope` option, set in a `.globalconfig` (or as an MSBuild property surfaced to analyzers), selects which task types are analyzed:
+
+| Value | Behavior |
+|---|---|
+| `all` (default) | Analyze every `ITask` implementation |
+| `multithreadable_only` | Analyze only tasks that carry `[MSBuildMultiThreadableTask]` — useful while a migration is in progress |
+| `require_multithreadable` | Analyze every `ITask` implementation **and** require each concrete task type to declare multithreading support (MSBuildTask0012) |
+
 ### Severity Levels
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
 - **MSBuildTask0010** is always **Error** — task item conversions must not rely on `Convert.ChangeType`.
 - **MSBuildTask0002–MSBuildTask0009** report as **Warning**, with MSBuildTask0006–MSBuildTask0008 limited to tasks directly marked with `[MSBuildMultiThreadableTask]`.
 - **MSBuildTask0011** reports as **Info** — it is a modernization suggestion rather than a correctness issue.
+- **MSBuildTask0012** reports as **Warning**, but only once it is opted into with `msbuild_task_analyzer.scope = require_multithreadable` or an explicit severity — otherwise it would fire on every task in a repository that has not migrated yet.
 
 ## Code Fixes
 
@@ -333,6 +379,7 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 | MSBuildTask0007: `new FileInfo(item.ItemSpec)` in `foreach` over `ITaskItem[]` | → Retype source property to ``ITaskItem<FileInfo>[]`` and replace with `item.Value` |
 | MSBuildTask0007: `new AbsolutePath(Item.GetMetadata("FullPath"))` | → Retype `Item` to ``ITaskItem<AbsolutePath>`` and replace with `Item.Value` |
 | MSBuildTask0008: relative default `= "obj"` on a path property | → Retype the property (unset default) and move the default into `Execute()` as a guarded, `TaskEnvironment`-rooted assignment |
+| MSBuildTask0012: concrete task without the opt-in | → Apply `[MSBuildMultiThreadableTask]`, implement `IMultiThreadableTask`, and add the `TaskEnvironment` property |
 
 The MSBuildTask0003 fixer intelligently finds the first **unwrapped** path argument rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument.
 
@@ -448,6 +495,8 @@ dotnet test
 | `DiagnosticIds.cs` | Public constants: `MSBuildTask0001`–`MSBuildTask0008` |
 | `PreferTypedParameterAnalyzer.cs` | Analyzer for MSBuildTask0006, MSBuildTask0007, and MSBuildTask0008 — detects manual path construction, ItemSpec parsing, Path.Combine usage (first argument only), helper method wrapping, FileInfo/DirectoryInfo construction through AbsolutePath intermediaries, System.IO consumption sites (`File.*`/`Directory.*`/`FileStream`/`StreamReader`/`StreamWriter`) that bias suggestions toward `FileInfo`/`DirectoryInfo`, and relative default paths that must be initialized in `Execute()` |
 | `PathDefaultClassifier.cs` | Shared classification of string path defaults as fully-qualified vs relative (host-independent, netstandard2.0-safe) |
+| `RequireMultiThreadableTaskAnalyzer.cs` | Analyzer for MSBuildTask0012 — reports concrete task types that do not declare multithreading support, once the rule is opted into |
+| `RequireMultiThreadableTaskCodeFixProvider.cs` | Code fix for MSBuildTask0012 — applies the attribute, implements `IMultiThreadableTask`, and adds the `TaskEnvironment` property |
 
 ### Performance
 
