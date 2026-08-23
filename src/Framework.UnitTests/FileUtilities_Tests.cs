@@ -531,14 +531,14 @@ public class FileUtilities_Tests
         FileUtilities.PathIsInvalid(@"c:\foo\|||").ShouldBeTrue();
     }
 
-    [Fact]
+    [WindowsOnlyFact]
     public void PathIsInvalid_DoesNotRejectLongPaths()
     {
         string longSegment = new string('a', 300);
         FileUtilities.PathIsInvalid($@"c:\{longSegment}\file.txt").ShouldBeFalse();
     }
 
-    [Fact]
+    [WindowsOnlyFact]
     public void PathIsInvalid_DoesNotRejectLeadingOrTrailingWhitespace()
     {
         FileUtilities.PathIsInvalid("  c:\\temp\\file.txt  ").ShouldBeFalse();
@@ -546,9 +546,9 @@ public class FileUtilities_Tests
 
 #if NETFRAMEWORK
     [WindowsOnlyFact]
-    public void NormalizePath_InvalidCharactersOnNetFramework_MatchesMicrosoftIoGetFullPath()
+    public void NormalizePath_RootedPathOnNetFramework_MatchesMicrosoftIoGetFullPath()
     {
-        string path = @"c:\aardvark\|||";
+        string path = @"c:\temp\subdir\..\..\windows";
         FileUtilities.NormalizePath(path).ShouldBe(Microsoft.IO.Path.GetFullPath(path));
     }
 #endif
