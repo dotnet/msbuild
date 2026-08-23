@@ -36,7 +36,7 @@ Before starting any phase, ensure you have these values (the user must provide t
 
 | Input | Example | How to determine |
 |---|---|---|
-| `PREVIOUS_RELEASE_VERSION` | `18.9` | Previous entry in the merge-flow chain |
+| `PREVIOUS_RELEASE_VERSION` | `18.9` | Version being replaced as latest — the previous release branch (`git branch -r --list 'origin/vs*'`) |
 | `PREVIOUS_RELEASE_EXACT_VERSION` | `18.9.6` | The version the previous release actually shipped as. From the previous release's tracking issue, or `git tag --list 'v18.9.*'`. Used by Phase 5.3a. |
 | `THIS_RELEASE_VERSION` | `18.10` | Current `VersionPrefix` in `eng/Versions.props` (drop `.0`) |
 | `NEXT_VERSION` | `18.11` | User-provided — not computable from current version |
@@ -81,7 +81,7 @@ It computes `git merge-base origin/main origin/vs{{THIS_RELEASE_VERSION}}`, find
 | Phase | Trigger | Key Actions |
 |---|---|---|
 | **0: Instantiate** | User-initiated | Validate inputs, create GitHub tracking issue |
-| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), merge-flow config, `VisualStudio.ChannelName` |
+| **1: Branch & Prepare** | `BRANCH_SNAP_DATE` | Create `vs*` branch, DARC channel setup (batched PR), identify retired branches, `VisualStudio.ChannelName` |
 | **2: DARC Subscription Updates** | Phase 1 branch exists (`vs*` created) | Retarget `main`-targeting subs + VMR backflow to next channel, retired-branch cleanup (batched PR), Arcade verify |
 | **3: Bump Main** | Phase 2 merged | Branding PR in `main` (`VersionPrefix` → next, ApiCompat baseline, refresh OptProf baseline) |
 | **4: Final Branding** | 7 days before `INSIDERS_SNAP_DATE` | Public API promotion, OptProf bootstrap (usually a no-op), M2/QB approval only if behind schedule, babysit the VS insertion into VS `main` before insiders snap |
@@ -125,7 +125,6 @@ When asked to execute a specific phase:
 | [`documentation/wiki/ChangeWaves.md`](../../../documentation/wiki/ChangeWaves.md) | Source doc for the Learn page sync — always sync the `vsXX.Y` (Insiders/preview-SDK) copy, not `main` |
 | [MSBuild Change Waves Learn page](https://learn.microsoft.com/visualstudio/msbuild/change-waves) | Public docs target to [`MicrosoftDocs/visualstudio-docs-pr`](https://github.com/MicrosoftDocs/visualstudio-docs-pr) (`docs/msbuild/change-waves.md`) |
 | [`eng/Versions.props`](../../../eng/Versions.props) | `VersionPrefix`, `PackageValidationBaselineVersion`, `BootstrapSdkVersion` |
-| [`.config/git-merge-flow-config.jsonc`](../../../.config/git-merge-flow-config.jsonc) | Branch merge chain — update each release |
 | [`azure-pipelines/vs-insertion.yml`](../../../azure-pipelines/vs-insertion.yml) | VS insertion pipeline — `AutoInsertTargetBranch` mappings |
 | [`azure-pipelines/vs-insertion-experimental.yml`](../../../azure-pipelines/vs-insertion-experimental.yml) | Experimental insertion — `TargetBranch` parameter values |
 | [`scripts/Get-PackageValidationBaseline.ps1`](../../../scripts/Get-PackageValidationBaseline.ps1) | Phase 3.2 — resolves `PackageValidationBaselineVersion` deterministically (merge-base → pipeline 9434 → dotnet-tools feed) |
