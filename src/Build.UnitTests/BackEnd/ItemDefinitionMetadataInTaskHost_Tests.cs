@@ -14,9 +14,9 @@ using Xunit;
 namespace Microsoft.Build.Engine.UnitTests.BackEnd
 {
     /// <summary>
-    /// Item definition metadata referencing built-in metadata, such as <c>%(Filename)</c>, is stored unexpanded
-    /// and substituted when the metadata is read. These tests assert that a task observes the same value whether
-    /// it runs in-proc or in a task host.
+    /// Metadata inherited from an item definition, such as <c>%(Filename)</c>, is stored unexpanded and expanded
+    /// when it is read. These tests assert that a task observes the same value whether it runs in-proc or in a
+    /// task host.
     /// Regression tests for https://github.com/dotnet/msbuild/issues/14763.
     /// </summary>
     public sealed class ItemDefinitionMetadataInTaskHost_Tests

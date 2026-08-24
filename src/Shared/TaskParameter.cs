@@ -546,6 +546,16 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Super simple ITaskItem derivative that we can use as a container for read items.
         /// </summary>
+        /// <remarks>
+        /// This is a flattened view of an engine item. An engine item keeps metadata set directly on the item apart
+        /// from metadata inherited from an item definition, and expands only the latter on read, so that a value such
+        /// as <c>%(Filename)</c> follows the item it is read from. Both kinds arrive here in one dictionary, so that
+        /// origin is recovered instead: a value that evaluation already expanded has no <c>%(</c> left in it, and a
+        /// value the task itself writes is recorded as it is written.
+        ///
+        /// Reads that hand a value to a task expand; reads that hand back the whole collection do not, so a value
+        /// returns to the engine as it left. Keep any new accessor on the side of the one it resembles.
+        /// </remarks>
         private class TaskParameterTaskItem :
 #if FEATURE_APPDOMAIN
             MarshalByRefObject,
@@ -576,10 +586,9 @@ namespace Microsoft.Build.BackEnd
             private ItemSpecModifiers.Cache _cachedModifiers;
 
             /// <summary>
-            /// Names of metadata written on this item after it was received. Their values are literal, so they are
-            /// never expanded on read.
+            /// Names of metadata the task wrote on this item. Their values are read as stored.
             /// </summary>
-            private HashSet<string> _locallySetMetadata = null;
+            private HashSet<string> _writtenByTask = null;
 
             /// <summary>
             /// Constructor for serialization
@@ -624,12 +633,11 @@ namespace Microsoft.Build.BackEnd
                     }
                 }
 
-                // RecursiveDir is a built-in metadata that cannot be derived from the item spec alone -
-                // it requires the original wildcard pattern (_includeBeforeWildcardExpansionEscaped).
-                // When crossing process boundaries (e.g., to TaskHost in -mt mode), built-in metadata
-                // is not included in CloneCustomMetadataEscaped(). Explicitly preserve RecursiveDir
-                // as custom metadata so it survives serialization.
-                // See https://github.com/dotnet/msbuild/issues/13140
+                // RecursiveDir cannot be derived from the item spec, only from the wildcard the item was expanded
+                // from, and CloneCustomMetadataEscaped() does not return built-in metadata. Carry it over explicitly
+                // so it survives the boundary. See https://github.com/dotnet/msbuild/issues/13140.
+                // Written straight to the dictionary rather than through SetMetadata: this is the item being built,
+                // not a task writing to it, and the value is already expanded.
                 if (copyFrom is ITaskItem2 copyFromForRecursiveDir)
                 {
                     string recursiveDirEscaped = copyFromForRecursiveDir.GetMetadataValueEscaped(ItemSpecModifiers.RecursiveDir);
@@ -765,11 +773,11 @@ namespace Microsoft.Build.BackEnd
 
                 _customEscapedMetadata[metadataName] = metadataValue ?? String.Empty;
 
-                // Only a value that would otherwise be substituted on read has to be remembered as literal.
-                if (metadataValue?.IndexOf("%(", StringComparison.Ordinal) >= 0)
+                // Only a value that would otherwise be expanded on read has to be remembered.
+                if (IsUnexpanded(metadataValue))
                 {
-                    _locallySetMetadata ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
-                    _locallySetMetadata.Add(metadataName);
+                    _writtenByTask ??= new HashSet<string>(MSBuildNameIgnoreCaseComparer.Default);
+                    _writtenByTask.Add(metadataName);
                 }
             }
 
@@ -788,7 +796,7 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 _customEscapedMetadata.Remove(metadataName);
-                _locallySetMetadata?.Remove(metadataName);
+                _writtenByTask?.Remove(metadataName);
             }
 
             /// <summary>
@@ -815,12 +823,12 @@ namespace Microsoft.Build.BackEnd
                     IEnumerable<KeyValuePair<string, string>> metadataToImport = _customEscapedMetadata
                         .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Key)));
 
-                    // The destination has no notion of a value awaiting substitution, so hand it finished values,
-                    // as an engine item does when copying onto an item a task can reach.
-                    if (HasAnyExpandableExpressions())
+                    // The destination has no notion of an unexpanded value, so hand it expanded ones, as an engine
+                    // item does when copying onto an item a task can reach.
+                    if (HasUnexpandedMetadata())
                     {
                         metadataToImport = metadataToImport
-                            .Select(metadatum => new KeyValuePair<string, string>(metadatum.Key, Substitute(metadatum.Key, metadatum.Value)));
+                            .Select(metadatum => new KeyValuePair<string, string>(metadatum.Key, ExpandIfFromItemDefinition(metadatum.Key, metadatum.Value)));
                     }
 
 #if FEATURE_APPDOMAIN
@@ -841,7 +849,7 @@ namespace Microsoft.Build.BackEnd
 
                         if (String.IsNullOrEmpty(value))
                         {
-                            destinationItem.SetMetadata(entry.Key, Substitute(entry.Key, entry.Value));
+                            destinationItem.SetMetadata(entry.Key, ExpandIfFromItemDefinition(entry.Key, entry.Value));
                         }
                     }
                 }
@@ -911,40 +919,44 @@ namespace Microsoft.Build.BackEnd
                     return string.Empty;
                 }
 
-                // Item definition metadata referencing built-in metadata is stored unexpanded and substituted on read
-                // so that it tracks the item it is read from. Definition and directly set metadata arrive here
-                // flattened into a single dictionary, so the distinction is instead carried by the value itself:
-                // anything expanded during evaluation has no reference left to substitute. Metadata a task sets is
-                // literal, so it is excluded.
-                return Substitute(metadataName, metadataValue);
+                return ExpandIfFromItemDefinition(metadataName, metadataValue);
             }
 
             /// <summary>
-            /// Substitutes any built-in metadata references in a stored metadata value, unless the value was
-            /// written by the task and is therefore literal.
+            /// Expands a stored value if it came from an item definition, and returns it as stored otherwise.
             /// </summary>
-            private string Substitute(string metadataName, string escapedValue)
+            private string ExpandIfFromItemDefinition(string metadataName, string escapedValue)
             {
-                if (escapedValue.IndexOf("%(", StringComparison.Ordinal) < 0 || _locallySetMetadata?.Contains(metadataName) == true)
+                if (!IsUnexpanded(escapedValue) || _writtenByTask?.Contains(metadataName) == true)
                 {
                     return escapedValue;
                 }
 
+                // RecursiveDir comes from the wildcard the item was expanded from, not from the item spec, so it is
+                // read from the item's own metadata rather than derived.
                 _customEscapedMetadata.TryGetValue(ItemSpecModifiers.RecursiveDir, out string escapedRecursiveDir);
 
                 return BuiltInMetadataExpander.Expand(escapedValue, _escapedItemSpec, _escapedDefiningProject, escapedRecursiveDir, ref _cachedModifiers);
             }
 
             /// <summary>
-            /// Indicates whether any stored value may contain a built-in metadata reference awaiting substitution.
+            /// Indicates whether a value still holds a built-in metadata reference, and so was never expanded.
+            /// Evaluation expands every other expression form, so this is what distinguishes a value inherited from
+            /// an item definition from one set directly on the item.
             /// </summary>
-            private bool HasAnyExpandableExpressions()
+            private static bool IsUnexpanded(string escapedValue)
+                => escapedValue?.IndexOf("%(", StringComparison.Ordinal) >= 0;
+
+            /// <summary>
+            /// Indicates whether any stored value is still unexpanded.
+            /// </summary>
+            private bool HasUnexpandedMetadata()
             {
                 if (_customEscapedMetadata is not null)
                 {
                     foreach (KeyValuePair<string, string> metadatum in _customEscapedMetadata)
                     {
-                        if (metadatum.Value.IndexOf("%(", StringComparison.Ordinal) >= 0)
+                        if (IsUnexpanded(metadatum.Value))
                         {
                             return true;
                         }
