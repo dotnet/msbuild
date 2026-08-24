@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Shouldly;
@@ -45,7 +46,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
     [InlineData("double")]
     [InlineData("decimal")]
     [InlineData("System.DateTime")]
-    public async Task ConvertChangeTypeType_ProducesError(string typeName)
+    public async Task ConvertChangeTypeType_ProducesWarning(string typeName)
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync($$"""
             using Microsoft.Build.Framework;
@@ -59,7 +60,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
         diags.ShouldNotContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
         Diagnostic diagnostic = diags.ShouldHaveSingleItem();
         diagnostic.Id.ShouldBe(DiagnosticIds.CultureSensitiveTaskItemType);
-        diagnostic.Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Error);
+        diagnostic.Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Warning);
         diagnostic.GetMessage().ShouldContain("Convert.ChangeType");
         diagnostic.GetMessage().ShouldContain("CultureInfo.InvariantCulture");
     }
@@ -116,7 +117,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
     // ═══════════════════════════════════════════════════════════════════════
 
     [Fact]
-    public async Task ConvertChangeTypeArray_ProducesError()
+    public async Task ConvertChangeTypeArray_ProducesWarning()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
             using Microsoft.Build.Framework;
@@ -129,7 +130,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
 
         Diagnostic diagnostic = diags.ShouldHaveSingleItem();
         diagnostic.Id.ShouldBe(DiagnosticIds.CultureSensitiveTaskItemType);
-        diagnostic.Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Error);
+        diagnostic.Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Warning);
     }
 
     [Fact]
@@ -149,7 +150,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
     }
 
     [Fact]
-    public async Task ConvertChangeTypeOutputProperty_ProducesError()
+    public async Task ConvertChangeTypeOutputProperty_ProducesWarning()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
             using Microsoft.Build.Framework;
@@ -163,7 +164,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
 
         Diagnostic diagnostic = diags.ShouldHaveSingleItem();
         diagnostic.Id.ShouldBe(DiagnosticIds.CultureSensitiveTaskItemType);
-        diagnostic.Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Error);
+        diagnostic.Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Warning);
     }
 
     [Fact]
@@ -201,6 +202,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
             """);
 
         diags.ShouldContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
+        diags.ShouldHaveSingleItem().Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Error);
         diags[0].GetMessage().ShouldContain("Item");
         diags[0].GetMessage().ShouldContain("Guid");
         diags[0].GetMessage().ShouldContain("string, bool, AbsolutePath, FileInfo, DirectoryInfo");
@@ -223,6 +225,42 @@ public class UnsupportedTaskItemTypeAnalyzerTests
         diags.ShouldContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
         diags[0].GetMessage().ShouldContain("Duration");
         diags[0].GetMessage().ShouldContain("TimeSpan");
+    }
+
+    [Fact]
+    public async Task TypedTaskItemDiagnostics_AreIndependentOfMtScope()
+    {
+        var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public ITaskItem<Guid> Invalid { get; set; } = null!;
+                public ITaskItem<int> CultureSensitive { get; set; } = null!;
+                public override bool Execute() => true;
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.UnsupportedTaskItemType).ShouldHaveSingleItem()
+            .Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Error);
+        diags.Where(d => d.Id == DiagnosticIds.CultureSensitiveTaskItemType).ShouldHaveSingleItem()
+            .Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Warning);
+    }
+
+    [Fact]
+    public async Task GenericTaskItemTypeParameter_NoDiagnostic()
+    {
+        var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+            public class GenericTask<T> : Microsoft.Build.Utilities.Task
+            {
+                public ITaskItem<T> Item { get; set; } = null!;
+                public override bool Execute() => true;
+            }
+            """);
+
+        diags.ShouldBeEmpty();
     }
 
     [Fact]
