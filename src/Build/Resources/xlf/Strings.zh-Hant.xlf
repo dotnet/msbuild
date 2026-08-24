@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.2" xsi:schemaLocation="urn:oasis:names:tc:xliff:document:1.2 xliff-core-1.2-transitional.xsd">
   <file datatype="xml" source-language="en" target-language="zh-Hant" original="../Strings.resx">
     <body>
@@ -731,7 +731,7 @@
       </trans-unit>
       <trans-unit id="OM_PartialEvaluationNotSupportedForProject">
         <source>Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</source>
-        <target state="new">Partial evaluation (the "{0}" evaluation stage) is not supported when creating a Project. Use ProjectInstance to perform a partial evaluation, or use the Full evaluation stage to create a Project.</target>
+        <target state="translated">建立專案時不支援部分評估 ("{0}" 評估階段)。使用 ProjectInstance 來執行部分評估，或使用完整評估階段來建立專案。</target>
         <note>UE: This message is shown when a partial (non-Full) ProjectEvaluationStage is passed to a Project factory method such as Project.FromFile. {0} is the requested ProjectEvaluationStage.</note>
       </trans-unit>
       <trans-unit id="OM_TargetNameNullOrEmpty">
@@ -3326,7 +3326,7 @@ Utilization:          {0} Average Utilization: {1:###.0}</source>
       </trans-unit>
       <trans-unit id="DeprecatedEventSerialization">
         <source>Custom event type '{0}' is not supported as all custom event types were deprecated. Please use Extended*EventArgs instead. More info: https://aka.ms/msbuild/eventargs</source>
-        <target state="translated">不支援自定義事件類型 '{0}'，因為所有自定義事件類型都已過時。請改用 Extended*EventArgs。更多資訊： https://aka.ms/msbuild/eventargs</target>
+        <target state="translated">不支援自訂事件類型 '{0}'，因為所有自訂事件類型都已淘汰。請改為使用 Extended*EventArgs。詳細資訊: https://aka.ms/msbuild/eventargs</target>
         <note />
       </trans-unit>
       <trans-unit id="InvalidProjectFile">
