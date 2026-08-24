@@ -58,7 +58,11 @@ namespace Microsoft.Build.Evaluation
         /// </summary>
         public const string MetadataMarker = "%(";
 
-        private static readonly char[] s_itemVectorOrMetadataMarkerPrefixes = ['@', '%'];
+        private const char PropertyMarkerPrefix = '$';
+        private const char ItemVectorMarkerPrefix = '@';
+        private const char MetadataMarkerPrefix = '%';
+
+        private static readonly char[] s_itemVectorOrMetadataMarkerPrefixes = [ItemVectorMarkerPrefix, MetadataMarkerPrefix];
 
         /// <summary>
         ///  Determines whether <paramref name="expression"/> contains a property marker.
@@ -101,7 +105,7 @@ namespace Microsoft.Build.Evaluation
         ///  The zero-based index of the marker, or <c>-1</c> if it is not found.
         /// </returns>
         public static int IndexOfPropertyMarker(string expression)
-            => IndexOfMarker(expression, '$');
+            => IndexOfMarker(expression, PropertyMarkerPrefix);
 
         /// <summary>
         ///  Finds the first property marker at or after <paramref name="startIndex"/>.
@@ -113,7 +117,7 @@ namespace Microsoft.Build.Evaluation
         ///  The zero-based index of the marker, or <c>-1</c> if it is not found.
         /// </returns>
         public static int IndexOfPropertyMarker(string expression, int startIndex)
-            => IndexOfMarker(expression, '$', startIndex, expression.Length - startIndex);
+            => IndexOfMarker(expression, PropertyMarkerPrefix, startIndex, expression.Length - startIndex);
 
         /// <summary>
         ///  Finds the first property marker in the range beginning at <paramref name="startIndex"/>
@@ -130,7 +134,7 @@ namespace Microsoft.Build.Evaluation
         ///  The zero-based index of the marker, or <c>-1</c> if it is not found.
         /// </returns>
         public static int IndexOfPropertyMarker(string expression, int startIndex, int count)
-            => IndexOfMarker(expression, '$', startIndex, count);
+            => IndexOfMarker(expression, PropertyMarkerPrefix, startIndex, count);
 
         /// <summary>
         ///  Finds the first item-vector marker.
@@ -143,7 +147,7 @@ namespace Microsoft.Build.Evaluation
         ///  The zero-based index of the marker, or <c>-1</c> if it is not found.
         /// </returns>
         public static int IndexOfItemVectorMarker(string expression)
-            => IndexOfMarker(expression, '@');
+            => IndexOfMarker(expression, ItemVectorMarkerPrefix);
 
         /// <summary>
         ///  Finds the first item-vector marker at or after <paramref name="startIndex"/>.
@@ -157,7 +161,7 @@ namespace Microsoft.Build.Evaluation
         ///  The zero-based index of the marker, or <c>-1</c> if it is not found.
         /// </returns>
         public static int IndexOfItemVectorMarker(string expression, int startIndex)
-            => IndexOfMarker(expression, '@', startIndex, expression.Length - startIndex);
+            => IndexOfMarker(expression, ItemVectorMarkerPrefix, startIndex, expression.Length - startIndex);
 
         /// <summary>
         ///  Finds the first item-vector marker in the range beginning at <paramref name="startIndex"/>
@@ -174,7 +178,7 @@ namespace Microsoft.Build.Evaluation
         ///  The zero-based index of the marker, or <c>-1</c> if it is not found.
         /// </returns>
         public static int IndexOfItemVectorMarker(string expression, int startIndex, int count)
-            => IndexOfMarker(expression, '@', startIndex, count);
+            => IndexOfMarker(expression, ItemVectorMarkerPrefix, startIndex, count);
 
         /// <summary>
         ///  Finds the first metadata marker.
@@ -187,7 +191,7 @@ namespace Microsoft.Build.Evaluation
         ///  The zero-based index of the marker, or <c>-1</c> if it is not found.
         /// </returns>
         public static int IndexOfMetadataMarker(string expression)
-            => IndexOfMarker(expression, '%');
+            => IndexOfMarker(expression, MetadataMarkerPrefix);
 
         /// <summary>
         ///  Finds the first metadata marker at or after <paramref name="startIndex"/>.
@@ -201,7 +205,7 @@ namespace Microsoft.Build.Evaluation
         ///  The zero-based index of the marker, or <c>-1</c> if it is not found.
         /// </returns>
         public static int IndexOfMetadataMarker(string expression, int startIndex)
-            => IndexOfMarker(expression, '%', startIndex, expression.Length - startIndex);
+            => IndexOfMarker(expression, MetadataMarkerPrefix, startIndex, expression.Length - startIndex);
 
         /// <summary>
         ///  Finds the first metadata marker in the range beginning at <paramref name="startIndex"/>
@@ -218,7 +222,7 @@ namespace Microsoft.Build.Evaluation
         ///  The zero-based index of the marker, or <c>-1</c> if it is not found.
         /// </returns>
         public static int IndexOfMetadataMarker(string expression, int startIndex, int count)
-            => IndexOfMarker(expression, '%', startIndex, count);
+            => IndexOfMarker(expression, MetadataMarkerPrefix, startIndex, count);
 
         private static int IndexOfMarker(string expression, char marker)
         {
