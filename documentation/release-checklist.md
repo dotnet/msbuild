@@ -81,11 +81,9 @@ Use `--configuration-branch msbuild-{{THIS_RELEASE_VERSION}}` on every command a
   - [ ] **1.2c** Pre-create default channel mapping for the **next** release branch (**last command — omit `--no-pr` to create the PR**). The `vs{{NEXT_VERSION}}` branch does not exist yet, so pass `-q` (non-interactive) to skip the "branch doesn't exist" prompt — otherwise the command blocks/aborts: \
   `darc add-default-channel --channel "VS {{NEXT_VERSION}}" --branch vs{{NEXT_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}} -q`
   - [ ] **1.2d** Get the maestro-configuration PR reviewed and merged: {{URL_OF_PHASE1_DARC_PR}}
-- [ ] **1.3** Update `.config/git-merge-flow-config.jsonc`:
-  - [ ] **1.3a** Insert `vs{{THIS_RELEASE_VERSION}}` as the last entry before `main` in the merge chain. Add a comment noting the VS/SDK version context.
-  - [ ] **1.3b** **Retire predecessor branches that will no longer be supported.** Remove their `MergeToBranch` entries and rewire the chain to skip them so automation does not open stale forward-merge PRs. \
+- [ ] **1.3** **Identify predecessor branches that will no longer be supported.** Record the list here — Phase 2.3e uses it to clean up their DARC subscriptions. \
   How to identify a retired branch:
-    - **The combined rule:** a branch paired with both an SDK band and a VS version is retired **only when both lifecycles agree it is out of support**. If only one side says retired but the other is still supported, **keep the branch** — automation must still flow forward-merges so the still-supported lifecycle keeps receiving fixes.
+    - **The combined rule:** a branch paired with both an SDK band and a VS version is retired **only when both lifecycles agree it is out of support**. If only one side says retired but the other is still supported, **keep the branch** — the still-supported lifecycle must keep receiving fixes.
     - **SDK lifecycle** — for branches paired with an SDK band, check https://learn.microsoft.com/dotnet/core/porting/versioning-sdk-msbuild-vs#lifecycle. If the paired SDK band is past its support end date, the branch is SDK-retired.
     - **VS lifecycle** — check the [VS Servicing Information wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/27212/Visual-Studio-Servicing-Information). Rule of thumb: the VS support window covers the current release plus two preceding versions, so the first candidate for VS-retirement is `vs{{THIS_RELEASE_VERSION}} - 3` — **always confirm on the wiki**, since servicing exceptions can extend specific versions beyond the rule of thumb.
     - **VS-only branches** (not paired with any active SDK band) are retired purely on the VS lifecycle.
@@ -124,7 +122,7 @@ _Tip: `darc add-default-channel` / `add-subscription` prompt interactively when 
   `darc update-subscription --id <main_targeting_sub_id> --channel "VS {{NEXT_VERSION}}" --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
   - [ ] **2.3d** If release branch association was missing in 2.2, add it: \
   `darc add-default-channel --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
-  - [ ] **2.3e** **Delete subscriptions for retired branches.** For each branch identified as retired in step 1.3b (apply the same combined SDK+VS rule — do **not** delete subscriptions for a branch that's retired on only one side, since fixes must keep flowing into the still-supported lifecycle), remove its inbound subscriptions and any default channel associations.
+  - [ ] **2.3e** **Delete subscriptions for retired branches.** For each branch identified as retired in step 1.3 (apply the same combined SDK+VS rule — do **not** delete subscriptions for a branch that's retired on only one side, since fixes must keep flowing into the still-supported lifecycle), remove its inbound subscriptions and any default channel associations.
   List them: `darc get-subscriptions --target-repo https://github.com/dotnet/msbuild --target-branch <retired_branch>` \
   Delete each: `darc delete-subscription --id <subscription_id> --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
   - [ ] **2.3f** **(VMR backflow — skip for a VS-only release, or if 2.2b found the channel unchanged.)** Repoint the `→ main` backflow (ID from 2.2b) to the **next** SDK band channel so the bumped `main` pulls next-version VMR dependencies: \
