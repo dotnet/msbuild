@@ -67,7 +67,8 @@ internal partial class Expander<P, I>
             Assumed.NotNull(metadata, "Cannot expand metadata without providing metadata");
 
             // PERF NOTE: pre-scanning the string for "%(" is cheaper than a full scan.
-            if (!ExpressionShredder.ContainsMetadataMarker(expression))
+            int markerIndex = ExpressionShredder.IndexOfMetadataMarker(expression);
+            if (markerIndex < 0)
             {
                 return expression;
             }
@@ -77,7 +78,7 @@ internal partial class Expander<P, I>
                 using SpanBasedStringBuilder builder = Strings.GetSpanBasedStringBuilder();
                 MetadataExpander expander = new(metadata, options, elementLocation, loggingContext, builder);
 
-                return expander.Expand(expression);
+                return expander.Expand(expression, markerIndex);
             }
             catch (InvalidOperationException ex)
             {
@@ -87,12 +88,12 @@ internal partial class Expander<P, I>
             return Assumed.Unreachable<string>();
         }
 
-        private string Expand(string expression)
+        private string Expand(string expression, int markerIndex)
         {
             if (!ExpressionShredder.TryGetNextItemVectorExpression(expression, out ExpressionShredder.ItemExpressionCapture itemVector))
             {
                 // No well-formed item vectors in the string — scan for metadata references directly.
-                ScanAndExpandMetadata(expression);
+                ScanAndExpandMetadata(expression, markerIndex);
             }
             else if (itemVector.Index == 0 && itemVector.Length == expression.Length && itemVector.Separator == null)
             {
@@ -158,9 +159,9 @@ internal partial class Expander<P, I>
             return itemVector.Index + itemVector.Length;
         }
 
-        /// <inheritdoc cref="ScanAndExpandMetadata(string, int, int)" />
-        private void ScanAndExpandMetadata(string input)
-            => ScanAndExpandMetadata(input, 0, input.Length);
+        /// <inheritdoc cref="ScanAndExpandMetadata(string, int, int, int?)" />
+        private void ScanAndExpandMetadata(string input, int markerIndex)
+            => ScanAndExpandMetadata(input, 0, input.Length, markerIndex);
 
         /// <summary>
         ///  Scans the specified range of <paramref name="input"/> for item metadata references
@@ -176,11 +177,10 @@ internal partial class Expander<P, I>
         ///  If a <c>%(</c> sequence does not form a valid metadata reference, it is appended
         ///  to the output verbatim.
         /// </remarks>
-        private void ScanAndExpandMetadata(string input, int startIndex, int endIndex)
+        private void ScanAndExpandMetadata(string input, int startIndex, int endIndex, int? markerIndex = null)
         {
             int lastCopied = startIndex;
-
-            int i = ExpressionShredder.IndexOfMetadataMarker(input, startIndex);
+            int i = markerIndex ?? ExpressionShredder.IndexOfMetadataMarker(input, startIndex);
 
             while (i >= 0 && i < endIndex - 1)
             {
