@@ -25,6 +25,8 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
 | **MSBuildTask0010** | Error | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
 | **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
+| **MSBuildTask0012** | Warning | Concrete tasks with `[MSBuildMultiThreadableTask]` applied directly | `TaskEnvironment` property is never assigned |
+| **MSBuildTask0013** | Info (off by default) | Concrete tasks declaring `IMultiThreadableTask` in their own base list | Missing `[MSBuildMultiThreadableTask]`, so the task still runs out-of-proc |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -287,6 +289,53 @@ The engine prefers this constructor when it is present. A public parameterless c
 
 **Scope:** Concrete classes implementing `IMultiThreadableTask`. Abstract base classes and tasks that already declare a public single-`TaskEnvironment` constructor do not produce the diagnostic.
 
+### MSBuildTask0012 — `TaskEnvironment` Property Is Never Assigned
+
+`[MSBuildMultiThreadableTask]` and `IMultiThreadableTask` do different jobs. The **attribute** is the routing signal — it is the only thing that makes a task run in-process instead of in an out-of-proc TaskHost. The **interface** is the injection signal — the engine assigns `TaskEnvironment` only to tasks that implement it.
+
+Declaring the attribute and a `TaskEnvironment` property, but not the interface, produces a task that runs in-process with an environment that is never populated:
+
+```csharp
+[MSBuildMultiThreadableTask]
+public class MyTask : Task            // ⚠️ MSBuildTask0012: no IMultiThreadableTask
+{
+    // Never assigned by the engine. Stays TaskEnvironment.Fallback, so every path below
+    // resolves against the shared process working directory instead of the project directory.
+    public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
+    public override bool Execute()
+    {
+        string text = File.ReadAllText(TaskEnvironment.GetAbsolutePath(Input));
+        ...
+    }
+}
+```
+
+Fix by implementing the interface:
+
+```csharp
+[MSBuildMultiThreadableTask]
+public class MyTask : Task, IMultiThreadableTask
+```
+
+**Scope:** Concrete `ITask` implementations with `[MSBuildMultiThreadableTask]` applied directly, that do not implement `IMultiThreadableTask`, and that declare (or inherit) a settable `TaskEnvironment` property.
+
+The attribute **without** a `TaskEnvironment` property is a supported state and is not reported — that is the compatibility-bridge shape, correct for a task that does not resolve relative paths or read environment variables. A task declaring a public constructor whose single parameter is `TaskEnvironment` is also not reported: the engine selects that constructor by signature, independently of the interface.
+
+### MSBuildTask0013 — Missing `[MSBuildMultiThreadableTask]`
+
+A task that declares `IMultiThreadableTask` receives a `TaskEnvironment` and resolves paths correctly, but without the attribute it still runs in an out-of-proc TaskHost and gains none of the multithreading performance benefit.
+
+This is a legitimate intermediate state during migration — path handling done, thread-safety review not yet complete — so the rule is **disabled by default**. Enable it once a codebase intends every multithreadable task to also be routed in-process:
+
+```ini
+dotnet_diagnostic.MSBuildTask0013.severity = suggestion
+```
+
+**Scope:** Concrete `ITask` implementations that declare `IMultiThreadableTask` **in their own base list** and lack the attribute.
+
+Inheriting the interface is deliberately not reported. `ToolTask` implements `IMultiThreadableTask`, so every `ToolTask`-derived task in the ecosystem satisfies it without its author having declared anything — the same reason `TaskRouter` cannot use the interface as a routing signal.
+
 ## Analysis Scope
 
 The analyzer determines what to check based on the type declaration:
@@ -311,6 +360,8 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 - **MSBuildTask0010** is always **Error** — task item conversions must not rely on `Convert.ChangeType`.
 - **MSBuildTask0002–MSBuildTask0009** report as **Warning**, with MSBuildTask0006–MSBuildTask0008 limited to tasks directly marked with `[MSBuildMultiThreadableTask]`.
 - **MSBuildTask0011** reports as **Info** — it is a modernization suggestion rather than a correctness issue.
+- **MSBuildTask0012** reports as **Warning** — the `TaskEnvironment` property is silently inert, which is a correctness issue.
+- **MSBuildTask0013** is **disabled by default** — running out-of-proc is a performance characteristic, and the shape it reports is a valid intermediate migration state.
 
 ## Code Fixes
 

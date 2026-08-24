@@ -1,0 +1,188 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.Diagnostics;
+
+namespace Microsoft.Build.TaskAuthoring.Analyzer
+{
+    /// <summary>
+    /// Validates that a task's two multithreading declarations agree.
+    /// <para>
+    /// <c>[MSBuildMultiThreadableTask]</c> is the routing signal: it is the only thing
+    /// <c>TaskRouter.NeedsTaskHostInMultiThreadedMode</c> reads, and without it a task runs in an
+    /// out-of-proc TaskHost sidecar. <c>IMultiThreadableTask</c> is the injection signal:
+    /// <c>TaskExecutionHost</c> assigns <c>TaskEnvironment</c> only to instances of that interface.
+    /// </para>
+    /// <para>
+    /// Declaring one without the other is legal but usually unintended, and both halves fail silently.
+    /// </para>
+    /// </summary>
+    [DiagnosticAnalyzer(LanguageNames.CSharp)]
+    public sealed class MultiThreadableTaskDeclarationAnalyzer : DiagnosticAnalyzer
+    {
+        private const string TaskEnvironmentPropertyName = "TaskEnvironment";
+
+        public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
+            ImmutableArray.Create(
+                DiagnosticDescriptors.TaskEnvironmentNeverAssigned,
+                DiagnosticDescriptors.MissingMultiThreadableTaskAttribute);
+
+        public override void Initialize(AnalysisContext context)
+        {
+            context.EnableConcurrentExecution();
+            context.ConfigureGeneratedCodeAnalysis(GeneratedCodeAnalysisFlags.None);
+            context.RegisterCompilationStartAction(OnCompilationStart);
+        }
+
+        private static void OnCompilationStart(CompilationStartAnalysisContext context)
+        {
+            INamedTypeSymbol? taskType = context.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskFullName);
+            INamedTypeSymbol? multiThreadableTaskType =
+                context.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
+            INamedTypeSymbol? taskEnvironmentType =
+                context.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
+            INamedTypeSymbol? attributeType =
+                context.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
+
+            if (taskType is null || multiThreadableTaskType is null || taskEnvironmentType is null || attributeType is null)
+            {
+                return;
+            }
+
+            context.RegisterSymbolAction(
+                symbolContext => AnalyzeNamedType(
+                    symbolContext,
+                    taskType,
+                    multiThreadableTaskType,
+                    taskEnvironmentType,
+                    attributeType),
+                SymbolKind.NamedType);
+        }
+
+        private static void AnalyzeNamedType(
+            SymbolAnalysisContext context,
+            INamedTypeSymbol taskType,
+            INamedTypeSymbol multiThreadableTaskType,
+            INamedTypeSymbol taskEnvironmentType,
+            INamedTypeSymbol attributeType)
+        {
+            var type = (INamedTypeSymbol)context.Symbol;
+
+            // Abstract types are never instantiated by the engine, and the routing attribute is not
+            // inherited, so neither declaration is meaningful on them.
+            if (type.TypeKind != TypeKind.Class ||
+                type.IsAbstract ||
+                !SharedAnalyzerHelpers.ImplementsInterface(type, taskType))
+            {
+                return;
+            }
+
+            bool implementsInterface = SharedAnalyzerHelpers.ImplementsInterface(type, multiThreadableTaskType);
+            bool hasAttribute = HasMultiThreadableTaskAttribute(type, attributeType);
+
+            if (hasAttribute && !implementsInterface)
+            {
+                // The attribute on its own is a supported state: it declares a task safe to run
+                // in-process without giving it access to TaskEnvironment. Only report when the task
+                // also declares a TaskEnvironment property, which says the author expects the engine
+                // to populate it -- and it never will.
+                if (HasTaskEnvironmentProperty(type, taskEnvironmentType) &&
+                    !HasTaskEnvironmentConstructor(type, taskEnvironmentType))
+                {
+                    ReportOnType(context, DiagnosticDescriptors.TaskEnvironmentNeverAssigned, type);
+                }
+            }
+            else if (!hasAttribute && DeclaresMultiThreadableTaskInterface(type, multiThreadableTaskType))
+            {
+                ReportOnType(context, DiagnosticDescriptors.MissingMultiThreadableTaskAttribute, type);
+            }
+        }
+
+        /// <summary>
+        /// Reports whether the type opts into <c>IMultiThreadableTask</c> in its own base list, rather
+        /// than merely inheriting it.
+        /// <para>
+        /// <c>ToolTask</c> implements <c>IMultiThreadableTask</c>, so every <c>ToolTask</c>-derived task in
+        /// the ecosystem satisfies the interface without its author having declared anything. Treating an
+        /// inherited implementation as intent would report thousands of untouched tasks, which is the same
+        /// reason <c>TaskRouter</c> cannot use the interface as a routing signal.
+        /// </para>
+        /// </summary>
+        private static bool DeclaresMultiThreadableTaskInterface(
+            INamedTypeSymbol type,
+            INamedTypeSymbol multiThreadableTaskType)
+        {
+            foreach (INamedTypeSymbol declaredInterface in type.Interfaces)
+            {
+                if (SymbolEqualityComparer.Default.Equals(declaredInterface, multiThreadableTaskType))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool HasMultiThreadableTaskAttribute(INamedTypeSymbol type, INamedTypeSymbol attributeType)
+        {
+            // Matches TaskRouter, which reads the attribute with inherit: false.
+            foreach (AttributeData attribute in type.GetAttributes())
+            {
+                if (SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, attributeType))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool HasTaskEnvironmentProperty(INamedTypeSymbol type, INamedTypeSymbol taskEnvironmentType)
+        {
+            foreach (IPropertySymbol property in SharedAnalyzerHelpers.GetPropertiesIncludingBaseTypes(type))
+            {
+                if (property.Name == TaskEnvironmentPropertyName &&
+                    SymbolEqualityComparer.Default.Equals(property.Type, taskEnvironmentType) &&
+                    property.SetMethod is not null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// The engine selects a single-parameter <c>TaskEnvironment</c> constructor by signature alone,
+        /// independently of <c>IMultiThreadableTask</c>, so such a task does receive an environment.
+        /// </summary>
+        private static bool HasTaskEnvironmentConstructor(INamedTypeSymbol type, INamedTypeSymbol taskEnvironmentType)
+        {
+            foreach (IMethodSymbol constructor in type.InstanceConstructors)
+            {
+                if (constructor.DeclaredAccessibility == Accessibility.Public &&
+                    constructor.Parameters.Length == 1 &&
+                    SymbolEqualityComparer.Default.Equals(constructor.Parameters[0].Type, taskEnvironmentType))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static void ReportOnType(SymbolAnalysisContext context, DiagnosticDescriptor descriptor, INamedTypeSymbol type)
+        {
+            foreach (Location location in type.Locations)
+            {
+                if (location.IsInSource)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(descriptor, location, type.Name));
+                    return;
+                }
+            }
+        }
+    }
+}

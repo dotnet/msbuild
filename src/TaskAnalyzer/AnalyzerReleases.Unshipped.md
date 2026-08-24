@@ -13,3 +13,5 @@ MSBuildTask0008 | MSBuild.TaskAuthoring | Warning | Initialize a relative defaul
 MSBuildTask0009 | MSBuild.TaskAuthoring | Warning | ITaskItem<T> used with a type argument T that MSBuild cannot bind as a task parameter
 MSBuildTask0010 | MSBuild.TaskAuthoring | Error | ITaskItem<T> used with a type argument T that MSBuild parses through Convert.ChangeType
 MSBuildTask0011 | MSBuild.TaskAuthoring | Info | Prefer constructor injection for TaskEnvironment
+MSBuildTask0012 | MSBuild.TaskAuthoring | Warning | TaskEnvironment property is never assigned because the task does not implement IMultiThreadableTask
+MSBuildTask0013 | MSBuild.TaskAuthoring | Info | Task declares IMultiThreadableTask but is not marked with [MSBuildMultiThreadableTask] (disabled by default)

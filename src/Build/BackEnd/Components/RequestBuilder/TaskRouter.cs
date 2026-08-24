@@ -8,13 +8,20 @@ namespace Microsoft.Build.BackEnd
 {
     /// <summary>
     /// Determines where a task should be executed in multi-threaded mode.
-    /// In multi-threaded execution mode, tasks implementing IMultiThreadableTask or marked with
-    /// MSBuildMultiThreadableTaskAttribute run in-process within thread nodes, while legacy tasks
-    /// are routed to sidecar TaskHost processes for isolation.
+    /// In multi-threaded execution mode, tasks marked with MSBuildMultiThreadableTaskAttribute run
+    /// in-process within thread nodes, while all other tasks are routed to sidecar TaskHost processes
+    /// for isolation.
     /// </summary>
     /// <remarks>
     /// This class should only be used when in multi-threaded mode. Traditional multi-proc builds
     /// have different semantics and should not use this routing logic.
+    /// <para>
+    /// The attribute is the only routing signal. Implementing <see cref="Microsoft.Build.Framework.IMultiThreadableTask"/>
+    /// does not opt a task into in-process execution: <c>Microsoft.Build.Utilities.ToolTask</c> implements that
+    /// interface, so honoring it here would silently opt in every ToolTask-derived task in the ecosystem, none of which
+    /// have been reviewed for thread safety. The interface instead controls whether the engine injects a
+    /// TaskEnvironment into the task, which TaskExecutionHost handles separately.
+    /// </para>
     /// </remarks>
     internal static class TaskRouter
     {
