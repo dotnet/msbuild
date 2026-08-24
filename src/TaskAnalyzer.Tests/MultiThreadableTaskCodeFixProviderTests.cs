@@ -337,6 +337,48 @@ public class MultiThreadableTaskCodeFixProviderTests
     }
 
     [Fact]
+    public async Task Fix_EnvironmentCallNestedInInvocation_ReplacesFlaggedCall()
+    {
+        // MSBuildTask0002 nested as an argument: the replacement must land on the flagged inner call,
+        // not on the enclosing invocation.
+        await CreateFixTest(
+            testCode: """
+                using System;
+                using Microsoft.Build.Framework;
+                public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+                {
+                    public TaskEnvironment TaskEnvironment { get; set; }
+                    public override bool Execute()
+                    {
+                        Consume({|#0:Environment.GetEnvironmentVariable("PATH")|});
+                        return true;
+                    }
+                    private static void Consume(string value)
+                    {
+                    }
+                }
+                """,
+            fixedCode: """
+                using System;
+                using Microsoft.Build.Framework;
+                public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+                {
+                    public TaskEnvironment TaskEnvironment { get; set; }
+                    public override bool Execute()
+                    {
+                        Consume(TaskEnvironment.GetEnvironmentVariable("PATH"));
+                        return true;
+                    }
+                    private static void Consume(string value)
+                    {
+                    }
+                }
+                """,
+            Diag(DiagnosticIds.TaskEnvironmentRequired).WithLocation(0)
+                .WithArguments("Environment.GetEnvironmentVariable(string)", "use TaskEnvironment.GetEnvironmentVariable instead")).RunAsync();
+    }
+
+    [Fact]
     public async Task Fix_NonPathStringArgumentIsNotWrapped()
     {
         // The first argument is a search pattern, not a path: the wrap must land on the flagged path parameter.
