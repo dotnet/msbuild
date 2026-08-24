@@ -608,8 +608,8 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// Regression test for https://github.com/dotnet/msbuild/issues/14763
-        /// Item definition metadata referencing built-in metadata is stored unexpanded and substituted on read,
-        /// so a task must observe the same value whether or not the item crossed the TaskHost boundary.
+        /// Metadata inherited from an item definition is stored unexpanded and expanded on read, so a task must
+        /// observe the same value whether or not the item crossed the TaskHost boundary.
         /// </summary>
         [Theory]
         [InlineData("%(Filename)", "hello")]
@@ -618,7 +618,7 @@ namespace Microsoft.Build.UnitTests
         [InlineData("pre-%(Filename)-post", "pre-hello-post")]
         [InlineData("%(Filename)%(Extension)", "hello.txt")]
         [InlineData("no expression", "no expression")]
-        // An escaped reference is literal text rather than an expression.
+        // An escaped reference is text, not an expression.
         [InlineData("%25(Filename)", "%(Filename)")]
         // Malformed references are not expressions either.
         [InlineData("%(Filename", "%(Filename")]
@@ -634,7 +634,7 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// A task that reassigns ItemSpec sees item definition metadata re-derived from the new spec. That must
-        /// hold on both sides of the TaskHost boundary, so the value cannot simply be substituted up front.
+        /// hold on both sides of the TaskHost boundary, so the value cannot simply be expanded up front.
         /// </summary>
         [Fact]
         public void ItemDefinitionMetadataFollowsReassignedItemSpecAcrossTaskHostBoundary()
@@ -652,10 +652,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// A value a task writes on the item is literal, matching what the same task would read back in-proc.
+        /// A value the task writes is read back as stored, matching what the same task would see in-proc.
         /// </summary>
         [Fact]
-        public void MetadataSetByTheTaskIsNotExpanded()
+        public void MetadataWrittenByTheTaskIsNotExpanded()
         {
             ITaskItem marshalled = RoundTrip(CreateItemWithDefinitionMetadata("NameMeta", "%(Filename)"));
 
@@ -714,10 +714,10 @@ namespace Microsoft.Build.UnitTests
         /// <summary>
         /// A task that clones its input, whether through <c>CopyMetadataTo</c> or the copy constructor that calls
         /// it, must get the same values the engine item hands out. The destination has no notion of a value
-        /// awaiting substitution, so the copy has to be made with finished values.
+        /// unexpanded value, so the copy has to be made with expanded ones.
         /// </summary>
         [Fact]
-        public void CopyingMetadataSubstitutesReferencesAcrossTaskHostBoundary()
+        public void CopyingMetadataExpandsReferencesAcrossTaskHostBoundary()
         {
             ProjectItemInstanceTaskItem item = CreateItemWithDefinitionMetadata("NameMeta", "%(Filename)");
             ITaskItem marshalled = RoundTrip(item);
@@ -736,10 +736,10 @@ namespace Microsoft.Build.UnitTests
         }
 
         /// <summary>
-        /// A value the task wrote is literal, so cloning has to carry it across as written.
+        /// A value the task wrote is read as stored, so cloning has to carry it across as written.
         /// </summary>
         [Fact]
-        public void MetadataSetByTheTaskIsCopiedLiterally()
+        public void MetadataWrittenByTheTaskIsCopiedAsStored()
         {
             ProjectItemInstanceTaskItem item = CreateItemWithDefinitionMetadata("NameMeta", "%(Filename)");
             ITaskItem marshalled = RoundTrip(item);
@@ -770,6 +770,92 @@ namespace Microsoft.Build.UnitTests
             marshalled.GetMetadata("FullPath").ShouldBe(item.GetMetadata("FullPath"));
             marshalled.GetMetadata("Directory").ShouldBe(item.GetMetadata("Directory"));
             marshalled.GetMetadata("PathMeta").ShouldBe(item.GetMetadata("PathMeta"));
+        }
+
+        /// <summary>
+        /// The expansion here is a deliberately minimal stand-in for the evaluation expander, so it has to agree
+        /// with it for every built-in metadata name, including any added later. Driving the theory from
+        /// <see cref="ItemSpecModifiers.All"/> rather than a fixed list is what keeps that true over time.
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(AllItemSpecModifiers))]
+        public void EveryBuiltInMetadataReferenceReadsTheSameAcrossTaskHostBoundary(string modifier)
+        {
+            // A wildcard origin so that RecursiveDir is a real value rather than empty on both sides.
+            string sep = Path.DirectorySeparatorChar.ToString();
+
+            ProjectItemDefinitionInstance definition = new(
+                "Thing",
+                ImmutableDictionaryExtensions.EmptyMetadata.SetItem("NameMeta", $"[%({modifier})]"));
+
+            ProjectItemInstanceTaskItem item = new(
+                includeEscaped: $"tree{sep}sub1{sep}sub2{sep}hello.txt",
+                includeBeforeWildcardExpansionEscaped: $"tree{sep}**{sep}*.txt",
+                directMetadata: null,
+                itemDefinitions: [definition],
+                projectDirectory: Directory.GetCurrentDirectory(),
+                immutable: false,
+                definingFileEscaped: "test.proj");
+
+            string expected = item.GetMetadata("NameMeta");
+
+            // The time-based modifiers read the file system and are empty for an item that does not exist. They go
+            // through the same shared call as the rest, so equality is still worth asserting, but only the others
+            // can be required to resolve to something.
+            if (!modifier.EndsWith("Time", StringComparison.Ordinal))
+            {
+                expected.ShouldNotBe("[]", $"%({modifier}) should resolve to something for this test to mean anything");
+            }
+
+            RoundTrip(item).GetMetadata("NameMeta").ShouldBe(expected, $"for %({modifier})");
+        }
+
+        public static TheoryData<string> AllItemSpecModifiers
+        {
+            get
+            {
+                TheoryData<string> data = [];
+
+                foreach (string modifier in ItemSpecModifiers.All)
+                {
+                    data.Add(modifier);
+                }
+
+                return data;
+            }
+        }
+
+        /// <summary>
+        /// A reference qualified by an item type is left as written. The engine resolves built-in metadata against
+        /// a table with no item type, so a qualified reference never matches and evaluates to an empty string;
+        /// expanding to empty here instead would mean blanking any text of that shape. This pins the difference so
+        /// that it stays a decision rather than an accident.
+        /// </summary>
+        [Theory]
+        [InlineData("%(Thing.Filename)")]
+        [InlineData("%( Thing.Filename )")]
+        [InlineData("%(Other.Filename)")]
+        public void QualifiedMetadataReferenceIsLeftAsWritten(string definitionValue)
+        {
+            ProjectItemInstanceTaskItem item = CreateItemWithDefinitionMetadata("NameMeta", definitionValue);
+
+            item.GetMetadata("NameMeta").ShouldBe("");
+            RoundTrip(item).GetMetadata("NameMeta").ShouldBe(definitionValue);
+        }
+
+        /// <summary>
+        /// Only values the task writes are read as stored. Nothing on the receiving path may record metadata that
+        /// way, or item definition values would stop being expanded.
+        /// </summary>
+        [Fact]
+        public void ReceivingAnItemDoesNotMarkItsMetadataAsWrittenByTheTask()
+        {
+            ITaskItem marshalled = RoundTrip(CreateItemWithDefinitionMetadata("NameMeta", "%(Filename)"));
+
+            marshalled.GetMetadata("NameMeta").ShouldBe("hello");
+
+            // A second hop must not change that either.
+            RoundTrip(marshalled).GetMetadata("NameMeta").ShouldBe("hello");
         }
 
         private static ProjectItemInstanceTaskItem CreateItemWithDefinitionMetadata(string name, string escapedValue)
