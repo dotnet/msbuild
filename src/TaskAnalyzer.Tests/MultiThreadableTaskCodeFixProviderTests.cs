@@ -422,6 +422,29 @@ public class MultiThreadableTaskCodeFixProviderTests
     }
 
     [Fact]
+    public async Task Fix_StaticLambda_NoFixOffered()
+    {
+        await CreateNoFixTest(
+            """
+            using System;
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public string InputPath { get; set; }
+                public override bool Execute()
+                {
+                    Func<string, bool> exists = static path => {|#0:File.Exists(path)|};
+                    return exists(InputPath);
+                }
+            }
+            """,
+            Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
+                .WithArguments("File.Exists(string?)", "wrap path argument with TaskEnvironment.GetAbsolutePath()"));
+    }
+
+    [Fact]
     public async Task Fix_LambdaInInstanceMethod_StillFixed()
     {
         // A non-static lambda inside an instance method can still reach the instance TaskEnvironment property.
