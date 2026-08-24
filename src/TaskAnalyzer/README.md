@@ -4,6 +4,18 @@ A Roslyn analyzer that detects unsafe API usage in MSBuild task implementations.
 
 The package also includes a Roslyn diagnostic suppressor for nullable warning `CS8618` on task properties marked with `Microsoft.Build.Framework.RequiredAttribute`, since MSBuild guarantees those inputs are initialized before task execution.
 
+## Installation
+
+TaskAnalyzer ships with the `Microsoft.Build.Framework` NuGet package. A C# task project that references `Microsoft.Build.Framework` automatically receives the analyzer; it does not need a separate analyzer reference.
+
+```xml
+<ItemGroup>
+  <PackageReference Include="Microsoft.Build.Framework" Version="18.11.0" />
+</ItemGroup>
+```
+
+NuGet installs the analyzer from `analyzers/dotnet/cs/Microsoft.Build.TaskAuthoring.Analyzer.dll`, and the compiler runs it during normal `dotnet build` and MSBuild builds.
+
 ## Background
 
 MSBuild is introducing multithreaded task execution via `IMultiThreadableTask`. Tasks opting into this mode share a process and can no longer safely use process-global state like environment variables, the current directory, or `Console` output. The `TaskEnvironment` abstraction provides per-task isolated access to these resources.

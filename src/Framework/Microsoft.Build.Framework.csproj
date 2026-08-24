@@ -143,6 +143,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StringTools\StringTools.csproj" />
+    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj"
+                      ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -209,6 +211,18 @@
   <Target Name="IncludeTlbInPackage" BeforeTargets="_GetPackageFiles" Condition="'$(CreateTlb)' == 'true'">
     <ItemGroup>
       <_PackageFiles Include="$(ArtifactsBinDir)Microsoft.Build.Framework\$(Configuration)\net472\Microsoft.Build.Framework.tlb" PackagePath="tools/net472" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="IncludeTaskAnalyzerInPackage" BeforeTargets="_GetPackageFiles">
+    <MSBuild Projects="..\TaskAnalyzer\TaskAnalyzer.csproj"
+             Targets="GetTargetPath"
+             BuildInParallel="$(BuildInParallel)">
+      <Output TaskParameter="TargetOutputs" ItemName="_TaskAnalyzerOutput" />
+    </MSBuild>
+
+    <ItemGroup>
+      <_PackageFiles Include="@(_TaskAnalyzerOutput)" PackagePath="analyzers/dotnet/cs" />
     </ItemGroup>
   </Target>
 

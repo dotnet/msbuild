@@ -25,6 +25,9 @@
   <ItemGroup>
     <Compile Remove="TestAssets\**\*.cs" />
     <None Include="TestAssets\**" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\NuGet.Config"
+          Link="TestAssets\TaskAnalyzerPackage\NuGet.Config"
+          CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
