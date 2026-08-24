@@ -22,7 +22,7 @@ Task authors declare thread-safe capabilities through two mechanisms that do **d
 
 Declaring one without the other is legal, and each half fails quietly:
 
-- **Attribute only** — a supported state. The task runs in-process without `TaskEnvironment`, which is correct for a task that does not resolve relative paths or read environment variables. If the task *does* declare a `TaskEnvironment` property, that property is never assigned and silently stays `TaskEnvironment.Fallback`, resolving every path against the shared process working directory. The task-authoring analyzer reports `MSBuildTask0012` for this shape.
+- **Attribute only** — a supported state. The task runs in-process without `TaskEnvironment`, which is correct for a task that does not resolve relative paths or read environment variables. If the task *does* declare a `TaskEnvironment` property, MSBuild never assigns it: the property silently retains whatever the task itself initialized it to — commonly `TaskEnvironment.Fallback`, or `null` when there is no initializer — so paths resolve against the shared process working directory. The task-authoring analyzer reports `MSBuildTask0012` for this shape.
 - **Interface only** — a useful intermediate state. The task resolves paths correctly but still pays for a TaskHost. `MSBuildTask0013` reports it, disabled by default.
 
 The interface cannot also serve as the routing signal, because `ToolTask` implements `IMultiThreadableTask`. Routing on the interface would opt in every `ToolTask`-derived task in the ecosystem, none of which have been reviewed for thread safety.

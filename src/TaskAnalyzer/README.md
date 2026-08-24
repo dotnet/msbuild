@@ -25,7 +25,7 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
 | **MSBuildTask0010** | Error | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
 | **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
-| **MSBuildTask0012** | Warning | Concrete tasks with `[MSBuildMultiThreadableTask]` applied directly | `TaskEnvironment` property is never assigned |
+| **MSBuildTask0012** | Warning | Concrete tasks with `[MSBuildMultiThreadableTask]` applied directly | MSBuild never assigns the `TaskEnvironment` property |
 | **MSBuildTask0013** | Info (off by default) | Concrete tasks declaring `IMultiThreadableTask` in their own base list | Missing `[MSBuildMultiThreadableTask]`, so the task still runs out-of-proc |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
@@ -289,18 +289,19 @@ The engine prefers this constructor when it is present. A public parameterless c
 
 **Scope:** Concrete classes implementing `IMultiThreadableTask`. Abstract base classes and tasks that already declare a public single-`TaskEnvironment` constructor do not produce the diagnostic.
 
-### MSBuildTask0012 — `TaskEnvironment` Property Is Never Assigned
+### MSBuildTask0012 — MSBuild Never Assigns the `TaskEnvironment` Property
 
 `[MSBuildMultiThreadableTask]` and `IMultiThreadableTask` do different jobs. The **attribute** is the routing signal — it is the only thing that makes a task run in-process instead of in an out-of-proc TaskHost. The **interface** is the injection signal — the engine assigns `TaskEnvironment` only to tasks that implement it.
 
-Declaring the attribute and a `TaskEnvironment` property, but not the interface, produces a task that runs in-process with an environment that is never populated:
+Declaring the attribute and a `TaskEnvironment` property, but not the interface, produces a task that runs in-process with an environment MSBuild never populates:
 
 ```csharp
 [MSBuildMultiThreadableTask]
 public class MyTask : Task            // ⚠️ MSBuildTask0012: no IMultiThreadableTask
 {
-    // Never assigned by the engine. Stays TaskEnvironment.Fallback, so every path below
-    // resolves against the shared process working directory instead of the project directory.
+    // MSBuild never assigns this. It keeps whatever the task set here -- Fallback below,
+    // or null with no initializer -- so paths resolve against the shared process working
+    // directory instead of the project directory.
     public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 
     public override bool Execute()
@@ -311,16 +312,30 @@ public class MyTask : Task            // ⚠️ MSBuildTask0012: no IMultiThread
 }
 ```
 
-Fix by implementing the interface:
+There are two ways to fix it. Implementing the interface is the usual one — it is the complete migration, and the engine assigns the property after construction:
 
 ```csharp
 [MSBuildMultiThreadableTask]
 public class MyTask : Task, IMultiThreadableTask
 ```
 
+Alternatively, declare a public constructor whose single parameter is `TaskEnvironment`. The engine selects it by signature, independently of the interface, so this works for a task that cannot implement the interface. The constructor **must assign the property itself**: without the interface there is no post-construction assignment to fall back on. Use this when the task needs the environment during construction — for example to root a default output path — which is also what [MSBuildTask0011](#msbuildtask0011--prefer-taskenvironment-constructor-injection) recommends.
+
+```csharp
+[MSBuildMultiThreadableTask]
+public class MyTask : Task
+{
+    public MyTask(TaskEnvironment taskEnvironment) => TaskEnvironment = taskEnvironment;
+
+    public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+}
+```
+
 **Scope:** Concrete `ITask` implementations with `[MSBuildMultiThreadableTask]` applied directly, that do not implement `IMultiThreadableTask`, and that declare (or inherit) a settable `TaskEnvironment` property.
 
-The attribute **without** a `TaskEnvironment` property is a supported state and is not reported — that is the compatibility-bridge shape, correct for a task that does not resolve relative paths or read environment variables. A task declaring a public constructor whose single parameter is `TaskEnvironment` is also not reported: the engine selects that constructor by signature, independently of the interface.
+The attribute **without** a `TaskEnvironment` property is a supported state and is not reported — that is the compatibility-bridge shape, correct for a task that does not resolve relative paths or read environment variables. A task declaring a public single-`TaskEnvironment` constructor is likewise not reported, per the second fix above.
+
+Inheriting `IMultiThreadableTask` from a base class satisfies the rule: the engine's injection check is a runtime type test, so an inherited implementation receives an environment just as a directly declared one does.
 
 ### MSBuildTask0013 — Missing `[MSBuildMultiThreadableTask]`
 

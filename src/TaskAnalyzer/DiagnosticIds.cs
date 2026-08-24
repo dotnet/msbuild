@@ -42,7 +42,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// <summary>Task should receive TaskEnvironment through constructor injection.</summary>
         public const string PreferTaskEnvironmentConstructorInjection = "MSBuildTask0011";
 
-        /// <summary>Task declares a TaskEnvironment property but does not implement IMultiThreadableTask, so the engine never assigns it.</summary>
+        /// <summary>Task declares a TaskEnvironment property but does not implement IMultiThreadableTask, so MSBuild never assigns it.</summary>
         public const string TaskEnvironmentNeverAssigned = "MSBuildTask0012";
 
         /// <summary>Task implements IMultiThreadableTask but lacks [MSBuildMultiThreadableTask], so it still runs in an out-of-proc TaskHost.</summary>

@@ -114,12 +114,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         public static readonly DiagnosticDescriptor TaskEnvironmentNeverAssigned = new(
             id: DiagnosticIds.TaskEnvironmentNeverAssigned,
-            title: "TaskEnvironment property is never assigned because the task does not implement IMultiThreadableTask",
-            messageFormat: "Task '{0}' declares a TaskEnvironment property but does not implement IMultiThreadableTask, so the engine never assigns it and it stays TaskEnvironment.Fallback; implement IMultiThreadableTask or add a public constructor taking a TaskEnvironment",
+            title: "TaskEnvironment property is never assigned by MSBuild because the task does not implement IMultiThreadableTask",
+            messageFormat: "Task '{0}' declares a TaskEnvironment property but does not implement IMultiThreadableTask, so MSBuild never assigns it and it retains the task's own default; implement IMultiThreadableTask, or add a public constructor taking a TaskEnvironment that assigns the property",
             category: "MSBuild.TaskAuthoring",
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "The MSBuild engine assigns TaskEnvironment only to tasks that implement IMultiThreadableTask, or through a public constructor that takes a single TaskEnvironment. A task that declares the property without either receives no environment: the property silently remains TaskEnvironment.Fallback and every path is resolved against the shared process working directory rather than the project directory. Because the task carries [MSBuildMultiThreadableTask] it runs in-process, which is exactly where that resolution is wrong.");
+            description: "MSBuild assigns TaskEnvironment only to tasks that implement IMultiThreadableTask, or through a public constructor that takes a single TaskEnvironment. A task that declares the property without either never receives an environment from the engine: the property silently retains whatever the task itself initialized it to -- commonly TaskEnvironment.Fallback, or null when there is no initializer -- so paths resolve against the shared process working directory rather than the project directory. Because the task carries [MSBuildMultiThreadableTask] it runs in-process, which is exactly where that resolution is wrong.");
 
         public static readonly DiagnosticDescriptor MissingMultiThreadableTaskAttribute = new(
             id: DiagnosticIds.MissingMultiThreadableTaskAttribute,
