@@ -188,7 +188,6 @@ internal partial class Expander<P, I>
                     // isn't really a well-formed property. Copy the remainder of the
                     // expression (starting with the "$(" that we found) into the result, and return.
                     results.Add(expression.AsMemory(markerIndex));
-                    index = expression.Length;
                     return results.GetResult();
                 }
 
