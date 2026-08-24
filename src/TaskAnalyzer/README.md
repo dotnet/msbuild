@@ -334,7 +334,7 @@ The analyzer determines what to check based on the type declaration:
 | Type | Rules Applied |
 |---|---|
 | Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009–MSBuildTask0010 |
-| Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 and MSBuildTask0012 (in addition to MSBuildTask0001–0005) |
+| Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 and MSBuildTask0012 (in addition to MSBuildTask0001–0005 and MSBuildTask0009–MSBuildTask0010) |
 | Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0012 |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
 | Regular class (no task interface or attribute) | Not analyzed |
