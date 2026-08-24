@@ -445,6 +445,27 @@ public class MultiThreadableTaskCodeFixProviderTests
     }
 
     [Fact]
+    public async Task Fix_TaskWithoutTaskEnvironmentMember_NoFixOffered()
+    {
+        // Under the default scope every ITask is analyzed, including plain tasks that have no
+        // TaskEnvironment member to reference (CS0103).
+        await CreateNoFixTest(
+            """
+            using System.IO;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public string InputPath { get; set; }
+                public override bool Execute()
+                {
+                    return {|#0:File.Exists(InputPath)|};
+                }
+            }
+            """,
+            Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
+                .WithArguments("File.Exists(string?)", "wrap path argument with TaskEnvironment.GetAbsolutePath()"));
+    }
+
+    [Fact]
     public async Task Fix_LambdaInInstanceMethod_StillFixed()
     {
         // A non-static lambda inside an instance method can still reach the instance TaskEnvironment property.
@@ -592,11 +613,65 @@ public class MultiThreadableTaskCodeFixProviderTests
         await test.RunAsync();
     }
 
+    [Fact]
+    public async Task Fix_InstancePropertyInitializer_NoFixOffered()
+    {
+        // A property initializer runs before `this` is usable, so TaskEnvironment is unreachable there (CS0236).
+        await CreateNoFixTest(
+            """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public string Text { get; set; } = {|#0:File.ReadAllText("file.txt")|};
+                public override bool Execute() => true;
+            }
+            """,
+            Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
+                .WithArguments("File.ReadAllText(string)", "wrap path argument with TaskEnvironment.GetAbsolutePath()"));
+    }
+
+    [Fact]
+    public async Task Fix_ImplicitObjectCreation_WrapsPathArgument()
+    {
+        await CreateFixTest(
+            testCode: """
+                using System.IO;
+                using Microsoft.Build.Framework;
+                public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+                {
+                    public TaskEnvironment TaskEnvironment { get; set; }
+                    public override bool Execute()
+                    {
+                        FileInfo fi = {|#0:new("file.txt")|};
+                        return true;
+                    }
+                }
+                """,
+            fixedCode: """
+                using System.IO;
+                using Microsoft.Build.Framework;
+                public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+                {
+                    public TaskEnvironment TaskEnvironment { get; set; }
+                    public override bool Execute()
+                    {
+                        FileInfo fi = new(TaskEnvironment.GetAbsolutePath("file.txt"));
+                        return true;
+                    }
+                }
+                """,
+            Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
+                .WithArguments("new FileInfo(...)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")).RunAsync();
+    }
+
     /// <summary>
     /// Builds a code-fix test where the diagnostic is expected but no fix is offered: the fixed source is
     /// identical to the test source, so applying any offered fix would fail the comparison.
     /// </summary>
-    private static async Task CreateNoFixTest(string code, params DiagnosticResult[] expected)    {
+    private static async Task CreateNoFixTest(string code, params DiagnosticResult[] expected)
+    {
         var test = new CSharpCodeFixTest<MultiThreadableTaskAnalyzer, MultiThreadableTaskCodeFixProvider, DefaultVerifier>
         {
             ReferenceAssemblies = ReferenceAssemblies.Net.Net80,

@@ -80,9 +80,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            // TaskEnvironment is an instance member, so a generated reference to it cannot compile in a
-            // static context. Withhold the fix instead of emitting code that fails with CS0120.
-            if (IsInStaticContext(semanticModel, node))
+            // The wrap references the instance TaskEnvironment member; withhold the fix rather than emit a
+            // reference that cannot bind here.
+            if (!CanReferenceTaskEnvironment(semanticModel, node))
             {
                 return;
             }
@@ -158,13 +158,47 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         /// <summary>
-        /// Determines whether <paramref name="node"/> sits in a context where <c>this</c> is unavailable —
-        /// a static member, a static local function, or a static lambda — so a reference to the instance
-        /// <c>TaskEnvironment</c> member would not compile.
+        /// Determines whether a generated reference to the instance <c>TaskEnvironment</c> member would compile
+        /// at <paramref name="node"/>: the enclosing type must actually expose such a member, and <c>this</c>
+        /// must be reachable from there.
         /// </summary>
-        private static bool IsInStaticContext(SemanticModel semanticModel, SyntaxNode node)
+        private static bool CanReferenceTaskEnvironment(SemanticModel semanticModel, SyntaxNode node)
         {
-            for (ISymbol? symbol = semanticModel.GetEnclosingSymbol(node.SpanStart); symbol is not null; symbol = symbol.ContainingSymbol)
+            var enclosingSymbol = semanticModel.GetEnclosingSymbol(node.SpanStart);
+
+            return !IsThisUnavailable(enclosingSymbol, node) &&
+                HasTaskEnvironmentMember(enclosingSymbol?.ContainingType);
+        }
+
+        /// <summary>
+        /// Determines whether <paramref name="type"/> or one of its base types declares a <c>TaskEnvironment</c>
+        /// property or field. Tasks are only required to implement <c>ITask</c>, and the default analyzer scope
+        /// covers all of them, so the member the fix would reference need not exist.
+        /// </summary>
+        private static bool HasTaskEnvironmentMember(INamedTypeSymbol? type)
+        {
+            for (INamedTypeSymbol? current = type; current is not null; current = current.BaseType)
+            {
+                foreach (var member in current.GetMembers("TaskEnvironment"))
+                {
+                    if (member is IPropertySymbol or IFieldSymbol)
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether <paramref name="node"/> sits in a context where <c>this</c> is unavailable — a
+        /// static member, a static local function, a static lambda, or an instance field or property
+        /// initializer.
+        /// </summary>
+        private static bool IsThisUnavailable(ISymbol? enclosingSymbol, SyntaxNode node)
+        {
+            for (ISymbol? symbol = enclosingSymbol; symbol is not null; symbol = symbol.ContainingSymbol)
             {
                 if (symbol.IsStatic)
                 {
@@ -177,7 +211,23 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     continue;
                 }
 
-                return false;
+                break;
+            }
+
+            // Instance field and property initializers run before `this` is usable (CS0236), including from
+            // inside a lambda declared there.
+            for (SyntaxNode? current = node; current is not null; current = current.Parent)
+            {
+                if (current is EqualsValueClauseSyntax &&
+                    current.Parent is PropertyDeclarationSyntax or VariableDeclaratorSyntax { Parent.Parent: BaseFieldDeclarationSyntax })
+                {
+                    return true;
+                }
+
+                if (current is MemberDeclarationSyntax)
+                {
+                    break;
+                }
             }
 
             return false;
@@ -201,9 +251,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         private static void RegisterTaskEnvironmentFix(CodeFixContext context, SemanticModel semanticModel, SyntaxNode node, Diagnostic diagnostic)
         {
-            // The replacements below all reference the instance TaskEnvironment member, which a static
-            // context cannot see.
-            if (IsInStaticContext(semanticModel, node))
+            // The replacements below all reference the instance TaskEnvironment member; withhold the fix
+            // rather than emit a reference that cannot bind here.
+            if (!CanReferenceTaskEnvironment(semanticModel, node))
             {
                 return;
             }
