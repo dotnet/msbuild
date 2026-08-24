@@ -622,6 +622,11 @@ internal partial class Expander<P, I>
 
             static string JoinEntries(string separator, List<TransformEntry> entries)
             {
+                if (entries.Count == 0)
+                {
+                    return string.Empty;
+                }
+
                 if (entries is [{ Value: var value }])
                 {
                     return value ?? string.Empty;
