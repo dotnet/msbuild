@@ -18,13 +18,14 @@ internal partial class Expander<P, I>
     ///  This is a private nested ref struct, exposed only through the static
     ///  <see cref="ExpandMetadataLeaveEscaped"/> entry point.
     /// </remarks>
-    private readonly ref struct MetadataExpander
+    private ref struct MetadataExpander
     {
         private readonly IMetadataTable _metadata;
         private readonly ExpanderOptions _options;
         private readonly IElementLocation _elementLocation;
         private readonly LoggingContext? _loggingContext;
         private readonly SpanBasedStringBuilder _builder;
+        private bool _metadataExpanded;
 
         private MetadataExpander(
             IMetadataTable metadata,
@@ -38,6 +39,7 @@ internal partial class Expander<P, I>
             _elementLocation = elementLocation;
             _loggingContext = loggingContext;
             _builder = builder;
+            _metadataExpanded = false;
         }
 
         /// <summary>
@@ -106,9 +108,7 @@ internal partial class Expander<P, I>
                 ScanAndExpandMetadataInGaps(expression, itemVector);
             }
 
-            return _builder.Equals(expression.AsSpan())
-                ? expression
-                : _builder.ToString();
+            return _metadataExpanded ? _builder.ToString() : expression;
         }
 
         /// <summary>
@@ -227,6 +227,7 @@ internal partial class Expander<P, I>
                     }
 
                     _builder.Append(expanded);
+                    _metadataExpanded = true;
                 }
                 else
                 {

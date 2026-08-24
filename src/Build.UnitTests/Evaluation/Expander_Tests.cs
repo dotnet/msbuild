@@ -1828,6 +1828,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 .ShouldBe(expected);
         }
 
+        [Theory]
+        [InlineData("%(", ExpanderOptions.ExpandMetadata)]
+        [InlineData("%(Culture)", ExpanderOptions.ExpandBuiltInMetadata)]
+        [InlineData("%(Filename)", ExpanderOptions.ExpandCustomMetadata)]
+        internal void ExpandMetadata_NoExpansionReturnsOriginalString(string input, ExpanderOptions options)
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateMetadataExpander();
+            string expression = new(input.ToCharArray());
+
+            expander.ExpandIntoStringLeaveEscaped(expression, options, MockElementLocation.Instance)
+                .ShouldBeSameAs(expression);
+        }
+
         /// <summary>
         ///  Parity tests for metadata expansion in the gaps between (and within the separators of) item
         ///  vector expressions. Items are intentionally left unexpanded (ExpandMetadata only) so the
