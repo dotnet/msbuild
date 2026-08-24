@@ -174,6 +174,21 @@ public bool Execute(...)
 }
 ```
 
+### Tasks That Construct Other Tasks
+
+The engine assigns `TaskEnvironment` only to the task instances it creates itself. A task that instantiates another task directly must pass its own environment along, otherwise the inner task keeps `TaskEnvironment.Fallback` and resolves paths and environment variables against the shared process state:
+
+```csharp
+_runningExec = new Exec
+{
+    BuildEngine = BuildEngine,
+    TaskEnvironment = TaskEnvironment,   // required: the engine does not inject here
+    Command = Command,
+};
+```
+
+The task-authoring analyzer reports `MSBuildTask0012` at Warning severity when a multithreadable task constructs an `ITask` without handing it a `TaskEnvironment` — through the object initializer, a constructor argument, or a later assignment on the instance — and offers a code fix that adds the initializer entry.
+
 ## Appendix: Alternatives
 
 This appendix collects alternative approaches considered during design.

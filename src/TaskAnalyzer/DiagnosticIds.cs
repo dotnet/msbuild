@@ -41,5 +41,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>Task should receive TaskEnvironment through constructor injection.</summary>
         public const string PreferTaskEnvironmentConstructorInjection = "MSBuildTask0011";
+
+        /// <summary>A task constructed inside a task does not receive the constructing task's TaskEnvironment.</summary>
+        public const string PropagateTaskEnvironmentToConstructedTask = "MSBuildTask0012";
     }
 }
