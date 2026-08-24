@@ -202,10 +202,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// </summary>
         private static bool HasTaskEnvironmentMember(INamedTypeSymbol type, INamedTypeSymbol taskEnvironmentType)
         {
-            if (GetPropertiesIncludingBaseTypes(type).Any(property =>
-                    !property.IsStatic && property.GetMethod is not null && IsTaskEnvironmentType(property.Type, taskEnvironmentType)))
+            foreach (IPropertySymbol property in GetPropertiesIncludingBaseTypes(type))
             {
-                return true;
+                if (!property.IsStatic && property.GetMethod is not null && IsTaskEnvironmentType(property.Type, taskEnvironmentType))
+                {
+                    return true;
+                }
             }
 
             for (INamedTypeSymbol? current = type;
@@ -229,10 +231,26 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// Checks whether a <c>TaskEnvironment</c> can be handed to the created task at all — through a
         /// settable property or through a constructor parameter. Without either, there is nothing to suggest.
         /// </summary>
-        private static bool CanReceiveTaskEnvironment(INamedTypeSymbol createdType, INamedTypeSymbol taskEnvironmentType) =>
-            TryGetTaskEnvironmentProperty(createdType, taskEnvironmentType, out _) ||
-            createdType.InstanceConstructors.Any(constructor =>
-                constructor.Parameters.Any(parameter => IsTaskEnvironmentType(parameter.Type, taskEnvironmentType)));
+        private static bool CanReceiveTaskEnvironment(INamedTypeSymbol createdType, INamedTypeSymbol taskEnvironmentType)
+        {
+            if (TryGetTaskEnvironmentProperty(createdType, taskEnvironmentType, out _))
+            {
+                return true;
+            }
+
+            foreach (IMethodSymbol constructor in createdType.InstanceConstructors)
+            {
+                foreach (IParameterSymbol parameter in constructor.Parameters)
+                {
+                    if (IsTaskEnvironmentType(parameter.Type, taskEnvironmentType))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Finds a publicly settable instance property of type <c>TaskEnvironment</c> on the type or one of its bases.
