@@ -653,6 +653,29 @@ public class MultiThreadableTaskCodeFixProviderTests
     }
 
     [Fact]
+    public async Task Fix_PrimaryConstructorBaseArguments_NoFixOffered()
+    {
+        // A primary constructor's base argument list is evaluated before the instance exists, so
+        // TaskEnvironment is unreachable there.
+        await CreateNoFixTest(
+            """
+            using System.IO;
+            using Microsoft.Build.Framework;
+            public class BaseTask : Microsoft.Build.Utilities.Task
+            {
+                public BaseTask(string text) { }
+                public override bool Execute() => true;
+            }
+            public class MyTask(string path) : BaseTask({|#0:File.ReadAllText(path)|}), IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+            }
+            """,
+            Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
+                .WithArguments("File.ReadAllText(string)", "wrap path argument with TaskEnvironment.GetAbsolutePath()"));
+    }
+
+    [Fact]
     public async Task Fix_ImplicitObjectCreation_WrapsPathArgument()
     {
         await CreateFixTest(

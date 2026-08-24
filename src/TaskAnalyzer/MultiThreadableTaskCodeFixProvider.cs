@@ -194,7 +194,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// <summary>
         /// Determines whether <paramref name="node"/> sits in a context where <c>this</c> is unavailable — a
         /// static member, a static local function, a static lambda, an instance field or property
-        /// initializer, or a constructor initializer.
+        /// initializer, or a constructor initializer (including a primary constructor's base arguments).
         /// </summary>
         private static bool IsThisUnavailable(ISymbol? enclosingSymbol, SyntaxNode node)
         {
@@ -215,11 +215,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             // Instance field and property initializers run before `this` is usable (CS0236), and a
-            // constructor initializer runs before the instance exists (CS0027), including from inside a
-            // lambda declared there.
+            // constructor initializer — including a primary constructor's base argument list — runs
+            // before the instance exists (CS0027), including from inside a lambda declared there.
             for (SyntaxNode? current = node; current is not null; current = current.Parent)
             {
-                if (current is ConstructorInitializerSyntax)
+                if (current is ConstructorInitializerSyntax or PrimaryConstructorBaseTypeSyntax)
                 {
                     return true;
                 }
