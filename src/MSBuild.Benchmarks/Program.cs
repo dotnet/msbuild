@@ -64,6 +64,11 @@ static IConfig GetConfig(
             .WithEnvironmentVariable("DOTNET_JitNoInline", "1");
     }
 
+    // DllGatherer redirects every project reference to one output directory. The Tasks project also builds
+    // netstandard2.0 reference-only Framework and Utilities assemblies for RoslynCodeTaskFactory, which can
+    // overwrite the current-TFM implementations and cause the generated benchmark executable to fail loading them.
+    overrides = overrides.WithMsBuildArguments("/p:SkipNetstandardRefAssembliesForBenchmarks=true");
+
     config = config.AddJob(overrides.AsMutator());
 
     return config;

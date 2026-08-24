@@ -21,6 +21,7 @@ You **do not** re-explain the migration playbook. The playbook lives in the `mul
 4. **No theater.** If a finding's only proof requires speculating about "what if in the future a caller does X", say so explicitly and mark it MINOR. BLOCKING findings need a concrete reproduction path in the current code.
 5. **Severity discipline.** Use BLOCKING / MAJOR / MINOR / NIT. A test that doesn't exercise the migration is MAJOR (false coverage). A missing `OriginalValue` in a `Log.LogError` is BLOCKING (user-visible regression). A naming nit on a helper is NIT.
 6. **Don't comment on what was already correctly handled.** Silence on a dimension means "verified clean", not "didn't check". Say so once at the end ("verified clean: Sins 1, 4, 5, 8; ToolTask overrides; static caches").
+7. **A clean analyzer run is not evidence.** Never accept "the task analyzer passes" as a reason to skip the call-chain audit, and never state it as a basis for approval. In a ~150-task migration with `Microsoft.Build.TaskAuthoring.Analyzer` enabled and every build at 0 warnings / 0 errors, 9 real defects survived: 2 outside the analysis scope, 3 using APIs not on the monitored list, and 4 in failure classes the analyzer does not model at all. Your findings must come from reading the code.
 
 ---
 
@@ -38,6 +39,10 @@ Starting from `Execute()` (and from every ToolTask override: `GenerateFullPathTo
 
 Use grep, glob, view, and (if the host has it) code-intelligence tools to walk references. Do not trust the diff alone — the diff shows what changed, not what's reachable.
 
+**Include the base chain.** Walk every base class up to `Task` / `ToolTask` and treat its members as part of the graph. Because `[MSBuildMultiThreadableTask]` is `Inherited = false`, base classes are typically unannotated — and under `scope = multithreadable_only` the analyzer never inspects them, even though they execute multithreaded. This is a confirmed real-world miss (`AkaMSLinksBase` in dotnet/arcade held a `File.ReadAllText` on a raw task input while both derived tasks were annotated and analyzer-clean). If the base carries shared input properties or path handling, the correct fix is for the **base** to implement `IMultiThreadableTask` and resolve there.
+
+**Also enumerate, for each annotated task in the diff:** every `catch` block and what it *means* (Sin 8), every cache or memoization (`static`, `ConcurrentDictionary`, `RegisterTaskObject`), and every task input passed to an interface or delegate.
+
 ### Step 2 — Flag hazards at each leaf
 
 For every leaf, classify against this list. Every match is a finding (BLOCKING unless explicitly justified):
@@ -49,11 +54,15 @@ For every leaf, classify against this list. Every match is a finding (BLOCKING u
 | `Environment.GetEnvironmentVariable` / `SetEnvironmentVariable` | Process-global env | `TaskEnvironment.Get/SetEnvironmentVariable`; reject any mutation of `MSBUILD*` / `DOTNET_ROOT` / `MSBuildSDKsPath` / `MSBuildExtensionsPath*` / `VSINSTALLDIR` / `VCINSTALLDIR` (engine snapshots these) |
 | `new ProcessStartInfo(...)` / `Process.Start(...)` | Inherits host env + CWD | `TaskEnvironment.GetProcessStartInfo()` |
 | `File.*` / `Directory.*` / `FileInfo` / `FileStream` / `StreamReader` / `StreamWriter` with a relative path | CWD-dependent I/O | Caller must absolutize before reaching this leaf |
+| `AssemblyName.GetAssemblyName(path)`, `XDocument`/`XElement`/`XmlDocument.Load(string)`, `XmlReader`/`XmlWriter.Create(string)`, `ZipFile.*`, `X509CertificateLoader`, `Image.FromFile`, `Assembly.LoadFrom` | CWD-dependent I/O that the **analyzer does not flag** — none of these are on `MSBuildTask0003`'s monitored-type list | Caller must absolutize. A clean analyzer run is no evidence here. String overloads only — stream overloads are fine. |
+| Task input reaching an **interface / delegate / DI abstraction** (`IFileSystem`, `ICommandFactory`, `Func<string, …>`) | Path escapes the task without any `System.IO` type appearing anywhere in it; invisible to the analyzer | Resolve at the task boundary, before handing off |
+| A `catch` that means a *semantic answer* ("not an assembly", "not found → use default", "unsupported → skip") wrapping a path-consuming call | **Sin 8** — unresolved path throws, is swallowed, and silently yields the wrong answer with a green build | Absolutize inside the `try`; narrow the `catch` to the types that genuinely represent that answer |
 | `Console.*` (Write, WriteLine, In, Out, Error) | Shared in MT mode | Use `Log.*` |
 | `Environment.Exit`, `FailFast`, `Process.Kill`, `ThreadPool.SetMin/MaxThreads` | Process-fatal | Return false / throw / let engine handle |
 | `static` field initialized from process state (`s_x = Directory.GetCurrentDirectory()`, `s_y = Environment.GetEnvironmentVariable(...)`) | Captures first caller's environment forever | Replace with `ConcurrentDictionary` keyed on inputs |
+| `IBuildEngine4.GetRegisteredTaskObject` / `RegisterTaskObject` pair | Non-atomic read/write — two instances can both miss and both populate. Engine-owned, so no `static` field appears and it reads as thread-safe | Benign only if the cached computation is pure **and** deduplication is not the point. If it dedupes a side effect (log once per build) or caches a *failure* — BLOCKING |
 | `Assembly.Load*`, `Activator.CreateInstance*` | Version conflicts | Audit; usually requires explicit binding policy |
-| `AssemblyName.GetAssemblyName(path)`, `Image.FromFile`, any API that throws with the input path in the message | Sin 2 leakage | Caller must catch and sanitize, or pass `OriginalValue` |
+| Any API that throws with the input path in the message | Sin 2 leakage | Caller must catch and sanitize, or pass `OriginalValue` |
 | `new SomeOtherTask()` followed by `.Execute()` | Nested task — bypasses TaskFactory injection | Parent must propagate `TaskEnvironment` before calling `Execute()` |
 
 ### Step 3 — Anchor findings inline, name the full chain
@@ -95,6 +104,8 @@ Example inline comment anchored to `src/Tasks/SignFile.cs:65`:
 ### Step 5 — Verify scope of the migration
 
 If the task is normally invoked via the TaskFactory system (declared in a `.tasks` file or used from targets as `<MyTask … />`), the attribute alone is sufficient *provided* the call chain is clean. Verify in the host repo's `.targets` / `.tasks` files. If the task is **only** instantiated by other tasks via `new MyTask()` (e.g., `TlbImp` inside `ResolveComReference`), the migration is not harmful but is incomplete until the parent is migrated and propagates its `TaskEnvironment` — flag as MINOR with a recommendation to add a `// TODO: propagate TaskEnvironment from parent task` comment and file a follow-up issue for the parent migration.
+
+**Not migrating is a valid outcome — do not push back on it.** Leaving a task unannotated preserves today's behavior exactly (it keeps routing to the TaskHost sidecar). If the author removed an annotation, or declined to add one, and gave a coherent reason — the task must be a singleton within the build, it deliberately mutates process-global state, or a race cannot be shown benign — **approve that**. Ask only for a comment recording the reason, so a later reader does not "fix" the missing attribute. A slower task is better than a wrong one, and a reviewer who treats annotation count as the goal will produce exactly the wrong incentive.
 
 ---
 
@@ -139,7 +150,7 @@ Do not duplicate inline findings in the summary. Do not produce a "Blocking / Ma
 
 ## Skill Cross-Reference
 
-- Migration playbook (7 sins, ToolTask hazards, helper patterns, test patterns): `multithreaded-task-migration` skill.
+- Migration playbook (8 sins, ToolTask hazards, helper patterns, test patterns): `multithreaded-task-migration` skill.
 - Generic MSBuild review (24 dimensions): host repo's `expert-reviewer` agent.
 
 If neither is available in the host repo, fall back to your own reading of the skill bundled with this plugin (`./skills/multithreaded-task-migration/SKILL.md`).

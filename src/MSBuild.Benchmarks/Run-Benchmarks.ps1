@@ -5,7 +5,8 @@
 .DESCRIPTION
     Runs BenchmarkDotNet benchmarks selected by filter or named set sequentially for each requested
     target framework. By default, the script runs net472 and net11.0 on Windows, and net11.0
-    elsewhere. Artifacts from each run are written to a separate target-framework directory.
+    elsewhere. The .NET SDK selected by the repository is used for the benchmark host and its child
+    processes. Artifacts from each run are written to a separate target-framework directory.
 
 .PARAMETER Filter
     One or more BenchmarkDotNet filter patterns.
@@ -128,6 +129,51 @@ param(
 Set-StrictMode -Version 'Latest'
 $ErrorActionPreference = 'Stop'
 
+# Match Arcade's SDK selection without installing anything. A repository build uses an existing installation
+# from DOTNET_INSTALL_DIR or PATH when it contains the requested SDK, and populates .dotnet only as a fallback.
+$repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+$dotnetExecutable = if ($env:OS -eq 'Windows_NT') { 'dotnet.exe' } else { 'dotnet' }
+$dotnetSdkVersion = (Get-Content (Join-Path $repoRoot 'global.json') -Raw | ConvertFrom-Json).tools.dotnet
+$dotnetRoots = @($env:DOTNET_INSTALL_DIR)
+$installedDotnet = Get-Command $dotnetExecutable -CommandType Application -ErrorAction SilentlyContinue
+
+if ($installedDotnet)
+{
+    $dotnetRoots += Split-Path $installedDotnet.Path -Parent
+}
+
+$dotnetRoots += Join-Path $repoRoot '.dotnet'
+$dotnetRoot = $null
+$dotnetPath = $null
+$dotnetSdkPath = $null
+
+foreach ($candidateRoot in $dotnetRoots)
+{
+    if (-not $candidateRoot)
+    {
+        continue
+    }
+
+    $candidateDotnetPath = Join-Path $candidateRoot $dotnetExecutable
+    $candidateSdkPath = Join-Path (Join-Path $candidateRoot 'sdk') $dotnetSdkVersion
+
+    if ((Test-Path $candidateDotnetPath -PathType Leaf) -and
+        (Test-Path $candidateSdkPath -PathType Container))
+    {
+        $dotnetRoot = $candidateRoot
+        $dotnetPath = $candidateDotnetPath
+        $dotnetSdkPath = $candidateSdkPath
+        break
+    }
+}
+
+if (-not $dotnetPath)
+{
+    throw ".NET SDK '$dotnetSdkVersion' was not found. Run the repository build first."
+}
+
+Write-Host "Using .NET SDK: $dotnetSdkPath"
+
 if (-not $ArtifactsPath)
 {
     $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
@@ -182,65 +228,107 @@ foreach ($scriptArgument in $scriptArguments.GetEnumerator())
 $projectPath = Join-Path $PSScriptRoot 'MSBuild.Benchmarks.csproj'
 $artifactsRoot = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($ArtifactsPath)
 
-foreach ($framework in $TargetFramework)
-{
-    $frameworkArtifactsPath = Join-Path $artifactsRoot $framework
-    $dotnetArguments = @(
-        'run'
-        '--project'
-        $projectPath
-        '--configuration'
-        $Configuration
-        '--framework'
-        $framework
-        '--'
-    )
-
-    $dotnetArguments += $selectionArguments
-    $dotnetArguments += @('--artifacts', $frameworkArtifactsPath)
-
-    if ($Job)
-    {
-        $dotnetArguments += @('--job', $Job)
-    }
-
-    if ($PSBoundParameters.ContainsKey('LaunchCount'))
-    {
-        $dotnetArguments += @('--launchCount', $LaunchCount)
-    }
-
-    if ($EnforcePowerPlan)
-    {
-        $dotnetArguments += '--enforce-power-plan'
-    }
-
-    if ($CollectEtw)
-    {
-        $dotnetArguments += '--collect-etw'
-    }
-
-    if ($DisableNGen)
-    {
-        $dotnetArguments += '--disable-ngen'
-    }
-
-    if ($DisableInlining)
-    {
-        $dotnetArguments += '--disable-inlining'
-    }
-
-    $dotnetArguments += $BenchmarkDotNetArguments
-
-    Write-Host "`nRunning MSBuild benchmarks for $framework"
-    Write-Host "Artifacts: $frameworkArtifactsPath"
-
-    & dotnet @dotnetArguments
-
-    if ($LASTEXITCODE -ne 0)
-    {
-        throw "Benchmarks for '$framework' failed with exit code $LASTEXITCODE."
-    }
+# BenchmarkDotNet launches child dotnet hosts and generated apphosts. Pin each host-selection mechanism to the
+# resolved installation so generated projects do not silently use a different machine-wide SDK or runtime.
+$architecture = [System.Runtime.InteropServices.RuntimeInformation]::ProcessArchitecture.ToString().ToUpperInvariant()
+$dotnetRootArchitectureVariable = "DOTNET_ROOT_$architecture"
+$dotnetEnvironment = @{
+    'DOTNET_HOST_PATH' = $dotnetPath
+    'DOTNET_INSTALL_DIR' = $dotnetRoot
+    'DOTNET_ROOT' = $dotnetRoot
+    $dotnetRootArchitectureVariable = $dotnetRoot
 }
 
-Write-Host "`nAll requested benchmark runs completed."
-Write-Host "Artifacts: $artifactsRoot"
+# PowerShell scripts run in the caller's process, so restore its SDK selection after the benchmarks finish.
+$originalDotnetEnvironment = @{}
+
+foreach ($variable in $dotnetEnvironment.Keys)
+{
+    $originalDotnetEnvironment[$variable] =
+        [Environment]::GetEnvironmentVariable($variable, [EnvironmentVariableTarget]::Process)
+    [Environment]::SetEnvironmentVariable(
+        $variable,
+        $dotnetEnvironment[$variable],
+        [EnvironmentVariableTarget]::Process)
+}
+
+$originalPath = $env:PATH
+$env:PATH = "$dotnetRoot$([IO.Path]::PathSeparator)$originalPath"
+
+try
+{
+    foreach ($framework in $TargetFramework)
+    {
+        $frameworkArtifactsPath = Join-Path $artifactsRoot $framework
+        $dotnetArguments = @(
+            'run'
+            '--project'
+            $projectPath
+            '--configuration'
+            $Configuration
+            '--framework'
+            $framework
+            '--'
+        )
+
+        $dotnetArguments += $selectionArguments
+        $dotnetArguments += @('--artifacts', $frameworkArtifactsPath)
+
+        if ($Job)
+        {
+            $dotnetArguments += @('--job', $Job)
+        }
+
+        if ($PSBoundParameters.ContainsKey('LaunchCount'))
+        {
+            $dotnetArguments += @('--launchCount', $LaunchCount)
+        }
+
+        if ($EnforcePowerPlan)
+        {
+            $dotnetArguments += '--enforce-power-plan'
+        }
+
+        if ($CollectEtw)
+        {
+            $dotnetArguments += '--collect-etw'
+        }
+
+        if ($DisableNGen)
+        {
+            $dotnetArguments += '--disable-ngen'
+        }
+
+        if ($DisableInlining)
+        {
+            $dotnetArguments += '--disable-inlining'
+        }
+
+        $dotnetArguments += $BenchmarkDotNetArguments
+
+        Write-Host "`nRunning MSBuild benchmarks for $framework"
+        Write-Host "Artifacts: $frameworkArtifactsPath"
+
+        & $dotnetPath @dotnetArguments
+
+        if ($LASTEXITCODE -ne 0)
+        {
+            throw "Benchmarks for '$framework' failed with exit code $LASTEXITCODE."
+        }
+    }
+
+    Write-Host "`nAll requested benchmark runs completed."
+    Write-Host "Artifacts: $artifactsRoot"
+}
+finally
+{
+    $env:PATH = $originalPath
+
+    foreach ($variable in $originalDotnetEnvironment.Keys)
+    {
+        [Environment]::SetEnvironmentVariable(
+            $variable,
+            $originalDotnetEnvironment[$variable],
+            [EnvironmentVariableTarget]::Process)
+    }
+}
