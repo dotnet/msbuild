@@ -301,10 +301,9 @@ The default `multithreadable_only` scope prevents MT-specific warnings from affe
 
 Set the scope to `all` to analyze regular tasks for MSBuildTask0002, MSBuildTask0003, and MSBuildTask0005 before MT migration:
 
-```ini
-[*.cs]
-msbuild_task_analyzer.scope = all
-```
+    # .globalconfig
+    is_global = true
+    msbuild_task_analyzer.scope = all
 
 Missing and unrecognized values use the safe `multithreadable_only` default.
 
