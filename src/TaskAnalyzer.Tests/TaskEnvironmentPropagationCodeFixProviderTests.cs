@@ -149,4 +149,26 @@ public class TaskEnvironmentPropagationCodeFixProviderTests
                 """,
             Diag().WithLocation(0).WithArguments("InnerTask")).RunAsync();
     }
+
+    [Fact]
+    public async Task Fix_IsNotOfferedInStaticContext()
+    {
+        const string Source = """
+            using Microsoft.Build.Framework;
+
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+                public override bool Execute() => Run();
+
+                private static bool Run() => {|#0:new InnerTask()|}.Execute();
+            }
+            """;
+
+        await CreateFixTest(
+            testCode: Source,
+            fixedCode: Source,
+            Diag().WithLocation(0).WithArguments("InnerTask")).RunAsync();
+    }
 }

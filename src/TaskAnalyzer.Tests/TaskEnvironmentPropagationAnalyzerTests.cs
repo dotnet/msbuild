@@ -335,6 +335,67 @@ public class TaskEnvironmentPropagationAnalyzerTests
         diagnostics.ShouldBeEmpty();
     }
 
+    [Fact]
+    public async Task ConstructedTaskInFieldInitializer_ProducesWarning()
+    {
+        var diagnostics = await GetDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                private readonly InnerTask _inner = new InnerTask();
+
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+                public override bool Execute() => _inner.Execute();
+            }
+            """);
+
+        diagnostics.Single().Id.ShouldBe(DiagnosticIds.PropagateTaskEnvironmentToConstructedTask);
+    }
+
+    [Fact]
+    public async Task ConstructedTaskInFieldInitializerConfiguredLater_DoesNotProduceDiagnostic()
+    {
+        var diagnostics = await GetDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                private readonly InnerTask _inner = new InnerTask();
+
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+                public override bool Execute()
+                {
+                    _inner.TaskEnvironment = TaskEnvironment;
+                    return _inner.Execute();
+                }
+            }
+            """);
+
+        diagnostics.ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task ConstructedTaskInStaticMethod_ProducesWarning()
+    {
+        var diagnostics = await GetDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+
+                public override bool Execute() => Run();
+
+                private static bool Run() => new InnerTask().Execute();
+            }
+            """);
+
+        diagnostics.Single().Id.ShouldBe(DiagnosticIds.PropagateTaskEnvironmentToConstructedTask);
+    }
+
     private static async Task<Diagnostic[]> GetDiagnosticsAsync(string source)
     {
         var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(
@@ -342,6 +403,7 @@ public class TaskEnvironmentPropagationAnalyzerTests
             new TaskEnvironmentPropagationAnalyzer());
 
         diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ShouldBeEmpty();
+        diagnostics.Where(diagnostic => diagnostic.Id == "AD0001").ShouldBeEmpty();
 
         return diagnostics
             .Where(diagnostic => diagnostic.Id == DiagnosticIds.PropagateTaskEnvironmentToConstructedTask)

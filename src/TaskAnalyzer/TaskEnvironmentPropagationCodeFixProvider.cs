@@ -132,13 +132,31 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             return null;
         }
 
-        private static bool IsInStaticContext(ISymbol enclosingSymbol) => enclosingSymbol switch
+        /// <summary>
+        /// Determines whether instance members are unavailable at the creation site, walking out of lambdas and
+        /// local functions to the member that encloses them.
+        /// </summary>
+        private static bool IsInStaticContext(ISymbol enclosingSymbol)
         {
-            IMethodSymbol method => method.IsStatic,
-            IFieldSymbol field => field.IsStatic,
-            IPropertySymbol property => property.IsStatic,
-            _ => false,
-        };
+            for (ISymbol? symbol = enclosingSymbol; symbol is not null and not INamedTypeSymbol; symbol = symbol.ContainingSymbol)
+            {
+                bool isStatic = symbol switch
+                {
+                    IMethodSymbol method => method.IsStatic,
+                    IFieldSymbol field => field.IsStatic,
+                    IPropertySymbol property => property.IsStatic,
+                    IEventSymbol @event => @event.IsStatic,
+                    _ => false,
+                };
+
+                if (isStatic)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         private static async Task<Document> AddTaskEnvironmentInitializerAsync(
             Document document,
