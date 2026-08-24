@@ -54,6 +54,7 @@ internal static class BuiltInMetadataExpander
         {
             while (index >= 0)
             {
+                // No closing parenthesis anywhere after this point means no reference can close, so stop.
                 int closingParenthesis = escapedValue!.IndexOf(')', index + 2);
 
                 if (closingParenthesis < 0)
@@ -69,9 +70,16 @@ internal static class BuiltInMetadataExpander
                         ? escapedRecursiveDir ?? string.Empty
                         : ItemSpecModifiers.GetItemSpecModifier(escapedItemSpec, kind, currentDirectory: null, escapedDefiningProject, ref cache));
                     copiedUpTo = closingParenthesis + 1;
-                }
 
-                index = escapedValue.IndexOf("%(", closingParenthesis + 1, StringComparison.Ordinal);
+                    index = escapedValue.IndexOf("%(", copiedUpTo, StringComparison.Ordinal);
+                }
+                else
+                {
+                    // This "%(" does not start a reference. Resume just after it rather than after the
+                    // parenthesis, because a well formed reference can begin inside the text it spanned,
+                    // as in "%(foo%(Filename)". The evaluation expander advances the same way.
+                    index = escapedValue.IndexOf("%(", index + 2, StringComparison.Ordinal);
+                }
             }
 
             if (builder is null)
