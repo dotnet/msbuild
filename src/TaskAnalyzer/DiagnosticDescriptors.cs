@@ -112,6 +112,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             isEnabledByDefault: true,
             description: "Constructor injection makes TaskEnvironment available to constructor logic and environment-dependent default initialization. The MSBuild engine prefers a public constructor with a single TaskEnvironment parameter when one is available.");
 
+        public static readonly DiagnosticDescriptor PropagateTaskEnvironmentToConstructedTask = new(
+            id: DiagnosticIds.PropagateTaskEnvironmentToConstructedTask,
+            title: "Propagate TaskEnvironment to a task constructed inside a task",
+            messageFormat: "'{0}' is constructed without receiving a TaskEnvironment; pass this task's TaskEnvironment to it so it does not fall back to the shared process environment",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "MSBuild only supplies TaskEnvironment to tasks it instantiates itself. A task instantiated by another task falls back to TaskEnvironment.Fallback and resolves paths and environment variables against the shared process state, so the constructing task must pass its own TaskEnvironment along.");
+
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
             TaskEnvironmentRequired,
@@ -123,6 +132,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             InitializeRelativeDefaultInExecute,
             UnsupportedTaskItemType,
             CultureSensitiveTaskItemType,
-            PreferTaskEnvironmentConstructorInjection);
+            PreferTaskEnvironmentConstructorInjection,
+            PropagateTaskEnvironmentToConstructedTask);
     }
 }

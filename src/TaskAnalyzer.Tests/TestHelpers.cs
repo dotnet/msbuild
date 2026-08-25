@@ -110,8 +110,9 @@ internal static class TestHelpers
                 public abstract bool Execute();
             }
 
-            public abstract class ToolTask : Task
+            public abstract class ToolTask : Task, Microsoft.Build.Framework.IMultiThreadableTask
             {
+                public virtual Microsoft.Build.Framework.TaskEnvironment TaskEnvironment { get; set; } = new();
                 protected abstract string ToolName { get; }
                 protected abstract string GenerateFullPathToTool();
             }

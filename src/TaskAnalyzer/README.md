@@ -25,6 +25,7 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
 | **MSBuildTask0010** | Error | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
 | **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
+| **MSBuildTask0012** | Warning | Multithreadable tasks that hold a `TaskEnvironment` | Task constructed inside a task does not receive `TaskEnvironment` |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -287,6 +288,45 @@ The engine prefers this constructor when it is present. A public parameterless c
 
 **Scope:** Concrete classes implementing `IMultiThreadableTask`. Abstract base classes and tasks that already declare a public single-`TaskEnvironment` constructor do not produce the diagnostic.
 
+### MSBuildTask0012 — Propagate `TaskEnvironment` to a Constructed Task
+
+MSBuild injects `TaskEnvironment` only into the tasks it instantiates itself. A task instance created by *another* task therefore keeps `TaskEnvironment.Fallback` and resolves paths and environment variables against the shared process state — even when the constructing task is fully migrated and uses `TaskEnvironment` correctly everywhere in its own body:
+
+```csharp
+[MSBuildMultiThreadableTask]
+public class ExecWithRetries : Task, IMultiThreadableTask
+{
+    public TaskEnvironment TaskEnvironment { get; set; }
+
+    public override bool Execute()
+    {
+        // ⚠️ MSBuildTask0012: 'Exec' is constructed without receiving a TaskEnvironment
+        _runningExec = new Exec
+        {
+            BuildEngine = BuildEngine,
+            Command = Command,
+        };
+
+        return _runningExec.Execute();
+    }
+}
+```
+
+Hand the constructed task the environment of the task that creates it:
+
+```csharp
+_runningExec = new Exec
+{
+    BuildEngine = BuildEngine,
+    TaskEnvironment = TaskEnvironment,   // inner task now resolves paths like its host
+    Command = Command,
+};
+```
+
+The environment counts as propagated when it is assigned in the object initializer, passed as a constructor argument, or assigned on the instance afterwards — including from another member of the same type, so a field configured in a helper method is recognized.
+
+**Scope:** Types implementing `IMultiThreadableTask` or carrying `[MSBuildMultiThreadableTask]` that hold a `TaskEnvironment` of their own; a task with no environment to propagate is not reported. The created type must implement `ITask` and be able to receive an environment — through a publicly settable `TaskEnvironment` property (such as `ToolTask.TaskEnvironment`, which is `public virtual`) or a constructor parameter — so the diagnostic is always actionable.
+
 ## Analysis Scope
 
 The analyzer determines what to check based on the type declaration:
@@ -294,8 +334,8 @@ The analyzer determines what to check based on the type declaration:
 | Type | Rules Applied |
 |---|---|
 | Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009–MSBuildTask0010 |
-| Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
-| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
+| Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 and MSBuildTask0012 (in addition to MSBuildTask0001–0005 and MSBuildTask0009–MSBuildTask0010) |
+| Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0012 |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
 | Regular class (no task interface or attribute) | Not analyzed |
 
@@ -311,6 +351,7 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 - **MSBuildTask0010** is always **Error** — task item conversions must not rely on `Convert.ChangeType`.
 - **MSBuildTask0002–MSBuildTask0009** report as **Warning**, with MSBuildTask0006–MSBuildTask0008 limited to tasks directly marked with `[MSBuildMultiThreadableTask]`.
 - **MSBuildTask0011** reports as **Info** — it is a modernization suggestion rather than a correctness issue.
+- **MSBuildTask0012** reports as **Warning** — a constructed task silently losing the environment is a correctness issue, but only in multithreaded execution.
 
 ## Code Fixes
 
@@ -333,6 +374,7 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 | MSBuildTask0007: `new FileInfo(item.ItemSpec)` in `foreach` over `ITaskItem[]` | → Retype source property to ``ITaskItem<FileInfo>[]`` and replace with `item.Value` |
 | MSBuildTask0007: `new AbsolutePath(Item.GetMetadata("FullPath"))` | → Retype `Item` to ``ITaskItem<AbsolutePath>`` and replace with `Item.Value` |
 | MSBuildTask0008: relative default `= "obj"` on a path property | → Retype the property (unset default) and move the default into `Execute()` as a guarded, `TaskEnvironment`-rooted assignment |
+| MSBuildTask0012: `new Exec { BuildEngine = BuildEngine }` | → `new Exec { BuildEngine = BuildEngine, TaskEnvironment = TaskEnvironment }` |
 
 The MSBuildTask0003 fixer intelligently finds the first **unwrapped** path argument rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument.
 
