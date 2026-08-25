@@ -586,7 +586,7 @@ namespace Microsoft.Build.BackEnd
             private ItemSpecModifiers.Cache _cachedModifiers;
 
             /// <summary>
-            /// Names of metadata the task wrote on this item. Their values are read as stored.
+            /// Names of metadata the task wrote on this item. The values of these metadata are returned without expansion.
             /// </summary>
             private HashSet<string> _writtenByTask = null;
 
@@ -820,16 +820,12 @@ namespace Microsoft.Build.BackEnd
                 if (_customEscapedMetadata != null && destinationItem is IMetadataContainer destinationItemAsMetadataContainer)
                 {
                     // The destination implements IMetadataContainer so we can use the ImportMetadata bulk-set operation.
-                    IEnumerable<KeyValuePair<string, string>> metadataToImport = _customEscapedMetadata
-                        .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Key)));
-
                     // The destination has no notion of an unexpanded value, so hand it expanded ones, as an engine
-                    // item does when copying onto an item a task can reach.
-                    if (HasUnexpandedMetadata())
-                    {
-                        metadataToImport = metadataToImport
-                            .Select(metadatum => new KeyValuePair<string, string>(metadatum.Key, ExpandIfFromItemDefinition(metadatum.Key, metadatum.Value)));
-                    }
+                    // item does when copying onto an item a task can reach. ExpandIfFromItemDefinition returns the
+                    // value it was given when there is nothing to expand, which is the usual case.
+                    IEnumerable<KeyValuePair<string, string>> metadataToImport = _customEscapedMetadata
+                        .Where(metadatum => string.IsNullOrEmpty(destinationItem.GetMetadata(metadatum.Key)))
+                        .Select(metadatum => new KeyValuePair<string, string>(metadatum.Key, ExpandIfFromItemDefinition(metadatum.Key, metadatum.Value)));
 
 #if FEATURE_APPDOMAIN
                     if (RemotingServices.IsTransparentProxy(destinationItem))
@@ -945,26 +941,7 @@ namespace Microsoft.Build.BackEnd
             /// an item definition from one set directly on the item.
             /// </summary>
             private static bool IsUnexpanded(string escapedValue)
-                => escapedValue?.IndexOf("%(", StringComparison.Ordinal) >= 0;
-
-            /// <summary>
-            /// Indicates whether any stored value is still unexpanded.
-            /// </summary>
-            private bool HasUnexpandedMetadata()
-            {
-                if (_customEscapedMetadata is not null)
-                {
-                    foreach (KeyValuePair<string, string> metadatum in _customEscapedMetadata)
-                    {
-                        if (IsUnexpanded(metadatum.Value))
-                        {
-                            return true;
-                        }
-                    }
-                }
-
-                return false;
-            }
+                => escapedValue is not null && BuiltInMetadataExpander.IndexOfMetadataMarker(escapedValue, 0) >= 0;
 
             /// <summary>
             /// Sets the exact metadata value given to the metadata name requested.
