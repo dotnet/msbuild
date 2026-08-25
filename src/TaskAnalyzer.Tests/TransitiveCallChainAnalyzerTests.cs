@@ -6,7 +6,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Testing;
 using Microsoft.CodeAnalysis.Diagnostics;
+using Microsoft.CodeAnalysis.Testing;
 using Shouldly;
 using Xunit;
 using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
@@ -268,6 +270,50 @@ public class TransitiveCallChainAnalyzerTests
     }
 
     [Fact]
+    public async Task Scope_Default_PlainTask_GetsAlwaysApplicableTransitiveDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System;
+            public static class Helper
+            {
+                public static void Run() => Environment.Exit(1);
+            }
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_Default_PlainTask_GetsPotentialIssueTransitiveDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
+            using System.Reflection;
+            public static class Helper
+            {
+                public static void Run() => Assembly.LoadFrom("helper.dll");
+            }
+            public class PlainTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    Helper.Run();
+                    return true;
+                }
+            }
+            """);
+
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
     public async Task Scope_Default_MultiThreadableTask_GetsTransitiveDiagnostic()
     {
         var diags = await GetAllDiagnosticsWithDefaultScopeAsync("""
@@ -311,5 +357,38 @@ public class TransitiveCallChainAnalyzerTests
             """, SharedAnalyzerHelpers.ScopeAll);
 
         diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldHaveSingleItem();
+    }
+
+    [Fact]
+    public async Task Scope_GlobalConfig_All_AnalyzesPlainTaskTransitively()
+    {
+        var test = new CSharpAnalyzerTest<TransitiveCallChainAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                public static class Helper
+                {
+                    public static void Run() => Environment.GetEnvironmentVariable("KEY");
+                }
+                public class PlainTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool {|#0:Execute|}()
+                    {
+                        Helper.Run();
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.globalconfig", """
+            is_global = true
+            msbuild_task_analyzer.scope = all
+            """));
+        test.ExpectedDiagnostics.Add(
+            new DiagnosticResult(DiagnosticIds.TransitiveUnsafeCall, DiagnosticSeverity.Warning).WithLocation(0));
+
+        await test.RunAsync();
     }
 }

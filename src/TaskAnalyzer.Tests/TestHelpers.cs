@@ -229,16 +229,8 @@ internal static class TestHelpers
     {
         var compilation = CreateCompilation(source);
         var analyzer = new MultiThreadableTaskAnalyzer();
-
-        var globalOptions = new Dictionary<string, string>
-        {
-            { $"build_property.{SharedAnalyzerHelpers.ScopeOptionKey}", scope }
-        };
-        var optionsProvider = new TestAnalyzerConfigOptionsProvider(globalOptions);
-        var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
-
         var compilationWithAnalyzers = compilation.WithAnalyzers(
-            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer), options);
+            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer), CreateAnalyzerOptions(scope));
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
     }
 
@@ -250,7 +242,7 @@ internal static class TestHelpers
         var compilation = CreateCompilation(source);
         var analyzer = new MultiThreadableTaskAnalyzer();
         var compilationWithAnalyzers = compilation.WithAnalyzers(
-            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
+            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer), CreateAnalyzerOptions());
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
     }
 
@@ -264,14 +256,7 @@ internal static class TestHelpers
             new MultiThreadableTaskAnalyzer(),
             new TransitiveCallChainAnalyzer());
 
-        var globalOptions = new Dictionary<string, string>
-        {
-            { $"build_property.{SharedAnalyzerHelpers.ScopeOptionKey}", scope }
-        };
-        var optionsProvider = new TestAnalyzerConfigOptionsProvider(globalOptions);
-        var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
-
-        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers, options);
+        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers, CreateAnalyzerOptions(scope));
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
     }
 
@@ -284,8 +269,25 @@ internal static class TestHelpers
         var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(
             new MultiThreadableTaskAnalyzer(),
             new TransitiveCallChainAnalyzer());
-        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
+        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers, CreateAnalyzerOptions());
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+    }
+
+    private static AnalyzerOptions CreateAnalyzerOptions(string? scope = null)
+    {
+        var globalOptions = new Dictionary<string, string>
+        {
+            { "unrelated_analyzer_option", "true" },
+        };
+
+        if (scope is not null)
+        {
+            globalOptions.Add(SharedAnalyzerHelpers.ScopeOptionKey, scope);
+        }
+
+        return new AnalyzerOptions(
+            ImmutableArray<AdditionalText>.Empty,
+            new TestAnalyzerConfigOptionsProvider(globalOptions));
     }
 
     private static MetadataReference[] CreateCoreReferences()

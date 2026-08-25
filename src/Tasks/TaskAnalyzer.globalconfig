@@ -1,0 +1,3 @@
+is_global = true
+
+msbuild_task_analyzer.scope = all

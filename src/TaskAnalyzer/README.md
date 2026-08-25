@@ -293,13 +293,13 @@ The default `multithreadable_only` scope prevents MT-specific warnings from affe
 
 | Type | Rules Applied |
 |---|---|
-| Regular class implementing `ITask` | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0010 |
+| Regular class implementing `ITask` | MSBuildTask0001, MSBuildTask0004, MSBuildTask0009–MSBuildTask0010, and MSBuildTask0005 for transitive MSBuildTask0001/0004 violations |
 | Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
 | Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
 | Regular class (no task interface or attribute) | Not analyzed |
 
-Set the scope to `all` to analyze regular tasks for MSBuildTask0002, MSBuildTask0003, and MSBuildTask0005 before MT migration:
+Set the scope to `all` to analyze regular tasks for MSBuildTask0002, MSBuildTask0003, and related transitive MSBuildTask0005 violations before MT migration:
 
     # .globalconfig
     is_global = true
@@ -317,7 +317,9 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
 - **MSBuildTask0010** is always **Error** — task item conversions must not rely on `Convert.ChangeType`.
-- **MSBuildTask0002–MSBuildTask0005 and MSBuildTask0009** report as **Warning** when their scope applies.
+- **MSBuildTask0002–MSBuildTask0003 and related MSBuildTask0005 violations** report as **Warning** when their scope applies.
+- **MSBuildTask0005** remains active for regular tasks when the call chain ends in an always-applicable MSBuildTask0001 or MSBuildTask0004 violation.
+- **MSBuildTask0009** reports as **Warning** independently of MT scope.
 - **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** report as **Info** — these are modernization suggestions, not correctness issues.
 
 ## Code Fixes

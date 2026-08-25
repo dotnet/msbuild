@@ -16,7 +16,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// <summary>
     /// Roslyn analyzer that detects unsafe API usage in MSBuild task implementations.
     /// 
-    /// Scope (controlled by .editorconfig option "msbuild_task_analyzer.scope"):
+    /// Scope (controlled by global analyzer option "msbuild_task_analyzer.scope"):
     /// - "multithreadable_only" (default): MSBuildTask0002 and 0003 fire only on IMultiThreadableTask or [MSBuildMultiThreadableTask]
     /// - "all": Enables MSBuildTask0002 and 0003 for all ITask implementations during migration
     ///   (MSBuildTask0001 and MSBuildTask0004 always fire on all tasks regardless)
@@ -29,7 +29,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     public sealed class MultiThreadableTaskAnalyzer : DiagnosticAnalyzer
     {
         /// <summary>
-        /// The .editorconfig key controlling analysis scope.
+        /// The global analyzer configuration key controlling analysis scope.
         /// Values: "multithreadable_only" (default) | "all"
         /// </summary>
         internal const string ScopeOptionKey = SharedAnalyzerHelpers.ScopeOptionKey;
@@ -55,7 +55,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            // Read scope option from .editorconfig: "multithreadable_only" (default) or "all"
+            // Read scope option: "multithreadable_only" (default) or "all"
             bool analyzeAllTasks = SharedAnalyzerHelpers.ReadAnalyzeAllTasksOption(compilationContext.Options.AnalyzerConfigOptionsProvider);
 
             var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
