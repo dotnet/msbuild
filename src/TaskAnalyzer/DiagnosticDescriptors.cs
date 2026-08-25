@@ -90,7 +90,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             title: "ITaskItem<T> used with unsupported type argument",
             messageFormat: "Task property '{0}' uses ITaskItem<{1}> but MSBuild cannot automatically parse '{1}' from item metadata. Use one of the directly parsed types: {2}.",
             category: "MSBuild.TaskAuthoring",
-            defaultSeverity: DiagnosticSeverity.Warning,
+            defaultSeverity: DiagnosticSeverity.Error,
             isEnabledByDefault: true,
             description: "MSBuild can only bind ITaskItem<T> properties when T is a supported type. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.");
 
@@ -99,7 +99,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             title: "ITaskItem<T> type argument relies on culture-sensitive conversion",
             messageFormat: "Task property '{0}' uses ITaskItem<{1}>, which MSBuild parses through Convert.ChangeType using CultureInfo.InvariantCulture. Use ITaskItem<string> and parse explicitly with a chosen culture.",
             category: "MSBuild.TaskAuthoring",
-            defaultSeverity: DiagnosticSeverity.Error,
+            defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
             description: "ITaskItem<T> type arguments parsed through Convert.ChangeType use CultureInfo.InvariantCulture. Bind the item as a string and parse it explicitly with the intended culture.");
 

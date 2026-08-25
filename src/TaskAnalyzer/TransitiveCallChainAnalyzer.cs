@@ -44,13 +44,18 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         private void OnCompilationStart(CompilationStartAnalysisContext compilationContext)
         {
+            if (!SharedAnalyzerHelpers.IsAnalyzerEnabled(compilationContext.Options.AnalyzerConfigOptionsProvider))
+            {
+                return;
+            }
+
             var iTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskFullName);
             if (iTaskType is null)
             {
                 return;
             }
 
-            // Read scope option from .editorconfig
+            // Read scope option
             bool analyzeAllTasks = SharedAnalyzerHelpers.ReadAnalyzeAllTasksOption(compilationContext.Options.AnalyzerConfigOptionsProvider);
 
             var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);

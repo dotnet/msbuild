@@ -94,34 +94,16 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // Environment variable access
                 new BannedApi("M:System.Environment.GetEnvironmentVariable(System.String)",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetEnvironmentVariable instead"),
-                new BannedApi("M:System.Environment.GetEnvironmentVariable(System.String,System.EnvironmentVariableTarget)",
-                    ApiCategory.TaskEnvironment, "use TaskEnvironment.GetEnvironmentVariable instead"),
                 new BannedApi("M:System.Environment.GetEnvironmentVariables",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetEnvironmentVariables instead"),
                 new BannedApi("M:System.Environment.SetEnvironmentVariable(System.String,System.String)",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.SetEnvironmentVariable instead"),
-                new BannedApi("M:System.Environment.SetEnvironmentVariable(System.String,System.String,System.EnvironmentVariableTarget)",
-                    ApiCategory.TaskEnvironment, "drop target parameter; use TaskEnvironment.SetEnvironmentVariable instead"),
                 new BannedApi("M:System.Environment.ExpandEnvironmentVariables(System.String)",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetEnvironmentVariable for individual variables instead"),
 
-                // Environment.GetFolderPath - uses process-wide state
-                new BannedApi("M:System.Environment.GetFolderPath(System.Environment.SpecialFolder)",
-                    ApiCategory.TaskEnvironment, "may be affected by environment variable overrides; use TaskEnvironment.GetEnvironmentVariable instead"),
-                new BannedApi("M:System.Environment.GetFolderPath(System.Environment.SpecialFolder,System.Environment.SpecialFolderOption)",
-                    ApiCategory.TaskEnvironment, "may be affected by environment variable overrides; use TaskEnvironment.GetEnvironmentVariable instead"),
-
                 // Path.GetFullPath
                 new BannedApi("M:System.IO.Path.GetFullPath(System.String)",
-                    ApiCategory.TaskEnvironment, "use TaskEnvironment.GetAbsolutePath instead"),
-                new BannedApi("M:System.IO.Path.GetFullPath(System.String,System.String)",
-                    ApiCategory.TaskEnvironment, "use TaskEnvironment.GetAbsolutePath instead"),
-
-                // Path.GetTempPath / GetTempFileName - depend on environment variables
-                new BannedApi("M:System.IO.Path.GetTempPath",
-                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; use TaskEnvironment.GetEnvironmentVariable(\"TMP\") instead"),
-                new BannedApi("M:System.IO.Path.GetTempFileName",
-                    ApiCategory.TaskEnvironment, "depends on TMP/TEMP environment variables; use TaskEnvironment.GetEnvironmentVariable(\"TMP\") instead"),
+                    ApiCategory.TaskEnvironment, "use TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm().Value instead"),
 
                 // Process.Start - use TaskEnvironment.GetProcessStartInfo
                 new BannedApi("M:System.Diagnostics.Process.Start(System.String)",
@@ -129,8 +111,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 new BannedApi("M:System.Diagnostics.Process.Start(System.String,System.String)",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
                 new BannedApi("M:System.Diagnostics.Process.Start(System.String,System.Collections.Generic.IEnumerable{System.String})",
-                    ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
-                new BannedApi("M:System.Diagnostics.Process.Start(System.Diagnostics.ProcessStartInfo)",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),
                 new BannedApi("M:System.Diagnostics.Process.Start(System.String,System.String,System.String,System.Security.SecureString,System.String)",
                     ApiCategory.TaskEnvironment, "use TaskEnvironment.GetProcessStartInfo instead"),

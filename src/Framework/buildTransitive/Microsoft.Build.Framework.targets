@@ -1,5 +1,7 @@
 <Project>
 
+  <Import Project="$(MSBuildThisFileDirectory)..\Microsoft.Build.Framework.TaskAnalyzer.targets" />
+
   <!--
     MSBuild's trim/AOT feature switches are defined in Microsoft.Build.Framework, but a library's
     RuntimeHostConfigurationOption items do not flow to a consuming app's publish. This buildTransitive

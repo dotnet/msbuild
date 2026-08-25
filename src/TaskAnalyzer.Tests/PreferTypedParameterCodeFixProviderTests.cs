@@ -326,10 +326,8 @@ public class PreferTypedParameterCodeFixProviderTests
     }
 
     [Fact]
-    public async Task Fix_0006_PathGetFullPath_RetypesToAbsolutePathAndRemovesCall()
+    public async Task Fix_0006_PathGetFullPath_RetypesToAbsolutePathAndPreservesCanonicalization()
     {
-        // Path.GetFullPath(prop) is the raw MSBuildTask0002 normalization. Retyping the property to AbsolutePath
-        // makes the value already-absolute, so the whole call collapses to the property (one-shot, no daisy-chain).
         await CreateFixTest(
             testCode: """
                 using System.IO;
@@ -354,7 +352,7 @@ public class PreferTypedParameterCodeFixProviderTests
                     public AbsolutePath InputPath { get; set; } = default;
                     public override bool Execute()
                     {
-                        var full = InputPath;
+                        var full = InputPath.GetCanonicalForm().Value;
                         return true;
                     }
                 }

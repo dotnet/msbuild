@@ -83,6 +83,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         private static void OnCompilationStart(CompilationStartAnalysisContext compilationContext)
         {
+            if (!SharedAnalyzerHelpers.IsAnalyzerEnabled(compilationContext.Options.AnalyzerConfigOptionsProvider))
+            {
+                return;
+            }
+
             if (!TryResolveWellKnownTaskTypes(compilationContext.Compilation, out WellKnownTaskTypes types))
             {
                 return;

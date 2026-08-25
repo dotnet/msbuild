@@ -33,6 +33,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         private static void OnCompilationStart(CompilationStartAnalysisContext compilationContext)
         {
+            if (!SharedAnalyzerHelpers.IsAnalyzerEnabled(compilationContext.Options.AnalyzerConfigOptionsProvider))
+            {
+                return;
+            }
+
             var iTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskFullName);
             if (iTaskType is null)
             {
@@ -94,6 +99,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     }
 
                     ITypeSymbol typeArg = namedPropertyType.TypeArguments[0];
+
+                    // A generic task can be constructed with a supported type. Its open type
+                    // parameter does not provide enough information for a binding diagnostic.
+                    if (typeArg.TypeKind == TypeKind.TypeParameter)
+                    {
+                        continue;
+                    }
 
                     if (SupportedTaskItemTypes.IsConvertChangeTypeTaskItemType(typeArg.SpecialType))
                     {

@@ -25,6 +25,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         private static void OnCompilationStart(CompilationStartAnalysisContext context)
         {
+            if (!SharedAnalyzerHelpers.IsAnalyzerEnabled(context.Options.AnalyzerConfigOptionsProvider))
+            {
+                return;
+            }
+
             INamedTypeSymbol? multiThreadableTaskType =
                 context.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
             if (multiThreadableTaskType is null)

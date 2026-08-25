@@ -4,27 +4,56 @@ A Roslyn analyzer that detects unsafe API usage in MSBuild task implementations.
 
 The package also includes a Roslyn diagnostic suppressor for nullable warning `CS8618` on task properties marked with `Microsoft.Build.Framework.RequiredAttribute`, since MSBuild guarantees those inputs are initialized before task execution.
 
+## Audience
+
+This guide is for authors and maintainers of C# MSBuild tasks. It also supports teams that plan to migrate existing tasks to multithreaded execution.
+
+## Installation and activation
+
+TaskAnalyzer is delivered in `Microsoft.Build.Framework` package versions that contain `Microsoft.Build.TaskAuthoring.Analyzer.dll`. Add or update the package reference:
+
+```xml
+<ItemGroup>
+  <PackageReference Include="Microsoft.Build.Framework" Version="18.11.0" />
+</ItemGroup>
+```
+
+NuGet adds `Microsoft.Build.TaskAuthoring.Analyzer.dll` to the C# compiler. The analyzer runs during normal `dotnet build`, MSBuild, IDE, and solution builds.
+
+Older `Microsoft.Build.Framework` package versions do not contain TaskAnalyzer. Use a package version that includes the analyzer asset.
+
+The default scope does not apply MT-specific diagnostics to regular tasks. These diagnostics become active for these types:
+
+- Implements `IMultiThreadableTask`.
+- Declares `[MSBuildMultiThreadableTask]`.
+- Declares `[MSBuildMultiThreadableTaskAnalyzed]` on a helper type.
+- Enables migration mode explicitly.
+
+Analyzer activation does not enable in-process MT execution. Apply `[MSBuildMultiThreadableTask]` directly to each task that can safely run in-process.
+
+MSBuildTask0009 and MSBuildTask0010 always analyze typed task properties. Their findings identify task-parameter binding problems that are not specific to MT execution.
+
 ## Background
 
 MSBuild is introducing multithreaded task execution via `IMultiThreadableTask`. Tasks opting into this mode share a process and can no longer safely use process-global state like environment variables, the current directory, or `Console` output. The `TaskEnvironment` abstraction provides per-task isolated access to these resources.
 
 This analyzer catches unsafe API usage at compile time and offers code fixes to migrate to the safe `TaskEnvironment` alternatives.
 
-## Diagnostic Rules
+## Diagnostic rules
 
-| ID | Severity | Scope | Title |
-|---|---|---|---|
-| **MSBuildTask0001** | Error | All `ITask` implementations | API is never safe in MSBuild tasks |
-| **MSBuildTask0002** | Warning | All `ITask` implementations | API requires `TaskEnvironment` alternative |
-| **MSBuildTask0003** | Warning | All `ITask` implementations | File system API requires absolute path |
-| **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
-| **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
-| **MSBuildTask0006** | Warning | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer typed path parameter over string |
-| **MSBuildTask0007** | Warning | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
-| **MSBuildTask0008** | Warning | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
-| **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
-| **MSBuildTask0010** | Error | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
-| **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
+| ID | Severity | Scope | Cause | Corrective action |
+|---|---|---|---|---|
+| **MSBuildTask0001** | Error | MT tasks by default; regular tasks in migration mode | The task uses an API that can terminate or corrupt the MSBuild process. | Remove the API call. Use MSBuild logging and normal task failure reporting. |
+| **MSBuildTask0002** | Warning | MT tasks by default; regular tasks in migration mode | The task reads or changes process-global state. | Use the named `TaskEnvironment` replacement. |
+| **MSBuildTask0003** | Warning | MT tasks by default; regular tasks in migration mode | A file API receives a path that is not known to be absolute. | Use `TaskEnvironment.GetAbsolutePath`, `AbsolutePath`, or a typed file-system object. |
+| **MSBuildTask0004** | Warning | MT tasks by default; regular tasks in migration mode | The task loads an assembly through an API that can conflict in a shared host. | Use normal task dependencies or review the load-context design. |
+| **MSBuildTask0005** | Warning | MT tasks by default; regular tasks in migration mode | A source helper called by the task contains an unsafe API. | Follow the reported call chain and correct the underlying API use. |
+| **MSBuildTask0006** | Warning | Tasks with `[MSBuildMultiThreadableTask]` applied directly | A string task parameter is converted to a path type. | Change the property to `AbsolutePath`, `FileInfo`, or `DirectoryInfo`. |
+| **MSBuildTask0007** | Warning | Tasks with `[MSBuildMultiThreadableTask]` applied directly | The task parses `ITaskItem.ItemSpec` manually. | Change the property to `ITaskItem<T>` and use `Value`. |
+| **MSBuildTask0008** | Warning | Tasks with `[MSBuildMultiThreadableTask]` applied directly | A path property has a relative initializer that cannot use `TaskEnvironment`. | Root the guarded default in `Execute`. |
+| **MSBuildTask0009** | Error | All `ITask` implementations | `ITaskItem<T>` uses a type that MSBuild cannot bind. | Use a supported type or receive a string and parse it explicitly. |
+| **MSBuildTask0010** | Warning | All `ITask` implementations | `ITaskItem<T>` uses `Convert.ChangeType` with invariant culture. | Use string parsing when the task requires different conversion rules. |
+| **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | The task receives `TaskEnvironment` only after construction. | Add a public constructor that accepts one `TaskEnvironment`. |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
 
@@ -55,12 +84,23 @@ These APIs access process-global state that varies per task in multithreaded mod
 | `Environment.SetEnvironmentVariable()` | `TaskEnvironment.SetEnvironmentVariable()` |
 | `Environment.GetEnvironmentVariables()` | `TaskEnvironment.GetEnvironmentVariables()` |
 | `Environment.ExpandEnvironmentVariables()` | Use `TaskEnvironment.GetEnvironmentVariable()` per variable |
-| `Environment.GetFolderPath()` | Use `TaskEnvironment.GetEnvironmentVariable()` |
-| `Path.GetFullPath()` | `TaskEnvironment.GetAbsolutePath()` |
-| `Path.GetTempPath()` | `TaskEnvironment.GetEnvironmentVariable("TMP")` |
-| `Path.GetTempFileName()` | `TaskEnvironment.GetEnvironmentVariable("TMP")` |
-| `Process.Start()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
+| `Path.GetFullPath()` | `TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm().Value` |
+| `Process.Start()` overloads that accept strings | Create a `ProcessStartInfo` with `TaskEnvironment.GetProcessStartInfo()` |
 | `new ProcessStartInfo()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
+
+The analyzer does not diagnose target-specific environment-variable overloads or `Environment.GetFolderPath`. `TaskEnvironment` does not provide equivalent behavior.
+
+### Temporary paths and files
+
+`Path.GetTempPath()` returns a directory path. It does not create a directory or file.
+
+`Path.GetTempFileName()` creates a unique, empty file and returns its path. Reading `TMP` does not reproduce this behavior.
+
+TaskAnalyzer does not diagnose these methods until MSBuild provides equivalent APIs. Do not replace either method with `TaskEnvironment.GetEnvironmentVariable("TMP")`.
+
+For an MT task, prefer an `AbsolutePath` input that supplies a temporary directory. If that design is not possible, do not opt the task into MT execution.
+
+Work on a task-scoped temporary directory continues in [PR #14729](https://github.com/dotnet/msbuild/pull/14729). A task-scoped temporary-file API is tracked by [issue #14723](https://github.com/dotnet/msbuild/issues/14723).
 
 ### MSBuildTask0003 — File Paths Must Be Absolute
 
@@ -130,7 +170,7 @@ public class MyTask : Task
 }
 ```
 
-The last four patterns are the same raw-string shapes that MSBuildTask0002 (`Path.GetFullPath`) and MSBuildTask0003 (a raw string flowing into a `System.IO` path parameter) flag. Surfacing them under MSBuildTask0006 as well means the property can be retyped in **one shot** instead of first applying the 0002/0003 fix (which only introduces a conversion) and then being told to apply 0006. The code fix rewrites each raw site as part of the retype: `Path.GetFullPath(prop)` collapses to `prop` (or `prop.FullName`), and a raw string consumption is fed through `prop.FullName` for `FileInfo`/`DirectoryInfo` (or left unchanged for `AbsolutePath`, which converts to `string` implicitly). Arguments already rooted through `TaskEnvironment.GetAbsolutePath`/`new AbsolutePath(...)` are not re-flagged.
+The last four patterns are the same raw-string shapes that MSBuildTask0002 (`Path.GetFullPath`) and MSBuildTask0003 (a raw string flowing into a `System.IO` path parameter) flag. Surfacing them under MSBuildTask0006 as well means the property can be retyped in **one shot** instead of first applying the 0002/0003 fix (which only introduces a conversion) and then being told to apply 0006. The code fix preserves `Path.GetFullPath` canonicalization through `GetCanonicalForm().Value`. A raw string consumption uses `prop.FullName` for `FileInfo`/`DirectoryInfo`, or the implicit string conversion for `AbsolutePath`. Arguments already rooted through `TaskEnvironment.GetAbsolutePath` or `new AbsolutePath(...)` are not re-flagged.
 
 **Not flagged:** `[Output]` properties, non-public properties, read-only properties, values from method calls or literals.
 
@@ -230,19 +270,19 @@ For a reference-typed target (`FileInfo`/`DirectoryInfo`) the guard is a null-co
 
 ### MSBuildTask0009 — Unsupported `ITaskItem<T>` Type Argument
 
-When a task property is typed as `ITaskItem<T>` or `ITaskItem<T>[]` but `T` is not supported by MSBuild's task parameter binder, a **Warning** is emitted. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.
+When a task property is typed as `ITaskItem<T>` or `ITaskItem<T>[]` but `T` is not supported by MSBuild's task parameter binder, an **Error** is emitted. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.
 
 **Directly parsed type arguments:** `string`, `bool`, `AbsolutePath`, `FileInfo`, `DirectoryInfo`.
 
 The binder also accepts `char`, numeric primitives, `decimal`, and `DateTime`, but MSBuildTask0010 rejects those types because they rely on `Convert.ChangeType`.
 
 ```csharp
-// ⚠️ MSBuildTask0009: Task property 'Id' uses ITaskItem<Guid> but 'Guid' is not supported
+// ❌ MSBuildTask0009: Task property 'Id' uses ITaskItem<Guid> but 'Guid' is not supported
 public class MyTask : Task
 {
-    public ITaskItem<System.Guid> Id { get; set; }       // warning
-    public ITaskItem<System.TimeSpan>[] Durations { get; set; }  // warning
-    public ITaskItem<int> Count { get; set; }             // MSBuildTask0010 error
+    public ITaskItem<System.Guid> Id { get; set; }       // error
+    public ITaskItem<System.TimeSpan>[] Durations { get; set; }  // error
+    public ITaskItem<int> Count { get; set; }             // MSBuildTask0010 warning
 }
 ```
 
@@ -252,13 +292,13 @@ No code fix is offered for MSBuildTask0009 — the resolution depends on the int
 
 ### MSBuildTask0010 — Culture-Sensitive `ITaskItem<T>` Conversion
 
-MSBuild binds `ITaskItem<T>` for `char`, numeric primitives, `decimal`, and `DateTime` through `Convert.ChangeType` using `CultureInfo.InvariantCulture`. Because this implicit conversion may not match the task's intended culture, the analyzer reports an **Error** whenever one of these types is used.
+MSBuild binds `ITaskItem<T>` for `char`, numeric primitives, `decimal`, and `DateTime` through `Convert.ChangeType` using `CultureInfo.InvariantCulture`. Because this implicit conversion may not match the task's intended culture, the analyzer reports a **Warning** whenever one of these types is used.
 
 ```csharp
 public class MyTask : Task
 {
-    public ITaskItem<int> Count { get; set; }       // error
-    public ITaskItem<DateTime>[] Dates { get; set; } // error
+    public ITaskItem<int> Count { get; set; }       // warning
+    public ITaskItem<DateTime>[] Dates { get; set; } // warning
 }
 ```
 
@@ -289,15 +329,83 @@ The engine prefers this constructor when it is present. A public parameterless c
 
 ## Analysis Scope
 
-The analyzer determines what to check based on the type declaration:
+The default `multithreadable_only` scope prevents MT-specific warnings from affecting regular tasks. It recognizes `IMultiThreadableTask`, `[MSBuildMultiThreadableTask]`, and `[MSBuildMultiThreadableTaskAnalyzed]` as MT opt-ins.
 
 | Type | Rules Applied |
 |---|---|
-| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009–MSBuildTask0010 |
+| Regular class implementing `ITask` | MSBuildTask0009–MSBuildTask0010 |
 | Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
 | Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
-| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
+| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0004 |
 | Regular class (no task interface or attribute) | Not analyzed |
+
+Set `MSBuildTaskAnalyzerScope` to `all` to analyze regular tasks before MT migration:
+
+```xml
+<PropertyGroup>
+  <MSBuildTaskAnalyzerScope>all</MSBuildTaskAnalyzerScope>
+</PropertyGroup>
+```
+
+Migration mode can add warnings and errors to existing task projects. Run it on a migration branch before you enable it for continuous integration.
+
+You can also create a `.globalconfig` file:
+
+```ini
+is_global = true
+msbuild_task_analyzer.scope = all
+```
+
+Missing and unrecognized values use the safe `multithreadable_only` default.
+
+## Configuration
+
+Set these properties in the task project or in `Directory.Build.props`:
+
+| Property | Values | Default | Result |
+|---|---|---|---|
+| `MSBuildTaskAnalyzerEnabled` | `true`, `false` | `true` | `false` disables all TaskAnalyzer diagnostics and its `CS8618` suppression. |
+| `MSBuildTaskAnalyzerScope` | `multithreadable_only`, `all` | `multithreadable_only` | `all` enables MSBuildTask0001–MSBuildTask0005 for regular tasks. |
+
+An invalid `MSBuildTaskAnalyzerEnabled` value keeps the analyzer enabled. An invalid scope value keeps the MT-only scope.
+
+A nonempty MSBuild property takes precedence over the corresponding `.globalconfig` key. An empty property uses `.globalconfig`, then the safe default.
+
+### Disable TaskAnalyzer
+
+Disable TaskAnalyzer only when a project cannot use it:
+
+```xml
+<PropertyGroup>
+  <MSBuildTaskAnalyzerEnabled>false</MSBuildTaskAnalyzerEnabled>
+</PropertyGroup>
+```
+
+This property does not disable other Roslyn analyzers.
+
+### Suppress one diagnostic
+
+Use standard compiler configuration to suppress a diagnostic:
+
+```xml
+<PropertyGroup>
+  <NoWarn>$(NoWarn);MSBuildTask0004</NoWarn>
+</PropertyGroup>
+```
+
+You can also set `dotnet_diagnostic.MSBuildTask0004.severity = none` in `.editorconfig`.
+
+### Warnings as errors
+
+TaskAnalyzer uses standard compiler severity controls. `TreatWarningsAsErrors` changes TaskAnalyzer warnings to build errors:
+
+```xml
+<PropertyGroup>
+  <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+</PropertyGroup>
+```
+
+MSBuildTask0001 and MSBuildTask0009 are errors without this property. MSBuildTask0006–MSBuildTask0008 are warnings. MSBuildTask0011 is informational.
 
 MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTask]` attribute is applied **directly** to the task class. The attribute is `Inherited = false`, so a task that merely derives from a base class implementing `IMultiThreadableTask` (or carrying the attribute) has not itself opted into multithreaded support and is not subject to these three rules. Input properties are collected from the task class **and its base classes**, so an `ITaskItem`/`string` input declared on a shared base task is still analyzed.
 
@@ -307,10 +415,10 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 ### Severity Levels
 
-- **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
-- **MSBuildTask0010** is always **Error** — task item conversions must not rely on `Convert.ChangeType`.
-- **MSBuildTask0002–MSBuildTask0009** report as **Warning**, with MSBuildTask0006–MSBuildTask0008 limited to tasks directly marked with `[MSBuildMultiThreadableTask]`.
-- **MSBuildTask0011** reports as **Info** — it is a modernization suggestion rather than a correctness issue.
+- **MSBuildTask0001 and MSBuildTask0009** report as **Error** when their scope applies.
+- **MSBuildTask0002–MSBuildTask0005 and MSBuildTask0010** report as **Warning** when their scope applies.
+- **MSBuildTask0006–MSBuildTask0008** report as **Warning**.
+- **MSBuildTask0011** reports as **Info**.
 
 ## Code Fixes
 
@@ -321,13 +429,13 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 | MSBuildTask0002: `Environment.GetEnvironmentVariable(x)` | → `TaskEnvironment.GetEnvironmentVariable(x)` |
 | MSBuildTask0002: `Environment.SetEnvironmentVariable(x, y)` | → `TaskEnvironment.SetEnvironmentVariable(x, y)` |
 | MSBuildTask0002: `Environment.GetEnvironmentVariables()` | → `TaskEnvironment.GetEnvironmentVariables()` |
-| MSBuildTask0002: `Path.GetFullPath(x)` | → `TaskEnvironment.GetAbsolutePath(x)` |
+| MSBuildTask0002: `Path.GetFullPath(x)` | → `TaskEnvironment.GetAbsolutePath(x).GetCanonicalForm().Value` |
 | MSBuildTask0002: `Environment.CurrentDirectory` | → `TaskEnvironment.ProjectDirectory` |
 | MSBuildTask0002: `Directory.GetCurrentDirectory()` | → `TaskEnvironment.ProjectDirectory` |
 | MSBuildTask0003: `File.Exists(relativePath)` | → `File.Exists(TaskEnvironment.GetAbsolutePath(relativePath))` |
 | MSBuildTask0006: `new AbsolutePath(InputPath)` | → Retype `InputPath` to `AbsolutePath` and replace conversion with direct property usage |
 | MSBuildTask0006: `new FileInfo(FilePath)` / `new DirectoryInfo(DirPath)` | → Retype property to `FileInfo`/`DirectoryInfo` and replace conversion with direct property usage |
-| MSBuildTask0006: `Path.GetFullPath(InputPath)` | → Retype `InputPath` to `AbsolutePath` and collapse the call to the property (one-shot for the 0002 shape) |
+| MSBuildTask0006: `Path.GetFullPath(InputPath)` | → Retype `InputPath` to `AbsolutePath` and preserve canonicalization with `GetCanonicalForm().Value` |
 | MSBuildTask0006: `File.Delete(Target)` / `Directory.CreateDirectory(Folder)` | → Retype property to `FileInfo`/`DirectoryInfo` and feed the string API through `.FullName` (one-shot for the 0003 shape) |
 | MSBuildTask0007: `int.Parse(Item.ItemSpec)` | → Retype `Item` to ``ITaskItem<int>`` and replace parse with `Item.Value` |
 | MSBuildTask0007: `new FileInfo(item.ItemSpec)` in `foreach` over `ITaskItem[]` | → Retype source property to ``ITaskItem<FileInfo>[]`` and replace with `item.Value` |
@@ -350,86 +458,59 @@ The analyzer package suppresses `CS8618` for non-nullable properties when all of
 
 This lets task authors omit manual `= null!;` initializers for required MSBuild task inputs.
 
-## Installation
+## Common migrations
 
-### Project Reference (development)
-
-Reference the analyzer project directly:
-
-```xml
-<ItemGroup>
-  <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj"
-                    OutputItemType="Analyzer"
-                    ReferenceOutputAssembly="false" />
-</ItemGroup>
-```
-
-### NuGet Package (future)
-
-When packaged as a NuGet analyzer, add it as a package reference:
-
-```xml
-<ItemGroup>
-  <PackageReference Include="Microsoft.Build.TaskAuthoring.Analyzer" Version="1.0.0"
-                    PrivateAssets="all" />
-</ItemGroup>
-```
-
-### MSBuild Tasks Build
-
-To enable the analyzer in the MSBuild Tasks project build, pass `/p:BuildAnalyzer=true`:
-
-```
-dotnet build src/Tasks/Microsoft.Build.Tasks.csproj /p:BuildAnalyzer=true
-```
-
-## Example
-
-**Before** (unsafe):
+### Environment variables
 
 ```csharp
-public class CopyFiles : Task, IMultiThreadableTask
-{
-    public TaskEnvironment TaskEnvironment { get; set; }
-    public string Source { get; set; }
-    public string Destination { get; set; }
+string? value = TaskEnvironment.GetEnvironmentVariable("MY_SETTING");
+TaskEnvironment.SetEnvironmentVariable("MY_RESULT", value);
+```
 
-    public override bool Execute()
-    {
-        Console.WriteLine("Copying files...");          // ❌ MSBuildTask0001
-        var tmp = Path.GetTempPath();                    // ❌ MSBuildTask0002
-        var envVar = Environment.GetEnvironmentVariable("MY_VAR"); // ❌ MSBuildTask0002
-        File.Copy(Source, Destination);                  // ❌ MSBuildTask0003 (×2)
-        return true;
-    }
+Use `TaskEnvironment` for process-scoped variables. The target-specific `EnvironmentVariableTarget.User` and `EnvironmentVariableTarget.Machine` values have no task-scoped replacement.
+
+### Path resolution and file APIs
+
+```csharp
+AbsolutePath source = TaskEnvironment.GetAbsolutePath(Source);
+AbsolutePath destination = TaskEnvironment.GetAbsolutePath(Destination);
+
+if (File.Exists(source))
+{
+    File.Copy(source, destination);
 }
 ```
 
-**After** (safe):
+`GetAbsolutePath` resolves relative paths against `TaskEnvironment.ProjectDirectory`. Do not resolve task paths against the process working directory.
+
+`GetAbsolutePath` does not remove `.` or `..` segments. Call `GetCanonicalForm()` when code requires the canonical behavior of `Path.GetFullPath`.
+
+### Process creation
 
 ```csharp
-public class CopyFiles : Task, IMultiThreadableTask
-{
-    public TaskEnvironment TaskEnvironment { get; set; }
-    public string Source { get; set; }
-    public string Destination { get; set; }
+ProcessStartInfo startInfo = TaskEnvironment.GetProcessStartInfo();
+startInfo.FileName = TaskEnvironment.GetAbsolutePath(ToolPath);
+startInfo.Arguments = Arguments;
 
-    public override bool Execute()
-    {
-        Log.LogMessage("Copying files...");              // ✅ Use build logging
-        var tmp = TaskEnvironment.GetEnvironmentVariable("TMP"); // ✅ Per-task env
-        var envVar = TaskEnvironment.GetEnvironmentVariable("MY_VAR"); // ✅ Per-task env
-        File.Copy(                                       // ✅ Absolute paths
-            TaskEnvironment.GetAbsolutePath(Source),
-            TaskEnvironment.GetAbsolutePath(Destination));
-        return true;
-    }
-}
+using Process? process = Process.Start(startInfo);
+process?.WaitForExit();
 ```
+
+`GetProcessStartInfo` copies the task environment and project directory into the new process configuration. Resolve a relative executable path before `Process.Start`.
+
+## Known limitations
+
+- MSBuildTask0005 follows calls only when source is available in the current compilation.
+- MSBuildTask0005 does not inspect helper methods in referenced binaries.
+- MSBuildTask0005 limits call-chain traversal to prevent excessive analysis time.
+- MSBuildTask0003 recognizes common file APIs and path parameter names. It cannot prove every custom path flow.
+- Code fixes are conservative. A diagnostic can remain without an automatic fix.
+- TaskAnalyzer supports C# projects. The package path is `analyzers/dotnet/cs`.
+- Temporary-path methods have no automated recommendation until equivalent `TaskEnvironment` APIs ship.
 
 ## Tests
 
-193 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
+The test suite covers all rules, safe patterns, configuration, code fixes, and compiler diagnostic suppression:
 
 ```
 cd src/TaskAnalyzer.Tests
@@ -465,4 +546,3 @@ dotnet test
 - [Analyzer Implementation PR](https://github.com/dotnet/msbuild/pull/12143)
 - [IMultiThreadableTask Interface](../Framework/IMultiThreadableTask.cs)
 - [TaskEnvironment Class](../Framework/TaskEnvironment.cs)
-- [Migration Skill Guide](../../.github/skills/multithreaded-task-migration/SKILL.md)

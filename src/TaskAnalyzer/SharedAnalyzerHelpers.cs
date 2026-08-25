@@ -17,26 +17,54 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     internal static class SharedAnalyzerHelpers
     {
         /// <summary>
-        /// The .editorconfig key controlling analysis scope.
-        /// Values: "all" (default) | "multithreadable_only"
+        /// The analyzer configuration key controlling analysis scope.
+        /// Values: "multithreadable_only" (default) | "all"
         /// </summary>
+        internal const string EnabledOptionKey = "msbuild_task_analyzer.enabled";
+        internal const string EnabledPropertyKey = "MSBuildTaskAnalyzerEnabled";
         internal const string ScopeOptionKey = "msbuild_task_analyzer.scope";
+        internal const string ScopePropertyKey = "MSBuildTaskAnalyzerScope";
         internal const string ScopeAll = "all";
         internal const string ScopeMultiThreadableOnly = "multithreadable_only";
 
         /// <summary>
+        /// Returns false only when the analyzer is explicitly disabled.
+        /// Missing and invalid values keep the analyzer enabled.
+        /// </summary>
+        internal static bool IsAnalyzerEnabled(AnalyzerConfigOptionsProvider optionsProvider)
+        {
+            if (optionsProvider.GlobalOptions.TryGetValue($"build_property.{EnabledPropertyKey}", out var enabledValue) &&
+                !string.IsNullOrWhiteSpace(enabledValue))
+            {
+                return !bool.TryParse(enabledValue, out bool enabled) || enabled;
+            }
+
+            if (optionsProvider.GlobalOptions.TryGetValue(EnabledOptionKey, out enabledValue))
+            {
+                return !bool.TryParse(enabledValue, out bool enabled) || enabled;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// Reads the scope option from the analyzer config options provider.
-        /// Returns true if all tasks should be analyzed; false if only multithreadable tasks.
+        /// Returns true only when all-task migration analysis is explicitly enabled.
         /// </summary>
         internal static bool ReadAnalyzeAllTasksOption(AnalyzerConfigOptionsProvider optionsProvider)
         {
-            if (optionsProvider.GlobalOptions.TryGetValue($"build_property.{ScopeOptionKey}", out var scopeValue) ||
-                optionsProvider.GlobalOptions.TryGetValue(ScopeOptionKey, out scopeValue))
+            if (optionsProvider.GlobalOptions.TryGetValue($"build_property.{ScopePropertyKey}", out var scopeValue) &&
+                !string.IsNullOrWhiteSpace(scopeValue))
             {
-                return !string.Equals(scopeValue, ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
+                return string.Equals(scopeValue, ScopeAll, StringComparison.OrdinalIgnoreCase);
             }
 
-            return true; // default: analyze all tasks
+            if (optionsProvider.GlobalOptions.TryGetValue(ScopeOptionKey, out scopeValue))
+            {
+                return string.Equals(scopeValue, ScopeAll, StringComparison.OrdinalIgnoreCase);
+            }
+
+            return false;
         }
         /// <summary>
         /// Represents a resolved banned API entry for O(1) lookup during analysis.

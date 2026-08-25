@@ -18,6 +18,8 @@
   
   <ItemGroup>
     <ProjectReference Include="..\MSBuild\MSBuild.csproj" />
+    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj"
+                      ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\UnitTests.Shared\Microsoft.Build.UnitTests.Shared.csproj" />
     <ProjectReference Include="..\Xunit.NetCore.Extensions\Xunit.NetCore.Extensions.csproj" />
   </ItemGroup>
@@ -25,6 +27,15 @@
   <ItemGroup>
     <Compile Remove="TestAssets\**\*.cs" />
     <None Include="TestAssets\**" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\NuGet.Config"
+          Link="TestAssets\TaskAnalyzerConfiguration\NuGet.Config"
+          CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="Microsoft.Build.EndToEndTests.TaskAnalyzerTestPathsAttribute">
+      <_Parameter1>$(ArtifactsBinDir)TaskAnalyzer\$(Configuration)\netstandard2.0\Microsoft.Build.TaskAuthoring.Analyzer.dll</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 
 </Project>

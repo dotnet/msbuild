@@ -21,6 +21,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         public override void ReportSuppressions(SuppressionAnalysisContext context)
         {
+            if (!SharedAnalyzerHelpers.IsAnalyzerEnabled(context.Options.AnalyzerConfigOptionsProvider))
+            {
+                return;
+            }
+
             var requiredAttributeType = context.Compilation.GetTypeByMetadataName(WellKnownTypeNames.RequiredAttributeFullName);
             var iTaskType = context.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskFullName);
             if (requiredAttributeType is null || iTaskType is null)

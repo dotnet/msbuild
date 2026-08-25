@@ -4,15 +4,27 @@
 
 MSBuild's current execution model assumes that tasks have exclusive control over the entire process during execution. This allows tasks to freely modify global process state such as environment variables, the current working directory, and other process-level resources. This design works well for MSBuild's approach of executing builds in separate processes for parallelization. With the introduction of multithreaded execution within a single MSBuild process, multiple tasks can now run concurrently. This requires a new task design to ensure that multiple tasks do not access/modify shared process state, and the relative paths are resolved correctly.
 
-To enable this multithreaded execution model, tasks will declare their capability to run in multiple threads within one process. These capabilities are referred to as **thread-safety** capabilities and the corresponding tasks are called **thread-safe tasks**. Thread-safe tasks must avoid using APIs that modify or depend on global process state, as this could cause conflicts when multiple tasks execute concurrently. See [Thread-Safe Tasks API Analysis Reference](thread-safe-tasks-api-analysis.md) for detailed guidelines. Task authors will also get access to a `TaskEnvironment` that provides safe alternatives to global process state APIs. For example, task authors should use `TaskEnvironment.GetAbsolutePath()` instead of `Path.GetFullPath()` to ensure correct path resolution in multithreaded scenarios.
+To enable this multithreaded execution model, tasks will declare their capability to run in multiple threads within one process. These capabilities are referred to as **thread-safety** capabilities and the corresponding tasks are called **thread-safe tasks**. Thread-safe tasks must avoid using APIs that modify or depend on global process state, as this could cause conflicts when multiple tasks execute concurrently. See [Thread-Safe Tasks API Analysis Reference](thread-safe-tasks-api-analysis.md) for detailed guidelines. Task authors also get a `TaskEnvironment` that provides safe alternatives to global process state APIs. Use `TaskEnvironment.GetAbsolutePath()` to root relative paths.
 
 Tasks that are not thread-safe can still participate in multithreaded builds. MSBuild will execute these tasks in separate TaskHost processes to provide process-level isolation.
 
+## TaskAnalyzer
+
+The `Microsoft.Build.Framework` package delivers TaskAnalyzer to C# task projects. TaskAnalyzer checks the MT contract during compilation.
+
+By default, MT-specific diagnostics apply only after a task declares MT support. This default prevents new diagnostics in regular task projects.
+
+Set `MSBuildTaskAnalyzerScope` to `all` to inspect regular tasks before migration. Set `MSBuildTaskAnalyzerEnabled` to `false` to disable TaskAnalyzer.
+
+For installation, configuration, rule actions, and migration examples, see the [TaskAnalyzer guide](../../../src/TaskAnalyzer/README.md).
+
 ## Thread-Safe Capability Indicators
 
-Task authors can declare thread-safe capabilities in two different ways:
-1. **Interface-Based Thread-Safe Capability Declaration** - Provides access to thread-safe APIs through `TaskEnvironment` to be used in the task code.
-2. **Attribute-Based Thread-Safe Capability Declaration** - Allows existing tasks to declare its ability run in multithreaded mode without code changes. It is a **compatibility bridge option**.
+Task authors use two thread-safe indicators:
+1. **`IMultiThreadableTask`** provides access to safe APIs through `TaskEnvironment`.
+2. **`MSBuildMultiThreadableTask`** permits in-process execution in MT mode.
+
+Apply `[MSBuildMultiThreadableTask]` directly to each task that can safely run in-process. Implement `IMultiThreadableTask` when the task also requires `TaskEnvironment`.
 
 Tasks that use `TaskEnvironment` cannot load in older MSBuild versions that do not support multithreading features, requiring authors to drop support for older MSBuild versions. To address this challenge, MSBuild provides a compatibility bridge that allows certain tasks targeting older MSBuild versions to participate in multithreaded builds. While correct absolute path resolution can be and should be achieved without accessing `TaskEnvironment` in tasks that use compatibility bridge options, tasks must avoid relying on environment variables or modifying global process state.
 
@@ -21,25 +33,15 @@ So, task authors who need to support older MSBuild versions will have three choi
 2. **Use compatibility bridge approaches** - Rely on MSBuild's ability to run legacy tasks in multithreaded mode without access to `TaskEnvironment`.
 3. **Accept reduced performance** - Tasks will execute more slowly than their thread-safe versions because they must run in a separate TaskHost process
 
-### Interface-Based Thread-Safe Capability Declaration
+### TaskEnvironment Access
 
-Tasks indicate thread-safety capabilities by implementing the `IMultiThreadableTask` interface.
+Tasks get `TaskEnvironment` by implementing the `IMultiThreadableTask` interface.
 
 ```csharp
 namespace Microsoft.Build.Framework;
 public interface IMultiThreadableTask : ITask
 {
     TaskEnvironment TaskEnvironment { get; set; }
-}
-```
-
-Similar to how MSBuild provides the abstract `Task` class with default implementations for the `ITask` interface, MSBuild will offer a `MultiThreadableTask` abstract class with default implementations for the `IMultiThreadableTask` interface. Task authors will only need to implement the `Execute` method for the `ITask` interface and use `TaskEnvironment` within it to create their thread-safe tasks.
-
-```csharp
-namespace Microsoft.Build.Utilities;
-public abstract class MultiThreadableTask : Task, IMultiThreadableTask
-{
-    public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
 }
 ```
 
@@ -81,20 +83,22 @@ Task authors who want to support older MSBuild versions need to:
 
 **Note:** Consider backporting `IMultiThreadableTask` to MSBuild 17.14 for graceful failure when the interface is used.
 
-### Attribute-Based Thread-Safe Capability Declaration
+### In-Process MT Execution
 
-Task authors can indicate thread-safety capabilities by marking their task classes with a specific attribute. Tasks marked with this attribute can run in multithreaded builds but do not have access to `TaskEnvironment` APIs.
+Apply the attribute directly to each task class that can run in-process. The attribute does not provide access to `TaskEnvironment`.
 
 ```csharp
 namespace Microsoft.Build.Framework;
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-internal class MSBuildMultiThreadableTaskAttribute : Attribute
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+public class MSBuildMultiThreadableTaskAttribute : Attribute
 {
     public MSBuildMultiThreadableTaskAttribute() { }
 }
 ```
 
-MSBuild detects `MSBuildMultiThreadableTaskAttribute` by its namespace and name only, ignoring the defining assembly, which allows customers to define the attribute in their own assemblies alongside their tasks. Since MSBuild does not ship the attribute, customers using newer MSBuild versions should prefer the Interface-Based Thread-Safe Capability Declaration.
+MSBuild detects `MSBuildMultiThreadableTaskAttribute` by its namespace and name only. This permits a compatibility attribute in task assemblies that target older Framework packages.
+
+New task projects can use the attribute from `Microsoft.Build.Framework`. The attribute is not inherited.
 
 For tasks to be eligible for multithreaded execution using this approach, they must satisfy the following conditions:
 - The task must not modify global process state (environment variables, working directory)
@@ -169,10 +173,18 @@ public bool Execute(...)
     AbsolutePath path = TaskEnvironment.GetAbsolutePath("SomePath");
     string content = File.ReadAllText(path);
     string content2 = File.ReadAllText(path.ToString());
-    string content3 = File.ReadAllText(path.Path);
+    string content3 = File.ReadAllText(path.Value);
     ...
 }
 ```
+
+### Temporary paths
+
+`Path.GetTempPath()` returns a temporary directory. `Path.GetTempFileName()` creates a unique, empty file.
+
+Reading `TMP` does not reproduce either method on all platforms. It also does not create a unique file.
+
+TaskEnvironment does not currently provide equivalent APIs. Pass a temporary directory to an MT task as an `AbsolutePath` input when possible.
 
 ## Appendix: Alternatives
 

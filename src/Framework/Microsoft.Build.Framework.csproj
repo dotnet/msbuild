@@ -93,7 +93,16 @@
   <ItemGroup>
     <None Include="buildTransitive\Microsoft.Build.Framework.targets"
           Pack="true"
-          PackagePath="buildTransitive\net10.0\Microsoft.Build.Framework.targets" />
+          PackagePath="buildTransitive\net10.0\Microsoft.Build.Framework.targets;buildTransitive\$(LatestDotNetCoreForMSBuild)\Microsoft.Build.Framework.targets" />
+    <None Include="buildTransitive\Microsoft.Build.Framework.TaskAnalyzer.Root.targets"
+          Pack="true"
+          PackagePath="buildTransitive\Microsoft.Build.Framework.targets" />
+    <None Include="buildTransitive\Microsoft.Build.Framework.TaskAnalyzer.targets"
+          Pack="true"
+          PackagePath="buildTransitive\Microsoft.Build.Framework.TaskAnalyzer.targets" />
+    <None Include="buildTransitive\Microsoft.Build.Framework.TaskAnalyzer.Framework.targets"
+          Pack="true"
+          PackagePath="buildTransitive\$(FullFrameworkTFM)\Microsoft.Build.Framework.targets" />
 
     <PackageReference Include="Microsoft.CodeAnalysis.Contracts" PrivateAssets="all" />
 

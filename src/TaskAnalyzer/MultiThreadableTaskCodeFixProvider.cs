@@ -154,9 +154,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     // Only offer fix for single-argument overload
                     if (invocation.ArgumentList.Arguments.Count == 1)
                     {
-                        RegisterSimpleReplacement(context, diagnostic, invocation,
-                            "TaskEnvironment", "GetAbsolutePath",
-                            "Use TaskEnvironment.GetAbsolutePath()");
+                        context.RegisterCodeFix(
+                            CodeAction.Create(
+                                title: "Use TaskEnvironment.GetAbsolutePath().GetCanonicalForm().Value",
+                                createChangedDocument: ct => ReplaceGetFullPathAsync(context.Document, invocation, ct),
+                                equivalenceKey: "UseTaskEnvironmentCanonicalPath"),
+                            diagnostic);
                     }
                     return;
                 }
@@ -191,6 +194,35 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                         diagnostic);
                 }
             }
+        }
+
+        private static async Task<Document> ReplaceGetFullPathAsync(
+            Document document,
+            InvocationExpressionSyntax invocation,
+            CancellationToken cancellationToken)
+        {
+            DocumentEditor editor = await DocumentEditor.CreateAsync(document, cancellationToken).ConfigureAwait(false);
+            ExpressionSyntax argument = invocation.ArgumentList.Arguments[0].Expression;
+            InvocationExpressionSyntax getAbsolutePath = SyntaxFactory.InvocationExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    SyntaxFactory.IdentifierName("TaskEnvironment"),
+                    SyntaxFactory.IdentifierName("GetAbsolutePath")),
+                SyntaxFactory.ArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(
+                        SyntaxFactory.Argument(argument))));
+            InvocationExpressionSyntax getCanonicalForm = SyntaxFactory.InvocationExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    getAbsolutePath,
+                    SyntaxFactory.IdentifierName("GetCanonicalForm")));
+            MemberAccessExpressionSyntax value = SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                getCanonicalForm,
+                SyntaxFactory.IdentifierName("Value"));
+
+            editor.ReplaceNode(invocation, value.WithTriviaFrom(invocation));
+            return editor.GetChangedDocument();
         }
 
         private static void RegisterSimpleReplacement(

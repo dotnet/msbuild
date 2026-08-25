@@ -139,13 +139,13 @@ public class MultiThreadableTaskCodeFixProviderTests
                     public TaskEnvironment TaskEnvironment { get; set; }
                     public override bool Execute()
                     {
-                        var p = TaskEnvironment.GetAbsolutePath("relative");
+                        var p = TaskEnvironment.GetAbsolutePath("relative").GetCanonicalForm().Value;
                         return true;
                     }
                 }
                 """,
             Diag(DiagnosticIds.TaskEnvironmentRequired).WithLocation(0)
-                .WithArguments("Path.GetFullPath(string)", "use TaskEnvironment.GetAbsolutePath instead")).RunAsync();
+                .WithArguments("Path.GetFullPath(string)", "use TaskEnvironment.GetAbsolutePath(path).GetCanonicalForm().Value instead")).RunAsync();
     }
 
     [Fact]

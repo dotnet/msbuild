@@ -1,6 +1,7 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Shouldly;
@@ -30,6 +31,33 @@ public class RequiredTaskPropertyInitializationSuppressorTests
 
         diagnostics.ShouldContain(d => d.Id == "CS8618" && d.IsSuppressed);
         diagnostics.ShouldNotContain(d => d.Id == "CS8618" && !d.IsSuppressed);
+    }
+
+    [Fact]
+    public async Task DisabledAnalyzer_DoesNotSuppressRequiredPropertyDiagnostic()
+    {
+        var optionsProvider = new TestAnalyzerConfigOptionsProvider(
+            new Dictionary<string, string>
+            {
+                [$"build_property.{SharedAnalyzerHelpers.EnabledPropertyKey}"] = "false",
+            });
+
+        var diagnostics = await GetCompilerAndAnalyzerDiagnosticsAsync(
+            """
+            using Microsoft.Build.Framework;
+
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                [Required]
+                public string IldasmPath { get; set; }
+
+                public override bool Execute() => true;
+            }
+            """,
+            optionsProvider,
+            new RequiredTaskPropertyInitializationSuppressor());
+
+        diagnostics.ShouldContain(d => d.Id == "CS8618" && !d.IsSuppressed);
     }
 
     [Fact]
