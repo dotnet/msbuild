@@ -54,7 +54,7 @@ namespace Microsoft.Build.Shared
             return a.ToHashSet().SetEquals(b);
         }
 
-        internal static bool DictionaryEquals<K, V>(IReadOnlyDictionary<K, V> a, IReadOnlyDictionary<K, V> b)
+        internal static bool DictionaryEquals<K, V>(IReadOnlyDictionary<K, V> a, IReadOnlyDictionary<K, V> b, IEqualityComparer<V> valueComparer = null)
         {
             if (a.Count != b.Count)
             {
@@ -68,9 +68,19 @@ namespace Microsoft.Build.Shared
                     return false;
                 }
 
-                if (!Equals(aKvp.Value, bValue))
+                if (valueComparer != null)
                 {
-                    return false;
+                    if (!valueComparer.Equals(aKvp.Value, bValue))
+                    {
+                        return false;
+                    }
+                }
+                else
+                {
+                    if (!Equals(aKvp.Value, bValue))
+                    {
+                        return false;
+                    }
                 }
             }
 
