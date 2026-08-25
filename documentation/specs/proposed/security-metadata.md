@@ -118,7 +118,7 @@ An opt-out mechanism would allow usage of properly denoted tasks with plain stri
 There needs to be a way how user specifies which data should be redacted from logs. We have several options:
 
  * New data type - this is part of the [North Star vision](#north-star--longer-term-vision), but is out of scope for the initial iteration.
- * [Not recommended] Denoting those via some metadata on a definition of the data to be redacted - this has two main drawbacks - a) For some data types (properties, metadata) we'd need new constructs how to attach additional info (property metadata; item meta-metadata). b) some data can be defined implicitly or dynamicaly
+ * [Not recommended] Denoting those via some metadata on a definition of the data to be redacted - this has two main drawbacks - a) For some data types (properties, metadata) we'd need new constructs how to attach additional info (property metadata; item meta-metadata). b) some data can be defined implicitly or dynamically
  * Property with global scope - e.g. 
    ```xml
    <DataToRedactFromLogs>Foo;Bar;Baz->SomeMetadata;MyItem->*</DataToRedactFromLogs>
