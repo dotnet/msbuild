@@ -16,11 +16,10 @@ namespace Microsoft.Build.BackEnd
     /// This class should only be used when in multi-threaded mode. Traditional multi-proc builds
     /// have different semantics and should not use this routing logic.
     /// <para>
-    /// The attribute is the only routing signal. Implementing <see cref="Microsoft.Build.Framework.IMultiThreadableTask"/>
-    /// does not opt a task into in-process execution: <c>Microsoft.Build.Utilities.ToolTask</c> implements that
-    /// interface, so honoring it here would silently opt in every ToolTask-derived task in the ecosystem, none of which
-    /// have been reviewed for thread safety. The interface instead controls whether the engine injects a
-    /// TaskEnvironment into the task, which TaskExecutionHost handles separately.
+    /// The attribute is the only routing signal. <see cref="Microsoft.Build.Framework.IMultiThreadableTask"/> is
+    /// deliberately not consulted here: <c>Microsoft.Build.Utilities.ToolTask</c> implements it, so honoring it
+    /// would silently opt in every ToolTask-derived task in the ecosystem. The interface instead controls
+    /// TaskEnvironment injection, which TaskExecutionHost handles separately.
     /// </para>
     /// </remarks>
     internal static class TaskRouter

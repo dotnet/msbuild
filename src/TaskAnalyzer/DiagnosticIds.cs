@@ -47,5 +47,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>Task implements IMultiThreadableTask but lacks [MSBuildMultiThreadableTask], so it still runs in an out-of-proc TaskHost.</summary>
         public const string MissingMultiThreadableTaskAttribute = "MSBuildTask0013";
+
+        /// <summary>[MSBuildMultiThreadableTask] is applied to a type that is not an MSBuild task, where it has no effect.</summary>
+        public const string MultiThreadableTaskAttributeOnNonTask = "MSBuildTask0014";
     }
 }

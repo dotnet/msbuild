@@ -17,6 +17,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// </para>
     /// <para>
     /// Declaring one without the other is legal but usually unintended, and both halves fail silently.
+    /// The attribute is also reported when it is applied to a type that is not a task at all, where
+    /// nothing reads it.
     /// </para>
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
@@ -27,7 +29,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         public override ImmutableArray<DiagnosticDescriptor> SupportedDiagnostics { get; } =
             ImmutableArray.Create(
                 DiagnosticDescriptors.TaskEnvironmentNeverAssigned,
-                DiagnosticDescriptors.MissingMultiThreadableTaskAttribute);
+                DiagnosticDescriptors.MissingMultiThreadableTaskAttribute,
+                DiagnosticDescriptors.MultiThreadableTaskAttributeOnNonTask);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -70,17 +73,34 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         {
             var type = (INamedTypeSymbol)context.Symbol;
 
+            if (type.TypeKind != TypeKind.Class)
+            {
+                return;
+            }
+
+            bool hasAttribute = HasMultiThreadableTaskAttribute(type, attributeType);
+
+            if (!SharedAnalyzerHelpers.ImplementsInterface(type, taskType))
+            {
+                // TaskRouter only inspects types the engine is about to run as a task, so the routing
+                // attribute does nothing here. This usually means it landed on a helper type, or on the
+                // wrong class of a multi-class file, leaving the real task unmarked.
+                if (hasAttribute)
+                {
+                    ReportOnType(context, DiagnosticDescriptors.MultiThreadableTaskAttributeOnNonTask, type);
+                }
+
+                return;
+            }
+
             // Abstract types are never instantiated by the engine, and the routing attribute is not
             // inherited, so neither declaration is meaningful on them.
-            if (type.TypeKind != TypeKind.Class ||
-                type.IsAbstract ||
-                !SharedAnalyzerHelpers.ImplementsInterface(type, taskType))
+            if (type.IsAbstract)
             {
                 return;
             }
 
             bool implementsInterface = SharedAnalyzerHelpers.ImplementsInterface(type, multiThreadableTaskType);
-            bool hasAttribute = HasMultiThreadableTaskAttribute(type, attributeType);
 
             if (hasAttribute && !implementsInterface)
             {

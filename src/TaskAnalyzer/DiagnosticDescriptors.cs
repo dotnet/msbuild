@@ -130,6 +130,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             isEnabledByDefault: false,
             description: "Only [MSBuildMultiThreadableTask] causes a task to run in-process in multithreaded mode; IMultiThreadableTask controls TaskEnvironment injection alone. Implementing the interface without the attribute is a valid intermediate state -- the task resolves paths correctly while remaining isolated in a TaskHost -- so this rule is disabled by default. Enable it once a codebase intends every multithreadable task to also be routed in-process. Only a type that declares the interface in its own base list is reported: ToolTask implements IMultiThreadableTask, so an inherited implementation says nothing about the derived task's intent.");
 
+        public static readonly DiagnosticDescriptor MultiThreadableTaskAttributeOnNonTask = new(
+            id: DiagnosticIds.MultiThreadableTaskAttributeOnNonTask,
+            title: "[MSBuildMultiThreadableTask] applied to a type that is not an MSBuild task",
+            messageFormat: "Type '{0}' is marked with [MSBuildMultiThreadableTask] but does not implement ITask, so the attribute has no effect",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "[MSBuildMultiThreadableTask] is read by TaskRouter to decide whether a task runs in-process or in an out-of-proc TaskHost sidecar. TaskRouter only ever inspects types the engine is about to execute as tasks, so the attribute is meaningless on a type that does not implement ITask. Applying it there usually means it was placed on a helper type, or on the wrong class of a multi-class file, leaving the actual task unmarked and still routed to a TaskHost.");
+
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
             TaskEnvironmentRequired,
@@ -143,6 +152,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             CultureSensitiveTaskItemType,
             PreferTaskEnvironmentConstructorInjection,
             TaskEnvironmentNeverAssigned,
-            MissingMultiThreadableTaskAttribute);
+            MissingMultiThreadableTaskAttribute,
+            MultiThreadableTaskAttributeOnNonTask);
     }
 }

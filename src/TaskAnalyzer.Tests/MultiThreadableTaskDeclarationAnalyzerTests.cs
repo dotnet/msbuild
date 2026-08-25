@@ -212,13 +212,62 @@ public class MultiThreadableTaskDeclarationAnalyzerTests
         diagnostics.ShouldBeEmpty();
     }
 
+    /// <summary>
+    /// TaskRouter only inspects types the engine is about to run as a task, so the attribute does
+    /// nothing on a type that is not one.
+    /// </summary>
     [Fact]
-    public async Task NonTaskTypeWithTaskEnvironmentProperty_DoesNotProduceDiagnostic()
+    public async Task AttributeOnNonTaskType_ProducesWarning()
     {
         var diagnostics = await GetDiagnosticsAsync("""
             using Microsoft.Build.Framework;
 
             [MSBuildMultiThreadableTask]
+            public class NotATask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = null!;
+            }
+            """);
+
+        Diagnostic diagnostic = diagnostics.Single();
+        diagnostic.Id.ShouldBe(DiagnosticIds.MultiThreadableTaskAttributeOnNonTask);
+        diagnostic.Severity.ShouldBe(DiagnosticSeverity.Warning);
+        diagnostic.GetMessage().ShouldContain("NotATask");
+    }
+
+    /// <summary>
+    /// The shape the rule is really aimed at: the attribute lands on a helper type in a file that also
+    /// declares the task, so the task itself is left unmarked and still routed to a TaskHost.
+    /// </summary>
+    [Fact]
+    public async Task AttributeOnHelperTypeBesideTask_ReportsOnlyTheHelper()
+    {
+        var diagnostics = await GetDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+
+            [MSBuildMultiThreadableTask]
+            public class MyTaskHelper
+            {
+                public string Value { get; set; } = "";
+            }
+
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute() => true;
+            }
+            """);
+
+        Diagnostic diagnostic = diagnostics.Single();
+        diagnostic.Id.ShouldBe(DiagnosticIds.MultiThreadableTaskAttributeOnNonTask);
+        diagnostic.GetMessage().ShouldContain("MyTaskHelper");
+    }
+
+    [Fact]
+    public async Task NonTaskTypeWithoutAttribute_DoesNotProduceDiagnostic()
+    {
+        var diagnostics = await GetDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+
             public class NotATask
             {
                 public TaskEnvironment TaskEnvironment { get; set; } = null!;
@@ -363,7 +412,8 @@ public class MultiThreadableTaskDeclarationAnalyzerTests
         return diagnostics
             .Where(diagnostic =>
                 diagnostic.Id == DiagnosticIds.TaskEnvironmentNeverAssigned ||
-                diagnostic.Id == DiagnosticIds.MissingMultiThreadableTaskAttribute)
+                diagnostic.Id == DiagnosticIds.MissingMultiThreadableTaskAttribute ||
+                diagnostic.Id == DiagnosticIds.MultiThreadableTaskAttributeOnNonTask)
             .ToArray();
     }
 }
