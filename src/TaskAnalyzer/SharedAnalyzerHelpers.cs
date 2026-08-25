@@ -20,9 +20,32 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// The analyzer configuration key controlling analysis scope.
         /// Values: "multithreadable_only" (default) | "all"
         /// </summary>
+        internal const string EnabledOptionKey = "msbuild_task_analyzer.enabled";
+        internal const string EnabledPropertyKey = "MSBuildTaskAnalyzerEnabled";
         internal const string ScopeOptionKey = "msbuild_task_analyzer.scope";
+        internal const string ScopePropertyKey = "MSBuildTaskAnalyzerScope";
         internal const string ScopeAll = "all";
         internal const string ScopeMultiThreadableOnly = "multithreadable_only";
+
+        /// <summary>
+        /// Returns false only when the analyzer is explicitly disabled.
+        /// Missing and invalid values keep the analyzer enabled.
+        /// </summary>
+        internal static bool IsAnalyzerEnabled(AnalyzerConfigOptionsProvider optionsProvider)
+        {
+            if (optionsProvider.GlobalOptions.TryGetValue($"build_property.{EnabledPropertyKey}", out var enabledValue) &&
+                !string.IsNullOrWhiteSpace(enabledValue))
+            {
+                return !bool.TryParse(enabledValue, out bool enabled) || enabled;
+            }
+
+            if (optionsProvider.GlobalOptions.TryGetValue(EnabledOptionKey, out enabledValue))
+            {
+                return !bool.TryParse(enabledValue, out bool enabled) || enabled;
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Reads the scope option from the analyzer config options provider.
@@ -30,8 +53,13 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// </summary>
         internal static bool ReadAnalyzeAllTasksOption(AnalyzerConfigOptionsProvider optionsProvider)
         {
-            if (optionsProvider.GlobalOptions.TryGetValue($"build_property.{ScopeOptionKey}", out var scopeValue) ||
-                optionsProvider.GlobalOptions.TryGetValue(ScopeOptionKey, out scopeValue))
+            if (optionsProvider.GlobalOptions.TryGetValue($"build_property.{ScopePropertyKey}", out var scopeValue) &&
+                !string.IsNullOrWhiteSpace(scopeValue))
+            {
+                return string.Equals(scopeValue, ScopeAll, StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (optionsProvider.GlobalOptions.TryGetValue(ScopeOptionKey, out scopeValue))
             {
                 return string.Equals(scopeValue, ScopeAll, StringComparison.OrdinalIgnoreCase);
             }

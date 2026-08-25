@@ -33,6 +33,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         private static void OnCompilationStart(CompilationStartAnalysisContext compilationContext)
         {
+            if (!SharedAnalyzerHelpers.IsAnalyzerEnabled(compilationContext.Options.AnalyzerConfigOptionsProvider))
+            {
+                return;
+            }
+
             var iTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.ITaskFullName);
             if (iTaskType is null)
             {

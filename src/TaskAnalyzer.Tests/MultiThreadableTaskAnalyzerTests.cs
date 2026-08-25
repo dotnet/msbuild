@@ -1225,7 +1225,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task PathGetTempPath_InMultiThreadable_ProducesWarning()
+    public async Task PathGetTempPath_InMultiThreadable_NoDiagnosticUntilReplacementApiShips()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
@@ -1241,11 +1241,11 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
     [Fact]
-    public async Task PathGetTempFileName_InMultiThreadable_ProducesWarning()
+    public async Task PathGetTempFileName_InMultiThreadable_NoDiagnosticUntilEquivalentApiShips()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.IO;
@@ -1261,11 +1261,11 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
     [Fact]
-    public async Task EnvironmentGetFolderPath_InMultiThreadable_ProducesWarning()
+    public async Task EnvironmentGetFolderPath_InMultiThreadable_NoDiagnosticWithoutEquivalentReplacement()
     {
         var diags = await GetDiagnosticsAsync("""
             using System;
@@ -1281,7 +1281,7 @@ public class MultiThreadableTaskAnalyzerTests
             }
             """);
 
-        diags.ShouldContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
     [Fact]
@@ -1339,7 +1339,7 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
-    public async Task ProcessStartWithPSI_InMultiThreadable_ProducesWarning()
+    public async Task ProcessStartWithTaskEnvironmentPSI_InMultiThreadable_NoDiagnostic()
     {
         var diags = await GetDiagnosticsAsync("""
             using System.Diagnostics;
@@ -1349,15 +1349,15 @@ public class MultiThreadableTaskAnalyzerTests
                 public TaskEnvironment TaskEnvironment { get; set; }
                 public override bool Execute()
                 {
-                    var psi = new ProcessStartInfo("cmd");
+                    var psi = TaskEnvironment.GetProcessStartInfo();
+                    psi.FileName = "cmd";
                     Process.Start(psi);
                     return true;
                 }
             }
             """);
 
-        // Should flag both: new ProcessStartInfo and Process.Start(ProcessStartInfo)
-        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).Count().ShouldBeGreaterThanOrEqualTo(2);
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.TaskEnvironmentRequired);
     }
 
     // ═══════════════════════════════════════════════════════════════════════

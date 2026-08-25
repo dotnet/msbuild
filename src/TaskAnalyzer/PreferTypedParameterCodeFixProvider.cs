@@ -562,8 +562,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         /// MSBuildTask0006: rewrites the site where a retyped path property is used. Handles three shapes:
         /// <list type="bullet">
         /// <item><c>new T(prop)</c> / <c>TaskEnvironment.GetAbsolutePath(prop)</c> collapses to <c>prop</c>.</item>
-        /// <item><c>Path.GetFullPath(prop)</c> (the banned normalization) collapses to <c>prop</c> for AbsolutePath,
-        /// or <c>prop.FullName</c> for FileInfo/DirectoryInfo, since the retyped value is already absolute.</item>
+        /// <item><c>Path.GetFullPath(prop)</c> becomes <c>prop.GetCanonicalForm().Value</c> for AbsolutePath,
+        /// or <c>prop.FullName</c> for FileInfo/DirectoryInfo, preserving canonicalization.</item>
         /// <item>A raw string consumption (<c>File.Delete(prop)</c>, <c>new FileStream(prop, ...)</c>) needs no edit
         /// for AbsolutePath (it converts to string implicitly), or <c>prop.FullName</c> for FileInfo/DirectoryInfo.</item>
         /// </list>
@@ -591,12 +591,11 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return true;
             }
 
-            // Banned normalization site: Path.GetFullPath(prop). The retyped value is already absolute, so the
-            // whole call collapses to the property (AbsolutePath, implicitly a string) or its absolute string.
+            // Banned normalization site: Path.GetFullPath(prop). Preserve its canonicalization and string result.
             if (IsPathGetFullPathInvocation(semanticModel, propertyAccess, cancellationToken, out var getFullPath))
             {
                 ExpressionSyntax replacement = (suggestedType == "AbsolutePath"
-                        ? (ExpressionSyntax)propertyAccess.WithoutTrivia()
+                        ? AppendCanonicalValue(propertyAccess)
                         : AppendFullName(propertyAccess))
                     .WithTriviaFrom(getFullPath)
                     .WithAdditionalAnnotations(Formatter.Annotation);
@@ -632,6 +631,20 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             return false;
+        }
+
+        private static MemberAccessExpressionSyntax AppendCanonicalValue(ExpressionSyntax expression)
+        {
+            InvocationExpressionSyntax canonicalForm = SyntaxFactory.InvocationExpression(
+                SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression,
+                    expression.WithoutTrivia(),
+                    SyntaxFactory.IdentifierName("GetCanonicalForm")));
+
+            return SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression,
+                canonicalForm,
+                SyntaxFactory.IdentifierName("Value"));
         }
 
         /// <summary>

@@ -53,6 +53,7 @@ internal static class TestHelpers
                 public AbsolutePath(string path) { Value = path; OriginalValue = path; }
                 public string Value { get; }
                 public string OriginalValue { get; }
+                public AbsolutePath GetCanonicalForm() => this;
                 public static implicit operator string(AbsolutePath p) => p.Value;
                 public bool Equals(AbsolutePath other) => Value == other.Value;
                 public override bool Equals(object? obj) => obj is AbsolutePath other && Equals(other);
@@ -153,13 +154,31 @@ internal static class TestHelpers
     /// Runs compiler diagnostics together with analyzers and suppressors and returns
     /// diagnostics reported for the primary test source file.
     /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetCompilerAndAnalyzerDiagnosticsAsync(
+    public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetCompilerAndAnalyzerDiagnosticsAsync(
         string source,
+        params DiagnosticAnalyzer[] analyzers)
+        => GetCompilerAndAnalyzerDiagnosticsAsync(
+            source,
+            new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty),
+            analyzers);
+
+    public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetCompilerAndAnalyzerDiagnosticsAsync(
+        string source,
+        AnalyzerConfigOptionsProvider optionsProvider,
+        params DiagnosticAnalyzer[] analyzers)
+        => GetCompilerAndAnalyzerDiagnosticsAsync(
+            source,
+            new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider),
+            analyzers);
+
+    private static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetCompilerAndAnalyzerDiagnosticsAsync(
+        string source,
+        AnalyzerOptions analyzerOptions,
         params DiagnosticAnalyzer[] analyzers)
     {
         var compilation = CreateCompilation(source);
         var options = new CompilationWithAnalyzersOptions(
-            new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty),
+            analyzerOptions,
             onAnalyzerException: null,
             concurrentAnalysis: true,
             logAnalyzerExecutionTime: false,
@@ -232,7 +251,7 @@ internal static class TestHelpers
 
         var globalOptions = new Dictionary<string, string>
         {
-            { $"build_property.{SharedAnalyzerHelpers.ScopeOptionKey}", scope }
+            { $"build_property.{SharedAnalyzerHelpers.ScopePropertyKey}", scope }
         };
         var optionsProvider = new TestAnalyzerConfigOptionsProvider(globalOptions);
         var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
@@ -283,7 +302,7 @@ internal static class TestHelpers
 
         var globalOptions = new Dictionary<string, string>
         {
-            { $"build_property.{SharedAnalyzerHelpers.ScopeOptionKey}", scope }
+            { $"build_property.{SharedAnalyzerHelpers.ScopePropertyKey}", scope }
         };
         var optionsProvider = new TestAnalyzerConfigOptionsProvider(globalOptions);
         var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
