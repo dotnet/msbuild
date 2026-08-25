@@ -665,7 +665,8 @@ namespace Microsoft.Build.UnitTests
             marshalled.GetMetadata("NameMeta").ShouldBe("%(Filename)");
             marshalled.GetMetadata("Other").ShouldBe("%(Filename)");
 
-            // Removing the task's value uncovers the item definition value again.
+            // The two origins were flattened into one dictionary when the item crossed the boundary, so removal
+            // leaves nothing behind. An engine item would uncover the item definition value here.
             marshalled.RemoveMetadata("NameMeta");
             marshalled.GetMetadata("NameMeta").ShouldBe("");
         }
@@ -713,8 +714,8 @@ namespace Microsoft.Build.UnitTests
 
         /// <summary>
         /// A task that clones its input, whether through <c>CopyMetadataTo</c> or the copy constructor that calls
-        /// it, must get the same values the engine item hands out. The destination has no notion of a value
-        /// unexpanded value, so the copy has to be made with expanded ones.
+        /// it, must get the same values the engine item hands out. The destination has no notion of an unexpanded
+        /// value, so the copy has to be made with expanded ones.
         /// </summary>
         [Fact]
         public void CopyingMetadataExpandsReferencesAcrossTaskHostBoundary()

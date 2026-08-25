@@ -127,5 +127,31 @@ namespace Microsoft.Build.UnitTests
         [InlineData("%(%(Filename)", "%(hello")]
         public void FindsAReferenceNestedInsideOneThatDoesNotResolve(string value, string expected)
             => Expand(value).ShouldBe(expected);
+
+        /// <summary>
+        /// The scan looks for '%' alone and tests the next character, because a single character search
+        /// vectorizes. These cases pin that it still agrees with searching for "%(" directly.
+        /// </summary>
+        [Theory]
+        [InlineData("", -1)]
+        [InlineData("%", -1)]
+        [InlineData("no marker here", -1)]
+        [InlineData("100% done", -1)]
+        [InlineData("50%", -1)]
+        [InlineData("%(", 0)]
+        [InlineData("a%(", 1)]
+        [InlineData("%x%(", 2)]
+        [InlineData("%%%(", 2)]
+        [InlineData("%a%b%(c", 4)]
+        [InlineData("trailing%", -1)]
+        public void FindsTheMetadataMarker(string value, int expected)
+            => BuiltInMetadataExpander.IndexOfMetadataMarker(value, 0).ShouldBe(expected);
+
+        [Theory]
+        [InlineData("%(Filename)%(Extension)", 11, 11)]
+        [InlineData("%(Filename)plain", 11, -1)]
+        [InlineData("abc", 3, -1)]
+        public void FindsTheMetadataMarkerFromAStartIndex(string value, int startIndex, int expected)
+            => BuiltInMetadataExpander.IndexOfMetadataMarker(value, startIndex).ShouldBe(expected);
     }
 }

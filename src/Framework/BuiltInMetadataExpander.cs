@@ -1,7 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
-using System;
 using Microsoft.NET.StringTools;
 
 namespace Microsoft.Build.Framework;
@@ -40,7 +39,7 @@ internal static class BuiltInMetadataExpander
         string? escapedRecursiveDir,
         ref ItemSpecModifiers.Cache cache)
     {
-        int index = escapedValue is null ? -1 : escapedValue.IndexOf("%(", StringComparison.Ordinal);
+        int index = escapedValue is null ? -1 : IndexOfMetadataMarker(escapedValue, 0);
 
         if (index < 0)
         {
@@ -71,14 +70,14 @@ internal static class BuiltInMetadataExpander
                         : ItemSpecModifiers.GetItemSpecModifier(escapedItemSpec, kind, currentDirectory: null, escapedDefiningProject, ref cache));
                     copiedUpTo = closingParenthesis + 1;
 
-                    index = escapedValue.IndexOf("%(", copiedUpTo, StringComparison.Ordinal);
+                    index = IndexOfMetadataMarker(escapedValue, copiedUpTo);
                 }
                 else
                 {
                     // This "%(" does not start a reference. Resume just after it rather than after the
                     // parenthesis, because a well formed reference can begin inside the text it spanned,
                     // as in "%(foo%(Filename)". The evaluation expander advances the same way.
-                    index = escapedValue.IndexOf("%(", index + 2, StringComparison.Ordinal);
+                    index = IndexOfMetadataMarker(escapedValue, index + 2);
                 }
             }
 
@@ -94,6 +93,35 @@ internal static class BuiltInMetadataExpander
         {
             builder?.Dispose();
         }
+    }
+
+    /// <summary>
+    ///  Finds the first <c>%(</c> at or after <paramref name="startIndex"/>, or -1 if there is none.
+    ///  Does not check that a well formed reference follows it.
+    /// </summary>
+    /// <remarks>
+    ///  <c>IndexOf(char)</c> vectorizes, and is significantly faster than an ordinal two-character search when
+    ///  the marker is absent, which is the usual case for a metadata value. So look for <c>%</c> alone and test
+    ///  the next character separately.
+    /// </remarks>
+    internal static int IndexOfMetadataMarker(string value, int startIndex)
+    {
+        int markerIndex = value.IndexOf('%', startIndex);
+
+        // A marker in the last position has no room for the parenthesis.
+        while (markerIndex >= 0 && markerIndex < value.Length - 1)
+        {
+            int nextIndex = markerIndex + 1;
+
+            if (value[nextIndex] == '(')
+            {
+                return markerIndex;
+            }
+
+            markerIndex = value.IndexOf('%', nextIndex);
+        }
+
+        return -1;
     }
 
     /// <summary>
