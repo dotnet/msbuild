@@ -17,8 +17,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// </para>
     /// <para>
     /// Declaring one without the other is legal but usually unintended, and both halves fail silently.
-    /// The attribute is also reported when it is applied to a type that is not a task at all, where
-    /// nothing reads it.
+    /// The attribute is also reported when it is applied to a type MSBuild never routes as a task --
+    /// one that is not a task at all, or an abstract task whose attribute no subclass inherits.
     /// </para>
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
@@ -30,7 +30,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             ImmutableArray.Create(
                 DiagnosticDescriptors.TaskEnvironmentNeverAssigned,
                 DiagnosticDescriptors.MissingMultiThreadableTaskAttribute,
-                DiagnosticDescriptors.MultiThreadableTaskAttributeOnNonTask);
+                DiagnosticDescriptors.MultiThreadableTaskAttributeHasNoEffect);
 
         public override void Initialize(AnalysisContext context)
         {
@@ -87,16 +87,26 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // wrong class of a multi-class file, leaving the real task unmarked.
                 if (hasAttribute)
                 {
-                    ReportOnType(context, DiagnosticDescriptors.MultiThreadableTaskAttributeOnNonTask, type);
+                    ReportNoEffect(context, type, "it does not implement ITask");
                 }
 
                 return;
             }
 
-            // Abstract types are never instantiated by the engine, and the routing attribute is not
-            // inherited, so neither declaration is meaningful on them.
+            // The engine never instantiates an abstract type, and TaskRouter reads the attribute with
+            // inherit: false off the concrete type it did instantiate. An attribute here reaches nothing:
+            // every derived task is still routed to a TaskHost. Neither MSBuildTask0012 nor
+            // MSBuildTask0013 is meaningful on an abstract type either.
             if (type.IsAbstract)
             {
+                if (hasAttribute)
+                {
+                    ReportNoEffect(
+                        context,
+                        type,
+                        "the engine never instantiates an abstract task and the attribute is not inherited, so derived tasks do not pick it up");
+                }
+
                 return;
             }
 
@@ -200,6 +210,27 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 if (location.IsInSource)
                 {
                     context.ReportDiagnostic(Diagnostic.Create(descriptor, location, type.Name));
+                    return;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Reports that the routing attribute cannot take effect on this type, naming the reason so the
+        /// two shapes -- not a task at all, and an abstract task whose attribute no subclass inherits --
+        /// are distinguishable in the message.
+        /// </summary>
+        private static void ReportNoEffect(SymbolAnalysisContext context, INamedTypeSymbol type, string reason)
+        {
+            foreach (Location location in type.Locations)
+            {
+                if (location.IsInSource)
+                {
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        DiagnosticDescriptors.MultiThreadableTaskAttributeHasNoEffect,
+                        location,
+                        type.Name,
+                        reason));
                     return;
                 }
             }

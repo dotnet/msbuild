@@ -173,10 +173,12 @@ public class MultiThreadableTaskDeclarationAnalyzerTests
 
     /// <summary>
     /// The attribute is not inherited (AttributeUsage sets Inherited = false) and TaskRouter reads it
-    /// with inherit: false, so a derived task does not pick it up from its base.
+    /// with inherit: false, so a derived task does not pick it up from its base. Only the base is
+    /// reported -- the derived task itself is clean, which is precisely why the diagnostic is useful:
+    /// nothing else signals that the derived task is still routed to a TaskHost.
     /// </summary>
     [Fact]
-    public async Task AttributeOnBaseIsNotInheritedByDerivedTask_DoesNotProduceDiagnostic()
+    public async Task AttributeOnAbstractBase_ReportsOnlyTheBase()
     {
         var diagnostics = await GetDiagnosticsAsync("""
             using Microsoft.Build.Framework;
@@ -193,11 +195,17 @@ public class MultiThreadableTaskDeclarationAnalyzerTests
             }
             """);
 
-        diagnostics.ShouldBeEmpty();
+        Diagnostic diagnostic = diagnostics.Single();
+        diagnostic.Id.ShouldBe(DiagnosticIds.MultiThreadableTaskAttributeHasNoEffect);
+        diagnostic.GetMessage().ShouldContain("MyTaskBase");
     }
 
+    /// <summary>
+    /// TaskRouter reads the attribute with inherit: false off the concrete type it instantiated, and it
+    /// never instantiates an abstract one, so the attribute reaches no derived task.
+    /// </summary>
     [Fact]
-    public async Task AbstractTask_DoesNotProduceDiagnostic()
+    public async Task AttributeOnAbstractTask_ProducesWarning()
     {
         var diagnostics = await GetDiagnosticsAsync("""
             using Microsoft.Build.Framework;
@@ -206,6 +214,34 @@ public class MultiThreadableTaskDeclarationAnalyzerTests
             public abstract class MyTask : Microsoft.Build.Utilities.Task
             {
                 public TaskEnvironment TaskEnvironment { get; set; } = null!;
+            }
+            """);
+
+        Diagnostic diagnostic = diagnostics.Single();
+        diagnostic.Id.ShouldBe(DiagnosticIds.MultiThreadableTaskAttributeHasNoEffect);
+        diagnostic.Severity.ShouldBe(DiagnosticSeverity.Warning);
+        diagnostic.GetMessage().ShouldContain("MyTask");
+        diagnostic.GetMessage().ShouldContain("not inherited");
+    }
+
+    /// <summary>
+    /// The correct shape: the shared base carries no attribute and each concrete task applies its own.
+    /// </summary>
+    [Fact]
+    public async Task AbstractTaskWithoutAttribute_DoesNotProduceDiagnostic()
+    {
+        var diagnostics = await GetDiagnosticsAsync("""
+            using Microsoft.Build.Framework;
+
+            public abstract class MyTaskBase : Microsoft.Build.Utilities.Task
+            {
+                public string Shared { get; set; } = "";
+            }
+
+            [MSBuildMultiThreadableTask]
+            public class MyTask : MyTaskBase
+            {
+                public override bool Execute() => true;
             }
             """);
 
@@ -230,7 +266,7 @@ public class MultiThreadableTaskDeclarationAnalyzerTests
             """);
 
         Diagnostic diagnostic = diagnostics.Single();
-        diagnostic.Id.ShouldBe(DiagnosticIds.MultiThreadableTaskAttributeOnNonTask);
+        diagnostic.Id.ShouldBe(DiagnosticIds.MultiThreadableTaskAttributeHasNoEffect);
         diagnostic.Severity.ShouldBe(DiagnosticSeverity.Warning);
         diagnostic.GetMessage().ShouldContain("NotATask");
     }
@@ -258,7 +294,7 @@ public class MultiThreadableTaskDeclarationAnalyzerTests
             """);
 
         Diagnostic diagnostic = diagnostics.Single();
-        diagnostic.Id.ShouldBe(DiagnosticIds.MultiThreadableTaskAttributeOnNonTask);
+        diagnostic.Id.ShouldBe(DiagnosticIds.MultiThreadableTaskAttributeHasNoEffect);
         diagnostic.GetMessage().ShouldContain("MyTaskHelper");
     }
 
@@ -413,7 +449,7 @@ public class MultiThreadableTaskDeclarationAnalyzerTests
             .Where(diagnostic =>
                 diagnostic.Id == DiagnosticIds.TaskEnvironmentNeverAssigned ||
                 diagnostic.Id == DiagnosticIds.MissingMultiThreadableTaskAttribute ||
-                diagnostic.Id == DiagnosticIds.MultiThreadableTaskAttributeOnNonTask)
+                diagnostic.Id == DiagnosticIds.MultiThreadableTaskAttributeHasNoEffect)
             .ToArray();
     }
 }

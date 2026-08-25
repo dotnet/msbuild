@@ -130,14 +130,14 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             isEnabledByDefault: false,
             description: "Only [MSBuildMultiThreadableTask] causes a task to run in-process in multithreaded mode; IMultiThreadableTask controls TaskEnvironment injection alone. Implementing the interface without the attribute is a valid intermediate state -- the task resolves paths correctly while remaining isolated in a TaskHost -- so this rule is disabled by default. Enable it once a codebase intends every multithreadable task to also be routed in-process. Only a type that declares the interface in its own base list is reported: ToolTask implements IMultiThreadableTask, so an inherited implementation says nothing about the derived task's intent.");
 
-        public static readonly DiagnosticDescriptor MultiThreadableTaskAttributeOnNonTask = new(
-            id: DiagnosticIds.MultiThreadableTaskAttributeOnNonTask,
-            title: "[MSBuildMultiThreadableTask] applied to a type that is not an MSBuild task",
-            messageFormat: "Type '{0}' is marked with [MSBuildMultiThreadableTask] but does not implement ITask, so the attribute has no effect",
+        public static readonly DiagnosticDescriptor MultiThreadableTaskAttributeHasNoEffect = new(
+            id: DiagnosticIds.MultiThreadableTaskAttributeHasNoEffect,
+            title: "[MSBuildMultiThreadableTask] has no effect on this type",
+            messageFormat: "[MSBuildMultiThreadableTask] on type '{0}' has no effect because {1}",
             category: "MSBuild.TaskAuthoring",
             defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
-            description: "[MSBuildMultiThreadableTask] is read by TaskRouter to decide whether a task runs in-process or in an out-of-proc TaskHost sidecar. TaskRouter only ever inspects types the engine is about to execute as tasks, so the attribute is meaningless on a type that does not implement ITask. Applying it there usually means it was placed on a helper type, or on the wrong class of a multi-class file, leaving the actual task unmarked and still routed to a TaskHost.");
+            description: "TaskRouter reads [MSBuildMultiThreadableTask] with inherit: false, off the concrete type the engine has just instantiated as a task. The attribute therefore only has an effect on a non-abstract class that implements ITask. On a type that is not a task, nothing ever reads it. On an abstract task, the engine never instantiates that type, and because the attribute is not inherited the concrete subclasses do not pick it up -- so every one of them is still routed to an out-of-proc TaskHost. Both shapes usually mean the attribute was applied to the wrong class: a helper type beside the real task, or a shared base instead of each task that derives from it.");
 
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
@@ -153,6 +153,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             PreferTaskEnvironmentConstructorInjection,
             TaskEnvironmentNeverAssigned,
             MissingMultiThreadableTaskAttribute,
-            MultiThreadableTaskAttributeOnNonTask);
+            MultiThreadableTaskAttributeHasNoEffect);
     }
 }
