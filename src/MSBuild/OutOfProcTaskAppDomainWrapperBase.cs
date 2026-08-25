@@ -12,6 +12,7 @@ using Microsoft.Build.BackEnd;
 using Microsoft.Build.Eventing;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
+using Microsoft.Build.Framework.Utilities;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -455,19 +456,17 @@ namespace Microsoft.Build.CommandLine
         /// Logs errors from TaskLoader
         /// </summary>
         private void LogErrorDelegate(string taskLocation, int taskLine, int taskColumn, string message, params object[] messageArgs)
-        {
-            buildEngine.LogErrorEvent(new BuildErrorEventArgs(
-                null,
-                null,
-                taskLocation,
-                taskLine,
-                taskColumn,
-                0,
-                0,
-                ResourceUtilities.FormatString(AssemblyResources.GetString(message), messageArgs),
-                null,
-                taskName));
-        }
+            => buildEngine.LogErrorEvent(new BuildErrorEventArgs(
+                subcategory: null,
+                code: null,
+                file: taskLocation,
+                lineNumber: taskLine,
+                columnNumber: taskColumn,
+                endLineNumber: 0,
+                endColumnNumber: 0,
+                message: MessageFormatter.Format(AssemblyResources.GetString(message), messageArgs),
+                helpKeyword: null,
+                senderName: taskName));
 
         /// <summary>
         /// Filters null elements from a string[] task output.

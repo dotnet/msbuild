@@ -3,10 +3,10 @@
   <Import Project="Version.Details.props" />
 
   <PropertyGroup>
-    <VersionPrefix>18.10.0</VersionPrefix>
+    <VersionPrefix>18.11.0</VersionPrefix>
     <PreReleaseVersionLabel>1</PreReleaseVersionLabel>
     <PreReleaseVersionLabel Condition="'$(IsExperimental)' == 'true'">$(PreReleaseVersionLabel)-test</PreReleaseVersionLabel>
-    <PackageValidationBaselineVersion>18.9.0-preview-26330-01</PackageValidationBaselineVersion>
+    <PackageValidationBaselineVersion>18.10.0-1.26378.2</PackageValidationBaselineVersion>
     <AssemblyVersion>15.1.0.0</AssemblyVersion>
 
     <!--
@@ -19,13 +19,14 @@
 
   <!-- Arcade features -->
   <PropertyGroup>
-    <UsingToolIbcOptimization>true</UsingToolIbcOptimization>
-    <UsingToolVisualStudioIbcTraining>true</UsingToolVisualStudioIbcTraining>
+    <UsingToolIbcOptimization Condition="'$(DotNetBuild)' != 'true'">true</UsingToolIbcOptimization>
+    <UsingToolVisualStudioIbcTraining Condition="'$(DotNetBuild)' != 'true'">true</UsingToolVisualStudioIbcTraining>
     <UsingToolSymbolUploader>true</UsingToolSymbolUploader>
     <UsingToolVSSDK>true</UsingToolVSSDK>
     <UsingToolNuGetRepack>true</UsingToolNuGetRepack>
 
-    <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
+    <!-- Tools.csproj's SwixBuild PackageReference reads this exact property name; MicroBuildPluginsSwixBuildVersion (no Microsoft/VisualStudioEng prefix) is a different, unused property. -->
+    <MicrosoftVisualStudioEngMicroBuildPluginsSwixBuildVersion>1.1.973</MicrosoftVisualStudioEngMicroBuildPluginsSwixBuildVersion>
   </PropertyGroup>
 
   <!-- Production Dependencies -->

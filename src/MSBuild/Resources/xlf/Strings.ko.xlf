@@ -218,17 +218,16 @@
         <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
                      터미널 로거에 대한 매개 변수입니다. (약식: -tlp)
                      사용 가능한 매개 변수입니다.
-                        default--터미널의 기본 동작을 지정합니다.
-                        로거입니다. 다음 값 중 하나가 필요합니다.
-                           - 'on', 'true'는 terminalLogger를 사용하도록 강제하며,
-                            이는 사용하지 않도록 설정된 경우에도 마찬가지입니다.
-                           - 'off', 'false'는 terminalLogger를 사용하지 않도록 강제하며,
-                            이는 사용하도록 설정된 경우에도 마찬가지입니다.
-                           - 'auto'는 터미널이
-                            지원하고 세션이 리디렉션되지 않을 때 TerminalLogger를 사용하도록 설정합니다.
+                        default--터미널 로거의 기본 동작을
+                        지정합니다. 다음 값 중 하나가 필요합니다.
+                           - `on`, `true`는 비활성화된 경우에도 terminalLogger를
+                            사용하도록 강제합니다.
+                           - `off`, `false`는 활성화된 경우에도 terminalLogger를
+                            사용하지 않도록 강제합니다.
+                           - `auto`는 터미널이 지원하고 세션이
+                            리디렉션되지 않을 때 TerminalLogger를 활성화합니다.
                             stdout/stderr
-                        verbosity--이
-로거에 대한 -verbosity 설정을
+                        verbosity--이 로거에 대한 -verbosity 설정을
                         재정의합니다.
                         showCommandLine--TaskCommandLineEvent 메시지를 표시합니다.
 
@@ -241,7 +240,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
-        <source>  -multithreaded
+        <source>  -multithreaded[:true|false]
                      Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
@@ -254,14 +253,13 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
+        <target state="translated">  -multithreaded[:true|false]
                      MSBuild에서 실험적 다중 스레드 모드를 활성화합니다.
                      즉, MSBuild는 여러 스레드를 사용하여
                      프로젝트를 병렬로 빌드합니다.
                      여러 프로세스 대신에 말이죠.
                      이 옵션은 지원되지 않습니다.
-                     사용되는 최대 스레드 수는 
-에 의해 결정됩니다.
+                     사용되는 최대 스레드 수는 에 의해 결정됩니다
                      -maxCpuCount 스위치에 의해 결정됩니다.
                      다중 스레드 모드가 켜져 있고
                      MSBUILDFORCEALLTASKSOUTOFPROC=1인 경우
@@ -313,6 +311,16 @@
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidMultiThreadedValue">
+        <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1072: 다중 스레드 모드 값이 유효하지 않습니다. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1072: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -multithreaded parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -383,62 +391,62 @@
       </trans-unit>
       <trans-unit id="MSBuildServerConnectFailed">
         <source>could not connect to the server within the timeout window; the server may have failed to start</source>
-        <target state="needs-review-translation">제한 시간 내에 서버에 연결할 수 없었습니다. 서버가 시작되지 못했을 수 있습니다</target>
+        <target state="translated">제한 시간 내에 서버에 연결할 수 없었습니다. 서버가 시작되지 못했을 수 있습니다</target>
         <note>LOCALIZATION: No format arguments. Used for any connect failure when the server's exit code is not known — covers both pipe-connect timeouts and non-timeout I/O errors during the connect attempt. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerCrashedOnLaunch">
         <source>the server process exited with code {0} immediately after launch</source>
-        <target state="needs-review-translation">서버 프로세스가 시작 직후 코드 {0}(으)로 종료되었습니다</target>
+        <target state="translated">서버 프로세스가 시작 직후 코드 {0}(으)로 종료되었습니다</target>
         <note>LOCALIZATION: {0} is the integer process exit code; rendered with InvariantCulture as a decimal integer, do not localize the digits. This message is concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerLaunchError">
         <source>the server process could not be launched</source>
-        <target state="needs-review-translation">서버 프로세스를 시작할 수 없습니다</target>
+        <target state="translated">서버 프로세스를 시작할 수 없습니다</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerNodeReused">
         <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
-        <target state="new">Reusing the running MSBuild Server node for this build (process ID {0}).</target>
+        <target state="translated">이 빌드에 대해 실행 중인 MSBuild Server 노드를 다시 사용합니다(프로세스 ID {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawned">
         <source>MSBuild Server node started for this build (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build (process ID {0}).</target>
+        <target state="translated">이 빌드에서 MSBuild Server 노드가 시작되었습니다(프로세스 ID {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNodeSpawnedShortLived">
         <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
-        <target state="new">MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</target>
+        <target state="translated">이 빌드에서만 MSBuild Server 노드가 시작되었습니다. 이후에는 종료됩니다(프로세스 ID {0}).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerNotUsedForBuild">
         <source>MSBuild Server was requested but not used for this build: {0}.</source>
-        <target state="new">MSBuild Server was requested but not used for this build: {0}.</target>
+        <target state="translated">MSBuild Server가 요청되었지만 이 빌드에는 사용되지 않았습니다: {0}.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonBusy">
         <source>the server was busy with another build</source>
-        <target state="new">the server was busy with another build</target>
+        <target state="translated">서버가 다른 빌드를 처리하느라 바빴습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
         <source>this invocation is not compatible with MSBuild Server</source>
-        <target state="new">this invocation is not compatible with MSBuild Server</target>
+        <target state="translated">이 호출은 MSBuild Server와 호환되지 않습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
         <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
-        <target state="new">node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</target>
+        <target state="translated">노드 재사용이 사용하지 않도록 설정되어 있습니다(-nodeReuse:false 또는 MSBUILDDISABLENODEREUSE=1).</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
         <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
-        <target state="new">the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</target>
+        <target state="translated">MSBUILDENSURESTDOUTFORTASKPROCESSES 이스케이프 해치가 사용하도록 설정되어 있습니다.</target>
         <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
         <source>the current server state could not be determined</source>
-        <target state="needs-review-translation">현재 서버 상태를 확인할 수 없습니다</target>
+        <target state="translated">현재 서버 상태를 확인할 수 없습니다</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
       </trans-unit>
       <trans-unit id="MSBuildServerUnavailable">
