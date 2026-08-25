@@ -14,16 +14,16 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 
 | ID | Severity | Scope | Title |
 |---|---|---|---|
-| **MSBuildTask0001** | Error | MT tasks by default; all tasks in migration mode | API is never safe in MSBuild tasks |
-| **MSBuildTask0002** | Warning | MT tasks by default; all tasks in migration mode | API requires `TaskEnvironment` alternative |
-| **MSBuildTask0003** | Warning | MT tasks by default; all tasks in migration mode | File system API requires absolute path |
-| **MSBuildTask0004** | Warning | MT tasks by default; all tasks in migration mode | API may cause issues in multithreaded tasks |
-| **MSBuildTask0005** | Warning | MT tasks by default; all tasks in migration mode | Transitive unsafe API usage in task call chain |
+| **MSBuildTask0001** | Error | All `ITask` implementations | API is never safe in MSBuild tasks |
+| **MSBuildTask0002** | Warning | All `ITask` implementations | API requires `TaskEnvironment` alternative |
+| **MSBuildTask0003** | Warning | All `ITask` implementations | File system API requires absolute path |
+| **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
+| **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
 | **MSBuildTask0006** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer typed path parameter over string |
 | **MSBuildTask0007** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
 | **MSBuildTask0008** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
-| **MSBuildTask0009** | Error | All `ITask` implementations with typed task properties | `ITaskItem<T>` used with unsupported type argument |
-| **MSBuildTask0010** | Warning | All `ITask` implementations with typed task properties | `ITaskItem<T>` relies on culture-sensitive conversion |
+| **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
+| **MSBuildTask0010** | Warning | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
 | **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
 
 ### MSBuildTask0001 — Critical: No Safe Alternative
@@ -230,18 +230,18 @@ For a reference-typed target (`FileInfo`/`DirectoryInfo`) the guard is a null-co
 
 ### MSBuildTask0009 — Unsupported `ITaskItem<T>` Type Argument
 
-When a task property is typed as `ITaskItem<T>` or `ITaskItem<T>[]` but `T` is not supported by MSBuild's task parameter binder, an **Error** is emitted. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.
+When a task property is typed as `ITaskItem<T>` or `ITaskItem<T>[]` but `T` is not supported by MSBuild's task parameter binder, a **Warning** is emitted. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.
 
 **Directly parsed type arguments:** `string`, `bool`, `AbsolutePath`, `FileInfo`, `DirectoryInfo`.
 
 The binder also accepts `char`, numeric primitives, `decimal`, and `DateTime`, but MSBuildTask0010 rejects those types because they rely on `Convert.ChangeType`.
 
 ```csharp
-// ❌ MSBuildTask0009: Task property 'Id' uses ITaskItem<Guid> but 'Guid' is not supported
+// ⚠️ MSBuildTask0009: Task property 'Id' uses ITaskItem<Guid> but 'Guid' is not supported
 public class MyTask : Task
 {
-    public ITaskItem<System.Guid> Id { get; set; }       // error
-    public ITaskItem<System.TimeSpan>[] Durations { get; set; }  // error
+    public ITaskItem<System.Guid> Id { get; set; }       // warning
+    public ITaskItem<System.TimeSpan>[] Durations { get; set; }  // warning
     public ITaskItem<int> Count { get; set; }             // MSBuildTask0010 warning
 }
 ```
@@ -289,24 +289,15 @@ The engine prefers this constructor when it is present. A public parameterless c
 
 ## Analysis Scope
 
-The default `multithreadable_only` scope prevents MT-specific warnings from affecting regular tasks. It recognizes `IMultiThreadableTask`, `[MSBuildMultiThreadableTask]`, and `[MSBuildMultiThreadableTaskAnalyzed]` as MT opt-ins.
+The analyzer determines what to check based on the type declaration:
 
 | Type | Rules Applied |
 |---|---|
-| Regular class implementing `ITask` | MSBuildTask0009–MSBuildTask0010 |
+| Any class implementing `ITask` | MSBuildTask0001–MSBuildTask0005, MSBuildTask0009–MSBuildTask0010 |
 | Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
 | Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
-| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0004 |
+| Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
 | Regular class (no task interface or attribute) | Not analyzed |
-
-Create a `.globalconfig` file to analyze regular tasks for MSBuildTask0001–MSBuildTask0005 before MT migration:
-
-```ini
-is_global = true
-msbuild_task_analyzer.scope = all
-```
-
-Missing and unrecognized values use the safe `multithreadable_only` default.
 
 MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTask]` attribute is applied **directly** to the task class. The attribute is `Inherited = false`, so a task that merely derives from a base class implementing `IMultiThreadableTask` (or carrying the attribute) has not itself opted into multithreaded support and is not subject to these three rules. Input properties are collected from the task class **and its base classes**, so an `ITaskItem`/`string` input declared on a shared base task is still analyzed.
 
@@ -316,8 +307,8 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 
 ### Severity Levels
 
-- **MSBuildTask0001 and MSBuildTask0009** report as **Error** when their scope applies.
-- **MSBuildTask0002–MSBuildTask0005 and MSBuildTask0010** report as **Warning** when their scope applies.
+- **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
+- **MSBuildTask0002–MSBuildTask0005, MSBuildTask0009, and MSBuildTask0010** report as **Warning**.
 - **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** report as **Info** — these are modernization suggestions, not correctness issues.
 
 ## Code Fixes

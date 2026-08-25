@@ -138,16 +138,34 @@ internal static class TestHelpers
     public static MetadataReference[] GetCoreReferences() => s_coreReferences;
 
     /// <summary>
-    /// Runs the MultiThreadableTaskAnalyzer in explicit all-task migration mode.
+    /// Runs the MultiThreadableTaskAnalyzer on the given source code and returns analyzer diagnostics.
+    /// Source is combined with framework stubs automatically.
     /// </summary>
-    public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(string source) =>
-        GetDiagnosticsWithScopeAsync(source, SharedAnalyzerHelpers.ScopeAll);
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsAsync(string source)
+    {
+        var compilation = CreateCompilation(source);
+        var analyzer = new MultiThreadableTaskAnalyzer();
+        var compilationWithAnalyzers = compilation.WithAnalyzers(
+            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
+
+        var allDiags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        return allDiags;
+    }
 
     /// <summary>
-    /// Runs both the direct and transitive analyzers in explicit all-task migration mode.
+    /// Runs BOTH the direct and transitive analyzers on the given source code.
     /// </summary>
-    public static System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsAsync(string source) =>
-        GetAllDiagnosticsWithScopeAsync(source, SharedAnalyzerHelpers.ScopeAll);
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsAsync(string source)
+    {
+        var compilation = CreateCompilation(source);
+        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(
+            new MultiThreadableTaskAnalyzer(),
+            new TransitiveCallChainAnalyzer());
+        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
+
+        var allDiags = await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
+        return allDiags;
+    }
 
     /// <summary>
     /// Runs compiler diagnostics together with analyzers and suppressors and returns
@@ -239,69 +257,6 @@ internal static class TestHelpers
 
         var compilationWithAnalyzers = compilation.WithAnalyzers(
             ImmutableArray.Create<DiagnosticAnalyzer>(analyzer), options);
-        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
-    }
-
-    /// <summary>
-    /// Runs the MultiThreadableTaskAnalyzer without a scope option.
-    /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithDefaultScopeAsync(string source)
-    {
-        var compilation = CreateCompilation(source);
-        var analyzer = new MultiThreadableTaskAnalyzer();
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
-            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
-        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
-    }
-
-    /// <summary>
-    /// Runs the MultiThreadableTaskAnalyzer without a scope option and applies a general diagnostic action.
-    /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithDefaultScopeAsync(
-        string source,
-        ReportDiagnostic generalDiagnosticOption)
-    {
-        var compilation = CreateCompilation(source);
-        compilation = compilation.WithOptions(
-            ((CSharpCompilationOptions)compilation.Options).WithGeneralDiagnosticOption(generalDiagnosticOption));
-
-        var analyzer = new MultiThreadableTaskAnalyzer();
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
-            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer));
-        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
-    }
-
-    /// <summary>
-    /// Runs both the direct and transitive analyzers with a specific scope option.
-    /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsWithScopeAsync(string source, string scope)
-    {
-        var compilation = CreateCompilation(source);
-        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(
-            new MultiThreadableTaskAnalyzer(),
-            new TransitiveCallChainAnalyzer());
-
-        var globalOptions = new Dictionary<string, string>
-        {
-            { $"build_property.{SharedAnalyzerHelpers.ScopeOptionKey}", scope }
-        };
-        var optionsProvider = new TestAnalyzerConfigOptionsProvider(globalOptions);
-        var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
-
-        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers, options);
-        return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
-    }
-
-    /// <summary>
-    /// Runs both the direct and transitive analyzers without a scope option.
-    /// </summary>
-    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsWithDefaultScopeAsync(string source)
-    {
-        var compilation = CreateCompilation(source);
-        var analyzers = ImmutableArray.Create<DiagnosticAnalyzer>(
-            new MultiThreadableTaskAnalyzer(),
-            new TransitiveCallChainAnalyzer());
-        var compilationWithAnalyzers = compilation.WithAnalyzers(analyzers);
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
     }
 

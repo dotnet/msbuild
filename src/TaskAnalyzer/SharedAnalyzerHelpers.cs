@@ -17,8 +17,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     internal static class SharedAnalyzerHelpers
     {
         /// <summary>
-        /// The analyzer configuration key controlling analysis scope.
-        /// Values: "multithreadable_only" (default) | "all"
+        /// The .editorconfig key controlling analysis scope.
+        /// Values: "all" (default) | "multithreadable_only"
         /// </summary>
         internal const string ScopeOptionKey = "msbuild_task_analyzer.scope";
         internal const string ScopeAll = "all";
@@ -26,17 +26,17 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>
         /// Reads the scope option from the analyzer config options provider.
-        /// Returns true only when all-task migration analysis is explicitly enabled.
+        /// Returns true if all tasks should be analyzed; false if only multithreadable tasks.
         /// </summary>
         internal static bool ReadAnalyzeAllTasksOption(AnalyzerConfigOptionsProvider optionsProvider)
         {
             if (optionsProvider.GlobalOptions.TryGetValue($"build_property.{ScopeOptionKey}", out var scopeValue) ||
                 optionsProvider.GlobalOptions.TryGetValue(ScopeOptionKey, out scopeValue))
             {
-                return string.Equals(scopeValue, ScopeAll, StringComparison.OrdinalIgnoreCase);
+                return !string.Equals(scopeValue, ScopeMultiThreadableOnly, StringComparison.OrdinalIgnoreCase);
             }
 
-            return false;
+            return true; // default: analyze all tasks
         }
         /// <summary>
         /// Represents a resolved banned API entry for O(1) lookup during analysis.

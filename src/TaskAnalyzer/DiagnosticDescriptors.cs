@@ -63,7 +63,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             title: "Prefer typed path parameter over manual path construction",
             messageFormat: "Consider changing task property '{0}' from '{1}' to '{2}' instead of converting inside the task body",
             category: "MSBuild.TaskAuthoring",
-            defaultSeverity: DiagnosticSeverity.Warning,
+            defaultSeverity: DiagnosticSeverity.Info,
             isEnabledByDefault: true,
             description: "MSBuild can bind AbsolutePath, FileInfo, and DirectoryInfo task parameters automatically for tasks that opt into multithreaded support. Using these types avoids manual path construction in the task body.");
 
@@ -72,7 +72,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             title: "Prefer ITaskItem<T> over manual ItemSpec parsing",
             messageFormat: "Consider changing task property '{0}' from '{1}' to 'ITaskItem<{2}>{3}' instead of parsing ItemSpec manually",
             category: "MSBuild.TaskAuthoring",
-            defaultSeverity: DiagnosticSeverity.Warning,
+            defaultSeverity: DiagnosticSeverity.Info,
             isEnabledByDefault: true,
             description: "MSBuild can bind ITaskItem<T> task parameters that provide a strongly-typed Value property parsed from ItemSpec for tasks that opt into multithreaded support. Using ITaskItem<T> avoids manual parsing in the task body.");
 
@@ -81,7 +81,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             title: "Initialize relative default path in Execute()",
             messageFormat: "Task property '{0}' has a relative default path; initialize it in Execute() so it can be rooted through TaskEnvironment when the property is changed to '{1}'",
             category: "MSBuild.TaskAuthoring",
-            defaultSeverity: DiagnosticSeverity.Warning,
+            defaultSeverity: DiagnosticSeverity.Info,
             isEnabledByDefault: true,
             description: "A relative default path cannot be rooted in a property initializer because the MSBuild engine only assigns TaskEnvironment after the task is constructed. Move the default into Execute(), where TaskEnvironment.GetAbsolutePath can resolve it, guarding the assignment so a value bound from the project is not overwritten.");
 
@@ -90,7 +90,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             title: "ITaskItem<T> used with unsupported type argument",
             messageFormat: "Task property '{0}' uses ITaskItem<{1}> but MSBuild cannot automatically parse '{1}' from item metadata. Use one of the directly parsed types: {2}.",
             category: "MSBuild.TaskAuthoring",
-            defaultSeverity: DiagnosticSeverity.Error,
+            defaultSeverity: DiagnosticSeverity.Warning,
             isEnabledByDefault: true,
             description: "MSBuild can only bind ITaskItem<T> properties when T is a supported type. Using an unsupported type will cause a runtime failure when MSBuild tries to bind the parameter.");
 

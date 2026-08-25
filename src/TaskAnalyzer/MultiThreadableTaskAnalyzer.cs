@@ -16,9 +16,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// <summary>
     /// Roslyn analyzer that detects unsafe API usage in MSBuild task implementations.
     /// 
-    /// Scope (controlled by analyzer option "msbuild_task_analyzer.scope"):
-    /// - "multithreadable_only" (default): MSBuildTask0001-0004 report only for MT tasks and explicitly analyzed helpers
-    /// - "all": Enables MSBuildTask0001-0004 for all ITask implementations during migration
+    /// Scope (controlled by .editorconfig option "msbuild_task_analyzer.scope"):
+    /// - "all" (default): All rules fire on ALL ITask implementations
+    /// - "multithreadable_only": MSBuildTask0002, 0003 fire only on IMultiThreadableTask or [MSBuildMultiThreadableTask]
+    ///   (MSBuildTask0001 and MSBuildTask0004 always fire on all tasks regardless)
     /// 
     /// Per review feedback from @rainersigwald:
     /// - Console.* promoted to MSBuildTask0001 (always wrong in tasks)
@@ -28,8 +29,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     public sealed class MultiThreadableTaskAnalyzer : DiagnosticAnalyzer
     {
         /// <summary>
-        /// The analyzer configuration key controlling analysis scope.
-        /// Values: "multithreadable_only" (default) | "all"
+        /// The .editorconfig key controlling analysis scope.
+        /// Values: "all" (default) | "multithreadable_only"
         /// </summary>
         internal const string ScopeOptionKey = SharedAnalyzerHelpers.ScopeOptionKey;
         internal const string ScopeAll = SharedAnalyzerHelpers.ScopeAll;
@@ -54,7 +55,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            // Read scope option: "multithreadable_only" (default) or "all"
+            // Read scope option from .editorconfig: "all" (default) or "multithreadable_only"
             bool analyzeAllTasks = SharedAnalyzerHelpers.ReadAnalyzeAllTasksOption(compilationContext.Options.AnalyzerConfigOptionsProvider);
 
             var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
@@ -96,12 +97,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // Helper classes with the attribute or tasks with [MSBuildMultiThreadableTask] are treated as IMultiThreadableTask
                 bool analyzeAsMultiThreadable = isMultiThreadableTask || hasAnalyzedAttribute || hasMultiThreadableAttribute;
 
-                // The default scope reports MSBuildTask0001-0004 only for MT tasks and explicitly analyzed helpers.
-                bool reportScopedRules = analyzeAllTasks || analyzeAsMultiThreadable;
+                // When scope is "multithreadable_only", only analyze MSBuildTask0002/0003 for multithreadable tasks
+                bool reportEnvironmentRules = analyzeAllTasks || analyzeAsMultiThreadable;
 
                 // Register operation-level analysis within this type
                 symbolStartContext.RegisterOperationAction(
-                    ctx => AnalyzeOperation(ctx, bannedApiLookup, filePathTypes, reportScopedRules,
+                    ctx => AnalyzeOperation(ctx, bannedApiLookup, filePathTypes, reportEnvironmentRules,
                         taskEnvironmentType, absolutePathType, iTaskItemType, consoleType),
                     OperationKind.Invocation,
                     OperationKind.ObjectCreation,
@@ -116,7 +117,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             OperationAnalysisContext context,
             Dictionary<ISymbol, BannedApiEntry> bannedApiLookup,
             ImmutableHashSet<INamedTypeSymbol> filePathTypes,
-            bool reportScopedRules,
+            bool reportEnvironmentRules,
             INamedTypeSymbol? taskEnvironmentType,
             INamedTypeSymbol? absolutePathType,
             INamedTypeSymbol? iTaskItemType,
@@ -164,7 +165,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Check banned API lookup (handles MSBuildTask0001, 0002, 0004)
             if (bannedApiLookup.TryGetValue(referencedSymbol, out var entry))
             {
-                if (!reportScopedRules)
+                // MSBuildTask0002 (TaskEnvironment) is gated by scope setting
+                if (entry.Category == BannedApiDefinitions.ApiCategory.TaskEnvironment && !reportEnvironmentRules)
                 {
                     return;
                 }
@@ -178,7 +180,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
             // Type-level Console ban: ANY member of System.Console is flagged.
             // This catches all Console methods/properties including ones added in newer .NET versions.
-            if (reportScopedRules && consoleType is not null)
+            if (consoleType is not null)
             {
                 var containingType = referencedSymbol.ContainingType;
                 if (containingType is not null && SymbolEqualityComparer.Default.Equals(containingType, consoleType))
@@ -196,7 +198,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
 
             // Check file path APIs (MSBuildTask0003) - gated by scope setting
-            if (reportScopedRules && !arguments.IsDefaultOrEmpty)
+            if (reportEnvironmentRules && !arguments.IsDefaultOrEmpty)
             {
                 var method = referencedSymbol as IMethodSymbol;
                 if (method is not null)

@@ -202,7 +202,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
             """);
 
         diags.ShouldContain(d => d.Id == DiagnosticIds.UnsupportedTaskItemType);
-        diags.ShouldHaveSingleItem().Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Error);
+        diags.ShouldHaveSingleItem().Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Warning);
         diags[0].GetMessage().ShouldContain("Item");
         diags[0].GetMessage().ShouldContain("Guid");
         diags[0].GetMessage().ShouldContain("string, bool, AbsolutePath, FileInfo, DirectoryInfo");
@@ -228,14 +228,13 @@ public class UnsupportedTaskItemTypeAnalyzerTests
     }
 
     [Fact]
-    public async Task TypedTaskItemDiagnostics_AreIndependentOfMtScope()
+    public async Task TypedTaskItemDiagnostics_AreIndependentOfMtOptIn()
     {
         var diags = await GetUnsupportedTaskItemTypeDiagnosticsAsync("""
             using System;
             using Microsoft.Build.Framework;
-            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            public class MyTask : Microsoft.Build.Utilities.Task
             {
-                public TaskEnvironment TaskEnvironment { get; set; }
                 public ITaskItem<Guid> Invalid { get; set; } = null!;
                 public ITaskItem<int> CultureSensitive { get; set; } = null!;
                 public override bool Execute() => true;
@@ -243,7 +242,7 @@ public class UnsupportedTaskItemTypeAnalyzerTests
             """);
 
         diags.Where(d => d.Id == DiagnosticIds.UnsupportedTaskItemType).ShouldHaveSingleItem()
-            .Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Error);
+            .Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Warning);
         diags.Where(d => d.Id == DiagnosticIds.CultureSensitiveTaskItemType).ShouldHaveSingleItem()
             .Severity.ShouldBe(Microsoft.CodeAnalysis.DiagnosticSeverity.Warning);
     }
