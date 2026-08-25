@@ -250,6 +250,27 @@ namespace Microsoft.Build.UnitTests.Evaluation
             pii.EvaluatedInclude.ShouldBe("false");
         }
 
+        [Theory]
+        [InlineData("@(unsetItem)", false)]
+        [InlineData("@(unsetItem->Distinct())", true)]
+        public void EmptyItemVectorReportsWhetherExpressionIsTransform(string expression, bool expected)
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateItemFunctionExpander();
+            ProjectItemInstanceFactory itemFactory = new ProjectItemInstanceFactory(project, "i");
+
+            IList<ProjectItemInstance> items = expander.ExpandSingleItemVectorExpressionIntoItems(
+                expression,
+                itemFactory,
+                ExpanderOptions.ExpandItems,
+                includeNullItems: false,
+                out bool isTransformExpression,
+                MockElementLocation.Instance);
+
+            items.ShouldBeEmpty();
+            isTransformExpression.ShouldBe(expected);
+        }
+
         /// <summary>
         /// Expand an item vector function Metadata()->DirectoryName()->Distinct()
         /// </summary>
@@ -1502,6 +1523,100 @@ namespace Microsoft.Build.UnitTests.Evaluation
                 expander.ExpandIntoStringAndUnescape(xmlattribute.Value, ExpanderOptions.ExpandAll, MockElementLocation.Instance));
         }
 
+        [Theory]
+        // These modifiers do not require project context.
+        [InlineData(ItemSpecModifiers.Filename, false, false)]
+        [InlineData(ItemSpecModifiers.Extension, false, false)]
+        [InlineData(ItemSpecModifiers.RelativeDir, false, false)]
+        [InlineData(ItemSpecModifiers.Identity, false, false)]
+        [InlineData(ItemSpecModifiers.ModifiedTime, false, false)]
+        [InlineData(ItemSpecModifiers.CreatedTime, false, false)]
+        [InlineData(ItemSpecModifiers.AccessedTime, false, false)]
+        // These modifiers require the project directory.
+        [InlineData(ItemSpecModifiers.FullPath, true, false)]
+        [InlineData(ItemSpecModifiers.RootDir, true, false)]
+        [InlineData(ItemSpecModifiers.Directory, true, false)]
+        // These modifiers require both the project directory and defining-project metadata.
+        [InlineData(ItemSpecModifiers.DefiningProjectFullPath, true, true)]
+        [InlineData(ItemSpecModifiers.DefiningProjectDirectory, true, true)]
+        [InlineData(ItemSpecModifiers.DefiningProjectName, true, true)]
+        [InlineData(ItemSpecModifiers.DefiningProjectExtension, true, true)]
+        public void QuotedTransformDerivableItemSpecModifierUsesRequiredContext(
+            string modifier,
+            bool usesProjectDirectory,
+            bool usesDefiningProject)
+        {
+            ProjectInstance project = ProjectHelpers.CreateEmptyProjectInstance();
+            string itemSpec = Path.Combine("src", "directory", "File.cs");
+            string definingProject = Path.Combine(project.Directory, "Imported.targets");
+            var item = new ContextTrackingItem("Compile", itemSpec, project.Directory, definingProject);
+            var items = new ItemDictionary<ContextTrackingItem> { item };
+            var properties = new PropertyDictionary<ProjectPropertyInstance>();
+            var expander = new Expander<ProjectPropertyInstance, ContextTrackingItem>(
+                properties,
+                items,
+                FileSystems.Default,
+                new TestLoggingContext(null!, new BuildEventContext(1, 2, 3, 4)));
+
+            string expected = ItemSpecModifiers.GetItemSpecModifier(itemSpec, modifier, project.Directory, definingProject);
+            string actual = expander.ExpandIntoStringLeaveEscaped(
+                $"@(Compile->'%({modifier})')",
+                ExpanderOptions.ExpandItems,
+                MockElementLocation.Instance);
+
+            actual.ShouldBe(expected);
+            item.ProjectDirectoryAccessCount.ShouldBe(usesProjectDirectory ? 1 : 0);
+            item.DefiningProjectAccessCount.ShouldBe(usesDefiningProject ? 1 : 0);
+        }
+
+        private sealed class ContextTrackingItem : IItem
+        {
+            private readonly string _itemSpec;
+            private readonly string _projectDirectory;
+            private readonly string _definingProject;
+
+            public ContextTrackingItem(string itemType, string itemSpec, string projectDirectory, string definingProject)
+            {
+                Key = itemType;
+                _itemSpec = itemSpec;
+                _projectDirectory = projectDirectory;
+                _definingProject = definingProject;
+            }
+
+            public string Key { get; }
+
+            public string EvaluatedInclude => _itemSpec;
+
+            public string EvaluatedIncludeEscaped => _itemSpec;
+
+            public string ProjectDirectory
+            {
+                get
+                {
+                    ProjectDirectoryAccessCount++;
+                    return _projectDirectory;
+                }
+            }
+
+            public int ProjectDirectoryAccessCount { get; private set; }
+
+            public int DefiningProjectAccessCount { get; private set; }
+
+            public string GetMetadataValue(string name)
+                => GetMetadataValueEscaped(name);
+
+            public string GetMetadataValueEscaped(string name)
+            {
+                if (name.Equals(ItemSpecModifiers.DefiningProjectFullPath, StringComparison.OrdinalIgnoreCase))
+                {
+                    DefiningProjectAccessCount++;
+                    return _definingProject;
+                }
+
+                return string.Empty;
+            }
+        }
+
         /// <summary>
         /// Exercises ExpandAllIntoString with a complex set of data.
         /// </summary>
@@ -1711,6 +1826,19 @@ namespace Microsoft.Build.UnitTests.Evaluation
 
             expander.ExpandIntoStringLeaveEscaped(input, ExpanderOptions.ExpandMetadata, MockElementLocation.Instance)
                 .ShouldBe(expected);
+        }
+
+        [Theory]
+        [InlineData("%(", ExpanderOptions.ExpandMetadata)]
+        [InlineData("%(Culture)", ExpanderOptions.ExpandBuiltInMetadata)]
+        [InlineData("%(Filename)", ExpanderOptions.ExpandCustomMetadata)]
+        internal void ExpandMetadata_NoExpansionReturnsOriginalString(string input, ExpanderOptions options)
+        {
+            Expander<ProjectPropertyInstance, ProjectItemInstance> expander = CreateMetadataExpander();
+            string expression = new(input.ToCharArray());
+
+            expander.ExpandIntoStringLeaveEscaped(expression, options, MockElementLocation.Instance)
+                .ShouldBeSameAs(expression);
         }
 
         /// <summary>

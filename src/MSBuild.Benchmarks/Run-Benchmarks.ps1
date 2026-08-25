@@ -176,6 +176,7 @@ Write-Host "Using .NET SDK: $dotnetSdkPath"
 
 if (-not $ArtifactsPath)
 {
+    $repoRoot = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
     $ArtifactsPath = Join-Path (Join-Path $repoRoot 'artifacts') 'BenchmarkDotNet'
 }
 

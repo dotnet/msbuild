@@ -95,12 +95,15 @@ public class ExpressionShredderBenchmark
         foreach (object value in ItemExpressionsCases())
         {
             var scenario = (ExpressionShredderScenario)value;
-            ExpressionShredder.ReferencedItemExpressionsEnumerator enumerator =
-                ExpressionShredder.GetReferencedItemExpressions(scenario.Expression);
+            int startIndex = 0;
 
-            while (enumerator.MoveNext())
+            while (ExpressionShredder.TryGetNextItemVectorExpression(
+                scenario.Expression,
+                startIndex,
+                out ExpressionShredder.ItemExpressionCapture itemVector))
             {
-                _warmCacheRoots.Add(enumerator.Current);
+                _warmCacheRoots.Add(itemVector);
+                startIndex = itemVector.Index + itemVector.Length;
             }
         }
 
@@ -161,12 +164,15 @@ public class ExpressionShredderBenchmark
     public int ItemExpressions(ExpressionShredderScenario scenario)
     {
         int count = 0;
-        ExpressionShredder.ReferencedItemExpressionsEnumerator enumerator =
-            ExpressionShredder.GetReferencedItemExpressions(scenario.Expression);
+        int startIndex = 0;
 
-        while (enumerator.MoveNext())
+        while (ExpressionShredder.TryGetNextItemVectorExpression(
+            scenario.Expression,
+            startIndex,
+            out ExpressionShredder.ItemExpressionCapture itemVector))
         {
             count++;
+            startIndex = itemVector.Index + itemVector.Length;
         }
 
         return count;
