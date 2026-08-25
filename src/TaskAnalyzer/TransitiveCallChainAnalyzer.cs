@@ -21,7 +21,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// a task class, this analyzer builds a compilation-wide call graph and traces method calls
     /// transitively to find unsafe APIs called by helper methods, utility classes, etc.
     ///
-    /// Reports MSBuildTask0005 with the full call chain for traceability.
+    /// Reports MSBuildTask0005 at the unsafe call site — so that <c>#pragma warning disable</c> and
+    /// <c>[SuppressMessage]</c> next to the reviewed call are honored — with the full call chain in
+    /// the message and the task entry point as an additional location.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class TransitiveCallChainAnalyzer : DiagnosticAnalyzer
@@ -177,7 +179,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             if (bannedApiLookup.TryGetValue(referencedSymbol, out var entry))
             {
                 var displayName = referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
-                var violation = new ViolationInfo(entry.Category.ToString(), displayName, entry.Message);
+                var violation = new ViolationInfo(entry.Category.ToString(), displayName, entry.Message, context.Operation.Syntax.GetLocation());
                 directViolations.GetOrAdd(callerKey, _ => new ConcurrentBag<ViolationInfo>()).Add(violation);
                 return;
             }
@@ -192,7 +194,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     string message = referencedSymbol.Name.StartsWith("Read", StringComparison.Ordinal)
                         ? "may cause deadlocks in automated builds"
                         : "interferes with build logging; use Log.LogMessage instead";
-                    var violation = new ViolationInfo("CriticalError", displayName, message);
+                    var violation = new ViolationInfo("CriticalError", displayName, message, context.Operation.Syntax.GetLocation());
                     directViolations.GetOrAdd(callerKey, _ => new ConcurrentBag<ViolationInfo>()).Add(violation);
                     return;
                 }
@@ -208,7 +210,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     {
                         var displayName = referencedSymbol.ToDisplayString(SymbolDisplayFormat.CSharpShortErrorMessageFormat);
                         var violation = new ViolationInfo("FilePathRequiresAbsolute", displayName,
-                            "may resolve relative paths against the process working directory");
+                            "may resolve relative paths against the process working directory", context.Operation.Syntax.GetLocation());
                         directViolations.GetOrAdd(callerKey, _ => new ConcurrentBag<ViolationInfo>()).Add(violation);
                     }
                 }
@@ -260,8 +262,10 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             foreach (var taskType in taskTypes)
             {
                 // Track reported violations per task type to avoid flooding with duplicates.
-                // Key: target banned API display name. We report only the shortest chain per API.
-                var reportedPerTaskType = new HashSet<string>(StringComparer.Ordinal);
+                // Key: the unsafe call site plus the target banned API display name. Keeping the call
+                // site in the key means a suppression on one reviewed call does not hide a second,
+                // unreviewed call to the same API. Only the shortest chain per call site is reported.
+                var reportedPerTaskType = new HashSet<(string ApiDisplayName, Location Location)>();
 
                 foreach (var member in taskType.GetMembers())
                 {
@@ -333,17 +337,23 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>
         /// Reports a transitive violation with deduplication per task type.
-        /// Only the first (shortest) chain reaching each banned API is reported.
+        /// Only the first (shortest) chain reaching each unsafe call site is reported.
         /// </summary>
+        /// <remarks>
+        /// The diagnostic is reported at the unsafe call site rather than at the task entry point so that
+        /// a <c>#pragma warning disable MSBuildTask0005</c> — or a <c>[SuppressMessage]</c> attribute on the
+        /// containing member — placed next to the reviewed call actually suppresses it. The task entry point
+        /// is still named in the message and carried as an additional location.
+        /// </remarks>
         private static void ReportTransitiveViolation(
             CompilationAnalysisContext context,
             IMethodSymbol taskMethod,
             ViolationInfo violation,
             List<string> chain,
-            HashSet<string> reportedPerTaskType)
+            HashSet<(string ApiDisplayName, Location Location)> reportedPerTaskType)
         {
-            // Deduplicate by target API — report each banned API only once per task type
-            if (!reportedPerTaskType.Add(violation.ApiDisplayName))
+            // Deduplicate by call site + target API — report each unsafe call site only once per task type
+            if (!reportedPerTaskType.Add((violation.ApiDisplayName, violation.Location)))
             {
                 return;
             }
@@ -351,10 +361,19 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var chainWithApi = new List<string>(chain) { violation.ApiDisplayName };
             var chainStr = string.Join(" → ", chainWithApi);
 
-            var location = taskMethod.Locations.Length > 0 ? taskMethod.Locations[0] : Location.None;
+            var taskMethodLocation = taskMethod.Locations.Length > 0 ? taskMethod.Locations[0] : Location.None;
+
+            // Prefer the call site; fall back to the task entry point when the call site has no source location.
+            bool hasCallSite = violation.Location.SourceTree is not null;
+            var location = hasCallSite ? violation.Location : taskMethodLocation;
+            var additionalLocations = hasCallSite && taskMethodLocation.SourceTree is not null
+                ? ImmutableArray.Create(taskMethodLocation)
+                : ImmutableArray<Location>.Empty;
+
             context.ReportDiagnostic(Diagnostic.Create(
                 DiagnosticDescriptors.TransitiveUnsafeCall,
                 location,
+                additionalLocations,
                 FormatMethodFull(taskMethod),
                 violation.ApiDisplayName,
                 chainStr));
@@ -425,11 +444,18 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             public string ApiDisplayName { get; }
             public string Message { get; }
 
-            public ViolationInfo(string category, string apiDisplayName, string message)
+            /// <summary>
+            /// Source location of the unsafe call itself. MSBuildTask0005 is reported here so that
+            /// suppressions placed next to the reviewed call are honored.
+            /// </summary>
+            public Location Location { get; }
+
+            public ViolationInfo(string category, string apiDisplayName, string message, Location location)
             {
                 Category = category;
                 ApiDisplayName = apiDisplayName;
                 Message = message;
+                Location = location;
             }
         }
     }
