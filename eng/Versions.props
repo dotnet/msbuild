@@ -25,7 +25,8 @@
     <UsingToolVSSDK>true</UsingToolVSSDK>
     <UsingToolNuGetRepack>true</UsingToolNuGetRepack>
 
-    <MicroBuildPluginsSwixBuildVersion>1.1.87</MicroBuildPluginsSwixBuildVersion>
+    <!-- Tools.csproj's SwixBuild PackageReference reads this exact property name; MicroBuildPluginsSwixBuildVersion (no Microsoft/VisualStudioEng prefix) is a different, unused property. -->
+    <MicrosoftVisualStudioEngMicroBuildPluginsSwixBuildVersion>1.1.973</MicrosoftVisualStudioEngMicroBuildPluginsSwixBuildVersion>
   </PropertyGroup>
 
   <!-- Production Dependencies -->

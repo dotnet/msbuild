@@ -23,7 +23,7 @@ public class MyTask : Task, IMultiThreadableTask
 }
 ```
 
-**Note**: `[MSBuildMultiThreadableTask]` has `Inherited = false` — it must be on each concrete class, not just the base.
+**Note**: `[MSBuildMultiThreadableTask]` has `Inherited = false` — it must be on each concrete class, not just the base. The corollary is easy to miss: the base class still executes multithreaded, but is not analyzed. Audit the whole base chain — see [Unsafe Code in an Unannotated Base Class](#unsafe-code-in-an-unannotated-base-class).
 
 ### Step 2: Absolutize Paths Before File Operations
 
@@ -70,7 +70,16 @@ Built-in MSBuild tasks now initialize `TaskEnvironment` with a `MultiProcessTask
 | **Forbidden** | `Environment.Exit`, `FailFast`, `Process.Kill`, `ThreadPool.SetMin/MaxThreads`, `Console.*` | Return false, throw, or use `Log` |
 | **Use TaskEnvironment** | `Environment.CurrentDirectory`, `Get/SetEnvironmentVariable`, `Path.GetFullPath`, `ProcessStartInfo` | See Steps 2-4 |
 | **Need absolute paths** | `File.*`, `Directory.*`, `FileInfo`, `DirectoryInfo`, `FileStream`, `StreamReader/Writer` | Absolutize first (File System APIs) |
+| **Need absolute paths (analyzer-invisible)** | `AssemblyName.GetAssemblyName`, `XDocument/XElement/XmlDocument.Load(string)`, `XmlReader/XmlWriter.Create(string)`, `ZipFile.*`, `X509CertificateLoader`, `Image.FromFile`, `Assembly.LoadFrom` | Absolutize first — **the analyzer does not flag these** |
 | **Review required** | `Assembly.Load*`, `Activator.CreateInstance*` | Check for version conflicts |
+
+### Analyzer-Invisible Path Consumers
+
+`MSBuildTask0003` monitors a fixed list of types (`File`, `Directory`, `FileInfo`, `DirectoryInfo`, `FileStream`, `StreamReader`, `StreamWriter`, `FileSystemWatcher`). Any *other* API that accepts a path string and touches disk is equally unsafe but produces **no diagnostic**.
+
+In a ~150-task migration across dotnet/arcade, dotnet/source-build-assets and the dotnet/dotnet VMR, `AssemblyName.GetAssemblyName` on a raw input was the single most-repeated defect. Do not treat a clean analyzer run as evidence that path handling is complete — see [Verification](#verification-a-clean-analyzer-run-is-not-a-migration).
+
+Note the overload distinction: the *string* overloads are hazards; `XDocument.Load(stream)` and `new StreamReader(stream)` are fine, because the caller already resolved the path to open the stream.
 
 ## Practical Notes
 
@@ -81,7 +90,11 @@ Trace every path string through all method calls and assignments to find all pla
 1. Find every path string (e.g., `item.ItemSpec`, function parameters)
 2. Trace downstream through all method calls
 3. Absolutize BEFORE any code path that touches the file system
-4. Use `OriginalValue` for user-facing output (logs, errors) — see [Sin 2](#sin-2-error-message-path-inflation)
+4. Use `OriginalValue` for user-facing output (logs, errors) — see [Sin 2](#sin-2-errorlog-message-path-inflation)
+
+**Trace through abstractions, not just concrete calls.** A path can reach the file system without a single `System.IO` type appearing in the task. In `InstallDotNetTool` (dotnet/arcade), the `DestinationPath`, `DotnetPath` and `WorkingDirectory` inputs flow raw through `IFileSystem` and `ICommandFactory` interfaces — the task body looks completely clean, and the analyzer reports nothing. When a task input is passed to an interface or delegate, resolve it at the task boundary rather than hoping the implementation does.
+
+**Resolve once, at the boundary.** The recurring failure is not "forgot to absolutize" but "absolutized at three of four use sites". If a variable is going to be used as a path at all, convert it to `AbsolutePath` where it enters the task and keep it that way — see [Sin 8](#sin-8-swallowed-exceptions-hiding-an-unresolved-path).
 
 ### Exception Handling in Batch Operations
 
@@ -137,7 +150,7 @@ After migration, review for behavioral compatibility. **Every observable differe
 
 Observable behavior = `Execute()` return value, `[Output]` property values, error/warning message content, exception types, files written, and which code path runs.
 
-## The 7 Deadly Compatibility Sins
+## The 8 Deadly Compatibility Sins
 
 Real bugs found during MSBuild task migrations. Every one shipped in initial "passing" code with green tests.
 
@@ -253,6 +266,30 @@ Old code threw `FileNotFoundException` for missing files; new code throws `Argum
 
 `GetAbsolutePath` correctly handles all path forms — including the Windows edge cases (`C:foo`, `\foo`) that `Path.IsPathRooted` considers "rooted" but that are still CWD/drive-dependent. Call it unconditionally; remove any `IsPathRooted` short-circuit.
 
+### Sin 8: Swallowed Exceptions Hiding an Unresolved Path
+
+The usual mental model is "unresolved path → `FileNotFoundException` → loud failure". That model is wrong wherever a `catch` treats an exception as a *semantic answer*. There, an unresolved path does not fail the build — it silently returns the wrong answer.
+
+Real example from the dotnet/dotnet VMR (`CheckForPoison`), where the same variable is resolved three lines later:
+
+```csharp
+// BROKEN
+try
+{
+    AssemblyName asm = AssemblyName.GetAssemblyName(fileToCheck);   // raw, relative-capable
+    ...
+    if (IsAssemblyFromSbrp(TaskEnvironment.GetAbsolutePath(fileToCheck))) { ... }   // resolved
+    else if (IsAssemblyPoisoned(TaskEnvironment.GetAbsolutePath(fileToCheck))) { ... }
+}
+catch (BadImageFormatException) { /* not a managed assembly - fine */ }
+```
+
+The `GetAssemblyName` call is only an "is this a managed assembly?" probe, and the catch means "not an assembly". So an unresolved path throws, gets swallowed, and **both poison checks are skipped** — turning a leaked binary into a false negative in the leak-detection gate itself. The build stays green while the check it exists to perform quietly stops working.
+
+This sin is especially dangerous because it defeats the usual verification strategy: the decoy-CWD test (Pattern A) still "passes" unless it asserts on the *result*, not just on `Execute()` returning true.
+
+**Detect**: For every `catch` in a migrated task, ask what the handler *means*. If it means anything other than "fail" — "not an assembly", "not found, use default", "unsupported, skip" — then every path-consuming call inside the corresponding `try` must be absolutized, and the catch should be narrowed to the exception types that genuinely represent that semantic answer (`BadImageFormatException` here, **not** `IOException`/`ArgumentException`).
+
 ---
 
 ## Call-Chain Hazards Beyond the Task
@@ -275,6 +312,45 @@ Helpers reached from `Execute()` can quietly depend on process state in any of t
 2. Promote the parameter type to `AbsolutePath` so `.Value` and `.OriginalValue` travel together.
 3. Replace process-state-seeded static caches with `ConcurrentDictionary<TKey, TValue>` keyed on the inputs that determine uniqueness — never on process state.
 4. For cross-repo helpers (foundation types used by many tasks), migrate the foundation in a dedicated PR before the tasks that consume it; the hydration step is usually where `Path.GetFullPath` is hiding.
+
+### Unsafe Code in an Unannotated Base Class
+
+`[MSBuildMultiThreadableTask]` is `Inherited = false`, so it goes on each concrete task. The consequence people miss is the mirror image: **the base class runs multithreaded too, but nothing marks it as such** — and with `msbuild_task_analyzer.scope = multithreadable_only` (the recommended setting for incremental migration) the analyzer does not look inside it at all.
+
+From dotnet/arcade: `CreateAkaMSLinks` and `DeleteAkaMSLinks` were both annotated, both analyzer-clean. Their shared base contained:
+
+```csharp
+// AkaMSLinksBase - NOT annotated, so never analyzed
+File.ReadAllText(ClientCertificate)   // ClientCertificate is a task input property
+```
+
+A monitored API (`File`) on a raw task input — exactly what the analyzer exists to catch — invisible purely because of where it lived.
+
+**Resolution:** when you annotate a task, audit its full base chain up to `Task`/`ToolTask`. If the base holds shared input properties or path handling, have the **base** implement `IMultiThreadableTask` and do the resolution there, so every derived task inherits the fix:
+
+```csharp
+public abstract class AkaMSLinksBase : Task, IMultiThreadableTask
+{
+    public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+    // ... resolve ClientCertificate here, once, for all derived tasks
+}
+```
+
+Note that implementing `IMultiThreadableTask` on the base is safe and does not change routing — routing keys off the attribute, which stays on the concrete classes.
+
+### Engine-Owned Shared State: `RegisterTaskObject`
+
+The guidance about `static` fields has a less obvious sibling: `IBuildEngine4.GetRegisteredTaskObject` / `RegisterTaskObject`. The state lives in the *engine*, so no `static` field appears and nothing looks shared — but the read/write pair is **not atomic**, and under MT two instances of the same task in one node can both miss and both populate.
+
+Whether that matters depends entirely on what is being cached:
+
+| Cached computation | Verdict |
+|---|---|
+| Pure and deterministic for the key (e.g., "where is dotnet?") | **Benign** — the loser overwrites an identical entry. Leave it, but say so in a comment. |
+| Deduplication is the *point* (e.g., "log this error exactly once") | **Broken** — both instances observe "not yet reported" and both act. |
+| A cached *failure* | **Suspect** — a failure computed under one task's environment gets served to a task with a different `ProjectDirectory`. Key the cache on the inputs that determine the result, or don't cache failures. |
+
+Real examples from dotnet/arcade: `LocateDotNet` is benign (pure computation). `SingleError` — whose entire purpose is emitting exactly one error per build — is broken by the race, and we removed the annotation rather than ship it. Same API shape, opposite conclusions.
 
 ### Tasks Instantiated Directly by Other Tasks
 
@@ -347,6 +423,52 @@ Attribute-only migrations (just `[MSBuildMultiThreadableTask]`, no `IMultiThread
 
 ---
 
+## Verification: A Clean Analyzer Run Is Not a Migration
+
+`Microsoft.Build.TaskAuthoring.Analyzer` is the right first line of defense, and it should be enabled. It is not sufficient on its own, and it is worth being concrete about why so you know what work it leaves you.
+
+**The data.** In a migration of ~150 tasks across dotnet/arcade, dotnet/source-build-assets and the dotnet/dotnet VMR, the analyzer was enabled in all three repos and every build was **0 warnings, 0 errors**. A manual audit afterwards found **9 real defects**:
+
+| Why the analyzer missed it | Count | Example |
+|---|---|---|
+| The code was outside the analysis scope | 2 | unsafe call in an unannotated base class |
+| The API is not on the monitored list | 3 | `AssemblyName.GetAssemblyName` |
+| The failure class is not modeled at all | 4 | task-object race, memoized failure, nested task construction, path crossing a DI boundary |
+
+The last row is the important one: those are dataflow and lifetime problems, not banned-API problems. No amount of allowlist tuning reaches them, which is why the [Red-Team Audit Protocol](#red-team-audit-protocol) below is not optional.
+
+**Why "it worked when I tested it" is weak evidence.** An unresolved relative path in MT mode does not reliably throw. It resolves against whatever the shared node's current directory happens to be, which depends on which project scheduled first. So the same defect passes locally single-threaded every time, passes in CI most of the time, and fails occasionally on one machine under load. And per [Sin 8](#sin-8-swallowed-exceptions-hiding-an-unresolved-path), some never throw at all.
+
+**Verification checklist.** The [Sign-Off Checklist](#sign-off-checklist) at the end of this document is the actionable list. The items most likely to be skipped — because nothing warns you about them — are:
+
+1. The full base chain, not just the concrete class.
+2. Every `catch`, classified: does it mean "fail", or a semantic answer? (Sin 8)
+3. Every task input traced to *every* use site — the common defect is resolved at 3 of 4 sites, not 0 of 4.
+4. Caches and memoization: `static` fields, `RegisterTaskObject`, and anything storing a failure.
+5. A Pattern A or Pattern B test that fails when the migration is reverted — asserting on the *result*, not merely that `Execute()` returned true.
+
+If your host supports agents, the `mt-migration-reviewer` agent automates most of this.
+
+## Migrating Is Not Always the Right Answer
+
+Adding the attribute is a claim that the task is safe to run concurrently in a shared process. When that claim cannot be made honestly, **leaving the task unannotated is a correct, supported outcome** — it simply keeps routing to the TaskHost sidecar, which is exactly the behavior it has today. A slower task is better than a wrong one.
+
+De-annotate (or never annotate) when:
+
+- The task's semantics depend on being a singleton within the build — `SingleError` above is the canonical case.
+- The task deliberately mutates process-global state for a downstream consumer and cannot be re-architected to pass it via `ProcessStartInfo`.
+- The correctness argument depends on a race being benign and you cannot convince yourself it is.
+
+When you do this, leave a comment saying *why*, so the next person does not "fix" the missing attribute:
+
+```csharp
+// Deliberately not [MSBuildMultiThreadableTask]: this task must report exactly
+// one error per build, and the Get/RegisterTaskObject pair used to enforce that
+// is not atomic across concurrent instances in a shared node.
+```
+
+---
+
 ## Red-Team Audit Protocol
 
 ### Phase 1: Trace Every Changed Line
@@ -384,7 +506,9 @@ Verify behavior on **both** .NET Framework and .NET TFMs.
 
 1. Two tasks with different `ProjectDirectory` values don't interfere
 2. No writes to static fields (shared across threads)
-3. All file operations use absolutized paths
+3. No non-atomic `GetRegisteredTaskObject` / `RegisterTaskObject` pair whose race is not provably benign
+4. No cached *failures* — a failure computed under one task's environment must not be served to another
+5. All file operations use absolutized paths
 
 ## Compatibility Test Matrix
 
@@ -401,6 +525,7 @@ Assertions: Execute() return value, [Output] exact string, error message content
 ## Sign-Off Checklist
 
 - [ ] `[MSBuildMultiThreadableTask]` on every concrete class (not just base — `Inherited=false`)
+- [ ] **Base chain audited** up to `Task`/`ToolTask` — unannotated bases still run multithreaded and are *not* analyzed
 - [ ] `IMultiThreadableTask` on classes that use `TaskEnvironment` APIs, with default initializer `= TaskEnvironment.Fallback`
 - [ ] Every `[Output]` property: exact string value matches pre-migration (Sin 1)
 - [ ] Every `Log.LogError`/`LogWarning`: path in message matches pre-migration (use `OriginalValue`) (Sin 2)
@@ -410,12 +535,18 @@ Assertions: Execute() return value, [Output] exact string, error message content
 - [ ] Every try-catch: absolutized value available in catch block where needed (Sin 4)
 - [ ] Every `??` or `?.` added: verified it doesn't swallow a previously-thrown exception (Sin 3)
 - [ ] No `Path.IsPathRooted` short-circuits around `GetAbsolutePath` — call unconditionally (Sin 7)
+- [ ] Every `catch` classified — any handler meaning a *semantic answer* rather than "fail" has all path calls in its `try` absolutized, and is narrowed to the types representing that answer (Sin 8)
+- [ ] **Analyzer-invisible path consumers** absolutized: `AssemblyName.GetAssemblyName`, `XDocument`/`XmlDocument.Load(string)`, `XmlReader.Create(string)`, `ZipFile.*`, `X509CertificateLoader`, `Assembly.LoadFrom` — none of these produce a diagnostic
+- [ ] Every task input resolved at **every** use site, not most of them
+- [ ] Task inputs crossing an interface / delegate / DI boundary (`IFileSystem`, `ICommandFactory`) resolved at the task boundary
 - [ ] No `AbsolutePath` leaks into user-visible strings unintentionally
 - [ ] No behavior conditioned on "MT mode on/off" — `TaskEnvironment.Fallback` handles single-process case
 - [ ] **Call chain traced end-to-end** for every helper invoked from `Execute()`:
     - No `Environment.CurrentDirectory` / `Directory.GetCurrentDirectory()` / `Path.GetFullPath(x)` without a base anywhere in the transitive call graph
     - No direct `Environment.Get/SetEnvironmentVariable` (route through `TaskEnvironment`)
     - No `static` mutable fields seeded from process state; replace with `ConcurrentDictionary` keyed on inputs
+    - No non-atomic `GetRegisteredTaskObject`/`RegisterTaskObject` pair unless the cached computation is pure *and* deduplication is not the point
+    - No cached *failures* — a failure computed under one task's environment must not be served to another
     - No `Console.*`, `Environment.Exit`, `Process.Kill`, `FailFast`
 - [ ] ToolTask overrides audited (`GenerateFullPathToTool`, `SkipTaskExecution`, `ValidateParameters`); `ProcessStartInfo.FileName` is absolute, tool *arguments* stay relative
 - [ ] No nested tasks created via `new …Task()` without explicit `TaskEnvironment` propagation
@@ -424,3 +555,4 @@ Assertions: Execute() return value, [Output] exact string, error message content
 - [ ] Migration test follows Pattern A (decoy-CWD) **or** Pattern B (cross-instance independence), or PR explains why no test is meaningful
 - [ ] CWD-mutating tests pinned to a non-parallel xUnit collection
 - [ ] Cross-framework: tested on .NET Framework and .NET TFMs.
+- [ ] If the task was **deliberately left unannotated**, a comment records why (see [Migrating Is Not Always the Right Answer](#migrating-is-not-always-the-right-answer))

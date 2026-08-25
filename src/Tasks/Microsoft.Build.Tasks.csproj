@@ -612,9 +612,16 @@
   <ItemGroup>
     <None Include="Resources\default.win32manifest" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(SkipNetstandardRefAssembliesForBenchmarks)' != 'true'">
+    <!-- These netstandard2.0 builds supply RoslynCodeTaskFactory's reference payload. BenchmarkDotNet's
+         DllGatherer redirects every project reference to one output directory, where these reference-only
+         Framework and Utilities assemblies can overwrite the current-TFM implementation assemblies and cause
+         the generated benchmark executable to fail with BadImageFormatException. Benchmark builds do not need
+         the RoslynCodeTaskFactory payload. -->
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
   </ItemGroup>
@@ -625,14 +632,15 @@
   </ItemGroup>
   <PropertyGroup Condition="'$(BuildAnalyzer)' == 'true'">
     <!-- Analyzer warnings should not break WarnAsError builds while issues are being fixed -->
-    <WarningsNotAsErrors>$(WarningsNotAsErrors);MSBuildTask0002;MSBuildTask0003;MSBuildTask0004;MSBuildTask0005</WarningsNotAsErrors>
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);MSBuildTask0002;MSBuildTask0003;MSBuildTask0004;MSBuildTask0005;MSBuildTask0006;MSBuildTask0007;MSBuildTask0008</WarningsNotAsErrors>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
 
-  <!-- Mimics AddRefAssemblies from MSBuild.csproj -->
-  <Target Name="AddRefAssemblies" DependsOnTargets="ResolveAssemblyReferences" BeforeTargets="AssignTargetPaths">
+  <!-- Mimics AddRefAssemblies from MSBuild.csproj. Use the same benchmark condition as the references above
+       so the disabled RoslynCodeTaskFactory payload is not added to the benchmark output. -->
+  <Target Name="AddRefAssemblies" DependsOnTargets="ResolveAssemblyReferences" BeforeTargets="AssignTargetPaths" Condition="'$(SkipNetstandardRefAssembliesForBenchmarks)' != 'true'">
     <ItemGroup>
       <Content Include="@(NetstandardRefAssemblies)" CopyToOutputDirectory="PreserveNewest" Link="ref\%(Filename)%(Extension)" />
     </ItemGroup>
