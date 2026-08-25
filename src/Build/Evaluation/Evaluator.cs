@@ -1828,14 +1828,12 @@ namespace Microsoft.Build.Evaluation
 
                 var projectPath = _data.GetProperty(ReservedPropertyNames.projectFullPath)?.EvaluatedValue;
 
-                CompareInfo compareInfo = CultureInfo.InvariantCulture.CompareInfo;
+                static bool HasProperty(string value) =>
+                    value != null && ExpressionShredder.ContainsPropertyMarker(value);
 
-                static bool HasProperty(string value, CompareInfo compareInfo) =>
-                    value != null && compareInfo.IndexOf(value, "$(") != -1;
-
-                if (HasProperty(sdkReference.Name, compareInfo) ||
-                    HasProperty(sdkReference.Version, compareInfo) ||
-                    HasProperty(sdkReference.MinimumVersion, compareInfo))
+                if (HasProperty(sdkReference.Name) ||
+                    HasProperty(sdkReference.Version) ||
+                    HasProperty(sdkReference.MinimumVersion))
                 {
                     SdkReferencePropertyExpansionMode mode =
                         Traits.Instance.EscapeHatches.SdkReferencePropertyExpansion ??

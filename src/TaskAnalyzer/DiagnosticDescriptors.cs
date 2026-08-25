@@ -112,6 +112,33 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             isEnabledByDefault: true,
             description: "Constructor injection makes TaskEnvironment available to constructor logic and environment-dependent default initialization. The MSBuild engine prefers a public constructor with a single TaskEnvironment parameter when one is available.");
 
+        public static readonly DiagnosticDescriptor TaskEnvironmentNeverAssigned = new(
+            id: DiagnosticIds.TaskEnvironmentNeverAssigned,
+            title: "TaskEnvironment property is never assigned by MSBuild because the task does not implement IMultiThreadableTask",
+            messageFormat: "Task '{0}' declares a TaskEnvironment property but does not implement IMultiThreadableTask, so MSBuild never assigns it and it retains the task's own default; implement IMultiThreadableTask, or add a public constructor taking a TaskEnvironment that assigns the property",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "MSBuild assigns TaskEnvironment only to tasks that implement IMultiThreadableTask, or through a public constructor that takes a single TaskEnvironment. A task that declares the property without either never receives an environment from the engine: the property silently retains whatever the task itself initialized it to -- commonly TaskEnvironment.Fallback, or null when there is no initializer -- so paths resolve against the shared process working directory rather than the project directory. Because the task carries [MSBuildMultiThreadableTask] it runs in-process, which is exactly where that resolution is wrong.");
+
+        public static readonly DiagnosticDescriptor MissingMultiThreadableTaskAttribute = new(
+            id: DiagnosticIds.MissingMultiThreadableTaskAttribute,
+            title: "Task implements IMultiThreadableTask but is not marked with [MSBuildMultiThreadableTask]",
+            messageFormat: "Task '{0}' implements IMultiThreadableTask but is not marked with [MSBuildMultiThreadableTask], so it still runs in an out-of-proc TaskHost",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Info,
+            isEnabledByDefault: false,
+            description: "Only [MSBuildMultiThreadableTask] causes a task to run in-process in multithreaded mode; IMultiThreadableTask controls TaskEnvironment injection alone. Implementing the interface without the attribute is a valid intermediate state -- the task resolves paths correctly while remaining isolated in a TaskHost -- so this rule is disabled by default. Enable it once a codebase intends every multithreadable task to also be routed in-process. Only a type that declares the interface in its own base list is reported: ToolTask implements IMultiThreadableTask, so an inherited implementation says nothing about the derived task's intent.");
+
+        public static readonly DiagnosticDescriptor MultiThreadableTaskAttributeHasNoEffect = new(
+            id: DiagnosticIds.MultiThreadableTaskAttributeHasNoEffect,
+            title: "[MSBuildMultiThreadableTask] has no effect on this type",
+            messageFormat: "[MSBuildMultiThreadableTask] on type '{0}' has no effect because {1}",
+            category: "MSBuild.TaskAuthoring",
+            defaultSeverity: DiagnosticSeverity.Warning,
+            isEnabledByDefault: true,
+            description: "TaskRouter reads [MSBuildMultiThreadableTask] with inherit: false, off the concrete type the engine has just instantiated as a task. The attribute therefore only has an effect on a non-abstract class that implements ITask. On a type that is not a task, nothing ever reads it. On an abstract task, the engine never instantiates that type, and because the attribute is not inherited the concrete subclasses do not pick it up -- so every one of them is still routed to an out-of-proc TaskHost. Both shapes usually mean the attribute was applied to the wrong class: a helper type beside the real task, or a shared base instead of each task that derives from it.");
+
         public static ImmutableArray<DiagnosticDescriptor> All { get; } = ImmutableArray.Create(
             CriticalError,
             TaskEnvironmentRequired,
@@ -123,6 +150,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             InitializeRelativeDefaultInExecute,
             UnsupportedTaskItemType,
             CultureSensitiveTaskItemType,
-            PreferTaskEnvironmentConstructorInjection);
+            PreferTaskEnvironmentConstructorInjection,
+            TaskEnvironmentNeverAssigned,
+            MissingMultiThreadableTaskAttribute,
+            MultiThreadableTaskAttributeHasNoEffect);
     }
 }
