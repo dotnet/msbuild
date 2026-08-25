@@ -2,7 +2,7 @@
 In the current effort to improve performance of MSBuild, we identified evaluation as one of the focus areas of this effort. Evaluation is the first step when loading or building, and it determines references, how projects are connected and what needs to be build. Because of this it runs in every MSBuild scenario, from solution load and design-time builds in Visual Studio, to up-to-date builds or full builds in VS or on the command line.
 
 ## Description
-Current performance state of evaluation is mostly unkown, we have a few measures but no easy way of accessing and assessing them. As such, we are unsure which specific areas can be improve. 
+Current performance state of evaluation is mostly unknown, we have a few measures but no easy way of accessing and assessing them. As such, we are unsure which specific areas can be improve. 
 
 ## Goals and Motivation
 We are trying to make evaluation phase of the build more performant, since it is almost always executed any performance gain becomes noticeable. A performant evaluation phase would decrease build times in general, in CI cases it frees up resources, and in individual cases it can increase dev-loop performance by making up-to-date and incremental builds go faster.
