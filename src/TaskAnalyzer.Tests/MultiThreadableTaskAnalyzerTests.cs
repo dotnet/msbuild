@@ -1180,6 +1180,223 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     // ═══════════════════════════════════════════════════════════════════════
+    // MSBuildTask0003: Path consumers on types that are not obviously file APIs.
+    // These read the file system through a path string on an unrelated type, so
+    // they are just as unsafe as File.*/Directory.* under multithreaded execution.
+    // ═══════════════════════════════════════════════════════════════════════
+
+    [Fact]
+    public async Task AssemblyNameGetAssemblyName_WithStringPath_ProducesDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.Reflection;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public string AssemblyPath { get; set; } = "";
+                public override bool Execute()
+                {
+                    var name = AssemblyName.GetAssemblyName(AssemblyPath);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task AssemblyNameGetAssemblyName_WithGetAbsolutePath_NoDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.Reflection;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public string AssemblyPath { get; set; } = "";
+                public override bool Execute()
+                {
+                    var name = AssemblyName.GetAssemblyName(TaskEnvironment.GetAbsolutePath(AssemblyPath));
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task NewAssemblyName_WithDisplayName_NoDiagnostic()
+    {
+        // AssemblyName(string assemblyName) takes a display name, not a path.
+        var diags = await GetDiagnosticsAsync("""
+            using System.Reflection;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var name = new AssemblyName("MyAssembly, Version=1.0.0.0");
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task XmlDocumentLoad_WithStringPath_ProducesDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.Xml;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var doc = new XmlDocument();
+                    doc.Load("input.xml");
+                    doc.Save("output.xml");
+                    return true;
+                }
+            }
+            """);
+
+        diags.Count(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task XmlDocumentLoad_WithStreamOverload_NoDiagnostic()
+    {
+        // Stream overloads carry no path string, so they must not be flagged.
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO;
+            using System.Xml;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var doc = new XmlDocument();
+                    Stream stream = Stream.Null;
+                    doc.Load(stream);
+                    doc.Save(stream);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task XmlDocumentNonPathMembers_NoDiagnostic()
+    {
+        // CreateElement/SelectNodes/LoadXml take names, XPath expressions and XML text —
+        // none of them are paths, so adding XmlDocument must not flag them.
+        var diags = await GetDiagnosticsAsync("""
+            using System.Xml;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var doc = new XmlDocument();
+                    doc.LoadXml("<root />");
+                    var element = doc.CreateElement("child", "http://example.com/ns");
+                    doc.DocumentElement!.AppendChild(element);
+                    doc.SelectNodes("//child");
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task X509CertificateLoaderLoadFromFile_WithStringPath_ProducesDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.Security.Cryptography.X509Certificates;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public string CertificatePath { get; set; } = "";
+                public override bool Execute()
+                {
+                    var certificate = X509CertificateLoader.LoadCertificateFromFile(CertificatePath);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task X509CertificateLoaderLoadFromBytes_NoDiagnostic()
+    {
+        // The byte[] overload has no path parameter; 'password' must not be treated as one.
+        var diags = await GetDiagnosticsAsync("""
+            using System.Security.Cryptography.X509Certificates;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute()
+                {
+                    var certificate = X509CertificateLoader.LoadPkcs12(new byte[0], "secret");
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldNotContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    [Fact]
+    public async Task ZipFileExtensionsExtractToFile_WithStringPath_ProducesDiagnostic()
+    {
+        // ZipFileExtensions members are extension methods; the reduced call form must still be seen.
+        var diags = await GetDiagnosticsAsync("""
+            using System.IO.Compression;
+            using Microsoft.Build.Framework;
+            public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; }
+                public string DestinationPath { get; set; } = "";
+                public override bool Execute()
+                {
+                    using var archive = ZipFile.OpenRead(TaskEnvironment.GetAbsolutePath("archive.zip"));
+                    foreach (var entry in archive.Entries)
+                    {
+                        entry.ExtractToFile(DestinationPath);
+                    }
+                    return true;
+                }
+            }
+            """);
+
+        var pathDiags = diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).ToArray();
+        pathDiags.Length.ShouldBe(1);
+        pathDiags[0].GetMessage().ShouldContain("ExtractToFile");
+    }
+
+    [Fact]
+    public async Task XPathDocumentConstructor_WithStringPath_ProducesDiagnostic()
+    {
+        var diags = await GetDiagnosticsAsync("""
+            using System.Xml.XPath;
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public string DocumentPath { get; set; } = "";
+                public override bool Execute()
+                {
+                    var doc = new XPathDocument(DocumentPath);
+                    return true;
+                }
+            }
+            """);
+
+        diags.ShouldContain(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute);
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════
     // Iteration 9-13: New APIs and features
     // ═══════════════════════════════════════════════════════════════════════
 

@@ -326,20 +326,24 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 "System.IO.BinaryReader",
                 "System.IO.BinaryWriter",
 
-                // XML types — only include types where the majority of string
-                // parameters are file paths. XmlDocument is excluded because methods
-                // like CreateElement, CreateAttribute etc. take non-path strings.
+                // XML types. Members that take non-path strings (CreateElement's name/
+                // namespaceURI, SelectNodes' xpath, LoadXml's xml, ...) are filtered out by
+                // IsPathParameterName, and the stream/reader overloads carry no string
+                // parameter at all, so only the string-path overloads are flagged.
                 "System.Xml.Linq.XDocument",
                 "System.Xml.Linq.XElement",
+                "System.Xml.XmlDocument",
                 "System.Xml.XmlReader",
                 "System.Xml.XmlWriter",
                 "System.Xml.XmlTextReader",
                 "System.Xml.XmlTextWriter",
+                "System.Xml.XPath.XPathDocument",
                 "System.Xml.Xsl.XslCompiledTransform",
                 "System.Xml.Schema.XmlSchema",
 
                 // Compression types that accept file paths
                 "System.IO.Compression.ZipFile",
+                "System.IO.Compression.ZipFileExtensions",
 
                 // Memory-mapped files
                 "System.IO.MemoryMappedFiles.MemoryMappedFile",
@@ -347,6 +351,8 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 // Security / certificates
                 "System.Security.Cryptography.X509Certificates.X509Certificate",
                 "System.Security.Cryptography.X509Certificates.X509Certificate2",
+                "System.Security.Cryptography.X509Certificates.X509Certificate2Collection",
+                "System.Security.Cryptography.X509Certificates.X509CertificateLoader",
 
                 // Diagnostics
                 "System.Diagnostics.FileVersionInfo",
@@ -358,6 +364,12 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
                 // Assembly loading (supplements the banned-API list for path-based overloads)
                 "System.Runtime.Loader.AssemblyLoadContext",
+
+                // AssemblyName.GetAssemblyName(assemblyFile) opens the file to read its
+                // manifest, so a relative path resolves against the shared working directory.
+                // The AssemblyName(assemblyName) constructor takes a display name, not a path,
+                // and is filtered out by IsPathParameterName.
+                "System.Reflection.AssemblyName",
             };
 
             var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);

@@ -12,6 +12,7 @@ using Microsoft.CodeAnalysis.CodeFixes;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Editing;
+using Microsoft.CodeAnalysis.Operations;
 
 namespace Microsoft.Build.TaskAuthoring.Analyzer
 {
@@ -38,13 +39,15 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
+            var semanticModel = await context.Document.GetSemanticModelAsync(context.CancellationToken).ConfigureAwait(false);
+
             foreach (var diagnostic in context.Diagnostics)
             {
                 var node = root.FindNode(diagnostic.Location.SourceSpan);
 
                 if (diagnostic.Id == DiagnosticIds.FilePathRequiresAbsolute)
                 {
-                    RegisterFilePathFix(context, node, diagnostic);
+                    RegisterFilePathFix(context, semanticModel, node, diagnostic);
                 }
                 else if (diagnostic.Id == DiagnosticIds.TaskEnvironmentRequired)
                 {
@@ -53,7 +56,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             }
         }
 
-        private static void RegisterFilePathFix(CodeFixContext context, SyntaxNode node, Diagnostic diagnostic)
+        private static void RegisterFilePathFix(CodeFixContext context, SemanticModel? semanticModel, SyntaxNode node, Diagnostic diagnostic)
         {
             // Find the invocation or object creation expression
             var invocation = FindContainingCall(node);
@@ -75,17 +78,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 return;
             }
 
-            // Find the first argument that is NOT already wrapped with TaskEnvironment.GetAbsolutePath()
-            ArgumentSyntax? targetArg = null;
-            foreach (var arg in argumentList.Arguments)
-            {
-                if (!IsAlreadyWrapped(arg.Expression))
-                {
-                    targetArg = arg;
-                    break;
-                }
-            }
-
+            var targetArg = FindPathArgumentToWrap(argumentList, semanticModel, context.CancellationToken);
             if (targetArg is null)
             {
                 return;
@@ -97,6 +90,41 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     createChangedDocument: ct => WrapArgumentWithGetAbsolutePathAsync(context.Document, targetArg, ct),
                     equivalenceKey: "WrapWithGetAbsolutePath"),
                 diagnostic);
+        }
+
+        /// <summary>
+        /// Finds the first argument that is NOT already wrapped with TaskEnvironment.GetAbsolutePath()
+        /// and that binds to a string parameter whose name identifies it as a path — the same test the
+        /// analyzer applies when it reports the diagnostic. Skipping non-path parameters keeps the fix off
+        /// arguments that cannot be rooted, such as the <c>ZipArchive</c> receiver of the static form of
+        /// <c>ZipFileExtensions.CreateEntryFromFile(archive, sourceFileName, entryName)</c>.
+        /// </summary>
+        private static ArgumentSyntax? FindPathArgumentToWrap(
+            ArgumentListSyntax argumentList, SemanticModel? semanticModel, CancellationToken cancellationToken)
+        {
+            foreach (var arg in argumentList.Arguments)
+            {
+                if (IsAlreadyWrapped(arg.Expression))
+                {
+                    continue;
+                }
+
+                // Without a semantic model the parameter cannot be inspected; fall back to the first
+                // unwrapped argument, which is the path for the overwhelming majority of path APIs.
+                if (semanticModel is null)
+                {
+                    return arg;
+                }
+
+                if (semanticModel.GetOperation(arg, cancellationToken) is IArgumentOperation { Parameter: { } parameter } &&
+                    parameter.Type.SpecialType == SpecialType.System_String &&
+                    SharedAnalyzerHelpers.IsPathParameterName(parameter.Name))
+                {
+                    return arg;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

@@ -66,9 +66,22 @@ These APIs access process-global state that varies per task in multithreaded mod
 
 File system APIs that accept a path parameter will resolve relative paths against the process working directory — which is shared and unpredictable in multithreaded mode.
 
-**Monitored types:** `File`, `Directory`, `FileInfo`, `DirectoryInfo`, `FileStream`, `StreamReader`, `StreamWriter`, `FileSystemWatcher`
+The rule covers the obvious `System.IO` entry points as well as *analyzer-invisible path consumers* — APIs on types that have nothing to do with `System.IO` but still take a path string and hit the file system.
 
-The analyzer inspects parameter names to determine which arguments are paths (e.g., `path`, `fileName`, `sourceFileName`, `destFileName`) and skips non-path string parameters (e.g., `contents`, `searchPattern`). Named arguments are handled correctly.
+**Monitored types:**
+
+| Area | Types |
+|---|---|
+| Files and directories | `File`, `Directory`, `FileInfo`, `DirectoryInfo`, `FileStream`, `StreamReader`, `StreamWriter`, `FileSystemWatcher`, `BinaryReader`, `BinaryWriter`, `MemoryMappedFile` |
+| XML | `XDocument`, `XElement`, `XmlDocument`, `XmlReader`, `XmlWriter`, `XmlTextReader`, `XmlTextWriter`, `XPathDocument`, `XslCompiledTransform`, `XmlSchema` |
+| Compression | `ZipFile`, `ZipFileExtensions` |
+| Certificates | `X509Certificate`, `X509Certificate2`, `X509Certificate2Collection`, `X509CertificateLoader` |
+| Reflection | `AssemblyName` (`GetAssemblyName`), `AssemblyLoadContext` |
+| Diagnostics / resources | `FileVersionInfo`, `TextWriterTraceListener`, `ResourceReader`, `ResourceWriter` |
+
+The analyzer inspects parameter names to determine which arguments are paths (e.g., `path`, `fileName`, `sourceFileName`, `destFileName`) and skips non-path string parameters (e.g., `contents`, `searchPattern`, `password`, `namespaceURI`, `xpath`). Named arguments are handled correctly.
+
+This parameter-name filter is what makes it safe to monitor whole types that mix path and non-path members: only the string-path overloads are flagged, so `XmlDocument.Load(string)` is reported while `XmlDocument.LoadXml(string)`, `XmlDocument.CreateElement(...)` and the `Stream`/`TextReader` overloads are not.
 
 **Recognized safe patterns** (suppress the diagnostic):
 
@@ -334,7 +347,7 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 | MSBuildTask0007: `new AbsolutePath(Item.GetMetadata("FullPath"))` | → Retype `Item` to ``ITaskItem<AbsolutePath>`` and replace with `Item.Value` |
 | MSBuildTask0008: relative default `= "obj"` on a path property | → Retype the property (unset default) and move the default into `Execute()` as a guarded, `TaskEnvironment`-rooted assignment |
 
-The MSBuildTask0003 fixer intelligently finds the first **unwrapped** path argument rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument.
+The MSBuildTask0003 fixer finds the first **unwrapped path** argument rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument. It binds each argument to its parameter, so arguments that cannot be rooted are skipped: for `ZipFileExtensions.CreateEntryFromFile(archive, sourceFileName, entryName)` it wraps `sourceFileName`, not the leading `ZipArchive` or the trailing entry name.
 
 The MSBuildTask0006/MSBuildTask0007 fixer is conservative by design: it only offers a fix when every reference to the property — across all partial declarations of the task type, in the current document — can be safely rewritten as part of the same change, so the resulting code keeps compiling after the property type is updated. If the property is referenced from another file (a partial class spread across documents) in a way this single-document fix can't rewrite, no fix is offered.
 

@@ -249,4 +249,42 @@ public class MultiThreadableTaskCodeFixProviderTests
             Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
                 .WithArguments("new FileInfo(...)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")).RunAsync();
     }
+
+    [Fact]
+    public async Task Fix_ZipFileExtensionsStaticForm_WrapsPathArgumentNotReceiver()
+    {
+        // The static form of an extension method puts a non-path argument first. The fix must
+        // skip it and wrap the string path parameter, otherwise it produces code that does not compile.
+        await CreateFixTest(
+            testCode: """
+                using System.IO.Compression;
+                using Microsoft.Build.Framework;
+                public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+                {
+                    public TaskEnvironment TaskEnvironment { get; set; }
+                    public override bool Execute()
+                    {
+                        ZipArchive archive = null!;
+                        {|#0:ZipFileExtensions.CreateEntryFromFile(archive, "input.txt", "entry.txt")|};
+                        return true;
+                    }
+                }
+                """,
+            fixedCode: """
+                using System.IO.Compression;
+                using Microsoft.Build.Framework;
+                public class MyTask : Microsoft.Build.Utilities.Task, IMultiThreadableTask
+                {
+                    public TaskEnvironment TaskEnvironment { get; set; }
+                    public override bool Execute()
+                    {
+                        ZipArchive archive = null!;
+                        ZipFileExtensions.CreateEntryFromFile(archive, TaskEnvironment.GetAbsolutePath("input.txt"), "entry.txt");
+                        return true;
+                    }
+                }
+                """,
+            Diag(DiagnosticIds.FilePathRequiresAbsolute).WithLocation(0)
+                .WithArguments("ZipFileExtensions.CreateEntryFromFile(ZipArchive, string, string)", "wrap path argument with TaskEnvironment.GetAbsolutePath()")).RunAsync();
+    }
 }
