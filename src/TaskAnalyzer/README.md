@@ -57,8 +57,8 @@ These APIs access process-global state that varies per task in multithreaded mod
 | `Environment.ExpandEnvironmentVariables()` | Use `TaskEnvironment.GetEnvironmentVariable()` per variable |
 | `Environment.GetFolderPath()` | Use `TaskEnvironment.GetEnvironmentVariable()` |
 | `Path.GetFullPath()` | `TaskEnvironment.GetAbsolutePath()` |
-| `Path.GetTempPath()` | `TaskEnvironment.GetEnvironmentVariable("TMP")` |
-| `Path.GetTempFileName()` | `TaskEnvironment.GetEnvironmentVariable("TMP")` |
+| `Path.GetTempPath()` | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
+| `Path.GetTempFileName()` | No good workaround until https://github.com/dotnet/msbuild/issues/14583 is resolved. |
 | `Process.Start()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 | `new ProcessStartInfo()` (all overloads) | `TaskEnvironment.GetProcessStartInfo()` |
 
