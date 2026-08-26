@@ -409,7 +409,7 @@ MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTa
 
 The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis, but it reports only at the task entry point. Adding this attribute to a helper class gives you inline diagnostics and code fixes directly in the helper's source.
 
-**When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles and code fixes) on unsafe APIs within those helpers.
+**When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles) on unsafe APIs within those helpers. Note that the MSBuildTask0002/0003 code fixes reference a `TaskEnvironment` member, so they are only offered in a helper that declares one — see [Code Fixes](#code-fixes).
 
 ### Severity Levels
 
@@ -439,7 +439,11 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 | MSBuildTask0007: `new AbsolutePath(Item.GetMetadata("FullPath"))` | → Retype `Item` to ``ITaskItem<AbsolutePath>`` and replace with `Item.Value` |
 | MSBuildTask0008: relative default `= "obj"` on a path property | → Retype the property (unset default) and move the default into `Execute()` as a guarded, `TaskEnvironment`-rooted assignment |
 
-The MSBuildTask0003 fixer intelligently finds the first **unwrapped** path argument rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument.
+The MSBuildTask0003 fixer anchors on the **call the analyzer flagged** (the one whose parameter takes the path) and wraps that call's own path argument. This matters when the flagged call is nested inside another call — `new StreamWriter(File.Create(OutputPath))` becomes `new StreamWriter(File.Create(TaskEnvironment.GetAbsolutePath(OutputPath)))`, not a wrap around the `Stream` the outer constructor receives. Within that call it wraps the first **unwrapped** path parameter rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument, and for `Directory.GetFiles(dir, searchPattern)` it leaves the search pattern alone.
+
+Both the MSBuildTask0002 and MSBuildTask0003 fixers reference the instance `TaskEnvironment` member, so no fix is offered where that reference would not compile: where `this` is unavailable — a static method, static local function, or static lambda (CS0120), or an instance field or property initializer (CS0236) — or where the task type simply has no `TaskEnvironment` member (CS0103), which the default `all` scope allows since it analyzes every `ITask`. Making the enclosing member non-static, moving the initializer into `Execute()`, or implementing `IMultiThreadableTask` re-enables the fix.
+
+When bulk-applying with `dotnet format analyzers`, note that the tool derives the batch from the *first* reported diagnostic: if that occurrence is one of the ones above where no fix is offered, it logs `Unable to fix MSBuildTask0003…` and applies nothing. Resolve or suppress that first occurrence by hand, then re-run.
 
 The MSBuildTask0006/MSBuildTask0007 fixer is conservative by design: it only offers a fix when every reference to the property — across all partial declarations of the task type, in the current document — can be safely rewritten as part of the same change, so the resulting code keeps compiling after the property type is updated. If the property is referenced from another file (a partial class spread across documents) in a way this single-document fix can't rewrite, no fix is offered.
 
