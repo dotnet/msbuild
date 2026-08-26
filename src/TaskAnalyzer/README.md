@@ -105,7 +105,7 @@ These APIs may cause version conflicts or other issues in a shared task host.
 
 ### MSBuildTask0005 — Transitive Unsafe API Usage
 
-MSBuildTask0001–MSBuildTask0004 only look at code written inside a task class. MSBuildTask0005 closes that gap: it builds a compilation-wide call graph and walks it from every task's members, so an unsafe API reached through a shared helper is still reported.
+MSBuildTask0001–MSBuildTask0004 only look at code written inside a task class — or inside a helper explicitly opted in with `[MSBuildMultiThreadableTaskAnalyzed]` (see [Analysis Scope](#analysis-scope)). MSBuildTask0005 closes that gap: it builds a compilation-wide call graph and walks it from every task's members, so an unsafe API reached through a shared helper is still reported.
 
 The diagnostic is reported **at the unsafe call site** — inside the helper — and names the task entry point plus the full call chain in the message:
 
@@ -457,6 +457,14 @@ public class CopyFiles : Task, IMultiThreadableTask
         return true;
     }
 }
+```
+
+## Tests
+
+Unit tests for all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppressions live in `src/TaskAnalyzer.Tests`. Run them from the repository root:
+
+```
+.\build.cmd -test -projects src\TaskAnalyzer.Tests\TaskAnalyzer.Tests.csproj -c Debug
 ```
 
 ## Architecture

@@ -262,9 +262,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             foreach (var taskType in taskTypes)
             {
                 // Track reported violations per task type to avoid flooding with duplicates.
-                // Key: the unsafe call site plus the target banned API display name. Keeping the call
-                // site in the key means a suppression on one reviewed call does not hide a second,
-                // unreviewed call to the same API. Only the shortest chain per call site is reported.
+                // Key: the location the diagnostic is reported at plus the target banned API display name.
+                // Keeping the location in the key means a suppression on one reviewed call does not hide a
+                // second, unreviewed call to the same API. Only the shortest chain per location is reported.
                 var reportedPerTaskType = new HashSet<(string ApiDisplayName, Location Location)>();
 
                 foreach (var member in taskType.GetMembers())
@@ -352,8 +352,17 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             List<string> chain,
             HashSet<(string ApiDisplayName, Location Location)> reportedPerTaskType)
         {
-            // Deduplicate by call site + target API — report each unsafe call site only once per task type
-            if (!reportedPerTaskType.Add((violation.ApiDisplayName, violation.Location)))
+            var taskMethodLocation = taskMethod.Locations.Length > 0 ? taskMethod.Locations[0] : Location.None;
+
+            // Prefer the call site; fall back to the task entry point when the call site has no source location.
+            bool hasCallSite = violation.Location.SourceTree is not null;
+            var location = hasCallSite ? violation.Location : taskMethodLocation;
+
+            // Deduplicate by the location the diagnostic is actually reported at, plus the target API. Keying
+            // on the call site means a suppression on one reviewed call does not hide a second, unreviewed
+            // call to the same API; keying on the *effective* location means the fallback above does not
+            // collapse violations that land on different task members.
+            if (!reportedPerTaskType.Add((violation.ApiDisplayName, location)))
             {
                 return;
             }
@@ -361,11 +370,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             var chainWithApi = new List<string>(chain) { violation.ApiDisplayName };
             var chainStr = string.Join(" → ", chainWithApi);
 
-            var taskMethodLocation = taskMethod.Locations.Length > 0 ? taskMethod.Locations[0] : Location.None;
-
-            // Prefer the call site; fall back to the task entry point when the call site has no source location.
-            bool hasCallSite = violation.Location.SourceTree is not null;
-            var location = hasCallSite ? violation.Location : taskMethodLocation;
             var additionalLocations = hasCallSite && taskMethodLocation.SourceTree is not null
                 ? ImmutableArray.Create(taskMethodLocation)
                 : ImmutableArray<Location>.Empty;
