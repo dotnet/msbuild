@@ -43,6 +43,7 @@ folder InstallDir:\MSBuild\Current\Bin
   file source=$(X86BinPath)Microsoft.VisualStudio.SolutionPersistence.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
   file source=$(X86BinPath)RuntimeContracts.dll
   file source=$(X86BinPath)System.Buffers.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
+  file source=$(X86BinPath)System.Diagnostics.DiagnosticSource.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\amd64\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=3
   file source=$(X86BinPath)System.Formats.Nrbf.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
   file source=$(X86BinPath)System.IO.Pipelines.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
   file source=$(X86BinPath)System.Memory.dll vs.file.ngenApplications="[installDir]\MSBuild\Current\Bin\MSBuild.exe" vs.file.ngenArchitecture=all vs.file.ngenPriority=2
