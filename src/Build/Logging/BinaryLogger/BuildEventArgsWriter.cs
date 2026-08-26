@@ -987,6 +987,11 @@ namespace Microsoft.Build.Logging
                         Write((byte)0);
                     }
                 }
+                else if (item is AbsolutePath absolutePath)
+                {
+                    WriteDeduplicatedString(absolutePath.OriginalValue ?? string.Empty);
+                    Write(0);
+                }
                 else
                 {
                     WriteDeduplicatedString(item?.ToString() ?? ""); // itemspec

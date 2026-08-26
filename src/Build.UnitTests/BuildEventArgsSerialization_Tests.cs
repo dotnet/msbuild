@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Text;
 using FluentAssertions;
 using Microsoft.Build.BackEnd;
@@ -873,6 +874,98 @@ namespace Microsoft.Build.UnitTests
                 e => e.LineNumber.ToString(),
                 e => e.ColumnNumber.ToString(),
                 e => TranslationHelpers.GetItemsString(e.Items));
+        }
+
+        [Fact]
+        public void AbsolutePathTaskParameterTextUsesOriginalValue()
+        {
+            var basePath = new AbsolutePath(Path.GetFullPath("."));
+            var path = new AbsolutePath("input.txt", basePath);
+
+            ItemGroupLoggingHelper.GetStringFromParameterValue(path).ShouldBe("input.txt");
+        }
+
+        [Fact]
+        public void TaskParameterEventForwardingPreservesAbsolutePathOriginalValue()
+        {
+            TaskParameterEventArgs args = CreateAbsolutePathTaskParameterEventArgs();
+            var memoryStream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                args.WriteToStream(binaryWriter);
+            }
+
+            memoryStream.Position = 0;
+#pragma warning disable SYSLIB0050 // Required to exercise the legacy event forwarding deserializer.
+            var forwardedArgs = (TaskParameterEventArgs)FormatterServices.GetUninitializedObject(typeof(TaskParameterEventArgs));
+#pragma warning restore SYSLIB0050
+            using (var binaryReader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                forwardedArgs.CreateFromStream(binaryReader, version: 0);
+            }
+
+            forwardedArgs.Items.Count.ShouldBe(1);
+            ((ITaskItem)forwardedArgs.Items[0]).ItemSpec.ShouldBe("input.txt");
+        }
+
+        [Fact]
+        public void BinaryLogSerializationPreservesAbsolutePathOriginalValue()
+        {
+            TaskParameterEventArgs args = CreateAbsolutePathTaskParameterEventArgs();
+            var memoryStream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                new BuildEventArgsWriter(binaryWriter).Write(args);
+            }
+
+            memoryStream.Position = 0;
+            using var reader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true);
+            using var eventArgsReader = new BuildEventArgsReader(reader, BinaryLogger.FileFormatVersion);
+            var replayedArgs = (TaskParameterEventArgs)eventArgsReader.Read();
+
+            replayedArgs.Items.Count.ShouldBe(1);
+            ((ITaskItem)replayedArgs.Items[0]).ItemSpec.ShouldBe("input.txt");
+            replayedArgs.Message.ShouldContain("input.txt");
+            replayedArgs.Message.ShouldNotContain(Path.GetFullPath("input.txt"));
+        }
+
+        [Fact]
+        public void BinaryLogSerializationWritesEmptyItemSpecForDefaultAbsolutePath()
+        {
+            var args = new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskInput,
+                "File",
+                propertyName: null,
+                "File",
+                new object[] { default(AbsolutePath) },
+                logItemMetadata: false,
+                DateTime.MinValue);
+            var memoryStream = new MemoryStream();
+            using (var binaryWriter = new BinaryWriter(memoryStream, Encoding.UTF8, leaveOpen: true))
+            {
+                new BuildEventArgsWriter(binaryWriter).Write(args);
+            }
+
+            memoryStream.Position = 0;
+            using var reader = new BinaryReader(memoryStream, Encoding.UTF8, leaveOpen: true);
+            using var eventArgsReader = new BuildEventArgsReader(reader, BinaryLogger.FileFormatVersion);
+            var replayedArgs = (TaskParameterEventArgs)eventArgsReader.Read();
+
+            replayedArgs.Items.Count.ShouldBe(1);
+            ((ITaskItem)replayedArgs.Items[0]).ItemSpec.ShouldBe(string.Empty);
+        }
+
+        private static TaskParameterEventArgs CreateAbsolutePathTaskParameterEventArgs()
+        {
+            var basePath = new AbsolutePath(Path.GetFullPath("."));
+            return new TaskParameterEventArgs(
+                TaskParameterMessageKind.TaskInput,
+                "File",
+                propertyName: null,
+                "File",
+                new object[] { new AbsolutePath("input.txt", basePath) },
+                logItemMetadata: false,
+                DateTime.MinValue);
         }
 
         [Fact]
