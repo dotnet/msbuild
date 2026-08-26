@@ -19,11 +19,11 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0003** | Warning | All `ITask` implementations | File system API requires absolute path |
 | **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
 | **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
-| **MSBuildTask0006** | Warning | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer typed path parameter over string |
-| **MSBuildTask0007** | Warning | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
-| **MSBuildTask0008** | Warning | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
+| **MSBuildTask0006** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer typed path parameter over string |
+| **MSBuildTask0007** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
+| **MSBuildTask0008** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
 | **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
-| **MSBuildTask0010** | Error | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
+| **MSBuildTask0010** | Warning | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
 | **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
 | **MSBuildTask0012** | Warning | Concrete tasks with `[MSBuildMultiThreadableTask]` applied directly | MSBuild never assigns the `TaskEnvironment` property |
 | **MSBuildTask0013** | Info (off by default) | Concrete tasks declaring `IMultiThreadableTask` in their own base list | Missing `[MSBuildMultiThreadableTask]`, so the task still runs out-of-proc |
@@ -246,7 +246,7 @@ public class MyTask : Task
 {
     public ITaskItem<System.Guid> Id { get; set; }       // warning
     public ITaskItem<System.TimeSpan>[] Durations { get; set; }  // warning
-    public ITaskItem<int> Count { get; set; }             // MSBuildTask0010 error
+    public ITaskItem<int> Count { get; set; }             // MSBuildTask0010 warning
 }
 ```
 
@@ -256,13 +256,13 @@ No code fix is offered for MSBuildTask0009 — the resolution depends on the int
 
 ### MSBuildTask0010 — Culture-Sensitive `ITaskItem<T>` Conversion
 
-MSBuild binds `ITaskItem<T>` for `char`, numeric primitives, `decimal`, and `DateTime` through `Convert.ChangeType` using `CultureInfo.InvariantCulture`. Because this implicit conversion may not match the task's intended culture, the analyzer reports an **Error** whenever one of these types is used.
+MSBuild binds `ITaskItem<T>` for `char`, numeric primitives, `decimal`, and `DateTime` through `Convert.ChangeType` using `CultureInfo.InvariantCulture`. Because this implicit conversion may not match the task's intended culture, the analyzer reports a **Warning** whenever one of these types is used.
 
 ```csharp
 public class MyTask : Task
 {
-    public ITaskItem<int> Count { get; set; }       // error
-    public ITaskItem<DateTime>[] Dates { get; set; } // error
+    public ITaskItem<int> Count { get; set; }       // warning
+    public ITaskItem<DateTime>[] Dates { get; set; } // warning
 }
 ```
 
@@ -391,7 +391,6 @@ Fix by moving the attribute onto each concrete task class. Both shapes usually m
 **Scope:** Classes carrying the attribute that either do not implement `ITask` or are abstract.
 
 A concrete task that MSBuild cannot construct — no public parameterless constructor and no public single-`TaskEnvironment` constructor — is a third inert shape, but it is **not** reported. `Microsoft.Build.Utilities.Task.RegisterTask(string, Func<TaskEnvironment, ITask>)` lets a host supply an arbitrary factory, so such a task may be perfectly reachable.
->>>>>>> origin/main
 
 ### MSBuildTask0015 — Require Multithreading Opt-In
 
@@ -447,7 +446,7 @@ MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTa
 
 The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis, but it reports only at the task entry point. Adding this attribute to a helper class gives you inline diagnostics and code fixes directly in the helper's source.
 
-**When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles and code fixes) on unsafe APIs within those helpers.
+**When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles) on unsafe APIs within those helpers. Note that the MSBuildTask0002/0003 code fixes reference a `TaskEnvironment` member, so they are only offered in a helper that declares one — see [Code Fixes](#code-fixes).
 
 ### Configuring the Scope
 
@@ -462,9 +461,8 @@ The `msbuild_task_analyzer.scope` option, set in a `.globalconfig` (or as an MSB
 ### Severity Levels
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
-- **MSBuildTask0010** is always **Error** — task item conversions must not rely on `Convert.ChangeType`.
-- **MSBuildTask0002–MSBuildTask0009** report as **Warning**, with MSBuildTask0006–MSBuildTask0008 limited to tasks directly marked with `[MSBuildMultiThreadableTask]`.
-- **MSBuildTask0011** reports as **Info** — it is a modernization suggestion rather than a correctness issue.
+- **MSBuildTask0002–MSBuildTask0005, MSBuildTask0009, and MSBuildTask0010** report as **Warning**.
+- **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** report as **Info** — these are modernization suggestions, not correctness issues.
 - **MSBuildTask0012** reports as **Warning** — the `TaskEnvironment` property is silently inert, which is a correctness issue.
 - **MSBuildTask0013** is **disabled by default** — running out-of-proc is a performance characteristic, and the shape it reports is a valid intermediate migration state.
 - **MSBuildTask0014** reports as **Warning** — the attribute is inert, and the task the author meant to mark is usually still running out-of-proc.
@@ -493,7 +491,11 @@ The analyzer ships with a code fix provider that offers automatic replacements:
 | MSBuildTask0008: relative default `= "obj"` on a path property | → Retype the property (unset default) and move the default into `Execute()` as a guarded, `TaskEnvironment`-rooted assignment |
 | MSBuildTask0012: concrete task without the opt-in | → Apply `[MSBuildMultiThreadableTask]`, implement `IMultiThreadableTask`, and add the `TaskEnvironment` property |
 
-The MSBuildTask0003 fixer intelligently finds the first **unwrapped** path argument rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument.
+The MSBuildTask0003 fixer anchors on the **call the analyzer flagged** (the one whose parameter takes the path) and wraps that call's own path argument. This matters when the flagged call is nested inside another call — `new StreamWriter(File.Create(OutputPath))` becomes `new StreamWriter(File.Create(TaskEnvironment.GetAbsolutePath(OutputPath)))`, not a wrap around the `Stream` the outer constructor receives. Within that call it wraps the first **unwrapped** path parameter rather than blindly wrapping the first argument — so for `File.Copy(safePath, unsafePath)` it correctly wraps the second argument, and for `Directory.GetFiles(dir, searchPattern)` it leaves the search pattern alone.
+
+Both the MSBuildTask0002 and MSBuildTask0003 fixers reference the instance `TaskEnvironment` member, so no fix is offered where that reference would not compile: where `this` is unavailable — a static method, static local function, or static lambda (CS0120), or an instance field or property initializer (CS0236) — or where the task type simply has no `TaskEnvironment` member (CS0103), which the default `all` scope allows since it analyzes every `ITask`. Making the enclosing member non-static, moving the initializer into `Execute()`, or implementing `IMultiThreadableTask` re-enables the fix.
+
+When bulk-applying with `dotnet format analyzers`, note that the tool derives the batch from the *first* reported diagnostic: if that occurrence is one of the ones above where no fix is offered, it logs `Unable to fix MSBuildTask0003…` and applies nothing. Resolve or suppress that first occurrence by hand, then re-run.
 
 The MSBuildTask0006/MSBuildTask0007 fixer is conservative by design: it only offers a fix when every reference to the property — across all partial declarations of the task type, in the current document — can be safely rewritten as part of the same change, so the resulting code keeps compiling after the property type is updated. If the property is referenced from another file (a partial class spread across documents) in a way this single-document fix can't rewrite, no fix is offered.
 
