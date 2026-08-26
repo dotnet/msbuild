@@ -410,6 +410,39 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         /// <summary>
+        /// Returns true when the type directly carries <c>Microsoft.Build.Framework.MSBuildMultiThreadableTaskAttribute</c>.
+        /// <para>
+        /// The attribute is matched by namespace and name rather than by symbol identity, because that is what
+        /// the engine does: <c>TaskRouter.HasMultiThreadableTaskAttribute</c> compares
+        /// <c>attr.GetType().FullName</c> and ignores the defining assembly so that a task can be marked with a
+        /// copy of the attribute declared in its own assembly -- the shim a repository uses to stay buildable
+        /// against an MSBuild that predates the attribute. Symbol identity would disagree with routing for
+        /// exactly those tasks, and <see cref="Compilation.GetTypeByMetadataName"/> returns null outright once
+        /// the shim and Microsoft.Build.Framework both contribute the name, which is the normal state during
+        /// such a migration.
+        /// </para>
+        /// <para>
+        /// <see cref="ISymbol.GetAttributes"/> returns only directly applied attributes, matching the
+        /// attribute's <c>Inherited = false</c> semantics and TaskRouter's <c>inherit: false</c> lookup.
+        /// </para>
+        /// </summary>
+        internal static bool HasMultiThreadableTaskAttribute(INamedTypeSymbol type)
+        {
+            foreach (AttributeData attribute in type.GetAttributes())
+            {
+                INamedTypeSymbol? attributeClass = attribute.AttributeClass;
+                if (attributeClass is not null &&
+                    string.Equals(attributeClass.Name, WellKnownTypeNames.MultiThreadableTaskAttributeName, StringComparison.Ordinal) &&
+                    string.Equals(attributeClass.ContainingNamespace?.ToDisplayString(), WellKnownTypeNames.FrameworkNamespace, StringComparison.Ordinal))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         /// Enumerates the properties declared on <paramref name="type"/> and all of its base types,
         /// most-derived first. A property hidden or overridden in a more derived type is yielded only
         /// once, via its most-derived declaration (matched by name). The <see cref="object"/> base is

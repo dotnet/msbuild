@@ -68,7 +68,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             if (taskType.TypeKind != TypeKind.Class ||
                 taskType.IsAbstract ||
                 !SharedAnalyzerHelpers.ImplementsInterface(taskType, iTaskType) ||
-                HasMultiThreadableTaskAttribute(taskType))
+                SharedAnalyzerHelpers.HasMultiThreadableTaskAttribute(taskType))
             {
                 return;
             }
@@ -87,29 +87,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                     return;
                 }
             }
-        }
-
-        /// <summary>
-        /// Returns true when the type directly carries <c>Microsoft.Build.Framework.MSBuildMultiThreadableTaskAttribute</c>.
-        /// The attribute is matched by namespace and name rather than by symbol identity, mirroring how the engine
-        /// detects it, so a task marked with a copy of the attribute defined in its own assembly is not reported.
-        /// <see cref="ISymbol.GetAttributes"/> returns only directly applied attributes, matching the attribute's
-        /// <c>Inherited = false</c> semantics.
-        /// </summary>
-        private static bool HasMultiThreadableTaskAttribute(INamedTypeSymbol taskType)
-        {
-            foreach (AttributeData attribute in taskType.GetAttributes())
-            {
-                INamedTypeSymbol? attributeClass = attribute.AttributeClass;
-                if (attributeClass is not null &&
-                    string.Equals(attributeClass.Name, WellKnownTypeNames.MultiThreadableTaskAttributeName, StringComparison.Ordinal) &&
-                    string.Equals(attributeClass.ContainingNamespace?.ToDisplayString(), WellKnownTypeNames.FrameworkNamespace, StringComparison.Ordinal))
-                {
-                    return true;
-                }
-            }
-
-            return false;
         }
 
         /// <summary>

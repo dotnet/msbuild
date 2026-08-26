@@ -54,7 +54,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             bool analyzeAllTasks = SharedAnalyzerHelpers.ReadAnalyzeAllTasksOption(compilationContext.Options.AnalyzerConfigOptionsProvider);
 
             var iMultiThreadableTaskType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.IMultiThreadableTaskFullName);
-            var multiThreadableTaskAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.MultiThreadableTaskAttributeFullName);
             var analyzedAttributeType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.AnalyzedAttributeFullName);
 
             var taskEnvironmentType = compilationContext.Compilation.GetTypeByMetadataName(WellKnownTypeNames.TaskEnvironmentFullName);
@@ -85,7 +84,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 AnalyzeTransitiveViolations(endCtx, callGraph, directViolations, iTaskType,
                     bannedApiLookup, filePathTypes, taskEnvironmentType, absolutePathType, iTaskItemType, consoleType,
-                    analyzeAllTasks, iMultiThreadableTaskType, multiThreadableTaskAttributeType, analyzedAttributeType);
+                    analyzeAllTasks, iMultiThreadableTaskType, analyzedAttributeType);
             });
         }
 
@@ -231,7 +230,6 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             INamedTypeSymbol? consoleType,
             bool analyzeAllTasks,
             INamedTypeSymbol? iMultiThreadableTaskType,
-            INamedTypeSymbol? multiThreadableTaskAttributeType,
             INamedTypeSymbol? analyzedAttributeType)
         {
             // Find all task types in the compilation
@@ -248,7 +246,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             {
                 taskTypes = taskTypes.Where(t =>
                     (iMultiThreadableTaskType is not null && t.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, iMultiThreadableTaskType))) ||
-                    (multiThreadableTaskAttributeType is not null && t.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, multiThreadableTaskAttributeType))) ||
+                    SharedAnalyzerHelpers.HasMultiThreadableTaskAttribute(t) ||
                     (analyzedAttributeType is not null && t.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, analyzedAttributeType)))).ToList();
 
                 if (taskTypes.Count == 0)

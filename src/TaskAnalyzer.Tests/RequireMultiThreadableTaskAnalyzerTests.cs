@@ -268,6 +268,39 @@ public class RequireMultiThreadableTaskAnalyzerTests
         diagnostics.Single().GetMessage().ShouldContain("MyTask");
     }
 
+    /// <summary>
+    /// The engine matches the attribute by full name and ignores the defining assembly, so a task marked with a
+    /// repository's own copy really is routed in-process and must not be told to opt in. That copy also makes the
+    /// name ambiguous, so the attribute cannot be resolved as a symbol at all -- the reason this rule and its
+    /// siblings match by name. See SharedAnalyzerHelpers.HasMultiThreadableTaskAttribute.
+    /// </summary>
+    [Fact]
+    public async Task RequireScope_AttributeFromReferencedAssembly_ProducesNoDiagnostic()
+    {
+        var compilation = TestHelpers.CreateCompilationWithAttributeFromReferences("""
+            [Microsoft.Build.Framework.MSBuildMultiThreadableTask]
+            public class MyTask : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute() => true;
+            }
+            """);
+
+        // The premise of the rule's name-based matching: the symbol is unresolvable here.
+        compilation.GetTypeByMetadataName("Microsoft.Build.Framework.MSBuildMultiThreadableTaskAttribute").ShouldBeNull();
+
+        var diagnostics = await TestHelpers.GetDiagnosticsWithGlobalOptionsAsync(
+            compilation,
+            new RequireMultiThreadableTaskAnalyzer(),
+            new Dictionary<string, string>
+            {
+                { SharedAnalyzerHelpers.ScopeOptionKey, SharedAnalyzerHelpers.ScopeRequireMultiThreadable },
+            });
+
+        diagnostics
+            .Where(diagnostic => diagnostic.Id == DiagnosticIds.RequireMultiThreadableTask)
+            .ShouldBeEmpty();
+    }
+
     private static CSharpAnalyzerTest<RequireMultiThreadableTaskAnalyzer, DefaultVerifier> CreateAnalyzerTest(
         string source, (string Path, string Content)? analyzerConfig, params DiagnosticResult[] expected)
     {
