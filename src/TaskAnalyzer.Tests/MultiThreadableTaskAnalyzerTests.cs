@@ -1965,6 +1965,35 @@ public class MultiThreadableTaskAnalyzerTests
     }
 
     [Fact]
+    public async Task Scope_EditorConfig_All_DoesNotSetCompilationWideScope()
+    {
+        var test = new CSharpAnalyzerTest<MultiThreadableTaskAnalyzer, DefaultVerifier>
+        {
+            TestCode = """
+                using System;
+                public class PlainTask : Microsoft.Build.Utilities.Task
+                {
+                    public override bool Execute()
+                    {
+                        var value = Environment.GetEnvironmentVariable("KEY");
+                        return true;
+                    }
+                }
+                """,
+            ReferenceAssemblies = ReferenceAssemblies.Net.Net80,
+        };
+        test.TestState.Sources.Add(("Stubs.cs", FrameworkStubs));
+        test.TestState.AnalyzerConfigFiles.Add(("/.editorconfig", """
+            root = true
+
+            [*.cs]
+            msbuild_task_analyzer.scope = all
+            """));
+
+        await test.RunAsync();
+    }
+
+    [Fact]
     public async Task Scope_UnrecognizedValue_UsesDefault()
     {
         var diags = await GetDiagnosticsWithScopeAsync("""

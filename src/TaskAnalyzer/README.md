@@ -411,6 +411,8 @@ Set the scope to `all` to analyze regular tasks for MSBuildTask0002, MSBuildTask
     is_global = true
     msbuild_task_analyzer.scope = all
 
+The scope applies to the entire compilation, so configure it in a `.globalconfig` file. A section-based `.editorconfig` applies options to individual source files and does not set this compilation-wide scope.
+
 Missing and unrecognized values use the safe `multithreadable_only` default.
 
 MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTask]` attribute is applied **directly** to the task class. The attribute is `Inherited = false`, so a task that merely derives from a base class implementing `IMultiThreadableTask` (or carrying the attribute) has not itself opted into multithreaded support and is not subject to these three rules. Input properties are collected from the task class **and its base classes**, so an `ITaskItem`/`string` input declared on a shared base task is still analyzed.

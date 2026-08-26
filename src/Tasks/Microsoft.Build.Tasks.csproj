@@ -628,6 +628,7 @@
   <!-- Thread-safe task analyzer: runs during Tasks compilation to catch unsafe API usage -->
   <ItemGroup Condition="'$(BuildAnalyzer)' == 'true'">
     <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <!-- Roslyn passes .globalconfig files through the EditorConfigFiles item. -->
     <EditorConfigFiles Include="$(MSBuildThisFileDirectory)TaskAnalyzer.globalconfig" />
   </ItemGroup>
   <PropertyGroup Condition="'$(BuildAnalyzer)' == 'true'">
