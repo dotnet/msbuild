@@ -442,12 +442,15 @@ namespace Microsoft.Build.Experimental
             private readonly Action<string> _writeCallback;
             private readonly Timer _timer;
             private readonly LockType _lock = new LockType();
-            private readonly StringWriter _internalWriter;
+            private readonly StringWriter _bufferWriter;
+            private TextWriter _internalWriter;
+            private bool _disposed;
 
             public RedirectConsoleWriter(Action<string> writeCallback)
             {
                 _writeCallback = writeCallback;
-                _internalWriter = new StringWriter();
+                _bufferWriter = new StringWriter();
+                _internalWriter = _bufferWriter;
                 _timer = new Timer(TimerCallback, null, 0, 40);
             }
 
@@ -457,12 +460,10 @@ namespace Microsoft.Build.Experimental
             {
                 lock (_lock)
                 {
-                    var sb = _internalWriter.GetStringBuilder();
-                    string captured = sb.ToString();
-                    sb.Clear();
-
-                    _writeCallback(captured);
-                    _internalWriter.Flush();
+                    if (!_disposed)
+                    {
+                        FlushInternal();
+                    }
                 }
             }
 
@@ -748,9 +749,12 @@ namespace Microsoft.Build.Experimental
 
             private void TimerCallback(object? state)
             {
-                if (_internalWriter.GetStringBuilder().Length > 0)
+                lock (_lock)
                 {
-                    Flush();
+                    if (!_disposed && _bufferWriter.GetStringBuilder().Length > 0)
+                    {
+                        FlushInternal();
+                    }
                 }
             }
 
@@ -759,11 +763,36 @@ namespace Microsoft.Build.Experimental
                 if (disposing)
                 {
                     _timer.Dispose();
-                    Flush();
-                    _internalWriter?.Dispose();
+
+                    lock (_lock)
+                    {
+                        if (!_disposed)
+                        {
+                            try
+                            {
+                                FlushInternal();
+                            }
+                            finally
+                            {
+                                _internalWriter = TextWriter.Null;
+                                _disposed = true;
+                                _bufferWriter.Dispose();
+                            }
+                        }
+                    }
                 }
 
                 base.Dispose(disposing);
+            }
+
+            private void FlushInternal()
+            {
+                var sb = _bufferWriter.GetStringBuilder();
+                string captured = sb.ToString();
+                sb.Clear();
+
+                _writeCallback(captured);
+                _bufferWriter.Flush();
             }
         }
     }

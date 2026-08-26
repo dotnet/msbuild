@@ -26,5 +26,18 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
 
             sb.ToString().ShouldBe($"Line 1{Environment.NewLine}Line 2");
         }
+
+        [Fact]
+        public void WriteLineAfterDisposeDoesNotThrowOrInvokeCallback()
+        {
+            bool callbackInvoked = false;
+            OutOfProcServerNode.RedirectConsoleWriter writer = new(_ => callbackInvoked = true);
+
+            writer.Dispose();
+            callbackInvoked = false;
+
+            Should.NotThrow(() => writer.WriteLine("after dispose"));
+            callbackInvoked.ShouldBeFalse();
+        }
     }
 }
