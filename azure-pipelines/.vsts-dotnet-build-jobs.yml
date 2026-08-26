@@ -39,13 +39,18 @@ jobs:
 
   - pwsh: Set-MpPreference -DisableRealtimeMonitoring $true
 
+  - template: /eng/common/templates/steps/get-federated-access-token.yml
+    parameters:
+      federatedServiceConnection: dnceng-artifacts-feeds-read
+      outputVariableName: dnceng-artifacts-feeds-read-access-token
+
   - task: PowerShell@2
-    displayName: Setup Private Feeds Credentials
+    displayName: Setup Internal Feeds
     inputs:
       filePath: $(Build.SourcesDirectory)/eng/common/SetupNugetSources.ps1
-      arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config -Password $Env:Token
-    env:
-      Token: $(dn-bot-dnceng-artifact-feeds-rw)
+      arguments: -ConfigFile $(Build.SourcesDirectory)/NuGet.config $(dnceng-artifacts-feeds-read-access-token)
+
+  - task: NuGetAuthenticate@1
 
 
   - task: NuGetCommand@2
@@ -248,4 +253,3 @@ jobs:
       name: $(DncEngInternalBuildPool)
       image: $(WindowsImage)
       os: windows
-
