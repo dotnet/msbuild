@@ -10,7 +10,7 @@ using static Microsoft.Build.TaskAuthoring.Analyzer.Tests.TestHelpers;
 namespace Microsoft.Build.TaskAuthoring.Analyzer.Tests;
 
 /// <summary>
-/// Tests for <see cref="RequireMultiThreadableTaskCodeFixProvider"/>, the code fix for MSBuildTask0012.
+/// Tests for <see cref="RequireMultiThreadableTaskCodeFixProvider"/>, the code fix for MSBuildTask0015.
 /// The rule only reports when it is opted into, so every test supplies a .globalconfig setting the scope.
 /// </summary>
 public class RequireMultiThreadableTaskCodeFixProviderTests

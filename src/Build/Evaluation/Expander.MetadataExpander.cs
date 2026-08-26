@@ -18,13 +18,14 @@ internal partial class Expander<P, I>
     ///  This is a private nested ref struct, exposed only through the static
     ///  <see cref="ExpandMetadataLeaveEscaped"/> entry point.
     /// </remarks>
-    private readonly ref struct MetadataExpander
+    private ref struct MetadataExpander
     {
         private readonly IMetadataTable _metadata;
         private readonly ExpanderOptions _options;
         private readonly IElementLocation _elementLocation;
         private readonly LoggingContext? _loggingContext;
         private readonly SpanBasedStringBuilder _builder;
+        private bool _metadataExpanded;
 
         private MetadataExpander(
             IMetadataTable metadata,
@@ -38,6 +39,7 @@ internal partial class Expander<P, I>
             _elementLocation = elementLocation;
             _loggingContext = loggingContext;
             _builder = builder;
+            _metadataExpanded = false;
         }
 
         /// <summary>
@@ -67,7 +69,8 @@ internal partial class Expander<P, I>
             Assumed.NotNull(metadata, "Cannot expand metadata without providing metadata");
 
             // PERF NOTE: pre-scanning the string for "%(" is cheaper than a full scan.
-            if (expression.IndexOf("%(", StringComparison.Ordinal) < 0)
+            int markerIndex = ExpressionShredder.IndexOfMetadataMarker(expression);
+            if (markerIndex < 0)
             {
                 return expression;
             }
@@ -77,7 +80,7 @@ internal partial class Expander<P, I>
                 using SpanBasedStringBuilder builder = Strings.GetSpanBasedStringBuilder();
                 MetadataExpander expander = new(metadata, options, elementLocation, loggingContext, builder);
 
-                return expander.Expand(expression);
+                return expander.Expand(expression, markerIndex);
             }
             catch (InvalidOperationException ex)
             {
@@ -87,63 +90,39 @@ internal partial class Expander<P, I>
             return Assumed.Unreachable<string>();
         }
 
-        private string Expand(string expression)
+        private string Expand(string expression, int markerIndex)
         {
-            if (expression.IndexOf("@(", StringComparison.Ordinal) < 0)
+            if (!ExpressionShredder.TryGetNextItemVectorExpression(expression, out ExpressionShredder.ItemExpressionCapture itemVector))
             {
-                // No item vectors in the string — scan for metadata references directly.
-                ScanAndExpandMetadata(expression);
+                // No well-formed item vectors in the string — scan for metadata references directly.
+                ScanAndExpandMetadata(expression, markerIndex);
+            }
+            else if (itemVector.Index == 0 && itemVector.Length == expression.Length && itemVector.Separator == null)
+            {
+                // The entire expression is a single item vector with no separator, so there are
+                // no gaps to expand metadata in — return the expression unchanged.
+                return expression;
             }
             else
             {
-                ExpressionShredder.ReferencedItemExpressionsEnumerator enumerator = ExpressionShredder.GetReferencedItemExpressions(expression);
-
-                if (!enumerator.MoveNext())
-                {
-                    // The string contains "@(" but no well-formed item vector expressions —
-                    // scan the entire string for metadata references.
-                    ScanAndExpandMetadata(expression);
-                }
-                else if (enumerator.Current.Value == expression
-                    && enumerator.Current.Separator == null
-                    && !enumerator.MoveNext())
-                {
-                    // The entire expression is a single item vector with no separator, so there are
-                    // no gaps to expand metadata in — return the expression unchanged.
-                    return expression;
-                }
-                else
-                {
-                    // Reuse the already-advanced enumerator (positioned at the first capture) to
-                    // expand metadata in the gaps between item vector expressions. This avoids
-                    // shredding the expression a second time.
-                    ScanAndExpandMetadataInGaps(expression, ref enumerator);
-                }
+                ScanAndExpandMetadataInGaps(expression, itemVector);
             }
 
-            return _builder.Equals(expression.AsSpan())
-                ? expression
-                : _builder.ToString();
+            return _metadataExpanded ? _builder.ToString() : expression;
         }
 
         /// <summary>
         ///  Expands metadata in the gaps between item vector expressions and within their separators.
         /// </summary>
-        /// <remarks>
-        ///  The supplied enumerator must already be positioned at the first capture (i.e. a successful
-        ///  <see cref="ExpressionShredder.ReferencedItemExpressionsEnumerator.MoveNext"/> has been called).
-        ///  Passing the already-advanced enumerator lets the caller's shred be reused instead of
-        ///  re-scanning the expression from scratch.
-        /// </remarks>
-        private void ScanAndExpandMetadataInGaps(string expression, ref ExpressionShredder.ReferencedItemExpressionsEnumerator enumerator)
+        private void ScanAndExpandMetadataInGaps(string expression, ExpressionShredder.ItemExpressionCapture itemVector)
         {
             int start = 0;
 
             do
             {
-                start = ProcessItemExpressionCapture(expression, start, enumerator.Current);
+                start = ProcessItemExpressionCapture(expression, start, itemVector);
             }
-            while (enumerator.MoveNext());
+            while (ExpressionShredder.TryGetNextItemVectorExpression(expression, start, out itemVector));
 
             // Expand metadata in any trailing text after the last item vector expression.
             if (start < expression.Length)
@@ -152,20 +131,20 @@ internal partial class Expander<P, I>
             }
         }
 
-        private int ProcessItemExpressionCapture(string expression, int start, ExpressionShredder.ItemExpressionCapture itemExpressionCapture)
+        private int ProcessItemExpressionCapture(string expression, int start, ExpressionShredder.ItemExpressionCapture itemVector)
         {
             // Expand metadata in the gap before this item vector expression.
-            if (itemExpressionCapture.Index > start)
+            if (itemVector.Index > start)
             {
-                ScanAndExpandMetadata(expression, start, itemExpressionCapture.Index);
+                ScanAndExpandMetadata(expression, start, itemVector.Index);
             }
 
             // Expand metadata that appears in the item vector expression's separator.
-            if (itemExpressionCapture.Separator != null)
+            if (itemVector.Separator != null)
             {
                 // Append the portion before the separator verbatim, then expand within the separator portion.
-                string value = itemExpressionCapture.Value;
-                int separatorStart = itemExpressionCapture.SeparatorStart;
+                string value = itemVector.Value;
+                int separatorStart = itemVector.SeparatorStart;
 
                 _builder.Append(value, 0, separatorStart);
                 ScanAndExpandMetadata(value, separatorStart, value.Length);
@@ -173,16 +152,16 @@ internal partial class Expander<P, I>
             else
             {
                 // Append the item vector expression as-is.
-                _builder.Append(itemExpressionCapture.Value);
+                _builder.Append(itemVector.Value);
             }
 
             // Advance past this item vector expression.
-            return itemExpressionCapture.Index + itemExpressionCapture.Length;
+            return itemVector.Index + itemVector.Length;
         }
 
-        /// <inheritdoc cref="ScanAndExpandMetadata(string, int, int)" />
-        private void ScanAndExpandMetadata(string input)
-            => ScanAndExpandMetadata(input, 0, input.Length);
+        /// <inheritdoc cref="ScanAndExpandMetadata(string, int, int, int?)" />
+        private void ScanAndExpandMetadata(string input, int markerIndex)
+            => ScanAndExpandMetadata(input, 0, input.Length, markerIndex);
 
         /// <summary>
         ///  Scans the specified range of <paramref name="input"/> for item metadata references
@@ -198,11 +177,10 @@ internal partial class Expander<P, I>
         ///  If a <c>%(</c> sequence does not form a valid metadata reference, it is appended
         ///  to the output verbatim.
         /// </remarks>
-        private void ScanAndExpandMetadata(string input, int startIndex, int endIndex)
+        private void ScanAndExpandMetadata(string input, int startIndex, int endIndex, int? markerIndex = null)
         {
             int lastCopied = startIndex;
-
-            int i = input.IndexOf("%(", startIndex, StringComparison.Ordinal);
+            int i = markerIndex ?? ExpressionShredder.IndexOfMetadataMarker(input, startIndex);
 
             while (i >= 0 && i < endIndex - 1)
             {
@@ -211,7 +189,7 @@ internal partial class Expander<P, I>
                 if (!ExpressionShredder.TryParseMetadataExpression(input, ref pos, endIndex, out string itemType, out string metadataName))
                 {
                     // Not a valid metadata reference — skip past '%(' and keep scanning.
-                    i = input.IndexOf("%(", i + 2, StringComparison.Ordinal);
+                    i = ExpressionShredder.IndexOfMetadataMarker(input, i + 2);
                     continue;
                 }
 
@@ -249,6 +227,7 @@ internal partial class Expander<P, I>
                     }
 
                     _builder.Append(expanded);
+                    _metadataExpanded = true;
                 }
                 else
                 {
@@ -258,7 +237,7 @@ internal partial class Expander<P, I>
                 lastCopied = pos;
 
                 // Continue scanning after this reference.
-                i = input.IndexOf("%(", pos, StringComparison.Ordinal);
+                i = ExpressionShredder.IndexOfMetadataMarker(input, pos);
             }
 
             // Append any remaining text after the last reference.

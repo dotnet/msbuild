@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 namespace Microsoft.Build.TaskAuthoring.Analyzer
 {
     /// <summary>
-    /// Reports concrete MSBuild task types that do not declare multithreading support (MSBuildTask0012).
+    /// Reports concrete MSBuild task types that do not declare multithreading support (MSBuildTask0015).
     ///
     /// In multithreaded builds the engine routes every task without a directly applied
     /// <c>[MSBuildMultiThreadableTask]</c> attribute to an out-of-proc TaskHost. That is not an error and
@@ -19,7 +19,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     ///
     /// The rule reports nothing unless it is opted into, either by setting
     /// <c>msbuild_task_analyzer.scope = require_multithreadable</c> or by configuring
-    /// <c>dotnet_diagnostic.MSBuildTask0012.severity</c> explicitly.
+    /// <c>dotnet_diagnostic.MSBuildTask0015.severity</c> explicitly.
     /// </summary>
     [DiagnosticAnalyzer(LanguageNames.CSharp)]
     public sealed class RequireMultiThreadableTaskAnalyzer : DiagnosticAnalyzer
@@ -114,7 +114,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>
         /// Returns true when the rule's severity is configured for the whole compilation, either by a ruleset,
-        /// <c>&lt;WarningsAsErrors&gt;</c> and friends, or by <c>dotnet_diagnostic.MSBuildTask0012.severity</c> in a
+        /// <c>&lt;WarningsAsErrors&gt;</c> and friends, or by <c>dotnet_diagnostic.MSBuildTask0015.severity</c> in a
         /// .globalconfig. Configuring the severity is an opt-in on its own, so a repository that prefers per-rule
         /// configuration over the scope option is not forced to set both.
         /// </summary>
@@ -132,7 +132,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         /// <summary>
-        /// Returns true when <c>dotnet_diagnostic.MSBuildTask0012.severity</c> is configured for any file in the
+        /// Returns true when <c>dotnet_diagnostic.MSBuildTask0015.severity</c> is configured for any file in the
         /// compilation, which is how a repository enables the rule for part of its sources only.
         /// </summary>
         private static bool IsEnabledForAnyTree(Compilation compilation, CancellationToken cancellationToken)
@@ -154,7 +154,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         /// <summary>
-        /// Returns true when <c>dotnet_diagnostic.MSBuildTask0012.severity</c> is configured for the given tree.
+        /// Returns true when <c>dotnet_diagnostic.MSBuildTask0015.severity</c> is configured for the given tree.
         /// </summary>
         private static bool IsEnabledForTree(Compilation compilation, SyntaxTree? tree, CancellationToken cancellationToken)
         {

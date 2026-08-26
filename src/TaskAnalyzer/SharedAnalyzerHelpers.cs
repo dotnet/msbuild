@@ -26,7 +26,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
 
         /// <summary>
         /// Analyze every task type, and additionally require each concrete task type to declare
-        /// multithreading support (MSBuildTask0012). Repositories that have finished migrating their
+        /// multithreading support (MSBuildTask0015). Repositories that have finished migrating their
         /// tasks set this so a newly added task cannot silently regress the migration.
         /// </summary>
         internal const string ScopeRequireMultiThreadable = "require_multithreadable";

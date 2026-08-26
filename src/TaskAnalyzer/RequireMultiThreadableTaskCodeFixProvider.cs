@@ -18,7 +18,7 @@ using Microsoft.CodeAnalysis.Simplification;
 namespace Microsoft.Build.TaskAuthoring.Analyzer
 {
     /// <summary>
-    /// Code fix for MSBuildTask0012: declares multithreading support on a concrete task type by applying
+    /// Code fix for MSBuildTask0015: declares multithreading support on a concrete task type by applying
     /// <c>[MSBuildMultiThreadableTask]</c>, implementing <c>IMultiThreadableTask</c>, and adding the
     /// <c>TaskEnvironment</c> property the engine injects. The remaining rules then report whatever is actually
     /// unsafe in the task body.
