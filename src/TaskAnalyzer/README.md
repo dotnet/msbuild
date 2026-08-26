@@ -106,6 +106,38 @@ These APIs may cause version conflicts or other issues in a shared task host.
 | `Activator.CreateInstanceFrom` | May cause version conflicts |
 | `AppDomain.Load`, `CreateInstance`, `CreateInstanceFrom` | May cause version conflicts |
 
+### MSBuildTask0005 — Transitive Unsafe API Usage
+
+MSBuildTask0001–MSBuildTask0004 only look at code written inside a task class — or inside a helper explicitly opted in with `[MSBuildMultiThreadableTaskAnalyzed]` (see [Analysis Scope](#analysis-scope)). MSBuildTask0005 closes that gap: it builds a compilation-wide call graph and walks it from every task's members, so an unsafe API reached through a shared helper is still reported.
+
+The diagnostic is reported **at the unsafe call site** — inside the helper — and names the task entry point plus the full call chain in the message:
+
+```
+ProcessService.cs(23,9): warning MSBuildTask0005: 'CreateSourceArtifact.Execute' transitively calls
+unsafe API 'Process.Kill(bool)' via: CreateSourceArtifact.Execute → CreateSourceArtifact.ExecuteAsync
+→ ProcessService.RunProcessAsync → Process.Kill(bool)
+```
+
+The task entry point is also attached as an additional location, so editors can navigate from the helper to the task that reaches it.
+
+**Suppressing a reviewed call.** Because the diagnostic is reported at the call site, the standard Roslyn suppression mechanisms work exactly where the reviewed code lives — either `#pragma warning disable`:
+
+```csharp
+#pragma warning disable MSBuildTask0005 // Only kills processes this task started; entireProcessTree walks descendants.
+try { process.Kill(entireProcessTree: true); } catch { }
+#pragma warning restore MSBuildTask0005
+```
+
+or `[SuppressMessage]` on the containing member, which records the review next to the code:
+
+```csharp
+[SuppressMessage("MSBuild.TaskAuthoring", "MSBuildTask0005",
+    Justification = "Only kills processes this task started; entireProcessTree walks descendants, not the MSBuild host.")]
+private static void KillProcessTree(Process process) => process.Kill(entireProcessTree: true);
+```
+
+Each unsafe call site is reported once per task type, so suppressing one reviewed call does **not** hide other transitive violations reachable from the same task — including other calls to the same API. Suppressing on the task's `Execute` method has no effect; scope the suppression to the call site instead.
+
 ### MSBuildTask0006 — Prefer Typed Path Parameters
 
 When a task has a `string` input property and converts it to `AbsolutePath`, `FileInfo`, or `DirectoryInfo` inside the task body, the analyzer suggests changing the property type directly. MSBuild can bind these types automatically.
@@ -407,7 +439,7 @@ The analyzer determines what to check based on the type declaration:
 
 MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTask]` attribute is applied **directly** to the task class. The attribute is `Inherited = false`, so a task that merely derives from a base class implementing `IMultiThreadableTask` (or carrying the attribute) has not itself opted into multithreaded support and is not subject to these three rules. Input properties are collected from the task class **and its base classes**, so an `ITaskItem`/`string` input declared on a shared base task is still analyzed.
 
-The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis, but it reports only at the task entry point. Adding this attribute to a helper class gives you inline diagnostics and code fixes directly in the helper's source.
+The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis and reports at the unsafe call site, but it offers no code fixes and only fires for helpers actually reachable from a task. Adding this attribute to a helper class gives you diagnostics and code fixes in the helper's source regardless of whether a task reaches it.
 
 **When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles) on unsafe APIs within those helpers. Note that the MSBuildTask0002/0003 code fixes reference a `TaskEnvironment` member, so they are only offered in a helper that declares one — see [Code Fixes](#code-fixes).
 
@@ -538,11 +570,10 @@ public class CopyFiles : Task, IMultiThreadableTask
 
 ## Tests
 
-193 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
+Unit tests for all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppressions live in `src/TaskAnalyzer.Tests`. Run them from the repository root:
 
 ```
-cd src/TaskAnalyzer.Tests
-dotnet test
+.\build.cmd -test -projects src\TaskAnalyzer.Tests\TaskAnalyzer.Tests.csproj -c Debug
 ```
 
 ## Architecture
