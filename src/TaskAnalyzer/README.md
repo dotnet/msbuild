@@ -18,12 +18,12 @@ This analyzer catches unsafe API usage at compile time and offers code fixes to 
 | **MSBuildTask0002** | Warning | MT tasks by default; all tasks in migration mode | API requires `TaskEnvironment` alternative |
 | **MSBuildTask0003** | Warning | MT tasks by default; all tasks in migration mode | File system API requires absolute path |
 | **MSBuildTask0004** | Warning | All `ITask` implementations | API may cause issues in multithreaded tasks |
-| **MSBuildTask0005** | Warning | MT tasks by default; all tasks in migration mode | Transitive unsafe API usage in task call chain |
+| **MSBuildTask0005** | Warning | All `ITask` implementations | Transitive unsafe API usage in task call chain |
 | **MSBuildTask0006** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer typed path parameter over string |
 | **MSBuildTask0007** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Prefer `ITaskItem<T>` over manual ItemSpec parsing |
 | **MSBuildTask0008** | Info | Tasks with `[MSBuildMultiThreadableTask]` applied directly | Initialize a relative-default path property in `Execute()` |
 | **MSBuildTask0009** | Warning | All `ITask` implementations | `ITaskItem<T>` used with unsupported type argument |
-| **MSBuildTask0010** | Error | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
+| **MSBuildTask0010** | Warning | All `ITask` implementations | `ITaskItem<T>` relies on culture-sensitive conversion |
 | **MSBuildTask0011** | Info | Concrete `IMultiThreadableTask` implementations | Prefer constructor injection for `TaskEnvironment` |
 | **MSBuildTask0012** | Warning | Concrete tasks with `[MSBuildMultiThreadableTask]` applied directly | MSBuild never assigns the `TaskEnvironment` property |
 | **MSBuildTask0013** | Info (off by default) | Concrete tasks declaring `IMultiThreadableTask` in their own base list | Missing `[MSBuildMultiThreadableTask]`, so the task still runs out-of-proc |
@@ -245,7 +245,7 @@ public class MyTask : Task
 {
     public ITaskItem<System.Guid> Id { get; set; }       // warning
     public ITaskItem<System.TimeSpan>[] Durations { get; set; }  // warning
-    public ITaskItem<int> Count { get; set; }             // MSBuildTask0010 error
+    public ITaskItem<int> Count { get; set; }             // MSBuildTask0010 warning
 }
 ```
 
@@ -255,13 +255,13 @@ No code fix is offered for MSBuildTask0009 — the resolution depends on the int
 
 ### MSBuildTask0010 — Culture-Sensitive `ITaskItem<T>` Conversion
 
-MSBuild binds `ITaskItem<T>` for `char`, numeric primitives, `decimal`, and `DateTime` through `Convert.ChangeType` using `CultureInfo.InvariantCulture`. Because this implicit conversion may not match the task's intended culture, the analyzer reports an **Error** whenever one of these types is used.
+MSBuild binds `ITaskItem<T>` for `char`, numeric primitives, `decimal`, and `DateTime` through `Convert.ChangeType` using `CultureInfo.InvariantCulture`. Because this implicit conversion may not match the task's intended culture, the analyzer reports a **Warning** whenever one of these types is used.
 
 ```csharp
 public class MyTask : Task
 {
-    public ITaskItem<int> Count { get; set; }       // error
-    public ITaskItem<DateTime>[] Dates { get; set; } // error
+    public ITaskItem<int> Count { get; set; }       // warning
+    public ITaskItem<DateTime>[] Dates { get; set; } // warning
 }
 ```
 
@@ -424,10 +424,7 @@ The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classe
 ### Severity Levels
 
 - **MSBuildTask0001** is always **Error** — these APIs are never safe in any MSBuild task.
-- **MSBuildTask0010** is always **Error** — task item conversions must not rely on `Convert.ChangeType`.
-- **MSBuildTask0002–MSBuildTask0003 and related MSBuildTask0005 violations** report as **Warning** when their scope applies.
-- **MSBuildTask0005** remains active for regular tasks when the call chain ends in an always-applicable MSBuildTask0001 or MSBuildTask0004 violation.
-- **MSBuildTask0009** reports as **Warning** independently of MT scope.
+- **MSBuildTask0002–MSBuildTask0005, MSBuildTask0009, and MSBuildTask0010** report as **Warning**.
 - **MSBuildTask0006–MSBuildTask0008 and MSBuildTask0011** report as **Info** — these are modernization suggestions, not correctness issues.
 
 ## Code Fixes
