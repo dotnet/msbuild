@@ -459,15 +459,6 @@ public class CopyFiles : Task, IMultiThreadableTask
 }
 ```
 
-## Tests
-
-254 tests covering all rules, safe patterns, edge cases, code fixes, and compiler diagnostic suppression:
-
-```
-cd src/TaskAnalyzer.Tests
-dotnet test
-```
-
 ## Architecture
 
 | File | Purpose |
