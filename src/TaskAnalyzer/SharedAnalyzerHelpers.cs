@@ -374,6 +374,136 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
         }
 
         /// <summary>
+        /// Determines whether a type opts into multithreaded task execution, either by implementing
+        /// <c>IMultiThreadableTask</c> or by carrying <c>[MSBuildMultiThreadableTask]</c> or
+        /// <c>[MSBuildMultiThreadableTaskAnalyzed]</c>.
+        /// </summary>
+        internal static bool IsMultiThreadable(
+            INamedTypeSymbol type,
+            INamedTypeSymbol? iMultiThreadableTaskType,
+            INamedTypeSymbol? multiThreadableTaskAttributeType,
+            INamedTypeSymbol? analyzedAttributeType)
+        {
+            if (iMultiThreadableTaskType is not null && ImplementsInterface(type, iMultiThreadableTaskType))
+            {
+                return true;
+            }
+
+            if (multiThreadableTaskAttributeType is null && analyzedAttributeType is null)
+            {
+                return false;
+            }
+
+            foreach (var attribute in type.GetAttributes())
+            {
+                if ((multiThreadableTaskAttributeType is not null && SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, multiThreadableTaskAttributeType))
+                    || (analyzedAttributeType is not null && SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, analyzedAttributeType)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Collects every base type declared in this compilation that a multithreadable task derives from.
+        /// <c>[MSBuildMultiThreadableTask]</c> is not inherited, but the members a task inherits still run on
+        /// the shared node, so an unannotated base class of an annotated task is in scope for analysis.
+        /// Base types outside the compilation cannot be analyzed and are skipped.
+        /// </summary>
+        internal static ImmutableHashSet<INamedTypeSymbol> CollectMultiThreadableBaseTypes(
+            Compilation compilation,
+            INamedTypeSymbol? iMultiThreadableTaskType,
+            INamedTypeSymbol? multiThreadableTaskAttributeType,
+            INamedTypeSymbol? analyzedAttributeType)
+        {
+            if (iMultiThreadableTaskType is null && multiThreadableTaskAttributeType is null && analyzedAttributeType is null)
+            {
+                return ImmutableHashSet<INamedTypeSymbol>.Empty;
+            }
+
+            var builder = ImmutableHashSet.CreateBuilder<INamedTypeSymbol>(SymbolEqualityComparer.Default);
+            foreach (var type in EnumerateTypes(compilation.Assembly.GlobalNamespace))
+            {
+                // Only types with a base class other than object can contribute; checking that first
+                // avoids binding attributes for the majority of types in a compilation.
+                if (type.BaseType is null
+                    || type.BaseType.SpecialType == SpecialType.System_Object
+                    || builder.Contains(type.BaseType.OriginalDefinition))
+                {
+                    continue;
+                }
+
+                if (!IsMultiThreadable(type, iMultiThreadableTaskType, multiThreadableTaskAttributeType, analyzedAttributeType))
+                {
+                    continue;
+                }
+
+                for (INamedTypeSymbol? current = type.BaseType;
+                     current is not null && current.SpecialType != SpecialType.System_Object;
+                     current = current.BaseType)
+                {
+                    // A type declared in metadata cannot derive from a type in this compilation, so the
+                    // rest of the chain is outside the compilation and cannot be analyzed either.
+                    if (current.DeclaringSyntaxReferences.Length == 0)
+                    {
+                        break;
+                    }
+
+                    // A generic base is referenced here as a constructed type (Base<string>), while the
+                    // symbol the analyzer visits is the definition (Base<T>).
+                    if (!builder.Add(current.OriginalDefinition))
+                    {
+                        // The rest of the chain was already collected through another derived task.
+                        break;
+                    }
+                }
+            }
+
+            return builder.ToImmutable();
+        }
+
+        /// <summary>
+        /// Enumerates all named types declared under a namespace, including nested types.
+        /// </summary>
+        internal static IEnumerable<INamedTypeSymbol> EnumerateTypes(INamespaceSymbol ns)
+        {
+            foreach (var member in ns.GetMembers())
+            {
+                if (member is INamespaceSymbol childNamespace)
+                {
+                    foreach (var type in EnumerateTypes(childNamespace))
+                    {
+                        yield return type;
+                    }
+                }
+                else if (member is INamedTypeSymbol type)
+                {
+                    yield return type;
+
+                    foreach (var nested in EnumerateNestedTypes(type))
+                    {
+                        yield return nested;
+                    }
+                }
+            }
+        }
+
+        private static IEnumerable<INamedTypeSymbol> EnumerateNestedTypes(INamedTypeSymbol type)
+        {
+            foreach (var nested in type.GetTypeMembers())
+            {
+                yield return nested;
+
+                foreach (var deeper in EnumerateNestedTypes(nested))
+                {
+                    yield return deeper;
+                }
+            }
+        }
+
+        /// <summary>
         /// Checks if a type implements a given interface.
         /// </summary>
         internal static bool ImplementsInterface(INamedTypeSymbol type, INamedTypeSymbol interfaceType)

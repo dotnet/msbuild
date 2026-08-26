@@ -315,16 +315,16 @@ Helpers reached from `Execute()` can quietly depend on process state in any of t
 
 ### Unsafe Code in an Unannotated Base Class
 
-`[MSBuildMultiThreadableTask]` is `Inherited = false`, so it goes on each concrete task. The consequence people miss is the mirror image: **the base class runs multithreaded too, but nothing marks it as such** — and with `msbuild_task_analyzer.scope = multithreadable_only` (the recommended setting for incremental migration) the analyzer does not look inside it at all.
+`[MSBuildMultiThreadableTask]` is `Inherited = false`, so it goes on each concrete task. The consequence people miss is the mirror image: **the base class runs multithreaded too, but nothing marks it as such**. The analyzer now follows the base chain of an annotated task and reports inherited code at its declaration site under either scope setting — but only for base classes declared in the same compilation. A base living in a referenced assembly is still unverified, so migrate that assembly first.
 
-From dotnet/arcade: `CreateAkaMSLinks` and `DeleteAkaMSLinks` were both annotated, both analyzer-clean. Their shared base contained:
+From dotnet/arcade, before the analyzer looked at base classes: `CreateAkaMSLinks` and `DeleteAkaMSLinks` were both annotated, both analyzer-clean. Their shared base contained:
 
 ```csharp
-// AkaMSLinksBase - NOT annotated, so never analyzed
+// AkaMSLinksBase - NOT annotated, and at the time not analyzed either
 File.ReadAllText(ClientCertificate)   // ClientCertificate is a task input property
 ```
 
-A monitored API (`File`) on a raw task input — exactly what the analyzer exists to catch — invisible purely because of where it lived.
+A monitored API (`File`) on a raw task input — exactly what the analyzer exists to catch — invisible purely because of where it lived. Audit the base chain yourself whenever any part of it lives outside the compilation the analyzer sees.
 
 **Resolution:** when you annotate a task, audit its full base chain up to `Task`/`ToolTask`. If the base holds shared input properties or path handling, have the **base** implement `IMultiThreadableTask` and do the resolution there, so every derived task inherits the fix:
 

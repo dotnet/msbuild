@@ -244,4 +244,104 @@ public class TransitiveCallChainAnalyzerTests
         msg.ShouldContain("A.Step1");
         msg.ShouldContain("B.Step2");
     }
+
+    [Fact]
+    public async Task Scope_MultithreadableOnly_BaseClassMethodCallingHelper_ProducesDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+
+            public class UnsafeHelper
+            {
+                public static string? ReadToken() => Environment.GetEnvironmentVariable("SYSTEM_ACCESSTOKEN");
+            }
+
+            public abstract class BaseWithHelperCall : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute() => UnsafeHelper.ReadToken() is not null && ExecuteCore();
+
+                protected abstract bool ExecuteCore();
+            }
+
+            [MSBuildMultiThreadableTask]
+            public sealed class DerivedAnnotated : BaseWithHelperCall, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
+
+                protected override bool ExecuteCore() => true;
+            }
+            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+
+        // The call chain starts in the unannotated base, which the annotated task inherits
+        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
+        transitive.Length.ShouldBe(1);
+        transitive[0].GetMessage().ShouldContain("UnsafeHelper.ReadToken");
+    }
+
+    [Fact]
+    public async Task Scope_MultithreadableOnly_BaseSharedByTwoAnnotatedTasks_ReportedOnce()
+    {
+        var diags = await GetAllDiagnosticsWithScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+
+            public class UnsafeHelper
+            {
+                public static string? ReadToken() => Environment.GetEnvironmentVariable("SYSTEM_ACCESSTOKEN");
+            }
+
+            public abstract class SharedBase : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute() => UnsafeHelper.ReadToken() is not null && ExecuteCore();
+
+                protected abstract bool ExecuteCore();
+            }
+
+            [MSBuildMultiThreadableTask]
+            public sealed class FirstTask : SharedBase, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
+
+                protected override bool ExecuteCore() => true;
+            }
+
+            [MSBuildMultiThreadableTask]
+            public sealed class SecondTask : SharedBase, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
+
+                protected override bool ExecuteCore() => true;
+            }
+            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+
+        // The shared base is walked once, not once per derived task
+        var transitive = diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ToArray();
+        transitive.Length.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Scope_MultithreadableOnly_BaseOfPlainTaskOnly_NoDiagnostic()
+    {
+        var diags = await GetAllDiagnosticsWithScopeAsync("""
+            using System;
+
+            public class UnsafeHelper
+            {
+                public static string? ReadToken() => Environment.GetEnvironmentVariable("SYSTEM_ACCESSTOKEN");
+            }
+
+            public abstract class PlainBase : Microsoft.Build.Utilities.Task
+            {
+                public override bool Execute() => UnsafeHelper.ReadToken() is not null;
+            }
+
+            public sealed class PlainDerived : PlainBase
+            {
+            }
+            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+
+        // No task in the hierarchy opted into multithreaded execution
+        diags.Where(d => d.Id == DiagnosticIds.TransitiveUnsafeCall).ShouldBeEmpty();
+    }
 }

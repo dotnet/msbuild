@@ -401,6 +401,7 @@ The analyzer determines what to check based on the type declaration:
 | Class with `[MSBuildMultiThreadableTask]` attribute applied directly | MSBuildTask0006–MSBuildTask0008 (in addition to MSBuildTask0001–0005) |
 | Concrete class implementing `IMultiThreadableTask` without the attribute | MSBuildTask0001–MSBuildTask0005 and MSBuildTask0009–MSBuildTask0011 |
 | Helper class with `[MSBuildMultiThreadableTaskAnalyzed]` attribute | MSBuildTask0001–MSBuildTask0005 |
+| Base class of a multithreadable task, declared in the same compilation | MSBuildTask0001–MSBuildTask0005 |
 | Regular class (no task interface or attribute) | Not analyzed |
 | Class with `[MSBuildMultiThreadableTask]` that does not implement `ITask` | MSBuildTask0014 |
 | Abstract class with `[MSBuildMultiThreadableTask]` | MSBuildTask0014 |
@@ -410,6 +411,14 @@ MSBuildTask0006–MSBuildTask0008 apply only when the `[MSBuildMultiThreadableTa
 The `[MSBuildMultiThreadableTaskAnalyzed]` attribute allows opting helper classes into **direct** analysis by the `MultiThreadableTaskAnalyzer` (MSBuildTask0001–0004). Without it, only classes implementing `ITask` receive per-line diagnostics and code fixes for those rules. The **transitive** analyzer (MSBuildTask0005) already discovers helpers via call graph analysis, but it reports only at the task entry point. Adding this attribute to a helper class gives you inline diagnostics and code fixes directly in the helper's source.
 
 **When to use:** Apply `[MSBuildMultiThreadableTaskAnalyzed]` to utility or helper classes that are primarily used by multithreadable tasks and where you want immediate in-editor feedback (squiggles and code fixes) on unsafe APIs within those helpers.
+
+### Inherited Code
+
+A task runs the members it inherits just like the ones it declares, so the base classes of a multithreadable task are analyzed as multithreadable themselves — even though `[MSBuildMultiThreadableTask]` is `Inherited = false` and the base carries no annotation of its own. This applies under both scope settings, and to the whole base chain, so an unannotated base shared by two annotated tasks still reports the `File.ReadAllText` it performs on a task input.
+
+Diagnostics are reported at the declaration site in the base, and a base shared by several tasks is analyzed once rather than once per derived task.
+
+**Limitation:** only base classes declared in the compilation being analyzed can be inspected. A task deriving from a base in a referenced assembly is analyzed for the members it declares itself; migrate the assembly holding the base first.
 
 ### Severity Levels
 

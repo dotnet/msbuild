@@ -1909,4 +1909,161 @@ public class MultiThreadableTaskAnalyzerTests
         // IMultiThreadableTask SHOULD get MSBuildTask0002 even when scope is multithreadable_only
         diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldNotBeEmpty();
     }
+
+    [Fact]
+    public async Task Scope_MultithreadableOnly_UnannotatedBaseOfAnnotatedTask_GetsDiagnostic()
+    {
+        var diags = await GetDiagnosticsWithScopeAsync("""
+            using System;
+            using System.IO;
+            using Microsoft.Build.Framework;
+
+            public abstract class BaseWithEnv : Microsoft.Build.Utilities.Task
+            {
+                protected string? Token => Environment.GetEnvironmentVariable("SYSTEM_ACCESSTOKEN");
+                protected string Here() => Directory.GetCurrentDirectory();
+            }
+
+            [MSBuildMultiThreadableTask]
+            public sealed class DerivedAnnotated : BaseWithEnv, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
+                public override bool Execute() => Token is not null && Here() is not null;
+            }
+            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+
+        // The base class runs on the shared node as part of the annotated task, so its
+        // environment and working-directory reads are reported.
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).Count().ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task Scope_MultithreadableOnly_UnannotatedBaseUsedByPlainTask_NoDiagnostic()
+    {
+        var diags = await GetDiagnosticsWithScopeAsync("""
+            using System;
+
+            public abstract class BaseWithEnv : Microsoft.Build.Utilities.Task
+            {
+                protected string? Token => Environment.GetEnvironmentVariable("SYSTEM_ACCESSTOKEN");
+            }
+
+            public sealed class PlainDerived : BaseWithEnv
+            {
+                public override bool Execute() => Token is not null;
+            }
+            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+
+        // No task in the hierarchy opted into multithreaded execution
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).ShouldBeEmpty();
+    }
+
+    [Fact]
+    public async Task Scope_MultithreadableOnly_GrandparentOfAnnotatedTask_GetsDiagnostic()
+    {
+        var diags = await GetDiagnosticsWithScopeAsync("""
+            using System.IO;
+            using Microsoft.Build.Framework;
+
+            public abstract class Grandparent : Microsoft.Build.Utilities.Task
+            {
+                protected string Read(string path) => File.ReadAllText(path);
+            }
+
+            public abstract class Parent : Grandparent
+            {
+            }
+
+            [MSBuildMultiThreadableTask]
+            public sealed class DerivedAnnotated : Parent, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
+                public string ClientCertificate { get; set; } = "cert.pfx";
+                public override bool Execute() => Read(ClientCertificate) is not null;
+            }
+            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+
+        // The whole base chain is in scope, not just the immediate base
+        diags.Where(d => d.Id == DiagnosticIds.FilePathRequiresAbsolute).Count().ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Scope_MultithreadableOnly_NonTaskBaseOfAnnotatedTask_GetsDiagnostic()
+    {
+        var diags = await GetDiagnosticsWithScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+
+            public abstract class NonTaskBase
+            {
+                protected string? Token => Environment.GetEnvironmentVariable("SYSTEM_ACCESSTOKEN");
+            }
+
+            [MSBuildMultiThreadableTask]
+            public sealed class DerivedAnnotated : NonTaskBase, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
+                public IBuildEngine BuildEngine { get; set; } = new BuildEngineStub();
+                public bool Execute() => Token is not null;
+            }
+            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+
+        // A base class that is not itself an ITask still runs as part of the annotated task
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).Count().ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Scope_MultithreadableOnly_GenericBaseOfAnnotatedTask_GetsDiagnostic()
+    {
+        var diags = await GetDiagnosticsWithScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+
+            public abstract class GenericBase<T> : Microsoft.Build.Utilities.Task
+            {
+                protected string? Token => Environment.GetEnvironmentVariable("SYSTEM_ACCESSTOKEN");
+            }
+
+            [MSBuildMultiThreadableTask]
+            public sealed class DerivedAnnotated : GenericBase<string>, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
+                public override bool Execute() => Token is not null;
+            }
+            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+
+        // The base is referenced as GenericBase<string> but declared as GenericBase<T>
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).Count().ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task Scope_MultithreadableOnly_BaseSharedByTwoAnnotatedTasks_ReportedOnce()
+    {
+        var diags = await GetDiagnosticsWithScopeAsync("""
+            using System;
+            using Microsoft.Build.Framework;
+
+            public abstract class SharedBase : Microsoft.Build.Utilities.Task
+            {
+                protected string? Token => Environment.GetEnvironmentVariable("SYSTEM_ACCESSTOKEN");
+            }
+
+            [MSBuildMultiThreadableTask]
+            public sealed class FirstTask : SharedBase, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
+                public override bool Execute() => Token is not null;
+            }
+
+            [MSBuildMultiThreadableTask]
+            public sealed class SecondTask : SharedBase, IMultiThreadableTask
+            {
+                public TaskEnvironment TaskEnvironment { get; set; } = new TaskEnvironment();
+                public override bool Execute() => Token is not null;
+            }
+            """, SharedAnalyzerHelpers.ScopeMultiThreadableOnly);
+
+        // The shared base is analyzed once, not once per derived task
+        diags.Where(d => d.Id == DiagnosticIds.TaskEnvironmentRequired).Count().ShouldBe(1);
+    }
 }

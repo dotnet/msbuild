@@ -246,10 +246,7 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // When scope is "multithreadable_only", filter to only multithreadable tasks
             if (!analyzeAllTasks)
             {
-                taskTypes = taskTypes.Where(t =>
-                    (iMultiThreadableTaskType is not null && t.AllInterfaces.Any(i => SymbolEqualityComparer.Default.Equals(i, iMultiThreadableTaskType))) ||
-                    (multiThreadableTaskAttributeType is not null && t.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, multiThreadableTaskAttributeType))) ||
-                    (analyzedAttributeType is not null && t.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, analyzedAttributeType)))).ToList();
+                taskTypes = taskTypes.Where(t => IsMultiThreadable(t, iMultiThreadableTaskType, multiThreadableTaskAttributeType, analyzedAttributeType)).ToList();
 
                 if (taskTypes.Count == 0)
                 {
@@ -257,7 +254,35 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 }
             }
 
+            // A task runs the members it inherits as well as the ones it declares, so the base chain is
+            // walked too. Types are visited once, so a base shared by several tasks is not reported twice.
+            var seedTypes = new List<INamedTypeSymbol>(taskTypes.Count);
+            var seenSeedTypes = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
             foreach (var taskType in taskTypes)
+            {
+                for (INamedTypeSymbol? current = taskType;
+                     current is not null && current.SpecialType != SpecialType.System_Object;
+                     current = current.BaseType)
+                {
+                    // Types outside this compilation have no source to walk, and nothing above them does either.
+                    if (current.DeclaringSyntaxReferences.Length == 0)
+                    {
+                        break;
+                    }
+
+                    // Members of a constructed generic base (Base<string>) are keyed in the call graph by
+                    // their original definition, so walk the definition.
+                    var definition = current.OriginalDefinition;
+                    if (!seenSeedTypes.Add(definition))
+                    {
+                        break;
+                    }
+
+                    seedTypes.Add(definition);
+                }
+            }
+
+            foreach (var taskType in seedTypes)
             {
                 // Track reported violations per task type to avoid flooding with duplicates.
                 // Key: target banned API display name. We report only the shortest chain per API.

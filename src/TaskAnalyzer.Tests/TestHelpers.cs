@@ -245,8 +245,23 @@ internal static class TestHelpers
     /// </summary>
     public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithScopeAsync(string source, string scope)
     {
+        return await GetDiagnosticsWithScopeAsync(source, scope, new MultiThreadableTaskAnalyzer());
+    }
+
+    /// <summary>
+    /// Runs BOTH the direct and transitive analyzers with a specific scope option.
+    /// </summary>
+    public static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetAllDiagnosticsWithScopeAsync(string source, string scope)
+    {
+        return await GetDiagnosticsWithScopeAsync(source, scope, new MultiThreadableTaskAnalyzer(), new TransitiveCallChainAnalyzer());
+    }
+
+    private static async System.Threading.Tasks.Task<ImmutableArray<Diagnostic>> GetDiagnosticsWithScopeAsync(
+        string source,
+        string scope,
+        params DiagnosticAnalyzer[] analyzers)
+    {
         var compilation = CreateCompilation(source);
-        var analyzer = new MultiThreadableTaskAnalyzer();
 
         var globalOptions = new Dictionary<string, string>
         {
@@ -255,8 +270,7 @@ internal static class TestHelpers
         var optionsProvider = new TestAnalyzerConfigOptionsProvider(globalOptions);
         var options = new AnalyzerOptions(ImmutableArray<AdditionalText>.Empty, optionsProvider);
 
-        var compilationWithAnalyzers = compilation.WithAnalyzers(
-            ImmutableArray.Create<DiagnosticAnalyzer>(analyzer), options);
+        var compilationWithAnalyzers = compilation.WithAnalyzers(ImmutableArray.Create(analyzers), options);
         return await compilationWithAnalyzers.GetAnalyzerDiagnosticsAsync();
     }
 

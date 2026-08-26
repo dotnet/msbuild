@@ -21,6 +21,9 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
     /// - "multithreadable_only": MSBuildTask0002, 0003 fire only on IMultiThreadableTask or [MSBuildMultiThreadableTask]
     ///   (MSBuildTask0001 and MSBuildTask0004 always fire on all tasks regardless)
     /// 
+    /// Base classes of a multithreadable task are analyzed as multithreadable under either scope, since the
+    /// members a task inherits run on the shared node just like the ones it declares.
+    /// 
     /// Per review feedback from @rainersigwald:
     /// - Console.* promoted to MSBuildTask0001 (always wrong in tasks)
     /// - Helper classes can opt in via [MSBuildMultiThreadableTaskAnalyzed] attribute
@@ -72,6 +75,16 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
             // Build set of file-path types for MSBuildTask0003
             var filePathTypes = ResolveFilePathTypes(compilationContext.Compilation);
 
+            // [MSBuildMultiThreadableTask] is not inherited, but the members a task inherits still run on
+            // the shared node. Base classes of a multithreadable task are therefore analyzed as
+            // multithreadable themselves. Computed once per compilation, on first use.
+            var multiThreadableBaseTypes = new Lazy<ImmutableHashSet<INamedTypeSymbol>>(() =>
+                CollectMultiThreadableBaseTypes(
+                    compilationContext.Compilation,
+                    iMultiThreadableTaskType,
+                    multiThreadableTaskAttributeType,
+                    analyzedAttributeType));
+
             // Use RegisterSymbolStartAction for efficient per-type scoping
             compilationContext.RegisterSymbolStartAction(symbolStartContext =>
             {
@@ -89,13 +102,17 @@ namespace Microsoft.Build.TaskAuthoring.Analyzer
                 bool hasMultiThreadableAttribute = multiThreadableTaskAttributeType is not null &&
                     namedType.GetAttributes().Any(a => SymbolEqualityComparer.Default.Equals(a.AttributeClass, multiThreadableTaskAttributeType));
 
-                if (!isTask && !hasAnalyzedAttribute)
+                // Base classes of a multithreadable task are in scope even without an annotation of their own
+                bool isMultiThreadableBaseType = !isMultiThreadableTask && !hasAnalyzedAttribute && !hasMultiThreadableAttribute &&
+                    multiThreadableBaseTypes.Value.Contains(namedType);
+
+                if (!isTask && !hasAnalyzedAttribute && !isMultiThreadableBaseType)
                 {
                     return;
                 }
 
                 // Helper classes with the attribute or tasks with [MSBuildMultiThreadableTask] are treated as IMultiThreadableTask
-                bool analyzeAsMultiThreadable = isMultiThreadableTask || hasAnalyzedAttribute || hasMultiThreadableAttribute;
+                bool analyzeAsMultiThreadable = isMultiThreadableTask || hasAnalyzedAttribute || hasMultiThreadableAttribute || isMultiThreadableBaseType;
 
                 // When scope is "multithreadable_only", only analyze MSBuildTask0002/0003 for multithreadable tasks
                 bool reportEnvironmentRules = analyzeAllTasks || analyzeAsMultiThreadable;
