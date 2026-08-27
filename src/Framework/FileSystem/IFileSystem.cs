@@ -46,16 +46,4 @@ namespace Microsoft.Build.Shared.FileSystem
 
         bool FileOrDirectoryExists(string path);
     }
-
-    /// <summary>
-    /// Internal capability for file systems whose enumeration methods are direct pass-throughs to the local file system.
-    /// </summary>
-    internal interface IDirectFileSystemEnumeration
-    {
-        /// <summary>
-        /// Whether enumeration is set-equivalent to direct <see cref="System.IO"/> enumeration and does not filter,
-        /// redirect, synthesize, or cache entries.
-        /// </summary>
-        bool SupportsDirectEnumeration { get; }
-    }
 }

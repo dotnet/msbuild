@@ -13,15 +13,13 @@ namespace Microsoft.Build.Shared.FileSystem
     /// TODO Remove this class and replace with WindowsFileSystem. Test perf to ensure no regressions.
     /// </summary>
     [SupportedOSPlatform("windows6.1")]
-    internal sealed class MSBuildOnWindowsFileSystem : IFileSystem, IDirectFileSystemEnumeration
+    internal sealed class MSBuildOnWindowsFileSystem : IFileSystem
     {
         private static readonly MSBuildOnWindowsFileSystem Instance = new MSBuildOnWindowsFileSystem();
 
         public static MSBuildOnWindowsFileSystem Singleton() => Instance;
 
         public MSBuildOnWindowsFileSystem() { }
-
-        public bool SupportsDirectEnumeration => true;
 
         public TextReader ReadFile(string path)
         {

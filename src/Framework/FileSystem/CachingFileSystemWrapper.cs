@@ -9,7 +9,7 @@ using System.IO;
 
 namespace Microsoft.Build.Shared.FileSystem
 {
-    internal sealed class CachingFileSystemWrapper : IFileSystem, IDirectFileSystemEnumeration
+    internal sealed class CachingFileSystemWrapper : IFileSystem
     {
         private readonly IFileSystem _fileSystem;
         private readonly ConcurrentDictionary<string, bool> _directoryExistenceCache = new();
@@ -21,9 +21,6 @@ namespace Microsoft.Build.Shared.FileSystem
         {
             _fileSystem = fileSystem;
         }
-
-        public bool SupportsDirectEnumeration =>
-            _fileSystem is IDirectFileSystemEnumeration { SupportsDirectEnumeration: true };
 
         public bool FileOrDirectoryExists(string path)
         {

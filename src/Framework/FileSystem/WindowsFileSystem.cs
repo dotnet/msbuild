@@ -39,8 +39,6 @@ namespace Microsoft.Build.Shared.FileSystem
 
         private WindowsFileSystem() { }
 
-        public override bool SupportsDirectEnumeration => false;
-
         public override IEnumerable<string> EnumerateFiles(string path, string searchPattern, SearchOption searchOption)
         {
             return EnumerateFileOrDirectories(path, FileArtifactType.File, searchPattern, searchOption);

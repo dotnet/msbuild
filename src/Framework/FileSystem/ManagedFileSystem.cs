@@ -14,7 +14,7 @@ namespace Microsoft.Build.Shared.FileSystem
     /// <summary>
     /// Implementation of file system operations directly over the dot net managed layer
     /// </summary>
-    internal class ManagedFileSystem : IFileSystem, IDirectFileSystemEnumeration
+    internal class ManagedFileSystem : IFileSystem
     {
         private static readonly ManagedFileSystem Instance = new ManagedFileSystem();
 
@@ -31,8 +31,6 @@ namespace Microsoft.Build.Shared.FileSystem
 #endif
 
         protected ManagedFileSystem() { }
-
-        public virtual bool SupportsDirectEnumeration => true;
 
         public TextReader ReadFile(string path)
         {

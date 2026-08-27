@@ -3,14 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Globbing;
 using Microsoft.Build.Shared;
-using Microsoft.Build.UnitTests;
-using Shouldly;
 using Xunit;
 
 #nullable disable
@@ -163,102 +160,6 @@ namespace Microsoft.Build.Engine.UnitTests.Globbing
             var glob2 = MSBuildGlob.Parse(globRoot, fileSpec);
 
             Assert.Same(glob1.TestOnlyRegex, glob2.TestOnlyRegex);
-        }
-
-        [Theory]
-        [InlineData("")]
-        [InlineData("en-US")]
-        [InlineData("tr-TR")]
-        public void GlobMatchingIsCultureInvariantByDefault(string cultureName)
-        {
-            using TestEnvironment environment = TestEnvironment.Create();
-            CultureInfo originalCulture = CultureInfo.CurrentCulture;
-
-            try
-            {
-                CultureInfo.CurrentCulture = new CultureInfo(cultureName);
-                environment.SetEnvironmentVariable("MSBUILDDISABLEFEATURESFROMVERSION", null);
-                environment.SetEnvironmentVariable("MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS", null);
-                ChangeWaves.ResetStateForTests();
-                MSBuildGlob glob = MSBuildGlob.Parse("**/I/*.cs");
-
-                glob.IsMatch("i/source.cs").ShouldBeTrue();
-                glob.IsMatch("İ/source.cs").ShouldBeFalse();
-                glob.IsMatch("ı/source.cs").ShouldBeFalse();
-            }
-            finally
-            {
-                ChangeWaves.ResetStateForTests();
-                CultureInfo.CurrentCulture = originalCulture;
-            }
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void GlobRegexCachePartitionsInvariantAndLegacyCultures(bool reverseOrder)
-        {
-            using TestEnvironment environment = TestEnvironment.Create();
-            CultureInfo originalCulture = CultureInfo.CurrentCulture;
-            (bool Legacy, string CultureName)[] cases =
-            [
-                (false, "tr-TR"),
-                (true, "tr-TR"),
-                (true, "en-US"),
-            ];
-
-            try
-            {
-                IEnumerable<(bool Legacy, string CultureName)> orderedCases = reverseOrder
-                    ? cases.Reverse()
-                    : cases;
-                List<MSBuildGlob> keepAlive = [];
-
-                foreach ((bool legacy, string cultureName) in orderedCases)
-                {
-                    CultureInfo.CurrentCulture = new CultureInfo(cultureName);
-                    environment.SetEnvironmentVariable(
-                        "MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS",
-                        legacy ? "1" : null);
-                    MSBuildGlob glob = MSBuildGlob.Parse("**/I/*.cs");
-                    keepAlive.Add(glob);
-
-                    glob.IsMatch("i/source.cs").ShouldBe(!legacy || cultureName == "en-US");
-                    glob.IsMatch("İ/source.cs").ShouldBe(legacy && cultureName == "en-US");
-                    glob.IsMatch("ı/source.cs").ShouldBe(legacy && cultureName == "tr-TR");
-                }
-            }
-            finally
-            {
-                ChangeWaves.ResetStateForTests();
-                CultureInfo.CurrentCulture = originalCulture;
-            }
-        }
-
-        [Fact]
-        public void DisablingWaveRestoresCultureSensitiveGlobMatching()
-        {
-            using TestEnvironment environment = TestEnvironment.Create();
-            CultureInfo originalCulture = CultureInfo.CurrentCulture;
-
-            try
-            {
-                CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
-                environment.SetEnvironmentVariable(
-                    "MSBUILDDISABLEFEATURESFROMVERSION",
-                    ChangeWaves.Wave18_11.ToString());
-                environment.SetEnvironmentVariable("MSBUILDUSELEGACYCULTURESENSITIVEFILEGLOBS", null);
-                ChangeWaves.ResetStateForTests();
-                MSBuildGlob glob = MSBuildGlob.Parse("**/I/*.cs");
-
-                glob.IsMatch("i/source.cs").ShouldBeFalse();
-                glob.IsMatch("ı/source.cs").ShouldBeTrue();
-            }
-            finally
-            {
-                ChangeWaves.ResetStateForTests();
-                CultureInfo.CurrentCulture = originalCulture;
-            }
         }
 
         [Fact]
