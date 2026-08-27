@@ -174,7 +174,7 @@ internal sealed class RedirectConsoleWriter : TextWriter
     {
         lock (_lock)
         {
-            _destination.WriteLine(format, arg);
+            _destination.Write(format, arg);
         }
     }
 
@@ -360,6 +360,11 @@ internal sealed class RedirectConsoleWriter : TextWriter
     private void FlushInternal()
     {
         StringBuilder buffer = _bufferWriter.GetStringBuilder();
+        if (buffer.Length == 0)
+        {
+            return;
+        }
+
         string captured = buffer.ToString();
         buffer.Clear();
 

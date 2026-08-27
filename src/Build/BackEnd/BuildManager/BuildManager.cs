@@ -2522,6 +2522,7 @@ namespace Microsoft.Build.Execution
 
             _nodeManager?.ClearPerBuildState();
             _nodeManager = null;
+            _taskHostNodeManager?.ClearPerBuildState();
 
             _shuttingDown = false;
             _executionCancellationTokenSource?.Dispose();
