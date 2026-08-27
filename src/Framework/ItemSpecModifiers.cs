@@ -350,24 +350,6 @@ internal static class ItemSpecModifiers
     }
 
     /// <summary>
-    ///  Performs path manipulations on the given item-spec as directed.
-    ///  Does not cache the result.
-    /// </summary>
-    /// <param name="itemSpec">The item-spec to modify.</param>
-    /// <param name="modifier">The modifier to apply to the item-spec.</param>
-    /// <param name="currentDirectory">The root directory for relative item-specs.</param>
-    /// <param name="definingProjectEscaped">The path to the project that defined this item (may be null).</param>
-    public static string GetItemSpecModifier(
-        string itemSpec,
-        ItemSpecModifierKind modifier,
-        string? currentDirectory,
-        string? definingProjectEscaped)
-    {
-        Cache cache = default;
-        return GetItemSpecModifier(itemSpec, modifier, currentDirectory, definingProjectEscaped, ref cache);
-    }
-
-    /// <summary>
     /// Performs path manipulations on the given item-spec as directed, caching
     /// derivable results in <paramref name="cache"/> for subsequent calls on the same item spec.
     ///

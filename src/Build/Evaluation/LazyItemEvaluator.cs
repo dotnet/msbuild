@@ -666,13 +666,21 @@ namespace Microsoft.Build.Evaluation
 
         private void AddItemReferences(string expression, OperationBuilder operationBuilder, IElementLocation elementLocation)
         {
-            if (Expander<P, I>.TryExpandSingleItemVectorExpression(
-                    expression,
-                    ExpanderOptions.ExpandItems,
-                    elementLocation,
-                    out ExpressionShredder.ItemExpressionCapture itemVector))
+            if (expression.Length == 0)
             {
-                AddReferencedItemLists(operationBuilder, itemVector);
+                return;
+            }
+            else
+            {
+                ExpressionShredder.ItemExpressionCapture? match = Expander<P, I>.ExpandSingleItemVectorExpressionIntoExpressionCapture(
+                    expression, ExpanderOptions.ExpandItems, elementLocation);
+
+                if (match == null)
+                {
+                    return;
+                }
+
+                AddReferencedItemLists(operationBuilder, match.Value);
             }
         }
 

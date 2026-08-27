@@ -47,13 +47,12 @@ public class ExpressionShredderAllocationBenchmark
 
         for (int i = 0; i < _itemExpressions.Length; i++)
         {
-            string expression = _itemExpressions[i];
-            int startIndex = 0;
+            ExpressionShredder.ReferencedItemExpressionsEnumerator enumerator =
+                ExpressionShredder.GetReferencedItemExpressions(_itemExpressions[i]);
 
-            while (ExpressionShredder.TryGetNextItemVectorExpression(expression, startIndex, out ExpressionShredder.ItemExpressionCapture itemVector))
+            while (enumerator.MoveNext())
             {
                 count++;
-                startIndex = itemVector.Index + itemVector.Length;
             }
         }
 
