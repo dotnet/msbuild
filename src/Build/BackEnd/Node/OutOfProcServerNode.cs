@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.BackEnd.Logging;
+using Microsoft.Build.Evaluation;
 using Microsoft.Build.Execution;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Framework.Telemetry;
@@ -421,6 +422,11 @@ namespace Microsoft.Build.Server
 
             CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
             Traits.UpdateFromEnvironment();
+
+            // The incoming environment can flip FeatureSwitches.EnableAllPropertyFunctions, which
+            // changes which types a property function body is allowed to resolve to, so parses
+            // cached for a previous build request on this reused node must not be reused.
+            PropertyFunctionDescriptorCache.Clear();
 
             Thread.CurrentThread.CurrentCulture = command.Culture;
             Thread.CurrentThread.CurrentUICulture = command.UICulture;
