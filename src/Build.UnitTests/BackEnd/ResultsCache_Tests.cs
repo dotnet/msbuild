@@ -180,7 +180,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
             result.AddResultsForTarget("testTarget2", BuildResultUtilities.GetEmptySucceedingTargetResult());
             cache.AddResult(result);
 
-            ResultsCacheResponse response = cache.SatisfyRequest(request, new List<string>(), new List<string>(new string[] { "testTarget2" }), skippedResultsDoNotCauseCacheMiss: false);
+            ResultsCacheResponse response = cache.SatisfyRequest(request, new List<string>(), new List<string>(new string[] { "testTarget2" }), skippedResultsDoNotCauseCacheMiss: false, allowedTopLevelTargets: null);
 
             Assert.Equal(ResultsCacheResponseType.Satisfied, response.Type);
 
@@ -236,19 +236,22 @@ namespace Microsoft.Build.UnitTests.BackEnd
                requestWithNoBuildDataFlags,
                new List<string>(),
                new List<string>(new string[] { targetName }),
-               skippedResultsDoNotCauseCacheMiss: false);
+               skippedResultsDoNotCauseCacheMiss: false,
+               allowedTopLevelTargets: null);
 
             ResultsCacheResponse cachedResponseForProjectState = cache.SatisfyRequest(
                requestWithProjectStateFlag,
                new List<string>(),
                new List<string>(new string[] { targetName }),
-               skippedResultsDoNotCauseCacheMiss: false);
+               skippedResultsDoNotCauseCacheMiss: false,
+               allowedTopLevelTargets: null);
 
             ResultsCacheResponse cacheResponseForNoBuildDataFlags2 = cache.SatisfyRequest(
                requestWithNoBuildDataFlags2,
                new List<string>(),
                new List<string>(new string[] { targetName }),
-               skippedResultsDoNotCauseCacheMiss: false);
+               skippedResultsDoNotCauseCacheMiss: false,
+               allowedTopLevelTargets: null);
 
             Assert.Equal(ResultsCacheResponseType.Satisfied, cacheResponseForRequestWithNoBuildDataFlags.Type);
 
@@ -317,13 +320,15 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 requestWithSubsetFlag1,
                 new List<string>(),
                 new List<string>(new string[] { targetName }),
-                skippedResultsDoNotCauseCacheMiss: false);
+                skippedResultsDoNotCauseCacheMiss: false,
+                allowedTopLevelTargets: null);
 
             ResultsCacheResponse cachedResponseWithSubsetFlag2 = cache.SatisfyRequest(
                 requestWithSubsetFlag2,
                 new List<string>(),
                 new List<string>(new string[] { targetName }),
-                skippedResultsDoNotCauseCacheMiss: false);
+                skippedResultsDoNotCauseCacheMiss: false,
+                allowedTopLevelTargets: null);
 
             // We used the same filter that was used for the ProjectInstance in the cache -> cache hit.
             Assert.Equal(ResultsCacheResponseType.Satisfied, cachedResponseWithSubsetFlag1.Type);
