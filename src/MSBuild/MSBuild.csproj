@@ -77,7 +77,6 @@
     <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesResponse.cs" />
     <Compile Include="..\Shared\TaskHostCoresRequest.cs" />
     <Compile Include="..\Shared\TaskHostCoresResponse.cs" />
-    <Compile Include="..\Shared\TaskHostConsoleConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostBuildRequest.cs" />
     <Compile Include="..\Shared\TaskHostBuildResponse.cs" />
 
@@ -85,8 +84,6 @@
     <Compile Include="..\Shared\TypeLoader.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
-    <Compile Include="..\Shared\ConsoleOutput.cs" />
-    <Compile Include="..\Shared\ServerNodeConsoleWrite.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
     <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />

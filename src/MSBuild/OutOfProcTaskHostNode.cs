@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
@@ -1449,76 +1448,6 @@ namespace Microsoft.Build.CommandLine
             _consoleErrorWriter = null;
             _originalConsoleOut = null;
             _originalConsoleError = null;
-        }
-
-        private sealed class RedirectConsoleWriter : TextWriter
-        {
-            private readonly Action<string> _writeCallback;
-            private readonly StringWriter _writer = new();
-            private readonly object _lock = new();
-            private readonly Timer _timer;
-
-            public RedirectConsoleWriter(Action<string> writeCallback)
-            {
-                _writeCallback = writeCallback;
-                _timer = new Timer(_ => Flush(), null, 40, 40);
-            }
-
-            public override Encoding Encoding => _writer.Encoding;
-
-            public override void Flush()
-            {
-                lock (_lock)
-                {
-                    StringBuilder buffer = _writer.GetStringBuilder();
-                    if (buffer.Length == 0)
-                    {
-                        return;
-                    }
-
-                    string captured = buffer.ToString();
-                    buffer.Clear();
-                    _writeCallback(captured);
-                }
-            }
-
-            public override void Write(char value)
-            {
-                lock (_lock)
-                {
-                    _writer.Write(value);
-                }
-            }
-
-            public override void Write(char[] buffer, int index, int count)
-            {
-                lock (_lock)
-                {
-                    _writer.Write(buffer, index, count);
-                }
-            }
-
-            public override void Write(string value)
-            {
-                lock (_lock)
-                {
-                    _writer.Write(value);
-                }
-            }
-
-            protected override void Dispose(bool disposing)
-            {
-                if (disposing)
-                {
-                    using ManualResetEvent timerDisposed = new(false);
-                    _timer.Dispose(timerDisposed);
-                    timerDisposed.WaitOne();
-                    Flush();
-                    _writer.Dispose();
-                }
-
-                base.Dispose(disposing);
-            }
         }
 
         /// <summary>
