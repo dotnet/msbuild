@@ -255,6 +255,7 @@ namespace Microsoft.Build.BackEnd
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.LogMessage, LogMessagePacket.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.TaskHostTaskComplete, TaskHostTaskComplete.FactoryForDeserialization, this);
             (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.NodeShutdown, NodeShutdown.FactoryForDeserialization, this);
+            (this as INodePacketFactory).RegisterPacketHandler(NodePacketType.ServerNodeConsoleWrite, ServerNodeConsoleWrite.FactoryForDeserialization, this);
 
             // Register callback request packet types so we can deserialize them when
             // they arrive from TaskHost processes. These are forwarded to the current
@@ -342,6 +343,32 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet.</param>
         public void PacketReceived(int node, INodePacket packet)
         {
+            if (packet is ServerNodeConsoleWrite consoleWrite)
+            {
+                bool isFirstInProcNodeSidecar =
+                    ComponentHost.BuildParameters.MultiThreaded &&
+                    _nodeIdToNodeKey.TryGetValue(node, out TaskHostNodeKey nodeKey) &&
+                    nodeKey.NodeId == NodeManager.FirstMultiThreadedNodeId;
+
+                if (isFirstInProcNodeSidecar)
+                {
+                    switch (consoleWrite.OutputType)
+                    {
+                        case ConsoleOutput.Standard:
+                            Console.Out.Write(consoleWrite.Text);
+                            break;
+                        case ConsoleOutput.Error:
+                            Console.Error.Write(consoleWrite.Text);
+                            break;
+                        default:
+                            InternalError.Throw($"Unexpected console output type {consoleWrite.OutputType}");
+                            break;
+                    }
+                }
+
+                return;
+            }
+
             if (_nodeIdToPacketHandlerStack.TryGetValue(node, out Stack<INodePacketHandler> handlerStack))
             {
                 lock (handlerStack)
@@ -669,6 +696,14 @@ namespace Microsoft.Build.BackEnd
                 }
 
                 // Configure the node.
+                if (ComponentHost.BuildParameters.MultiThreaded &&
+                    nodeKey.NodeId == NodeManager.FirstMultiThreadedNodeId &&
+                    context.NegotiatedPacketVersion >= NodePacketTypeExtensions.ConsoleOutputForwardingMinVersion &&
+                    wasNewlyCreated)
+                {
+                    context.SendData(new TaskHostConsoleConfiguration());
+                }
+
                 context.SendData(configuration);
                 return true;
             }
