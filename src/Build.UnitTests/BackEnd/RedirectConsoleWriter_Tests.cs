@@ -49,5 +49,31 @@ namespace Microsoft.Build.Engine.UnitTests.BackEnd
             output.ToString().ShouldBe("before dispose");
             callbackCount.ShouldBe(callbackCountAfterDispose);
         }
+
+        [Fact]
+        public void FormattedWriteDoesNotAppendNewLine()
+        {
+            StringBuilder output = new();
+
+            using (RedirectConsoleWriter writer = new(text => output.Append(text)))
+            {
+                writer.Write("{0}{1}{2}{3}", "a", "b", "c", "d");
+            }
+
+            output.ToString().ShouldBe("abcd");
+        }
+
+        [Fact]
+        public void EmptyFlushDoesNotInvokeCallback()
+        {
+            int callbackCount = 0;
+
+            using (RedirectConsoleWriter writer = new(_ => callbackCount++))
+            {
+                writer.Flush();
+            }
+
+            callbackCount.ShouldBe(0);
+        }
     }
 }

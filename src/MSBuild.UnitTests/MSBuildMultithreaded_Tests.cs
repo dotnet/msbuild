@@ -117,6 +117,7 @@ namespace Microsoft.Build.Engine.UnitTests
                 return false;
             }
 
+            Log.LogMessage(MessageImportance.High, "ConsoleOutputTestTask executed");
             Console.WriteLine("ConsoleOutputTestTask output");
             Console.Error.WriteLine("ConsoleOutputTestTask error output");
             return true;
@@ -156,6 +157,17 @@ namespace Microsoft.Build.Engine.UnitTests
         }
     }
 
+    public class ExplicitTaskHostConsoleOutputTestTask : Task
+    {
+        public override bool Execute()
+        {
+            Log.LogMessage(MessageImportance.High, "ExplicitTaskHostConsoleOutputTestTask executed");
+            Console.WriteLine("EXPLICIT-TASKHOST-STDOUT");
+            Console.Error.WriteLine("EXPLICIT-TASKHOST-STDERR");
+            return true;
+        }
+    }
+
     /// <summary>
     /// Integration tests for MSBuild and CallTarget tasks with TaskEnvironment support.
     /// These tests verify that tasks work correctly in both multithreaded and single-threaded scenarios
@@ -170,6 +182,7 @@ namespace Microsoft.Build.Engine.UnitTests
         {
             _output = output;
             _env = TestEnvironment.Create(output);
+            _env.SetEnvironmentVariable("MSBUILDUSESERVER", "0");
         }
 
         public void Dispose()
@@ -228,6 +241,84 @@ namespace Microsoft.Build.Engine.UnitTests
             success.ShouldBeTrue(output);
             output.ShouldContain("ConsoleOutputTestTask output");
             output.ShouldContain("ConsoleOutputTestTask error output");
+        }
+
+        [Fact]
+        public void ConsoleOutputFromExplicitTaskHostIsNotForwarded()
+        {
+            string project = $"""
+                <Project>
+                    <UsingTask
+                        TaskName="ConsoleOutputTestTask"
+                        AssemblyFile="{typeof(ConsoleOutputTestTask).Assembly.Location}"
+                        TaskFactory="TaskHostFactory"
+                        Runtime="{XMakeAttributes.GetCurrentMSBuildRuntime()}"
+                        Architecture="{XMakeAttributes.GetCurrentMSBuildArchitecture()}" />
+
+                    <Target Name="Build">
+                        <ConsoleOutputTestTask ShouldRunInTaskHost="true" />
+                    </Target>
+                </Project>
+                """;
+            TransientTestFile projectFile = _env.CreateFile("explicit-taskhost-console-output.proj", project);
+
+            string output = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                $"\"{projectFile.Path}\" /m:2 /nodereuse:false /mt",
+                out bool success,
+                false,
+                _output);
+
+            success.ShouldBeTrue(output);
+            output.ShouldContain("ConsoleOutputTestTask executed");
+            output.ShouldNotContain("ConsoleOutputTestTask output");
+            output.ShouldNotContain("ConsoleOutputTestTask error output");
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public void ConsoleForwardingDoesNotLeakBetweenSharedTaskHostConfigurations(bool explicitTaskRunsFirst)
+        {
+            string tasks = explicitTaskRunsFirst
+                ? """
+                    <ExplicitTaskHostConsoleOutputTestTask />
+                    <ConsoleOutputTestTask ShouldRunInTaskHost="true" />
+                    """
+                : """
+                    <ConsoleOutputTestTask ShouldRunInTaskHost="true" />
+                    <ExplicitTaskHostConsoleOutputTestTask />
+                    """;
+            string project = $"""
+                <Project>
+                    <UsingTask TaskName="ConsoleOutputTestTask" AssemblyFile="{typeof(ConsoleOutputTestTask).Assembly.Location}" />
+                    <UsingTask
+                        TaskName="ExplicitTaskHostConsoleOutputTestTask"
+                        AssemblyFile="{typeof(ExplicitTaskHostConsoleOutputTestTask).Assembly.Location}"
+                        TaskFactory="TaskHostFactory"
+                        Runtime="{XMakeAttributes.GetCurrentMSBuildRuntime()}"
+                        Architecture="{XMakeAttributes.GetCurrentMSBuildArchitecture()}" />
+
+                    <Target Name="Build">
+                        {tasks}
+                    </Target>
+                </Project>
+                """;
+            TransientTestFile projectFile = _env.CreateFile("mixed-taskhost-console-output.proj", project);
+
+            string output = RunnerUtilities.ExecMSBuild(
+                BuildEnvironmentHelper.Instance.CurrentMSBuildExePath,
+                $"\"{projectFile.Path}\" /m:2 /nodereuse:false /mt",
+                out bool success,
+                false,
+                _output);
+
+            success.ShouldBeTrue(output);
+            output.ShouldContain("ConsoleOutputTestTask output");
+            output.ShouldContain("ConsoleOutputTestTask error output");
+            output.ShouldContain("ExplicitTaskHostConsoleOutputTestTask executed");
+            output.ShouldNotContain("EXPLICIT-TASKHOST-STDOUT");
+            output.ShouldNotContain("EXPLICIT-TASKHOST-STDERR");
         }
 
         [Fact]

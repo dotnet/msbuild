@@ -64,6 +64,8 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private TaskHostParameters _factoryIdentityParameters;
 
+        private bool _taskHostExplicitlyRequested;
+
 
         #endregion
 
@@ -247,6 +249,7 @@ namespace Microsoft.Build.BackEnd
         {
             ArgumentNullException.ThrowIfNull(loadInfo);
             VerifyThrowIdentityParametersValid(taskFactoryIdentityParameters, elementLocation, taskName, "Runtime", "Architecture");
+            _taskHostExplicitlyRequested = taskHostExplicitlyRequested;
 
             bool taskHostParamsMatchCurrentProc = true;
             if (!taskFactoryIdentityParameters.IsEmpty)
@@ -319,6 +322,7 @@ namespace Microsoft.Build.BackEnd
             bool useTaskFactory = _loadedType.LoadedViaMetadataLoadContext;
 
             TaskHostParameters mergedParameters = TaskHostParameters.Empty;
+            bool useTaskHostForMultiThreadedCompatibility = false;
 
             // Optimization for the common (vanilla AssemblyTaskFactory) case -- only calculate
             // the task factory parameters if we have any to calculate; otherwise even if we
@@ -340,6 +344,8 @@ namespace Microsoft.Build.BackEnd
                 if (TaskRouter.NeedsTaskHostInMultiThreadedMode(_loadedType.Type))
                 {
                     useTaskFactory = true;
+                    useTaskHostForMultiThreadedCompatibility =
+                        !_taskHostExplicitlyRequested;
                 }
             }
 
@@ -366,6 +372,7 @@ namespace Microsoft.Build.BackEnd
                     mergedParameters,
                     _loadedType,
                     useSidecarTaskHost: useSidecarTaskHost,
+                    forwardConsoleOutput: useTaskHostForMultiThreadedCompatibility,
                     projectFile,
 #if FEATURE_APPDOMAIN
                     appDomainSetup,
