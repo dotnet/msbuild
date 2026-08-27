@@ -35,7 +35,7 @@ Fill in these values before starting. Version increments are irregular — they 
 | `{{INSIDERS_SNAP_DATE}}` | Date VS snaps `main` → `rel/insiders`. Final-branded MSBuild must be in VS `main` **before** this date. From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) | |
 | `{{STABLE_SNAP_DATE}}` | Date VS snaps `rel/insiders` → `rel/stable`. From [VS-Dates wiki](https://dev.azure.com/devdiv/DevDiv/_wiki/wikis/DevDiv.wiki/49807/VS-Dates) | |
 | `{{VS_SHIP_DATE}}` | Date VS ships publicly (GA). Post-GA tasks (nuget.org, docs) happen after this. | |
-| `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` | Latest `{{THIS_RELEASE_VERSION}}.0-preview-NNNNN-NN` MSBuild build reachable from `vs{{THIS_RELEASE_VERSION}}`. Used as the ApiCompat baseline for the bumped `main`. **How to determine it:** see the [release skill](https://github.com/dotnet/msbuild/blob/main/.github/skills/release/SKILL.md#how-to-determine-package_validation_baseline_version). | |
+| `{{PACKAGE_VALIDATION_BASELINE_VERSION}}` | Latest `{{THIS_RELEASE_VERSION}}.0-<label>.<shortDate>.<rev>` MSBuild build reachable from `vs{{THIS_RELEASE_VERSION}}` (`<label>` is `PreReleaseVersionLabel` from `eng/Versions.props`, currently `1` — e.g. `18.11.0-1.26426.2`). Used as the ApiCompat baseline for the bumped `main`. **How to determine it:** see the [release skill](https://github.com/dotnet/msbuild/blob/main/.github/skills/release/SKILL.md#how-to-determine-package_validation_baseline_version). | |
 
 **Derived values** (do not edit — computed from inputs):
 - Release branch: `vs{{THIS_RELEASE_VERSION}}`
@@ -124,13 +124,14 @@ _Tip: `darc add-default-channel` / `add-subscription` prompt interactively when 
   `darc add-default-channel --channel "VS {{THIS_RELEASE_VERSION}}" --branch vs{{THIS_RELEASE_VERSION}} --repo https://github.com/dotnet/msbuild --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
   - [ ] **2.3e** **Delete subscriptions for retired branches.** For each branch identified as retired in step 1.3 (apply the same combined SDK+VS rule — do **not** delete subscriptions for a branch that's retired on only one side, since fixes must keep flowing into the still-supported lifecycle), remove its inbound subscriptions and any default channel associations.
   List them: `darc get-subscriptions --target-repo https://github.com/dotnet/msbuild --target-branch <retired_branch>` \
-  Delete each: `darc delete-subscription --id <subscription_id> --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
+  Delete each: `darc delete-subscriptions --id <subscription_id> -q --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr` \
+  _(Note the plural verb: `delete-subscription` does not exist. `-q` skips the confirmation prompt, which would otherwise hang in a non-interactive session.)_
   - [ ] **2.3f** **(VMR backflow — skip for a VS-only release, or if 2.2b found the channel unchanged.)** Repoint the `→ main` backflow (ID from 2.2b) to the **next** SDK band channel so the bumped `main` pulls next-version VMR dependencies: \
   `darc update-subscription --id <main_backflow_id> --channel ".NET <NEXT_BAND> SDK" --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr`
   - [ ] **2.3g** **(VMR backflow — skip for a VS-only release.)** Add a backflow from the **outgoing** SDK band into the new release branch so that band keeps flowing into `vs{{THIS_RELEASE_VERSION}}` (mirrors the previous release branch's backflow: source-enabled, source dir `msbuild`, everyDay, Standard merge, excluded assets `*`; the branch is brand-new so pass `-q`): \
   `darc add-subscription --channel ".NET <OUTGOING_BAND> SDK" --source-repo https://github.com/dotnet/dotnet --target-repo https://github.com/dotnet/msbuild --target-branch vs{{THIS_RELEASE_VERSION}} --update-frequency everyDay --source-enabled --source-directory msbuild --excluded-assets '*' --standard-automerge --configuration-branch msbuild-{{THIS_RELEASE_VERSION}}-main-bump --no-pr -q`
   - [ ] **2.3h** **Arcade fix-up (run 2.4 first if you haven't).** _If the Arcade subscription from 2.4 below is missing or pointed at the wrong channel, include the fix-up here with `--no-pr` before creating the PR._
-  - [ ] **2.3i** **Create the PR** — re-run the final write command without `--no-pr` to open the PR on the configuration branch.
+  - [ ] **2.3i** **Create the PR** — omit `--no-pr` on the *last* write command of the batch so it both applies its change and opens the PR. (Do **not** re-run an already-applied command without `--no-pr`; that would duplicate the change.)
   - [ ] **2.3j** Get the maestro-configuration PR reviewed and merged: {{URL_OF_PHASE2_DARC_PR}}
 
 Verifications (**parallel** — read-only, no ordering dependency):
