@@ -119,7 +119,6 @@
     <Compile Include="..\Shared\TaskHostIsRunningMultipleNodesResponse.cs" />
     <Compile Include="..\Shared\TaskHostCoresRequest.cs" />
     <Compile Include="..\Shared\TaskHostCoresResponse.cs" />
-    <Compile Include="..\Shared\TaskHostConsoleConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostBuildRequest.cs" />
     <Compile Include="..\Shared\TaskHostBuildResponse.cs" />
 
@@ -227,12 +226,10 @@
     <Compile Include="Utilities\AwaitExtensions.cs" />
     <Compile Include="Utilities\EncodingStringWriter.cs" />
     <Compile Include="Utilities\ProjectWriter.cs" />
-    <Compile Include="..\Shared\ConsoleOutput.cs" />
     <Compile Include="BackEnd\Node\PartialBuildTelemetry.cs" />
     <Compile Include="BackEnd\Node\ServerNamedMutex.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildCancel.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildCommand.cs" />
-    <Compile Include="..\Shared\ServerNodeConsoleWrite.cs" />
     <Compile Include="BackEnd\Node\ServerNodeBuildResult.cs" />
     <Compile Include="BackEnd\Node\OutOfProcServerNode.cs" />
     <Compile Include="Logging\ConsoleConfiguration.cs" />
