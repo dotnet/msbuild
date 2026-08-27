@@ -41,4 +41,5 @@
       <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="build" Visible="false" />
     </ItemGroup>
   </Target>
+
 </Project>

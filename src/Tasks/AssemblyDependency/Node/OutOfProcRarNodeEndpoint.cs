@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using Microsoft.Build.BackEnd;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Tasks.AssemblyDependency
 {
@@ -124,7 +123,7 @@ namespace Microsoft.Build.Tasks.AssemblyDependency
                             _pipeServer.Disconnect();
                             break;
                         default:
-                            ErrorUtilities.ThrowInternalError($"Received unexpected packet type {packetType}");
+                            Assumed.Unreachable($"Received unexpected packet type {packetType}");
                             break;
                     }
                 }

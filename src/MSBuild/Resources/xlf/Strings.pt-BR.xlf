@@ -240,7 +240,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
-        <source>  -multithreaded
+        <source>  -multithreaded[:true|false]
                      Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
@@ -253,14 +253,14 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
+        <target state="translated">  -multithreaded[:true|false]
                      Habilita o modo multithread EXPERIMENTAL no MSBuild.
                      Isso significa que o MSBuild usará vários threads
-                     para criar projetos em paralelo,
+                     para criar projetos em paralelo,
                      em vez de vários processos.
-                     Essa opção não tem suporte.
+                     Essa opção não tem suporte.
                      O número máximo de threads usados é determinado pela
-                     opção -maxCpuCount.
+                     opção de linha de comando -maxCpuCount.
                      No caso do modo multithread em
                      e MSBUILDFORCEALLTASKSOUTOFPROC=1
                      maxCpuCount não pode ser maior que 256.
@@ -311,6 +311,16 @@
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidMultiThreadedValue">
+        <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1072: o valor do modo multithread não é válido. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1072: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -multithreaded parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -393,6 +403,46 @@
         <source>the server process could not be launched</source>
         <target state="translated">o processo do servidor não pôde ser iniciado</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeReused">
+        <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
+        <target state="translated">Reutilizando o nó do Servidor do MSBuild em execução para esta compilação (ID do processo {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawned">
+        <source>MSBuild Server node started for this build (process ID {0}).</source>
+        <target state="translated">Nó do Servidor do MSBuild iniciado para esta compilação (ID do processo {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawnedShortLived">
+        <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
+        <target state="translated">Nó do Servidor do MSBuild iniciado somente para esta compilação; ele será encerrado depois (ID do processo {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNotUsedForBuild">
+        <source>MSBuild Server was requested but not used for this build: {0}.</source>
+        <target state="translated">O Servidor do MSBuild foi solicitado, mas não usado para esta compilação: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonBusy">
+        <source>the server was busy with another build</source>
+        <target state="translated">o servidor estava ocupado com outra compilação</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
+        <source>this invocation is not compatible with MSBuild Server</source>
+        <target state="translated">esta invocação não é compatível com o Servidor do MSBuild</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
+        <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
+        <target state="translated">a reutilização do nó está desabilitada (-nodeReuse:false ou MSBUILDDISABLENODEREUSE=1)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
+        <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
+        <target state="translated">A hachura de escape MSBUILDENSURESTDOUTFORTASKPROCESSES está habilitada</target>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
         <source>the current server state could not be determined</source>
@@ -2320,6 +2370,36 @@ arquivo de resposta.
         <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
         <target state="translated">MSBUILD : error MSB4192: O arquivo de projeto "{0}" está no formato de arquivo ".vcproj" ou ".dsp", o qual não pode ser compilado diretamente pelo MSBuild. Converta o projeto abrindo-o no IDE do Visual Studio ou executando uma ferramenta de conversão ou, para ".vcproj", use o MSBuild para compilar o arquivo de solução que contém o projeto.</target>
         <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
+        <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
+        <target state="translated">MSB5022: O host de tarefas MSBuild não dá suporte a tarefas em execução que executam chamadas de retorno de IBuildEngine. Se desejar executar essas operações, execute sua tarefa no processo MSBuild principal.  Uma tarefa será automaticamente executada no host de tarefas se UsingTask tiver como atributo um valor "Runtime" ou "Architecture" ou se a invocação da tarefa tiver como atributo um valor "MSBuildRuntime" ou "MSBuildArchitecture", que não coincida com o tempo de execução ou arquitetura atual do MSBuild.</target>
+        <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="InvalidLogFileFormat">
+        <source>MSB4233: There was an exception while reading the log file: {0}</source>
+        <target state="translated">MSB4233: houve uma exceção durante a leitura do arquivo de log: {0}</target>
+        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentHeader">
+        <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
+        <target state="translated">Fazendo as seguintes modificações no ambiente recebido do nó pai antes de aplicá-lo ao host de tarefas:</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentVariable">
+        <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
+        <target state="translated">  Definindo "{0}" como "{1}" em vez do valor do ambiente pai, "{2}".</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="SubCategoryForSchemaValidationErrors">
+        <source>Schema validation</source>
+        <target state="translated">Validação de esquema</target>
+        <note>
+      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
+      "MSBUILD : Schema validation error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.
+    </note>
       </trans-unit>
     </body>
   </file>

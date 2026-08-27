@@ -7,7 +7,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Framework.Utilities;
 
 namespace Microsoft.Build.Shared;
 
@@ -16,43 +15,6 @@ namespace Microsoft.Build.Shared;
 /// </summary>
 internal static class ErrorUtilities
 {
-    /// <inheritdoc cref="FrameworkErrorUtilities.DebugTraceMessage(string, string)"/>
-    public static void DebugTraceMessage(string category, string message)
-        => FrameworkErrorUtilities.DebugTraceMessage(category, message);
-
-    /// <inheritdoc cref="FrameworkErrorUtilities.DebugTraceMessage(string, ref FrameworkErrorUtilities.DebugTraceInterpolatedStringHandler)"/>
-    public static void DebugTraceMessage(string category, ref FrameworkErrorUtilities.DebugTraceInterpolatedStringHandler handler)
-        => FrameworkErrorUtilities.DebugTraceMessage(category, ref handler);
-
-    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalError(string)"/>
-    [DoesNotReturn]
-    internal static void ThrowInternalError(string message)
-        => FrameworkErrorUtilities.ThrowInternalError(message);
-
-    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalError(ref UnconditionalInterpolatedStringHandler)"/>
-    [DoesNotReturn]
-    internal static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler)
-        => FrameworkErrorUtilities.ThrowInternalError(ref handler);
-
-    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalError(string, Exception)"/>
-    [DoesNotReturn]
-    internal static void ThrowInternalError(string message, Exception innerException)
-        => FrameworkErrorUtilities.ThrowInternalError(message, innerException);
-
-    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalError(ref UnconditionalInterpolatedStringHandler, Exception)"/>
-    [DoesNotReturn]
-    internal static void ThrowInternalError(ref UnconditionalInterpolatedStringHandler handler, Exception innerException)
-        => FrameworkErrorUtilities.ThrowInternalError(ref handler, innerException);
-
-    /// <inheritdoc cref="FrameworkErrorUtilities.ThrowInternalErrorUnreachable()"/>
-    [DoesNotReturn]
-    internal static void ThrowInternalErrorUnreachable()
-        => FrameworkErrorUtilities.ThrowInternalErrorUnreachable();
-
-    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalErrorUnreachable(bool)"/>
-    internal static void VerifyThrowInternalErrorUnreachable([DoesNotReturnIf(false)] bool condition)
-        => FrameworkErrorUtilities.VerifyThrowInternalErrorUnreachable(condition);
-
     /// <summary>
     /// Throws InternalErrorException.
     /// Indicates the code path followed should not have been possible.
@@ -64,16 +26,10 @@ internal static class ErrorUtilities
         // Check it has a real implementation of ToString()
         if (String.Equals(param.GetType().ToString(), param.ToString(), StringComparison.Ordinal))
         {
-            ThrowInternalError($"This type does not implement ToString() properly {param.GetType().FullName!}");
+            InternalError.Throw($"This type does not implement ToString() properly {param.GetType().FullName!}");
         }
 #endif
     }
-
-    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalNull(object?, string?)"/>
-    internal static void VerifyThrowInternalNull(
-        [NotNull] object? parameter,
-        [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-        => FrameworkErrorUtilities.VerifyThrowInternalNull(parameter, parameterName);
 
     /// <summary>
     /// Helper to throw an InternalErrorException when a lock on the specified object is not already held.
@@ -83,36 +39,12 @@ internal static class ErrorUtilities
     /// <param name="locker">The object that should already have been used as a lock.</param>
     internal static void VerifyThrowInternalLockHeld(object locker)
     {
-        if (!Monitor.IsEntered(locker))
-        {
-            ThrowInternalError("Lock should already have been taken");
-        }
+        Assumed.True(Monitor.IsEntered(locker), "Lock should already have been taken");
     }
-
-    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalLength(string?, string?)"/>
-    internal static void VerifyThrowInternalLength(
-        [NotNull] string? parameterValue,
-        [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
-        => FrameworkErrorUtilities.VerifyThrowInternalLength(parameterValue, parameterName);
-
-    internal static void VerifyThrowInternalLength<T>(
-        [NotNull] T[]? parameterValue,
-        [CallerArgumentExpression(nameof(parameterValue))] string? parameterName = null)
-        => FrameworkErrorUtilities.VerifyThrowInternalLength(parameterValue, parameterName);
 
     /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowInternalRooted(string)"/>
     internal static void VerifyThrowInternalRooted(string value)
         => FrameworkErrorUtilities.VerifyThrowInternalRooted(value);
-
-    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrow(bool, string)"/>
-    internal static void VerifyThrow([DoesNotReturnIf(false)] bool condition, string message)
-        => FrameworkErrorUtilities.VerifyThrow(condition, message);
-
-    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrow(bool, ref FrameworkErrorUtilities.IsTrueInterpolatedStringHandler)"/>
-    internal static void VerifyThrow(
-        [DoesNotReturnIf(false)] bool condition,
-        [InterpolatedStringHandlerArgument(nameof(condition))] ref FrameworkErrorUtilities.IsTrueInterpolatedStringHandler handler)
-        => FrameworkErrorUtilities.VerifyThrow(condition, ref handler);
 
     /// <summary>
     /// Throws an InvalidOperationException with the specified resource string
@@ -120,7 +52,7 @@ internal static class ErrorUtilities
     /// <param name="resourceName">Resource to use in the exception</param>
     /// <param name="args">Formatting args.</param>
     [DoesNotReturn]
-    internal static void ThrowInvalidOperation(string resourceName, params object?[]? args)
+    internal static void ThrowInvalidOperation(string resourceName, params object?[] args)
     {
         throw new InvalidOperationException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args));
     }
@@ -133,7 +65,7 @@ internal static class ErrorUtilities
         ResourceUtilities.VerifyResourceStringExists(resourceName);
         if (!condition)
         {
-            ThrowInvalidOperation(resourceName, null);
+            ThrowInvalidOperation(resourceName);
         }
     }
 
@@ -206,7 +138,7 @@ internal static class ErrorUtilities
     /// not call this method repeatedly in performance-critical scenarios
     /// </summary>
     [DoesNotReturn]
-    internal static void ThrowArgument(string resourceName, params object?[]? args)
+    internal static void ThrowArgument(string resourceName, params object?[] args)
     {
         ThrowArgument(null, resourceName, args);
     }
@@ -225,7 +157,7 @@ internal static class ErrorUtilities
     /// <param name="resourceName"></param>
     /// <param name="args"></param>
     [DoesNotReturn]
-    internal static void ThrowArgument(Exception? innerException, string resourceName, params object?[]? args)
+    internal static void ThrowArgument(Exception? innerException, string resourceName, params object?[] args)
     {
         throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, args), innerException);
     }
@@ -282,7 +214,7 @@ internal static class ErrorUtilities
         ResourceUtilities.VerifyResourceStringExists(resourceName);
         if (!condition)
         {
-            ThrowArgument(innerException, resourceName, null);
+            ThrowArgument(innerException, resourceName);
         }
     }
 
@@ -347,96 +279,17 @@ internal static class ErrorUtilities
         throw new ArgumentOutOfRangeException(parameterName);
     }
 
-    /// <summary>
-    /// Throws an ArgumentOutOfRangeException using the given parameter name
-    /// if the condition is false.
-    /// </summary>
-    internal static void VerifyThrowArgumentOutOfRange([DoesNotReturnIf(false)] bool condition, [CallerArgumentExpression(nameof(condition))] string? parameterName = null)
-    {
-        if (!condition)
-        {
-            ThrowArgumentOutOfRange(parameterName);
-        }
-    }
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull{T}(IReadOnlyCollection{T}, string)"/>
+    internal static void VerifyThrowArgumentLengthIfNotNull<T>(IReadOnlyCollection<T>? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+        => FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(parameter, parameterName);
 
-    /// <summary>
-    /// Throws an ArgumentNullException if the given string parameter is null
-    /// and ArgumentException if it has zero length.
-    /// </summary>
-    internal static void VerifyThrowArgumentLength([NotNull] string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        VerifyThrowArgumentNull(parameter, parameterName);
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowArgumentInvalidPath(string, string)"/>
+    internal static void VerifyThrowArgumentInvalidPath([NotNull] string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
+        => FrameworkErrorUtilities.VerifyThrowArgumentInvalidPath(parameter, parameterName);
 
-        if (parameter.Length == 0)
-        {
-            ThrowArgumentLength(parameterName);
-        }
-    }
-
-    /// <summary>
-    /// Throws an ArgumentNullException if the given collection is null
-    /// and ArgumentException if it has zero length.
-    /// </summary>
-    internal static void VerifyThrowArgumentLength<T>([NotNull] IReadOnlyCollection<T> parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        VerifyThrowArgumentNull(parameter, parameterName);
-
-        if (parameter.Count == 0)
-        {
-            ThrowArgumentLength(parameterName);
-        }
-    }
-
-    /// <summary>
-    /// Throws an ArgumentException if the given collection is not null but of zero length.
-    /// </summary>
-    internal static void VerifyThrowArgumentLengthIfNotNull<T>([MaybeNull] IReadOnlyCollection<T>? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        if (parameter?.Count == 0)
-        {
-            ThrowArgumentLength(parameterName);
-        }
-    }
-
-    [DoesNotReturn]
-    private static void ThrowArgumentLength(string? parameterName)
-    {
-        throw new ArgumentException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword("Shared.ParameterCannotHaveZeroLength", parameterName));
-    }
-
-    /// <summary>
-    /// Throws an ArgumentNullException if the given string parameter is null
-    /// and ArgumentException if it has zero length.
-    /// </summary>
-    internal static void VerifyThrowArgumentInvalidPath([NotNull] string parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        VerifyThrowArgumentNull(parameter, parameterName);
-
-        if (FileUtilities.PathIsInvalid(parameter))
-        {
-            ThrowArgument("Shared.ParameterCannotHaveInvalidPathChars", parameterName, parameter);
-        }
-    }
-
-    /// <summary>
-    /// Throws an ArgumentException if the string has zero length, unless it is
-    /// null, in which case no exception is thrown.
-    /// </summary>
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(string, string)"/>
     internal static void VerifyThrowArgumentLengthIfNotNull(string? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        if (parameter?.Length == 0)
-        {
-            ThrowArgumentLength(parameterName);
-        }
-    }
-
-    /// <summary>
-    /// Throws an ArgumentNullException if the given parameter is null.
-    /// </summary>
-    internal static void VerifyThrowArgumentNull([NotNull] object? parameter, [CallerArgumentExpression(nameof(parameter))] string? parameterName = null)
-    {
-        VerifyThrowArgumentNull(parameter, parameterName, "Shared.ParameterCannotBeNull");
-    }
+        => FrameworkErrorUtilities.VerifyThrowArgumentLengthIfNotNull(parameter, parameterName);
 
     /// <summary>
     /// Throws an ArgumentNullException if the given parameter is null.
@@ -451,49 +304,18 @@ internal static class ErrorUtilities
     }
 
     [DoesNotReturn]
-    internal static void ThrowArgumentNull(string? parameterName, string resourceName)
+    private static void ThrowArgumentNull(string? parameterName, string resourceName)
     {
         // Most ArgumentNullException overloads append its own rather clunky multi-line message. So use the one overload that doesn't.
         throw new ArgumentNullException(ResourceUtilities.FormatResourceStringStripCodeAndKeyword(resourceName, parameterName), (Exception?)null);
     }
 
-    internal static void VerifyThrowObjectDisposed([DoesNotReturnIf(false)] bool condition, string objectName)
-    {
-        if (!condition)
-        {
-            ThrowObjectDisposed(objectName);
-        }
-    }
-
-    [DoesNotReturn]
-    internal static void ThrowObjectDisposed(string objectName)
-    {
-        throw new ObjectDisposedException(objectName);
-    }
-
-    /// <summary>
-    /// A utility that verifies the parameters provided to a standard ICollection<typeparamref name="T"/>.CopyTo call.
-    /// </summary>
-    /// <exception cref="ArgumentNullException">If <paramref name="array"/> is null.</exception>
-    /// <exception cref="ArgumentOutOfRangeException">If <paramref name="arrayIndex"/> falls outside of the bounds <paramref name="array"/>.</exception>
-    /// <exception cref="ArgumentException">If there is insufficient capacity to copy the collection contents into <paramref name="array"/>
-    /// when starting at <paramref name="arrayIndex"/>.</exception>
+    /// <inheritdoc cref="FrameworkErrorUtilities.VerifyCollectionCopyToArguments{T}(ICollection{T}, int, int, string, string)"/>
     internal static void VerifyCollectionCopyToArguments<T>(
-        [NotNull] T[]? array,
-        string arrayParameterName,
-        int arrayIndex,
-        string arrayIndexParameterName,
-        int requiredCapacity)
-    {
-        VerifyThrowArgumentNull(array, arrayParameterName);
-        VerifyThrowArgumentOutOfRange(arrayIndex >= 0 && arrayIndex < array.Length, arrayIndexParameterName);
-
-        int arrayCapacity = array.Length - arrayIndex;
-        if (requiredCapacity > arrayCapacity)
-        {
-            throw new ArgumentException(
-                ResourceUtilities.GetResourceString("Shared.CollectionCopyToFailureProvidedArrayIsTooSmall"),
-                arrayParameterName);
-        }
-    }
+        [NotNull] ICollection<T>? collection,
+        int index,
+        int requiredCapacity,
+        [CallerArgumentExpression(nameof(collection))] string? collectionParamName = null,
+        [CallerArgumentExpression(nameof(index))] string? indexParamName = null)
+        => FrameworkErrorUtilities.VerifyCollectionCopyToArguments(collection, index, requiredCapacity, collectionParamName, indexParamName);
 }

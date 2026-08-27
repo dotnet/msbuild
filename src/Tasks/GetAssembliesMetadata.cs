@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.FileSystem;
 using Microsoft.Build.Tasks.AssemblyDependency;
 using Microsoft.Build.Utilities;
@@ -18,8 +17,12 @@ namespace Microsoft.Build.Tasks
     /// Resolves metadata for the specified set of assemblies.
     /// </summary>
     [SupportedOSPlatform("windows")]
-    public class GetAssembliesMetadata : TaskExtension
+    [MSBuildMultiThreadableTask]
+    public class GetAssembliesMetadata : TaskExtension, IMultiThreadableTask
     {
+        /// <inheritdoc />
+        public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+
         /// <summary>
         /// Assembly paths.
         /// </summary>
@@ -38,15 +41,28 @@ namespace Microsoft.Build.Tasks
             var assembliesMetadata = new List<ITaskItem>();
             foreach (string assemblyPath in AssemblyPaths)
             {
-                // During DTB the referenced project may not has been built yet, so we need to check if the assembly already exists.
-                if (FileSystems.Default.FileExists(assemblyPath))
+                // Preserve original behavior: entries that are null, empty, or whitespace-only previously
+                // fell through FileExists and were skipped silently. Skip them here so GetAbsolutePath is
+                // never handed a value it could reject with an ArgumentException.
+                if (string.IsNullOrWhiteSpace(assemblyPath))
                 {
-                    using (AssemblyInformation assemblyInformation = new(assemblyPath))
+                    continue;
+                }
+
+                AbsolutePath absoluteAssemblyPath = TaskEnvironment.GetAbsolutePath(assemblyPath);
+
+                // During DTB the referenced project may not has been built yet, so we need to check if the assembly already exists.
+                if (FileSystems.Default.FileExists(absoluteAssemblyPath))
+                {
+                    using (AssemblyInformation assemblyInformation = new(absoluteAssemblyPath))
                     {
                         AssemblyAttributes attributes = assemblyInformation.GetAssemblyMetadata();
 
                         if (attributes != null)
                         {
+                            // Preserve the original [Output] behavior: the resulting item's ItemSpec must be
+                            // the exact path the caller supplied, not the absolutized form used to read metadata.
+                            attributes.AssemblyFullPath = assemblyPath;
                             assembliesMetadata.Add(CreateItemWithMetadata(attributes));
                         }
                     }
@@ -68,7 +84,7 @@ namespace Microsoft.Build.Tasks
 
             set
             {
-                ErrorUtilities.VerifyThrowArgumentNull(value, nameof(AssemblyPaths));
+                ArgumentNullException.ThrowIfNull(value, nameof(AssemblyPaths));
                 _assemblyPaths = value;
             }
         }

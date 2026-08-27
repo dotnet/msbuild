@@ -215,25 +215,24 @@
                       Example:
                         -tlp:default=auto;verbosity=diag;shownCommandLine
     </source>
-        <target state="translated">  -terminalLoggerParameters: &lt;parameters&gt;
-                    終端機記錄器的參數。(簡短形式: -tlp)
-                    可用的參數。
-                       default -- 指定終端機記錄器的預設值。
-                       其需要下列其中一值: 
-。
-                          - 'on'、'true' 會強制使用 TerminalLogger，即使
-                           其之後可能會停用。
-                          - 'off'、'false' 會強制使用 TerminalLogger，即使
-                           其之後可能會啟用。
-                          - `auto` 會啟用 terminalLogger，但終端機必須能夠
-                           提供支援，且工作階段未經重新導向
-                           stdout/stderr
-                       verbosity -- 覆寫上記錄器的
-                       -verbosity
-                       showCommandLine -- 顯示 TaskCommandLineEvent 訊息
+        <target state="translated">  -terminalLoggerParameters: &lt;參數&gt;
+                     終端機記錄器的參數。(簡短形式: -tlp)
+                     可用的參數。
+                        default -- 指定終端機記錄器的預設值
+                        。其需要下列其中一值:
+                           - `on`、`true` 會強制使用 TerminalLogger，即使
+                            其之後可能會停用。
+                           - `off`、`false` 會強制使用 TerminalLogger，即使
+                            其之後可能會啟用。
+                           - `auto` 會啟用 terminalLogger，但終端機必須能夠
+                            提供支援，且工作階段未經重新導向
+                            stdout/stderr
+                        verbosity -- 覆寫上記錄器的
+                        -verbosity
+                        showCommandLine -- 顯示 TaskCommandLineEvent 訊息
 
-                     範例: 
-                       -tlp:default=auto;verbosity=diag;shownCommandLine
+                      範例:
+                        -tlp:default=auto;verbosity=diag;shownCommandLine
     </target>
         <note>
       LOCALIZATION: "-terminalLoggerParameters", "-tlp", "default", "on", "true", "off", "false", "auto", "verbosity", "showCommandLine" should not be localized.
@@ -241,7 +240,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
-        <source>  -multithreaded
+        <source>  -multithreaded[:true|false]
                      Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
@@ -254,16 +253,16 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
+        <target state="translated">  -multithreaded[:true|false]
                      在 MSBuild 中啟用實驗性多執行緒模式。
                      這表示 MSBuild 將使用多個執行緒
                      來平行建置專案，
                      而不是使用多個處理序。
                      不支援此選項。
                      使用的執行緒數量上限由
-                     -maxCpuCount 切換開關決定。
+                     -maxCpuCount 參數決定。
                      若啟用多執行緒模式
-                     且 MSBUILDFORCEALLTASKSOUTOFPROC=1，
+                     且 MSBUILDFORCEALLTASKSOUTOFPROC=1
                      maxCpuCount 不得超過 256。
                      (簡短形式: -m)
     </target>
@@ -312,6 +311,16 @@
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidMultiThreadedValue">
+        <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1072: 多執行緒模式值無效。 {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1072: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -multithreaded parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -394,6 +403,46 @@
         <source>the server process could not be launched</source>
         <target state="translated">無法啟動伺服器處理序</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeReused">
+        <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
+        <target state="translated">正在針對此組建重複使用執行中的 MSBuild 伺服器節點 (處理序識別碼 {0})。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawned">
+        <source>MSBuild Server node started for this build (process ID {0}).</source>
+        <target state="translated">MSBuild 伺服器節點已針對此組建啟動 (處理序識別碼 {0})。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawnedShortLived">
+        <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
+        <target state="translated">MSBuild 伺服器節點已僅針對此組建啟動; 之後會將其關閉 (處理序識別碼 {0})。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNotUsedForBuild">
+        <source>MSBuild Server was requested but not used for this build: {0}.</source>
+        <target state="translated">已要求 MSBuild 伺服器，但未用於此組建: {0}。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonBusy">
+        <source>the server was busy with another build</source>
+        <target state="translated">伺服器正在忙碌於另一個組建</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
+        <source>this invocation is not compatible with MSBuild Server</source>
+        <target state="translated">此叫用與 MSBuild 伺服器不相容</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
+        <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
+        <target state="translated">節點重複使用已停用 (-nodeReuse:false 或 MSBUILDDISABLENODEREUSE=1)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
+        <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
+        <target state="translated">MSBUILDENSURESTDOUTFORTASKPROCESSES 逸出交錯線已啟用</target>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
         <source>the current server state could not be determined</source>
@@ -2320,6 +2369,36 @@
         <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
         <target state="translated">MSBUILD : error MSB4192: 專案檔 "{0}" 的檔案格式為 ".vcproj" 或 ".dsp"，MSBuild 無法直接加以建置。請在 Visual Studio IDE 中開啟此專案或執行轉換工具加以轉換，若是 ".vcproj"，則改為使用 MSBuild 建置包含專案的方案檔。</target>
         <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
+        <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
+        <target state="translated">MSB5022: MSBuild 工作主機不支援會執行 IBuildEngine 回撥的工作。若您想要執行這些作業，請改為在核心 MSBuild 處理序執行您的工作。若 UsingTask 已由 "Runtime" 或 "Architecture" 值賦予屬性，或工作引動過程已由 "MSBuildRuntime" 或 "MSBuildArchitecture" 值賦予屬性 (不符合 MSBuild 的目前執行階段或結構)，則工作將自動在工作主機中執行。</target>
+        <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="InvalidLogFileFormat">
+        <source>MSB4233: There was an exception while reading the log file: {0}</source>
+        <target state="translated">MSB4233: 讀取記錄檔時發生錯誤: {0}</target>
+        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentHeader">
+        <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
+        <target state="translated">在套用到工作主機之前，對從父節點接收的環境進行下列修改:</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentVariable">
+        <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
+        <target state="translated">  將 '{0}' 設定為 '{1}' 而非父環境的值 '{2}。</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="SubCategoryForSchemaValidationErrors">
+        <source>Schema validation</source>
+        <target state="translated">結構描述驗證</target>
+        <note>
+      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
+      "MSBUILD : Schema validation error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.
+    </note>
       </trans-unit>
     </body>
   </file>

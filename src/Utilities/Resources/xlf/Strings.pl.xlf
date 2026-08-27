@@ -72,6 +72,11 @@
         <target state="translated">Nie można pominąć zadania, ponieważ nie jest ono aktualne.</target>
         <note />
       </trans-unit>
+      <trans-unit id="ToolTask.PipeEOFTimeout">
+        <source>Pipe EOF not received within {0} seconds. A grandchild process may still be holding the pipe open. Output already delivered has been logged.</source>
+        <target state="translated">Nie odebrano znacznika EOF potoku w ciągu {0} sekund. Proces potomny drugiego poziomu może nadal utrzymywać potok otwarty. Już dostarczone dane wyjściowe zostały zarejestrowane.</target>
+        <note />
+      </trans-unit>
       <trans-unit id="ToolTask.ToolCommandFailed">
         <source>MSB6006: "{0}" exited with code {1}.</source>
         <target state="translated">MSB6006: Polecenie „{0}” zakończone przez kod {1}.</target>
@@ -296,6 +301,21 @@
         <source>Build succeeded.</source>
         <target state="translated">Kompilacja powiodła się.</target>
         <note />
+      </trans-unit>
+      <trans-unit id="KillingProcess">
+        <source>MSB5002: Terminating the task executable "{0}" because it did not finish within the specified limit of {1} milliseconds.</source>
+        <target state="translated">MSB5002: plik wykonywalny zadania „{0}” zostanie zakończony, ponieważ nie ukończył działania przed określonym limitem czasu ({1} ms).</target>
+        <note>{StrBegin="MSB5002: "}</note>
+      </trans-unit>
+      <trans-unit id="KillingProcessByCancellation">
+        <source>MSB5021: Terminating the task executable "{0}" and its child processes because the build was canceled.</source>
+        <target state="translated">MSB5021: plik wykonywalny zadania „{0}” i jego procesy podrzędne zostaną zakończone, ponieważ anulowano kompilację.</target>
+        <note>{StrBegin="MSB5021: "}</note>
+      </trans-unit>
+      <trans-unit id="FailedDeletingTempFile">
+        <source>MSB5018: Failed to delete the temporary file "{0}". {1} {2}</source>
+        <target state="translated">MSB5018: nie można usunąć pliku tymczasowego „{0}”. {1} {2}</target>
+        <note>{StrBegin="MSB5018: "}</note>
       </trans-unit>
     </body>
   </file>

@@ -491,7 +491,7 @@
       </trans-unit>
       <trans-unit id="Exec.AllDriveLettersMappedError">
         <source>MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</source>
-        <target state="new">MSB3071: All drive letters from A: through Z: are currently in use. Since the working directory "{0}" (resolved to UNC path "{1}") requires a UNC mapping, the "Exec" task needs a free drive letter to map the UNC path to. Disconnect from one or more shared resources to free up drive letters, or specify a local working directory before attempting this command again.</target>
+        <target state="translated">MSB3071: 從 A: 到 Z: 的所有磁碟機代號目前都在使用中。因為工作目錄 "{0}" (解析為 UNC 路徑 "{1}") 需要 UNC 對應，所以 "Exec" 工作需要可用的磁碟機代號以對應 UNC 路徑。請先中斷一或多個共用資源的連線以釋放磁碟機代號，或指定本機工作目錄，再嘗試重新執行此命令。</target>
         <note>{StrBegin="MSB3071: "}LOCALIZATION: "Exec", "A:", and "Z:" should not be localized.</note>
       </trans-unit>
       <trans-unit id="Exec.CommandExitedZeroWithErrors">
@@ -563,6 +563,11 @@
         <source>MSB3541: {0} has invalid value "{1}". {2}</source>
         <target state="translated">MSB3541: {0} 有無效的值 "{1}"。{2}</target>
         <note>{StrBegin="MSB3541: "}</note>
+      </trans-unit>
+      <trans-unit id="FormatUrl.WhitespaceInputUrlNotAllowedOnWindows">
+        <source>MSB4311: The InputUrl value '{0}' is not a valid path on Windows because it consists only of whitespace characters.</source>
+        <target state="translated">MSB4311: InputUrl 值 '{0}' 不是 Windows 上的有效路徑，因為它只包含空白字元。</target>
+        <note>{StrBegin="MSB4311: "}</note>
       </trans-unit>
       <trans-unit id="General.CouldNotDeleteStateFile">
         <source>MSB3102: Could not delete state file "{0}". {1}</source>
@@ -1220,8 +1225,8 @@
         <note>{0} and {1} are filenames on disk.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MOTW">
-        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you want to process these files.</source>
-        <target state="translated">MSB3821: 因為檔案 {0} 位於網際網路或是限制區域上，或是檔案上標有 Web 字樣，所以無法處理該檔案。若希望處理這些檔案，請移除 Web 字樣。</target>
+        <source>MSB3821: Couldn't process file {0} due to its being in the Internet or Restricted zone or having the mark of the web on the file. Remove the mark of the web if you trust these files and want to process them. Please follow MSBuild secure usage best practices - https://aka.ms/msbuild-security-documentation</source>
+        <target state="translated">MSB3821: 因為檔案 {0} 位於網際網路或是限制區域上，或是檔案上標有 Web 字樣，所以無法處理該檔案。若您相信這些檔案，並希望加以處理，請移除 Web 字樣。請遵循 MSBuild 安全使用最佳做法 - https://aka.ms/msbuild-security-documentation</target>
         <note>{StrBegin="MSB3821: "} "Internet zone", "Restricted zone", and "mark of the web" are Windows concepts that may have a specific translation.</note>
       </trans-unit>
       <trans-unit id="GenerateResource.MimeTypeNotSupportedOnCore">
@@ -2667,6 +2672,46 @@
         <target state="translated">MSB3353: 未指定延遲簽署所需的公開金鑰。</target>
         <note>{StrBegin="MSB3353: "}</note>
       </trans-unit>
+      <trans-unit id="TarDirectory.Comment">
+        <source>Creating tar archive from directory "{0}" to "{1}".</source>
+        <target state="translated">正在從目錄 "{0}" 建立 tar 封存至 "{1}"。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorDirectoryDoesNotExist">
+        <source>MSB4321: Failed to tar directory "{0}" because it does not exist or is inaccessible.</source>
+        <target state="translated">MSB4321: 因為目錄 "{0}" 不存在或無法存取，所以無法將其建立為 tar 檔。</target>
+        <note>{StrBegin="MSB4321: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorFailIfNotIncremental">
+        <source>MSB4325: Failed to tar directory "{0}" to file "{1}" because the archive is out of date and incremental build was requested.</source>
+        <target state="translated">MSB4325: 因為封存已過期，且已要求累加建置，所以無法將目錄 "{0}" 建立為 tar 檔 "{1}"。</target>
+        <note>{StrBegin="MSB4325: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorFailed">
+        <source>MSB4323: Failed to tar directory "{0}" to file "{1}".  {2} {3}</source>
+        <target state="translated">MSB4323: 無法將目錄 "{0}" 建立為 tar 檔 "{1}"。{2} {3}</target>
+        <note>{StrBegin="MSB4323: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.ErrorFileExists">
+        <source>MSB4322: Failed to create tar file "{0}" because it already exists.  Please delete or rename the file and try again.</source>
+        <target state="translated">MSB4322: 因為 tar 檔 "{0}" 已存在，所以無法建立。 請刪除或重新命名該檔案，然後再試一次。</target>
+        <note>{StrBegin="MSB4322: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.InvalidCompression">
+        <source>MSB4327: The Compression value "{0}" is not valid. Specify one of "None", "GZip" or "ZStandard".</source>
+        <target state="translated">MSB4327: 壓縮值 "{0}" 無效。請指定 "None"、"GZip" 或 "ZStandard" 其中之一。</target>
+        <note>{StrBegin="MSB4327: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.InvalidDeterministicTimestamp">
+        <source>MSB4324: The DeterministicTimestamp value "{0}" is not valid. Specify an RFC 3339 date-time (for example, "2024-01-01T00:00:00Z") or an integer number of seconds since the Unix epoch.</source>
+        <target state="translated">MSB4324: DeterministicTimestamp 值 "{0}" 無效。請指定 RFC 3339 日期時間 (例如，"2024-01-01T00:00:00Z") 或自 Unix Epoch 起算的整數秒數。</target>
+        <note>{StrBegin="MSB4324: "}</note>
+      </trans-unit>
+      <trans-unit id="TarDirectory.InvalidFormat">
+        <source>MSB4326: The Format value "{0}" is not valid. Specify one of "Pax", "Ustar", "V7" or "Gnu".</source>
+        <target state="translated">MSB4326: 格式值 "{0}" 無效。請指定 "Pax"、"Ustar"、"V7" 或 "Gnu" 其中之一。</target>
+        <note>{StrBegin="MSB4326: "}</note>
+      </trans-unit>
       <trans-unit id="TaskRequiresFrameworkFailure">
         <source>MSB4803: The task "{0}" is not supported on the .NET Core version of MSBuild. Please use the .NET Framework version of MSBuild. See https://aka.ms/msbuild/MSB4803 for further details.</source>
         <target state="translated">MSB4803: MSBuild 的 .NET Core 版本不支援工作 "{0}"。請使用 MSBuild 的 .NET Framework 版本。如需進一步的詳細資料，請參閱 https://aka.ms/msbuild/MSB4803。</target>
@@ -2771,6 +2816,71 @@
         <source>MSB3394: Type library "{0}" is not registered, cannot unregister.</source>
         <target state="translated">MSB3394: 類型程式庫 "{0}" 並未註冊，因此無法移除註冊。</target>
         <note>{StrBegin="MSB3394: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.DidNotUntarBecauseOfEntryType">
+        <source>Did not untar entry "{0}" because its entry type "{1}" is not supported.</source>
+        <target state="translated">未 untar 項目 "{0}"，因為不支援其項目類型 "{1}"。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Untar.DidNotUntarBecauseOfFileMatch">
+        <source>Did not untar from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
+        <target state="translated">並未從檔案 "{0}" untar 為檔 "{1}"，因為在專案中的 "{2}" 參數原先設定為 "{3}"，且檔案的大小與時間戳記相符。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Untar.DidNotUntarBecauseOfFilter">
+        <source>Did not untar file "{0}" because it didn't match the include filter or because it matched the exclude filter.</source>
+        <target state="translated">因為檔案 "{0}" 不符合包含篩選條件，或符合排除篩選條件，所以未將該檔案 untar。</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="Untar.ErrorCouldNotCreateDestinationDirectory">
+        <source>MSB4331: Failed to untar to directory "{0}" because it could not be created.  {1}</source>
+        <target state="translated">MSB4331: 無法 untar 至目錄 "{0}"，因為該目錄無法建立。{1}</target>
+        <note>{StrBegin="MSB4331: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorCouldNotExtractFile">
+        <source>MSB4336: Failed to untar file "{0}" to "{1}".  {2}</source>
+        <target state="translated">MSB4336: 無法將檔案 "{0}" untar 至 "{1}"。{2}</target>
+        <note>{StrBegin="MSB4336: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorCouldNotMakeFileWriteable">
+        <source>MSB4335: Failed to untar file "{0}" because destination file "{1}" is read-only and could not be made writable.  {2} {3}</source>
+        <target state="translated">MSB4335: 因為目的地檔案 "{1}" 為唯讀，而無法設定為可寫入，所以無法 untar 檔案 "{0}"。{2}{3}</target>
+        <note>{StrBegin="MSB4335: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorCouldNotOpenFile">
+        <source>MSB4333: Failed to open tar file "{0}".  {1}</source>
+        <target state="translated">MSB4333: 無法開啟 tar 檔 "{0}"。{1}</target>
+        <note>{StrBegin="MSB4333: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorExtractingResultsInFilesOutsideDestination">
+        <source>MSB4334: Failed to untar file "{0}" to "{1}" because it is outside the destination directory.</source>
+        <target state="translated">MSB4334: 無法將檔案 "{0}" untar 為 "{1}"，因為其位於目的地目錄之外。</target>
+        <note>{StrBegin="MSB4334: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorFileDoesNotExist">
+        <source>MSB4332: Failed to untar file "{0}" because the file does not exist or is inaccessible.</source>
+        <target state="translated">MSB4332: 因為檔案不存在或無法存取，所以無法將檔案 "{0}" untar。</target>
+        <note>{StrBegin="MSB4332: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorParsingPatternInvalidPath">
+        <source>MSB4337: Failed to parse pattern "{0}" because it contains an invalid path character.</source>
+        <target state="translated">MSB4337: 因為模式 "{0}" 包含無效的路徑字元，所以無法加以剖析。</target>
+        <note>{StrBegin="MSB4337: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorParsingPatternPropertyReferences">
+        <source>MSB4338: Failed to parse pattern "{0}" because it contains a property reference which isn't supported.</source>
+        <target state="translated">MSB4338: 因為模式 "{0}" 包含不支援的屬性參考，所以無法加以剖析。</target>
+        <note>{StrBegin="MSB4338: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.ErrorFailIfNotIncremental">
+        <source>MSB4339: Failed to untar file "{0}" to "{1}" because the destination is out of date and incremental build was requested.</source>
+        <target state="translated">MSB4339: 無法將檔案 "{0}" untar 至 "{1}"，因為目的地已過期，且已要求累加建置。</target>
+        <note>{StrBegin="MSB4339: "}</note>
+      </trans-unit>
+      <trans-unit id="Untar.FileComment">
+        <source>Untarring file "{0}" to "{1}".</source>
+        <target state="translated">正在將檔案 "{0}" untar 至 "{1}"。</target>
+        <note />
       </trans-unit>
       <trans-unit id="Unzip.DidNotUnzipBecauseOfFileMatch">
         <source>Did not unzip from file "{0}" to file "{1}" because the "{2}" parameter was set to "{3}" in the project and the files' sizes and timestamps match.</source>
@@ -3002,6 +3112,11 @@
         <target state="translated">MSB3723: 參數 "{0}" 要求必須設定遺漏的參數 "{1}"。</target>
         <note>{StrBegin="MSB3723: "}</note>
       </trans-unit>
+      <trans-unit id="XmlPeekPoke.InputDtdProhibited">
+        <source>MSB3733: The XML input contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or suppress by setting "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
+        <target state="translated">MSB3733: XML 輸入包含 DTD。基於安全性理由，預設會禁止 DTD。請移除 DTD，或在 "{1}" 工作上將 "{0}" 設為 "false" 來隱藏以忽略 DTD。</target>
+        <note />
+      </trans-unit>
       <trans-unit id="XslTransform.ArgumentError">
         <source>MSB3701: Unable to load arguments for the XslTransformation task. {0}</source>
         <target state="translated">MSB3701: 無法載入 XslTransformation 工作的引數。{0}</target>
@@ -3016,6 +3131,11 @@
         <source>You are enabling relaxed XSLT security settings via the UseTrustedSettings parameter. For more details on security implications of this setting please see https://aka.ms/msbuild/xsltransformation-task</source>
         <target state="translated">您正在透過 UseTrustedSettings 參數啟用寬鬆的 XSLT 安全性設定。如需此設定安全性含意的詳細資料，請參閱 https://aka.ms/msbuild/xsltransformation-task</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XslTransform.TransformDtdProhibited">
+        <source>MSB3703: Unable to execute transformation because the XML input "{0}" contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{1}" to "false" on the "{2}" task to ignore DTDs.</source>
+        <target state="translated">MSB3703: 因為 XML 輸入 "{0}" 包含 DTD，所以無法執行轉換。基於安全性理由，預設會禁止 DTD。請移除 DTD，如果您信任輸入，請在 "{2}" 工作上將 "{1}" 設為 "false"，以忽略 DTD。</target>
+        <note>{StrBegin="MSB3703: "}{0} is the XML input path or inline content indicator. {1} is the ProhibitDtd property name and should not be translated. {2} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltArgumentsError">
         <source>MSB3702: Unable to process the XsltParameters argument for the XslTransformation task. {0}</source>
@@ -3046,6 +3166,11 @@
         <source>One of XslContent, XslInputPath and XslCompiledDllPath arguments must be set.</source>
         <target state="translated">必須設定 XslContent、XslInputPath 和 XslCompiledDllPath 其中一個引數。</target>
         <note />
+      </trans-unit>
+      <trans-unit id="XslTransform.XsltLoadDtdProhibited">
+        <source>MSB3704: Unable to load the specified Xslt because it contains a DTD. DTDs are prohibited by default for security reasons. Remove the DTD, or if you trust the input, set "{0}" to "false" on the "{1}" task to ignore DTDs.</source>
+        <target state="translated">MSB3704: 因為指定的 Xslt 包含 DTD，所以無法載入。基於安全性理由，預設會禁止 DTD。請移除 DTD，如果您信任輸入，請在 "{1}" 工作上將 "{0}" 設為 "false"，以忽略 DTD。</target>
+        <note>{StrBegin="MSB3704: "}{0} is the ProhibitDtd property name and should not be translated. {1} is the XslTransformation task name and should not be translated.</note>
       </trans-unit>
       <trans-unit id="XslTransform.XsltLoadError">
         <source>MSB3704: Unable to load the specified Xslt. {0}</source>

@@ -5,7 +5,6 @@ using System;
 using System.IO;
 
 using Microsoft.Build.Framework;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -28,7 +27,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrowArgumentNull(_list, nameof(List));
+                ArgumentNullException.ThrowIfNull(_list, nameof(List));
                 return _list;
             }
             set => _list = value;

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 
 using System;
+using System.Buffers.Binary;
 #if NET
 using System.Collections.Frozen;
 #endif
@@ -13,13 +14,12 @@ using System.IO.Pipes;
 using System.Threading;
 using Microsoft.Build.Framework;
 using Microsoft.Build.Internal;
-using Microsoft.Build.Shared;
 using Microsoft.Build.Shared.Debugging;
 
-#if FEATURE_SECURITY_PERMISSIONS || FEATURE_PIPE_SECURITY
+#if FEATURE_SECURITY_PERMISSIONS
 using System.Security.AccessControl;
 #endif
-#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
+#if FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
 using System.Security.Principal;
 #endif
 #if NET451_OR_GREATER || NETCOREAPP
@@ -46,9 +46,11 @@ namespace Microsoft.Build.BackEnd
 #endif // NETCOREAPP2_1
 
         /// <summary>
-        /// The size of the buffers to use for named pipes
+        /// The size of the buffers to use for named pipes. Re-evaluated on each access via
+        /// <see cref="Traits.NodeConnectionBufferSize"/> so it honors the change wave / env override
+        /// (and the per-access <see cref="Traits.Instance"/> reset used in tests).
         /// </summary>
-        private const int PipeBufferSize = 131072;
+        private static int PipeBufferSize => Traits.Instance.NodeConnectionBufferSize;
 
         /// <summary>
         /// The current communication status of the node.
@@ -119,9 +121,25 @@ namespace Microsoft.Build.BackEnd
         private BinaryWriter _binaryWriter;
 
         /// <summary>
+        /// Initial capacity of the packet body read buffer.
+        /// </summary>
+        private const int InitialReadBufferSize = 128 * 1024; // 128 KB
+
+        /// <summary>
+        /// Upper bound on the packet body read buffer retained between packets.
+        /// </summary>
+        private const int MaxRetainedReadBufferSize = 2 * 1024 * 1024; // 2 MB
+
+        /// <summary>
         /// Represents the version of the parent packet associated with the node instantiation.
         /// </summary>
         private byte _parentPacketVersion;
+
+        /// <summary>
+        /// The packet version negotiated for outgoing packets: the minimum of this node's supported
+        /// version and the parent's version.
+        /// </summary>
+        private byte _negotiatedWriteVersion;
 
 #if NET
         /// <summary>
@@ -169,8 +187,8 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">The factory used to create packets.</param>
         public void Listen(INodePacketFactory factory)
         {
-            ErrorUtilities.VerifyThrow(_status == LinkStatus.Inactive, $"Link not inactive.  Status is {_status}");
-            ErrorUtilities.VerifyThrowArgumentNull(factory, nameof(factory));
+            Assumed.Equal(_status, LinkStatus.Inactive, $"Link not inactive.  Status is {_status}");
+            ArgumentNullException.ThrowIfNull(factory);
             _packetFactory = factory;
 
             InitializeAsyncPacketThread();
@@ -182,7 +200,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="factory">The factory used to create packets.</param>
         public void Connect(INodePacketFactory factory)
         {
-            ErrorUtilities.ThrowInternalError("Connect() not valid on the out of proc endpoint.");
+            InternalError.Throw("Connect() not valid on the out of proc endpoint.");
         }
 
         /// <summary>
@@ -230,10 +248,13 @@ namespace Microsoft.Build.BackEnd
             _packetStream = new MemoryStream();
             _binaryWriter = new BinaryWriter(_packetStream);
             _parentPacketVersion = parentPacketVersion;
+            _negotiatedWriteVersion = parentPacketVersion < NodePacketTypeExtensions.PacketVersion ? parentPacketVersion : NodePacketTypeExtensions.PacketVersion;
 
             pipeName ??= NamedPipeUtil.GetPlatformSpecificPipeName();
 
-#if FEATURE_PIPE_SECURITY && FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
+            CommunicationsUtilities.Trace($"Creating pipe '{pipeName}' with buffer size {PipeBufferSize}.");
+
+#if FEATURE_NAMED_PIPE_SECURITY_CONSTRUCTOR
             SecurityIdentifier identifier = WindowsIdentity.GetCurrent().Owner;
             PipeSecurity security = new PipeSecurity();
 
@@ -289,7 +310,7 @@ namespace Microsoft.Build.BackEnd
         /// <param name="newStatus">The status the node should now be in.</param>
         protected void ChangeLinkStatus(LinkStatus newStatus)
         {
-            ErrorUtilities.VerifyThrow(_status != newStatus, $"Attempting to change status to existing status {_status}.");
+            Assumed.NotEqual(_status, newStatus, $"Attempting to change status to existing status {_status}.");
             CommunicationsUtilities.Trace($"Changing link status from {_status} to {newStatus}");
             _status = newStatus;
             RaiseLinkStatusChanged(_status);
@@ -312,7 +333,7 @@ namespace Microsoft.Build.BackEnd
         /// </summary>
         private void InternalDisconnect()
         {
-            ErrorUtilities.VerifyThrow(_packetPump.ManagedThreadId != Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
+            Assumed.NotEqual(_packetPump.ManagedThreadId, Thread.CurrentThread.ManagedThreadId, "Can't join on the same thread.");
             _terminatePacketPump.Set();
             _packetPump.Join();
             _terminatePacketPump.Dispose();
@@ -329,9 +350,9 @@ namespace Microsoft.Build.BackEnd
         /// <param name="packet">The packet to be transmitted.</param>
         private void EnqueuePacket(INodePacket packet)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(packet, nameof(packet));
-            ErrorUtilities.VerifyThrow(_packetQueue != null, "packetQueue is null");
-            ErrorUtilities.VerifyThrow(_packetAvailable != null, "packetAvailable is null");
+            ArgumentNullException.ThrowIfNull(packet);
+            Assumed.NotNull(_packetQueue, "packetQueue is null");
+            Assumed.NotNull(_packetAvailable, "packetAvailable is null");
             _packetQueue.Enqueue(packet);
             _packetAvailable.Set();
         }
@@ -425,7 +446,7 @@ namespace Microsoft.Build.BackEnd
                                 CommunicationsUtilities.Trace($"Handshake failed with error: {result.ErrorMessage}");
                             }
 
-                            if (!IsHandshakePartValid(component, result.Value, index))
+                            if (!IsHandshakePartValid(component, result.Value, index, handshake))
                             {
                                 CommunicationsUtilities.Trace(
                                     $"Handshake failed. Received {result.Value} from host for {component.Key} but expected {component.Value}. Probably the host is a different MSBuild build.");
@@ -519,7 +540,6 @@ namespace Microsoft.Build.BackEnd
             }
 
             RunReadLoop(
-                new BufferedReadStream(_pipeServer),
                 _pipeServer,
                 localPacketQueue, localPacketAvailable, localTerminatePacketPump);
 
@@ -548,7 +568,7 @@ namespace Microsoft.Build.BackEnd
         /// <summary>
         /// Method to verify that the handshake part received from the host matches the expected values.
         /// </summary>
-        private bool IsHandshakePartValid(KeyValuePair<string, int> component, int handshakePart, int index)
+        private bool IsHandshakePartValid(KeyValuePair<string, int> component, int handshakePart, int index, Handshake handshake)
         {
             if (handshakePart == component.Value)
             {
@@ -561,9 +581,17 @@ namespace Microsoft.Build.BackEnd
 
             if (component.Key == nameof(HandshakeComponents.Options))
             {
-                // NET Task host allows MSBuild.exe to connect to it even if they have bitness mismatch.
-                // 0x00FFFFFF is the handshake version included in component, the rest is the node type.
+                // NET task host tolerates a worker node connecting with an architecture mismatch.
+                // The lower 24 bits carry the HandshakeOptions flags; the upper byte is the handshake version.
                 isAllowedMismatch = IsAllowedBitnessMismatch(component.Value, handshakePart);
+            }
+            else if (component.Key == nameof(HandshakeComponents.Salt))
+            {
+                // The .NET task host parent and child derive the tools-directory portion of the salt
+                // from different sources that, on Windows, can differ only by drive-letter casing
+                // ("D:\..." vs "d:\..."). Both spellings denote the same directory, so accept the
+                // parent's casing rather than failing the handshake with MSB4216.
+                isAllowedMismatch = handshake.IsNetTaskHostSaltMatch(handshakePart);
             }
             else
             {
@@ -584,27 +612,52 @@ namespace Microsoft.Build.BackEnd
 
 #if NET
         /// <summary>
-        /// NET Task host allows MSBuild.exe to connect to it even if they have bitness mismatch.
-        /// 0x00FFFFFF is the handshake version included in component, the rest is the node type.
+        /// The .NET task host (TaskHost node) tolerates a worker node that did not emit an
+        /// architecture bit on the wire (indistinguishable from x86) when the TaskHost node
+        /// itself is x64 or arm64. This is the .NET Framework worker node → .NET SDK TaskHost
+        /// node scenario: the worker node typically cannot describe the TaskHost node's
+        /// architecture, but the launched process is whatever the SDK ships (x64 on
+        /// Windows-x64, arm64 on Windows-arm64).
+        ///
+        /// True cross-arch mismatches (e.g. worker node sent X64 but TaskHost node expects
+        /// Arm64, or vice versa) remain rejected.
+        ///
+        /// The tolerance is scoped to architecture: every non-architecture flag must still
+        /// match. Those flags carry the node's identity, most importantly <see cref="HandshakeOptions.NodeReuse"/>,
+        /// which is what separates a long-lived sidecar TaskHost from a TaskHost that exits
+        /// with the build. Tolerating a difference there would let a process that is not the
+        /// sidecar's owner connect to it, take it over for its own build, and afterwards
+        /// return it to the global reconnectable pool, defeating the sidecar's lifetime
+        /// guarantees.
+        ///
+        /// The lower 24 bits (mask 0x00FFFFFF) carry the HandshakeOptions flags; the upper
+        /// byte carries the handshake version and is ignored here.
         /// </summary>
-        private bool IsAllowedBitnessMismatch(int expectedOptions, int receivedOptions)
+        internal static bool IsAllowedBitnessMismatch(int expectedOptions, int receivedOptions)
         {
             var expectedNodeType = (HandshakeOptions)(expectedOptions & 0x00FFFFFF);
             var receivedNodeType = (HandshakeOptions)(receivedOptions & 0x00FFFFFF);
+            const HandshakeOptions ArchitectureFlags = HandshakeOptions.X64 | HandshakeOptions.Arm64;
 
-            // not X64 or Arm64 means we are running on x86
+            // Only the architecture may differ; everything else identifies the node and must match.
+            if ((expectedNodeType & ~ArchitectureFlags) != (receivedNodeType & ~ArchitectureFlags))
+            {
+                return false;
+            }
+
+            // not X64 or Arm64 means the wire-form architecture is x86 (or no arch bit).
             bool receivedIsX86 = !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.X64) &&
                                  !Handshake.IsHandshakeOptionEnabled(receivedNodeType, HandshakeOptions.Arm64);
 
             bool expectedIsX64 = Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.X64);
+            bool expectedIsArm64 = Handshake.IsHandshakeOptionEnabled(expectedNodeType, HandshakeOptions.Arm64);
 
-            return receivedIsX86 && expectedIsX64;
+            return receivedIsX86 && (expectedIsX64 || expectedIsArm64);
         }
 #endif
 
         private void RunReadLoop(
-            BufferedReadStream localReadPipe,
-            NamedPipeServerStream localWritePipe,
+            NamedPipeServerStream localPipe,
             ConcurrentQueue<INodePacket> localPacketQueue,
             AutoResetEvent localPacketAvailable,
             AutoResetEvent localTerminatePacketPump)
@@ -614,6 +667,15 @@ namespace Microsoft.Build.BackEnd
             // terminate event triggered so that we cannot get into a situation where packets are being
             // spammed to the endpoint and it never gets an opportunity to shutdown.
             CommunicationsUtilities.Trace("Entering read loop.");
+
+            bool preBufferPacketBody = ChangeWaves.AreFeaturesEnabled(ChangeWaves.Wave18_11);
+            MemoryStream readBufferMemoryStream = null;
+
+            // Use 64 KB read-ahead under the change wave; retain the legacy 1 KB size otherwise.
+            BufferedReadStream localReadPipe = preBufferPacketBody
+                ? new BufferedReadStream(localPipe, 64 * 1024)
+                : new BufferedReadStream(localPipe);
+
             byte[] headerByte = new byte[5];
             ITranslator writeTranslator = null;
 #if NET451_OR_GREATER
@@ -637,94 +699,160 @@ namespace Microsoft.Build.BackEnd
                 localTerminatePacketPump,
             };
 
-            bool exitLoop = false;
-            do
+            try
             {
-                int waitId = WaitHandle.WaitAny(handles);
-                switch (waitId)
+                bool exitLoop = false;
+                do
                 {
-                    case 0:
-                        {
-                            int bytesRead = 0;
-                            try
+                    int waitId = WaitHandle.WaitAny(handles);
+                    switch (waitId)
+                    {
+                        case 0:
                             {
+                                int bytesRead = 0;
+                                try
+                                {
 #if NET451_OR_GREATER || NETCOREAPP
-                                bytesRead = readTask.ConfigureAwait(false).GetAwaiter().GetResult();
+                                    bytesRead = readTask.ConfigureAwait(false).GetAwaiter().GetResult();
 #else
                                 bytesRead = localReadPipe.EndRead(result);
 #endif
-                            }
-                            catch (Exception e)
-                            {
-                                // Lost communications.  Abort (but allow node reuse)
-                                CommunicationsUtilities.Trace($"Exception reading from server.  {e}");
-                                DebugUtils.DumpExceptionToFile(e);
-                                ChangeLinkStatus(LinkStatus.Inactive);
-                                exitLoop = true;
-                                break;
-                            }
-
-                            if (bytesRead != headerByte.Length)
-                            {
-                                // Incomplete read.  Abort.
-                                if (bytesRead == 0)
+                                }
+                                catch (Exception e)
                                 {
-                                    if (_isClientDisconnecting)
+                                    // Lost communications.  Abort (but allow node reuse)
+                                    CommunicationsUtilities.Trace($"Exception reading from server.  {e}");
+                                    DebugUtils.DumpExceptionToFile(e);
+                                    ChangeLinkStatus(LinkStatus.Inactive);
+                                    exitLoop = true;
+                                    break;
+                                }
+
+                                if (bytesRead != headerByte.Length)
+                                {
+                                    // Incomplete read.  Abort.
+                                    if (bytesRead == 0)
                                     {
-                                        CommunicationsUtilities.Trace("Parent disconnected gracefully.");
-                                        // Do not change link status to failed as this could make node think connection has failed
-                                        // and recycle node, while this is perfectly expected and handled race condition
-                                        // (both client and node is about to close pipe and client can be faster).
+                                        if (_isClientDisconnecting)
+                                        {
+                                            CommunicationsUtilities.Trace("Parent disconnected gracefully.");
+                                            // Do not change link status to failed as this could make node think connection has failed
+                                            // and recycle node, while this is perfectly expected and handled race condition
+                                            // (both client and node is about to close pipe and client can be faster).
+                                        }
+                                        else
+                                        {
+                                            CommunicationsUtilities.Trace("Parent disconnected abruptly.");
+                                            ChangeLinkStatus(LinkStatus.Failed);
+                                        }
                                     }
                                     else
                                     {
-                                        CommunicationsUtilities.Trace("Parent disconnected abruptly.");
+                                        CommunicationsUtilities.Trace($"Incomplete header read from server.  {bytesRead} of {headerByte.Length} bytes read");
                                         ChangeLinkStatus(LinkStatus.Failed);
                                     }
+
+                                    exitLoop = true;
+                                    break;
                                 }
-                                else
+
+                                byte rawType = headerByte[0];
+                                bool hasExtendedHeader = NodePacketTypeExtensions.HasExtendedHeader(rawType);
+                                NodePacketType packetType = hasExtendedHeader ? NodePacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
+
+                                // The stream the translator deserializes from. With the pre-buffer change wave enabled this
+                                // is the in-memory packet body; otherwise packets are deserialized from the BufferedReadStream.
+                                Stream deserializationStream = localReadPipe;
+
+                                if (preBufferPacketBody)
                                 {
-                                    CommunicationsUtilities.Trace($"Incomplete header read from server.  {bytesRead} of {headerByte.Length} bytes read");
-                                    ChangeLinkStatus(LinkStatus.Failed);
+                                    // Bytes 1..4 are the little-endian int32 body length (bytes after the header).
+                                    int packetLength = BinaryPrimitives.ReadInt32LittleEndian(new Span<byte>(headerByte, 1, 4));
+                                    if (packetLength < 0)
+                                    {
+                                        CommunicationsUtilities.Trace($"Invalid packet length {packetLength} received from server. Aborting.");
+                                        ChangeLinkStatus(LinkStatus.Failed);
+                                        exitLoop = true;
+                                        break;
+                                    }
+
+                                    bool bodyReadFailed = false;
+                                    try
+                                    {
+                                        // Buffer the whole body before deserializing so InterningBinaryReader takes its
+                                        // MemoryStream fast-path and we don't issue a pipe read per primitive.
+                                        readBufferMemoryStream ??= new MemoryStream(InitialReadBufferSize);
+                                        readBufferMemoryStream.SetLength(packetLength);
+                                        readBufferMemoryStream.Position = 0;
+                                        byte[] packetData = readBufferMemoryStream.GetBuffer();
+
+                                        int totalBytesRead = 0;
+                                        while (totalBytesRead < packetLength)
+                                        {
+                                            // Request the remaining body; Read may complete partially.
+                                            int bytesReadThisCall = localReadPipe.Read(packetData, totalBytesRead, packetLength - totalBytesRead);
+                                            if (bytesReadThisCall == 0)
+                                            {
+                                                CommunicationsUtilities.Trace($"Parent disconnected while reading packet body ({totalBytesRead} of {packetLength} bytes read).");
+                                                ChangeLinkStatus(LinkStatus.Failed);
+                                                bodyReadFailed = true;
+                                                break;
+                                            }
+
+                                            totalBytesRead += bytesReadThisCall;
+                                        }
+                                    }
+                                    catch (Exception e)
+                                    {
+                                        CommunicationsUtilities.Trace($"Exception reading packet body from server.  {e}");
+                                        DebugUtils.DumpExceptionToFile(e);
+                                        ChangeLinkStatus(LinkStatus.Failed);
+                                        bodyReadFailed = true;
+                                    }
+
+                                    if (bodyReadFailed)
+                                    {
+                                        exitLoop = true;
+                                        break;
+                                    }
+
+                                    deserializationStream = readBufferMemoryStream;
                                 }
 
-                                exitLoop = true;
-                                break;
-                            }
+                                byte parentVersion = 0;
+                                try
+                                {
+                                    if (hasExtendedHeader)
+                                    {
+                                        parentVersion = NodePacketTypeExtensions.ReadVersion(deserializationStream);
+                                    }
 
-                            // Check if this packet has an extended header that includes a version part.
-                            byte rawType = headerByte[0];
-                            bool hasExtendedHeader = NodePacketTypeExtensions.HasExtendedHeader(rawType);
-                            NodePacketType packetType = hasExtendedHeader ? NodePacketTypeExtensions.GetNodePacketType(rawType) : (NodePacketType)rawType;
+                                    ITranslator readTranslator = BinaryTranslator.GetReadTranslator(deserializationStream, _sharedReadBuffer);
 
-                            byte parentVersion = 0;
-                            if (hasExtendedHeader)
-                            {
-                                parentVersion = NodePacketTypeExtensions.ReadVersion(localReadPipe);
-                            }
+                                    // parent sends a packet version that is already negotiated during handshake.
+                                    // For Framework task hosts (CLR2/CLR4) without extended headers, defaults to 0.
+                                    // For .NET task hosts, read from extended header (>= 1).
+                                    readTranslator.NegotiatedPacketVersion = parentVersion;
+                                    _packetFactory.DeserializeAndRoutePacket(0, packetType, readTranslator);
+                                }
+                                catch (Exception e)
+                                {
+                                    // Error while deserializing or handling packet.  Abort.
+                                    CommunicationsUtilities.Trace($"Exception while deserializing packet {packetType}: {e}");
+                                    DebugUtils.DumpExceptionToFile(e);
+                                    ChangeLinkStatus(LinkStatus.Failed);
+                                    exitLoop = true;
+                                    break;
+                                }
 
-                            try
-                            {
-                                ITranslator readTranslator = BinaryTranslator.GetReadTranslator(localReadPipe, _sharedReadBuffer);
-
-                                // parent sends a packet version that is already negotiated during handshake.
-                                // For Framework task hosts (CLR2/CLR4) without extended headers, defaults to 0.
-                                // For .NET task hosts, read from extended header (>= 1).
-                                readTranslator.NegotiatedPacketVersion = parentVersion;
-                                _packetFactory.DeserializeAndRoutePacket(0, packetType, readTranslator);
-                            }
-                            catch (Exception e)
-                            {
-                                // Error while deserializing or handling packet.  Abort.
-                                CommunicationsUtilities.Trace($"Exception while deserializing packet {packetType}: {e}");
-                                DebugUtils.DumpExceptionToFile(e);
-                                ChangeLinkStatus(LinkStatus.Failed);
-                                exitLoop = true;
-                                break;
-                            }
+                                if (preBufferPacketBody && readBufferMemoryStream.Capacity > MaxRetainedReadBufferSize)
+                                {
+                                    readBufferMemoryStream.Dispose();
+                                    readBufferMemoryStream = new MemoryStream(InitialReadBufferSize);
+                                }
 
 #if NET451_OR_GREATER
-                            readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
+                                readTask = localReadPipe.ReadAsync(headerByte, 0, headerByte.Length, CancellationToken.None);
 #elif NETCOREAPP
                             readTask = localReadPipe.ReadAsync(headerByte.AsMemory(), CancellationToken.None).AsTask();
 #else
@@ -732,71 +860,78 @@ namespace Microsoft.Build.BackEnd
 #endif
 
 #if NET451_OR_GREATER || NETCOREAPP
-                            handles[0] = ((IAsyncResult)readTask).AsyncWaitHandle;
+                                handles[0] = ((IAsyncResult)readTask).AsyncWaitHandle;
 #else
                             handles[0] = result.AsyncWaitHandle;
 #endif
-                        }
-
-                        break;
-
-                    case 1:
-                    case 2:
-                        try
-                        {
-                            // Write out all the queued packets.
-                            INodePacket packet;
-                            while (localPacketQueue.TryDequeue(out packet))
-                            {
-                                var packetStream = _packetStream;
-                                packetStream.SetLength(0);
-
-                                // Re-use writeTranslator; we clear _packetStream but never replace it.
-                                // If _packetStream is ever reassigned, set writeTranslator = null first.
-                                writeTranslator ??= BinaryTranslator.GetWriteTranslator(packetStream);
-
-                                packetStream.WriteByte((byte)packet.Type);
-
-                                // Pad for packet length
-                                _binaryWriter.Write(0);
-
-                                // Reset the position in the write buffer.
-                                packet.Translate(writeTranslator);
-
-                                int packetStreamLength = (int)packetStream.Position;
-
-                                // Now write in the actual packet length
-                                packetStream.Position = 1;
-                                _binaryWriter.Write(packetStreamLength - 5);
-
-                                localWritePipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
                             }
-                        }
-                        catch (Exception e)
-                        {
-                            // Error while deserializing or handling packet.  Abort.
-                            CommunicationsUtilities.Trace($"Exception while serializing packets: {e}");
-                            DebugUtils.DumpExceptionToFile(e);
-                            ChangeLinkStatus(LinkStatus.Failed);
-                            exitLoop = true;
+
                             break;
-                        }
 
-                        if (waitId == 2)
-                        {
-                            CommunicationsUtilities.Trace("Disconnecting voluntarily");
-                            ChangeLinkStatus(LinkStatus.Failed);
-                            exitLoop = true;
-                        }
+                        case 1:
+                        case 2:
+                            try
+                            {
+                                // Write out all the queued packets.
+                                INodePacket packet;
+                                while (localPacketQueue.TryDequeue(out packet))
+                                {
+                                    var packetStream = _packetStream;
+                                    packetStream.SetLength(0);
 
-                        break;
+                                    // Re-use writeTranslator; we clear _packetStream but never replace it.
+                                    // If _packetStream is ever reassigned, set writeTranslator = null first.
+                                    writeTranslator ??= BinaryTranslator.GetWriteTranslator(packetStream);
 
-                    default:
-                        ErrorUtilities.ThrowInternalError($"waitId {waitId} out of range.");
-                        break;
+                                    writeTranslator.NegotiatedPacketVersion = _negotiatedWriteVersion;
+
+                                    packetStream.WriteByte((byte)packet.Type);
+
+                                    // Pad for packet length
+                                    _binaryWriter.Write(0);
+
+                                    // Reset the position in the write buffer.
+                                    packet.Translate(writeTranslator);
+
+                                    int packetStreamLength = (int)packetStream.Position;
+
+                                    // Now write in the actual packet length
+                                    packetStream.Position = 1;
+                                    _binaryWriter.Write(packetStreamLength - 5);
+
+                                    localPipe.Write(packetStream.GetBuffer(), 0, packetStreamLength);
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                // Error while deserializing or handling packet.  Abort.
+                                CommunicationsUtilities.Trace($"Exception while serializing packets: {e}");
+                                DebugUtils.DumpExceptionToFile(e);
+                                ChangeLinkStatus(LinkStatus.Failed);
+                                exitLoop = true;
+                                break;
+                            }
+
+                            if (waitId == 2)
+                            {
+                                CommunicationsUtilities.Trace("Disconnecting voluntarily");
+                                ChangeLinkStatus(LinkStatus.Failed);
+                                exitLoop = true;
+                            }
+
+                            break;
+
+                        default:
+                            InternalError.Throw($"waitId {waitId} out of range.");
+                            break;
+                    }
                 }
+                while (!exitLoop);
             }
-            while (!exitLoop);
+            finally
+            {
+                readBufferMemoryStream?.Dispose();
+            }
         }
 
         #endregion

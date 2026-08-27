@@ -1,9 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Build.Shared;
 
 namespace Microsoft.Build.Globbing
 {
@@ -39,8 +39,8 @@ namespace Microsoft.Build.Globbing
         /// <param name="gaps">The gap glob</param>
         internal MSBuildGlobWithGaps(IMSBuildGlob mainGlob, IMSBuildGlob gaps)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(mainGlob);
-            ErrorUtilities.VerifyThrowArgumentNull(gaps);
+            ArgumentNullException.ThrowIfNull(mainGlob);
+            ArgumentNullException.ThrowIfNull(gaps);
 
             MainGlob = mainGlob;
             Gaps = gaps;
@@ -53,8 +53,8 @@ namespace Microsoft.Build.Globbing
         /// <param name="gaps">The gap glob</param>
         public MSBuildGlobWithGaps(IMSBuildGlob mainGlob, IEnumerable<IMSBuildGlob> gaps)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(mainGlob);
-            ErrorUtilities.VerifyThrowArgumentNull(gaps);
+            ArgumentNullException.ThrowIfNull(mainGlob);
+            ArgumentNullException.ThrowIfNull(gaps);
 
             MainGlob = mainGlob;
             Gaps = CompositeGlob.Create(gaps);

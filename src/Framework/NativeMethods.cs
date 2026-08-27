@@ -3,16 +3,19 @@
 
 using System;
 using System.IO;
+#if NET
+using System.Runtime.CompilerServices;
+#endif
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using Microsoft.Build.Framework.Logging;
-using Microsoft.Build.Shared;
 using Microsoft.Win32;
 #if FEATURE_WINDOWSINTEROP
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using Microsoft.Build.Utilities;
+using Microsoft.Build.Shared;
 using Microsoft.Win32.SafeHandles;
 using FILETIME = System.Runtime.InteropServices.ComTypes.FILETIME;
 using Windows.Win32;
@@ -600,11 +603,25 @@ internal static class NativeMethods
         {
             if (s_frameworkCurrentPath == null)
             {
-                var baseTypeLocation = AssemblyUtilities.GetAssemblyLocation(typeof(string).Assembly);
+#if NET
+                // Under Native AOT there is no core library on disk (typeof(string).Assembly.Location is
+                // empty), so the running runtime's directory is unknown. Every consumer of this value is
+                // locating an installed .NET Framework (or Mono) - which a Native AOT process never has -
+                // and already treats an empty path as "not found", so report empty here instead of reading
+                // the (empty) assembly location.
+                if (!RuntimeFeature.IsDynamicCodeSupported)
+                {
+                    s_frameworkCurrentPath = string.Empty;
+                }
+                else
+#endif
+                {
+                    var baseTypeLocation = typeof(string).Assembly.Location;
 
-                s_frameworkCurrentPath =
-                    Path.GetDirectoryName(baseTypeLocation)
-                    ?? string.Empty;
+                    s_frameworkCurrentPath =
+                        Path.GetDirectoryName(baseTypeLocation)
+                        ?? string.Empty;
+                }
             }
 
             return s_frameworkCurrentPath;
@@ -1168,34 +1185,6 @@ internal static class NativeMethods
     }
 #endif
 
-    /// <summary>
-    /// Internal, optimized GetCurrentDirectory implementation that simply delegates to the native method
-    /// </summary>
-    internal static string GetCurrentDirectory()
-    {
-#if FEATURE_LEGACY_GETCURRENTDIRECTORY
-        if (IsWindows)
-        {
-            using BufferScope<char> buffer = new(stackalloc char[(int)PInvoke.MAX_PATH]);
-            int pathLength = (int)PInvoke.GetCurrentDirectory(buffer);
-
-            if (pathLength > buffer.Length)
-            {
-                buffer.EnsureCapacity(pathLength);
-                pathLength = (int)PInvoke.GetCurrentDirectory(buffer);
-            }
-
-            if (pathLength != 0)
-            {
-                return buffer.Slice(0, pathLength).ToString();
-            }
-
-            HRESULT.FromLastError().ThrowOnFailure();
-        }
-#endif
-        return Directory.GetCurrentDirectory();
-    }
-
     internal static bool SetCurrentDirectory(string path)
     {
 #if FEATURE_WINDOWSINTEROP
@@ -1217,34 +1206,24 @@ internal static class NativeMethods
         return true;
     }
 
-#if FEATURE_WINDOWSINTEROP
-    [SupportedOSPlatform("windows6.1")]
-    internal static unsafe string GetFullPath(string path)
-    {
-        using BufferScope<char> buffer = new(stackalloc char[(int)PInvoke.MAX_PATH]);
-        int fullPathLength = (int)PInvoke.GetFullPathName(path, buffer, out _);
-
-        // If user is using long paths we could need to allocate a larger buffer
-        if (fullPathLength > buffer.Length)
-        {
-            buffer.EnsureCapacity(fullPathLength);
-            fullPathLength = (int)PInvoke.GetFullPathName(path, buffer, out _);
-        }
-
-        if (fullPathLength == 0)
-        {
-            HRESULT.FromLastError().ThrowOnFailure();
-        }
-
-        // Avoid creating new strings unnecessarily
-        ReadOnlySpan<char> result = buffer.AsSpan().Slice(0, fullPathLength);
-        return result.SequenceEqual(path.AsSpan()) ? path : result.ToString();
-    }
-
-#endif
+    /// <summary>
+    /// Overrides the console capabilities reported by <see cref="QueryIsScreenAndTryEnableAnsiColorCodes"/>.
+    /// Set by a node (e.g. the MSBuild Server node) to the capabilities transmitted from the client process,
+    /// so that auto-detection reflects the client's real terminal rather than the node's own redirected stdout.
+    /// Null when no override is active - i.e. during in-proc builds, or when a server node is idle between
+    /// out-of-proc builds - in which case the local <see cref="Console"/> is queried as usual.
+    /// </summary>
+    internal static (bool acceptAnsiColorCodes, bool outputIsScreen)? ConsoleConfigurationOverride { get; set; }
 
     internal static (bool acceptAnsiColorCodes, bool outputIsScreen, uint? originalConsoleMode) QueryIsScreenAndTryEnableAnsiColorCodes(bool useStandardError = false)
     {
+        if (ConsoleConfigurationOverride is (bool overrideAcceptAnsiColorCodes, bool overrideOutputIsScreen))
+        {
+            // The real terminal lives in a separate client process; use the capabilities it transmitted.
+            // We must not change this node's console mode, so there is no original mode to restore.
+            return (acceptAnsiColorCodes: overrideAcceptAnsiColorCodes, outputIsScreen: overrideOutputIsScreen, originalConsoleMode: null);
+        }
+
         if (Console.IsOutputRedirected)
         {
             // There's no ANSI terminal support if console output is redirected.
@@ -1324,6 +1303,56 @@ internal static class NativeMethods
 
     [DllImport("libc", SetLastError = true)]
     internal static extern int symlink(string oldpath, string newpath);
+
+#if NET
+    [DllImport("libc", EntryPoint = "realpath", SetLastError = true)]
+    private static extern IntPtr realpath_native(string path, IntPtr resolved);
+
+    [DllImport("libc", EntryPoint = "free")]
+    private static extern void free_native(IntPtr ptr);
+
+    /// <summary>
+    /// Resolves <paramref name="path"/> to its canonical form via POSIX <c>realpath(3)</c>, following
+    /// symlinks. Returns <c>null</c> on Windows, on null/empty input, or when the call fails.
+    /// Unlike <see cref="System.IO.Path.GetFullPath(string)"/>, this resolves symlinks against the real
+    /// filesystem without mutating process-global state, so it is safe to call from any thread.
+    /// </summary>
+    internal static string RealPath(string path)
+    {
+        if (IsWindows || string.IsNullOrEmpty(path))
+        {
+            return null;
+        }
+
+        IntPtr ptr = IntPtr.Zero;
+        try
+        {
+            ptr = realpath_native(path, IntPtr.Zero);
+            if (ptr == IntPtr.Zero)
+            {
+                return null;
+            }
+
+            return Marshal.PtrToStringUTF8(ptr);
+        }
+        finally
+        {
+            if (ptr != IntPtr.Zero)
+            {
+                // realpath() with NULL second arg returns a malloc()'d buffer; caller must free().
+                // Free it through libc's free() - the same library realpath() allocated it from -
+                // rather than relying on the managed runtime's allocator matching that libc.
+                free_native(ptr);
+            }
+        }
+    }
+#else
+    /// <summary>
+    /// .NET Framework builds of MSBuild only ship for Windows, where POSIX <c>realpath(3)</c> does not
+    /// exist, so this is always a no-op returning <c>null</c>.
+    /// </summary>
+    internal static string RealPath(string path) => null;
+#endif
 
 #if FEATURE_WINDOWSINTEROP
     [SupportedOSPlatform("windows6.1")]

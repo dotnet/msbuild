@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -15,19 +16,40 @@ using Microsoft.Build.Framework.Telemetry;
 using Microsoft.Build.Internal;
 using Microsoft.Build.Shared;
 
-namespace Microsoft.Build.Experimental
+namespace Microsoft.Build.Server
 {
     /// <summary>
     /// This class represents an implementation of INode for out-of-proc server nodes aka MSBuild server
     /// </summary>
+    /// <remarks>
+    /// This type is public only so that the MSBuild command-line application can host the MSBuild server;
+    /// third-party use is not expected or supported. It exists to wrap the MSBuild CLI and offers nothing
+    /// beyond it, so invoke the CLI instead.
+    /// </remarks>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public sealed class OutOfProcServerNode : INode, INodePacketFactory, INodePacketHandler
     {
         /// <summary>
         /// A callback used to execute command line build.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public delegate (int exitCode, string exitType) BuildCallback(string[] commandLine);
 
         private readonly BuildCallback _buildFunction;
+
+        /// <summary>
+        /// Backing field for <see cref="CurrentBuildShutsDownServerNode"/>.
+        /// </summary>
+        private static bool s_currentBuildShutsDownServerNode;
+
+        /// <summary>
+        /// Whether the build currently being served by this server node will tear the node down afterward
+        /// instead of leaving it resident for reuse (a "short-lived" server — a <c>/mt</c> build with node reuse
+        /// off). Only meaningful from within a server build callback; written and read on the same build thread,
+        /// so no synchronization is needed. Public because MSBuild.exe reads it and Microsoft.Build exposes no
+        /// InternalsVisibleTo to it.
+        /// </summary>
+        public static bool CurrentBuildShutsDownServerNode => s_currentBuildShutsDownServerNode;
 
         /// <summary>
         /// The endpoint used to talk to the host.
@@ -70,9 +92,17 @@ namespace Microsoft.Build.Experimental
         private bool _cancelRequested = false;
         private string _serverBusyMutexName = default!;
 
-        public OutOfProcServerNode(BuildCallback buildFunction)
+        /// <summary>
+        /// Identifies this transient server, or <see langword="null"/> when this is the resident
+        /// server. Supplied by the client that launched this process, which derives the same pipe and
+        /// mutex names from it.
+        /// </summary>
+        private readonly string? _instanceId;
+
+        public OutOfProcServerNode(BuildCallback buildFunction, string? instanceId = null)
         {
             _buildFunction = buildFunction;
+            _instanceId = instanceId;
 
             _receivedPackets = new ConcurrentQueue<INodePacket>();
             _packetReceivedEvent = new AutoResetEvent(false);
@@ -94,7 +124,8 @@ namespace Microsoft.Build.Experimental
         public NodeEngineShutdownReason Run(out Exception? shutdownException)
         {
             ServerNodeHandshake handshake = new(
-                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()));
+                CommunicationsUtilities.GetHandshakeOptions(taskHost: false, taskHostParameters: TaskHostParameters.Empty, architectureFlagToSet: XMakeAttributes.GetCurrentMSBuildArchitecture()),
+                _instanceId);
 
             _serverBusyMutexName = GetBusyServerMutexName(handshake);
 
@@ -107,13 +138,6 @@ namespace Microsoft.Build.Experimental
                 shutdownException = new InvalidOperationException("MSBuild server is already running!");
                 return NodeEngineShutdownReason.Error;
             }
-
-            // Mark the process as a long-lived host so per-build BuildParameters instances
-            // inherit IsLongLivedHost = true. This drives the workaround that routes tasks
-            // whose static state would leak across invocations (e.g., NuGet RestoreTask) to
-            // a transient TaskHost instead of a reusable sidecar.
-            // See https://github.com/dotnet/msbuild/issues/13315.
-            BuildParameters.MarkProcessAsLongLivedHost();
 
             while (true)
             {
@@ -169,6 +193,13 @@ namespace Microsoft.Build.Experimental
         }
 
         #endregion
+
+        /// <summary>
+        /// The command line switch a client uses to tell the transient server it launches which
+        /// instance it is. Both sides fold the value into <see cref="ServerNodeHandshake.ComputeHash"/>,
+        /// so a transient server is addressable only by that client.
+        /// </summary>
+        internal const string ServerInstanceIdCommandLineSwitch = "/serverinstanceid:";
 
         internal static string GetPipeName(ServerNodeHandshake handshake)
             => NamedPipeUtil.GetPlatformSpecificPipeName($"MSBuildServer-{handshake.ComputeHash()}");
@@ -326,7 +357,8 @@ namespace Microsoft.Build.Experimental
         /// <param name="buildComplete"></param>
         private void HandleServerShutdownCommand(NodeBuildComplete buildComplete)
         {
-            bool shouldReuse = buildComplete.PrepareForReuse;
+            // A transient server is private to one build and must never enter the resident reuse loop.
+            bool shouldReuse = buildComplete.PrepareForReuse && _instanceId is null;
 
             if (shouldReuse)
             {
@@ -388,7 +420,6 @@ namespace Microsoft.Build.Experimental
             Directory.SetCurrentDirectory(command.StartupDirectory);
 
             CommunicationsUtilities.SetEnvironment(command.BuildProcessEnvironment);
-
             Traits.UpdateFromEnvironment();
 
             Thread.CurrentThread.CurrentCulture = command.Culture;
@@ -401,50 +432,70 @@ namespace Microsoft.Build.Experimental
             // Configure console configuration so Loggers can change their behavior based on Target (client) Console properties.
             ConsoleConfiguration.Provider = command.ConsoleConfiguration;
 
-            // Initiate build telemetry
-            if (command.PartialBuildTelemetry != null)
-            {
-                BuildTelemetry buildTelemetry = KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry();
+            // TerminalLogger/ANSI auto-detection runs in this node, but the real terminal belongs to the client.
+            // Override the local console query with the capabilities the client transmitted so that e.g. '-tl:auto'
+            // reflects the client's terminal instead of this node's redirected stdout.
+            NativeMethodsShared.ConsoleConfigurationOverride =
+                (command.ConsoleConfiguration.AcceptAnsiColorCodes, command.ConsoleConfiguration.OutputIsScreen);
+            CommunicationsUtilities.Trace($"ConsoleConfigurationOverride: acceptAnsi={command.ConsoleConfiguration.AcceptAnsiColorCodes}, outputIsScreen={command.ConsoleConfiguration.OutputIsScreen}");
 
-                buildTelemetry.StartAt = command.PartialBuildTelemetry.StartedAt;
-                buildTelemetry.InitialMSBuildServerState = command.PartialBuildTelemetry.InitialServerState;
-                buildTelemetry.ServerFallbackReason = command.PartialBuildTelemetry.ServerFallbackReason;
-            }
-
-            // Also try our best to increase chance custom Loggers which use Console static members will work as expected.
-            try
-            {
-                if (NativeMethodsShared.IsWindows && command.ConsoleConfiguration.BufferWidth > 0)
-                {
-                    Console.BufferWidth = command.ConsoleConfiguration.BufferWidth;
-                }
-
-                if ((int)command.ConsoleConfiguration.BackgroundColor != -1)
-                {
-                    Console.BackgroundColor = command.ConsoleConfiguration.BackgroundColor;
-                }
-            }
-            catch (Exception)
-            {
-                // Ignore exception, it is best effort only
-            }
-
-            // Configure console output redirection
             var oldOut = Console.Out;
             var oldErr = Console.Error;
             (int exitCode, string exitType) buildResult;
 
-            // Dispose must be called before the server sends ServerNodeBuildResult packet
-            using (RedirectConsoleWriter outWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
-            using (RedirectConsoleWriter errWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
+            // Everything below is wrapped so that on any failure path the original Console writers are
+            // restored and the override is cleared - important for a long-lived, reusable server node.
+            try
             {
-                Console.SetOut(outWriter);
-                Console.SetError(errWriter);
+                // Initiate build telemetry
+                if (command.PartialBuildTelemetry != null)
+                {
+                    BuildTelemetry buildTelemetry = KnownTelemetry.PartialBuildTelemetry ??= new BuildTelemetry();
 
-                buildResult = _buildFunction(command.CommandLine);
+                    buildTelemetry.StartAt = command.PartialBuildTelemetry.StartedAt;
+                    buildTelemetry.InitialMSBuildServerState = command.PartialBuildTelemetry.InitialServerState;
+                    buildTelemetry.ServerFallbackReason = command.PartialBuildTelemetry.ServerFallbackReason;
+                    buildTelemetry.ServerEnableReason = command.PartialBuildTelemetry.ServerEnableReason;
+                }
 
+                // Also try our best to increase chance custom Loggers which use Console static members will work as expected.
+                try
+                {
+                    if (NativeMethodsShared.IsWindows && command.ConsoleConfiguration.BufferWidth > 0)
+                    {
+                        Console.BufferWidth = command.ConsoleConfiguration.BufferWidth;
+                    }
+
+                    if ((int)command.ConsoleConfiguration.BackgroundColor != -1)
+                    {
+                        Console.BackgroundColor = command.ConsoleConfiguration.BackgroundColor;
+                    }
+                }
+                catch (Exception)
+                {
+                    // Ignore exception, it is best effort only
+                }
+
+                // Dispose must be called before the server sends ServerNodeBuildResult packet
+                using (RedirectConsoleWriter outWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Standard))))
+                using (RedirectConsoleWriter errWriter = new(text => SendPacket(new ServerNodeConsoleWrite(text, ConsoleOutput.Error))))
+                {
+                    Console.SetOut(outWriter);
+                    Console.SetError(errWriter);
+
+                    // Publish whether this build's server is short-lived so the build callback can report it.
+                    s_currentBuildShutsDownServerNode = command.ShutdownAfterBuild;
+
+                    buildResult = _buildFunction(command.CommandLine);
+                }
+            }
+            finally
+            {
+                // Restore the original Console writers and clear the override on all paths so a reusable
+                // server node never observes stale state (or disposed writers) between builds.
                 Console.SetOut(oldOut);
                 Console.SetError(oldErr);
+                NativeMethodsShared.ConsoleConfigurationOverride = null;
             }
 
             // On Windows, a process holds a handle to the current directory,
@@ -455,8 +506,8 @@ namespace Microsoft.Build.Experimental
             var response = new ServerNodeBuildResult(buildResult.exitCode, buildResult.exitType);
             SendPacket(response);
 
-            // Shutdown server if cancel was requested. This is consistent with nodes behavior.
-            _shutdownReason = _cancelRequested ? NodeEngineShutdownReason.BuildComplete : NodeEngineShutdownReason.BuildCompleteReuse;
+            // Shutdown server after this build if a cancel was requested, or if the client asked for no reuse. This is consistent with nodes behavior.
+            _shutdownReason = (_cancelRequested || command.ShutdownAfterBuild) ? NodeEngineShutdownReason.BuildComplete : NodeEngineShutdownReason.BuildCompleteReuse;
             _shutdownEvent.Set();
         }
 

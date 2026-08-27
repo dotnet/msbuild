@@ -53,7 +53,7 @@ namespace Microsoft.Build.Instance
         public void CopyTo(string[] array, int arrayIndex)
         {
             var items = EnsureListInitialized();
-            ErrorUtilities.VerifyCollectionCopyToArguments(array, nameof(array), arrayIndex, nameof(arrayIndex), items.Count);
+            ErrorUtilities.VerifyCollectionCopyToArguments(array, arrayIndex, items.Count);
 
             items.CopyTo(array, arrayIndex);
         }

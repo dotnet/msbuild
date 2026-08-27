@@ -130,6 +130,8 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
         /// </summary>
         /// <param name="settings">The properties used to build this bootstrapper.</param>
         /// <returns>The results of the bootstrapper generation</returns>
+        [UnconditionalSuppressMessage("AotAnalysis", "IL3050:RequiresDynamicCode",
+            Justification = "Building a bootstrapper transforms its configuration with XslCompiledTransform, which generates IL at runtime; the GenerateBootstrapper task is inherently incompatible with Native AOT.")]
         public BuildResults Build(BuildSettings settings)
         {
             _results = new BuildResults();
@@ -1749,6 +1751,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             return null;
         }
 
+        [RequiresDynamicCode("Transforms bootstrapper resource configuration with XslCompiledTransform, which generates IL at runtime and is not supported with Native AOT.")]
         private bool BuildResources(BuildSettings settings, ResourceUpdater resourceUpdater)
         {
             if (_cultures.Count == 0)
@@ -1948,6 +1951,7 @@ namespace Microsoft.Build.Tasks.Deployment.Bootstrapper
             node.Attributes.Append(attrib);
         }
 
+        [RequiresDynamicCode("XslCompiledTransform generates IL at runtime, which is not supported with Native AOT.")]
         [SuppressMessage("Microsoft.Security.Xml", "CA3073: ReviewTrustedXsltUse.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
         [SuppressMessage("Microsoft.Security.Xml", "CA3059: UseXmlReaderForXPathDocument.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]
         [SuppressMessage("Microsoft.Security.Xml", "CA3052: UseXmlResolver.", Justification = "Input style sheet comes from our own assemblies. Hence it is a trusted source.")]

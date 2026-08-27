@@ -16,6 +16,8 @@ using Microsoft.Build.Shared;
 using Microsoft.Win32.SafeHandles;
 using Xunit;
 #if FEATURE_WINDOWSINTEROP
+using Windows.Win32;
+using Windows.Win32.Foundation;
 using Windows.Win32.Storage.FileSystem;
 #endif
 
@@ -1005,26 +1007,36 @@ namespace Microsoft.Build.UnitTests.BackEnd
                 expectedOutOfDate: true);
         }
 
-        [DllImport("kernel32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
         [SupportedOSPlatform("windows6.1")]
-        private static extern bool CreateSymbolicLink(string lpSymlinkFileName, string lpTargetFileName, UInt32 dwFlags);
+        private static unsafe bool CreateSymbolicLink(string lpSymlinkFileName, string lpTargetFileName, uint dwFlags)
+        {
+            fixed (char* pSym = lpSymlinkFileName)
+            {
+                fixed (char* pTarget = lpTargetFileName)
+                {
+                    return PInvoke.CreateSymbolicLink(new PCWSTR(pSym), new PCWSTR(pTarget), (SYMBOLIC_LINK_FLAGS)dwFlags) != 0;
+                }
+            }
+        }
 
-        [DllImport("kernel32.dll", SetLastError = true)]
         [SupportedOSPlatform("windows6.1")]
-        private static extern bool SetFileTime(SafeFileHandle hFile, ref long creationTime,
-            ref long lastAccessTime, ref long lastWriteTime);
+        private static unsafe SafeFileHandle CreateFileForSymlink(string path)
+        {
+            HANDLE h;
+            fixed (char* pPath = path)
+            {
+                h = PInvoke.CreateFile(
+                    new PCWSTR(pPath),
+                    (uint)FILE_ACCESS_RIGHTS.FILE_GENERIC_READ | 0x100 /* FILE_WRITE_ATTRIBUTES */,
+                    FILE_SHARE_MODE.FILE_SHARE_READ,
+                    lpSecurityAttributes: null,
+                    FILE_CREATION_DISPOSITION.OPEN_EXISTING,
+                    FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_NORMAL | FILE_FLAGS_AND_ATTRIBUTES.FILE_FLAG_OPEN_REPARSE_POINT,
+                    hTemplateFile: default);
+            }
 
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true, EntryPoint = "CreateFileW")]
-        [SupportedOSPlatform("windows6.1")]
-        private static extern SafeFileHandle CreateFileForSymlink(
-            string lpFileName,
-            uint dwDesiredAccess,
-            uint dwShareMode,
-            IntPtr lpSecurityAttributes,
-            uint dwCreationDisposition,
-            uint dwFlagsAndAttributes,
-            IntPtr hTemplateFile);
+            return new SafeFileHandle((IntPtr)h.Value, ownsHandle: true);
+        }
 
         [SupportedOSPlatform("windows6.1")]
         private void SimpleSymlinkInputCheck(DateTime symlinkWriteTime, DateTime targetWriteTime,
@@ -1052,14 +1064,7 @@ namespace Microsoft.Build.UnitTests.BackEnd
 
                 // File.SetLastWriteTime on the symlink sets the target write time,
                 // so set the symlink's write time the hard way
-                using (SafeFileHandle handle = CreateFileForSymlink(
-                        inputSymlink,
-                        (uint)FILE_ACCESS_RIGHTS.FILE_GENERIC_READ | 0x100 /* FILE_WRITE_ATTRIBUTES */,
-                        (uint)FILE_SHARE_MODE.FILE_SHARE_READ,
-                        IntPtr.Zero,
-                        (uint)FILE_CREATION_DISPOSITION.OPEN_EXISTING,
-                        (uint)(FILE_FLAGS_AND_ATTRIBUTES.FILE_ATTRIBUTE_NORMAL | FILE_FLAGS_AND_ATTRIBUTES.FILE_FLAG_OPEN_REPARSE_POINT),
-                        IntPtr.Zero))
+                using (SafeFileHandle handle = CreateFileForSymlink(inputSymlink))
                 {
                     if (handle.IsInvalid)
                     {
@@ -1067,9 +1072,13 @@ namespace Microsoft.Build.UnitTests.BackEnd
                     }
 
                     long symlinkWriteTimeTicks = symlinkWriteTime.ToFileTimeUtc();
+                    System.Runtime.InteropServices.ComTypes.FILETIME ft = new()
+                    {
+                        dwLowDateTime = (int)(symlinkWriteTimeTicks & 0xFFFFFFFF),
+                        dwHighDateTime = (int)(symlinkWriteTimeTicks >> 32),
+                    };
 
-                    if (!SetFileTime(handle, ref symlinkWriteTimeTicks, ref symlinkWriteTimeTicks,
-                            ref symlinkWriteTimeTicks))
+                    if (!PInvoke.SetFileTime((HANDLE)handle.DangerousGetHandle(), ft, ft, ft))
                     {
                         Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
                     }

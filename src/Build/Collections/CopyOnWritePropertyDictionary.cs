@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics;
 
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -103,8 +102,8 @@ namespace Microsoft.Build.Collections
 
             set
             {
-                ErrorUtilities.VerifyThrowInternalNull(value, "Properties can't have null value");
-                ErrorUtilities.VerifyThrow(String.Equals(name, value.Key, StringComparison.OrdinalIgnoreCase), "Key must match value's key");
+                Assumed.NotNull(value, "Properties can't have null value");
+                Assumed.Equal(name, value.Key, StringComparison.OrdinalIgnoreCase, "Key must match value's key");
                 Set(value);
             }
         }
@@ -254,8 +253,8 @@ namespace Microsoft.Build.Collections
         /// </summary>
         void IDictionary<string, T>.Add(string key, T value)
         {
-            ErrorUtilities.VerifyThrowInternalNull(value, "Properties can't have null value");
-            ErrorUtilities.VerifyThrow(key == value.Key, "Key must match value's key");
+            Assumed.NotNull(value, "Properties can't have null value");
+            Assumed.Equal(key, value.Key, "Key must match value's key");
             Set(value);
         }
 
@@ -298,16 +297,14 @@ namespace Microsoft.Build.Collections
         /// Not implemented
         /// </summary>
         void ICollection<KeyValuePair<string, T>>.CopyTo(KeyValuePair<string, T>[] array, int arrayIndex)
-        {
-            ErrorUtilities.ThrowInternalError("CopyTo is not supported on PropertyDictionary.");
-        }
+            => InternalError.Throw("CopyTo is not supported on PropertyDictionary.");
 
         /// <summary>
         /// Removes a property from the collection
         /// </summary>
         bool ICollection<KeyValuePair<string, T>>.Remove(KeyValuePair<string, T> item)
         {
-            ErrorUtilities.VerifyThrow(item.Key == item.Value.Key, "Key must match value's key");
+            Assumed.Equal(item.Key, item.Value.Key, "Key must match value's key");
             return Remove(item.Key);
         }
 
@@ -331,7 +328,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public bool Remove(string name)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
 
             return ImmutableInterlocked.TryRemove(ref _backing, name, out _);
         }
@@ -343,7 +340,7 @@ namespace Microsoft.Build.Collections
         /// </summary>
         public void Set(T projectProperty)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(projectProperty);
+            ArgumentNullException.ThrowIfNull(projectProperty);
 
             _backing = _backing.SetItem(projectProperty.Key, projectProperty);
         }

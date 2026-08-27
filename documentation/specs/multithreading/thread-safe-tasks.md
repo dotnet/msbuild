@@ -10,11 +10,22 @@ Tasks that are not thread-safe can still participate in multithreaded builds. MS
 
 ## Thread-Safe Capability Indicators
 
-Task authors can declare thread-safe capabilities in two different ways:
-1. **Interface-Based Thread-Safe Capability Declaration** - Provides access to thread-safe APIs through `TaskEnvironment` to be used in the task code.
-2. **Attribute-Based Thread-Safe Capability Declaration** - Allows existing tasks to declare its ability run in multithreaded mode without code changes. It is a **compatibility bridge option**.
+Thread-safe capability is declared by a single mechanism: the `[MSBuildMultiThreadableTask]` attribute. A task may *additionally* implement the `IMultiThreadableTask` interface to gain access to thread-safe APIs. The two do **different** jobs and are not alternatives:
 
-Tasks that use `TaskEnvironment` cannot load in older MSBuild versions that do not support multithreading features, requiring authors to drop support for older MSBuild versions. To address this challenge, MSBuild provides a compatibility bridge that allows certain tasks targeting older MSBuild versions to participate in multithreaded builds. While correct absolute path resolution can be and should be achieved without accessing `TaskEnvironment` in tasks that use compatibility bridge options, tasks must avoid relying on environment variables or modifying global process state.
+1. **Attribute-Based Thread-Safe Capability Declaration** (`[MSBuildMultiThreadableTask]`) — the **routing** signal. This is the only thing that opts a task into running in-process; without it the task is routed to an out-of-proc TaskHost sidecar regardless of anything else it declares.
+2. **Interface-Based Thread-Safe Capability Declaration** (`IMultiThreadableTask`) — the **injection** signal. It gives the task access to thread-safe APIs through `TaskEnvironment`, which the engine assigns only to tasks implementing the interface.
+
+| Declaration | Effect | Read by |
+| --- | --- | --- |
+| `[MSBuildMultiThreadableTask]` | Runs in-process instead of an out-of-proc TaskHost | `TaskRouter.NeedsTaskHostInMultiThreadedMode` |
+| `IMultiThreadableTask` | Receives a `TaskEnvironment` | `TaskExecutionHost` |
+
+Declaring one without the other is legal, and each half fails quietly:
+
+- **Attribute only** — a complete, properly migrated state for a task that does not resolve relative paths or read environment variables. The task runs in-process without `TaskEnvironment`. If the task *does* declare a `TaskEnvironment` property, MSBuild never assigns it: the property silently retains whatever the task itself initialized it to — commonly `TaskEnvironment.Fallback`, or `null` when there is no initializer — so paths resolve against the shared process working directory. The task-authoring analyzer reports `MSBuildTask0012` for this shape.
+- **Interface only** — a useful intermediate state. The task resolves paths correctly but still pays for a TaskHost. Note that the engine does not assign the property in that TaskHost: the out-of-proc host supplies `TaskEnvironment.Fallback` to a `TaskEnvironment` constructor if the task declares one, and otherwise leaves the property at the task's own default. That is correct there, because `Fallback` is backed by `MultiProcessTaskEnvironmentDriver` and the host process is dedicated to a single task. `MSBuildTask0013` reports this shape, disabled by default.
+
+Tasks that use `TaskEnvironment` cannot load in older MSBuild versions that do not support multithreading features, requiring authors to drop support for older MSBuild versions. To address this challenge, MSBuild provides a compatibility bridge that allows certain tasks targeting older MSBuild versions to participate in multithreaded builds: the attribute is detected by name, so a task can apply it without referencing a new MSBuild assembly, and correct absolute path resolution can be and should be achieved without accessing `TaskEnvironment`. Tasks using that bridge must still avoid relying on environment variables or modifying global process state.
 
 So, task authors who need to support older MSBuild versions will have three choices:
 1. **Maintain separate implementations** - Create and support both thread-safe and legacy versions of the same task.
@@ -23,7 +34,7 @@ So, task authors who need to support older MSBuild versions will have three choi
 
 ### Interface-Based Thread-Safe Capability Declaration
 
-Tasks indicate thread-safety capabilities by implementing the `IMultiThreadableTask` interface.
+Tasks gain access to `TaskEnvironment` by implementing the `IMultiThreadableTask` interface. Implementing it does not by itself cause the task to run in-process — `[MSBuildMultiThreadableTask]` is required for that.
 
 ```csharp
 namespace Microsoft.Build.Framework;
@@ -33,17 +44,37 @@ public interface IMultiThreadableTask : ITask
 }
 ```
 
-Similar to how MSBuild provides the abstract `Task` class with default implementations for the `ITask` interface, MSBuild will offer a `MultiThreadableTask` abstract class with default implementations for the `IMultiThreadableTask` interface. Task authors will only need to implement the `Execute` method for the `ITask` interface and use `TaskEnvironment` within it to create their thread-safe tasks.
+Built-in MSBuild tasks initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. This ensures tasks have a usable `TaskEnvironment` even when explicitly instantiated outside the engine (e.g., `new Copy()`) or run in the out-of-proc task host. The engine's in-proc path (`TaskExecutionHost.InitializeForBatch`) overwrites the default with the appropriate driver before `Execute()` is called.
+
+#### Constructor Injection of `TaskEnvironment`
+
+When the engine instantiates a task type, it first looks for a public constructor that accepts a single `TaskEnvironment` parameter. If one exists, the engine calls it with the current `TaskEnvironment` instead of the parameterless constructor; otherwise it falls back to the parameterless constructor as before. The engine still assigns the `IMultiThreadableTask.TaskEnvironment` property after construction, so tasks that use the constructor should assign the property from within it.
+
+This exists because C# property initializers run during object construction (before the constructor body completes)—before the engine can assign the `TaskEnvironment` property—so an initializer cannot rely on the environment. Constructor injection lets a task compute environment-dependent default values (for example, rooting a default output directory) during construction:
 
 ```csharp
-namespace Microsoft.Build.Utilities;
-public abstract class MultiThreadableTask : Task, IMultiThreadableTask
+[MSBuildMultiThreadableTask]
+public sealed class MyTask : Task, IMultiThreadableTask
 {
-    public TaskEnvironment TaskEnvironment { get; set; } = TaskEnvironment.Fallback;
+    public MyTask(TaskEnvironment taskEnvironment)
+    {
+        TaskEnvironment = taskEnvironment;
+
+        // Now a reasonable default can be computed using the environment.
+        IntermediateOutputDir = new DirectoryInfo(TaskEnvironment.GetAbsolutePath("obj").Value);
+    }
+
+    public TaskEnvironment TaskEnvironment { get; set; }
+
+    public DirectoryInfo IntermediateOutputDir { get; set; }
 }
 ```
 
-Built-in MSBuild tasks initialize `TaskEnvironment` with a `MultiProcessTaskEnvironmentDriver`-backed default. This ensures tasks have a usable `TaskEnvironment` even when explicitly instantiated outside the engine (e.g., `new Copy()`) or run in the out-of-proc task host. The engine's in-proc path (`TaskExecutionHost.InitializeForBatch`) overwrites the default with the appropriate driver before `Execute()` is called.
+In multi-process execution (out-of-proc task host) and when a task is instantiated outside the engine, `TaskEnvironment.Fallback` is supplied to the constructor. A task that declares only a `TaskEnvironment` constructor (no parameterless constructor) is therefore still instantiable everywhere the engine runs it. This should not be combined with `LoadInSeparateAppDomain`, because `TaskEnvironment` is not marshalable across AppDomain boundaries.
+
+Constructor injection also applies to host-registered tasks (the reflection-free `Microsoft.Build.Utilities.Task.RegisterTask` path used for trimming/Native AOT). The generic `RegisterTask<T>(string)` overload injects the `TaskEnvironment` when `T` declares such a constructor (its public constructors are already trim-rooted). Because that overload's `new()` constraint requires a parameterless constructor, a task whose *only* constructor takes a `TaskEnvironment` is registered through the `RegisterTask(string, Func<TaskEnvironment, ITask>)` factory overload, which hands the environment to the factory. See [task-class-registration-api.md](../task-class-registration-api.md).
+
+The task-authoring analyzer reports `MSBuildTask0011` at Info severity for concrete `IMultiThreadableTask` implementations that rely only on post-construction property injection. Add a public constructor whose single parameter is `TaskEnvironment` to make the environment available during construction. A task may retain a public parameterless constructor for callers that instantiate it directly; the engine prefers the injecting constructor when both are present.
 
 Task authors who want to support older MSBuild versions need to:
 - Maintain both thread-safe and legacy implementations.
@@ -57,14 +88,14 @@ Task authors can indicate thread-safety capabilities by marking their task class
 
 ```csharp
 namespace Microsoft.Build.Framework;
-[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-internal class MSBuildMultiThreadableTaskAttribute : Attribute
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false, Inherited = false)]
+public class MSBuildMultiThreadableTaskAttribute : Attribute
 {
     public MSBuildMultiThreadableTaskAttribute() { }
 }
 ```
 
-MSBuild detects `MSBuildMultiThreadableTaskAttribute` by its namespace and name only, ignoring the defining assembly, which allows customers to define the attribute in their own assemblies alongside their tasks. Since MSBuild does not ship the attribute, customers using newer MSBuild versions should prefer the Interface-Based Thread-Safe Capability Declaration.
+MSBuild detects `MSBuildMultiThreadableTaskAttribute` by its namespace and name only, ignoring the defining assembly, which allows customers to define the attribute in their own assemblies alongside their tasks. The attribute is not inherited (`Inherited = false`, and `TaskRouter` reads it with `inherit: false`), so it must be applied to each concrete task class rather than to a shared base.
 
 For tasks to be eligible for multithreaded execution using this approach, they must satisfy the following conditions:
 - The task must not modify global process state (environment variables, working directory)
@@ -157,3 +188,7 @@ The main advantages of API hooking include requiring no action from task authors
 ### Alternative to Attribute-Based Thread-Safe Capability Declaration
 
 We considered making the thread-safety signal using the task declaration (for example, a `ThreadSafe="true"` attribute on `UsingTask`) so that project authors could declare compatibility without changing task assemblies. However, because older MSBuild versions treat unknown attributes in task declarations as errors, this approach would require updating older MSBuild versions or servicing them to ignore the attribute. 
+
+### Alternative: Routing on `IMultiThreadableTask` Instead of the Attribute
+
+We considered using the interface as the routing signal, so that a task implementing `IMultiThreadableTask` would run in-process without also applying the attribute. This does not work: `Microsoft.Build.Utilities.ToolTask` implements `IMultiThreadableTask`, so routing on the interface would silently opt in every `ToolTask`-derived task in the ecosystem, none of which have been reviewed for thread safety.

@@ -60,7 +60,6 @@
     </Compile>
     <Compile Include="..\Shared\ResourceUtilities.cs" />
     <Compile Include="..\Shared\ErrorUtilities.cs" />
-    <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\GlobalUsings.cs" Link="GlobalUsings.cs" />
     <Compile Include="..\Shared\INodeEndpoint.cs" />
     <Compile Include="..\Shared\NodeEndpointOutOfProcBase.cs" />
@@ -68,6 +67,7 @@
     <Compile Include="..\Shared\INodePacketFactory.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\INodePacketHandler.cs" />
+    <Compile Include="..\Shared\InvariantPayloadTransferMode.cs" />
     <Compile Include="..\Shared\TaskHostConfiguration.cs" />
     <Compile Include="..\Shared\TaskHostTaskComplete.cs" />
     <Compile Include="..\Shared\OutOfProcTaskHostTaskResult.cs" />
@@ -85,6 +85,7 @@
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
+    <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
     <Compile Include="..\Shared\TaskEngineAssemblyResolver.cs" />
     <Compile Include="..\Shared\StringExtensions.cs" />
@@ -115,11 +116,6 @@
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
-      <Link>Resources\Strings.shared.resx</Link>
-      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
     <!-- Content Files -->
     <Content Include="MSBuild.ico" Pack="false" />
     <Content Include="MSBuild.rsp" Pack="false">
@@ -138,7 +134,6 @@
          or when a .NET 10 SDK is used (NuGet Package Pruning eliminates netstandard1.x dependencies). -->
     <PackageReference Include="NETStandard.Library" VersionOverride="2.0.3" PrivateAssets="all" Condition="'$(FeatureReportFileAccesses)' == 'true'" />
 
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Configuration.ConfigurationManager" />
   </ItemGroup>
   <!-- Manually download this library for RoslynCodeTaskFactory.

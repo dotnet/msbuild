@@ -1,9 +1,9 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 
+using System;
 using System.Collections.Generic;
 using Microsoft.Build.BackEnd;
-using Microsoft.Build.Shared;
 
 #nullable disable
 
@@ -31,7 +31,7 @@ namespace Microsoft.Build.Tasks
         {
             get
             {
-                ErrorUtilities.VerifyThrow(_assemblies.Count == _typeLibraries.Count, "Internal assembly and type library lists should have the same number of entries in AssemblyRegistrationCache");
+                Assumed.Equal(_assemblies.Count, _typeLibraries.Count, "Internal assembly and type library lists should have the same number of entries in AssemblyRegistrationCache");
                 return _assemblies.Count;
             }
         }
@@ -50,7 +50,7 @@ namespace Microsoft.Build.Tasks
         /// </summary>
         internal void GetEntry(int index, out string assemblyPath, out string typeLibraryPath)
         {
-            ErrorUtilities.VerifyThrow((index >= 0) && (index < _assemblies.Count), "Invalid index in the call to AssemblyRegistrationCache.GetEntry");
+            Assumed.True((index >= 0) && (index < _assemblies.Count), "Invalid index in the call to AssemblyRegistrationCache.GetEntry");
             assemblyPath = _assemblies[index];
             typeLibraryPath = _typeLibraries[index];
         }
@@ -64,7 +64,7 @@ namespace Microsoft.Build.Tasks
 
         public override void Translate(ITranslator translator)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(translator);
+            ArgumentNullException.ThrowIfNull(translator);
             translator.Translate(ref _assemblies);
             translator.Translate(ref _typeLibraries);
         }

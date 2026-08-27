@@ -8,6 +8,7 @@ using System.Linq;
 #else
 using System.Text;
 #endif
+using Microsoft.Build.Framework;
 using Microsoft.Build.Shared;
 
 #nullable disable
@@ -41,14 +42,14 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         // Resolves the path, and if path is a url also canonicalizes it.
-        public static string Format(string path)
+        public static string Format(string path, AbsolutePath baseDirectory)
         {
             if (String.IsNullOrEmpty(path))
             {
                 return path;
             }
 
-            string resolvedPath = Resolve(path);
+            string resolvedPath = Resolve(path, baseDirectory);
             Uri u = new Uri(resolvedPath);
             //
             // GB18030: Uri class does not correctly encode chars in the PUA range for implicit 
@@ -202,8 +203,8 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
         }
 
         // If path is a url and starts with "localhost", resolves to machine name.
-        // If path is a relative path, resolves to a full path.
-        public static string Resolve(string path)
+        // If path is a relative path, resolves to a full path against <paramref name="baseDirectory"/>.
+        public static string Resolve(string path, AbsolutePath baseDirectory)
         {
             if (String.IsNullOrEmpty(path))
             {
@@ -235,8 +236,13 @@ namespace Microsoft.Build.Tasks.Deployment.ManifestUtilities
                 return path;
             }
 
-            // if not unc or url then it must be a local disk path...
-            return Path.GetFullPath(path); // make sure it's a full path
+            // If not UNC or URL then treat as a local disk path. Root the (possibly relative)
+            // path against the supplied base directory rather than the process current directory
+            // so the resolution is deterministic under multithreaded task execution, and return
+            // its canonical (fully qualified, normalized) form. FormatUrl rejects whitespace-only
+            // inputs on Windows before reaching this method, since AbsolutePath would otherwise
+            // silently trim trailing whitespace and absolutize "baseDirectory\ " to baseDirectory.
+            return new AbsolutePath(path, baseDirectory).GetCanonicalForm();
         }
 
         private static bool IsAsciiString(string str) =>

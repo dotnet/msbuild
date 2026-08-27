@@ -329,16 +329,24 @@ namespace Microsoft.Build.Eventing
             WriteEvent(36);
         }
 
-        [Event(37, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void RequestThreadProcStart()
+        /// <param name="projectPath">Full path to the project being built on the request thread.</param>
+        /// <param name="configurationId">Configuration id for the request.</param>
+        /// <param name="globalRequestId">Global request id assigned by the build manager.</param>
+        /// <param name="nodeRequestId">Node-local request id assigned by the scheduling node.</param>
+        [Event(37, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
+        public void RequestThreadProcStart(string projectPath, int configurationId, int globalRequestId, int nodeRequestId)
         {
-            WriteEvent(37);
+            WriteEvent(37, projectPath ?? string.Empty, configurationId, globalRequestId, nodeRequestId);
         }
 
-        [Event(38, Keywords = Keywords.All | Keywords.PerformanceLog)]
-        public void RequestThreadProcStop()
+        /// <param name="projectPath">Full path to the project being built on the request thread.</param>
+        /// <param name="configurationId">Configuration id for the request.</param>
+        /// <param name="globalRequestId">Global request id assigned by the build manager.</param>
+        /// <param name="nodeRequestId">Node-local request id assigned by the scheduling node.</param>
+        [Event(38, Keywords = Keywords.All | Keywords.PerformanceLog, Version = 1)]
+        public void RequestThreadProcStop(string projectPath, int configurationId, int globalRequestId, int nodeRequestId)
         {
-            WriteEvent(38);
+            WriteEvent(38, projectPath ?? string.Empty, configurationId, globalRequestId, nodeRequestId);
         }
 
         /// <param name="fileLocation">Project file's location.</param>
@@ -701,13 +709,13 @@ namespace Microsoft.Build.Eventing
         [Event(97, Keywords = Keywords.All)]
         public void FallbackAssemblyLoadStart(string assemblyName)
         {
-            WriteEvent(97);
+            WriteEvent(97, assemblyName);
         }
 
         [Event(98, Keywords = Keywords.All)]
         public void FallbackAssemblyLoadStop(string assemblyName)
         {
-            WriteEvent(98);
+            WriteEvent(98, assemblyName);
         }
 
         [Event(99, Keywords = Keywords.All)]

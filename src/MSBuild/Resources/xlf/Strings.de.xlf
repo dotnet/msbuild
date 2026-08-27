@@ -66,12 +66,11 @@
 
                      This flag is experimental and may not work as intended.
     </source>
-        <target state="translated">  -reportFileAccesses[:True|Falsch]
-                     Führt dazu, dass MSBuild Dateizugriffe an alle konfigurierten
- meldet
-                     Projektcache-Plug-Ins.
+        <target state="translated">  -reportFileAccesses[:True|False]
+                     Führt dazu, dass MSBuild Dateizugriffe auf ein beliebiges konfiguriertes
+                     Projektcache-Plug-In meldet.
 
-                     Dieses Kennzeichen ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
+                     Dieses Flag ist experimentell und funktioniert möglicherweise nicht wie vorgesehen.
     </target>
         <note>
       LOCALIZATION: "-reportFileAccesses" should not be localized.
@@ -241,7 +240,7 @@
     </note>
       </trans-unit>
       <trans-unit id="HelpMessage_49_MultiThreadedSwitch">
-        <source>  -multithreaded
+        <source>  -multithreaded[:true|false]
                      Enables EXPERIMENTAL multi-threaded mode in MSBuild.
                      This means that MSBuild will use multiple threads
                      to build projects in parallel,
@@ -254,7 +253,7 @@
                      maxCpuCount cannot be greater than 256.
                      (Short form: -mt)
     </source>
-        <target state="translated">  -multithreaded
+        <target state="translated">  -multithreaded[:true|false]
                      Aktiviert den EXPERIMENTELLEN Multithreadmodus in MSBuild.
                      Dies bedeutet, dass MSBuild mehrere Threads verwendet,
                      um Projekte parallel zu erstellen,
@@ -312,6 +311,16 @@
       {StrBegin="MSBUILD : error MSB1064: "}
       UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
       This error is shown when a user specifies a value for the lowPriority parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
+      LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
+    </note>
+      </trans-unit>
+      <trans-unit id="InvalidMultiThreadedValue">
+        <source>MSBUILD : error MSB1072: Multi-threaded mode value is not valid. {0}</source>
+        <target state="translated">MSBUILD : error MSB1072: Der Wert für den Mehrfachthreadmodus ist nicht gültig. {0}</target>
+        <note>
+      {StrBegin="MSBUILD : error MSB1072: "}
+      UE: This message does not need in-line parameters because the exception takes care of displaying the invalid arg.
+      This error is shown when a user specifies a value for the -multithreaded parameter that is not equivalent to Boolean.TrueString or Boolean.FalseString.
       LOCALIZATION: The prefix "MSBUILD : error MSBxxxx:" should not be localized.
     </note>
       </trans-unit>
@@ -394,6 +403,46 @@
         <source>the server process could not be launched</source>
         <target state="translated">der Serverprozess konnte nicht gestartet werden</target>
         <note>LOCALIZATION: No format arguments. Concatenated mid-sentence after a colon in MSBuildServerUnavailable: lower-case start in English is intentional and the message must NOT end with a period (the outer template adds it).</note>
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeReused">
+        <source>Reusing the running MSBuild Server node for this build (process ID {0}).</source>
+        <target state="translated">Der laufende MSBuild-Serverknoten wird für diesen Build wiederverwendet (Prozess-ID {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawned">
+        <source>MSBuild Server node started for this build (process ID {0}).</source>
+        <target state="translated">MSBuild-Serverknoten wurde für diesen Build gestartet (Prozess-ID {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNodeSpawnedShortLived">
+        <source>MSBuild Server node started for this build only; it will shut down afterward (process ID {0}).</source>
+        <target state="translated">MSBuild-Serverknoten wurde nur für diesen Build gestartet und wird danach heruntergefahren (Prozess-ID {0}).</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerNotUsedForBuild">
+        <source>MSBuild Server was requested but not used for this build: {0}.</source>
+        <target state="translated">MSBuild Server wurde angefordert, aber für diesen Build nicht verwendet: {0}.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonBusy">
+        <source>the server was busy with another build</source>
+        <target state="translated">Der Server war mit einem anderen Build beschäftigt.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonIncompatibleInvocation">
+        <source>this invocation is not compatible with MSBuild Server</source>
+        <target state="translated">Dieser Aufruf ist nicht mit MSBuild Server kompatibel.</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonNodeReuseDisabled">
+        <source>node reuse is disabled (-nodeReuse:false or MSBUILDDISABLENODEREUSE=1)</source>
+        <target state="translated">Die Knotenwiederverwendung ist deaktiviert (-nodeReuse:false oder MSBUILDDISABLENODEREUSE=1)</target>
+        <note />
+      </trans-unit>
+      <trans-unit id="MSBuildServerReasonStdOutForChildNodes">
+        <source>the MSBUILDENSURESTDOUTFORTASKPROCESSES escape hatch is enabled</source>
+        <target state="translated">Die Ausnahmeregel MSBUILDENSURESTDOUTFORTASKPROCESSES ist aktiviert.</target>
+        <note />
       </trans-unit>
       <trans-unit id="MSBuildServerStateUnknown">
         <source>the current server state could not be determined</source>
@@ -2320,6 +2369,36 @@ Hinweis: Ausführlichkeit der Dateiprotokollierungen
         <source>MSBUILD : error MSB4192: The project file "{0}" is in the ".vcproj" or ".dsp" file format, which MSBuild cannot build directly. Please convert the project by opening it in the Visual Studio IDE or running the conversion tool, or, for ".vcproj", use MSBuild to build the solution file containing the project instead.</source>
         <target state="translated">MSBUILD : error MSB4192: Die Projektdatei "{0}" weist das Dateiformat ".vcproj" oder ".dsp" auf, das von MSBuild nicht direkt erstellt werden kann. Konvertieren Sie das Projekt, indem Sie es in der Visual Studio IDE öffnen oder das Konvertierungstool ausführen. Für ".vcproj" verwenden Sie zum Erstellen der Projektmappendatei, die stattdessen das Projekt enthält, MSBuild.</target>
         <note>{StrBegin="MSBUILD : error MSB4192: "} LOC: ".vcproj" and ".dsp" should not be localized</note>
+      </trans-unit>
+      <trans-unit id="BuildEngineCallbacksInTaskHostUnsupported">
+        <source>MSB5022: The MSBuild task host does not support running tasks that perform IBuildEngine callbacks. If you wish to perform these operations, please run your task in the core MSBuild process instead.  A task will automatically execute in the task host if the UsingTask has been attributed with a "Runtime" or "Architecture" value, or the task invocation has been attributed with an "MSBuildRuntime" or "MSBuildArchitecture" value, that does not match the current runtime or architecture of MSBuild.</source>
+        <target state="translated">MSB5022: Der MSBuild-Aufgabenhost unterstützt das Ausführen von Aufgaben nicht, die IBuildEngine-Rückrufe tätigen. Führen Sie Ihre Aufgabe stattdessen im MSBuild-Kernprozess aus, wenn Sie diese Vorgänge durchführen möchten.  Wenn UsingTask mit einem Runtime- oder Architecture-Wert oder der Aufgabenaufruf mit einem MSBuildRuntime- oder MSBuildArchitecture-Wert attribuiert wurde, der nicht mit der aktuellen Laufzeit oder Architektur von MSBuild übereinstimmt, wird eine Aufgabe automatisch im Aufgabenhost ausgeführt.</target>
+        <note>{StrBegin="MSB5022: "} "Runtime", "Architecture", "MSBuildRuntime", and "MSBuildArchitecture" are all attributes in the project file, and thus should not be localized.</note>
+      </trans-unit>
+      <trans-unit id="InvalidLogFileFormat">
+        <source>MSB4233: There was an exception while reading the log file: {0}</source>
+        <target state="translated">MSB4233: Beim Lesen der Protokolldatei ist eine Ausnahme aufgetreten: {0}.</target>
+        <note>{StrBegin="MSB4233: "}This is shown when the Binary Logger can't read the log file.</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentHeader">
+        <source>Making the following modifications to the environment received from the parent node before applying it to the task host:</source>
+        <target state="translated">Es werden folgende vom übergeordneten Knoten empfangene Änderungen an der Umgebung vorgenommen, bevor sie auf den Aufgabenhost angewendet wird:</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="ModifyingTaskHostEnvironmentVariable">
+        <source>  Setting '{0}' to '{1}' rather than the parent environment's value, '{2}'.</source>
+        <target state="translated">  Festlegen von "{0}" auf "{1}" statt auf den Wert "{2}" der übergeordneten Umgebung.</target>
+        <note>Only ever used when MSBuild is run under a "secret" environment variable switch, MSBuildTaskHostUpdateEnvironmentAndLog=1</note>
+      </trans-unit>
+      <trans-unit id="SubCategoryForSchemaValidationErrors">
+        <source>Schema validation</source>
+        <target state="translated">Schemavalidierung</target>
+        <note>
+      UE: this fragment is used to describe errors that are caused by schema validation. For example, if a normal error is
+      displayed like this: "MSBUILD : error MSB0000: This is an error.", then an error from schema validation would look like this:
+      "MSBUILD : Schema validation error MSB0000: This is an error."
+      LOCALIZATION: This fragment needs to be localized.
+    </note>
       </trans-unit>
     </body>
   </file>

@@ -32,7 +32,7 @@ namespace Microsoft.Build.Construction
         internal UsingTaskParameterGroupElement(XmlElementWithLocation xmlElement, ProjectElementContainer parent, ProjectRootElement containingProject)
             : base(xmlElement, parent, containingProject)
         {
-            ErrorUtilities.VerifyThrowArgumentNull(parent);
+            ArgumentNullException.ThrowIfNull(parent);
             VerifyCorrectParent(parent);
         }
 
@@ -63,13 +63,7 @@ namespace Microsoft.Build.Construction
         /// This does not allow conditions, so it should not be called.
         /// </summary>
         public override ElementLocation ConditionLocation
-        {
-            get
-            {
-                ErrorUtilities.ThrowInternalError("Should not evaluate this");
-                return null;
-            }
-        }
+            => InternalError.Throw<ElementLocation>("Should not evaluate this");
 
         #region Add parameters
         /// <summary>
@@ -77,7 +71,7 @@ namespace Microsoft.Build.Construction
         /// </summary>
         public ProjectUsingTaskParameterElement AddParameter(string name, string output, string required, string parameterType)
         {
-            ErrorUtilities.VerifyThrowArgumentLength(name);
+            ArgumentException.ThrowIfNullOrEmpty(name);
 
             ProjectUsingTaskParameterElement newParameter = ContainingProject.CreateUsingTaskParameterElement(name, output, required, parameterType);
             AppendChild(newParameter);
@@ -132,7 +126,7 @@ namespace Microsoft.Build.Construction
             // that it is not empty
             if (parentUsingTask.TaskFactory.Length == 0)
             {
-                ErrorUtilities.VerifyThrow(parentUsingTask.Link == null, "TaskFactory");
+                Assumed.Null(parentUsingTask.Link, "TaskFactory");
                 ProjectXmlUtilities.VerifyThrowProjectRequiredAttribute(parent.XmlElement, "TaskFactory");
             }
 

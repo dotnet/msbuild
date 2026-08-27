@@ -6,6 +6,9 @@
     <TargetFrameworks>$(LibraryTargetFrameworks)</TargetFrameworks>
     <EnableDefaultItems>false</EnableDefaultItems>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <!-- Enable the trim/AOT analyzers. They only run on net8.0+ TFMs; the condition keeps
+         older TFMs (net472, netstandard2.0) from emitting NETSDK1210. -->
+    <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
     <GenerateReferenceAssemblySource>true</GenerateReferenceAssemblySource>
     <AssemblyName>Microsoft.Build.Tasks.Core</AssemblyName>
     <RootNamespace>Microsoft.Build.Tasks</RootNamespace>
@@ -38,17 +41,16 @@
     <Compile Include="..\Shared\INodePacketHandler.cs" />
     <Compile Include="..\Shared\LogMessagePacketBase.cs" />
     <Compile Include="..\Shared\NodeBuildComplete.cs" />
-    <Compile Include="..\Shared\NamedPipeUtil.cs" />
     <Compile Include="..\Shared\NodePacketFactory.cs" />
     <Compile Include="..\Shared\NodePipeBase.cs" />
     <Compile Include="..\Shared\NodePipeClient.cs" />
     <Compile Include="..\Shared\NodePipeServer.cs" />
     <Compile Include="..\Shared\NodeShutdown.cs" />
     <Compile Include="..\Shared\TaskParameter.cs" />
+    <Compile Include="..\Shared\TaskParameterValueStringConverter.cs" />
     <Compile Include="..\Shared\TaskParameterTypeVerifier.cs" />
-  </ItemGroup>
-  <ItemGroup>
     <!-- Source Files -->
+    <Compile Include="BuiltInTasks.cs" />
     <Compile Include="..\Shared\AssemblyFolders\AssemblyFoldersEx.cs">
       <Link>AssemblyDependency\AssemblyFoldersEx.cs</Link>
     </Compile>
@@ -188,7 +190,6 @@
     <Compile Include="GetReferenceAssemblyPaths.cs" />
     <Compile Include="Hash.cs" />
     <Compile Include="InstalledSDKResolver.cs" />
-    <Compile Include="Interop.cs" />
     <Compile Include="ErrorFromResources.cs" />
     <Compile Include="ExtractedClassName.cs" />
     <Compile Include="FileIO\ReadLinesFromFile.cs" />
@@ -225,10 +226,9 @@
     <Compile Include="Move.cs" />
     <Compile Include="MSBuild.cs" />
     <Compile Include="NativeMethods.cs" />
-    <Compile Include="AssemblyDependency\Fusion\Fusion.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
-    <Compile Include="AssemblyDependency\Fusion\IAssemblyCache.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
-    <Compile Include="AssemblyDependency\Fusion\IAssemblyEnum.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
-    <Compile Include="AssemblyDependency\Fusion\IAssemblyName.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
+    <Compile Include="AssemblyDependency\Fusion\*.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
+    <Compile Include="AssemblyDependency\Metadata\*.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
+    <Compile Include="TypeLib\*.cs" Condition="'$(FeatureWindowsInterop)' == 'true'" />
     <Compile Include="MSBuildInternalMessage.cs" />
     <Compile Include="ParserState.cs" />
     <Compile Include="AddToWin32Manifest.cs" />
@@ -262,6 +262,7 @@
     <Compile Include="VisualBasicParserUtilities.cs" />
     <Compile Include="Warning.cs" />
     <Compile Include="XslTransformation.cs" />
+    <Compile Include="XmlTaskUtility.cs" />
     <Compile Include="AssignCulture.cs" />
     <Compile Include="Culture.cs" />
     <Compile Include="CultureInfoCache.cs" />
@@ -274,6 +275,12 @@
     <Compile Include="SystemState.cs" />
     <Compile Include="DependencyFile.cs" />
     <Compile Include="ZipDirectory.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp'">
+    <!-- TarDirectory relies on System.Formats.Tar which is only available on .NET (not .NET Framework). -->
+    <Compile Include="TarDirectory.cs" />
+    <!-- Untar relies on System.Formats.Tar which is only available on .NET (not .NET Framework). -->
+    <Compile Include="Untar.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="TaskRequiresFramework.cs" />
@@ -425,11 +432,6 @@
     <EmbeddedResource Include="Resources\Strings.resx">
       <LogicalName>$(AssemblyName).Strings.resources</LogicalName>
       <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\Shared\Resources\Strings.shared.resx">
-      <Link>Resources\Strings.shared.resx</Link>
-      <SubType>Designer</SubType>
-      <LogicalName>$(AssemblyName).Strings.shared.resources</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="ManifestUtil\Resources\Strings.ManifestUtilities.resx">
       <LogicalName>$(AssemblyName).Strings.ManifestUtilities.resources</LogicalName>
@@ -610,27 +612,34 @@
   <ItemGroup>
     <None Include="Resources\default.win32manifest" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(SkipNetstandardRefAssembliesForBenchmarks)' != 'true'">
+    <!-- These netstandard2.0 builds supply RoslynCodeTaskFactory's reference payload. BenchmarkDotNet's
+         DllGatherer redirects every project reference to one output directory, where these reference-only
+         Framework and Utilities assemblies can overwrite the current-TFM implementation assemblies and cause
+         the generated benchmark executable to fail with BadImageFormatException. Benchmark builds do not need
+         the RoslynCodeTaskFactory payload. -->
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" SetTargetFramework="TargetFramework=netstandard2.0" OutputItemType="NetstandardRefAssemblies" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\Framework\Microsoft.Build.Framework.csproj" />
     <ProjectReference Include="..\Utilities\Microsoft.Build.Utilities.csproj" />
   </ItemGroup>
   <!-- Thread-safe task analyzer: runs during Tasks compilation to catch unsafe API usage -->
   <ItemGroup Condition="'$(BuildAnalyzer)' == 'true'">
-    <ProjectReference Include="..\ThreadSafeTaskAnalyzer\ThreadSafeTaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\TaskAnalyzer\TaskAnalyzer.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
   <PropertyGroup Condition="'$(BuildAnalyzer)' == 'true'">
     <!-- Analyzer warnings should not break WarnAsError builds while issues are being fixed -->
-    <WarningsNotAsErrors>$(WarningsNotAsErrors);MSBuildTask0002;MSBuildTask0003;MSBuildTask0004;MSBuildTask0005</WarningsNotAsErrors>
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);MSBuildTask0002;MSBuildTask0003;MSBuildTask0004;MSBuildTask0005;MSBuildTask0006;MSBuildTask0007;MSBuildTask0008</WarningsNotAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.IO.Redist" Condition="'$(FeatureMSIORedist)' == 'true'" />
     <PackageReference Include="System.Resources.Extensions" />
   </ItemGroup>
 
-  <!-- Mimics AddRefAssemblies from MSBuild.csproj -->
-  <Target Name="AddRefAssemblies" DependsOnTargets="ResolveAssemblyReferences" BeforeTargets="AssignTargetPaths">
+  <!-- Mimics AddRefAssemblies from MSBuild.csproj. Use the same benchmark condition as the references above
+       so the disabled RoslynCodeTaskFactory payload is not added to the benchmark output. -->
+  <Target Name="AddRefAssemblies" DependsOnTargets="ResolveAssemblyReferences" BeforeTargets="AssignTargetPaths" Condition="'$(SkipNetstandardRefAssembliesForBenchmarks)' != 'true'">
     <ItemGroup>
       <Content Include="@(NetstandardRefAssemblies)" CopyToOutputDirectory="PreserveNewest" Link="ref\%(Filename)%(Extension)" />
     </ItemGroup>
@@ -648,9 +657,6 @@
     <PackageReference Include="System.Collections.Immutable" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework' and '$(DotNetBuildSourceOnly)' != 'true'">
-    <PackageReference Include="Microsoft.VisualStudio.Setup.Configuration.Interop" PrivateAssets="all" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETFramework'">
     <Content Include="$(NuGetPackageRoot)microsoft.net.compilers.toolset\$(MicrosoftNetCompilersToolsetVersion)\tasks\net472\**\*" CopyToOutputDirectory="PreserveNewest" LinkBase="Roslyn" />
   </ItemGroup>
